@@ -1,44 +1,80 @@
 # Obsidian Plugin Shell
 
-**Current:** PRD 0.7 plus implemented style/token fixtures and scoped verification. The Vue plugin, npm setup/makers, native services, full build and release automation remain pending.
+**Iteration 01 — runnable Nuxt UI capability showcase, version 0.1.0.**
 
-**Selected UI direction:** Nuxt UI with Tailwind CSS through the plain Vue/Vite integration, not the Nuxt application framework. The [implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) defines ten planned work packages, host-safe CSS/runtime adapters and explicit acceptance gates. This is a researched implementation direction, not an installed or verified integration.
+A TypeScript/Vue/Pinia plugin with a native Obsidian view, Task Markdown creation, typed events, persisted preferences, localized feedback, scoped Nuxt UI styling, and a real-component browser harness. This is the first working slice, not completion of the full template PRD.
 
-## Run the current baseline
+## Open it in Obsidian
+
+Use the qualified Node **24.21.0** with npm, open the repository directory, and run:
 
 ```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
-node scripts/styles/check-tokens.mjs
-node scripts/testing/verify-baseline.mjs --repeat 3 --json
+npm run setup
 ```
 
-The default fixture uses the owner-supplied **real, reduced Obsidian stylesheet** from Renovation Planner, not the old approximate palette. The original simulator remains at `/harness/style-fixture/simulated.html`. Both are clearly labeled specimens, not a running Obsidian app.
+Review and confirm the installer plan. It installs the lockfile, builds, type-checks, runs service tests, and copies only `main.js`, `manifest.json`, and `styles.css` into:
 
-## Native tokens, not a second theme
+```text
+.dev-vault/.obsidian/plugins/plugin-shell/
+```
 
-`src/styles/index.css` imports 38 `--plugin-shell-*` aliases on `.plugin-shell`. They consume host colors, spacing, fonts, borders, radiuses, icons, and layers. No base palette or theme defaults are copied into production CSS. Direct native variables remain usable.
+Open `.dev-vault` as a vault in desktop Obsidian, deliberately enable **Plugin Shell**, then run **Open capability showcase** from the command palette or use the Blocks ribbon button. The manifest minimum is **1.13.7** and the plugin is intentionally desktop-only pending mobile qualification. Setup does not change Restricted Mode or create Task notes.
 
-The reference includes **133 reviewed documented names** and a separate **968-name extracted inventory**. These are distinct scopes, not a claim that all retained variables are public API. New aliases reject deprecated RGB/HSL helpers and misspelled/missing targets.
+For a prebuilt ZIP, place its three files in `<test-vault>/.obsidian/plugins/plugin-shell/` and follow the same enable/open steps. Do not confuse the source ZIP with the installable plugin.
 
-The vendor archive decodes to the exact supplied Git blob and includes the original header. The server repairs one documented comment terminator for runtime parsing; it alters no style declarations. Unknown source app version, reduced coverage and upstream rights remain explicit. No font files are included. The archive and host adapter are harness-only, never plugin-release CSS.
+## Develop in the browser
+
+```sh
+npm run dev:ui
+```
+
+Open the printed loopback address at `/harness/app/`. This runs the same Vue/Nuxt UI components, application services, event bus, and styles with synthetic browser-backed storage and host adapters. It does not access your personal vault. Use `npm run dev:local` for successful-build installation into the development vault, then reload the plugin manually.
+
+## Explore four panels
+
+| Panel | Working behavior |
+| --- | --- |
+| Overview | Nuxt UI capability cards, environment information, and entry to document creation/native modal. |
+| Documents | Validate title/due/tags, preview exact Markdown and destination, explicitly create a Task note, and open the created note separately. |
+| Events & feedback | Publish typed events, inspect recent events/diagnostics, show/dismiss owned feedback and native notices, open a native modal. |
+| Preferences | English/German, Task folder, and routine-success notifications saved through the shared writer. Native settings use the same service. |
+
+Markdown is canonical for Tasks; plugin data stores preferences rather than a second Task database. No file is created by preview. A created file remains successful if opening it fails. Views own independent Vue/Pinia state and cleanup, while repositories/events are runtime-scoped.
+
+## Verify
+
+```sh
+npm run verify
+npm run test:coverage
+node node_modules/@playwright/test/cli.js install chromium
+npm run test:e2e
+```
+
+The current `verify` performs the iteration's build, strict runtime/Vue/harness/test type checks, Oxlint, Obsidian/Vue ESLint, source/locale/architecture gates, Vitest tests, token/artifact checks, retained repeated Node baseline, and harness build. Served E2E is explicit and separate. This is not yet the complete PRD release gate. See the [test record](docs/testing/ITERATION-ONE.md) for exact execution results and coverage scope.
+
+`npm run help` lists commands. `npm run setup -- --dry-run` works without project dependencies and does not write or install. `--yes --no-interaction` accepts a reviewed setup plan; `--no-local` selects browser-only setup. The full rename/resume wizard and `make` catalog remain planned; this installer intentionally uses the fixed showcase identity.
+
+## Implementation boundaries
+
+Nuxt UI **4.11.2** is integrated through Vue/Vite, not the Nuxt framework. It uses explicit component imports, local SVG icons, host-owned theme roles, no Tailwind Preflight, and a source-hash-guarded adaptation of two runtime global-style modules. Plugin CSS is composed into one `styles.css`; the extracted Obsidian stylesheet remains harness-only. Dependency notices are retained in the native bundle; no font binaries are shipped.
+
+`main.ts` is nine lines of lifecycle composition. Domain/application remain independent of Obsidian/Vue/Pinia. Handwritten runtime/CSS/scripts stay within 400 physical lines and tests/helpers within 450.
+
+Still pending: complete generators/identity migration, broader host events/entity configurations/notification timing policies, full coverage and analyzer gates, expanded Nuxt UI component qualification, mobile/device acceptance, and public release promotion. No public release was published by this milestone.
 
 ## Documentation
 
 | Document | Purpose |
 | --- | --- |
-| [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Selected architecture, prerequisites, target files, dependencies, ten work packages and review gates. |
-| [Nuxt UI research](docs/research/2026-09-22-nuxt-ui-integration.md) | Primary-source findings, release/source identities, runtime-style and shared-state risks. |
-| [Nuxt UI acceptance matrix](docs/testing/NUXT-UI-ACCEPTANCE.md) | 34 planned cases and concrete verification designs; not executed evidence or part of the current 96-case inventory. |
-| [Native token/style integration](docs/design/OBSIDIAN-TOKENS.md) | Token usage, provenance, profiles, runtime repair, verification and extension rules. |
-| [Current PRD](docs/product/PRD.md) | Requirements and 96 acceptance cases, preserving prior scope. |
-| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | Intended setup/maker/first-change path. |
-| [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Risk, deterministic execution, evidence modes and remaining scope. |
-| [Latest verification](docs/testing/2026-09-22-token-verification.md) | Actual tests, failures fixed, environment limits. |
-| [Harness styles](harness/styles/README.md) | Current executable specimen routes and boundaries. |
-| [Agent instructions](AGENTS.md) | Shared contributor rules. |
+| [Iteration-one guide](docs/development/ITERATION-ONE.md) | Installation, architecture decisions, current commands, dependency exceptions and limits. |
+| [Iteration-one test record](docs/testing/ITERATION-ONE.md) | Actual tests, native/served evidence and remaining gaps. |
+| [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
+| [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
+| [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
+| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Future complete wizard and generator contract. |
+| [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
+| [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |
+| [Obsidian tokens](docs/design/OBSIDIAN-TOKENS.md) | Native tokens, aliases and pinned host fixture provenance. |
+| [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Full update/candidate/promotion contract. |
 
-The planned complete template still uses Vite, Vitest, Oxlint, fallow, TypeScript, Vue 3, Pinia, Obsidian ESLint; guided `npm run setup`; `make` scaffolding; typed events; entity Markdown creation; shared errors/notifications; and exact-candidate releases. Current Node commands are a limited bridge, not a replacement for that qualified toolchain.
-
-Latest public/stable Obsidian remains the policy, with reviewed exact dependency updates. A snapshot's floor marker is not proof of the app version. Native/mobile, full Vite artifact exclusion, and current-host visual comparison remain separate acceptance work.
-
-[License](LICENSE). Third-party extracted CSS retains its original provenance/rights and is not relicensed by this file.
+[Agent instructions](AGENTS.md) · [License](LICENSE)

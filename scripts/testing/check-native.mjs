@@ -13,7 +13,7 @@ if (flags.length !== 1 || flags[0] !== '--allow-download') {
 const output = resolve('reports/native'); await mkdir(output, { recursive: true });
 const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', assets: [], checks: [], errors: [] };
 const scratch = await mkdtemp(join(tmpdir(), 'plugin-shell-native-'));
-let launched; let browser;
+let launched; let browser; let activePage;
 try {
   const module = await import(pathToFileURL(resolve('.native-runner/node_modules/obsidian-launcher/dist/index.js')).href);
   const Launcher = module.default ?? module.ObsidianLauncher;
@@ -36,6 +36,7 @@ try {
   const context = browser.contexts()[0];
   let page = context.pages().find(value => value.url().startsWith('app:')) ?? context.pages()[0];
   if (!page) page = await context.waitForEvent('page', { timeout: 30000 });
+  activePage = page;
   page.on('pageerror', error => report.errors.push(error.message.slice(0, 300)));
   await page.waitForSelector('.workspace', { timeout: 45000 });
   report.userAgent = await page.evaluate(() => navigator.userAgent);
@@ -60,9 +61,18 @@ try {
   await page.getByRole('button', { name: 'Open native modal', exact: true }).click();
   await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toBeVisible();
   await page.keyboard.press('Escape'); report.checks.push('native-modal-opens-and-dismisses');
-  await page.keyboard.press('Control+,');
-  const settings = page.locator('.modal.mod-settings');
-  await expect(settings).toBeVisible();
+  await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toHaveCount(0);
+  await page.locator('[aria-label^="Settings"]').first().click();
+  // Current Obsidian can place settings in another native window.
+  let settingsPage;
+  await expect.poll(async () => {
+    for (const candidate of context.pages()) {
+      if (await candidate.locator('.vertical-tab-nav-item').filter({ hasText: /^Plugin shell$/i }).count()) { settingsPage = candidate; return true; }
+    }
+    return false;
+  }, { timeout: 15000 }).toBe(true);
+  activePage = settingsPage;
+  const settings = settingsPage.locator('body');
   await settings.locator('.vertical-tab-nav-item').filter({ hasText: /^Plugin shell$/i }).click();
   const folderControl = settings.locator('.setting-item').filter({ hasText: 'Task note folder' }).locator('input');
   await expect(folderControl).toHaveValue('Tasks'); await folderControl.fill('Native/Tasks'); await folderControl.press('Tab');
@@ -71,11 +81,17 @@ try {
     catch { return null; }
   }).toBe('Native/Tasks');
   report.checks.push('native-declarative-settings-use-application-writer');
-  await page.screenshot({ path: join(output, 'native-settings.png') }); await page.keyboard.press('Escape');
+  await settingsPage.screenshot({ path: join(output, 'native-settings.png') }); await settingsPage.keyboard.press('Escape');
   if (report.errors.length) throw new Error('Native page reported unexpected errors; inspect report.');
   report.status = 'passed';
   await writeFile(join(output, 'host.log'), log);
-} catch (error) { report.status = 'failed'; report.reason = error.message; process.exitCode = 1; }
+} catch (error) {
+  report.status = 'failed'; report.reason = error.message; process.exitCode = 1;
+  if (activePage) {
+    await activePage.screenshot({ path: join(output, 'native-failure.png') }).catch(() => undefined);
+    report.visibleText = await activePage.locator('body').innerText().then(value => value.slice(-12000)).catch(() => 'unavailable');
+  }
+}
 finally {
   if (browser) await browser.close().catch(() => undefined);
   if (launched?.proc.pid) { try { if (process.platform !== 'win32') process.kill(-launched.proc.pid, 'SIGTERM'); else launched.proc.kill(); } catch { /* Already exited. */ } }
