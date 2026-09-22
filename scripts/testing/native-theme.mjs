@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
 /** Change the real supported Appearance setting; do not invent private theme IDs/commands. */
 export async function setNativeTheme(page, context, theme) {
   if (!['light', 'dark'].includes(theme)) throw new Error('INVALID_THEME_TEST');
@@ -19,7 +20,10 @@ export async function setNativeTheme(page, context, theme) {
   }, { timeout: 15000 }).toBe(true);
   await settingsPage.bringToFront();
   await settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i }).click();
-  const scheme = settingsPage.locator('.setting-item:visible').filter({ hasText: /Base colou?r scheme/i }).locator('select');
+  // A grouped native setting can contain both scheme and theme selectors. Match the actual options.
+  const controls = settingsPage.locator('select:visible');
+  writeFileSync('reports/native/theme-controls.json', JSON.stringify(await controls.evaluateAll(elements => elements.map(el => ({ options: Array.from(el.options).map(option => ({ label: option.label, value: option.value })) }))), null, 2));
+  const scheme = controls.filter({ has: settingsPage.locator('option').filter({ hasText: /^Dark$/i }) });
   await expect(scheme).toHaveCount(1);
   const value = await scheme.evaluate((el, target) => {
     const matches = Array.from(el.options).filter(option => option.label.trim().toLowerCase() === target);
@@ -27,6 +31,7 @@ export async function setNativeTheme(page, context, theme) {
     return matches[0].value;
   }, theme);
   await scheme.selectOption(value);
+  await settingsPage.screenshot({ path: `reports/native/native-appearance-${theme}.png` });
   await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
   if (settingsPage === page) {
     await settingsPage.keyboard.press('Escape');
