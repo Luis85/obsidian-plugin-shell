@@ -39,8 +39,8 @@ export async function setNativeTheme(page, context, theme) {
   await settingsPage.screenshot({ path: `reports/native/native-appearance-${theme}.png` });
   await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
   // Retain the real settings window for subsequent transitions. Await the host's paint work
-  // rather than closing its realm immediately after a class mutation. It is closed once by
-  // normal host controls after the theme scenarios; no errors are ignored.
+  // rather than closing its realm immediately after a class mutation. The isolated native
+  // process is stopped by the owning fixture during restart/teardown; no errors are ignored.
   await settingsPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   if (settingsPage === page) {
     await settingsPage.keyboard.press('Escape');
