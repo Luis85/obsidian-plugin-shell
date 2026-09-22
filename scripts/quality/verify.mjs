@@ -1,5 +1,6 @@
 import { runNode } from '../shared/process.mjs';
 const commands = [
+  ['--test', 'tests/tooling/npm-install.checks.mjs'],
   ['scripts/build/build.mjs'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['node_modules/oxlint/bin/oxlint', 'src', '--deny-warnings'],

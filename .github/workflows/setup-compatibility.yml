@@ -1,0 +1,76 @@
+name: Setup npm policy compatibility
+on:
+  push:
+    branches: [main, fix/setup-npm-policy]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/setup.mjs'
+      - 'scripts/shared/**'
+      - 'scripts/testing/check-npm-install-policy.mjs'
+      - 'tests/tooling/npm-install.checks.mjs'
+      - '.github/workflows/setup-compatibility.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: setup-policy-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  setup:
+    name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '24.15.0'
+            npm: '12.0.2'
+          - os: windows-latest
+            node: '24.15.0'
+            npm: '12.0.2'
+          - os: ubuntu-latest
+            node: '24.21.0'
+            npm: '11.19.1'
+          - os: windows-latest
+            node: '24.21.0'
+            npm: '11.19.1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Provision exact npm in runner scratch directory, not globally
+        shell: pwsh
+        run: |
+          $tool = Join-Path $env:RUNNER_TEMP 'shell-policy-npm'
+          npm install --prefix "$tool" --ignore-scripts --no-audit --no-fund --package-lock=false npm@${{ matrix.npm }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
+      - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
+        shell: pwsh
+        run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"
+      - name: Run fresh setup with the problematic forwarded configuration
+        shell: pwsh
+        env:
+          npm_config_allow_scripts: unrelated-globally-approved-package
+        run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
+      - name: Verify without weakening existing gates
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM_CLI" run verify
+      - name: Retain non-secret compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: setup-policy-${{ matrix.os }}-npm-${{ matrix.npm }}
+          path: |
+            reports/setup-policy/
+            reports/verification/
+          retention-days: 7
+          if-no-files-found: warn
