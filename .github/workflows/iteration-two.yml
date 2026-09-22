@@ -1,0 +1,57 @@
+name: Iteration two qualification
+on:
+  push:
+    branches: [build/iteration-two]
+permissions:
+  contents: read
+concurrency:
+  group: iteration-two-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Record execution environment and unmodified dependency audit
+        shell: bash
+        run: |
+          mkdir -p reports/iteration-two/baseline
+          { node --version; npm --version; git rev-parse HEAD; uname -a; } > reports/iteration-two/baseline/environment.txt
+          npm audit --json > reports/iteration-two/baseline/audit-before.json || echo "$?" > reports/iteration-two/baseline/audit-before.exit
+          npm ci > reports/iteration-two/baseline/npm-ci.log 2>&1
+          npm ls --all --json > reports/iteration-two/baseline/dependency-tree.json
+          npm outdated --json > reports/iteration-two/baseline/outdated.json || test "$?" = 1
+          node --input-type=module -e 'import {readFileSync,writeFileSync} from "node:fs"; import {execFileSync} from "node:child_process"; const p=JSON.parse(readFileSync("package.json")); const result={}; for(const name of Object.keys({...p.dependencies,...p.devDependencies})){try{result[name]=JSON.parse(execFileSync("npm",["view",name,"version","engines","peerDependencies","deprecated","--json"],{encoding:"utf8"}));}catch{result[name]={error:"registry query failed"};}} writeFileSync("reports/iteration-two/baseline/registry-latest.json",JSON.stringify(result,null,2));'
+      - name: Execute real baseline gates
+        shell: bash
+        run: |
+          set +e
+          npm run verify > reports/iteration-two/baseline/verify.log 2>&1
+          echo "$?" > reports/iteration-two/baseline/verify.exit
+          npm run test:coverage > reports/iteration-two/baseline/coverage.log 2>&1
+          echo "$?" > reports/iteration-two/baseline/coverage.exit
+          npm run analyze > reports/iteration-two/baseline/analyze.log 2>&1
+          echo "$?" > reports/iteration-two/baseline/analyze.exit
+      - name: Prepare temporary offline development dependencies (no fonts or browsers)
+        shell: bash
+        run: |
+          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='*.eot' --exclude='*/.local-browsers/*' -czf offline-dependencies.tgz node_modules
+          git archive --format=zip --output=checkpoint-source.zip HEAD
+      - name: Retain baseline evidence and temporary offline dependencies
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: iteration-two-baseline
+          path: |
+            reports/iteration-two/baseline/
+            offline-dependencies.tgz
+            checkpoint-source.zip
+          retention-days: 2
+          if-no-files-found: error
