@@ -34,7 +34,9 @@ jobs:
         run: npm run test:coverage
       - name: Provision pinned Chromium
         if: matrix.os == 'ubuntu-latest'
-        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          sudo apt-get install -y xdotool
       - name: Exercise the actual served showcase
         if: matrix.os == 'ubuntu-latest'
         run: npm run test:e2e
@@ -43,7 +45,7 @@ jobs:
         run: npm install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
       - name: Exercise exact candidate in isolated Obsidian
         if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
-        run: xvfb-run -a node scripts/testing/check-native.mjs --allow-download
+        run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download
       - name: Archive tracked source only
         if: always()
         run: git archive --format=zip --output=iteration-one-source.zip HEAD

@@ -43,7 +43,9 @@ jobs:
           node "$QUALIFIED_NPM" run test:coverage 2>&1 | tee reports/iteration-two/coverage-core.txt
           node "$QUALIFIED_NPM" run test:coverage:production 2>&1 | tee reports/iteration-two/coverage-production.txt
       - name: Provision pinned Chromium
-        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          sudo apt-get install -y xdotool
       - name: Exercise actual served components and capture scope-labeled screenshots
         run: node "$QUALIFIED_NPM" run test:e2e
       - name: Provision isolated native host provider

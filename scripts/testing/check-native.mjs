@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { createServer } from 'node:net';
 import { chromium, expect } from '@playwright/test';
 import { qualifyHeaders, assertDiagnostics } from './native-header-checks.mjs';
+import { sizeNativeWindow } from './native-window.mjs';
 const flags = process.argv.slice(2);
 if (flags.length !== 1 || flags[0] !== '--allow-download') {
   console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. This may download the host. No test was run.'); process.exit(2);
@@ -40,6 +41,7 @@ try {
   const observe = candidate => {
     if (observedPages.has(candidate)) return;
     observedPages.add(candidate);
+    candidate.setDefaultTimeout(15000); candidate.setDefaultNavigationTimeout(45000);
     candidate.on('pageerror', error => report.errors.push(error.message.slice(0, 300)));
   };
   for (const candidate of context.pages()) observe(candidate);
@@ -48,10 +50,7 @@ try {
   if (!page) page = await context.waitForEvent('page', { timeout: 30000 });
   activePage = page;
   await page.waitForSelector('.workspace', { timeout: 45000 });
-  const windowSession = await context.newCDPSession(page);
-  const hostWindow = await windowSession.send('Browser.getWindowForTarget');
-  await windowSession.send('Browser.setWindowBounds', { windowId: hostWindow.windowId, bounds: { width: 1920, height: 1080 } });
-  await windowSession.detach();
+  report.window = await sizeNativeWindow(page);
   report.installedAssets = [];
   for (const asset of report.assets) {
     const sha256 = createHash('sha256').update(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell', asset.file))).digest('hex');
