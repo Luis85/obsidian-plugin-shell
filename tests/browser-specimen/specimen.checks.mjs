@@ -50,16 +50,18 @@ export const specimenChecks = [
     assert.equal(await page.evaluate(() => document.activeElement.id), 'open-modal');
     return { loop: true, restored: true };
   } },
-  { id: 'BRW-06', name: 'media changes and scope isolation', run: async ({ page }) => {
+  { id: 'BRW-06', name: 'media changes and plugin/host scope isolation', run: async ({ page, host }) => {
     await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'active' });
     assert.equal(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true);
     assert.equal(await page.evaluate(() => matchMedia('(forced-colors: active)').matches), true);
-    await page.locator('body').evaluate((el) => el.classList.remove('obsidian-harness'));
-    assert.equal(await page.locator('body').evaluate((el) => getComputedStyle(el).getPropertyValue('--background-primary').trim()), '');
-    return { mediaExercised: true, rootScoped: true };
+    await page.locator('body').evaluate((el) => el.classList.remove('obsidian-harness', 'plugin-shell'));
+    const value = await page.locator('body').evaluate((el) => getComputedStyle(el).getPropertyValue('--background-primary').trim());
+    if (host === 'simulated') assert.equal(value, ''); else assert.ok(value);
+    assert.equal(await page.locator('body').evaluate((el) => getComputedStyle(el).getPropertyValue('--plugin-shell-surface').trim()), '');
+    return { mediaExercised: true, host, pluginAliasesScoped: true };
   } },
   { id: 'BRW-07', name: 'negative control detects missing host stylesheet', run: async ({ page }) => {
-    await page.locator('link[href*="styles/obsidian.css"], style[data-host-fixture]').evaluateAll((els) => els.forEach((el) => el.remove()));
+    await page.locator('link[href*="styles/obsidian.css"], link[href*="styles/simulated.css"], style[data-host-fixture]').evaluateAll((els) => els.forEach((el) => el.remove()));
     const value = await page.locator('body').evaluate((el) => getComputedStyle(el).getPropertyValue('--background-primary').trim());
     // The same positive invariant MUST fail after removing its actual style input.
     assert.throws(() => assert.ok(value, 'host token required'));
@@ -73,4 +75,35 @@ export const specimenChecks = [
     ledger.assertExpected([{ code: 'CONSOLE_ERROR', scope: 'specimen', count: 1 }]);
     return { expectedFault: 'CONSOLE_ERROR', count: 1 };
   }, expected: [{ code: 'CONSOLE_ERROR', scope: 'specimen', count: 1 }] },
+  { id: 'BRW-09', name: 'host default dimensions and aliases resolve', run: async ({ page, host }) => {
+    const got = await page.evaluate(() => {
+      const body = getComputedStyle(document.body), sample = getComputedStyle(document.querySelector('#token-surface'));
+      const reference = document.createElement('div'); reference.style.backgroundColor='var(--background-primary)'; document.body.append(reference);
+      const hostBackground = getComputedStyle(reference).backgroundColor; reference.remove();
+      return { input: body.getPropertyValue('--input-height').trim(), radius: body.getPropertyValue('--radius-m').trim(),
+        background: sample.backgroundColor, hostBackground,
+        padding:sample.paddingTop, spacing:body.getPropertyValue('--size-4-4').trim() };
+    });
+    if (host === 'extracted') assert.equal(got.input,'30px');
+    assert.equal(got.radius,'8px'); assert.equal(got.padding,got.spacing); assert.equal(got.background,got.hostBackground);
+    return got;
+  } },
+  { id: 'BRW-10', name: 'theme overrides flow through aliases without changing host defaults', run: async ({ page }) => {
+    await page.locator('body').evaluate((el) => { el.style.setProperty('--text-normal','rgb(31, 72, 113)'); el.style.setProperty('--interactive-accent','rgb(53, 107, 61)'); el.style.setProperty('--size-4-4','23px'); });
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#token-surface')).color === 'rgb(31, 72, 113)' && getComputedStyle(document.querySelector('#token-accent')).backgroundColor === 'rgb(53, 107, 61)' && getComputedStyle(document.querySelector('#token-surface')).paddingTop === '23px');
+    const value = await page.evaluate(() => ({ text:getComputedStyle(document.querySelector('#token-surface')).color,
+      accent:getComputedStyle(document.querySelector('#token-accent')).backgroundColor, padding:getComputedStyle(document.querySelector('#token-surface')).paddingTop }));
+    assert.deepEqual(value,{ text:'rgb(31, 72, 113)',accent:'rgb(53, 107, 61)',padding:'23px' }); return value;
+  } },
+  { id: 'BRW-11', name: 'negative control detects missing plugin aliases while host remains', run: async ({ page }) => {
+    await page.locator('link[href*="src/styles/index.css"], style[data-plugin-tokens]').evaluateAll((els) => els.forEach((el) => el.remove()));
+    const values = await page.locator('body').evaluate((el) => ({ host:getComputedStyle(el).getPropertyValue('--background-primary').trim(), alias:getComputedStyle(el).getPropertyValue('--plugin-shell-surface').trim() }));
+    assert.ok(values.host); assert.equal(values.alias,''); assert.throws(() => assert.ok(values.alias)); return { missingAliasDetected:true };
+  } },
+  { id: 'BRW-12', name: 'host style source and no implicit fallback are observable', run: async ({ page, host }) => {
+    assert.equal(await page.locator('body').getAttribute('data-host-style'),host);
+    const hasExtractedDeclaration = await page.locator('body').evaluate((el) => getComputedStyle(el).getPropertyValue('--bases-table-row-height').trim());
+    if (host === 'extracted') assert.equal(hasExtractedDeclaration,'30px'); else assert.equal(hasExtractedDeclaration,'');
+    return { host, extractedMarkerPresent: Boolean(hasExtractedDeclaration) };
+  } },
 ];

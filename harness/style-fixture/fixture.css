@@ -24,3 +24,8 @@ body[data-narrow=true] .fixture-layout { grid-template-columns: minmax(0, 1fr); 
 @media (max-width: 540px) { .fixture-page { padding: 0.75rem; } }
 
 .fixture-page .view-header h2 { margin: 0; font-size: var(--font-ui-medium); }
+
+/* Alias consumers are specimen-only examples of production source tokens. */
+.fixture-token-proof { margin-block: var(--size-4-6); }
+.token-surface { background: var(--plugin-shell-surface); color: var(--plugin-shell-text); padding: var(--plugin-shell-space-lg); border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-radius-md); }
+button.token-accent { background: var(--plugin-shell-accent); color: var(--plugin-shell-text-on-accent); margin-block-start: var(--size-4-2); }

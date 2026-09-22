@@ -4,23 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Obsidian host stylesheet — validation fixture</title>
-  <link rel="stylesheet" href="../styles/obsidian.css">
+  <link rel="stylesheet" href="../styles/simulated.css">
   <link rel="stylesheet" href="../../src/styles/index.css">
   <link rel="stylesheet" href="fixture.css">
   <script src="fixture.js" defer></script>
 </head>
-<body data-host-style="extracted" class="obsidian-harness plugin-shell theme-dark" data-density="native" data-narrow="false">
+<body data-host-style="simulated" class="obsidian-harness plugin-shell theme-dark" data-density="comfortable" data-narrow="false">
   <main class="fixture-page">
     <header class="fixture-intro">
-      <p class="fixture-eyebrow">OBSIDIAN PLUGIN SHELL / HOST STYLE FIXTURE 0.2</p>
+      <p class="fixture-eyebrow">OBSIDIAN PLUGIN SHELL / HOST STYLE FIXTURE 0.1</p>
       <h1>Host styles, without a vault</h1>
-      <p>Extracted Obsidian stylesheet from Renovation Planner, with separately labeled harness adapters. Reduced snapshot; source app version unknown. Not a running Obsidian instance.</p>
+      <p>Original CSS simulation for frontend testing. Not Obsidian’s stylesheet, a running plugin, or proof of native compatibility.</p>
       <p class="fixture-caption">The controls below exercise this specimen only. No notes are created, no preferences are stored, and no production notification service is running.</p>
     </header>
     <section class="fixture-toolbar" aria-label="Fixture controls">
       <label for="theme">Theme<select id="theme" class="dropdown"><option value="dark">Dark</option><option value="light">Light</option></select></label>
       <label for="language">Message language<select id="language" class="dropdown"><option value="en">English</option><option value="de">Deutsch (messages only)</option></select></label>
-      <label for="density">Control density<select id="density" class="dropdown"><option value="native">Native defaults</option><option value="comfortable">Comfortable override</option><option value="compact">Compact</option></select></label>
+      <label for="density">Control density<select id="density" class="dropdown"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
       <label for="width">Pane width<select id="width" class="dropdown"><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
     </section>
     <div class="fixture-layout workspace-split">
@@ -54,8 +54,8 @@ due: "2026-09-30"
         </div></section>
       </div>
     </div>
-    <section class="fixture-token-proof" aria-labelledby="tokens-heading"><h2 id="tokens-heading">Plugin token inheritance</h2><p>These samples consume plugin aliases, not fixed colors.</p><div id="token-surface" class="token-surface">Surface and text</div><button id="token-accent" class="token-accent" type="button">Accent alias</button></section>
-    <footer><p class="fixture-caption">Extracted host CSS → explicit harness adapters → plugin token aliases → specimen layout. Only the token stylesheet is implemented, not a complete production plugin. <a href="simulated.html">Open the original simulator separately</a>.</p></footer>
+    <section class="fixture-token-proof" aria-labelledby="tokens-heading"><h2 id="tokens-heading">Plugin token inheritance</h2><div id="token-surface" class="token-surface">Surface and text</div><button id="token-accent" class="token-accent" type="button">Accent alias</button></section>
+    <footer><p class="fixture-caption">Original modular host CSS → later plugin CSS → scenario-only controls. Production plugin CSS is intentionally absent in this standalone fixture.</p></footer>
   </main>
   <div class="notice-container" id="notice-root"></div>
   <dialog class="modal" id="modal" aria-labelledby="modal-heading" aria-describedby="modal-copy">

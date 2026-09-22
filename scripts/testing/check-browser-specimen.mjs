@@ -7,19 +7,22 @@ import { createFixtureServer } from '../harness/serve-style-fixture.mjs';
 import { sourceInputs, sha256 } from './source-inputs.mjs';
 import { createFaultLedger } from './fault-ledger.mjs';
 import { validatePlan } from './test-plan.mjs';
+import { readVendor, runtimeVendorCss, upstreamBlob } from '../styles/vendor-policy.mjs';
+import { hostFiles, assertProfile, profilePage } from '../harness/style-profile.mjs';
 import { inlineSpecimen } from './browser-input.mjs';
 import { specimenChecks } from '../../tests/browser-specimen/specimen.checks.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const options = { mode: 'served', repeat: 2, driver: null, browser: null };
+const options = { mode: 'served', repeat: 2, host: 'extracted', driver: null, browser: null };
 for (let i = 2; i < process.argv.length; i++) {
   const flag = process.argv[i];
-  if (flag === '--mode') options.mode = process.argv[++i];
+  if (flag === '--host') options.host = assertProfile(process.argv[++i]);
+  else if (flag === '--mode') options.mode = process.argv[++i];
   else if (flag === '--repeat') options.repeat = Number(process.argv[++i]);
   else if (flag === '--driver') options.driver = process.argv[++i];
   else if (flag === '--browser') options.browser = process.argv[++i];
   else if (flag === '--help') {
-    console.log('node scripts/testing/check-browser-specimen.mjs [--mode served|inline] [--repeat 2..5] [--driver /absolute/preprovisioned/playwright/index.mjs] [--browser /absolute/chromium]');
+    console.log('node scripts/testing/check-browser-specimen.mjs [--host extracted|simulated] [--mode served|inline] [--repeat 2..5] [--driver /absolute/preprovisioned/playwright/index.mjs] [--browser /absolute/chromium]');
     process.exit(0);
   } else throw new Error('UNKNOWN_ARGUMENT');
 }
@@ -47,9 +50,9 @@ try {
   if (options.mode === 'served') {
     server = createFixtureServer();
     await new Promise((ok, bad) => { server.once('error', bad); server.listen(0,'127.0.0.1',ok); });
-    url = `http://127.0.0.1:${server.address().port}/harness/style-fixture/`;
+    url = `http://127.0.0.1:${server.address().port}/${profilePage(options.host)}`;
   }
-  const html = options.mode === 'inline' ? await inlineSpecimen(root) : null;
+  const html = options.mode === 'inline' ? await inlineSpecimen(root, options.host) : null;
   for (let repetition = 0; repetition < options.repeat; repetition++) {
     const results = [];
     for (const check of specimenChecks) {
@@ -71,7 +74,7 @@ try {
         await page.clock.setFixedTime(new Date('2026-09-22T10:00:00Z'));
         if (html) await page.setContent(html); else await page.goto(url);
         await page.waitForFunction(() => document.body.dataset.fixtureReady === 'true');
-        const observed = await check.run({ page, ledger }); ledger.assertExpected(check.expected ?? []);
+        const observed = await check.run({ page, ledger, host: options.host }); ledger.assertExpected(check.expected ?? []);
         result = { id:check.id, status:'passed', observed };
         if (repetition === 0 && ['BRW-01','BRW-02'].includes(check.id)) await page.screenshot({ path:resolve(directory,`${check.id}.png`),fullPage:true });
       } catch (error) {
@@ -94,7 +97,7 @@ const after = await sourceInputs(root);
 const outcomeDigests = runs.map((run) => sha256(JSON.stringify(run.map(({id,status,observed}) => ({id,status,observed})))));
 const passed = !fatal && after.digest === input.digest && runs.length === options.repeat &&
   runs.every((run) => run.length === specimenChecks.length && run.every((r) => r.status === 'passed')) && new Set(outcomeDigests).size === 1;
-const report = { schemaVersion:1, mode, status:passed?'passed':(fatal || runs.some((run) => run.some((r) => r.status === 'infrastructure-error')))?'infrastructure-error':'failed',
+const report = { schemaVersion:1, hostStyle: options.host, hostInputs: hostFiles[options.host], hostSnapshot: options.host === 'extracted' ? { sourceBlob:upstreamBlob, runtimeCssSha256:sha256(runtimeVendorCss(await readVendor(root))) } : null, mode, status:passed?'passed':(fatal || runs.some((run) => run.some((r) => r.status === 'infrastructure-error')))?'infrastructure-error':'failed',
   fatal, inputDigest:input.digest, browserVersion, driverVersion, explicitBrowserOverride:Boolean(options.browser), node:process.version,
   timezone:'UTC', fixedTime:'2026-09-22T10:00:00Z', repetitions:runs.length, retries:0,
   outcomeDigests, runs, releaseReady:false, nativeVerified:false,

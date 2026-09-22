@@ -1,70 +1,44 @@
 # Obsidian Plugin Shell
 
-A planned current Obsidian plugin template using TypeScript, Vue 3, Pinia, Vite, Vitest, Oxlint, fallow and Obsidian ESLint.
-
-> **Current status — PRD 0.6:** The original host-style specimen and its verification baseline run now. The actual plugin, guided npm setup/makers, DocumentCreationService, production feedback/bus, complete toolchain and native release workflow remain specified, not implemented.
+**Current:** PRD 0.7 plus implemented style/token fixtures and scoped verification. The Vue plugin, npm setup/makers, native services, full build and release automation remain pending.
 
 **Selected UI direction:** Nuxt UI with Tailwind CSS through the plain Vue/Vite integration, not the Nuxt application framework. The [implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) defines ten planned work packages, host-safe CSS/runtime adapters and explicit acceptance gates. This is a researched implementation direction, not an installed or verified integration.
 
-## Start here
+## Run the current baseline
+
+```sh
+node scripts/harness/serve-style-fixture.mjs --port 4174
+node scripts/styles/check-tokens.mjs
+node scripts/testing/verify-baseline.mjs --repeat 3 --json
+```
+
+The default fixture uses the owner-supplied **real, reduced Obsidian stylesheet** from Renovation Planner, not the old approximate palette. The original simulator remains at `/harness/style-fixture/simulated.html`. Both are clearly labeled specimens, not a running Obsidian app.
+
+## Native tokens, not a second theme
+
+`src/styles/index.css` imports 38 `--plugin-shell-*` aliases on `.plugin-shell`. They consume host colors, spacing, fonts, borders, radiuses, icons, and layers. No base palette or theme defaults are copied into production CSS. Direct native variables remain usable.
+
+The reference includes **133 reviewed documented names** and a separate **968-name extracted inventory**. These are distinct scopes, not a claim that all retained variables are public API. New aliases reject deprecated RGB/HSL helpers and misspelled/missing targets.
+
+The vendor archive decodes to the exact supplied Git blob and includes the original header. The server repairs one documented comment terminator for runtime parsing; it alters no style declarations. Unknown source app version, reduced coverage and upstream rights remain explicit. No font files are included. The archive and host adapter are harness-only, never plugin-release CSS.
+
+## Documentation
 
 | Document | Purpose |
 | --- | --- |
 | [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Selected architecture, prerequisites, target files, dependencies, ten work packages and review gates. |
 | [Nuxt UI research](docs/research/2026-09-22-nuxt-ui-integration.md) | Primary-source findings, release/source identities, runtime-style and shared-state risks. |
-| [Nuxt UI acceptance matrix](docs/testing/NUXT-UI-ACCEPTANCE.md) | 34 planned cases and concrete verification designs; not executed evidence or a change to today's 90-case inventory. |
-| [Test strategy](docs/testing/TEST-STRATEGY.md) | Risk, levels, determinism, evidence, coverage, release and ownership policy. |
-| [Test concept](docs/testing/TEST-CONCEPT.md) | Exact runnable commands, files, fixtures, reports and implementation plan. |
-| [Machine test plan](docs/testing/test-plan.json) | 90 acceptance cases with risk/owner/modes/current evidence gaps. |
-| [Current PRD](docs/product/PRD.md) | Product contract and honest capability status. |
-| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | Intended setup, maker and feature-development path. |
-| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Dependency-free wizard and safe source generators. |
-| [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Typed entities to Markdown through the shared service. |
-| [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Effect-aware outcomes, feedback ownership and recovery. |
-| [Events](docs/architecture/EVENT-BUS.md) / [styles](docs/architecture/STYLES.md) | Runtime-scoped typed events and one composed plugin stylesheet. |
-| [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Current dependencies, fixed candidates and explicit publication. |
+| [Nuxt UI acceptance matrix](docs/testing/NUXT-UI-ACCEPTANCE.md) | 34 planned cases and concrete verification designs; not executed evidence or part of the current 96-case inventory. |
+| [Native token/style integration](docs/design/OBSIDIAN-TOKENS.md) | Token usage, provenance, profiles, runtime repair, verification and extension rules. |
+| [Current PRD](docs/product/PRD.md) | Requirements and 96 acceptance cases, preserving prior scope. |
+| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | Intended setup/maker/first-change path. |
+| [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Risk, deterministic execution, evidence modes and remaining scope. |
+| [Latest verification](docs/testing/2026-09-22-token-verification.md) | Actual tests, failures fixed, environment limits. |
+| [Harness styles](harness/styles/README.md) | Current executable specimen routes and boundaries. |
+| [Agent instructions](AGENTS.md) | Shared contributor rules. |
 
-## Run what exists today
+The planned complete template still uses Vite, Vitest, Oxlint, fallow, TypeScript, Vue 3, Pinia, Obsidian ESLint; guided `npm run setup`; `make` scaffolding; typed events; entity Markdown creation; shared errors/notifications; and exact-candidate releases. Current Node commands are a limited bridge, not a replacement for that qualified toolchain.
 
-With Node available, no project dependency installation is needed for:
+Latest public/stable Obsidian remains the policy, with reviewed exact dependency updates. A snapshot's floor marker is not proof of the app version. Native/mobile, full Vite artifact exclusion, and current-host visual comparison remain separate acceptance work.
 
-```sh
-node scripts/testing/verify-baseline.mjs --repeat 3
-```
-
-It checks the actual baseline through 40 Node tests, each run three times in fresh processes with no retries. Reports include exact test IDs, source/input hashes, JSON, JUnit, a readable summary and unverified acceptance gaps. This is NOT full `npm run verify` or measured production coverage.
-
-The optional native-readiness guard is intentionally blocked:
-
-```sh
-node scripts/testing/verify-baseline.mjs --profile release --json
-```
-
-It exits 2 without publication, because the actual native-candidate validator and evidence do not exist yet.
-
-Inspect the original stylesheet specimen with:
-
-```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
-```
-
-For an explicitly preprovisioned Playwright/browser environment, `node scripts/testing/check-browser-specimen.mjs --mode served` runs eight browser checks. Missing dependencies/environment fail rather than silently install. Inline diagnostic mode is available explicitly and cannot establish served CSS/CSP or native behavior. See the test concept and [execution record](docs/testing/2026-09-22-verification-record.md).
-
-## Intended complete template
-
-```text
-Get template → npm run setup → npm run make → develop
-→ full verification → test exact candidate in Obsidian → approve release
-```
-
-The future setup starts with Node-only checked-in scripts before node_modules exists. Makers generate ordinary source with explicit wiring and tests; no note creation during setup/scaffolding. Domain/application code stays independent of host/UI APIs. main.ts remains composition-only and at most 100 physical lines; other handwritten source/CSS/tooling at most 400, tests/helpers at most 450.
-
-Each view owns Vue/Pinia state and disposables; canonical data lives in its defined store. Note-backed Tasks use Markdown, not a duplicate data.json database. The bus carries typed committed facts and normalized native events. Source CSS modules and compiled SFC styles produce one plugin styles.css; the host shim never ships with it.
-
-Preserve user data, use contained test vaults, keep exact qualified dependencies current through reviewed updates, and publish only accepted fixed-commit assets. Browser specimen evidence cannot establish native/mobile compatibility.
-
-## Verification maturity
-
-The read-only Linux/Windows baseline workflow is included with pinned official actions. Its configured Node 24.21.0 environment is a CI qualification target; local testing used Node 22.16.0. No hosted/Windows result is inferred from local Linux execution. The complete Vitest/Vite/Playwright Test matrix still needs WP-00 qualification; this dependency-free bridge does not replace it.
-
-[Agent instructions](AGENTS.md) · [Tooling guide](scripts/README.md) · [License](LICENSE)
+[License](LICENSE). Third-party extracted CSS retains its original provenance/rights and is not relicensed by this file.

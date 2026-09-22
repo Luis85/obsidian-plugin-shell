@@ -1,9 +1,3 @@
-/* Original host simulation, MIT. Not copied from Obsidian app.css.
- * Harness-only entry. Never include in the plugin's dist/styles.css.
- * Keep this order; the plugin stylesheet is loaded AFTER this entry.
- */
-@import './obsidian/tokens.css';
-@import './obsidian/base.css';
-@import './obsidian/controls.css';
-@import './obsidian/overlays.css';
-@import './obsidian/accessibility.css';
+/* Host extraction entry; document-scoped. Never ship in the plugin. */
+@import './vendor/obsidian.css';
+@import './host-adapter.css';

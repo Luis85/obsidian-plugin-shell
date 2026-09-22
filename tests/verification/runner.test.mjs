@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runNodeTests, evaluateRecords } from '../../scripts/testing/run-node-tests.mjs';
 async function fixture(t, body) {
-  const root = await mkdtemp(join(tmpdir(), 'shell-runner-'));
+  const root = await mkdtemp(join(tmpdir(), 'shell runner é-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'scripts/testing'), { recursive: true });
   await copyFile(new URL('../../scripts/testing/node-reporter.mjs', import.meta.url), join(root, 'scripts/testing/node-reporter.mjs'));
@@ -16,6 +16,8 @@ test('[RUN-01] real child success has exact test evidence', async (t) => {
   const root = await fixture(t, "test('[CHILD-01] works', () => {});");
   const result = await runNodeTests(root, ['case.test.mjs'], ['CHILD-01']);
   assert.equal(result.status, 'passed'); assert.equal(result.counts.tests, 1);
+  assert.match(result.command.find((arg) => arg.startsWith('--test-reporter=')), /^--test-reporter=file:\/\//);
+  assert.ok(result.command.some((arg) => arg.includes('%20') && arg.includes('%C3%A9')));
 });
 test('[RUN-02] deliberately failing child produces nonzero and failed evidence', async (t) => {
   const root = await fixture(t, "test('[CHILD-01] fails', () => { throw new Error('intentional'); });");

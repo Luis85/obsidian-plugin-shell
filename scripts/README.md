@@ -23,3 +23,7 @@ Setup/bootstrap, makers/templates, plugin build, deployment, event/entity catalo
 Dependency-free Node tests are an explicitly bounded bridge until WP-00 qualifies Vitest/Vite/Playwright Test. Port the assertions into those configured projects; do not maintain two permanent copies. The browser assertions use Playwright APIs and are reusable in the eventual Playwright Test suite.
 
 See [strategy](../docs/testing/TEST-STRATEGY.md) and [concept](../docs/testing/TEST-CONCEPT.md) for scope, commands, determinism, security and migration.
+
+## Native stylesheet and token tools
+
+`styles/check-tokens.mjs` verifies the pinned snapshot, reviewed aliases, inventories and profile order offline. `styles/export-host-css.mjs` exports verified runtime CSS to stdout; redirection is explicit. `harness/style-profile.mjs` defines the extracted versus simulated inputs. These tools do not download dependencies, regenerate the source snapshot, or publish. See [the token contract](../docs/design/OBSIDIAN-TOKENS.md).

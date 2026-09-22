@@ -161,3 +161,7 @@ Choose the lowest level that can detect the defect, then add an integration/nati
 Run the targeted file, then repeated baseline verification. For frontend changes run the appropriate served browser command; an inline result must stay diagnostic. Review the report's gaps as well as green test counts. On a tool upgrade, deliberately break a known invariant to verify the checker still catches it.
 
 The [execution record](2026-09-22-verification-record.md) lists current results and limitations; it is not a timeless passing badge.
+
+## Native stylesheet profile update — PRD 0.7
+
+The current inventory has 96 acceptance cases, 52 baseline Node tests, and 12 browser checks per selected host profile. Earlier counts above describe the preceding baseline. `--host extracted` is now the default; `--host simulated` remains explicit and separate. The extraction is pinned and verified, not fetched during tests. See [the token contract](../design/OBSIDIAN-TOKENS.md) and [current verification](2026-09-22-token-verification.md). Source hashing now includes `src/` and the token reference. The qualified vendor archive is the only new immutable upstream-input exception; handwritten limits remain unchanged.

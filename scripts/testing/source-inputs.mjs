@@ -2,8 +2,9 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 
-export const inputRoots = ['harness', 'scripts', 'tests', 'docs/testing/test-plan.json', '.github/workflows/baseline-verification.yml'];
+export const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows/baseline-verification.yml'];
 export const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 export function physicalLines(text) {
   if (!text) return 0;
@@ -25,9 +26,10 @@ export async function sourceInputs(root, roots = inputRoots) {
     } else if (stat.isFile()) {
       const name = relative(root, path).split('\\').join('/');
       const data = await readFile(path);
+      const decoded = name === vendorArchive ? decodeVendor(data) : null;
       const limit = lineLimit(name);
       files.push({ path: name, sha256: sha256(data), bytes: data.length,
-        lines: limit === null ? null : physicalLines(data.toString('utf8')), limit });
+        lines: decoded ? physicalLines(decoded.toString('utf8')) : limit === null ? null : physicalLines(data.toString('utf8')), limit });
     } else throw new Error('SOURCE_NOT_REGULAR');
   }
   for (const path of roots) await visit(join(root, path));

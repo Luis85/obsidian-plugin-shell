@@ -1,6 +1,7 @@
 /** Bounded child runner for the temporary dependency-free baseline, not a new test framework. */
 import { spawn } from 'node:child_process';
 import { resolve, relative } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 export function evaluateRecords(text, code, expected) {
   const rows = text.trim() ? text.trim().split('\n').map((line) => JSON.parse(line)) : [];
@@ -26,7 +27,7 @@ export function evaluateRecords(text, code, expected) {
 }
 
 export async function runNodeTests(root, files, expected, { timeoutMs = 60000 } = {}) {
-  const reporter = resolve(root, 'scripts/testing/node-reporter.mjs');
+  const reporter = pathToFileURL(resolve(root, 'scripts/testing/node-reporter.mjs')).href;
   return await new Promise((done) => {
     const args = ['--unhandled-rejections=strict', '--test', '--test-concurrency=1',
       `--test-reporter=${reporter}`, ...files];

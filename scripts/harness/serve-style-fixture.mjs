@@ -1,4 +1,5 @@
-/** Dedicated loopback server for the original stylesheet specimen only. */
+/** Dedicated loopback server for the selected host stylesheet specimen only. */
+import { readVendor, vendorPath, runtimeVendorCss } from '../styles/vendor-policy.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +18,12 @@ for (const module of ['tokens', 'base', 'controls', 'overlays', 'accessibility']
   routes.set(`/harness/styles/obsidian/${module}.css`, [`harness/styles/obsidian/${module}.css`, 'text/css; charset=utf-8']);
 }
 
+for (const path of ['harness/styles/vendor/obsidian.css', 'harness/styles/host-adapter.css',
+  'harness/styles/simulated.css', 'src/styles/index.css', 'src/styles/tokens.css']) {
+  routes.set(`/${path}`, [path, 'text/css; charset=utf-8']);
+}
+routes.set('/harness/style-fixture/simulated.html', ['harness/style-fixture/simulated.html', 'text/html; charset=utf-8']);
+
 export function createFixtureServer() {
   return createServer(async (request, response) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -29,7 +36,7 @@ export function createFixtureServer() {
     if (!route) { response.writeHead(404); response.end(); return; }
     if (raw === '/') { response.writeHead(302, { Location: '/harness/style-fixture/' }); response.end(); return; }
     try {
-      const data = await readFile(new URL(route[0], root));
+      const data = route[0] === vendorPath ? Buffer.from(runtimeVendorCss(await readVendor(fileURLToPath(root)))) : await readFile(new URL(route[0], root));
       response.writeHead(200, { 'Content-Type': route[1] });
       response.end(request.method === 'HEAD' ? undefined : data);
     } catch {

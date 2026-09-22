@@ -5,8 +5,8 @@ import { validatePlan, acceptanceEvidence, releaseDecision } from '../../scripts
 const fresh = async () => JSON.parse(await readFile(new URL('../../docs/testing/test-plan.json', import.meta.url), 'utf8'));
 test('[POL-01] inventory covers every acceptance ID exactly once', async () => {
   const plan = validatePlan(await fresh());
-  assert.equal(plan.acceptance.length, 90);
-  assert.equal(plan.acceptance.at(-1).id, 'AC-90');
+  assert.equal(plan.acceptance.length, 96);
+  assert.equal(plan.acceptance.at(-1).id, 'AC-96');
 });
 test('[POL-02] missing and duplicate acceptance cannot disappear', async () => {
   const plan = await fresh(); plan.acceptance.pop(); assert.throws(() => validatePlan(plan), /COUNT/);

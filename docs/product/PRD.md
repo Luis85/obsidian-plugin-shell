@@ -1,13 +1,13 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.6.0 · **Updated:** 2026-09-22 · **Owner:** Luis85  
+> **Version:** 0.7.0 · **Updated:** 2026-09-22 · **Owner:** Luis85  
 > **State:** Specification plus an implemented style specimen and scope-limited verification baseline. The plugin runtime, setup/makers, full Vue harness and native release qualification are not implemented.
 
 ## 1. Product direction and normative structure
 
 Provide an approachable current Obsidian plugin baseline: obtain the template, run guided setup, generate a first feature, develop with a real-component browser harness and native host, verify, and publish the exact accepted artifacts.
 
-This revision adds a proper test strategy, executable test concept, machine-readable traceability, deterministic repeated baseline checks, and explicit evidence boundaries. It does not claim a working plugin because fixture tests pass.
+This revision retains the test strategy and adds sourced Obsidian token aliases, a pinned owner-provided host stylesheet, explicit extracted/simulated profiles, and deterministic token/fidelity checks. It does not claim a working plugin because fixture tests pass.
 
 [BASELINE-0.4.md](BASELINE-0.4.md) remains the exact retained original specification (blob `eb6e37ed128c6bbe6a2eba895729d2643c8cfb3e`). Its requirements, command contracts, work packages and AC-01–62 remain incorporated. The v0.5 error/notification/harness requirements and AC-63–82 are retained below. Historical status/version wording is not a current capability claim; current refinements take precedence without weakening earlier safety or quality requirements.
 
@@ -21,6 +21,7 @@ This revision adds a proper test strategy, executable test concept, machine-read
 | [Errors/notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md) | ERR-07–18, NTF-01–12, retaining original ERR/LOG rules. |
 | [Harness styles](../testing/HARNESS-STYLES.md) | HSS-01–12. |
 | [Test strategy](../testing/TEST-STRATEGY.md) | Adds TST-01–16. |
+| [Native tokens](../design/OBSIDIAN-TOKENS.md) | Adds TOK-01–06; default extracted host styling with precise provenance. |
 | [Test concept](../testing/TEST-CONCEPT.md) | Executable profiles, fixtures, reporting, determinism and implementation roadmap. |
 
 The [machine test plan](../testing/test-plan.json) is an executable inventory and traceability index. It does not replace normative behavior with abbreviated summaries. Test results, acceptance evidence and release readiness are distinct.
@@ -195,6 +196,25 @@ WP-00–09 keep existing scope and dependencies. Integrate the test strategy rat
 POL-01: Distinguish specified/implemented/locally-tested/native-verified/released. POL-02: Preserve numbered requirements through one current entrypoint and focused companions. POL-03: Avoid a new inbox/theme/error/testing platform. POL-04: Generated source follows shared policies and gates. POL-05: Risk-select profiles without dropping required coverage. POL-06: Generated qualification has an explicit finite boundary; no recursive full-suite generation or hidden blanket skip.
 
 A baseline may become useful before complete v1 qualification, but its label must remain honest. Do not lower unchanged requirements to make an early milestone look complete.
+
+## 21.1 Native token and host-style refinement
+
+The [token contract](../design/OBSIDIAN-TOKENS.md) is normative. It supersedes original-only default styling and blanket no-vendor assumptions specifically for the owner-requested extraction; it does not relicense third-party code, supply fonts, claim native fidelity, or put host styles in the plugin bundle. The original simulator is retained in a separate profile.
+
+Implemented now: 133 reviewed reference names, 968 observed extracted names, 38 scoped aliases, a lossless pinned archive and one explicit comment-only runtime repair, profile-aware server/inline adapter, and token tests. No full plugin/Vite artifact/native-host certification follows.
+
+AC-01–90 remain. Add AC-91–96:
+
+| ID | Requirement | Evidence scope |
+| --- | --- | --- |
+| AC-91 | Sourced native reference and usable plugin aliases | TOK-01; code/reference checks, not all host API variables. |
+| AC-92 | Snapshot hash and narrow vendor-input integrity | TOK-02; any altered decoded bytes fail. |
+| AC-93 | Explicit host → plugin → fixture order and isolated profiles | TOK-03; no automatic fallback. |
+| AC-94 | Theme overrides and missing-style negative browser cases | TOK-04; environment/mode recorded, native not inferred. |
+| AC-95 | Accurate unknown-version/rights/font/provenance claims | TOK-05; no MIT relabel or font distribution. |
+| AC-96 | Deprecated/missing aliases and drift fail checks | TOK-06; exact current alias grammar, no general CSS lint claim. |
+
+The specified acceptance total is now 96, not a passing runtime-test count. Handwritten source limits remain 400/450; the exact immutable vendor input has a checked, documented exception. Production code now includes only the style entry/aliases, not a functioning plugin runtime.
 
 ## 22. Sources and executed evidence
 

@@ -30,11 +30,11 @@ export function validatePlan(plan) {
       }
     } else if (suite.file !== null || suite.testIds?.length !== 0) throw new Error('PLAN_FAKE_IMPLEMENTATION');
   }
-  if (!Array.isArray(plan.acceptance) || plan.acceptance.length !== 90) throw new Error('PLAN_ACCEPTANCE_COUNT');
+  if (!Array.isArray(plan.acceptance) || plan.acceptance.length !== 96) throw new Error('PLAN_ACCEPTANCE_COUNT');
   const ids = new Set();
   for (const item of plan.acceptance) {
     exactKeys(item, ['id', 'summary', 'risk', 'owner', 'requiredModes', 'evidence', 'gap']);
-    if (!/^AC-(?:0[1-9]|[1-8][0-9]|90)$/.test(item.id ?? '') || ids.has(item.id) ||
+    if (!/^AC-(?:0[1-9]|[1-8][0-9]|9[0-6])$/.test(item.id ?? '') || ids.has(item.id) ||
         !item.summary || !['critical', 'high', 'normal'].includes(item.risk) || !item.owner || !item.gap)
       throw new Error('PLAN_ACCEPTANCE');
     ids.add(item.id);

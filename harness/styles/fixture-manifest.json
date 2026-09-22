@@ -1,15 +1,47 @@
 {
-  "schemaVersion": 1,
-  "fixtureVersion": "0.1.0",
-  "kind": "original-host-style-simulation",
+  "schemaVersion": 2,
+  "fixtureVersion": "0.2.0",
+  "defaultProfile": "extracted",
   "entry": "obsidian.css",
-  "rootClass": "obsidian-harness",
-  "themes": ["theme-light", "theme-dark"],
-  "modules": ["obsidian/tokens.css", "obsidian/base.css", "obsidian/controls.css", "obsidian/overlays.css", "obsidian/accessibility.css"],
-  "origin": "Original repository implementation; no copied Obsidian app.css or font files",
-  "license": "MIT",
+  "profiles": {
+    "extracted": {
+      "kind": "user-supplied-reduced-host-css",
+      "entry": "obsidian.css",
+      "documentIsolation": true,
+      "modules": [
+        "vendor/obsidian.css",
+        "host-adapter.css"
+      ],
+      "provenance": "vendor/provenance.json"
+    },
+    "simulated": {
+      "kind": "original-host-style-simulation",
+      "entry": "simulated.css",
+      "rootClass": "obsidian-harness",
+      "modules": [
+        "obsidian/tokens.css",
+        "obsidian/base.css",
+        "obsidian/controls.css",
+        "obsidian/overlays.css",
+        "obsidian/accessibility.css"
+      ]
+    }
+  },
+  "themes": [
+    "theme-light",
+    "theme-dark"
+  ],
   "nativeComparison": null,
   "qualifiedNativeHost": null,
   "productionBundleAllowed": false,
-  "notes": "A standalone specimen is not an integrated plugin, native adapter, or device test."
+  "adapterSurfaces": [
+    "specimen document scrolling",
+    "workspace shell gaps",
+    "settings flex layout",
+    "select widget approximation",
+    "notice appearance",
+    "browser dialog closure and backdrop",
+    "accessibility accommodations"
+  ],
+  "notes": "Extracted rules are not a current full Obsidian installation. Original simulator is isolated, not used as fallback or stacked above extraction."
 }

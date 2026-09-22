@@ -2,6 +2,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { request } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { readVendor, runtimeVendorCss } from '../../scripts/styles/vendor-policy.mjs';
+import { fileURLToPath } from 'node:url';
 import { createFixtureServer } from '../../scripts/harness/serve-style-fixture.mjs';
 
 const server = createFixtureServer();
@@ -31,7 +33,7 @@ function get(path, method = 'GET') {
 test('[HTTP-01] serves an explicitly labeled stylesheet fixture', async () => {
   const result = await get('/harness/style-fixture/');
   assert.equal(result.status, 200);
-  assert.match(result.body, /Original CSS simulation/);
+  assert.match(result.body, /Extracted Obsidian stylesheet/);
   assert.match(result.body, /not a live failure/i);
   assert.match(result.headers['content-type'], /text\/html/);
 });
@@ -41,7 +43,7 @@ test('[HTTP-02] root redirects to the canonical asset-relative route', async () 
   assert.equal(result.headers.location, '/harness/style-fixture/');
 });
 test('[HTTP-03] serves all five ordered CSS modules', async () => {
-  const entry = await get('/harness/styles/obsidian.css');
+  const entry = await get('/harness/styles/simulated.css');
   const names = [...entry.body.matchAll(/@import '\.\/obsidian\/([a-z]+)\.css';/g)].map((m) => m[1]);
   assert.deepEqual(names, ['tokens', 'base', 'controls', 'overlays', 'accessibility']);
   for (const name of names) {
@@ -70,7 +72,7 @@ test('[HTTP-06] HEAD returns headers without a body', async () => {
   assert.equal(result.body, '');
 });
 test('[HTTP-07] source-level tripwires: fixture provenance, no external assets or HTML injection', async () => {
-  const entry = await readFile(new URL('../../harness/styles/obsidian.css', import.meta.url), 'utf8');
+  const entry = await readFile(new URL('../../harness/styles/simulated.css', import.meta.url), 'utf8');
   const script = await readFile(new URL('../../harness/style-fixture/fixture.js', import.meta.url), 'utf8');
   assert.match(entry, /Not copied from Obsidian/);
   assert.doesNotMatch(entry, /https?:\/\//);
@@ -93,4 +95,16 @@ test('[HTTP-10] alternate traversal and absolute-form paths do not escape the al
   for (const path of ['/harness/%2e%2e/AGENTS.md', '/harness/styles/%252e%252e/README.md',
     '//harness/style-fixture/', '/harness/styles/obsidian.css/extra', 'http://example.invalid/'])
     assert.equal((await get(path)).status, 404, path);
+});
+
+test('[HTTP-11] serves decoded pinned extraction and plugin aliases without exposing its archive', async () => {
+  const raw = await readVendor(fileURLToPath(new URL('../../',import.meta.url)));
+  const result = await get('/harness/styles/vendor/obsidian.css');
+  assert.equal(result.status,200); assert.equal(result.body,runtimeVendorCss(raw));
+  assert.match(result.headers['content-type'], /text\/css/);
+  assert.equal((await get('/harness/styles/vendor/obsidian.css.gz')).status,404);
+  for (const path of ['harness/styles/host-adapter.css','src/styles/index.css','src/styles/tokens.css']) {
+    const response = await get(`/${path}`); assert.equal(response.status,200);
+    assert.equal(response.body,await readFile(new URL(`../../${path}`,import.meta.url),'utf8'));
+  }
 });

@@ -1,0 +1,44 @@
+/* Native variables remain host/theme owned. Apply this class to each plugin view/modal root.
+ * Generated projects rename only the plugin-shell namespace through setup.
+ * No fixed light/dark palette and no defaults that can conceal a missing host stylesheet.
+ */
+:where(.plugin-shell) {
+  --plugin-shell-surface: var(--background-primary);
+  --plugin-shell-surface-raised: var(--background-primary-alt);
+  --plugin-shell-surface-muted: var(--background-secondary);
+  --plugin-shell-text: var(--text-normal);
+  --plugin-shell-text-muted: var(--text-muted);
+  --plugin-shell-text-subtle: var(--text-faint);
+  --plugin-shell-text-on-accent: var(--text-on-accent);
+  --plugin-shell-accent: var(--interactive-accent);
+  --plugin-shell-accent-hover: var(--interactive-accent-hover);
+  --plugin-shell-link: var(--text-accent);
+  --plugin-shell-border: var(--background-modifier-border);
+  --plugin-shell-border-hover: var(--background-modifier-border-hover);
+  --plugin-shell-border-focus: var(--background-modifier-border-focus);
+  --plugin-shell-hover: var(--background-modifier-hover);
+  --plugin-shell-error: var(--text-error);
+  --plugin-shell-warning: var(--text-warning);
+  --plugin-shell-success: var(--text-success);
+  --plugin-shell-space-xs: var(--size-4-1);
+  --plugin-shell-space-sm: var(--size-4-2);
+  --plugin-shell-space-md: var(--size-4-3);
+  --plugin-shell-space-lg: var(--size-4-4);
+  --plugin-shell-space-xl: var(--size-4-6);
+  --plugin-shell-space-2xl: var(--size-4-8);
+  --plugin-shell-radius-sm: var(--radius-s);
+  --plugin-shell-radius-md: var(--radius-m);
+  --plugin-shell-radius-lg: var(--radius-l);
+  --plugin-shell-font-ui: var(--font-interface);
+  --plugin-shell-font-code: var(--font-monospace);
+  --plugin-shell-text-size: var(--font-ui-medium);
+  --plugin-shell-text-size-sm: var(--font-ui-small);
+  --plugin-shell-weight-normal: var(--font-normal);
+  --plugin-shell-weight-strong: var(--font-semibold);
+  --plugin-shell-line-height: var(--line-height-normal);
+  --plugin-shell-control-height: var(--input-height);
+  --plugin-shell-control-radius: var(--input-radius);
+  --plugin-shell-modal-layer: var(--layer-modal);
+  --plugin-shell-notice-layer: var(--layer-notice);
+  --plugin-shell-icon-size: var(--icon-m);
+}
