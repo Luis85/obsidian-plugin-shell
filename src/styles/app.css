@@ -5,5 +5,7 @@
 @import "./nuxt-bridge.css";
 @import "./shell.css";
 @import "./panels.css";
+@import "./layout.css";
+@import "./native-header.css";
 @source "../presentation";
 @source "../../node_modules/.nuxt-ui";

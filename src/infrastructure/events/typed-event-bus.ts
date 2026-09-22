@@ -27,7 +27,9 @@ export class TypedEventBus<M> implements EventPort<M> {
   publish(event: EventInput<M>): void {
     if (this.disposed) return;
     if (this.depth >= 32) { this.errors.report('event.recursion', 'event.dispatch'); return; }
-    const payload: unknown = structuredClone(event.payload); freeze(payload);
+    let payload: unknown;
+    try { payload = structuredClone(event.payload); freeze(payload); }
+    catch { this.errors.report('event.payload', 'event.dispatch'); return; }
     this.depth++;
     try {
       // Snapshot is required: a listener added during dispatch starts with the next event.

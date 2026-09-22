@@ -4,6 +4,8 @@ const prefix = 'plugin-shell:harness:v1:';
 export function browserAdapters() {
   let failWrite = false;
   let failOpen = false;
+  let failSettings = false;
+  let failNotice = false;
 
   const dialogs = new Set<HTMLDialogElement>();
   const disposers = new Set<() => void>();
@@ -26,6 +28,7 @@ export function browserAdapters() {
     async openDocument(path) { if (failOpen) return failure('storage', 'error.open'); const value = files()[path]; if (value === undefined) return failure('storage', 'error.open'); dialog(path, value, true); return success(undefined); },
     showModal: dialog,
     notice(text, duration = 4000) {
+      if (failNotice) throw new Error('FIXTURE_NOTICE_FAILURE');
       const el = document.createElement('div'); el.className = 'harness-native-notice'; el.textContent = text; el.setAttribute('role', 'status');
       let container = document.querySelector('.harness-native-notices');
       if (!container) { container = document.createElement('div'); container.className = 'harness-native-notices'; document.body.append(container); }
@@ -35,7 +38,7 @@ export function browserAdapters() {
     },
   };
   const adapters: ServiceAdapters = {
-    settings: { async load() { return read('settings'); }, async save(value) { write('settings', value); } },
+    settings: { async load() { return read('settings'); }, async save(value) { if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
     local: { get: read, set: write }, host,
     documents: { async create(path, markdown) { if (failWrite) return failure('storage', 'error.write'); const current = files(); if (current[path] !== undefined) return failure('conflict', 'error.conflict'); write('files', { ...current, [path]: markdown }); return success(undefined); } },
     newId: () => { const sequence = Number(read('sequence') ?? 0) + 1; write('sequence', sequence); return `demo-${String(sequence).padStart(4, '0')}`; },
@@ -43,7 +46,7 @@ export function browserAdapters() {
     observeError: entry => errors.push({ code: entry.code, operation: entry.operation }),
   };
   return { adapters, files, errors,
-    fault(kind: 'write' | 'open' | 'none') { failWrite = kind === 'write'; failOpen = kind === 'open'; },
+    fault(kind: 'write' | 'open' | 'settings' | 'notice' | 'none') { failWrite = kind === 'write'; failOpen = kind === 'open'; failSettings = kind === 'settings'; failNotice = kind === 'notice'; },
     dispose() { for (const hide of [...disposers]) hide(); for (const el of dialogs) el.close(); },
   };
 }

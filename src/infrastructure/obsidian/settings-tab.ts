@@ -9,20 +9,23 @@ export class ShellSettingsTab extends PluginSettingTab {
   getSettingDefinitions(): SettingDefinitionItem[] {
     const t = (key: string) => this.services.text(key);
     return [
-      { name: t('settings.language'), desc: t('settings.languageHelp'), control: { type: 'dropdown', key: 'locale', options: { en: 'English', de: 'Deutsch' }, defaultValue: 'en' } },
-      { name: t('settings.folder'), desc: t('settings.folderHelp'), control: { type: 'text', key: 'taskFolder', defaultValue: 'Tasks', validate: value => { const r = validateFolder(value); return r.ok ? undefined : t(r.error.key); } } },
-      { name: t('settings.notices'), desc: t('settings.noticesHelp'), control: { type: 'toggle', key: 'notifySuccess', defaultValue: true } },
+      { name: t('settings.hideHeader'), desc: t('settings.hideHeaderHelp'), control: { disabled: () => this.services.preferences.readonly, type: 'toggle', key: 'hideObsidianViewHeader', defaultValue: false } },
+      { name: t('settings.language'), desc: t('settings.languageHelp'), control: { disabled: () => this.services.preferences.readonly, type: 'dropdown', key: 'locale', options: { en: 'English', de: 'Deutsch' }, defaultValue: 'en' } },
+      { name: t('settings.folder'), desc: t('settings.folderHelp'), control: { disabled: () => this.services.preferences.readonly, type: 'text', key: 'taskFolder', defaultValue: 'Tasks', validate: value => { const r = validateFolder(value); return r.ok ? undefined : t(r.error.key); } } },
+      { name: t('settings.notices'), desc: t('settings.noticesHelp'), control: { disabled: () => this.services.preferences.readonly, type: 'toggle', key: 'notifySuccess', defaultValue: true } },
     ];
   }
   getControlValue(key: string): unknown {
     const value = this.services.preferences.current;
+    if (key === 'hideObsidianViewHeader') return value.hideObsidianViewHeader;
     if (key === 'locale') return value.locale;
     if (key === 'taskFolder') return value.taskFolder;
     if (key === 'notifySuccess') return value.notifySuccess;
     return undefined;
   }
   async setControlValue(key: string, value: unknown): Promise<void> {
-    const patch: Partial<Preferences> | null = key === 'locale' && (value === 'en' || value === 'de') ? { locale: value }
+    const patch: Partial<Preferences> | null = key === 'hideObsidianViewHeader' && typeof value === 'boolean' ? { hideObsidianViewHeader: value }
+      : key === 'locale' && (value === 'en' || value === 'de') ? { locale: value }
       : key === 'taskFolder' && typeof value === 'string' ? { taskFolder: value }
       : key === 'notifySuccess' && typeof value === 'boolean' ? { notifySuccess: value } : null;
     if (!patch) return;

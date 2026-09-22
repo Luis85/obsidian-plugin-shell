@@ -23,7 +23,7 @@ export function sharedConfig() {
     plugins: [staticVendor(), vue(), ui({ root, router: false, colorMode: false, autoImport: false, components: false,
       experimental: { componentDetection: true },
       theme: { prefix: 'ps', colors: ['primary', 'success', 'info', 'warning', 'error'] },
-      icon: { mode: 'svg', clientBundle: { icons: ['lucide:layout-dashboard', 'lucide:file-plus-2', 'lucide:radio', 'lucide:sliders-horizontal', 'lucide:panel-top', 'lucide:scan-text', 'lucide:file-check-2', 'lucide:arrow-up-right', 'lucide:bell', 'lucide:message-square-warning', 'lucide:x', 'lucide:check', 'lucide:loader-circle'] } },
+      icon: { mode: 'svg', clientBundle: { icons: ['lucide:layout-dashboard', 'lucide:file-plus-2', 'lucide:radio', 'lucide:sliders-horizontal', 'lucide:panel-top', 'lucide:scan-text', 'lucide:file-check-2', 'lucide:arrow-up-right', 'lucide:bell', 'lucide:message-square-warning', 'lucide:x', 'lucide:check', 'lucide:loader-circle', 'lucide:ellipsis-vertical'] } },
     })],
     css: { postcss: { plugins: [cssOwnership()] } },
     define: { 'process.env.NODE_ENV': JSON.stringify('production'), 'import.meta.dev': false, __VUE_OPTIONS_API__: true, __VUE_PROD_DEVTOOLS__: false },

@@ -3,7 +3,11 @@ body { margin: 0; overflow: hidden; contain: none; }
 .harness-toolbar strong { color: var(--text-normal); font-weight: 550; }
 .harness-toolbar > div { display: flex; gap: 6px; margin-left: auto; }
 .harness-toolbar button { height: 24px; font-size: 10px; padding: 3px 10px; }
-#showcase-root { height: calc(100vh - 38px); }
+#harness-workspace { display: flex; height: calc(100vh - 38px); overflow: auto; align-items: stretch; }
+.harness-leaf { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; height: 100%; overflow: hidden; border-inline-end: 1px solid var(--background-modifier-border); }
+.harness-leaf > .view-header { flex: 0 0 auto; min-height: 30px; padding: 5px 12px; font-size: 11px; text-align: center; color: var(--text-muted); background: var(--background-primary); }
+.harness-plugin-root { flex: 1; min-height: 0; min-width: 0; }
+#non-plugin-leaf { position: fixed; inset-inline-end: 16px; bottom: 4px; z-index: -1; pointer-events: none; }
 .harness-modal { background: var(--background-primary); color: var(--text-normal); width: min(620px, 90vw); max-height: 80vh; border: 1px solid var(--background-modifier-border); border-radius: var(--radius-l); padding: 24px; }
 .harness-modal::backdrop { background: rgba(0,0,0,.6); }
 .harness-modal h2 { margin: 0 0 16px; }

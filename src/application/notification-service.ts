@@ -16,7 +16,11 @@ export class NotificationService {
     while (this.items.length > 5) { const first = this.items[0]; if (first) this.dismiss(first.id); }
     if (native) {
       try { this.hides.set(entry.id, this.host.notice(this.text(key), 4000)); }
-      catch { this.errors.report('notice.sink', 'notice.show'); }
+      catch {
+        this.errors.report('notice.sink', 'notice.show');
+        // A failed host sink must still leave owned, localized inline feedback.
+        this.items = this.items.map(item => item.id === entry.id ? Object.freeze({ ...item, native: false }) : item);
+      }
     }
     this.changed(); return entry.id;
   }
