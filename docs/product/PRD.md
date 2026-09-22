@@ -1,169 +1,174 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.3.0  
+> **Version:** 0.4.0  
 > **Updated:** 2026-09-22  
 > **Owner:** Luis85  
-> **Status:** Implementation specification; current repository delivery is documentation only.  
-> **Product goal:** Obtain the template, run guided setup, generate a first feature, develop confidently, keep dependencies current, and release a tested Obsidian plugin.
+> **Status:** Implementation specification; the repository remains documentation-only.  
+> **Product goal:** Obtain the template, run guided setup, generate a first feature, develop confidently, create entity-backed Markdown safely, keep dependencies current, and release a tested Obsidian plugin.
 
 ## 1. Product direction
 
-Obsidian Plugin Shell is a GitHub template for maintainable TypeScript/Vue 3/Pinia plugins. It supplies a working removable example, native integration, a real-component frontend harness, enforceable architecture, a typed event bus, modular composed styling, development generators, and a straightforward GitHub release workflow.
+Obsidian Plugin Shell is a GitHub template for maintainable TypeScript/Vue 3/Pinia plugins. It provides a removable example, native integration, a real-component frontend harness, enforceable architecture, a typed event bus, modular composed CSS, guided setup, development makers, an entity-driven DocumentCreationService, and an explicit GitHub release workflow.
 
 ```text
-Get template → npm run setup → npm run make → develop in browser/Obsidian
-→ verify → create release draft → accept exact artifacts → publish
+Get template → npm run setup → npm run make → browser/native development
+→ verify → release candidate → accept exact artifacts → publish
 ```
 
-Node and npm are prerequisites. Installing project dependencies is part of setup; a separate `npm ci` must not be required to start the wizard. CI and ordinary explicit lockfile reinstalls still use `npm ci` directly.
+Node and npm are prerequisites. Installing project dependencies is part of setup; starting the wizard must not require a separate npm ci. CI and explicit locked reinstalls still use npm ci directly.
 
-Target the latest **public/stable** Obsidian and current compatible dependencies through reviewed updates. Do not require Catalyst access, an AI account, a personal vault, or a paid release/tooling service.
+Target latest **public/stable** Obsidian and current compatible dependencies through reviewed updates. Normal use does not require Catalyst, an AI account, a personal vault, or paid tooling/release services.
 
 ### 1.1 Owner requirements
 
 | Area | Required outcome |
 | --- | --- |
-| Stack | Vite, Vitest, Oxlint, fallow, TypeScript, Vue 3, Pinia, and `eslint-plugin-obsidianmd`. |
-| Foundation | Settings, durable storage, local preferences, view shell, commands, ribbon, modals, notices, multilingual UI, error handling, logging. |
-| Architecture | Domain-oriented clean architecture with composition-only `main.ts` and enforced dependency directions. |
-| File size | At most 400 physical lines per handwritten source file, 450 per test/helper file. |
-| Guided installation | A fresh template can start `npm run setup` without installed project dependencies; guided configuration, installation, checks, and handoff. |
-| Tooling organization | Executable scripts, shared helpers, makers, and templates live in a dedicated `scripts/` tree. |
-| Boilerplate | A Symfony-inspired `make` interface generates readable, integrated, tested scaffolds and supports custom makers. |
-| Events | A typed, plugin-scoped, extensible event bus with a supported Obsidian-event bridge and owned cleanup. |
-| Styles | CSS can be split into modules and Vue component styles; the build composes one complete `styles.css`. |
-| Agent readiness | Bounded tasks, noninteractive tooling, deterministic frontend scenarios, and truthful verification evidence. |
-| Maintenance/release | Latest-stable-first compatibility, active dependency upkeep, safe codebase-local installation, and explicit tested releases. |
+| Stack | Vite, Vitest, Oxlint, fallow, TypeScript, Vue 3, Pinia, and eslint-plugin-obsidianmd. |
+| Foundation | Native settings, plugin data, local preferences, view shell, commands/ribbon, modals/notices, multilingual UI, error handling, logging. |
+| Architecture | Domain-oriented clean architecture, enforced imports, composition-only main.ts. |
+| File size | At most 400 physical lines per handwritten source file; 450 per test/helper. |
+| Installation | Fresh-checkout npm run setup, dependency-free bootstrap, guided configuration/install/checks. |
+| Scripts | Executable tooling, shared helpers, maker implementations/templates under scripts/. |
+| Makers | Symfony-inspired discoverable generators producing readable integrated code and tests, with custom extensions. |
+| Events | Typed extensible plugin-scoped bus and supported Obsidian bridge with owned cleanup. |
+| Styles | Modular CSS and Vue component styles composed into one complete styles.css. |
+| Documents | Easy-to-use DocumentCreationService creates Markdown with a defined frontmatter projection based on registered entities; Task is the reference recipe. |
+| Agent readiness | Bounded tasks, finite noninteractive tooling, deterministic frontend evidence, truthful results. |
+| Maintenance/release | Current-host policy, active dependency upkeep, safe local installation, explicit tested releases. |
 
-### 1.2 Contract organization
+### 1.2 Normative contracts
 
-MUST requirements are necessary for the complete template. SHOULD identifies a preferred implementation with a documented exception path; MAY identifies optional extensions. Defaults such as npm, English/German, Vue I18n, Playwright, the example-item feature, a 100-line `main.ts`, and quantitative quality budgets are template policies—not measured results or vendor requirements.
+MUST requirements are necessary for the complete template; SHOULD permits a documented exception; MAY is optional. Defaults such as npm, English/German, Vue I18n, Playwright, the example recipes, a 100-line main.ts ceiling, and numeric budgets are chosen policies, not measured facts or vendor requirements.
 
-This revision preserves existing core requirement identifiers and AC-01–35. It adds AC-36–49 and the following **normative companion contracts**. Their requirements are part of this PRD, not optional suggestions:
+This revision retains AC-01–49 and adds AC-50–62. The following companion requirements are part of the PRD:
 
-| Contract | Requirement IDs |
+| Contract | IDs |
 | --- | --- |
 | [Guided setup and makers](../development/SETUP-AND-MAKERS.md) | TOOL-01–06, SETUP-01–12, MAKE-01–12 |
 | [Typed event bus](../architecture/EVENT-BUS.md) | EVT-01–16 |
 | [Modular CSS composition](../architecture/STYLES.md) | CSS-01–12 |
+| [Entity document creation](../architecture/DOCUMENT-CREATION.md) | DOC-01–20 |
 
-These replace v0.2's optional-generator/no-bus assumption and its separate-install quickstart. They do not relax architecture, lifecycle, safety, or quality controls. Practical navigation starts at the [developer workflow](../development/DEVELOPER-WORKFLOW.md); release operations are in the [maintenance guide](../development/MAINTENANCE-AND-RELEASE.md).
+The setup/maker/event/style decisions introduced in v0.3 remain. V0.4 adds note creation on an explicit requested action, not unsolicited note seeding. The original data.json-backed example and the note-backed Task recipe illustrate different persistence categories; they do not store the same Task twice. The entity maker extends the existing catalog rather than creating a separate generator system.
 
-R01–R35 source references resolve in the [earlier research register](../research/2026-09-22-template-research.md). S01–S14 resolve in the [setup/makers/events/styles supplement](../research/2026-09-22-setup-makers-events-styles.md).
+Start with the [developer workflow](../development/DEVELOPER-WORKFLOW.md), [entity recipe](../development/ENTITY-DOCUMENTS.md), and [maintenance/release guide](../development/MAINTENANCE-AND-RELEASE.md). R01–R35 reference the [baseline research](../research/2026-09-22-template-research.md), S01–S14 the [tooling/events/styles supplement](../research/2026-09-22-setup-makers-events-styles.md), and D01–D05 the [document-creation research](../research/2026-09-22-entity-documents.md).
 
 ## 2. Users, outcomes, and developer experience
 
-The primary user is a developer starting a plugin. Agents and reviewers support that developer. The first useful change must not require reading the whole PRD or configuring each underlying tool.
+The primary user is a developer starting a plugin. Agents and reviewers support that developer. A first useful feature must not require reading the entire specification or configuring every underlying tool.
 
-**SUC-01:** A differently named generated repository initializes, installs, builds, verifies, and prepares valid release assets without manual path repair.
+**SUC-01:** A differently named generated repository initializes, installs, builds, verifies, and prepares valid release assets without manual path repairs.
 
-**SUC-02:** One reference feature demonstrates real UI → application → domain validation → persistence → committed event → projection/feedback behavior, including failure paths.
+**SUC-02:** The reference feature exercises UI → application → validation → persistence → committed fact → projection/feedback, including failures.
 
-**SUC-03:** Browser development/verification work without Obsidian, a personal vault, AI subscriptions, or API keys.
+**SUC-03:** Browser development/verification requires neither Obsidian nor a personal vault/AI subscription/API key.
 
-**SUC-04:** Real-host compatibility is established separately; browser success is not host proof.
+**SUC-04:** Real-host compatibility is proved separately, not inferred from browser tests.
 
-**SUC-05:** Isolated negative fixtures prove important gates actually fail for their intended defects.
+**SUC-05:** Isolated negative fixtures prove important gates reject their intended defects.
 
-**SUC-06:** Rebuild/setup/generation preserve user data, notes, unrelated files/plugins, configuration, and security decisions.
+**SUC-06:** Setup/generation/rebuilds preserve user data, unrelated files/plugins, configuration, and security decisions.
 
-**DX-01:** The quickstart emphasizes setup, make, dev:ui/dev:local, verify, and release:prepare, with help one command away. Advanced commands remain discoverable rather than crowding first-run guidance.
+**SUC-07:** Registered entity values produce a valid Markdown note through the shared service; invalid values, preview/cancel, and conflicts do not produce unintended documents or overwrite existing ones.
 
-**DX-02:** Guided setup starts dependency-free, supports validated noninteractive inputs/dry run/resume, and reports next actions. No global npm tooling, Docker, GitHub CLI, native compiler, or separate package manager is required for the normal browser path unless a proven unavoidable prerequisite is explicitly documented.
+**DX-01:** Promote setup, make, dev:ui/dev:local, verify, and release:prepare. Help is one command away; specialized commands do not crowd first-run guidance.
 
-**DX-03:** Provide both a maker-based first-feature recipe and a manual first-change recipe. Proposed measured usability target: first visible change within 15 minutes of active work after prerequisites/downloads are available; do not claim it before testing.
+**DX-02:** Setup starts without installed project dependencies and offers validated inputs, dry run, noninteractive mode, safe resume, and next actions. No global package tooling, Docker, GitHub CLI, native compiler, or extra package manager is a standard browser prerequisite unless proven unavoidable and documented.
 
-**DX-04:** Errors identify what failed, evidence location, and narrow recovery. Distinguish missing Node/browser/host, port conflicts, invalid identity, generator collision, CSS build failure, and dependency installation failure.
+**DX-03:** Provide maker-based first-feature and manual first-change recipes, plus a short define-entity/create-document recipe. Proposed measured target: first visible change within 15 minutes of active work after prerequisites/downloads are ready; no unmeasured claim.
 
-**DX-05:** Generated product documentation reflects its own identity. Template-maintenance documentation stays separately discoverable; stale upstream names/badges and claims must not survive initialization unnoticed.
+**DX-04:** Explain the failure, evidence, and narrow recovery. Distinguish environment, identity, generator, style, installation, validation, path, document conflict, and uncertain-write errors.
 
-## 3. Scope and boundaries
+**DX-05:** Generated documentation uses the new product's identity, not stale upstream names/badges. Keep template-maintenance detail separately discoverable.
 
-The first complete release includes the plugin/example, typed events and native bridge, composed styles, setup/makers, quality configuration, harness/tests, safe local deployment, dependency maintenance, CI/release workflows, and documentation.
+## 3. Scope and exclusions
 
-Runtime remains mobile-compatible by design; mobile support requires device evidence. Desktop and mobile public release numbers are tracked separately.
+The complete baseline includes plugin/example and explicit Task-note recipe, typed events/native bridge, composed styles, setup/makers, DocumentCreationService, quality/tests/harness, safe local deployment, dependency maintenance, CI/releases, and documentation.
 
-Not included: an in-plugin AI runtime, telemetry, authentication, business ERP features, Bases views, canvas engine, reflection/DI framework, generic repository hierarchy, distributed messaging, event sourcing, durable/replaying bus, SSR, npm-library publication, mandatory Storybook/Histoire/MCP, or universal historical Obsidian compatibility.
+Runtime is mobile-compatible by design; actual mobile support requires device evidence. Track desktop/mobile public releases separately.
 
-The event bus is an explicit required integration primitive, not permission to turn every function into an event. Commands requiring results use application calls. Parent/child Vue interactions use their native mechanisms. Makers generate ordinary source, not a second runtime platform interpreting feature definitions.
+Excluded: an in-plugin AI runtime, telemetry, authentication, ERP features, full Todo management, whole-vault entity database/ORM, automatic note migration/synchronization, bulk document transactions, arbitrary executable templates, Bases views, canvas engine, reflection/DI framework, generic repository hierarchy, distributed/durable/replaying messaging, SSR, npm-library publication, mandatory Storybook/Histoire/MCP, or universal old-host support.
 
-## 4. Research-informed design decisions
+Use direct service calls for requests/results and typed events for facts. Parent/child Vue communication uses its normal mechanisms. Makers generate source; entity/document definitions describe validation and representation, not a second runtime workflow language.
+
+## 4. Research-informed decisions
 
 | Area | Decision |
 | --- | --- |
-| Host baseline | Latest public/stable; Catalyst is optional early warning. |
-| Settings | Current declarative native definitions and custom storage hooks using the application preference service. |
-| Dependencies | Exact direct versions and lockfile, reviewed family updates, Dependabot default/one updater. |
-| Setup | Checked-in Node-only bootstrap starts before dependency installation; no lifecycle recursion. |
-| Generation | Discoverable local makers with dry-run plans, explicit integration, tests, and custom extensions. |
-| Events | A typed transient notification bus; host events mapped through supported APIs with lifecycle/startup controls. |
-| CSS | Explicit source imports plus compiled SFC styles, extracted by the shared Vite pipeline. |
-| Quality | Prefer supported fallow boundaries/coverage and actual gate fixtures over duplicated analyzer frameworks. |
-| Native workflow | Optional official CLI restricted to the approved fixture vault. |
-| Release | Explicit commit/candidate, exact retained assets, host acceptance, deliberate promotion. |
-| Simplicity | Small first-run surface; no mandatory remote generator templates, AI runtime, release SaaS, or npm publication. |
+| Host | Latest public/stable; optional Catalyst canary. |
+| Settings | Current declarative native definitions with shared application storage. |
+| Dependencies | Exact versions/lockfile plus reviewed compatible-family updates; one updater. |
+| Setup | Checked-in Node-only bootstrap, locked install after consent, no lifecycle recursion. |
+| Makers | Planned safe edits, explicit registration/tests, local custom extensions. |
+| Bus | Typed transient notifications, mapped host inputs, startup/lifecycle safeguards. |
+| CSS | Ordered source imports and compiled SFC styles, one shared Vite pipeline. |
+| Entity documents | Separate entity schema and document projection, real YAML serialization, complete create-only host write, plain typed receipt. |
+| Property types | Local schemas cannot silently redefine vault-wide host property types. |
+| Quality | Supported tool enforcement plus real negative fixtures, not parallel custom frameworks. |
+| Releases | Fixed-commit candidate, retained JS/CSS/manifest, native acceptance, explicit promotion. |
 
-Selected files in Renovation Planner and Backlog View informed the baseline; they were not fully audited or copied wholesale. External documentation establishes tool capabilities, not proof that the chosen combination works. Source/evidence boundaries are in section 22.
+Reference-project files informed patterns, not a full audit or wholesale copy. Research does not prove package/host compatibility; exact versions and runtime behaviors remain qualification work.
 
-## 5. Technology, compatibility, and freshness
+## 5. Technology, compatibility, and updates
 
-### 5.1 Responsibility allocation
+### 5.1 Responsibilities
 
 | Tool | Responsibility |
 | --- | --- |
-| TypeScript / vue-tsc / tooling checkJs | Strict runtime, Vue, harness, test, generator-output, and tooling checks. |
-| Vite / Vue plugin | Native CJS and browser builds, including compiled and composed CSS. |
-| Vue 3 / Pinia | Presentation and explicitly owned view state. |
-| Vitest / Vue Test Utils | Domain/use-case/adapter/component/event/tooling contracts. |
-| Playwright Test | Browser flows, accessibility integration, reviewed visuals, failure traces. |
-| Oxlint | Fast supported correctness/quality rules. |
-| ESLint / Obsidian / Vue plugins | Complementary native, template, and typed rules. |
-| fallow | Reachability, dependencies, duplication, complexity, and resolved boundaries. |
-| Vue I18n | One localization service for native and Vue surfaces. |
-| Node scripts / npm | Guided setup, makers, orchestration, deterministic installation. |
-| GitHub Actions | Required CI, maintenance checks, reviewed draft/promote operations. |
+| TypeScript/vue-tsc/checkJs | Strict runtime, SFC, harness/test/tooling/generated-code checks. |
+| Vite/Vue plugin | Native CommonJS/browser builds and compiled/composed CSS. |
+| Vue 3/Pinia | Presentation and explicitly owned view state. |
+| Vitest/Vue Test Utils | Domain, application, adapter, component, bus, document, and tooling contracts. |
+| Playwright Test | Real-browser flows, accessibility, reviewed visuals, failure evidence. |
+| Oxlint | Fast supported correctness/quality checks. |
+| ESLint/Obsidian/Vue plugins | Complementary host, template, and typed rules. |
+| fallow | Reachability/dependencies/duplication/complexity/resolved boundaries. |
+| Vue I18n | Shared native/Vue localization. |
+| yaml, proposed qualified runtime dependency | One shared Markdown frontmatter serializer behind the renderer port. |
+| Node scripts/npm | Setup, makers, safe orchestration, reproducible installation. |
+| GitHub Actions | CI, freshness, and approved release stages. |
 
-Use one formatter and one browser test stack initially. The typed bus may use a small qualified implementation behind the specified ports; its semantics must be tested rather than inherited accidentally from an emitter dependency.
+Use one formatter and one initial browser runner. Entity validation reuses the template's chosen shared validator rather than a second schema engine. Qualify the serializer's exact version/bundle impact; do not import host-only helpers into application code just to avoid a port.
 
-### 5.2 Latest-stable host contract
+### 5.2 Host contract
 
-**TEC-01:** Maintain a machine-readable exact compatibility record for tools, Node/npm, host application/API declarations, relevant installer/runtime, browser binaries, platforms, date, and evidence. WP-00 establishes it.
+**TEC-01:** Record exact tested tools, Node/npm, app/API/installer/runtime, browser binaries, platforms, date, and evidence in a machine-readable compatibility record.
 
-**TEC-02:** Select the newest public desktop host for a fresh qualified baseline. The dated prior research observed 1.13.7; re-resolve at implementation/qualification rather than treating that number as permanent. Do not infer old-host support from successful compilation. [R01, R02]
+**TEC-02:** A fresh baseline selects current public desktop Obsidian. The earlier dated snapshot was 1.13.7; resolve again during qualification. Compilation is not older-host support. [R01, R02]
 
-**TEC-03:** Use current stable-supported declarative settings, not an unnecessary pre-1.13 fallback. Newer API declarations do not authorize early-access-only calls on a stable target. [R05, R06]
+**TEC-03:** Current stable declarative settings; no unnecessary pre-1.13 fallback. New declarations do not authorize beta-only calls. [R05, R06]
 
-**TEC-04:** Bundle required runtime libraries; externalize genuinely host-provided modules. Scripts, makers, fixture loaders, and agent integrations must not enter the runtime graph.
+**TEC-04:** Bundle needed runtime libraries, externalize host-provided modules, and exclude scripts/makers/fixtures/agents from the production graph.
 
-**TEC-05:** No Node/Electron runtime dependency when mobile support is claimed. Externalizing such a dependency is not portability; Node is appropriate in scripts only.
+**TEC-05:** No Node/Electron runtime requirement when claiming mobile. Scripts may use Node; normal note creation uses a host Vault adapter.
 
-**TEC-06:** Distinguish build syntax from runtime API support and desktop Chromium from mobile WebViews. No remote polyfill/asset requirement is hidden in the build.
+**TEC-06:** Separate syntax and runtime API compatibility, desktop engine and mobile WebViews. No hidden remote assets/polyfills.
 
-**TEC-07:** Test latest public desktop and any deliberately retained different minimum. Advance a baseline through an explicit compatibility change; a dependency PR must not silently raise an established plugin's minimum.
+**TEC-07:** Test latest public desktop and a different deliberately retained minimum. Baseline changes are explicit; ordinary dependency PRs do not silently raise established support floors.
 
-**TEC-08:** Optional Catalyst testing is isolated/nonblocking for public-host support unless it exposes a defect in the supported scope. Normal development needs no entitlement.
+**TEC-08:** Optional isolated Catalyst checks do not require entitlement for ordinary development or block public-host support except for defects affecting that scope.
 
-### 5.3 Dependency policy
+### 5.3 Dependency upkeep
 
-**UPD-01:** Select latest compatible stable candidates, save exact direct versions, and commit one lockfile. Ordinary installs and setup's install stage use `npm ci`, not floating latest. [R22]
+**UPD-01:** Qualified latest compatible stable candidates, exact direct versions, one lockfile, npm ci; no floating latest in normal builds/setup. [R22]
 
-**UPD-02:** Use a tested patched Active LTS Node track; the prior dated selection was Node 24. Keep version files, engines, npm selection, and CI aligned. Assess new LTS tracks explicitly; do not promise all future Node majors. [R15]
+**UPD-02:** Tested patched Active LTS Node track; prior dated selection Node 24. Align engines/version files/npm/CI and assess new LTS deliberately. [R15]
 
-**UPD-03:** Deliver Dependabot for npm/GitHub Actions with frequent checks and bounded PRs. Group compatible families and assess majors visibly. Renovate is a replacement, never a competing second updater. [R23, R24]
+**UPD-03:** Dependabot npm/Actions, frequent checks/bounded PRs/compatible groups and visible major reviews. Renovate replaces rather than duplicates it. [R23, R24]
 
-**UPD-04:** Initial proposed cooldown: three days for patch/minor, seven for majors; expedite security remediation after targeted review. Waiting is not proof of safety.
+**UPD-04:** Proposed three-day patch/minor and seven-day major cooldown; security remediation expedited after review. Waiting alone is not safety.
 
-**UPD-05:** Updates run relevant complete checks, including gate/maker-output/style-parity tests when tooling changes. Automerge starts disabled. Any later narrow patch policy excludes host-floor/schema/release/policy changes and never automatically publishes.
+**UPD-05:** Updates run relevant complete checks, including gates, maker output, styles and document serialization when affected. Automerge initially disabled; any later narrow patch policy excludes host/schema/release/policy changes and never publishes automatically.
 
-**UPD-06:** Weekly/on-demand freshness reports host/API/dependency/Node/action status as current, cooling down, available, incompatible, blocked, or source unavailable. Discovery failure is not a clean result.
+**UPD-06:** Weekly/on-demand freshness reports current/cooling-down/available/incompatible/blocked/source-unavailable for relevant host/dependencies/Node/actions. Discovery failure is not clean status.
 
-**UPD-07:** Track blocked updates with reason, owner, and review date. Proposed targets: review routine compatible updates within seven days after eligibility; assess majors within fourteen. Do not hide majors indefinitely or weaken checks to appear current.
+**UPD-07:** Reason/owner/review date for blocked upgrades. Proposed targets: routine review within seven days after eligibility, major assessment within fourteen. No perpetual broad ignores or weakened checks.
 
-**UPD-08:** Online discovery is separate from normal offline-capable verification after provisioning. Review transitive/security changes too. Setup installs the qualified lockfile and may report freshness; it does not automatically upgrade it.
+**UPD-08:** Online discovery separated from normal offline-capable verification after provisioning. Review transitive/security changes. Setup may report updates, not silently apply them.
 
-## 6. Architecture and extension model
+## 6. Architecture and extensibility
 
-### 6.1 Dependency direction
+### 6.1 Direction
 
 ```text
 presentation → application → domain → shared
@@ -172,565 +177,586 @@ bootstrap → concrete adapters and presentation factories
 main.ts → minimal host lifecycle and bootstrap
 ```
 
-Feature folders live within these layers. Runtime source includes `bootstrap`, `domain`, `application`, `infrastructure`, `presentation`, `shared`, `locales`, and `styles`. Harness/tests/scripts are separate. Add actual exercised modules, not empty folders to satisfy a diagram.
+Feature folders live inside these layers; harness/tests/scripts are separate. Add exercised modules, not empty architecture decoration.
 
-**ARC-01:** `main.ts` is composition/lifecycle only and at most 100 physical lines. No feature algorithms, persistence transformations, locale dictionaries, or markup.
+**ARC-01:** main.ts is lifecycle/composition only, ≤100 physical lines; no feature logic, persistence transformations, dictionaries, or markup.
 
-**ARC-02:** Bootstrap constructs dependencies, registers capabilities, and coordinates ownership. A large bootstrap class containing moved business logic is not compliant.
+**ARC-02:** Bootstrap constructs dependencies/registers capabilities/owns lifecycle, not relocated business logic.
 
-**ARC-03:** Domain/application import no Obsidian, Vue, Pinia, browser/Node/Electron APIs, or concrete infrastructure. Inject time/IDs when needed. Event payloads use values, not host objects.
+**ARC-03:** Domain/application import no Obsidian/Vue/Pinia/browser/Node/Electron or concrete infrastructure. Inject nondeterminism. Entities/payloads/receipts are values, not native objects.
 
-**ARC-04:** Inner capabilities own narrow necessary ports; use explicit injection/factories. Pure computation does not need ceremonial interfaces or a service locator.
+**ARC-04:** Inner capabilities own narrow necessary ports; explicit injection, no service locator/ceremonial pure-function interfaces.
 
-**ARC-05:** Presentation calls application contracts; it does not directly save data/access vault or storage/create native notices. Event observation is through a scoped subscriber facade, not a global mutable bus.
+**ARC-05:** Presentation calls application contracts, not Vault/storage/native notices. Events arrive through scoped facades; document creation through DocumentCreationService.
 
-**ARC-06:** Host adapters receive application/mounting interfaces; bootstrap wires concrete components and services. Makers update those composition registries, not feature logic in `main.ts`.
+**ARC-06:** Host adapters receive application/mounting contracts; bootstrap wires them. Makers update explicit registries, never business logic in main.ts.
 
-**ARC-07:** Cross-feature access uses small application contracts or declared typed facts; no sibling-internal imports. Keep `shared` neutral and small.
+**ARC-07:** Small application interfaces or declared facts for cross-feature work; no sibling-internal imports or business dumping into shared.
 
-**ARC-08:** Enforce resolved aliases, re-exports, type imports, supported dynamic imports, and SFC imports, with all runtime files classified. Prefer qualified fallow coverage; supplement only proven gaps. [R12]
+**ARC-08:** Resolve aliases/re-exports/type/dynamic/SFC imports and classify all runtime source. Prefer qualified fallow coverage; custom checks only for demonstrated gaps. [R12]
 
-**ARC-09:** Production cannot import harness/tests/scripts/makers/fixtures/agent tooling. Independently validate output for leakage.
+**ARC-09:** Runtime cannot import harness/tests/scripts/makers/fixtures/agent tooling; artifact checks independently reject leakage.
 
-**ARC-10:** Cohesive modules, explicit names, concise TSDoc, and small public contracts. No speculative generic repositories, reflection frameworks, or excessive indirection.
+**ARC-10:** Cohesive names/modules, concise TSDoc, small contracts. No speculative generic repository/reflection framework. A reusable document renderer is not a universal ORM.
 
-### 6.2 Typed event bus
+### 6.2 Typed bus
 
-The [event-bus contract](../architecture/EVENT-BUS.md), EVT-01–16, is mandatory. It supplies one bus per runtime, literal correlated payload types, event catalog/descriptors, `publish`/`on`/`once`, explicit disposal, and narrow injected facades.
+EVT-01–16 in the [bus contract](../architecture/EVENT-BUS.md) require a bus per runtime, correlated literal event types, explicit catalog, publish/on/once, owned disposal, and narrow facades. Notification begins synchronously without awaiting async listeners. No replay/durability/command-result guarantee. Test errors, reentrancy, startup create suppression, nullable/file-folder mappings, and unload. [S06–S09]
 
-The bus is transient notification infrastructure, not canonical state or an awaited command path. Publication begins synchronously; asynchronous listener failures are observed without turning committed writes into failed writes. No replay/durable delivery guarantee is implied. Host input mapping, startup `create` suppression, nullable/file-folder cases, reentrancy, and ownership are explicitly tested. [S06–S09]
+### 6.3 DocumentCreationService
 
-## 7. Lifecycle and state ownership
+DOC-01–20 in the [document contract](../architecture/DOCUMENT-CREATION.md) require an entity definition, an explicit frontmatter/body/destination definition, one application service, shared YAML renderer, and host writer port. The service is generic over registered entities; Task/Meeting/Project do not require service-core edits.
 
-**LIF-01:** One runtime owns plugin-wide repositories, services, bus, and host bridge. Failed initialization disposes partially created resources and does not present success.
+Creation validates and prepares full content before a complete create-only write. Preview is side-effect-free. Managed fields cannot be overwritten by arbitrary input. A plain result and documents.created event report confirmed creation; opening/cache/listener work is separate. No whole-vault scan or second authoritative Task store is introduced.
 
-**LIF-02:** Each view owns its Vue app, Pinia instance, drafts/selection, and disposables. Closing one view cannot dispose another's state or the plugin bus.
+## 7. Lifecycle and state
 
-**LIF-03:** Application/repository services own canonical data. Typed events invalidate projections; late views query current state. Avoid a second parallel untyped emitter or assumed event replay. Snapshot/subscription initialization must not miss intervening updates.
+**LIF-01:** One runtime owns services/repositories/bus/bridge/document service. Partial initialization is disposed honestly.
 
-**LIF-04:** Every mount/subscription/observer/timer/listener/async effect has an owner. Repeated lifecycle changes do not accumulate handlers. Unsubscribe prevents future calls; already-started asynchronous work requires its own cancellation/late-result guard. [R17]
+**LIF-02:** Per-view Vue/Pinia/drafts/selection/disposables; closing a view cannot destroy shared services or another view.
 
-**LIF-05:** Use supplied `app`, supported host registrations, and EventRefs. No singleton custom-view retention or manually detached leaves on unload. [R07, S06]
+**LIF-03:** Canonical data belongs to its declared persistence boundary: plugin document for plugin data, Markdown for note-backed entities. Events invalidate projections; late views query state. Snapshot/subscription initialization handles intervening changes.
 
-**LIF-06:** Use owning documents/windows for pop-outs, modals, resize, and theme behavior. Owned native roots also receive their style namespace/tokens.
+**LIF-04:** Every effect/listener/timer/mount has an owner, including post-await work. Unsubscribe stops future calls; already-running work requires cancellation/late-result handling. [R17]
 
-**LIF-07:** No eager vault scan, unsolicited notes, hidden Vue mount, startup event flood, or unload-only durability. Guard deferred layout callbacks when unload occurs first.
+**LIF-05:** Supplied app, supported registration/EventRefs, no retained singleton views or detached leaves on unload. [R07, S06]
 
-## 8. Reference feature and native surfaces
+**LIF-06:** Owning documents/windows for pop-outs/modals/theme/resize. Native roots receive their style namespace/tokens.
 
-### 8.1 Removable example
+**LIF-07:** No eager scans, unsolicited note seeding, hidden mounts, startup event floods, or unload-only durability. Guard deferred readiness callbacks after disposal. Closing a modal during an in-flight create is not authorization to delete a created note.
 
-**EXA-01:** Create/rename/delete a small example item with stable ID and trimmed 1–120-character label, preserving its language.
+## 8. Reference examples and native UI
 
-**EXA-02:** Empty, populated, pending, invalid, failed-write, and recovered states; no false success.
+### 8.1 Examples
 
-**EXA-03:** Demonstrate actual UI/use-case/domain/repository/result behavior plus post-commit event notification between views. The harness uses the same components, bus, and use cases.
+**EXA-01:** The original small plugin-data item supports create/rename/delete with stable ID and trimmed 1–120-character label.
 
-**EXA-04:** No network requests or generated vault notes. Destructive action is deliberate; cancel causes no write.
+**EXA-02:** Real empty/populated/pending/invalid/failed-write/recovered states, never false success.
 
-**EXA-05:** A tested removal recipe removes example code/registrations/events/catalog entries/styles/fixtures/tests/locales while retaining infrastructure. Makers can create a replacement feature without keeping the example database forever.
+**EXA-03:** Exercise actual UI/use-case/domain/persistence/outcome/event behavior. Add a separately labeled Task-note creation recipe using the real DocumentCreationService.
+
+**EXA-04:** The generic item example performs no network or vault-note writes. The Task recipe writes a note only after an explicit creation request; no startup/setup seeding. Cancel before commit writes nothing; in-flight cancellation reports the real outcome.
+
+**EXA-05:** Tested removal recipes remove each example's code/registrations/catalog entries/style imports/fixtures/tests/locales while retaining reusable infrastructure. Do not retain duplicate authoritative Task records in data.json.
 
 ### 8.2 Native surfaces
 
 | ID | Capability | Required behavior |
 | --- | --- | --- |
-| UI-01 | Shell | Small action/header/content structure; clear loading/empty/error/help entry, no unnecessary dashboard chrome. |
-| UI-02 | Commands | Open/focus, create, appropriate diagnostics; stable IDs/localized labels/correct callbacks/no default hotkeys. |
-| UI-03 | Ribbon | One accessible localized entry to the same open-shell action. |
-| UI-04 | Settings | Declarative native definitions, shared preference service, searchability, validation, truthful write feedback. |
-| UI-05 | Modals | Native adapter and typed form contract; labels/focus/cancel/pending/errors/disposal, owned composed styles. |
-| UI-06 | Notices | Central outcome policy, inline validation and deduplicated repeated failures. |
-| UI-07 | Multiple leaves | Focus suitable existing view by default; explicit new/restored leaves have independent ephemeral state. |
-| UI-08 | Styling | Namespaced source modules, semantic host variables, light/dark/narrow layouts, no global reset. |
-| UI-09 | Accessibility | Keyboard/focus/labels/semantic controls, non-color-only errors, touch targets, reduced motion. |
+| UI-01 | Shell | Small actions/content, clear loading/empty/error/help states, no unnecessary dashboard chrome. |
+| UI-02 | Commands | Open/focus, item creation, diagnostics, and explicit Task-note recipe; localized stable IDs/correct callbacks/no default hotkeys. |
+| UI-03 | Ribbon | One accessible localized entry to the same shell action. |
+| UI-04 | Settings | Searchable declarative controls, shared validated writer, truthful save results; configured entity destination where needed. |
+| UI-05 | Modals | Typed native form/cancel/focus/pending/errors/disposal and composed owned styles. |
+| UI-06 | Notices | Outcome policy, inline validation, deduplicated failures, no false failed-create after open failure. |
+| UI-07 | Leaves | Focus existing by default; explicit/restored independent views. |
+| UI-08 | Styles | Namespaced modules, semantic variables, light/dark/narrow; no global reset. |
+| UI-09 | Accessibility | Keyboard/focus/labels/semantics, non-color-only errors, touch targets, reduced motion. |
+| UI-10 | Task-note flow | Title/due/status/tags, read-only path/Markdown preview, deliberate create/cancel, accurate receipt and optional open action. Not a full Todo app. |
 
-**SET-01:** Use cheap I/O-free `getSettingDefinitions()` and supported updates; definitions may be indexed while not visible. [R05, R06]
+**SET-01:** Cheap I/O-free native getSettingDefinitions and supported update/search behavior. [R05, R06]
 
-**SET-02:** Custom typed/allowlisted control read/write hooks use application validation/ordering/persistence/errors; no competing autosave path or arbitrary dot-path mutation. [R05]
+**SET-02:** Allowlisted typed control hooks use shared validation/ordering/persistence, not competing autosave or arbitrary dot-path mutation. [R05]
 
-**SET-03:** Native settings are the canonical full editor; contextual Vue preferences reuse the same service.
+**SET-03:** Native full settings editor is canonical; contextual Vue preferences reuse its service. Entity property type declarations do not silently mutate vault-wide host property settings.
 
-Use typed Composition API/SFCs. Tests deliberately choose real versus stubbed Pinia actions; helper-default stubs are not evidence of application execution. [R18]
+Use typed Composition API/SFCs; tests deliberately select real versus stubbed Pinia actions. Helper-default stubs are not application evidence. [R18]
 
-## 9. Persistence and local preferences
+## 9. Persistence and entity documents
 
 | Category | Owner | Example |
 | --- | --- | --- |
-| Durable | Versioned repository over `loadData`/`saveData` | Preferences and example records. |
-| Local | Namespaced host-local storage adapter | Nonessential last section/display preference. |
-| Ephemeral | Per-view Vue/Pinia | Draft, focus, selection, modal visibility. |
-| Vault documents | Future feature adapter | Not required by the example. |
+| Durable plugin data | Versioned loadData/saveData repository | Preferences and generic example items. |
+| Local preferences | Namespaced host local-storage adapter | Nonessential view choices. |
+| Ephemeral | Per-view Vue/Pinia | Drafts, selection, modal state. |
+| Entity documents | Markdown notes through document-writer port | A Task's frontmatter/body; not duplicated in plugin data. |
 
-**DAT-01:** Stored payloads are `unknown`, structurally validated before typed construction; casts are not validation.
+**DAT-01:** Unknown stored/external payloads validated before typed construction; casts are not validation.
 
-**DAT-02:** Schema version and ordered tested migrations; stable reopening and no older-code overwrite of future schemas.
+**DAT-02:** Explicit schema versions and ordered tested migrations for plugin data; no older overwrite of future schemas. Document schema version does not authorize automatic migration of existing notes.
 
-**DAT-03:** One coordinated writer for the durable document; concurrent native settings/item updates cannot lose successful changes through stale snapshots.
+**DAT-03:** One coordinated writer for the combined plugin document. Concurrent settings/item changes cannot overwrite successful work. Note writes use their own scoped host contract, not that document as a second Task database.
 
-**DAT-04:** Distinguish absent/corrupt/inaccessible/future data. Preserve it and make reset/recovery explicit; never silently overwrite with defaults.
+**DAT-04:** Distinguish absent/corrupt/inaccessible/future data; preserve it and make reset/recovery explicit, never silent defaults over existing data.
 
-**DAT-05:** Claim durability and publish committed facts only after successful persistence. Cancel/invalid input causes no write.
+**DAT-05:** Durability/success facts only after confirmed persistence; invalid/cancelled-before-write input produces none.
 
-**DAT-06:** Save during normal operation; any justified debounce has tested flush/cancel ownership. Unload-only flushing is insufficient.
+**DAT-06:** Persist normally, test debounce ownership when justified, no unload-only flush reliance.
 
-**DAT-07:** Do not advertise encrypted secret storage; the baseline requires no credentials.
+**DAT-07:** No claim of encrypted secret storage; baseline requires no credentials.
 
-**LOC-01:** Use namespaced versioned `App.loadLocalStorage`/`saveLocalStorage` through the production port. [R09]
+**LOC-01:** Versioned plugin-prefixed App.loadLocalStorage/saveLocalStorage production port. [R09]
 
-**LOC-02:** Only the harness adapter directly uses browser localStorage, with isolated fixture namespaces.
+**LOC-02:** Direct browser storage only in isolated harness adapter.
 
-**LOC-03:** Test absence, malformed data, serialization, denial/quota, migration, deletion, and safe fallback; respect host value semantics.
+**LOC-03:** Test absent/malformed/serialized/quota/denied/migrated/deleted/fallback behavior and actual host value semantics.
 
-**LOC-04:** Reset only owned keys, never global storage.
+**LOC-04:** Reset only owned keys.
 
-**LOC-05:** Test two plugin IDs/vaults. Explain local versus portable/synchronized durable preferences.
+**LOC-05:** Two plugin/vault namespace isolation and explicit local versus portable/synced data distinction.
+
+### 9.1 Document requirements
+
+DOC-01–20 specify: correlated entity inputs/output; managed identity/defaults; explicit property allowlist/mapping; simple Obsidian-friendly types; date-only calendar semantics; one real serializer; framework-free service ports; prepare/create/commit reuse; body-only safe templates; contained path/folder policy; one complete native create call; no overwrite; bounded confirmed-collision handling; session-scoped duplicate request handling; uncertain-write/cancellation outcomes; cache/navigation separation; canonical documents.created; Markdown source of truth; privacy; entity makers and a real Task vertical slice.
+
+Supported native APIs do not imply filesystem-wide atomicity or global exactly-once creation. The contract requires truthful boundaries and testing, not invented guarantees. Obsidian property types apply by name across a vault; local schema metadata is not native type registration. [D01–D05]
 
 ## 10. Localization
 
-**I18N-01:** English/German with English fallback; all template-owned visible and accessibility text, native surfaces included, uses catalogs.
+**I18N-01:** English/German with fallback; all owned visible/accessibility/native/form error text cataloged.
 
-**I18N-02:** One Vue I18n-based service for native and Vue code, not two engines. [R35]
+**I18N-02:** One Vue I18n service for native/Vue, not competing engines. [R35]
 
-**I18N-03:** Explicit plugin choice → supported host mapping → fallback, using supported host API.
+**I18N-03:** Explicit plugin locale, supported host mapping, fallback via supported API.
 
-**I18N-04:** Check keys, parameters, plurals, locale formatting. Do not translate user content or IDs.
+**I18N-04:** Check keys/parameters/plurals/formatting. Do not translate entity IDs, property keys, enum values, or user content automatically.
 
-**I18N-05:** Refresh mounted UI; host labels only through supported mechanisms, otherwise disclose reload requirements.
+**I18N-05:** Mounted UI refreshes; host labels only through supported mechanisms or disclosed reload. Changing UI language does not rewrite existing Markdown.
 
-**I18N-06:** Test longer text, both locales, fallback, and development pseudo-localization. English sentence-case rules must not incorrectly apply to other languages. Prefer logical CSS. Generated locale skeletons remain pending review rather than claimed translations.
+**I18N-06:** Both locales/long text/fallback/pseudo-localization, appropriate language-aware lint, logical CSS. Generated locale skeletons remain pending review. A chosen body-creation locale is captured in the prepared document plan.
 
-**I18N-07:** Safe fallback during localization initialization; no recursive error/translation loop.
+**I18N-07:** Safe initialization fallback, no recursive error/translation loop.
 
-## 11. Errors, privacy, and diagnostics
+## 11. Errors and privacy
 
-**ERR-01:** Expected validation/cancel/storage outcomes have typed results; normalize unexpected `unknown` exceptions at relevant boundaries. Do not wrap every trivial computation unnecessarily.
+**ERR-01:** Typed expected validation/cancel/storage outcomes; normalize unexpected unknown exceptions at real boundaries, not every trivial function.
 
-**ERR-02:** Stable code/category/operation/recoverability; safe localized user messages, not raw exception strings.
+**ERR-02:** Stable code/category/operation/recoverability and safe localized text, not arbitrary exception strings.
 
-**ERR-03:** Observe async command/settings/ribbon/modal/startup/subscriber errors. `void` is not error handling.
+**ERR-03:** Observe async commands/settings/modals/startup/document/subscriber errors. void alone is not handling.
 
-**ERR-04:** Relevant recovery and only understood safe/idempotent retries.
+**ERR-04:** Relevant recovery and only known-safe retries; uncertain document writes are reconciled, not blindly retried with a new filename.
 
-**ERR-05:** Vue boundaries supplement explicit host/async handling; do not suppress errors of other plugins/Obsidian.
+**ERR-05:** Vue boundaries supplement explicit async/host handling; never suppress other plugins' errors.
 
-**ERR-06:** One primary notification per failure; coordinate inline feedback/notices/diagnostics. Listener failure is not misreported as failure of an already committed write.
+**ERR-06:** One primary notification. Listener/open/cache follow-up failure cannot relabel an already created document as failed or trigger silent duplication.
 
-**LOG-01:** Inject structured logger; raw console only in approved sink/tool scripts.
+**LOG-01:** Inject logger; raw console only in approved sink/scripts.
 
-**LOG-02:** Production default error-only; explicit diagnostics verbosity. [R07]
+**LOG-02:** Error-only production default, opt-in diagnostics. [R07]
 
-**LOG-03:** Initial diagnostic bounds: 200 entries/256 KiB retained payload with field truncation.
+**LOG-03:** Proposed retained buffer 200 entries/256 KiB with field bounds.
 
-**LOG-04:** Allowlisted fields; no note content, paths, user labels, secrets, arbitrary object dumps, or raw event payloads by default. Redact exported causes/stacks.
+**LOG-04:** Allowlisted safe fields; no note content/titles/paths/secrets/property values/full plans/raw payloads by default. Redact exported stack/cause.
 
-**LOG-05:** Explicit local previewable export; no telemetry/network sink.
+**LOG-05:** Explicit local previewable export; no network/telemetry sink.
 
-**LOG-06:** Narrow expected-error contracts for negative tests. Unexpected browser errors fail. Event-listener failures go directly to the error sink, not into a recursive error event.
+**LOG-06:** Narrow expected-error fixtures, unexpected browser errors fail, bus errors go directly to sink rather than recursive events.
 
-Render text safely; never compile untrusted templates or use unsafe HTML injection for ordinary input. [R31]
+Render text safely. Neither user note/frontmatter nor template input is executable code. [R31]
 
-## 12. Frontend harness and agent tools
+## 12. Frontend harness
 
-The harness renders production components, application/domain services, stores, event bus, and style sources; substitute only declared host boundaries. It is a simulation, not the host itself.
+Use actual components, services, stores, bus, entity validation, YAML renderer, and style sources. Substitute only declared host ports. A fake document writer retains actual Markdown, not a fabricated success object.
 
-**HAR-01:** Vite dev and built/preview modes; required browser tests against built harness.
+**HAR-01:** Vite dev and built preview; required browser tests against built harness.
 
-**HAR-02:** Loopback, synthetic data, no personal vault/network exposure or automatic GUI opener in headless mode.
+**HAR-02:** Loopback/synthetic fixtures, no personal vault, network exposure, or forced GUI in headless mode.
 
-**HAR-03:** Shared contracts with injected adapters; explicit fake scope/omissions and contract tests.
+**HAR-03:** Shared contracts with explicit fake scope/omissions and adapter tests.
 
-**HAR-04:** Scenario/locale/theme/viewport/seed selection and observable readiness, not sleeps.
+**HAR-04:** Declared scenario/locale/theme/viewport/seed and observable readiness, not sleeps.
 
-**HAR-05:** Controlled clock/IDs/faults/storage/event inputs; independent tests plus deliberate reload persistence.
+**HAR-05:** Controlled IDs/clock/faults/storage/native inputs/collisions/cache delays, isolated tests and explicit reload scenarios.
 
-**HAR-06:** Typed harness-only controls for scenario listing/reset/faults/readiness/redacted diagnostics. No arbitrary evaluation/filesystem/shell endpoint.
+**HAR-06:** Typed local test controls only; no arbitrary eval/filesystem/shell endpoint.
 
-**HAR-07:** Artifact gates exclude fake host, fixtures, faults, harness globals, makers, and agent endpoints.
+**HAR-07:** Artifacts exclude fake host/fixtures/faults/harness/maker/agent code.
 
-**HAR-08:** Shared plugin style graph; own separately identified host shim, no unjustified vendored host/theme assets. Exact packaged CSS is tested through the style contract's artifact-fidelity mode.
+**HAR-08:** Shared style graph, separately owned host shim, no unjustified vendored assets, exact-candidate stylesheet scenario.
 
-**HAR-09:** Browser native-surface adapters test application contracts; actual native internals require host evidence.
+**HAR-09:** Browser native adapters test contracts; actual native behavior needs host tests.
 
-**HAR-10:** Multi-view/repeated-mount scenarios use real stores and the production bus; one view closing leaves shared services/other views valid.
+**HAR-10:** Real multi-view/state/bus/disposal cases; closing one view leaves shared services valid. Document submission during disposal follows actual write outcome.
 
-Required scenarios cover empty/populated, validation, reload, preferences, write failure/recovery, corrupt/future schema, local storage denial, localization, two views, lifecycle, responsive light/dark, keyboard/focus, host-event mapping, listener failure, and generated feature/style integration.
+Required scenario groups include normal/invalid/pending/failure/reload/settings/localization/multi-view/lifecycle/responsive/focus, event mapping/errors, generated features/styles, document preview/validation/full content/conflicts/uncertain writes/cache lag/created-but-open-failed.
 
-**E2E-01:** Playwright CLI is canonical, using roles/names or stable test IDs, auto-wait assertions, observable outcomes.
+**E2E-01:** Playwright CLI, robust roles/names/test IDs, observable outcomes and auto-wait.
 
-**E2E-02:** Real application actions cover success/failure/cancel/persistence/localization/ownership and unexpected browser errors.
+**E2E-02:** Real actions for behavior claims, not stubbed persistence or YAML success.
 
-**E2E-03:** Small reviewed visual set on pinned OS/browser/fonts/viewport; never CI self-acceptance. [R20]
+**E2E-03:** Small reviewed visual set with pinned OS/browser/fonts/viewport; no CI self-acceptance. [R20]
 
-**E2E-04:** Automated accessibility plus keyboard/focus/manual review, not scanner-based certification.
+**E2E-04:** Automated accessibility plus keyboard/focus/manual scope, no certification claim.
 
-**E2E-05:** Bounded sanitized readable/JSON reports, screenshots, traces, logs on failure.
+**E2E-05:** Bounded sanitized readable/JSON reports/screenshots/traces/logs on failure.
 
-**E2E-06:** Source/worktree/build hashes, tools/browser, scenario/theme/locale/seed identify evidence. Include composed CSS hash. Missing/stale evidence is not success.
+**E2E-06:** Source/worktree/assets/tools/browser/scenario/locale/theme/seed identify evidence, including CSS hash and actual fixture document content where appropriate. No stale/missing evidence as success.
 
-**E2E-07:** Isolated intentionally failing cases prove real runner failures. Own/validate the test server; reject unrelated stale CI processes. [R19]
+**E2E-07:** Intentional isolated failures prove runner behavior; own/check the server, reject unrelated stale processes. [R19]
 
-MCP integrations are optional and restricted to synthetic data/dedicated contexts with reviewed mutation capability. CLI remains authoritative. [R34]
+MCP remains optional with limited fixture context and reviewed mutation rights; CLI is authoritative. [R34]
 
-## 13. Test strategy and real-host evidence
+## 13. Test strategy and native proof
 
-| Layer | Evidence |
+| Layer | Required evidence |
 | --- | --- |
-| Domain/application | Validation, migrations, concurrency, outcomes, post-commit facts. |
-| Adapter/component | Narrow contracts, real/stubbed action choices, subscriptions, safe forms. |
-| Bus/host bridge | Types, order, error isolation, once/unsubscribe/disposal, startup/null/folder mappings. |
-| Browser/style | Real workflows, focus/layout, visual/accessibility, scoped-style parity, maker-generated slice. |
-| Tooling | Fresh setup, safe plans, generators, process cancellation, real negative quality fixtures. |
-| Artifact | CJS loading, one composed CSS file, complete assets, no development leakage. |
-| Host/device | Native registration/settings/modal/notice, lifecycle/pop-out/restore, persistence, claimed mobile behavior. |
+| Domain/application | Validation/defaults/migrations/concurrency/results and committed facts. |
+| Components/adapters | Narrow native contracts, intentional store action mode, owned subscriptions/forms. |
+| Bus/bridge | Types/order/errors/once/disposal/startup/null/file-folder mappings. |
+| Documents | Entity correlation, real serialization, preview, safe full write, conflicts/request tracking/cancellation/follow-up boundaries. |
+| Browser/styles | Real workflows/focus/layout/a11y/scoped parity and generated entity/feature. |
+| Tooling | Fresh setup, safe generation, real negative gates, definition/catalog checks. |
+| Artifact | Native CJS, one complete CSS, all assets, no dev leakage. |
+| Host/device | Registration, native Properties/Source content, modals, lifecycle/pop-outs, data preservation and claimed mobile paths. |
 
-**HST-01:** Current public desktop and different declared minimum when retained, with exact candidate source/hash, host/installer/platform/results.
+**HST-01:** Latest public desktop and differing retained minimum with exact source/assets/host/installer/platform/result.
 
-**HST-02:** Prove/pin the native runner in WP-00; `wdio-obsidian-service` remains a candidate, not official guarantee. Keep manual acceptance available. [R21]
+**HST-02:** Prove/pin native runner; wdio-obsidian-service is a candidate, not official guarantee; manual acceptance remains. [R21]
 
-**HST-03:** Normal `verify` needs no Obsidian; absent native provisioning is not run. Release promotion requires candidate-bound native evidence collected after candidate build.
+**HST-03:** Normal verify needs no Obsidian. Missing native provisioning is not run; promotion needs candidate-bound evidence.
 
-**HST-04:** Load/disable/re-enable, command/ribbon, searchable native settings and failure, modal focus/cancel/notices, multi-leaf/pop-out/restore/restart data, event bridge cleanup, composed native styles, safe install preservation.
+**HST-04:** Native registration/settings/forms/notice/multi-view/pop-out/reload/persistence/event cleanup/composed styles/local-install checks, plus actual created Task source/Properties and no-overwrite behavior.
 
-**HST-05:** Candidate tests on claimed supported iOS/Android hosts before mobile claims, recording separate app versions. Browser emulation/Linux CI is not device proof.
+**HST-05:** iOS/Android evidence before claims, recorded separately; browser emulation/Linux CI is insufficient.
 
-**HST-06:** Disposable fixtures, explicit lawful host provisioning, no redistribution/personal credentials/data. Any sandbox-specific enablement by a test runner remains isolated and documented; human setup does not automatically disable Restricted Mode.
+**HST-06:** Disposable fixture vault, explicit lawful provisioning, no personal data/binary redistribution. Synthetic test Task notes remain inside an explicitly selected test vault; human setup does not silently change security preferences.
 
 ## 14. Quality policy
 
-### 14.1 Physical line limits
+### 14.1 Lines
 
-**QLT-01:** Count physical lines including comments/blanks and the entire SFC; terminal newline adds no extra content line; CRLF/LF equivalent; empty zero. Check new/uncommitted relevant files too.
+**QLT-01:** Count physical lines including comments/blanks/full SFC; trailing newline adds no extra content line; CRLF/LF equivalent, empty zero. Include new/uncommitted relevant files.
 
-| Category | Maximum |
+| Category | Limit |
 | --- | ---: |
-| `src/main.ts` | 100 |
-| Other handwritten runtime, CSS, harness implementation, and tooling | 400 |
-| Test specifications/helpers, including genuine colocated tests | 450 |
+| main.ts | 100 |
+| Other handwritten runtime/CSS/harness/tooling/definitions | 400 |
+| Test specifications/helpers | 450 |
 
-Generated application scaffolds become ordinary developer-owned source and obey these limits. Compiled `dist/styles.css` is a generated composition artifact, exempt only from per-source LoC—not from size/provenance/artifact checks. Machine data/lockfiles/Markdown/generated declarations have explicit separate treatment; none may hide handwritten executable logic. Production cannot import test-classified modules.
+Generated application/entity scaffolds become normal maintained source and obey the limit. Composed dist/styles.css is generated output with size/provenance checks instead. Machine data/Markdown/lockfiles/generated declarations have explicit treatment, never a hiding place for executable source. Runtime may not import test-classified modules.
 
-**QLT-02:** Real boundary fixtures for 400/450 pass and 401/451 fail, full SFC/CRLF/comment/blank/terminal-newline handling; verify generated-output exemption separately.
+**QLT-02:** Actual 400/450 boundary/excess fixtures including full SFC, comments, blanks, CRLF, terminal newline, and separate output exemption.
 
-### 14.2 Type, lint, coverage, and analysis
+### 14.2 Checks
 
-**QLT-03:** Strict runtime/Vue/test/harness/tooling type checks with explicit optional/indexed handling. No unsafe casts or public `any` merely for mocks/events.
+**QLT-03:** Strict runtime/Vue/tests/harness/tooling with explicit optional/indexed handling; no unsafe casts or public any to erase event/entity/adapter typing.
 
-**QLT-04:** Complementary Oxlint and ESLint/Vue/Obsidian rules, no unapproved warnings; deliberate rule ownership, not disabling in both tools. [R10, R11]
+**QLT-04:** Complementary Oxlint and typed Vue/Obsidian ESLint, no unapproved warnings or disabled-in-both gaps. [R10, R11]
 
-**QLT-05:** Proposed cyclomatic 10/cognitive 15 where supported; document metrics without fragmenting cohesive behavior to game them.
+**QLT-05:** Proposed cyclomatic 10/cognitive 15 where supported, documented scope, no metric-driven fragmentation.
 
-**QLT-06:** Fixtures prove actual Vue script/template/parser/TS-extension/async/settings coverage. Generator output and typed event unions are part of that proof.
+**QLT-06:** Fixtures verify actual parser/template/script/extension/async/settings coverage and generated event/entity type correlation.
 
-**QLT-07:** Proposed measured production coverage including untested files: global lines/statements/functions 90%, branches 85%; domain/application 95%, branches 90%. Explicit type/generated exclusions only; narrow evidence-backed native limitations, not whole-layer exclusions.
+**QLT-07:** Proposed production coverage including untested files: global lines/statements/functions 90%, branches 85%; domain/application 95%, branches 90%. Explicit type/generated exemptions, narrow evidenced native limits, no whole-layer exclusion.
 
-**QLT-08:** Critical behavior remains mandatory beyond percentages: failed/concurrent writes, corruption/future schema, cancel, cleanup, namespace isolation, event errors, validation, safe setup/generation.
+**QLT-08:** Behavior cases mandatory regardless of percentages: failure/concurrency/corruption/cancel/cleanup/namespaces/validation, safe scripts, event errors, document round trips/conflicts/uncertain outcomes.
 
-**QLT-09:** Pin fallow and validate installed schema; real plugin/harness/test/script entries and known data-template consumers. Do not mark every runtime file an entry or ignore all maker outputs. [R32]
+**QLT-09:** Pinned fallow/installed schema, genuine process entries and template data consumers. No all-source entry or maker/entity subtree suppression. [R32]
 
-**QLT-10:** Whole-repo plus production analysis; block unjustified unused runtime files/exports/dependencies, cycles, boundary violations, and configured errors. Test-only references do not legitimize shipped dead code. [R13]
+**QLT-10:** Whole repository and production scope; block unjustified unused runtime files/exports/dependencies, cycles, boundaries, configured errors. Tests alone do not justify dead shipped code. [R13]
 
-**QLT-11:** Full scope for full verification/release; changed-only feedback is additional.
+**QLT-11:** Complete scope for full verification; changed-only feedback is additional.
 
-**QLT-12:** Proposed production duplication 3%, initial clone minimum 50 tokens/5 lines when supported; validate denominator/schema. Report repetitive fixtures/templates separately without unreadable test abstraction or masking actual duplicate runtime scaffolds.
+**QLT-12:** Proposed duplication 3% production, initial clone minimum 50 tokens/5 lines when supported; validate metric/denominator, separate fixture/template reporting without hiding duplicated runtime scaffolds.
 
-**QLT-13:** Respect static-analysis limits/dynamic native registration, investigate findings, no automatic deletion/fix in verification. [R33]
+**QLT-13:** Respect analyzer limits/dynamic native registrations, investigate before changes, no destructive autofix/deletion during verification. [R33]
 
-**QLT-14:** Prefer qualified `boundaries.coverage.requireAllFiles` plus explicit rules; fixture aliases/re-exports/unclassified/files/external/test boundaries. Only add custom enforcement for proven gaps. [R12]
+**QLT-14:** Prefer qualified boundary coverage and explicit zone rules; test aliases/re-exports/unclassified/external/test imports. Add custom checks for demonstrated gaps only. [R12]
 
-**QLT-15:** Narrow reason/owner/scope/review condition for exceptions; no copied legacy baseline, broad suppression, or quiet threshold/baseline reductions.
+**QLT-15:** Narrow scope/reason/owner/review for exceptions; no copied legacy baseline, broad suppression, or quiet threshold/snapshot changes.
 
-**QLT-16:** Passed/failed/not-run/infrastructure-error with actual command/tool/scope/exit code. Crashes and unfamiliar output schema cannot become zero findings.
+**QLT-16:** Passed/failed/not-run/infrastructure-error, actual command/tool/scope/exit. Crash or unknown report schema cannot mean no findings.
 
-**QLT-17:** Isolated child-project negative fixtures cannot contaminate the normal graph or recursively execute all verification. Maker qualification runs generated projects as explicit isolated targets.
+**QLT-17:** Negative fixtures run in isolated child projects, with no graph contamination or recursive full checks; generated-repository qualification is explicit.
 
-## 15. Build, setup, makers, and styles
+## 15. Builds, setup, makers, styles, and documents
 
-### 15.1 Artifact
+### 15.1 Artifacts
 
-**BLD-01:** Dedicated `dist/` contains tested Obsidian-loadable CommonJS `main.js`, manifest, and one complete composed `styles.css`. Prove actual host/export shape.
+**BLD-01:** Dedicated dist with actual host-loadable CJS main.js, manifest.json, and one fully composed styles.css; native export proof.
 
-**BLD-02:** Required runtime dependencies/owned assets bundled, host APIs external, no CDN/dev server/source-only path/unintended chunks. Preserve required licenses.
+**BLD-02:** Required runtime deps/owned assets bundled, native modules external, no CDN/dev server/source paths/unintended chunks; preserve licenses.
 
-**BLD-03:** Debug maps in development; explicit release-map policy, no secrets/sensitive machine paths.
+**BLD-03:** Debug maps in development, explicit release policy, no secrets/sensitive paths.
 
-**BLD-04:** Validate identity/version/minimum host and package/lock/manifest consistency, mapping/hashes. This is a plugin application, not an npm library requiring declaration bundles/publishing.
+**BLD-04:** Identity/version/minimum/package-lock-manifest/mapping/hashes validated. Plugin application, not npm library/declaration publication. Note fixtures, catalogs' explanatory metadata, and user documents are not plugin-release payloads unless explicitly intended.
 
-### 15.2 Safe codebase-local testing
+### 15.2 Local installation
 
-**DEP-01:** Default `.dev-vault/` inside the repository, with its configured config directory's `plugins/<id>/` destination.
+**DEP-01:** Repository-contained .dev-vault and configured config-dir/plugins/id target.
 
-**DEP-02:** Explicit validated repository-root-vault option and custom config dir. Host code reads its actual config directory.
+**DEP-02:** Explicit safe repository-root mode/custom config directory; host uses actual configDir.
 
-**DEP-03:** Allowlisted output copies only; preserve data.json, unknown/user files, notes, unrelated plugins/config/security. Never clean a repository/vault as output.
+**DEP-03:** Allowlisted assets only; preserve data.json, user notes/unknown files/other plugins/config/security. No vault/repo-root cleaning.
 
-**DEP-04:** Validate identity, containment, symlinks, approved targets; normalization alone is insufficient. Dry run.
+**DEP-04:** Validate containment/IDs/symlinks/approved targets, not normalization alone; dry run.
 
-**DEP-05:** Validate/stage complete matching JS/CSS/manifest before replacement. Failed watch/style builds preserve last good install; detect concurrent deployment and report recovery.
+**DEP-05:** Stage/validate matching full JS/CSS/manifest; failed builds keep last good set; detect concurrency and report recovery.
 
-**DEP-06:** Developer-vault enablement is explicit/additive; malformed config is an error, not an empty list. No automatic Restricted Mode disablement.
+**DEP-06:** Additive explicit developer-vault enabling; malformed config is error; no automatic Restricted Mode disablement.
 
-**DEP-07:** Print resolved destination/identity/hashes/human action; generated vault/build artifacts ignored.
+**DEP-07:** Resolved destination/identity/hashes/human actions; generated builds/vault artifacts ignored.
 
-**DEP-08:** Optional supported CLI reload/screenshots only in the explicitly configured fixture vault. Missing CLI/host has a manual fallback; no personal-vault inference. [R08]
+**DEP-08:** Optional official CLI target-checked to fixture vault, fallback when missing, never personal-vault inference. [R08]
 
-### 15.3 User-facing command contract
+### 15.3 Commands
 
-These are required future commands, not functionality already present. Root package scripts stay short and point to `scripts/` implementations where orchestration is needed.
+These are future implemented commands. Root package scripts are short entrypoints into scripts, not working capabilities of today's documentation-only repository.
 
 | Command | Contract |
 | --- | --- |
-| `setup` | Node-only bootstrap, guided plan/identity, locked installation, selected provisioning/build/checks, resumable handoff. No preinstalled dependencies needed. |
-| `make -- <kind>` | Discoverable integrated scaffolds, safe plan, tests, custom makers, machine mode. |
-| `help` / `doctor` | Discover workflows/prerequisites; basic help/diagnosis works before dependency installation. |
-| `template:init` | Setup's focused identity operation, no competing rewrite implementation. |
-| `dev:ui` / `harness:dev` | Same loopback real-component HMR harness, no native-host requirement. |
-| `dev` | Plugin build watch without implicit install. |
-| `dev:local` | Successful complete builds installed into approved vault; optional opted-in CLI reload. |
-| `build` / `build:dev` | Qualified production/debug builds with composed styles. |
-| `build:local` / `test-build` | Same safe local build/install operation. |
-| `typecheck` / `lint` / `format:check` | Finite non-mutating configured checks. |
-| `lint:fix` / `format` | Explicit targeted mutations; never automatic verification fixes. |
-| `test` / `test:watch` / `test:coverage` | Finite default, explicit watcher, enforced coverage. |
-| `test:setup` | Explicit test prerequisite provisioning; reused by guided setup, not a second installer. |
-| `test:gates` | Isolated negative enforcement tests. |
-| `test:tooling` | Fresh setup and maker qualification/safety/extension tests. |
-| `harness:build` / `harness:preview` / `harness:shot` | Build/serve/capture declared scenario and evidence. |
-| `test:e2e` | Required built-harness workflows, visuals/accessibility, composed CSS/generated-feature evidence. |
-| `test:obsidian` | Provisioned native test or truthful not-run status. |
-| `check:loc` / `check:architecture` / `check:i18n` / `check:docs` | Focused checks composed into verification. |
-| `events:catalog` / `events:check` | Generate/check documented typed event registry; no separate hand-maintained payload model. |
-| `styles:build` / `styles:check` | Shared complete SFC/CSS pipeline and source/output validation, not root-CSS-only concatenation. |
-| `analyze` / `analyze:production` / `analyze:changed` | Full, production, and optional incremental analysis. |
-| `verify:fast` | Clearly partial finite feedback. |
-| `verify` / `check` | Same full ordinary static/coverage/fixtures/docs/build/browser verification, including current event/style/tooling contracts. No native claim. |
-| `quality:report` | Actual current results, including missing evidence. |
-| `deps:status` / `security:audit` | Explicit online freshness/security review. |
-| `release:prepare -- --version X.Y.Z` | Consistent staged metadata/changelog, dry run, no implicit commit/tag/push/publish. |
-| `verify:release -- --candidate <path>` | Validate retained candidate and source/hash-bound host evidence without rebuilding it. |
-| `release:check` | Explain release/listing prerequisites; explicit optional online checks. |
+| setup | Node-only guided bootstrap/plan/identity/locked install/provision/check/resume. |
+| make -- <kind> | Safe discoverable integrated scaffolds, including entity --document. |
+| help / doctor | Discover/diagnose safely before dependency installation. |
+| template:init | Focused shared identity operation. |
+| dev:ui / harness:dev | Same loopback real-component HMR without Obsidian. |
+| dev | Native build watch, no implicit deployment. |
+| dev:local | Successful matching assets into approved local vault, optional opted-in CLI. |
+| build / build:dev | Qualified production/debug output including compiled CSS/YAML renderer. |
+| build:local / test-build | Same safe local build/install. |
+| typecheck / lint / format:check | Finite non-mutating complete configured scope. |
+| lint:fix / format | Explicit targeted edits only. |
+| test / test:watch / test:coverage | Finite default, explicit watcher, enforced coverage. |
+| test:setup | Explicit prerequisite provisioning reused by setup. |
+| test:gates / test:tooling | Isolated negative checks and fresh setup/maker qualification. |
+| harness:build / harness:preview / harness:shot | Build/serve/capture declared scenarios/evidence. |
+| test:e2e | Required real browser/visual/a11y/style/generated-document scenarios. |
+| test:obsidian | Provisioned native checks or truthful not-run. |
+| check:loc / check:architecture / check:i18n / check:docs | Focused checks composed into verify. |
+| events:catalog / events:check | Derived typed catalog and validation, including documents.created. |
+| entities:catalog / entities:check | Derived entity/document catalog and schema/mapping/default/property-type consistency checks. |
+| styles:build / styles:check | Shared complete CSS/SFC pipeline, not isolated raw concatenation. |
+| analyze / analyze:production / analyze:changed | Full/production/optional incremental fallow. |
+| verify:fast | Clearly partial finite feedback. |
+| verify / check | Same complete ordinary static/coverage/fixtures/docs/build/browser/event/style/entity/tooling verification; no native claim. |
+| quality:report | Actual evidence/status, including missing results. |
+| deps:status / security:audit | Explicit online maintenance/security. |
+| release:prepare -- --version X.Y.Z | Consistent metadata/changelog/dry run, no implicit commit/tag/push/publish. |
+| verify:release -- --candidate <path> | Retained candidate and host evidence validation, not a rebuild. |
+| release:check | Release/listing prerequisites and explicit optional online checks. |
 
-### 15.4 Guided installation and tooling layout
+### 15.4 Installation/tooling
 
-[TOOL-01–06 and SETUP-01–12](../development/SETUP-AND-MAKERS.md) require a dependency-free entrypoint, explicit consent/plan, no lifecycle recursion, safe identity, validated noninteractive mode, dry run, resumable failures, cross-platform child management, and truthful profile readiness. Scripts/helpers/maker templates live in `scripts/`; conventional root tool configuration remains thin/declarative.
+TOOL-01–06 and SETUP-01–12 require dependency-free start, disclosed consent/plan/downloads, no lifecycle recursion, safe identity/noninteractive/dry-run/resume, portable child ownership, and truthful per-profile readiness. Scripts/helpers/templates are under scripts; root configs remain thin/declarative.
 
-The wizard does not install Node, globally alter packages/PATH, elevate permissions, change Git remotes, enable personal-vault security options, or publish. Selected downloads/installation are disclosed. Setup installs the qualified graph, not an automatic latest upgrade.
+No Node/global/PATH elevation, Git remote alteration, implicit personal-vault security changes, or publication. Install the qualified graph, not newest packages on each run. Neither setup nor a maker creates real Task notes to demonstrate the service; only explicit user creation or isolated native test fixtures do so.
 
-### 15.5 Boilerplate generation
+### 15.5 Makers
 
-[MAKE-01–12](../development/SETUP-AND-MAKERS.md) require feature/view/component/store/usecase/command/modal/setting/event/listener/style/locale/custom-maker recipes, introduced in bounded implementation slices. Every supported recipe generates integrated readable code with relevant tests, not orphan files or fake success.
+MAKE-01–12 remain, extended by DOC-19 with an entity maker. The complete catalog covers feature/view/component/store/usecase/command/modal/setting/event/listener/style/locale/maker/entity. A note-backed entity recipe generates schema/document definition/registration/action/tests/Markdown fixture, not documents in the user's vault.
 
-Makers show explicit plans, preserve user work, reject unsafe paths/collisions, update structured registries, and never put business logic in main.ts. Their scripts/templates are development-only. Normal generation performs no remote template download or dependency installation.
+Reuse existing command/modal/style/event recipes. No service-core edits per entity, orphan files hidden by fallow exceptions, broad overwrite, runtime source scanning, remote template installation, or fake finished business behavior.
 
-### 15.6 Composed styles
+### 15.6 Styles
 
-[CSS-01–12](../architecture/STYLES.md) require ordered modular CSS plus compiled styles from real Vue components, one complete output, shared plugin/harness processing, namespaced native roots, watch/add/remove coverage, source LoC/output-budget separation, maker integration, and exact-candidate style evidence.
+CSS-01–12 remain unchanged: ordered CSS modules plus compiled real SFC styles, one output, shared plugin/harness processing, native namespaces, watch/add/remove coverage, source/output limits, maker integration, exact-artifact proof. Task form/preview styles use that same pipeline. Do not edit generated styles.css or concatenate raw scoped text. [S10–S14]
 
-Use supported Vite extraction rather than raw string concatenation of scoped SFC styles. Ordinary source module organization does not require hashed CSS Modules. Generated `styles.css` is not hand-edited. [S10–S14]
+### 15.7 Documents
 
-## 16. Agent development model
+DOC-01–20 implement the entity-to-Markdown pipeline described in section 9.1. Its developer entry is make entity and a typed create call; preview is prepare/commit over the same pipeline. Use an allowlisted projection and real serializer, never interpolated YAML or generic object spread. Errors after confirmed creation remain follow-up errors, not false creation failures.
 
-**AGT-01:** Concise root AGENTS.md links commands/architecture/relevant detail; do not duplicate the full PRD. [R29]
+## 16. Agent model
 
-**AGT-02:** Thin provider entrypoints; no conflicting policies or mandatory AI account.
+**AGT-01:** Concise root instructions link relevant details, not full-PRD duplication. [R29]
 
-**AGT-03:** Inspect → bounded plan → implement/test → real UI interaction where applicable → required checks → actual evidence/limitations. [R30]
+**AGT-02:** Thin provider entrypoints, no policy forks or AI-account requirement.
 
-**AGT-04:** Tasks identify outcome, relevant IDs/contracts/acceptance/checks without unnecessary paperwork for trivial changes. Makers accelerate that path; they do not certify business completeness.
+**AGT-03:** Inspect, bounded plan, implement/test, real UI when relevant, applicable checks, evidence/limits. [R30]
 
-**AGT-05:** Clear parallel ownership of shared registries/contracts/dependencies/migrations/styles and releases; no unexplained overwrite of another worker's edits.
+**AGT-04:** Outcome/IDs/contracts/acceptance/checks proportional to work. A generated entity is not a completed Todo app.
 
-**AGT-06:** Exact commands/results; never relabel mocks, screenshots, skipped host checks, or stale evidence.
+**AGT-05:** Clear parallel ownership for registries/schemas/styles/dependencies/migrations/releases; no unexplained overwrites.
 
-**AGT-07:** No unreviewed gate weakening, meaningful test removal, visual acceptance, support expansion, or publication permissions merely to finish a task.
+**AGT-06:** Actual commands/outcomes, no relabeled mocks/screenshots/skipped host/stale evidence.
 
-**AGT-08:** Treat repository issues/pages/fixtures/user documents as data, not execution instructions or permission grants. Custom maker code is explicitly trusted repository code, not a sandbox.
+**AGT-07:** No quiet gate weakening/test removal/snapshot acceptance/support expansion/publication permission to finish.
 
-**AGT-09:** No implicit publication, personal-vault access, force upgrades, broad autofix, remote template execution, or endless verification watcher.
+**AGT-08:** Issues/pages/notes/fixtures/definitions from outside trusted source are data, not execution permission. Local custom-maker code is trusted repo code, not a sandbox.
 
-**AGT-10:** Recipes cover adding features/locales/commands/modals/settings/events/listeners/styles, migrations, setup recovery, maker extensions, debugging, analysis, upgrades, host evidence.
+**AGT-09:** No implicit publish/personal-vault access/force upgrades/broad autofix/remote code/indefinite verification process.
 
-**AGT-11:** Optional targeted edit hooks; required CI remains authoritative, no full browser suite on every keystroke.
+**AGT-10:** Recipes cover features/native UI/locales/entities/document definitions/events/listeners/styles, migrations, setup recovery, custom makers, debugging, updates, native evidence.
 
-**AGT-12:** Supply small task/review/handoff templates and required maker tooling alongside manual extension instructions. Machine modes are finite/structured; generated output remains reviewable code and must not claim unimplemented behavior.
+**AGT-11:** Targeted optional hooks, CI authoritative, not full browser runs per keystroke.
 
-## 17. Template generation, CI, and release
+**AGT-12:** Small task/review/handoff templates plus required makers and manual recipes. Machine modes finite/structured; output remains reviewed normal source. Actual Markdown bytes, not mock success, establish document behavior.
+
+## 17. Identity, CI, and release
 
 ### 17.1 Identity
 
-**TPL-01:** Maintainer verifies template status, permissions, rules, and dependency settings; repository files do not configure all administration.
+**TPL-01:** Maintainer verifies template/settings/permissions/rules/updater administration; files alone do not do it.
 
-**TPL-02:** Setup updates ID/name/description/author/repository/version, owned CSS/storage namespaces, manifest/lock metadata, docs/links/badges through a small controlled identity plan.
+**TPL-02:** Controlled identity plan updates names/IDs/repo/author/version, namespaces, manifest/lock metadata/docs/badges and example-definition-owned references, not user content globally.
 
-**TPL-03:** Validate before writes/dry run/safe repeat/preserve licenses and user work. Installed ID changes are migrations. Do not copy `obsidian-plugin-shell` as a directory-ready ID; enforce current submission restrictions. [R25]
+**TPL-03:** Validate/dry run/safe repeat/license/user preservation. Installed ID changes are migrations; enforce current directory restrictions rather than copying template repository name. [R25]
 
-**TPL-04:** Qualify differently named generated repos, fresh dependency-free setup, maker sequences, example removal, style composition, local installation, and release preparation. No silent hardcoded IDs/paths/namespaces/badges.
+**TPL-04:** Different generated repo, no node_modules start, maker sequences including entity, example removal, CSS/local install/release qualification; no hidden original identity/path/schema references.
 
 ### 17.2 CI
 
-**CI-01:** Linux full verification, Windows cross-platform tooling/build/tests; explicit broader native/macOS/mobile evidence. Do not imply one Linux result covers all.
+**CI-01:** Linux full ordinary and Windows tooling/build/tests, explicit broader host/macOS/mobile scope.
 
-**CI-02:** Pin tools/actions, cache by lock/tool/browser/platform, provision explicitly; no reused reports for different input/assets.
+**CI-02:** Pin revisions/tools, cache by lock/tool/browser/platform, explicit provisioning, no mismatched evidence reuse.
 
-**CI-03:** Bounded sanitized failure evidence; missing suites/reports and crashes fail honestly.
+**CI-03:** Bounded sanitized failure artifacts, missing suites/reports and crashes fail honestly.
 
-**CI-04:** No release privileges/secrets for untrusted PR execution. Narrow publication stage and pinned actions. [R28]
+**CI-04:** Untrusted PR code receives no release privileges/secrets; scoped pinned publication stage. [R28]
 
-**CI-05:** Review runtime/dev security updates; no force-upgrade or permanent exception concealment.
+**CI-05:** Reviewed runtime/dev security, no force upgrades/permanent concealment.
 
-**CI-06:** Workflows invoke shared scripts. Bot changes run the same relevant checks, including setup/maker/event/style regressions, with no quality bypass.
+**CI-06:** Shared scripts, same relevant bot/feature checks including setup/maker/bus/CSS/entity-renderer regression.
 
-### 17.3 Release lifecycle
+### 17.3 Release
 
-```text
-Prepared source → candidate from fixed commit → verified draft
-→ native acceptance of exact assets → explicit promotion → public release
-```
+Prepared source → fixed-commit candidate → verified draft → native acceptance of exact files → explicit promotion → public release.
 
-**REL-01:** Validate identity, package/lock/manifest/mapping, support, licenses, notes, source SHA and hashes. Stable version/tag match `X.Y.Z` without `v`. [R25]
+**REL-01:** Identity/version/package-lock-manifest/mapping/support/licenses/notes/source/hashes validated; stable X.Y.Z tag without v. [R25]
 
-**REL-02:** Build once/retain/test/publish those files. Separate candidate-bound host records; no rebuild after acceptance or reuse after JS/CSS changes.
+**REL-02:** Build once, retain/test/publish those assets. Host evidence separate and candidate-bound; JS/CSS/serializer changes invalidate prior acceptance.
 
-**REL-03:** First Community directory submission is separate; current checklist/metadata and no implicit approval or account operation. [R25]
+**REL-03:** First current-directory submission is separate, with checklist/metadata and no implicit approval/account operations. [R25]
 
-**REL-04:** Document breaking template/workflow/storage/event-contract changes and upgrade instructions; generated repos do not automatically inherit them.
+**REL-04:** Document breaking template/workflow/storage/event/entity-contract changes. Downstream repos do not inherit upgrades automatically; new document definitions do not migrate old notes implicitly.
 
-**REL-05:** GitHub Actions/scoped token and optional CLI, no mandatory npm credentials/conventional commits/release SaaS. Local prepare is not publish.
+**REL-05:** Actions/scoped token/optional CLI, no mandatory npm credentials/commit convention/release SaaS; prepare is not publish.
 
-**REL-06:** Explicit maintainer draft from trusted reviewed commit; verified candidate, individual main.js/manifest.json/composed styles.css; optional ZIP/checksums. Source archive is insufficient.
+**REL-06:** Explicit reviewed source/draft, individual tested main.js/manifest/styles assets, optional ZIP/checksum; source archives insufficient.
 
-**REL-07:** Explicit promotion validates approval/evidence/tag/commit/hashes and uses retained files. Accept honest manual native record when automation is unavailable, never invented evidence. Failed upload leaves draft, not partial public release.
+**REL-07:** Promotion checks approval/host evidence/commit/tag/hashes and publishes retained files. Honest manual native records permitted when automation absent; incomplete upload remains draft.
 
-**REL-08:** Safe draft retry only for matching identity. Never move/overwrite a published version/tag/assets; forward-fix with new version and consider data downgrade compatibility.
+**REL-08:** Matching-identity draft retries only; never move/overwrite public versions/assets/tags. Forward-fix, with schema/downgrade compatibility considered.
 
-**REL-09:** Direct/reusable/dispatch orchestration, not assuming GITHUB_TOKEN-created tags trigger separate push workflows. [R27]
+**REL-09:** Direct/reusable/dispatch stages, no assumption of a GITHUB_TOKEN-created tag triggering another push workflow. [R27]
 
-**REL-10:** Optional beta distribution separate; no uncontrolled suffixes on stable path or mandatory Catalyst/BRAT.
+**REL-10:** Optional beta distribution separate from stable manifest convention; no mandatory Catalyst/BRAT.
 
-**REL-11:** Test first/subsequent draft, partial upload, evidence/hash/commit mismatch, duplicate version, permissions, and retry/promotion recovery in a fixture repository before claiming easy releases.
+**REL-11:** Rehearse first/subsequent/partial-upload/evidence/hash/commit/duplicate/permission/retry cases before claiming easy release.
 
 ## 18. Non-functional targets
 
-Proposed numbers require a declared measurement environment and evidence.
+Numbers are proposed until measured in a stated reference environment.
 
 | ID | Target |
 | --- | --- |
-| NFR-01 | Runtime offline, no account/remote assets/telemetry. |
-| NFR-02 | Warm plugin initialization p95 ≤200 ms over 30 controlled desktop runs; exclude host startup, no eager scan. |
-| NFR-03 | Shell readiness p95 ≤500 ms with 100 fixture items in reference environment. |
-| NFR-04 | Initial main.js ≤1 MiB and composed CSS ≤100 KiB minified uncompressed; report compressed/actual sizes and reviewed changes. |
-| NFR-05 | Owned resources return to baseline after 20 open/close cycles, including bus and bridge subscriptions. |
-| NFR-06 | Safe actionable states for storage/schema/write/startup/setup/generation failure. |
-| NFR-07 | Keyboard/focus passes, automated accessibility findings reviewed, manual scope explicit. |
-| NFR-08 | Standard Windows/Linux workflows, broader platform claims evidence-based. |
-| NFR-09 | Executable architecture/LoC/lint/coverage/analyzer/style/event/tooling gates with reviewable exceptions. |
-| NFR-10 | Reproducible source/tool/template/fixture/asset identity in evidence. |
-| NFR-11 | Measured first-run/maker usability matches DX-01–04. |
-| NFR-12 | Freshness and blocked/outage status visible. |
+| NFR-01 | Offline runtime, no account/remote asset/telemetry dependency. |
+| NFR-02 | Warm initialization p95 ≤200 ms over 30 controlled runs, excluding host startup; no eager scan. |
+| NFR-03 | Shell readiness p95 ≤500 ms for 100 items on reference environment. |
+| NFR-04 | Initial main.js ≤1 MiB, composed CSS ≤100 KiB minified uncompressed; measure serializer impact and compressed sizes. |
+| NFR-05 | Owned resources return to baseline after 20 open/close cycles, bus/bridge/in-flight UI included. |
+| NFR-06 | Safe actionable outcomes for data/schema/storage/startup/script/document failures. |
+| NFR-07 | Keyboard/focus success, reviewed scanner findings, explicit manual accessibility scope. |
+| NFR-08 | Standard Windows/Linux workflows and evidence-based wider support. |
+| NFR-09 | Executable code/architecture/style/event/entity/tooling gates and reviewed exceptions. |
+| NFR-10 | Reproducible source/tool/schema/template/fixture/artifact identity. |
+| NFR-11 | Measured setup/maker/first-change usability. |
+| NFR-12 | Visible freshness, blocked and outage states. |
+| NFR-13 | Bounded document inputs/body/request records/collision attempts; no whole-vault scan per create or hidden duplicate database. |
 
-Do not weaken correctness to satisfy budgets or use noisy shared-runner timings as universal performance proof.
+Do not weaken correctness for budgets or present noisy CI timing as universal performance proof.
 
-## 19. Acceptance scenarios and traceability
+## 19. Acceptance and traceability
 
 | ID | Required outcome | Trace |
 | --- | --- | --- |
-| AC-01 | Different identity installs/builds/verifies; identity dry run changes nothing. | TPL-02–04 |
-| AC-02 | Native command/ribbon opens/focuses without duplicates. | UI-01–03, HST-04 |
-| AC-03 | Real create/rename/delete persists after reload. | EXA-01–03, DAT-05 |
-| AC-04 | Invalid label localized inline; no write. | EXA-01, ERR-01 |
-| AC-05 | Failed write preserves prior data/no false success/safe recovery. | DAT-03–05 |
-| AC-06 | Concurrent settings/item updates lose nothing; drafts independent. | DAT-03, LIF-02–03 |
-| AC-07 | Corrupt/future schema preserved. | DAT-01–04 |
-| AC-08 | Local storage denial nonfatal and namespaces isolated. | LOC-01–05 |
-| AC-09 | Locale/fallback/long text/host-label refresh correct. | I18N-01–07 |
+| AC-01 | Different identity installs/builds/verifies, dry run changes nothing. | TPL-02–04 |
+| AC-02 | Native command/ribbon opens/focuses without duplicate registration. | UI-01–03, HST-04 |
+| AC-03 | Generic example create/rename/delete survives reload through real services. | EXA-01–03, DAT-05 |
+| AC-04 | Invalid label localized inline, no write. | EXA-01, ERR-01 |
+| AC-05 | Failed persistence preserves data/no false success/safe recovery. | DAT-03–05 |
+| AC-06 | Concurrent settings/items lose nothing; drafts independent. | DAT-03, LIF-02–03 |
+| AC-07 | Corrupt/future data preserved. | DAT-01–04 |
+| AC-08 | Local denial nonfatal, namespaces isolated. | LOC-01–05 |
+| AC-09 | Locale/long text/fallback/host label behavior correct. | I18N-01–07 |
 | AC-10 | Modal cancel/submit/reopen/focus/cleanup correct. | UI-05, ERR-06 |
-| AC-11 | Repeated lifecycle restores resource baseline, preserves other views. | LIF-01–07 |
-| AC-12 | 400/450 pass, excess fails, SFC/CRLF included. | QLT-01–02 |
-| AC-13 | Alias/re-export/unclassified violations fail real architecture gate. | ARC-08–09, QLT-14 |
-| AC-14 | Vue/async/native lint and locale defects fail real checks. | QLT-03–06, I18N-04 |
-| AC-15 | Test-only references do not conceal unused runtime code. | QLT-09–13 |
-| AC-16 | Unexpected browser errors fail with current artifacts. | E2E-05–07 |
-| AC-17 | CJS and composed assets valid, no dev leakage/chunks. | BLD-01–04, HAR-07 |
-| AC-18 | Local install preserves data/notes/other plugins/security. | DEP-01–07 |
-| AC-19 | Unsafe path/malformed config/failed build cause no destructive replace. | DEP-04–06 |
-| AC-20 | Tool crash/unavailable host is not pass. | QLT-16, HST-03 |
-| AC-21 | Bounded redacted local diagnostics, no automatic upload. | LOG-01–06 |
-| AC-22 | Keyboard/narrow/light/dark interaction usable. | UI-08–09, E2E-04 |
-| AC-23 | Claimed iOS/Android support has candidate-bound device record. | HST-05 |
-| AC-24 | Example removal leaves no orphan wiring/events/styles/locales/dependencies. | EXA-05, TPL-04 |
-| AC-25 | New developer completes short first-change path without whole-PRD reading. | DX-01–05 |
-| AC-26 | Public/beta discovery separated, no silent beta-only calls. | TEC-02–08 |
-| AC-27 | Searchable declarative settings share validated writer including failures. | SET-01–03 |
-| AC-28 | Reproducible lock install and compatible update families run relevant checks. | UPD-01–05 |
-| AC-29 | Freshness truthfully reports blocked/cooldown/network states. | UPD-06–08 |
-| AC-30 | Optional CLI operates only on selected fixture vault. | DEP-08 |
-| AC-31 | Release prepare consistent, without commit/tag/push/publish. | REL-01, REL-05 |
-| AC-32 | First/subsequent draft has individual installable assets for fixed commit. | REL-06, REL-11 |
-| AC-33 | Promotion rejects mismatched/missing evidence/assets; no rebuild. | REL-02, REL-07 |
+| AC-11 | Lifecycle restores resource baseline, other views valid. | LIF-01–07 |
+| AC-12 | 400/450 pass, excess fails including full SFC/CRLF. | QLT-01–02 |
+| AC-13 | Real architecture rejects alias/re-export/unclassified violations. | ARC-08–09, QLT-14 |
+| AC-14 | Real Vue/async/native lint and locale checks reject defects. | QLT-03–06, I18N-04 |
+| AC-15 | Tests cannot hide unused production code. | QLT-09–13 |
+| AC-16 | Browser failures produce failure/current artifacts. | E2E-05–07 |
+| AC-17 | Correct CJS/composed assets, no unintended chunks/dev leakage. | BLD-01–04, HAR-07 |
+| AC-18 | Install preserves notes/data/other plugins/security. | DEP-01–07 |
+| AC-19 | Unsafe path/config/build failure causes no destructive replacement. | DEP-04–06 |
+| AC-20 | Crash/unavailable host is not pass. | QLT-16, HST-03 |
+| AC-21 | Bounded/redacted/local diagnostics, no upload. | LOG-01–06 |
+| AC-22 | Keyboard/narrow/light/dark usable. | UI-08–09, E2E-04 |
+| AC-23 | Claimed iOS/Android has candidate-bound evidence. | HST-05 |
+| AC-24 | Removal leaves no orphan wiring/catalog/styles/locales/dependencies. | EXA-05, TPL-04 |
+| AC-25 | New developer completes short first-change path without entire PRD. | DX-01–05 |
+| AC-26 | Public/beta discovery distinct, no silent beta-only API. | TEC-02–08 |
+| AC-27 | Searchable native settings share validated writer including failure. | SET-01–03 |
+| AC-28 | Locked installation and update families execute relevant checks. | UPD-01–05 |
+| AC-29 | Freshness reports blocked/cooldown/outage honestly. | UPD-06–08 |
+| AC-30 | Optional CLI only targets configured fixture vault. | DEP-08 |
+| AC-31 | Release prepare consistent, no implicit commit/tag/push/publish. | REL-01, REL-05 |
+| AC-32 | Fixed-commit first/subsequent draft has individual installable assets. | REL-06, REL-11 |
+| AC-33 | Promotion rejects missing/mismatched evidence/assets, no rebuild. | REL-02, REL-07 |
 | AC-34 | Retry/permission/upload/duplicate failures preserve public versions. | REL-08–11 |
-| AC-35 | Listing validation rejects invalid identity/versions/missing docs/assets and explains current route. | TPL-03, REL-01–03 |
-| AC-36 | Fresh checkout with no node_modules starts npm run setup, installs qualified graph, reaches selected-profile readiness. | SETUP-01–05 |
-| AC-37 | Setup dry-run/help need no dependencies or side effects; non-TTY input never hangs; no lifecycle recursion. | SETUP-02, SETUP-08–10 |
-| AC-38 | Interrupted/failed/rerun setup preserves changes and resumes only still-valid stages; skipped checks remain explicit. | SETUP-06–07, SETUP-11–12 |
-| AC-39 | All script logic/helpers/templates reside in scripts; root configs and workflows are thin; source limits enforced. | TOOL-01–06 |
-| AC-40 | Built-in/composed makers create reachable registered code/tests/events/styles that build and work in the real harness. | MAKE-01–04, MAKE-10–12 |
-| AC-41 | Maker dry-run/collision/rerun/concurrency/partial failures preserve user work with accurate plans. | MAKE-05–07 |
-| AC-42 | Custom maker and machine output work through the same validated plan engine, without remote code/dependency installation. | MAKE-08–09 |
-| AC-43 | Event names/payloads/unions and duplicate catalogs fail appropriately; generated extensions need no bus-core edits. | EVT-04–06, EVT-15 |
-| AC-44 | Event order/once/reentrancy/error isolation/disposal/snapshot behavior matches the tested contract. | EVT-07, EVT-09–11, EVT-16 |
-| AC-45 | Native bridge handles startup/null/file-folder/rename mappings and unload-before-ready safely. | EVT-12–14 |
-| AC-46 | No committed event on save failure; two views update on success; separate plugin instances stay isolated. | EVT-01–03, EVT-08, EVT-15–16 |
-| AC-47 | Ordered CSS and compiled SFC styles produce one complete artifact with correct namespacing/assets and no source/remote imports. | CSS-01–07 |
-| AC-48 | Style maker add/edit/remove and failed builds behave correctly in HMR/local install; exact candidate stylesheet parity is proved. | CSS-08–10, CSS-12 |
-| AC-49 | Source CSS/SFC limits remain enforced while composed output follows its generated/size policy; native/modal/pop-out styles do not leak. | CSS-06–07, CSS-11–12 |
+| AC-35 | Listing rejects invalid identity/versions/missing docs/assets and describes current route. | TPL-03, REL-01–03 |
+| AC-36 | Fresh no-node_modules npm run setup reaches selected-profile readiness. | SETUP-01–05 |
+| AC-37 | Dependency-free dry-run/help, no side effects/TTY hangs/lifecycle recursion. | SETUP-02, SETUP-08–10 |
+| AC-38 | Setup failure/interruption/rerun preserves edits, valid-only resume, explicit skipped scope. | SETUP-06–07, SETUP-11–12 |
+| AC-39 | Scripts/helpers/templates in scripts, root configs/workflows thin, source limits active. | TOOL-01–06 |
+| AC-40 | Built-in/composed makers generate registered real code/tests/events/styles. | MAKE-01–04, MAKE-10–12 |
+| AC-41 | Maker plan/rerun/collision/concurrency/failure preserves work. | MAKE-05–07 |
+| AC-42 | Custom/machine maker uses same validated plan without remote code/install. | MAKE-08–09 |
+| AC-43 | Typed event keys/payloads/unions/duplicates checked; extensible without bus-core edit. | EVT-04–06, EVT-15 |
+| AC-44 | Event order/once/reentrancy/errors/disposal/snapshots match contract. | EVT-07, EVT-09–11, EVT-16 |
+| AC-45 | Native bridge startup/null/file-folder/rename/unload-before-ready safe. | EVT-12–14 |
+| AC-46 | No success fact for failed write, two-view refresh, runtime isolation. | EVT-01–03, EVT-08, EVT-15–16 |
+| AC-47 | Ordered CSS plus SFC output is complete/single/scoped/self-contained. | CSS-01–07 |
+| AC-48 | Style maker/HMR/removal/failure/last-good/candidate parity correct. | CSS-08–10, CSS-12 |
+| AC-49 | CSS/SFC source limits versus output budget correct, no native/pop-out leakage. | CSS-06–07, CSS-11–12 |
+| AC-50 | Registered entity/input/output types correlate; unknown fields and duplicate definitions/mappings fail. | DOC-01–03, DOC-07 |
+| AC-51 | Task defaults/required values/date-only validation/false-zero-null rules are correct. | DOC-02, DOC-04–05 |
+| AC-52 | Real YAML round-trip preserves scalar meanings; internal/managed overrides and unsupported values are rejected. | DOC-03–05, DOC-09 |
+| AC-53 | Prepare writes nothing; accepted commit uses same ID/content/path; stale plans do not silently change. | DOC-08 |
+| AC-54 | One complete create call includes frontmatter/body; failed write emits no created fact or empty-note workaround. | DOC-11, DOC-16 |
+| AC-55 | Unsafe paths/folder-file/case/race conflicts are handled without overwrite or unsafe cleanup. | DOC-10–12 |
+| AC-56 | Duplicate submission coalesces within scope; mismatched keys/uncertain writes do not cause blind duplicate retries. | DOC-12–13 |
+| AC-57 | Confirmed creation remains success despite cache lag/open/listener failure; host/service observations do not double count. | DOC-15–16 |
+| AC-58 | A second entity uses the same service; Markdown remains canonical, no auto-seed/duplicate Task database. | DOC-06, DOC-17, DOC-20 |
+| AC-59 | Entity maker creates integrated definitions/action/tests/fixture, preserves safety and never creates actual user notes. | DOC-19, MAKE-01–12 |
+| AC-60 | Versioned schemas/type hints do not rewrite existing notes or silently mutate vault-wide property types. | DOC-04, DOC-17 |
+| AC-61 | Harness inspects actual emitted Markdown, native Properties/Source behavior verified on claimed platforms. | DOC-05–06, DOC-20, HST-04–05 |
+| AC-62 | Cancellation before/during write reports actual outcome, preserves created note, protects disposed UI/privacy/bounds. | DOC-14, DOC-18 |
 
-Requirement coverage is not code coverage. Tests cite the relevant IDs; host/manual cases retain explicit evidence rather than an assumed automated pass.
+Requirement coverage and code coverage are different. Tests cite relevant IDs; native/manual cases retain honest evidence.
 
-## 20. Implementation work packages
+## 20. Work packages
 
-Keep dependency-ordered slices. WP-00 is a focused compatibility proof, not open-ended research preventing the first working shell.
+Dependency-ordered slices; WP-00 is a focused proof, not indefinite research before any working shell.
 
-| Package | Outcome | Dependencies / exit evidence |
+| Package | Outcome | Exit evidence |
 | --- | --- | --- |
-| WP-00 — Current baseline | Qualified current packages/host/Node, Vite native CJS+SFC CSS, declarative write hooks, fallow, native-runner choice, Node-only setup boot proof. | Research; exact matrix and minimal host/style/tool proof. |
-| WP-01 — Tooling and bootstrap | scripts layout, locked tools, strict projects, quality/negative fixtures, setup/help/doctor preflight and safe plan engine, initial CI. | WP-00; dependency-free start/help and useful failures. |
-| WP-02 — Runtime/events/styles | Thin composition, services/ports, typed bus/native bridge core, Vue/Pinia ownership, shell, ordered CSS/SFC build, initial harness mount. | WP-01; visible shell, bus/type/lifecycle/style contracts. |
-| WP-03 — Data/settings | Versioned/serialized storage, local preferences, native definitions, localization/errors/logs, successful post-commit facts. | WP-02; native/Vue concurrency and failure evidence. |
-| WP-04 — Reference feature | Complete use cases, commands/ribbon/modals/notices, two-view updates, responsive styles, removal recipe. | WP-03; complete actual behavior and cleanup. |
-| WP-05 — Harness | Deterministic fixtures/faults/host-source mapping, real bus/components, readiness, isolated host shim, style-fidelity scenario. | WP-04; reproducible scenarios without native host. |
-| WP-06 — Test evidence | Playwright/visual/a11y, bus/bridge errors, negative runner, exact stylesheet parity, native/manual evidence. | WP-05; independent honest browser/native results. |
-| WP-07 — Guided setup/makers/local | Complete fresh install wizard/resume, safe local watch/CLI, identity, built-in/custom makers and structured registrations, generated-project tests. | WP-04 plus WP-06 integration; AC-36–42 and real generated slice. |
-| WP-08 — Maintenance/releases | Dependabot/freshness, shared secured workflows, event/style catalog checks, draft/promote metadata, current submission and agent recipes. | WP-06–07; upgrade/release failure recovery. |
-| WP-09 — Qualification | Fresh differently named repo with no dependencies, full wizard, maker feature/event/listener/style, example removal, onboarding/budgets/platforms, release rehearsals. | WP-08; AC-01–49 accounted for with no hidden unmet MUSTs. |
+| WP-00 — Current baseline | Current qualified packages/host/Node, Vite native+CSSL, native settings, analyzer/runner/bootstrap, shared YAML/native-parser probe. | Exact matrix and small real host/build/serialization proofs. |
+| WP-01 — Tools/bootstrap | scripts layout, strict projects, locked checks/negative fixtures, setup/help/doctor, safe file-plan engine, CI. | Dependency-free start/help and useful failures. |
+| WP-02 — Runtime/bus/styles | Composition/ports, typed bus/bridge, Vue/Pinia, shell, modular CSS/SFC pipeline, first harness. | Visible shell and type/lifecycle/style contracts. |
+| WP-03 — Data/documents/settings | Versioned plugin writer, local prefs, declarative settings, locale/errors/logs, entity/definition contracts, DocumentCreationService and writer/renderer. | Storage concurrency plus actual Task Markdown, validation/no-write-preview/collision/failure tests. |
+| WP-04 — Examples | Generic example, explicit Task-note modal/preview/action, committed events, responsive styles/removal recipes. | Real end-to-end behavior, no Task duplication or unsolicited notes. |
+| WP-05 — Harness | Deterministic host/file/event/storage faults, actual Markdown capture, real services, readiness, shim/style fidelity. | Reproducible native-independent scenarios. |
+| WP-06 — Evidence | Playwright/visual/a11y/bus/document/negative runner, native/manual Properties/no-overwrite, exact assets. | Separate honest browser/native results. |
+| WP-07 — Setup/makers/local | Full wizard/resume/install/CLI, identity, built-in/custom/entity makers, generated-repo tests. | Fresh setup and generated entity/feature/event/style functioning under safety checks. |
+| WP-08 — Maintenance/release | Updater/freshness, secured shared workflows, catalogs/checks, draft/promote/submission/agent guidance. | Upgrade and release failure recovery. |
+| WP-09 — Qualification | Fresh differently named repo, full wizard/makers/Task create/example removal, usability/budgets/platforms, release rehearsals. | AC-01–62 accounted for; no hidden unmet MUST. |
 
-Implement makers inside WP-07 incrementally: first feature/view/command/style, then event/listener/modal/setting, then smaller component/store/usecase/locale/custom-maker recipes. All remain necessary for the declared complete v1 catalog; intermediate states are labeled incomplete rather than advertised as fully qualified.
+The maker catalog is implemented in bounded slices, including the entity/document recipe; unfinished intermediate releases must not claim complete qualification. Existing work-package ordering remains; document creation extends data/example/testing packages rather than adding a separate platform.
 
-### Ready and done
+Ready work has outcome, affected contracts/IDs, acceptance, data/error/migration/lifecycle implications, and evidence. Done means actual intended-layer behavior/checks/current UI/native evidence where needed, docs/catalog updates, preserved user work, and truthful handoff—not volume or expected future tests.
 
-Ready: outcome, affected contracts/IDs, acceptance, data/error/migration behavior, and evidence are clear. UI includes empty/loading/error/localization/style ownership. Event work includes payload/owner/disposal/failure; maker work includes plan/conflicts/integration.
+Use concise lasting ADRs for host/settings, persistence/event/document identity, style pipeline, maker mutations, tool roles, deployment/release/update policy. Routine feature changes do not each require an ADR.
 
-Done: intended-layer behavior, actual checks, current UI evidence, host evidence where needed, docs/catalog updates, preserved user work, and truthful handoff. No claim based on generated volume, expected future tests, or a screenshot alone.
-
-Record concise ADRs for lasting decisions: current host/settings, state/event ownership and semantics, style pipeline, generator mutation policy, lint/analyzer roles, deployment/release identity, and update policy. Routine feature edits do not each require an ADR.
-
-## 21. Risks and mitigations
+## 21. Risks
 
 | Risk | Mitigation |
 | --- | --- |
-| Setup itself needs uninstalled tools. | Built-ins-only checked-in bootstrap, fresh-checkout acceptance. |
-| npm lifecycle calls setup recursively or makes unexpected changes. | Explicit wizard only, reviewed install hooks, child-process/cancellation tests. |
-| Makers overwrite work or produce lint-dead scaffolds. | Safe plans, preconditions, explicit registries, generated-project verification, no blanket force. |
-| Event bus hides commands/coupling or leaks after unload. | Narrow fact contracts, direct requests, owned disposers, no global singleton/replay guarantee. |
-| Native startup events look like new user changes. | Readiness registration, disposed guards, explicit initial queries. |
-| CSS splitting loses SFC transforms or cascade parity. | Shared compiler/import graph, scoped identifier checks, exact-artifact scenario. |
-| New CSS is installed with old scoped-component JS. | Stage matching complete artifacts, last-good preservation. |
-| Latest packages/host declarations are incompatible. | Qualified exact matrix, reviewed updates, visible bounded exceptions. |
-| Analyzer upgrade stops checking files. | Coverage/parser/production/output-schema negative fixtures. |
-| Release fails to trigger or publishes rebuilt assets. | Direct stage orchestration, fixed commit, retained hash-bound candidate. |
-| Scope/tooling overwhelms a developer. | Short workflow, composable recipes, ordinary generated code, progressive docs. |
-| Privacy/support claims exceed evidence. | Fixture-only default, metadata-only diagnostics, independent host/device checks. |
+| Bootstrap needs missing dependencies or recurses through npm hooks. | Node-only entry and fresh-install/lifecycle tests. |
+| Makers overwrite work or produce unreachable boilerplate. | Planned preconditions, explicit registrations, isolated qualification, no blanket force. |
+| Bus hides commands or leaks resources. | Typed facts/direct requests/scoped owners/no durable guarantees. |
+| Native startup events look like new activity. | Readiness/guard/initial query contract. |
+| CSS splitting loses identifiers or deploys with old JS. | Shared compiler, exact parity, matching staged set. |
+| Document creation corrupts frontmatter or overwrites a note. | Strict projection/real serializer/full create/no-overwrite/error distinction. |
+| Duplicate retries create multiple Tasks or follow-up failures claim write failure. | Stable bounded request handling, plain receipt, uncertain-outcome reconciliation, separate opening. |
+| Local schema changes global property behavior or creates duplicate authority. | No private type mutation, Markdown canonical, explicit future migration contract. |
+| Latest packages/API/host differ. | Exact qualified matrix, reviewed updates, visible exceptions. |
+| Analyzer silently loses coverage. | Parser/zone/production/report negative fixtures. |
+| Release doesn't trigger or rebuilds after acceptance. | Direct staged orchestration/fixed commit/retained hash-bound assets. |
+| Baseline becomes too complex. | Short workflow, small reused services, ordinary generated code, progressive docs; no ORM/workflow platform. |
 
 ## 22. Sources and delivery boundary
 
-The [baseline research](../research/2026-09-22-template-research.md) retains R01–R35 and its dated host observations. The [new supplement](../research/2026-09-22-setup-makers-events-styles.md) records S01–S14 for npm/bootstrap, Symfony makers, native events, TypeScript, Vite, Vue styles, and Obsidian CSS.
+The baseline R sources, S tooling/events/styles sources, and D entity-document sources are linked in section 1.2. Primary public declarations were used where generated API documentation URLs were unavailable. Source inspection does not establish package compatibility, race guarantees, complete host behavior, or measured performance.
 
-This revision edits specifications and guides. It does not implement package scripts, install dependencies, run a plugin/harness, enable bots or repository administration, publish releases, or establish a tested package matrix. Commands, generators, bus, composed styles, and scheduled jobs remain requirements until implemented and accepted. Earlier registry-access limitations and unmeasured performance claims remain explicit.
+This delivery updates requirements/guides only. It does not implement or execute setup/makers/DocumentCreationService/bus/styles/harness, install dependencies, enable updater/admin settings, create real user Tasks, or publish a plugin. Those capabilities require their implementation and acceptance evidence. Previously unverified package-matrix and benchmark details remain explicitly unverified.

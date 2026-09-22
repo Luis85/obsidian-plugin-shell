@@ -1,170 +1,143 @@
 # Developer workflow
 
-> **Status:** Target experience for PRD 0.3. The repository currently contains specifications, not working npm commands or a plugin. The examples below define the implementation contract.
+> **Status:** Target experience for PRD 0.4. The repository contains specifications, not working npm commands or a plugin. All commands/API references below describe the required implementation.
 
-Use this as the short path through the [PRD](../product/PRD.md). Detailed contracts are in [setup/makers](SETUP-AND-MAKERS.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), and [maintenance/release](MAINTENANCE-AND-RELEASE.md).
+Start here, then read the [setup/maker contract](SETUP-AND-MAKERS.md), [entity-document recipe](ENTITY-DOCUMENTS.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), and [release guide](MAINTENANCE-AND-RELEASE.md) as needed. The [PRD](../product/PRD.md) holds the complete requirements.
 
-## 1. Get the template and run setup
+## 1. Obtain the template and run setup
 
-Install the supported Node/npm prerequisites, obtain the template through GitHub, and open its directory. Git is useful for development/release, but a source download without .git must still support browser setup.
-
-The first project command is:
+With supported Node/npm installed, open the template directory and run:
 
 ```sh
 npm run setup
 ```
 
-No separate dependency installation comes first. The checked-in Node-only bootstrap reviews identity, development profile, downloads, and file changes before it runs the locked dependency install. It then provisions selected test tools/local-vault artifacts, builds, verifies the selected scope, and prints the next action. It exits rather than starting an indefinite watcher.
+No separate project-dependency install comes first. The Node-only bootstrap reviews identity, profile, file edits and selected downloads, runs the locked install, provisions selected tools/vault artifacts, builds/checks the chosen scope, and prints the next action. It exits instead of starting an indefinite watcher.
 
-The wizard collects plugin ID/name/description/author/repository/version, validates them, and offers browser-first or optional native development setup. It never installs Node itself, globally changes your machine, silently disables Restricted Mode, or publishes a release.
-
-The implemented compatibility record identifies exact supported tools and latest public Obsidian. Setup installs that qualified lockfile; it does not silently upgrade the stack during installation. CI and deliberate reinstalls can still use `npm ci` directly.
-
-### Review, dry run, and agents
+Git is recommended; a source download without .git still supports browser setup. Setup never installs Node itself, globally changes the machine, silently edits security preferences, publishes, or creates example Tasks in a user's vault.
 
 ```sh
 npm run setup -- --dry-run
 npm run --silent setup -- --id field-notes --name "Field notes" --author "Your name" --repo your-account/field-notes --profile browser --no-interaction --yes --json
 ```
 
-Dry run makes no filesystem/network changes and works before dependencies are installed. Noninteractive execution requires complete valid inputs; it does not wait for missing answers. A second run validates/resumes rather than overwriting an initialized project.
+Dry run makes no filesystem/network changes before dependencies exist. Missing noninteractive answers fail rather than hang. Repeat validates/resumes without overwriting user edits. The plugin ID is not blindly inherited from the template repository name. Current exact compatibility comes from the qualified record, not dated research numbers; setup installs that lockfile rather than upgrading it.
 
-The repository name and distributable plugin ID differ. Do not keep the upstream identity or blindly use `obsidian-plugin-shell` as the plugin ID. The setup contract includes current submission constraints and preserves license attribution.
-
-## 2. Generate and inspect the first feature
+## 2. Generate a feature and an entity
 
 ```sh
-npm run make
 npm run make -- --list
 npm run make -- feature tasks
+npm run make -- entity task --feature tasks --document
 npm run dev:ui
 ```
 
-`make` provides a chooser/help and command-specific options. A generated feature is ordinary source wired into the existing architecture, with a minimal real view/action, localization/style ownership, a harness fixture, and tests. It is not a new runtime framework and it does not invent the finished behavior of your product.
+An interactive make chooser and per-maker help explain inputs. The feature recipe provides a small real shell/action/fixture. The entity recipe adds typed fields/defaults/validation and a separate document mapping/template with tests. It creates source, not user notes. Select noncolliding names and inspect the plan rather than blindly rerunning a composite recipe.
 
-The generator previews its plan and refuses collisions. Existing files edited by the developer are not overwritten. A successful scaffold means the stated template behavior exists; it does not mean an unfinished business use case has been implemented.
+Other recipes cover native views/commands/modals/settings, components/stores/use cases, typed events/listeners, CSS modules/locales, and custom makers. Use dry-run/noninteractive JSON for agents. No GNU Make, PHP, global alias, or remote boilerplate service is required.
 
-More recipes are available, with names selected to avoid whatever the composite feature already created:
+Generated code is ordinary developer-owned source with explicit wiring. Edited files are preserved; no blanket force. A scaffold can remain explicitly unfinished but must never fake a successful business action.
 
-```sh
-npm run make -- command open-tasks --feature tasks
-npm run make -- modal edit-task --feature tasks
-npm run make -- event tasks.item-archived --feature tasks
-npm run make -- listener refresh-task-list --event tasks.item-archived
-npm run make -- style item-card --feature tasks
+## 3. Create Markdown from a Task
+
+Define Task values once and separately choose its destination, filename, allowed frontmatter, and body. The shared DocumentCreationService then handles the safe pipeline; presentation does not call Vault or build YAML itself.
+
+The intended call is:
+
+```ts
+const result = await documentCreationService.create({
+  entity: 'task',
+  values: {
+    title: 'Prepare release checklist',
+    due: '2026-09-30',
+    tags: ['work', 'release'],
+  },
+  requestId: submissionId,
+});
 ```
 
-Use per-maker `--help` for required existing owners/actions/payload details. These are illustrative recipes, not a promise that each should be run blindly after a composite maker. The full catalog also covers views, components, stores, use cases, settings, locales, and custom makers.
+The form retains submissionId across a retry. The service supplies managed identity/type/schema and defaults, returns a typed receipt, and publishes documents.created only after confirmed creation. Note opening is separate. A failed open action must not imply the note was not created.
 
-For machine-readable planning:
+For review, prepare returns a no-write Markdown/path plan; commit uses the same values after revalidation. Invalid input, cancel-before-write, unsafe paths and collisions create no unintended note. Cancellation during an already-started write reports its actual outcome rather than deleting a successful result.
 
-```sh
-npm run --silent make -- feature tasks --dry-run --no-interaction --json
-```
+A Task note stores its structured fields in frontmatter and notes in the body. It is canonical Markdown, not a duplicate of a Task list in data.json. This does not deliver a complete Todo index, synchronization system, or automatic old-note migration. See [the definition and output example](ENTITY-DOCUMENTS.md).
 
-Scripts and generator templates live in `scripts/`, but generated plugin code lives under `src/` and tests under `tests/`. A global executable called make, GNU Make, PHP, and Symfony are not prerequisites.
+## 4. Make a manual change
 
-## 3. Understand one change without learning all infrastructure
+The manual first-change recipe adds an optional description to the original generic example item. Validate it, extend the existing use-case input/output, handle old data safely, add a labeled Vue field/locales/styles, and test success/reload/failure. Do not introduce a second writer or new infrastructure for an ordinary field.
 
-The retained manual recipe is to add an optional description to an example item. Empty text is allowed, oversized text produces a localized error, saved text survives reload, and it is displayed as text rather than HTML.
+For a note-backed entity, update its schema and explicit document projection intentionally. A new internal field must not silently appear in frontmatter. Changes to definitions do not rewrite existing notes; any update/migration is separately designed.
 
-| Area | Change |
-| --- | --- |
-| Domain | Add the value/validation rule without framework imports. |
-| Application | Extend the existing use-case input/output; reuse its repository and outcome policy. |
-| Persistence | Decode old data safely and migrate/default the new field; do not create a second writer. |
-| Vue/Pinia | Add a labeled field using the existing application interface. |
-| Localization | Add matching keys/parameters, not scattered literals. |
-| Styles | Edit the owned module/SFC and keep it within 400 lines. |
-| Events | Publish the existing appropriate committed fact after a successful write; change its payload only deliberately. |
-| Tests/harness | Validate input, old data, successful reload, failed writes, two-view refresh, and the actual field interaction. |
+Most changes do not touch main.ts. New registrations go in small composition modules, and domain values stay independent of native/UI APIs.
 
-Most changes do not need to touch `main.ts`. New native registrations belong in small composition registries; pure functions do not need a new interface/bus/event solely to appear architectural.
+## 5. Events and styles
 
-## 4. Events in ordinary development
+One typed bus per runtime, scoped subscriber/publisher facades, post-success facts, and explicit cleanup. Late views query canonical state and then observe changes. Do not turn a service call requiring a result into an event command. Native host events enter through the supported bridge with startup replay/nullable/file-folder guards.
 
-The plugin has one typed bus per runtime. Application services publish completed facts after successful writes. Views subscribe through narrow injected interfaces and query canonical state for their initial snapshot. Closing a view disposes its subscriptions, not the shared bus.
+For document creation, raw host entry-created and canonical documents.created are not two Task creations. Handle invalidation deliberately and do not rely on a cache being current when the write returns. Subscriber failures cannot roll back a completed write.
 
-`make event` adds the contract/catalog/type tests; `make listener` adds a typed owned subscriber and its tests. A subscriber sees the correct payload type and must not import native `TFile`, `App`, or WorkspaceLeaf into application code.
-
-Native file/workspace/metadata changes enter through the supported Obsidian bridge. Startup create replay is not treated as new user activity. A bus publication does not perform the corresponding vault action; requests requiring a result call a service directly.
-
-The bus begins delivery synchronously but does not await async listeners. Exceptions/rejections are captured without rolling back a committed save. Owners must guard/cancel in-flight work when their view closes. See the [full semantics](../architecture/EVENT-BUS.md) before relying on ordering or lifecycle behavior.
-
-## 5. Styles in ordinary development
-
-Author CSS in small modules under `src/styles/`, with explicit ordered entries, or as component-owned scoped styles. Do not edit the generated stylesheet.
+Author small CSS modules and component-owned styles, never generated output:
 
 ```text
-ordered CSS imports + compiled styles from imported Vue components
-                              ↓
-                        dist/styles.css
+ordered CSS source + compiled Vue SFC styles → dist/styles.css
 ```
 
-`make style` connects its file to the selected owner/import graph. `make feature`, `make view`, and `make modal` reuse the same style recipe. The native build and harness share the processing rules; artifact-fidelity tests load the exact candidate CSS with matching component identifiers.
+Style makers wire the file into the correct graph. Native roots need their namespace/tokens. Task forms reuse the existing composition. The browser development path shares sources; artifact-fidelity checks use the actual candidate stylesheet with matching component identifiers.
 
 ```sh
-npm run styles:build
 npm run styles:check
+npm run events:check
+npm run entities:check
 ```
 
-These commands use the shared pipeline and include SFC CSS; they are not a separate raw concatenator. Keep all handwritten CSS files and full SFCs within 400 physical lines. Generated composed output can be longer but retains its bundle-size and artifact checks.
+These checks complement normal verification; they do not create user content. Catalogs are derived from registrations, not competing manually maintained schemas.
 
-Use plugin-scoped classes and Obsidian variables. Native modal/settings roots need their own namespace/tokens; a selector scoped only below a view will not automatically reach a modal elsewhere. Avoid global resets and duplicate harness-only plugin styles.
-
-## 6. Main workflows
+## 6. Main commands
 
 | Command | Purpose |
 | --- | --- |
-| `setup` | Guided fresh install/configuration/verification and safe resume. |
-| `make -- <kind>` | Integrated boilerplate with an explicit reviewable plan. |
-| `dev:ui` | Real-component browser HMR without Obsidian. |
-| `dev:local` | Successful matching JS/CSS/manifest builds installed into the approved development vault. |
-| `verify` | Complete ordinary checks after explicit provisioning. |
-| `release:prepare -- --version X.Y.Z` | Metadata/changelog preparation, not publication. |
-| `help` / `doctor` | Discover commands and diagnose prerequisites safely. |
+| setup | Guided install/configuration/readiness and safe resume. |
+| make -- <kind> | Reviewable integrated scaffolds. |
+| dev:ui | Real-component browser HMR without Obsidian. |
+| dev:local | Successful complete JS/CSS/manifest builds installed into the approved vault. |
+| verify | Complete ordinary checks after explicit provisioning. |
+| release:prepare -- --version X.Y.Z | Metadata preparation, not publication. |
+| help / doctor | Safe discovery and prerequisite diagnosis. |
 
-Use targeted tests and `verify:fast` during a change, then `verify` before handoff. It must not download tools silently or become a watcher. `test:setup` is the focused provisioning operation reused by setup.
-
-Native-sensitive changes additionally need `test:obsidian` or the documented manual procedure. Browser, fake-host, native, and device evidence remain separate.
+Use targeted tests and verify:fast during edits, then verify before handoff. No silent tool downloads/watchers inside verification. test:setup is the focused provisioning operation reused by setup. Native-sensitive work additionally runs test:obsidian or the documented manual procedure.
 
 ## 7. Native development
 
-The default location is `.dev-vault/.obsidian/plugins/<plugin-id>/` inside the repository. Open `.dev-vault` in Obsidian. Enable Community plugins deliberately when required; the script does not disable Restricted Mode for you.
+Default installation is .dev-vault/.obsidian/plugins/<plugin-id>/ inside the repository. Open that vault and make any required Community-plugin enabling decision yourself. Never test against important personal notes by default.
 
-`dev:local` preserves data.json, unrelated plugins, notes, and configuration. A failed JS or CSS build leaves the last good matching asset set intact. An explicit repository-root-vault mode is available through validated configuration, never inferred silently from an existing .obsidian directory.
+Local builds preserve data.json, existing notes, unrelated plugins/configuration/security. Failed JS/CSS builds retain the last good matching set. Repository-root-vault mode is explicit and uses the same safeguards, not an inferred .obsidian folder.
 
-Optional official CLI reload/screenshots must validate the exact fixture vault and capabilities. Missing CLI falls back to manual steps; it is not required for browser work and must not target an arbitrary personal vault. [Baseline research R08](../research/2026-09-22-template-research.md)
+Optional official CLI operations validate the fixture vault/capabilities. Missing CLI gives a manual fallback; browser work stays independent. Synthetic document tests are permitted only inside the declared disposable test vault, not as unsolicited startup data.
 
-## 8. Harness and troubleshooting
+## 8. Harness and recovery
 
-A reproducible scenario can be selected with a documented URL such as:
+A declared URL can choose scenario/locale/theme/seed, for example `/?scenario=storage-failure&locale=de&theme=dark&seed=42`. Cover normal and failure flows, lifecycle/multiple views, real events, exact styles, and actual emitted Markdown—not only a happy-path screenshot.
 
-```text
-/?scenario=storage-failure&locale=de&theme=dark&seed=42
-```
-
-Cover normal and failure paths, two views, event disposal, and composed styles—not only one successful screenshot. The runner owns its server, validates readiness, and records current source/asset hashes. Golden baseline changes require review.
-
-| Problem | Safe diagnostic/recovery |
+| Failure | Required recovery |
 | --- | --- |
-| Setup fails before install | Check Node/npm, checked-in bootstrap, lockfile, identity plan, permissions; no unpinned install fallback. |
-| Install/download interrupted | Resume only valid recorded stages, preserve files, explain unmet prerequisites. |
-| Missing answers in an agent session | Fail with missing keys; do not hang for input. |
-| Generator collision | Show affected file/registration; no blanket force overwrite. |
-| Generated file is unused | Repair its real registration, not a broad fallow suppression. |
-| Events appear duplicated | Inspect runtime/bridge/view ownership and startup registration; no global emitter workaround. |
-| Event listener rejects | Inspect bounded safe diagnostics and cancellation; do not mark a committed save failed. |
-| CSS missing in native view/modal | Check source ownership, compiled scope/class mapping, native root namespace, and installed CSS hash. |
-| Style change not visible | Check graph/watch ownership and last-good build status; do not add a second runtime stylesheet. |
-| Browser/host missing | Explain test:setup/native prerequisites and report not run, not pass. |
-| Port occupied | Reject unrelated process or use explicit alternate port. |
-| Release permissions absent | Explain least required permission, not an unrestricted personal token. |
+| Bootstrap/install/provisioning failure | Identify prerequisite/stage, preserve edits, resume still-valid steps, no unpinned install fallback. |
+| Non-TTY missing input | Explicit missing keys, no prompt hang. |
+| Maker conflict/unreachable code | Show affected paths/registration; preserve edits and repair real wiring, not suppress fallow. |
+| Duplicate events/leaked listeners | Inspect runtime/bridge/view ownership and startup behavior. |
+| Missing styles | Check graph/SFC identifiers/native namespace/current artifact hashes; no second runtime stylesheet. |
+| Invalid entity or future schema | Validate/preserve; do not override properties or rewrite existing notes. |
+| Document path/conflict/uncertain write | Fail safely or reconcile the known candidate; no overwrite/blind new-filename retry. |
+| Note created but opening/indexing fails | Accurate follow-up status, no duplicate creation. |
+| Host/browser unavailable | Explain provisioning and report not run. |
+| Port conflict | Reject unrelated process or explicitly choose another port. |
+| Release permission failure | Explain least required permission, not an unrestricted token. |
 
-## 9. Removing the example and releasing
+The runner owns its server/readiness and current artifact identity. Golden screenshots change only after review. Browser fakes and native/device tests prove different scopes.
 
-Use the tested removal recipe for example code, registrations, events/descriptors, style imports, tests/fixtures, and locales. Keep reusable host/bus/persistence/localization/error/testing infrastructure. Verify the resulting graph and generate the first real product slice with make.
+## 9. Remove examples, hand off, release
 
-Handoffs name actual behavior, exact commands/results, current artifacts, migration/compatibility impact, and untested scope. Generated code volume is not acceptance evidence.
+Removal covers feature/entity definitions, registrations, event/catalog entries, style imports, fixtures/tests/locales while preserving shared infrastructure. Test both the generic plugin-data example and Task-note recipe removal; no retained duplicate authority or hidden analyzer exception.
 
-The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) covers reviewed dependency updates, fixed-commit candidates, native acceptance, and explicit publication of the same JS/CSS/manifest. First directory approval is separate from GitHub release creation.
+A handoff names actual changes/commands/results/artifacts, compatibility/schema impact and untested scope. Generated volume and mock success do not establish functionality.
+
+Use the [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) for reviewed updates, fixed-commit candidates, exact native acceptance and explicit promotion. Directory approval is separate from GitHub release creation.
