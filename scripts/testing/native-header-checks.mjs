@@ -19,7 +19,10 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   const tabs = await page.locator('.workspace-tabs').count();
   const controls = await page.locator('.titlebar-button').count();
   await page.screenshot({ path: join(output, 'native-preferences-header-shown.png') });
-  await owned.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true }).check();
+  // Persistence deliberately keeps this controlled input unchanged until the write commits.
+  // Playwright check() assumes a synchronous mutation; click once, then await the real state.
+  const headerToggle = owned.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true });
+  await headerToggle.click(); await expect(headerToggle).toBeChecked();
   await expect(header).toBeHidden();
   await expect(owned.locator('.shell-header')).toBeVisible();
   expect(await page.locator('.workspace-tabs').count()).toBe(tabs);

@@ -2,7 +2,7 @@ import type { Preferences } from '../../src/domain/preferences';
 export interface HarnessApi {
   files(): Record<string, string>;
   faults: { code: string; operation: string }[];
-  fault(kind: 'write' | 'open' | 'settings' | 'notice' | 'none'): void;
+  fault(kind: 'write' | 'open' | 'settings' | 'settings-pause' | 'notice' | 'none'): void;
   mountSecond(): void;
   closeSecond(): void;
   resourceCount(): number;

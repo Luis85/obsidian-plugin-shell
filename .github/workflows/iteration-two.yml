@@ -65,8 +65,13 @@ jobs:
         run: node "$QUALIFIED_NPM" run test:e2e
       - name: Provision isolated native host provider
         run: node "$QUALIFIED_NPM" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
-      - name: Verify the unchanged installed candidate in real Obsidian
-        run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download
+      - name: Verify the unchanged installed candidate in three fresh native sessions, no retries
+        run: |
+          for run in 1 2 3; do
+            xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download
+            mv reports/native "reports/native-run-$run"
+          done
+          cp -R reports/native-run-3 reports/native
       - name: Live security gate, all installed dependency categories
         if: always()
         run: node "$QUALIFIED_NPM" run check:security

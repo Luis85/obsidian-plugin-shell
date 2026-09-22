@@ -78,7 +78,7 @@ test('[UI-02-HDR] immediate toggle is shared, isolated, persisted and restorable
   const header = primary(page).locator(':scope > .view-header'); await expect(header).toBeVisible();
   const sentinel = await page.locator('#non-plugin-leaf').evaluate(el => el.outerHTML);
   const control = primary(page).getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true });
-  await control.check(); await expect(header).toBeHidden();
+  await control.click(); await expect(control).toBeChecked(); await expect(header).toBeHidden();
   await page.evaluate(() => window.__SHELL_TEST__.mountSecond());
   await expect(page.locator('[data-leaf="secondary"] > .view-header')).toBeHidden();
   for (let i = 0; i < 6; i++) await page.evaluate(() => window.__SHELL_TEST__.toggleHeader());
@@ -87,12 +87,13 @@ test('[UI-02-HDR] immediate toggle is shared, isolated, persisted and restorable
   await primary(page).getByRole('button', { name: 'View actions', exact: true }).click(); await expect(page.getByRole('dialog')).toBeVisible(); await page.keyboard.press('Escape');
   await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   await expect(control).toBeChecked(); await expect(header).toBeHidden();
-  await control.uncheck(); await expect(header).toBeVisible();
+  await control.click(); await expect(control).not.toBeChecked(); await expect(header).toBeVisible();
 });
 test('[UI-02-DRAFT] header changes and another leaf’s save preserve local drafts without stale overwrites', async ({ page }) => {
   await open(page); await page.getByRole('button', { name: 'Preferences', exact: true }).click();
   await page.getByLabel('Task note folder', { exact: true }).fill('My/Unsaved/Draft');
-  await page.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true }).check();
+  const headerToggle = page.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true });
+  await headerToggle.click(); await expect(headerToggle).toBeChecked();
   await expect(page.getByLabel('Task note folder', { exact: true })).toHaveValue('My/Unsaved/Draft');
   await page.evaluate(() => window.__SHELL_TEST__.setPreferences({ notifySuccess: false }));
   await page.getByRole('button', { name: 'Save preferences' }).click();
