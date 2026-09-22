@@ -45,6 +45,7 @@ describe('Real tooling boundaries', () => {
       await cp(join(root, 'scripts/shared'), join(dir, 'shared'), { recursive: true });
       await writeFile(join(dir, 'manifest.json'), JSON.stringify({ name: 'Plugin Shell', id: 'plugin-shell' }));
       await writeFile(join(dir, 'package-lock.json'), '{}');
+      await cp(join(root, 'package.json'), join(dir, 'package.json'));
       for (const args of [['--help'], ['--dry-run']]) {
         const result = spawnSync(process.execPath, [join(dir, 'setup.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 5000 });
         expect(result.status, result.stderr).toBe(0);

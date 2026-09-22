@@ -4,6 +4,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { resolve } from 'node:path';
 import { runNode } from './shared/process.mjs';
+import { projectInstallEnvironment } from './shared/npm-install.mjs';
 const accepted = new Set(['--yes', '--no-interaction', '--dry-run', '--skip-install', '--no-local', '--help']);
 async function setup() {
   const flags = new Set(process.argv.slice(2));
@@ -13,15 +14,23 @@ async function setup() {
   if (major < 22 || (major === 22 && minor < 12)) throw new Error('Node 22.12+ is required. Node 24.21.0 is the qualified development version.');
   const manifest = JSON.parse(await readFile('manifest.json', 'utf8')); await access('package-lock.json');
   const local = !flags.has('--no-local');
+  const install = projectInstallEnvironment();
+  const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+  if (!pkg.allowScripts || typeof pkg.allowScripts !== 'object' || Array.isArray(pkg.allowScripts))
+    throw new Error('Missing project allowScripts policy. Update package.json from the reviewed template before setup.');
+  const approvals = Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name);
+  const npmVersion = /(?:^|\s)npm\/([^\s]+)/.exec(process.env.npm_config_user_agent ?? '')?.[1] ?? 'unknown';
   console.log(`Plugin Shell — iteration 01 setup
 Plugin: ${manifest.name} (${manifest.id})
-Node: ${process.version}
+Node: ${process.version} | npm: ${npmVersion}
 1. Install the exact lockfile${flags.has('--skip-install') ? ' [explicitly skipped]' : ''}
 2. Build and type-check the Nuxt UI showcase
 3. Run the service tests
 4. ${local ? 'Install to .dev-vault/.obsidian/plugins/' + manifest.id : 'Browser-only profile'}
 
-No notes, global packages, security preferences, Git identity or releases are changed.
+Dependency lifecycle policy: package.json allowScripts (${approvals.join(', ')}).
+${install.removedKeys.length ? 'Nested install: discard the forwarded allow-scripts environment value; reload persistent policy. Other npm configuration is preserved.' : 'Nested install: use the persistent project policy; no one-off approvals are passed.'}
+No blanket script approval, npm configuration edits, notes, global packages, vault security changes or releases.
 The complete template-renaming and maker wizard remains planned; this installs the working showcase.
 `);
   if (flags.has('--dry-run')) { console.log('Dry run: no writes, installation or network requests.'); return; }
@@ -34,7 +43,7 @@ The complete template-renaming and maker wizard remains planned; this installs t
   if (!flags.has('--skip-install')) {
     const npm = process.env.npm_execpath;
     if (!npm) throw new Error('Run setup through npm run setup so its npm launcher is known.');
-    await runNode(npm, ['ci', '--no-fund']);
+    await runNode(npm, ['ci', '--no-fund'], { env: install.env });
   }
   await runNode('scripts/build/build.mjs');
   await runNode('node_modules/vue-tsc/bin/vue-tsc.js', ['--noEmit']);
