@@ -34,6 +34,7 @@ try {
   report.npm = ok(scratch, ['--version']).stdout.trim();
   assert.match(report.npm, /^(?:11|12)\./, 'This compatibility probe requires provisioned npm 11/12 with allowScripts support.');
   const tarballs = {};
+  const identities = {};
   for (const kind of ['approved', 'denied', 'unreviewed']) {
     const name = `shell-fixture-${kind}`;
     const directory = join(scratch, name); await mkdir(directory);
@@ -45,12 +46,14 @@ try {
     const filename = `${name}-1.0.0.tgz`;
     await access(join(scratch, filename));
     tarballs[name] = `file:../${filename}`;
+    identities[kind] = `file:${join(scratch, filename)}`;
   }
   const project = join(scratch, 'project'); await mkdir(project);
   const pkg = { name: 'npm-policy-fixture', version: '1.0.0', private: true,
     dependencies: tarballs,
-    // File sources match their resolved identity, not self-declared package names.
-    allowScripts: { [tarballs['shell-fixture-approved']]: true, [tarballs['shell-fixture-denied']]: false },
+    // Match absolute native file identities across npm versions. Registry pins are tested by full setup.
+    // The third hook starts explicitly denied, then becomes unreviewed in the strict negative control.
+    allowScripts: { [identities.approved]: true, [identities.denied]: false, [identities.unreviewed]: false },
     scripts: { probe: 'node probe.mjs' } };
   await writeFile(join(project, 'package.json'), JSON.stringify(pkg, null, 2));
   await writeFile(join(project, 'probe.mjs'), `
@@ -88,6 +91,8 @@ try {
   assert.equal(await readFile(join(project, 'package-lock.json'), 'utf8'), before);
   assert.equal(await readFile(config, 'utf8'), 'allow-scripts=unreviewed-fixture\n');
   report.checks.push('lockfile-and-user-config-preserved');
+  delete pkg.allowScripts[identities.unreviewed];
+  await writeFile(join(project, 'package.json'), JSON.stringify(pkg, null, 2));
   const strict = call(project, ['ci', '--offline', '--no-audit', '--no-fund', '--strict-allow-scripts']);
   assert.notEqual(strict.status, 0, 'Unreviewed hook must remain an error in strict mode.');
   assert.match(strict.stderr, /allowScripts|install.script|unreviewed/i);
