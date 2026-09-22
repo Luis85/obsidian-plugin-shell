@@ -42,7 +42,7 @@ try {
     if (observedPages.has(candidate)) return;
     observedPages.add(candidate);
     candidate.setDefaultTimeout(15000); candidate.setDefaultNavigationTimeout(45000);
-    candidate.on('pageerror', error => report.errors.push(error.message.slice(0, 300)));
+    candidate.on('pageerror', error => report.errors.push({ message: error.message.slice(0, 300), stack: error.stack?.slice(0, 3000), url: candidate.url(), phase: report.phase ?? 'initial-smoke' }));
   };
   for (const candidate of context.pages()) observe(candidate);
   context.on('page', observe);
@@ -83,6 +83,7 @@ try {
   await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toHaveCount(0);
   report.checks.push('native-modal-opens-and-dismisses');
   await qualifyHeaders(page, context, report, output, path);
+  report.phase = 'native-settings';
   // Use the documented user workflow, not a global substring matching a hidden Search settings icon.
   await page.keyboard.press('ControlOrMeta+p');
   await page.locator('input.prompt-input').fill('Open settings');
@@ -115,6 +116,7 @@ try {
   report.checks.push('native-declarative-settings-use-application-writer');
   await settingsPage.screenshot({ path: join(output, 'native-settings.png') });
   await assertDiagnostics(page);
+  report.phase = 'cold-restart';
   // A cold process restart uses the same isolated vault and its already-installed assets.
   await headerControl.click();
   await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell/data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(true);

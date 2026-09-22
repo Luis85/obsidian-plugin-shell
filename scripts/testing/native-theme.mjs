@@ -1,12 +1,10 @@
 import { expect } from '@playwright/test';
 import { writeFileSync } from 'node:fs';
+import { nativeCommand } from './native-command.mjs';
 /** Change the real supported Appearance setting; do not invent private theme IDs/commands. */
 export async function setNativeTheme(page, context, theme) {
   if (!['light', 'dark'].includes(theme)) throw new Error('INVALID_THEME_TEST');
-  await page.bringToFront();
-  await page.keyboard.press('ControlOrMeta+p');
-  await page.locator('input.prompt-input').fill('Open settings');
-  await page.locator('.suggestion-item:visible').filter({ hasText: /Open settings/i }).click();
+  await nativeCommand(page, 'Open settings');
   let settingsPage;
   await expect.poll(async () => {
     settingsPage = undefined;

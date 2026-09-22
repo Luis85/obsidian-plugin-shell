@@ -1,14 +1,9 @@
 import { expect } from '@playwright/test';
 import { join } from 'node:path';
+import { nativeCommand as command } from './native-command.mjs';
 import { setNativeTheme } from './native-theme.mjs';
 const view = '.workspace-leaf-content[data-type="plugin-shell-showcase"]';
 const marker = 'plugin-shell-native-header-hidden';
-async function command(page, label) {
-  await page.bringToFront();
-  await page.keyboard.press('ControlOrMeta+p');
-  await page.locator('input.prompt-input').fill(label);
-  await page.locator('.suggestion-item:visible').filter({ hasText: label }).first().click();
-}
 export async function assertDiagnostics(page) {
   const entries = await page.evaluate(() => window.app.plugins.plugins['plugin-shell']?.runtime?.diagnosticSnapshot());
   expect(entries, 'Independent native application diagnostics must be available').toBeDefined();
@@ -57,6 +52,7 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
     expect(await foreignStyles()).toEqual(before);
   }
   report.checks.push('native-command-palette-repeat-toggle-all-leaves-foreign-isolation');
+  report.phase = 'theme-transitions';
   // Native host stylesheet transitions; each leaf retains its independent view state.
   for (const theme of ['dark', 'light']) {
     await setNativeTheme(page, context, theme);
@@ -77,6 +73,7 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   }
   await page.evaluate(() => window.require('electron').webFrame.setZoomFactor(1));
   report.checks.push('native-electron-125-150-percent-zoom-no-clipped-language-control');
+  report.phase = 'popout-create';
   // The host may move this exact ItemView into another document rather than remount.
   const pagesBefore = new Set(context.pages());
   await owned.getByRole('button', { name: 'View actions', exact: true }).click();
@@ -87,10 +84,13 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
     return !!popout && await popout.locator(view).count() === 1;
   }, { timeout: 15000 }).toBe(true);
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
+  report.phase = 'popout-toggle';
+  await popout.screenshot({ path: join(output, 'native-popout-created.png') });
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeVisible();
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
+  report.phase = 'popout-theme';
   await setNativeTheme(popout, context, 'light');
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/light/);
   await setNativeTheme(popout, context, 'dark');
@@ -98,6 +98,7 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page);
   report.checks.push('native-popout-inherits-preference-and-live-toggle');
+  report.phase = 'popout-close';
   // Close by the actual owned view menu; its cleanup must not affect the other view.
   await popout.getByRole('button', { name: 'View actions', exact: true }).click();
   await popout.locator('.menu-item').filter({ hasText: 'Close this view' }).click();
@@ -105,6 +106,7 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await assertDiagnostics(page);
   // Compare foreign controls within the same theme, not across a legitimate host theme change.
   const beforeUnload = await foreignStyles();
+  report.phase = 'plugin-unload';
   // Record references before unload because Obsidian itself may replace view objects.
   await page.evaluate(() => { window.__ownedHeadersBeforeUnload = Array.from(document.querySelectorAll('[data-type="plugin-shell-showcase"]')); });
   await page.evaluate(async () => window.app.plugins.disablePlugin('plugin-shell'));
