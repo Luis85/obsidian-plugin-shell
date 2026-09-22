@@ -1,65 +1,56 @@
 # Obsidian Plugin Shell
 
-A planned GitHub template for maintainable, agent-ready Obsidian plugins built with TypeScript, Vue 3, and Pinia.
+A planned GitHub template for starting, maintaining, and releasing Obsidian plugins with **TypeScript, Vue 3, Pinia, Vite, Vitest, Oxlint, fallow, and Obsidian ESLint**.
 
-> **Current status: specification only.** The repository contains the product requirements and contributor/agent entrypoints. It does not yet contain an implemented plugin, `package.json`, runnable npm scripts, a frontend harness, or CI workflows. Requirements describe the target product, not verified capabilities of the current repository.
+> **Current status: specification only.** PRD **0.2.0** and the guides below describe the target implementation. No plugin, package scripts, frontend harness, updater, CI, or release workflow has been implemented or activated yet.
 
 ## Start here
 
-| Document | Purpose |
+| Document | Read it for |
 | --- | --- |
-| [Product requirements](docs/product/PRD.md) | Scope, researched decisions, architecture, functional requirements, quality policy, command contracts, 24 acceptance scenarios, and ten implementation work packages. |
-| [Agent instructions](AGENTS.md) | A concise entrypoint for coding agents and contributors; links to the authoritative requirements. |
-| [Claude Code entrypoint](CLAUDE.md) | Imports the same agent instructions rather than maintaining a second policy. |
+| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | The short setup path, first feature change, browser/native development, and troubleshooting. |
+| [Maintenance and release](docs/development/MAINTENANCE-AND-RELEASE.md) | Dependency updates, latest-stable support, release preparation, draft/publish stages, and initial listing. |
+| [PRD 0.2](docs/product/PRD.md) | The implementation contract, architecture, quality rules, 35 acceptance scenarios, and ten work packages. |
+| [Research and sources](docs/research/2026-09-22-template-research.md) | Dated findings, 35 primary-source references, alternatives, and verification limitations. |
+| [Agent instructions](AGENTS.md) | Shared contributor/agent rules; [CLAUDE.md](CLAUDE.md) imports the same guidance. |
 | [License](LICENSE) | Repository license. |
 
-## Intended foundation
-
-The template will integrate **Vite, Vitest, Oxlint, fallow, TypeScript, Vue 3, Pinia, and `eslint-plugin-obsidianmd`**. Vue I18n and Playwright are the proposed localization and browser-testing additions. Exact compatible versions are selected and proved in the first implementation package, not inferred from this list.
-
-The supplied plugin will demonstrate settings, durable storage, vault-local preferences, a view shell, commands, a ribbon action, native modals, notices, localization, error handling, and bounded local diagnostics through one small removable example feature.
-
-### Architecture
+## Intended developer path
 
 ```text
-presentation -> application -> domain -> shared
-infrastructure -> application contracts / domain / shared
-bootstrap -> concrete adapters and presentation factories
-main.ts -> minimal host lifecycle and composition
+Use template → initialize identity → run real UI → implement a feature
+→ verify → test in Obsidian → create draft → approve and publish
 ```
 
-Domain and application code remain independent of Obsidian, Vue, Pinia, Node, and browser APIs. Application-owned repositories hold canonical data; each view owns its Vue app and ephemeral Pinia state. Dependency directions must be enforced, including aliases, re-exports, Vue files, and unclassified source files.
+The future quickstart is `npm ci`, `npm run setup`, and `npm run dev:ui`. Normal work uses `dev:local`, `verify`, `release:prepare`, and `help`. These commands do not exist in the current documentation-only repository.
 
-### Quality and evidence
+The template will ship one small removable example with native settings, storage, a view, commands/ribbon, modals/notices, English/German localization, error handling, and bounded local diagnostics. UI work uses the real components in a deterministic browser harness; actual Obsidian compatibility has separate native evidence.
 
-Handwritten source files are limited to **400 physical lines** and test files to **450**, counting comments and blank lines. The PRD additionally proposes a **100-line composition-only `main.ts`**. The whole Vue Single-File Component counts toward its limit.
+## Current by policy, reproducible by build
 
-Verification will combine type checking, complementary Oxlint/ESLint rules, full and production-scoped fallow analysis, architecture checks, coverage, localization checks, artifact validation, and browser tests. Deliberately invalid fixtures must prove that important gates actually reject the defects they claim to detect.
+Target the **latest public/stable Obsidian**. Catalyst is optional early-warning testing, not a prerequisite. The research snapshot on 2026-09-22 found public desktop **1.13.7** and early-access **1.14.2**; implementation must re-resolve the current public target.
 
-The frontend harness will run the real presentation and application code with explicit fixture adapters. Playwright tests will assert behavior and retain useful failure evidence. A harness pass will not be represented as proof of real Obsidian compatibility; native-host and mobile evidence have separate requirements.
+Use current declarative native settings rather than maintaining an unnecessary legacy tab. Select the supported Active LTS Node/toolchain, pin tested dependencies and the lockfile, then keep them current through reviewed update PRs. **Dependabot is the default; Renovate is an optional replacement.** Neither dependency updates nor agents publish releases automatically.
 
-### Local testing
+The intended release workflow prepares consistent metadata, builds a candidate from a fixed commit, creates a draft, collects host evidence for its exact files, and explicitly promotes those same assets. First Community directory submission remains a separate maintainer step.
 
-The planned default development vault is inside the repository:
+## Architecture and safety
 
 ```text
-.dev-vault/.obsidian/plugins/<plugin-id>/
+presentation → application → domain → shared
+infrastructure → application contracts / domain / shared
+bootstrap → concrete adapters and presentation factories
+main.ts → minimal host lifecycle and composition
 ```
 
-An explicit repository-root-vault mode will also be supported. Installation must preserve plugin data, notes, unrelated plugins, and security settings. Build scripts must not disable Restricted Mode or silently replace malformed vault configuration.
+Domain/application stay independent of Obsidian, Vue, Pinia, and browser/Node APIs. Each view owns its ephemeral Vue/Pinia state; application services own canonical data.
 
-The future command interface—including `build`, `build:local`, `test-build`, `harness:dev`, `test:e2e`, `verify`, and `verify:release`—is specified in **PRD section 15.3**. These commands do not exist yet.
+Handwritten source is limited to **400 physical lines**, tests/helpers to **450**, and composition-only `main.ts` to **100**. Count the entire Vue SFC, comments, and blanks. Configured tools and negative fixtures enforce actual boundaries rather than relying on folder names alone.
+
+Local installation defaults to `.dev-vault/.obsidian/plugins/<plugin-id>/` inside the repository. An explicit repository-root-vault mode is also planned. Preserve existing data, notes, other plugins, and security settings; do not disable Restricted Mode automatically.
 
 ## Implementation entrypoint
 
-Begin with **WP-00 — Compatibility and decisions** in PRD section 20: prove the package-version combination, the Obsidian-loadable Vite output, the native settings API and minimum host version, fallow enforcement behavior, and the chosen host-testing approach.
+Start with **WP-00** in the PRD: resolve and prove the latest-stable package/host combination, native Vite loading, declarative settings storage hooks, fallow boundary coverage, and test provisioning. Then implement the bounded packages, ending with a differently named generated repository and release rehearsal.
 
-Then implement the dependency-ordered packages incrementally. Each package identifies its deliverables and exit evidence. Do not implement the entire PRD as one unreviewed change or weaken a gate merely to make a package appear complete.
-
-## Research and limitations
-
-The PRD includes primary-source references for Obsidian, Vue, Pinia, Vite, Vitest, Oxlint, fallow, Playwright, and agent workflows, plus selected source-file observations from `Luis85/renovation-planner` and `Luis85/backlog-view`. The review is not a full audit of those repositories.
-
-English/German localization, npm, the example-item feature, additional coverage/complexity thresholds, and initial performance budgets are explicitly proposed defaults. No runtime benchmark, plugin host test, or package compatibility experiment has been performed as part of the documentation delivery.
-
-GitHub's **Template repository** setting and generated-repository administration are maintainer setup tasks described by the PRD; documentation files alone do not configure them.
+The research did not execute a build, benchmark, browser suite, or host test. Direct npm registry access was insufficient for a verified all-package patch-version matrix. Repository administration, update schedules, and release capabilities remain implementation/setup tasks—not claims made by these documents.
