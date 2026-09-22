@@ -1,0 +1,132 @@
+{
+  "app": {
+    "title": "Plugin Shell",
+    "tagline": "Your plugin starts here.",
+    "intro": "A working foundation, not another blank canvas. Explore the services behind this view, then make them your own.",
+    "showcase": "Capability showcase",
+    "iteration": "Iteration 01",
+    "local": "Local-first · no account required",
+    "ready": "Runtime ready",
+    "browser": "Browser harness",
+    "native": "Obsidian host",
+    "scope": "This is a working first slice. Full makers, automatic releases and device qualification are still planned."
+  },
+  "nav": {
+    "overview": "Overview",
+    "documents": "Documents",
+    "events": "Events & feedback",
+    "settings": "Preferences",
+    "section": "Explore the template"
+  },
+  "overview": {
+    "title": "Everything is connected.",
+    "subtitle": "Real components. Real services. Your Obsidian theme.",
+    "primary": "Create your first Task note",
+    "secondary": "Open a native modal",
+    "safe": "Nothing is written to your vault until you review and confirm.",
+    "stack": "Built on your stack",
+    "active": "Available now",
+    "cards": {
+      "documents": "Entity → Markdown",
+      "documentsText": "Validate a Task, preview its frontmatter, then create one complete note.",
+      "events": "Typed events, owned lifecycle",
+      "eventsText": "Watch committed facts flow between services without a global singleton.",
+      "feedback": "Feedback without false success",
+      "feedbackText": "Field errors stay with the form. Native notices remain deliberate.",
+      "theme": "Native tokens, Nuxt UI",
+      "themeText": "Scoped component styles follow the host’s colors, type and spacing."
+    },
+    "flow": "Follow one operation",
+    "flowText": "The same services run inside Obsidian and in the browser harness. Only the host adapters change.",
+    "steps": "Input → Validate → Preview → Create → Publish",
+    "statNotes": "Notes created this session",
+    "statEvents": "Events observed",
+    "statLocale": "Active locale"
+  },
+  "doc": {
+    "title": "Create a Task document",
+    "subtitle": "The Markdown file is the record. There is no duplicate Task database.",
+    "form": "Task details",
+    "label": "Title",
+    "placeholder": "Prepare the first release",
+    "due": "Due date",
+    "tags": "Tags",
+    "tagsHint": "Comma-separated. For example: work, release",
+    "preview": "Preview Markdown",
+    "previewTitle": "Review before writing",
+    "empty": "Your Markdown preview will appear here.",
+    "emptyText": "Enter a title and preview the exact content and destination.",
+    "destination": "Destination",
+    "commit": "Create Task note",
+    "creating": "Creating…",
+    "edit": "Back to editing",
+    "created": "Task note created",
+    "open": "Open created note",
+    "new": "Create another",
+    "note": "Existing notes are never overwritten. Preview does not create files or folders.",
+    "browserNote": "Harness mode: notes are stored in this browser’s synthetic vault, not a real Obsidian vault."
+  },
+  "events": {
+    "title": "See the wiring work",
+    "subtitle": "Events carry facts. Commands perform actions. Every subscription has an owner.",
+    "ping": "Publish a typed event",
+    "notice": "Show a native notice",
+    "error": "Try recoverable feedback",
+    "modal": "Open native modal",
+    "log": "Live event stream",
+    "empty": "No events yet. Publish one or create a document.",
+    "type": "Event",
+    "sequence": "Sequence",
+    "safety": "Payloads are not included in diagnostic logs. Closing a view removes its listeners.",
+    "diagnostics": "Contained diagnostics",
+    "noErrors": "No unexpected errors captured.",
+    "expected": "This is a deliberate feedback example. Your data has not changed."
+  },
+  "settings": {
+    "title": "Make it feel at home",
+    "subtitle": "The same preferences are available in Obsidian’s native plugin settings.",
+    "language": "Language",
+    "languageHelp": "Updates the view immediately. Registered command labels update after a plugin reload.",
+    "folder": "Task note folder",
+    "folderHelp": "A vault-relative folder, for example Tasks or Projects/Tasks.",
+    "notices": "Success notices",
+    "noticesHelp": "Also show a native notice after successful document creation.",
+    "save": "Save preferences",
+    "saved": "Preferences saved",
+    "theme": "Theme follows Obsidian",
+    "themeHelp": "No independent color mode is installed. Components consume the host’s CSS variables.",
+    "blocked": "Stored settings could not be safely read. Defaults are shown for inspection only; saving is disabled to preserve the original data."
+  },
+  "feedback": {
+    "dismiss": "Dismiss notification",
+    "native": "This notice came through the host adapter.",
+    "saved": "Task note created successfully."
+  },
+  "modal": {
+    "title": "One view, two environments",
+    "text": "This dialog uses the Obsidian Modal API in the plugin and an isolated browser adapter in the harness. The application services do not depend on either implementation."
+  },
+  "command": {
+    "open": "Open capability showcase"
+  },
+  "error": {
+    "title": "Enter a title with 1–120 characters.",
+    "due": "Enter a valid calendar date (YYYY-MM-DD).",
+    "tags": "Use up to 12 short tags with letters, numbers, hyphens or slashes.",
+    "folder": "Use a safe relative folder without hidden names, traversal or special filename characters.",
+    "preferences": "These preferences are not valid.",
+    "settingsRead": "Stored settings are protected. Resolve the read error before saving.",
+    "settingsWrite": "Preferences were not saved. Your previous values remain active.",
+    "conflict": "The destination already exists. No file was overwritten.",
+    "write": "The note was not created. Check the destination and permissions.",
+    "uncertain": "The write result is uncertain. Check the exact destination before trying a new submission.",
+    "open": "The note is created, but could not be opened. Retry opening; do not create it again.",
+    "stale": "This preview no longer matches the request or destination. Prepare a new preview.",
+    "disposed": "This view has closed. Reopen the showcase.",
+    "request": "Invalid submission identity. Prepare a new preview.",
+    "entity": "The entity definition is invalid or unavailable.",
+    "sessionLimit": "This session reached its 100-preview limit. Reopen the plugin before preparing more.",
+    "unexpected": "An unexpected error was contained. Check the diagnostic panel.",
+    "render": "This view encountered a rendering error. Close and reopen the view. Your documents are unchanged."
+  }
+}

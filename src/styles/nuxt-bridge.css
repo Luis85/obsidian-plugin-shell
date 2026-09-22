@@ -1,0 +1,44 @@
+/* Native semantic roles, on every owned view or portal root. No host palette override. */
+[data-plugin-ui="plugin-shell"] {
+  --ui-primary: var(--interactive-accent);
+  --ui-success: var(--text-success);
+  --ui-info: var(--text-accent);
+  --ui-warning: var(--text-warning);
+  --ui-error: var(--text-error);
+  --ui-text-dimmed: var(--text-faint);
+  --ui-text-muted: var(--text-muted);
+  --ui-text-toned: var(--text-muted);
+  --ui-text: var(--text-normal);
+  --ui-text-highlighted: var(--text-normal);
+  --ui-text-inverted: var(--text-on-accent);
+  --ui-bg: var(--background-primary);
+  --ui-bg-muted: var(--background-primary-alt);
+  --ui-bg-elevated: var(--background-secondary);
+  --ui-bg-accented: var(--background-modifier-hover);
+  --ui-bg-inverted: var(--text-normal);
+  --ui-border: var(--background-modifier-border);
+  --ui-border-muted: var(--background-modifier-border);
+  --ui-border-accented: var(--background-modifier-border-hover);
+  --ui-border-inverted: var(--text-normal);
+  --ui-radius: var(--radius-s);
+  --ps-font-sans: var(--font-interface);
+  --ps-font-mono: var(--font-monospace);
+  font-family: var(--font-interface);
+  color: var(--text-normal);
+  accent-color: var(--interactive-accent);
+}
+/* Minimal owned reset. Tailwind Preflight is deliberately not imported. */
+[data-plugin-ui="plugin-shell"] *,
+[data-plugin-ui="plugin-shell"] *::before,
+[data-plugin-ui="plugin-shell"] *::after { box-sizing: border-box; border-style: solid; border-width: 0; }
+[data-plugin-ui="plugin-shell"] button { background-color: transparent; cursor: pointer; font: inherit; height: auto; box-shadow: none; }
+[data-plugin-ui="plugin-shell"] input { font: inherit; }
+[data-plugin-ui="plugin-shell"] :focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 3px; }
+[data-plugin-ui="plugin-shell"] h1,
+[data-plugin-ui="plugin-shell"] h2,
+[data-plugin-ui="plugin-shell"] h3,
+[data-plugin-ui="plugin-shell"] p { margin: 0; }
+[data-plugin-ui="plugin-shell"] h1,
+[data-plugin-ui="plugin-shell"] h2,
+[data-plugin-ui="plugin-shell"] h3 { font-family: var(--font-interface); font-style: normal; font-variant: normal; }
+[data-plugin-ui="plugin-shell"] svg { flex-shrink: 0; }

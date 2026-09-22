@@ -1,0 +1,170 @@
+{
+  "entry": [
+    "src/main.ts",
+    "harness/app/main.ts",
+    "harness/style-fixture/fixture.js",
+    "tests/runtime/types.ts",
+    "scripts/testing/node-reporter.mjs"
+  ],
+  "ignorePatterns": [
+    "dist-harness/**",
+    "reports/**"
+  ],
+  "boundaries": {
+    "coverage": {
+      "requireAllFiles": true
+    },
+    "zones": [
+      {
+        "name": "domain",
+        "patterns": [
+          "src/domain/**"
+        ]
+      },
+      {
+        "name": "application",
+        "patterns": [
+          "src/application/**"
+        ]
+      },
+      {
+        "name": "infrastructure",
+        "patterns": [
+          "src/infrastructure/**"
+        ]
+      },
+      {
+        "name": "presentation",
+        "patterns": [
+          "src/presentation/**"
+        ]
+      },
+      {
+        "name": "bootstrap",
+        "patterns": [
+          "src/bootstrap/**",
+          "src/main.ts"
+        ]
+      },
+      {
+        "name": "test",
+        "patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "name": "harness",
+        "patterns": [
+          "harness/**"
+        ]
+      },
+      {
+        "name": "tooling",
+        "patterns": [
+          "scripts/**",
+          "*.config.*"
+        ]
+      },
+      {
+        "name": "styles",
+        "patterns": [
+          "src/styles/**"
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "from": "domain",
+        "allow": [
+          "domain"
+        ]
+      },
+      {
+        "from": "application",
+        "allow": [
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "infrastructure",
+        "allow": [
+          "infrastructure",
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "presentation",
+        "allow": [
+          "presentation",
+          "application",
+          "domain",
+          "styles"
+        ]
+      },
+      {
+        "from": "bootstrap",
+        "allow": [
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles"
+        ]
+      },
+      {
+        "from": "test",
+        "allow": [
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles"
+        ]
+      },
+      {
+        "from": "harness",
+        "allow": [
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles"
+        ]
+      },
+      {
+        "from": "tooling",
+        "allow": [
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles"
+        ]
+      },
+      {
+        "from": "styles",
+        "allow": [
+          "styles"
+        ]
+      }
+    ]
+  }
+}

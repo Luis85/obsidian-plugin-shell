@@ -6,3 +6,13 @@ playwright-report/
 dist/
 .dev-vault/
 *.tsbuildinfo
+
+node_modules/
+dist/
+dist-harness/
+.dev-vault/
+.qualification/
+node-qualified
+.fallow/
+.native-runner/
+.native-cache/

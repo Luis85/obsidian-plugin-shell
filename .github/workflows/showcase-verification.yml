@@ -1,0 +1,65 @@
+name: Showcase verification
+on:
+  push:
+    branches: [main, build/iteration-one]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: showcase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: Showcase / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - run: npm ci
+      - name: Verify first iteration and retained baseline
+        run: npm run verify
+      - name: Measure declared core coverage
+        run: npm run test:coverage
+      - name: Provision pinned Chromium
+        if: matrix.os == 'ubuntu-latest'
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Exercise the actual served showcase
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run test:e2e
+      - name: Provision optional native smoke provider
+        if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
+        run: npm install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
+      - name: Exercise exact candidate in isolated Obsidian
+        if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
+        run: xvfb-run -a node scripts/testing/check-native.mjs --allow-download
+      - name: Archive tracked source only
+        if: always()
+        run: git archive --format=zip --output=iteration-one-source.zip HEAD
+      - name: Retain candidate and scope-labeled evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: showcase-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            dist/
+            package-lock.json
+            iteration-one-source.zip
+          retention-days: 7
+          if-no-files-found: error
