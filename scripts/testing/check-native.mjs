@@ -64,7 +64,7 @@ try {
   await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toBeVisible();
   await page.keyboard.press('Escape'); report.checks.push('native-modal-opens-and-dismisses');
   await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toHaveCount(0);
-  await page.locator('[aria-label^="Settings"]').first().click();
+  await page.locator('[aria-label*="settings" i]').first().click();
   // Current Obsidian can place settings in another native window.
   let settingsPage;
   await expect.poll(async () => {
@@ -91,6 +91,7 @@ try {
   report.status = 'failed'; report.reason = error.message; process.exitCode = 1;
   if (activePage) {
     await activePage.screenshot({ path: join(output, 'native-failure.png') }).catch(() => undefined);
+    report.nativeControlLabels = await activePage.locator('[aria-label]').evaluateAll(els => els.map(el => el.getAttribute('aria-label'))).catch(() => []);
     report.visibleText = await activePage.locator('body').innerText().then(value => value.slice(-12000)).catch(() => 'unavailable');
   }
 }
