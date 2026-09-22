@@ -1,13 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-interface HarnessApi {
-  files(): Record<string, string>;
-  faults: { code: string; operation: string }[];
-  fault(kind: 'write' | 'open' | 'none'): void;
-  mountSecond(): void;
-  closeSecond(): void;
-  resourceCount(): number;
-}
-declare global { interface Window { __SHELL_TEST__: HarnessApi } }
+import '../../harness/app/test-api';
 async function open(page: Page) {
   await page.goto('/harness/app/');
   await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');

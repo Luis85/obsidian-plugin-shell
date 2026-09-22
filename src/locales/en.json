@@ -4,12 +4,12 @@
     "tagline": "Your plugin starts here.",
     "intro": "A working foundation, not another blank canvas. Explore the services behind this view, then make them your own.",
     "showcase": "Capability showcase",
-    "iteration": "Iteration 01",
+    "iteration": "Iteration 02",
     "local": "Local-first · no account required",
     "ready": "Runtime ready",
     "browser": "Browser harness",
     "native": "Obsidian host",
-    "scope": "This is a working first slice. Full makers, automatic releases and device qualification are still planned."
+    "scope": "Iteration 02 · Responsive layout, optional native header and reliability improvements. Full makers, automatic releases and device qualification remain planned."
   },
   "nav": {
     "overview": "Overview",
@@ -95,7 +95,10 @@
     "saved": "Preferences saved",
     "theme": "Theme follows Obsidian",
     "themeHelp": "No independent color mode is installed. Components consume the host’s CSS variables.",
-    "blocked": "Stored settings could not be safely read. Defaults are shown for inspection only; saving is disabled to preserve the original data."
+    "blocked": "Stored settings could not be safely read. Defaults are shown for inspection only; saving is disabled to preserve the original data.",
+    "hideHeader": "Hide Obsidian view header",
+    "hideHeaderHelp": "Applies immediately to all Plugin Shell views. Restore it here, in native settings, or with the command palette.",
+    "headerSaving": "Saving header preference…"
   },
   "feedback": {
     "dismiss": "Dismiss notification",
@@ -107,7 +110,8 @@
     "text": "This dialog uses the Obsidian Modal API in the plugin and an isolated browser adapter in the harness. The application services do not depend on either implementation."
   },
   "command": {
-    "open": "Open capability showcase"
+    "open": "Open capability showcase",
+    "toggleHeader": "Toggle Obsidian view header"
   },
   "error": {
     "title": "Enter a title with 1–120 characters.",
@@ -128,5 +132,11 @@
     "sessionLimit": "This session reached its 100-preview limit. Reopen the plugin before preparing more.",
     "unexpected": "An unexpected error was contained. Check the diagnostic panel.",
     "render": "This view encountered a rendering error. Close and reopen the view. Your documents are unchanged."
+  },
+  "view": {
+    "actions": "View actions",
+    "split": "Open showcase in a split",
+    "popout": "Move view to new window",
+    "close": "Close this view"
   }
 }

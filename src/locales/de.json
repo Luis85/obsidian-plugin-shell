@@ -4,12 +4,12 @@
     "tagline": "Hier beginnt dein Plugin.",
     "intro": "Eine funktionierende Grundlage statt einer leeren Seite. Erkunde die Dienste hinter dieser Ansicht und entwickle dein eigenes Plugin.",
     "showcase": "Funktionsübersicht",
-    "iteration": "Iteration 01",
+    "iteration": "Iteration 02",
     "local": "Lokal · ohne Benutzerkonto",
     "ready": "Laufzeit bereit",
     "browser": "Browser-Testumgebung",
     "native": "Obsidian-Umgebung",
-    "scope": "Dies ist der erste funktionierende Stand. Vollständige Generatoren, automatische Releases und Gerätetests sind noch geplant."
+    "scope": "Iteration 02 · Responsives Layout, optionaler Ansichtskopf und verbesserte Zuverlässigkeit. Vollständige Generatoren, automatische Releases und Gerätequalifizierung bleiben geplant."
   },
   "nav": {
     "overview": "Übersicht",
@@ -95,7 +95,10 @@
     "saved": "Einstellungen gespeichert",
     "theme": "Theme folgt Obsidian",
     "themeHelp": "Kein eigener Farbmodus wird installiert. Komponenten verwenden die CSS-Variablen des Hosts.",
-    "blocked": "Gespeicherte Einstellungen konnten nicht sicher gelesen werden. Standardwerte dienen nur zur Ansicht; Speichern ist zum Schutz der Daten gesperrt."
+    "blocked": "Gespeicherte Einstellungen konnten nicht sicher gelesen werden. Standardwerte dienen nur zur Ansicht; Speichern ist zum Schutz der Daten gesperrt.",
+    "hideHeader": "Obsidian-Ansichtskopf ausblenden",
+    "hideHeaderHelp": "Gilt sofort für alle Plugin-Shell-Ansichten. Hier, in den nativen Einstellungen oder über die Befehlspalette wiederherstellen.",
+    "headerSaving": "Ansichtseinstellung wird gespeichert…"
   },
   "feedback": {
     "dismiss": "Hinweis schließen",
@@ -107,7 +110,8 @@
     "text": "Dieser Dialog verwendet im Plugin die Obsidian-Modal-API und im Browser einen isolierten Adapter. Die Anwendungsdienste sind von beiden Implementierungen unabhängig."
   },
   "command": {
-    "open": "Funktionsübersicht öffnen"
+    "open": "Funktionsübersicht öffnen",
+    "toggleHeader": "Obsidian-Ansichtskopf umschalten"
   },
   "error": {
     "title": "Gib einen Titel mit 1–120 Zeichen ein.",
@@ -128,5 +132,11 @@
     "sessionLimit": "Das Limit von 100 Vorschauen dieser Sitzung ist erreicht. Lade das Plugin neu.",
     "unexpected": "Ein unerwarteter Fehler wurde behandelt. Prüfe den Diagnosebereich.",
     "render": "Beim Darstellen ist ein Fehler aufgetreten. Schließe und öffne die Ansicht erneut. Deine Dokumente bleiben unverändert."
+  },
+  "view": {
+    "actions": "Ansichtsaktionen",
+    "split": "Schaufenster in geteilter Ansicht öffnen",
+    "popout": "Ansicht in neues Fenster verschieben",
+    "close": "Diese Ansicht schließen"
   }
 }

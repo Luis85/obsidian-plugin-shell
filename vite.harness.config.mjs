@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { sharedConfig } from './scripts/build/vite-shared.mjs';
+import { sharedConfig } from './scripts/bundling/vite-shared.mjs';
 import { readVendor, runtimeVendorCss } from './scripts/styles/vendor-policy.mjs';
 function hostStyles() {
   return { name: 'fixture-host-styles',

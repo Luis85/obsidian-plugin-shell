@@ -1,7 +1,7 @@
 name: Setup npm policy compatibility
 on:
   push:
-    branches: [main, fix/setup-npm-policy]
+    branches: [main, fix/setup-npm-policy, build/iteration-two]
     paths:
       - 'package.json'
       - 'package-lock.json'
@@ -51,7 +51,7 @@ jobs:
         shell: pwsh
         run: |
           $tool = Join-Path $env:RUNNER_TEMP 'shell-policy-npm'
-          npm install --prefix "$tool" --ignore-scripts --no-audit --no-fund --package-lock=false npm@${{ matrix.npm }}
+          npm install --prefix "$tool" --ignore-scripts --no-fund --package-lock=false npm@${{ matrix.npm }}
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
       - name: Run fresh setup with the problematic forwarded configuration

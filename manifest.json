@@ -1,7 +1,7 @@
 {
   "id": "plugin-shell",
   "name": "Plugin Shell",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minAppVersion": "1.13.7",
   "description": "Explore a working Vue and Nuxt UI plugin foundation: documents, typed events, preferences and feedback.",
   "author": "Luis Mendez",

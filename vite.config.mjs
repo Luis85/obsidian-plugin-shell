@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
-import { licenseNotices } from './scripts/build/license-notices.mjs';
-import { sharedConfig } from './scripts/build/vite-shared.mjs';
+import { licenseNotices } from './scripts/bundling/license-notices.mjs';
+import { sharedConfig } from './scripts/bundling/vite-shared.mjs';
 export default defineConfig(() => {
   const config = sharedConfig();
   return { ...config, plugins: [...config.plugins, licenseNotices()], build: { ...config.build, outDir: 'dist', emptyOutDir: true,

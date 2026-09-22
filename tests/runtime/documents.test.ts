@@ -68,3 +68,14 @@ describe('DocumentCreationService', () => {
     expect(errors.report).toHaveBeenCalledWith('event.listener', 'event.dispatch');
   });
 });
+
+it('[DOC-02-01] abandoning a preview releases only an unattempted request', async () => {
+  const f = fixture(); const prepared = f.documents.prepare('task', input, 'Tasks', 'unused');
+  if (!prepared.ok) throw new Error('prepare');
+  expect(f.documents.discard(prepared.value)).toBe(true);
+  expect((await f.documents.commit(prepared.value, 'Tasks')).ok).toBe(false);
+  const committed = f.documents.prepare('task', input, 'Tasks', 'committed');
+  if (!committed.ok) throw new Error('prepare');
+  await f.documents.commit(committed.value, 'Tasks'); expect(f.documents.discard(committed.value)).toBe(false);
+  await f.documents.commit(committed.value, 'Tasks'); expect(f.writer.create).toHaveBeenCalledTimes(1);
+});

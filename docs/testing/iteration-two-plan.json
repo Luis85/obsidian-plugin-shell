@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "milestone": "0.2.0",
+  "legacyPlan": "test-plan.json",
+  "legacyAcceptancePromotion": false,
+  "families": [
+    {
+      "id": "LAYOUT-02",
+      "files": [
+        "tests/e2e/iteration-two.spec.ts"
+      ],
+      "cases": [
+        "UI-02-L320",
+        "UI-02-L480",
+        "UI-02-L768",
+        "UI-02-L1280",
+        "UI-02-L1920",
+        "UI-02-DOC",
+        "UI-02-SCALE",
+        "UI-02-EVIDENCE"
+      ],
+      "mode": "served-browser"
+    },
+    {
+      "id": "HEADER-02",
+      "files": [
+        "tests/runtime/header.test.ts",
+        "tests/e2e/iteration-two.spec.ts",
+        "scripts/testing/native-header-checks.mjs"
+      ],
+      "cases": [
+        "HDR-02-01",
+        "HDR-02-02",
+        "HDR-02-03",
+        "HDR-02-04",
+        "HDR-02-05",
+        "HDR-02-06",
+        "HDR-02-07",
+        "UI-02-HDR",
+        "UI-02-DRAFT",
+        "UI-02-FAIL"
+      ],
+      "modes": [
+        "deterministic-service-dom",
+        "served-browser",
+        "native-obsidian"
+      ]
+    },
+    {
+      "id": "PENDING-PREFERENCE-02",
+      "files": [
+        "tests/e2e/pending-preferences.spec.ts"
+      ],
+      "cases": [
+        "UI-02-PENDING"
+      ],
+      "mode": "served-browser"
+    },
+    {
+      "id": "RELIABILITY-02",
+      "files": [
+        "tests/runtime/reliability.test.ts",
+        "tests/runtime/theme.test.ts",
+        "tests/runtime/view-state.test.ts",
+        "tests/runtime/documents.test.ts"
+      ],
+      "cases": [
+        "REL-02-01",
+        "REL-02-02",
+        "REL-02-03",
+        "REL-02-04",
+        "REL-02-05",
+        "THEME-02-01",
+        "THEME-02-02",
+        "THEME-02-03",
+        "VIEW-02-01",
+        "VIEW-02-02",
+        "VIEW-02-03",
+        "DOC-02-01"
+      ],
+      "mode": "deterministic-service-dom"
+    },
+    {
+      "id": "FEEDBACK-02",
+      "files": [
+        "tests/e2e/iteration-two.spec.ts"
+      ],
+      "cases": [
+        "UI-02-NOTICE"
+      ],
+      "mode": "served-browser"
+    },
+    {
+      "id": "TOOLING-02",
+      "files": [
+        "tests/tooling/build.checks.mjs",
+        "tests/tooling/gates.checks.mjs",
+        "tests/tooling/security.checks.mjs",
+        "tests/tooling/npm-install.checks.mjs",
+        "tests/tooling/coverage.checks.mjs"
+      ],
+      "cases": [
+        "BLD-02-01",
+        "BLD-02-02",
+        "BLD-02-03",
+        "GATE-02-01",
+        "GATE-02-02",
+        "SEC-02-01",
+        "SEC-02-02",
+        "NPM-01",
+        "NPM-02",
+        "NPM-03",
+        "NPM-04",
+        "NPM-05",
+        "COV-02-01"
+      ],
+      "mode": "deterministic-node"
+    },
+    {
+      "id": "NATIVE-02",
+      "files": [
+        "scripts/testing/check-native.mjs",
+        "scripts/testing/native-header-checks.mjs",
+        "scripts/testing/native-command.mjs",
+        "scripts/testing/native-theme.mjs"
+      ],
+      "mode": "native-obsidian",
+      "report": "reports/native/report.json"
+    },
+    {
+      "id": "SECURITY-02",
+      "mode": "live-advisory",
+      "commands": [
+        "npm audit --json",
+        "npm audit"
+      ],
+      "report": "reports/security/result.json"
+    },
+    {
+      "id": "COVERAGE-02",
+      "modes": [
+        "selected-core",
+        "whole-production"
+      ],
+      "inventoryCheck": "scripts/quality/coverage-inventory.mjs",
+      "reports": [
+        "reports/runtime-coverage/coverage-summary.json",
+        "reports/production-coverage/coverage-summary.json"
+      ]
+    }
+  ]
+}

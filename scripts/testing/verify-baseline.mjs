@@ -42,7 +42,7 @@ export async function verify({ repeat, profile = 'baseline' } = {}) {
   const report = { schemaVersion: 1, scope: 'fixture-and-verification-baseline', profile, status, reason,
     checkedAt: new Date().toISOString(), environment: { node: process.version, platform: process.platform,
       architecture: process.arch, timezone: 'UTC' }, inputDigest: input.digest, inputs: input.files,
-    coverage: { measured: false, reason: 'No qualified production Vitest coverage project exists yet.' },
+    coverage: { measured: false, reason: 'This retained fixture baseline does not measure production coverage; see the separate core and whole-production Vitest reports.' },
     repeatability: { repetitions: runs.length, retries: 0, outcomeDigests: runs.map(outcomeDigest) },
     violations, runs, acceptance: acceptanceEvidence(plan, acceptedResults), release: releaseDecision(plan, acceptedResults),
     pending: plan.suites.filter((s) => !baselineSuites.includes(s)).map((s) => ({ id: s.id,

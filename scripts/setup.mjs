@@ -11,7 +11,7 @@ async function setup() {
   for (const flag of flags) if (!accepted.has(flag)) throw new Error(`Unknown option: ${flag}`);
   if (flags.has('--help')) { console.log('npm run setup -- [--yes --no-interaction] [--dry-run] [--skip-install] [--no-local]'); return; }
   const [major, minor] = process.versions.node.split('.').map(Number);
-  if (major < 22 || (major === 22 && minor < 12)) throw new Error('Node 22.12+ is required. Node 24.21.0 is the qualified development version.');
+  if (major < 22 || (major === 22 && minor < 13)) throw new Error('Node 22.13+ is required. Node 24.21.0 is the qualified development version.');
   const manifest = JSON.parse(await readFile('manifest.json', 'utf8')); await access('package-lock.json');
   const local = !flags.has('--no-local');
   const install = projectInstallEnvironment();
@@ -20,7 +20,7 @@ async function setup() {
     throw new Error('Missing project allowScripts policy. Update package.json from the reviewed template before setup.');
   const approvals = Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name);
   const npmVersion = /(?:^|\s)npm\/([^\s]+)/.exec(process.env.npm_config_user_agent ?? '')?.[1] ?? 'unknown';
-  console.log(`Plugin Shell — iteration 01 setup
+  console.log(`Plugin Shell — iteration 02 setup
 Plugin: ${manifest.name} (${manifest.id})
 Node: ${process.version} | npm: ${npmVersion}
 1. Install the exact lockfile${flags.has('--skip-install') ? ' [explicitly skipped]' : ''}
@@ -45,7 +45,7 @@ The complete template-renaming and maker wizard remains planned; this installs t
     if (!npm) throw new Error('Run setup through npm run setup so its npm launcher is known.');
     await runNode(npm, ['ci', '--no-fund'], { env: install.env });
   }
-  await runNode('scripts/build/build.mjs');
+  await runNode('scripts/bundling/build.mjs');
   await runNode('node_modules/vue-tsc/bin/vue-tsc.js', ['--noEmit']);
   await runNode('node_modules/vitest/vitest.mjs', ['run']);
   if (local) await runNode('scripts/dev/install-local.mjs', ['--no-build']);

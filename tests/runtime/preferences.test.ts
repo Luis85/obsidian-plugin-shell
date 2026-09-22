@@ -20,7 +20,7 @@ describe('Serialized settings', () => {
     const first = service.update({ locale: 'de' }); const second = service.update({ taskFolder: 'Projects/Tasks' });
     await Promise.resolve(); expect(writes).toHaveLength(1); expect(service.current.locale).toBe('en'); barrier.resolve();
     expect((await first).ok).toBe(true); expect((await second).ok).toBe(true);
-    expect(service.current).toEqual({ locale: 'de', taskFolder: 'Projects/Tasks', notifySuccess: true });
+    expect(service.current).toEqual({ ...defaults, locale: 'de', taskFolder: 'Projects/Tasks' });
     expect(writes[1]).toMatchObject({ preferences: service.current });
   });
   it('[PREF-I04] failed save retains values and later valid save recovers', async () => {

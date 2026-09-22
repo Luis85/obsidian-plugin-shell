@@ -37,7 +37,7 @@ test('[NPM-02] no-policy and empty-value inputs are deterministic nonmutating co
 test('[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals', async () => {
   const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
   const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
-  assert.deepEqual(pkg.allowScripts, { 'esbuild@0.27.7': true, 'vue-demi@0.14.10': true, fsevents: false });
+  assert.deepEqual(pkg.allowScripts, { 'esbuild@0.28.2': true, 'vue-demi@0.14.10': true, fsevents: false });
   const observed = new Set();
   for (const [path, entry] of Object.entries(lock.packages)) {
     if (!entry.hasInstallScript) continue;
@@ -46,7 +46,7 @@ test('[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals'
     assert.ok(pkg.allowScripts[key] === true || pkg.allowScripts[name] === false, `Unreviewed lifecycle hook: ${key}`);
     observed.add(key);
   }
-  assert.ok(observed.has('esbuild@0.27.7'));
+  assert.ok(observed.has('esbuild@0.28.2'));
   assert.ok(observed.has('vue-demi@0.14.10'));
   for (const hook of ['preinstall', 'install', 'postinstall', 'prepare', 'presetup', 'postsetup'])
     assert.equal(pkg.scripts[hook], undefined, `Recursive setup risk: ${hook}`);
@@ -73,7 +73,7 @@ test('[NPM-04] real setup CLI isolates npm env with stub tools and preserves str
       }
       writeFileSync('probe.json', JSON.stringify({args:process.argv.slice(2),
         ignore:process.env.npm_config_ignore_scripts, strict:process.env.npm_config_strict_allow_scripts}));`);
-    for (const path of ['scripts/build/build.mjs', 'node_modules/vue-tsc/bin/vue-tsc.js', 'node_modules/vitest/vitest.mjs']) {
+    for (const path of ['scripts/bundling/build.mjs', 'node_modules/vue-tsc/bin/vue-tsc.js', 'node_modules/vitest/vitest.mjs']) {
       const target = join(dir, path);
       await mkdir(join(target, '..'), { recursive: true });
       await writeFile(target, '// Stub: this test asserts the CLI boundary, not build or Vitest behavior.\n');

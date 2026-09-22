@@ -2,15 +2,15 @@
 
 ## Current state
 
-Iteration 01 is a real Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-ONE.md), and [actual test record](docs/testing/ITERATION-ONE.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
+Iteration 02 is a real Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-TWO.md), and [actual test record](docs/testing/ITERATION-TWO.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
 
 No full make catalog or identity migration is implemented. Setup installs the fixed showcase identity. Do not advertise pending capabilities or invent placeholder commands.
 
 ## Commands and environment
 
-Use the qualified Node 24.21.0/npm with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
+Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
 
-`npm run verify` performs the current static/service/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` is a selected-core measurement, not complete production coverage. `analyze` is broader diagnostic fallow analysis; the blocking gate presently enforces architecture. Use actual tool output, not assumed success.
+`npm run verify` performs the current static/service/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` gates the selected core; `test:coverage:production` measures every production TS/Vue input separately and is report-only. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 
@@ -43,5 +43,7 @@ Parallel workers must coordinate shared config/contracts/styles/migrations. Pres
 Deploy only inside approved codebase-contained test vaults. Preserve data.json, notes, unrelated plugins and security preferences. Do not disable Restricted Mode during normal setup. Last-good complete artifacts survive failed builds.
 
 Maintain exact tested stable dependencies through reviewed updates. TypeScript 6.0.3 is a documented parser-compatibility choice; do not force TypeScript 7 through unsupported peers. Host app/API/installer/mobile and toolchain versions remain separate. No silent host-floor increase or broad permanent update ignore.
+
+Known unresolved acceptance criterion: the official Obsidian ESLint package retains nested ESLint 9.39.5 through its SDL/import peers. Root ESLint 10 and the audit pass, but the entire dependency graph is not supported. Read docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md before proposing updates. Do not force incompatible peers, claim deduplication removed it, or equate an audit pass with support.
 
 This milestone is not the final release-ready GitHub template. Retain all existing product requirements and qualify each extension with its relevant tests.

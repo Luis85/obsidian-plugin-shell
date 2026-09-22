@@ -1,7 +1,7 @@
- .shell-page-heading { margin-bottom: 26px; }
-.shell-page-heading h1 { font-size: 30px; font-weight: 600; letter-spacing: -.9px; line-height: 1.2; }
+.shell-page-heading { margin-bottom: 26px; }
+.shell-page-heading h1 { font-size: clamp(1.5rem, 2.4cqi, 1.875rem); font-weight: 600; letter-spacing: -.9px; line-height: 1.2; }
 .shell-page-heading > p { color: var(--text-muted); margin-top: 12px !important; line-height: 1.6; font-size: 13px; }
-.shell-document-grid { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr); gap: 20px; align-items: start; }
+.shell-document-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
 .shell-form { display: grid; gap: 22px; }
 .shell-field { display: grid; gap: 8px; }
 .shell-field > div { width: 100%; }
@@ -29,18 +29,26 @@
 .shell-empty-text { padding: 28px 0; color: var(--text-muted); font-size: 12px; }
 .shell-diagnostics { margin-top: 20px; }
 .shell-diagnostic { display: flex; gap: 20px; padding: 8px 0; font-size: 11px; color: var(--text-muted); }
-.shell-settings-card { max-width: 860px; margin-left: 0; }
-.shell-setting-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding: 8px 0 24px; border-bottom: 1px solid var(--background-modifier-border); }
-.shell-setting-row > div:first-child { flex: 1; }
+.shell-settings-card { width: 100%; }
+.shell-setting-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 8px 0 24px; border-bottom: 1px solid var(--background-modifier-border); }
+.shell-setting-row > div:first-child { flex: 1; min-width: 0; }
+.shell-setting-row > :last-child:not([type="checkbox"]) { flex: 0 1 20rem; width: 100%; min-width: 0; }
+.shell-setting-row > :last-child input { width: 100%; min-height: max(var(--input-height), 2.5em); }
+.shell-setting-row input[type="checkbox"] { flex: 0 0 auto; }
 .shell-setting-row label { font-size: 13px; font-weight: 550; }
-.shell-setting-row p { margin-top: 7px !important; max-width: 370px; line-height: 1.6; color: var(--text-muted); font-size: 12px; }
-.shell-setting-row select { background: var(--background-modifier-form-field); color: var(--text-normal); border: 1px solid var(--background-modifier-border); padding: 8px 12px; border-radius: var(--input-radius); min-width: 120px; }
+.shell-setting-row p { margin-top: 7px !important; max-width: 64ch; line-height: 1.6; color: var(--text-muted); font-size: 12px; }
+.shell-setting-row select { background: var(--background-modifier-form-field); color: var(--text-normal); border: 1px solid var(--background-modifier-border); box-sizing: border-box; font: inherit; font-size: var(--font-ui-small); line-height: 1.4; height: auto; min-height: max(var(--input-height), 2.5em); padding: .55em 2.25em .55em .8em; overflow: visible; border-radius: var(--input-radius); }
 .shell-setting-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; appearance: auto; }
-.shell-theme-note { padding: 26px 0; margin-left: 0; }
+.shell-theme-note { padding: 26px 0;  }
 .shell-theme-note p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 8px !important; }
 .shell-swatches { display: flex; gap: 6px; margin-top: 16px; }
 .shell-swatches span { width: 32px; height: 32px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 50%; }
 .shell-swatches span:nth-child(2) { background: var(--background-secondary); }
 .shell-swatches span:nth-child(3) { background: var(--text-muted); }
 .shell-swatches span:nth-child(4) { background: var(--interactive-accent); }
-@media (max-width: 900px) { .shell-document-grid { grid-template-columns: minmax(0, 1fr); } .shell-setting-row { flex-wrap: wrap; } }
+.shell-setting-row :disabled { opacity: .6; cursor: not-allowed; }
+.shell-setting-row select:hover:not(:disabled) { border-color: var(--background-modifier-border-hover); }
+.shell-event-table { table-layout: fixed; }
+.shell-event-table td { overflow-wrap: anywhere; }
+.shell-preview pre { max-width: 100%; white-space: pre; }
+.shell-page-heading > p { max-width: 78ch; }

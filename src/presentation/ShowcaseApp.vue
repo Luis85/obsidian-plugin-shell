@@ -11,7 +11,7 @@ import OverviewPanel from './panels/OverviewPanel.vue';
 import DocumentPanel from './panels/DocumentPanel.vue';
 import EventsPanel from './panels/EventsPanel.vue';
 import SettingsPanel from './panels/SettingsPanel.vue';
-const props = defineProps<{ portalRoot: HTMLElement }>();
+const props = defineProps<{ portalRoot: HTMLElement; showViewActions?: (event: MouseEvent) => void }>();
 const { t, locale } = useI18n();
 const services = useServices();
 const model = useShowcase();
@@ -30,11 +30,12 @@ const icons = { overview: 'i-lucide-layout-dashboard', documents: 'i-lucide-file
         <nav class="shell-nav">
           <UButton v-for="item in pages" :key="item" :icon="icons[item]" :variant="model.page === item ? 'soft' : 'ghost'" :color="model.page === item ? 'primary' : 'neutral'" :aria-current="model.page === item ? 'page' : undefined" @click="model.navigate(item)">{{ t(`nav.${item}`) }}</UButton>
         </nav>
-        <div class="shell-sidebar-bottom"><UBadge color="neutral" variant="subtle">{{ t('app.iteration') }}</UBadge><p>{{ t('app.local') }}</p><code>v0.1.0</code></div>
+        <div class="shell-sidebar-bottom"><UBadge color="neutral" variant="subtle">{{ t('app.iteration') }}</UBadge><p>{{ t('app.local') }}</p><code>v0.2.0</code></div>
       </aside>
       <div class="shell-workspace">
-        <header class="shell-header"><div class="shell-breadcrumb">{{ t('app.title') }} <span>/</span> <strong>{{ t(`nav.${model.page}`) }}</strong></div><div class="shell-header-status"><span class="shell-status-dot" aria-hidden="true" />{{ t('app.ready') }}<UBadge color="neutral" variant="outline">{{ t(services.host.kind === 'obsidian' ? 'app.native' : 'app.browser') }}</UBadge></div></header>
+        <header class="shell-header"><div class="shell-breadcrumb">{{ t('app.title') }} <span>/</span> <strong>{{ t(`nav.${model.page}`) }}</strong></div><div class="shell-header-status"><span class="shell-status-dot" aria-hidden="true" />{{ t('app.ready') }}<UBadge color="neutral" variant="outline">{{ t(services.host.kind === 'obsidian' ? 'app.native' : 'app.browser') }}</UBadge></div><UButton v-if="props.showViewActions" class="shell-view-actions" icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" :aria-label="t('view.actions')" :title="t('view.actions')" @click="props.showViewActions" /></header>
         <main class="shell-main">
+          <section class="shell-page">
           <div v-if="failed" role="alert" class="shell-error">{{ t('error.render') }}</div>
           <template v-else>
             <OverviewPanel v-if="model.page === 'overview'" />
@@ -42,6 +43,7 @@ const icons = { overview: 'i-lucide-layout-dashboard', documents: 'i-lucide-file
             <EventsPanel v-else-if="model.page === 'events'" />
             <SettingsPanel v-else />
           </template>
+          </section>
           <footer class="shell-footer">{{ t('app.scope') }}</footer>
         </main>
         <div class="shell-feedback" aria-live="polite" aria-atomic="false">

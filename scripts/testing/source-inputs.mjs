@@ -4,7 +4,7 @@ import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 
-export const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows/baseline-verification.yml'];
+const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
 export const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 export function physicalLines(text) {
   if (!text) return 0;

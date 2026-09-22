@@ -5,7 +5,7 @@ import type { Failure } from '../../domain/outcome';
 import type { TaskInput } from '../../domain/task';
 import type { PreparedDocument, DocumentReceipt } from '../../application/document-service';
 export const pages = ['overview', 'documents', 'events', 'settings'] as const;
-export type Page = typeof pages[number];
+type Page = typeof pages[number];
 export const useShowcase = defineStore('showcase', () => {
   const services = useServices();
   const owner = `view-${services.newId()}`;
@@ -35,12 +35,14 @@ export const useShowcase = defineStore('showcase', () => {
     services.events.on('preferences.changed', () => record('preferences.changed')),
     services.events.on('host.active-file-changed', () => record('host.active-file-changed')),
   ];
-  onScopeDispose(() => { alive = false; for (const stop of stops) stop(); for (const item of services.notifications.current) { if (item.owner.startsWith(`${owner}:`)) services.notifications.dismiss(item.id); } });
+  onScopeDispose(() => { alive = false; if (prepared.value) services.documents.discard(prepared.value); for (const stop of stops) stop(); for (const item of services.notifications.current) { if (item.owner.startsWith(`${owner}:`)) services.notifications.dismiss(item.id); } });
   function navigate(next: Page) {
     page.value = next;
     try { services.local.set('page', next); } catch { services.diagnostics.report('local.write', 'preferences.local'); }
   }
   function preview(input: TaskInput) {
+    if (busy.value || error.value?.effect === 'uncertain') return;
+    if (prepared.value) services.documents.discard(prepared.value);
     error.value = undefined; receipt.value = undefined;
     const result = services.documents.prepare('task', input, preferences.value.taskFolder, services.newId());
     if (result.ok) prepared.value = result.value; else { error.value = result.error; prepared.value = undefined; }
@@ -66,6 +68,6 @@ export const useShowcase = defineStore('showcase', () => {
       if (alive && !result.ok) error.value = { ...result.error, effect: 'committed' };
     } catch { if (alive) error.value = { code: 'unexpected', key: 'error.open', effect: 'committed' }; services.diagnostics.report('document.open', 'document.open'); }
   }
-  function reset() { if (!busy.value) { prepared.value = undefined; receipt.value = undefined; error.value = undefined; } }
+  function reset() { if (!busy.value && error.value?.effect !== 'uncertain') { if (prepared.value) services.documents.discard(prepared.value); prepared.value = undefined; receipt.value = undefined; error.value = undefined; } }
   return { owner, draft, page, navigate, preferences, feedback, diagnostics, stream, createdCount, eventCount, prepared, receipt, error, busy, preview, commit, openCreated, reset };
 });

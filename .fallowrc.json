@@ -4,7 +4,20 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "tests/runtime/types.ts",
-    "scripts/testing/node-reporter.mjs"
+    "scripts/testing/node-reporter.mjs",
+    "tests/tooling/*.checks.mjs",
+    "tests/verification/*.test.mjs",
+    "tests/harness-styles/*.test.mjs",
+    "tests/browser-specimen/specimen.checks.mjs",
+    "scripts/styles/export-host-css.mjs",
+    "scripts/testing/check-browser-specimen.mjs",
+    "scripts/harness/serve-style-fixture.mjs",
+    "src/infrastructure/ui/static-plugin.ts",
+    "src/styles/index.css",
+    "harness/style-fixture/fixture.css",
+    "harness/styles/obsidian.css",
+    "harness/styles/simulated.css",
+    "harness/styles/host-adapter.css"
   ],
   "ignorePatterns": [
     "dist-harness/**",
@@ -166,5 +179,25 @@
         ]
       }
     ]
+  },
+  "ignoreDependencies": [
+    "obsidian"
+  ],
+  "ignoreUnresolvedImports": [
+    "/__host.css",
+    "./vendor/obsidian.css"
+  ],
+  "usedClassMembers": [
+    {
+      "extends": "PluginSettingTab",
+      "members": [
+        "getSettingDefinitions",
+        "getControlValue",
+        "setControlValue"
+      ]
+    }
+  ],
+  "rules": {
+    "policy-violation": "off"
   }
 }
