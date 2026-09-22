@@ -1,0 +1,46 @@
+ .shell-page-heading { margin-bottom: 26px; }
+.shell-page-heading h1 { font-size: 30px; font-weight: 600; letter-spacing: -.9px; line-height: 1.2; }
+.shell-page-heading > p { color: var(--text-muted); margin-top: 12px !important; line-height: 1.6; font-size: 13px; }
+.shell-document-grid { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr); gap: 20px; align-items: start; }
+.shell-form { display: grid; gap: 22px; }
+.shell-field { display: grid; gap: 8px; }
+.shell-field > div { width: 100%; }
+.shell-field input { width: 100%; min-height: 36px; }
+.shell-field label { font-size: 12px; font-weight: 550; }
+.shell-field small, .shell-main small { color: var(--text-muted); font-size: 11px; line-height: 1.5; }
+.shell-field label span { color: var(--text-faint); }
+.shell-error { color: var(--text-error); background: color-mix(in srgb, var(--text-error) 6%, transparent); border: 1px solid color-mix(in srgb, var(--text-error) 20%, transparent); padding: 12px; border-radius: var(--radius-s); line-height: 1.6; font-size: 12px; }
+.shell-info { color: var(--text-muted); border-inline-start: 2px solid var(--interactive-accent); padding: 8px 12px; margin-bottom: 20px !important; font-size: 12px; line-height: 1.5; }
+.shell-preview { min-height: 370px; }
+.shell-destination { display: grid; gap: 6px; padding-bottom: 16px; }
+.shell-destination code { white-space: normal; overflow-wrap: anywhere; font-size: 11px; color: var(--text-muted); }
+.shell-preview pre { margin: 0; padding: 18px; min-height: 250px; overflow: auto; border-radius: var(--radius-s); background: var(--background-primary-alt); border: 1px solid var(--background-modifier-border); line-height: 1.8; font-size: 11px; }
+.shell-preview pre code { font: inherit; font-family: var(--font-monospace); color: var(--text-normal); }
+.shell-empty { text-align: center; display: grid; justify-items: center; align-content: center; min-height: 280px; padding: 20px; }
+.shell-empty > span { font-size: 36px; color: var(--text-faint); margin-bottom: 22px; }
+.shell-empty h3 { font-size: 13px; }
+.shell-empty p { font-size: 12px; max-width: 240px; line-height: 1.6; color: var(--text-muted); margin-top: 8px !important; }
+.shell-created { margin-top: 20px; color: var(--text-success); }
+.shell-demo-actions { margin-bottom: 26px; }
+.shell-event-table { width: 100%; text-align: start; border-collapse: collapse; font-size: 12px; }
+.shell-event-table th { color: var(--text-muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; padding: 0 10px 12px; }
+.shell-event-table td { padding: 12px 10px; border-top: 1px solid var(--background-modifier-border); }
+.shell-event-table td:first-child { width: 90px; color: var(--text-faint); }
+.shell-empty-text { padding: 28px 0; color: var(--text-muted); font-size: 12px; }
+.shell-diagnostics { margin-top: 20px; }
+.shell-diagnostic { display: flex; gap: 20px; padding: 8px 0; font-size: 11px; color: var(--text-muted); }
+.shell-settings-card { max-width: 860px; margin-left: 0; }
+.shell-setting-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding: 8px 0 24px; border-bottom: 1px solid var(--background-modifier-border); }
+.shell-setting-row > div:first-child { flex: 1; }
+.shell-setting-row label { font-size: 13px; font-weight: 550; }
+.shell-setting-row p { margin-top: 7px !important; max-width: 370px; line-height: 1.6; color: var(--text-muted); font-size: 12px; }
+.shell-setting-row select { background: var(--background-modifier-form-field); color: var(--text-normal); border: 1px solid var(--background-modifier-border); padding: 8px 12px; border-radius: var(--input-radius); min-width: 120px; }
+.shell-setting-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; appearance: auto; }
+.shell-theme-note { padding: 26px 0; margin-left: 0; }
+.shell-theme-note p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 8px !important; }
+.shell-swatches { display: flex; gap: 6px; margin-top: 16px; }
+.shell-swatches span { width: 32px; height: 32px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 50%; }
+.shell-swatches span:nth-child(2) { background: var(--background-secondary); }
+.shell-swatches span:nth-child(3) { background: var(--text-muted); }
+.shell-swatches span:nth-child(4) { background: var(--interactive-accent); }
+@media (max-width: 900px) { .shell-document-grid { grid-template-columns: minmax(0, 1fr); } .shell-setting-row { flex-wrap: wrap; } }

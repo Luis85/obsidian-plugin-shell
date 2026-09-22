@@ -1,1 +1,17 @@
 .obsidian
+
+node_modules/
+reports/
+coverage/
+test-results/
+playwright-report/
+dist/
+.dev-vault/
+*.tsbuildinfo
+
+dist-harness/
+.qualification/
+node-qualified
+.fallow/
+.native-runner/
+.native-cache/

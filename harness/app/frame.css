@@ -1,0 +1,15 @@
+body { margin: 0; overflow: hidden; contain: none; }
+.harness-toolbar { height: 38px; display: flex; align-items: center; padding: 0 16px; gap: 14px; font-size: 11px; background: var(--background-secondary); border-bottom: 1px solid var(--background-modifier-border); color: var(--text-muted); }
+.harness-toolbar strong { color: var(--text-normal); font-weight: 550; }
+.harness-toolbar > div { display: flex; gap: 6px; margin-left: auto; }
+.harness-toolbar button { height: 24px; font-size: 10px; padding: 3px 10px; }
+#showcase-root { height: calc(100vh - 38px); }
+.harness-modal { background: var(--background-primary); color: var(--text-normal); width: min(620px, 90vw); max-height: 80vh; border: 1px solid var(--background-modifier-border); border-radius: var(--radius-l); padding: 24px; }
+.harness-modal::backdrop { background: rgba(0,0,0,.6); }
+.harness-modal h2 { margin: 0 0 16px; }
+.harness-modal p { line-height: 1.7; }
+.harness-modal pre { white-space: pre-wrap; max-height: 50vh; overflow: auto; }
+.harness-modal button { margin-top: 16px; }
+.harness-native-notices { position: fixed; top: 54px; right: 18px; z-index: 100; display: grid; gap: 8px; }
+.harness-native-notice { background: var(--background-secondary); color: var(--text-normal); border: 1px solid var(--background-modifier-border); padding: 14px 20px; border-radius: var(--radius-m); box-shadow: var(--shadow-s); font-size: 12px; }
+@media (max-width: 700px) { .harness-toolbar > span { display: none; } }

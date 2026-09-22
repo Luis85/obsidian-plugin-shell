@@ -1,0 +1,9 @@
+@import "tailwindcss/theme.css" prefix(ps);
+@import "tailwindcss/utilities.css" prefix(ps);
+@import "@nuxt/ui";
+@import "./tokens.css";
+@import "./nuxt-bridge.css";
+@import "./shell.css";
+@import "./panels.css";
+@source "../presentation";
+@source "../../node_modules/.nuxt-ui";

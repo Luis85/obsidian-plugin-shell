@@ -1,0 +1,8 @@
+{
+  "version": "4.11.2",
+  "replaced": {
+    "node_modules/@nuxt/ui/dist/runtime/plugins/colors.js": "ccd0fcf16de1c86effed25e7aeb8809b177dedacba0438b4f492e6e7eb1e8240",
+    "node_modules/@nuxt/ui/dist/runtime/vue/plugins/head.js": "01934e8a3dfd7b743ed8f8ec43bf4fd3a80bc16e52662f3e9914f395c263b956"
+  },
+  "reason": "Static scoped role variables replace runtime head injection. The selected first-view components require no document head ownership."
+}
