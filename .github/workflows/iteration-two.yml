@@ -27,6 +27,21 @@ jobs:
           echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
       - name: Fresh strict-policy install of the committed lockfile
         run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+      - name: Preserve source checkpoint and installed dependency provenance
+        if: always()
+        run: |
+          mkdir -p reports/iteration-two
+          git archive --format=zip --output=iteration-two-source.zip HEAD
+          node "$QUALIFIED_NPM" explain eslint --json > reports/iteration-two/eslint-provenance.json
+          node "$QUALIFIED_NPM" ls --all --json > reports/iteration-two/dependency-tree.json
+      - name: Retain exact source for interrupted-session recovery
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: iteration-two-recovery-source
+          path: iteration-two-source.zip
+          retention-days: 7
+          if-no-files-found: error
       - name: Execute every offline gate and build the complete candidate
         run: |
           mkdir -p reports/iteration-two
@@ -61,7 +76,6 @@ jobs:
           node scripts/quality/check-artifacts.mjs > reports/iteration-two/final-assets.json
           cmp reports/iteration-two/candidate-assets.json reports/iteration-two/final-assets.json
           git diff --exit-code -- package-lock.json
-          git archive --format=zip --output=iteration-two-source.zip HEAD
           mkdir -p package/plugin-shell
           cp dist/main.js dist/manifest.json dist/styles.css package/plugin-shell/
           cd package && zip -r ../plugin-shell-0.2.0.zip plugin-shell
