@@ -68,7 +68,7 @@
     "check:analyzer": "node scripts/quality/check-analyzer.mjs",
     "check:security": "node scripts/security/audit.mjs",
     "check:dependencies": "node scripts/security/check-dependencies.mjs",
-    "test:coverage:production": "vitest run --coverage --config vitest.production.config.mjs"
+    "test:coverage:production": "vitest run --coverage --config vitest.production.config.mjs && node scripts/quality/coverage-inventory.mjs"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

@@ -1,6 +1,6 @@
 import { runNode } from '../shared/process.mjs';
 const commands = [
-  ['--test', 'tests/tooling/npm-install.checks.mjs', 'tests/tooling/build.checks.mjs', 'tests/tooling/security.checks.mjs', 'tests/tooling/gates.checks.mjs'],
+  ['--test', 'tests/tooling/npm-install.checks.mjs', 'tests/tooling/build.checks.mjs', 'tests/tooling/security.checks.mjs', 'tests/tooling/gates.checks.mjs', 'tests/tooling/coverage.checks.mjs'],
   ['scripts/security/check-dependencies.mjs'],
   ['scripts/bundling/build.mjs'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],

@@ -4,8 +4,11 @@ import { nativeCommand } from './native-command.mjs';
 /** Change the real supported Appearance setting; do not invent private theme IDs/commands. */
 export async function setNativeTheme(page, context, theme) {
   if (!['light', 'dark'].includes(theme)) throw new Error('INVALID_THEME_TEST');
-  await nativeCommand(page, 'Open settings');
   let settingsPage;
+  for (const candidate of context.pages()) {
+    if (await candidate.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i }).count()) settingsPage = candidate;
+  }
+  if (!settingsPage) await nativeCommand(page, 'Open settings');
   await expect.poll(async () => {
     settingsPage = undefined;
     for (const candidate of context.pages()) {
@@ -28,18 +31,20 @@ export async function setNativeTheme(page, context, theme) {
     if (matches.length !== 1) throw new Error('NATIVE_SCHEME_OPTION_UNAVAILABLE');
     return matches[0].value;
   }, theme);
-  await scheme.selectOption(value);
+  // Real keyboard input avoids synthetic cross-realm select events in a native settings window.
+  const targetIndex = await scheme.evaluate((el, target) => Array.from(el.options).findIndex(option => option.value === target), value);
+  await scheme.focus(); await scheme.press('Home');
+  for (let index = 0; index < targetIndex; index++) await scheme.press('ArrowDown');
+  await scheme.press('Tab'); await expect(scheme).toHaveValue(value);
   await settingsPage.screenshot({ path: `reports/native/native-appearance-${theme}.png` });
   await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
+  // Retain the real settings window for subsequent transitions. Await the host's paint work
+  // rather than closing its realm immediately after a class mutation. It is closed once by
+  // normal host controls after the theme scenarios; no errors are ignored.
+  await settingsPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   if (settingsPage === page) {
     await settingsPage.keyboard.press('Escape');
     await expect(settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i })).toHaveCount(0);
-  } else {
-    // CDP Page.close skips the host's close-control lifecycle and can leave stale window state.
-    const close = settingsPage.locator('.titlebar-button.mod-close');
-    await expect(close).toHaveCount(1);
-    await close.click();
-    await expect.poll(() => settingsPage.isClosed()).toBe(true);
   }
   await page.bringToFront();
 }
