@@ -4,7 +4,7 @@
 
 A TypeScript/Vue/Pinia plugin with a native Obsidian view, Task Markdown creation, typed events, persisted preferences, localized feedback, scoped Nuxt UI styling, and a real-component browser harness. This is the layout/header/reliability milestone, not completion of the full template PRD.
 
-**Qualification:** the runtime, served-browser, native Linux Obsidian, Windows/Ubuntu setup and all-category audit checks passed. One dependency-support criterion remains open: the official Obsidian lint integration still installs a nested ESLint 9.39.5. The active linter is ESLint 10.11.0; zero audit findings do not close this upstream support exception. See the [exact verification record](docs/testing/ITERATION-TWO.md) and [dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). PR #1 remains draft; no release was published.
+**Qualification:** the runtime, served-browser, native Linux Obsidian, Windows/Ubuntu setup and all-category audit checks passed. One dependency-support criterion remains open: the official Obsidian lint integration still installs a nested ESLint 9.39.5. The active linter is ESLint 10.11.0; zero audit findings do not close this upstream support exception. See the [exact verification record](docs/testing/ITERATION-TWO.md) and [dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). PR #1 was merged on 2026-09-22; no release was published.
 
 ## Open it in Obsidian
 
@@ -81,6 +81,8 @@ Still pending: complete generators/identity migration, broader host events/entit
 | [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
 | [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
+| [TypeScript quality-tool research](docs/research/2026-09-23-typescript-quality-tools.md) | Repository-specific tool assessment, overlap analysis, compatibility caveats and primary sources. |
+| [Quality-tool adoption plan](docs/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed work packages, gate qualification, negative controls and CI placement; no new tools installed. |
 | [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Future complete wizard and generator contract. |
 | [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
 | [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |
