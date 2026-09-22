@@ -43,7 +43,8 @@ try {
     await writeFile(join(directory, 'hook.cjs'), "require('node:fs').writeFileSync(require('node:path').join(__dirname, 'hook-ran'), 'yes');\n");
     const result = ok(directory, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', scratch]);
     const parsed = JSON.parse(result.stdout);
-    tarballs[name] = pathToFileURL(join(scratch, (Array.isArray(parsed) ? parsed[0] : parsed).filename)).href;
+    // npm package specs use file: paths, not percent-encoded module-import URLs.
+    tarballs[name] = `file:../${(Array.isArray(parsed) ? parsed[0] : parsed).filename}`;
   }
   const project = join(scratch, 'project'); await mkdir(project);
   const pkg = { name: 'npm-policy-fixture', version: '1.0.0', private: true,
