@@ -1,0 +1,37 @@
+name: Recover reviewed lock blob
+on:
+  push:
+    branches: [build/iteration-two]
+    paths: [.github/workflows/recover-reviewed-lock.yml]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  reviewed-blob:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Recover and verify the reviewed dependency artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/10711869248/zip > recovered.zip
+          unzip -p recovered.zip reports/dependency-candidate/package-lock.json > reviewed-lock.json
+          echo '2876bbb827f914eba6616c2f7084ca57310bc146b3564d8bc7a9c868a8af042a  reviewed-lock.json' | sha256sum -c -
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const lock = JSON.parse(fs.readFileSync('reviewed-lock.json', 'utf8'));
+          lock.version = '0.2.0'; lock.packages[''].version = '0.2.0';
+          lock.packages[''].engines = { node: '>=22.13.0', npm: '>=11.19.1 <13' };
+          const content = JSON.stringify(lock, null, 2) + '\n';
+          fs.writeFileSync('package-lock.json', content);
+          fs.writeFileSync('blob-request.json', JSON.stringify({content, encoding:'utf-8'}));
+          NODE
+          echo '598de19279cd66cf9cb1b2efb384f456d72e3f1c73cbd34a91601d74d8ef0e3e  package-lock.json' | sha256sum -c -
+          gh api --method POST repos/${{ github.repository }}/git/blobs --input blob-request.json > reviewed-blob.json
+          cat reviewed-blob.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: reviewed-lock-blob-reference
+          path: reviewed-blob.json
+          retention-days: 2
