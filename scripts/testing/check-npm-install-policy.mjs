@@ -40,10 +40,11 @@ try {
     await writeFile(join(directory, 'package.json'), JSON.stringify({ name, version: '1.0.0',
       scripts: { postinstall: 'node hook.cjs' } }));
     await writeFile(join(directory, 'hook.cjs'), "require('node:fs').writeFileSync(require('node:path').join(__dirname, 'hook-ran'), 'yes');\n");
-    const result = ok(directory, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', scratch]);
-    const parsed = JSON.parse(result.stdout);
-    // npm package specs use file: paths, not percent-encoded module-import URLs.
-    tarballs[name] = `file:../${(Array.isArray(parsed) ? parsed[0] : parsed).filename}`;
+    ok(directory, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', scratch]);
+    // Verify the actual controlled unscoped artifact, not a version-dependent JSON envelope.
+    const filename = `${name}-1.0.0.tgz`;
+    await access(join(scratch, filename));
+    tarballs[name] = `file:../${filename}`;
   }
   const project = join(scratch, 'project'); await mkdir(project);
   const pkg = { name: 'npm-policy-fixture', version: '1.0.0', private: true,
@@ -68,6 +69,8 @@ try {
   ok(project, ['install', '--package-lock-only', '--ignore-scripts', '--offline', '--no-audit', '--no-fund']);
   const before = await readFile(join(project, 'package-lock.json'), 'utf8');
   report.fixtureLock = JSON.parse(before).packages;
+  for (const name of Object.keys(tarballs))
+    assert.equal(report.fixtureLock[`node_modules/${name}`].hasInstallScript, true, `Fixture has no install hook: ${name}`);
   const broken = call(project, ['ci', '--offline', '--no-audit', '--no-fund'], { ...env, npm_config_allow_scripts: 'unreviewed-fixture' });
   assert.notEqual(broken.status, 0);
   assert.match(broken.stderr, /EALLOWSCRIPTS/);
@@ -75,7 +78,6 @@ try {
   ok(project, ['run', 'probe']);
   const nested = JSON.parse(await readFile(join(project, 'nested-result.json'), 'utf8'));
   report.fixtureOutput = { stdout: nested.stdout.slice(-6000), stderr: nested.stderr.slice(-6000), ignoreScripts: nested.ignore ?? null };
-  report.fixturePackage = JSON.parse(await readFile(join(project, 'node_modules/shell-fixture-approved/package.json'), 'utf8'));
   assert.equal(nested.status, 0);
   assert.ok(nested.removed.length > 0);
   report.checks.push('nested-npm-run-ci-reloads-persistent-policy');
