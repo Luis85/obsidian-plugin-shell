@@ -1,28 +1,22 @@
 # Tooling directory
 
-> **Current contents:** This guide only. Executable setup, makers, build/verification, and release scripts have not been implemented.
+## Available now
 
-All future executable tooling belongs in this directory, as specified by [TOOL-01–06](../docs/development/SETUP-AND-MAKERS.md). Root package.json commands and Actions workflows call these implementations. Conventional root Vite/Vitest/Playwright/ESLint/TypeScript configs remain declarative or thin adapters.
+```sh
+node scripts/harness/serve-style-fixture.mjs --port 4174
+node --test tests/harness-styles/server.test.mjs
+```
 
-## Entry and responsibility map
+The first starts a loopback-only fixed-asset server for the original stylesheet specimen; Ctrl+C stops it. `--help` prints usage. The second runs seven focused Node tests. Neither initializes the plugin or replaces full verification. There is no package.json yet.
 
-| Location | Responsibility |
-| --- | --- |
-| `setup.mjs` and `setup/bootstrap/` | Dependency-free Node entry and pre-install logic; no local package imports before approved installation. |
-| `setup/steps/` | Validated identity, profile, installation, provisioning, readiness, resume. |
-| `make.mjs` and `make/registry.mjs` | Discovery, parsing, interactive/noninteractive dispatch. |
-| `make/makers/`, `make/templates/`, `make/custom/` | Built-in recipes, local versioned boilerplate, explicit custom extensions. |
-| `shared/` | Small safe-file plan, child-process, input/output utilities. |
-| `build/` | Shared Vite/plugin/style configuration and output checks. |
-| `dev/` | Contained staged installation and optional target-checked native CLI. |
-| `quality/` | Verification orchestration and event/style/tooling checks. |
-| `release/` | Version preparation, retained candidates, explicit draft/promotion operations. |
-| `maintenance/` | Online dependency/host freshness and maintenance reports. |
+## Planned structure
 
-Implementation creates files only when exercised. Runtime event contracts/implementations and style modules remain under src, not scripts. Tooling tests live under tests/tooling and use isolated temporary repositories/vaults.
+Keep setup/bootstrap, makers/templates, shared safe-file/process helpers, build/style composition, local deployment, quality, maintenance and release logic under scripts. Root configs/package commands/Actions stay thin. See [TOOL-01–06](../docs/development/SETUP-AND-MAKERS.md).
 
-Use plain .mjs with JSDoc/checkJs for bootstrap; no TS loader may be necessary to start `npm run setup`. Do not connect setup to install/prepare lifecycle hooks. Arguments are not shell expressions. Standard tooling does not elevate privileges, install globals, modify personal vaults, or publish implicitly.
+Bootstrap must run without installed dependencies. Do not wire an interactive wizard to npm install/prepare hooks. Generation uses safe plans, explicit registries, tests and collision handling. Setup and makers never write example Task notes into a personal vault.
 
-Handwritten scripts follow the 400-physical-line limit; test helpers/specifications follow 450. Maker-generated application code becomes ordinary maintained source. Generation must be planned, collision-safe, registered, and verified; marking all outputs as dynamic or generated is not a quality exemption.
+The current host-style server is intentionally a small standalone qualification tool. Integrate its fixture/tests into the selected Vite/Vitest/Playwright projects when those exist; do not create a second permanent stack. It serves no vault or arbitrary repository paths and performs no network installation.
 
-See the [setup/maker contract](../docs/development/SETUP-AND-MAKERS.md), [event bus](../docs/architecture/EVENT-BUS.md), [style pipeline](../docs/architecture/STYLES.md), and [release guide](../docs/development/MAINTENANCE-AND-RELEASE.md).
+Runtime services and plugin CSS stay under src; original host simulation and gallery stay under harness. Release code must exclude them. Source tooling ≤400 physical lines, tests/helpers ≤450. No implicit privilege changes, global installation, browser opening, or publication.
+
+[Harness contract](../docs/testing/HARNESS-STYLES.md) · [Error/notification contract](../docs/architecture/ERRORS-AND-NOTIFICATIONS.md) · [Release guide](../docs/development/MAINTENANCE-AND-RELEASE.md)

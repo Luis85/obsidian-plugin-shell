@@ -1,0 +1,51 @@
+/* Simulation defaults; verify native host behavior independently. */
+:where(.obsidian-harness) :where([hidden]) { display: none !important; }
+:where(.obsidian-harness) :where(:focus-visible) {
+  outline: 2px solid var(--background-modifier-border-focus);
+  outline-offset: 3px;
+}
+:where(.obsidian-harness) :where(.harness-sr-only) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 540px) {
+  :where(.obsidian-harness) :where(.setting-item) { align-items: stretch; }
+  :where(.obsidian-harness) :where(.setting-item-control) { flex: 1 1 100%; }
+  :where(.obsidian-harness) :where(.modal) { padding: var(--size-4-4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.obsidian-harness) :where(*) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (forced-colors: active) {
+  :where(.obsidian-harness) {
+    --background-primary: Canvas;
+    --background-secondary: Canvas;
+    --background-modifier-border: ButtonText;
+    --background-modifier-border-focus: Highlight;
+    --background-modifier-form-field: Field;
+    --text-normal: CanvasText;
+    --text-muted: CanvasText;
+    --text-faint: CanvasText;
+    --text-error: CanvasText;
+    --text-warning: CanvasText;
+    --text-success: CanvasText;
+    --text-accent: LinkText;
+    --interactive-normal: ButtonFace;
+    --interactive-accent: Highlight;
+    --text-on-accent: HighlightText;
+  }
+  :where(.obsidian-harness) :where(:focus-visible) { outline-color: Highlight; }
+  :where(.obsidian-harness) :where(.notice, .modal) { box-shadow: none; }
+}

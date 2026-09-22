@@ -1,0 +1,58 @@
+/* Appearance approximation only; CSS does not implement modal focus or menus. */
+:where(.obsidian-harness) :where(.modal-container) {
+  position: fixed;
+  inset: 0;
+  z-index: var(--harness-overlay-z);
+  display: grid;
+  place-items: center;
+  padding: var(--size-4-4);
+}
+:where(.obsidian-harness) :where(.modal-bg) { position: absolute; inset: 0; background: var(--background-modifier-cover); }
+:where(.obsidian-harness) :where(.modal) {
+  position: relative;
+  inline-size: min(36rem, calc(100vw - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  overflow: auto;
+  margin: auto;
+  padding: var(--size-4-6);
+  color: var(--text-normal);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-l);
+}
+:where(.obsidian-harness) :where(dialog.modal)::backdrop { background: var(--background-modifier-cover); }
+:where(.obsidian-harness) :where(.modal-title) { margin-block: 0 var(--size-4-3); font-size: 1.25rem; font-weight: var(--font-semibold); }
+:where(.obsidian-harness) :where(.modal-content) { min-inline-size: 0; overflow-wrap: anywhere; }
+:where(.obsidian-harness) :where(.modal-button-container) { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--size-4-2); margin-block-start: var(--size-4-4); }
+:where(.obsidian-harness) :where(.notice-container) {
+  position: fixed;
+  inset-block-start: var(--size-4-4);
+  inset-inline-end: var(--size-4-4);
+  z-index: var(--harness-notice-z);
+  display: grid;
+  gap: var(--size-4-2);
+  inline-size: min(24rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+:where(.obsidian-harness) :where(.notice) {
+  pointer-events: auto;
+  padding: var(--size-4-3) var(--size-4-4);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-s);
+  overflow-wrap: anywhere;
+}
+:where(.obsidian-harness) :where(.notice-message) { white-space: pre-wrap; }
+:where(.obsidian-harness) :where(.menu, .suggestion-container) {
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  padding: var(--size-4-1);
+  box-shadow: var(--shadow-s);
+}
+:where(.obsidian-harness) :where(.menu-item, .suggestion-item) { padding: var(--size-4-2) var(--size-4-3); border-radius: var(--radius-s); }
+:where(.obsidian-harness) :where(.menu-item.is-selected, .suggestion-item.is-selected) { background: var(--background-modifier-hover); }

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "0.1.0",
+  "kind": "original-host-style-simulation",
+  "entry": "obsidian.css",
+  "rootClass": "obsidian-harness",
+  "themes": ["theme-light", "theme-dark"],
+  "modules": ["obsidian/tokens.css", "obsidian/base.css", "obsidian/controls.css", "obsidian/overlays.css", "obsidian/accessibility.css"],
+  "origin": "Original repository implementation; no copied Obsidian app.css or font files",
+  "license": "MIT",
+  "nativeComparison": null,
+  "qualifiedNativeHost": null,
+  "productionBundleAllowed": false,
+  "notes": "A standalone specimen is not an integrated plugin, native adapter, or device test."
+}

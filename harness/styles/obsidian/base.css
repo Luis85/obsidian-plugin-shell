@@ -1,0 +1,66 @@
+/* Low specificity is deliberate: do not mask defects in later plugin CSS. */
+:where(body.obsidian-harness) {
+  margin: 0;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  font-family: var(--font-interface);
+  font-size: var(--font-ui-medium);
+  line-height: var(--line-height-normal);
+}
+:where(.obsidian-harness *) { box-sizing: border-box; }
+:where(.obsidian-harness) :where(a) { color: var(--text-accent); }
+:where(.obsidian-harness) :where(code, pre) { font-family: var(--font-monospace); }
+:where(.obsidian-harness) :where(code) { overflow-wrap: anywhere; }
+:where(.obsidian-harness) :where(pre) {
+  padding: var(--size-4-3);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  overflow: auto;
+  max-inline-size: 100%;
+}
+:where(.obsidian-harness) :where(.workspace-split, .workspace-leaf, .view-content) {
+  min-inline-size: 0;
+}
+:where(.obsidian-harness) :where(.workspace-leaf) {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+:where(.obsidian-harness) :where(.view-header) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-2);
+  padding: var(--size-4-3) var(--size-4-4);
+  border-block-end: 1px solid var(--background-modifier-border);
+}
+:where(.obsidian-harness) :where(.view-header-title) { font-weight: var(--font-semibold); }
+:where(.obsidian-harness) :where(.view-content) { padding: var(--size-4-4); }
+:where(.obsidian-harness) :where(.setting-item) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-4);
+  padding-block: var(--size-4-3);
+  border-block-end: 1px solid var(--background-modifier-border);
+}
+:where(.obsidian-harness) :where(.setting-item-info) { flex: 1 1 12rem; min-inline-size: 0; }
+:where(.obsidian-harness) :where(.setting-item-name) { font-weight: var(--font-semibold); }
+:where(.obsidian-harness) :where(.setting-item-description) {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  overflow-wrap: anywhere;
+}
+:where(.obsidian-harness) :where(.setting-item-control) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-2);
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+:where(.obsidian-harness) :where(.setting-item-heading) { border-block-end-width: 0; }
+:where(.obsidian-harness) :where(.setting-item-heading .setting-item-name) { font-size: var(--font-ui-large); }
+:where(.obsidian-harness) :where(.mod-warning) { color: var(--text-error); }
+:where(.obsidian-harness) :where(hr) { border: 0; border-block-start: 1px solid var(--background-modifier-border); }

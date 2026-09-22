@@ -1,0 +1,44 @@
+/* Native semantic controls. ARIA behavior belongs to the adapter, not CSS. */
+:where(.obsidian-harness) :where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+  max-inline-size: 100%;
+}
+:where(.obsidian-harness) :where(button, .dropdown) {
+  min-block-size: var(--input-height);
+  padding: var(--size-4-2) var(--size-4-3);
+  background: var(--interactive-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--button-radius);
+  white-space: normal;
+  cursor: pointer;
+}
+:where(.obsidian-harness) :where(button:hover:not(:disabled), .dropdown:hover:not(:disabled)) {
+  background: var(--interactive-hover);
+}
+:where(.obsidian-harness) :where(button.mod-cta) {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+:where(.obsidian-harness) :where(button.mod-cta:hover:not(:disabled)) { background: var(--interactive-accent-hover); }
+:where(.obsidian-harness) :where(button:disabled, input:disabled, select:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+:where(.obsidian-harness) :where(input:not([type=checkbox], [type=radio], [type=range]), textarea, select) {
+  min-block-size: var(--input-height);
+  min-inline-size: 0;
+  padding: var(--size-4-2) var(--size-4-3);
+  background: var(--background-modifier-form-field);
+  border: var(--input-border-width) solid var(--background-modifier-border-hover);
+  border-radius: var(--input-radius);
+}
+:where(.obsidian-harness) :where(textarea) { resize: vertical; min-block-size: 6rem; }
+:where(.obsidian-harness) :where(input, textarea)::placeholder { color: var(--text-faint); opacity: 1; }
+:where(.obsidian-harness) :where(input[type=checkbox], input[type=radio], input[type=range]) { accent-color: var(--interactive-accent); }
+:where(.obsidian-harness) :where(input[type=checkbox], input[type=radio]) { inline-size: 1.15rem; block-size: 1.15rem; }
+:where(.obsidian-harness) :where(.checkbox-container) { display: inline-flex; align-items: center; min-block-size: var(--input-height); }
+:where(.obsidian-harness) :where([aria-invalid=true]) { border-color: var(--text-error); }
+:where(.obsidian-harness) :where(progress) { max-inline-size: 100%; accent-color: var(--interactive-accent); }
+:where(.obsidian-harness) :where(.clickable-icon) { display: inline-grid; place-items: center; min-inline-size: var(--input-height); }
