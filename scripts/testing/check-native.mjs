@@ -146,7 +146,7 @@ try {
   await restarted.keyboard.press('ControlOrMeta+p');
   await restarted.locator('input.prompt-input').fill('Open capability showcase');
   await restarted.locator('.suggestion-item:visible').filter({ hasText: 'Open capability showcase' }).first().click();
-  const restartedView = restarted.locator('[data-type="plugin-shell-showcase"]').first();
+  const restartedView = restarted.locator('.workspace-leaf-content[data-type="plugin-shell-showcase"]').first();
   await expect(restartedView.locator('[data-plugin-ui]')).toBeVisible();
   await expect(restartedView.locator(':scope > .view-header')).toBeHidden();
   await restartedView.getByRole('button', { name: 'Preferences', exact: true }).click();

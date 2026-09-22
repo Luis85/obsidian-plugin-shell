@@ -34,6 +34,12 @@ export async function setNativeTheme(page, context, theme) {
   if (settingsPage === page) {
     await settingsPage.keyboard.press('Escape');
     await expect(settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i })).toHaveCount(0);
-  } else await settingsPage.close();
+  } else {
+    // CDP Page.close skips the host's close-control lifecycle and can leave stale window state.
+    const close = settingsPage.locator('.titlebar-button.mod-close');
+    await expect(close).toHaveCount(1);
+    await close.click();
+    await expect.poll(() => settingsPage.isClosed()).toBe(true);
+  }
   await page.bringToFront();
 }
