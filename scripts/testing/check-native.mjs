@@ -40,6 +40,8 @@ try {
   page.on('pageerror', error => report.errors.push(error.message.slice(0, 300)));
   await page.waitForSelector('.workspace', { timeout: 45000 });
   report.userAgent = await page.evaluate(() => navigator.userAgent);
+  // Workspace visibility precedes async plugin registration on a fresh vault.
+  await expect(page.locator('[aria-label="Open capability showcase"]')).toBeVisible({ timeout: 45000 });
   await page.keyboard.press('Control+p');
   await page.locator('input.prompt-input').fill('Open capability showcase');
   await page.locator('.suggestion-item').filter({ hasText: 'Open capability showcase' }).first().click();
