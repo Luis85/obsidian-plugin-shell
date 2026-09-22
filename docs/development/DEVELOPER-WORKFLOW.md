@@ -1,156 +1,170 @@
 # Developer workflow
 
-> **Status:** Target developer experience for the template implementation. The repository currently contains specifications, not an executable plugin or npm scripts. The commands below are acceptance contracts for that implementation.
+> **Status:** Target experience for PRD 0.3. The repository currently contains specifications, not working npm commands or a plugin. The examples below define the implementation contract.
 
-This guide is the short path through the [PRD](../product/PRD.md). The [maintenance and release guide](MAINTENANCE-AND-RELEASE.md) covers keeping the plugin current and publishing it.
+Use this as the short path through the [PRD](../product/PRD.md). Detailed contracts are in [setup/makers](SETUP-AND-MAKERS.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), and [maintenance/release](MAINTENANCE-AND-RELEASE.md).
 
-## 1. What a developer should need
+## 1. Get the template and run setup
 
-For browser development: Git, the documented Node LTS/npm versions, a code editor, and a browser. The template must not require an AI account, Docker, a separate package manager, or a personal Obsidian vault.
+Install the supported Node/npm prerequisites, obtain the template through GitHub, and open its directory. Git is useful for development/release, but a source download without .git must still support browser setup.
 
-For real-host development: the latest public Obsidian and a development vault created inside the repository. The official CLI is optional; native testing still needs a real host. For releases: GitHub repository access and permitted Actions workflows. Local GitHub CLI authentication is not required when using the GitHub Actions interface.
-
-The dated research baseline selects public desktop Obsidian 1.13.7 and Node 24 LTS. The implemented compatibility record—not this dated guide—must identify the current exact tested versions. See [research R01–R02 and R15](../research/2026-09-22-template-research.md).
-
-## 2. First run: the intended quickstart
-
-Create a repository using the GitHub template, clone it, and install the committed dependency graph:
+The first project command is:
 
 ```sh
-npm ci
 npm run setup
+```
+
+No separate dependency installation comes first. The checked-in Node-only bootstrap reviews identity, development profile, downloads, and file changes before it runs the locked dependency install. It then provisions selected test tools/local-vault artifacts, builds, verifies the selected scope, and prints the next action. It exits rather than starting an indefinite watcher.
+
+The wizard collects plugin ID/name/description/author/repository/version, validates them, and offers browser-first or optional native development setup. It never installs Node itself, globally changes your machine, silently disables Restricted Mode, or publishes a release.
+
+The implemented compatibility record identifies exact supported tools and latest public Obsidian. Setup installs that qualified lockfile; it does not silently upgrade the stack during installation. CI and deliberate reinstalls can still use `npm ci` directly.
+
+### Review, dry run, and agents
+
+```sh
+npm run setup -- --dry-run
+npm run --silent setup -- --id field-notes --name "Field notes" --author "Your name" --repo your-account/field-notes --profile browser --no-interaction --yes --json
+```
+
+Dry run makes no filesystem/network changes and works before dependencies are installed. Noninteractive execution requires complete valid inputs; it does not wait for missing answers. A second run validates/resumes rather than overwriting an initialized project.
+
+The repository name and distributable plugin ID differ. Do not keep the upstream identity or blindly use `obsidian-plugin-shell` as the plugin ID. The setup contract includes current submission constraints and preserves license attribution.
+
+## 2. Generate and inspect the first feature
+
+```sh
+npm run make
+npm run make -- --list
+npm run make -- feature tasks
 npm run dev:ui
 ```
 
-`setup` must explain and collect plugin ID, display name, author, description, repository identity, and initial version. It validates the proposed changes before applying them and finishes with a summary, including the local test-vault destination and the next command.
+`make` provides a chooser/help and command-specific options. A generated feature is ordinary source wired into the existing architecture, with a minimal real view/action, localization/style ownership, a harness fixture, and tests. It is not a new runtime framework and it does not invent the finished behavior of your product.
 
-A proposed noninteractive equivalent for agents and automation is:
+The generator previews its plan and refuses collisions. Existing files edited by the developer are not overwritten. A successful scaffold means the stated template behavior exists; it does not mean an unfinished business use case has been implemented.
+
+More recipes are available, with names selected to avoid whatever the composite feature already created:
 
 ```sh
-npm run setup -- --id field-notes --name "Field notes" --author "Your name" --repo your-account/field-notes --yes
+npm run make -- command open-tasks --feature tasks
+npm run make -- modal edit-task --feature tasks
+npm run make -- event tasks.item-archived --feature tasks
+npm run make -- listener refresh-task-list --event tasks.item-archived
+npm run make -- style item-card --feature tasks
 ```
 
-The precise accepted options must be included in `npm run help`. A `--dry-run` must show intended changes without writing them. Re-running setup with the same identity is safe; renaming a plugin that already has user data requires a separate identity/data migration.
+Use per-maker `--help` for required existing owners/actions/payload details. These are illustrative recipes, not a promise that each should be run blindly after a composite maker. The full catalog also covers views, components, stores, use cases, settings, locales, and custom makers.
 
-The default distributable ID must not be copied from `obsidian-plugin-shell`: IDs intended for Community directory submission cannot contain `obsidian`. The repository name and plugin ID are different fields. See [research R25](../research/2026-09-22-template-research.md).
+For machine-readable planning:
 
-### Expected first screen
+```sh
+npm run --silent make -- feature tasks --dry-run --no-interaction --json
+```
 
-The browser opens, or prints a loopback URL for manual opening, into the real example view. It shows a clear empty state, one primary create action, and a small path to useful preferences/help. Creating an item exercises the actual use case and persistence adapter. There is no fake dashboard, account setup, or mandatory guided tour before the first action.
+Scripts and generator templates live in `scripts/`, but generated plugin code lives under `src/` and tests under `tests/`. A global executable called make, GNU Make, PHP, and Symfony are not prerequisites.
 
-The browser harness labels its host simulation boundary. A settings/notices/modal preview is not falsely presented as native Obsidian behavior.
+## 3. Understand one change without learning all infrastructure
 
-## 3. The small primary command surface
+The retained manual recipe is to add an optional description to an example item. Empty text is allowed, oversized text produces a localized error, saved text survives reload, and it is displayed as text rather than HTML.
 
-| Command | Use it for |
+| Area | Change |
 | --- | --- |
-| `npm run setup` | Identity initialization and prerequisite checks. |
-| `npm run dev:ui` | Fast UI development with the real components and controlled fixtures. |
-| `npm run dev:local` | Watch, build, and safely install successful builds into the development vault. |
-| `npm run verify` | Complete normal checks, including browser tests once prerequisites are provisioned. |
-| `npm run release:prepare -- --version 0.1.0` | Prepare consistent release metadata for review without publishing. |
-| `npm run help` | Find specialized tasks and explain prerequisites. |
+| Domain | Add the value/validation rule without framework imports. |
+| Application | Extend the existing use-case input/output; reuse its repository and outcome policy. |
+| Persistence | Decode old data safely and migrate/default the new field; do not create a second writer. |
+| Vue/Pinia | Add a labeled field using the existing application interface. |
+| Localization | Add matching keys/parameters, not scattered literals. |
+| Styles | Edit the owned module/SFC and keep it within 400 lines. |
+| Events | Publish the existing appropriate committed fact after a successful write; change its payload only deliberately. |
+| Tests/harness | Validate input, old data, successful reload, failed writes, two-view refresh, and the actual field interaction. |
 
-Useful lower-level commands remain available: `doctor`, `test`, `test:coverage`, `verify:fast`, `build`, `build:local`, `harness:shot`, `test:e2e`, and `test:obsidian`. Existing `test-build` and `check` names are aliases, not separate implementations.
+Most changes do not need to touch `main.ts`. New native registrations belong in small composition registries; pure functions do not need a new interface/bus/event solely to appear architectural.
 
-`verify` must not silently download tools or start an endless watcher. `test:setup` provisions browser or selected native prerequisites explicitly. Its network/disk requirements must be explained before it runs.
+## 4. Events in ordinary development
 
-## 4. First change: add a description to an example item
+The plugin has one typed bus per runtime. Application services publish completed facts after successful writes. Views subscribe through narrow injected interfaces and query canonical state for their initial snapshot. Closing a view disposes its subscriptions, not the shared bus.
 
-The template's first-change recipe should demonstrate a real extension without creating unnecessary architecture. This scenario is a tutorial specification; the implementing files must be named explicitly once the code exists.
+`make event` adds the contract/catalog/type tests; `make listener` adds a typed owned subscriber and its tests. A subscriber sees the correct payload type and must not import native `TFile`, `App`, or WorkspaceLeaf into application code.
 
-### Define the behavior
+Native file/workspace/metadata changes enter through the supported Obsidian bridge. Startup create replay is not treated as new user activity. A bus publication does not perform the corresponding vault action; requests requiring a result call a service directly.
 
-An item may have an optional plain-text description. Empty text is allowed; oversized text is rejected with a localized message. The description survives reload, remains separate from logging, and is shown safely without HTML interpretation.
+The bus begins delivery synchronously but does not await async listeners. Exceptions/rejections are captured without rolling back a committed save. Owners must guard/cancel in-flight work when their view closes. See the [full semantics](../architecture/EVENT-BUS.md) before relying on ordering or lifecycle behavior.
 
-### Change the existing layers
+## 5. Styles in ordinary development
 
-| Location | Change | Do not add |
-| --- | --- | --- |
-| `src/domain/example/` | Value validation and updated item shape. | Obsidian or Vue imports. |
-| `src/application/example/` | Extend the existing create/update use case and DTO. | A new global command bus. |
-| Existing persistence adapter | Update schema decoding and provide a migration/default for older records. | A second independent settings/data writer. |
-| `src/presentation/example/` | Add a labeled field and safe text display using the existing store/service contract. | Direct calls to `saveData` or `localStorage`. |
-| `src/locales/` | Add matching English/German labels and validation text. | Hardcoded fallback strings scattered through components. |
-| `harness/scenarios/` | Extend one populated/validation fixture. | A second implementation of the use case. |
-| `tests/` | Cover validation, old-data load, successful write/reload, failed write, and browser interaction. | Tests that stub the action while claiming to verify persistence. |
-
-Most features do not need to change `main.ts`. New native registrations belong in the small composition registration module only when the behavior actually requires them.
-
-### Verify the change
-
-Run the relevant unit/component tests during implementation and `verify:fast` for early feedback. Inspect the changed UI in the real harness, exercise its success and failure states, then run `verify` before handoff.
-
-For host-sensitive changes, add `test:obsidian` or the documented native check. Report separately what the browser and host checks established. A successful screenshot is not a persistence test; a mocked native contract is not a real settings integration test.
-
-## 5. Working with the native plugin
-
-The standard generated location is:
+Author CSS in small modules under `src/styles/`, with explicit ordered entries, or as component-owned scoped styles. Do not edit the generated stylesheet.
 
 ```text
-<repository>/
-  .dev-vault/
-    .obsidian/
-      plugins/
-        <plugin-id>/
-          main.js
-          manifest.json
-          styles.css
+ordered CSS imports + compiled styles from imported Vue components
+                              ↓
+                        dist/styles.css
 ```
 
-`dev:local` must preserve plugin data, unrelated plugins, vault notes, and all other configuration. An unsuccessful rebuild leaves the last good installed bundle intact. The output states where files went and whether a reload is required.
+`make style` connects its file to the selected owner/import graph. `make feature`, `make view`, and `make modal` reuse the same style recipe. The native build and harness share the processing rules; artifact-fidelity tests load the exact candidate CSS with matching component identifiers.
 
-Open `.dev-vault` as a vault in Obsidian. Any required decision to enable Community plugins belongs to the developer; the installer must not silently disable Restricted Mode. Do not open your personal knowledge vault merely to test a template.
+```sh
+npm run styles:build
+npm run styles:check
+```
 
-An explicit repository-root-vault mode is supported for developers who prefer it. It uses the same validated deployment implementation and is never inferred automatically from an existing `.obsidian` folder.
+These commands use the shared pipeline and include SFC CSS; they are not a separate raw concatenator. Keep all handwritten CSS files and full SFCs within 400 physical lines. Generated composed output can be longer but retains its bundle-size and artifact checks.
 
-### Optional CLI feedback loop
+Use plugin-scoped classes and Obsidian variables. Native modal/settings roots need their own namespace/tokens; a selector scoped only below a view will not automatically reach a modal elsewhere. Avoid global resets and duplicate harness-only plugin styles.
 
-The official CLI can reload a plugin and capture the native window. It communicates with the actual installed host and has its own prerequisites. [Research R08](../research/2026-09-22-template-research.md)
+## 6. Main workflows
 
-The template wrapper must confirm the intended fixture vault, plugin ID, and available CLI capabilities before taking action. If CLI support is absent, print the manual reload procedure rather than failing browser development or operating on an arbitrary active vault. Do not grant unrestricted evaluation to an agent merely to support a reload command.
+| Command | Purpose |
+| --- | --- |
+| `setup` | Guided fresh install/configuration/verification and safe resume. |
+| `make -- <kind>` | Integrated boilerplate with an explicit reviewable plan. |
+| `dev:ui` | Real-component browser HMR without Obsidian. |
+| `dev:local` | Successful matching JS/CSS/manifest builds installed into the approved development vault. |
+| `verify` | Complete ordinary checks after explicit provisioning. |
+| `release:prepare -- --version X.Y.Z` | Metadata/changelog preparation, not publication. |
+| `help` / `doctor` | Discover commands and diagnose prerequisites safely. |
 
-## 6. Browser scenarios and evidence
+Use targeted tests and `verify:fast` during a change, then `verify` before handoff. It must not download tools silently or become a watcher. `test:setup` is the focused provisioning operation reused by setup.
 
-The harness must make scenario selection discoverable. Proposed URL parameters include:
+Native-sensitive changes additionally need `test:obsidian` or the documented manual procedure. Browser, fake-host, native, and device evidence remain separate.
+
+## 7. Native development
+
+The default location is `.dev-vault/.obsidian/plugins/<plugin-id>/` inside the repository. Open `.dev-vault` in Obsidian. Enable Community plugins deliberately when required; the script does not disable Restricted Mode for you.
+
+`dev:local` preserves data.json, unrelated plugins, notes, and configuration. A failed JS or CSS build leaves the last good matching asset set intact. An explicit repository-root-vault mode is available through validated configuration, never inferred silently from an existing .obsidian directory.
+
+Optional official CLI reload/screenshots must validate the exact fixture vault and capabilities. Missing CLI falls back to manual steps; it is not required for browser work and must not target an arbitrary personal vault. [Baseline research R08](../research/2026-09-22-template-research.md)
+
+## 8. Harness and troubleshooting
+
+A reproducible scenario can be selected with a documented URL such as:
 
 ```text
 /?scenario=storage-failure&locale=de&theme=dark&seed=42
 ```
 
-Stable scenario families cover first run, populated data, input validation, successful persistence/reload, failed writes, future/corrupt schema, unavailable local storage, language switching, narrow panes, two views, and repeated mount/unmount.
+Cover normal and failure paths, two views, event disposal, and composed styles—not only one successful screenshot. The runner owns its server, validates readiness, and records current source/asset hashes. Golden baseline changes require review.
 
-For a UI change, inspect the relevant states rather than only the happy path. A deterministic failure scenario should expose the error without editing production code or deliberately damaging a real vault.
-
-The browser runner owns its server and checks application readiness. CI must not silently connect to an unrelated old process occupying the expected port. Traces/screenshots/reports identify the actual build and scenario. Golden screenshots are changed only through an explicit reviewed baseline update. [Research R19–R20](../research/2026-09-22-template-research.md)
-
-## 7. Troubleshooting requirements
-
-The implemented `doctor` and command output must cover these cases:
-
-| Symptom | Required explanation / safe recovery |
+| Problem | Safe diagnostic/recovery |
 | --- | --- |
-| Node is unsupported | Print detected and supported versions plus the repository's version-selection file. Do not silently bypass engine checks. |
-| Browser binaries are missing | Identify `test:setup`; explain downloads separately from normal tests. |
-| Harness port is occupied | Identify the conflict and allow an explicit alternate port; do not claim another server is this build. |
-| Plugin fails to appear | Check destination, manifest ID, valid build, Community-plugin enablement, and host minimum. Preserve existing data. |
-| Plugin fails after reload | Identify current artifact hash, native logs, and the last good build; no automatic destructive reset. |
-| Settings do not persist | Surface the write error, explain which storage category is affected, and avoid reporting false success. |
-| fallow reports an unused host entry | Investigate real registration/entrypoint modeling. Do not ignore the whole directory or delete code solely on trust. |
-| Vue lint reports an unexpected result | Check active parser/rule coverage and the gate fixture; do not disable the rule in both linters. |
-| Release permissions are missing | Identify the required narrowly scoped workflow permission; do not recommend an unrestricted personal token by default. |
-| Latest package is incompatible | Record a bounded maintenance exception and the failed check, not a permanent blanket ignore. |
+| Setup fails before install | Check Node/npm, checked-in bootstrap, lockfile, identity plan, permissions; no unpinned install fallback. |
+| Install/download interrupted | Resume only valid recorded stages, preserve files, explain unmet prerequisites. |
+| Missing answers in an agent session | Fail with missing keys; do not hang for input. |
+| Generator collision | Show affected file/registration; no blanket force overwrite. |
+| Generated file is unused | Repair its real registration, not a broad fallow suppression. |
+| Events appear duplicated | Inspect runtime/bridge/view ownership and startup registration; no global emitter workaround. |
+| Event listener rejects | Inspect bounded safe diagnostics and cancellation; do not mark a committed save failed. |
+| CSS missing in native view/modal | Check source ownership, compiled scope/class mapping, native root namespace, and installed CSS hash. |
+| Style change not visible | Check graph/watch ownership and last-good build status; do not add a second runtime stylesheet. |
+| Browser/host missing | Explain test:setup/native prerequisites and report not run, not pass. |
+| Port occupied | Reject unrelated process or use explicit alternate port. |
+| Release permissions absent | Explain least required permission, not an unrestricted personal token. |
 
-## 8. Removing the sample and starting the real product
+## 9. Removing the example and releasing
 
-Keep reusable host integration, localization, error handling, persistence primitives, testing adapters, and verification scripts. Remove the example's domain/use cases, UI, registrations, fixtures, tests, and translations using the supplied recipe.
+Use the tested removal recipe for example code, registrations, events/descriptors, style imports, tests/fixtures, and locales. Keep reusable host/bus/persistence/localization/error/testing infrastructure. Verify the resulting graph and generate the first real product slice with make.
 
-The recipe must be exercised in a generated-repository acceptance test. It must not leave an unused example service hidden by a fallow exception, a ribbon action pointing to a removed view, or a README claiming functionality that no longer exists.
+Handoffs name actual behavior, exact commands/results, current artifacts, migration/compatibility impact, and untested scope. Generated code volume is not acceptance evidence.
 
-A new product replaces the example behavior with its own first vertical slice. It does not need to retain an example-item database or copy a large feature-generator framework.
-
-## 9. Handoff and release preparation
-
-A useful handoff states the behavior changed, exact checks run and their results, relevant browser/native evidence, compatibility or data migration impact, and any untested scope.
-
-Use the [maintenance and release guide](MAINTENANCE-AND-RELEASE.md) for dependency PRs, preparing a version, creating a draft, testing its exact assets, and explicit publication. Creating a GitHub release and obtaining the first Community directory listing are separate steps.
+The [maintenance/release guide](MAINTENANCE-AND-RELEASE.md) covers reviewed dependency updates, fixed-commit candidates, native acceptance, and explicit publication of the same JS/CSS/manifest. First directory approval is separate from GitHub release creation.
