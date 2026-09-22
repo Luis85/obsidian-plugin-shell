@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import '../../harness/app/test-api';
+import { controlMetrics } from './control-metrics';
 const observed = new WeakMap<Page, { browser: string[]; expected: { code: string; operation: string }[] }>();
 const primary = (page: Page) => page.locator('[data-leaf="primary"]');
 async function open(page: Page) {
@@ -46,10 +47,9 @@ for (const width of [320, 480, 768, 1280, 1920]) {
       expect(result.gutter).toBe(width <= 600 ? 16 : width >= 1440 ? 32 : 24);
     }
     const select = primary(page).getByLabel('Language', { exact: true });
-    expect(await select.evaluate(el => {
-      const css = getComputedStyle(el);
-      return el.clientHeight - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom) >= parseFloat(css.lineHeight) - 1;
-    })).toBe(true);
+    const metrics = await controlMetrics(select);
+    expect(metrics.glyphHeight).toBeGreaterThan(0);
+    expect(metrics.height - metrics.padding).toBeGreaterThanOrEqual(metrics.glyphHeight + 2);
     await select.focus(); await expect(select).toBeFocused(); await select.selectOption('de');
     await primary(page).getByRole('button', { name: 'Save preferences' }).click();
     expect((await geometry(page)).overflow).toBeLessThanOrEqual(1);

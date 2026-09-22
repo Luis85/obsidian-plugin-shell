@@ -9,6 +9,32 @@ concurrency:
   group: iteration-two-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  dependency-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - run: npm ci
+      - run: node scripts/testing/dependency-candidate.mjs
+      - name: Retain reviewed diff and temporary offline dependencies
+        if: always()
+        run: |
+          git diff -- package.json package-lock.json > reports/dependency-candidate/lock-review.diff
+          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='*.eot' --exclude='*/.local-browsers/*' -czf offline-dependencies.tgz node_modules
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: iteration-two-supported-dependency-candidate
+          path: |
+            reports/dependency-candidate/
+            offline-dependencies.tgz
+          retention-days: 2
   candidate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
