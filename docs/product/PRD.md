@@ -1,222 +1,203 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.5.0  
-> **Updated:** 2026-09-22  
-> **Owner:** Luis85  
-> **State:** Specification plus an implemented, isolated host-stylesheet specimen. The plugin runtime, setup/makers, full harness, and release automation are not implemented yet.
+> **Version:** 0.6.0 · **Updated:** 2026-09-22 · **Owner:** Luis85  
+> **State:** Specification plus an implemented style specimen and scope-limited verification baseline. The plugin runtime, setup/makers, full Vue harness and native release qualification are not implemented.
 
-## 1. Product direction
+## 1. Product direction and normative structure
 
-Provide an approachable, current Obsidian plugin baseline: obtain the template, run guided setup, generate a useful first feature, develop in a real-component browser harness and the native host, verify, then publish the exact accepted assets.
+Provide an approachable current Obsidian plugin baseline: obtain the template, run guided setup, generate a first feature, develop with a real-component browser harness and native host, verify, and publish the exact accepted artifacts.
 
-This revision strengthens errors/notifications and frontend evidence, adds original host-style fixture assets, and reviews the complete product from developer, end-user, UX, accessibility, architecture, quality, data integrity, privacy, performance, maintenance, and release perspectives. It does not add a notification-center product or another general-purpose framework.
+This revision adds a proper test strategy, executable test concept, machine-readable traceability, deterministic repeated baseline checks, and explicit evidence boundaries. It does not claim a working plugin because fixture tests pass.
 
-### Normative structure and preservation
+[BASELINE-0.4.md](BASELINE-0.4.md) remains the exact retained original specification (blob `eb6e37ed128c6bbe6a2eba895729d2643c8cfb3e`). Its requirements, command contracts, work packages and AC-01–62 remain incorporated. The v0.5 error/notification/harness requirements and AC-63–82 are retained below. Historical status/version wording is not a current capability claim; current refinements take precedence without weakening earlier safety or quality requirements.
 
-The exact previous specification is preserved as [BASELINE-0.4.md](BASELINE-0.4.md), using its original blob `eb6e37ed128c6bbe6a2eba895729d2643c8cfb3e`. Its numbered requirements, command contracts, work packages and AC-01–62 remain incorporated here. No previous requirement is deleted by shortening this front door.
-
-Historical version/status text and dated research snapshots in that baseline are not current capability claims. The current status above and this revision's explicit refinements take precedence. The companion contracts below remain normative. New error/notification and harness-style requirements refine the prior generic rules; they do not weaken data safety, architecture, or release evidence.
-
-| Contract | Scope |
+| Normative document | Scope |
 | --- | --- |
-| [Baseline requirements](BASELINE-0.4.md) | Existing core requirements, AC-01–62, WP-00–09. |
-| [Setup and makers](../development/SETUP-AND-MAKERS.md) | TOOL-01–06, SETUP-01–12, MAKE-01–12. |
+| [Retained baseline](BASELINE-0.4.md) | Core requirements, AC-01–62, WP-00–09. |
+| [Setup/makers](../development/SETUP-AND-MAKERS.md) | TOOL-01–06, SETUP-01–12, MAKE-01–12. |
 | [Typed events](../architecture/EVENT-BUS.md) | EVT-01–16. |
-| [Modular styles](../architecture/STYLES.md) | CSS-01–12. |
+| [Styles](../architecture/STYLES.md) | CSS-01–12. |
 | [Document creation](../architecture/DOCUMENT-CREATION.md) | DOC-01–20. |
-| [Errors and notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md) | Adds ERR-07–18 and NTF-01–12. |
-| [Harness styles and evidence](../testing/HARNESS-STYLES.md) | Adds HSS-01–12. |
+| [Errors/notifications](../architecture/ERRORS-AND-NOTIFICATIONS.md) | ERR-07–18, NTF-01–12, retaining original ERR/LOG rules. |
+| [Harness styles](../testing/HARNESS-STYLES.md) | HSS-01–12. |
+| [Test strategy](../testing/TEST-STRATEGY.md) | Adds TST-01–16. |
+| [Test concept](../testing/TEST-CONCEPT.md) | Executable profiles, fixtures, reporting, determinism and implementation roadmap. |
 
-## 2. Users and success
+The [machine test plan](../testing/test-plan.json) is an executable inventory and traceability index. It does not replace normative behavior with abbreviated summaries. Test results, acceptance evidence and release readiness are distinct.
 
-The developer should not need to study the full specification before a first change. Agents and reviewers use the same commands and architecture. End users receive native-feeling, local-first functionality with honest outcomes and actionable recovery.
+## 2. Users and outcomes
 
-Retain SUC-01–06 and DX-01–05. A successful generated repository must actually install/build/verify, not merely contain extensive documentation. Setup and maker readiness remain pending. A standalone stylesheet page is useful but is not a completed first plugin feature.
+SUC-01–06 and DX-01–05 remain. A developer/agent uses the same short workflow and does not need to read the entire specification before changing a feature. End users receive native-feeling, private, reliable behavior and actionable recovery.
 
-## 3. Scope and capability status
+A successful generated repository must really install/build/verify. No placeholder package scripts or mock services may simulate that success. Current baseline tests are useful implementation progress but are not the completed first plugin feature.
 
-| Capability | State after this revision |
+## 3. Capability status
+
+| Capability | Current state |
 | --- | --- |
-| Current product/architecture/developer contracts | Specified and reviewed. |
-| Original modular host stylesheet | Implemented as isolated fixture source. |
-| Static/style specimen with interactive controls | Implemented; no real plugin business behavior. |
-| Loopback fixture server and focused Node tests | Implemented; seven tests executed successfully in the editing environment. |
-| ErrorService/NotificationService and integrated captured-defect observer | Specified; not implemented. |
-| Vue/Pinia plugin, DocumentCreationService, typed bus | Specified; not implemented. |
-| Fresh-checkout npm setup/make/full verify | Specified; no package.json/toolchain yet. |
-| Full Vite/Playwright/native harness | Pending. |
-| Host/device compatibility and release acceptance | Not run. |
+| Product/architecture/developer contracts | Specified, including explicit test strategy/concept. |
+| Original modular host CSS and interactive style specimen | Implemented. |
+| Allowlisted loopback fixture server | Implemented and locally tested. |
+| Baseline test-plan validation, fault observer, source hashes/limits, real child execution, repeated reports | Implemented and locally tested. |
+| Optional preprovisioned Playwright specimen checks | Implemented; local inline diagnostic mode tested. Served browser mode is environment-blocked locally. |
+| Scoped Linux/Windows baseline CI | Workflow supplied; local runs do not establish hosted/Windows success. |
+| Production ErrorService/NotificationService/caught-Vue observer | Specified, not implemented. The new observer is test tooling only. |
+| Vue/Pinia plugin, DocumentCreationService, bus, setup/makers | Specified, not implemented. |
+| Full pinned Vite/Vitest/Playwright Test toolchain and code coverage | Pending. No package.json/lockfile is fabricated for this bridge. |
+| Native/device/release compatibility | Not run; release profile remains blocked. |
 
-All previous requested capabilities remain in scope. No OS push notifications, cloud telemetry, persistent notification inbox, distributed tracing, generic retry platform, full theme emulator, or automated user-note migration is added.
+All previous requested capabilities remain in scope. This does not add a notification inbox, ORM, distributed event/error platform, theme emulator or autonomous release publisher.
 
-## 4. Product review
+## 4. Product review continuity
 
-The [review report](../reviews/2026-09-22-product-review.md) records twenty findings against baseline commit `c62303e1d60a77b1496ed06f7142e1952dcf78c0`, their changes, actual evidence and unresolved runtime work.
-
-The most consequential findings are the distinction between specified and implemented capabilities; fragmented notification ownership; committed versus uncertain mutation outcomes; captured Vue defects escaping browser-only error checks; missing original host styling; and the risk of a static specimen being mistaken for native compatibility.
+The [v0.5 review](../reviews/2026-09-22-product-review.md) retains its twenty findings and historical evidence. This pass addresses its test-evidence and finite-qualification gaps through executable inventory, fault expectations, exact test accounting, repeated runs and release scope guards. Its historical test counts are not current totals.
 
 ## 5. Stack, compatibility and updates
 
-TEC-01–08 and UPD-01–08 remain required: Vite/Vitest/Oxlint/fallow/TypeScript/Vue 3/Pinia/Obsidian ESLint, one formatter/package manager, latest compatible stable dependencies, exact qualified lockfile, current public Obsidian target, and explicit update PRs.
+TEC-01–08 and UPD-01–08 remain: required Vite/Vitest/Oxlint/fallow/TypeScript/Vue/Pinia/Obsidian ESLint stack, latest compatible stable dependencies, one qualified exact lockfile, current public host and reviewed updates.
 
-No version matrix was established by the fixture tests. Node 22.16.0 and Chromium 144 used for the bounded review are environment observations, not new supported-version policies. Resolve exact current stable candidates in WP-00. Optional Catalyst coverage is not a standard-development prerequisite.
+The dependency-free Node baseline is temporary qualification of existing assets, not a new permanent competing framework. Reuse/port its assertions to the selected Vitest/Playwright Test projects in WP-00/01. Registry unavailability in this editing environment is not a reason to invent a compatible latest-package matrix.
+
+Node 22.16.0 and Chromium 144 used locally are evidence-environment observations. The workflow targets an exact Node 24.21.0 qualification environment; that does not establish complete plugin support. Record actual CI results separately.
 
 ## 6. Architecture
 
-Retain ARC-01–10 and the direction:
+ARC-01–10 remain: presentation → application → domain → shared; infrastructure implements inner ports; bootstrap composes concrete adapters; main.ts owns minimal lifecycle and no business logic.
 
-```text
-presentation → application → domain → shared
-infrastructure → application contracts / domain / shared
-bootstrap → concrete adapters and view factories
-main.ts → minimal lifecycle and composition
-```
-
-Expected failures are application data; translation, native notices and DOM belong to presentation/adapters. Introduce one shared feedback coordinator around real user operations, not arbitrary new Notice calls throughout domain/services/components. The harness uses the same failure/notification policy, substituting only supported host sinks.
+Testing utilities under scripts/tests are never runtime dependencies. The test ledger must not become a globally imported production error service. Actual application outcomes, notification policy and host/harness sinks retain their declared ownership.
 
 ## 7. Lifecycle
 
-LIF-01–07 remain. Views own Vue/Pinia and local disposables; the runtime owns canonical services and the typed bus. Add explicit ownership for notification handles, timers, action callbacks, diagnostic observers and in-flight completion guards.
+LIF-01–07 remain, including view/runtime ownership, no leaf detachment and late async guards. Tests own servers, ports, child processes, temporary repositories, browser contexts, fault ledgers and report outputs. Disposal must be asserted rather than hidden by blanket cleanup that conceals a leak.
 
-Closing a view is neither cancelling a committed write nor dismissing another plugin's notices. Unload disposes only owned resources. No global host error suppression or notice-container sweep.
+## 8. UI and notifications
 
-## 8. UI, recovery and notifications
+EXA-01–05, UI-01–10, SET-01–03 and NTF-01–12 remain. Field validation stays associated and persistent; essential recovery is not only in an expiring notice. One operation updates its feedback handle; independent operations remain distinct. Cancellation before mutation is not an error alert.
 
-EXA-01–05, UI-01–10 and SET-01–03 remain. Use a predictable surface policy: validation beside fields; durable recovery in the owning form/view; bounded optional native notices; one updating progress state; no error alert for cancellation before mutation.
+Specimen controls exercise styling only. A browser dialog, hardcoded progress element, or demo notice does not prove native adapter/service behavior. Tests must explicitly choose real Pinia actions when they claim application execution.
 
-NTF-01–12 define kind, ownership, localized messages, deduplication, update/dismiss behavior, timers, accessibility, actions, and native/harness adapters. The public Notice API does not automatically supply a severity-aware queue, action framework, or targetable notification manager. Qualify those template behaviors explicitly.
+## 9. Data and entity documents
 
-## 9. Data and documents
+DAT-01–07, LOC-01–05 and DOC-01–20 remain. Markdown is canonical for note-backed Tasks, using explicit entity/document definitions and real serialization through the prepared/create/commit pipeline. No overwrite, automatic user-note migration, duplicate data.json Task authority or unsafe uncertain-write retry.
 
-DAT-01–07, LOC-01–05 and DOC-01–20 remain unchanged in intent. Markdown is canonical for note-backed entities. Creation uses the existing prepare/commit pipeline and stable submission identity, with no silent overwrite or uncertain-write retry.
-
-Feedback preserves effect facts. A created document whose open action fails stays created; the offered retry is open, not create. A lost/uncertain create response stays uncertain until reconciled. Listener and notification failures cannot roll back a committed operation.
+Tests inspect actual generated Markdown/writer content and state. Confirmed creation survives failed opening/subscriber/notification; retries target the follow-up, not another document creation.
 
 ## 10. Localization and accessibility
 
-Retain I18N-01–07 and prior accessibility requirements. Localized feedback includes native notices, recovery actions, field errors, and accessible labels. Stable operation/error codes are not translated. User values never become executable HTML or template code.
+I18N-01–07 remain. Tests cover relevant locales/long text, date-only timezone independence, associated validation, keyboard/focus and persistent recovery. Force-colors/reduced-motion rendering does not establish complete accessibility or screen-reader behavior. Required manual/native evidence remains explicit.
 
-Use polite status announcements for routine updates and alerts selectively. Essential recovery is not only in an expiring toast. A modal requires actual focus/inert/keyboard behavior; a CSS backdrop or aria-modal attribute alone is insufficient. The specimen's German option translates its demo messages only and does not claim a complete localized application.
+## 11. Errors and diagnostics
 
-## 11. Error and diagnostic contract
+ERR-01–18 and LOG-01–06 remain. An unexpected caught defect must still fail an ordinary test. The test observer records exact safe code/scope/count, rejects missing/extra expected failures and cannot erase overflow by evicting entries. Production integration into Vue/error/subscriber boundaries remains a future acceptance obligation.
 
-ERR-01–06 and LOG-01–06 are retained and extended by ERR-07–18. Key additions: canonical effect-aware outcomes, single feedback ownership, safe retry capabilities, Vue containment with independent test observability, reporter-failure fallback, pre-buffer redaction, and honest degraded mode.
+No raw user content, paths, plans or secrets in default logs/reports. Current negative fixtures use synthetic values. Test helpers cannot expand publication or filesystem permissions.
 
-No console-only success signal or empty catch may conceal an unexpected defect. Production can show a useful fallback while tests still fail through an independent captured-defect ledger. Expected fault scenarios must assert exact code/scope/count, including that the intended fault actually occurred.
+## 12. Harness and styling
 
-## 12. Harness and stylesheet
+HAR-01–10, E2E-01–07, CSS-01–12 and HSS-01–12 remain. The original host CSS is separate from composed plugin CSS. Real plugin components/services and matching compiled style identifiers remain required for integrated evidence.
 
-HAR-01–10/E2E-01–07/CSS-01–12 remain and are clarified by HSS-01–12. The original `harness/styles/obsidian.css` supplies scoped semantic tokens and native-like controls/settings/overlays through five modules. It is separate from generated plugin styles.css and excluded from release artifacts.
+Modes are explicit: HTTP specimen, browser specimen, inline diagnostic, integrated browser and native candidate. The optional browser command never silently switches from blocked HTTP navigation to inline HTML. Missing host CSS and controlled console errors are tested negative controls, not proof of a completed native error pipeline.
 
-Reports identify one of three modes: standalone style specimen, integrated real-component harness, or native candidate. Fast HMR shares style sources; release-fidelity tests use exact composed plugin CSS and matching compiled Vue identifiers. None may conceal missing plugin CSS under added shim rules.
+## 13. Test strategy and test concept
 
-## 13. Test strategy
+TST-01–16 establish risk-based test levels, ownership, deterministic inputs/scheduling, isolation, no-hidden-retry repetition, independent fault observation, separate metrics, exact traceability, fail-closed gates, release boundaries, defect/flake handling, update regression and retained evidence.
 
-Keep all existing unit/application/adapter/component/bus/document/browser/tooling/artifact/native tests. Add independent captured-error and notification-lifecycle assertions, missing-host/plugin-style negative cases, host-model provenance, and exact-error-count scenarios.
+The [test concept](../testing/TEST-CONCEPT.md) defines executable files, commands, IDs, profile requirements, report schemas and detailed future service scenarios. The inventory assigns every AC-01–90 an owner, risk, required modes and current evidence/gap. A partial fixture link cannot satisfy a whole native requirement.
 
-Focused fixture tests delivered now establish only their declared scope. Full real-component and native tests still need implementation. Required cases can be assigned to core and targeted profiles rather than an unnecessarily exhaustive Cartesian matrix, but every required behavior must be covered. Missing evidence is not pass.
+Current baseline verification uses actual Node tests in isolated child processes with exact IDs and schema-checked event reports. Empty, skipped, missing, malformed or timed-out execution is not pass. Three fresh runs must all pass with stable semantic outcomes; input hashes are compared before/after. These checks do not measure production coverage.
 
 ## 14. Quality policy
 
-QLT-01–17 remain: source/CSS/tooling 400 physical lines, tests/helpers 450, main.ts 100, complete SFC count, strict types, complementary linters, full/production fallow, actual negative fixtures, and reviewed exceptions. Composed build output keeps its separate size/provenance policy.
+QLT-01–17 remain unchanged in intent: 400 physical source/CSS/tooling lines, 450 test/helper lines, main.ts 100; full SFC counts; strict types; complementary lint; full/production fallow; reviewed exceptions; deliberately invalid gate fixtures.
 
-The fixture source and server obey those limits. Its Node tests are temporary dependency-free qualification for the bounded stylesheet delivery; integrate them into the selected existing test projects when the real toolchain is implemented. Do not add a competing permanent test framework.
+Baseline physical-line and input checks cover their declared roots only. Limited source regex tripwires are not CSS parsing, full architecture analysis or a security audit. The planned runtime coverage floors remain unmeasured until the real coverage project exists. Test count, acceptance state and coverage must never be combined into a misleading single percentage.
 
-## 15. Commands and current executable scope
+## 15. Commands
 
-All intended npm command contracts in baseline section 15 remain pending. No package.json is invented just to make a documentation-led repository appear operational.
-
-These two focused commands are implemented now:
+Future npm commands in the retained baseline remain pending. These focused commands now work independently of package installation:
 
 ```sh
 node scripts/harness/serve-style-fixture.mjs --port 4174
-node --test tests/harness-styles/server.test.mjs
+node scripts/testing/verify-baseline.mjs --repeat 3 --json
+node scripts/testing/verify-baseline.mjs --profile release --json
 ```
 
-The first serves a fixed allowlist on loopback for manual specimen inspection and terminates on SIGINT/SIGTERM. The second runs seven finite tests. They do not initialize a plugin, install packages, create notes, or satisfy full verify.
+The server is interactive; verification is finite. The release profile deliberately exits 2 with blocked readiness and no publication. Optional `check-browser-specimen.mjs --mode served` requires preprovisioned Playwright/browser; inline diagnostic mode is explicit and produces separately labeled evidence. See the concept for safe local override/provisioning details.
 
-All tooling stays in scripts; host CSS and specimen code stay in harness. The proper native Vite build still composes plugin source CSS/SFCs into one styles.css; it never packages the original host shim.
+Reports are written into unique ignored folders. They contain execution input hashes, mode, tool/environment, actual outcomes, JUnit/readable summaries and remaining gaps. A stale report is not a fresh execution or a signed attestation.
 
 ## 16. Agent workflow
 
-AGT-01–12 remain, with evidence labels made explicit. Agents use the same error/notification helpers and maker rules, not locally invented success patterns. They cannot hide a caught defect by deleting the observer, muting the ledger, accepting screenshots, or widening expected errors.
+AGT-01–12 remain. Add actual tests/IDs/trace links with implementation, use finite commands and read scope/status as well as counts. No quiet inventory deletion, skip, retry-only green, observer removal, lowered threshold or visual baseline acceptance to finish work.
 
-The short README and current PRD are entrypoints; read detailed contracts only for the task. Reference the retained numbered requirements rather than copying the complete baseline into every provider file.
+Property-generated tests will record seeds/replay paths after the library is pinned. Do not add fake property tests over a substitute implementation merely to fill a planned suite.
 
-## 17. Template, maintenance and releases
+## 17. CI, maintenance and release
 
-TPL-01–04, CI-01–06 and REL-01–11 remain. First setup, generated-repository qualification, current dependencies and native acceptance still need implementation. Fixture source/server/report assets are never part of a plugin distribution.
+TPL-01–04, CI-01–06 and REL-01–11 remain. The new read-only baseline workflow calls the same finite command on Linux/Windows with pinned official actions and bounded artifact retention. It does not install an invented plugin toolchain or receive release credentials.
 
-Release promotion consumes fixed source and accepted JS/CSS/manifest hashes. Fixture checks are not native evidence. A shim update or a changed plugin stylesheet invalidates the relevant visual comparison; neither is an excuse to rebuild a different candidate after acceptance.
+Release qualification still requires actual runtime/browser/artifact/native/generated-repository evidence for the candidate. The current guard stays blocked even if baseline tests are green; replace it only with the real reviewed release implementation. Full host/device and generated-repository workflows remain pending.
 
-## 18. Non-functional requirements
+## 18. Non-functional targets
 
-NFR-01–13 remain proposed targets until measured in the qualified environment. Error/notification contracts add bounded queues/actions/timers/diagnostics, no notification storms, and zero orphan owner resources after cleanup. Suggested progress/expiry/queue defaults are documented policies to qualify, not upstream Obsidian guarantees.
-
-No blanket claims of WCAG conformance, pixel equivalence to native Obsidian, future-host compatibility, or cross-device write guarantees are made from this specimen.
+NFR-01–13 remain proposed until measured. Baseline runner deadlines and fresh temp directories support reliable feedback but do not certify plugin performance, mobile support, exactly-once writes, WCAG compliance or pixel equivalence to Obsidian.
 
 ## 19. Acceptance and traceability
 
-AC-01–62 are preserved byte-for-byte in the baseline. This revision adds twenty cases, bringing the specified total to 82:
+AC-01–62 remain in the retained baseline. The v0.5 cases and eight new test-system cases follow. There are **90 specified acceptance cases**, not 90 passing implementation tests. The machine inventory is validated independently of actual execution results.
 
 | ID | Required outcome | Trace |
 | --- | --- | --- |
-| AC-63 | Canonical failures preserve category, safe identity and actual effect state across layers. | ERR-07–09 |
-| AC-64 | Invalid fields receive associated persistent guidance without one toast per field. | NTF-02, NTF-06 |
-| AC-65 | Same operation updates one progress/terminal notification; independent attempts stay distinct. | NTF-01, NTF-03–04 |
-| AC-66 | Uncertain writes never expose an unsafe create retry; committed/open-failed exposes only safe follow-up. | ERR-09–11, NTF-10 |
-| AC-67 | Reporter/translator/sink failure is bounded, nonrecursive, and does not falsify the operation. | ERR-13–14, NTF-07 |
-| AC-68 | A contained Vue/render defect still fails an ordinary browser scenario through the independent ledger. | ERR-12, ERR-15, HSS-08 |
-| AC-69 | Expected-fault scenarios reject missing faults, unexpected extra faults and ledger overflow. | ERR-15, HSS-08–09 |
-| AC-70 | Notice burst/dedup/expiry/dismiss obey bounds without losing essential recovery or test evidence. | NTF-04–05, NTF-11 |
-| AC-71 | View/runtime disposal removes owned handles/actions/timers, preserving other views/plugins. | NTF-03, NTF-10–11 |
-| AC-72 | Keyboard, focus, live announcements and persistent recovery work in the declared environment. | NTF-06–09 |
-| AC-73 | Native Notice capability/targeting/timer limitations are modeled without private API assumptions. | NTF-07–08 |
-| AC-74 | Host-style fixture is original, scoped and provenance-labeled; no copied app.css/fonts or release inclusion. | HSS-01–02, HSS-11 |
-| AC-75 | Missing host CSS, missing plugin CSS, wrong scope identifiers or accidental shim packaging fail checks. | HSS-06–07 |
-| AC-76 | Light/dark/narrow/long-text/forced-color/reduced-motion cases have explicit mode and evidence. | HSS-04–05 |
-| AC-77 | CSS-only specimen cannot be reported as a real native/Vue/service test. | HSS-03, HSS-05 |
-| AC-78 | Host comparison records actual host/runtime/style/build identity and remains unverified when not run. | HSS-01, HSS-06 |
-| AC-79 | Makers reuse canonical error/notification policy and provide failure/cleanup tests. | ERR-16, POL-04 |
-| AC-80 | Freshness/release evidence excludes fixture-only success and preserves all previous safety requirements. | POL-01, REL-02, HSS-12 |
-| AC-81 | Loopback specimen server rejects arbitrary paths/writes and serves declared assets with safe headers. | HSS-11–12 |
-| AC-82 | Complete required scenario coverage is finite and does not recursively regenerate test projects. | POL-05–06 |
-
-“Specified total” is not a passing-test count. The review reports actual executed checks separately.
+| AC-63 | Canonical failures preserve category, safe identity and actual effect state. | ERR-07–09 |
+| AC-64 | Associated persistent field guidance, not a toast per invalid field. | NTF-02, NTF-06 |
+| AC-65 | One progress/terminal handle per operation; independent attempts stay distinct. | NTF-01, NTF-03–04 |
+| AC-66 | Uncertain create has no unsafe retry; committed/open-failed exposes safe follow-up only. | ERR-09–11, NTF-10 |
+| AC-67 | Reporter/translator/sink failure bounded/nonrecursive and truthful. | ERR-13–14, NTF-07 |
+| AC-68 | Contained Vue/render defect fails ordinary browser scenario via independent ledger. | ERR-12, ERR-15, HSS-08 |
+| AC-69 | Expected-fault scenarios reject missing/extra faults and overflow. | ERR-15, HSS-08–09 |
+| AC-70 | Notice bursts/dedup/expiry/dismiss preserve recovery and evidence. | NTF-04–05, NTF-11 |
+| AC-71 | Disposal removes only owned handles/actions/timers. | NTF-03, NTF-10–11 |
+| AC-72 | Keyboard/focus/live announcements/persistent recovery work in declared environment. | NTF-06–09 |
+| AC-73 | Native Notice limitations modeled without private API assumptions. | NTF-07–08 |
+| AC-74 | Original scoped/provenance-labeled fixture, no copied app.css/fonts or packaging. | HSS-01–02, HSS-11 |
+| AC-75 | Missing host/plugin CSS, wrong identifiers and shim packaging fail checks. | HSS-06–07 |
+| AC-76 | Theme/narrow/long-text/media cases have explicit mode/evidence. | HSS-04–05 |
+| AC-77 | Specimen is not reported as native/Vue/service testing. | HSS-03, HSS-05 |
+| AC-78 | Native comparison has actual identity or remains unverified. | HSS-01, HSS-06 |
+| AC-79 | Makers reuse canonical feedback and failure/cleanup tests. | ERR-16, POL-04 |
+| AC-80 | Freshness/release excludes fixture-only success and retains prior safeguards. | POL-01, REL-02, HSS-12 |
+| AC-81 | Loopback server rejects arbitrary paths/writes and serves declared assets safely. | HSS-11–12 |
+| AC-82 | Required coverage/qualification finite without recursive generation. | POL-05–06 |
+| AC-83 | Plan rejects missing/duplicate acceptance and unknown evidence/test IDs. | TST-09–10 |
+| AC-84 | Repeated cold runs agree without retries hiding failures. | TST-04–06 |
+| AC-85 | Exact expected code/scope/count and overflow cannot conceal faults. | TST-07 |
+| AC-86 | New/changed execution inputs invalidate stale evidence. | TST-10, TST-15 |
+| AC-87 | Empty/skipped/malformed/crashed/missing test execution fails closed. | TST-10 |
+| AC-88 | Owned test execution is bounded and timeout cleanup exercised. | TST-05, TST-10 |
+| AC-89 | Execution rate, acceptance evidence and code coverage remain separate. | TST-08–09 |
+| AC-90 | Baseline/inline success cannot satisfy native/release gates. | TST-01, TST-11 |
 
 ## 20. Implementation packages
 
-WP-00–09 retain their baseline dependencies and outcomes. Integrate this pass into them rather than add a parallel project:
+WP-00–09 keep existing scope and dependencies. Integrate the test strategy rather than add a second project:
 
-| Package | Refinement |
+| Package | Required follow-through |
 | --- | --- |
-| WP-00/01 | Qualify current tools/native APIs, establish truthful readiness, incorporate focused fixture tests. |
-| WP-02/03 | Implement shared failure/outcome handling, notification sinks and owner lifecycle with real services. |
-| WP-04 | Demonstrate success, validation, uncertain write and committed-with-follow-up-error in existing examples. |
-| WP-05/06 | Mount real Vue/components using original host CSS; captured-error observer, negative fidelity tests, native comparison. |
-| WP-07 | Generate the same error/notification/style patterns, with failure and cleanup tests. |
-| WP-08/09 | Upgrade/release rehearsal retains scope-bound evidence and exact candidate assets. |
+| WP-00/01 | Qualify actual current tool versions; port/reuse baseline checks in Vitest and locked CI; preserve no-dependency bootstrap tests. |
+| WP-02/03 | Real service/bus/error/notification/document contracts with controlled clocks, barriers, faults and bytes. |
+| WP-04 | Example and Task flows with truthful outcomes and actual persistence. |
+| WP-05/06 | Real Vue harness, independent caught-defect observer, composed CSS fidelity, native/device checks. |
+| WP-07 | Bounded fresh setup/generated-repository tests, maker output and removal safety. |
+| WP-08/09 | Upgrade regression and exact-candidate release/native/generated qualification. |
 
-A first-working developer milestone may precede complete template qualification; label it honestly. Every previously required complete-v1 capability remains required.
+## 21. Polishing and governance
 
-## 21. Polishing rules and risk control
+POL-01: Distinguish specified/implemented/locally-tested/native-verified/released. POL-02: Preserve numbered requirements through one current entrypoint and focused companions. POL-03: Avoid a new inbox/theme/error/testing platform. POL-04: Generated source follows shared policies and gates. POL-05: Risk-select profiles without dropping required coverage. POL-06: Generated qualification has an explicit finite boundary; no recursive full-suite generation or hidden blanket skip.
 
-**POL-01:** Current capability tables and handoffs distinguish specified, implemented, locally tested, native-verified and released. Never promote status based on documentation alone.
+A baseline may become useful before complete v1 qualification, but its label must remain honest. Do not lower unchanged requirements to make an early milestone look complete.
 
-**POL-02:** Preserve numbered requirements rather than rewriting their entire text every iteration. Use one current entrypoint and focused normative companions; historic baseline status is not current.
+## 22. Sources and executed evidence
 
-**POL-03:** Keep the starter small: no notification inbox, theme engine, distributed error platform or new generic framework. Reuse current boundaries and policies.
+Primary test-tool documentation is cited in the strategy. Earlier R/S/D and reliability sources remain with existing companions. [The execution record](../testing/2026-09-22-verification-record.md) states the actual local tests, fixed inputs, negative controls, tooling faults corrected, and blocked environments.
 
-**POL-04:** Generated code follows canonical feedback/ownership paths and existing quality gates. No scaffold-local exceptions, new log sinks, or global emitters to make it pass.
-
-**POL-05:** Map all required scenarios to explicit core/targeted/native profiles. Avoid redundant full Cartesian runs, but never skip required coverage silently. Record environment and mode.
-
-**POL-06:** Template-qualification tests run isolated generated repositories using a finite project selection. They do not recursively regenerate themselves. Scope the generator-of-generators test explicitly while retaining all generated runtime checks; no quiet blanket skip.
-
-See the review for remaining implementation risks and priorities. The main outstanding risk is still the distance between a specification and a working fresh-checkout workflow.
-
-## 22. Sources and evidence
-
-The [new research register](../research/2026-09-22-reliability-harness-review.md) records Vue error behavior, native Notice API, accessible feedback, Playwright evidence and stylesheet guidance. Earlier R/S/D sources remain with the baseline/companions.
-
-The [review record](../reviews/2026-09-22-product-review.md) contains exact bounded checks and environment limitations: the HTTP server was tested using Node, while administrator-blocked browser loopback navigation required inline specimen rendering for Chromium checks. No native/plugin/toolchain/full-harness claim follows from that test mode.
+This iteration supplies runnable baseline verification—not the unimplemented plugin. Hosted CI, native Obsidian, mobile devices, production coverage, full generated repositories and release acceptance require their own evidence.

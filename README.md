@@ -1,77 +1,65 @@
 # Obsidian Plugin Shell
 
-A developing GitHub template for maintainable Obsidian plugins using TypeScript, Vue 3, Pinia, Vite, Vitest, Oxlint, fallow, and Obsidian ESLint.
+A planned current Obsidian plugin template using TypeScript, Vue 3, Pinia, Vite, Vitest, Oxlint, fallow and Obsidian ESLint.
 
-> **Current state:** PRD **0.5.0**, an original modular host-stylesheet specimen, its loopback server, and focused tests. The plugin runtime, npm setup/makers, full Vite harness, ErrorService/NotificationService, DocumentCreationService, and release automation remain specified but unimplemented. There is no package.json yet.
-
-## Available now: inspect the host stylesheet
-
-With Node installed, run:
-
-```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
-```
-
-Open the loopback address printed by the server. The specimen provides light/dark themes, narrow layouts, settings/inputs, modal appearance, validation messages, and notice examples. It writes no notes or preferences. Stop the server with Ctrl+C.
-
-Run its focused tests:
-
-```sh
-node --test tests/harness-styles/server.test.mjs
-```
-
-This is an **original host simulation**, not copied Obsidian app.css, a running plugin, or native compatibility proof. See [provenance and coverage](harness/styles/README.md) and the [actual review evidence](docs/reviews/2026-09-22-product-review.md).
+> **Current status — PRD 0.6:** The original host-style specimen and its verification baseline run now. The actual plugin, guided npm setup/makers, DocumentCreationService, production feedback/bus, complete toolchain and native release workflow remain specified, not implemented.
 
 ## Start here
 
 | Document | Purpose |
 | --- | --- |
-| [Current PRD](docs/product/PRD.md) | Short authoritative entrypoint; all existing requirements retained plus 20 new acceptance cases, 82 specified in total. |
-| [Product review](docs/reviews/2026-09-22-product-review.md) | Twenty findings across product/developer/UX/architecture/testing/privacy/release perspectives and their actual status. |
-| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | What runs now, intended setup/maker path, first feature, testing and release boundaries. |
-| [Errors and notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Shared outcome model, feedback surfaces, native/harness sinks, retries, ownership and captured-error evidence. |
-| [Harness styles and evidence](docs/testing/HARNESS-STYLES.md) | Original host CSS, fidelity modes, fault matrix and qualification. |
-| [Setup and makers](docs/development/SETUP-AND-MAKERS.md) | Dependency-free guided installation and safe source generators. |
-| [Entity document recipe](docs/development/ENTITY-DOCUMENTS.md) / [service](docs/architecture/DOCUMENT-CREATION.md) | Typed entities, explicit frontmatter, preview, safe complete note creation. |
-| [Events](docs/architecture/EVENT-BUS.md) / [plugin CSS composition](docs/architecture/STYLES.md) | Scoped typed integration and one composed plugin stylesheet. |
-| [Maintenance and release](docs/development/MAINTENANCE-AND-RELEASE.md) | Reviewed current dependencies and exact-candidate draft/promotion. |
-| [Agent instructions](AGENTS.md) / [tooling](scripts/README.md) | Shared contributor rules and actual/planned commands. |
+| [Test strategy](docs/testing/TEST-STRATEGY.md) | Risk, levels, determinism, evidence, coverage, release and ownership policy. |
+| [Test concept](docs/testing/TEST-CONCEPT.md) | Exact runnable commands, files, fixtures, reports and implementation plan. |
+| [Machine test plan](docs/testing/test-plan.json) | 90 acceptance cases with risk/owner/modes/current evidence gaps. |
+| [Current PRD](docs/product/PRD.md) | Product contract and honest capability status. |
+| [Developer workflow](docs/development/DEVELOPER-WORKFLOW.md) | Intended setup, maker and feature-development path. |
+| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Dependency-free wizard and safe source generators. |
+| [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Typed entities to Markdown through the shared service. |
+| [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Effect-aware outcomes, feedback ownership and recovery. |
+| [Events](docs/architecture/EVENT-BUS.md) / [styles](docs/architecture/STYLES.md) | Runtime-scoped typed events and one composed plugin stylesheet. |
+| [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Current dependencies, fixed candidates and explicit publication. |
 
-The previous complete PRD is preserved without changes as [BASELINE-0.4.md](docs/product/BASELINE-0.4.md). Its numbered requirements remain incorporated; its historical status text is not the current implementation state. The new PRD explains precedence rather than silently dropping existing capabilities.
+## Run what exists today
 
-## Intended complete-template workflow — not implemented yet
+With Node available, no project dependency installation is needed for:
 
 ```sh
-npm run setup
-npm run make -- feature tasks
-npm run make -- entity task --feature tasks --document
-npm run dev:ui
-npm run verify
+node scripts/testing/verify-baseline.mjs --repeat 3
 ```
 
-Setup must start without node_modules using checked-in Node-only code, install the qualified lockfile after review, and finish with honest readiness. Makers generate readable source, explicit wiring, tests, events, locales and styles—not notes in a personal vault.
+It checks the actual baseline through 40 Node tests, each run three times in fresh processes with no retries. Reports include exact test IDs, source/input hashes, JSON, JUnit, a readable summary and unverified acceptance gaps. This is NOT full `npm run verify` or measured production coverage.
 
-Domain/application remain independent of UI/host APIs. Each view owns Vue/Pinia and disposables; application services own canonical data. The typed bus distributes committed facts, not commands or durable replay. Note-backed entities live in Markdown rather than a duplicate data.json database.
+The optional native-readiness guard is intentionally blocked:
 
-Handwritten source/CSS/tooling: **400 physical lines**. Tests/helpers: **450**. Composition-only main.ts: **100**. Generated application scaffolds follow the same rules.
+```sh
+node scripts/testing/verify-baseline.mjs --profile release --json
+```
 
-## Feedback that preserves the truth
+It exits 2 without publication, because the actual native-candidate validator and evidence do not exist yet.
 
-Validate beside fields, retain essential recovery in the owning view, update one progress/notice per operation, and handle duplicate or stale actions safely. A document that was created but could not be opened stays created; retry opening, not creation. Unknown write outcomes must not trigger unsafe blind retries.
+Inspect the original stylesheet specimen with:
 
-The future harness must inspect captured Vue/application failures as well as console/page errors. A useful fallback screen cannot hide a defect from tests. Error and notification services are specified in this pass, not implemented by the specimen buttons.
+```sh
+node scripts/harness/serve-style-fixture.mjs --port 4174
+```
 
-## Two different stylesheets
+For an explicitly preprovisioned Playwright/browser environment, `node scripts/testing/check-browser-specimen.mjs --mode served` runs eight browser checks. Missing dependencies/environment fail rather than silently install. Inline diagnostic mode is available explicitly and cannot establish served CSS/CSP or native behavior. See the test concept and [execution record](docs/testing/2026-09-22-verification-record.md).
+
+## Intended complete template
 
 ```text
-harness/styles/obsidian.css       original host simulation, harness only
-src CSS + compiled Vue styles    → dist/styles.css, actual plugin output
+Get template → npm run setup → npm run make → develop
+→ full verification → test exact candidate in Obsidian → approve release
 ```
 
-The real-component harness will load host styling before the actual plugin stylesheet. Releases include only the plugin output; never deploy the host shim. CSS scoping, dark/light behavior and exact-candidate parity require their own tests.
+The future setup starts with Node-only checked-in scripts before node_modules exists. Makers generate ordinary source with explicit wiring and tests; no note creation during setup/scaffolding. Domain/application code stays independent of host/UI APIs. main.ts remains composition-only and at most 100 physical lines; other handwritten source/CSS/tooling at most 400, tests/helpers at most 450.
 
-## Next implementation milestone
+Each view owns Vue/Pinia state and disposables; canonical data lives in its defined store. Note-backed Tasks use Markdown, not a duplicate data.json database. The bus carries typed committed facts and normalized native events. Source CSS modules and compiled SFC styles produce one plugin styles.css; the host shim never ships with it.
 
-Continue WP-00/01 qualification, then implement the real shell/services and integrate the fixture into the existing Vite/Vitest/Playwright workflow. The product review records what was and was not exercised; no native host/device or release tests ran in this iteration.
+Preserve user data, use contained test vaults, keep exact qualified dependencies current through reviewed updates, and publish only accepted fixed-commit assets. Browser specimen evidence cannot establish native/mobile compatibility.
 
-[License](LICENSE)
+## Verification maturity
+
+The read-only Linux/Windows baseline workflow is included with pinned official actions. Its configured Node 24.21.0 environment is a CI qualification target; local testing used Node 22.16.0. No hosted/Windows result is inferred from local Linux execution. The complete Vitest/Vite/Playwright Test matrix still needs WP-00 qualification; this dependency-free bridge does not replace it.
+
+[Agent instructions](AGENTS.md) · [Tooling guide](scripts/README.md) · [License](LICENSE)

@@ -1,22 +1,25 @@
 # Tooling directory
 
-## Available now
+## Implemented now
+
+- `harness/serve-style-fixture.mjs`: fixed-allowlist loopback HTTP specimen server.
+- `testing/verify-baseline.mjs`: finite baseline policy, source checks, real tests, repeated outcomes, scope-bound reports.
+- `testing/check-browser-specimen.mjs`: optional preprovisioned Playwright checks, explicit served/inline evidence modes.
+- Other `testing/` files: small shared plan/report/observer/process helpers used by those checks.
 
 ```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
-node --test tests/harness-styles/server.test.mjs
+node scripts/testing/verify-baseline.mjs --repeat 3 --json
+node scripts/testing/verify-baseline.mjs --profile release --json
 ```
 
-The first starts a loopback-only fixed-asset server for the original stylesheet specimen; Ctrl+C stops it. `--help` prints usage. The second runs seven focused Node tests. Neither initializes the plugin or replaces full verification. There is no package.json yet.
+The first can pass for this baseline. The second intentionally reports blocked with exit 2; there is no native-candidate release validator yet. This is not an implementation of the future full `npm run verify` or publication workflow.
 
-## Planned structure
+Reports go to unique ignored folders under reports/. No cached report is treated as a test execution. Errors/unknown schema/empty or skipped tests fail. Node test workers use synthetic isolated temporary directories, not user vaults.
 
-Keep setup/bootstrap, makers/templates, shared safe-file/process helpers, build/style composition, local deployment, quality, maintenance and release logic under scripts. Root configs/package commands/Actions stay thin. See [TOOL-01–06](../docs/development/SETUP-AND-MAKERS.md).
+## Planned
 
-Bootstrap must run without installed dependencies. Do not wire an interactive wizard to npm install/prepare hooks. Generation uses safe plans, explicit registries, tests and collision handling. Setup and makers never write example Task notes into a personal vault.
+Setup/bootstrap, makers/templates, plugin build, deployment, event/entity catalog and release tooling still follow the [setup/maker contract](../docs/development/SETUP-AND-MAKERS.md). Keep actual executable tooling here and root tool configuration thin. Do not create placeholder setup or a package.json merely to suggest unimplemented commands work.
 
-The current host-style server is intentionally a small standalone qualification tool. Integrate its fixture/tests into the selected Vite/Vitest/Playwright projects when those exist; do not create a second permanent stack. It serves no vault or arbitrary repository paths and performs no network installation.
+Dependency-free Node tests are an explicitly bounded bridge until WP-00 qualifies Vitest/Vite/Playwright Test. Port the assertions into those configured projects; do not maintain two permanent copies. The browser assertions use Playwright APIs and are reusable in the eventual Playwright Test suite.
 
-Runtime services and plugin CSS stay under src; original host simulation and gallery stay under harness. Release code must exclude them. Source tooling ≤400 physical lines, tests/helpers ≤450. No implicit privilege changes, global installation, browser opening, or publication.
-
-[Harness contract](../docs/testing/HARNESS-STYLES.md) · [Error/notification contract](../docs/architecture/ERRORS-AND-NOTIFICATIONS.md) · [Release guide](../docs/development/MAINTENANCE-AND-RELEASE.md)
+See [strategy](../docs/testing/TEST-STRATEGY.md) and [concept](../docs/testing/TEST-CONCEPT.md) for scope, commands, determinism, security and migration.
