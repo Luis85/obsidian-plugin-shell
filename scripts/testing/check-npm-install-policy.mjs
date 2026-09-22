@@ -49,7 +49,9 @@ try {
   const project = join(scratch, 'project'); await mkdir(project);
   const pkg = { name: 'npm-policy-fixture', version: '1.0.0', private: true,
     dependencies: tarballs,
-    allowScripts: { 'shell-fixture-approved@1.0.0': true, 'shell-fixture-denied': false },
+    // Local tarballs match their resolved source, not self-declared name/version.
+    // Actual registry dependency pins are independently checked by NPM-03/full setup.
+    allowScripts: { [tarballs['shell-fixture-approved']]: true, [tarballs['shell-fixture-denied']]: false },
     scripts: { probe: 'node probe.mjs' } };
   await writeFile(join(project, 'package.json'), JSON.stringify(pkg, null, 2));
   await writeFile(join(project, 'probe.mjs'), `
@@ -75,13 +77,14 @@ try {
   // A real npm run exports persistent config; its nested ci uses the production helper.
   ok(project, ['run', 'probe']);
   const nested = JSON.parse(await readFile(join(project, 'nested-result.json'), 'utf8'));
+  report.fixtureOutput = { stdout: nested.stdout.slice(-6000), stderr: nested.stderr.slice(-6000) };
   assert.equal(nested.status, 0);
   assert.ok(nested.removed.length > 0);
   report.checks.push('nested-npm-run-ci-reloads-persistent-policy');
   await access(join(project, 'node_modules/shell-fixture-approved/hook-ran'));
   for (const kind of ['denied', 'unreviewed'])
     await assert.rejects(access(join(project, `node_modules/shell-fixture-${kind}/hook-ran`)), { code: 'ENOENT' });
-  report.checks.push('only-version-approved-hook-executes');
+  report.checks.push('only-explicit-source-approved-hook-executes');
   assert.equal(await readFile(join(project, 'package-lock.json'), 'utf8'), before);
   assert.equal(await readFile(config, 'utf8'), 'allow-scripts=unreviewed-fixture\n');
   report.checks.push('lockfile-and-user-config-preserved');
