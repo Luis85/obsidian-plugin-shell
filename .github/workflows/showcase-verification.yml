@@ -26,7 +26,8 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - run: npm ci
+      - name: Guided setup from a clean checkout without node_modules
+        run: npm run setup -- --yes --no-interaction
       - name: Verify first iteration and retained baseline
         run: npm run verify
       - name: Measure declared core coverage
