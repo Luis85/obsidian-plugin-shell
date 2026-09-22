@@ -53,14 +53,14 @@ jobs:
           npm install --prefix "$tool" --ignore-scripts --no-audit --no-fund --package-lock=false npm@${{ matrix.npm }}
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
-      - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
-        shell: pwsh
-        run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"
       - name: Run fresh setup with the problematic forwarded configuration
         shell: pwsh
         env:
           npm_config_allow_scripts: unrelated-globally-approved-package
         run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
+      - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
+        shell: pwsh
+        run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"
       - name: Verify without weakening existing gates
         shell: pwsh
         run: node "$env:QUALIFIED_NPM_CLI" run verify

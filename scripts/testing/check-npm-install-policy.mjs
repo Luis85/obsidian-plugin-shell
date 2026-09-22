@@ -23,7 +23,6 @@ try {
   await access(npm);
   await writeFile(config, 'allow-scripts=unreviewed-fixture\n');
   const env = { ...projectInstallEnvironment().env, npm_config_userconfig: config };
-  // All npm invocations are against explicit scratch directories. Existing auth/proxy controls remain intact.
   const call = (cwd, args, variables = env) => spawnSync(process.execPath, [npm, ...args], {
     cwd, env: variables, encoding: 'utf8', timeout: 30000, maxBuffer: 2 * 1024 * 1024,
   });
@@ -49,8 +48,7 @@ try {
   const project = join(scratch, 'project'); await mkdir(project);
   const pkg = { name: 'npm-policy-fixture', version: '1.0.0', private: true,
     dependencies: tarballs,
-    // Local tarballs match their resolved source, not self-declared name/version.
-    // Actual registry dependency pins are independently checked by NPM-03/full setup.
+    // File sources match their resolved identity, not self-declared package names.
     allowScripts: { [tarballs['shell-fixture-approved']]: true, [tarballs['shell-fixture-denied']]: false },
     scripts: { probe: 'node probe.mjs' } };
   await writeFile(join(project, 'package.json'), JSON.stringify(pkg, null, 2));
@@ -64,20 +62,20 @@ try {
     const result = spawnSync(process.execPath, [${JSON.stringify(npm)}, 'ci', '--offline', '--no-audit', '--no-fund'],
       {env:prepared.env, encoding:'utf8'});
     writeFileSync('nested-result.json', JSON.stringify({status:result.status, removed:prepared.removedKeys,
-      stderr:result.stderr, stdout:result.stdout}));
+      stderr:result.stderr, stdout:result.stdout, ignore:prepared.env.npm_config_ignore_scripts}));
     process.exit(result.status ?? 1);
   `);
   ok(project, ['install', '--package-lock-only', '--ignore-scripts', '--offline', '--no-audit', '--no-fund']);
   const before = await readFile(join(project, 'package-lock.json'), 'utf8');
-  // The broken unsanitized boundary must reproduce the user's error on this actual npm binary.
+  report.fixtureLock = JSON.parse(before).packages;
   const broken = call(project, ['ci', '--offline', '--no-audit', '--no-fund'], { ...env, npm_config_allow_scripts: 'unreviewed-fixture' });
   assert.notEqual(broken.status, 0);
   assert.match(broken.stderr, /EALLOWSCRIPTS/);
   report.checks.push('actual-npm-reproduces-EALLOWSCRIPTS');
-  // A real npm run exports persistent config; its nested ci uses the production helper.
   ok(project, ['run', 'probe']);
   const nested = JSON.parse(await readFile(join(project, 'nested-result.json'), 'utf8'));
-  report.fixtureOutput = { stdout: nested.stdout.slice(-6000), stderr: nested.stderr.slice(-6000) };
+  report.fixtureOutput = { stdout: nested.stdout.slice(-6000), stderr: nested.stderr.slice(-6000), ignoreScripts: nested.ignore ?? null };
+  report.fixturePackage = JSON.parse(await readFile(join(project, 'node_modules/shell-fixture-approved/package.json'), 'utf8'));
   assert.equal(nested.status, 0);
   assert.ok(nested.removed.length > 0);
   report.checks.push('nested-npm-run-ci-reloads-persistent-policy');
