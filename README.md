@@ -2,7 +2,9 @@
 
 **Iteration 02 — responsive Nuxt UI capability showcase, version 0.2.0.**
 
-A TypeScript/Vue/Pinia plugin with a native Obsidian view, Task Markdown creation, typed events, persisted preferences, localized feedback, scoped Nuxt UI styling, and a real-component browser harness. This is the first working slice, not completion of the full template PRD.
+A TypeScript/Vue/Pinia plugin with a native Obsidian view, Task Markdown creation, typed events, persisted preferences, localized feedback, scoped Nuxt UI styling, and a real-component browser harness. This is the layout/header/reliability milestone, not completion of the full template PRD.
+
+**Qualification:** the runtime, served-browser, native Linux Obsidian, Windows/Ubuntu setup and all-category audit checks passed. One dependency-support criterion remains open: the official Obsidian lint integration still installs a nested ESLint 9.39.5. The active linter is ESLint 10.11.0; zero audit findings do not close this upstream support exception. See the [exact verification record](docs/testing/ITERATION-TWO.md) and [dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). PR #1 remains draft; no release was published.
 
 ## Open it in Obsidian
 
@@ -20,7 +22,7 @@ Review and confirm the installer plan. It installs the lockfile, builds, type-ch
 
 Open `.dev-vault` as a vault in desktop Obsidian, deliberately enable **Plugin Shell**, then run **Open capability showcase** from the command palette or use the Blocks ribbon button. The manifest minimum is **1.13.7** and the plugin is intentionally desktop-only pending mobile qualification. Setup does not change Restricted Mode or create Task notes.
 
-For a prebuilt ZIP, place its three files in `<test-vault>/.obsidian/plugins/plugin-shell/` and follow the same enable/open steps. Do not confuse the source ZIP with the installable plugin.
+For a prebuilt ZIP, disable an existing installation and replace only its three files in `<test-vault>/.obsidian/plugins/plugin-shell/` and follow the same enable/open steps. Preserve `data.json`, notes and unrelated plugin files. Do not confuse the source ZIP with the installable plugin.
 
 ## Hide or restore the native header
 
@@ -74,7 +76,7 @@ Still pending: complete generators/identity migration, broader host events/entit
 | --- | --- |
 | [Iteration-two guide](docs/development/ITERATION-TWO.md) | Layout/header operation, safe build/install, compatible dependencies and security decisions. |
 | [Iteration-two review](docs/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
-| [Iteration-one guide](docs/development/ITERATION-ONE.md) | Installation, architecture decisions, current commands, dependency exceptions and limits. |
+| [Iteration-one guide](docs/development/ITERATION-ONE.md) | Historical installation and architecture context; the Iteration 02 guide supersedes its current-state claims. |
 | [Current test record](docs/testing/ITERATION-TWO.md) | Actual tests, native/served evidence and remaining gaps. |
 | [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
 | [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |

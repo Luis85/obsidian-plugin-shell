@@ -39,7 +39,7 @@ Preference patches are snapshots in a serialized writer. Functional header toggl
 
 ## Dependency decision and security boundary
 
-ESLint **9.39.5 → 10.11.0** removes the unsupported direct lint release. Supported parent updates/deduplication also remove nested ESLint 9. Actual TypeScript type-aware, Obsidian and Vue negative probes must fail under the new parser/rules, so an install alone is not qualification.
+ESLint **9.39.5 → 10.11.0** removes the unsupported direct lint release. **The nested ESLint 9.39.5 is not removed.** The current official Obsidian lint package depends on SDL/import packages whose published peers still require or stop at ESLint 9. Supported parent updates/deduplication were investigated and did not resolve this. The trial lock was not adopted; there is no unsupported peer override. This is an explicit unmet dependency-support criterion, documented with primary sources and closure conditions in the [dependency exception](ITERATION-TWO-DEPENDENCY-EXCEPTION.md). Actual TypeScript type-aware, Obsidian and Vue negative probes must fail under the new parser/rules, so an install alone is not qualification.
 
 The selected Nuxt UI/Vue/Pinia/Vite/Vitest/Oxlint/fallow/TypeScript stack remains pinned at its existing mutually compatible stable versions. TypeScript **6.0.3** remains deliberate: the current typescript-eslint peer range does not support TypeScript 7. There is no `--force` or `--legacy-peer-deps` bypass.
 
@@ -66,7 +66,9 @@ Native qualification additionally requires the isolated `obsidian-launcher@3.2.1
 
 The full fallow report is now blocking, alongside architecture. Build implementation moved from `scripts/build/` to `scripts/bundling/` because fallow's default generated-build exclusion otherwise hid handwritten build code. Dynamic test/stylesheet/virtual-module entrypoints are declared explicitly, not ignored wholesale. Only host-supplied `obsidian` is exempted from deployment-dependency classification. Two exact unresolved CSS specifiers are supplied by the verified host-fixture middleware/vendor pipeline. Native `PluginSettingTab` callbacks are declared as framework-invoked members. Policy-pack analysis is explicitly off because no pack is configured; no false policy-enforcement claim is made. Unused exports were removed. Negative fixtures prove dead-code, boundary and actual lint failures.
 
-Core coverage now gates at 95% lines and 90% statements/functions/branches. Whole-production coverage is separately measured without inheriting a selected-core threshold. It includes native adapters, composition and all Vue SFCs even when uncovered. It does not yet satisfy the complete product's production coverage target. Existing baseline acceptance IDs remain unchanged; a passed iteration is not a public-release approval.
+Core coverage now gates at 95% lines and 90% statements/functions/branches. Whole-production coverage is separately measured without inheriting a selected-core threshold. It includes native adapters, composition and all Vue SFCs even when uncovered. The production configuration uses the same Nuxt/Vue resolver as the real build. An inventory assertion fails unless every one of the 30 production TS/Vue inputs appears in the summary; COV-02-01 proves that an omitted file fails. The earlier 54.91% line result silently omitted `mount-ui.ts` and is superseded by the complete 53.39% result. It does not yet satisfy the complete product's production coverage target. Existing baseline acceptance IDs remain unchanged; a passed iteration is not a public-release approval.
+
+The qualified run and installed candidate hashes are recorded in [Iteration 02 verification](../testing/ITERATION-TWO.md). Both JSON and ordinary audit completed with zero findings. This does not alter the nested-ESLint support exception.
 
 ## Remaining bounded scope
 

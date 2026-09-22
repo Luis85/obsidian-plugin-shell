@@ -44,4 +44,6 @@ Deploy only inside approved codebase-contained test vaults. Preserve data.json, 
 
 Maintain exact tested stable dependencies through reviewed updates. TypeScript 6.0.3 is a documented parser-compatibility choice; do not force TypeScript 7 through unsupported peers. Host app/API/installer/mobile and toolchain versions remain separate. No silent host-floor increase or broad permanent update ignore.
 
+Known unresolved acceptance criterion: the official Obsidian ESLint package retains nested ESLint 9.39.5 through its SDL/import peers. Root ESLint 10 and the audit pass, but the entire dependency graph is not supported. Read docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md before proposing updates. Do not force incompatible peers, claim deduplication removed it, or equate an audit pass with support.
+
 This milestone is not the final release-ready GitHub template. Retain all existing product requirements and qualify each extension with its relevant tests.

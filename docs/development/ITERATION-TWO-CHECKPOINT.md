@@ -1,25 +1,21 @@
-# Iteration 02 — recovery checkpoint
+# Iteration 02 — completed implementation checkpoint
 
-Branch: `build/iteration-two`; base main `e64e75eefb22822356cb2473b77eadee35871beb`; draft PR #1. Version 0.2.0, fixed identity `plugin-shell`. Main has not been merged, tagged or published.
+Branch `build/iteration-two`; main baseline `e64e75eefb22822356cb2473b77eadee35871beb`; version 0.2.0; fixed identity `plugin-shell`; draft PR #1. Main was not merged, tagged or published.
 
-## Completed
+## Completed and verified
 
-- [x] Full-width leaf layout, shared gutters, responsive navigation/Documents, actual language-control metrics and light/dark/German layouts.
-- [x] Validated persistent header preference, command/menu/native-settings restoration, all-leaf ownership, pop-out theme ownership and cleanup.
-- [x] Review corrections: serialized preference snapshots, safe notification/subscriber failures, preview discard, uncertain-write protection, complete atomic build/install and full analyzer enforcement.
-- [x] Root ESLint 10.11.0 with actual rule/parser negative probes; reviewed esbuild 0.28.2 scoped override; retained narrow npm hook approvals and real EALLOWSCRIPTS regression.
-- [x] Production coverage uses the real Nuxt/Vue resolver and proves all 30 TS/Vue inputs are present. COV-02-01 fails on omitted inputs. Earlier 54.91% whole-production line coverage was incomplete and is superseded by 53.39%.
-- [x] Full qualification at `23c0893db3c34d7c15ea06c4c5d647a91a041b60`, workflow run [35780897004](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35780897004): fresh strict npm ci; all verify gates; 51 runtime tests plus three fresh repetitions; core/production coverage; 20 served tests; all 15 real Linux Obsidian checks with zero unexpected errors; JSON and ordinary audit both exit 0 with zero vulnerabilities.
-- [x] Same revision's PR setup matrix [35780905297](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35780905297) is successful. Windows setup/build is not Windows-native UI evidence.
+- [x] Full-width leaf-relative layout, common gutters, responsive navigation/Documents, unclipped native select, light/dark and German layouts.
+- [x] Persistent header preference with validated defaults, all-view/pop-out ownership, command/menu/native-settings restoration and cleanup.
+- [x] Review corrections: serialized snapshot settings, safe notification/subscriber failures, abandoned-preview disposal, uncertain-write protection and complete staged build/install.
+- [x] Supported root ESLint 10 with actual parser/rule probes, reviewed esbuild override, narrow npm hook approvals and real EALLOWSCRIPTS regression.
+- [x] Complete 30-input production coverage inventory; no silently omitted mount input or falsely inflated whole-production percentage.
+- [x] Controlled pending-save regression and native-driver fix: click once and await committed checkbox state, never retry the action to hide timing failures.
+- [x] Final candidate `f3a964621ccfb7678fc629666c29f37e948f6143`, [run 35782207137](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35782207137): fresh strict installation, all verify gates, 13 tooling tests, 51 runtime tests plus three repetitions, 52 baseline cases times three, 21 served tests, all 15 native checks in each of three fresh sessions, zero unexpected native errors and zero all-category audit vulnerabilities.
+- [x] [Windows/Ubuntu setup matrix 35782212498](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35782212498) passed both Node/npm combinations. These are setup/build checks, not Windows-native UI evidence.
+- [x] Accepted runtime assets frozen and matched through native restart and packaging. Final changes only complete documentation and the UI-02-PENDING inventory entry; no runtime rebuild.
 
-## Finalization
+## Remaining acceptance exception
 
-This checkpoint removes the completed exploratory dependency workflow and corrects a native-test lifecycle comment. No production source, package lock or accepted runtime assets change. The next qualification must retain identical asset hashes. Final documentation and downloadable source/plugin/evidence packages remain to be assembled from the qualified candidate, without rebuilding another runtime deliverable.
+The official Obsidian lint package still installs nested ESLint 9.39.5 through SDL/import peers. Supported parent updates did not resolve it; the trial lock was not adopted and no unsupported peer bypass was used. A clean audit does not make the entire graph supported. Keep PR #1 draft pending resolution or explicit acceptance of this exception; see [dependency investigation](ITERATION-TWO-DEPENDENCY-EXCEPTION.md).
 
-## Explicit unresolved criterion
-
-The whole dependency graph is **not fully supported**. The official Obsidian lint package still pulls ESLint 9.39.5 through its SDL/import dependency peers. The supported parent-update/dedupe investigation did not remove it; no incompatible peer override was adopted. See [dependency exception](ITERATION-TWO-DEPENDENCY-EXCEPTION.md). A zero-vulnerability audit does not close this support finding. Keep PR #1 draft until that acceptance exception is resolved or explicitly accepted.
-
-## Environment and prior failures
-
-The local runtime cannot reach GitHub/npm and its served Chromium navigation was policy-blocked. Hosted runners provide the fresh-install, served, Windows and native evidence. Earlier native attempts failed on moved-document theme ownership and multi-window test-driver assumptions; their failures were not retried into acceptance or ignored. Final native commands locate the real palette owner, use the actual Appearance control, and preserve the settings realm until fixture restart/teardown. All native page errors and independent application diagnostics remain assertions.
+The full-production coverage target and broader maker/mobile/release backlog remain separately scoped. See [actual verification](../testing/ITERATION-TWO.md) for exact counts, platform limits, asset hashes and the superseded failures. Do not reconstruct evidence from historical screenshots or advertise all PRD cases complete.
