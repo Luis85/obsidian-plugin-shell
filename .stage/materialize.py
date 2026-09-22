@@ -14,8 +14,14 @@ for name, content in files.items():
     target.write_text(content, encoding='utf8', newline='')
 repo = 'Luis85/obsidian-plugin-shell'
 headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}
+class ArtifactRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+        target = super().redirect_request(req, fp, code, msg, hdrs, newurl)
+        target.remove_header('Authorization')
+        return target
 request = urllib.request.Request(f'https://api.github.com/repos/{repo}/actions/artifacts/10697906837/zip', headers=headers)
-with urllib.request.urlopen(request) as response: archive = zipfile.ZipFile(io.BytesIO(response.read()))
+with urllib.request.build_opener(ArtifactRedirect()).open(request) as response:
+    archive = zipfile.ZipFile(io.BytesIO(response.read()))
 lock = json.loads(archive.read('package-lock.json'))
 package = json.loads(files['package.json'])
 for key in ('name', 'version'): lock[key] = package[key]
