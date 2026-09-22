@@ -8,6 +8,7 @@ import { createServer } from 'node:net';
 import { chromium, expect } from '@playwright/test';
 import { qualifyHeaders, assertDiagnostics } from './native-header-checks.mjs';
 import { sizeNativeWindow } from './native-window.mjs';
+import { nativeCommand } from './native-command.mjs';
 const flags = process.argv.slice(2);
 if (flags.length !== 1 || flags[0] !== '--allow-download') {
   console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. This may download the host. No test was run.'); process.exit(2);
@@ -84,13 +85,8 @@ try {
   report.checks.push('native-modal-opens-and-dismisses');
   await qualifyHeaders(page, context, report, output, path);
   report.phase = 'native-settings';
-  // Use the documented user workflow, not a global substring matching a hidden Search settings icon.
-  await page.keyboard.press('ControlOrMeta+p');
-  await page.locator('input.prompt-input').fill('Open settings');
-  const openSettings = page.locator('.suggestion-item:visible').filter({ hasText: /Open settings/i });
-  await expect(openSettings).toHaveCount(1);
-  await openSettings.click();
-  // Current Obsidian can place settings in another native window.
+  // The command palette may belong to a different native window after pop-out use.
+  await nativeCommand(page, 'Open settings');
   let settingsPage;
   await expect.poll(async () => {
     for (const candidate of context.pages()) {
@@ -143,9 +139,7 @@ try {
   const restarted = restartedContext.pages().find(value => value.url().startsWith('app:')) ?? restartedContext.pages()[0];
   if (!restarted) throw new Error('NATIVE_RESTART_PAGE'); activePage = restarted;
   await expect(restarted.locator('[aria-label="Open capability showcase"]')).toBeVisible({ timeout: 45000 });
-  await restarted.keyboard.press('ControlOrMeta+p');
-  await restarted.locator('input.prompt-input').fill('Open capability showcase');
-  await restarted.locator('.suggestion-item:visible').filter({ hasText: 'Open capability showcase' }).first().click();
+  await nativeCommand(restarted, 'Open capability showcase');
   const restartedView = restarted.locator('.workspace-leaf-content[data-type="plugin-shell-showcase"]').first();
   await expect(restartedView.locator('[data-plugin-ui]')).toBeVisible();
   await expect(restartedView.locator(':scope > .view-header')).toBeHidden();
