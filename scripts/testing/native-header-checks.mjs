@@ -1,8 +1,10 @@
 import { expect } from '@playwright/test';
 import { join } from 'node:path';
+import { setNativeTheme } from './native-theme.mjs';
 const view = '.workspace-leaf-content[data-type="plugin-shell-showcase"]';
 const marker = 'plugin-shell-native-header-hidden';
 async function command(page, label) {
+  await page.bringToFront();
   await page.keyboard.press('ControlOrMeta+p');
   await page.locator('input.prompt-input').fill(label);
   await page.locator('.suggestion-item:visible').filter({ hasText: label }).first().click();
@@ -57,12 +59,12 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   report.checks.push('native-command-palette-repeat-toggle-all-leaves-foreign-isolation');
   // Native host stylesheet transitions; each leaf retains its independent view state.
   for (const theme of ['dark', 'light']) {
-    await command(page, `Use ${theme} mode`);
+    await setNativeTheme(page, context, theme);
     await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
     for (const root of await page.locator(`${view} [data-plugin-ui]`).all()) await expect(root).toHaveClass(new RegExp(theme));
     await page.screenshot({ path: join(output, `native-split-preferences-${theme}.png`) });
   }
-  await command(page, 'Use dark mode');
+  await setNativeTheme(page, context, 'dark');
   report.checks.push('native-split-pane-light-dark-theme-transition');
   for (const factor of [1.25, 1.5]) {
     await page.evaluate(value => window.require('electron').webFrame.setZoomFactor(value), factor);
@@ -89,9 +91,9 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await expect(popout.locator(`${view} > .view-header`)).toBeVisible();
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
-  await command(popout, 'Use light mode');
+  await setNativeTheme(popout, context, 'light');
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/light/);
-  await command(popout, 'Use dark mode');
+  await setNativeTheme(popout, context, 'dark');
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/dark/);
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page);
