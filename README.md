@@ -4,10 +4,15 @@ A planned current Obsidian plugin template using TypeScript, Vue 3, Pinia, Vite,
 
 > **Current status — PRD 0.6:** The original host-style specimen and its verification baseline run now. The actual plugin, guided npm setup/makers, DocumentCreationService, production feedback/bus, complete toolchain and native release workflow remain specified, not implemented.
 
+**Selected UI direction:** Nuxt UI with Tailwind CSS through the plain Vue/Vite integration, not the Nuxt application framework. The [implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) defines ten planned work packages, host-safe CSS/runtime adapters and explicit acceptance gates. This is a researched implementation direction, not an installed or verified integration.
+
 ## Start here
 
 | Document | Purpose |
 | --- | --- |
+| [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Selected architecture, prerequisites, target files, dependencies, ten work packages and review gates. |
+| [Nuxt UI research](docs/research/2026-09-22-nuxt-ui-integration.md) | Primary-source findings, release/source identities, runtime-style and shared-state risks. |
+| [Nuxt UI acceptance matrix](docs/testing/NUXT-UI-ACCEPTANCE.md) | 34 planned cases and concrete verification designs; not executed evidence or a change to today's 90-case inventory. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) | Risk, levels, determinism, evidence, coverage, release and ownership policy. |
 | [Test concept](docs/testing/TEST-CONCEPT.md) | Exact runnable commands, files, fixtures, reports and implementation plan. |
 | [Machine test plan](docs/testing/test-plan.json) | 90 acceptance cases with risk/owner/modes/current evidence gaps. |
