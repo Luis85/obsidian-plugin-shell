@@ -8,7 +8,7 @@ concurrency:
   group: iteration-two-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  baseline:
+  dependency-research:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -19,39 +19,45 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Record execution environment and unmodified dependency audit
+      - name: Research supported remediation paths against the live registry
         shell: bash
         run: |
-          mkdir -p reports/iteration-two/baseline
-          { node --version; npm --version; git rev-parse HEAD; uname -a; } > reports/iteration-two/baseline/environment.txt
-          npm audit --json > reports/iteration-two/baseline/audit-before.json || echo "$?" > reports/iteration-two/baseline/audit-before.exit
-          npm ci > reports/iteration-two/baseline/npm-ci.log 2>&1
-          npm ls --all --json > reports/iteration-two/baseline/dependency-tree.json
-          npm outdated --json > reports/iteration-two/baseline/outdated.json || test "$?" = 1
-          node --input-type=module -e 'import {readFileSync,writeFileSync} from "node:fs"; import {execFileSync} from "node:child_process"; const p=JSON.parse(readFileSync("package.json")); const result={}; for(const name of Object.keys({...p.dependencies,...p.devDependencies})){try{result[name]=JSON.parse(execFileSync("npm",["view",name,"version","engines","peerDependencies","deprecated","--json"],{encoding:"utf8"}));}catch{result[name]={error:"registry query failed"};}} writeFileSync("reports/iteration-two/baseline/registry-latest.json",JSON.stringify(result,null,2));'
-      - name: Execute real baseline gates
+          mkdir -p reports/dependency-research
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; import {execFileSync} from "node:child_process"; const result={}; for(const name of ["esbuild","fontless","@nuxt/fonts","@unhead/bundler","unplugin","npm","@eslint/js","@eslint/compat","@types/node@24","obsidian-launcher"]){try{result[name]=JSON.parse(execFileSync("npm",["view",name,"version","engines","dependencies","peerDependencies","deprecated","--json"],{encoding:"utf8"}));}catch{result[name]={error:"registry query failed"};}} writeFileSync("reports/dependency-research/registry.json",JSON.stringify(result,null,2));'
+          npm ci > reports/dependency-research/npm-ci.log 2>&1
+      - name: Explore supported direct and transitive upgrades without overrides
         shell: bash
         run: |
           set +e
-          npm run verify > reports/iteration-two/baseline/verify.log 2>&1
-          echo "$?" > reports/iteration-two/baseline/verify.exit
-          npm run test:coverage > reports/iteration-two/baseline/coverage.log 2>&1
-          echo "$?" > reports/iteration-two/baseline/coverage.exit
-          npm run analyze > reports/iteration-two/baseline/analyze.log 2>&1
-          echo "$?" > reports/iteration-two/baseline/analyze.exit
-      - name: Prepare temporary offline development dependencies (no fonts or browsers)
+          npm install --save-exact --save-dev eslint@10.11.0 > reports/dependency-research/eslint-upgrade.log 2>&1
+          echo "$?" > reports/dependency-research/eslint-upgrade.exit
+          npm update esbuild fontless @nuxt/fonts @unhead/bundler unplugin > reports/dependency-research/transitive-update.log 2>&1
+          echo "$?" > reports/dependency-research/transitive-update.exit
+          npm audit --json > reports/dependency-research/audit-exploration.json
+          echo "$?" > reports/dependency-research/audit-exploration.exit
+          npm ls --all --json > reports/dependency-research/tree.json
+          npm run lint > reports/dependency-research/lint.log 2>&1
+          echo "$?" > reports/dependency-research/lint.exit
+          git diff -- package.json package-lock.json > reports/dependency-research/lock-review.diff
+          cp package.json package-lock.json reports/dependency-research/
+          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='*.eot' --exclude='*/.local-browsers/*' -czf offline-dependencies.tgz node_modules
+      - name: Reproduce served baseline from the unmodified product source
         shell: bash
         run: |
-          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='*.eot' --exclude='*/.local-browsers/*' -czf offline-dependencies.tgz node_modules
-          git archive --format=zip --output=checkpoint-source.zip HEAD
-      - name: Retain baseline evidence and temporary offline dependencies
+          set +e
+          npm run harness:build > reports/dependency-research/harness-build.log 2>&1
+          node node_modules/@playwright/test/cli.js install --with-deps chromium > reports/dependency-research/browser-provision.log 2>&1
+          npm run test:e2e > reports/dependency-research/baseline-e2e.log 2>&1
+          echo "$?" > reports/dependency-research/baseline-e2e.exit
+      - name: Retain research for review; these are not accepted release artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: iteration-two-baseline
+          name: iteration-two-dependency-research
           path: |
-            reports/iteration-two/baseline/
+            reports/dependency-research/
+            reports/e2e/results.json
+            reports/e2e/artifacts/**/*.png
             offline-dependencies.tgz
-            checkpoint-source.zip
           retention-days: 2
           if-no-files-found: error
