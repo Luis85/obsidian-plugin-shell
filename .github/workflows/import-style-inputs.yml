@@ -1,0 +1,21 @@
+name: Stage pinned stylesheet inputs
+on:
+  push:
+    branches: [chore/stage-native-style-inputs]
+    paths:
+      - .github/workflows/import-style-inputs.yml
+      - scripts/styles/stage-pinned-inputs.py
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify pinned inputs and create unreferenced Git blobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/styles/stage-pinned-inputs.py
