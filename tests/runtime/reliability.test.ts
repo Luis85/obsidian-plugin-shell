@@ -5,6 +5,14 @@ import { NotificationService } from '../../src/application/notification-service'
 import { PreferenceService } from '../../src/application/preference-service';
 import { fixture, host } from './helpers';
 describe('Iteration 02 failure isolation', () => {
+  it('[REL-02-05] rejected feedback listeners are observed and do not undo success', async () => {
+    const f = fixture(); const notifications = new NotificationService(host(), key => key, f.errors);
+    notifications.subscribe(async () => { throw new Error('private'); });
+    notifications.show('owner', 'success', 'feedback.saved'); await Promise.resolve();
+    expect(notifications.current[0]?.kind).toBe('success');
+    expect(f.errors.report).toHaveBeenCalledExactlyOnceWith('notice.listener', 'notice.notify');
+    notifications.dispose();
+  });
   it('[REL-02-01] uncloneable event data is contained and the next event still dispatches', () => {
     const errors = { report: vi.fn() }; const bus = new TypedEventBus<{ unsafe: { callback?: () => void } }>(errors);
     const subscriber = vi.fn(); bus.on('unsafe', subscriber);

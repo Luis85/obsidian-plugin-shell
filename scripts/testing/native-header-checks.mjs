@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { join } from 'node:path';
 const view = '.workspace-leaf-content[data-type="plugin-shell-showcase"]';
 const marker = 'plugin-shell-native-header-hidden';
-export async function command(page, label) {
+async function command(page, label) {
   await page.keyboard.press('ControlOrMeta+p');
   await page.locator('input.prompt-input').fill(label);
   await page.locator('.suggestion-item:visible').filter({ hasText: label }).first().click();
@@ -56,13 +56,25 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   }
   report.checks.push('native-command-palette-repeat-toggle-all-leaves-foreign-isolation');
   // Native host stylesheet transitions; each leaf retains its independent view state.
-  for (const theme of ['obsidian', 'moonstone']) {
-    await page.evaluate(theme => window.app.setTheme(theme), theme);
-    await expect(owned.locator('[data-plugin-ui]')).toHaveClass(theme === 'obsidian' ? /dark/ : /light/);
-    await page.screenshot({ path: join(output, `native-split-preferences-${theme === 'obsidian' ? 'dark' : 'light'}.png`) });
+  for (const theme of ['dark', 'light']) {
+    await command(page, `Use ${theme} mode`);
+    await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
+    for (const root of await page.locator(`${view} [data-plugin-ui]`).all()) await expect(root).toHaveClass(new RegExp(theme));
+    await page.screenshot({ path: join(output, `native-split-preferences-${theme}.png`) });
   }
-  await page.evaluate(() => window.app.setTheme('obsidian'));
+  await command(page, 'Use dark mode');
   report.checks.push('native-split-pane-light-dark-theme-transition');
+  for (const factor of [1.25, 1.5]) {
+    await page.evaluate(value => window.require('electron').webFrame.setZoomFactor(value), factor);
+    await expect.poll(() => page.evaluate(() => window.require('electron').webFrame.getZoomFactor())).toBeCloseTo(factor, 2);
+    await expect.poll(() => owned.locator('.shell-main').evaluate(el => el.scrollWidth <= el.clientWidth + 2)).toBe(true);
+    const select = owned.getByLabel('Language', { exact: true });
+    await select.scrollIntoViewIfNeeded(); await expect(select).toBeVisible();
+    expect(await select.evaluate(el => { const s = getComputedStyle(el); return el.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom) >= parseFloat(s.lineHeight) - 1; })).toBe(true);
+    await page.screenshot({ path: join(output, `native-preferences-zoom-${Math.round(factor * 100)}.png`) });
+  }
+  await page.evaluate(() => window.require('electron').webFrame.setZoomFactor(1));
+  report.checks.push('native-electron-125-150-percent-zoom-no-clipped-language-control');
   // The host may move this exact ItemView into another document rather than remount.
   const pagesBefore = new Set(context.pages());
   await owned.getByRole('button', { name: 'View actions', exact: true }).click();
@@ -77,6 +89,10 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await expect(popout.locator(`${view} > .view-header`)).toBeVisible();
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
+  await command(popout, 'Use light mode');
+  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/light/);
+  await command(popout, 'Use dark mode');
+  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/dark/);
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page);
   report.checks.push('native-popout-inherits-preference-and-live-toggle');
@@ -85,11 +101,13 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await popout.locator('.menu-item').filter({ hasText: 'Close this view' }).click();
   await expect(page.locator(`${view} > .view-header:visible`)).toHaveCount(0);
   await assertDiagnostics(page);
+  // Compare foreign controls within the same theme, not across a legitimate host theme change.
+  const beforeUnload = await foreignStyles();
   // Record references before unload because Obsidian itself may replace view objects.
   await page.evaluate(() => { window.__ownedHeadersBeforeUnload = Array.from(document.querySelectorAll('[data-type="plugin-shell-showcase"]')); });
   await page.evaluate(async () => window.app.plugins.disablePlugin('plugin-shell'));
   expect(await page.evaluate(name => window.__ownedHeadersBeforeUnload.every(el => !el.classList.contains(name)), marker)).toBe(true);
-  expect(await foreignStyles()).toEqual(before);
+  expect(await foreignStyles()).toEqual(beforeUnload);
   report.checks.push('native-unload-restores-retained-host-elements-without-foreign-mutation');
   await page.evaluate(async () => window.app.plugins.enablePlugin('plugin-shell'));
   await command(page, 'Open capability showcase');

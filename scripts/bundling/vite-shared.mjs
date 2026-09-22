@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import ui from '@nuxt/ui/vite';
 import { cssOwnership } from './css-ownership.mjs';
 const root = process.cwd();
-const profile = JSON.parse(readFileSync(resolve(root, 'scripts/build/ui-adaptation.json'), 'utf8'));
+const profile = JSON.parse(readFileSync(resolve(root, 'scripts/bundling/ui-adaptation.json'), 'utf8'));
 const replacements = new Set(Object.keys(profile.replaced).map(p => resolve(root, p).replaceAll('\\', '/')));
 function staticVendor() {
   return { name: 'plugin-shell-static-ui', enforce: 'pre',

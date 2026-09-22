@@ -5,7 +5,7 @@ export class NotificationService {
   private disposed = false;
   private items: Feedback[] = [];
   private readonly hides = new Map<number, () => void>();
-  private readonly listeners = new Set<() => void>();
+  private readonly listeners = new Set<() => void | Promise<void>>();
   constructor(private readonly host: HostActions, private readonly text: (key: string) => string, private readonly errors: ErrorReporter) {}
   get current(): readonly Feedback[] { return this.items.slice(); }
   show(owner: string, kind: Feedback['kind'], key: string, native = false): number {
@@ -29,12 +29,15 @@ export class NotificationService {
     this.hides.delete(id); this.items = this.items.filter(item => item.id !== id); this.changed();
   }
   dismissOwner(owner: string): void { for (const item of this.items.filter(item => item.owner === owner)) this.dismiss(item.id); }
-  subscribe(listener: () => void): Unsubscribe { if (this.disposed) return () => undefined; this.listeners.add(listener); return () => this.listeners.delete(listener); }
+  subscribe(listener: () => void | Promise<void>): Unsubscribe { if (this.disposed) return () => undefined; this.listeners.add(listener); return () => this.listeners.delete(listener); }
   private changed(): void {
     const snapshot = Array.from(this.listeners);
     for (const listener of snapshot) {
       if (!this.listeners.has(listener)) continue;
-      try { listener(); } catch { this.errors.report('notice.listener', 'notice.notify'); }
+      try {
+        const result = listener();
+        if (result) Promise.resolve(result).catch(() => this.errors.report('notice.listener', 'notice.notify'));
+      } catch { this.errors.report('notice.listener', 'notice.notify'); }
     }
   }
   dispose(): void { if (this.disposed) return; this.disposed = true; this.listeners.clear(); for (const item of this.items) this.dismiss(item.id); }

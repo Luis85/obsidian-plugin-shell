@@ -44,3 +44,9 @@ The npm version matters independently of the Node version; setup now prints both
 - [ESLint support policy](https://eslint.org/version-support/): support status, separate from installation failure.
 
 Reviewed 2026-09-22. This patch changes installer/policy/test code, not the plugin's runtime behavior or its declared native/mobile support.
+
+## Iteration 02 toolchain and build notes
+
+Select Node24.21.0/npm11.19.1 independently. ESLint10 raises the minimum Node22 floor to22.13. The historical Node24.15.0/npm12.0.2 combination is retained as a Windows/Linux regression target, not the preferred newly installed Node patch. A project-local npm selection or the package runner can select the tested npm without changing global tools; scripts never perform a global installation.
+
+The reviewed lock now approves esbuild@0.28.2, not the old0.27.7 installer. Do not pass a broad one-off allow-scripts list to repair installation, disable audits, or delete the lockfile. `npm run check:dependencies` checks exact pins, reviewed hashes and a real CSS transform; `npm run check:security` records both full audits. Build sources now live in scripts/bundling; failed staged builds preserve dist. Inspect an orphaned .shell-build-lock only after confirming no build process is active. See [Iteration02](ITERATION-TWO.md) for the narrow fontless override and current commands.

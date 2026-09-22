@@ -43,6 +43,12 @@ export class DocumentCreationService<Inputs> {
     this.requests.set(requestId, { input: fingerprint, plan });
     return success(plan);
   }
+  /** Release only an unused preview. Keep all attempted writes for safe deduplication. */
+  discard(plan: PreparedDocument): boolean {
+    const entry = this.requests.get(plan.requestId);
+    if (!entry || entry.plan !== plan || entry.work || entry.result) return false;
+    return this.requests.delete(plan.requestId);
+  }
   async commit(plan: PreparedDocument, currentFolder: string): Promise<Result<DocumentReceipt>> {
     if (this.disposed) return failure('disposed', 'error.disposed');
     const entry = this.requests.get(plan.requestId);

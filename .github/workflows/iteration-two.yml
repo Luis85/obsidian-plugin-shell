@@ -2,6 +2,7 @@ name: Iteration two qualification
 on:
   push:
     branches: [build/iteration-two]
+    paths-ignore: ['docs/**', 'README.md', 'AGENTS.md']
   workflow_dispatch:
 permissions:
   contents: read
@@ -9,32 +10,6 @@ concurrency:
   group: iteration-two-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  dependency-research:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - run: npm ci
-      - run: node scripts/testing/dependency-candidate.mjs
-      - name: Retain reviewed diff and temporary offline dependencies
-        if: always()
-        run: |
-          git diff -- package.json package-lock.json > reports/dependency-candidate/lock-review.diff
-          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' --exclude='*.eot' --exclude='*/.local-browsers/*' -czf offline-dependencies.tgz node_modules
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        if: always()
-        with:
-          name: iteration-two-supported-dependency-candidate
-          path: |
-            reports/dependency-candidate/
-            offline-dependencies.tgz
-          retention-days: 2
   candidate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -46,26 +21,49 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Install the reviewed lockfile
-        run: npm ci
-      - name: Verify the candidate
-        run: npm run verify
-      - name: Record selected-core coverage
-        run: npm run test:coverage
+      - name: Select npm independently without global installation
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Fresh strict-policy install of the committed lockfile
+        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+      - name: Execute every offline gate and build the complete candidate
+        run: |
+          mkdir -p reports/iteration-two
+          set -o pipefail
+          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/iteration-two/verify.txt
+          node scripts/quality/check-artifacts.mjs > reports/iteration-two/candidate-assets.json
+      - name: Repeat deterministic runtime suites in fresh processes with no retries
+        run: |
+          set -o pipefail
+          for run in 1 2 3; do node node_modules/vitest/vitest.mjs run 2>&1 | tee "reports/iteration-two/runtime-$run.txt"; done
+      - name: Record separately scoped coverage
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run test:coverage 2>&1 | tee reports/iteration-two/coverage-core.txt
+          node "$QUALIFIED_NPM" run test:coverage:production 2>&1 | tee reports/iteration-two/coverage-production.txt
       - name: Provision pinned Chromium
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
-      - name: Exercise the actual served application
-        run: npm run test:e2e
-      - name: Provision isolated native smoke provider
+      - name: Exercise actual served components and capture scope-labeled screenshots
+        run: node "$QUALIFIED_NPM" run test:e2e
+      - name: Provision isolated native host provider
+        run: node "$QUALIFIED_NPM" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
+      - name: Verify the unchanged installed candidate in real Obsidian
+        run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download
+      - name: Live security gate, all installed dependency categories
         if: always()
-        run: npm install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
-      - name: Exercise exact candidate in isolated Obsidian
-        if: always()
-        run: xvfb-run -a node scripts/testing/check-native.mjs --allow-download
-      - name: Archive tracked source
-        if: always()
-        run: git archive --format=zip --output=iteration-two-source.zip HEAD
-      - name: Retain candidate and scope-labeled evidence
+        run: node "$QUALIFIED_NPM" run check:security
+      - name: Confirm accepted asset identity and archive source
+        if: success()
+        run: |
+          node scripts/quality/check-artifacts.mjs > reports/iteration-two/final-assets.json
+          cmp reports/iteration-two/candidate-assets.json reports/iteration-two/final-assets.json
+          git diff --exit-code -- package-lock.json
+          git archive --format=zip --output=iteration-two-source.zip HEAD
+          mkdir -p package/plugin-shell
+          cp dist/main.js dist/manifest.json dist/styles.css package/plugin-shell/
+          cd package && zip -r ../plugin-shell-0.2.0.zip plugin-shell
+      - name: Retain candidate and sanitized, scope-labeled evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -78,7 +76,32 @@ jobs:
             !reports/**/*.woff
             !reports/**/*.woff2
             dist/
-            package-lock.json
+            plugin-shell-0.2.0.zip
             iteration-two-source.zip
           retention-days: 7
           if-no-files-found: error
+  original-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: e64e75eefb22822356cb2473b77eadee35871beb
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - run: npm ci
+      - name: Capture pre-remediation audit without treating its known finding as a clean result
+        run: |
+          mkdir -p reports/baseline-security
+          set +e
+          npm audit --json > reports/baseline-security/audit.json 2> reports/baseline-security/stderr.txt
+          echo $? > reports/baseline-security/exit.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: iteration-two-before-audit
+          path: reports/baseline-security/
+          retention-days: 7

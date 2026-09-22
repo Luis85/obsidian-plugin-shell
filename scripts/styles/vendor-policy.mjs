@@ -6,7 +6,7 @@ import { gunzipSync } from 'node:zlib';
 export const vendorPath = 'harness/styles/vendor/obsidian.css';
 export const vendorArchive = 'harness/styles/vendor/obsidian.css.gz';
 export const upstreamBlob = 'eb7b27320341f9ed0874bf152ed9955d82d38221';
-export function gitBlob(data) {
+function gitBlob(data) {
   return createHash('sha1').update(`blob ${data.length}\0`).update(data).digest('hex');
 }
 export function assertVendor(data) {

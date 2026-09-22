@@ -1,5 +1,5 @@
 /** Strict validation of the versioned test-plan data, not execution of configurable shell commands. */
-export const evidenceModes = ['node-baseline', 'http-specimen', 'browser-specimen',
+const evidenceModes = ['node-baseline', 'http-specimen', 'browser-specimen',
   'browser-inline-diagnostic', 'unit', 'component', 'browser-integrated', 'native',
   'device', 'artifact', 'tooling-generated', 'manual', 'security', 'performance'];
 const exactKeys = (object, keys) => {

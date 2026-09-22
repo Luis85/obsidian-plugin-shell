@@ -24,7 +24,11 @@ export async function initializePlugin(plugin: Plugin) {
   };
   try {
     plugin.registerView(SHOWCASE_VIEW, leaf => new ShowcaseView(leaf,
-      (root, actions) => mountShowcase(root, services, actions),
+      (root, actions) => mountShowcase(root, services, actions, refresh => {
+        const workspace = plugin.app.workspace;
+        const refs = [workspace.on('layout-change', refresh), workspace.on('css-change', refresh), workspace.on('window-open', refresh)];
+        return () => { for (const ref of refs) workspace.offref(ref); };
+      }),
       { preferences: services.preferences, diagnostics: services.diagnostics, text, toggleHeader: () => { void toggleHeader(); } },
       (view, open) => { if (open) views.add(view); else views.delete(view); }));
     const open = async () => {

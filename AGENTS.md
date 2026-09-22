@@ -2,15 +2,15 @@
 
 ## Current state
 
-Iteration 01 is a real Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-ONE.md), and [actual test record](docs/testing/ITERATION-ONE.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
+Iteration 02 is a real Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-TWO.md), and [actual test record](docs/testing/ITERATION-TWO.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
 
 No full make catalog or identity migration is implemented. Setup installs the fixed showcase identity. Do not advertise pending capabilities or invent placeholder commands.
 
 ## Commands and environment
 
-Use the qualified Node 24.21.0/npm with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
+Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
 
-`npm run verify` performs the current static/service/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` is a selected-core measurement, not complete production coverage. `analyze` is broader diagnostic fallow analysis; the blocking gate presently enforces architecture. Use actual tool output, not assumed success.
+`npm run verify` performs the current static/service/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` gates the selected core; `test:coverage:production` measures every production TS/Vue input separately and is report-only. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 

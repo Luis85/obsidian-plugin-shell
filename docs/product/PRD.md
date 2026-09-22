@@ -1,7 +1,7 @@
 # Product requirements: Obsidian Plugin Shell
 
 > **Version:** 0.8.0 · **Updated:** 2026-09-22 · **Owner:** Luis85  
-> **Implementation milestone:** First runnable Nuxt UI capability showcase, plugin version 0.1.0. The complete GitHub-template product is not yet finished.
+> **Implementation milestone:** Responsive layout/header/dependency/reliability milestone, plugin version 0.2.0. The complete GitHub-template product is not yet finished.
 
 ## Product goal
 
@@ -11,7 +11,7 @@ The owner requested the first runnable iteration up to an openable showcase view
 
 ## Requirements remain in force
 
-The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../testing/ITERATION-ONE.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
+The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../testing/ITERATION-TWO.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
 
 | Contract | Scope |
 | --- | --- |
@@ -29,12 +29,12 @@ The [machine plan](../testing/test-plan.json) remains the retained baseline inve
 
 ## Current capabilities
 
-| Capability | Status in iteration 01 |
+| Capability | Status in iteration 02 |
 | --- | --- |
 | Native plugin and open/focus command/ribbon | Implemented; native opening exercised in Obsidian1.13.7. |
 | Nuxt UI showcase | Real Vue/Pinia components with four panels, not a parallel mock UI. |
 | Task DocumentCreationService | Working explicit Task definition, validation, exact preview/commit, complete Markdown write and separate opening. Full schema/catalog machinery still pending. |
-| Settings | Native declarative tab and Vue preferences use one validated queued service; English/German and local panel preference. |
+| Settings | Native declarative tab and Vue preferences use one validated queued service; English/German, local panel preference and persisted isolated native-header visibility. |
 | Event bus | Typed plugin-scoped facts, once/disposal/error observation; selected file-open bridge. Full catalog/bridge remains pending. |
 | Feedback | Owner-scoped local/native notification subset and bounded diagnostics. Full timer/action/queue specification remains pending. |
 | Styling | Native token roles, Nuxt UI containment, local icons, no Preflight/global head injection, one composed plugin CSS. |
@@ -63,6 +63,6 @@ Current dependency/audit exceptions and their review boundary are in the [guide]
 
 ## Verification and definition of this milestone
 
-The [iteration test record](../testing/ITERATION-ONE.md) identifies actual checks, source/candidate identity, failures corrected and untested scope. `verify` currently covers static/service/artifact/retained-baseline/harness-build checks; served E2E is separate. Full PRD verification and release promotion are not implemented aliases to this partial gate.
+The [iteration test record](../testing/ITERATION-TWO.md) identifies actual checks, source/candidate identity, failures corrected and untested scope. `verify` currently covers static/service/artifact/retained-baseline/harness-build checks; served E2E is separate. Full PRD verification and release promotion are not implemented aliases to this partial gate.
 
 The milestone is an openable working desktop showcase. Complete template qualification still requires the retained work packages: full setup/renaming/makers, broader runtime contracts, production-wide test thresholds and analyzers, expanded host/device/accessibility evidence, and fixed-asset release rehearsal. Existing native evidence is limited to named smoke cases and cannot certify all hosts, themes or devices.

@@ -1,6 +1,6 @@
 {
   "name": "plugin-shell",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "devDependencies": {
@@ -10,7 +10,7 @@
     "@vitejs/plugin-vue": "6.0.9",
     "@vitest/coverage-v8": "5.0.1",
     "@vue/test-utils": "2.5.1",
-    "eslint": "9.39.5",
+    "eslint": "10.11.0",
     "eslint-plugin-obsidianmd": "0.4.2",
     "eslint-plugin-vue": "10.11.0",
     "fallow": "3.28.0",
@@ -36,13 +36,14 @@
   "description": "An Obsidian plugin foundation with a working Nuxt UI capability showcase",
   "license": "MIT",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.13.0",
+    "npm": ">=11.19.1 <13"
   },
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev:ui": "vite --config vite.harness.config.mjs --host 127.0.0.1 --open /harness/app/",
-    "dev": "vite build --watch --config vite.config.mjs",
-    "build": "node scripts/build/build.mjs",
+    "dev": "node scripts/dev/watch-local.mjs --no-local",
+    "build": "node scripts/bundling/build.mjs",
     "build:local": "node scripts/dev/install-local.mjs",
     "test-build": "npm run build:local",
     "typecheck": "vue-tsc --noEmit",
@@ -63,11 +64,21 @@
     "dev:local": "node scripts/dev/watch-local.mjs",
     "check:architecture": "node scripts/quality/check-architecture.mjs",
     "test:native": "node scripts/testing/check-native.mjs",
-    "test:setup-policy": "node --test tests/tooling/npm-install.checks.mjs"
+    "test:setup-policy": "node --test tests/tooling/npm-install.checks.mjs",
+    "check:analyzer": "node scripts/quality/check-analyzer.mjs",
+    "check:security": "node scripts/security/audit.mjs",
+    "check:dependencies": "node scripts/security/check-dependencies.mjs",
+    "test:coverage:production": "vitest run --coverage --config vitest.production.config.mjs"
   },
   "allowScripts": {
-    "esbuild@0.27.7": true,
+    "esbuild@0.28.2": true,
     "vue-demi@0.14.10": true,
     "fsevents": false
-  }
+  },
+  "overrides": {
+    "fontless@0.2.1": {
+      "esbuild": "0.28.2"
+    }
+  },
+  "packageManager": "npm@11.19.1"
 }
