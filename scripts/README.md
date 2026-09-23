@@ -12,15 +12,27 @@ node scripts/testing/verify-baseline.mjs --repeat 3 --json
 node scripts/testing/verify-baseline.mjs --profile release --json
 ```
 
-The first can pass for this baseline. The second intentionally reports blocked with exit 2; there is no native-candidate release validator yet. This is not an implementation of the future full `npm run verify` or publication workflow.
+The first can pass for this retained baseline. The second intentionally reports
+blocked with exit 2: its legacy acceptance inventory is separate from current
+`npm run verify`, native evidence and candidate operations. See the
+[readiness ledger](../docs/development/TEMPLATE-READINESS-LEDGER.md).
 
 Reports go to unique ignored folders under reports/. No cached report is treated as a test execution. Errors/unknown schema/empty or skipped tests fail. Node test workers use synthetic isolated temporary directories, not user vaults.
 
-## Planned
+## Current implementation
 
-Setup/bootstrap, makers/templates, plugin build, deployment, event/entity catalog and release tooling still follow the [setup/maker contract](../docs/development/SETUP-AND-MAKERS.md). Keep actual executable tooling here and root tool configuration thin. Do not create placeholder setup or a package.json merely to suggest unimplemented commands work.
+`setup/`, `makers/`, `examples/`, `bundling/`, `dev/`, `quality/`, `maintenance/`
+and `release/` contain the current executable workflows. Run `npm run help` for
+commands and [authoring tools](../docs/development/AUTHORING-TOOLS.md) for supported
+recipes. `release/cli.mjs` exposes authenticated planning and separately authorized
+execution through the retained-candidate engine and GitHub adapter; read
+[release execution](../docs/development/RELEASE-EXECUTION.md) before opting in.
+Entity catalog/check commands exist; separate event catalog/check commands remain
+an open requirement. Keep root configuration thin and shared policy here.
 
-Dependency-free Node tests are an explicitly bounded bridge until WP-00 qualifies Vitest/Vite/Playwright Test. Port the assertions into those configured projects; do not maintain two permanent copies. The browser assertions use Playwright APIs and are reusable in the eventual Playwright Test suite.
+Node tests cover tooling and retained fixture acceptance. Vitest exercises actual
+application services/components; Playwright serves the real harness. These scopes
+remain distinct and do not silently promote the legacy release profile.
 
 See [strategy](../docs/testing/TEST-STRATEGY.md) and [concept](../docs/testing/TEST-CONCEPT.md) for scope, commands, determinism, security and migration.
 

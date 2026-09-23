@@ -2,6 +2,11 @@
 
 **Iteration 04 — reusable authoring and persistence foundation, version 0.4.0.**
 
+The next milestone adds [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
+from a retained candidate. [Readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md)
+tracks remaining requirements; real publication and the privileged Actions interface
+remain unqualified. No release has been published by this implementation task.
+
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
 Project proves reuse with number/boolean fields. The existing native view, typed
@@ -24,6 +29,7 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Plugin-data entities | [Typed CRUD and shared persistence](docs/development/PLUGIN-DATA-ENTITIES.md) |
 | Removing demonstrations | [Reviewed example removal](docs/development/EXAMPLE-REMOVAL.md) |
 | Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
+| Release operations | [Authenticated planning, explicit execution and recovery](docs/development/RELEASE-EXECUTION.md) |
 
 **Qualification:** See the [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
 for actual execution scope. Whole-production coverage is now a blocking gate,

@@ -1,6 +1,6 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.10.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
+> **Version:** 0.11.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
 > **Implementation milestone:** Authoring, optional examples, shared durable persistence
 > and release-preparation milestone, plugin version 0.4.0. Final platform/public-release
 > readiness remains evidence-bound.
@@ -12,6 +12,17 @@ A developer obtains the template, runs a guided setup, generates a feature, deve
 The owner requested the first runnable iteration up to an openable showcase view. That slice now implements the native view, selected Nuxt UI components, Task Markdown workflow, shared preferences, typed events, feedback, scoped CSS, setup/local installation and executable tests. Do not interpret a working showcase as completion of every v1 capability.
 
 ## Requirements remain in force
+
+**Release execution extension:** The [milestone plan](../development/RELEASE-EXECUTION-PLAN.md)
+adds authenticated GitHub discovery and a separately authorized local executor for
+retained candidate drafts, missing uploads and promotion. It reuses the existing
+candidate/planner contracts, preserves public versions and stops on uncertain
+outcomes. Promotion requires an existing matching tag. All workflows remain
+read-only; no publication, tag, listing or permissions change is authorized.
+The [readiness ledger](../development/TEMPLATE-READINESS-LEDGER.md) accounts for
+remaining requirements and every legacy acceptance row without promoting earlier
+evidence. The standard privileged Actions interface and real first/subsequent
+publication qualification remain open.
 
 **Iteration 04 extension:** Complete the local maker catalog with primitive reuse,
 explicit local custom registry, domain-only definitions and useful integrated
@@ -82,7 +93,7 @@ The [machine plan](../testing/test-plan.json) remains the retained baseline inve
 | --- | --- |
 | Native plugin and open/focus command/ribbon | Implemented. Iteration 02 exercised native opening in Obsidian 1.13.7; the current candidate's native results are recorded separately. |
 | Nuxt UI showcase | Real Vue/Pinia components with four panels, not a parallel mock UI. |
-| Entity/document/repository foundation | Typed fields and explicit recipes, catalog validation, preview/commit and Markdown CRUD with revision checks. Task/Project share the same infrastructure. Note-feature makers and catalog CLI are implemented; alternate durable backends remain pending. |
+| Entity/document/repository foundation | Typed fields and explicit recipes, catalog validation, preview/commit and Markdown CRUD with revision checks. Task/Project share the same infrastructure. Current iteration also supplies explicit shared-writer plugin-data CRUD. |
 | Settings | Native declarative tab and Vue preferences use one validated queued service; English/German, local panel preference and persisted isolated native-header visibility. |
 | Event bus | Typed plugin-scoped facts and eight owned normalized native mappings; listener failures remain independently observable. |
 | Feedback | Owned local/native handles, progress delay, transient timing/queues, persistent recovery, locale refresh and single-flight action policies. Broader manual/accessibility qualification remains separate. |
@@ -92,7 +103,7 @@ The [machine plan](../testing/test-plan.json) remains the retained baseline inve
 | Styling | Native token roles, Nuxt UI containment, local icons, no Preflight/global head injection, one composed plugin CSS. |
 | Browser harness | Actual services/components with synthetic adapters, served Playwright tests and independent captured-defect observation. |
 | Setup and local install | Dependency-free identity/profile review, root-lock metadata preservation, verified resume, explicit disabled-plugin data migration and contained asset installation. |
-| Author tooling | Safe registered note-feature/entity recipes, real generated CRUD tests/fixtures, and actual-source entity catalog/check commands. Broader UI/custom makers remain pending. |
+| Author tooling | Safe registered recipes, real generated CRUD tests/fixtures and actual-source entity catalog/check commands; the current full local catalog includes UI/custom makers and reviewed example removal. |
 | Tooling | Exact lockfile, Vite/Vitest, strict types, Oxlint/Obsidian-Vue ESLint, source/locales, real fallow architecture and artifact checks. |
 | Coverage and broad analysis | Whole-production and stricter domain/application/features coverage gates; complete inventory and negative probes. Full fallow zero-finding analyzer, independent architecture and presentation-concern gates. Broader complexity/duplication qualification remains pending. |
 | CI | Read-only Linux/Windows verification, Linux served-browser and selected native smoke, temporary artifacts only. |
@@ -133,9 +144,10 @@ served E2E and native qualification are separate. Full PRD verification and rele
 promotion are not implemented aliases to this gate.
 
 The milestone is a reusable entity/document foundation with a working desktop
-example. Identity setup, verified resume, explicit contained migration and note-feature
-makers are implemented. Complete template qualification still requires the broader
-UI/custom-maker catalog, automatic example removal, additional runtime contracts/analyzers,
-expanded host/device/accessibility evidence,
-and fixed-asset release rehearsal. Native evidence is limited to named checks and
-cannot certify all hosts, themes or devices.
+example, integrated maker catalog, reviewed example removal, shared plugin-data
+persistence and fixed-asset release rehearsal. The local release executor extends
+that foundation. Complete template qualification still requires the specific
+runtime/tooling gaps in the readiness ledger, the Actions publication interface,
+real public-release qualification and expanded host/device/accessibility evidence.
+Native evidence is limited to named checks and cannot certify all hosts, themes
+or devices.
