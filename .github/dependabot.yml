@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    cooldown:
+      semver-patch-days: 3
+      semver-minor-days: 3
+      semver-major-days: 7
+    groups:
+      vue:
+        patterns: [vue, '@vue/*', pinia, vue-i18n]
+        update-types: [minor, patch]
+      typescript:
+        patterns: [typescript, vue-tsc]
+        update-types: [minor, patch]
+      vite:
+        patterns: [vite, '@vitejs/*']
+        update-types: [minor, patch]
+      vitest:
+        patterns: [vitest, '@vitest/*']
+        update-types: [minor, patch]
+      lint:
+        patterns: [eslint, 'eslint-*', typescript-eslint, '@typescript-eslint/*']
+        update-types: [minor, patch]
+      playwright:
+        patterns: ['@playwright/*', playwright]
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 3

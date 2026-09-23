@@ -13,10 +13,11 @@ export async function componentFixture(raw: unknown = null) {
   const modalSink = browserModalSink();
   const services = await createServices({ documents: storage, host: native, modals: modalSink, settings: { load: async () => raw, save },
     local: { get: () => null, set: () => undefined }, newId: () => `component-${++sequence}`, now: () => '2026-09-22T12:00:00.000Z', observeError: observe });
+  const runtimeEventCount = services.events.size;
   const root = document.createElement('div'); document.body.append(root);
   const actions = vi.fn(); const close = mountShowcase(root, services, actions);
   await settle();
-  return { root, services, storage, modalSink, write, save, files, observe, native, actions, close, dispose() { close(); services.dispose(); root.remove(); } };
+  return { root, services, runtimeEventCount, storage, modalSink, write, save, files, observe, native, actions, close, dispose() { close(); services.dispose(); root.remove(); } };
 }
 export async function settle() { await nextTick(); await flushPromises(); await nextTick(); }
 export function button(root: HTMLElement, text: string): HTMLButtonElement {

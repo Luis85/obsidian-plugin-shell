@@ -1,16 +1,18 @@
 {
-  "notification": { "overflow": "Weitere Meldungen warten. Details finden Sie in den zugehörigen Ansichten." },
+  "notification": {
+    "overflow": "Weitere Meldungen warten. Details finden Sie in den zugehörigen Ansichten."
+  },
   "app": {
     "title": "Plugin Shell",
     "tagline": "Hier beginnt dein Plugin.",
     "intro": "Eine funktionierende Grundlage statt einer leeren Seite. Erkunde die Dienste hinter dieser Ansicht und entwickle dein eigenes Plugin.",
     "showcase": "Funktionsübersicht",
-    "iteration": "Iteration 03",
+    "iteration": "Iteration 04",
     "local": "Lokal · ohne Benutzerkonto",
     "ready": "Laufzeit bereit",
     "browser": "Browser-Testumgebung",
     "native": "Obsidian-Umgebung",
-    "scope": "Iteration 03 · Wiederverwendbare Entitäten, Markdown-Repositories und Bearbeitung von Aufgabennotizen. Vollständige Generatoren, automatische Releases und Gerätequalifizierung bleiben geplant."
+    "scope": "Wiederverwendbare Werkzeuge, optionale Beispiele und explizite Markdown- oder Plugin-Datenspeicherung. Native Geräte- und Release-Abnahme werden getrennt geprüft."
   },
   "nav": {
     "overview": "Übersicht",
@@ -121,7 +123,7 @@
     "saved": "Einstellungen gespeichert",
     "theme": "Theme folgt Obsidian",
     "themeHelp": "Kein eigener Farbmodus wird installiert. Komponenten verwenden die CSS-Variablen des Hosts.",
-    "blocked": "Gespeicherte Einstellungen konnten nicht sicher gelesen werden. Standardwerte dienen nur zur Ansicht; Speichern ist zum Schutz der Daten gesperrt.",
+    "blocked": "Plugin-Daten konnten nicht sicher gelesen oder ein Speichervorgang nicht bestätigt werden. Speichern bleibt zum Schutz der Daten gesperrt. Behebe das Problem und starte das Plugin vor weiteren Änderungen neu.",
     "hideHeader": "Obsidian-Ansichtskopf ausblenden",
     "hideHeaderHelp": "Gilt sofort für alle Plugin-Shell-Ansichten. Hier, in den nativen Einstellungen oder über die Befehlspalette wiederherstellen.",
     "headerSaving": "Ansichtseinstellung wird gespeichert…"
@@ -132,10 +134,18 @@
     "saved": "Aufgabennotiz erfolgreich erstellt."
   },
   "modal": {
-    "close": "Schließen", "confirm": "Bestätigen", "cancel": "Abbrechen", "input": "Beispieltext", "invalid": "Geben Sie einen kurzen, nicht leeren Wert ein.", "validating": "Eingabe wird geprüft…",
-    "confirmTitle": "Beispiel bestätigen", "confirmText": "Dieses Beispiel verändert keine Dokumente. Bestätigen oder brechen Sie ab, um das typisierte Ergebnis zu prüfen.",
-    "promptTitle": "Texteingabe ausprobieren", "promptText": "Geben Sie einen kurzen Wert ein. Er bleibt in diesem Beispiel und wird nicht in den Vault geschrieben.",
-    "confirmed": "Beispiel bestätigt. Keine Dokumente geändert.", "cancelled": "Beispiel abgebrochen. Keine Dokumente geändert.",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "input": "Beispieltext",
+    "invalid": "Geben Sie einen kurzen, nicht leeren Wert ein.",
+    "validating": "Eingabe wird geprüft…",
+    "confirmTitle": "Beispiel bestätigen",
+    "confirmText": "Dieses Beispiel verändert keine Dokumente. Bestätigen oder brechen Sie ab, um das typisierte Ergebnis zu prüfen.",
+    "promptTitle": "Texteingabe ausprobieren",
+    "promptText": "Geben Sie einen kurzen Wert ein. Er bleibt in diesem Beispiel und wird nicht in den Vault geschrieben.",
+    "confirmed": "Beispiel bestätigt. Keine Dokumente geändert.",
+    "cancelled": "Beispiel abgebrochen. Keine Dokumente geändert.",
     "title": "Eine Ansicht, zwei Umgebungen",
     "text": "Dieser Dialog verwendet im Plugin die Obsidian-Modal-API und im Browser einen isolierten Adapter. Die Anwendungsdienste sind von beiden Implementierungen unabhängig."
   },
@@ -156,12 +166,18 @@
     "duplicateIdentity": "Zwei Notizen haben dieselbe Entitäts-ID. Behebe das Duplikat vor der Bearbeitung; keine Notizen wurden geändert.",
     "repositoryLimit": "Dieser Ordner überschreitet die Prüfgrenze von 1.000 Notizen. Verwende einen kleineren, eigenen Ordner.",
     "title": "Gib einen Titel mit 1–120 Zeichen ein.",
+    "filename": "Verwende einen nicht leeren Notiztitel ohne / \\ : * ? \" < > |, Steuerzeichen, führenden Punkt, abschließendes Leerzeichen oder Punkt und ohne reservierten Gerätenamen. Der Dateiname einschließlich .md darf 255 Byte nicht überschreiten.",
     "due": "Gib ein gültiges Kalenderdatum ein (JJJJ-MM-TT).",
     "tags": "Verwende bis zu 12 kurze Tags aus Buchstaben, Zahlen, Bindestrichen oder Schrägstrichen.",
     "folder": "Verwende einen sicheren relativen Ordner ohne versteckte Namen oder unzulässige Zeichen.",
     "preferences": "Diese Einstellungen sind ungültig.",
-    "settingsRead": "Gespeicherte Einstellungen sind geschützt. Behebe den Lesefehler vor dem Speichern.",
-    "settingsWrite": "Einstellungen wurden nicht gespeichert. Vorherige Werte bleiben aktiv.",
+    "settingsRead": "Gespeicherte Plugin-Daten sind geschützt. Behebe den Lesefehler vor dem Speichern.",
+    "settingsWrite": "Der Speicherstatus ist ungewiss. Speichern bleibt gesperrt, bis das Plugin neu startet und die gespeicherten Daten liest.",
+    "pluginDataRead": "Gespeicherte Entitätsdaten sind ungültig oder verwenden ein nicht unterstütztes Schema. Sie bleiben unverändert erhalten.",
+    "pluginDataMissing": "Diese Entität existiert nicht mehr. Lade die Sammlung neu, bevor du fortfährst.",
+    "pluginDataConflict": "Eine Entität mit dieser ID existiert bereits. Keine Entität wurde überschrieben.",
+    "pluginDataLimit": "Plugin-Daten überschreiten die unterstützte Größe, Datensatzanzahl oder Revisionsgrenze. Es wurden keine Änderungen gespeichert.",
+    "pluginDataStale": "Diese Entität wurde geändert oder ihr Stand stammt aus einer anderen Laufzeit. Lade sie neu und prüfe sie vor dem Speichern.",
     "conflict": "Der Zielpfad existiert bereits. Keine Datei wurde überschrieben.",
     "write": "Die Notiz konnte nicht gespeichert werden. Prüfe Zielpfad und Berechtigungen.",
     "uncertain": "Das Schreibergebnis ist unklar. Prüfe den exakten Zielpfad vor einem neuen Versuch.",
@@ -179,5 +195,31 @@
     "split": "Schaufenster in geteilter Ansicht öffnen",
     "popout": "Ansicht in neues Fenster verschieben",
     "close": "Diese Ansicht schließen"
+  },
+  "items": {
+    "title": "Elemente in Plugin-Daten",
+    "help": "Eine kleine Liste in den Plugin-Daten. Elemente erstellen oder ändern keine Notizen im Vault.",
+    "reload": "Elemente neu laden",
+    "reloaded": "Elemente neu geladen. Deine Entwürfe bleiben erhalten. Prüfe vor dem Speichern die aktuelle Bezeichnung.",
+    "invalid": "Gib eine Bezeichnung mit 1–120 Zeichen ohne äußere Leerzeichen ein.",
+    "labelHint": "1–120 Zeichen. Leerzeichen am Anfang und Ende werden entfernt.",
+    "newLabel": "Bezeichnung des neuen Elements",
+    "create": "Element erstellen",
+    "created": "Element erstellt.",
+    "loading": "Elemente werden geladen…",
+    "empty": "Noch keine Elemente. Erstelle oben dein erstes Element.",
+    "edit": "Element bearbeiten",
+    "editNamed": "Element bearbeiten: {label}",
+    "editing": "Element bearbeiten: {label}",
+    "renameLabel": "Elementbezeichnung",
+    "rename": "Element umbenennen",
+    "renamed": "Element umbenannt.",
+    "delete": "Element löschen…",
+    "deleteTitle": "Dieses Element löschen?",
+    "deleteHelp": "Das ausgewählte Element wird dauerhaft aus den Plugin-Daten gelöscht. Es kann nicht aus dem Vault-Papierkorb wiederhergestellt werden.",
+    "confirmDelete": "Element löschen",
+    "deleted": "Element gelöscht.",
+    "pending": "Diese Aktion wird noch ausgeführt…",
+    "stale": "Dein Entwurf bleibt erhalten. Lade die Elemente neu und prüfe die aktuelle Bezeichnung vor dem erneuten Speichern."
   }
 }

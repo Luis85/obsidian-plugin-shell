@@ -3,12 +3,15 @@ import { createI18n } from 'vue-i18n';
 import { createPinia, disposePinia } from 'pinia';
 import ui from '@nuxt/ui/vue-plugin';
 import ShowcaseApp from '../presentation/components/ShowcaseApp.vue';
+import AuthoringView from '../presentation/components/AuthoringView.vue';
 import { contextKey } from '../presentation/context/use-services';
+import { authoringContextKey } from '../presentation/context/authoring-context';
+import { createAuthoringPanels } from './authoring';
 import type { Services } from './services';
 import { bindHostTheme, type ObserveOwnerChange } from '../infrastructure/ui/host-theme';
 import { pluginIdentity } from '../infrastructure/plugin-identity';
 let mountSequence = 0;
-export function mountShowcase(root: HTMLElement, services: Services, showViewActions?: (event: MouseEvent) => void, observeOwner?: ObserveOwnerChange): () => void {
+export function mountShowcase(root: HTMLElement, services: Services, showViewActions?: (event: MouseEvent) => void, observeOwner?: ObserveOwnerChange, panelId?: string): () => void {
   const releases: (() => void)[] = []; let closed = false;
   const close = () => {
     if (closed) return; closed = true;
@@ -22,7 +25,7 @@ export function mountShowcase(root: HTMLElement, services: Services, showViewAct
     if (failed) throw firstError;
   };
   try {
-    root.classList.add(pluginIdentity.rootClass); root.dataset.pluginUi = pluginIdentity.id;
+    root.classList.add(pluginIdentity.rootClass, pluginIdentity.scopeClass); root.dataset.pluginUi = pluginIdentity.id;
     releases.push(bindHostTheme(root, observeOwner));
     const pinia = createPinia(); releases.push(() => disposePinia(pinia));
     // This shared browser/native boundary needs a detached node in the owning document.
@@ -32,11 +35,14 @@ export function mountShowcase(root: HTMLElement, services: Services, showViewAct
       fallbackLocale: services.i18n.global.fallbackLocale.value, messages: services.i18n.global.messages.value });
     releases.push(() => i18n.dispose());
     releases.push(services.preferences.subscribe(value => { i18n.global.locale.value = value.locale; }));
-    const app = createApp(ShowcaseApp, { portalRoot: surface, showViewActions }); let mounted = false;
+    const panels = createAuthoringPanels(services).filter(panel => panelId === undefined || panel.id === panelId);
+    if (panelId !== undefined && panels.length !== 1) throw new Error('AUTHORING_VIEW_NOT_REGISTERED');
+    const app = createApp(panelId === undefined ? ShowcaseApp : AuthoringView, { portalRoot: surface, showViewActions }); let mounted = false;
     releases.push(() => { if (mounted) app.unmount(); });
     app.config.idPrefix = `${pluginIdentity.id}-${++mountSequence}-`;
     app.config.errorHandler = () => services.diagnostics.report('vue.unexpected', 'view.render');
     app.use(pinia); app.use(i18n); app.use(ui); app.provide(contextKey, services);
+    app.provide(authoringContextKey, { services, panels });
     // Finish Vue's own mount before host attachment can fail. Teleports stay owned
     // by this detached surface so they cannot bypass the attachment boundary.
     app.mount(surface); mounted = true; root.insertBefore(surface, null);

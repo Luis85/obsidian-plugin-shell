@@ -1,0 +1,69 @@
+// @vitest-environment happy-dom
+import { afterEach, beforeEach, expect, it, vi, type MockInstance } from 'vitest';
+import { componentFixture, button, click, settle } from './component-fixture';
+import { mountShowcase } from '../../src/bootstrap/mount-ui';
+import { deferred } from './helpers';
+let warnings: string[]; let warningSpy: MockInstance;
+beforeEach(() => { warnings = []; warningSpy = vi.spyOn(console, 'warn').mockImplementation(message => { warnings.push(String(message)); }); });
+afterEach(() => { warningSpy.mockRestore(); document.body.replaceChildren(); expect(warnings).toEqual([]); });
+it('minimal plugin mounts real preferences and releases feedback subscriptions per view', async () => {
+  const f = await componentFixture();
+  try {
+    expect(f.root.querySelector('[data-testid="foundation"]')).not.toBeNull();
+    expect(f.root.textContent).toContain('Your plugin'); expect(f.root.textContent).not.toContain('Create Task');
+    f.services.notifications.show('background', 'error', 'error.unexpected', false, 'runtime'); await settle();
+    expect(f.root.querySelector('.shell-feedback-item')).not.toBeNull();
+    await click(f.root, 'Dismiss notification'); expect(f.root.querySelector('.shell-feedback-item')).toBeNull();
+    f.root.querySelector<HTMLButtonElement>('button[aria-label="View actions"]')?.click(); expect(f.actions).toHaveBeenCalledOnce();
+    expect(f.files.size).toBe(0); expect(f.observe).not.toHaveBeenCalled();
+  } finally { f.dispose(); }
+});
+it('retains child error containment and independent diagnostics after example removal', async () => {
+  const f = await componentFixture();
+  try {
+    vi.spyOn(f.services.preferences, 'readonly', 'get').mockImplementationOnce(() => { throw new Error('Child control failure'); });
+    f.root.querySelector<HTMLInputElement>('.shell-settings-card input[type="checkbox"]')?.click(); await settle();
+    expect(f.root.querySelector('[role="alert"]')?.textContent).toContain('rendering error');
+    expect(f.observe.mock.calls.map(([entry]) => entry.code)).toEqual(['vue.render']);
+    expect(f.files.size).toBe(0);
+  } finally { f.dispose(); }
+});
+it('failed attachment restores host state and a later independent mount remains usable', async () => {
+  const f = await componentFixture(); const root = document.createElement('div'); root.className = 'user-owned dark'; document.body.append(root);
+  const runtimeDispose = vi.spyOn(f.services.i18n, 'dispose');
+  const insert = vi.spyOn(root, 'insertBefore').mockImplementation(() => { throw new Error('DOM mount failed'); });
+  try {
+    expect(() => mountShowcase(root, f.services)).toThrow('DOM mount failed'); expect(root.children).toHaveLength(0);
+    expect(root.classList.contains('dark')).toBe(true); expect(root.classList.contains('light')).toBe(false); expect(root.classList.contains('user-owned')).toBe(true);
+    expect(runtimeDispose).not.toHaveBeenCalled(); insert.mockRestore();
+    const close = mountShowcase(root, f.services); await settle(); expect(root.querySelector('[data-testid="foundation"]')).not.toBeNull(); close(); close();
+  } finally { insert.mockRestore(); root.remove(); f.dispose(); }
+});
+it('closing one view or failing sibling attachment cannot dispose runtime translations', async () => {
+  const f = await componentFixture(); const root = document.createElement('div'); document.body.append(root);
+  const runtimeDispose = vi.spyOn(f.services.i18n, 'dispose'); const close = mountShowcase(root, f.services);
+  try {
+    f.close(); expect(runtimeDispose).not.toHaveBeenCalled();
+    const failedRoot = document.createElement('div'); document.body.append(failedRoot);
+    const failedInsert = vi.spyOn(failedRoot, 'insertBefore').mockImplementation(() => { throw new Error('failed sibling attachment'); });
+    try { expect(() => mountShowcase(failedRoot, f.services)).toThrow('failed sibling attachment'); expect(runtimeDispose).not.toHaveBeenCalled(); }
+    finally { failedInsert.mockRestore(); failedRoot.remove(); }
+    await f.services.preferences.update({ locale: 'de' }); await settle();
+    expect(root.querySelector('[data-testid="foundation"]')?.getAttribute('lang')).toBe('de'); expect(root.textContent).toContain('Einstellungen');
+    expect(f.services.i18n.global.t('nav.settings')).toBe('Einstellungen'); close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(f.runtimeEventCount);
+  } finally { close(); root.remove(); f.dispose(); f.services.dispose(); }
+  expect(runtimeDispose).toHaveBeenCalledOnce(); expect(f.services.events.size).toBe(0);
+});
+it('runtime recovery remains visible and single-flight while preserving persisted data', async () => {
+  const f = await componentFixture(); const available = deferred<boolean>();
+  const off = f.services.notifications.registerActions('background', { open: { labelKey: 'view.actions', available: () => available.promise, run: async () => { await f.native.openDocument('Notes/committed.md'); } } });
+  try {
+    f.services.notifications.notify({ owner: 'background', operation: 'committed-open', kind: 'error', key: 'error.open', native: true, actions: ['open'] }); await settle();
+    const feedback = f.root.querySelector<HTMLElement>('.shell-feedback'); if (!feedback) throw new Error('Missing feedback');
+    const action = button(feedback, 'View actions'); expect(action.disabled).toBe(false); action.click(); await settle();
+    expect(button(feedback, 'View actions').disabled).toBe(true); available.resolve(true); await settle();
+    expect(f.native.openDocument).toHaveBeenCalledExactlyOnceWith('Notes/committed.md'); expect(f.write).not.toHaveBeenCalled();
+    expect(button(feedback, 'View actions').disabled).toBe(false); expect(f.observe).not.toHaveBeenCalled();
+    off(); await settle(); expect(f.root.querySelector('.shell-feedback-item')).toBeNull();
+  } finally { off(); f.dispose(); }
+});

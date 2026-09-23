@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "milestone": "runtime-authoring",
+  "legacyPlan": "test-plan.json",
+  "legacyAcceptancePromotion": false,
+  "families": [
+    {
+      "id": "EVENT-RIGHTS-CATALOG",
+      "requirements": ["EVT-03", "EVT-05", "EVT-06", "EVT-11", "EVT-16"],
+      "relatedAcceptance": ["AC-43", "AC-44", "AC-46"],
+      "files": ["tests/runtime/event-authoring.test.ts", "tests/tooling/event-contracts.checks.mjs", "tests/tooling/maker-catalog.checks.mjs"],
+      "modes": ["actual-compiler", "actual-checker", "real-service", "generated-runtime"],
+      "scope": "Narrow rights and widened union correlation; descriptor composition, payload/catalog drift and registered identities; generated production-bus subscriptions and owned cleanup"
+    },
+    {
+      "id": "ITEMS-REFERENCE",
+      "requirements": ["EXA-01", "EXA-02", "EXA-03", "EXA-04", "EVT-08", "EVT-15"],
+      "relatedAcceptance": ["AC-03", "AC-04", "AC-46"],
+      "files": ["tests/runtime/items.test.ts", "tests/runtime/items-components.test.ts", "tests/e2e/items.spec.ts"],
+      "modes": ["real-service", "real-component", "served-browser"],
+      "scope": "Actual stable-ID plugin-data CRUD, exact persisted envelope and write counts, independent drafts, pending/failure/recovery, current-state queries, stale/uncertain protection and confirmation/disposal races"
+    },
+    {
+      "id": "CONSUMER-REMOVAL",
+      "requirements": ["EXA-05", "TPL-04", "EVT-15"],
+      "relatedAcceptance": ["AC-24", "AC-43"],
+      "files": ["tests/tooling/example-removal.checks.mjs", ".github/workflows/template-authoring.yml"],
+      "modes": ["tooling", "generated-consumer", "source-archive-dry-run"],
+      "scope": "Reviewed exact example ownership; distinct identity with consumer edits, custom maker, generated event/listener/plugin-data entity, full verification before/after removal and independent extension afterward"
+    },
+    {
+      "id": "WINDOWS-TRANSITION-DIAGNOSIS",
+      "requirements": ["HST-01", "TST-01"],
+      "files": ["docs/testing/RUNTIME-AUTHORING-NATIVE.md", "docs/testing/evidence/runtime-authoring-native.json"],
+      "modes": ["historical-candidate-native-diagnosis"],
+      "scope": "One instrumented plugin-free/full comparison on retained PR8 bytes; old failure remains unexplained and is not new-candidate acceptance"
+    }
+  ]
+}

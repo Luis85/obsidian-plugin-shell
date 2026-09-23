@@ -11,6 +11,28 @@ function fixture() {
 }
 const error = (code: string) => ({ ok: false, error: expect.objectContaining({ code }) });
 describe('Browser synthetic document storage parity', () => {
+  it('conflicts on composed/decomposed aliases without rewriting valid Unicode paths', async () => {
+    const f = fixture(); const composed = 'Notes/Café.md'; const decomposed = 'Notes/Re\u0301sume\u0301.md';
+    expect((await f.storage.create(composed, 'composed')).ok).toBe(true);
+    expect(await f.storage.create('Notes/Cafe\u0301.md', 'overwrite')).toEqual(error('conflict'));
+    expect(f.writes()).toBe(1); expect(f.files()[composed]).toBe('composed');
+    expect((await f.storage.create(decomposed, 'decomposed')).ok).toBe(true);
+    expect(f.files()[decomposed]).toBe('decomposed'); expect(f.files()[decomposed.normalize('NFC')]).toBeUndefined();
+    expect(await f.storage.create('Notes/Résumé.md', 'overwrite')).toEqual(error('conflict'));
+    expect((await f.storage.create('Données/Original.md', 'folder')).ok).toBe(true);
+    expect(await f.storage.create('Donne\u0301es/Other.md', 'alias')).toEqual(error('conflict'));
+    expect(f.writes()).toBe(3);
+  });
+  it('matches verbatim Unicode filenames and case-only collision safety without overwrites', async () => {
+    const f = fixture(); const path = 'Notes/Title Case – Übersicht.md';
+    expect((await f.storage.create(path, 'original')).ok).toBe(true);
+    for (const conflict of [path, 'Notes/title case – übersicht.md', 'notes/Other Title.md']) expect(await f.storage.create(conflict, 'overwrite')).toEqual(error('conflict'));
+    expect(f.writes()).toBe(1); expect(f.files()).toEqual({ [path]: 'original' });
+    expect((await f.storage.create('Notes/  Leading space.md', 'leading')).ok).toBe(true);
+    expect((await f.storage.create(`Notes/${'ä'.repeat(100)}.md`, 'long')).ok).toBe(true);
+    for (const invalid of ['Notes/Title .md', 'Notes/Title..md', 'Notes/COM¹.md', `Notes/${'😀'.repeat(64)}.md`]) expect(await f.storage.create(invalid, 'bad')).toEqual(error('validation'));
+    expect(f.writes()).toBe(3);
+  });
   it('creates, lists, reads and updates exact bytes with revision conflicts and missing paths', async () => {
     const f = fixture();
     expect((await f.storage.create('Tasks/a.md', 'first')).ok).toBe(true);

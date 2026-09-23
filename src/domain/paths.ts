@@ -1,7 +1,7 @@
 import { failure, success, type Result } from './outcome';
 // Intentional security boundary: reject ASCII control characters in path segments.
 // oxlint-disable-next-line no-control-regex
-const forbidden = /[<>:"|?*\\\u0000-\u001f]/;
+const forbidden = /[<>:"|?*\\\u0000-\u001f\u007f]/;
 const device = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 /** Vault-relative paths only. Never address hidden/configuration folders. */
 export function validateFolder(input: unknown): Result<string> {
@@ -13,7 +13,14 @@ export function validateFolder(input: unknown): Result<string> {
   }
   return success(folder);
 }
-export function documentStem(title: string): string {
-  return title.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 55).replace(/-$/, '') || 'document';
+/** Validate a portable note basename without altering its spelling or Unicode. */
+export function validateDocumentTitle(input: unknown): Result<string> {
+  const invalid = () => failure('validation', 'error.filename', 'title');
+  if (typeof input !== 'string' || !input.trim() || input.length > 252 || input.startsWith('.') || /[ .]$/.test(input)
+    || input.includes('/') || forbidden.test(input) || /^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?: *\.| *$)/i.test(input)) return invalid();
+  // .md adds three bytes to the common 255-byte filesystem component limit.
+  // URI encoding counts UTF-8 bytes and rejects unpaired surrogate code units.
+  try { if (encodeURIComponent(input).replace(/%[\dA-F]{2}/g, 'x').length > 252) return invalid(); }
+  catch { return invalid(); }
+  return success(input);
 }

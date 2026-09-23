@@ -9,8 +9,9 @@ test('[IDENTITY-CSS-01] selected identity scopes selectors, native ownership, va
   const source = `
 :root { --plugin-shell-space: 4px; --tw-opacity: 1; }
 [data-plugin-ui="plugin-shell"] { container: plugin-shell-leaf / inline-size; }
-.plugin-shell-host { padding: 0; }
+.ph--plugin-shell { padding: 0; }
 .plugin-shell-native-header-hidden[data-type="plugin-shell-showcase"] > .view-header { display: none; }
+.plugin-shell-native-header-hidden[data-plugin-view-owner="plugin-shell"] > .view-header { display: none; }
 @property --tw-opacity { syntax: "<number>"; inherits: false; initial-value: 1; }
 @keyframes spin { from { opacity: 0; } to { opacity: 1; } }
 .shell-spinner { animation: spin 1s linear; padding: var(--plugin-shell-space); opacity: var(--tw-opacity); }
@@ -19,7 +20,8 @@ test('[IDENTITY-CSS-01] selected identity scopes selectors, native ownership, va
   const result = await postcss([cssOwnership('field-notes')]).process(source, { from: 'src/styles/test.css' });
   assert.match(result.css, /data-plugin-ui="field-notes"/);
   assert.match(result.css, /\.field-notes-native-header-hidden\[data-type="field-notes-showcase"\]/);
-  assert.match(result.css, /\.field-notes-host/);
+  assert.match(result.css, /\.field-notes-native-header-hidden\[data-plugin-view-owner="field-notes"\]/);
+  assert.match(result.css, /\.ph--field-notes/);
   assert.match(result.css, /@property --field-notes-tw-opacity/);
   assert.match(result.css, /@keyframes field-notes-spin/);
   assert.match(result.css, /animation: field-notes-spin/);
@@ -43,15 +45,22 @@ test('[IDENTITY-CSS-02] two built identities never share registered properties o
 test('[IDENTITY-CSS-03] short ids, class prefixes and negative selector mentions cannot escape ownership', async () => {
   for (const [id, source] of [['a', '.app-button { color: red; }'], ['shell', '.shell-sidebar { color: red; }'], ['a', 'body:not(.a) .foreign, :where(.a, .foreign) { color: red; }'], ['a', ':not(:root) .foreign { color: red; }'], ['a', '.row + .row { color: red; }']]) {
     const result = await postcss([cssOwnership(id)]).process(source, { from: 'src/styles/test.css' });
-    assert.ok(result.css.includes(`[data-plugin-ui="${id}"] `), result.css);
+    assert.ok(result.css.includes(`.ps--${id} `), result.css);
     postcss.parse(result.css).walkRules(rule => selectorParser(list => list.each(selector => assert.ok(ownsSelector(selector, id), selector.toString()))).processSync(rule.selector));
     const repeat = await postcss([cssOwnership(id)]).process(result.css, { from: 'src/styles/test.css' });
     assert.equal(repeat.css, result.css);
   }
-  for (const text of ['.app-button', '.a-suffix', 'body:not(.a) .foreign', ':where(.a, .foreign)', '[data-plugin-ui="another"]']) {
+  for (const text of ['.app-button', '.a-suffix', '.ps--a-suffix', '.ps--another', '.ps--a + .foreign', ':not(.ps--a) .foreign', 'body:not(.a) .foreign', ':where(.a, .foreign)', '[data-plugin-ui="another"]', '.a-native-header-hidden[data-plugin-view-owner*="a"] > .view-header', '.a-native-header-hidden[data-plugin-view-owner="another"] > .view-header', '.a-native-header-hidden[data-plugin-view-owner="a"] .view-header', '.a-native-header-hidden[data-plugin-view-owner="a"] > .foreign']) {
     selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'a'), false, text))).processSync(text);
   }
   assert.throws(() => assertCssOwnership(postcss.parse('.app-button { color: red; }'), 'a', selectorParser), /UNSCOPED_RULE/);
+  selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'notes'), false))).processSync('.ps-notes');
+  selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'ps-notes'), false))).processSync('.ps--notes');
+  selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'notes'), false))).processSync('.notes-host');
+  selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'notes-host'), false))).processSync('.notes--host');
+  selectorParser(list => list.each(selector => assert.equal(ownsSelector(selector, 'host'), false))).processSync('.ph--ps');
+  assert.throws(() => cssOwnership('ps--notes'), /INVALID_CSS_IDENTITY/);
+  assert.throws(() => cssOwnership('ph--notes'), /INVALID_CSS_IDENTITY/);
 });
 
 test('[IDENTITY-CSS-04] harness frame remains external on both path separator conventions', async () => {

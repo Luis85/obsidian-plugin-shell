@@ -33,11 +33,12 @@ export function isCalendarDate(value: string): boolean {
   const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= (days[month - 1] ?? 0);
 }
-function text(options: { min?: number; max?: number; trim?: boolean } = {}): Field<string, true> {
+function text(options: { min?: number; max?: number; trim?: boolean; nonblank?: boolean } = {}): Field<string, true> {
   options = Object.freeze({ ...options });
   return { required: true, kind: 'text', read(input) {
     if (typeof input !== 'string') return invalid();
     const value = options.trim ? input.trim() : input;
+    if (options.nonblank && !value.trim()) return invalid();
     return value.length >= (options.min ?? 0) && value.length <= (options.max ?? 1000) ? success(value) : invalid();
   } };
 }

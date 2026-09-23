@@ -55,7 +55,11 @@ One default document definition per note-backed entity is sufficient for v1. Dup
 | `due` | Optional date-only string | Valid calendar date `YYYY-MM-DD`; omitted when absent. |
 | `tags` | Input list of text | Default empty list; explicit tag validation, no implicit scalar-to-list coercion. |
 
-The default folder is `Tasks`, configurable through validated plugin preferences. The default filename contains a safe title stem plus the stable ID, so two intentionally different tasks can share a title without overwriting each other. No document is created merely by registering this definition.
+The default folder is `Tasks`, configurable through validated plugin preferences. Creation uses the projected document title verbatim followed by `.md`: case, spaces and Unicode are preserved, with no slug conversion or appended ID. The stable ID remains in frontmatter. An existing same-title path (including a case-only alias) is a conflict: do not overwrite or choose an automatic suffix. Unsafe, reserved or oversized filenames fail validation rather than silently changing the title. No document is created merely by registering this definition.
+
+The service preserves exactly the title returned by the document definition. A business entity may explicitly normalize values before projection; that policy must be visible to its author. The Task example and newly generated entities preserve title spelling while rejecting blank values. Filename validation rejects separators, control characters, Windows-reserved characters/device names, leading dots, trailing spaces/dots, invalid Unicode and names exceeding 255 UTF-8 bytes including `.md`. Updates retain the existing path even when a title field changes; no automatic rename or migration of earlier ID-suffixed notes occurs.
+
+Collision checks compare NFC-normalized, case-insensitive names to reject canonically equivalent Unicode aliases, including folder aliases. Comparison never changes the proposed or stored path bytes. Native creation inspects only immediate siblings through the host's existing folder tree; it does not enumerate the vault.
 
 ## 3. Property semantics and serialization
 

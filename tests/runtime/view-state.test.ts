@@ -64,20 +64,23 @@ it('[VIEW-03-03] a closed view never receives late completion or notification wh
 it('[VIEW-03-04] bounded event history records all canonical event kinds and stops with its view', async () => {
   const f = await view();
   try {
-    for (let i = 0; i < 40; i++) f.services.events.publish({ type: 'showcase.ping', payload: { sequence: i } });
-    f.services.events.publish({ type: 'host.active-file-changed', payload: { available: true } });
+    for (let i = 0; i < 40; i++) f.services.showcase.ping(i);
+    f.services.hostEvents.publish({ type: 'host.active-file-changed', payload: { available: true } });
     await f.services.preferences.update({ locale: 'de' }); expect(f.store.eventCount).toBe(42); expect(f.store.stream).toHaveLength(30);
     expect(f.store.stream.slice(0, 2).map(item => item.type)).toEqual(['preferences.changed', 'host.active-file-changed']);
-    f.unmount(); f.services.events.publish({ type: 'showcase.ping', payload: { sequence: 41 } }); expect(f.store.eventCount).toBe(42);
+    f.unmount(); f.services.showcase.ping(41); expect(f.store.eventCount).toBe(42);
   } finally { f.services.dispose(); }
 });
 it('[VIEW-03-05] host observations and repository changes are visible without counting the same committed create twice', async () => {
   const f = await view();
   try {
-    f.services.events.publish({ type: 'host.vault.entry-created', payload: { path: 'Private/secret.md', kind: 'file' } });
+    f.services.hostEvents.publish({ type: 'host.vault.entry-created', payload: { path: 'Private/secret.md', kind: 'file' } });
     expect(f.store.createdCount).toBe(0);
-    const payload = { entity: 'task', id: 'one', path: 'Private/secret.md', schemaVersion: 1 };
-    f.services.events.publish({ type: 'documents.created', payload }); f.services.events.publish({ type: 'documents.updated', payload }); f.services.events.publish({ type: 'documents.deleted', payload });
+    const created = await f.services.repositories.task.create({ title: 'secret', status: 'todo', tags: [] }, 'one');
+    expect(created.ok).toBe(true); if (!created.ok) throw new Error('Expected created note');
+    const updated = await f.services.repositories.task.update(created.value, { ...created.value.values, title: 'renamed' });
+    expect(updated.ok).toBe(true); if (!updated.ok) throw new Error('Expected updated note');
+    expect((await f.services.repositories.task.delete(updated.value)).ok).toBe(true);
     expect(f.store.createdCount).toBe(1); expect(f.store.stream.map(item => item.type)).toEqual(['documents.deleted', 'documents.updated', 'documents.created', 'host.vault.entry-created']);
     expect(JSON.stringify(f.store.stream)).not.toContain('Private'); expect(JSON.stringify(f.store.stream)).not.toContain('secret');
   } finally { f.close(); }

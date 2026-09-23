@@ -1,7 +1,7 @@
 name: Showcase verification
 on:
   push:
-    branches: [main, build/iteration-three]
+    branches: [main, build/template-foundation]
   pull_request:
   workflow_dispatch:
 permissions:

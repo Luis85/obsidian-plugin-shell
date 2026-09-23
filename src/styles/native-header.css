@@ -1,2 +1,3 @@
 /* Compatibility adaptation: direct native row in an explicitly owned leaf only. */
 .plugin-shell-native-header-hidden[data-type="plugin-shell-showcase"] > .view-header { display: none !important; }
+.plugin-shell-native-header-hidden[data-plugin-view-owner="plugin-shell"] > .view-header { display: none !important; }

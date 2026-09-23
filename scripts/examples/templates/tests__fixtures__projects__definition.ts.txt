@@ -1,0 +1,10 @@
+// Test-owned schema for reusable foundation qualification. Never registered in the plugin.
+import { defineDocument, defineNoteFeature, heading } from '../../../src/features/api';
+import { projectEntity } from './entity';
+
+export const projectDocument = defineDocument(projectEntity, {
+  mappings: [{ field: 'name', property: 'name' }, { field: 'budget', property: 'budget' }, { field: 'archived', property: 'archived' }],
+  title: value => value.name,
+  body: value => `# ${heading(value.name)}\n\n## Notes\n\n`,
+});
+export const projectFeature = defineNoteFeature({ document: projectDocument, defaultFolder: 'Projects' });

@@ -1,0 +1,97 @@
+{
+  "sourceCommit": "a7dacca2cecc9ed7edde39b475a4caac65d8af4e",
+  "sourceZipSha256": "44f6d344d3f4b41d92a108fbe5d09109b939a24ee2ed6fb67f4bec01e023b13e",
+  "scope": "Fresh Git-free literal source archive, distinct identity, strict-allow-scripts install and full verify; browser/native stages explicitly not selected",
+  "identity": {
+    "id": "archive-notes",
+    "name": "Archive Notes",
+    "description": "Explore a working Vue and Nuxt UI plugin foundation: documents, typed events, preferences and feedback.",
+    "author": "Archive Qualification",
+    "version": "1.0.0",
+    "repo": "example/archive-notes"
+  },
+  "toolchain": {
+    "node": "v24.21.0",
+    "npm": "11.19.1",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "status": "verified",
+  "strictAllowScripts": true,
+  "ancestorGitDiscoveryExit": 128,
+  "stages": [
+    {
+      "id": "install",
+      "selected": true,
+      "status": "verified",
+      "exitCode": 0
+    },
+    {
+      "id": "browser-provision",
+      "selected": false,
+      "status": "skipped"
+    },
+    {
+      "id": "verify",
+      "selected": true,
+      "status": "verified",
+      "exitCode": 0
+    },
+    {
+      "id": "native-install",
+      "selected": false,
+      "status": "skipped"
+    }
+  ],
+  "tooling": {
+    "total": 116,
+    "passed": 115,
+    "failed": 0,
+    "skipped": 1
+  },
+  "runtime": {
+    "files": 52,
+    "tests": 305
+  },
+  "productionCoverage": {
+    "inputs": 97,
+    "total": {
+      "lines": {
+        "total": 2171,
+        "covered": 2160,
+        "skipped": 0,
+        "pct": 99.49
+      },
+      "statements": {
+        "total": 3530,
+        "covered": 3438,
+        "skipped": 0,
+        "pct": 97.39
+      },
+      "functions": {
+        "total": 830,
+        "covered": 808,
+        "skipped": 0,
+        "pct": 97.34
+      },
+      "branches": {
+        "total": 2300,
+        "covered": 2183,
+        "skipped": 0,
+        "pct": 94.91
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  },
+  "assets": {
+    "main.js": "5b379215419faccb6abcdf522710076b758f226f87aef1bb0c06398fa5999926",
+    "styles.css": "078f89546242acc58065c9b9b8d125184484a55853b23bf5a4528ff7a5a45e0c",
+    "manifest.json": "11de968dd438d6c5af6871f27f8ee025ba3fe04ce80cfe292e08d7fea6cc851c"
+  },
+  "logSha256": "b6d85d2a52b94e1ff7930ce80c21ab4738e6eac814ddb6cdb02018269df13683"
+}

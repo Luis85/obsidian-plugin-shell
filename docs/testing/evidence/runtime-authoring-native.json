@@ -1,0 +1,1118 @@
+{
+  "capturedAt": "2026-09-23T13:06:08.088Z",
+  "scope": "Instrumented Windows diagnosis of retained PR8 assets; not qualification of runtime-authoring source",
+  "sourceCommit": "4f9b3b13825c7e2fbfca414611cc7aa0143a4812",
+  "runs": {
+    "plugin-free-boot-failure": {
+      "status": "failed",
+      "reason": "page.evaluate: TypeError: Cannot read properties of null (reading 'insertChild')\n    at t.getUnpinnedLeaf (app://obsidian.md/app.js:1:2872243)\n    at t.getLeaf (app://obsidian.md/app.js:1:2872458)\n    at eval (eval at evaluate (:311:30), <anonymous>:3:53)\n    at async <anonymous>:337:30",
+      "cleanupFailure": "NATIVE_CONFIG_CLEANUP_FAILED",
+      "checks": [],
+      "rendererErrors": [],
+      "versions": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "observationFailure": null,
+      "observationRows": 3,
+      "assets": [],
+      "intervalMs": 100,
+      "reports": {
+        "report": "7e9ea6be078e2dc3b26b266b20fefbe74b16e630372138a056d9c7f64f5b4c5c",
+        "observations": "73312520f3ff7b4c975675317f561a85357cb5512d9b6f9093b35abbf14969e7",
+        "driver": "19c74d403dbb86ced327b85e3187c6cc1c801b39979884317aa2d8f9e256bccd"
+      },
+      "firstLightWindowSamples": [],
+      "eventCounts": {
+        "mutation": 7
+      },
+      "disk": [
+        {
+          "time": "2026-09-23T13:00:48.682Z",
+          "appearance": {}
+        }
+      ],
+      "transitions": [
+        {
+          "time": "2026-09-23T13:00:48.005Z",
+          "theme": "system",
+          "main": {
+            "bodyClass": "theme-dark mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars in-progress show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header is-focused",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(28, 28, 28)",
+            "roots": []
+          },
+          "precedingSecondary": [],
+          "events": []
+        }
+      ]
+    },
+    "plugin-free": {
+      "status": "passed",
+      "checks": [
+        "plugin-free-split-dark",
+        "plugin-free-split-light"
+      ],
+      "rendererErrors": [],
+      "versions": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "observationFailure": null,
+      "observationRows": 22,
+      "assets": [],
+      "intervalMs": 100,
+      "reports": {
+        "report": "ef06f0db954006afcf418907fe56967ac37a8236d244e5237496a2b3ff0fc43b",
+        "observations": "05a3c37846333cdad96fea0c1cf7f59df1dbe42f10cb4c452bd65dbc717b0fdb",
+        "driver": "9ed5f9924312679e71ae81d6f65e45e0c8b1c3d8dfb8affce0aa8f11c9681bdd"
+      },
+      "firstLightWindowSamples": [
+        {
+          "time": "2026-09-23T13:01:53.728Z",
+          "window": 1,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(28, 28, 28)",
+          "config": {
+            "theme": "obsidian",
+            "cssTheme": "",
+            "accentColor": "",
+            "baseFontSize": 16
+          },
+          "roots": []
+        },
+        {
+          "time": "2026-09-23T13:01:53.737Z",
+          "window": 2,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window is-popout-modal is-focused",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(28, 28, 28)",
+          "config": null,
+          "roots": []
+        },
+        {
+          "time": "2026-09-23T13:01:53.856Z",
+          "window": 1,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(255, 255, 255)",
+          "config": {
+            "theme": "moonstone",
+            "cssTheme": "",
+            "accentColor": "",
+            "baseFontSize": 16
+          },
+          "roots": []
+        },
+        {
+          "time": "2026-09-23T13:01:53.861Z",
+          "window": 2,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-popout-window is-popout-modal is-focused",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(255, 255, 255)",
+          "config": null,
+          "roots": []
+        }
+      ],
+      "eventCounts": {
+        "mutation": 31,
+        "css-change": 3,
+        "focus": 6,
+        "blur": 5,
+        "change": 3,
+        "config-changed": 2
+      },
+      "disk": [
+        {
+          "time": "2026-09-23T13:01:50.563Z",
+          "appearance": {}
+        }
+      ],
+      "transitions": [
+        {
+          "time": "2026-09-23T13:01:49.878Z",
+          "theme": "system",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars in-progress is-focused theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(255, 255, 255)",
+            "roots": []
+          },
+          "precedingSecondary": [],
+          "events": []
+        },
+        {
+          "time": "2026-09-23T13:01:52.976Z",
+          "theme": "obsidian",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(28, 28, 28)",
+            "roots": []
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:01:52.820Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "system",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Adapt to system",
+                  "options": [
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168512936,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168512937,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168512938,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:01:53.856Z",
+          "theme": "moonstone",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(255, 255, 255)",
+            "roots": []
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:01:53.737Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "obsidian",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Dark",
+                  "options": [
+                    "Dark"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168513830,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168513832,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168513832,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark theme-light"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "full": {
+      "status": "passed",
+      "checks": [
+        "native-command-opens-view",
+        "native-public-command-local-id-removal-before-plugin-unload",
+        "actual-vault-verbatim-title-and-markdown-match-preview",
+        "native-repository-list-reads-canonical-manually-edited-note",
+        "native-repository-update-preserves-path-identity-user-properties-and-body",
+        "native-repository-trash-cancellation-preserves-exact-note",
+        "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+        "native-host-bridge-publishes-normalized-crud-observations",
+        "native-view-real-event",
+        "native-modal-opens-and-dismisses",
+        "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+        "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+        "native-debug-commands-toggle-and-export-attributable-redacted-report",
+        "native-exact-title-row-hidden-not-tabs-or-window-controls",
+        "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+        "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+        "native-split-pane-light-dark-theme-transition",
+        "native-electron-125-150-percent-zoom-no-clipped-language-control",
+        "native-popout-inherits-preference-and-live-toggle",
+        "native-unload-restores-retained-host-elements-without-foreign-mutation",
+        "native-runtime-reload-restores-persisted-hidden-preference",
+        "native-settings-restoration-shares-canonical-service",
+        "native-declarative-settings-use-application-writer",
+        "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+      ],
+      "rendererErrors": [],
+      "versions": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+      "observationFailure": null,
+      "observationRows": 126,
+      "assets": [
+        {
+          "file": "main.js",
+          "sha256": "0063e7032123818bdc378672be054e6ea18c6b87a0c999526b26fea723553c02"
+        },
+        {
+          "file": "styles.css",
+          "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+        },
+        {
+          "file": "manifest.json",
+          "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+        }
+      ],
+      "installedAssets": [
+        {
+          "file": "main.js",
+          "sha256": "0063e7032123818bdc378672be054e6ea18c6b87a0c999526b26fea723553c02"
+        },
+        {
+          "file": "styles.css",
+          "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+        },
+        {
+          "file": "manifest.json",
+          "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+        }
+      ],
+      "intervalMs": 100,
+      "reports": {
+        "report": "676bcc6b1cc29937317656dcecbcc70352868e1cca0ea5923ad7acc4a75532c9",
+        "observations": "523296e2996d4f199ab4897de185f25ae002b669819651fc31e468ba469c00fc",
+        "driver": "84cbf5e964b060612e28d659385a1358426629f6c747c9fbb082d3b29a27c919"
+      },
+      "firstLightWindowSamples": [
+        {
+          "time": "2026-09-23T13:02:52.427Z",
+          "window": 1,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(28, 28, 28)",
+          "config": {
+            "theme": "obsidian",
+            "cssTheme": "",
+            "accentColor": "",
+            "baseFontSize": 16
+          },
+          "roots": [
+            {
+              "className": "plugin-shell ps--plugin-shell dark",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+            },
+            {
+              "className": "plugin-shell ps--plugin-shell dark",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:52.432Z",
+          "window": 2,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window is-popout-modal is-focused",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(28, 28, 28)",
+          "config": null,
+          "roots": []
+        },
+        {
+          "time": "2026-09-23T13:02:52.560Z",
+          "window": 1,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(255, 255, 255)",
+          "config": {
+            "theme": "moonstone",
+            "cssTheme": "",
+            "accentColor": "",
+            "baseFontSize": 16
+          },
+          "roots": [
+            {
+              "className": "plugin-shell ps--plugin-shell light",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+            },
+            {
+              "className": "plugin-shell ps--plugin-shell light",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:52.566Z",
+          "window": 2,
+          "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-popout-window is-popout-modal is-focused",
+          "visibility": "visible",
+          "focused": true,
+          "background": "rgb(255, 255, 255)",
+          "config": null,
+          "roots": []
+        }
+      ],
+      "eventCounts": {
+        "mutation": 81,
+        "focus": 77,
+        "change": 32,
+        "blur": 77,
+        "css-change": 7,
+        "config-changed": 7
+      },
+      "disk": [
+        {
+          "time": "2026-09-23T13:02:40.084Z",
+          "appearance": {}
+        },
+        {
+          "time": "2026-09-23T13:02:54.420Z",
+          "appearance": {
+            "theme": "obsidian"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "time": "2026-09-23T13:02:39.227Z",
+          "theme": "system",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars in-progress theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header is-focused",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(255, 255, 255)",
+            "roots": []
+          },
+          "precedingSecondary": [],
+          "events": []
+        },
+        {
+          "time": "2026-09-23T13:02:51.602Z",
+          "theme": "obsidian",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(28, 28, 28)",
+            "roots": [
+              {
+                "className": "plugin-shell ps--plugin-shell dark",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+              },
+              {
+                "className": "plugin-shell ps--plugin-shell dark",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+              }
+            ]
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:02:51.387Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "system",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Adapt to system",
+                  "options": [
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168571529,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168571531,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168571531,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars theme-light show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:52.560Z",
+          "theme": "moonstone",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(255, 255, 255)",
+            "roots": [
+              {
+                "className": "plugin-shell ps--plugin-shell light",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+              },
+              {
+                "className": "plugin-shell ps--plugin-shell light",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+              }
+            ]
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:02:52.432Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "obsidian",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Dark",
+                  "options": [
+                    "Dark"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168572508,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168572509,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168572510,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark theme-light"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:53.374Z",
+          "theme": "obsidian",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(28, 28, 28)",
+            "roots": [
+              {
+                "className": "plugin-shell ps--plugin-shell dark",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+              },
+              {
+                "className": "plugin-shell ps--plugin-shell dark",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+              }
+            ]
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:02:53.266Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "moonstone",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Light",
+                  "options": [
+                    "Light"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168573324,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168573325,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168573325,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:56.386Z",
+          "theme": "moonstone",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(255, 255, 255)",
+            "roots": [
+              {
+                "className": "plugin-shell ps--plugin-shell light",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+              }
+            ]
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:02:56.248Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "obsidian",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Dark",
+                  "options": [
+                    "Dark"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "time": "2026-09-23T13:02:56.251Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-popout-window",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "en",
+                  "options": [
+                    "English",
+                    "Deutsch"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168576315,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168576315,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168576316,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark theme-light"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "time": "2026-09-23T13:02:56.867Z",
+          "theme": "obsidian",
+          "main": {
+            "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark",
+            "focused": true,
+            "visibility": "visible",
+            "background": "rgb(28, 28, 28)",
+            "roots": [
+              {
+                "className": "plugin-shell ps--plugin-shell dark",
+                "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark"
+              }
+            ]
+          },
+          "precedingSecondary": [
+            {
+              "id": 2,
+              "time": "2026-09-23T13:02:56.722Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-popout-window is-popout-modal is-focused",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "moonstone",
+                  "options": [
+                    "Dark",
+                    "Light",
+                    "Adapt to system"
+                  ]
+                },
+                {
+                  "value": "Light",
+                  "options": [
+                    "Light"
+                  ]
+                },
+                {
+                  "value": "",
+                  "options": [
+                    "Default"
+                  ]
+                },
+                {
+                  "value": "Default",
+                  "options": [
+                    "Default"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "time": "2026-09-23T13:02:56.726Z",
+              "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-popout-window",
+              "focused": true,
+              "visibility": "visible",
+              "selected": [
+                {
+                  "value": "en",
+                  "options": [
+                    "English",
+                    "Deutsch"
+                  ]
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "time": 1790168576818,
+              "kind": "css-change",
+              "details": null
+            },
+            {
+              "time": 1790168576819,
+              "kind": "config-changed",
+              "details": null
+            },
+            {
+              "time": 1790168576819,
+              "kind": "mutation",
+              "details": [
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light"
+                },
+                {
+                  "target": "BODY",
+                  "attribute": "class",
+                  "previous": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "priorFailure": {
+    "path": "../release-operations/reports/native/report.json",
+    "sha256": "175b8d74554478d5fc1885ce3a03880ce17062390e263e6e7245dd110aac0a72",
+    "unchanged": true
+  },
+  "instrumentationHash": "49a94264f515165cf80659bb6f463a325868856ce207b6491654b27f6df240ca",
+  "prs": [
+    {
+      "number": 8,
+      "url": "https://github.com/Luis85/obsidian-plugin-shell/pull/8",
+      "state": "OPEN",
+      "sha": "12d07b90e8ae370e7f9baafbd80800f46b0164e2",
+      "checks": [
+        {
+          "name": "Baseline / ubuntu-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862312222/job/107185239160"
+        },
+        {
+          "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862311933/job/107185238389"
+        },
+        {
+          "name": "Showcase / ubuntu-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862312154/job/107185238743"
+        },
+        {
+          "name": "renamed-feature",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862311961/job/107185238348"
+        },
+        {
+          "name": "renamed-feature",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862307991/job/107185226206"
+        },
+        {
+          "name": "Baseline / windows-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862312222/job/107185239141"
+        },
+        {
+          "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862311933/job/107185238784"
+        },
+        {
+          "name": "Showcase / windows-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862312154/job/107185239171"
+        },
+        {
+          "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862311933/job/107185238877"
+        },
+        {
+          "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35862311933/job/107185238762"
+        },
+        {
+          "name": "GitGuardian Security Checks",
+          "conclusion": "SUCCESS",
+          "url": "https://dashboard.gitguardian.com"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "url": "https://github.com/Luis85/obsidian-plugin-shell/pull/6",
+      "state": "OPEN",
+      "sha": "afbd918b8ec54f201951e6c4c5cc1c1da614c1ea",
+      "checks": [
+        {
+          "name": "Baseline / ubuntu-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857289006/job/107168697038"
+        },
+        {
+          "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857288953/job/107168696880"
+        },
+        {
+          "name": "Showcase / ubuntu-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857289013/job/107168697631"
+        },
+        {
+          "name": "renamed-feature",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857289017/job/107168697470"
+        },
+        {
+          "name": "Baseline / windows-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857289006/job/107168697253"
+        },
+        {
+          "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857288953/job/107168696898"
+        },
+        {
+          "name": "Showcase / windows-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857289013/job/107168697343"
+        },
+        {
+          "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857288953/job/107168696735"
+        },
+        {
+          "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857288953/job/107168697014"
+        },
+        {
+          "name": "GitGuardian Security Checks",
+          "conclusion": "SUCCESS",
+          "url": "https://dashboard.gitguardian.com"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "url": "https://github.com/Luis85/obsidian-plugin-shell/pull/7",
+      "state": "OPEN",
+      "sha": "08e33955504c4ae3dada40ca54d51a7906f0456e",
+      "checks": [
+        {
+          "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321906/job/107168804156"
+        },
+        {
+          "name": "Showcase / ubuntu-latest",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321920/job/107168804578"
+        },
+        {
+          "name": "renamed-feature",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321997/job/107168804715"
+        },
+        {
+          "name": "Baseline / ubuntu-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321898/job/107168803846"
+        },
+        {
+          "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321906/job/107168804103"
+        },
+        {
+          "name": "Showcase / windows-latest",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321920/job/107168804341"
+        },
+        {
+          "name": "Baseline / windows-latest",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321898/job/107168804227"
+        },
+        {
+          "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321906/job/107168803962"
+        },
+        {
+          "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321906/job/107168803869"
+        },
+        {
+          "name": "GitGuardian Security Checks",
+          "conclusion": "SUCCESS",
+          "url": "https://dashboard.gitguardian.com"
+        }
+      ]
+    }
+  ]
+}

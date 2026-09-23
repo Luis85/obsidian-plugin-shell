@@ -16,7 +16,7 @@ Create `src/features/bookmarks/entity.ts`:
 import { defineEntity, fields } from '../api';
 
 export const bookmarkEntity = defineEntity('bookmark', 1, {
-  title: fields.text({ trim: true, min: 1, max: 120 }),
+  title: fields.text({ nonblank: true, min: 1, max: 120 }),
   favorite: fields.defaulted(fields.boolean(), false),
 });
 ```
@@ -104,6 +104,8 @@ registration tests demonstrate an independent third entity without modifying the
 shared infrastructure. Then run `npm run verify` and relevant served/native tests.
 
 Keep source files under 400 code lines (tests/helpers 450, lifecycle main 100),
-excluding comments/blanks, and name files for their responsibility. The broader
-UI/custom-maker catalog and release workflow remain pending. Setup identity/resume
-and note-feature makers are implemented; this manual path needs no hidden step.
+excluding comments/blanks, and name files for their responsibility. The complete
+maker catalog is described in [Authoring tools](AUTHORING-TOOLS.md). Choose
+[plugin-data entities](PLUGIN-DATA-ENTITIES.md) explicitly for records belonging in
+plugin data; keep note-backed values exclusively in Markdown. Setup identity/resume
+and fixed-candidate release rehearsal are separate commands.

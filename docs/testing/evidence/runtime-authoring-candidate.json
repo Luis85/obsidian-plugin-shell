@@ -1,0 +1,252 @@
+{
+  "status": "passed",
+  "auditedAt": "2026-09-23T14:00:47.559492+00:00",
+  "sourceCommit": "a7dacca2cecc9ed7edde39b475a4caac65d8af4e",
+  "hostedRun": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35869168964",
+  "readOnlyRetainedCheck": {
+    "exit": 0,
+    "recordSha256": "fc1ae7d424e62b1b063e0a2c85d7a2bc43661ab35290a4ced002139f1ba6dafc"
+  },
+  "tools": {
+    "node": "v24.21.0",
+    "npm": "11.19.1"
+  },
+  "assetHashes": {
+    "main.js": "5265eb5cd301cd1c3448bf5bc4f59eec18bdfb2fd2762177a05b1948fd0c69bc",
+    "manifest.json": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380",
+    "styles.css": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+  },
+  "lockHash": "a4b3b8c22434a1bf89a71fc9d8c4f3a67885b3bb7ef6429b396838236be38b45",
+  "notesHash": "68843e854e8488e5be123d5827c5117db50ca9f4c1da885752629004e42d5f10",
+  "sourceArchive": {
+    "sha256": "c1a2a6ec03e2441b6fec0dd133fb31f57c6e2481e471b8fd41b0ac7a09720605",
+    "gitComment": "a7dacca2cecc9ed7edde39b475a4caac65d8af4e",
+    "files": 471,
+    "allGitBlobsMatched": true
+  },
+  "pluginZipHash": "6613298407555c39a9fae749032e52489dee8279628a0d7997c6d559862dd127",
+  "coverage": {
+    "exactSourceZipInventory": true,
+    "scopes": {
+      "production": {
+        "inputs": 97,
+        "metrics": {
+          "lines": {
+            "total": 2171,
+            "covered": 2160,
+            "pct": 99.49332105020727,
+            "floor": 90
+          },
+          "statements": {
+            "total": 3530,
+            "covered": 3438,
+            "pct": 97.39376770538244,
+            "floor": 90
+          },
+          "functions": {
+            "total": 830,
+            "covered": 808,
+            "pct": 97.34939759036145,
+            "floor": 90
+          },
+          "branches": {
+            "total": 2300,
+            "covered": 2183,
+            "pct": 94.91304347826087,
+            "floor": 85
+          }
+        }
+      },
+      "domainApplicationFeatures": {
+        "inputs": 41,
+        "metrics": {
+          "lines": {
+            "total": 1114,
+            "covered": 1113,
+            "pct": 99.91023339317773,
+            "floor": 95
+          },
+          "statements": {
+            "total": 1803,
+            "covered": 1764,
+            "pct": 97.8369384359401,
+            "floor": 95
+          },
+          "functions": {
+            "total": 397,
+            "covered": 392,
+            "pct": 98.74055415617129,
+            "floor": 95
+          },
+          "branches": {
+            "total": 1374,
+            "covered": 1324,
+            "pct": 96.36098981077147,
+            "floor": 90
+          }
+        }
+      }
+    },
+    "reportedTotals": {
+      "lines": {
+        "total": 2171,
+        "covered": 2160,
+        "skipped": 0,
+        "pct": 99.49
+      },
+      "statements": {
+        "total": 3530,
+        "covered": 3438,
+        "skipped": 0,
+        "pct": 97.39
+      },
+      "functions": {
+        "total": 830,
+        "covered": 808,
+        "skipped": 0,
+        "pct": 97.34
+      },
+      "branches": {
+        "total": 2300,
+        "covered": 2183,
+        "skipped": 0,
+        "pct": 94.91
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "summaryHash": "ab5aec22614684f25f3be49e00b4adbb99c8781c3a82ad202f2ea0f7502baaa5"
+  },
+  "browser": {
+    "stats": {
+      "startTime": "2026-09-23T13:50:24.080Z",
+      "duration": 35663.642,
+      "expected": 33,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "resultCount": 33,
+    "retryResults": 0,
+    "configuredRetries": 0
+  },
+  "nativeLinux": [
+    {
+      "run": 1,
+      "checks": 24,
+      "errors": 0,
+      "reportHash": "fb8a22d4cd2f9c03dbb5d06a6db844590a76d8eefe651551b56a46e9aaf39349",
+      "appInstaller": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "launcher": "3.2.1",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+      "coldRestartSameBytesCheck": true
+    },
+    {
+      "run": 2,
+      "checks": 24,
+      "errors": 0,
+      "reportHash": "fb8a22d4cd2f9c03dbb5d06a6db844590a76d8eefe651551b56a46e9aaf39349",
+      "appInstaller": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "launcher": "3.2.1",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+      "coldRestartSameBytesCheck": true
+    },
+    {
+      "run": 3,
+      "checks": 24,
+      "errors": 0,
+      "reportHash": "fb8a22d4cd2f9c03dbb5d06a6db844590a76d8eefe651551b56a46e9aaf39349",
+      "appInstaller": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "launcher": "3.2.1",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+      "coldRestartSameBytesCheck": true
+    }
+  ],
+  "runtimeFreshProcesses": [
+    {
+      "run": 1,
+      "files": 52,
+      "tests": 305,
+      "logHash": "568a0b5c35eb8cf30be846b741f19d88c7e99b7083e7d1a440081b5ce16d7b1b"
+    },
+    {
+      "run": 2,
+      "files": 52,
+      "tests": 305,
+      "logHash": "38b20dc7b1013bbe7ad6b0899ce09130309fe35fd9f75678c33c39958fb4c31f"
+    },
+    {
+      "run": 3,
+      "files": 52,
+      "tests": 305,
+      "logHash": "d5d7888cff025528768ec46a0a540091f84c8d8576debe5f8b10cc42c30ab722"
+    }
+  ],
+  "verification": {
+    "toolingTotal": 116,
+    "toolingPassed": 112,
+    "toolingSkipped": 4,
+    "toolingSkipScope": "Windows-only path/isolation cases on Linux",
+    "toolingFailed": 0,
+    "runtimeFiles": 52,
+    "runtimeTests": 305,
+    "legacyTests": 52,
+    "legacyRuns": 3,
+    "analyzerFindings": 0,
+    "logHash": "6a99b9e5d4798cd5dcf4b2c92df574512d3f52d86f3c8a13322bf14a73bd9dee"
+  },
+  "security": {
+    "status": "passed",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "node": "v24.21.0",
+    "jsonExit": 0,
+    "ordinaryExit": 0,
+    "capturedAt": "2026-09-23T13:52:09.062Z"
+  },
+  "binaryScan": {
+    "physicalFiles": 325,
+    "nestedArchiveFiles": 474,
+    "archives": [
+      {
+        "path": "candidate-plugin.zip",
+        "sha256": "6613298407555c39a9fae749032e52489dee8279628a0d7997c6d559862dd127",
+        "files": 3
+      },
+      {
+        "path": "reports/candidate-qualification/candidate-source.zip",
+        "sha256": "c1a2a6ec03e2441b6fec0dd133fb31f57c6e2481e471b8fd41b0ac7a09720605",
+        "files": 471
+      }
+    ],
+    "fontBinaries": []
+  },
+  "limitations": [
+    "Retained report/byte audit, not fresh test execution.",
+    "Linux native driver covers 24 declared host/lifecycle checks; it does not separately execute item-specific CRUD/native-window interaction.",
+    "No a7dacca same-byte Windows native qualification in this packet; prior PR8 diagnosis has different historical bytes.",
+    "Source ZIP equality does not itself establish an install from the ZIP; parent separately qualifies archive transport.",
+    "macOS, physical devices, manual accessibility and public release remain unqualified here.",
+    "Candidate nativeAcceptance stays not-run by design; separate reports carry Linux native evidence.",
+    "Nested ESLint 9 upstream support exception remains despite zero vulnerability findings."
+  ]
+}

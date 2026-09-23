@@ -1,10 +1,10 @@
 import { failure, success, type Result } from '../domain/outcome';
-import { validateFolder } from '../domain/paths';
+import { validateDocumentTitle, validateFolder } from '../domain/paths';
 import { DocumentCreationService, type PreparedDocument } from './document-service';
 import type { DocumentRecipe } from './document-definition';
 import type { DocumentCodec } from './document-codec';
 import type { DocumentStorage, ErrorReporter } from './ports';
-import type { EventPort, ShellEvents } from './events';
+import type { EventPublisher, ShellEvents } from './events';
 
 export interface NoteSnapshot<V> {
   readonly entity: string;
@@ -31,7 +31,7 @@ export class NoteRepository<I, V> {
     private readonly recipe: DocumentRecipe<I, V>,
     private readonly storage: DocumentStorage,
     private readonly codec: DocumentCodec,
-    private readonly events: EventPort<ShellEvents>,
+    private readonly events: EventPublisher<Pick<ShellEvents, 'documents.created' | 'documents.updated' | 'documents.deleted'>>,
     private readonly folder: () => string,
     newId: () => string,
     now: () => string,
@@ -52,7 +52,7 @@ export class NoteRepository<I, V> {
           return storage.create(path, markdown);
         });
       },
-    }, events, codec.render, newId, now, errors);
+    }, { publish: event => events.publish(event) }, codec.render, newId, now, errors);
   }
   prepare(values: I, requestId: string): Result<PreparedDocument> {
     return this.creation.prepare(this.recipe.entity.key, values, this.folder(), requestId);
@@ -162,7 +162,7 @@ export class NoteRepository<I, V> {
   }
   private contains(path: string, folder: string): boolean {
     const split = path.lastIndexOf('/');
-    return path.startsWith(`${folder}/`) && path.endsWith('.md') && validateFolder(path.slice(0, split)).ok && validateFolder(path.slice(split + 1, -3)).ok;
+    return path.startsWith(`${folder}/`) && path.endsWith('.md') && validateFolder(path.slice(0, split)).ok && validateDocumentTitle(path.slice(split + 1, -3)).ok;
   }
   private publish(type: 'documents.updated' | 'documents.deleted', snapshot: NoteSnapshot<V>): void {
     try { this.events.publish({ type, payload: { entity: snapshot.entity, id: snapshot.id, schemaVersion: snapshot.schemaVersion, path: snapshot.path } }); }

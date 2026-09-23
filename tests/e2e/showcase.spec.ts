@@ -5,9 +5,9 @@ async function open(page: Page) {
   await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   await expect(page.getByTestId('showcase')).toBeVisible();
 }
-async function task(page: Page) {
+async function task(page: Page, title = 'Prepare release checklist') {
   await page.getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Prepare release checklist');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill(title);
   await page.getByLabel('Due date', { exact: true }).fill('2026-09-30');
   await page.getByRole('textbox', { name: 'Tags' }).fill('work,release');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
@@ -40,18 +40,33 @@ test('[UI-I02] validates, previews exact Markdown, commits once and persists rea
   await open(page); await page.getByRole('button', { name: 'Documents', exact: true }).click();
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Enter a title');
-  await expect(page.getByRole('textbox', { name: 'Title' })).toBeFocused();
+  await expect(page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' })).toBeFocused();
   expect(await page.evaluate(() => Object.keys(window.__SHELL_TEST__.files()))).toHaveLength(0);
   await task(page);
   const preview = await page.getByTestId('markdown-preview').innerText();
   expect(await page.evaluate(() => Object.keys(window.__SHELL_TEST__.files()))).toHaveLength(0);
   await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
   await expect(page.getByText('Task note created', { exact: true })).toBeVisible();
-  const files = await page.evaluate(() => window.__SHELL_TEST__.files()); expect(Object.values(files)).toEqual([preview]);
+  const files = await page.evaluate(() => window.__SHELL_TEST__.files()); expect(files).toEqual({ 'Tasks/Prepare release checklist.md': preview });
   await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual(files);
   await task(page); await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('The destination already exists.');
+  expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual(files);
+  await task(page, 'Übersicht – Release Plan');
+  await expect(page.locator('.shell-destination code')).toHaveText('Tasks/Übersicht – Release Plan.md');
+  await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
   await expect.poll(() => page.evaluate(() => Object.keys(window.__SHELL_TEST__.files()).length)).toBe(2);
+});
+test('[UI-FILENAME] unsafe titles stay visible for correction and never become sanitized filenames', async ({ page }) => {
+  await open(page); await page.getByRole('button', { name: 'Documents', exact: true }).click();
+  const title = page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title', exact: true });
+  for (const invalid of ['Forbidden/name', 'CON', 'Title ']) {
+    await title.fill(invalid); await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('Use a nonblank note title');
+    await expect(title).toHaveValue(invalid); await expect(title).toBeFocused();
+    expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual({});
+  }
 });
 test('[UI-I03] known write failure produces no note and no success', async ({ page }) => {
   await open(page); await task(page); await page.evaluate(() => window.__SHELL_TEST__.fault('write'));
@@ -81,7 +96,7 @@ test('[UI-I05] settings save, switch language immediately and survive reload', a
 test('[UI-I06] real event publication, owner feedback and native-adapter modal work', async ({ page }) => {
   await open(page); await page.getByRole('button', { name: 'Events & feedback', exact: true }).click();
   await page.getByRole('button', { name: 'Publish a typed event' }).click(); await expect(page.locator('table')).toContainText('showcase.ping');
-  await page.getByRole('button', { name: 'Try recoverable feedback' }).click(); await expect(page.getByRole('status')).toContainText('deliberate feedback');
+  await page.getByRole('button', { name: 'Try recoverable feedback' }).click(); await expect(page.locator('.shell-feedback').getByRole('status')).toContainText('deliberate feedback');
   await page.getByRole('button', { name: 'Dismiss notification' }).click(); await expect(page.locator('.shell-feedback-item')).toHaveCount(0);
   await page.getByRole('button', { name: 'Open native modal', exact: true }).click(); await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -101,11 +116,18 @@ test('[UI-I07] responsive and live host theme changes do not remount the view', 
   expect(await page.getByTestId('showcase').count()).toBe(1);
 });
 test('[UI-I08] two views have unique DOM IDs and dispose independently', async ({ page }) => {
-  await open(page); const initial = await page.evaluate(() => window.__SHELL_TEST__.resourceCount());
+  await open(page);
   await page.getByRole('button', { name: 'Documents', exact: true }).click();
+  const initial = await page.evaluate(() => window.__SHELL_TEST__.resourceCount());
+  // Per-view item drafts/subscriptions survive panel navigation and are acquired once.
+  await page.getByRole('button', { name: 'Overview', exact: true }).click();
+  await page.getByRole('button', { name: 'Documents', exact: true }).click();
+  expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(initial);
   await page.evaluate(() => window.__SHELL_TEST__.mountSecond()); await expect(page.getByTestId('showcase')).toHaveCount(2);
   const ids = await page.locator('[data-testid=showcase] [id]').evaluateAll(els => els.map(el => el.id)); expect(new Set(ids).size).toBe(ids.length);
   expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBeGreaterThan(initial);
   await page.evaluate(() => window.__SHELL_TEST__.closeSecond()); await expect(page.getByTestId('showcase')).toHaveCount(1);
   expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(initial);
+  await page.evaluate(() => window.__SHELL_TEST__.dispose());
+  expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(0);
 });

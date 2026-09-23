@@ -4,17 +4,19 @@ import { useServices } from '../context/use-services';
 import type { Failure } from '../../domain/outcome';
 import type { TaskInput } from '../../features/tasks/form';
 import type { PreparedDocument, DocumentReceipt } from '../../application/document-service';
+import { useViewPreferences } from '../composables/use-view-preferences';
 export const pages = ['overview', 'documents', 'events', 'settings'] as const;
 type Page = typeof pages[number];
 export const useShowcase = defineStore('showcase', () => {
   const services = useServices();
-  const owner = `view-${services.newId()}`;
+  const viewPreferences = useViewPreferences();
+  const owner = viewPreferences.owner;
   const draft = reactive({ title: '', due: '', tags: '' });
   const ownedFeedback = () => services.notifications.current.filter(item => (item.owner.startsWith(`${owner}:`) || item.scope === 'runtime') && !item.native && item.visible !== false);
   const page = ref<Page>('overview');
   try { const stored = services.local.get('page'); if (pages.includes(stored as Page)) page.value = stored as Page; }
   catch { services.diagnostics.report('local.read', 'preferences.local'); }
-  const preferences = shallowRef(services.preferences.current);
+  const preferences = viewPreferences.preferences;
   const feedback = shallowRef(ownedFeedback());
   const diagnostics = shallowRef(services.diagnostics.current);
   const stream = ref<{ sequence: number; type: string }[]>([]);
@@ -28,7 +30,6 @@ export const useShowcase = defineStore('showcase', () => {
   let alive = true;
   const record = (type: string) => { eventCount.value++; stream.value = [{ sequence: eventCount.value, type }, ...stream.value].slice(0, 30); };
   const stops = [
-    services.preferences.subscribe(value => { preferences.value = value; }),
     services.notifications.subscribe(() => { feedback.value = ownedFeedback(); }),
     services.diagnostics.subscribe(() => { diagnostics.value = services.diagnostics.current; }),
     services.events.on('showcase.ping', () => record('showcase.ping')),

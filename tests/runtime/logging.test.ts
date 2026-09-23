@@ -97,13 +97,13 @@ describe('Structured logging and explicit debugging', () => {
     f.logger.dispose(); f.diagnostics.dispose();
   });
   it('[LOG-03-07] reporter, observer and listener reentry is bounded and later independent logging still works', async () => {
-    let nested: StructuredLogger | undefined;
-    const reporter = { report: vi.fn(() => { nested?.error('operation.failed', 'command.execute'); }) };
-    const logger = new StructuredLogger(reporter, () => 'invalid clock'); nested = logger;
+    const reentry: { nested?: StructuredLogger; observed?: StructuredLogger } = {};
+    const reporter = { report: vi.fn(() => { reentry.nested?.error('operation.failed', 'command.execute'); }) };
+    const logger = new StructuredLogger(reporter, () => 'invalid clock'); reentry.nested = logger;
     expect(logger.error('operation.failed', 'command.execute')).toBe(true); expect(reporter.report).toHaveBeenCalledOnce();
     expect(logger.current).toHaveLength(1); expect(logger.statistics.reentrant).toBe(1); logger.dispose();
-    const diagnostics = new Diagnostics(); let observed: StructuredLogger | undefined;
-    const value = new StructuredLogger(diagnostics, now, { observe: () => { observed?.info('operation.completed', 'command.execute'); } }); observed = value;
+    const diagnostics = new Diagnostics();
+    const value = new StructuredLogger(diagnostics, now, { observe: () => { reentry.observed?.info('operation.completed', 'command.execute'); } }); reentry.observed = value;
     const off = value.subscribe(() => { value.info('operation.completed', 'command.execute'); value.setLevel('debug'); value.clear(); });
     value.info('runtime.started', 'runtime.initialize'); expect(value.current).toHaveLength(1); expect(value.level).toBe('info');
     expect(value.statistics.reentrant).toBe(4); off();
@@ -113,15 +113,15 @@ describe('Structured logging and explicit debugging', () => {
     expect(value.statistics.reentrant).toBeGreaterThan(4); value.dispose(); diagnostics.dispose();
   });
   it('[LOG-03-08] an asynchronous observer rejection remains observable after delivery and cannot restart logging', async () => {
-    const errors = { report: vi.fn() }; let logger: StructuredLogger | undefined;
-    const instance = new StructuredLogger(errors, now, { observe: async () => { await Promise.resolve(); logger?.info('runtime.started', 'runtime.initialize'); throw new Error('private'); } }); logger = instance;
+    const errors = { report: vi.fn() }; const reentry: { logger?: StructuredLogger } = {};
+    const instance = new StructuredLogger(errors, now, { observe: async () => { await Promise.resolve(); reentry.logger?.info('runtime.started', 'runtime.initialize'); throw new Error('private'); } }); reentry.logger = instance;
     instance.info('runtime.started', 'runtime.initialize'); await Promise.resolve(); await Promise.resolve();
     expect(instance.current).toHaveLength(2); expect(instance.statistics.deliverySkipped).toBe(1); expect(instance.statistics.reentrant).toBe(0);
     expect(errors.report).toHaveBeenCalledExactlyOnceWith('logging.observer', 'logging.observe'); instance.dispose();
   });
   it('[LOG-03-09] disposal during a reporter callback cannot append late records', () => {
-    let logger: StructuredLogger | undefined;
-    const instance = new StructuredLogger({ report() { logger?.dispose(); } }, () => 'invalid'); logger = instance;
+    const reentry: { logger?: StructuredLogger } = {};
+    const instance = new StructuredLogger({ report() { reentry.logger?.dispose(); } }, () => 'invalid'); reentry.logger = instance;
     expect(instance.error('operation.failed', 'command.execute')).toBe(false); expect(instance.current).toEqual([]);
   });
   it('[LOG-03-10] a pending subscriber never suppresses independent records, level changes or clearing', async () => {

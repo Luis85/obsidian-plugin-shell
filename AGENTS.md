@@ -2,13 +2,21 @@
 
 ## Current state
 
-Iteration 03 adds reusable entity definitions, optional document recipes and Markdown repository CRUD to the Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-THREE.md), and [actual test record](docs/testing/ITERATION-THREE.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
+The runtime-authoring milestone extends iteration 04 with narrow event contracts,
+source-derived catalogs and an optional plugin-data Items workflow. Read
+[README](README.md), [authoring](docs/development/AUTHORING-TOOLS.md),
+[plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md), the
+[milestone plan](docs/development/RUNTIME-AUTHORING-PLAN.md), the current
+[execution record](docs/testing/RUNTIME-AUTHORING.md) and the historical
+[iteration-four test record](docs/testing/ITERATION-FOUR.md) first. The
+[PRD](docs/product/PRD.md) and retained normative companions remain the complete
+target; qualification and release authorization are separate.
 
 Setup supports reviewed identity changes, browser/native profiles, verified resume
 and explicit disabled-plugin data migration inside the contained vault. Makers
-implement note-feature and entity --document recipes plus actual-source catalog
-checks. The full UI/custom-maker catalog remains pending. Do not advertise missing
-recipes or invent placeholder commands.
+implement the explicit catalog described by their help, composed from primitives
+and the shared safe-plan engine. Locale output is a pending translation draft,
+not a newly reviewed selectable language. Do not advertise unexecuted qualification.
 
 ## Commands and environment
 
@@ -23,6 +31,12 @@ Native smoke is optional and explicitly provisioned; use only its isolated scrat
 Domain/application depend on framework-free contracts, never Obsidian/Vue/Pinia/browser/Node or concrete adapters. Bootstrap constructs and wires. main.ts is lifecycle composition, at most 100 code lines. No manually detached leaves on unload.
 
 Application services own canonical data; Markdown is canonical for note-backed Tasks. Per-view Vue/Pinia own drafts and subscriptions. Typed bus is runtime-scoped, no global singleton. Publish committed facts after successful persistence; direct calls handle requests/results. Observe synchronous and asynchronous subscriber failures without relabeling an already committed write.
+
+Observers receive no publication or capability-acquisition method. Bootstrap
+injects descriptor-scoped publishers/subscribers into feature factories. Register
+compact descriptors separately from tooling-only explanatory metadata; run
+`events:check` for source contracts, references, duplicates and catalog drift.
+Query projections after subscribing and discard older query completions.
 
 Task/Project are example definitions, not branches inside generic services. Repository recipes must persist every entity field. Keep note IDs/paths/creation metadata, unrelated properties and body content when updating. Prevalidate full candidate bytes before persistence. Recheck folder/disposal after awaited preflight; use revision-checked native processing and reversible trash. Never claim cross-process atomic trash or use incomplete mappings as silent data loss.
 
@@ -47,6 +61,13 @@ in context. Presentation TypeScript does not import Vue components; bootstrap
 assembles the component tree. `check:presentation` enforces this concern boundary.
 
 Validate unknown stored data, serialize preference writes, preserve corrupt/future data, and keep preview free of writes. Never overwrite conflicting notes, retry uncertain writes blindly, or turn failed opening into another create operation.
+
+Plugin-data entities opt in through definePluginDataFeature. One PluginDataStore
+owns preference/entity envelope transactions; never add a parallel saveData path.
+Preserve untouched raw records and revisions, reject unsafe JSON shapes, and block
+further runtime writes after an uncertain save. Runtime serialization is not
+cross-process CAS. Example removal uses reviewed hashes, exact registration
+identity and original template preconditions; edited/consumer files are retained.
 
 ## Nuxt UI and styles
 

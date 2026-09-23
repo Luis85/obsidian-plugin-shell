@@ -16,7 +16,10 @@ afterEach(() => { document.body.replaceChildren(); vi.restoreAllMocks(); });
 function plugin() { return new ShellPlugin(new App(), manifest); }
 it('[HOST-03-01] runtime registers commands, opens/reuses leaves, reports navigation failures and ignores late readiness', async () => {
   const p = plugin(); const runtime = await initializePlugin(p);
-  expect(hostState.views.has(SHOWCASE_VIEW)).toBe(true); expect([...hostState.commands.keys()]).toEqual(['open-showcase', 'toggle-view-header', 'debug-toggle', 'debug-report']);
+  expect(hostState.views.has(SHOWCASE_VIEW)).toBe(true);
+  const foundationCommands = ['open-showcase', 'toggle-view-header', 'debug-toggle', 'debug-report'];
+  // Consumer feature commands are intentional extensions; assert the owned foundation exactly.
+  expect([...hostState.commands.keys()].filter(id => foundationCommands.includes(id))).toEqual(foundationCommands);
   const open = hostState.commands.get('open-showcase')?.callback; expect(open).toBeDefined(); open?.(); await settle();
   expect(p.app.workspace.getLeaf).toHaveBeenCalledWith('tab');
   const leaf = p.app.workspace.getLeaf('tab'); expect(leaf.setViewState).toHaveBeenCalledExactlyOnceWith({ type: SHOWCASE_VIEW, active: true });
@@ -60,9 +63,9 @@ it('[HOST-03-03] view actions own menus, preserve unrelated host state and recov
   } finally { view.disposeView(); services.dispose(); }
 });
 it('[HOST-03-04] native setting definitions use validated canonical preferences and report failed saves', async () => {
-  const p = plugin(); const services = await createServices(nativeAdapters(p)); const tab = new ShellSettingsTab(p, { ...services, text: key => key });
+  const p = plugin(); const services = await createServices(nativeAdapters(p)); const tab = new ShellSettingsTab(p, { ...services, settings: services.authoring.settings, text: key => key });
   try {
-    const definitions = tab.getSettingDefinitions(); expect(definitions).toHaveLength(4);
+    const definitions = tab.getSettingDefinitions().filter(item => 'control' in item && item.control && ['hideObsidianViewHeader', 'locale', 'taskFolder', 'notifySuccess'].includes(item.control.key)); expect(definitions).toHaveLength(4);
     for (const definition of definitions) {
       if (!('control' in definition) || !definition.control || Array.isArray(definition.control)) throw new Error('EXPECTED_SETTING_CONTROL');
       const control = definition.control;
@@ -76,7 +79,7 @@ it('[HOST-03-04] native setting definitions use validated canonical preferences 
     vi.mocked(p.saveData).mockRejectedValueOnce(new Error('settings disk failure')); await tab.setControlValue('locale', 'en');
     expect(services.preferences.current.locale).toBe('de'); expect(services.notifications.current[0]?.key).toBe('error.settingsWrite');
     expect(tab.update).toHaveBeenCalledTimes(5);
-  } finally { services.dispose(); }
+  } finally { tab.dispose(); services.dispose(); }
 });
 it('[HOST-03-05] failed registration disposes services and reports startup failure without leaving a live command', async () => {
   const p = plugin(); vi.spyOn(p, 'addSettingTab').mockImplementation(() => { throw new Error('register failed'); });

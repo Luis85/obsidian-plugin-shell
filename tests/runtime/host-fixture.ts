@@ -34,7 +34,7 @@ class Workspace extends HostEvents {
 }
 class HostApp {
   workspace = new Workspace();
-  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', getAbstractFileByPath: vi.fn(() => null), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
+  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', getAbstractFileByPath: vi.fn(() => null), getRoot: () => new HostFolder(), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
   metadataCache = new HostEvents('metadata.');
   loadLocalStorage = vi.fn(() => null); saveLocalStorage = vi.fn();
 }
@@ -58,15 +58,46 @@ class HostItemView {
   containerEl = element(); contentEl = element(); app: HostApp;
   constructor(public leaf: WorkspaceLeaf) {
     this.app = new HostApp();
-    this.containerEl.dataset.type = pluginIdentity.viewType;
+    // Match ItemView: identity overrides are invoked before subclass fields initialize.
+    this.containerEl.dataset.type = this.getViewType();
+    this.containerEl.dataset.initialTitle = this.getDisplayText();
     const header = element(); header.className = 'view-header'; this.containerEl.append(header, this.contentEl); document.body.append(this.containerEl);
   }
+  getViewType(): string { return pluginIdentity.viewType; }
+  getDisplayText(): string { return pluginIdentity.name; }
   onPaneMenu() {}
 }
 class HostSettingsTab {
   constructor(public app: App, public plugin: HostPlugin) {}
   update = vi.fn();
+  hide() {}
 }
+class HostToggle {
+  readonly toggleEl = element(); private value = false; private disabled = false; private changed: (value: boolean) => unknown = () => undefined;
+  constructor(container: HTMLElement) {
+    this.toggleEl.className = 'checkbox-container'; this.toggleEl.tabIndex = 0; this.toggleEl.setAttribute('role', 'switch'); container.append(this.toggleEl);
+    this.toggleEl.addEventListener('click', () => { if (!this.disabled) this.setValue(!this.value); });
+  }
+  setValue(value: boolean) {
+    const different = this.value !== value; this.value = value;
+    this.toggleEl.classList.toggle('is-enabled', value); this.toggleEl.setAttribute('aria-checked', String(value));
+    if (different) this.changed(value); return this;
+  }
+  setDisabled(value: boolean) { this.disabled = value; this.toggleEl.setAttribute('aria-disabled', String(value)); return this; }
+  onChange(callback: (value: boolean) => unknown) { this.changed = callback; return this; }
+}
+class HostSetting {
+  readonly settingEl = element(); readonly nameEl = element(); readonly descEl = element(); readonly controlEl = element(); readonly errorEl = element();
+  constructor(container: HTMLElement) {
+    this.settingEl.className = 'setting-item'; this.errorEl.className = 'setting-item-error'; this.errorEl.setAttribute('role', 'alert');
+    this.settingEl.append(this.nameEl, this.descEl, this.controlEl, this.errorEl); container.append(this.settingEl);
+  }
+  setName(value: string) { this.nameEl.textContent = value; return this; }
+  setDesc(value: string) { this.descEl.textContent = value; return this; }
+  setErrorMessage(value: string | null) { this.errorEl.textContent = value ?? ''; this.errorEl.hidden = value === null; return this; }
+  addToggle(callback: (toggle: HostToggle) => unknown) { callback(new HostToggle(this.controlEl)); return this; }
+}
+class HostSettingGroup { readonly groupEl = element(); constructor(container: HTMLElement) { container.append(this.groupEl); } }
 class HostMenu {
   hide = vi.fn(); addSeparator = vi.fn(); showAtPosition = vi.fn();
   addItem(callback: (item: MenuItem) => void) { const item = new MenuItem(); callback(item); hostState.menu.push(item); return this; }
@@ -77,5 +108,7 @@ class MenuItem {
   onClick(callback: () => unknown) { this.action = callback; return this; }
 }
 class HostNotice { constructor(text: string) { hostState.notices.push(text); } hide = vi.fn(); setMessage = vi.fn(); }
+class HostFolder { readonly children: unknown[] = []; readonly path = ''; readonly name = ''; }
 export const hostModule = { App: HostApp, Plugin: HostPlugin, ItemView: HostItemView, PluginSettingTab: HostSettingsTab,
-  WorkspaceLeaf: Leaf, Menu: HostMenu, Notice: HostNotice, TFile: class {}, TFolder: class {}, Modal: class {} };
+  WorkspaceLeaf: Leaf, Menu: HostMenu, Notice: HostNotice, TFile: class {}, TFolder: HostFolder, Modal: class {},
+  Setting: HostSetting, SettingGroup: HostSettingGroup, ToggleComponent: HostToggle };

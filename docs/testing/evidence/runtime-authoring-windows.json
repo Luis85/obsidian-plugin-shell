@@ -1,0 +1,131 @@
+{
+  "scope": "One unchanged native driver session on exact CI retained assets; no rebuild; not separate item-specific native CRUD",
+  "reportSha256": "e1ca65ac964f2b1da9a8d3eee6827cb97e33f6344a21368aceb978ece81684cd",
+  "mode": "native-obsidian",
+  "status": "passed",
+  "sourceCommit": "a7dacca2cecc9ed7edde39b475a4caac65d8af4e",
+  "targetApp": "1.13.7",
+  "assets": [
+    {
+      "file": "main.js",
+      "sha256": "5265eb5cd301cd1c3448bf5bc4f59eec18bdfb2fd2762177a05b1948fd0c69bc"
+    },
+    {
+      "file": "styles.css",
+      "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+    }
+  ],
+  "checks": [
+    "native-command-opens-view",
+    "native-public-command-local-id-removal-before-plugin-unload",
+    "actual-vault-verbatim-title-and-markdown-match-preview",
+    "native-repository-list-reads-canonical-manually-edited-note",
+    "native-repository-update-preserves-path-identity-user-properties-and-body",
+    "native-repository-trash-cancellation-preserves-exact-note",
+    "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+    "native-host-bridge-publishes-normalized-crud-observations",
+    "native-view-real-event",
+    "native-modal-opens-and-dismisses",
+    "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+    "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+    "native-debug-commands-toggle-and-export-attributable-redacted-report",
+    "native-exact-title-row-hidden-not-tabs-or-window-controls",
+    "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+    "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+    "native-split-pane-light-dark-theme-transition",
+    "native-electron-125-150-percent-zoom-no-clipped-language-control",
+    "native-popout-inherits-preference-and-live-toggle",
+    "native-unload-restores-retained-host-elements-without-foreign-mutation",
+    "native-runtime-reload-restores-persisted-hidden-preference",
+    "native-settings-restoration-shares-canonical-service",
+    "native-declarative-settings-use-application-writer",
+    "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+  ],
+  "errors": [],
+  "identity": {
+    "id": "plugin-shell",
+    "name": "Plugin Shell",
+    "version": "0.4.0"
+  },
+  "launcherVersion": "3.2.1",
+  "resolvedVersions": [
+    "1.13.7",
+    "1.13.7"
+  ],
+  "window": {
+    "width": 1023,
+    "height": 800,
+    "pixelRatio": 2,
+    "inventory": [],
+    "mode": "actual-native-window-not-browser-viewport-emulation"
+  },
+  "installedAssets": [
+    {
+      "file": "main.js",
+      "sha256": "5265eb5cd301cd1c3448bf5bc4f59eec18bdfb2fd2762177a05b1948fd0c69bc"
+    },
+    {
+      "file": "styles.css",
+      "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+    }
+  ],
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+  "phase": "cold-restart",
+  "repository": {
+    "path": "Tasks/Native repository Task.md",
+    "localTrashPath": ".trash\\Native repository Task.md",
+    "preservedBody": true,
+    "preservedIdentity": true
+  },
+  "headerContract": {
+    "tag": "DIV",
+    "classes": "view-header",
+    "ownerType": "plugin-shell-showcase"
+  },
+  "themeTransitions": [
+    {
+      "target": "dark",
+      "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-focused",
+      "roots": [
+        {
+          "className": "plugin-shell ps--plugin-shell dark",
+          "connected": true,
+          "ownerIsCurrentDocument": true,
+          "ownerBodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-focused"
+        },
+        {
+          "className": "plugin-shell ps--plugin-shell dark",
+          "connected": true,
+          "ownerIsCurrentDocument": true,
+          "ownerBodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-dark is-focused"
+        }
+      ]
+    },
+    {
+      "target": "light",
+      "bodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-focused",
+      "roots": [
+        {
+          "className": "plugin-shell ps--plugin-shell light",
+          "connected": true,
+          "ownerIsCurrentDocument": true,
+          "ownerBodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-focused"
+        },
+        {
+          "className": "plugin-shell ps--plugin-shell light",
+          "connected": true,
+          "ownerIsCurrentDocument": true,
+          "ownerBodyClass": "mod-windows is-frameless is-hidden-frameless obsidian-app styled-scrollbars show-inline-title is-floating-nav auto-full-screen show-ribbon show-view-header theme-light is-focused"
+        }
+      ]
+    }
+  ]
+}
