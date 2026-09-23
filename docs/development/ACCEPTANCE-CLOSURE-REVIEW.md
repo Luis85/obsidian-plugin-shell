@@ -54,3 +54,18 @@ test. A single explicitly bounded full production-coverage diagnostic retained
 stage timings and passed without reproducing the timeout. Review found no
 demonstrable corrective source edit; the failure remains unresolved. Its deadline
 and isolation were not changed, and later passes cannot erase it.
+
+## Archive-command follow-up
+
+The later evidence-head Windows showcase failure retained only cleanup `EBUSY`;
+the original command/body outcome is unknown. Source review established that
+unconditional cleanup could replace a work error, and command receipts were absent.
+The test author implemented narrow receipt/error preservation. Parent and the
+independent inventory reviewer both found two gaps in its first draft: setup-time
+receipt failure could bypass cleanup, and result-receipt failure could replace a
+real child error. Both are corrected with guarded cleanup and retained aggregate
+errors/outcome context. Five real-command and injected cleanup/reporting-boundary
+controls passed; these do not establish the hosted lock's cause. A first control
+expectation incorrectly anticipated `EISDIR`/`EACCES`; exclusive creation actually
+reported `EEXIST`, and the exact expectation was corrected with the failed output
+retained. No production behavior, deadline or retry policy changed.

@@ -1,5 +1,12 @@
 # Acceptance closure execution record
 
+**Follow-up qualification pending:** the later evidence-head Windows showcase
+check exposed missing archive-command diagnostics and a cleanup `EBUSY`. A narrow
+test-fixture correction now preserves command outcomes, reporting failures and
+primary/cleanup errors without changing limits or retries. The accepted results
+below remain bound to `e14c1c3`; they do not qualify the corrected source until its
+new frozen-candidate run completes. Earlier reports/assets are retained.
+
 Frozen code: `e14c1c303df75a80a8a287ee8d8a66d4efb9b738`, development version 0.4.0.
 [PR #11](https://github.com/Luis85/obsidian-plugin-shell/pull/11), branch
 `codex/acceptance-closure`, now targets **main**. It began stacked on then-open
@@ -160,6 +167,27 @@ remains an explicit unresolved CI qualification issue.
 The [timeout audit](evidence/acceptance-closure-ci-timeout.json) retains the exact
 PR merge checkout/tree identity, original job log, diagnostic configuration and
 all diagnostic receipt hashes. The merge tree equals the frozen code tree.
+
+The evidence-only `7a292e4` Windows showcase run
+[35916883304](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35916883304)
+subsequently failed the existing archive-analysis fixture with `EBUSY` on its Git
+staging directory after 61.8 seconds. No command receipts survived, so neither a
+prior timeout nor its cause can be established. Its artifact is retained with
+SHA-256 `308db9ba0e1c1aed15a2eafa4983d166e50d339ad71cbf56601f7c847a4298dd`.
+An owned-child timeout probe did not reproduce an orphan. A distinct error-masking
+probe also failed its own final cleanup; neither is presented as a passing host
+reproduction. Known fixture processes were no longer present in the subsequent
+read-only inspection. Automatic approval review rejected manual deletion of
+`.qualification/cleanup-masking-repro-SeD42d` as “blocked by policy,” with no more
+specific reason. That directory remains preserved; deletion was not retried.
+
+The supported correction is diagnostic/error preservation only. Per-command
+started/result receipts retain fixed limits, status, signal, output and error
+details. Work completion and cleanup outcome are distinct. A reporting failure
+cannot replace a child failure; cleanup cannot replace the work failure. Five
+focused controls passed after independent review, including telemetry I/O failure
+and actual timeout/nonzero command cases. The 60-second/12 MiB default command
+bounds, all analyzer assertions and lack of automatic retries remain unchanged.
 
 Windows archive extraction first reported timestamp-restoration errors. The
 verified original ZIP and that extraction are retained; a separate extraction

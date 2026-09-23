@@ -5,16 +5,13 @@ import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
+import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unapproved archived source', async () => {
-  const scratch = await mkdtemp(join(tmpdir(), 'analyzer-archive-'));
-  const staging = join(scratch, 'staging'); const extracted = join(scratch, 'extracted');
-  const env = { ...process.env, GIT_CEILING_DIRECTORIES: scratch, FALLOW_TELEMETRY_DISABLED: '1' };
-  const command = (file, args, cwd) => {
-    const run = spawnSync(file, args, { cwd, env, encoding: 'utf8', timeout: 60000, maxBuffer: 12 * 1024 * 1024 });
-    assert.ifError(run.error); return run;
-  };
-  try {
+  await archiveCommandFixture(async ({ scratch, command: execute }) => {
+    const staging = join(scratch, 'staging'); const extracted = join(scratch, 'extracted');
+    const env = { ...process.env, GIT_CEILING_DIRECTORIES: scratch, FALLOW_TELEMETRY_DISABLED: '1' };
+    const command = (file, args, cwd) => execute(file, args, cwd, env);
     await mkdir(staging); await mkdir(extracted);
     const source = await sourceInputs(process.cwd());
     for (const input of source.files) {
@@ -50,10 +47,7 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     assert.ok((await diagnostic()).workspace_diagnostics.some(row => row.kind === 'excluded-by-default-ignore' && row.path === 'dist'));
     await rm(hidden);
     const restored = check(); assert.equal(restored.status, 0, restored.stdout + restored.stderr);
-  } finally {
-    assert.equal(dirname(scratch), resolve(tmpdir()));
-    await rm(scratch, { recursive: true, force: true });
-  }
+  });
 });
 test('[GATE-02-01] full analyzer fails for real unused files and exports', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shell-analysis-'));

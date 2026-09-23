@@ -61,3 +61,22 @@ retargeted PR #11 to main. No merge was performed by this task and the frozen
 `e14c1c3` candidate was not rebased/rebuilt. The specifically requested preservation
 of the prior qualification worktree and raw evidence takes precedence over routine
 worktree cleanup; both remain in their original paths.
+
+## Follow-up correction after evidence-head checks
+
+The evidence-only head's Windows showcase run failed an existing archive-analysis
+fixture: its final `rm` reported `EBUSY` for the Git staging directory after about
+61 seconds. Command outcomes were not retained, so whether an earlier error was
+masked is unknown. Preserve run 35916883304 and
+its downloaded artifact. A bounded owned-child control did not reproduce an orphan;
+no Git/Fallow/process-leak cause is established. A distinct owned-lock control
+examines primary-error masking before any correction.
+
+Parent approved B's exact ownership of `tests/tooling/archive-command-fixture.mjs`,
+`archive-command.checks.mjs` and only the archive case in `gates.checks.mjs`.
+Retain command/result diagnostics and both primary/cleanup failures. Preserve all
+analyzer assertions, the 60,000 ms/12 MiB command limits and current spawn behavior;
+add no retries, blanket cleanup suppression or speculative process-tree changes.
+Do not export environment/Git configuration secrets. Independent review and real
+positive/negative controls precede a new frozen candidate. Earlier candidates and
+failed checks remain distinct; their results cannot be relabeled as the new source.
