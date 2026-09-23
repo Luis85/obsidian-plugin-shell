@@ -1,7 +1,8 @@
-import { mkdtemp, mkdir, writeFile, readFile, cp, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, cp, rm, symlink, realpath } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 
 export const makerSourceRoot = fileURLToPath(new URL('../../', import.meta.url));
 // Representative syntax belongs to the tooling test, never to a consumer's live registry.
@@ -17,11 +18,26 @@ export function createFeatures(services: Parameters<typeof createNoteFeatures>[0
 }
 `;
 
-export async function makerFixture(work) {
-  const root = await mkdtemp(join(tmpdir(), 'template-maker-'));
+export async function makerFixture(work, { temporaryRoot = tmpdir() } = {}) {
+  const requested = await mkdtemp(join(temporaryRoot, 'template-maker-'));
+  const root = await realpath(requested);
   try {
+    // Keep root/link validation on the original spelling, then use one canonical
+    // path for Vite config, module IDs and child cwd (Windows TEMP may be 8.3).
+    await createFilePlan(requested, []);
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), registry);
+    await writeFile(join(root, 'src/bootstrap/authoring.ts'), `import type { AuthoringFactory, AuthoringServices } from '../application/authoring';
+import type { Component } from 'vue';
+import type { createFeatures } from './features';
+type Capabilities = AuthoringServices & { readonly repositories: ReturnType<typeof createFeatures>['repositories'] };
+export const authoringFactories: readonly AuthoringFactory<Capabilities>[] = [
+];
+export const authoringPanels: readonly { readonly id: string; readonly titleKey: string; readonly component: Component; readonly props: (services: Capabilities) => Record<string, unknown> }[] = [
+];
+`);
+    await writeFile(join(root, 'src/bootstrap/authoring-locales.ts'), 'export const authoringLocaleModules = [\n];\n');
+    await writeFile(join(root, 'src/bootstrap/authoring-domains.ts'), 'export const authoringDomains = [\n];\n');
     await work(root);
   } finally { await rm(root, { recursive: true, force: true }); }
 }
@@ -29,7 +45,7 @@ export async function makerFixture(work) {
 /** Exercise the real reusable implementation without inheriting any worked/user feature. */
 export async function installMakerFoundation(root) {
   const paths = ['src/application', 'src/domain', 'src/infrastructure/events', 'src/infrastructure/markdown.ts',
-    'src/features/api.ts', 'tests/runtime/entity-fixture.ts', 'tests/runtime/memory-storage.ts'];
+    'src/features/api.ts', 'tests/runtime/entity-fixture.ts', 'tests/runtime/memory-storage.ts', 'tests/runtime/authoring-fixture.ts'];
   for (const path of paths) {
     const target = join(root, path); await mkdir(dirname(target), { recursive: true });
     await cp(resolve(makerSourceRoot, path), target, { recursive: true });
@@ -46,7 +62,7 @@ export const ${name}Feature = defineNoteFeature({ defaultFolder: 'Fixture', docu
   }
   await writeFile(join(root, 'package.json'), '{"name":"independent-author-fixture","type":"module"}');
   await symlink(resolve(makerSourceRoot, 'node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  await writeFile(join(root, 'vitest.config.mjs'), "export default { test: { include: ['tests/runtime/generated/**/*.test.ts'], environment: 'node', fileParallelism: false } };\n");
+  await writeFile(join(root, 'vitest.config.mjs'), "import vue from '@vitejs/plugin-vue';\nexport default { plugins: [vue()], test: { include: ['tests/runtime/generated/**/*.test.ts'], environment: 'node', fileParallelism: false } };\n");
 }
 
 export async function removeMakerExamples(root) {
@@ -58,7 +74,7 @@ export async function removeMakerExamples(root) {
 }
 
 export async function copyMakerSuite(root) {
-  for (const path of ['scripts/makers', 'scripts/shared', 'tests/tooling/makers.checks.mjs', 'tests/tooling/maker-fixture.mjs']) {
+  for (const path of ['scripts/makers', 'scripts/shared', 'scripts/quality/format-generated.mjs', 'tests/tooling/makers.checks.mjs', 'tests/tooling/maker-fixture.mjs']) {
     const target = join(root, path); await mkdir(dirname(target), { recursive: true });
     await cp(resolve(makerSourceRoot, path), target, { recursive: true });
   }

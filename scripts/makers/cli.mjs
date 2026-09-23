@@ -1,16 +1,35 @@
 import { createInterface } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
-import { parseArguments, help } from './arguments.mjs';
-import { planMaker } from './plan.mjs';
+import { parseArguments, help, builtinRecipes } from './arguments.mjs';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 import { applyFilePlan } from '../shared/file-plan.mjs';
 import { runNode } from '../shared/process.mjs';
 
 let request;
 async function main() {
   request = parseArguments(process.argv.slice(2));
-  if (!request.maker || request.options['--help'] || request.options['--list']) {
-    console.log(request.options['--json'] ? JSON.stringify({ version: 1, recipes: ['feature', 'entity'], help }) : help); return;
+  if (!request.maker && stdin.isTTY && !request.options['--no-interaction'] && !request.options['--list'] && !request.options['--help'] && !request.options['--json']) {
+    const prompt = createInterface({ input: stdin, output: stderr });
+    try {
+      stderr.write(`${help}\n`);
+      const maker = (await prompt.question('Recipe: ')).trim();
+      if (!maker) return;
+      const name = (await prompt.question('Name: ')).trim();
+      const args = [maker, name];
+      if (!['feature', 'locale', 'maker'].includes(maker)) args.push('--feature', (await prompt.question('Existing feature owner: ')).trim());
+      if (maker === 'listener') args.push('--event', (await prompt.question('Existing event name in this feature: ')).trim());
+      if (maker === 'style') args.push('--view', (await prompt.question('Existing view name in this feature: ')).trim());
+      request = parseArguments(args);
+    } finally { prompt.close(); }
   }
+  if (!request.maker || request.options['--help'] || request.options['--list']) {
+    let custom = [];
+    try { const registry = await import(pathToFileURL(resolve('scripts/makers/custom/registry.mjs')).href); custom = registry.customMakers.map(({ name, description, version }) => ({ name, description, version })); }
+    catch (error) { if (error.code !== 'ERR_MODULE_NOT_FOUND') throw error; }
+    console.log(request.options['--json'] ? JSON.stringify({ version: 2, recipes: builtinRecipes, custom, help }) : `${help}${custom.length ? '\nLocal custom recipes: ' + custom.map(entry => entry.name).join(', ') : ''}`); return;
+  }
+  const { planMaker } = await import('./plan.mjs');
   const planned = await planMaker(process.cwd(), request);
   const publicPlan = { ...planned, plan: { ...planned.plan, changes: planned.plan.changes.map(({ content, ...change }) => change) }, checks: planned.checks.map(check => ({ ...check, status: 'not-run' })) };
   if (request.options['--dry-run']) { console.log(request.options['--json'] ? JSON.stringify({ status: 'planned', ...publicPlan }) : JSON.stringify({ status: 'planned', ...publicPlan }, null, 2)); return; }

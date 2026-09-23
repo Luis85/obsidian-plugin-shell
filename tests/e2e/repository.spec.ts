@@ -5,7 +5,7 @@ async function create(page: Page) {
   await page.goto('/harness/app/');
   await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   await page.getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title', exact: true }).fill('Repository example');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title', exact: true }).fill('Repository example');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
   await expect(page.getByText('Task note created', { exact: true })).toBeVisible();

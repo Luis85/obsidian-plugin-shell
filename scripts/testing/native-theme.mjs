@@ -20,7 +20,9 @@ export async function setNativeTheme(page, context, theme) {
     return !!settingsPage;
   }, { timeout: 15000 }).toBe(true);
   await settingsPage.bringToFront();
-  await settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i }).click();
+  const appearance = settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i });
+  // Reopening an already active native tab destroys its controls; preserve the current render.
+  if (!(await appearance.evaluate(element => element.classList.contains('is-active')))) await appearance.click();
   // A grouped native setting can contain both scheme and theme selectors. Match the actual options.
   const controls = settingsPage.locator('select:visible');
   writeFileSync('reports/native/theme-controls.json', JSON.stringify(await controls.evaluateAll(elements => elements.map(el => ({ options: Array.from(el.options).map(option => ({ label: option.label, value: option.value })) }))), null, 2));
@@ -31,13 +33,19 @@ export async function setNativeTheme(page, context, theme) {
     if (matches.length !== 1) throw new Error('NATIVE_SCHEME_OPTION_UNAVAILABLE');
     return matches[0].value;
   }, theme);
-  // Real keyboard input avoids synthetic cross-realm select events in a native settings window.
-  const targetIndex = await scheme.evaluate((el, target) => Array.from(el.options).findIndex(option => option.value === target), value);
-  await scheme.focus(); await scheme.press('Home');
-  for (let index = 0; index < targetIndex; index++) await scheme.press('ArrowDown');
-  await scheme.press('Tab'); await expect(scheme).toHaveValue(value);
+  if (process.platform === 'win32') {
+    // Appearance rebuilds the Windows select during multi-key interaction. Change
+    // its actual option in one action, with the native handler and errors observed.
+    await scheme.selectOption(value);
+  } else {
+    // Retain the qualified Linux keyboard path for its separate settings realm.
+    const targetIndex = await scheme.evaluate((el, target) => Array.from(el.options).findIndex(option => option.value === target), value);
+    await scheme.focus(); await scheme.press('Home');
+    for (let index = 0; index < targetIndex; index++) await scheme.press('ArrowDown');
+    await scheme.press('Tab');
+  }
+  await expect(scheme).toHaveValue(value);
   await settingsPage.screenshot({ path: `reports/native/native-appearance-${theme}.png` });
-  await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
   // Retain the real settings window for subsequent transitions. Await the host's paint work
   // rather than closing its realm immediately after a class mutation. The isolated native
   // process is stopped by the owning fixture during restart/teardown; no errors are ignored.
@@ -47,4 +55,9 @@ export async function setNativeTheme(page, context, theme) {
     await expect(settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i })).toHaveCount(0);
   }
   await page.bringToFront();
+  // On Windows the separate Appearance window can throttle the target renderer.
+  // Foreground the actual view owner and drain its paint/mutation delivery before
+  // requiring the host's class transition; settling only settingsPage is insufficient.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await expect(page.locator('body')).toHaveClass(new RegExp(`(?:^|\\s)theme-${theme}(?:\\s|$)`));
 }

@@ -23,20 +23,20 @@ async function fixture() {
   const services = await createServices({ documents: memoryStorage().storage, host: host(), settings: { load: async () => null, save: async () => undefined },
     local: { get: () => null, set() {} }, newId: () => `mount-${++id}`, now: () => '2026-09-22T12:00:00.000Z', observeError: errors });
   const root = document.createElement('div'); root.className = 'user-owned dark'; document.body.append(root);
-  return { root, services, errors };
+  return { root, services, errors, runtimeEventCount: services.events.size };
 }
 it('[MOUNT-01] initial teleports stay in the staging surface and failed host attachment releases mounted Vue scopes', async () => {
   const f = await fixture(); const runtimeDispose = vi.spyOn(f.services.i18n, 'dispose');
   const insert = vi.spyOn(f.root, 'insertBefore').mockImplementation(surface => {
-    expect(probe.mounted).toBe(1); expect(probe.active).toBe(1); expect(f.services.events.size).toBe(1);
+    expect(probe.mounted).toBe(1); expect(probe.active).toBe(1); expect(f.services.events.size).toBe(f.runtimeEventCount + 1);
     expect(surface instanceof HTMLElement && surface.querySelector('[data-owned-portal]')).toBeTruthy();
     expect(f.root.children).toHaveLength(0); throw new Error('host attachment failed');
   });
   try {
     expect(() => mountShowcase(f.root, f.services)).toThrow('host attachment failed');
-    expect(probe.active).toBe(0); expect(f.services.events.size).toBe(0); expect(f.root.children).toHaveLength(0);
+    expect(probe.active).toBe(0); expect(f.services.events.size).toBe(f.runtimeEventCount); expect(f.root.children).toHaveLength(0);
     expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.root.classList.contains('dark')).toBe(true); expect(f.errors).not.toHaveBeenCalled();
-  } finally { insert.mockRestore(); f.services.dispose(); }
+  } finally { insert.mockRestore(); f.services.dispose(); expect(f.services.events.size).toBe(0); }
 });
 it('[MOUNT-02] initialization failure releases previously acquired theme resources without attempting Vue unmount', async () => {
   const f = await fixture(); const unsubscribeOwner = vi.fn();
@@ -44,16 +44,16 @@ it('[MOUNT-02] initialization failure releases previously acquired theme resourc
   try {
     expect(() => mountShowcase(f.root, f.services, undefined, () => unsubscribeOwner)).toThrow('preference subscription failed');
     expect(unsubscribeOwner).toHaveBeenCalledOnce(); expect(f.root.classList.contains('dark')).toBe(true); expect(f.root.classList.contains('light')).toBe(false);
-    expect(f.root.children).toHaveLength(0); expect(f.services.events.size).toBe(0); expect(probe.active).toBe(0); expect(f.errors).not.toHaveBeenCalled();
-  } finally { subscribe.mockRestore(); f.services.dispose(); }
+    expect(f.root.children).toHaveLength(0); expect(f.services.events.size).toBe(f.runtimeEventCount); expect(probe.active).toBe(0); expect(f.errors).not.toHaveBeenCalled();
+  } finally { subscribe.mockRestore(); f.services.dispose(); expect(f.services.events.size).toBe(0); }
 });
 it('[MOUNT-03] cleanup faults cannot skip other releases or replace the original attachment error', async () => {
   const f = await fixture(); const unsubscribeOwner = vi.fn(() => { throw new Error('owner unsubscribe failed'); });
   const insert = vi.spyOn(f.root, 'insertBefore').mockImplementation(() => { throw new Error('original attachment error'); });
   try {
     expect(() => mountShowcase(f.root, f.services, undefined, () => unsubscribeOwner)).toThrow('original attachment error');
-    expect(unsubscribeOwner).toHaveBeenCalledOnce(); expect(probe.active).toBe(0); expect(f.services.events.size).toBe(0); expect(f.root.children).toHaveLength(0);
+    expect(unsubscribeOwner).toHaveBeenCalledOnce(); expect(probe.active).toBe(0); expect(f.services.events.size).toBe(f.runtimeEventCount); expect(f.root.children).toHaveLength(0);
     expect(f.root.classList.contains('dark')).toBe(true); expect(f.root.classList.contains('light')).toBe(false);
     expect(f.errors.mock.calls.map(([entry]) => [entry.code, entry.operation])).toEqual([['view.cleanup', 'view.close']]);
-  } finally { insert.mockRestore(); f.services.dispose(); }
+  } finally { insert.mockRestore(); f.services.dispose(); expect(f.services.events.size).toBe(0); }
 });

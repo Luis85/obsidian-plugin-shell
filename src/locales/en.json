@@ -1,16 +1,18 @@
 {
-  "notification": { "overflow": "More notifications are waiting. Review the related views for details." },
+  "notification": {
+    "overflow": "More notifications are waiting. Review the related views for details."
+  },
   "app": {
     "title": "Plugin Shell",
     "tagline": "Your plugin starts here.",
     "intro": "A working foundation, not another blank canvas. Explore the services behind this view, then make them your own.",
     "showcase": "Capability showcase",
-    "iteration": "Iteration 03",
+    "iteration": "Iteration 04",
     "local": "Local-first · no account required",
     "ready": "Runtime ready",
     "browser": "Browser harness",
     "native": "Obsidian host",
-    "scope": "Iteration 03 · Reusable entities, Markdown repositories and Task note editing. Full makers, automatic releases and device qualification remain planned."
+    "scope": "Reusable authoring, optional examples and explicit Markdown or plugin-data persistence. Native/device and release acceptance remain separately qualified."
   },
   "nav": {
     "overview": "Overview",
@@ -121,7 +123,7 @@
     "saved": "Preferences saved",
     "theme": "Theme follows Obsidian",
     "themeHelp": "No independent color mode is installed. Components consume the host’s CSS variables.",
-    "blocked": "Stored settings could not be safely read. Defaults are shown for inspection only; saving is disabled to preserve the original data.",
+    "blocked": "Stored plugin data could not be safely read, or a save could not be confirmed. Saving is disabled to preserve the data. Resolve the issue and restart the plugin before making further changes.",
     "hideHeader": "Hide Obsidian view header",
     "hideHeaderHelp": "Applies immediately to all Plugin Shell views. Restore it here, in native settings, or with the command palette.",
     "headerSaving": "Saving header preference…"
@@ -132,10 +134,18 @@
     "saved": "Task note created successfully."
   },
   "modal": {
-    "close": "Close", "confirm": "Confirm", "cancel": "Cancel", "input": "Example text", "invalid": "Enter a short, non-empty value.", "validating": "Checking input…",
-    "confirmTitle": "Confirm an example", "confirmText": "This example changes no documents. Confirm or cancel to inspect the typed outcome.",
-    "promptTitle": "Try a text prompt", "promptText": "Enter a short value. It stays in this example and is never written to your vault.",
-    "confirmed": "Example confirmed. No documents changed.", "cancelled": "Example cancelled. No documents changed.",
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "input": "Example text",
+    "invalid": "Enter a short, non-empty value.",
+    "validating": "Checking input…",
+    "confirmTitle": "Confirm an example",
+    "confirmText": "This example changes no documents. Confirm or cancel to inspect the typed outcome.",
+    "promptTitle": "Try a text prompt",
+    "promptText": "Enter a short value. It stays in this example and is never written to your vault.",
+    "confirmed": "Example confirmed. No documents changed.",
+    "cancelled": "Example cancelled. No documents changed.",
     "title": "One view, two environments",
     "text": "This dialog uses the Obsidian Modal API in the plugin and an isolated browser adapter in the harness. The application services do not depend on either implementation."
   },
@@ -153,12 +163,18 @@
   "error": {
     "commandUnavailable": "This command is not available in the current context.",
     "title": "Enter a title with 1–120 characters.",
+    "filename": "Use a nonblank note title without / \\ : * ? \" < > |, control characters, a leading dot, a trailing space or dot, or a reserved device name. The title must fit a 255-byte filename including .md.",
     "due": "Enter a valid calendar date (YYYY-MM-DD).",
     "tags": "Use up to 12 short tags with letters, numbers, hyphens or slashes.",
     "folder": "Use a safe relative folder without hidden names, traversal or special filename characters.",
     "preferences": "These preferences are not valid.",
-    "settingsRead": "Stored settings are protected. Resolve the read error before saving.",
-    "settingsWrite": "Preferences were not saved. Your previous values remain active.",
+    "settingsRead": "Stored plugin data is protected. Resolve the read error before saving.",
+    "settingsWrite": "The save outcome is uncertain. Saving is disabled until the plugin restarts and reads the stored data.",
+    "pluginDataRead": "Stored entity data is invalid or uses an unsupported schema. It has been preserved without changes.",
+    "pluginDataMissing": "This entity no longer exists. Reload the collection before continuing.",
+    "pluginDataConflict": "An entity with this ID already exists. No entity was overwritten.",
+    "pluginDataLimit": "Plugin data exceeds its supported size, record count or revision limit. No changes were saved.",
+    "pluginDataStale": "This entity changed or its snapshot belongs to another runtime. Reload and review it before saving.",
     "conflict": "The destination already exists. No file was overwritten.",
     "write": "The note could not be saved. Check the destination and permissions.",
     "read": "The note could not be read. Check that it exists and is accessible, then reload notes.",

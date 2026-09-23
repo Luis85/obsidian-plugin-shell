@@ -10,6 +10,7 @@ it('[IDENTITY-01] a renamed plugin uses its own DOM, view and storage identity a
   try {
     expect(pluginIdentity.id).toBe('field-notes'); expect(SHOWCASE_VIEW).toBe('field-notes-showcase');
     expect(f.root.dataset.pluginUi).toBe('field-notes');
+    expect(f.root.classList.contains('ps--field-notes')).toBe(true);
     expect(f.root.classList.contains('field-notes')).toBe(true); expect(f.root.classList.contains('plugin-shell')).toBe(false);
     expect(f.root.textContent).toContain('Field @ {Notes}'); expect(f.root.textContent).toContain('v1.2.3');
     await click(f.root, 'Documents');

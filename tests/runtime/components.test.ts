@@ -64,9 +64,9 @@ it('[UI-03-13] closing a sibling view or failed attachment cannot dispose runtim
     await f.services.preferences.update({ locale: 'de' }); await settle();
     expect(root.querySelector('[data-testid="showcase"]')?.getAttribute('lang')).toBe('de'); expect(root.textContent).toContain('Dokumente');
     expect(f.services.i18n.global.t('nav.documents')).toBe('Dokumente');
-    close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(0);
+    close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(f.runtimeEventCount);
   } finally { close(); root.remove(); f.dispose(); f.services.dispose(); }
-  expect(runtimeDispose).toHaveBeenCalledOnce(); runtimeDispose.mockRestore();
+  expect(runtimeDispose).toHaveBeenCalledOnce(); expect(f.services.events.size).toBe(0); runtimeDispose.mockRestore();
 });
 it('[UI-03-10] runtime recovery stays visible inline with a keyboard button and single-flight owner action', async () => {
   const f = await componentFixture(); const available = deferred<boolean>();
@@ -113,9 +113,9 @@ it('[UI-03-02] real overview and events panels deliver facts and dismiss owned f
     await click(f.root, 'Events & feedback');
     await click(f.root, 'Publish a typed event'); expect(f.root.textContent).toContain('showcase.ping');
     await click(f.root, 'Show a native notice'); expect(f.native.notice).toHaveBeenCalledTimes(1);
-    await click(f.root, 'Try recoverable feedback'); expect(f.root.querySelector('[role="status"]')).not.toBeNull();
+    await click(f.root, 'Try recoverable feedback'); expect(f.root.querySelector('.shell-feedback [role="status"]')).not.toBeNull();
     f.root.querySelector<HTMLButtonElement>('button[aria-label="Dismiss notification"]')?.click(); await settle();
-    expect(f.root.querySelector('[role="status"]')).toBeNull();
+    expect(f.root.querySelector('.shell-feedback [role="status"]')).toBeNull();
     await click(f.root, 'Open native modal'); expect(document.querySelector('dialog[open]')?.textContent).toContain('One view, two environments');
     document.querySelector<HTMLDialogElement>('dialog')?.close(); await settle();
     f.services.diagnostics.report('fixture.expected', 'fixture.test'); await settle(); expect(f.root.textContent).toContain('fixture.expected');

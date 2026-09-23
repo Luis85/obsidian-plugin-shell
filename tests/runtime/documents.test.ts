@@ -13,7 +13,7 @@ describe('DocumentCreationService', () => {
     const yaml = result.value.markdown.split('---')[1];
     expect(parse(yaml ?? '')).toEqual({ type: 'task', id: 'id-1', schema_version: 1, created_at: '2026-09-22T12:00:00.000Z', title: input.title, status: 'todo', tags: ['work', 'release'], due: input.due });
     expect(result.value.markdown).toContain('due: "2026-09-30"');
-    expect(result.value.path).toBe('Tasks/release-checklist--id-1.md');
+    expect(result.value.path).toBe('Tasks/Release checklist.md');
     expect(documents.prepare('task', input, 'Tasks', 'submit-1')).toEqual(result);
   });
   it('[DOC-I02] preserves preview identity and commits once under concurrent confirmation', async () => {
@@ -56,9 +56,9 @@ describe('DocumentCreationService', () => {
   });
   it('[DOC-I06] second entity uses the same service and preserves false/zero/string scalars', async () => {
     const { writer, bus } = fixture();
-    const service = new DocumentCreationService<{ meeting: { title: string } }>({ meeting: { project: value => success({ title: value.title, properties: { title: value.title, archived: false, effort: 0 }, body: '# Meeting' }) } }, writer, bus, renderMarkdown, () => 'meeting-1', () => 'fixed');
-    const result = service.prepare('meeting', { title: 'false: # [note]' }, 'Meetings', 'r'); if (!result.ok) throw new Error('preview');
-    const values = parse(result.value.markdown.split('---')[1] ?? ''); expect(values.title).toBe('false: # [note]'); expect(values.archived).toBe(false); expect(values.effort).toBe(0);
+    const service = new DocumentCreationService<{ meeting: { title: string } }>({ meeting: { project: value => success({ title: value.title, properties: { title: value.title, label: 'false: # [note]', archived: false, effort: 0 }, body: '# Meeting' }) } }, writer, bus, renderMarkdown, () => 'meeting-1', () => 'fixed');
+    const result = service.prepare('meeting', { title: 'false # [note]' }, 'Meetings', 'r'); if (!result.ok) throw new Error('preview');
+    const values = parse(result.value.markdown.split('---')[1] ?? ''); expect(values.title).toBe('false # [note]'); expect(values.label).toBe('false: # [note]'); expect(values.archived).toBe(false); expect(values.effort).toBe(0);
     expect((await service.commit(result.value, 'Meetings')).ok).toBe(true);
   });
   it('[DOC-I07] a failing subscriber cannot relabel a committed write as failure', async () => {

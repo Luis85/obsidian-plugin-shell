@@ -1,3 +1,4 @@
+import { pendingNativeData } from './native-data.mjs';
 // Optional native smoke: only fresh temporary vault/config directories, never a personal vault.
 import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -35,7 +36,7 @@ try {
   report.resolvedVersions = await launcher.resolveVersion('1.13.7', 'latest');
   const [appVersion, installerVersion] = report.resolvedVersions;
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
-  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
+  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], localStorage: { language: 'en' }, args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
   await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir));
   let log = ''; const capture = data => { log = (log + data.toString()).slice(-50000); };
   launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
@@ -77,14 +78,15 @@ try {
   await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Native smoke Task');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill('Native smoke Task');
   await page.getByLabel('Due date', { exact: true }).fill('2026-09-30');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   const preview = await page.getByTestId('markdown-preview').innerText();
   await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
   await expect(page.getByText('Task note created', { exact: true })).toBeVisible();
   const path = await page.locator('.shell-destination code').innerText();
-  expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview); report.checks.push('actual-vault-markdown-matches-preview');
+  expect(path).toBe('Tasks/Native smoke Task.md');
+  expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview); report.checks.push('actual-vault-verbatim-title-and-markdown-match-preview');
   await page.screenshot({ path: join(output, 'native-document.png') });
   await qualifyRepository(page, report, output, launched.vault ?? vault, identity);
   expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview);
@@ -108,15 +110,12 @@ try {
   await settings.locator('.vertical-tab-nav-item:visible').filter({ hasText: identity.settingsName }).click();
   const headerControl = settings.locator('.setting-item:visible').filter({ hasText: 'Hide Obsidian view header' }).locator('.checkbox-container');
   await expect(headerControl).toHaveClass(/is-enabled/); await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(false);
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.hideObsidianViewHeader).toBe(false);
   await expect(page.locator(`${identity.viewSelector} > .view-header:visible`)).toHaveCount(1);
   report.checks.push('native-settings-restoration-shares-canonical-service');
   const folderControl = settings.locator('.setting-item:visible').filter({ hasText: 'Task note folder' }).locator('input');
   await expect(folderControl).toHaveValue('Tasks'); await folderControl.fill('Native/Tasks'); await folderControl.press('Tab');
-  await expect.poll(async () => {
-    try { return JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.taskFolder; }
-    catch { return null; }
-  }).toBe('Native/Tasks');
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.taskFolder).toBe('Native/Tasks');
   await expect(folderControl).toHaveValue('Native/Tasks');
   report.checks.push('native-declarative-settings-use-application-writer');
   await settingsPage.screenshot({ path: join(output, 'native-settings.png') });
@@ -124,7 +123,7 @@ try {
   report.phase = 'cold-restart';
   // A cold process restart uses the same isolated vault and its already-installed assets.
   await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(true);
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.hideObsidianViewHeader).toBe(true);
   const persistedVault = launched.vault ?? vault;
   const previousPid = launched.proc.pid;
   await browser.close(); browser = undefined;
@@ -134,6 +133,7 @@ try {
     await Promise.race([exited, new Promise((_, reject) => setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000))]);
   }
   launched = await launcher.launch({ appVersion, installerVersion, vault: persistedVault, copy: false,
+    localStorage: { language: 'en' },
     args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
   await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir)); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   expect(launched.proc.pid).not.toBe(previousPid);
@@ -166,12 +166,25 @@ try {
 } catch (error) {
   report.status = 'failed'; report.reason = error.message; process.exitCode = 1;
   if (activePage) {
+    report.themeFailure = await activePage.evaluate(() => ({
+      bodyClass: document.body.className.slice(0, 2048),
+      bodyConnected: document.body.isConnected,
+      roots: Array.from(document.querySelectorAll('[data-plugin-ui]')).slice(0, 16).map(root => ({
+        className: String(root.className).slice(0, 2048), connected: root.isConnected,
+        ownerIsCurrentDocument: root.ownerDocument === document,
+        ownerBodyClass: root.ownerDocument.body?.className.slice(0, 2048),
+        ownerBodyIsCurrent: root.ownerDocument.body === document.body,
+        owningViewType: root.closest('[data-type]')?.getAttribute('data-type'),
+      })),
+    })).catch(() => ({ unavailable: true }));
     await activePage.screenshot({ path: join(output, 'native-failure.png') }).catch(() => undefined);
     report.nativeControlLabels = await activePage.locator('[aria-label]').evaluateAll(els => els.map(el => el.getAttribute('aria-label'))).catch(() => []);
     report.visibleText = await activePage.locator('body').innerText().then(value => value.slice(-12000)).catch(() => 'unavailable');
   }
 }
 finally {
+  // Preserve the primary outcome even when host processes delay filesystem cleanup.
+  await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   if (browser) await browser.close().catch(() => undefined);
   if (launched?.proc.pid && launched.proc.exitCode === null && launched.proc.signalCode === null) {
     let timeout;
@@ -187,8 +200,10 @@ finally {
     try { if (!stopped) throw new Error('NATIVE_STILL_RUNNING'); await rm(await nativeConfigDirectory(directory), { recursive: true, force: true }); }
     catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_CONFIG_CLEANUP_FAILED'; process.exitCode = 1; }
   }
-  if (stopped) await rm(scratch, { recursive: true, force: true });
-  else report.scratchPreserved = true;
+  if (stopped) {
+    try { await rm(scratch, { recursive: true, force: true }); }
+    catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_SCRATCH_CLEANUP_FAILED'; report.scratchPreserved = true; process.exitCode = 1; }
+  } else report.scratchPreserved = true;
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

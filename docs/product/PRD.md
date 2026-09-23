@@ -1,8 +1,9 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.9.0 · **Updated:** 2026-09-22 · **Owner:** Luis85
-> **Implementation milestone:** Entity/repository and test-foundation milestone,
-> plugin version 0.3.0. The complete GitHub-template product is not yet finished.
+> **Version:** 0.10.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
+> **Implementation milestone:** Authoring, optional examples, shared durable persistence
+> and release-preparation milestone, plugin version 0.4.0. Final platform/public-release
+> readiness remains evidence-bound.
 
 ## Product goal
 
@@ -11,6 +12,40 @@ A developer obtains the template, runs a guided setup, generates a feature, deve
 The owner requested the first runnable iteration up to an openable showcase view. That slice now implements the native view, selected Nuxt UI components, Task Markdown workflow, shared preferences, typed events, feedback, scoped CSS, setup/local installation and executable tests. Do not interpret a working showcase as completion of every v1 capability.
 
 ## Requirements remain in force
+
+**Iteration 04 extension:** Complete the local maker catalog with primitive reuse,
+explicit local custom registry, domain-only definitions and useful integrated
+source. Remove optional demonstrations through reviewed file/registration ownership
+while preserving consumer features and shared tests. Add explicitly selected
+plugin-data CRUD through the same runtime writer as preferences; do not duplicate
+Markdown authority. Preserve corrupt/future data and untouched raw records, reject
+stale snapshots and stop after uncertain writes. Add focused generated formatting,
+seeded data properties, rendered accessibility, test/workflow/style/documentation
+checks and fixed-commit retained-asset release preparation. No automatic migration,
+ORM/query language, whole-vault index, publication, permission changes or automerge
+is introduced. See the [plan](../development/ITERATION-FOUR-PLAN.md),
+[review](../development/ITERATION-FOUR-REVIEW.md) and
+[executed evidence](../testing/ITERATION-FOUR.md).
+
+**Owner amendment — note titles:** On creation, the document service uses the
+projected title verbatim as the Markdown filename, followed only by `.md`.
+IDs remain in frontmatter and never appear as an automatic filename suffix.
+Unsafe portable names are rejected; existing or case-conflicting destinations
+are preserved and reported, without automatic renaming. Entity normalization is
+an explicit upstream business rule, not filename sanitization. Existing notes
+are not renamed or migrated; later updates retain their established paths.
+
+| Iteration 04 capability | Implementation and qualification boundary |
+| --- | --- |
+| Maker catalog | Integrated feature/entity/view/component/store/usecase/command/modal/setting/event/listener/style/locale/custom recipes; locale drafts remain nonselectable until translated/reviewed. |
+| Optional examples | Reviewed removal plan, consumer-preserving registry edits and minimal foundation source/test profile; source planning is separate from resulting-plugin qualification. |
+| Plugin-data entities | Typed explicit backend, one serialized envelope writer, authenticated revision snapshots, schema preservation, committed facts and disposal. No cross-process atomicity claim. |
+| Quality | Existing floors retained; generated formatting, properties, rendered axe/keyboard checks and targeted guard mutation plus bounded repository policies. |
+| Maintenance/release | Dependabot configuration, truthful freshness states, consistent version plans and fixed-source retained-asset rehearsal; public promotion remains explicitly unauthorized. |
+
+The iteration 03 table below is retained baseline context. The rows above and
+current evidence supersede its pending-capability descriptions without promoting
+any unrelated historical acceptance case.
 
 **Iteration 03 scope extension:** The owner's new request adds reusable entity
 definitions, optional document recipes and typed repository CRUD to the template.

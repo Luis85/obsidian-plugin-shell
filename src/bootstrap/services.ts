@@ -1,5 +1,6 @@
 import { createI18n } from 'vue-i18n';
 import { PreferenceService } from '../application/preference-service';
+import { PluginDataStore } from '../application/plugin-data-store';
 import { DocumentCreationService } from '../application/document-service';
 import { NoticeService } from '../application/notice-service';
 import { ModalService } from '../application/modal-service';
@@ -7,6 +8,8 @@ import { StructuredLogger } from '../application/logging';
 import { DebugService } from '../application/debug-service';
 import { taskDefinition, type EntityInputs } from '../features/tasks/form';
 import { createFeatures } from './features';
+import { createAuthoring } from './authoring';
+import { authoringMessages } from './authoring-locales';
 import type { ShellEvents } from '../application/events';
 import type { ServiceAdapters } from '../application/ports';
 import { TypedEventBus } from '../infrastructure/events/typed-event-bus';
@@ -18,24 +21,117 @@ import en from '../locales/en.json';
 import de from '../locales/de.json';
 export async function createServices(adapters: ServiceAdapters) {
   const diagnostics = new Diagnostics(adapters.observeError);
-  const logger = new StructuredLogger(diagnostics, adapters.now);
-  const debugging = new DebugService(logger, () => diagnostics.current, { id: pluginIdentity.id, version: pluginIdentity.version, host: adapters.host.kind });
-  const scheduler = adapters.scheduler ?? createTimerScheduler();
-  const events = new TypedEventBus<ShellEvents>(diagnostics);
-  const preferences = new PreferenceService(adapters.settings, events, diagnostics);
-  await preferences.load();
-  const messages = { en: { ...en, app: { ...en.app, title: () => pluginIdentity.name } }, de: { ...de, app: { ...de.app, title: () => pluginIdentity.name } } };
-  const i18n = createI18n({ legacy: false, locale: preferences.current.locale, fallbackLocale: 'en', messages });
-  const notifications = new NoticeService(adapters.host, key => i18n.global.t(key), diagnostics, { scheduler, validKey: key => i18n.global.te(key) });
-  const modals = new ModalService(adapters.modals, key => i18n.global.t(key), diagnostics, key => i18n.global.te(key));
-  const off = preferences.subscribe(value => { i18n.global.locale.value = value.locale; notifications.refreshLocale(); });
-  const documents = new DocumentCreationService<EntityInputs>({ task: taskDefinition }, adapters.documents, events, renderMarkdown, adapters.newId, adapters.now, diagnostics);
-  const features = createFeatures({ storage: adapters.documents, codec: markdownCodec, events, newId: adapters.newId, now: adapters.now, errors: diagnostics }, preferences);
-  const { repositories } = features;
-  logger.info('runtime.started', 'runtime.initialize');
+  const releases: (() => void)[] = [() => diagnostics.dispose()];
   let disposed = false;
-  return { identity: pluginIdentity, events, diagnostics, logger, debugging, scheduler, preferences, i18n, modals, notices: notifications, notifications, documents, repositories, host: adapters.host, local: adapters.local, newId: adapters.newId,
-    dispose() { if (disposed) return; disposed = true; off(); documents.dispose(); features.dispose(); modals.dispose(); notifications.dispose(); preferences.dispose(); events.dispose(); i18n.dispose(); adapters.host.dispose?.(); logger.dispose(); diagnostics.dispose(); },
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    for (const release of Array.from(releases).reverse()) {
+      try {
+        release();
+      } catch {
+        diagnostics.report('runtime.cleanup', 'runtime.dispose');
+      }
+    }
   };
+  try {
+    releases.push(() => adapters.host.dispose?.());
+    const logger = new StructuredLogger(diagnostics, adapters.now);
+    releases.push(() => logger.dispose());
+    const debugging = new DebugService(logger, () => diagnostics.current, {
+      id: pluginIdentity.id,
+      version: pluginIdentity.version,
+      host: adapters.host.kind,
+    });
+    const scheduler = adapters.scheduler ?? createTimerScheduler();
+    const events = new TypedEventBus<ShellEvents>(diagnostics);
+    releases.push(() => events.dispose());
+    const pluginData = new PluginDataStore(adapters.settings, diagnostics);
+    releases.push(() => pluginData.dispose());
+    const preferences = new PreferenceService(pluginData, events, diagnostics);
+    releases.push(() => preferences.dispose());
+    await preferences.load();
+    const messages = {
+      en: { ...en, authoring: authoringMessages.en, app: { ...en.app, title: () => pluginIdentity.name } },
+      de: { ...de, authoring: authoringMessages.de, app: { ...de.app, title: () => pluginIdentity.name } },
+    };
+    const i18n = createI18n({ legacy: false, locale: preferences.current.locale, fallbackLocale: 'en', messages });
+    releases.push(() => i18n.dispose());
+    const notifications = new NoticeService(adapters.host, (key) => i18n.global.t(key), diagnostics, {
+      scheduler,
+      validKey: (key) => i18n.global.te(key),
+    });
+    releases.push(() => notifications.dispose());
+    const modals = new ModalService(
+      adapters.modals,
+      (key) => i18n.global.t(key),
+      diagnostics,
+      (key) => i18n.global.te(key),
+    );
+    releases.push(() => modals.dispose());
+    const off = preferences.subscribe((value) => {
+      i18n.global.locale.value = value.locale;
+      notifications.refreshLocale();
+    });
+    releases.push(off);
+    const documents = new DocumentCreationService<EntityInputs>(
+      { task: taskDefinition },
+      adapters.documents,
+      events,
+      renderMarkdown,
+      adapters.newId,
+      adapters.now,
+      diagnostics,
+    );
+    releases.push(() => documents.dispose());
+    const features = createFeatures(
+      {
+        pluginData,
+        storage: adapters.documents,
+        codec: markdownCodec,
+        events,
+        newId: adapters.newId,
+        now: adapters.now,
+        errors: diagnostics,
+      },
+      preferences,
+    );
+    releases.push(() => features.dispose());
+    const { repositories } = features;
+    logger.info('runtime.started', 'runtime.initialize');
+    const authoring = createAuthoring({
+      events,
+      modals,
+      notices: notifications,
+      preferences,
+      diagnostics,
+      repositories,
+    });
+    releases.push(() => authoring.dispose());
+    await authoring.initialize();
+    return {
+      identity: pluginIdentity,
+      events,
+      diagnostics,
+      logger,
+      debugging,
+      scheduler,
+      preferences,
+      i18n,
+      modals,
+      notices: notifications,
+      notifications,
+      documents,
+      repositories,
+      authoring,
+      host: adapters.host,
+      local: adapters.local,
+      newId: adapters.newId,
+      dispose,
+    };
+  } catch (error) {
+    dispose();
+    throw error;
+  }
 }
 export type Services = Awaited<ReturnType<typeof createServices>>;

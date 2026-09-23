@@ -8,7 +8,7 @@
 .shell-field input { width: 100%; min-height: 36px; }
 .shell-field label { font-size: 12px; font-weight: 550; }
 .shell-field small, .shell-main small { color: var(--text-muted); font-size: 11px; line-height: 1.5; }
-.shell-field label span { color: var(--text-faint); }
+.shell-field label span { color: var(--text-muted); }
 .shell-error { color: var(--text-error); background: color-mix(in srgb, var(--text-error) 6%, transparent); border: 1px solid color-mix(in srgb, var(--text-error) 20%, transparent); padding: 12px; border-radius: var(--radius-s); line-height: 1.6; font-size: 12px; }
 .shell-info { color: var(--text-muted); border-inline-start: 2px solid var(--interactive-accent); padding: 8px 12px; margin-bottom: 20px !important; font-size: 12px; line-height: 1.5; }
 .shell-preview { min-height: 370px; }
@@ -17,7 +17,7 @@
 .shell-preview pre { margin: 0; padding: 18px; min-height: 250px; overflow: auto; border-radius: var(--radius-s); background: var(--background-primary-alt); border: 1px solid var(--background-modifier-border); line-height: 1.8; font-size: 11px; }
 .shell-preview pre code { font: inherit; font-family: var(--font-monospace); color: var(--text-normal); }
 .shell-empty { text-align: center; display: grid; justify-items: center; align-content: center; min-height: 280px; padding: 20px; }
-.shell-empty > span { font-size: 36px; color: var(--text-faint); margin-bottom: 22px; }
+.shell-empty > span { font-size: 36px; color: var(--text-muted); margin-bottom: 22px; }
 .shell-empty h3 { font-size: 13px; }
 .shell-empty p { font-size: 12px; max-width: 240px; line-height: 1.6; color: var(--text-muted); margin-top: 8px !important; }
 .shell-created { margin-top: 20px; color: var(--text-success); }
@@ -25,7 +25,7 @@
 .shell-event-table { width: 100%; text-align: start; border-collapse: collapse; font-size: 12px; }
 .shell-event-table th { color: var(--text-muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; padding: 0 10px 12px; }
 .shell-event-table td { padding: 12px 10px; border-top: 1px solid var(--background-modifier-border); }
-.shell-event-table td:first-child { width: 90px; color: var(--text-faint); }
+.shell-event-table td:first-child { width: 90px; color: var(--text-muted); }
 .shell-empty-text { padding: 28px 0; color: var(--text-muted); font-size: 12px; }
 .shell-diagnostics { margin-top: 20px; }
 .shell-diagnostic { display: flex; gap: 20px; padding: 8px 0; font-size: 11px; color: var(--text-muted); }

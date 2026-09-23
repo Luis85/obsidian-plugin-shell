@@ -1,5 +1,5 @@
 import { failure, success, type Result } from '../domain/outcome';
-import { validateFolder } from '../domain/paths';
+import { validateDocumentTitle, validateFolder } from '../domain/paths';
 import { DocumentCreationService, type PreparedDocument } from './document-service';
 import type { DocumentRecipe } from './document-definition';
 import type { DocumentCodec } from './document-codec';
@@ -162,7 +162,7 @@ export class NoteRepository<I, V> {
   }
   private contains(path: string, folder: string): boolean {
     const split = path.lastIndexOf('/');
-    return path.startsWith(`${folder}/`) && path.endsWith('.md') && validateFolder(path.slice(0, split)).ok && validateFolder(path.slice(split + 1, -3)).ok;
+    return path.startsWith(`${folder}/`) && path.endsWith('.md') && validateFolder(path.slice(0, split)).ok && validateDocumentTitle(path.slice(split + 1, -3)).ok;
   }
   private publish(type: 'documents.updated' | 'documents.deleted', snapshot: NoteSnapshot<V>): void {
     try { this.events.publish({ type, payload: { entity: snapshot.entity, id: snapshot.id, schemaVersion: snapshot.schemaVersion, path: snapshot.path } }); }

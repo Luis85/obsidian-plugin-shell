@@ -18,16 +18,16 @@ describe('Serialized settings', () => {
     const f = fixture(); const barrier = deferred(); const writes: unknown[] = [];
     const service = new PreferenceService({ load: async () => null, save: async value => { writes.push(value); if (writes.length === 1) await barrier.promise; } }, f.bus, f.errors);
     const first = service.update({ locale: 'de' }); const second = service.update({ taskFolder: 'Projects/Tasks' });
-    await Promise.resolve(); expect(writes).toHaveLength(1); expect(service.current.locale).toBe('en'); barrier.resolve();
+    await vi.waitFor(() => expect(writes).toHaveLength(1)); expect(service.current.locale).toBe('en'); barrier.resolve();
     expect((await first).ok).toBe(true); expect((await second).ok).toBe(true);
     expect(service.current).toEqual({ ...defaults, locale: 'de', taskFolder: 'Projects/Tasks' });
     expect(writes[1]).toMatchObject({ preferences: service.current });
   });
-  it('[PREF-I04] failed save retains values and later valid save recovers', async () => {
+  it('[PREF-I04] uncertain save retains values and blocks blind retries', async () => {
     const f = fixture(); const save = vi.fn().mockRejectedValueOnce(new Error('write')).mockResolvedValue(undefined);
     const service = new PreferenceService({ load: async () => null, save }, f.bus, f.errors); const event = vi.fn(); f.bus.on('preferences.changed', event);
-    expect((await service.update({ locale: 'de' })).ok).toBe(false); expect(service.current).toEqual(defaults); expect(event).not.toHaveBeenCalled();
-    expect((await service.update({ taskFolder: 'Work' })).ok).toBe(true); expect(service.current.locale).toBe('en'); expect(event).toHaveBeenCalledTimes(1);
+    expect(await service.update({ locale: 'de' })).toMatchObject({ ok: false, error: { code: 'uncertain' } }); expect(service.current).toEqual(defaults); expect(event).not.toHaveBeenCalled();
+    expect((await service.update({ taskFolder: 'Work' })).ok).toBe(false); expect(service.readonly).toBe(true); expect(event).not.toHaveBeenCalled(); expect(save).toHaveBeenCalledOnce();
   });
   it('[PREF-I05] invalid patches and disposed service never save', async () => {
     const f = fixture(); const save = vi.fn(); const service = new PreferenceService({ load: async () => null, save }, f.bus, f.errors);

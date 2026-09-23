@@ -6,6 +6,7 @@ import OverviewPanel from './panels/OverviewPanel.vue';
 import DocumentPanel from './panels/DocumentPanel.vue';
 import EventsPanel from './panels/EventsPanel.vue';
 import SettingsPanel from './panels/SettingsPanel.vue';
+import AuthoringHost from './AuthoringHost.vue';
 import { useShowcaseShell } from '../composables/use-showcase-shell';
 import { useShowcase } from '../stores/showcase';
 const props = defineProps<{ portalRoot: HTMLElement; showViewActions?: (event: MouseEvent) => void }>();
@@ -30,6 +31,7 @@ const { t, locale, services, failed, uiLocale, icons, pages } = useShowcaseShell
           <section class="shell-page">
           <div v-if="failed" role="alert" class="shell-error">{{ t('error.render') }}</div>
           <template v-else>
+            <AuthoringHost />
             <OverviewPanel v-if="model.page === 'overview'" />
             <DocumentPanel v-else-if="model.page === 'documents'" />
             <EventsPanel v-else-if="model.page === 'events'" />

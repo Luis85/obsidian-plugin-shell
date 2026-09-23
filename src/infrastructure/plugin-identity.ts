@@ -7,6 +7,7 @@ export const pluginIdentity = Object.freeze({
   version: manifest.version,
   viewType: `${manifest.id}-showcase`,
   rootClass: manifest.id,
-  hostClass: `${manifest.id}-host`,
+  scopeClass: `ps--${manifest.id}`,
+  hostClass: `ph--${manifest.id}`,
   hiddenHeaderClass: `${manifest.id}-native-header-hidden`,
 });

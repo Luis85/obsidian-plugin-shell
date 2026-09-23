@@ -1,4 +1,4 @@
-import { documentStem, validateFolder } from '../domain/paths';
+import { validateDocumentTitle, validateFolder } from '../domain/paths';
 import { failure, success, type Result } from '../domain/outcome';
 import type { DocumentWriter, ErrorReporter } from './ports';
 import type { EventPort, ShellEvents } from './events';
@@ -44,10 +44,12 @@ export class DocumentCreationService<Inputs> {
     const { title, properties, body } = projection.value;
     const schemaVersion = projection.value.schemaVersion ?? 1;
     if (!Number.isSafeInteger(schemaVersion) || schemaVersion < 1 || typeof title !== 'string' || typeof body !== 'string' || body.length > 1_000_000) return failure('validation', 'error.entity');
+    const filename = validateDocumentTitle(title);
+    if (!filename.ok) return filename;
     if (Object.keys(properties).some(k => ['type', 'id', 'schema_version', 'created_at'].includes(k))) return failure('validation', 'error.entity');
     const markdown = this.serialize({ type: entity, id, schema_version: schemaVersion, created_at: this.now(), ...properties }, body);
     if (markdown.length > 1_000_000) return failure('validation', 'error.entity');
-    const plan = Object.freeze({ entity, id, schemaVersion, requestId, folder: folder.value, path: `${folder.value}/${documentStem(title)}--${id}.md`, markdown });
+    const plan = Object.freeze({ entity, id, schemaVersion, requestId, folder: folder.value, path: `${folder.value}/${filename.value}.md`, markdown });
     this.requests.set(requestId, { input: fingerprint, plan });
     return success(plan);
   }

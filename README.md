@@ -1,9 +1,9 @@
 # Obsidian Plugin Shell
 
-**Iteration 03 — reusable entity and Markdown repository foundation, version 0.3.0.**
+**Iteration 04 — reusable authoring and persistence foundation, version 0.4.0.**
 
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
-recipes and reusable Markdown repository CRUD. Task is the visible example;
+recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
 Project proves reuse with number/boolean fields. The existing native view, typed
 events, shared preferences, scoped Nuxt UI styling and real-component harness
 remain. This is a template-foundation milestone, not completion of the full PRD.
@@ -21,13 +21,16 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Logging and debugging | [Logging and debugging](docs/development/LOGGING-AND-DEBUGGING.md): `services.logger`, typed catalogs and explicit debug commands |
 | Vue markup and TypeScript behavior | [Presentation structure](docs/development/PRESENTATION-STRUCTURE.md): components, composables, stores and context |
 | Scaffolding and identity | [Authoring tools](docs/development/AUTHORING-TOOLS.md) and [reviewed setup](docs/development/SETUP-IDENTITY.md) |
+| Plugin-data entities | [Typed CRUD and shared persistence](docs/development/PLUGIN-DATA-ENTITIES.md) |
+| Removing demonstrations | [Reviewed example removal](docs/development/EXAMPLE-REMOVAL.md) |
+| Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
 
-**Qualification:** See the [iteration 03 verification record](docs/testing/ITERATION-THREE.md)
+**Qualification:** See the [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
 for actual execution scope. Whole-production coverage is now a blocking gate,
 with an independent stricter domain/application/features gate. The official Obsidian lint
 integration still installs nested ESLint 9.39.5; zero audit findings do not close
 that [upstream support exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md).
-Iteration 02 was merged as PR #1 on 2026-09-22. No public release was published.
+Iteration 03 was merged as PR #3 on 2026-09-23. No public release was published.
 
 ## Open it in Obsidian
 
@@ -92,8 +95,9 @@ Open the printed loopback address at `/harness/app/`. This runs the same Vue/Nux
 | Events & feedback | Inspect safe event/diagnostic summaries, show owned feedback/native notices, and try info, confirmation and validated text-prompt dialogs without changing notes. |
 | Preferences | English/German, Task folder, routine-success notices and **Hide Obsidian view header** through one validated writer. The header toggle applies immediately. Native settings use the same service. |
 
-Markdown is canonical; plugin data stores preferences rather than a second entity
-database. Preview never writes. Editing preserves the note path, ID, creation time,
+Markdown is canonical for note-backed entities. Explicit plugin-data entities share
+one serialized writer with preferences, without duplicating note-backed records.
+Preview never writes. Editing preserves the note path, ID, creation time,
 handwritten body and unrelated properties. Stale revisions require explicit reload;
 uncertain outcomes are never blindly retried. Native trash is reversible but has no
 cross-process compare-and-delete transaction. Views own drafts and cleanup;
@@ -121,7 +125,7 @@ The current `verify` runs the build, strict runtime/Vue/harness/test types, both
 linters, source/locale/architecture/presentation checks, the zero-finding analyzer,
 Vitest and coverage gates, token/artifact checks, the retained repeated Node
 baseline, and harness build. Served E2E is explicit and separate. This is not the
-complete PRD release gate. See the [current test record](docs/testing/ITERATION-THREE.md)
+complete PRD release gate. See the [current test record](docs/testing/ITERATION-FOUR.md)
 for actual execution results and coverage scope.
 
 `npm run help` lists commands. Setup dry-run works without project dependencies and
@@ -136,8 +140,9 @@ npm run make -- feature bookmarks --entity bookmark --yes --no-interaction
 npm run entities:catalog
 ```
 
-The makers support registered note features and `entity --document`, with title,
-Task and Project presets. They preserve edited files and never create user notes.
+The catalog includes composed features, entities, views, components, stores,
+usecases, commands, modals, settings, events, listeners, styles, locale drafts and
+explicit local custom makers. They preserve edited files and never create user notes.
 See [Authoring tools](docs/development/AUTHORING-TOOLS.md) for the supported catalog.
 The [runtime services](docs/development/RUNTIME-SERVICES.md) include eight normalized
 host mappings, notification timing/queues and validated recovery actions.
@@ -158,26 +163,34 @@ injection live in `composables`, `stores` and `context`. Components retain minim
 bindings, enforced by `npm run check:presentation`. See
 [Presentation structure](docs/development/PRESENTATION-STRUCTURE.md).
 
-Still pending: the broader UI/custom-maker catalog, additional entity backends,
-expanded Nuxt UI components, broader accessibility/host/device qualification and
-public release promotion. No public release was published.
+Use `npm run examples:remove -- --dry-run` to review removal of the showcase,
+Task and Project while retaining the foundation and your own features. Edited
+example files conflict instead of being deleted. Follow the
+[removal guide](docs/development/EXAMPLE-REMOVAL.md), then verify your resulting plugin.
+
+Maintenance and release preparation use `maintenance:status`, `release:prepare`
+and `release:rehearse`. They report discovery failures and retained asset identity;
+they do not publish. Expanded native/device, manual accessibility and public
+release promotion require separate evidence and authorization.
 
 ## Documentation
 
 | Document | Purpose |
 | --- | --- |
+| [Iteration-four plan](docs/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
+| [Iteration-four review](docs/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
 | [Iteration-three guide](docs/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
 | [Iteration-three review](docs/development/ITERATION-THREE-REVIEW.md) | Independent findings, regression fixes and improvement pass. |
 | [Iteration-two guide](docs/development/ITERATION-TWO.md) | Historical layout/header operation, build/install and dependency decisions. |
 | [Iteration-two review](docs/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
 | [Iteration-one guide](docs/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
-| [Current test record](docs/testing/ITERATION-THREE.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
+| [Current test record](docs/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
 | [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
 | [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
 | [TypeScript quality-tool research](docs/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |
 | [Quality-tool adoption plan](docs/development/TYPESCRIPT-QUALITY-TOOLS-PLAN.md) | Proposed additional tools, negative controls and CI placement; not blanket implementation claims. |
-| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Retained full contract; setup/identity and note-feature makers are implemented, broader recipes remain planned. |
+| [Setup/makers](docs/development/SETUP-AND-MAKERS.md) | Retained full contract; the authoring guide states executable recipes and limitations. |
 | [Entity documents](docs/development/ENTITY-DOCUMENTS.md) | Full entity-to-Markdown contract. |
 | [Errors/notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md) | Canonical outcomes, recovery and notification roadmap. |
 | [Obsidian tokens](docs/design/OBSIDIAN-TOKENS.md) | Native tokens, aliases and pinned host fixture provenance. |

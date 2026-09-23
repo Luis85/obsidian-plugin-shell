@@ -1,6 +1,6 @@
 # Iteration 02 — unresolved upstream lint dependency support
 
-**Status: unmet fully-supported-dependency-graph acceptance criterion.** Investigation date: 2026-09-22. This is separate from the all-category npm audit, which reports zero vulnerabilities for the qualified candidate.
+**Status: unmet fully-supported-dependency-graph acceptance criterion.** Investigation dates: 2026-09-22 and live upstream recheck 2026-09-23. This is separate from the all-category npm audit; a passed audit does not establish upstream support.
 
 ## What is fixed
 
@@ -26,6 +26,13 @@ ESLint 9 reached upstream end of life on 2026-08-06. Microsoft's SDL repository 
 Forcing ESLint 10 into these declared ESLint-9 peers would be an unsupported bypass, not remediation. Removing the official Obsidian integration, importing undocumented deep files, or introducing an unreviewed private fork solely to remove the warning would also change the requested contract. None was done. The completed exploratory workflow has been removed; its evidence remains attached to the handover.
 
 ## Closure condition
+
+The 2026-09-23 npm registry recheck still reports stable Obsidian plugin 0.4.2,
+SDL 1.1.0 (ESLint `^9`, fixed React 7.37.3), import 2.32.0 (ESLint range through
+`^9`), and React 7.37.5 (range through `^9.7`). The official preset source still
+imports the older family, and the SDL repository remains archived. No newly
+published supported replacement closed the exception. No force override or trial
+lockfile was adopted. Maintenance reports this independently as `incompatible`.
 
 Re-evaluate a supported Obsidian lint release that removes/replaces these older preset dependencies or a separately reviewed and maintained integration replacement. Require a fresh strict `npm ci`, an installed graph without unsupported lint dependencies, the real TypeScript/Obsidian/Vue negative probes, all normal gates and a new all-category audit. Do not claim the warning was resolved merely because root `eslint --version` reports 10 or npm audit is clean.
 

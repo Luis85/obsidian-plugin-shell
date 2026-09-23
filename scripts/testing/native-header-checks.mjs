@@ -55,11 +55,15 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   }
   report.checks.push('native-command-palette-repeat-toggle-all-leaves-foreign-isolation');
   report.phase = 'theme-transitions';
+  report.themeTransitions = [];
   // Native host stylesheet transitions; each leaf retains its independent view state.
   for (const theme of ['dark', 'light']) {
     await setNativeTheme(page, context, theme);
-    await expect(page.locator('body')).toHaveClass(new RegExp(`theme-${theme}`));
-    for (const root of await page.locator(`${view} [data-plugin-ui]`).all()) await expect(root).toHaveClass(new RegExp(theme));
+    await expect(page.locator('body')).toHaveClass(new RegExp(`(?:^|\\s)theme-${theme}(?:\\s|$)`));
+    for (const root of await page.locator(`${view} [data-plugin-ui]`).all()) await expect(root).toHaveClass(new RegExp(`(?:^|\\s)${theme}(?:\\s|$)`));
+    report.themeTransitions.push(await page.evaluate(target => ({ target, bodyClass: document.body.className.slice(0, 2048),
+      roots: Array.from(document.querySelectorAll('[data-plugin-ui]')).slice(0, 16).map(root => ({ className: String(root.className).slice(0, 2048), connected: root.isConnected,
+        ownerIsCurrentDocument: root.ownerDocument === document, ownerBodyClass: root.ownerDocument.body?.className.slice(0, 2048) })) }), theme));
     await page.screenshot({ path: join(output, `native-split-preferences-${theme}.png`) });
   }
   await setNativeTheme(page, context, 'dark');
@@ -94,9 +98,9 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
   report.phase = 'popout-theme';
   await setNativeTheme(popout, context, 'light');
-  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/light/);
+  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/(?:^|\s)light(?:\s|$)/);
   await setNativeTheme(popout, context, 'dark');
-  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/dark/);
+  await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/(?:^|\s)dark(?:\s|$)/);
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page, identity);
   report.checks.push('native-popout-inherits-preference-and-live-toggle');
