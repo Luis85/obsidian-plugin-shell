@@ -1,0 +1,74 @@
+{
+  "base": "d22cc1c86aece83624713a2d3da30d1fd048e6ed",
+  "parts": [
+    {
+      "path": "part-01.json",
+      "sha256": "a09f749726e0ad67144f457c913600e59184edc5c560d0f0e43c020729087de7"
+    },
+    {
+      "path": "part-02.json",
+      "sha256": "90a16d40a225b92e54be8cf5d3cdb469abd57340f1d1bb32e81e6365f5686572"
+    },
+    {
+      "path": "part-03.json",
+      "sha256": "3fcce09c208055240b4ec5bdc3205d37cdb6e220ee571eb1bd77a9f9132af4aa"
+    },
+    {
+      "path": "part-04.json",
+      "sha256": "95699e928f170ff8e77c06f79a176ab120b5621bbd71c85169b211a08efeada2"
+    },
+    {
+      "path": "part-05.json",
+      "sha256": "102fcbd8e45537009d4b99fdcc97b0f5f145c8876247db1c954d9fb720d2c4c6"
+    },
+    {
+      "path": "part-06.json",
+      "sha256": "dd82e6fe2ee7f672eea02a23b74844cf620c52b58dbe673a09204e5522aabb13"
+    },
+    {
+      "path": "part-07.json",
+      "sha256": "0f0c76e9bfe2aa26e0a284c1611fd475e20fa707dcaa074238b60247d76b8baf"
+    }
+  ],
+  "html_sha256": "d85e9ddf3f6177a2a9fac11a3c99bd90e6c536f2246e8c2a008b13454a4e27da",
+  "files": [
+    "docs/concepts/companion/README.md",
+    "docs/concepts/companion/UNIFIED-REVIEW.md",
+    "docs/concepts/companion/UNIFIED-VERIFICATION.md",
+    "docs/concepts/companion/src/brick-catalog.js",
+    "docs/concepts/companion/src/brick-model.js",
+    "docs/concepts/companion/src/brick-views.js",
+    "docs/concepts/companion/src/canvas-model.js",
+    "docs/concepts/companion/src/canvas-view.js",
+    "docs/concepts/companion/src/component-views.js",
+    "docs/concepts/companion/src/connection-actions.js",
+    "docs/concepts/companion/src/connection-menu.js",
+    "docs/concepts/companion/src/connection-model.js",
+    "docs/concepts/companion/src/connection-views.js",
+    "docs/concepts/companion/src/design-actions.js",
+    "docs/concepts/companion/src/design-dialogs.js",
+    "docs/concepts/companion/src/flow-actions.js",
+    "docs/concepts/companion/src/flow-catalog.js",
+    "docs/concepts/companion/src/flow-model.js",
+    "docs/concepts/companion/src/flow-runtime.js",
+    "docs/concepts/companion/src/flow-views.js",
+    "docs/concepts/companion/src/library-actions.js",
+    "docs/concepts/companion/src/library-model.js",
+    "docs/concepts/companion/src/library-views.js",
+    "docs/concepts/companion/src/product-actions.js",
+    "docs/concepts/companion/src/product-model.js",
+    "docs/concepts/companion/src/product-plan.js",
+    "docs/concepts/companion/src/reference-content.js",
+    "docs/concepts/companion/src/reference-model.js",
+    "docs/concepts/companion/src/reference-views.js",
+    "docs/concepts/companion/src/spatial-model.js",
+    "docs/concepts/companion/src/spatial-runtime.js",
+    "docs/concepts/companion/src/unified-library.js",
+    "docs/concepts/companion/src/unified.css",
+    "docs/concepts/companion/verification-unified.json",
+    "scripts/concepts/build-companion.py",
+    "tests/concepts/companion-reference-graph.browser.py",
+    "tests/concepts/companion-reference.browser.py",
+    "tests/concepts/companion-unified.browser.py"
+  ]
+}
