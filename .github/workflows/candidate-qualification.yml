@@ -31,7 +31,7 @@ jobs:
         if: always()
         run: |
           mkdir -p reports/candidate-qualification
-          git archive --format=zip --output=candidate-source.zip HEAD
+          git archive --format=zip --output=reports/candidate-qualification/candidate-source.zip HEAD
           node "$QUALIFIED_NPM" explain eslint --json > reports/candidate-qualification/eslint-provenance.json
           node "$QUALIFIED_NPM" ls --all --json > reports/candidate-qualification/dependency-tree.json
       - name: Retain exact source for interrupted-session recovery
@@ -39,14 +39,15 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: candidate-recovery-source
-          path: candidate-source.zip
+          path: reports/candidate-qualification/candidate-source.zip
           retention-days: 7
           if-no-files-found: error
-      - name: Execute every offline gate and build the complete candidate
+      - name: Rehearse the fixed source and retain the verified candidate
         run: |
           mkdir -p reports/candidate-qualification
           set -o pipefail
-          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/candidate-qualification/verify.txt
+          VERSION=$(node -p "require('./manifest.json').version")
+          node "$QUALIFIED_NPM" run release:rehearse -- --commit "$GITHUB_SHA" --version "$VERSION" 2>&1 | tee reports/candidate-qualification/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/candidate-qualification/candidate-assets.json
       - name: Repeat deterministic runtime suites in fresh processes with no retries
         run: |
@@ -99,6 +100,5 @@ jobs:
             !reports/**/*.woff2
             dist/
             candidate-plugin.zip
-            candidate-source.zip
           retention-days: 7
           if-no-files-found: error

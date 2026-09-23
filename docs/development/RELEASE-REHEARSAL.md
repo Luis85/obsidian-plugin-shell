@@ -80,6 +80,12 @@ run; the selected `verify` gate cannot certify those scopes.
 
 ## Actions and manual acceptance
 
+The topic-branch **Candidate qualification** workflow runs the same fixed-source
+rehearsal before browser/native checks. Its recovery archive stays under ignored
+`reports/`, so source cleanliness remains an actual gate. The retained packet and
+subsequent unchanged-asset evidence are uploaded together. This proposal-level
+qualification has read-only permissions and cannot publish or create a tag.
+
 After merge, **Release rehearsal** accepts a full source SHA and stable version.
 It verifies that source is reachable from the repository's default branch, freezes
 the detached checkout, refuses an existing exact version tag, installs the exact
