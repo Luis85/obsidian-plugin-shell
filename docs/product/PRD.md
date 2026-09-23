@@ -104,3 +104,13 @@ UI/custom-maker catalog, automatic example removal, additional runtime contracts
 expanded host/device/accessibility evidence,
 and fixed-asset release rehearsal. Native evidence is limited to named checks and
 cannot certify all hosts, themes or devices.
+
+## Proposed companion product
+
+The [companion developer-workbench PRD](COMPANION-PLUGIN-PRD.md) specifies a
+same-repository Obsidian companion built on the shell, with a fresh-vault creation
+wizard and UI access to shared CLI workflows. Its [dated research](../research/2026-09-23-companion-plugin.md)
+records current platform, distribution and safety constraints. This is proposed
+additional product scope, not an implemented capability or a change to existing
+verification results. The companion's public-distribution policy and explicitly
+bound development-vault deployment require separate qualification.
