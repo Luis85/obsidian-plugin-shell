@@ -27,6 +27,14 @@ is introduced. See the [plan](../development/ITERATION-FOUR-PLAN.md),
 [review](../development/ITERATION-FOUR-REVIEW.md) and
 [executed evidence](../testing/ITERATION-FOUR.md).
 
+**Owner amendment — note titles:** On creation, the document service uses the
+projected title verbatim as the Markdown filename, followed only by `.md`.
+IDs remain in frontmatter and never appear as an automatic filename suffix.
+Unsafe portable names are rejected; existing or case-conflicting destinations
+are preserved and reported, without automatic renaming. Entity normalization is
+an explicit upstream business rule, not filename sanitization. Existing notes
+are not renamed or migrated; later updates retain their established paths.
+
 | Iteration 04 capability | Implementation and qualification boundary |
 | --- | --- |
 | Maker catalog | Integrated feature/entity/view/component/store/usecase/command/modal/setting/event/listener/style/locale/custom recipes; locale drafts remain nonselectable until translated/reviewed. |

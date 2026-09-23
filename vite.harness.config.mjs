@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { sharedConfig } from './scripts/bundling/vite-shared.mjs';
 import { readVendor, runtimeVendorCss } from './scripts/styles/vendor-policy.mjs';
 function hostStyles() {
   return { name: 'fixture-host-styles',
@@ -7,7 +6,11 @@ function hostStyles() {
     async generateBundle() { this.emitFile({ type: 'asset', fileName: '__host.css', source: runtimeVendorCss(await readVendor(process.cwd())) }); },
   };
 }
-export default defineConfig(() => {
+export default defineConfig(async ({ isPreview }) => {
+  // Preview serves the qualified emitted assets, including __host.css. Running
+  // build plugins here would rescan source/caches and rewrite generated inputs.
+  if (isPreview) return { build: { outDir: 'dist-harness' } };
+  const { sharedConfig } = await import('./scripts/bundling/vite-shared.mjs');
   const config = sharedConfig();
   return { ...config, plugins: [...config.plugins, hostStyles()],
     build: { ...config.build, outDir: 'dist-harness', emptyOutDir: true, rolldownOptions: { input: 'harness/app/index.html' } },

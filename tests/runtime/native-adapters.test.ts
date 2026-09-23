@@ -7,25 +7,72 @@ vi.mock('obsidian', () => ({ TFile: class {}, TFolder: class {} }));
 
 function fixture(configDir = '.obsidian') {
   const entries = new Map<string, TAbstractFile>(); const contents = new Map<string, string>();
-  const put = (path: string, markdown = 'original') => {
-    const file = Object.assign(new TFile(), { path }); entries.set(path, file); contents.set(path, markdown); return file;
+  const children: TAbstractFile[] = [];
+  const root = Object.assign(new TFolder(), { path: '', name: '', children });
+  const parent = (path: string) => path.includes('/') ? entries.get(path.slice(0, path.lastIndexOf('/'))) : root;
+  const attach = (file: TAbstractFile) => {
+    const owner = parent(file.path);
+    if (owner instanceof TFolder) {
+      const index = owner.children.findIndex(existing => existing.path === file.path);
+      if (index < 0) owner.children.push(file); else owner.children[index] = file;
+    }
+    entries.set(file.path, file); return file;
   };
-  const folder = (path: string) => { const file = Object.assign(new TFolder(), { path }); entries.set(path, file); return file; };
+  const put = (path: string, markdown = 'original') => {
+    const file = Object.assign(new TFile(), { path, name: path.slice(path.lastIndexOf('/') + 1) }); attach(file); contents.set(path, markdown); return file;
+  };
+  const folder = (path: string) => { const children: TAbstractFile[] = []; const file = Object.assign(new TFolder(), { path, name: path.slice(path.lastIndexOf('/') + 1), children }); attach(file); return file; };
   const vault = {
     configDir,
     getAbstractFileByPath: vi.fn((path: string) => entries.get(path) ?? null),
+    getRoot: vi.fn(() => root),
+    getAllLoadedFiles: vi.fn(() => { throw new Error('Full-vault enumeration is forbidden during create'); }),
     getMarkdownFiles: vi.fn(() => [...entries.values()].filter((file): file is TFile => file instanceof TFile && file.path.endsWith('.md'))),
     createFolder: vi.fn(async (path: string) => folder(path)),
     create: vi.fn(async (path: string, markdown: string) => put(path, markdown)),
     read: vi.fn(async (file: TFile) => contents.get(file.path) ?? ''),
     process: vi.fn(async (file: TFile, update: (current: string) => string) => { const value = update(contents.get(file.path) ?? ''); contents.set(file.path, value); return value; }),
-    trash: vi.fn(async (file: TAbstractFile, _system: boolean) => { entries.delete(file.path); }),
+    trash: vi.fn(async (file: TAbstractFile, _system: boolean) => {
+      entries.delete(file.path); const owner = parent(file.path);
+      if (owner instanceof TFolder) owner.children = owner.children.filter(entry => entry !== file);
+    }),
   };
-  return { vault, entries, contents, put, folder, storage: nativeDocumentStorage(vault) };
+  return { vault, entries, contents, put, folder, clear() { entries.clear(); contents.clear(); root.children.length = 0; }, storage: nativeDocumentStorage(vault) };
 }
 const error = (code: string) => ({ ok: false, error: expect.objectContaining({ code }) });
 
 describe('Synthetic host storage contracts (not native-host qualification)', () => {
+  it('rejects canonical Unicode sibling aliases while preserving valid decomposed path bytes', async () => {
+    const f = fixture(); const composed = 'Notes/Café.md'; const decomposed = 'Notes/Re\u0301sume\u0301.md';
+    expect((await f.storage.create(composed, 'composed')).ok).toBe(true);
+    expect(await f.storage.create('Notes/Cafe\u0301.md', 'overwrite')).toEqual(error('conflict'));
+    expect(f.vault.create).toHaveBeenCalledTimes(1); expect(f.contents.get(composed)).toBe('composed');
+    expect((await f.storage.create(decomposed, 'decomposed')).ok).toBe(true);
+    expect(f.vault.create).toHaveBeenLastCalledWith(decomposed, 'decomposed');
+    expect(f.contents.has(decomposed)).toBe(true); expect(f.contents.has(decomposed.normalize('NFC'))).toBe(false);
+    expect(await f.storage.create('Notes/Résumé.md', 'overwrite')).toEqual(error('conflict'));
+    expect((await f.storage.create('Données/Original.md', 'folder')).ok).toBe(true);
+    expect(await f.storage.create('Donne\u0301es/Other.md', 'alias')).toEqual(error('conflict'));
+    expect(f.vault.create).toHaveBeenCalledTimes(3); expect(f.vault.createFolder).toHaveBeenCalledTimes(2);
+    expect(f.vault.getAllLoadedFiles).not.toHaveBeenCalled(); expect(f.vault.getMarkdownFiles).not.toHaveBeenCalled();
+  });
+  it('preserves verbatim titles and rejects exact or case-only file/folder collisions before native writes', async () => {
+    const f = fixture();
+    const path = 'Notes/Title Case – Übersicht.md';
+    expect((await f.storage.create(path, 'original')).ok).toBe(true);
+    for (const conflict of [path, 'Notes/title case – übersicht.md', 'notes/Other Title.md']) {
+      expect(await f.storage.create(conflict, 'overwrite')).toEqual(error('conflict'));
+    }
+    expect(f.vault.create).toHaveBeenCalledExactlyOnceWith(path, 'original');
+    expect(f.contents.get(path)).toBe('original');
+    expect((await f.storage.create('Notes/  Leading space.md', 'leading')).ok).toBe(true);
+    expect((await f.storage.create(`Notes/${'ä'.repeat(100)}.md`, 'long')).ok).toBe(true);
+    for (const invalid of ['Notes/Title .md', 'Notes/Title..md', 'Notes/COM¹.md', `Notes/${'😀'.repeat(64)}.md`]) {
+      expect(await f.storage.create(invalid, 'bad')).toEqual(error('validation'));
+    }
+    expect(f.vault.create).toHaveBeenCalledTimes(3);
+    expect(f.vault.getAllLoadedFiles).not.toHaveBeenCalled(); expect(f.vault.getMarkdownFiles).not.toHaveBeenCalled();
+  });
   it('creates exact bytes and nested folders once, preserving existing documents', async () => {
     const f = fixture(); const markdown = '---\ntitle: "Hello"\n---\n\n# Hello\n';
     expect(await f.storage.create('Projects/Tasks/one.md', markdown)).toEqual({ ok: true, value: undefined });
@@ -67,7 +114,7 @@ describe('Synthetic host storage contracts (not native-host qualification)', () 
   it('handles folder conflicts, creation races and lookup faults without overwriting', async () => {
     const f = fixture(); f.put('Tasks');
     expect(await f.storage.create('Tasks/a.md', 'a')).toEqual(error('conflict'));
-    f.entries.clear(); f.vault.createFolder.mockImplementationOnce(async path => { f.folder(path); throw new Error('another writer'); });
+    f.clear(); f.vault.createFolder.mockImplementationOnce(async path => { f.folder(path); throw new Error('another writer'); });
     expect((await f.storage.create('Tasks/a.md', 'a')).ok).toBe(true);
     f.vault.createFolder.mockRejectedValueOnce(new Error('denied'));
     expect(await f.storage.create('Other/a.md', 'a')).toEqual(error('storage'));

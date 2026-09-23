@@ -17,7 +17,7 @@
   "files": [
     {
       "path": "src/features/tasks/entity.ts",
-      "sha256": "1eb98c457e7829d2fa2b2c3615a2a9984d90e9d2251744ea153908926c98cdee"
+      "sha256": "cdacd67561d0eeb4c735d3f36601898c97ca3b403e9477a99802dfa1c03ca9bf"
     },
     {
       "path": "src/features/tasks/definition.ts",
@@ -89,7 +89,7 @@
     },
     {
       "path": "tests/runtime/components.test.ts",
-      "sha256": "ed9f83d17678ff5e35197c605ec5bf0a86de7ec511b6eb59ab19280818f6d8ae"
+      "sha256": "858081935cef20622805e389b925ef03189982ef2e8f203ce5acdef426062da1"
     },
     {
       "path": "tests/runtime/presentation-composables.test.ts",
@@ -97,7 +97,7 @@
     },
     {
       "path": "tests/e2e/layout-and-header.spec.ts",
-      "sha256": "d0e173b963af1de16d293c5c703fa1dc16cb7003444983f60e770963af761d84"
+      "sha256": "4eb64f6782e12c0b49eda195811eb847da0b7a2727b9ef731c5198811571e31f"
     },
     {
       "path": "tests/e2e/modals.spec.ts",
@@ -113,7 +113,7 @@
     },
     {
       "path": "tests/e2e/showcase.spec.ts",
-      "sha256": "8344d59903a8d238f4309d79fad95aaf59848a5637adaf9494d68015e1472468"
+      "sha256": "b466b5a4402e54b934ea5a6ce78875273c30c5d0ee8216dacd27bfe8185dbf12"
     },
     {
       "path": "tests/e2e/accessibility.spec.ts",
@@ -126,7 +126,7 @@
     },
     {
       "path": "src/bootstrap/mount-ui.ts",
-      "sha256": "a45a93b62aaa0a007d4d1494037117f1a7f6dbbd59553f4f98c37198f1974217",
+      "sha256": "4d87bba85ae8e116f102ce1549b674582bdc429b2a9638a82c7111118e137e6f",
       "template": "src__bootstrap__mount-ui.ts.txt"
     },
     {
@@ -181,7 +181,7 @@
     },
     {
       "path": "tests/runtime/domain.test.ts",
-      "sha256": "c85b405ae7926819a1c548ac52053cbb6b8f12bc346451820ed4742939956c97",
+      "sha256": "92e86b9a65efa4e19c382c74358e83eb1470a6fbe075c2c5d669039081fef0fc",
       "template": "tests__runtime__domain.test.ts.txt"
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "tests/runtime/feature-extension.test.ts",
-      "sha256": "78d1d7ebee4331c0fd3bfc8fad53a3597d72c23a3a9684b3c983c41436110373",
+      "sha256": "21a80f71530034b32806de476658e2e4a98f225d40941e11a17d1a07733b77cc",
       "template": "tests__runtime__feature-extension.test.ts.txt"
     },
     {
@@ -201,7 +201,7 @@
     },
     {
       "path": "tests/runtime/identity.test.ts",
-      "sha256": "431549bc6bf688000727a6e53077fb40f408d0f6caa9dfa6a666b3b13577f2f3",
+      "sha256": "bc8bdd76e0885a6f1e58076cb9504ba701666b69351e0e9d224d4bc552002147",
       "template": "tests__runtime__identity.test.ts.txt"
     },
     {
@@ -211,7 +211,7 @@
     },
     {
       "path": "tests/runtime/native-lifecycle.test.ts",
-      "sha256": "e8a44bcfdbf68d3019f434573b3a3669d1031c4a84b9b36b4b7c50d3978ff67d",
+      "sha256": "3bb00e6314f61d8032e37dc6cdd9564c5151245533b595ff9bb8ca78544e0935",
       "template": "tests__runtime__native-lifecycle.test.ts.txt"
     },
     {
@@ -226,7 +226,7 @@
     },
     {
       "path": "tests/runtime/settings-components.test.ts",
-      "sha256": "48616bc46657be7b63243c3e2c566add6708dd7a4ca86207399e15e773f0c09c",
+      "sha256": "e9f238400bec3c7d5a5cfd6f966b2603acb535cfe1ef12e44a2aad346da6ece2",
       "template": "tests__runtime__settings-components.test.ts.txt"
     },
     {
@@ -236,7 +236,7 @@
     },
     {
       "path": "src/styles/shell.css",
-      "sha256": "38473795c3857d1698792dfdce61d48ecf9ac1a6af1b3e5faa0417f25eae9fec",
+      "sha256": "0cd251d43dbab61883ef668963a781336b4cace825454ed92c32db1c9187a59a",
       "template": "src__styles__shell.css.txt"
     },
     {
@@ -251,12 +251,12 @@
     },
     {
       "path": "src/locales/en.json",
-      "sha256": "958f7adfd13ea24f5aefcbe18b4a1adb7b056b75e8bcc1d3ec3b8a577c5a9f64",
+      "sha256": "92e889d2aa3986989af7b965af796d370d05dbd273fd8723fcbcd5f800a00563",
       "template": "src__locales__en.json.txt"
     },
     {
       "path": "src/locales/de.json",
-      "sha256": "faff8dce464c490260af607d18a02d7b78c3b02d021bce41b89faae7df26ef9b",
+      "sha256": "96f2366fb6e163d4cf849bc682455a67fdfd39d0707017df1b3e672e71b07918",
       "template": "src__locales__de.json.txt"
     },
     {
@@ -286,7 +286,7 @@
     },
     {
       "path": "scripts/testing/check-native.mjs",
-      "sha256": "292945c6a02da6d26d78de847852f9e1766f76a8ae1c6b579e12a20ed73f1fca",
+      "sha256": "5163d0c2811b11a973e2bc5e2427fe07815156b91a0f013b21d665dc0e0112ee",
       "template": "scripts__testing__check-native.mjs.txt"
     }
   ]

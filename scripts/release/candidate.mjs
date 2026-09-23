@@ -40,7 +40,7 @@ export async function collectAssets(root, input, version) {
 export async function retainCandidate({ root, input, output, commit, version, qualification }) {
   fixedSource(root, commit);
   if (qualification?.status !== 'passed' || qualification.sourceCommit !== commit || qualification.command !== 'verify') throw new Error('QUALIFICATION_REQUIRED');
-  if (process.version !== 'v24.21.0' || qualification.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
+  if (qualification.node !== 'v24.21.0' || qualification.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
   const { bytes, manifest } = await collectAssets(root, input, version);
   const hashes = Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])]));
   if (JSON.stringify(qualification.assetHashes) !== JSON.stringify(hashes)) throw new Error('QUALIFICATION_HASH_MISMATCH');
@@ -49,7 +49,7 @@ export async function retainCandidate({ root, input, output, commit, version, qu
   const record = { schemaVersion: 1, kind: 'release-rehearsal', sourceCommit: commit, version,
     identity: manifest.id, minAppVersion: manifest.minAppVersion, isDesktopOnly: manifest.isDesktopOnly,
     assetHashes: hashes, notesHash: sha256(notes), lockHash: sha256(await readFile(join(root, 'package-lock.json'))),
-    tools: { node: process.version, npm: qualification.npm }, createdAt: new Date().toISOString(),
+    tools: { node: qualification.node, npm: qualification.npm }, packagingNode: process.version, createdAt: new Date().toISOString(),
     qualification, nativeAcceptance: { status: 'not-run' }, publication: 'not-authorized' };
   output = resolve(output); await mkdir(dirname(output), { recursive: true });
   try { await lstat(output); throw new Error('CANDIDATE_ALREADY_EXISTS'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -70,7 +70,7 @@ export async function validateRetained(directoryPath, expectedCommit, expectedVe
   if (JSON.stringify((await readdir(directoryPath)).sort()) !== JSON.stringify(expectedFiles)) throw new Error('ASSET_SET_MISMATCH');
   const record = JSON.parse(await regularBytes(join(directoryPath, 'candidate.json')));
   if (record.schemaVersion !== 1 || record.kind !== 'release-rehearsal' || record.sourceCommit !== expectedCommit || record.version !== expectedVersion) throw new Error('PROVENANCE_MISMATCH');
-  if (record.tools?.node !== 'v24.21.0' || record.tools?.npm !== '11.19.1' || record.qualification?.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
+  if (record.tools?.node !== 'v24.21.0' || record.tools?.npm !== '11.19.1' || record.qualification?.node !== record.tools.node || record.qualification?.npm !== '11.19.1') throw new Error('QUALIFIED_TOOLCHAIN_REQUIRED');
   if (!/^[a-f0-9]{64}$/.test(record.lockHash ?? '') || !Number.isFinite(Date.parse(record.createdAt)) || record.publication !== 'not-authorized' || record.nativeAcceptance?.status !== 'not-run') throw new Error('PROVENANCE_MISMATCH');
   if (record.qualification?.status !== 'passed' || record.qualification.command !== 'verify' || record.qualification.sourceCommit !== expectedCommit) throw new Error('QUALIFICATION_REQUIRED');
   if (JSON.stringify(Object.keys(record.assetHashes ?? {}).sort()) !== JSON.stringify([...assetNames].sort())) throw new Error('ASSET_SET_MISMATCH');

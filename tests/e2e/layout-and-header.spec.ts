@@ -58,7 +58,7 @@ for (const width of [320, 480, 768, 1280, 1920]) {
 test('[UI-02-DOC] preview expands in wide panes and stacks without page overflow on resize', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 }); await open(page);
   await primary(page).getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('A very long filename with German characters: Übersicht und zuverlässige Auslieferung '.repeat(1));
+  await page.getByRole('textbox', { name: 'Title' }).fill('A very long filename with German characters – Übersicht und zuverlässige Auslieferung');
   await page.getByRole('textbox', { name: 'Tags' }).fill('implementation,review,release');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   const pre = page.getByTestId('markdown-preview'); await expect(pre).toBeVisible();

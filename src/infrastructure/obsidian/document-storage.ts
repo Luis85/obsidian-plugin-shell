@@ -1,9 +1,9 @@
 import { TFile, TFolder, type Vault } from 'obsidian';
 import type { DocumentStorage } from '../../application/ports';
 import { failure, success, type Result } from '../../domain/outcome';
-import { validateFolder } from '../../domain/paths';
+import { validateDocumentTitle, validateFolder } from '../../domain/paths';
 
-type DocumentVault = Pick<Vault, 'configDir' | 'getAbstractFileByPath' | 'getMarkdownFiles' | 'createFolder' | 'create' | 'read' | 'process' | 'trash'>;
+type DocumentVault = Pick<Vault, 'configDir' | 'getAbstractFileByPath' | 'getRoot' | 'getMarkdownFiles' | 'createFolder' | 'create' | 'read' | 'process' | 'trash'>;
 
 /** Host paths are checked again here, including the actual configurable metadata directory. */
 export function nativeDocumentStorage(vault: DocumentVault): DocumentStorage {
@@ -13,32 +13,43 @@ export function nativeDocumentStorage(vault: DocumentVault): DocumentStorage {
     pending = result.catch(() => undefined);
     return result;
   };
+  const collisionKey = (value: string) => value.normalize('NFC').toLowerCase();
   const allowed = (path: string, folder = false): boolean => {
-    const config = vault.configDir.replaceAll('\\', '/').replace(/\/$/, '').toLowerCase();
-    const normalized = path.toLowerCase();
+    const config = collisionKey(vault.configDir.replaceAll('\\', '/').replace(/\/$/, ''));
+    const normalized = collisionKey(path);
     const segments = path.split('/');
     const filename = segments.pop() ?? '';
     const validPath = folder ? validateFolder(path).ok
-      : validateFolder(filename).ok && (!segments.length || validateFolder(segments.join('/')).ok) && filename.endsWith('.md');
+      : filename.endsWith('.md') && validateDocumentTitle(filename.slice(0, -3)).ok && (!segments.length || validateFolder(segments.join('/')).ok);
     return validPath
       && normalized !== config && !normalized.startsWith(`${config}/`);
   };
   const invalid = () => failure('validation', 'error.folder', 'folder');
+  // Compare only immediate siblings for case/Unicode aliases; never rewrite paths.
+  const existingPath = (path: string) => {
+    const exact = vault.getAbstractFileByPath(path);
+    if (exact) return exact;
+    const separator = path.lastIndexOf('/');
+    const parent = separator < 0 ? vault.getRoot() : vault.getAbstractFileByPath(path.slice(0, separator));
+    if (!(parent instanceof TFolder)) return undefined;
+    const name = collisionKey(path.slice(separator + 1));
+    return parent.children.find(entry => collisionKey(entry.name) === name);
+  };
   async function create(path: string, markdown: string): Promise<Result<void>> {
     if (!allowed(path)) return invalid();
     try {
-      if (vault.getAbstractFileByPath(path)) return failure('conflict', 'error.conflict');
+      if (existingPath(path)) return failure('conflict', 'error.conflict');
       const segments = path.split('/').slice(0, -1);
       for (let i = 1; i <= segments.length; i++) {
         const folder = segments.slice(0, i).join('/');
-        const existing = vault.getAbstractFileByPath(folder);
-        if (existing && !(existing instanceof TFolder)) return failure('conflict', 'error.conflict');
+        const existing = existingPath(folder);
+        if (existing && (!(existing instanceof TFolder) || existing.path !== folder)) return failure('conflict', 'error.conflict');
         if (!existing) {
           try { await vault.createFolder(folder); }
           catch { if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) return failure('storage', 'error.write'); }
         }
       }
-      if (vault.getAbstractFileByPath(path)) return failure('conflict', 'error.conflict');
+      if (existingPath(path)) return failure('conflict', 'error.conflict');
     } catch { return failure('storage', 'error.write'); }
     try { await vault.create(path, markdown); return success(undefined); }
     catch {

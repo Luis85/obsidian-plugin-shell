@@ -84,7 +84,8 @@ try {
   await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
   await expect(page.getByText('Task note created', { exact: true })).toBeVisible();
   const path = await page.locator('.shell-destination code').innerText();
-  expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview); report.checks.push('actual-vault-markdown-matches-preview');
+  expect(path).toBe('Tasks/Native smoke Task.md');
+  expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview); report.checks.push('actual-vault-verbatim-title-and-markdown-match-preview');
   await page.screenshot({ path: join(output, 'native-document.png') });
   await qualifyRepository(page, report, output, launched.vault ?? vault, identity);
   expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview);

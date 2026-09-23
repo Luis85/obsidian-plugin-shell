@@ -66,6 +66,7 @@
     "duplicateIdentity": "Zwei Notizen haben dieselbe Entitäts-ID. Behebe das Duplikat vor der Bearbeitung; keine Notizen wurden geändert.",
     "repositoryLimit": "Dieser Ordner überschreitet die Prüfgrenze von 1.000 Notizen. Verwende einen kleineren, eigenen Ordner.",
     "title": "Gib einen Titel mit 1–120 Zeichen ein.",
+    "filename": "Verwende einen nicht leeren Notiztitel ohne / \\ : * ? \" < > |, Steuerzeichen, führenden Punkt, abschließendes Leerzeichen oder Punkt und ohne reservierten Gerätenamen. Der Dateiname einschließlich .md darf 255 Byte nicht überschreiten.",
     "due": "Gib ein gültiges Kalenderdatum ein (JJJJ-MM-TT).",
     "tags": "Verwende bis zu 12 kurze Tags aus Buchstaben, Zahlen, Bindestrichen oder Schrägstrichen.",
     "folder": "Verwende einen sicheren relativen Ordner ohne versteckte Namen oder unzulässige Zeichen.",

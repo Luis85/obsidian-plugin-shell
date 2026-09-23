@@ -17,7 +17,7 @@ async function fixture(t) {
   const record = { schemaVersion: 1, kind: 'release-rehearsal', sourceCommit: commit, version, identity: manifest.id,
     minAppVersion: manifest.minAppVersion, isDesktopOnly: true, assetHashes, notesHash: hashes['release-notes.md'], lockHash: 'b'.repeat(64),
     createdAt: '2026-09-23T10:00:00Z', tools: { node: 'v24.21.0', npm: '11.19.1' },
-    qualification: { status: 'passed', command: 'verify', sourceCommit: commit, assetHashes, npm: '11.19.1' }, nativeAcceptance: { status: 'not-run' }, publication: 'not-authorized' };
+    qualification: { status: 'passed', command: 'verify', sourceCommit: commit, assetHashes, node: 'v24.21.0', npm: '11.19.1' }, nativeAcceptance: { status: 'not-run' }, publication: 'not-authorized' };
   files['candidate.json'] = JSON.stringify(record); hashes['candidate.json'] = sha256(files['candidate.json']);
   for (const [name, value] of Object.entries(files)) await writeFile(join(candidateDirectory, name), value);
   const remote = { schemaVersion: 1, repository: 'Example/consumer-plugin', sourceCommit: commit, sourceReviewed: true, checkedAt: '2026-09-23T11:50:00Z', tag: null, releases: [] };

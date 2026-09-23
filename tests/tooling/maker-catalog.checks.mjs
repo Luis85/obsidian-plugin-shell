@@ -10,6 +10,7 @@ import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
 import { checkGenerated } from '../../scripts/quality/format-generated.mjs';
 import { createMakerContext } from '../../scripts/makers/engine.mjs';
+import { pathToFileURL } from 'node:url';
 
 async function apply(root, args) {
   const planned = await planMaker(root, parseArguments(args));
@@ -115,4 +116,26 @@ test('[MAKER-REGISTRY-MODIFIERS] edited async and optional chains never equal re
     await assert.rejects(context.editArray(path, 'authoringFactories', expected), /REGISTRY_UNSUPPORTED_EXPRESSION/);
     assert.equal(await readFile(join(root, path), 'utf8'), source);
   }
+}));
+
+test('[MAKER-METADATA-LABELS] two owners remain distinguishable and settings report their actual storage', () => makerFixture(async root => {
+  await apply(root, ['feature', 'research', '--entity', 'record']);
+  await apply(root, ['feature', 'reading', '--entity', 'book']);
+  const readMessages = async (owner, name) => {
+    const module = await import(pathToFileURL(join(root, `src/features/${owner}/${name}.messages.ts`)).href);
+    return Object.values(module)[0];
+  };
+  const research = await readMessages('research', 'workspace-panel');
+  const reading = await readMessages('reading', 'workspace-panel');
+  assert.notEqual(research.en.researchWorkspacePanel.title, reading.en.readingWorkspacePanel.title);
+  assert.notEqual(research.en.researchWorkspacePanel.input, reading.en.readingWorkspacePanel.input);
+  assert.notEqual(research.de.researchWorkspacePanel.input, reading.de.readingWorkspacePanel.input);
+  const researchCommand = await readMessages('research', 'about-command');
+  const readingCommand = await readMessages('reading', 'about-command');
+  assert.notEqual(researchCommand.en.researchAboutCommand.title, readingCommand.en.readingAboutCommand.title);
+  const setting = await planMaker(root, parseArguments(['setting', 'compact', '--feature', 'research']));
+  assert.equal(setting.backend, 'plugin-data'); assert.equal(setting.entity, 'research-compact-setting');
+  assert.equal(Object.hasOwn(setting, 'folder'), false); assert.equal(Object.hasOwn(setting, 'preset'), false);
+  const command = await planMaker(root, parseArguments(['command', 'extra', '--feature', 'research']));
+  assert.equal(Object.hasOwn(command, 'backend'), false);
 }));

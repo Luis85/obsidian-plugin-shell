@@ -8,6 +8,12 @@ test('foundation loads without example data and retains accessible preferences a
   await expect(page.getByRole('heading', { name: 'Your plugin', exact: true })).toBeVisible();
   for (const theme of ['light', 'dark']) {
     await page.locator('#theme-' + theme).click();
+    await expect(page.locator('[data-plugin-ui]')).toHaveClass(new RegExp(theme));
+    // Wait for Nuxt's foreground transition to reach the actual host token before auditing the stable view.
+    await page.waitForFunction(() => {
+      const root = document.querySelector('[data-plugin-ui]'); const action = document.querySelector('[aria-label="View actions"]');
+      return !!root && !!action && getComputedStyle(root).color === getComputedStyle(action).color;
+    });
     expect((await new AxeBuilder({ page }).include('[data-plugin-ui]').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
   }
   await page.getByLabel('Language', { exact: true }).selectOption('de');
@@ -36,8 +42,13 @@ test('registered note features create distinct persisted notes through their rea
     await expect(panel.getByRole('status')).toHaveText('Note created');
     const files = await page.evaluate(() => window.__SHELL_TEST__.files());
     expect(Object.keys(files)).toHaveLength(before + 2);
+    expect(Object.keys(files).some(path => path.endsWith('/Consumer first ' + exercised + '.md'))).toBe(true);
+    expect(Object.keys(files).some(path => path.endsWith('/Consumer second ' + exercised + '.md'))).toBe(true);
     expect(Object.values(files).some(text => text.includes('Consumer first ' + exercised))).toBe(true);
     expect(Object.values(files).some(text => text.includes('Consumer second ' + exercised))).toBe(true);
+    await panel.getByRole('textbox').fill('Consumer first ' + exercised); await create.click();
+    await expect(panel.getByRole('status')).toContainText('already exists');
+    expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual(files);
     exercised++;
   }
   await testInfo.attach('consumer-note-feature-count', { body: JSON.stringify({ exercised }), contentType: 'application/json' });

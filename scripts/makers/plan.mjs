@@ -62,7 +62,9 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
   if (maker === 'feature' && ownerExists && plan.changes.some(change => change.status === 'create')) throw new Error(`Feature ${owner} already exists. Use a child recipe to extend it.`);
   const runtimeTests = [...context.tests].filter(path => path.endsWith('.test.ts'));
   const toolingTests = [...context.tests].filter(path => path.endsWith('.checks.mjs'));
-  return { maker, templateVersion: 2, owner, entity, folder, preset, backend, plan, checks: [
+  const metadata = ['feature', 'entity'].includes(maker) ? { entity, preset, backend, ...(backend === 'markdown' ? { folder } : {}) }
+    : maker === 'setting' ? { backend: 'plugin-data', ...(options['--preference'] ? { preference: options['--preference'] } : { entity: `${owner}-${name}-setting` }) } : {};
+  return { maker, templateVersion: 2, owner, ...metadata, plan, checks: [
     { command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'] },
     ...(runtimeTests.length ? [{ command: 'node', args: ['node_modules/vitest/vitest.mjs', 'run', ...runtimeTests] }] : []),
     ...(toolingTests.length ? [{ command: 'node', args: ['--test', ...toolingTests] }] : []),

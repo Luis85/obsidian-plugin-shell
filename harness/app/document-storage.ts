@@ -1,12 +1,13 @@
 import type { DocumentStorage } from '../../src/application/ports';
 import { failure, success, type Result } from '../../src/domain/outcome';
-import { validateFolder } from '../../src/domain/paths';
+import { validateDocumentTitle, validateFolder } from '../../src/domain/paths';
 
 /** Synthetic browser persistence follows the same compare-before-write contract. */
 export function browserDocumentStorage(files: () => Record<string, string>, save: (files: Record<string, string>) => void, fails: () => boolean): DocumentStorage {
+  const collisionKey = (value: string) => value.normalize('NFC').toLowerCase();
   const allowed = (path: string, folder = false) => {
     const parts = path.split('/'); const filename = parts.pop() ?? '';
-    return folder ? validateFolder(path).ok : filename.endsWith('.md') && validateFolder(filename).ok
+    return folder ? validateFolder(path).ok : filename.endsWith('.md') && validateDocumentTitle(filename.slice(0, -3)).ok
       && (!parts.length || validateFolder(parts.join('/')).ok);
   };
   const invalid = () => failure('validation', 'error.folder', 'folder');
@@ -22,7 +23,9 @@ export function browserDocumentStorage(files: () => Record<string, string>, save
   }
   return {
     create: (path, markdown) => mutate(path, current => {
-      if (Object.hasOwn(current, path)) return failure('conflict', 'error.conflict');
+      const parts = path.split('/'); const parents = parts.slice(0, -1).map((_, index) => parts.slice(0, index + 1).join('/') + '/');
+      if (Object.keys(current).some(existing => collisionKey(existing) === collisionKey(path)
+        || parents.some(parent => collisionKey(existing).startsWith(collisionKey(parent)) && !existing.startsWith(parent)))) return failure('conflict', 'error.conflict');
       current[path] = markdown; return success(undefined);
     }),
     async list(folder) {

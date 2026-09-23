@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { prepareVersion, parsePrepareArguments } from '../../scripts/release/prepare.mjs';
 import { parseRehearsalArguments } from '../../scripts/release/rehearse.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
@@ -51,12 +53,14 @@ async function retained(t) {
   const { root, commit } = await fixture(t); const version = '0.3.0';
   const input = join(root, 'dist'); const output = join(root, 'reports/release/candidate');
   const { bytes } = await collectAssets(root, input, version);
-  const qualification = { status: 'passed', command: 'verify', sourceCommit: commit, npm: '11.19.1', assetHashes: Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])])) };
+  // Synthetic prior build evidence tests transport policy, not this fixture process's qualification.
+  const qualification = { status: 'passed', command: 'verify', sourceCommit: commit, node: 'v24.21.0', npm: '11.19.1', assetHashes: Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])])) };
   return { root, commit, version, input, output, qualification };
 }
 test('retained package has exactly three assets, notes and hash-bound provenance; refuses retry overwrite', async t => {
   const options = await retained(t); const record = await retainCandidate(options);
   assert.equal(record.nativeAcceptance.status, 'not-run'); assert.equal(record.publication, 'not-authorized');
+  assert.equal(record.tools.node, options.qualification.node); assert.equal(record.packagingNode, process.version);
   assert.equal((await readdir(options.output)).length, 5);
   assert.equal((await validateRetained(options.output, options.commit, options.version)).identity, 'different-plugin');
   await assert.rejects(retainCandidate(options), /CANDIDATE_ALREADY_EXISTS/);
@@ -87,13 +91,26 @@ test('retained validation fails closed on missing or invented qualification meta
   const options = await retained(t); await retainCandidate(options);
   const path = join(options.output, 'candidate.json'); const original = JSON.parse(await readFile(path));
   const check = () => validateRetained(options.output, options.commit, options.version);
-  for (const [key, value] of [['tools', {}], ['lockHash', 'invalid'], ['nativeAcceptance', { status: 'passed' }], ['publication', 'approved'], ['qualification', { ...original.qualification, status: 'not-run' }]]) {
+  for (const [key, value] of [['tools', {}], ['lockHash', 'invalid'], ['nativeAcceptance', { status: 'passed' }], ['publication', 'approved'], ['qualification', { ...original.qualification, status: 'not-run' }], ['qualification', { ...original.qualification, node: 'v24.15.0' }]]) {
     await writeFile(path, JSON.stringify({ ...original, [key]: value }));
     await assert.rejects(check());
   }
   await writeFile(path, JSON.stringify(original));
   await rm(join(options.output, 'styles.css'));
   await assert.rejects(check(), /ASSET_SET_MISMATCH/);
+});
+test('retention rejects missing or unqualified build metadata while rehearsal rejects an unqualified actual runner', async t => {
+  const options = await retained(t);
+  for (const node of [undefined, 'v24.15.0', 'v26.0.0']) {
+    await assert.rejects(retainCandidate({ ...options, qualification: { ...options.qualification, node } }), /QUALIFIED_TOOLCHAIN_REQUIRED/);
+  }
+  const script = fileURLToPath(new URL('../../scripts/release/rehearse.mjs', import.meta.url));
+  const probe = 'data:text/javascript,' + encodeURIComponent('Object.defineProperty(process, "version", { value: "v24.15.0" });');
+  const result = spawnSync(process.execPath, ['--import', probe, script, '--commit', options.commit, '--version', options.version], {
+    cwd: options.root, encoding: 'utf8', windowsHide: true, timeout: 30000, env: { ...process.env, npm_execpath: 'must-not-execute-before-node-qualification' },
+  });
+  assert.equal(result.error, undefined); assert.equal(result.status, 1); assert.match(result.stderr, /QUALIFIED_NODE_AND_NPM_REQUIRED/);
+  await assert.rejects(readFile(join(options.output, 'candidate.json')), { code: 'ENOENT' });
 });
 test('metadata apply refuses stale reviewed bytes and source manifest mismatch', async t => {
   const { root } = await fixture(t);

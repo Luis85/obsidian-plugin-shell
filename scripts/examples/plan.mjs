@@ -21,13 +21,24 @@ function validateManifest(manifest) {
 }
 /** Only the reviewed imports and registered property nodes are eligible for removal. */
 async function withoutExamples(root, expected) {
+  const probe = await createFilePlan(root, [{ path: 'src/bootstrap/features.ts', content: null }]);
   const registry = await readRegistry(root);
+  if (digest(registry.source) !== probe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_INPUT: ' + registry.path);
   const ts = await import('typescript');
   const ast = ts.createSourceFile(registry.path, registry.source, ts.ScriptTarget.Latest, true);
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed, removeComments: true });
   const canonical = (node, source = ast) => printer.printNode(ts.EmitHint.Unspecified, node, source);
   const edits = []; const removed = []; const owned = new Map(expected.map(item => [item.local, item]));
   const paths = new Map(expected.map(item => [item.from, item]));
+  function edit(start, end, replacement) {
+    // Outside trivia remains untouched. Inline comments inside removed syntax
+    // need the author's review; never silently discard their text.
+    const scanner = ts.createScanner(ts.ScriptTarget.Latest, false, ts.LanguageVariant.Standard, registry.source, undefined, start, end - start);
+    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+      if (token === ts.SyntaxKind.SingleLineCommentTrivia || token === ts.SyntaxKind.MultiLineCommentTrivia) throw new Error('EXAMPLES_INLINE_COMMENT: move or reconcile comments inside the removed syntax');
+    }
+    edits.push([start, end, replacement]);
+  }
   let callback; let object;
   function locate(node) {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'createNoteFeatures') {
@@ -43,7 +54,7 @@ async function withoutExamples(root, expected) {
     const item = paths.get(node.moduleSpecifier.text); const bindings = node.importClause?.namedBindings;
     if (node.importClause?.name || node.importClause?.isTypeOnly || !bindings || !ts.isNamedImports(bindings) || bindings.elements.length !== 1 ||
       bindings.elements[0].name.text !== item.local || bindings.elements[0].propertyName || bindings.elements[0].isTypeOnly) throw new Error('EXAMPLES_EDITED_IMPORT');
-    edits.push([node.getFullStart(), node.end, '']); removed.push(node);
+    edit(node.getStart(ast), node.end, ''); removed.push(node);
   }
   let removedEntries = 0;
   for (const node of object.properties) {
@@ -55,8 +66,13 @@ async function withoutExamples(root, expected) {
       !ts.isCallExpression(statement.expression) || node.name.text !== item.key || canonical(node.initializer) !== canonical(statement.expression, expectedAst)) throw new Error('EXAMPLES_EDITED_REGISTRATION');
     const registered = registry.registrations.find(entry => entry.local === local);
     if (!registered || registered.exported !== local || registered.from !== item.from) throw new Error('EXAMPLES_EDITED_REGISTRATION');
-    let end = node.end; if (registry.source[end] === ',') end++;
-    edits.push([node.getFullStart(), end, '']); removed.push(node); removedEntries++;
+    edit(node.getStart(ast), node.end, '');
+    const children = object.getChildren(ast).find(child => child.kind === ts.SyntaxKind.SyntaxList)?.getChildren(ast);
+    const index = children?.indexOf(node) ?? -1;
+    if (index < 0) throw new Error('EXAMPLES_UNKNOWN_PROPERTY_RANGE');
+    const separator = children[index + 1];
+    if (separator?.kind === ts.SyntaxKind.CommaToken) edit(separator.getStart(ast), separator.end, '');
+    removed.push(node); removedEntries++;
   }
   function checkReferences(node) {
     if (removed.some(parent => node.pos >= parent.pos && node.end <= parent.end)) return;
@@ -66,7 +82,7 @@ async function withoutExamples(root, expected) {
   checkReferences(ast);
   if (object.properties.length === removedEntries && callback.parameters.length) {
     if (callback.modifiers?.length) throw new Error('EXAMPLES_UNSUPPORTED_CALLBACK');
-    edits.push([callback.getStart(ast), callback.equalsGreaterThanToken.getStart(ast), '() ']);
+    edit(callback.getStart(ast), callback.equalsGreaterThanToken.getStart(ast), '() ');
   }
   // Retain the author-facing parameter spelling, including consumer uses. A single
   // explicit no-op keeps the empty foundation factory valid under no-unused-vars.

@@ -24,6 +24,11 @@ not treated as evidence. Parent acceptance includes integration and consumer che
 | A generated native open command reported success after a host failure | Propagate the contained failure into CommandService so it emits one failure outcome and feedback. |
 | Oxlint directory discovery ignored a source archive's ignored ancestor | Enumerate every owned JS/TS/Vue file explicitly, reject empty/symlink inputs and prove real valid/invalid archive fixtures. No exclusion or warning threshold is relaxed. |
 | A native theme test inspected a background renderer before restoring focus | Qualify native control input and foreground the owner before paint/state assertions; keep failed attempts in evidence instead of reporting a retry as acceptance. |
+| Longer identities exceeded the unchanged CSS budget | Use exact dedicated scope and host classes (`ps--<id>`, `ph--<id>`). Their namespaces cannot overlap valid root IDs or each other. Retain the readable data marker, variable/keyframe namespaces and independent isolation checks. |
+| Foundation tests assumed no consumer UI or commands existed | Scope assertions to owned settings/feedback and required foundation command IDs; run them with an actual generated consumer feature. |
+| Example removal consumed comments outside reviewed registration expressions | Preserve AST trivia outside removed syntax; ambiguous inline edits conflict before mutation. |
+| Windows short paths confused generated DOM-test resolution | Validate the original scratch path, then use its canonical filesystem identity for all child paths and processes. Actual 8.3 regression runs the affected suites. |
+| Packaging tests confused build provenance with the copier's runtime | Keep the release runner's exact actual-toolchain guard; validate prior build metadata separately from the recorded packaging runtime. |
 
 The final test record distinguishes targeted reproduction, complete source gates,
 served Chromium, synthetic native boundaries and actual native host evidence.

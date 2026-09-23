@@ -113,9 +113,9 @@ it('[UI-03-02] real overview and events panels deliver facts and dismiss owned f
     await click(f.root, 'Events & feedback');
     await click(f.root, 'Publish a typed event'); expect(f.root.textContent).toContain('showcase.ping');
     await click(f.root, 'Show a native notice'); expect(f.native.notice).toHaveBeenCalledTimes(1);
-    await click(f.root, 'Try recoverable feedback'); expect(f.root.querySelector('[role="status"]')).not.toBeNull();
+    await click(f.root, 'Try recoverable feedback'); expect(f.root.querySelector('.shell-feedback [role="status"]')).not.toBeNull();
     f.root.querySelector<HTMLButtonElement>('button[aria-label="Dismiss notification"]')?.click(); await settle();
-    expect(f.root.querySelector('[role="status"]')).toBeNull();
+    expect(f.root.querySelector('.shell-feedback [role="status"]')).toBeNull();
     await click(f.root, 'Open native modal'); expect(document.querySelector('dialog[open]')?.textContent).toContain('One view, two environments');
     document.querySelector<HTMLDialogElement>('dialog')?.close(); await settle();
     f.services.diagnostics.report('fixture.expected', 'fixture.test'); await settle(); expect(f.root.textContent).toContain('fixture.expected');

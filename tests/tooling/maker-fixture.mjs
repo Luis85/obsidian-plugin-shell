@@ -1,7 +1,8 @@
-import { mkdtemp, mkdir, writeFile, readFile, cp, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, cp, rm, symlink, realpath } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 
 export const makerSourceRoot = fileURLToPath(new URL('../../', import.meta.url));
 // Representative syntax belongs to the tooling test, never to a consumer's live registry.
@@ -17,9 +18,13 @@ export function createFeatures(services: Parameters<typeof createNoteFeatures>[0
 }
 `;
 
-export async function makerFixture(work) {
-  const root = await mkdtemp(join(tmpdir(), 'template-maker-'));
+export async function makerFixture(work, { temporaryRoot = tmpdir() } = {}) {
+  const requested = await mkdtemp(join(temporaryRoot, 'template-maker-'));
+  const root = await realpath(requested);
   try {
+    // Keep root/link validation on the original spelling, then use one canonical
+    // path for Vite config, module IDs and child cwd (Windows TEMP may be 8.3).
+    await createFilePlan(requested, []);
     await mkdir(join(root, 'src/bootstrap'), { recursive: true });
     await writeFile(join(root, 'src/bootstrap/features.ts'), registry);
     await writeFile(join(root, 'src/bootstrap/authoring.ts'), `import type { AuthoringFactory, AuthoringServices } from '../application/authoring';

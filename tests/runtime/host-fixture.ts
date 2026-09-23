@@ -34,7 +34,7 @@ class Workspace extends HostEvents {
 }
 class HostApp {
   workspace = new Workspace();
-  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', getAbstractFileByPath: vi.fn(() => null), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
+  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', getAbstractFileByPath: vi.fn(() => null), getRoot: () => new HostFolder(), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
   metadataCache = new HostEvents('metadata.');
   loadLocalStorage = vi.fn(() => null); saveLocalStorage = vi.fn();
 }
@@ -81,5 +81,6 @@ class MenuItem {
   onClick(callback: () => unknown) { this.action = callback; return this; }
 }
 class HostNotice { constructor(text: string) { hostState.notices.push(text); } hide = vi.fn(); setMessage = vi.fn(); }
+class HostFolder { readonly children: unknown[] = []; readonly path = ''; readonly name = ''; }
 export const hostModule = { App: HostApp, Plugin: HostPlugin, ItemView: HostItemView, PluginSettingTab: HostSettingsTab,
-  WorkspaceLeaf: Leaf, Menu: HostMenu, Notice: HostNotice, TFile: class {}, TFolder: class {}, Modal: class {} };
+  WorkspaceLeaf: Leaf, Menu: HostMenu, Notice: HostNotice, TFile: class {}, TFolder: HostFolder, Modal: class {} };

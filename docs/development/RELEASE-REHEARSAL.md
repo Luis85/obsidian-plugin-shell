@@ -51,6 +51,13 @@ resulting `dist` bytes without rebuilding. The immutable output directory is
 - `candidate.json` (source SHA, identity, version/floor, lock hash, file SHA-256,
   selected tools, qualified scopes and explicit missing acceptance).
 
+`tools` and `qualification.node/npm` identify the actual qualified build runner.
+`packagingNode` records the process that copied the already qualified bytes; pure
+retention does not rebuild or claim that packaging itself qualifies that runtime.
+The rehearsal CLI still requires actual Node 24.21.0/npm 11.19.1 before running
+verification. Synthetic packet tests can run on the supported setup matrix while
+supplying explicitly synthetic prior build evidence.
+
 Extra files, missing/empty files, symlinks, inconsistent versions or manifest,
 qualification/hash mismatch and an existing output directory are rejected. A
 retry never clobbers an earlier candidate. Preserve it for investigation or use a

@@ -16,6 +16,18 @@ actual frontend inputs and avoids scanning archive caches or unrelated examples.
 It does not change lint, test or coverage inventories. The mechanism follows
 [Tailwind's explicit-source contract](https://tailwindcss.com/docs/detecting-classes-in-source-files#disabling-automatic-detection).
 
+Preview loads emitted harness assets without invoking Nuxt's generation plugins;
+build/dev retain their guarded shared pipeline. An actual config-contract test
+prevents preview from rewriting generated build inputs or scanning source caches.
+
+The stylesheet pipeline uses the dedicated exact scope class `ps--<plugin-id>`
+for repeated selectors, and `ph--<plugin-id>` for the native content container.
+The double hyphens are outside the valid ID grammar, keeping these marker categories
+disjoint from retained root IDs and each other. Readable `data-plugin-ui` markers
+remain; variable/keyframe namespaces and hash guards are unchanged. Negative
+controls reject foreign, suffix and sibling selectors, while actual renamed
+consumer artifacts remain subject to the unchanged 100 KiB stylesheet limit.
+
 `npm run check:test-quality` parses every TypeScript file in `tests/runtime` and
 `tests/e2e` with the installed TypeScript AST. It rejects focused/skipped/todo/
 conditional declarations from imported Vitest/Playwright test, suite, describe and

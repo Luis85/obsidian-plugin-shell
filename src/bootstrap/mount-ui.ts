@@ -25,7 +25,7 @@ export function mountShowcase(root: HTMLElement, services: Services, showViewAct
     if (failed) throw firstError;
   };
   try {
-    root.classList.add(pluginIdentity.rootClass); root.dataset.pluginUi = pluginIdentity.id;
+    root.classList.add(pluginIdentity.rootClass, pluginIdentity.scopeClass); root.dataset.pluginUi = pluginIdentity.id;
     releases.push(bindHostTheme(root, observeOwner));
     const pinia = createPinia(); releases.push(() => disposePinia(pinia));
     // This shared browser/native boundary needs a detached node in the owning document.

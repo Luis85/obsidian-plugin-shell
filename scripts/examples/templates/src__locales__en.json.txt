@@ -63,6 +63,7 @@
   "error": {
     "commandUnavailable": "This command is not available in the current context.",
     "title": "Enter a title with 1–120 characters.",
+    "filename": "Use a nonblank note title without / \\ : * ? \" < > |, control characters, a leading dot, a trailing space or dot, or a reserved device name. The title must fit a 255-byte filename including .md.",
     "due": "Enter a valid calendar date (YYYY-MM-DD).",
     "tags": "Use up to 12 short tags with letters, numbers, hyphens or slashes.",
     "folder": "Use a safe relative folder without hidden names, traversal or special filename characters.",

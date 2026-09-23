@@ -15,7 +15,7 @@ async function rehearse({ root = process.cwd(), commit, version }) {
   if (result.status !== 0) throw new Error('QUALIFICATION_FAILED');
   fixedSource(root, commit);
   const { bytes } = await collectAssets(root, join(root, 'dist'), version);
-  const qualification = { command: 'verify', status: 'passed', sourceCommit: commit, npm: npmVersion.stdout.trim(),
+  const qualification = { command: 'verify', status: 'passed', sourceCommit: commit, node: process.version, npm: npmVersion.stdout.trim(),
     assetHashes: Object.fromEntries(assetNames.map(name => [name, sha256(bytes[name])])),
     completedAt: new Date().toISOString(), scopes: ['static', 'unit', 'coverage', 'artifact', 'harness-build'],
     notRun: ['served-browser', 'native-host', 'mobile', 'publication'] };

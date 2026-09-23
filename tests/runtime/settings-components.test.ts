@@ -5,9 +5,9 @@ import { defaults } from '../../src/domain/preferences';
 import { deferred } from './helpers';
 afterEach(() => { document.body.replaceChildren(); });
 function controls(root: HTMLElement) {
-  const folder = root.querySelector<HTMLInputElement>('input[type="text"]');
-  const locale = root.querySelector<HTMLSelectElement>('select');
-  const checks = root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+  const folder = root.querySelector<HTMLInputElement>('.shell-settings-card input[type="text"]');
+  const locale = root.querySelector<HTMLSelectElement>('.shell-settings-card select');
+  const checks = root.querySelectorAll<HTMLInputElement>('.shell-settings-card input[type="checkbox"]');
   if (!folder || !locale || !checks[0] || !checks[1]) throw new Error('SETTINGS_CONTROLS_MISSING');
   return { folder, locale, header: checks[0], notices: checks[1] };
 }
@@ -49,7 +49,7 @@ it('[UI-03-06] invalid preferences preserve committed values and readonly data d
   const readonly = await componentFixture({ schemaVersion: 200, preferences: defaults });
   try {
     await click(readonly.root, 'Preferences');
-    expect(Array.from(readonly.root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('.shell-form input, .shell-form select')).every(el => el.disabled)).toBe(true);
+    expect(Array.from(readonly.root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('.shell-settings-card input, .shell-settings-card select')).every(el => el.disabled)).toBe(true);
     expect(readonly.save).not.toHaveBeenCalled();
   } finally { readonly.dispose(); }
 });
@@ -58,7 +58,7 @@ it('[UI-03-07] closing a view during a save never creates feedback or revives it
   try {
     await click(f.root, 'Preferences'); await input(controls(f.root).folder, 'AfterClose');
     f.save.mockImplementationOnce(() => barrier.promise);
-    f.root.querySelector<HTMLButtonElement>('button[type="submit"]')?.click(); await settle();
+    f.root.querySelector<HTMLButtonElement>('.shell-settings-card button[type="submit"]')?.click(); await settle();
     f.close(); barrier.resolve(); await settle();
     expect(f.services.preferences.current.taskFolder).toBe('AfterClose');
     expect(f.services.notifications.current).toEqual([]); expect(f.root.children.length).toBe(0); expect(f.observe).not.toHaveBeenCalled();

@@ -16,7 +16,10 @@ afterEach(() => { document.body.replaceChildren(); vi.restoreAllMocks(); });
 function plugin() { return new ShellPlugin(new App(), manifest); }
 it('[HOST-03-01] runtime registers commands, opens/reuses leaves, reports navigation failures and ignores late readiness', async () => {
   const p = plugin(); const runtime = await initializePlugin(p);
-  expect(hostState.views.has(SHOWCASE_VIEW)).toBe(true); expect([...hostState.commands.keys()]).toEqual(expect.arrayContaining(['open-plugin', 'toggle-view-header', 'debug-toggle', 'debug-report']));
+  expect(hostState.views.has(SHOWCASE_VIEW)).toBe(true);
+  const foundationCommands = ['open-plugin', 'toggle-view-header', 'debug-toggle', 'debug-report'];
+  // Consumer feature commands are intentional extensions; assert the owned foundation exactly.
+  expect([...hostState.commands.keys()].filter(id => foundationCommands.includes(id))).toEqual(foundationCommands);
   const open = hostState.commands.get('open-plugin')?.callback; expect(open).toBeDefined(); open?.(); await settle();
   expect(p.app.workspace.getLeaf).toHaveBeenCalledWith('tab');
   const leaf = p.app.workspace.getLeaf('tab'); expect(leaf.setViewState).toHaveBeenCalledExactlyOnceWith({ type: SHOWCASE_VIEW, active: true });

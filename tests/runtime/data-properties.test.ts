@@ -31,7 +31,7 @@ function fixture() {
 }
 const options = { numRuns: 100, seed: 23092026, endOnFailure: false };
 const values = fc.record({
-  title: fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 #:-]{0,60}$/),
+  title: fc.array(fc.constantFrom('Title', 'Änderung', 'Überblick', '日本語', '😀', '#', '001'), { minLength: 1, maxLength: 6 }).map(parts => parts.join(' ')),
   amount: fc.integer({ min: -100000, max: 100000 }), enabled: fc.boolean(),
   day: fc.date({ min: new Date('1600-01-01T00:00:00Z'), max: new Date('2400-12-31T00:00:00Z'), noInvalidDate: true }).map(value => value.toISOString().slice(0, 10)),
 });
@@ -40,6 +40,7 @@ it('[DATA-PROP-01] real Markdown repository round-trips scalar values and preser
     const f = fixture();
     try {
       const prepared = unwrapEntity(f.repo.prepare(value, 'request'));
+      expect(prepared.path).toBe(`Properties/${value.title}.md`);
       expect(f.files.size).toBe(0);
       const saved = unwrapEntity(await f.repo.commit(prepared));
       expect(unwrapEntity(await f.repo.get(saved.path))?.values).toEqual(value);

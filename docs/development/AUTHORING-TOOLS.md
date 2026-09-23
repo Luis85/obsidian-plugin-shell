@@ -19,6 +19,11 @@ owners/options, unknown flags, unsupported option combinations and invalid names
 fail with a prerequisite message. `--yes` applies the selected plan; it does not
 request downloads or new permissions.
 
+Machine plans report the actual storage backend where applicable; new settings
+report `plugin-data`. Unrelated recipes omit backend/folder/schema options. Default
+view, command and input labels include the feature owner so multiple generated
+features remain distinguishable. Existing developer-owned scaffolds are preserved.
+
 ## Recipes and integration
 
 All child recipes take `<name> --feature <existing-owner>` unless stated otherwise.
@@ -54,12 +59,17 @@ npm run make -- reminder review --feature bookmarks
 npm run make -- locale fr
 ```
 
-The title preset has a required trimmed title. Task adds status/tags/optional due;
+The title preset has a required nonblank title whose spelling is preserved. Task adds status/tags/optional due;
 Project supplies name/budget/archived, preserving zero and false defaults.
 `--folder` selects a safe vault-relative Markdown folder. Customize these ordinary
 schemas and actions for the actual product; templates do not overwrite your edits.
 Domain-only and plugin-data features receive an editable draft panel when composed
 as a feature; that panel makes no claim of repository persistence.
+
+Markdown creation uses the projected title verbatim plus `.md`, without an ID
+suffix. Invalid/reserved filenames fail with a localized error; same-title and
+case-only path collisions fail without overwriting or choosing another filename.
+IDs remain in frontmatter. Changing an existing entity title preserves its path.
 
 ## Registries and ownership
 

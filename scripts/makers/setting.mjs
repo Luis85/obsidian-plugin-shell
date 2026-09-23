@@ -1,10 +1,11 @@
 import { localName, locales, registerFactory, generatedTest } from './primitives.mjs';
 import { registerEntity } from './entities-recipe.mjs';
+import { title } from './arguments.mjs';
 
 /** A new setting is explicit plugin-data storage, sharing the preference writer. */
 export async function settingRecipe(context, owner, name) {
   const local = localName(owner, name, 'setting'); const definition = `${local}Feature`;
-  const prefix = await locales(context, owner, `${name}-setting`, { title: `Toggle ${name}`, description: 'Boolean feature preference; disabled by default.' });
+  const prefix = await locales(context, owner, `${name}-setting`, { title: `${title(owner)}: Toggle ${title(name)}`, description: 'Boolean feature preference; disabled by default.' });
   await context.add(`src/features/${owner}/${name}.setting-definition.ts`, `import { defineEntity, fields, definePluginDataFeature } from '../api';\n\nexport const ${definition} = definePluginDataFeature({\n  backend: 'plugin-data',\n  entity: defineEntity('${owner}-${name}-setting', 1, { enabled: fields.defaulted(fields.boolean(), false) }),\n});\n`);
   await registerEntity(context, { key: local, local: definition, from: `../features/${owner}/${name}.setting-definition` });
   await context.add(`src/features/${owner}/${name}.setting.ts`, `import { defineCommand } from '../api';\nimport type { PluginDataRepository } from '../../application/plugin-data-repository';\nimport { failure } from '../../domain/outcome';\n\nexport function ${local}(repository: PluginDataRepository<{ enabled?: boolean }, { readonly enabled: boolean }>) {\n  let disposed = false;\n  const command = defineCommand({ id: '${owner}-${name}-setting', titleKey: '${prefix}.title', available: () => !disposed,\n    async execute() {\n      if (disposed) return failure('disposed', 'error.disposed');\n      const current = await repository.list();\n      if (!current.ok) return current;\n      if (disposed) return failure('disposed', 'error.disposed');\n      if (current.value.length > 1) return failure('conflict', 'error.conflict');\n      const saved = current.value[0];\n      return saved ? repository.update(saved, { enabled: !saved.values.enabled }) : repository.create({ enabled: true });\n    },\n  });\n  return { commands: [command] as const, dispose() { disposed = true; } };\n}\n`);

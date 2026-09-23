@@ -122,3 +122,43 @@ test('edited examples and concurrent registry changes fail before removal, with 
     assert.equal(await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8'), '// preserved concurrent edit\n');
   });
 });
+test('leading and trailing user comments survive exact import and registration removal', async () => {
+  await fixture(async root => {
+    const path = join(root, 'src/bootstrap/features.ts');
+    const comments = ['// retained import introduction', '/* retained import tail */', '/** retained registry introduction */', '/* retained before comma */', '// retained after comma', '// retained consumer introduction'];
+    const source = (await readFile(path, 'utf8'))
+      .replace("import { taskFeature } from '../features/tasks/definition';", `${comments[0]}\nimport { taskFeature } from '../features/tasks/definition'; ${comments[1]}`)
+      .replace('    task: register(taskFeature),', `    ${comments[2]}\n    task: register(taskFeature) ${comments[3]}, ${comments[4]}`)
+      .replace('    bookmark: register(bookmarkFeature),', `    ${comments[5]}\n    bookmark: register(bookmarkFeature),`);
+    await writeFile(path, source);
+    await applyFilePlan((await planExampleRemoval(root)).plan);
+    const result = await readFile(path, 'utf8');
+    for (const comment of comments) assert.equal(result.split(comment).length - 1, 1, comment);
+    assert.match(result, /bookmark: register\(bookmarkFeature\)/); assert.doesNotMatch(result, /taskFeature|projectFeature/);
+    assert.deepEqual((await applyFilePlan((await planExampleRemoval(root)).plan)).written, []);
+  });
+});
+test('comments in owned syntax or rewritten callback parameters conflict without changing source', async () => {
+  for (const edit of [
+    text => text.replace('{ taskFeature }', '{ /* retained import binding */ taskFeature }'),
+    text => text.replace('task: register', 'task /* retained key comment */: register'),
+    text => text.replace('register(taskFeature)', 'register(/* retained argument */ taskFeature)'),
+    text => text.replace('register =>', '(/* retained callback parameter */ register) =>')
+      .replace("import { bookmarkFeature } from '../features/bookmarks/definition';\n", '').replace('    bookmark: register(bookmarkFeature),\n', ''),
+  ]) await fixture(async root => {
+    const path = join(root, 'src/bootstrap/features.ts'); const source = edit(await readFile(path, 'utf8')); await writeFile(path, source);
+    await assert.rejects(planExampleRemoval(root), /EXAMPLES_INLINE_COMMENT/);
+    assert.equal(await readFile(path, 'utf8'), source);
+    assert.equal(await readFile(join(root, 'example.txt'), 'utf8'), 'reviewed example\n');
+  });
+});
+test('registry parent redirects are rejected before registry source is read or edited', async () => {
+  await fixture(async root => {
+    const folder = join(root, 'src/bootstrap'); const target = join(root, 'src/redirected-bootstrap');
+    const original = await readFile(join(folder, 'features.ts'), 'utf8');
+    await rename(folder, target); await symlink(target, folder, process.platform === 'win32' ? 'junction' : 'dir');
+    await assert.rejects(planExampleRemoval(root), /PLAN_SYMLINK/);
+    assert.equal(await readFile(join(target, 'features.ts'), 'utf8'), original);
+    assert.equal(await readFile(join(root, 'example.txt'), 'utf8'), 'reviewed example\n');
+  });
+});

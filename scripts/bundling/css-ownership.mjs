@@ -3,7 +3,9 @@ import { ownsSelector } from './css-identity.mjs';
 /** Runs in Vite's CSS pipeline after Tailwind generation, in dev and production. */
 export function cssOwnership(id = 'plugin-shell') {
   if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(id)) throw new Error('INVALID_CSS_IDENTITY');
-  const scope = `[data-plugin-ui="${id}"]`;
+  // A dedicated exact owner class avoids repeating the long data-attribute syntax
+  // on every utility selector. The readable data-plugin-ui marker remains on roots.
+  const scope = `.ps--${id}`;
   const prefix = id === 'plugin-shell' ? 'ps' : id;
   const owned = value => value.replace(/plugin-shell(?=-|$)/g, id);
   return {
@@ -28,7 +30,10 @@ export function cssOwnership(id = 'plugin-shell') {
         if (rule.parent?.type === 'atrule' && /keyframes$/.test(rule.parent.name)) return;
         rule.selector = selectorParser(selectors => {
           selectors.each(selector => {
-            selector.walkClasses(node => { if (node.value === 'plugin-shell' || node.value.startsWith('plugin-shell-')) node.value = owned(node.value); });
+            selector.walkClasses(node => {
+              if (node.value === 'ph--plugin-shell') node.value = `ph--${id}`;
+              else if (node.value === 'plugin-shell' || node.value.startsWith('plugin-shell-')) node.value = owned(node.value);
+            });
             selector.walkAttributes(node => {
               if ((['data-plugin-ui', 'data-plugin-view-owner'].includes(node.attribute) && node.value === 'plugin-shell') || (node.attribute === 'data-type' && node.value === 'plugin-shell-showcase')) node.setValue(owned(node.value), { quoteMark: '"' });
             });

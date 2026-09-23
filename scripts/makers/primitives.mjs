@@ -5,8 +5,9 @@ const testPath = (owner, name, kind) => `tests/runtime/generated/${owner}-${name
 export const localName = (owner, name, kind) => symbol(`${owner}-${name}-${kind}`);
 export async function locales(context, owner, name, labels = {}) {
   const local = localName(owner, name, 'messages'); const namespace = symbol(`${owner}-${name}`);
-  const en = { title: title(name), description: `Local ${title(name)} capability.`, input: 'Title', action: 'Open', reset: 'Reset draft', preview: 'Preview', count: 'Characters', create: 'Create note', created: 'Note created', ...labels };
-  const de = { ...en, description: `Lokale Funktion: ${title(name)}.`, input: 'Titel', action: 'Öffnen', reset: 'Entwurf zurücksetzen', preview: 'Vorschau', count: 'Zeichen', create: 'Notiz erstellen', created: 'Notiz erstellt' };
+  const scope = `${title(owner)}: ${title(name)}`;
+  const en = { title: scope, description: `Local ${title(name)} capability.`, input: `${scope} title`, action: 'Open', reset: 'Reset draft', preview: 'Preview', count: 'Characters', create: 'Create note', created: 'Note created', ...labels };
+  const de = { ...en, description: `Lokale Funktion: ${title(name)}.`, input: labels.input ?? `${scope} – Titel`, action: 'Öffnen', reset: 'Entwurf zurücksetzen', preview: 'Vorschau', count: 'Zeichen', create: 'Notiz erstellen', created: 'Notiz erstellt' };
   const path = `src/features/${owner}/${name}.messages.ts`;
   await context.add(path, `export const ${local} = ${JSON.stringify({ en: { [namespace]: en }, de: { [namespace]: de } }, null, 2)};\n`);
   await context.editArray('src/bootstrap/authoring-locales.ts', 'authoringLocaleModules', local, [{ local, from: `../features/${owner}/${name}.messages` }]);

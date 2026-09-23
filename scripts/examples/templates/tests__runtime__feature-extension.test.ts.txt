@@ -38,7 +38,7 @@ describe('Author-facing feature extension', () => {
     expect(f.storage.create).not.toHaveBeenCalled();
     const repository = features.repositories.meeting;
     const preview = unwrap(repository.prepare({ subject: 'Release review', attendees: ['Ada', 'Lin'] }, 'submission'));
-    expect(preview.path).toBe('Meetings/release-review--meeting-1.md');
+    expect(preview.path).toBe('Meetings/Release review.md');
     expect(preview.markdown).toContain('confirmed: false'); expect(f.files.size).toBe(0);
     const created = unwrap(await repository.commit(preview));
     expect(created.values).toEqual({ subject: 'Release review', attendees: ['Ada', 'Lin'], confirmed: false });
