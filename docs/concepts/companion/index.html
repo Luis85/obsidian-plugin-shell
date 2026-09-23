@@ -887,6 +887,286 @@ html[data-theme="light"] [data-group="feedback"]{--brick-tint:#a16b80;--brick-in
 /* Keep the graph hit areas clear of the in-card footer at every zoom level. */
 #vf-root .map-node>.flow-port.vue-flow__handle-top{top:calc(-12px * clamp(1,var(--map-inverse),2))}
 #vf-root .map-node>.flow-port.vue-flow__handle-bottom{bottom:calc(-12px * clamp(1,var(--map-inverse),2))}
+/* Reference-led sitemap skin. Scoped to the concept, with host-owned theme roles. */
+.ref-studio {
+ --map-accent:#3478e8;--map-accent-soft:#e8f0ff;--ref-paper:#fff;--ref-panel:#fff;--ref-ink:#1f3659;--ref-muted:#637895;--ref-line:#dce5f1;
+ --ref-shadow:0 6px 24px rgb(23 42 70 / 11%);display:flex;flex-direction:column;gap:10px;
+}
+html[data-theme="dark"] .ref-studio,html[data-theme="dark"] .reference-content-modal {
+ --map-accent:#91b7ff;--map-accent-soft:#26344c;--ref-paper:#171b22;--ref-panel:#202630;--ref-ink:#e3ebf8;--ref-muted:#a4b5ce;--ref-line:#354052;--ref-shadow:0 8px 26px rgb(0 0 0 / 28%);
+}
+.ref-page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px}
+.ref-page-header h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
+.ref-page-header p{font-size:12px;margin:0;color:var(--muted)}
+.ref-page-header p span{margin:0 6px;opacity:.6}
+.ref-workspace.map-workspace{display:block;position:relative;height:calc(100dvh - 260px);min-height:500px;overflow:hidden;border:1px solid var(--ref-line);border-radius:12px;background:var(--ref-paper)}
+.ref-workspace .map-main{height:100%;min-width:0;display:block}
+.ref-canvas.map-viewport{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;background-color:var(--ref-paper);background-image:none;color:var(--ref-ink)}
+.ref-canvas[data-grid="true"]{background-image:radial-gradient(var(--ref-line) 1px,transparent 1px)}
+.ref-canvas #vf-root{z-index:1}
+.ref-canvas .vue-flow{background:transparent}
+.ref-canvas-top{position:absolute;z-index:11;top:14px;left:14px;display:flex;align-items:center;gap:8px}
+.ref-display-control,.ref-arrange-popover>summary,.ref-panel-toggle{display:flex;align-items:center;gap:6px;background:var(--ref-panel);border:1px solid var(--ref-line);border-radius:8px;padding:4px;color:var(--ref-muted);font-size:12px}
+.ref-display-control button{padding:6px 10px;border:0;border-radius:5px;background:transparent;color:inherit;font-size:12px}
+.ref-display-control button:hover,.ref-display-control button.active{background:var(--map-accent-soft);color:var(--map-accent)}
+.ref-arrange-popover{position:relative}
+.ref-arrange-popover>summary{list-style:none;cursor:pointer;padding:9px 10px}
+.ref-arrange-popover>summary::-webkit-details-marker{display:none}
+.ref-arrange-popover>summary .icon:last-child{height:12px;width:12px;transform:rotate(90deg)}
+.ref-popover{position:absolute;top:44px;left:0;width:238px;padding:16px;background:var(--ref-panel);box-shadow:var(--ref-shadow);border-radius:10px;display:grid;gap:12px;color:var(--ref-ink)}
+.ref-popover label{display:grid;gap:7px;font-size:12px}
+.ref-popover label:has(input){display:flex;gap:8px;align-items:center}
+.ref-popover select{width:100%;background:var(--ref-paper);border:1px solid var(--ref-line);color:inherit;padding:8px;border-radius:6px}
+.ref-panel-toggle{padding:9px 10px}
+.ref-main-dock{position:absolute;z-index:12;bottom:18px;left:calc((100% - 284px)/2);transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:6px;background:var(--ref-panel);border-radius:12px;box-shadow:var(--ref-shadow);color:var(--map-accent);white-space:nowrap}
+.ref-studio[data-panel="none"] .ref-main-dock{left:50%}
+.ref-tool{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer;padding:0}
+.ref-tool .icon{width:18px;height:18px}
+.ref-tool:hover,.ref-tool[aria-pressed="true"]{background:var(--map-accent-soft);color:var(--map-accent)}
+.ref-tool:disabled{opacity:.35;cursor:default}
+.ref-tool:focus-visible{outline:2px solid var(--map-accent);outline-offset:2px}
+.ref-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);padding:5px 8px;background:var(--ref-ink);color:var(--ref-paper);border-radius:5px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;z-index:30}
+.ref-tool:hover .ref-tooltip,.ref-tool:focus-visible .ref-tooltip{opacity:1}
+.ref-tool-separator{height:24px;width:1px;background:var(--ref-line);margin:0 5px}
+.ref-node-toolbar{position:absolute;z-index:12;background:var(--ref-panel);border-radius:10px;box-shadow:var(--ref-shadow);color:var(--map-accent);padding:7px;max-width:calc(100% - 24px)}
+.ref-node-toolbar[hidden]{display:none}
+.ref-selection-name{display:none}
+.ref-selection-actions{display:flex;align-items:center;gap:5px}
+.ref-selection-actions .ref-tool{width:36px;height:34px}
+.ref-zoom-dock.map-controls{right:16px;left:auto;bottom:18px;top:auto;border:0;box-shadow:var(--ref-shadow);background:var(--ref-panel);padding:5px;gap:0;border-radius:12px;z-index:12;color:var(--ref-muted)}
+.ref-zoom-dock .btn{background:transparent;border:0;box-shadow:none;color:inherit;height:34px;min-width:30px;padding:4px 8px}
+.ref-zoom-dock #map-zoom-label{min-width:48px;font-variant-numeric:tabular-nums}
+.ref-zoom-dock .map-pan-controls summary{border:0;background:transparent;color:inherit;padding:8px;font-size:11px}
+.ref-panel{position:absolute!important;z-index:10;right:14px;top:65px;bottom:84px;width:268px!important;min-width:0!important;border:0!important;border-radius:10px;background:var(--ref-panel)!important;box-shadow:var(--ref-shadow);padding:0;overflow:hidden;color:var(--ref-ink);display:flex;flex-direction:column}
+.ref-studio:not([data-panel="structure"]) .outline-tree.ref-panel{display:none}
+.ref-studio:not([data-panel="inspector"]) .node-inspector.ref-panel{display:none}
+.ref-panel-heading{display:flex;align-items:center;justify-content:space-between;min-height:45px;padding:10px 14px;font-size:12px}
+.ref-panel-heading>span{color:var(--ref-muted);font-size:11px}
+.ref-panel-heading .ref-tool{height:25px;width:25px}
+.ref-structure-search{margin:0 14px 10px;display:flex;align-items:center;border:1px solid var(--ref-line);border-radius:6px;padding:0 9px;color:var(--ref-muted)}
+.ref-structure-search .icon{height:14px;width:14px}
+.ref-structure-search input{width:100%;padding:8px;border:0!important;background:transparent!important;box-shadow:none!important;font-size:12px;color:var(--ref-ink)}
+.ref-structure-list{overflow:auto;min-height:40px;padding:0 8px 12px;flex:1}
+.ref-tree-row{display:flex;align-items:center;padding-left:calc(var(--depth)*12px)}
+.ref-tree-fold{border:0;background:transparent;padding:0;width:18px;color:var(--ref-muted);flex:none}
+.ref-tree-fold .icon{width:12px;height:12px}
+.ref-tree-dot{width:18px;flex:none}
+.ref-tree-row .outline-node{display:flex;align-items:center;gap:7px;width:100%;min-width:0;border:0;padding:7px 6px;border-radius:5px;background:transparent;color:var(--ref-muted);font-size:12px;text-align:left}
+.ref-tree-row .outline-node>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.ref-tree-row .outline-node.selected{background:var(--map-accent-soft);color:var(--map-accent)}
+.ref-tree-row .outline-node small{display:none;font-size:10px}
+.ref-tree-row .outline-node.selected small{display:block;opacity:.8;margin-top:3px}
+.ref-tree-row .outline-node i{font-size:10px;font-style:normal;background:var(--map-accent-soft);padding:1px 4px;border-radius:4px}
+.ref-structure-sections{border-top:1px solid var(--ref-line);padding-bottom:8px;max-height:38%;overflow:auto}
+.ref-structure-sections p{font-size:10px;color:var(--ref-muted);padding:0 14px;margin:0 0 6px}
+.ref-structure-sections>button{display:flex;align-items:center;gap:9px;border:0;background:transparent;width:100%;padding:7px 14px;color:var(--ref-muted);font-size:11px}
+.ref-structure-sections>button span{flex:1;text-align:left}
+.ref-structure-sections .icon{width:14px;height:14px}
+.ref-no-results{font-size:12px;color:var(--ref-muted);padding:14px}
+.ref-panel .inspector-tabs{padding:0 8px;border-bottom:1px solid var(--ref-line);display:grid;grid-template-columns:repeat(3,1fr)}
+.ref-panel .inspector-body{overflow-y:auto;flex:1;padding:14px}
+.ref-map-footer{font-size:10px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;min-height:24px;gap:8px}
+.ref-map-footer>div{display:flex;align-items:center}
+.ref-map-footer .btn{font-size:10px;padding:3px 6px}
+.ref-map-footer .ref-tool{height:22px;width:22px}
+.ref-canvas .map-node{border:1.5px solid var(--map-accent);color:var(--ref-ink);background:var(--ref-panel);border-radius:11px;box-shadow:none;min-height:0;width:244px}
+.ref-canvas .map-node.selected{outline:3px solid color-mix(in srgb,var(--map-accent) 20%,transparent);outline-offset:2px;border-color:var(--map-accent);box-shadow:none}
+.ref-canvas .map-node.brick-page{height:var(--brick-height);min-height:0;padding:7px;overflow:visible}
+.ref-card-header{height:57px;position:relative;padding:16px 18px 6px!important;border:0!important;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.ref-card-kind{font-size:8px;color:var(--ref-muted);white-space:nowrap}
+.ref-card-header .map-card-title{font-size:15px;line-height:20px;font-weight:650;color:var(--map-accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0;margin:0}
+.ref-card-more,.ref-card-open{position:absolute;top:-3px;border:0;background:transparent;color:var(--map-accent);width:22px;height:22px;padding:2px}
+.ref-card-more{left:0}
+.ref-card-open{right:0;opacity:0}
+.ref-card-more .icon{width:20px}
+.ref-card-open .icon{width:14px}
+.map-node:is(:hover,:focus-within,.selected) .ref-card-open{opacity:1}
+.ref-collapse.flow-collapse{position:absolute;top:-18px;right:-17px;background:var(--map-accent);color:var(--ref-panel);border:2px solid var(--ref-panel);border-radius:50%;width:23px;height:23px;display:flex;align-items:center;justify-content:center;padding:0;font-size:18px}
+.ref-collapse span{display:none}
+.ref-canvas .brick-stack{display:flex;flex-direction:column;gap:4px;padding:0;margin:0}
+.ref-canvas .content-brick{border:0!important;border-radius:3px;height:var(--ref-block-height);min-height:0;position:relative;display:block;overflow:hidden;background:var(--ref-block)!important;color:var(--ref-block-text)!important}
+.ref-studio [data-group="navigation"],.reference-content-modal [data-group="navigation"]{--ref-block:#087f7b;--ref-block-text:#fff}
+.ref-studio [data-group="content"],.reference-content-modal [data-group="content"]{--ref-block:#326fd1;--ref-block-text:#fff}
+.ref-studio [data-group="data"],.reference-content-modal [data-group="data"]{--ref-block:#326fd1;--ref-block-text:#fff}
+.ref-studio [data-group="input"],.reference-content-modal [data-group="input"]{--ref-block:#596f8a;--ref-block-text:#fff}
+.ref-studio [data-group="action"],.reference-content-modal [data-group="action"]{--ref-block:#f4ac48;--ref-block-text:#372508}
+.ref-studio [data-group="feedback"],.reference-content-modal [data-group="feedback"]{--ref-block:#9853c8;--ref-block-text:#fff}
+.ref-canvas .brick-open{display:block;width:100%;height:100%;padding:6px 8px!important;color:inherit;background:transparent;text-align:left}
+.ref-canvas .brick-title-row{height:15px;display:flex;align-items:center}
+.ref-canvas .brick-title-row strong{font-size:10px;font-weight:600;color:inherit;line-height:14px}
+.ref-canvas .brick-wireframe{display:block;width:100%;height:calc(100% - 16px);max-height:none!important;color:inherit;opacity:.72;margin:0}
+.ref-wireframe{stroke:currentColor;stroke-width:1.5;fill:none}
+.ref-wireframe rect{fill:currentColor;fill-opacity:.12}
+.ref-wireframe path{stroke-opacity:.74}
+.ref-canvas .brick-kind{display:none}
+.ref-canvas .brick-grip{position:absolute;left:0;top:16px;bottom:0;width:18px;z-index:3;opacity:0;background:var(--ref-block)!important;color:inherit;display:flex;padding:2px;align-items:center;justify-content:center}
+.ref-canvas .brick-grip span{display:none}
+.ref-canvas .brick-grip .icon{width:13px}
+.ref-canvas .content-brick:is(:hover,:focus-within) .brick-grip{opacity:1}
+.ref-canvas .content-brick:focus-within{outline:2px solid var(--map-accent);outline-offset:2px}
+.ref-canvas .brick-reorder-actions{background:var(--ref-block)!important;color:inherit;border:0;right:1px;top:18px}
+.ref-canvas .brick-reorder-actions button{color:inherit!important}
+.ref-canvas .brick-add{display:flex;justify-content:center;align-items:center;height:22px;min-height:22px;margin:3px 0 0;padding:0;opacity:0;border:0;background:transparent;color:var(--map-accent);font-size:10px}
+.ref-canvas .map-node:is(:hover,:focus-within,.selected) .brick-add,.ref-canvas .map-node:not(:has(.content-brick)) .brick-add{opacity:1}
+.ref-canvas .brick-add .icon{height:12px;width:12px}
+.ref-card-footer{display:flex;align-items:center;justify-content:space-between;height:12px;margin-top:2px;opacity:0}
+.ref-card-footer button{border:0;background:transparent;font-size:8px!important;color:var(--ref-muted)!important;padding:0!important;margin:0!important;min-height:0!important;display:inline-flex;align-items:center;gap:3px}
+.ref-card-footer .icon{height:10px;width:10px}
+.ref-canvas .map-node:is(:hover,:focus-within,.selected) .ref-card-footer{opacity:1}
+.ref-canvas .flow-port{border-color:var(--map-accent)!important;color:var(--map-accent)!important}
+.ref-canvas .flow-port-source{background:var(--map-accent)!important}
+.ref-canvas .flow-port-target{background:var(--ref-panel)!important}
+.ref-canvas .flow-port{opacity:.3}
+.ref-canvas .map-node:is(:hover,:focus-within,.selected) .flow-port{opacity:1}
+.ref-canvas .flow-containment .vue-flow__edge-path{stroke:var(--map-accent)!important;stroke-width:1.2}
+.ref-canvas .flow-transition .vue-flow__edge-path{stroke:var(--map-accent)!important}
+.ref-canvas .flow-edge-label{background:var(--ref-panel)!important;color:var(--ref-muted)!important;font-size:10px;border-color:var(--ref-line)!important}
+#ref-section-layer{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.ref-section-line{position:absolute;border-top:1px solid var(--ref-line);display:flex;align-items:center;justify-content:center;height:0;gap:10px;color:var(--ref-muted)}
+.ref-section-line>span{background:var(--ref-paper);padding:0 16px;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.ref-section-line .ref-tool{pointer-events:auto;background:var(--ref-panel);width:25px;height:25px}
+.ref-section-roots{border:1px solid var(--line);border-radius:8px;display:grid;gap:12px;padding:14px}
+.ref-section-roots label{display:flex;align-items:center;gap:8px}
+.ref-section-roots small{color:var(--muted);margin-left:auto}
+/* Focused content writing, with a synchronized schematic page preview. */
+.reference-content-modal{--map-accent:#3478e8;--map-accent-soft:#e8f0ff;--ref-paper:#fff;--ref-panel:#fff;--ref-ink:#1f3659;--ref-muted:#637895;--ref-line:#dce5f1;--ref-shadow:0 6px 24px rgb(23 42 70 / 11%);width:min(1240px,calc(100vw - 64px))!important;max-width:none!important;height:min(900px,calc(100dvh - 64px));max-height:none!important;padding:0!important;border:0!important;border-radius:16px!important;overflow:hidden!important;background:var(--ref-paper)!important;color:var(--ref-ink)}
+.reference-content-modal::backdrop{background:rgb(45 73 115 / 25%)!important;backdrop-filter:none!important}
+.ref-editor{height:100%;display:flex;flex-direction:column}
+.ref-editor-heading{display:flex;align-items:center;justify-content:space-between;padding:24px 34px 20px;border-bottom:1px solid var(--ref-line);flex:none}
+.ref-editor-heading>div{display:flex;align-items:center;gap:14px}
+.ref-editor-heading>div>.icon{width:30px;height:30px;color:var(--map-accent)}
+.ref-editor-heading h2{margin:0;font-size:26px;font-weight:650;letter-spacing:-.02em;color:var(--map-accent)}
+.ref-editor-heading p{margin:5px 0 0;font-size:11px;color:var(--ref-muted)}
+.ref-editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 282px;min-height:0;flex:1}
+.ref-write-column{padding:20px 32px 40px;overflow:auto}
+.ref-editor-intro{margin-bottom:22px}
+.ref-editor-intro p{font-size:13px;color:var(--ref-ink);margin:0 0 5px}
+.ref-editor-intro>span{font-size:11px;color:var(--ref-muted)}
+.ref-write-block{border:1px solid var(--ref-line);border-radius:10px;margin-bottom:16px;padding:13px 15px;transition:border-color .12s;position:relative}
+.ref-write-block.active,.ref-write-block:focus-within{border-color:var(--map-accent)}
+.ref-block-heading{display:flex;align-items:center;gap:5px;margin-bottom:9px}
+.ref-block-heading input{background:transparent!important;border:0!important;box-shadow:none!important;min-width:0;flex:1;font-weight:600;font-size:15px;color:var(--ref-ink)!important;padding:4px!important}
+.ref-block-heading .ref-tool{height:26px;width:26px;color:var(--ref-muted)}
+.ref-block-heading .ref-tool .icon{width:15px;height:15px}
+.ref-write-grip{width:20px;flex:none;border:0;background:transparent;color:var(--ref-muted);cursor:grab;padding:0}
+.ref-block-counter{font-size:10px;color:var(--ref-muted);margin:0 4px;font-variant-numeric:tabular-nums}
+.ref-format-toolbar{display:flex;align-items:center;gap:2px;margin:0 0 7px;opacity:.5}
+.ref-write-block:is(.active,:focus-within) .ref-format-toolbar{opacity:1}
+.ref-format-toolbar button{border:0;border-radius:4px;background:transparent;padding:4px 8px;color:var(--ref-muted);font-size:11px;min-height:26px}
+.ref-format-toolbar button:hover{background:var(--map-accent-soft);color:var(--map-accent)}
+.ref-format-toolbar>span{margin-left:auto;font-size:10px;color:var(--ref-muted)}
+.ref-write-block>textarea{display:block;width:100%;resize:vertical;min-height:96px;background:transparent!important;color:var(--ref-ink)!important;border:0!important;box-shadow:none!important;font-size:13px;line-height:1.7;padding:3px!important}
+.ref-write-block>textarea::placeholder{color:var(--ref-muted)}
+.ref-block-details{margin-top:7px;border-top:1px solid var(--ref-line);padding-top:8px}
+.ref-block-details summary{font-size:10px;cursor:pointer;color:var(--ref-muted)}
+.ref-block-details summary span{opacity:.8}
+.ref-block-details label{display:grid;gap:6px;margin-top:12px;font-size:11px;color:var(--ref-muted)}
+.ref-block-details textarea,.ref-block-details select{color:var(--ref-ink)!important;background:var(--ref-paper)!important;border:1px solid var(--ref-line)!important;border-radius:5px;padding:8px;font-size:12px}
+.ref-block-details p{font-size:10px;color:var(--ref-muted);margin:12px 0 0}
+.ref-editor-preview{padding:12px 18px 24px;border-left:1px solid var(--ref-line);overflow:auto}
+.ref-mini-page{border:2px solid var(--map-accent);border-radius:12px;padding:9px;max-width:244px;margin:8px auto 0}
+.ref-mini-title{position:relative;text-align:center;padding:17px 8px 14px;color:var(--map-accent)}
+.ref-mini-title>span{position:absolute;left:0;top:-3px;font-size:13px;letter-spacing:1px}
+.ref-mini-title strong{font-size:16px}
+.ref-mini-block{display:block;width:100%;margin:0 0 4px;border:0;border-radius:3px;padding:6px 8px;background:var(--ref-block)!important;color:var(--ref-block-text)!important;text-align:left;opacity:.4}
+.ref-mini-block:last-child{margin-bottom:0}
+.ref-mini-block.active,.ref-mini-block:hover,.ref-mini-block:focus-visible{opacity:1}
+.ref-mini-block strong{display:block;font-size:10px;margin-bottom:3px;overflow-wrap:anywhere}
+.ref-mini-block svg{display:block;width:100%;height:auto;max-height:84px;opacity:.7}
+.ref-preview-note{font-size:10px;color:var(--ref-muted);text-align:center;margin-top:14px}
+.ref-editor-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--ref-line);padding:13px 28px;font-size:12px;color:var(--ref-muted);flex:none;gap:10px}
+.ref-editor-footer>div{display:flex;gap:8px}
+.ref-add-block{border:1px dashed var(--ref-line);border-radius:8px;padding:14px;width:100%;display:flex;gap:10px;align-items:center;background:transparent;color:var(--map-accent);font-size:13px}
+.ref-empty-content,.ref-mini-empty{padding:22px 10px;color:var(--ref-muted);font-size:12px}
+.ref-editor-library .field{font-size:11px;color:var(--ref-muted)}
+.ref-library-item{border:0;border-bottom:1px solid var(--ref-line);display:flex;align-items:center;gap:9px;width:100%;background:transparent;color:var(--ref-ink);padding:12px 0;text-align:left}
+.ref-library-item>span{width:52px;padding:3px;background:var(--ref-block);color:var(--ref-block-text);border-radius:3px;flex:none}
+.ref-library-item svg{display:block;width:100%;height:34px}
+.ref-library-item>strong{font-size:11px;flex:1}
+.ref-library-item small{display:block;font-size:9px;font-weight:400;color:var(--ref-muted);margin-top:4px}
+.ref-library-item>.icon{width:14px;height:14px}
+.ref-drag-over{border-top:3px solid var(--map-accent)}
+@media(min-width:1250px){.sitemap-workspace #content{padding:10px 16px 6px!important}.ref-workspace.map-workspace{height:calc(100dvh - 250px)}}
+@media(max-width:1150px){
+ .ref-main-dock{left:16px!important;transform:none;bottom:16px}
+ .ref-main-dock .ref-tool{width:29px;height:32px}
+ .ref-main-dock .ref-tool-separator{margin:0 2px}
+ .ref-zoom-dock.map-controls{bottom:70px}
+ .ref-panel{bottom:125px}
+ .ref-editor-layout{grid-template-columns:minmax(0,1fr) 230px}
+}
+@media(max-width:760px){
+ .ref-page-header{align-items:flex-start}.ref-page-header h1{font-size:19px}
+ .ref-page-header>.row .btn.ghost{display:none}
+ .ref-page-header p{font-size:10px}
+ .ref-workspace.map-workspace{height:calc(100dvh - 238px);min-height:500px}
+ .ref-canvas-top{left:8px;right:8px;top:10px;gap:4px}
+ .ref-display-control button{padding:6px;font-size:10px}
+ .ref-arrange-popover>summary{font-size:0;padding:8px}
+ .ref-panel-toggle{font-size:0;padding:8px}
+ .ref-panel{right:8px;top:58px;width:min(268px,calc(100% - 16px))!important}
+ .ref-main-dock{left:8px!important;right:8px;justify-content:center;padding:5px;gap:0;bottom:12px;overflow:visible}
+ .ref-main-dock .ref-tool{width:26px}
+ .ref-main-dock .ref-tool .icon{width:16px;height:16px}
+ .ref-main-dock .ref-tool-separator{margin:0 2px}
+ .ref-zoom-dock.map-controls{bottom:64px;right:8px}
+ .ref-map-footer>span{max-width:68%;font-size:9px}
+ .ref-map-footer .btn{display:none}
+ .reference-content-modal{width:calc(100vw - 16px)!important;height:calc(100dvh - 24px);border-radius:10px!important}
+ .ref-editor-heading{padding:16px}.ref-editor-heading h2{font-size:21px}
+ .ref-editor-layout{grid-template-columns:1fr;overflow:auto;display:flex;flex-direction:column-reverse}
+ .ref-write-column{padding:15px;overflow:visible}
+ .ref-editor-preview{border-left:0;border-bottom:1px solid var(--ref-line);max-height:220px;min-height:100px;flex:none;padding:8px 15px}
+ .ref-mini-page{max-width:none;border:0;padding:0;display:flex;gap:5px;overflow:auto;margin:0}
+ .ref-mini-title{display:none}.ref-mini-block{flex:0 0 90px;opacity:.7}.ref-mini-block svg{height:55px}
+ .ref-preview-note{display:none}.ref-editor-footer{padding:10px 15px}
+ .ref-block-heading{gap:1px}.ref-block-heading input{font-size:13px}
+ .ref-block-heading .ref-tool{width:22px}
+ .ref-write-block{padding:10px}
+ .ref-format-toolbar button{padding:4px 5px}
+ .ref-format-toolbar>span{display:none}
+}
+@media(prefers-reduced-motion:reduce){.ref-studio *,.ref-editor *{scroll-behavior:auto!important;transition:none!important}}
+
+.ref-canvas .flow-port::before,.ref-canvas .flow-port::after{box-shadow:none!important;background:transparent!important;border-color:transparent!important}
+.ref-canvas .flow-port{box-shadow:none!important}
+.ref-canvas .map-node:not(.brick-page) .flow-card-toolbar{display:none}
+.ref-canvas .map-node.brick-page .flow-node-content{height:100%}
+.ref-canvas .content-brick .brick-grip,.ref-canvas .content-brick .brick-reorder-actions{background:var(--ref-block)!important}
+.ref-format-toolbar button[data-value$=":bold"]{font-weight:700}
+.ref-format-toolbar button[data-value$=":italic"]{font-style:italic}
+
+/* Keep native handle hit areas large; only their center mark is visible. */
+#vf-root .flow-port{background:transparent!important;opacity:1!important}
+#vf-root .flow-port::after{inset:calc(8px * clamp(1,var(--map-inverse),2))!important;background:var(--ref-panel)!important;border:1.5px solid var(--map-accent)!important}
+#vf-root .flow-port-source::after{background:var(--map-accent)!important}
+#vf-root .flow-port:hover::after{inset:calc(6px * clamp(1,var(--map-inverse),2))!important}
+body.sitemap-workspace #content:has(.ref-studio){overflow:hidden!important}
+.sitemap-studio.ref-studio{height:100%!important;min-height:0!important}
+.ref-workspace.map-workspace{flex:1 1 0%!important;height:auto!important;min-height:240px!important}
+.ref-workspace .map-main{min-height:0!important}
+.ref-workspace .ref-panel{max-height:none!important;min-height:0!important}
+@media(max-width:760px){.ref-page-header{min-height:58px;flex:none}.ref-map-footer{flex:none}.ref-page-header>div:first-child{min-width:0}.ref-page-header p{max-width:170px;line-height:1.4}.ref-page-header .btn.primary{font-size:10px;padding:7px 9px}.ref-main-dock .ref-tool:nth-of-type(6){display:none}}
+
+.ref-tree-fold[aria-expanded="true"] .icon{transform:rotate(90deg)}
+
+/* Reconciliation polish: recoverable drafting and readable inactive controls. */
+.ref-format-toolbar{opacity:1}
+.ref-format-toolbar button{opacity:1;color:var(--ref-muted);min-height:28px}
+.ref-format-toolbar button:hover,.ref-format-toolbar button:focus-visible{color:var(--ref-ink);background:var(--map-accent-soft)}
+.ref-character-count{font-variant-numeric:tabular-nums;font-size:10px;white-space:nowrap}
+.ref-draft-recovery{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:14px;border:1px solid var(--ref-line);border-radius:8px;font-size:12px;color:var(--ref-ink);background:var(--map-accent-soft)}
+.ref-draft-recovery[hidden]{display:none}
+.ref-draft-recovery>span{min-width:0;overflow-wrap:anywhere}
+.ref-draft-recovery button{flex:none}
+.ref-write-block.ref-drag-before{box-shadow:0 -3px 0 var(--map-accent)}
+.ref-write-block.ref-drag-after{box-shadow:0 3px 0 var(--map-accent)}
+.ref-block-heading input[aria-invalid="true"]{outline:2px solid var(--danger);outline-offset:3px;border-radius:3px}
+.ref-editor-heading h2{overflow-wrap:anywhere}
+.ref-editor-heading>div{min-width:0}.ref-editor-heading>div>div{min-width:0}
+.ref-editor-heading .ref-tool{flex:none}
+#ref-content-error:focus{outline:2px solid var(--map-accent);outline-offset:4px}
+@media(max-width:760px){.ref-editor-footer{flex-wrap:wrap}.ref-editor-footer>div{margin-left:auto}.ref-draft-recovery{align-items:flex-start}}
 
 </style>
 <!--
@@ -1022,7 +1302,7 @@ THE SOFTWARE.
 <div class="app-frame">
 <aside class="ribbon" aria-label="Obsidian concept ribbon"><button class="ribbon-active" data-action="nav" data-value="projects" aria-label="Shell Workbench" title="Shell Workbench">◇</button><button data-action="palette" aria-label="Command palette" title="Command palette">⌘</button><button data-action="note" aria-label="Project handoff note" title="Project handoff note">▤</button><div class="ribbon-bottom"><button data-action="theme" aria-label="Toggle light or dark theme" title="Toggle theme">◐</button><button data-action="settings" aria-label="Workbench preferences" title="Preferences">⚙</button></div></aside>
 <aside class="sidebar" id="sidebar" aria-label="Workbench navigation"></aside>
-<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 08 · Component library</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
+<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 10 · Reconciled workspace</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
 </div>
 <footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status"></span><span>Desktop concept · offline</span></footer>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
@@ -11262,7 +11542,7 @@ function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
  if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:236+Math.max(1,bricksOf(n).length)*(mode==='wireframes'?76:40)};
+ return {width:MAP_SIZE.w,height:110+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+4,0)};
 }
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){
@@ -11355,14 +11635,14 @@ function createDesign(blueprint='workspace') {
  return ensureProductModel(d);
 }
 
-const MAP_LAYOUTS={vertical:'Hierarchy · top down',horizontal:'Hierarchy · left to right',lanes:'Surface lanes',grid:'Compact grid',free:'Freeform'};
-const MAP_SIZE={w:272,h:292,gapX:86,gapY:92};
+const MAP_LAYOUTS={vertical:'Hierarchy · top down',horizontal:'Hierarchy · left to right',lanes:'Surface lanes',grid:'Compact grid',free:'Freeform',sections:'Sections'};
+const MAP_SIZE={w:244,h:216,gapX:92,gapY:96};
 const canvasUi={owner:null,selected:null,search:'',edge:null,connecting:null,outline:false,inspector:'details',expanded:false,drag:null,suppressClick:false,liveTimer:null,metrics:{moves:0,frames:0}};
 
 // Semantic connection types are independent of Vue Flow's visual edge shape.
 const LINK_TYPES={navigate:{label:'Navigate',description:'Open or focus the destination screen.'},return:{label:'Return',description:'Return to a previous screen; preserve the relevant context.'},conditional:{label:'Conditional navigation',description:'Navigate only when the declared condition is met.'},open:{label:'Open dialog',description:'Open a transient dialog with a separate result.'},configure:{label:'Configure',description:'Open the native settings surface.'},execute:{label:'Execute action',description:'Invoke a shared application action.'},data:{label:'Pass context',description:'Describe a data/context dependency. This is not a navigation route.'}};
 const PORTS={left:{type:'target',id:'in-left'},top:{type:'target',id:'in-top'},right:{type:'source',id:'out-right'},bottom:{type:'source',id:'out-bottom'}};
-function defaultCanvasPreferences(){return {schema:1,wheel:'pan',panOnDrag:true,pinch:true,grid:true,curve:'bezier',labels:true};}
+function defaultCanvasPreferences(){return {schema:1,wheel:'pan',panOnDrag:true,pinch:true,grid:false,curve:'bezier',labels:true};}
 
 let dialogReturnFocus=null;
 // Concept section: model
@@ -11534,7 +11814,7 @@ function makerCode(index){const g=state.generator;const group=g.kind==='feature'
 function makerReview(){const g=state.generator;const files=makerFiles();return dialogBody('Review generated changes',`<div class="row between"><p class="mb0">${esc(g.entity)} · ${esc(g.preset)} preset</p>${badge('5 illustrative files','purple')}</div><div class="grid2 mt16"><div class="file-list">${files.map((f,i)=>`<button class="file-row ${state.selectedFile===i?'active':''}" data-action="file-preview" data-value="${i}"><span class="plus">${i===2?'~':'+'}</span><code>${esc(f)}</code></button>`).join('')}</div><div class="code-panel"><div class="code-title">Illustrative source · not executable output</div><pre class="code-body">${esc(makerCode(state.selectedFile))}</pre></div></div><div class="mt16">${command(getMakerCommand(false))}</div><p class="scope-label">The real maker is authoritative for paths, validation and generated bytes. These snippets are UX fixtures only.</p><div class="mt16">${callout('Apply runs typecheck, the generated test and entity validation. Full verify is separate. Edited files must never be force-overwritten.')}</div><div id="maker-error" class="error" role="alert">${esc(g.error||'')}</div>`,`${button('Back to form','close','','ghost')}${button('Apply simulated changes','maker-apply','','primary','wand')}`);}
 
 // Concept section: dialogs
-function drawModal(){const factories={'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
+function drawModal(){const factories={'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return dialogBody('Choose a project',`<div class="modal-list">${state.projects.map(p=>`<button data-action="select-project" data-value="${esc(p.id)}"><span class="project-initial">${esc(initials(p.name))}</span><span class="grow">${esc(p.name)}<small>${esc(p.root)}</small></span>${p.id===state.activeId?badge('Selected','purple'):icon('arrow')}</button>`).join('')}</div>${state.projects.length?'':'<p>No projects yet. Create one or explore a clearly labeled example.</p>'}<div class="button-row">${button('Create a plugin','create','','primary','plus')}${button('Attach example project','attach','','','link')}</div>`);}
 function attachDialog(){return dialogBody('Attach an existing project',`<p>The production companion will read static metadata before asking to trust executable project code. This concept attaches a second, synthetic project.</p>${field('Example project name','attach-name','Garden Journal')}${field('Example source location','attach-root','/workspace/plugins/garden-journal')}<div id="attach-error" class="error" role="alert"></div>${callout('No directory picker or filesystem scan is implemented. Attaching grants no automatic execution trust.')}`,`${button('Cancel','close','','ghost')}${button('Attach fixture','attach-confirm','','primary','link')}`);}
@@ -11587,7 +11867,7 @@ function downloadText(){const {text,filename}=modalData;const blob=new Blob([tex
 
 // Concept section: interactions
 function dispatch(action,value){
- if(handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
+ if(handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
  case 'nav':setView(value);break;
@@ -11655,7 +11935,7 @@ function dispatch(action,value){
  default:notify('This action is outside the current concept.');
  }
 }
-function updateField(el,commit=false){if(editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
+function updateField(el,commit=false){if(editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
  if(key?.startsWith('w-')){const w=state.wizard;const fieldName=key.slice(2);w[fieldName]=value;w.error='';if(!['trusted','approved'].includes(fieldName)){w.rev++;w.plan=null;w.approved=false;if(fieldName==='source'||fieldName==='root')w.acquired=false;}if(fieldName==='trusted'&&!value){w.plan=null;w.approved=false;}save();if(commit&&(el.type==='checkbox'||el.tagName==='SELECT'))redrawModal();}
  if(key?.startsWith('g-')){state.generator[key.slice(2)]=value;state.generator.plan=null;state.generator.error='';save();}
  if(key==='tool-search'){state.search=value;document.getElementById('tool-results').innerHTML=toolResults();}
@@ -11670,6 +11950,441 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+// Reference-led canvas presentation; canonical plugin architecture stays unchanged.
+const referenceUi={panel:window.innerWidth<950?'none':'structure',sectionForm:null,sectionError:'',content:null,contentError:'',libraryQuery:'',editorTab:'content',drag:null};
+function referenceIcon(name){
+ const shapes={
+  content:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
+  properties:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/>',
+  branch:'<path d="M6 4v12c0 2 2 3 4 3h6M6 8h10"/><circle cx="6" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="18" cy="19" r="2"/>',
+  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  pointer:'<path d="m5 3 14 10-7 1-3 7z"/>', hand:'<path d="M8 12V5a2 2 0 0 1 4 0v6-7a2 2 0 0 1 4 0v7-4a2 2 0 0 1 4 0v8c0 5-3 7-7 7-3 0-4-2-6-5l-3-4a2 2 0 0 1 3-2l1 1"/>',
+  section:'<path d="M3 5h18M3 19h18"/><rect x="7" y="9" width="10" height="6" rx="1"/>',
+  close:'<path d="m6 6 12 12M18 6 6 18"/>',undo:'<path d="m9 4-6 5 6 5M3 9h10c8 0 8 11 0 11"/>',
+  redo:'<path d="m15 4 6 5-6 5M21 9H11c-8 0-8 11 0 11"/>',
+  focus:'<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><rect x="8" y="8" width="8" height="8" rx="1"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  chevron:'<path d="m9 5 7 7-7 7"/>',up:'<path d="m6 14 6-6 6 6"/>',down:'<path d="m6 10 6 6 6-6"/>'
+ };
+ return shapes[name]?`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[name]}</svg>`:icon(name);
+}
+function referenceTool(label,action,value,ic,extra=''){
+ return `<button class="ref-tool" type="button" data-action="${action}" data-value="${esc(value||'')}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}>${referenceIcon(ic)}<span class="ref-tooltip">${esc(label)}</span></button>`;
+}
+function referenceBrickHeight(kind,mode='wireframes'){
+ if(mode!=='wireframes')return 40;
+ return {navigation:44,toolbar:50,heading:62,text:80,list:114,table:108,board:90,detail:100,form:94,chart:96,media:102,actions:68,empty:68,notice:58}[kind]||76;
+}
+function validReferenceSections(sections){
+ if(sections===undefined)return true;
+ if(!Array.isArray(sections)||sections.length>12)return false;
+ const ids=new Set(),assigned=new Set();
+ return sections.every(s=>s&&typeof s.id==='string'&&/^section-[1-9][0-9]*$/.test(s.id)&&!ids.has(s.id)&&ids.add(s.id)&&
+  typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=80&&Array.isArray(s.roots)&&s.roots.length<=60&&
+  s.roots.every(id=>typeof id==='string'&&id.length<=120&&!assigned.has(id)&&assigned.add(id))&&
+  Object.keys(s).every(k=>['id','name','roots'].includes(k)));
+}
+function referenceSections(d){
+ const roots=d.nodes.filter(n=>!n.parent),stored=d.canvas?.sections||[],claimed=new Set(stored.flatMap(s=>s.roots));
+ return [{id:'main',name:'Main workspace',roots:roots.filter(n=>!claimed.has(n.id)).map(n=>n.id)},...stored].map(s=>({...s,roots:s.roots.filter(id=>roots.some(n=>n.id===id))}));
+}
+function sectionLayouts(d){
+ const out=Object.create(null),bands=[];let y=72;
+ for(const section of referenceSections(d)){
+  const ids=new Set(section.roots.flatMap(id=>[...nodeDescendants(d,id)]));
+  const sub={...d,nodes:d.nodes.filter(n=>ids.has(n.id))};
+  const positions=layoutPositions(sub,'vertical');
+  const height=sub.nodes.length?Math.max(...sub.nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+64:160;
+  for(const n of sub.nodes)out[n.id]={x:positions[n.id].x,y:positions[n.id].y+y};
+  bands.push({...section,y,height,width:Math.max(740,...sub.nodes.map(n=>positions[n.id].x+MAP_SIZE.w+50))});
+  y+=height+96;
+ }
+ return {positions:out,bands};
+}
+function openSectionEditor(id=null){
+ const s=(canvasState().sections||[]).find(s=>s.id===id);
+ referenceUi.sectionForm={id:s?.id||null,name:s?.name||'New section',roots:[...(s?.roots||[])],owner:designOwner(),fingerprint:JSON.stringify(canvasState().sections||[]),revision:design().revision};
+ referenceUi.sectionError='';showModal('ref-section');
+}
+function saveSectionEditor(remove=false){
+ const f=referenceUi.sectionForm,d=design(),c=canvasState();
+ const fail=m=>{referenceUi.sectionError=m;redrawModal();};
+ if(!f||f.owner!==designOwner()||f.revision!==d.revision||f.fingerprint!==JSON.stringify(c.sections||[]))return fail('The outline or sections changed. Reopen this review.');
+ if(state.activeRun)return fail('Finish the active operation before changing sections.');
+ if(!remove&&(!f.name.trim()||f.name.length>80))return fail('Use a section name of 1–80 characters.');
+ const sections=designCopy(c.sections||[]);
+ if(!f.id&&sections.length>=12)return fail('This concept supports up to 12 sections.');
+ let id=f.id;if(!id){let i=1;while(sections.some(s=>s.id==='section-'+i))i++;id='section-'+i;}
+ const next=sections.filter(s=>s.id!==id).map(s=>({...s,roots:remove?s.roots:s.roots.filter(r=>!f.roots.includes(r))}));
+ if(!remove)next.splice(f.id?Math.max(0,sections.findIndex(s=>s.id===f.id)):next.length,0,{id,name:f.name.trim(),roots:f.roots});
+ if(!validReferenceSections(next))return fail('Section assignments are not valid.');
+ modalOriginal=null;closeModal();
+ canvasCommit(c=>{c.sections=next;c.layout='sections';c.positions=layoutPositions(d,'sections');c.custom=false;c.fitted=false;c.arrangedFor=canvasStructure(d);},remove?'Section removed. All views and content were retained.':'Section saved. Plugin structure and source approval are unchanged.');
+}
+function referencePaneMode(panel){referenceUi.panel=referenceUi.panel===panel?'none':panel;canvasUi.outline=referenceUi.panel==='structure';render();}
+function paintReferenceChrome(){
+ const vp=document.getElementById('map-viewport'),toolbar=document.getElementById('ref-node-toolbar');
+ if(!vp)return;
+ document.querySelector('.sitemap-studio')?.setAttribute('data-panel',referenceUi.panel);
+ if(toolbar){
+  const n=selectedNode(),c=canvasState();
+  const projection=flowUi.api?.getNodes.value.find(x=>x.id===n?.id);
+  const p=projection?.position||c.positions[n?.id],size=n&&brickSurfaceSize(n);
+  const visible=n&&p&&visibleMapNodes().some(x=>x.id===n.id);
+  toolbar.hidden=!visible||flowUi.dragging||flowUi.connecting;
+  if(visible){
+   if(toolbar.dataset.node!==n.id){toolbar.dataset.node=n.id;toolbar.innerHTML=referenceSelectionToolbar(n);}
+   const right=referenceUi.panel==='none'?vp.clientWidth-12:vp.clientWidth-294;
+   const cardX=p.x*c.zoom+c.pan.x,cardY=p.y*c.zoom+c.pan.y;
+   toolbar.hidden=toolbar.hidden||cardX+MAP_SIZE.w*c.zoom<0||cardX>right||cardY+size.height*c.zoom<0||cardY>vp.clientHeight;
+   toolbar.style.left=Math.max(12,Math.min(right-toolbar.offsetWidth,cardX+MAP_SIZE.w*c.zoom/2-toolbar.offsetWidth/2))+'px';
+   const width=toolbar.offsetWidth,height=toolbar.offsetHeight,vr=vp.getBoundingClientRect();
+   const card={x:cardX,y:cardY,w:MAP_SIZE.w*c.zoom,h:size.height*c.zoom};
+   const obstacles=[card,...[...document.querySelectorAll('.ref-canvas-top,.ref-main-dock,.ref-zoom-dock,.ref-panel')].filter(e=>e.offsetWidth&&e.offsetHeight).map(e=>{const r=e.getBoundingClientRect();return {x:r.x-vr.x,y:r.y-vr.y,w:r.width,h:r.height};})];
+   const overlap=(x,y,r)=>x<r.x+r.w+5&&x+width>r.x-5&&y<r.y+r.h+5&&y+height>r.y-5;
+   const center=cardX+card.w/2-width/2;
+   const candidates=[[center,cardY-height-12],[center,cardY+card.h+12],[cardX+card.w+16,cardY],[cardX-width-16,cardY],[vp.clientWidth-width-14,12],[14,65]];
+   const place=candidates.map(([x,y])=>({x:Math.max(12,Math.min(vp.clientWidth-width-12,x)),y})).find(({x,y})=>y>=10&&y+height<=vp.clientHeight-12&&obstacles.every(r=>!overlap(x,y,r)));
+   if(place){toolbar.style.left=place.x+'px';toolbar.style.top=place.y+'px';}else toolbar.hidden=true;
+  }
+ }
+ const layer=document.getElementById('ref-section-layer');
+ if(layer){
+  const c=canvasState();layer.innerHTML=c.layout==='sections'?sectionLayouts(design()).bands.map(s=>`<div class="ref-section-line" style="top:${s.y*c.zoom+c.pan.y}px;left:${c.pan.x+36*c.zoom}px;width:${s.width*c.zoom}px"><span>${esc(s.name)}</span>${s.id!=='main'?referenceTool('Edit section','ref-section',s.id,'properties'):''}</div>`).join(''):'';
+ }
+}
+
+// Canvas-first shell, restrained overview cards and synchronized full-page editing.
+function referenceSelectionToolbar(n){
+ return `<div class="ref-selection-name">${esc(n.label)}</div><div class="ref-selection-actions" role="toolbar" aria-label="Actions for ${esc(n.label)}">
+ ${canHaveBricks(n)?referenceTool('Edit page content','ref-content',n.id,'content'):''}
+ ${referenceTool('Surface properties','design-edit',n.id,'properties')}
+ ${referenceTool('Add component or screen','library-card-add',n.id,'plus')}
+ ${n.kind!=='group'?referenceTool('Add connected card','connection-card-add',n.id,'link'):''}
+ ${referenceTool('Open inspector','ref-inspect',n.id,'layers')}
+ <span class="ref-tool-separator"></span>${referenceTool('More actions','canvas-card-menu',n.id,'more')}</div>`;
+}
+function referenceSitemapView(){
+ const d=design(),n=selectedNode(),errors=designIssues(d).filter(x=>x.level==='error');
+ return `<section class="sitemap-studio ref-studio" data-panel="${referenceUi.panel}">
+ <header class="ref-page-header"><div><h1>Sitemap & views</h1><p>${esc(project()?.name||'Plugin outline')} <span>·</span> ${d.nodes.length} surfaces <span>·</span> ${d.links.length} interactions <span>·</span> ${errors.length?errors.length+' checks need attention':'Structure consistent'}</p></div>
+ <div class="row">${designUi.mode!=='map'?button('Back to map','ref-mode','map','small','arrow'):''}${button('Import / export','design-transfer','','ghost small','code')}${button('Review boilerplate','design-plan','','primary small','wand')}${referenceTool(canvasUi.expanded?'Leave focus mode':'Focus mode','canvas-expand','','focus')}</div></header>
+ <div class="map-workspace ref-workspace"><section class="map-main" aria-label="Sitemap editor">${designUi.mode==='map'?referenceMap(d):designUi.mode==='preview'?designLivePreview(d,n):designCheckView(designIssues(d))}</section>
+ <aside class="outline-tree ref-panel" aria-label="Structure panel">${referenceStructure(d)}</aside>
+ <aside class="node-inspector polish-inspector ref-panel" aria-label="Selected surface">
+ <div class="ref-panel-heading"><strong>Inspector</strong>${referenceTool('Close inspector','ref-panel-close','','close')}</div>
+ <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Content'],['intent','Intent'],['components','Components'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
+ </div><footer class="ref-map-footer"><span id="map-status-message" role="status">Drag cards to arrange · Click a block to write · Use handles to connect</span><div>${button('Change blueprint','nav','blueprints','ghost small')}${referenceTool('Map help','canvas-help','','help')}</div></footer><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
+}
+function referenceMap(d){
+ const c=canvasState(),nodes=visibleMapNodes();
+ return `<div id="map-viewport" class="map-viewport ref-canvas" tabindex="0" role="region" aria-label="Interactive sitemap canvas" aria-describedby="map-instructions">
+ <div id="ref-section-layer" role="group" aria-label="Visual sections"></div><div id="vf-root" aria-label="Vue Flow sitemap"></div>
+ <div class="ref-canvas-top nodrag nopan"><div class="ref-display-control" role="group" aria-label="Card content display">${[['structure','Structure'],['labels','Content'],['wireframes','Wireframes']].map(([id,label])=>`<button data-action="brick-display" data-value="${id}" aria-pressed="${brickDisplay()===id}" class="${brickDisplay()===id?'active':''}">${label}</button>`).join('')}</div>
+ <details class="ref-arrange-popover"><summary>${referenceIcon('grid')} Arrange ${referenceIcon('chevron')}</summary><div class="ref-popover">
+ <label for="map-layout">Map layout<select id="map-layout" data-field="canvas-layout">${Object.entries(MAP_LAYOUTS).map(([id,label])=>`<option value="${id}" ${c.layout===id?'selected':''}>${label}</option>`).join('')}</select></label>${button('Arrange cards','canvas-arrange','','small','grid',c.layout==='free'?'disabled':'')}
+ <label><input data-field="canvas-snap" type="checkbox" ${c.snap?'checked':''}> Snap to grid</label><label for="map-edges">Show interactions<select id="map-edges" data-field="canvas-edges">${[['selected','Selected surface'],['all','All connections'],['none','Hide connections']].map(([id,label])=>`<option value="${id}" ${c.edges===id?'selected':''}>${label}</option>`).join('')}</select></label>
+ ${button('Add section','ref-section','','ghost small','plus')}${button('Canvas settings','flow-settings','','ghost small','settings')}</div></details>
+ <button class="ref-panel-toggle" data-action="canvas-outline" aria-pressed="${referenceUi.panel==='structure'}">${referenceIcon('layers')} Outline</button></div>
+ <div id="ref-node-toolbar" class="ref-node-toolbar nodrag nopan" hidden></div>
+ ${!nodes.length?`<div class="map-empty"><h2>One view is a good beginning.</h2><p>Add its content. Then connect the next step.</p>${button('Add a view','design-add','view','primary','plus')}</div>`:''}
+ <div id="map-mode-message" class="map-mode-message" ${canvasUi.connecting?'':'hidden'}><span>Choose a destination card.</span>${button('Cancel','canvas-cancel-mode','','small')}</div>
+ <div class="ref-main-dock nodrag nopan" role="toolbar" aria-label="Canvas tools">
+ ${referenceTool('Select cards','ref-select-mode','','pointer',`aria-pressed="${!c.interaction.panOnDrag}"`)}
+ ${referenceTool('Hand tool: drag blank canvas','ref-pan-mode','','hand',`aria-pressed="${c.interaction.panOnDrag}"`)}
+ <span class="ref-tool-separator"></span>${referenceTool('Add a native view','design-add','view','plus')}${referenceTool('Add a screen or dialog','design-add','page','content')}${referenceTool('Connect surfaces','design-connect','','link')}
+ ${referenceTool('Add section','ref-section','','section')}<span class="ref-tool-separator"></span>
+ ${referenceTool('Undo','design-undo','','undo',!d.history.length?'disabled':'')}${referenceTool('Redo','design-redo','','redo',!d.future.length?'disabled':'')}
+ <span class="ref-tool-separator"></span>${referenceTool('Layout preview','ref-mode','preview','eye')}${referenceTool('Structure checks','ref-mode','issues','check')}${referenceTool('Canvas settings','flow-settings','','settings')}
+ </div>
+ <div class="map-controls ref-zoom-dock nodrag nopan" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','','aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" aria-label="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small')}${referenceTool('Focus selected card','canvas-focus','','focus',!selectedNode()?'disabled':'')}
+ <details class="map-pan-controls"><summary title="Pan without dragging">Pan</summary><div class="map-pan-menu">${button('←','canvas-pan','96,0','small','','aria-label="Pan left"')}${button('↑','canvas-pan','0,96','small','','aria-label="Pan up"')}${button('↓','canvas-pan','0,-96','small','','aria-label="Pan down"')}${button('→','canvas-pan','-96,0','small','','aria-label="Pan right"')}</div></details></div>
+ <div id="map-instructions" class="sr-only">Click cards to select; drag their headers to move. Click blocks to write. Click or drag handles to connect. Empty canvas clears selection.</div><span id="map-count" class="sr-only">${nodes.length}/${d.nodes.length} visible</span><div id="map-search-feedback" class="sr-only" hidden></div></div>`;
+}
+function referenceStructure(d){
+ const q=canvasUi.search.trim(),ordered=designNodesInOrder(d);
+ const visible=new Set(visibleMapNodes(d).map(n=>n.id));const shown=q?ordered.filter(({n})=>mapMatch(n)):ordered.filter(({n})=>visible.has(n.id));
+ return `<div class="ref-panel-heading"><strong>Structure</strong>${referenceTool('Close structure','ref-panel-close','','close')}</div>
+ <label class="ref-structure-search" for="map-search">${icon('search')}<input id="map-search" type="search" data-field="ref-search" value="${esc(canvasUi.search)}" placeholder="Find a screen…" autocomplete="off"></label>
+ <div class="ref-structure-list" aria-label="Surface outline">${shown.length?shown.map(({n,depth})=>`<div class="ref-tree-row" style="--depth:${Math.min(depth,6)}">${d.nodes.some(x=>x.parent===n.id)?`<button class="ref-tree-fold" aria-expanded="${!canvasState().collapsed.includes(n.id)}" data-action="canvas-collapse" data-value="${n.id}" aria-label="${canvasState().collapsed.includes(n.id)?'Expand':'Collapse'} ${esc(n.label)}">${referenceIcon('chevron')}</button>`:'<span class="ref-tree-dot"></span>'}<button data-action="ref-reveal" data-value="${n.id}" class="outline-node ${designUi.selected===n.id?'selected':''}" aria-pressed="${designUi.selected===n.id}"><span>${esc(n.label)}<small>${NODE_KINDS[n.kind]}</small></span>${bricksOf(n).length?`<i>${bricksOf(n).length}</i>`:''}</button></div>`).join(''):'<p class="ref-no-results">No matching screens. Clear the search to see the outline.</p>'}</div>
+ <div class="ref-structure-sections"><div class="ref-panel-heading"><strong>Sections</strong>${referenceTool('Add section','ref-section','','plus')}</div><p>Visual groups, not plugin hierarchy.</p>${referenceSections(d).map(s=>`<button data-action="${s.id==='main'?'ref-section-layout':'ref-section'}" data-value="${s.id==='main'?'':s.id}">${referenceIcon('section')}<span>${esc(s.name)}</span><small>${s.roots.length}</small></button>`).join('')}</div>`;
+}
+function referenceSectionDialog(){
+ const f=referenceUi.sectionForm;
+ return dialogBody(f.id?'Edit visual section':'New visual section',`<p>Arrange related root views in a separate band. Their screens follow them. No view is reparented and no source plan changes.</p>
+ <label class="field">Section name<input data-field="ref-section-name" value="${esc(f.name)}" maxlength="80"></label>
+ <fieldset class="ref-section-roots"><legend>Include root surfaces</legend>${design().nodes.filter(n=>!n.parent).map(n=>`<label><input type="checkbox" data-field="ref-section-root" data-id="${n.id}" ${f.roots.includes(n.id)?'checked':''}>${esc(n.label)} <small>${NODE_KINDS[n.kind]}</small></label>`).join('')}</fieldset>
+ <p class="small muted">Assigning a root here moves it out of its previous visual section. Deleting a section returns its views to Main workspace.</p><p role="alert" class="error">${esc(referenceUi.sectionError)}</p>`,
+ (f.id?button('Remove section','ref-section-remove','','danger'):'')+button('Cancel','close','','ghost')+button('Save section','ref-section-save','','primary'));
+}
+function referenceCardContents(n,lib,children,collapsed){
+ const mode=brickDisplay(),items=bricksOf(n);
+ return `<header class="brick-card-header ref-card-header">
+ <button class="ref-card-more nodrag nopan" data-action="canvas-card-menu" data-value="${n.id}" aria-label="More actions for ${esc(n.label)}">${referenceIcon('more')}</button>
+ <span class="ref-card-kind">${esc(NODE_KINDS[n.kind])}${n.entry?' · Entry':''}</span>
+ <strong class="map-card-title" title="${esc(n.label)}">${esc(n.label)}</strong>
+ <button class="ref-card-open nodrag nopan" data-action="ref-content" data-value="${n.id}" aria-label="Edit content of ${esc(n.label)}" title="Edit content">${referenceIcon('content')}</button>
+ ${children?`<button class="flow-collapse ref-collapse nodrag nopan" data-action="canvas-collapse" data-value="${n.id}" aria-label="${collapsed?'Expand':'Collapse'} ${esc(n.label)} branch">${collapsed?'+':'−'}<span>${children}</span></button>`:''}</header>
+ <div class="brick-stack ${mode}" data-brick-stack="${n.id}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')}</div>
+ <button class="brick-add nodrag nopan" data-action="brick-add" data-value="${n.id}">${icon('plus')} ${items.length?'Add component':'Plan this screen'}</button>
+ <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${n.components?.length||0} bindings</button></div>`;
+}
+function referenceSketch(kind){
+ const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`;
+ const box=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
+ const row=(y,flip=false)=>box(flip?140:10,y,60,25)+[0,7,14].map((v,i)=>line(flip?10:84,y+4+v,[113,94,69][i])).join('');
+ const shapes={
+ list:row(6)+row(39,true)+row(72),text:[6,16,26,42,52,62].map((y,i)=>line(10,y,i%3===2?136:190)).join(''),
+ navigation:box(9,6,27,16)+line(92,12,20)+line(126,12,20)+line(160,12,20),
+ toolbar:box(9,5,125,21)+line(148,10,48)+line(148,20,34),
+ heading:line(10,7,114)+line(10,21,190)+line(10,29,140),
+ table:box(9,4,194,77)+[18,34,50,66].map(y=>line(9,y,194)).join('')+'<path d="M63 4v77M146 4v77"/>',
+ board:[9,77,145].map((x,i)=>line(x,5,50)+box(x,15,57,24)+box(x,46,57,i===1?16:25)).join(''),
+ detail:box(10,5,66,58)+[8,21,34,47,62].map((y,i)=>line(91,y,i%2?86:108)).join(''),
+ form:[7,37].map(y=>line(10,y,38)+box(10,y+7,191,18)).join(''),
+ chart:'<path d="M10 4v65h190"/>'+[25,70,115,160].map((x,i)=>box(x,[37,17,28,7][i],24,[30,50,39,60][i])).join(''),
+ media:box(9,4,194,71)+'<path d="m27 64 44-35 36 29 37-43 42 49"/><circle cx="165" cy="24" r="7"/>',
+ actions:line(10,6,95)+line(10,15,76)+box(140,5,60,35)+box(10,27,49,13),
+ empty:box(10,6,31,32)+line(58,12,142)+line(58,24,109)+line(58,36,69),
+ notice:'<circle cx="22" cy="18" r="10"/>'+line(44,12,156)+line(44,25,112)
+ };
+ const height={navigation:28,toolbar:34,heading:38,list:104,table:88,board:78,detail:72,form:72,chart:76,media:84,actions:46,empty:44,notice:36,text:72}[kind]||44;
+ return `<svg class="brick-wireframe ref-wireframe" viewBox="0 0 212 ${height}" aria-hidden="true" focusable="false">${shapes[kind]||shapes.text}</svg>`;
+}
+
+// A page content draft commits as one reviewed, undoable edit; no source writes.
+function openReferenceContent(value){
+ const [id,brickId]=value.split(':'),d=design(),n=d.nodes.find(n=>n.id===id);
+ if(!canHaveBricks(n)||state.activeRun){notify('Choose a visual surface after the active operation finishes.');return;}
+ const bricks=designCopy(bricksOf(n));
+ referenceUi.content={owner:designOwner(),revision:d.revision,node:id,label:n.label,bricks,original:JSON.stringify(bricks),selected:brickId||bricks[0]?.id||null,next:1,removed:null};
+ referenceUi.contentError='';referenceUi.editorTab='content';referenceUi.libraryQuery='';showModal('ref-content');
+}
+function referenceContentDirty(){const f=referenceUi.content;return !!f&&f.original!==JSON.stringify(f.bricks);}
+function referenceDraftBlock(id){return referenceUi.content?.bricks.find(b=>b.id===id);}
+function referenceFocusBlock(id){
+ const f=referenceUi.content;if(!referenceDraftBlock(id))return;
+ f.selected=id;
+ document.querySelectorAll('.ref-write-block').forEach(e=>e.classList.toggle('active',e.dataset.block===id));
+ document.querySelectorAll('.ref-mini-block').forEach(e=>e.classList.toggle('active',e.dataset.block===id));
+ const block=document.querySelector('.ref-write-block[data-block="'+CSS.escape(id)+'"]');
+ block?.scrollIntoView({block:'nearest',behavior:'instant'});
+ block?.querySelector('textarea')?.focus({preventScroll:true});
+}
+function referenceContentMini(){
+ const f=referenceUi.content;if(!f)return '';
+ return `<div class="ref-mini-page"><div class="ref-mini-title"><span>•••</span><strong>${esc(f.label)}</strong></div>${f.bricks.map(b=>`<button class="ref-mini-block ${f.selected===b.id?'active':''}" data-group="${BRICK_KINDS[b.kind].group}" data-action="ref-block-focus" data-value="${b.id}" data-block="${b.id}" title="Focus ${esc(b.title)}" aria-label="Focus ${esc(b.title)}"><strong>${esc(b.title)}</strong>${referenceSketch(b.kind)}</button>`).join('')||'<p class="ref-mini-empty">Your content outline will appear here.</p>'}</div><p class="ref-preview-note">Outline preview · not a live Vue screen</p>`;
+}
+function referenceWriteBlock(b,index){
+ const spec=BRICK_KINDS[b.kind],n=design().nodes.find(n=>n.id===referenceUi.content.node);
+ return `<section class="ref-write-block ${referenceUi.content.selected===b.id?'active':''}" data-block="${b.id}" data-group="${spec.group}">
+ <div class="ref-block-heading"><button class="ref-write-grip" draggable="true" data-ref-drag="${b.id}" title="Drag to reorder this draft" aria-label="Reorder ${esc(b.title)}">${icon('menu')}</button>
+ <label class="sr-only" for="ref-title-${b.id}">Block name</label><input id="ref-title-${b.id}" data-field="ref-block-title" data-block="${b.id}" value="${esc(b.title)}" maxlength="${BRICK_LIMITS.title}">
+ <span class="ref-block-counter">${index+1}</span>${referenceTool('Move earlier','ref-block-up',b.id,'up',index===0?'disabled':'')}${referenceTool('Move later','ref-block-down',b.id,'down',index===referenceUi.content.bricks.length-1?'disabled':'')}${referenceTool('Remove from draft','ref-block-remove',b.id,'trash')}</div>
+ <div class="ref-format-toolbar" role="toolbar" aria-label="Markdown formatting for ${esc(b.title)}">${[['heading','Heading'],['bold','Bold'],['italic','Italic'],['list','Bulleted list'],['check','Checklist'],['code','Code'],['link','Link']].map(([key,label])=>`<button type="button" data-action="ref-format" data-value="${b.id}:${key}" title="${label}" aria-label="${label}">${{heading:'H2',bold:'B',italic:'I',list:'• List',check:'☐',code:'&lt;/&gt;',link:'Link'}[key]}</button>`).join('')}<span id="ref-count-${b.id}" class="ref-character-count">${b.content.length.toLocaleString()} / ${BRICK_LIMITS.content.toLocaleString()}</span></div>
+ <label class="sr-only" for="ref-body-${b.id}">Content for ${esc(b.title)}</label><textarea id="ref-body-${b.id}" data-field="ref-block-content" data-block="${b.id}" maxlength="${BRICK_LIMITS.content}" ${referenceUi.content.selected===b.id?'autofocus':''} rows="4" placeholder="Describe the content, behavior and states…">${esc(b.content)}</textarea>
+ <details class="ref-block-details"><summary>${esc(spec.label)} <span>· ${esc(b.region)} · Purpose & region</span></summary>
+ <label>What does this component help the user do?<textarea data-field="ref-block-purpose" data-block="${b.id}" rows="2" maxlength="${BRICK_LIMITS.purpose}">${esc(b.purpose)}</textarea></label>
+ <label>Layout region<select data-field="ref-block-region" data-block="${b.id}">${componentSlots(n).map(slot=>`<option ${b.region===slot?'selected':''}>${esc(slot)}</option>`).join('')}</select></label>
+ <p>Screen-specific content. The shared library definition and implementation binding are unchanged.</p></details></section>`;
+}
+function referenceEditorLibrary(){
+ const q=referenceUi.libraryQuery.toLowerCase();
+ return `<div class="ref-editor-library"><div class="ref-panel-heading"><strong>Add a component</strong>${referenceTool('Back to preview','ref-editor-preview','','close')}</div><label class="field">Find in library<input id="ref-library-search" type="search" data-field="ref-library-search" value="${esc(referenceUi.libraryQuery)}" placeholder="Search components…"></label>
+ <div id="ref-library-list">${referenceLibraryItems(q)}</div></div>`;
+}
+function referenceLibraryItems(q=''){
+ return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&(c.name+' '+c.contentSpec.title).toLowerCase().includes(q)).map(c=>`<button class="ref-library-item" data-action="ref-block-add" data-value="${c.id}" data-group="${BRICK_KINDS[c.contentSpec.kind].group}"><span>${referenceSketch(c.contentSpec.kind)}</span><strong>${esc(c.contentSpec.title)}<small>${esc(c.name)} · v${esc(c.version)}</small></strong>${icon('plus')}</button>`).join('')||'<p>No matching components.</p>';
+}
+function referenceContentDialog(){
+ const f=referenceUi.content,n=design().nodes.find(n=>n.id===f?.node);
+ if(!f||!n)return dialogBody('Surface unavailable','Close and reopen a surface.');
+ return `<div class="ref-editor"><header class="ref-editor-heading"><div>${referenceIcon('content')}<div><h2 id="modal-title">${esc(n.label)}</h2><p>Content outline · ${esc(NODE_KINDS[n.kind])} · ${esc(n.slug)}</p></div></div>${referenceTool('Close content editor','close','','close')}</header>
+ <div class="ref-editor-layout"><div class="ref-write-column"><div class="ref-editor-intro"><p>${esc(n.intent||'Describe what belongs on this screen, then refine each component.')}</p><span>Changes stay in this draft until you save.</span></div>
+ <div id="ref-draft-recovery" class="ref-draft-recovery" ${f.removed?'':'hidden'}>${f.removed?`<span>${esc(f.removed.block.title)} removed from this draft.</span>${button('Undo remove','ref-block-restore','','small')}`:''}</div>
+ <div id="ref-write-blocks">${referenceBlockList()}</div>
+ <button class="ref-add-block" data-action="ref-editor-library">${icon('plus')} Add component</button>
+ <p id="ref-content-error" role="alert" tabindex="-1" class="error">${esc(referenceUi.contentError)}</p></div>
+ <aside class="ref-editor-preview">${referenceUi.editorTab==='library'?referenceEditorLibrary():`<div class="ref-panel-heading"><strong>Page preview</strong><span id="ref-draft-count">${f.bricks.length} components</span></div><div id="ref-content-mini">${referenceContentMini()}</div>`}</aside></div>
+ <footer class="ref-editor-footer"><span id="ref-content-state" role="status">${referenceContentDirty()?'Unsaved changes':'No changes yet'}</span><div>${button('Export draft','ref-draft-export','','ghost')}${button('Cancel','close','','ghost')}${button('Save content','ref-content-save','','primary','',''+(!referenceContentDirty()?'disabled':''))}</div></footer></div>`;
+}
+function refreshReferenceContent(){
+ const mini=document.getElementById('ref-content-mini');if(mini)mini.innerHTML=referenceContentMini();
+ const state=document.getElementById('ref-content-state');if(state)state.textContent=referenceContentDirty()?'Unsaved changes':'No changes yet';
+ const save=document.querySelector('[data-action="ref-content-save"]');if(save)save.disabled=!referenceContentDirty();
+ const count=document.getElementById('ref-draft-count');if(count)count.textContent=referenceUi.content.bricks.length+' components';
+ const err=document.getElementById('ref-content-error');if(err)err.textContent=referenceUi.contentError;
+ for(const b of referenceUi.content.bricks){const count=document.getElementById('ref-count-'+b.id);if(count)count.textContent=b.content.length.toLocaleString()+' / '+BRICK_LIMITS.content.toLocaleString();const input=document.getElementById('ref-title-'+b.id);if(input&&b.title.trim()){input.removeAttribute('aria-invalid');input.removeAttribute('aria-describedby');}}
+ const recovery=document.getElementById('ref-draft-recovery'),removed=referenceUi.content.removed;
+ if(recovery){recovery.hidden=!removed;recovery.innerHTML=removed?`<span>${esc(removed.block.title)} removed from this draft.</span>${button('Undo remove','ref-block-restore','','small')}`:'';}
+}
+function refreshReferenceBlocks(){
+ const blocks=document.getElementById('ref-write-blocks');if(blocks)blocks.innerHTML=referenceBlockList();
+ refreshReferenceContent();
+}
+function moveReferenceBlock(id,delta,targetId=null,after=false){
+ const f=referenceUi.content,from=f?.bricks.findIndex(b=>b.id===id);
+ if(from===undefined||from<0)return;
+ let to=targetId?f.bricks.findIndex(b=>b.id===targetId):from+delta;
+ if(targetId){if(to<0||targetId===id)return;to+=after?1:0;if(from<to)to--;}
+ if(to<0||to>=f.bricks.length||from===to)return;
+ f.bricks.splice(to,0,f.bricks.splice(from,1)[0]);f.selected=id;refreshReferenceBlocks();
+ document.querySelector('[data-ref-drag="'+CSS.escape(id)+'"]')?.focus();
+}
+function addReferenceBlock(definition){
+ const f=referenceUi.content,d=design(),c=d.library.find(c=>c.id===definition),n=d.nodes.find(n=>n.id===f?.node);
+ if(!f||!n||!isBrickComponent(c)||c.status==='deprecated')return;
+ if(f.bricks.length>=BRICK_LIMITS.perSurface){referenceUi.contentError='This screen supports up to 24 content components.';refreshReferenceContent();return;}
+ const b=attachBrickDefinition({schema:1,id:'draft-'+f.next++,kind:c.contentSpec.kind,title:c.contentSpec.title,purpose:c.contentSpec.purpose,content:c.contentSpec.content,region:componentSlots(n).includes(c.contentSpec.region)?c.contentSpec.region:componentSlots(n)[0],component:null},c);
+ f.bricks.push(b);f.selected=b.id;refreshReferenceBlocks();referenceFocusBlock(b.id);
+}
+function formatReferenceText(value){
+ const [id,format]=value.split(':'),el=document.getElementById('ref-body-'+id),b=referenceDraftBlock(id);
+ if(!el||!b)return;
+ const begin=el.selectionStart,end=el.selectionEnd,selected=el.value.slice(begin,end)||'text';
+ const replacement={heading:'## '+selected,bold:'**'+selected+'**',italic:'_'+selected+'_',list:selected.split('\n').map(s=>'- '+s).join('\n'),check:selected.split('\n').map(s=>'- [ ] '+s).join('\n'),code:'`'+selected+'`',link:'['+selected+'](https://example.com)'}[format];
+ if(!replacement)return;
+ if(el.value.length-(end-begin)+replacement.length>BRICK_LIMITS.content){referenceUi.contentError='Formatting would exceed the content limit. Shorten the text first; nothing was changed.';refreshReferenceContent();el.focus();return;}
+ el.setRangeText(replacement,begin,end,'select');b.content=el.value;el.focus();refreshReferenceContent();
+}
+function saveReferenceContent(){
+ const f=referenceUi.content,d=design(),n=d.nodes.find(n=>n.id===f?.node);
+ const fail=(m,field=null)=>{referenceUi.contentError=m;refreshReferenceContent();const target=field||document.getElementById('ref-content-error');if(field){field.setAttribute('aria-invalid','true');field.setAttribute('aria-describedby','ref-content-error');}target?.focus();target?.scrollIntoView({block:'nearest'});};
+ if(!n||f.owner!==designOwner()||f.revision!==d.revision)return fail('This screen changed outside your draft. Copy your text, cancel, and reopen before saving.');
+ if(state.activeRun)return fail('Finish the active operation before saving.');
+ if(!referenceContentDirty()){modalOriginal=null;closeModal();return;}
+ const invalid=f.bricks.find(b=>!b.title.trim());
+ if(invalid)return fail('Give each component a name before saving. Your draft is retained.',document.getElementById('ref-title-'+invalid.id));
+ let next=d.nextId;
+ const used=new Set(d.nodes.flatMap(n=>bricksOf(n).map(b=>b.id)));
+ const bricks=designCopy(f.bricks).map(b=>{
+  if(b.id.startsWith('draft-')){while(used.has('brick-'+next))next++;b.id='brick-'+next++;used.add(b.id);}
+  b.title=b.title.trim();return b;
+ });
+ const updated={...n,bricks};
+ if(!validBricks(updated))return fail('Every component needs a name. Check the field length limits before saving.');
+ const candidate={...d,nodes:d.nodes.map(v=>v.id===n.id?updated:v)};
+ const oldIssues=new Set(brickIssues(d).map(i=>i.code+':'+i.message));
+ const introduced=brickIssues(candidate).find(i=>!oldIssues.has(i.code+':'+i.message));
+ if(introduced)return fail(introduced.message);
+ recordDesign();n.bricks=bricks;d.nextId=next;designChanged();designUi.selected=n.id;
+ modalOriginal=null;closeModal();render();canvasAnnounce('Page content saved. One undo restores the previous outline.');
+}
+
+function referenceBlockList(){
+ const items=referenceUi.content?.bricks||[];
+ return items.map(referenceWriteBlock).join('')||'<div class="ref-empty-content"><h3>Start with the content.</h3><p>Choose a reusable component. Describe its purpose and what the user will see.</p></div>';
+}
+function removeReferenceBlock(id){
+ const f=referenceUi.content,index=f?.bricks.findIndex(b=>b.id===id);
+ if(index===undefined||index<0)return;
+ f.removed={block:designCopy(f.bricks[index]),index};f.bricks.splice(index,1);
+ f.selected=f.bricks[Math.min(index,f.bricks.length-1)]?.id||null;
+ refreshReferenceBlocks();document.querySelector('[data-action="ref-block-restore"]')?.focus();
+}
+function restoreReferenceBlock(){
+ const f=referenceUi.content,removed=f?.removed;if(!removed)return;
+ if(f.bricks.length>=BRICK_LIMITS.perSurface){referenceUi.contentError='Remove another draft component before restoring this one. The removed content is still retained.';refreshReferenceContent();return;}
+ if(!f.bricks.some(b=>b.id===removed.block.id))f.bricks.splice(Math.min(removed.index,f.bricks.length),0,removed.block);
+ f.selected=removed.block.id;f.removed=null;refreshReferenceBlocks();referenceFocusBlock(f.selected);
+}
+function exportReferenceDraft(){
+ const f=referenceUi.content;if(!f)return;
+ const data={schema:1,kind:'screen-content-draft',surface:f.node,label:f.label,sourceRevision:f.revision,blocks:f.bricks};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json'}));
+ const a=document.createElement('a');a.href=url;a.download='screen-content-draft.json';document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Draft copy exported. No source files or saved content were changed.');
+}
+
+function handleReferenceAction(action,value){
+ if(!action.startsWith('ref-'))return false;
+ switch(action){
+  case 'ref-content':openReferenceContent(value);break;
+  case 'ref-content-save':saveReferenceContent();break;
+  case 'ref-inspect':designUi.selected=value;referenceUi.panel='inspector';render();break;
+  case 'ref-panel-close':referenceUi.panel='none';canvasUi.outline=false;render();break;
+  case 'ref-reveal':showMapNode(value,true);fitMap(true);break;
+  case 'ref-section':openSectionEditor(value||null);break;
+  case 'ref-section-save':saveSectionEditor();break;
+  case 'ref-section-remove':saveSectionEditor(true);break;
+  case 'ref-section-layout':arrangeMap('sections');break;
+  case 'ref-select-mode':canvasPreferences().panOnDrag=false;save();refreshFlowConfig();render();break;
+  case 'ref-pan-mode':canvasPreferences().panOnDrag=true;save();refreshFlowConfig();render();break;
+  case 'ref-mode':designUi.mode=designUi.mode===value?'map':value;render();break;
+  case 'ref-editor-library':referenceUi.editorTab='library';redrawModal();break;
+  case 'ref-editor-preview':referenceUi.editorTab='content';redrawModal();break;
+  case 'ref-block-focus':referenceFocusBlock(value);break;
+  case 'ref-block-add':addReferenceBlock(value);break;
+  case 'ref-block-up':moveReferenceBlock(value,-1);break;
+  case 'ref-block-down':moveReferenceBlock(value,1);break;
+  case 'ref-block-remove':removeReferenceBlock(value);break;
+  case 'ref-block-restore':restoreReferenceBlock();break;
+  case 'ref-draft-export':exportReferenceDraft();break;
+  case 'ref-format':formatReferenceText(value);break;
+  default:return false;
+ }
+ return true;
+}
+function editReferenceField(el){
+ const field=el.dataset.field;
+ if(!field?.startsWith('ref-'))return false;
+ if(field==='ref-search'){
+  canvasUi.search=el.value;
+  const old=document.activeElement,start=old.selectionStart;
+  const panel=document.querySelector('.outline-tree.ref-panel');
+  if(panel){panel.innerHTML=referenceStructure(design());const search=panel.querySelector('#map-search');search.focus();try{search.setSelectionRange(start,start);}catch{}}
+  syncFlowSelection();document.querySelectorAll('.map-node').forEach(e=>e.classList.toggle('search-dim',!mapMatch(design().nodes.find(n=>n.id===e.dataset.node))));return true;
+ }
+ if(field==='ref-section-name')referenceUi.sectionForm.name=el.value;
+ else if(field==='ref-section-root'){const f=referenceUi.sectionForm;f.roots=el.checked?[...new Set([...f.roots,el.dataset.id])]:f.roots.filter(id=>id!==el.dataset.id);}
+ else if(field==='ref-library-search'){
+  referenceUi.libraryQuery=el.value;
+  document.getElementById('ref-library-list').innerHTML=referenceLibraryItems(el.value.toLowerCase());
+ }else if(field.startsWith('ref-block-')){
+  const b=referenceDraftBlock(el.dataset.block),key=field.slice(10);
+  if(b&&['title','purpose','content','region'].includes(key)){
+   b[key]=el.value;referenceUi.content.selected=b.id;referenceUi.contentError='';refreshReferenceContent();
+  }
+ }
+ return true;
+}
+document.addEventListener('dragstart',event=>{
+ const grip=event.target.closest('[data-ref-drag]');if(!grip)return;
+ referenceUi.drag={id:grip.dataset.refDrag,owner:referenceUi.content?.owner};
+ event.dataTransfer.setData('text/plain',grip.dataset.refDrag);event.dataTransfer.effectAllowed='move';event.stopPropagation();
+});
+document.addEventListener('dragover',event=>{
+ if(!referenceUi.drag)return;
+ const block=event.target.closest('.ref-write-block');if(!block)return;
+ event.preventDefault();event.dataTransfer.dropEffect='move';const after=event.clientY>block.getBoundingClientRect().top+block.offsetHeight/2;
+ document.querySelectorAll('.ref-drag-before,.ref-drag-after').forEach(e=>e.classList.remove('ref-drag-before','ref-drag-after'));
+ block.classList.add(after?'ref-drag-after':'ref-drag-before');
+});
+document.addEventListener('dragleave',event=>event.target.closest('.ref-write-block')?.classList.remove('ref-drag-before','ref-drag-after'));
+document.addEventListener('drop',event=>{
+ const drag=referenceUi.drag,block=event.target.closest('.ref-write-block');if(!drag||!block)return;
+ event.preventDefault();event.stopPropagation();
+ if(referenceUi.content?.owner===drag.owner)moveReferenceBlock(drag.id,0,block.dataset.block,event.clientY>block.getBoundingClientRect().top+block.offsetHeight/2);
+ referenceUi.drag=null;document.querySelectorAll('.ref-drag-before,.ref-drag-after').forEach(e=>e.classList.remove('ref-drag-before','ref-drag-after'));
+});
+document.addEventListener('dragend',()=>{referenceUi.drag=null;document.querySelectorAll('.ref-drag-before,.ref-drag-after').forEach(e=>e.classList.remove('ref-drag-before','ref-drag-after'));});
+document.addEventListener('keydown',event=>{
+ if(modalType==='ref-content'&&document.getElementById('modal').open&&!document.getElementById('discard-dialog')?.open&&(event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();saveReferenceContent();}
+});
+
+// Dismiss canvas popovers without also cancelling a graph gesture or selection.
+document.addEventListener('pointerdown',event=>{
+ for(const popover of document.querySelectorAll('.ref-arrange-popover[open],.map-pan-controls[open]')){
+  if(!popover.contains(event.target))popover.open=false;
+ }
+},true);
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||document.getElementById('modal').open)return;
+ const popover=document.querySelector('.ref-arrange-popover[open],.map-pan-controls[open]');
+ if(popover){event.preventDefault();event.stopImmediatePropagation();popover.open=false;popover.querySelector('summary')?.focus();}
+},true);
+
 // A brick is an ordered instance of a library component. Code readiness remains separate.
 const libraryUi={filter:'all',includeDeprecated:false,form:null,returnNode:null,error:''};
 
@@ -11800,9 +12515,7 @@ function libraryUpgradeDialog(){
  const {changes}=upgradedBrick(b,c);
  return dialogBody('Review content component upgrade',`<p><strong>${esc(c.name)}</strong> in ${esc(n.label)}: v${esc(b.version)} → v${esc(c.version)}</p><div class="library-upgrade-fields">${changes.map(x=>`<section><strong>${esc(x.field)}</strong>${badge(x.local?'Keep local override':x.before===x.after?'Unchanged':'Use new default',x.local?'purple':'')}<p>${esc(x.after||'Empty')}</p></section>`).join('')}</div><p>Only this instance is upgraded. Its ID, order, requirement links and implementation binding are preserved.</p><p class="error" role="alert">${esc(libraryUi.error)}</p>`,button('Cancel','close','','ghost')+button('Accept reviewed upgrade','library-upgrade-save','','primary'));
 }
-function libraryCardToolbar(n){
- return `<div class="flow-card-toolbar card-actions-compact nodrag nopan" role="group" aria-label="Actions for ${esc(n.label)}">${button('Edit','design-edit',n.id,'ghost small','settings')}${button('Add','library-card-add',n.id,'ghost small','plus')}${button('More','canvas-card-menu',n.id,'ghost small','menu')}</div>`;
-}
+function libraryCardToolbar(n){return "";}
 function libraryCardAddDialog(){
  const id=modalData||libraryUi.returnNode,n=design().nodes.find(n=>n.id===id);
  if(!n)return dialogBody('Select a card','Select a surface first.');
@@ -11962,12 +12675,9 @@ function brickSketch(kind){
 }
 function brickTile(n,b,index,mode){
  const spec=BRICK_KINDS[b.kind],value=esc(n.id+':'+b.id),c=design().library.find(c=>c.id===b.definition);
- return `<div class="content-brick nodrag nopan ${brickUi.selected===b.id&&brickUi.node===n.id?'active':''}" data-brick-id="${esc(b.id)}" data-brick-node="${esc(n.id)}" data-group="${spec.group}"><button type="button" class="brick-grip nodrag nopan" draggable="true" data-brick-drag="${value}" aria-label="Reorder ${esc(b.title)}. Drag, or use Alt plus Arrow Up or Down." title="Drag to reorder · Alt + ↑ / ↓">${icon('menu')}<span>${String(index+1).padStart(2,'0')}</span></button><button class="brick-open nodrag nopan" data-action="brick-edit" data-value="${value}" title="Edit this screen instance"><span class="brick-title-row"><strong>${esc(b.title)}</strong><span>${c&&b.version!==c.version?'<span class="brick-version-warning" title="Library version changed">Review</span>':''}</span></span>${mode==='wireframes'?brickSketch(b.kind):''}<span class="brick-kind">${esc(spec.label)}<span>${esc(b.region)}</span></span></button><div class="brick-reorder-actions" role="group" aria-label="Reorder ${esc(b.title)}"><button class="nodrag nopan" data-action="brick-up" data-value="${value}" aria-label="Move ${esc(b.title)} earlier" title="Move earlier" ${index===0?'disabled':''}>${icon('arrow')}</button><button class="nodrag nopan" data-action="brick-down" data-value="${value}" aria-label="Move ${esc(b.title)} later" title="Move later" ${index===bricksOf(n).length-1?'disabled':''}>${icon('arrow')}</button></div></div>`;
+ return `<div class="content-brick nodrag nopan ${brickUi.selected===b.id&&brickUi.node===n.id?'active':''}" data-brick-id="${esc(b.id)}" data-brick-node="${esc(n.id)}" data-group="${spec.group}" style="--ref-block-height:${referenceBrickHeight(b.kind,mode)}px"><button type="button" class="brick-grip nodrag nopan" draggable="true" data-brick-drag="${value}" aria-label="Reorder ${esc(b.title)}. Drag, or use Alt plus Arrow Up or Down." title="Drag to reorder · Alt + ↑ / ↓">${icon('menu')}<span>${String(index+1).padStart(2,'0')}</span></button><button class="brick-open nodrag nopan" data-action="ref-content" data-value="${value}" title="Write content for this screen instance"><span class="brick-title-row"><strong>${esc(b.title)}</strong><span>${c&&b.version!==c.version?'<span class="brick-version-warning" title="Library version changed">Review</span>':''}</span></span>${mode==='wireframes'?referenceSketch(b.kind):''}<span class="brick-kind">${esc(spec.label)}<span>${esc(b.region)}</span></span></button><div class="brick-reorder-actions" role="group" aria-label="Reorder ${esc(b.title)}"><button class="nodrag nopan" data-action="brick-up" data-value="${value}" aria-label="Move ${esc(b.title)} earlier" title="Move earlier" ${index===0?'disabled':''}>${icon('arrow')}</button><button class="nodrag nopan" data-action="brick-down" data-value="${value}" aria-label="Move ${esc(b.title)} later" title="Move later" ${index===bricksOf(n).length-1?'disabled':''}>${icon('arrow')}</button></div></div>`;
 }
-function brickCardContents(n,lib,children,collapsed){
- const mode=brickDisplay(),items=bricksOf(n),bindings=(n.components||[]).map(b=>{const c=lib.find(c=>c.id===b.id);return `<button class="flow-binding-chip nodrag nopan" data-action="flow-binding" data-value="${esc(n.id+':'+b.id+':'+b.slot)}" title="Edit placement">${esc(c?.name||b.id)}<span>${esc(b.slot)}</span></button>`;}).join('');
- return `<div class="brick-card-header"><div class="map-node-top"><span>${icon(n.kind==='view'?'box':n.kind==='modal'?'layers':'file')}${esc(NODE_KINDS[n.kind])}</span>${n.entry?'<span class="map-entry">Entry</span>':''}${children?`<button class="flow-collapse nodrag nopan" data-action="canvas-collapse" data-value="${esc(n.id)}" title="${collapsed?'Expand':'Collapse'} branch">${collapsed?'+':'−'} ${children}</button>`:''}</div><strong class="map-card-title">${esc(n.label)}</strong><code class="map-card-slug">${esc(n.slug)}</code><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${esc(n.id)}">${esc(n.intent||'Describe the user’s intent…')}</button></div><div class="brick-stack ${mode}" data-brick-stack="${esc(n.id)}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')||'<div class="brick-empty"><strong>What belongs on this screen?</strong><span>Add reusable content from your component library.</span></div>'}</div><button class="brick-add nodrag nopan" data-action="brick-add" data-value="${esc(n.id)}">${icon('plus')} Add content brick</button><div class="brick-card-bottom"><button class="nodrag nopan flow-goals" data-action="flow-intent" data-value="${esc(n.id)}">${n.goals?.length||0} user goals</button><span>${items.length} content components</span></div><div class="flow-card-bindings">${bindings||'<span class="tiny muted">No implementation bindings</span>'}</div>${libraryCardToolbar(n)}`;
-}
+function brickCardContents(n,lib,children,collapsed){return referenceCardContents(n,lib,children,collapsed);}
 function brickViewControl(){const m=brickDisplay();return `<div class="brick-display-bar"><div class="segmented" role="group" aria-label="Card content display">${[['structure','Structure'],['labels','Content blocks'],['wireframes','Wireframes']].map(([id,label])=>`<button data-action="brick-display" data-value="${id}" aria-pressed="${m===id}" class="${m===id?'selected':''}">${label}</button>`).join('')}</div><div class="brick-legend" aria-label="Content roles">${Object.entries(BRICK_GROUPS).map(([id,label])=>`<span data-group="${id}"><i></i>${label}</span>`).join('')}</div>${button('Method','brick-method','','ghost small','help')}</div>`;}
 function brickPalette(n){
  const q=brickUi.query.toLowerCase();return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&(c.name+' '+c.contentSpec.title+' '+c.description).toLowerCase().includes(q)).map(c=>`<button class="brick-palette-item" data-action="library-pick" data-value="${esc(n.id+':'+c.id)}" data-brick-kind="${c.contentSpec.kind}" data-brick-definition="${esc(c.id)}" data-brick-palette-node="${esc(n.id)}" draggable="true" data-group="${BRICK_KINDS[c.contentSpec.kind].group}">${brickSketch(c.contentSpec.kind)}<span><strong>${esc(c.contentSpec.title)}</strong><small>${esc(c.name)} · v${esc(c.version)}<br>${esc(c.description)}</small></span>${icon('plus')}</button>`).join('')||'<p class="small muted">No available components match. Clear the search or add one to your library.</p>';
@@ -12526,7 +13236,7 @@ function mountFlow(){
    flowUi.drag={owner,revision:design().revision,id:node.id,startX:event.clientX,startY:event.clientY,before:designCopy(canvasState())};flowUi.dragging=true;flowUi.cancelled=false;
    designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
   });
-  api.onNodeDrag(()=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;refreshStructureRouting();}});
+  api.onNodeDrag(()=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;refreshStructureRouting();paintReferenceChrome();}});
   api.onNodeDragStop(({node,event})=>{
    if(!current())return;const drag=flowUi.drag;flowUi.drag=null;flowUi.dragging=false;if(drag&&!flowUi.cancelled&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<5){api.applyNodeChanges([{id:node.id,type:'position',position:drag.before.positions[node.id],dragging:false}]);flowUi.suppressClick=false;return;}flowUi.suppressClick=true;
    setTimeout(()=>{flowUi.suppressClick=false;},160);
@@ -12561,7 +13271,7 @@ function paintFlowChrome(){
  const z=document.getElementById('map-zoom-label');if(z)z.textContent=Math.round(c.zoom*100)+'%';
  if(root)root.style.setProperty('--map-inverse',1/c.zoom);
  vp.style.backgroundSize=(24*c.zoom)+'px '+(24*c.zoom)+'px';vp.style.backgroundPosition=c.pan.x+'px '+c.pan.y+'px';vp.style.backgroundImage=c.interaction.grid?'':'none';
- vp.dataset.wheel=c.interaction.wheel;
+ vp.dataset.wheel=c.interaction.wheel;vp.dataset.grid=String(c.interaction.grid);paintReferenceChrome();
 }
 function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>flowUi.syncing=false);}
 function syncFlowSelection(){
@@ -12795,6 +13505,8 @@ document.addEventListener('keydown',event=>{
 function emptyCanvas(){return {schema:1,layout:'vertical',positions:Object.create(null),pan:{x:32,y:28},zoom:1,snap:true,collapsed:[],edges:'selected',custom:false,arrangedFor:'',fitted:false};}
 function validCanvas(c){
  if(c===undefined)return true;
+ if(!c||typeof c!=='object'||Array.isArray(c))return false;
+ if(!validReferenceSections(c.sections))return false;
  if(c.brickDisplay!==undefined&&!['structure','labels','wireframes'].includes(c.brickDisplay))return false;
  const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isFinite(x)&&Math.abs(x)<=50000;
  return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x)&&num(c.pan.y)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
@@ -12850,8 +13562,10 @@ function canvasBounds(nodes=visibleMapNodes()){
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
  const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes(),b=canvasBounds(nodes);
- c.zoom=Math.max(.12,Math.min(selected?1.15:1,(pane.clientWidth-80)/b.w,(pane.clientHeight-(selected?160:100))/b.h));
- c.pan={x:(pane.clientWidth-b.w*c.zoom)/2-b.x*c.zoom,y:(pane.clientHeight-b.h*c.zoom)/2-b.y*c.zoom};c.fitted=true;paintMap();save();
+ const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
+ const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
+ c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));
+ c.pan={x:(width-b.w*c.zoom)/2-b.x*c.zoom,y:top+(height-top-bottom-b.h*c.zoom)/2-b.y*c.zoom};c.fitted=true;paintMap();save();
 }
 function zoomMap(factor,anchor=null){
  const pane=document.getElementById('map-viewport');if(!pane)return;
@@ -12867,18 +13581,21 @@ function paintMap(){
 }
 function afterCanvasRender(){
  document.body.classList.toggle('sitemap-workspace',state.view==='sitemap');document.body.classList.toggle('map-expanded',state.view==='sitemap'&&canvasUi.expanded);
- if(state.view==='sitemap'&&document.getElementById('map-viewport')){mountFlow();const c=canvasState();if(!c.fitted)fitMap();else paintMap();}
+ if(state.view==='sitemap'&&document.getElementById('map-viewport')){mountFlow();paintReferenceChrome();const c=canvasState();if(!c.fitted)fitMap();else paintMap();}
 }
 function revealDesignSelection(){
  const pane=document.getElementById('map-viewport'),n=selectedNode();if(!pane||!n)return;
- const c=canvasState(),p=c.positions[n.id],size=brickSurfaceSize(n),left=p.x*c.zoom+c.pan.x,top=p.y*c.zoom+c.pan.y;
- if(left<20||left+MAP_SIZE.w*c.zoom>pane.clientWidth-20||top<20||top+size.height*c.zoom>pane.clientHeight-20){c.pan={x:pane.clientWidth/2-(p.x+MAP_SIZE.w/2)*c.zoom,y:pane.clientHeight/2-(p.y+size.height/2)*c.zoom};paintMap();save();}
+ const c=canvasState(),p=c.positions[n.id],size=brickSurfaceSize(n),right=pane.clientWidth-(referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160));
+ const left=p.x*c.zoom+c.pan.x,top=p.y*c.zoom+c.pan.y,w=MAP_SIZE.w*c.zoom,h=size.height*c.zoom;
+ const dx=left<24?24-left:left+w>right-24?right-24-left-w:0;
+ const dy=top<90?90-top:top+h>pane.clientHeight-96?(h>pane.clientHeight-186?90-top:pane.clientHeight-96-top-h):0;
+ if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
-
 function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;return value;}
 
 // Bounded deterministic layouts for at most 60 concept surfaces. No external engine.
 function layoutPositions(d,mode){
+ if(mode==="sections")return sectionLayouts(d).positions;
  const out=Object.create(null),{w,gapX,gapY}=MAP_SIZE,h=Math.max(MAP_SIZE.h,...d.nodes.map(n=>brickSurfaceSize(n,d).height)),dx=w+gapX,dy=h+gapY;
  const ordered=designNodesInOrder(d),roots=d.nodes.filter(n=>!n.parent||!d.nodes.some(x=>x.id===n.parent));
  if(mode==='grid'||mode==='free'){
@@ -12918,20 +13635,9 @@ function canvasWires(d,nodes){
  return `<defs><marker id="map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker></defs>${tree}${nav}`;
 }
 
-function sitemapView(){
- const d=design(),c=canvasState(d),n=selectedNode(),issues=designIssues(d),errors=issues.filter(i=>i.level==='error'),visible=visibleMapNodes(d);
- return `<section class="sitemap-studio"><div class="sitemap-heading"><div><h1>Sitemap & views</h1><p>Structure the screens. Outline the content. Connect the experience.</p></div><div class="row wrap">${button('Import / export','design-transfer','','small','code')}${button('Review boilerplate','design-plan','','primary','wand')}</div></div><div class="sitemap-context"><span>${esc(BLUEPRINTS.find(b=>b.id===d.blueprint)?.name||'Custom outline')}</span><span>${d.nodes.length} surfaces</span><span>${d.links.length} actions</span><span>${errors.length?badge(errors.length+' blockers','bad'):badge('Structure consistent','good')}</span><span class="grow"></span><span class="small muted">Design r${d.revision} · ${project()?'Project outline':'Unattached draft'}</span>${button('Product goal','design-goal','','ghost small')}${button('Canvas settings','flow-settings','','small','settings')}</div>
- <div class="designer-toolbar map-main-toolbar"><div class="row wrap">${button('Add a view','design-add','view','small','plus')}${button('Add screen / dialog','design-add','page','small','layers')}${button('Connect','design-connect','','small','link',d.nodes.length<2?'disabled':'')}</div><div class="row wrap">${button('Undo','design-undo','','ghost small','',!d.history.length?'disabled':'')}${button('Redo','design-redo','','ghost small','',!d.future.length?'disabled':'')}<div class="segmented" role="group" aria-label="Sitemap representation">${[['map','Map'],['preview','View layout'],['issues','Checks'+(errors.length?' · '+errors.length:'')]].map(([id,label])=>`<button data-action="design-mode" data-value="${id}" aria-pressed="${designUi.mode===id}" class="${designUi.mode===id?'selected':''}">${label}</button>`).join('')}</div>${button(canvasUi.expanded?'Exit focus':'Focus mode','canvas-expand','','ghost small','box')}</div></div>
- <div class="map-workspace ${canvasUi.outline?'with-outline':''}">${canvasUi.outline?mapOutline(d):''}<section class="map-main" aria-label="Sitemap editor">${designUi.mode==='map'?sitemapMap(d):designUi.mode==='preview'?designLivePreview(d,n):designCheckView(issues)}</section><aside class="node-inspector polish-inspector" aria-label="Selected surface"><div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Content'],['intent','Intent'],['components','Components'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside></div>
- <div class="map-footer"><span id="map-status-message" role="status">Card position is visual only. Change hierarchy in Edit surface.</span><div class="row wrap">${button('Change blueprint','nav','blueprints','ghost small')}${!project()?button('Create project from outline','design-create','','small','plus'):''}${button('Map help & shortcuts','canvas-help','','ghost small','help')}</div></div><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
-}
-function mapOutline(d){return `<aside class="outline-tree"><div class="section-head"><h3>Structure</h3>${button('Hide','canvas-outline','','ghost small')}</div><p class="tiny muted">Containment and navigation are independent.</p><div class="outline-list" aria-label="Surface outline">${designNodesInOrder(d).map(({n,depth})=>`<button class="outline-node ${n.id===selectedNode()?.id?'selected':''}" style="--depth:${Math.min(depth,5)}" data-action="design-select" data-value="${esc(n.id)}" aria-pressed="${n.id===selectedNode()?.id}">${icon(n.kind==='view'?'box':'file')}<span><strong>${esc(n.label)}</strong><small>${NODE_KINDS[n.kind]}</small></span></button>`).join('')}</div></aside>`;}
-function sitemapMap(d){
- const c=canvasState(d),nodes=visibleMapNodes(d),all=d.nodes.length,hidden=all-nodes.length;const issues=designIssues(d),requirements=allRequirements(d);
- return `${brickViewControl()}<div class="map-tools"><div class="row wrap">${button('Outline','canvas-outline','','ghost small','layers',`aria-pressed="${canvasUi.outline}"`)}<label class="map-layout-label" for="map-layout">Map layout</label><select id="map-layout" data-field="canvas-layout" aria-label="Sitemap layout">${Object.entries(MAP_LAYOUTS).map(([id,name])=>`<option value="${id}" ${id===c.layout?'selected':''}>${name}</option>`).join('')}</select>${button('Arrange','canvas-arrange','','small','grid',c.layout==='free'?'disabled title="Choose an aligned layout first"':'title="Realign all cards without changing the hierarchy"')}</div><div class="row wrap"><label class="map-search">${icon('search')}<input id="map-search" type="search" data-field="canvas-search" value="${esc(canvasUi.search)}" placeholder="Find a surface…" aria-label="Find a surface"></label></div></div><div id="map-search-feedback" class="map-search-feedback" hidden></div><div class="map-secondary-tools"><label><input type="checkbox" data-field="canvas-snap" ${c.snap?'checked':''}> Snap to grid</label><label for="map-edges">Actions</label><select id="map-edges" data-field="canvas-edges"><option value="selected" ${c.edges==='selected'?'selected':''}>Selected surface</option><option value="all" ${c.edges==='all'?'selected':''}>All connections</option><option value="none" ${c.edges==='none'?'selected':''}>Hide connections</option></select><span class="grow"></span><span id="map-count" class="tiny muted">${nodes.length}/${all} visible${hidden?' · '+hidden+' collapsed':''}</span>${hidden?button('Expand all','canvas-expand-all','','ghost small'):''}</div>
- <div id="map-viewport" class="map-viewport" tabindex="0" role="region" aria-label="Interactive sitemap canvas" aria-describedby="map-instructions"><div id="vf-root" aria-label="Vue Flow sitemap"></div>${!nodes.length?`<div class="map-empty"><h2>Start with one useful view.</h2><p>Add a view, or choose a blueprint to arrange your first screens.</p>${button('Add a view','design-add','view','primary','plus')}</div>`:''}<div id="map-mode-message" class="map-mode-message" ${canvasUi.connecting?'':'hidden'}>${canvasUi.connecting?'Choose a destination card to connect.':''}${button('Cancel','canvas-cancel-mode','','small')}</div><div class="map-controls" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','', 'aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" title="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small','','aria-label="Fit all visible cards"')}${button('Focus','canvas-focus','','small','',`aria-label="Focus selected card" ${!nForFocus()?'disabled':''}`)}<details class="map-pan-controls"><summary title="Pan without dragging">Pan</summary><div class="map-pan-menu" role="group" aria-label="Pan without dragging">${button('←','canvas-pan','96,0','small','','aria-label="Pan left"')}${button('↑','canvas-pan','0,96','small','','aria-label="Pan up"')}${button('↓','canvas-pan','0,-96','small','','aria-label="Pan down"')}${button('→','canvas-pan','-96,0','small','','aria-label="Pan right"')}</div></details></div><div class="map-legend"><span><i class="solid-line"></i>Contains</span><span><i class="dashed-line"></i>Typed interaction</span></div></div>
- <div class="map-caption" id="map-instructions"><span><strong>Click</strong> to select · <strong>Edit</strong> on card · <strong>Drag</strong> to move · <strong>Handles</strong> to connect · <strong>Blank canvas</strong> to deselect</span><span>${c.custom?'Custom positions':c.layout==='free'?'Freeform arrangement':'Aligned arrangement'}${c.arrangedFor!==canvasStructure(d)?' · Arrange to include structural edits':''}</span></div>`;
-}
+function sitemapView(){return referenceSitemapView();}
+function mapOutline(d){return referenceStructure(d);}
+function sitemapMap(d){return referenceMap(d);}
 function mapLaneLabels(d){
  const c=canvasState(d);if(c.layout!=='lanes'||c.custom)return '';
  const kinds=['view','page','modal','settings','action','group'].filter(kind=>d.nodes.some(n=>n.kind===kind));
@@ -12962,9 +13668,9 @@ function handleCanvasAction(action,value){
   case 'canvas-child':designUi.selected=value;startNodeForm('page');break;
   case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
-  case 'canvas-outline':canvasUi.outline=!canvasUi.outline;render();break;
+  case 'canvas-outline':referencePaneMode('structure');break;
   case 'canvas-expand':canvasUi.expanded=!canvasUi.expanded;render();fitMap();break;
-  case 'canvas-inspector':canvasUi.inspector=value;render();break;
+  case 'canvas-inspector':referenceUi.panel='inspector';canvasUi.inspector=value;render();break;
   case 'canvas-arrange':arrangeMap(c.layout);break;
   case 'canvas-collapse':toggleMapBranch(value);break;
   case 'canvas-expand-all':canvasCommit(v=>v.collapsed=[],'All branches expanded.');break;
@@ -13017,7 +13723,7 @@ function canvasEdgeRemoveDialog(){const e=design().links.find(e=>e.id===modalDat
 // Pointer movement updates only world coordinates and SVG paths, never the full app.
 function mapPointerDown(event){
  if(event.target.closest('#vf-root'))return;
- const vp=event.target.closest('#map-viewport');if(!vp||event.button!==0||event.target.closest('button,input,select,.map-controls,.map-edge,.map-legend'))return;
+ const vp=event.target.closest('#map-viewport');if(!vp||event.button!==0||event.target.closest('button,input,select,.map-controls,.map-edge,.map-legend,.ref-node-toolbar,.ref-main-dock,.ref-canvas-top,.ref-panel'))return;
  if(canvasUi.connecting||canvasUi.placing)return;
  const card=event.target.closest('.map-node'),c=canvasState();
  if(card&&state.activeRun){notify('Finish or cancel the active simulation before moving a card.');return;}
@@ -13028,7 +13734,7 @@ function mapPointerDown(event){
 function paintMapSelection(){
  document.querySelectorAll('.map-node').forEach(el=>el.classList.toggle('selected',el.dataset.node===designUi.selected));
  const inspector=document.querySelector('.inspector-body'),n=selectedNode();
- if(inspector)inspector.innerHTML=flowInspector(design(),n);if(flowUi.api)syncFlowSelection();
+ if(inspector)inspector.innerHTML=flowInspector(design(),n);if(flowUi.api)syncFlowSelection();paintReferenceChrome();
  const wires=document.getElementById('map-wires');if(wires)wires.innerHTML=canvasWires(design(),visibleMapNodes());
 }
 function mapPointerMove(event){
@@ -13109,13 +13815,14 @@ document.addEventListener('keydown',mapKeyDown);
 document.addEventListener('wheel',mapWheel,{passive:false});
 document.addEventListener('contextmenu',event=>{const n=event.target.closest('.map-node');if(n){event.preventDefault();dispatch('canvas-card-menu',n.dataset.node);}});
 document.addEventListener('dblclick',event=>{const n=event.target.closest('.map-node');if(n&&!event.target.closest('button,.flow-port')){event.preventDefault();startNodeForm('view',n.dataset.node);}});
-document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){designUi.selected=n.dataset.node;paintMapSelection();revealDesignSelection();}});
+document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){designUi.selected=n.dataset.node;paintMapSelection();if(n.matches(':focus-visible')&&!flowUi.dragging)revealDesignSelection();}});
 window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});
 
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
 }
 function rememberModalForm(){modalOriginal=TRACKED_FORMS.has(modalType)?formCheckpoint():null;}
@@ -13150,6 +13857,13 @@ function requirementsResults(p){const list=filteredRequirements(p);if(!list.leng
 function editPolishField(el){if(el.dataset.field!=='polish-requirement-search')return false;productUi.requirementSearch=el.value;document.getElementById('requirement-results').innerHTML=requirementsResults(selectedPrd());document.getElementById('requirement-count').textContent=filteredRequirements(selectedPrd()).length+' / '+selectedPrd().requirements.length;return true;}
 document.addEventListener('click',event=>{if(event.target.closest('[data-action="close"]')&&askDiscardForm()){event.preventDefault();event.stopImmediatePropagation();}},true);
 document.getElementById('modal').addEventListener('cancel',event=>{if(askDiscardForm()){event.preventDefault();event.stopImmediatePropagation();}},true);
+
+// A browser refresh must not silently discard a still-open editing draft.
+window.addEventListener('beforeunload',event=>{
+ if(document.getElementById('modal').open&&modalOriginal&&TRACKED_FORMS.has(modalType)&&formCheckpoint()!==modalOriginal){
+  event.preventDefault();event.returnValue='';
+ }
+});
 
 // Local concept data only. Production PRDs are Markdown; components are source-backed.
 const productUi={tab:'document',prd:null,component:null,story:'default',filter:'',form:null,error:'',returnTo:null};
