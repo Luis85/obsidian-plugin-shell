@@ -1,6 +1,6 @@
 # Obsidian Plugin Shell
 
-**Iteration 04 — reusable authoring and persistence foundation, version 0.4.0.**
+**Runtime authoring milestone — event contracts and reference items, version 0.4.0.**
 
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
@@ -22,11 +22,13 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Vue markup and TypeScript behavior | [Presentation structure](docs/development/PRESENTATION-STRUCTURE.md): components, composables, stores and context |
 | Scaffolding and identity | [Authoring tools](docs/development/AUTHORING-TOOLS.md) and [reviewed setup](docs/development/SETUP-IDENTITY.md) |
 | Plugin-data entities | [Typed CRUD and shared persistence](docs/development/PLUGIN-DATA-ENTITIES.md) |
+| Event contracts and subscriptions | [Typed event authoring](docs/architecture/EVENT-BUS.md), `events:catalog` and `events:check` |
 | Removing demonstrations | [Reviewed example removal](docs/development/EXAMPLE-REMOVAL.md) |
 | Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
 
-**Qualification:** See the [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
-for actual execution scope. Whole-production coverage is now a blocking gate,
+**Qualification:** See the [runtime-authoring record](docs/testing/RUNTIME-AUTHORING.md)
+and historical [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)
+for actual execution scope. Whole-production coverage is a blocking gate,
 with an independent stricter domain/application/features gate. The official Obsidian lint
 integration still installs nested ESLint 9.39.5; zero audit findings do not close
 that [upstream support exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md).
@@ -97,6 +99,11 @@ Open the printed loopback address at `/harness/app/`. This runs the same Vue/Nux
 
 Markdown is canonical for note-backed entities. Explicit plugin-data entities share
 one serialized writer with preferences, without duplicating note-backed records.
+The Documents panel also contains the optional **Items** example: create, rename
+and permanently delete plugin-data items with stable IDs and trimmed 1–120-character
+labels. Views keep separate drafts and refresh committed rows through typed facts.
+Reload and review stale edits; an uncertain save requires investigation and a
+runtime restart before another deliberate write. Items never create vault notes.
 Preview never writes. Editing preserves the note path, ID, creation time,
 handwritten body and unrelated properties. Stale revisions require explicit reload;
 uncertain outcomes are never blindly retried. Native trash is reversible but has no
@@ -164,7 +171,7 @@ bindings, enforced by `npm run check:presentation`. See
 [Presentation structure](docs/development/PRESENTATION-STRUCTURE.md).
 
 Use `npm run examples:remove -- --dry-run` to review removal of the showcase,
-Task and Project while retaining the foundation and your own features. Edited
+Task, Project and Items while retaining the foundation and your own features. Edited
 example files conflict instead of being deleted. Follow the
 [removal guide](docs/development/EXAMPLE-REMOVAL.md), then verify your resulting plugin.
 

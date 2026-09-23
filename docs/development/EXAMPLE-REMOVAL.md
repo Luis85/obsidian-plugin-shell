@@ -13,7 +13,9 @@ The same locked, staged file-plan engine used by setup and makers rechecks hashe
 and preserves concurrent edits. Identical reruns do not rewrite source.
 
 The replacement UI retains preferences, feedback, native view ownership and the
-extension host. Task and Project registrations and the showcase panels disappear.
+extension host. Task, Project and Items registrations and the showcase panels disappear.
+The example event registry and its catalog metadata become empty; custom event
+and listener registrations remain in their separate explicit registries.
 Shared service tests keep test-owned schemas, while example-only UI tests are
 replaced by foundation behavior tests. No vault, note, `data.json`, installed
 plugin or historical specification is deleted. The legacy preference key

@@ -14,7 +14,8 @@
     "harness/styles/simulated.css",
     "harness/styles/host-adapter.css",
     "scripts/makers/custom/registry.mjs",
-    "src/bootstrap/authoring-domains.ts"
+    "src/bootstrap/authoring-domains.ts",
+    "src/bootstrap/event-catalog.ts"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

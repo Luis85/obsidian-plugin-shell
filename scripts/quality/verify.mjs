@@ -20,6 +20,7 @@ const commands = [
   ['scripts/quality/check-architecture.mjs'],
   ['scripts/quality/check-analyzer.mjs'],
   ['scripts/makers/entities.mjs', '--check'],
+  ['scripts/events/catalog.mjs', '--check'],
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage'],
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.production.config.mjs'],
   ['scripts/quality/coverage-inventory.mjs'],

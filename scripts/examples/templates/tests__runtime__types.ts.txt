@@ -1,4 +1,4 @@
-import type { EventInput, ShellEvents } from '../../src/application/events';
+import type { ShellEvents } from '../../src/application/events';
 import type { DocumentCreationService } from '../../src/application/document-service';
 import type { EntityInputs } from '../fixtures/tasks/form';
 import { taskEntity, type TaskValues } from '../fixtures/tasks/entity';
@@ -6,18 +6,55 @@ import { projectEntity } from '../fixtures/projects/entity';
 import { createNoteFeatures } from '../../src/application/note-feature';
 import { taskFeature } from '../fixtures/tasks/definition';
 import { projectFeature } from '../fixtures/projects/definition';
-import { defineCommand, defineRibbon } from '../../src/features/api';
+import {
+  defineCommand,
+  defineRibbon,
+  defineEvent,
+  type EventDefinition,
+  type EventInput,
+  type EventPayload,
+  type EventMapOf,
+  type EventObserver,
+  type EventPublisher,
+  type EventSubscriber,
+} from '../../src/features/api';
 const good: EventInput<ShellEvents> = { type: 'showcase.ping', payload: { sequence: 1 } };
 // @ts-expect-error Unknown event names must be rejected.
 const badName: EventInput<ShellEvents> = { type: 'unknown', payload: {} };
 // @ts-expect-error The name and payload remain correlated.
 const badPayload: EventInput<ShellEvents> = { type: 'showcase.ping', payload: { path: 'x' } };
+const authorFact: EventDefinition<'author.completed', { readonly value: number }> = defineEvent(
+  'author.completed',
+  (value: unknown): value is { readonly value: number } =>
+    typeof value === 'object' && value !== null && 'value' in value && typeof value.value === 'number',
+);
+export function eventTypeContract(
+  observer: EventObserver<EventMapOf<typeof authorFact>>,
+  publisher: EventPublisher<EventMapOf<typeof authorFact>>,
+  subscriber: EventSubscriber<EventPayload<typeof authorFact>>,
+): void {
+  observer.on('author.completed', (payload) => {
+    void payload.value;
+  });
+  subscriber.once((payload) => {
+    void payload.value;
+  });
+  publisher.publish({ type: 'author.completed', payload: { value: 1 } });
+  // @ts-expect-error An observer cannot publish facts.
+  observer.publish({ type: 'author.completed', payload: { value: 1 } });
+  // @ts-expect-error A feature publisher cannot publish another owner's fact.
+  publisher.publish({ type: 'host.metadata.changed', payload: { path: 'private' } });
+  // @ts-expect-error A subscriber cannot acquire another event's publisher.
+  subscriber.publisher(authorFact);
+}
 export function typeContract(documents: DocumentCreationService<EntityInputs>): void {
   // @ts-expect-error Unknown entity keys are rejected.
   documents.prepare('meeting', {}, 'Tasks', 'id');
   // @ts-expect-error Incorrect Task values are rejected.
   documents.prepare('task', { title: 42 }, 'Tasks', 'id');
-  void good; void badName; void badPayload;
+  void good;
+  void badName;
+  void badPayload;
   // Defaults are optional on input; genuinely optional output fields can be omitted.
   taskEntity.parse({ title: 'Task' });
   const task: TaskValues = { title: 'Task', status: 'done', tags: [] };
@@ -35,10 +72,15 @@ export function typeContract(documents: DocumentCreationService<EntityInputs>): 
   projectEntity.parse({ title: 'Task', status: 'todo' });
   // @ts-expect-error Numbers and booleans remain typed, not coerced strings.
   projectEntity.parse({ name: 'Project', budget: '0', archived: 'false' });
-  void task; void due; void missingStatus;
+  void task;
+  void due;
+  void missingStatus;
 }
 export function featureTypeContract(shared: Parameters<typeof createNoteFeatures>[0]): void {
-  const features = createNoteFeatures(shared, register => ({ task: register(taskFeature), project: register(projectFeature) }));
+  const features = createNoteFeatures(shared, (register) => ({
+    task: register(taskFeature),
+    project: register(projectFeature),
+  }));
   void features.repositories.task.create({ title: 'Task', tags: ['work'] }, 'task');
   void features.repositories.project.create({ name: 'Project', budget: 0, archived: false }, 'project');
   // @ts-expect-error Only explicitly registered feature keys exist.
@@ -49,7 +91,7 @@ export function featureTypeContract(shared: Parameters<typeof createNoteFeatures
   void features.repositories.project.create({ name: 'Project', budget: '0' }, 'bad');
   features.dispose();
   // @ts-expect-error Async registration would escape synchronous ownership/rollback.
-  createNoteFeatures(shared, async register => ({ task: register(taskFeature) }));
+  createNoteFeatures(shared, async (register) => ({ task: register(taskFeature) }));
 }
 export function commandTypeContract(): void {
   const open = defineCommand({ id: 'open-example', titleKey: 'command.open', execute() {} });

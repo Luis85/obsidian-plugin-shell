@@ -195,5 +195,31 @@
     "split": "Schaufenster in geteilter Ansicht öffnen",
     "popout": "Ansicht in neues Fenster verschieben",
     "close": "Diese Ansicht schließen"
+  },
+  "items": {
+    "title": "Elemente in Plugin-Daten",
+    "help": "Eine kleine Liste in den Plugin-Daten. Elemente erstellen oder ändern keine Notizen im Vault.",
+    "reload": "Elemente neu laden",
+    "reloaded": "Elemente neu geladen. Deine Entwürfe bleiben erhalten. Prüfe vor dem Speichern die aktuelle Bezeichnung.",
+    "invalid": "Gib eine Bezeichnung mit 1–120 Zeichen ohne äußere Leerzeichen ein.",
+    "labelHint": "1–120 Zeichen. Leerzeichen am Anfang und Ende werden entfernt.",
+    "newLabel": "Bezeichnung des neuen Elements",
+    "create": "Element erstellen",
+    "created": "Element erstellt.",
+    "loading": "Elemente werden geladen…",
+    "empty": "Noch keine Elemente. Erstelle oben dein erstes Element.",
+    "edit": "Element bearbeiten",
+    "editNamed": "Element bearbeiten: {label}",
+    "editing": "Element bearbeiten: {label}",
+    "renameLabel": "Elementbezeichnung",
+    "rename": "Element umbenennen",
+    "renamed": "Element umbenannt.",
+    "delete": "Element löschen…",
+    "deleteTitle": "Dieses Element löschen?",
+    "deleteHelp": "Das ausgewählte Element wird dauerhaft aus den Plugin-Daten gelöscht. Es kann nicht aus dem Vault-Papierkorb wiederhergestellt werden.",
+    "confirmDelete": "Element löschen",
+    "deleted": "Element gelöscht.",
+    "pending": "Diese Aktion wird noch ausgeführt…",
+    "stale": "Dein Entwurf bleibt erhalten. Lade die Elemente neu und prüfe die aktuelle Bezeichnung vor dem erneuten Speichern."
   }
 }

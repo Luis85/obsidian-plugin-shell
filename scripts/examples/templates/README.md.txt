@@ -1,6 +1,6 @@
 # Plugin foundation
 
-The optional showcase, Task and Project features have been removed. Your own features and registrations remain.
+The optional showcase, Task, Project and Items features have been removed. Your own features and registrations remain.
 
 Run `npm run make -- feature bookmarks --entity bookmark` to add a working note-backed feature, or use `npm run make -- --help` for the full catalog. Run `npm run verify` and `npm run test:e2e` after authoring. Native/device checks have separate evidence.
 

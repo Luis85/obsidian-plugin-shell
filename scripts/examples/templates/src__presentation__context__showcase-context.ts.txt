@@ -4,12 +4,12 @@ import type { ModalService } from '../../application/modal-service';
 import type { NoticeService } from '../../application/notice-service';
 import type { StructuredLogger } from '../../application/logging';
 import type { DebugService } from '../../application/debug-service';
-import type { EventPort, ShellEvents } from '../../application/events';
+import type { EventObserver, ShellEvents } from '../../application/events';
 import type { HostActions, LocalPreferences, Diagnostic, Unsubscribe } from '../../application/ports';
 export interface ShowcaseContext {
   identity: { readonly id: string; readonly name: string; readonly version: string };
   preferences: PreferenceService;
-  events: EventPort<ShellEvents>;
+  events: EventObserver<ShellEvents>;
   notifications: NotificationService;
   notices: NoticeService;
   modals: ModalService;

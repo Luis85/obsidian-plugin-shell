@@ -1,0 +1,2 @@
+import type { EventDefinition } from '../application/event-definition';
+export const exampleEvents: readonly EventDefinition[] = [];

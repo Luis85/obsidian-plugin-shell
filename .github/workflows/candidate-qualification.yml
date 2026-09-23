@@ -1,7 +1,7 @@
 name: Candidate qualification
 on:
   push:
-    branches: [build/template-foundation]
+    branches: [build/template-foundation, build/runtime-authoring]
     paths-ignore: ['docs/**', 'README.md', 'AGENTS.md']
   workflow_dispatch:
 permissions:

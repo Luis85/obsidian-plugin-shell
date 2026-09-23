@@ -11,7 +11,7 @@ export function useShowcaseActions() {
   const model = useShowcase();
   const owner = `${model.owner}:modal`; let alive = true;
   onScopeDispose(() => { alive = false; services.modals.closeOwner(owner); services.notices.dismissOwner(owner); });
-  function ping() { services.events.publish({ type: 'showcase.ping', payload: { sequence: model.eventCount + 1 } }); }
+  function ping() { services.showcase.ping(model.eventCount + 1); }
   function notice() { services.notices.info({ owner: `${model.owner}:showcase-notice`, operation: 'example', key: 'feedback.native', native: true, scope: 'view' }); }
   function expected() { services.notices.error({ owner: `${model.owner}:showcase-example`, operation: 'example', key: 'events.expected', native: false, scope: 'view' }); }
   function result(outcome: ModalOutcome<unknown>, announce = true) {

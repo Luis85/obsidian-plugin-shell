@@ -65,7 +65,7 @@ export async function initializePlugin(plugin: Plugin) {
     const settings = new ShellSettingsTab(plugin, { preferences: services.preferences, notifications: services.notifications,
       diagnostics: services.diagnostics, settings: services.authoring.settings, text });
     stopSettings = () => settings.dispose(); plugin.addSettingTab(settings);
-    stopHostEvents = bindHostEvents(plugin, services.events, services.diagnostics, services.scheduler);
+    stopHostEvents = bindHostEvents(plugin, services.hostEvents, services.diagnostics, services.scheduler);
   } catch (error) { dispose(); new Notice(`${plugin.manifest.name} could not start. Check the installed version.`); throw error; }
   return { dispose, diagnosticSnapshot: () => services.diagnostics.current };
 }

@@ -33,7 +33,7 @@ it('[UI-03-08] child render/event failures produce owned fallback and independen
   const f = await componentFixture();
   try {
     await click(f.root, 'Events & feedback');
-    vi.spyOn(f.services.events, 'publish').mockImplementationOnce(() => { throw new Error('child event failed'); });
+    vi.spyOn(f.services.showcase, 'ping').mockImplementationOnce(() => { throw new Error('child event failed'); });
     await click(f.root, 'Publish a typed event');
     expect(f.root.querySelector('[role="alert"]')?.textContent).toContain('rendering error');
     expect(f.observe.mock.calls.map(([entry]) => entry.code)).toEqual(['vue.render']);

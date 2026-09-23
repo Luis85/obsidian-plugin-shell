@@ -6,3 +6,6 @@ export { definePluginDataFeature } from '../application/plugin-data-feature';
 export { defineCommand, defineRibbon } from '../application/command-definitions';
 export { defineLogCatalog } from '../application/logging';
 export { BooleanSetting } from '../application/boolean-setting';
+export { defineEvent } from '../application/event-definition';
+export type { EventDefinition, EventPayload, EventMapOf } from '../application/event-definition';
+export type { EventObserver, EventPublisher, EventSubscriber, EventInput } from '../application/events';

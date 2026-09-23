@@ -116,11 +116,18 @@ test('[UI-I07] responsive and live host theme changes do not remount the view', 
   expect(await page.getByTestId('showcase').count()).toBe(1);
 });
 test('[UI-I08] two views have unique DOM IDs and dispose independently', async ({ page }) => {
-  await open(page); const initial = await page.evaluate(() => window.__SHELL_TEST__.resourceCount());
+  await open(page);
   await page.getByRole('button', { name: 'Documents', exact: true }).click();
+  const initial = await page.evaluate(() => window.__SHELL_TEST__.resourceCount());
+  // Per-view item drafts/subscriptions survive panel navigation and are acquired once.
+  await page.getByRole('button', { name: 'Overview', exact: true }).click();
+  await page.getByRole('button', { name: 'Documents', exact: true }).click();
+  expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(initial);
   await page.evaluate(() => window.__SHELL_TEST__.mountSecond()); await expect(page.getByTestId('showcase')).toHaveCount(2);
   const ids = await page.locator('[data-testid=showcase] [id]').evaluateAll(els => els.map(el => el.id)); expect(new Set(ids).size).toBe(ids.length);
   expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBeGreaterThan(initial);
   await page.evaluate(() => window.__SHELL_TEST__.closeSecond()); await expect(page.getByTestId('showcase')).toHaveCount(1);
   expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(initial);
+  await page.evaluate(() => window.__SHELL_TEST__.dispose());
+  expect(await page.evaluate(() => window.__SHELL_TEST__.resourceCount())).toBe(0);
 });

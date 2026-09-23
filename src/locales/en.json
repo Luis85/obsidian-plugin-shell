@@ -195,5 +195,31 @@
     "split": "Open showcase in a split",
     "popout": "Move view to new window",
     "close": "Close this view"
+  },
+  "items": {
+    "title": "Plugin-data items",
+    "help": "Keep a small list in plugin data. Items do not create or change vault notes.",
+    "reload": "Reload items",
+    "reloaded": "Items reloaded. Your drafts are retained; review the current label before saving.",
+    "invalid": "Enter a label with 1–120 characters after trimming spaces.",
+    "labelHint": "1–120 characters. Spaces at the beginning and end are removed.",
+    "newLabel": "New item label",
+    "create": "Create item",
+    "created": "Item created.",
+    "loading": "Loading items…",
+    "empty": "No items yet. Add your first item above.",
+    "edit": "Edit item",
+    "editNamed": "Edit item: {label}",
+    "editing": "Editing item: {label}",
+    "renameLabel": "Item label",
+    "rename": "Rename item",
+    "renamed": "Item renamed.",
+    "delete": "Delete item…",
+    "deleteTitle": "Delete this item?",
+    "deleteHelp": "This permanently removes the selected item from plugin data. It cannot be restored from the vault trash.",
+    "confirmDelete": "Delete item",
+    "deleted": "Item deleted.",
+    "pending": "Waiting for this action to finish…",
+    "stale": "Your draft is retained. Reload items and review the current label before saving again."
   }
 }

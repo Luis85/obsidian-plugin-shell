@@ -1,7 +1,7 @@
 name: Template authoring
 on:
   push:
-    branches: [main, build/template-foundation]
+    branches: [main, build/template-foundation, build/runtime-authoring]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -29,12 +29,21 @@ jobs:
         run: |
           mkdir -p reports/template-authoring
           set -o pipefail
-          node "$QUALIFIED_NPM" run setup -- --id field-notes --name "Field Notes" --author "Template Qualification" --repo example/field-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
+          node "$QUALIFIED_NPM" run setup -- --id atlas-notes --name "Atlas Notes" --author "Template Qualification" --repo example/atlas-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
       - name: Generate a new business feature through the public maker
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
           node "$QUALIFIED_NPM" run entities:check
+      - name: Extend consumer source and exercise local event and plugin-data authoring
+        run: |
+          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
+          node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- entity rating --feature bookmarks --backend plugin-data --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- event refreshed --feature bookmarks --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- listener observe --feature bookmarks --event refreshed --yes --no-interaction
+          node "$QUALIFIED_NPM" run events:check
       - name: Verify the complete renamed and extended template
         run: |
           set -o pipefail
@@ -44,6 +53,15 @@ jobs:
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
+      - name: Exercise literal source archive without ancestor Git discovery
+        run: |
+          ARCHIVE_ROOT="$RUNNER_TEMP/runtime-authoring-archive"
+          mkdir -p "$ARCHIVE_ROOT"
+          git archive --format=tar HEAD | tar -x -C "$ARCHIVE_ROOT"
+          export GIT_CEILING_DIRECTORIES="$RUNNER_TEMP"
+          cd "$ARCHIVE_ROOT"
+          if git rev-parse --show-toplevel; then exit 1; fi
+          node scripts/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
           set -o pipefail
@@ -72,6 +90,12 @@ jobs:
             !reports/**/*.woff
             !reports/**/*.woff2
             src/features/bookmarks/
+            src/features/reading/
+            src/bootstrap/events.ts
+            src/bootstrap/event-catalog.ts
+            src/bootstrap/authoring.ts
+            scripts/makers/custom/
+            tests/runtime/generated/
             tests/runtime/generated/bookmarks-bookmark.test.ts
             tests/fixtures/entities/bookmarks-bookmark.md
             src/bootstrap/features.ts

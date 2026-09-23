@@ -83,6 +83,23 @@ write. Repositories and preferences suppress late events after disposal.
 
 ## Verification scope
 
+The optional `src/features/items` reference uses this backend in the Documents
+panel. Its actions own create, rename and confirmed permanent deletion; the view
+owns drafts, pending/error feedback and a committed projection. Labels trim
+surrounding whitespace and must contain 1–120 characters. Task note filenames keep
+their separate verbatim-title rule.
+
+Each view subscribes before its first query. A generation guard prevents an old
+query completion from replacing newer committed rows. Another view's update
+refreshes the list while preserving the original edit snapshot and draft. A stale
+save requires explicit reload/review before applying the retained draft. An
+uncertain save disables further writes and instructs the user to investigate and
+restart; querying cannot clear the shared writer's uncertainty lockout.
+
+`tests/runtime/items.test.ts`, `items-components.test.ts` and the served item
+scenarios exercise actual actions, repositories and UI. The example-removal plan
+owns the item source, registrations, locales and tests alongside Task/Project.
+
 `tests/runtime/plugin-data.test.ts` exercises real shared services, registration,
 CRUD, revisions, concurrent preferences, uncertain writes, subscriber failures and
 disposal. `plugin-data-preservation.test.ts` covers corrupt/future schemas,

@@ -13,6 +13,17 @@ The owner requested the first runnable iteration up to an openable showcase view
 
 ## Requirements remain in force
 
+**Runtime authoring extension:** Complete narrow publication/observation contracts,
+explicit event descriptor composition and source-derived catalog/check commands.
+The optional Items reference uses the existing plugin-data backend for stable-ID
+create/rename/delete, with trimmed 1–120-character labels and separate per-view
+drafts. It shares the preferences writer and refreshes committed projections from
+typed facts. Task remains a distinct Markdown workflow. See the
+[implementation and acceptance plan](../development/RUNTIME-AUTHORING-PLAN.md).
+This work addresses EVT-03/05/06/11/16 and EXA-01–03; execution evidence is recorded
+separately and does not promote all historical acceptance cases. PR #8's pending
+release executor is outside this independent branch.
+
 **Iteration 04 extension:** Complete the local maker catalog with primitive reuse,
 explicit local custom registry, domain-only definitions and useful integrated
 source. Remove optional demonstrations through reviewed file/registration ownership

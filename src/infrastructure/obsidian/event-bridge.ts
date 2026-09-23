@@ -1,9 +1,9 @@
 import { TFile, TFolder, type EventRef, type Plugin } from 'obsidian';
-import type { EventPort, ShellEvents } from '../../application/events';
+import type { EventPublisher, ShellEvents } from '../../application/events';
 import type { ErrorReporter, TimerScheduler, Unsubscribe } from '../../application/ports';
 
 /** Native observations invalidate projections; they never claim a committed use case. */
-export function bindHostEvents(plugin: Plugin, events: EventPort<ShellEvents>, errors: ErrorReporter, timers: TimerScheduler,
+export function bindHostEvents(plugin: Plugin, events: EventPublisher<Pick<ShellEvents, Extract<keyof ShellEvents, `host.${string}`>>>, errors: ErrorReporter, timers: TimerScheduler,
   options: { modifications?: boolean; metadata?: boolean; layoutDelay?: number } = {}): Unsubscribe {
   let disposed = false; let started = false; let revision = 0; let layoutTimer: Unsubscribe | undefined;
   const owned: { source: { offref(ref: EventRef): void }; ref: EventRef }[] = [];

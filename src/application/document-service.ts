@@ -1,7 +1,7 @@
 import { validateDocumentTitle, validateFolder } from '../domain/paths';
 import { failure, success, type Result } from '../domain/outcome';
 import type { DocumentWriter, ErrorReporter } from './ports';
-import type { EventPort, ShellEvents } from './events';
+import type { EventPublisher, ShellEvents } from './events';
 export type Frontmatter = Readonly<Record<string, string | number | boolean | readonly string[]>>;
 export interface DocumentDefinition<I> {
   project(input: I): Result<{ readonly title: string; readonly properties: Frontmatter; readonly body: string; readonly schemaVersion?: number }>;
@@ -16,7 +16,7 @@ export class DocumentCreationService<Inputs> {
   constructor(
     private readonly definitions: { [K in keyof Inputs]: DocumentDefinition<Inputs[K]> },
     private readonly writer: DocumentWriter,
-    private readonly events: EventPort<ShellEvents>,
+    private readonly events: EventPublisher<Pick<ShellEvents, 'documents.created'>>,
     private readonly serialize: (properties: Frontmatter, body: string) => string,
     private readonly newId: () => string,
     private readonly now: () => string,

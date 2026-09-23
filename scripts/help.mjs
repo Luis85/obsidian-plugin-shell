@@ -7,6 +7,8 @@ npm run make -- --list    Discover integrated source recipes and their prerequis
 npm run examples:remove -- --dry-run  Review optional-example removal without deleting user features
 npm run entities:check    Validate actual registered entity/document definitions
 npm run entities:catalog Print the derived entity catalog (also supports --json)
+npm run events:check      Check registered event contracts, metadata and references
+npm run events:catalog    Print the source-derived event catalog (also supports --json)
 npm run dev:ui            Real plugin UI in the browser
 npm run build:local       Build/install to .dev-vault without touching notes or security settings
 npm run dev:local         Rebuild and install successful changes; manually reload Obsidian

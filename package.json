@@ -83,7 +83,9 @@
     "check:test-quality": "node scripts/quality/check-test-quality.mjs",
     "check:repository": "node scripts/quality/check-repository.mjs",
     "test:mutation": "node scripts/quality/mutation-smoke.mjs",
-    "release:plan": "node scripts/release/promotion-plan.mjs"
+    "release:plan": "node scripts/release/promotion-plan.mjs",
+    "events:catalog": "node scripts/events/catalog.mjs",
+    "events:check": "node scripts/events/catalog.mjs --check"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

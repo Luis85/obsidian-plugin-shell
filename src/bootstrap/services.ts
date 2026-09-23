@@ -10,7 +10,9 @@ import { taskDefinition, type EntityInputs } from '../features/tasks/form';
 import { createFeatures } from './features';
 import { createAuthoring } from './authoring';
 import { authoringMessages } from './authoring-locales';
-import type { ShellEvents } from '../application/events';
+import type { EventPublisher, ShellEvents } from '../application/events';
+import { runtimeEventDefinitions } from './events';
+import { showcasePing } from '../features/showcase/events';
 import type { ServiceAdapters } from '../application/ports';
 import { TypedEventBus } from '../infrastructure/events/typed-event-bus';
 import { Diagnostics } from '../infrastructure/diagnostics';
@@ -44,7 +46,13 @@ export async function createServices(adapters: ServiceAdapters) {
       host: adapters.host.kind,
     });
     const scheduler = adapters.scheduler ?? createTimerScheduler();
-    const events = new TypedEventBus<ShellEvents>(diagnostics);
+    const events = new TypedEventBus<ShellEvents>(diagnostics, runtimeEventDefinitions);
+    const observer = events.observer();
+    const hostEvents: EventPublisher<Pick<ShellEvents, Extract<keyof ShellEvents, `host.${string}`>>> = {
+      publish: event => events.publish(event),
+    };
+    const showcasePublisher = events.publisher(showcasePing);
+    const showcase = { ping(sequence: number) { showcasePublisher.publish({ type: 'showcase.ping', payload: { sequence } }); } };
     releases.push(() => events.dispose());
     const pluginData = new PluginDataStore(adapters.settings, diagnostics);
     releases.push(() => pluginData.dispose());
@@ -100,18 +108,20 @@ export async function createServices(adapters: ServiceAdapters) {
     const { repositories } = features;
     logger.info('runtime.started', 'runtime.initialize');
     const authoring = createAuthoring({
-      events,
+      events: observer,
       modals,
       notices: notifications,
       preferences,
       diagnostics,
       repositories,
-    });
+    }, definition => events.publisher(definition), definition => events.subscriber(definition));
     releases.push(() => authoring.dispose());
     await authoring.initialize();
     return {
       identity: pluginIdentity,
-      events,
+      events: observer,
+      hostEvents,
+      showcase,
       diagnostics,
       logger,
       debugging,

@@ -1,7 +1,7 @@
 # Typed event bus and Obsidian integration
 
 > **Contract:** PRD 0.3 extension; requirements EVT-01–16.  
-> **Status:** Architecture and behavior specification, not an implemented library.  
+> **Status:** Runtime bus, scoped authoring ports, registered descriptors, catalog/checker and makers implemented. This document retains the complete target; qualification records state the executed scope.
 > **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
 
 ## 1. Purpose and boundary
@@ -56,7 +56,7 @@ src/
 
 **EVT-04 — Correlated types.** Event names are literal keys with associated payload types. `on`, `once`, and `publish` preserve the correlation between a name and its exact payload, including when event types are combined into unions. Unknown names and incorrect payloads fail TypeScript tests. Do not expose a catch-all string index, public `any`, or an unchecked generic `emit(name, unknown)` overload to erase this guarantee. [S09]
 
-The following illustrates the proposed consumer experience; it is not executable code in the current repository:
+The current `EventPublisher<FactMap>` accepts the correlated publication union; `EventObserver<FactMap>` supplies `on` and `once` without publication or capability-acquisition methods:
 
 ```ts
 interface TaskEvents {
@@ -73,7 +73,7 @@ taskEvents.publish({
 });
 
 // Injected subscriber facade; the owner retains the disposer.
-const unsubscribe = taskEvents.on('tasks.item-created', ({ payload }) => {
+const unsubscribe = taskObservers.on('tasks.item-created', payload => {
   taskProjection.invalidate(payload.itemId);
 });
 
@@ -81,13 +81,52 @@ const unsubscribe = taskEvents.on('tasks.item-created', ({ payload }) => {
 unsubscribe();
 ```
 
-The public publication input is a mapped discriminated union of `{ type, payload }`, rather than two unrelated unions. Subscribers receive a read-only envelope with that pair and bus-provided metadata. Tests cover widened union inputs, not only obvious misspelled literals.
+The public publication input is a mapped discriminated union of `{ type, payload }`, rather than two unrelated unions. Current subscribers receive frozen typed payload snapshots. The retained envelope and bus-generated metadata target in section 5 remains separate from this authoring milestone. Tests cover widened union inputs, not only obvious misspelled literals.
 
 **EVT-05 — Explicit composition.** Core, host, and feature maps/descriptors are composed through explicit imports. Duplicate event names are rejected during catalog validation, including duplicates with identical payload shapes; type intersections alone do not detect every collision. Adding an event never requires editing the bus algorithm or widening a global string map.
 
 **EVT-06 — Event catalog.** Each descriptor identifies literal name, owner, meaning, payload contract/version, publisher, expected subscribers, origin, sensitivity classification, and delivery notes. Generate the human-readable catalog from registered descriptors using `events:catalog`; `events:check` detects drift, duplicates, and invalid references. Do not maintain a second hand-edited payload schema that can diverge silently. The runtime needs a compact descriptor/validation registry, not all explanatory documentation strings bundled into the plugin.
 
 Names use feature/category prefixes and describe completed facts, for example `example.item-created` or `host.vault.entry-renamed`. Breaking payload changes require an explicit contract/version decision. This is a local process contract; catalog versioning does not imply durable replay or public cross-plugin compatibility.
+
+### Current descriptor authoring and catalog commands
+
+`defineEvent(literalName, payloadTypeGuard)` creates the compact immutable runtime
+contract. Add it to `featureEvents` in `src/bootstrap/events.ts`; core, host and
+removable example descriptors are composed separately. Duplicate names fail even
+when their guards or payload shapes match. Generated facts require no augmentation
+of `ShellEvents` and no changes to the bus algorithm.
+
+Bootstrap supplies `bus.publisher(descriptor)` only to its declaring action and
+`bus.subscriber(descriptor)` only to its listener factory. The latter returns an
+`EventSubscriber<Payload>` with `on(listener)` and `once(listener)`; it has neither
+an arbitrary event-name parameter nor publication rights. Public runtime services
+expose an observer facade only. Returned disposers remain owned by the feature or
+view; closing a view does not dispose the runtime bus. These are compile-time
+capability boundaries, not protection from deliberately malicious plugin code.
+
+`npm run events:catalog` prints the registered human-readable catalog;
+`-- --json` prints the same contracts as JSON. `npm run events:check` fails for
+runtime duplicates, absent catalog entries, duplicate documentation, invalid
+registered references, invalid metadata and ambiguous source payload declarations.
+Payload text is inferred by the actual TypeScript checker from the same guard
+used at runtime, rather than a parallel payload schema. The catalog includes owner,
+meaning, contract version, publisher, subscribers, origin, sensitivity and delivery.
+Explanatory catalog modules are imported by tooling and tests, never by the
+production runtime registry.
+
+The event maker registers the descriptor and its documentation, then injects only
+its publisher into the generated demonstration command. The listener maker injects
+only its declared subscriber. Both preserve reviewed plans, exact reruns and edited
+source conflicts. Their generated tests execute the production bus and release
+owned subscriptions. A demonstration command is not a persistence success fact;
+a real business action must publish only after its committed write.
+
+The bus clones first, validates that exact snapshot against registered guards,
+then freezes and dispatches it. Unknown runtime names and invalid values report a
+safe diagnostic without delivery. Registered reference identity is checked when
+creating a scoped capability. The legacy unconstrained constructor remains useful
+for isolated typed bus tests; production always supplies explicit descriptors.
 
 ## 4. Delivery semantics
 
