@@ -72,7 +72,7 @@
     },
     {
       "id": "FOUNDATION-03",
-      "files": ["tests/runtime/components.test.ts", "tests/runtime/settings-components.test.ts", "tests/runtime/native-lifecycle.test.ts", "tests/runtime/ownership-failures.test.ts", "tests/runtime/view-state.test.ts"],
+      "files": ["tests/runtime/components.test.ts", "tests/runtime/mount-lifecycle.test.ts", "tests/runtime/settings-components.test.ts", "tests/runtime/native-lifecycle.test.ts", "tests/runtime/ownership-failures.test.ts", "tests/runtime/view-state.test.ts"],
       "mode": "deterministic-component-lifecycle",
       "scope": "Real services/actions and Vue components, settings, bootstrap, owned cleanup and independent error observation."
     },

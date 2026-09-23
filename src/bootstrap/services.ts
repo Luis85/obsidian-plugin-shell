@@ -33,8 +33,9 @@ export async function createServices(adapters: ServiceAdapters) {
   const features = createFeatures({ storage: adapters.documents, codec: markdownCodec, events, newId: adapters.newId, now: adapters.now, errors: diagnostics }, preferences);
   const { repositories } = features;
   logger.info('runtime.started', 'runtime.initialize');
+  let disposed = false;
   return { identity: pluginIdentity, events, diagnostics, logger, debugging, scheduler, preferences, i18n, modals, notices: notifications, notifications, documents, repositories, host: adapters.host, local: adapters.local, newId: adapters.newId,
-    dispose() { off(); documents.dispose(); features.dispose(); modals.dispose(); notifications.dispose(); preferences.dispose(); events.dispose(); adapters.host.dispose?.(); logger.dispose(); diagnostics.dispose(); },
+    dispose() { if (disposed) return; disposed = true; off(); documents.dispose(); features.dispose(); modals.dispose(); notifications.dispose(); preferences.dispose(); events.dispose(); i18n.dispose(); adapters.host.dispose?.(); logger.dispose(); diagnostics.dispose(); },
   };
 }
 export type Services = Awaited<ReturnType<typeof createServices>>;

@@ -22,8 +22,9 @@ export function bindHostTheme(root: HTMLElement, observeOwner?: ObserveOwnerChan
   let stop: Unsubscribe | undefined;
   const close = () => {
     if (closed) return;
-    closed = true; observer?.disconnect(); stop?.();
-    root.classList.toggle('dark', original.dark); root.classList.toggle('light', original.light);
+    closed = true;
+    try { observer?.disconnect(); stop?.(); }
+    finally { root.classList.toggle('dark', original.dark); root.classList.toggle('light', original.light); }
   };
   try { refresh(); stop = observeOwner?.(refresh); return close; }
   catch (error) { close(); throw error; }

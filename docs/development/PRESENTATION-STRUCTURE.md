@@ -50,6 +50,15 @@ the injection key and lookup. Neither contracts, composables nor stores import
 Vue component files. Bootstrap assembles the root component and injects the actual
 services; components compose other components through explicit imports.
 
+Each mount owns its Vue app, Pinia scope, i18n instance and portal surface. Its
+locale follows the canonical preference service; closing one view does not
+dispose the runtime translator used by native notices or another view. Bootstrap
+finishes mounting into a detached surface before attaching it to the host. The
+surface uses `display: contents` to preserve layout, and teleports stay inside that
+owned surface. Acquired resources are released after a failed attachment or
+earlier initialization failure. This is not a guarantee of recovery from arbitrary
+internal Vue renderer corruption.
+
 For a new feature, start with its framework-free entity/document definition under
 `src/features/<name>`. Add a composable only when presentation behavior is needed,
 then a small SFC under `components` (or `components/panels`). Do not move business

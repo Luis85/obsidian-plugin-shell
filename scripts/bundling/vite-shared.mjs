@@ -6,7 +6,7 @@ import ui from '@nuxt/ui/vite';
 import { cssOwnership } from './css-ownership.mjs';
 const root = process.cwd();
 const profile = JSON.parse(readFileSync(resolve(root, 'scripts/bundling/ui-adaptation.json'), 'utf8'));
-const replacements = new Set(Object.keys(profile.replaced).map(p => resolve(root, p).replaceAll('\\', '/')));
+const replacements = new Map(Object.keys(profile.replaced).map((p, index) => [resolve(root, p).replaceAll('\\', '/'), index]));
 function staticVendor() {
   return { name: 'plugin-shell-static-ui', enforce: 'pre',
     buildStart() {
@@ -15,7 +15,10 @@ function staticVendor() {
         if (actual !== expected) throw new Error(`Unqualified Nuxt UI module: ${path}`);
       }
     },
-    resolveId(id) { if (replacements.has(id.replaceAll('\\', '/'))) return resolve(root, 'src/infrastructure/ui/static-plugin.ts'); },
+    resolveId(id) {
+      const replacement = replacements.get(id.replaceAll('\\', '/'));
+      if (replacement !== undefined) return `${resolve(root, 'src/infrastructure/ui/static-plugin.ts')}?qualified-ui=${replacement}`;
+    },
   };
 }
 export function sharedConfig() {

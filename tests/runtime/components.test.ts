@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type MockInstance } from 'vitest';
 import { componentFixture, click, input, field, button, settle } from './component-fixture';
 import { failure } from '../../src/domain/outcome';
 import { deferred } from './helpers';
 import { mountShowcase } from '../../src/bootstrap/mount-ui';
-afterEach(() => { document.body.replaceChildren(); });
+let warnings: string[]; let warningSpy: MockInstance;
+beforeEach(() => { warnings = []; warningSpy = vi.spyOn(console, 'warn').mockImplementation(message => { warnings.push(String(message)); }); });
+afterEach(() => { warningSpy.mockRestore(); document.body.replaceChildren(); expect(warnings, 'Every Vue/console warning is unexpected in these real-component cases').toEqual([]); });
 it('[UI-03-01] real panels preview exact Markdown, commit once and retain success after failed opening', async () => {
   const f = await componentFixture();
   try {
@@ -40,13 +42,31 @@ it('[UI-03-08] child render/event failures produce owned fallback and independen
 });
 it('[UI-03-09] failed mounting restores theme ownership and a later independent mount remains usable', async () => {
   const f = await componentFixture(); const root = document.createElement('div'); root.className = 'user-owned dark'; document.body.append(root);
-  const insert = vi.spyOn(root, 'insertBefore').mockImplementation(() => { throw new Error('DOM mount failed'); });
+  const baseline = f.services.events.size; let mountedListeners = 0;
+  const insert = vi.spyOn(root, 'insertBefore').mockImplementation(() => { mountedListeners = f.services.events.size; throw new Error('DOM mount failed'); });
   try {
     expect(() => mountShowcase(root, f.services)).toThrow('DOM mount failed');
+    expect(mountedListeners).toBeGreaterThan(baseline); expect(f.services.events.size).toBe(baseline); expect(root.children).toHaveLength(0);
     expect(root.classList.contains('dark')).toBe(true); expect(root.classList.contains('light')).toBe(false); expect(root.classList.contains('user-owned')).toBe(true);
     insert.mockRestore(); const close = mountShowcase(root, f.services); await settle();
     expect(root.querySelector('[data-testid="showcase"]')).not.toBeNull(); close(); close();
   } finally { insert.mockRestore(); root.remove(); f.dispose(); }
+});
+it('[UI-03-13] closing a sibling view or failed attachment cannot dispose runtime translation or stop another view locale', async () => {
+  const f = await componentFixture(); const root = document.createElement('div'); document.body.append(root);
+  const runtimeDispose = vi.spyOn(f.services.i18n, 'dispose'); const close = mountShowcase(root, f.services);
+  try {
+    f.close(); expect(runtimeDispose).not.toHaveBeenCalled();
+    const failedRoot = document.createElement('div'); document.body.append(failedRoot);
+    const failedInsert = vi.spyOn(failedRoot, 'insertBefore').mockImplementation(() => { throw new Error('failed sibling attachment'); });
+    try { expect(() => mountShowcase(failedRoot, f.services)).toThrow('failed sibling attachment'); expect(runtimeDispose).not.toHaveBeenCalled(); }
+    finally { failedInsert.mockRestore(); failedRoot.remove(); }
+    await f.services.preferences.update({ locale: 'de' }); await settle();
+    expect(root.querySelector('[data-testid="showcase"]')?.getAttribute('lang')).toBe('de'); expect(root.textContent).toContain('Dokumente');
+    expect(f.services.i18n.global.t('nav.documents')).toBe('Dokumente');
+    close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(0);
+  } finally { close(); root.remove(); f.dispose(); f.services.dispose(); }
+  expect(runtimeDispose).toHaveBeenCalledOnce(); runtimeDispose.mockRestore();
 });
 it('[UI-03-10] runtime recovery stays visible inline with a keyboard button and single-flight owner action', async () => {
   const f = await componentFixture(); const available = deferred<boolean>();
