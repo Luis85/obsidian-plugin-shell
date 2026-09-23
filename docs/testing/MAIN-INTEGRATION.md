@@ -15,7 +15,7 @@ release publication, tag or permission change is involved.
 | Package scripts | Retain both event catalog/check commands and `release:operate` |
 | Example ownership | Recompute only the merged README's reviewed SHA-256; keep complete Items/example ownership and the combined foundation README |
 
-The merge does not change production TS/Vue/styles or the dependency lockfile.
+The PR #8 merge does not change production TS/Vue/styles or the dependency lockfile.
 The newly available readiness ledger now reflects the actual event and item
 implementations without promoting every legacy acceptance row.
 
@@ -38,8 +38,13 @@ declarations to 26.6.1, Undici declarations to 8.9.0, and records six bundled
 optional Tailwind WASM entries. The runtime stays Node 24.21.0/npm 11.19.1;
 new declaration APIs must not be inferred to exist on that runtime. The owner
 requested merging compatible dependency updates. The branch was refreshed
-against current main to `d4fdda1099ec7e6f098c462e874468af299862dc`; renewed
-qualification is required before merging that exact head.
+against current main to `d4fdda1099ec7e6f098c462e874468af299862dc`. All ten refreshed
+checks passed, including the exact Node 24.21.0/npm 11.19.1 Windows/Linux matrix,
+showcase and full generated-consumer qualification. The exact checked head was
+merged as `525ee264abf5f532e10592ea5d5f694e3c658abe`; main was fast-forwarded and
+that dependency change was integrated into PR #9. This deliberately accepts the
+declaration update for the tested code; it neither upgrades Node nor qualifies
+unexercised Node 26 APIs. [Refreshed consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35875932657).
 
 [PR #7](https://github.com/Luis85/obsidian-plugin-shell/pull/7) remains blocked.
 Fresh registry metadata reports `typescript-eslint` and its parser at 8.70.1,
