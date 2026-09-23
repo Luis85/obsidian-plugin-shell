@@ -63,7 +63,23 @@
     "docs/concepts/companion/src/unified-library.js",
     "docs/concepts/companion/src/workflow-actions.js",
     "docs/concepts/companion/src/workflow-model.js",
-    "docs/concepts/companion/src/workflow-views.js"
+    "docs/concepts/companion/src/workflow-views.js",
+    "docs/concepts/companion/src/bricks.css",
+    "docs/concepts/companion/src/canvas.css",
+    "docs/concepts/companion/src/connection.css",
+    "docs/concepts/companion/src/design.css",
+    "docs/concepts/companion/src/flow.css",
+    "docs/concepts/companion/src/library.css",
+    "docs/concepts/companion/src/product.css",
+    "docs/concepts/companion/src/reference.css",
+    "docs/concepts/companion/src/surface.css",
+    "docs/concepts/companion/src/unified.css",
+    "docs/concepts/companion/src/workflow.css",
+    "docs/concepts/companion/vendor/pinia.iife.prod.js",
+    "docs/concepts/companion/vendor/vue-flow-core.iife.js",
+    "docs/concepts/companion/vendor/vue-flow.css",
+    "docs/concepts/companion/vendor/vue-flow.scoped.css",
+    "docs/concepts/companion/vendor/vue.runtime.global.prod.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -142,7 +158,8 @@
       {
         "name": "companion-concept",
         "patterns": [
-          "docs/concepts/companion/src/**"
+          "docs/concepts/companion/src/**",
+          "docs/concepts/companion/vendor/**"
         ]
       }
     ],

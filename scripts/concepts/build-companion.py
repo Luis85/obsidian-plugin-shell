@@ -53,17 +53,30 @@ def build(output: Path, check: bool = False):
  change("document.getElementById('modal').innerHTML=(factories[modalType]", "document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]")
  # Insert the new modules before the final render, so no runtime override/eval is needed.
  modules=['state-safety.js','surface-view.js','edge-editing.js','unified-library.js','spatial-model.js','spatial-runtime.js','reference-model.js','reference-views.js','reference-content.js','reference-actions.js','library-model.js','library-views.js','library-actions.js','brick-model.js','brick-views.js','brick-actions.js','connection-model.js','connection-views.js','connection-menu.js','connection-actions.js','flow-model.js','flow-views.js','flow-actions.js','flow-runtime.js','flow-edge.js','workflow-model.js','workflow-views.js','workflow-actions.js','canvas-model.js','canvas-layout.js','canvas-view.js','canvas-actions.js','canvas-pointer.js','interaction-polish.js','product-model.js','component-views.js','prd-views.js','product-actions.js','product-plan.js','design-model.js','design-plan.js','design-views.js','design-dialogs.js','design-actions.js']
- # Register exactly the fragments this non-module browser assembly executes.
- inputs=set(modules+['brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js'])
+ # Register exact JS/CSS inputs, including retained hash-verified upstream CSS.
+ styles=['design.css','product.css','canvas.css','workflow.css','flow.css','connection.css','bricks.css','library.css','reference.css','unified.css','surface.css']
+ vendor_scripts=['vue.runtime.global.prod.js','pinia.iife.prod.js','vue-flow-core.iife.js']
+ vendor_inputs=vendor_scripts+['vue-flow.css','vue-flow.scoped.css']
+ source_inputs=modules+['brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js']+styles
+ inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}
  config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text())
- prefix='docs/concepts/companion/src/'
- registered={entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix)}
- if inputs!=registered or inputs!={file.name for file in (ROOT/'src').glob('*.js')}:
+ prefix='docs/concepts/companion/'
+ registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix)]
+ actual={file.relative_to(ROOT).as_posix() for folder in ['src','vendor'] for file in (ROOT/folder).rglob('*') if file.suffix in {'.js','.css'}}
+ if inputs!=set(registered) or len(registered)!=len(inputs) or inputs!=actual:
   raise ValueError('Concept assembly/analyzer entry inventory differs; do not hide unassembled source')
+ # Pin the provenance manifest too: edits cannot legitimize altered vendor bytes.
+ provenance=(ROOT/'vendor/provenance.json').read_bytes()
+ if hashlib.sha256(provenance).hexdigest()!='96ecfefb110fee7f89c3276bc672c2b5f866a6d1cdc9f9e880fe6ffb5e00e5ea':
+  raise ValueError('Unreviewed vendor provenance')
+ for entry in json.loads(provenance)['files']:
+  raw=(ROOT/'vendor'/entry['path']).read_bytes()
+  if len(raw)!=entry['bytes'] or hashlib.sha256(raw).hexdigest()!=entry['sha256']:
+   raise ValueError('Unreviewed vendor input: '+entry['path'])
  extension='\n'.join((ROOT/'src'/m).read_text() for m in modules)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
  change('<script>','<script>\n'+(ROOT/'src/brick-catalog.js').read_text()+'\n'+(ROOT/'src/catalog.js').read_text()+'\n'+(ROOT/'src/canvas-catalog.js').read_text()+'\n'+(ROOT/'src/flow-catalog.js').read_text()+'\nlet dialogReturnFocus=null;\n')
- change('</style>',(ROOT/'src/design.css').read_text()+(ROOT/'src/product.css').read_text()+(ROOT/'src/canvas.css').read_text()+(ROOT/'src/workflow.css').read_text()+(ROOT/'src/flow.css').read_text()+(ROOT/'src/connection.css').read_text()+(ROOT/'src/bricks.css').read_text()+(ROOT/'src/library.css').read_text()+(ROOT/'src/reference.css').read_text()+(ROOT/'src/unified.css').read_text()+(ROOT/'src/surface.css').read_text()+'\n</style>')
+ change('</style>',''.join((ROOT/'src'/name).read_text() for name in styles)+'\n</style>')
  # Local pinned vendors only. Preserve upstream licenses and no runtime requests.
  vendor=ROOT/'vendor'
  css=(vendor/'vue-flow.scoped.css').read_text()
@@ -79,7 +92,7 @@ def build(output: Path, check: bool = False):
    if text.count(old)!=1:raise ValueError('Vue Flow environment replacement no longer matches')
    text=text.replace(old,'productionEnvs.includes("production" || "")',1)
   return text.replace('</script','<\\/script')
- bundles='\n'.join('<script data-vendor="'+name+'">'+vendor_text(name)+'</script>' for name in ['vue.runtime.global.prod.js','pinia.iife.prod.js','vue-flow-core.iife.js'])
+ bundles='\n'.join('<script data-vendor="'+name+'">'+vendor_text(name)+'</script>' for name in vendor_scripts)
  s=s.replace('<script>',bundles+'\n<script>',1)
  notices=(vendor/'THIRD_PARTY_NOTICES.txt').read_text().replace('--','—')
  s=s.replace('</head>', '<!--\n'+notices+'\n-->\n</head>',1)

@@ -7,19 +7,19 @@ import { spawnSync } from 'node:child_process';
 
 // Use the repository's real zone contract and pinned analyzer. No exclusions,
 // suppressions or production threshold changes are needed for concept sources.
-async function probe(sources, transform = value => value) {
+async function probe(sources, transform = value => value, { full = false, entry = Object.keys(sources) } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'companion-boundary-'));
   try {
     const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
     const boundaries = transform(structuredClone(config.boundaries));
-    await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry: Object.keys(sources), boundaries }));
+    await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry, boundaries }));
     await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'companion-boundary-fixture', type: 'module' }));
     for (const [path, source] of Object.entries(sources)) {
       const target = join(root, path);
       await mkdir(dirname(target), { recursive: true });
       await writeFile(target, source);
     }
-    const run = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code', '--boundary-violations'], {
+    const run = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code', ...(full ? [] : ['--boundary-violations'])], {
       cwd: root, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024,
       env: { ...process.env, FALLOW_TELEMETRY_DISABLED: '1', GIT_CEILING_DIRECTORIES: root },
     });
@@ -27,7 +27,7 @@ async function probe(sources, transform = value => value) {
     const report = JSON.parse(run.stdout);
     assert.equal(report.kind, 'dead-code');
     assert.equal(report.schema_version, 9);
-    return { status: run.status, summary: report.summary, diagnostic: run.stdout + run.stderr };
+    return { status: run.status, summary: report.summary, unusedFiles: report.unused_files, diagnostic: run.stdout + run.stderr };
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -62,4 +62,19 @@ test('[CONCEPT-OUTBOUND] concept implementation cannot become a runtime adapter'
   });
   assert.notEqual(result.status, 0, result.diagnostic);
   assert.ok(result.summary.boundary_violations > 0, result.diagnostic);
+});
+
+
+test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still rejects extra files', async () => {
+  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const entry = config.entry.filter(path => path.startsWith('docs/concepts/companion/'));
+  const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
+  assert.equal(entry.length, 64, '48 maintained JS, 11 maintained CSS and 5 verified vendor inputs');
+  const valid = await probe(sources, value => value, { full: true, entry });
+  assert.equal(valid.status, 0, valid.diagnostic);
+  assert.equal(valid.summary.total_issues, 0, valid.diagnostic);
+  const orphan = 'docs/concepts/companion/src/unassembled.css';
+  const invalid = await probe({ ...sources, [orphan]: '.unassembled-fixture { display: block; }\n' }, value => value, { full: true, entry });
+  assert.notEqual(invalid.status, 0, invalid.diagnostic);
+  assert.ok(invalid.unusedFiles.some(file => file.path === orphan), invalid.diagnostic);
 });

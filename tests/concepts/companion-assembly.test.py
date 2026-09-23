@@ -53,7 +53,55 @@ class AssemblyContract(unittest.TestCase):
     def test_unreviewed_vendor_input_is_rejected(self):
         vendor = self.concept / 'vendor/vue-flow-core.iife.js'
         vendor.write_bytes(vendor.read_bytes() + b'\n// changed fixture\n')
-        with self.assertRaisesRegex(ValueError, 'Unreviewed Vue Flow vendor input'):
+        with self.assertRaisesRegex(ValueError, 'Unreviewed vendor input'):
+            self.build()
+
+    def test_missing_asset_entries_are_rejected(self):
+        config = self.root / '.fallowrc.json'
+        original = config.read_text()
+        for entry in ['src/surface.css', 'vendor/vue-flow.css', 'vendor/vue.runtime.global.prod.js']:
+            with self.subTest(entry=entry):
+                edited = json.loads(original)
+                edited['entry'].remove('docs/concepts/companion/' + entry)
+                config.write_text(json.dumps(edited))
+                with self.assertRaisesRegex(ValueError, 'inventory differs'):
+                    self.build()
+        config.write_text(original)
+
+    def test_unassembled_styles_and_vendor_sources_are_not_hidden(self):
+        for name in ['src/orphan.css', 'vendor/orphan.js', 'src/nested/orphan.js']:
+            with self.subTest(name=name):
+                target = self.concept / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text('/* unassembled fixture */\n')
+                with self.assertRaisesRegex(ValueError, 'inventory differs'):
+                    self.build()
+                target.unlink()
+
+    def test_all_retained_vendor_bytes_are_verified(self):
+        for name in ['pinia.iife.prod.js', 'vue.runtime.global.prod.js', 'vue-flow.css', 'vue-flow.scoped.css', 'THIRD_PARTY_NOTICES.txt']:
+            with self.subTest(name=name):
+                target = self.concept / 'vendor' / name
+                original = target.read_bytes()
+                target.write_bytes(original + b'\n/* changed fixture */\n')
+                with self.assertRaisesRegex(ValueError, 'Unreviewed vendor input'):
+                    self.build()
+                target.write_bytes(original)
+
+    def test_vendor_provenance_cannot_approve_changed_inputs(self):
+        target = self.concept / 'vendor/provenance.json'
+        value = json.loads(target.read_text())
+        value['files'][0]['sha256'] = '0' * 64
+        target.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError, 'Unreviewed vendor provenance'):
+            self.build()
+
+    def test_duplicate_analyzer_entries_are_rejected(self):
+        config = self.root / '.fallowrc.json'
+        value = json.loads(config.read_text())
+        value['entry'].append('docs/concepts/companion/src/state-safety.js')
+        config.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError, 'inventory differs'):
             self.build()
 
     def test_stale_generated_output_is_rejected(self):
