@@ -1,6 +1,6 @@
 import { failure, success, type Failure, type Result } from '../domain/outcome';
 import type { PluginDataRepository, PluginDataSnapshot } from './plugin-data-repository';
-import type { EventPort, ShellEvents } from './events';
+import type { EventObserver, ShellEvents } from './events';
 import type { ErrorReporter, Unsubscribe } from './ports';
 
 type Values = { readonly enabled: boolean };
@@ -20,7 +20,7 @@ export class BooleanSetting {
   private readonly listeners = new Set<() => void | Promise<void>>();
   private readonly stops: Unsubscribe[];
   constructor(definition: BooleanSettingDefinition, private readonly repository: Repository,
-    private readonly services: { events: EventPort<ShellEvents>; diagnostics: ErrorReporter; readonly: () => boolean }) {
+    private readonly services: { events: EventObserver<ShellEvents>; diagnostics: ErrorReporter; readonly: () => boolean }) {
     if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(definition.id) || definition.id.length > 64 || !definition.entity
       || !/^[a-z][\w.-]{0,99}$/.test(definition.titleKey) || !/^[a-z][\w.-]{0,99}$/.test(definition.descriptionKey)
       || typeof definition.defaultValue !== 'boolean') throw new Error('INVALID_BOOLEAN_SETTING');

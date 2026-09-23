@@ -1,6 +1,6 @@
 import { plainRecord, type EntityDefinition } from '../domain/entity';
 import { failure, success, type Result } from '../domain/outcome';
-import type { EventPort, ShellEvents } from './events';
+import type { EventPublisher, ShellEvents } from './events';
 import type { ErrorReporter } from './ports';
 import { PluginDataStore, type PluginDataEnvelope } from './plugin-data-store';
 
@@ -31,7 +31,7 @@ export class PluginDataRepository<I, V> {
   private disposed = false;
   private readonly snapshots = new WeakSet<PluginDataSnapshot<V>>();
   constructor(private readonly entity: EntityDefinition<I, V>, private readonly data: PluginDataStore,
-    private readonly events: EventPort<ShellEvents>, private readonly newId: () => string,
+    private readonly events: EventPublisher<Pick<ShellEvents, 'plugin-data.created' | 'plugin-data.updated' | 'plugin-data.deleted'>>, private readonly newId: () => string,
     private readonly now: () => string, private readonly errors: ErrorReporter) {}
   private collection(data: PluginDataEnvelope): Result<Collection<V>> {
     const root = registry(data);

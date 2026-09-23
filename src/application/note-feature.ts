@@ -7,7 +7,7 @@ import { PluginDataRepository } from './plugin-data-repository';
 import type { PluginDataFeature } from './plugin-data-feature';
 import type { PluginDataStore } from './plugin-data-store';
 import type { DocumentStorage, ErrorReporter } from './ports';
-import type { EventPort, ShellEvents } from './events';
+import type { EventPublisher, ShellEvents } from './events';
 
 interface NoteFeature<I, V> {
   readonly document: DocumentRecipe<I, V>;
@@ -22,7 +22,7 @@ interface FeatureServices {
   readonly pluginData?: PluginDataStore;
   readonly storage: DocumentStorage;
   readonly codec: DocumentCodec;
-  readonly events: EventPort<ShellEvents>;
+  readonly events: EventPublisher<Pick<ShellEvents, 'documents.created' | 'documents.updated' | 'documents.deleted' | 'plugin-data.created' | 'plugin-data.updated' | 'plugin-data.deleted'>>;
   readonly newId: () => string;
   readonly now: () => string;
   readonly errors: ErrorReporter;
@@ -50,12 +50,12 @@ export function createNoteFeatures<R extends Record<string, { dispose(): void }>
     keys.add(key);
     if ('backend' in feature) {
       if (!services.pluginData) throw new Error('Plugin-data storage is not configured');
-      const repository = new PluginDataRepository(feature.entity, services.pluginData, services.events, services.newId, services.now, services.errors);
+      const repository = new PluginDataRepository(feature.entity, services.pluginData, { publish: event => services.events.publish(event) }, services.newId, services.now, services.errors);
       owned.push(repository);
       return repository;
     }
     validateDocumentCatalog([...catalog, feature.document]);
-    const repository = new NoteRepository(feature.document, services.storage, services.codec, services.events,
+    const repository = new NoteRepository(feature.document, services.storage, services.codec, { publish: event => services.events.publish(event) },
       folder ?? (() => feature.defaultFolder), services.newId, services.now, services.errors);
     catalog.push(feature.document); owned.push(repository);
     return repository;

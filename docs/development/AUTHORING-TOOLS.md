@@ -179,3 +179,17 @@ exact bytes, no success on failed writes, uncertain lockout and late unmounts.
 The native adapter tests use a synthetic host and separately prove two mounted
 view owners. Browser, real-native and physical-device evidence remain distinct;
 see the current iteration test record for executed full-consumer qualification.
+
+## Scoped event authoring
+
+Event recipes use `defineEvent` and register compact runtime descriptors separately
+from catalog metadata. They do not augment `ShellEvents`. Bootstrap passes a scoped
+publisher into each generated event action and a scoped `EventSubscriber` into each
+listener; ordinary authoring services only observe core facts. Generated listeners
+own their disposer and their tests use the real registered bus.
+
+Run `npm run events:catalog` (or `-- --json`) to inspect source-derived payload
+contracts and explanatory metadata. `npm run events:check` rejects duplicate names,
+missing documentation, invalid references and ambiguous payload declarations. Both
+commands follow explicit registration; descriptive metadata is absent from the
+production import graph. Maker apply includes this check after the targeted tests.

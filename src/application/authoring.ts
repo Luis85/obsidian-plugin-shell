@@ -1,5 +1,5 @@
 import type { CommandGroup } from './command-definitions';
-import type { EventPort, ShellEvents } from './events';
+import type { EventObserver, ShellEvents } from './events';
 import type { ModalService } from './modal-service';
 import type { NoticeService } from './notice-service';
 import type { PreferenceService } from './preference-service';
@@ -8,7 +8,7 @@ import { BooleanSetting } from './boolean-setting';
 
 /** Framework-free capabilities; each factory owns its subscriptions and dialogs. */
 export interface AuthoringServices {
-  readonly events: EventPort<ShellEvents>;
+  readonly events: EventObserver<ShellEvents>;
   readonly modals: Pick<ModalService, 'info' | 'confirm' | 'prompt' | 'closeOwner'>;
   readonly notices: Pick<NoticeService, 'info' | 'dismissOwner'>;
   readonly preferences: Pick<PreferenceService, 'current' | 'readonly' | 'update' | 'toggleViewHeader' | 'subscribe'>;

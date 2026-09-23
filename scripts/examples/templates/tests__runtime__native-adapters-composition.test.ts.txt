@@ -6,6 +6,9 @@ import { taskFeature } from '../fixtures/tasks/definition';
 import { projectFeature } from '../fixtures/projects/definition';
 import { browserDocumentStorage } from '../../harness/app/document-storage';
 import { host } from './helpers';
+import { TypedEventBus } from '../../src/infrastructure/events/typed-event-bus';
+import { runtimeEventDefinitions } from '../../src/bootstrap/events';
+import type { ShellEvents } from '../../src/application/events';
 
 describe('Real runtime repository composition', () => {
   it('registers Task and Project with one storage contract, preferences folder and independent definitions', async () => {
@@ -18,7 +21,10 @@ describe('Real runtime repository composition', () => {
       newId: () => `entity-${++sequence}`, now: () => '2026-09-22T12:00:00.000Z',
       scheduler: { after(ms, callback) { const timer = setTimeout(callback, ms); return () => clearTimeout(timer); } },
     });
-    const features = createNoteFeatures({ storage, codec: markdownCodec, events: services.events, errors: services.diagnostics,
+    const events = new TypedEventBus<ShellEvents>(services.diagnostics, runtimeEventDefinitions);
+    const facts: string[] = [];
+    events.on('documents.created', value => { facts.push(value.entity); });
+    const features = createNoteFeatures({ storage, codec: markdownCodec, events, errors: services.diagnostics,
       newId: services.newId, now: () => '2026-09-23T00:00:00.000Z' }, register => ({
       task: register(taskFeature, () => services.preferences.current.taskFolder), project: register(projectFeature),
     }));
@@ -41,7 +47,9 @@ describe('Real runtime repository composition', () => {
       const next = await features.repositories.task.create({ title: 'Moved folder' }, 'next-request');
       expect(next.ok && next.value.path.startsWith('Work/Tasks/')).toBe(true);
       expect(files[task.value.path]).toBeDefined();
-    } finally { features.dispose(); services.dispose(); }
+      expect(facts).toEqual(['task', 'project', 'task']);
+      expect(services.diagnostics.current).toEqual([]);
+    } finally { features.dispose(); events.dispose(); services.dispose(); }
     expect(await features.repositories.task.list()).toMatchObject({ ok: false, error: { code: 'disposed' } });
     expect(await features.repositories.project.list()).toMatchObject({ ok: false, error: { code: 'disposed' } });
   });

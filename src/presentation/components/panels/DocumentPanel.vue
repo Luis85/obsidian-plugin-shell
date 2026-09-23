@@ -4,6 +4,7 @@ import UInput from '@nuxt/ui/components/Input.vue';
 import UCard from '@nuxt/ui/components/Card.vue';
 import UBadge from '@nuxt/ui/components/Badge.vue';
 import TaskRepositoryPanel from './TaskRepositoryPanel.vue';
+import ItemsPanel from './ItemsPanel.vue';
 import { useDocumentForm } from '../../composables/use-document-form';
 import { useShowcase } from '../../stores/showcase';
 const model = useShowcase();
@@ -32,4 +33,5 @@ const { t, services, input, uid, form, preview } = useDocumentForm();
     </UCard>
   </div>
   <TaskRepositoryPanel />
+  <ItemsPanel />
 </template>

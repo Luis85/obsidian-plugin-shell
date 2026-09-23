@@ -34,9 +34,9 @@ or metadata mappings and change the layout delay. Disposing the bridge cancels
 pending work. There is no initial vault scan, native-event interception, outward
 echo, durable replay or reliable attribution to the plugin that caused a change.
 
-Subscribe through the existing typed `events.on(name, listener)` facade; retain
-its disposer. Query the repository for current state, then use native events to
-invalidate a deliberate projection. Count application `documents.created` once
+Subscribe through the typed observer-only `events.on(name, listener)` facade;
+retain its disposer. Subscribe before querying current state, and invalidate any
+older query result when a newer fact arrives. Count application `documents.created` once
 for the initiating use case, not once again when the host reports the file.
 
 ## Notification API

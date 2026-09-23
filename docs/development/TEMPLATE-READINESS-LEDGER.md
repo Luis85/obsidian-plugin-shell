@@ -14,6 +14,11 @@ broader requirement. **Externally blocked** identifies an upstream or owner-held
 condition that this implementation cannot establish. A row marked implemented
 does not promote a historical acceptance ID or qualify a newly built candidate.
 
+Runtime-authoring integration updates the selected rows below. Its prior fixed
+candidate and exact evidence are in the [runtime-authoring record](../testing/RUNTIME-AUTHORING.md).
+Merging release operations and later dependency changes creates a new source
+checkpoint; earlier asset qualification remains bound to its recorded commit.
+
 ## Baseline and evidence interpretation
 
 Iteration four qualified source `94da3ef97d8d3d570e444b092ea0a70380e5ad4b`,
@@ -83,7 +88,7 @@ out explicitly. The AC table below retains every individual legacy condition.
 | UPD-05–08 | Partial | CI/update policy, discovery states and forced outage tests exist; a successfully reviewed representative parser/analyzer upgrade and full operational cadence remain separate. |
 | ARC-01–10 | Implemented | Composition, framework-free inner ports, explicit feature registration, resolved boundaries, artifact separation and negative gates. No generic ORM scope is implied. |
 | LIF-01–07 | Implemented | U lifecycle/ownership/mount tests, B multi-view behavior and N unload/pop-out checks; measured 20-cycle resource budget remains under NFR-05. |
-| EXA-01–03 | Partial | Task/Project note examples and generic plugin-data CRUD exist. The original plugin-data item create/rename/delete reference UI with the exact 1–120 label contract is not established by repository tests alone. |
+| EXA-01–03 | Implemented | Optional Items UI/actions use stable IDs and trimmed 1–120 labels, shared persistence, independent view drafts and real failure/recovery states; items runtime/component/served tests and runtime-authoring evidence. Item-specific native CRUD remains separately unqualified. |
 | EXA-04–05 | Implemented | No startup note seeding; explicit creates and reviewed removal preserve consumer features (T/R). |
 | UI-01–08, UI-10, SET-01–03 | Implemented | Four panels, shared commands/ribbon, native modal/notice/settings adapters, preferences and Task preview/CRUD; U/B/N. |
 | UI-09 | Partial | Rendered axe/keyboard/label checks exist; manual screen-reader/device qualification remains. |
@@ -98,10 +103,11 @@ out explicitly. The AC table below retains every individual legacy condition.
 | ERR-18 | Partial | Many boundary/failure tests exist; complete named cross-realm/host/recursive failure matrix still needs acceptance-level audit. |
 | NTF-01–05, NTF-07–11 | Implemented | Notification policy/safety/sink tests and runtime guide cover queue/timing/localization/recovery/owned handles. Native Notice targeting limitations are disclosed. |
 | NTF-06, NTF-12 | Partial | Automated form/modal/feedback scenarios exist; manual live announcements and all native end-to-end scenario combinations remain unqualified. |
-| EVT-01–02, EVT-04, EVT-07–10, EVT-12–15 | Implemented | TypedEventBus, host bridge, committed facts, snapshot/once/disposal behavior and generated event/listener tests. |
-| EVT-03, EVT-05, EVT-11 | Partial | Typed contracts and generated validators exist; full least-authority facade and uniform descriptor/unknown-boundary catalog contract need qualification. |
-| EVT-06 | Missing | No `events:catalog`/`events:check` npm command or complete descriptive catalog surface; entity catalog does not substitute. |
-| EVT-16 | Partial | U events/host-events and generated listener tests cover substantial behavior; catalog gaps and complete native evidence linkage remain. |
+| EVT-01–02, EVT-04, EVT-07–09, EVT-12–15 | Implemented | TypedEventBus, host bridge, committed facts, snapshot/once/disposal behavior and generated event/listener tests. |
+| EVT-10 | Partial | Frozen isolated payload snapshots exist; the retained bus-generated metadata/envelope target remains separate from the payload-only subscriber API. |
+| EVT-03, EVT-05, EVT-11 | Implemented | Observer-only ports, descriptor-scoped publishers/subscribers, explicit core/host/feature composition and cloned-payload validation; actual compiler/checker negatives and generated real-bus tests. These are compile-time design boundaries, not a sandbox. |
+| EVT-06 | Implemented | `events:catalog`/`events:check` derive payload contracts from registered TypeScript source and reject duplicate/ambiguous definitions, invalid references and drift; explanatory metadata stays outside the production bundle. |
+| EVT-16 | Partial | Runtime-authoring closes rights, catalog and generated-bus controls. Complete native evidence linkage and the retained envelope/metadata target remain separate; no bulk acceptance promotion. |
 | DOC-01–19 | Implemented | Entity definitions, explicit recipes, real YAML, preview/commit, safe title filenames and bounded request/error/lifecycle semantics; U entities/documents/repository tests plus T. |
 | DOC-20 | Partial | Second entity and recorded native Markdown flow exist; complete per-platform Properties/source evidence remains case-specific. |
 | TOOL-01–06, SETUP-01–12, MAKE-01–12 | Implemented | Current bounded catalog, shared hash-reviewed file planner, identity/profiles/resume and explicit local custom makers; T/R. Generated code is a starting feature, not a finished business app. |
@@ -150,8 +156,8 @@ acceptance grants.
 | --- | --- | --- |
 | AC-01 | Different identity and read-only dry run | Implemented: T setup-identity, R renamed/archived consumers; audit exact generated mode linkage. |
 | AC-02 | Native command/ribbon without duplication | Implemented: U native-commands, N named command/ribbon/unload checks. |
-| AC-03 | Example CRUD survives reload | Partial: U repository/plugin-data and B repository; original generic plugin-data item UI is not proven. |
-| AC-04 | Localized invalid label, no write | Partial: U components/authoring and B accessibility; original item label/native requirement needs exact mapping. |
+| AC-03 | Example CRUD survives reload | Implemented service/component/browser behavior: Items stable-ID CRUD and actual reload; see runtime-authoring record. Item-specific native scope is not implied. |
+| AC-04 | Localized invalid label, no write | Partial: exact trimmed 1–120 label, localized field feedback and zero invalid writes are proven by item service/component/browser tests; item-specific native mapping remains. |
 | AC-05 | Persistence failure preserves truthful outcome | Implemented: U documents/repository-failures/plugin-data, B failure flows. |
 | AC-06 | Concurrent settings/items and independent drafts | Implemented: U preferences/plugin-data/view-state, B pending-preferences. |
 | AC-07 | Corrupt/future data preservation | Implemented: U plugin-data-preservation/preferences; browser case linkage needs audit. |
@@ -190,7 +196,7 @@ acceptance grants.
 | AC-40 | Makers generate functioning registered code/tests | Implemented: T maker-catalog and R consumer/catalog qualification; output boundaries documented. |
 | AC-41 | Conflicts/concurrency/failure preserve work | Implemented: T file-plan/maker-paths/makers. |
 | AC-42 | Custom maker uses shared safe engine | Implemented: T maker-catalog/custom recipe and R archive-generated consumer. |
-| AC-43 | Event types/unions/keys/catalog | Partial: U events/types and generated validators; descriptive event catalog/check commands absent. |
+| AC-43 | Event types/unions/keys/catalog | Implemented: actual compiler rejects wrong rights and widened mismatched unions; actual checker rejects duplicates, drift and invalid references; generated consumer and removal qualification passed for the recorded candidate. |
 | AC-44 | Event order/once/reentrancy/snapshot/disposal | Implemented: U events/host-events; link actual assertions before acceptance promotion. |
 | AC-45 | Native bridge startup/null/rename/unload | Partial: U host-events synthetic host; exact full native matrix needs evidence. |
 | AC-46 | Post-commit facts/two views/runtime isolation | Implemented: U events/repository/plugin-data/view-state and B repository. |
@@ -278,7 +284,7 @@ maintainer, with next review **2026-09-30** or earlier on a supported upstream r
 
 | Item | Observed evidence | Recommended disposition |
 | --- | --- | --- |
-| [PR #6](https://github.com/Luis85/obsidian-plugin-shell/pull/6), Node types 24.13.6 → 26.6.1 | Open; ten reported checks successful. Registry stable is now 26.6.2. Qualified execution remains Node 24.21.0/npm 11.19.1. | Blocked on a deliberate runtime/declaration policy decision; do not infer Node 26 runtime qualification or adopt newer API declarations merely from passing existing tests. Prefer a reviewed Node-24-compatible types update while runtime remains 24; major migration requires its own concern. This is not an observed compilation failure. |
+| [PR #6](https://github.com/Luis85/obsidian-plugin-shell/pull/6), Node types 24.13.6 → 26.6.1 | Merged as `525ee264abf5f532e10592ea5d5f694e3c658abe` after the owner requested compatible dependency merges and all refreshed checks on current main passed. See [integration evidence](../testing/MAIN-INTEGRATION.md). | Deliberate declaration update only. Qualified runtime remains Node 24.21.0/npm 11.19.1; tests establish used-code compatibility, not availability of every Node 26 API. |
 | [PR #7](https://github.com/Luis85/obsidian-plugin-shell/pull/7), TypeScript 6.0.3 → 7.0.2 | Open; seven reported checks failed, three succeeded. [Showcase run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321920) fails strict installation with `ERESOLVE`: typescript-eslint 8.70.1 requires TypeScript `>=4.8.4 <6.1.0`. Current parser 8.70.1 has the same peer range. | Incompatible. Retain 6.0.3 until a supported compiler/parser family can install strictly and pass real negative gates, generated consumers and normal verification. No force/legacy-peer-deps or broad permanent ignore. |
 | Nested ESLint 9.39.5 | Stable official Obsidian lint remains 0.4.2, importing SDL/import presets. SDL 1.1.0 declares ESLint `^9` and fixes React 7.37.3; import 2.32.0 peers end at `^9`; current React 7.37.5 ends at `^9.7`. | Externally blocked full-supported-graph criterion. Root ESLint 10 and a clean audit do not close it. Require a supported upstream replacement or separately reviewed maintained integration plus strict install/all gates/audit. |
 
@@ -324,7 +330,7 @@ The live operation must require explicit opt-in by the maintainer. This work
 authorizes no real release, tag, upload, listing, permission or protection change.
 
 After this milestone, full template readiness still requires case-specific legacy
-evidence reconciliation; event catalog/facade gaps; original plugin-data example
+evidence reconciliation; remaining event-envelope metadata and item-specific native
 scope; proposed analyzer metrics and measured performance/onboarding; manual/native/
 device breadth matching actual support claims; executable listing readiness;
 supported dependency graph closure; and explicitly authorized real first/subsequent

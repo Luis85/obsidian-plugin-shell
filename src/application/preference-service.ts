@@ -1,7 +1,7 @@
 import { defaults, parsePreferences, type Preferences } from '../domain/preferences';
 import { success, type Result } from '../domain/outcome';
 import type { SettingsStorage, Unsubscribe, ErrorReporter } from './ports';
-import type { EventPort, ShellEvents } from './events';
+import type { EventPublisher, ShellEvents } from './events';
 import { PluginDataStore } from './plugin-data-store';
 export class PreferenceService {
   private value: Preferences = defaults;
@@ -9,7 +9,7 @@ export class PreferenceService {
   private revision = 0;
   private readonly listeners = new Set<(value: Preferences) => void | Promise<void>>();
   private readonly data: PluginDataStore;
-  constructor(storage: SettingsStorage | PluginDataStore, private readonly events: EventPort<ShellEvents>, private readonly errors: ErrorReporter) {
+  constructor(storage: SettingsStorage | PluginDataStore, private readonly events: EventPublisher<Pick<ShellEvents, 'preferences.changed'>>, private readonly errors: ErrorReporter) {
     this.data = storage instanceof PluginDataStore ? storage : new PluginDataStore(storage, errors);
   }
   get current(): Preferences { return this.value; }

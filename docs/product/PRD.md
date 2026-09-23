@@ -13,6 +13,17 @@ The owner requested the first runnable iteration up to an openable showcase view
 
 ## Requirements remain in force
 
+**Runtime authoring extension:** Complete narrow publication/observation contracts,
+explicit event descriptor composition and source-derived catalog/check commands.
+The optional Items reference uses the existing plugin-data backend for stable-ID
+create/rename/delete, with trimmed 1–120-character labels and separate per-view
+drafts. It shares the preferences writer and refreshes committed projections from
+typed facts. Task remains a distinct Markdown workflow. See the
+[implementation and acceptance plan](../development/RUNTIME-AUTHORING-PLAN.md).
+This work addresses EVT-03/05/06/11/16 and EXA-01–03; execution evidence is recorded
+separately and does not promote all historical acceptance cases. The release
+executor below is now part of the merged integration baseline.
+
 **Release execution extension:** The [milestone plan](../development/RELEASE-EXECUTION-PLAN.md)
 adds authenticated GitHub discovery and a separately authorized local executor for
 retained candidate drafts, missing uploads and promotion. It reuses the existing
