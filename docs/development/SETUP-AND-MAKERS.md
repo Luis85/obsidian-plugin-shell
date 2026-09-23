@@ -1,9 +1,9 @@
 # Guided setup and maker tooling
 
-> **Contract:** Retained complete PRD 0.4 target. Iteration 03 implements reviewed
-> [identity setup/resume](SETUP-IDENTITY.md) and bounded
-> [note-feature/entity makers](AUTHORING-TOOLS.md). Recipes outside that supported
-> catalog remain planned; examples below are not blanket executable claims.
+> **Contract:** Retained complete PRD 0.4 target. Current implementation includes reviewed
+> [identity setup/resume](SETUP-IDENTITY.md) and the integrated
+> [maker catalog](AUTHORING-TOOLS.md). Recipe details and bounds in that current guide
+> supersede historical pending descriptions; examples below are not blanket executable claims.
 > **Requirements:** TOOL-01–06, SETUP-01–12, MAKE-01–12, extended by DOC-19 for entities.  
 > **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
 

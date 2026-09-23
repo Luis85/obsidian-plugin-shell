@@ -1,8 +1,9 @@
 # Fixed-candidate release rehearsal
 
-This iteration supplies a local version plan, a read-only release rehearsal and
-validated [draft/promotion operation plans](RELEASE-OPERATION-PLANS.md). It does
-not execute remote draft creation or publication. No release, tag,
+The rehearsal supplies a local version plan, a read-only release rehearsal and
+validated [draft/promotion operation plans](RELEASE-OPERATION-PLANS.md). The separate
+[opt-in executor](RELEASE-EXECUTION.md) can operate retained packets after explicit
+authorization; the rehearsal itself never mutates GitHub. No release, tag,
 listing, repository permission, environment protection or automerge change is
 performed. Those remain explicit future work in the [full contract](MAINTENANCE-AND-RELEASE.md).
 
@@ -26,8 +27,8 @@ entries survive. Host-floor changes require their own evidenced review; this
 command refuses a mismatch rather than silently adopting one. No Git operation
 is part of version preparation. Review and commit through the normal PR process.
 
-Metadata should land immediately before its corresponding release operation once
-publication is implemented. Until then these are development versions, explicitly
+Metadata should land immediately before its corresponding authorized release operation.
+Until an actual publication is authorized these are development versions, explicitly
 not published releases. Do not submit to the directory while default-branch
 metadata and public assets disagree. A failed future publication leaves a draft
 and requires maintainer recovery; never move an existing public tag or overwrite
@@ -94,8 +95,8 @@ selection restriction, not proof that branch protection/review rules exist; owne
 must verify those settings themselves. The workflow has `contents: read`, pinned
 actions, no persisted Git credentials and no privileged publication stage.
 Version-keyed concurrency avoids overlapping same-version runs. Existing GitHub
-drafts/releases are not inspected because this operation never modifies them;
-that check is mandatory for future draft/publication implementation.
+drafts/releases are not inspected by this rehearsal because it never modifies them;
+the separate local executor performs authenticated discovery before execution.
 
 Download its retained artifact into a codebase-contained isolated vault, disable
 that plugin, and install only the three assets in
@@ -107,11 +108,11 @@ ribbon, close/reopen and disable/re-enable. Missing checks stay `not-run`. Test
 additional platforms/pop-outs/devices before claiming them. A later rebuild needs
 a new candidate and evidence.
 
-Future draft and promotion stages must reject existing public versions, mismatched
-tags, incomplete upload sets, untrusted evidence and changed hashes. Promotion
-must validate native evidence and approval and upload the retained bytes without
-rebuilding. Introduce only an explicitly authorized isolated mutation stage with
-the minimum token permission then; do not rely on token-created tags to trigger
-another workflow. The rehearsal intentionally cannot publish even when all its
-checks pass. First/subsequent public release and failed-upload recovery qualification
-remain unperformed.
+The local executor rejects existing public versions, mismatched tags, incomplete
+promotion uploads and changed hashes. It validates supplied native evidence and
+explicit confirmation, and uses the retained bytes. The future privileged Actions
+stage still requires separate authorization and scoped policy review; do not rely
+on token-created tags to trigger another workflow. The rehearsal cannot publish
+even when all checks pass. Real first/subsequent public release and remote failure
+recovery qualification remain unperformed; synthetic operation/transport tests
+are documented separately.

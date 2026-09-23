@@ -1,5 +1,8 @@
 # Draft and promotion operation plans
 
+For authenticated discovery and separately authorized execution, use
+[release execution](RELEASE-EXECUTION.md). This offline planner remains read-only.
+
 `npm run release:plan -- --input <operation-input.json>` validates retained local
 bytes and supplied state/evidence, then prints exact `gh` argument arrays. It never
 calls GitHub, executes those arrays, builds, uploads, tags or publishes. Output is
