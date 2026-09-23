@@ -112,6 +112,17 @@ is rejected, then selects the reviewed showcase policy for its synthetic parser
 controls. The two affected adapter cases passed; no product profile validation
 or consumer registration was relaxed.
 
+The complete transformed-consumer workflow subsequently passed on 8a350b1 in
+[run 35901973632](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35901973632),
+including literal archive, removal, post-removal Reading and final evidence
+producers. The two Windows setup-policy matrix jobs instead exhausted their
+aggregate 15-minute job deadline near the end of the unchanged verification
+sequence. GitHub explicitly reported `The job has exceeded the maximum execution
+time of 15m0s`; assertion failures were not reported. The workflow budget is now
+20 minutes to accommodate fresh setup and standalone full verification plus the
+actual policy probes. Native assertion deadlines, producer timeouts, performance
+protocols and quality thresholds are unchanged.
+
 ## Scope distinctions
 
 The original 96-case plan and blocked release profile are retained unchanged.
