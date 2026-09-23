@@ -35,25 +35,30 @@ export function defineRibbon<const CommandId extends string, const Id extends st
   if (!label(titleKey)) throw new Error('INVALID_RIBBON_DEFINITION');
   return Object.freeze({ ...definition, titleKey, command });
 }
+function validateGroup(group: CommandGroup): void {
+  if (!group || !Array.isArray(group.commands) || (group.ribbons !== undefined && !Array.isArray(group.ribbons))) throw new Error('INVALID_COMMAND_GROUP');
+}
 
 export function commandCatalog(groups: readonly CommandGroup[], validKey: (key: string) => boolean) {
   const commands = new Map<string, CommandDefinition>(); const ribbons: RibbonDefinition[] = []; const ribbonIds = new Set<string>();
+  function addCommand(command: CommandDefinition): void {
+    defineCommand(command);
+    if (commands.has(command.id)) throw new Error(`DUPLICATE_COMMAND_ID:${command.id}`);
+    if (commands.size >= 100) throw new Error('COMMAND_CATALOG_LIMIT');
+    if (!validKey(command.titleKey)) throw new Error(`UNKNOWN_COMMAND_LABEL:${command.titleKey}`);
+    commands.set(command.id, command);
+  }
+  function addRibbon(ribbon: RibbonDefinition): void {
+    defineRibbon(ribbon.command, ribbon);
+    if (ribbonIds.has(ribbon.id)) throw new Error(`DUPLICATE_RIBBON_ID:${ribbon.id}`);
+    if (ribbons.length >= 100) throw new Error('RIBBON_CATALOG_LIMIT');
+    if (!validKey(ribbon.titleKey)) throw new Error(`UNKNOWN_COMMAND_LABEL:${ribbon.titleKey}`);
+    ribbonIds.add(ribbon.id); ribbons.push(ribbon);
+  }
   for (const group of groups) {
-    if (!group || !Array.isArray(group.commands) || (group.ribbons !== undefined && !Array.isArray(group.ribbons))) throw new Error('INVALID_COMMAND_GROUP');
-    for (const command of group.commands) {
-      defineCommand(command);
-      if (commands.has(command.id)) throw new Error(`DUPLICATE_COMMAND_ID:${command.id}`);
-      if (commands.size >= 100) throw new Error('COMMAND_CATALOG_LIMIT');
-      if (!validKey(command.titleKey)) throw new Error(`UNKNOWN_COMMAND_LABEL:${command.titleKey}`);
-      commands.set(command.id, command);
-    }
-    for (const ribbon of group.ribbons ?? []) {
-      defineRibbon(ribbon.command, ribbon);
-      if (ribbonIds.has(ribbon.id)) throw new Error(`DUPLICATE_RIBBON_ID:${ribbon.id}`);
-      if (ribbons.length >= 100) throw new Error('RIBBON_CATALOG_LIMIT');
-      if (!validKey(ribbon.titleKey)) throw new Error(`UNKNOWN_COMMAND_LABEL:${ribbon.titleKey}`);
-      ribbonIds.add(ribbon.id); ribbons.push(ribbon);
-    }
+    validateGroup(group);
+    for (const command of group.commands) addCommand(command);
+    for (const ribbon of group.ribbons ?? []) addRibbon(ribbon);
   }
   for (const ribbon of ribbons) if (commands.get(ribbon.command.id) !== ribbon.command) throw new Error(`RIBBON_COMMAND_NOT_REGISTERED:${ribbon.id}`);
   return Object.freeze({

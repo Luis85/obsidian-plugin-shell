@@ -5,6 +5,16 @@ import { DocumentCreationService } from '../../src/application/document-service'
 import { renderMarkdown } from '../../src/infrastructure/markdown';
 import { fixture, input, deferred } from './helpers';
 describe('DocumentCreationService', () => {
+  it('validates the captured projection values without re-reading mutable accessors', () => {
+    const { writer, bus } = fixture(); let reads = 0;
+    const projected = Object.defineProperty({ title: 'Snapshot', properties: {}, body: 'valid' }, 'body', {
+      enumerable: true, get: () => ++reads === 2 ? undefined : 'valid',
+    });
+    const serialize = vi.fn(() => 'must not serialize invalid captured data');
+    const service = new DocumentCreationService<{ sample: void }>({ sample: { project: () => success(projected) } }, writer, bus, serialize, () => 'snapshot-1', () => 'fixed');
+    expect(service.prepare('sample', undefined, 'Samples', 'request')).toMatchObject({ ok: false, error: { code: 'validation', key: 'error.entity' } });
+    expect(reads).toBe(2); expect(serialize).not.toHaveBeenCalled(); expect(writer.create).not.toHaveBeenCalled();
+  });
   it('[DOC-I01] preview produces exact valid YAML and has no write effects', () => {
     const { documents, writer } = fixture();
     const result = documents.prepare('task', input, 'Tasks', 'submit-1');

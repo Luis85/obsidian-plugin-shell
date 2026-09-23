@@ -14,15 +14,21 @@ import { readNativeIdentity } from './native-identity.mjs';
 import { qualifyCommandRemoval } from './native-command-contract.mjs';
 import { qualifyModals } from './native-modals.mjs';
 import { qualifyDebugging } from './native-debugging.mjs';
+import { qualifyItems, qualifyItemsRestart } from './native-items.mjs';
+import { qualifyPerformance } from './native-performance.mjs';
+import { qualifyItemOwnership } from './native-item-ownership.mjs';
 import { nativeScratch, nativeConfigDirectory, assertNativeVault } from './native-isolation.mjs';
 const flags = process.argv.slice(2);
-if (flags.length !== 1 || flags[0] !== '--allow-download') {
-  console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. This may download the host. No test was run.'); process.exit(2);
+if (flags.length === 1 && flags[0] === '--help') {
+  console.log('Usage: npm run test:native -- --allow-download [--performance [--controlled-reference]]\nRequires provisioned obsidian-launcher 3.2.1 and retained dist assets; uses isolated vault/config only.\nPerformance: 3 warmups + 30 samples each of warm initialization and real 100-item readiness. Budgets are reported separately.\nUse --controlled-reference only on an otherwise idle reference host. All attempts are retained under reports/native/attempts.'); process.exit(0);
 }
-const output = resolve('reports/native'); await mkdir(output, { recursive: true });
-const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', assets: [], checks: [], errors: [] };
+if (!flags.includes('--allow-download') || new Set(flags).size !== flags.length || flags.some(flag => !['--allow-download', '--performance', '--controlled-reference'].includes(flag)) || flags.includes('--controlled-reference') && !flags.includes('--performance')) {
+  console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. Optional flags: --performance [--controlled-reference]. This may download the host. No test was run.'); process.exit(2);
+}
+const output = resolve('reports/native/attempts', `${new Date().toISOString().replaceAll(':', '-')}-${process.pid}`); await mkdir(output, { recursive: true });
+const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', attemptDirectory: output, assets: [], checks: [], errors: [] };
 const scratch = await nativeScratch();
-let launched; let browser; let activePage; const configDirectories = [];
+let launched; let browser; let activePage; let log = ''; const configDirectories = [];
 try {
   const identity = await readNativeIdentity(); report.identity = { id: identity.id, name: identity.name, version: identity.version };
   const provider = JSON.parse(await readFile('.native-runner/node_modules/obsidian-launcher/package.json', 'utf8'));
@@ -38,7 +44,7 @@ try {
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
   launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], localStorage: { language: 'en' }, args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
   await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir));
-  let log = ''; const capture = data => { log = (log + data.toString()).slice(-50000); };
+  const capture = data => { log = (log + data.toString()).slice(-50000); };
   launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   const endpoint = `http://127.0.0.1:${port}`;
   const deadline = Date.now() + 90000;
@@ -70,11 +76,14 @@ try {
   report.userAgent = await page.evaluate(() => navigator.userAgent);
   // Workspace visibility precedes async plugin registration on a fresh vault.
   await expect(page.locator('[aria-label="Open capability showcase"]')).toBeVisible({ timeout: 45000 });
+  if (flags.includes('--performance')) await qualifyPerformance(page, report, output, launched.vault ?? vault, identity, flags.includes('--controlled-reference') ? 'controlled-reference' : 'shared-runner');
   await page.keyboard.press('ControlOrMeta+p');
   await page.locator('input.prompt-input').fill('Open capability showcase');
   await page.locator('.suggestion-item:visible').filter({ hasText: 'Open capability showcase' }).first().click();
   await expect(page.getByTestId('showcase')).toBeVisible({ timeout: 30000 });
   await expect(page.getByText('Obsidian host', { exact: true })).toBeAttached(); report.checks.push('native-command-opens-view');
+  await qualifyItems(page, report, output, launched.vault ?? vault, identity);
+  await qualifyItemOwnership(page, report, output, launched.vault ?? vault, identity);
   await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();
@@ -155,6 +164,7 @@ try {
   await restartedView.getByRole('button', { name: 'Preferences', exact: true }).click();
   await expect(restartedView.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true })).toBeChecked();
   await expect(restartedView.getByRole('textbox', { name: 'Task note folder', exact: true })).toHaveValue('Native/Tasks');
+  await qualifyItemsRestart(restarted, report, persistedVault, identity);
   for (const asset of report.assets) expect(createHash('sha256').update(await readFile(join(persistedVault, identity.pluginDirectory, asset.file))).digest('hex')).toBe(asset.sha256);
   expect(await readFile(join(persistedVault, path), 'utf8')).toBe(preview);
   await assertDiagnostics(restarted, identity); await restarted.screenshot({ path: join(output, 'native-cold-restart-header-hidden.png') });
@@ -162,13 +172,16 @@ try {
   for (const asset of report.assets) expect(createHash('sha256').update(await readFile(`dist/${asset.file}`)).digest('hex')).toBe(asset.sha256);
   if (report.errors.length) throw new Error('Native page reported unexpected errors; inspect report.');
   report.status = 'passed';
-  await writeFile(join(output, 'host.log'), log);
 } catch (error) {
   report.status = 'failed'; report.reason = error.message; process.exitCode = 1;
   if (activePage) {
     report.themeFailure = await activePage.evaluate(() => ({
       bodyClass: document.body.className.slice(0, 2048),
       bodyConnected: document.body.isConnected,
+      visibility: document.visibilityState, focus: document.hasFocus(),
+      viewport: { width: innerWidth, height: innerHeight, devicePixelRatio },
+      hostConfig: window.app ? { theme: window.app.vault.getConfig('theme'), cssTheme: window.app.vault.getConfig('cssTheme') } : { unavailable: true },
+      independentForegroundHwnd: 'not-captured',
       roots: Array.from(document.querySelectorAll('[data-plugin-ui]')).slice(0, 16).map(root => ({
         className: String(root.className).slice(0, 2048), connected: root.isConnected,
         ownerIsCurrentDocument: root.ownerDocument === document,
@@ -184,6 +197,7 @@ try {
 }
 finally {
   // Preserve the primary outcome even when host processes delay filesystem cleanup.
+  await writeFile(join(output, 'host.log'), log);
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   if (browser) await browser.close().catch(() => undefined);
   if (launched?.proc.pid && launched.proc.exitCode === null && launched.proc.signalCode === null) {
@@ -205,5 +219,6 @@ finally {
     catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_SCRATCH_CLEANUP_FAILED'; report.scratchPreserved = true; process.exitCode = 1; }
   } else report.scratchPreserved = true;
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
+  await writeFile(resolve('reports/native/report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

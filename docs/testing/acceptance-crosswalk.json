@@ -1,0 +1,1224 @@
+{
+  "schemaVersion": 1,
+  "baselineSchemaVersion": 1,
+  "acceptance": [
+    {
+      "id": "AC-01",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Different identity installs/builds/verifies and dry run is read-only. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-02",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Native command/ribbon opens without duplicate registration. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-03",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/items.test.ts",
+          "name": "Item reference actions and real per-view projections persists trimmed CRUD, stable IDs and concurrent preferences through the one writer without note writes or duplicate facts",
+          "mode": "unit",
+          "extent": "whole",
+          "assertions": "Real Items actions and shared persistence perform trimmed create, stable-ID rename and confirmed/cancelled delete with exact stored envelope, write/fact counts and no note writes. After each committed create, rename and delete, independently constructed services reload the saved raw envelope, assert the expected IDs/labels or empty collection, and perform zero initialization writes with zero observed errors."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/items.spec.ts",
+          "name": "item UI validates, synchronizes two views, retains drafts and persists rename/delete through reload",
+          "mode": "browser-integrated",
+          "extent": "whole",
+          "assertions": "Served production Items components/services create and rename a real item, synchronize a sibling while retaining its draft, cancel then confirm deletion, and reload the entire page after create, rename and delete to assert the durable populated/empty state. Independent fault observations are checked before every reload and page errors remain observed across reloads; browser storage is the declared harness boundary."
+        }
+      ],
+      "gap": "The audited unit and served-browser assertions cover this bounded CRUD-through-reload acceptance case in both required modes. Verification still requires passing current-input runtime and browser producer packets in one consistent session; source edits, failed repetitions or absent mode evidence prevent completion. This case does not establish native/device qualification or release authority."
+    },
+    {
+      "id": "AC-04",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/items-components.test.ts",
+          "name": "Item panel with production components and services renders empty, invalid, populated and committed CRUD states with field-specific feedback",
+          "mode": "component",
+          "extent": "partial",
+          "assertions": "Rendered field-specific invalid-label guidance and successful CRUD states; native mode remains mandatory."
+        },
+        {
+          "producer": "native",
+          "file": "scripts/testing/check-native.mjs",
+          "name": "native-items-invalid-and-trimmed-create-one-write",
+          "mode": "native",
+          "extent": "partial",
+          "assertions": "Actual native Items UI rejects whitespace-only and overlength labels with English inline guidance and zero observed saveData calls; a trimmed valid label then persists with exactly one native call. It does not cover another locale."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/items.spec.ts",
+          "name": "item UI validates, synchronizes two views, retains drafts and persists rename/delete through reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served Items UI shows English inline guidance for whitespace-only input while the canonical harness settings storage key remains absent. This is browser persistence, not native I/O or non-default-locale qualification."
+        }
+      ],
+      "gap": "English no-write guidance is now linked in component, served-browser and native modes. Inline invalid-label guidance after changing to a non-default supported locale is not asserted by these links; native completion additionally requires the actual retained-candidate run to pass."
+    },
+    {
+      "id": "AC-05",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Failed persistence preserves data and truthful outcomes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-06",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/items.test.ts",
+          "name": "Item reference actions and real per-view projections persists trimmed CRUD, stable IDs and concurrent preferences through the one writer without note writes or duplicate facts",
+          "mode": "unit",
+          "extent": "whole",
+          "assertions": "Promise.all runs real item creation and preference persistence together; exact saved envelope retains both successful updates, the sibling draft is unchanged, and a late view reads the committed item. This whole unit-mode assertion does not satisfy the required browser mode."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/items.spec.ts",
+          "name": "item UI validates, synchronizes two views, retains drafts and persists rename/delete through reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real Items components and services; validation, sibling drafts, stable-ID rename/delete and local persistence reload. Browser storage is not native I/O."
+        }
+      ],
+      "gap": "The unit link covers concurrent settings/item writes, the exact combined envelope, independent drafts and late-view current state. The browser link covers sibling drafts/projections but never overlaps a preference mutation with an item save; browser concurrency remains partial."
+    },
+    {
+      "id": "AC-07",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Corrupt/future data is preserved. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-08",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Local storage failure is nonfatal and namespaces isolate. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-09",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Locale/fallback/long text/native labels behave correctly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-10",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Modal cancellation, submission, focus and cleanup. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-11",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/items.test.ts",
+          "name": "Item reference actions and real per-view projections ignores older delayed queries, catches independent subscriber failures and releases each view owner",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Exact bus baseline after view close; sibling remains usable; stale queries cannot replace newer projection. This is not native host resource evidence."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/resource-qualification.test.ts",
+          "name": "[RESOURCE-20] twenty full real-view cycles return every measured owner resource to the live sibling baseline",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Twenty production-view open/close cycles exercise notices/dialogs, assert bus/observer/scheduler/notice/dialog/feedback counts return to the live sibling baseline, suppress late timer callbacks and keep the sibling event action usable without disposing shared services. Host and scheduler boundaries are explicit unit doubles."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/resource-qualification.test.ts",
+          "name": "[RESOURCE-PENDING] closing the writing view suppresses late UI work while its committed fact reaches the live sibling",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A real pending Items action outlives its closed view; the closed DOM and owned-resource baseline stay unchanged, the successful committed projection reaches the sibling, its draft remains independent and another deliberate action works."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/resource-qualification.test.ts",
+          "name": "[RESOURCE-FAILURE] an uncertain late native-boundary double failure is independently observed and cannot announce success",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Controlled persistence rejection after owner close preserves resource baseline, emits one exact independent settings.write observation, shows no success projection and prevents an uncertain retry. This is an adapter-double failure, not native disk I/O."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/resource-qualification.test.ts",
+          "name": "[RESOURCE-HOST-20] actual native registration wiring releases per-view EventRefs for twenty cycles without stopping its runtime bridge",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real native adapter registration code against the explicit host fixture retains eight runtime bridge refs, restores the live sibling baseline after twenty view cycles, keeps sibling events working and never disposes the shared bus or manually detaches leaves until final runtime cleanup. Synthetic host fixture remains unit mode."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I08] two views have unique DOM IDs and dispose independently",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production views preserve the bus subscription count across panel navigation, acquire distinct DOM IDs and additional subscriptions for a sibling, restore the first-view count when the sibling closes, and return bus size to zero only after final runtime disposal. The harness resourceCount measures bus subscriptions only."
+        }
+      ],
+      "gap": "Linked unit tests cover twenty view cycles, all measured owner resources, late success/failure and synthetic native EventRefs with a live sibling. The served-browser link measures one sibling cycle and bus subscriptions only; it does not measure all owned timers/dialogs/notices/window references over twenty browser cycles or establish full pop-out ownership."
+    },
+    {
+      "id": "AC-12",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Physical source limits count full SFC and CRLF correctly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-13",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Real resolved architecture checks reject violations. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-14",
+      "requiredModes": [
+        "tooling-generated",
+        "component"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Real Vue/async/native lint and locales reject defects. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-15",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Tests do not hide unused runtime code. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-16",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Unexpected browser failures generate failed current evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-17",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Correct CJS/composed assets without development leakage. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-18",
+      "requiredModes": [
+        "tooling-generated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Local install preserves data/notes/plugins/security. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-19",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Unsafe destination/config/build causes no destructive replacement. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-20",
+      "requiredModes": [
+        "node-baseline",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Unavailable host or crashed tool is never pass. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-21",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Bounded redacted local diagnostics without upload. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-22",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Keyboard/narrow/light/dark interaction is usable. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-23",
+      "requiredModes": [
+        "device"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Claimed mobile support has candidate-bound device evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-24",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Example removal leaves no orphan source/registrations. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-25",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: New developer completes the short first-change workflow. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-26",
+      "requiredModes": [
+        "unit",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Stable and beta discovery/API usage remain distinct. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-27",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Searchable native settings use shared validated writer. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-28",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Locked installs and family updates run relevant checks. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-29",
+      "requiredModes": [
+        "unit"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Freshness reports blocked/cooldown/outage honestly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-30",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Optional CLI only targets configured test vault. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-31",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Release preparation is consistent without publication. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-32",
+      "requiredModes": [
+        "artifact",
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Fixed-commit drafts have individually installable assets. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-33",
+      "requiredModes": [
+        "artifact",
+        "native",
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Promotion rejects missing/mismatched evidence without rebuilding. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-34",
+      "requiredModes": [
+        "artifact",
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Release retry/permissions/upload preserve published versions. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-35",
+      "requiredModes": [
+        "artifact",
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Listing validation rejects invalid metadata and missing assets. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-36",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Fresh dependency-free setup reaches declared readiness. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-37",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Setup help/dry run avoids side effects/hangs/recursion. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-38",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Setup recovery preserves edits and resumes only valid stages. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-39",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Tool scripts live in scripts and obey source limits. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-40",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Makers produce registered functioning code and tests. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-41",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Maker plan/conflict/concurrency/failure preserves work. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-42",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Custom machine maker uses the same safe plan engine. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-43",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/event-authoring.test.ts",
+          "name": "Registered event authoring documents every registered descriptor and validates actual boundary payloads",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual registered descriptors and boundary payload validation; compiler and browser obligations remain partial."
+        }
+      ],
+      "gap": "The linked unit case verifies the registered catalog and boundary payload validators. Negative compiler checks for keys/payloads/correlated unions, duplicate registration and feature extension without bus-core edits are not linked here; browser-integrated evidence is also unlinked."
+    },
+    {
+      "id": "AC-44",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I01] preserves registration order and skips removed entries",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I02] removes once before nested publication",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I03] observes thrown and rejected listeners while continuing dispatch",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I04] isolates and deeply freezes payload snapshots",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I05] isolates instances and disposes without reviving subscriptions",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/events.test.ts",
+          "name": "Typed event ownership [EVT-I06] bounds synchronous recursion",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
+        }
+      ],
+      "gap": "Six real-bus unit cases are linked. No served-browser links cover dispatch order and registration mutation, once/reentrancy, thrown/rejected listeners, immutable snapshots, disposal and runtime isolation; the required browser-integrated mode remains incomplete."
+    },
+    {
+      "id": "AC-45",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Native bridge startup/null/file-folder/rename/unload safety. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-46",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/items.test.ts",
+          "name": "Item reference actions and real per-view projections persists trimmed CRUD, stable IDs and concurrent preferences through the one writer without note writes or duplicate facts",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Two real projections refresh after persistence with one fact per successful mutation; runtime isolation remains a separate assertion."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/items.spec.ts",
+          "name": "item UI validates, synchronizes two views, retains drafts and persists rename/delete through reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real Items components and services; validation, sibling drafts, stable-ID rename/delete and local persistence reload. Browser storage is not native I/O."
+        }
+      ],
+      "gap": "Linked successful writes refresh both views with independent drafts. The links do not establish absence of committed facts on failed saves or isolation between independent runtimes in each required mode; these assertions must be linked before whole evidence is claimed."
+    },
+    {
+      "id": "AC-47",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Ordered CSS/SFC produces one complete safe artifact. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-48",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Style maker/HMR/removal/failure/candidate parity. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-49",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: CSS/SFC limits versus output budget, no native leakage. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-50",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Entity types correlate and duplicate mappings fail. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-51",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Entity defaults/date-only/falsy/null semantics. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-52",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Real YAML round-trip and safe property projection. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-53",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Prepare is read-only and accepted commit uses the same plan. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-54",
+      "requiredModes": [
+        "unit",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Complete host create with no premature created fact. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-55",
+      "requiredModes": [
+        "unit",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Unsafe document paths/folder/race conflicts never overwrite. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-56",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Duplicate/uncertain submissions never create blind duplicates. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-57",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Creation success survives cache/open/listener failures. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-58",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Second entity reuses service, Markdown stays canonical. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-59",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Entity maker creates code/fixtures but no user notes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-60",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Schemas do not rewrite old notes/global property types. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-61",
+      "requiredModes": [
+        "unit",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Actual emitted Markdown and native Properties verified. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-62",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Cancellation preserves actual outcome/privacy/disposed UI. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-63",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Canonical failures preserve category, identity and effect. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-64",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Persistent field guidance without one toast per field. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-65",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: One updating progress/terminal notice per operation. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-66",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Uncertain create has no unsafe retry; open retry stays separate. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-67",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Reporter/translator/sink failures are bounded/nonrecursive. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-68",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Contained Vue defects fail through independent ledger. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-69",
+      "requiredModes": [
+        "unit",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Fault scenarios reject missing/extra faults and overflow. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-70",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Notice burst/dedup/expiry preserves recovery/evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-71",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Disposal removes only owned handles/actions/timers. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-72",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native",
+        "manual"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Keyboard/focus/live announcement/recovery behavior. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-73",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Native Notice limitations modeled without private APIs. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-74",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Host fixture is original/scoped/labeled and not packaged. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-75",
+      "requiredModes": [
+        "artifact",
+        "browser-integrated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Missing host/plugin CSS or wrong identifiers fail checks. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-76",
+      "requiredModes": [
+        "component",
+        "browser-integrated",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Themes/narrow/long text/media cases label evidence mode. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-77",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Specimen is not reported as native/Vue/service evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-78",
+      "requiredModes": [
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Host comparison records actual identity or remains unverified. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-79",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Makers use shared errors/notifications and cleanup tests. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-80",
+      "requiredModes": [
+        "artifact",
+        "native"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Freshness/release excludes specimen-only success. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-81",
+      "requiredModes": [
+        "http-specimen"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Loopback server serves only declared assets and rejects writes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-82",
+      "requiredModes": [
+        "tooling-generated"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Scenario coverage and generated qualification remain finite. Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-83",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real CLI rejects unknown packet schema, hooks, retries, wrong modes, duplicate and missing raw cases",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual producer and CLI reject report schema/hooks/mode/count tampering; the retained 96-row plan remains independent."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Vitest JSON and public reporter diagnostics qualify a genuine pass and reject failure, retry, repeat and skip",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Real Vitest reporter output rejects count disagreement, an unknown report field/schema, empty assertions and contradictory diagnostic/suite statuses even when altered raw hashes are recomputed; the valid packet is restored between controls."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "framework adapters reject mode substitution, malformed shapes, empty and incomplete inventory",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "The actual framework adapters reject unknown shapes, empty or incomplete case inventories and mode substitutions; this parser control supplies no application acceptance claim."
+        }
+      ],
+      "gap": "Current Node/Vitest schema, inventory and contradictory-status controls are linked. Missing/duplicate legacy acceptance rows and unknown legacy test IDs remain tested by the independent POL baseline; those results remain separate from current packet evidence."
+    },
+    {
+      "id": "AC-84",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "session inventory retains a failed first attempt even when the next real run passes",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Real failed attempt remains in whole-session verdict after later pass; omitted run directory fails closed."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "whole-session CLI rejects real repeated case-inventory drift while identical same-producer repetitions pass",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Two genuine same-source cold child runs with identical cases qualify; another independently passing run with changed registration fails whole-session reconciliation and suppresses acceptance."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Vitest JSON and public reporter diagnostics qualify a genuine pass and reject failure, retry, repeat and skip",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual Vitest child runs prove that a real failed-first per-test retry and configured repetition cannot become ordinary passing evidence through final-success JSON; public retry/repeat diagnostics participate in the verdict."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Playwright JSON records passing assertions, first-failure retries and asset drift without claiming browser UI coverage",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "A genuine Playwright test fails its first attempt and passes its configured retry; every result is retained and the real producer/checker remain nonpassing. Reporter-only fixture launches no browser UI."
+        }
+      ],
+      "gap": "Cold Node semantic repetition, first-failure retention and genuine Vitest/Playwright retry/repeat controls are now linked. This proves the implemented rejection paths; candidate qualification still requires the declared complete producer runs and their matching case inventories, with no claim for runs not executed."
+    },
+    {
+      "id": "AC-85",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "a deliberately faulty real assertion and a skipped real assertion cannot produce passing evidence",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual Node producer runs an overflowing independent fault ledger and cannot turn it into passed evidence."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Vitest JSON and public reporter diagnostics qualify a genuine pass and reject failure, retry, repeat and skip",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "The public reporter and real JSON must agree on every case status; an extra independently reported unhandled error makes frameworkPassed false and prevents validation. Exact application fault code/scope expectations remain a separate ledger concern."
+        }
+      ],
+      "gap": "Actual child-ledger overflow and independent Vitest error/status rejection are linked. Exact missing/extra application fault codes, scopes and counts remain covered by the independent ERR baseline and production tests; they are not inferred from generic framework failure counts."
+    },
+    {
+      "id": "AC-86",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "fresh-input checking rejects stale source, added tests, absent reports and invalid acceptance modes",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual CLI validates executable bytes and policy identity; changed or additional source invalidates retained packets."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "actual CLI distinguishes a literal archive from malformed local Git metadata without falling back to archive",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Real archive producer runs pass on both sides of a malformed own-.git control; the malformed checkout exits with EVIDENCE_GIT_STATE and produces no fabricated archive evidence."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Playwright JSON records passing assertions, first-failure retries and asset drift without claiming browser UI coverage",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "After a real successful Playwright reporter fixture, changing the bound asset bytes makes the read-only CLI reject EVIDENCE_ASSET_MISMATCH. Fixture assets/executable are explicitly synthetic and do not qualify an actual browser application."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "native performance adapter rejects crafted classification, budget, size, graph and resolved-host lies against measured fixture bytes",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Crafted native-parser samples are checked against genuinely measured fixture asset/compression bytes; altered asset hashes, serializer contribution, on-disk attribution graph and resolved-host identity are rejected. This is identity-control evidence, not native execution."
+        }
+      ],
+      "gap": "New/modified source, malformed own-Git metadata, actual asset drift and crafted native asset/attribution/host identity controls are linked. Tool-install version mismatch and changed config/protocol/lockfile identities are enforced by hashing but do not yet have separate substitution controls linked here."
+    },
+    {
+      "id": "AC-87",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real CLI rejects empty suites and source changes during execution",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual empty Node suite and source-mutating child run produce nonpassing retained evidence."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real CLI rejects unknown packet schema, hooks, retries, wrong modes, duplicate and missing raw cases",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual CLI rejects absent raw-output receipts, malformed raw bytes, duplicated normalized cases, unknown schemas/hooks, nonzero retries and mode tampering around a real successful child control."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "a deliberately faulty real assertion and a skipped real assertion cannot produce passing evidence",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Actual failed assertions, skips and fault-ledger overflow produce retained failed packets and failed session reports, rather than zero-result success."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "session inventory retains a failed first attempt even when the next real run passes",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "A failed first run remains visible after a later real pass; deleting its registered run directory fails the session inventory check instead of silently selecting the later packet."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "real Vitest JSON and public reporter diagnostics qualify a genuine pass and reject failure, retry, repeat and skip",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Real framework failures/skips and malformed or contradictory reporter counts/statuses fail; matching real pass output remains a nearby valid control."
+        }
+      ],
+      "gap": "Node/Vitest failure, skip, empty, malformed, contradictory and missing registered-run paths are linked. An abruptly crashing real reporter and native-host partial/missing-output scenarios have not been independently injected through every producer; passing fixture parsers cannot establish those executions."
+    },
+    {
+      "id": "AC-88",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "a hung actual producer is terminated as an owned process tree and retains its timeout verdict",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "A real hung child uses a one-second producer deadline; the owned runner returns EVIDENCE_TIMEOUT, retains the failed packet and cannot pass the read-only checker."
+        }
+      ],
+      "gap": "The linked real hung Node producer times out, returns a retained failed verdict and cannot pass validation. The additive row does not yet link timeout-injection results for browser or native-host process trees; the retained RUN-06 baseline stays separate."
+    },
+    {
+      "id": "AC-89",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real producer retains exact source, cases and whole-session acceptance with a blocked release guard",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Execution counts, 96-case acceptance, source coverage and performance remain separate report fields."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "whole-session CLI rejects real repeated case-inventory drift while identical same-producer repetitions pass",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "All individual executions can pass while their changed semantic inventory fails the session; every acceptance row remains not-run, proving that passing execution counts alone do not promote acceptance."
+        }
+      ],
+      "gap": "Linked reports keep execution/acceptance/source coverage distinct, and passing individual runs with changed inventories cannot promote any acceptance row. A populated production-coverage report has not been independently used to assert that high measured coverage cannot promote incomplete acceptance."
+    },
+    {
+      "id": "AC-90",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real producer retains exact source, cases and whole-session acceptance with a blocked release guard",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Passing producer/session preserves blocked release decision and unexecuted required modes."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-cli.checks.mjs",
+          "name": "real CLI rejects unknown packet schema, hooks, retries, wrong modes, duplicate and missing raw cases",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Changing a genuine tooling case mode to native in a packet is rejected by the actual CLI despite the underlying child pass; JSON cannot confer native evidence by relabeling results."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/evidence-adapters.checks.mjs",
+          "name": "framework adapters reject mode substitution, malformed shapes, empty and incomplete inventory",
+          "mode": "node-baseline",
+          "extent": "partial",
+          "assertions": "Unit-mode data is rejected by the native adapter, and native-mode data is rejected by the artifact adapter. These mode-control assertions are Node baseline evidence only."
+        }
+      ],
+      "gap": "Passing sessions retain blocked release, and actual packet/native/artifact mode-substitution controls are linked. The independent legacy inline/specimen guard remains unchanged; no current link establishes administrative/public-release authorization, and no packet grants it."
+    },
+    {
+      "id": "AC-91",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Reviewed native token contract and scoped aliases Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-92",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Extracted source integrity and narrow vendor exception Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-93",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Host/plugin separation and profile load order Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-94",
+      "requiredModes": [
+        "browser-specimen"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Theme override and missing-style browser checks Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-95",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Provenance does not claim unknown host or transfer upstream license Retained baseline evidence remains separately scoped; required modes are unchanged."
+    },
+    {
+      "id": "AC-96",
+      "requiredModes": [
+        "node-baseline"
+      ],
+      "links": [],
+      "gap": "No reviewed additive assertion link establishes the full requirement: Deprecated/missing aliases fail verification Retained baseline evidence remains separately scoped; required modes are unchanged."
+    }
+  ]
+}

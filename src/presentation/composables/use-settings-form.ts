@@ -2,6 +2,14 @@ import { reactive, ref, watch, useId, onScopeDispose } from 'vue';
 import type { Preferences } from '../../domain/preferences';
 import { useServices } from '../context/use-services';
 import { useViewPreferences } from './use-view-preferences';
+function checkbox(target: EventTarget | null): target is EventTarget & { checked: boolean } {
+  return !!target && 'checked' in target && typeof target.checked === 'boolean';
+}
+function changedPreferences(form: Preferences, base: Preferences): Partial<Preferences> {
+  return { ...(form.locale !== base.locale ? { locale: form.locale } : {}),
+    ...(form.taskFolder !== base.taskFolder ? { taskFolder: form.taskFolder } : {}),
+    ...(form.notifySuccess !== base.notifySuccess ? { notifySuccess: form.notifySuccess } : {}) };
+}
 
 export function useSettingsForm() {
   const uid = useId();
@@ -24,11 +32,7 @@ export function useSettingsForm() {
   async function save() {
     if (pending.value || services.preferences.readonly) return;
     pending.value = true; error.value = '';
-    const patch: Partial<Preferences> = {
-      ...(form.locale !== base.locale ? { locale: form.locale } : {}),
-      ...(form.taskFolder !== base.taskFolder ? { taskFolder: form.taskFolder } : {}),
-      ...(form.notifySuccess !== base.notifySuccess ? { notifySuccess: form.notifySuccess } : {}),
-    };
+    const patch = changedPreferences(form, base);
     try {
       const result = await services.preferences.update(patch);
       if (!alive) return;
@@ -40,7 +44,7 @@ export function useSettingsForm() {
   async function toggleHeader(event: Event) {
     if (headerPending.value || services.preferences.readonly) return;
     const target = event.currentTarget;
-    if (!target || !('checked' in target) || typeof target.checked !== 'boolean') return;
+    if (!checkbox(target)) return;
     const requested = target.checked;
     // Controlled value: do not display a successful change before persistence succeeds.
     target.checked = model.preferences.value.hideObsidianViewHeader;

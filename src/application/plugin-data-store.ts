@@ -65,18 +65,19 @@ export class PluginDataStore {
 }
 
 /** Reject non-JSON inputs instead of silently deleting values during serialization. */
-function jsonValue(value: unknown, depth = 0): boolean {
-  if (depth > 30) return false;
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
-  if (typeof value === 'number') return Number.isFinite(value);
-  if (Array.isArray(value)) {
+function jsonArray(value: unknown[], depth: number): boolean {
     if (Object.getPrototypeOf(value) !== Array.prototype || Reflect.ownKeys(value).length !== value.length + 1) return false;
     for (let index = 0; index < value.length; index++) {
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
       if (!descriptor || !descriptor.enumerable || !('value' in descriptor) || !jsonValue(descriptor.value, depth + 1)) return false;
     }
     return true;
-  }
+}
+function jsonValue(value: unknown, depth = 0): boolean {
+  if (depth > 30) return false;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return jsonArray(value, depth);
   if (!plainRecord(value)) return false;
   const names = Reflect.ownKeys(value);
   return names.length === Object.keys(value).length && names.every(name => {

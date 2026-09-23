@@ -19,6 +19,16 @@ interface Registry { readonly schemaVersion: 1; readonly collections: Readonly<R
 const corrupt = () => failure('storage', 'error.pluginDataRead');
 const validId = (value: unknown): value is string => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(value);
 const exact = (value: Record<string, unknown>, keys: readonly string[]) => Object.keys(value).every(key => keys.includes(key));
+const validRevision = (value: unknown, minimum: number): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= minimum;
+function storedRecord(row: unknown, revision: number): row is { id: string; revision: number; createdAt: string; values: unknown } {
+  if (!plainRecord(row) || !exact(row, ['id', 'revision', 'createdAt', 'values'])) return false;
+  return validId(row.id) && validRevision(row.revision, 1) && row.revision <= revision
+    && typeof row.createdAt === 'string' && row.createdAt.length > 0 && row.createdAt.length <= 100;
+}
+function storedCollection(raw: unknown, schemaVersion: number): raw is { revision: number; records: unknown[] } {
+  return plainRecord(raw) && exact(raw, ['schemaVersion', 'revision', 'records']) && raw.schemaVersion === schemaVersion
+    && validRevision(raw.revision, 0) && Array.isArray(raw.records) && raw.records.length <= 1000;
+}
 function registry(data: PluginDataEnvelope): Result<Registry> {
   const raw = data.pluginEntities;
   if (raw === undefined) return success({ schemaVersion: 1, collections: {} });
@@ -38,12 +48,12 @@ export class PluginDataRepository<I, V> {
     if (!root.ok) return root;
     const raw = Object.hasOwn(root.value.collections, this.entity.key) ? root.value.collections[this.entity.key] : undefined;
     if (raw === undefined) return success({ schemaVersion: this.entity.schemaVersion, revision: 0, records: [], storedValues: new Map() });
-    if (!plainRecord(raw) || !exact(raw, ['schemaVersion', 'revision', 'records']) || raw.schemaVersion !== this.entity.schemaVersion || !Number.isSafeInteger(raw.revision) || typeof raw.revision !== 'number' || raw.revision < 0 || !Array.isArray(raw.records) || raw.records.length > 1000) return corrupt();
+    if (!storedCollection(raw, this.entity.schemaVersion)) return corrupt();
     const records: RecordValue<V>[] = [];
     const storedValues = new Map<string, unknown>();
     const ids = new Set<string>();
     for (const row of raw.records) {
-      if (!plainRecord(row) || !exact(row, ['id', 'revision', 'createdAt', 'values']) || !validId(row.id) || ids.has(row.id) || typeof row.revision !== 'number' || !Number.isSafeInteger(row.revision) || row.revision < 1 || row.revision > raw.revision || typeof row.createdAt !== 'string' || !row.createdAt.length || row.createdAt.length > 100) return corrupt();
+      if (!storedRecord(row, raw.revision) || ids.has(row.id)) return corrupt();
       const values = this.entity.decode(row.values);
       if (!values.ok) return corrupt();
       records.push({ id: row.id, revision: row.revision, createdAt: row.createdAt, values: values.value });

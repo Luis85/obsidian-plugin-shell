@@ -16,6 +16,10 @@ npm run verify            Current iteration's type/lint/architecture/unit/build/
 npm run test:e2e          Served real-component browser tests (provision browsers first)
 npm run test:coverage     Enforce selected-core/feature coverage
 npm run check:artifacts   Validate the installable bundle and CSS isolation
+npm run check:maintainability  Measure full production complexity and duplication with pinned Fallow
+npm run evidence -- --help  Run trusted producers, check input-bound packets and report acceptance gaps
+npm run measure:assets    Read existing asset hashes, sizes and matching serializer build attribution
+npm run test:native -- --allow-download --performance  Explicit isolated native timing protocol; budgets advisory
 npm run check:security   Live all-category JSON and ordinary npm audit; registry failure is not clean
 npm run test:coverage:production  Gate all production inputs plus stricter business-code coverage
 npm run test:baseline     Preserved specimen/verification regression suite

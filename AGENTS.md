@@ -12,6 +12,16 @@ source-derived catalogs and an optional plugin-data Items workflow. Read
 [PRD](docs/product/PRD.md) and retained normative companions remain the complete
 target; qualification and release authorization are separate.
 
+The executable qualification extension adds trusted evidence producers, an
+additive acceptance crosswalk, full production maintainability gates and explicit
+native resource/performance protocols. Read its
+[plan](docs/development/EXECUTABLE-QUALIFICATION-PLAN.md),
+[evidence guide](docs/testing/EXECUTABLE-EVIDENCE.md),
+[metric scope](docs/development/MAINTAINABILITY.md) and
+[execution record](docs/testing/EXECUTABLE-QUALIFICATION.md) for current scope.
+Keep every legacy acceptance row/mode and the blocked release profile. Read-only
+report validation is not proof of honest execution or release authorization.
+
 Setup supports reviewed identity changes, browser/native profiles, verified resume
 and explicit disabled-plugin data migration inside the contained vault. Makers
 implement the explicit catalog described by their help, composed from primitives

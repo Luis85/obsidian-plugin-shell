@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "profiles": {
+    "showcase": [
+      "actual-vault-verbatim-title-and-markdown-match-preview",
+      "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets",
+      "native-command-opens-view",
+      "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+      "native-debug-commands-toggle-and-export-attributable-redacted-report",
+      "native-declarative-settings-use-application-writer",
+      "native-electron-125-150-percent-zoom-no-clipped-language-control",
+      "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+      "native-exact-title-row-hidden-not-tabs-or-window-controls",
+      "native-host-bridge-publishes-normalized-crud-observations",
+      "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+      "native-items-cold-restart-current-state-load-without-writes",
+      "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+      "native-items-controlled-adapter-rejection-retains-draft-no-success",
+      "native-items-invalid-and-trimmed-create-one-write",
+      "native-items-settings-entity-serialized-writes-retain-current-state",
+      "native-items-stable-id-rename-two-view-projection-independent-draft",
+      "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+      "native-modal-opens-and-dismisses",
+      "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+      "native-popout-inherits-preference-and-live-toggle",
+      "native-public-command-local-id-removal-before-plugin-unload",
+      "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+      "native-repository-list-reads-canonical-manually-edited-note",
+      "native-repository-trash-cancellation-preserves-exact-note",
+      "native-repository-update-preserves-path-identity-user-properties-and-body",
+      "native-runtime-reload-restores-persisted-hidden-preference",
+      "native-settings-restoration-shares-canonical-service",
+      "native-split-pane-light-dark-theme-transition",
+      "native-unload-restores-retained-host-elements-without-foreign-mutation",
+      "native-view-real-event"
+    ],
+    "foundation": [
+      "native-foundation-cold-restart-persists-preferences-and-identical-installed-assets",
+      "native-foundation-command-opens-real-view",
+      "native-foundation-header-ownership-preserves-tabs",
+      "native-foundation-preferences-persist-through-shared-writer",
+      "native-foundation-real-light-and-dark-host-themes",
+      "native-foundation-unload-reenable-restores-preferences-and-preserves-notes",
+      "native-public-command-local-id-removal-before-plugin-unload"
+    ]
+  }
+}

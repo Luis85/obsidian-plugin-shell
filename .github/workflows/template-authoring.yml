@@ -1,7 +1,7 @@
 name: Template authoring
 on:
   push:
-    branches: [main, build/template-foundation, build/release-operations, build/runtime-authoring]
+    branches: [main, build/template-foundation, build/release-operations, build/runtime-authoring, codex/executable-qualification]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -55,13 +55,18 @@ jobs:
           node "$QUALIFIED_NPM" run test:e2e
       - name: Exercise literal source archive without ancestor Git discovery
         run: |
-          ARCHIVE_ROOT="$RUNNER_TEMP/runtime-authoring-archive"
+          ARCHIVE_ROOT="$RUNNER_TEMP/executable-qualification-archive"
           mkdir -p "$ARCHIVE_ROOT"
           git archive --format=tar HEAD | tar -x -C "$ARCHIVE_ROOT"
           export GIT_CEILING_DIRECTORIES="$RUNNER_TEMP"
           cd "$ARCHIVE_ROOT"
           if git rev-parse --show-toplevel; then exit 1; fi
           node scripts/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
+          set -o pipefail
+          node "$QUALIFIED_NPM" run setup -- --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-setup.txt"
+          node scripts/testing/evidence-cli.mjs run runtime
+          node scripts/testing/evidence-cli.mjs run artifact
+          cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
           set -o pipefail
@@ -76,7 +81,13 @@ jobs:
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
           node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
-          node "$QUALIFIED_NPM" run test:e2e
+          node scripts/testing/evidence-cli.mjs run runtime
+          node scripts/testing/evidence-cli.mjs run coverage
+          node scripts/testing/evidence-cli.mjs run artifact
+          node scripts/testing/evidence-cli.mjs run browser
+          for session in reports/evidence/*; do
+            node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
+          done
       - name: Retain authoring evidence and the generated source
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

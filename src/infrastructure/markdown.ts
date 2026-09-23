@@ -7,6 +7,15 @@ import { failure, success } from '../domain/outcome';
 export function renderMarkdown(properties: Frontmatter, body: string): string {
   return `---\n${stringify(properties, { lineWidth: 0, defaultStringType: 'QUOTE_DOUBLE', defaultKeyType: 'PLAIN' })}---\n\n${body}`;
 }
+function safeDocument(document: ReturnType<typeof parseDocument>): boolean {
+  if (document.errors.length || document.warnings.length || !isMap(document.contents)) return false;
+  let unsafe = false;
+  visit(document, (key, node, path) => {
+    if (path.length > 30 || isAlias(node) || (isScalar(node) && key === 'key' && (typeof node.value !== 'string' || ['__proto__', 'prototype', 'constructor', '<<'].includes(node.value)))) { unsafe = true; return visit.BREAK; }
+    return undefined;
+  });
+  return !unsafe;
+}
 
 function parseMarkdown(markdown: string) {
   if (markdown.length > 1_000_000) return failure('validation', 'error.entity');
@@ -15,13 +24,7 @@ function parseMarkdown(markdown: string) {
   if (!block) return failure('validation', 'error.entity');
   try {
     const document = parseDocument(block[1] ?? '', { uniqueKeys: true, strict: true });
-    if (document.errors.length || document.warnings.length || !isMap(document.contents)) return failure('validation', 'error.entity');
-    let unsafe = false;
-    visit(document, (key, node, path) => {
-      if (path.length > 30 || isAlias(node) || (isScalar(node) && key === 'key' && (typeof node.value !== 'string' || ['__proto__', 'prototype', 'constructor', '<<'].includes(node.value)))) { unsafe = true; return visit.BREAK; }
-      return undefined;
-    });
-    if (unsafe) return failure('validation', 'error.entity');
+    if (!safeDocument(document)) return failure('validation', 'error.entity');
     const properties: unknown = document.toJS({ maxAliasCount: 0 });
     if (!plainRecord(properties)) return failure('validation', 'error.entity');
     return success({ document, properties, body: markdown.slice(block[0].length) });

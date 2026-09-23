@@ -15,12 +15,18 @@ export interface LogRecord {
 }
 interface LogCatalog<C extends string, O extends string> { readonly scope: string; readonly codes: readonly C[]; readonly operations: readonly O[] }
 const identifier = (value: unknown, maximum = 100): value is string => typeof value === 'string' && value.length <= maximum && /^[a-z][a-z0-9.-]*$/.test(value);
+function identifiers(values: readonly string[]): boolean {
+  return Array.isArray(values) && values.length > 0 && values.length <= 100
+    && values.every(value => identifier(value)) && new Set(values).size === values.length;
+}
+function metadataDescriptors(input: object): PropertyDescriptorMap | undefined {
+  if (![Object.prototype, null].includes(Object.getPrototypeOf(input))) return undefined;
+  const descriptors = Object.getOwnPropertyDescriptors(input);
+  return Reflect.ownKeys(descriptors).some(key => typeof key !== 'string' || !['count', 'attempt', 'durationMs', 'effect', 'correlation'].includes(key)) ? undefined : descriptors;
+}
 /** Catalogs are authored static declarations, never generated from user content. */
 export function defineLogCatalog<const C extends readonly string[], const O extends readonly string[]>(scope: string, definition: { readonly codes: C; readonly operations: O }): LogCatalog<C[number], O[number]> {
-  if (!identifier(scope, 64) || !Array.isArray(definition.codes) || !Array.isArray(definition.operations)
-    || !definition.codes.length || !definition.operations.length || definition.codes.length > 100 || definition.operations.length > 100
-    || [...definition.codes, ...definition.operations].some(value => !identifier(value))
-    || new Set(definition.codes).size !== definition.codes.length || new Set(definition.operations).size !== definition.operations.length) throw new Error('INVALID_LOG_CATALOG');
+  if (!identifier(scope, 64) || !identifiers(definition.codes) || !identifiers(definition.operations)) throw new Error('INVALID_LOG_CATALOG');
   return Object.freeze({ scope, codes: Object.freeze([...definition.codes]), operations: Object.freeze([...definition.operations]) });
 }
 const coreCatalog = defineLogCatalog('core', {
@@ -92,27 +98,45 @@ export class StructuredLogger {
   private metadata(input: unknown): SafeMetadata | undefined {
     if (input === undefined) return Object.freeze({});
     try {
-      if (input === null || typeof input !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(input))) return undefined;
-      const descriptors = Object.getOwnPropertyDescriptors(input);
-      if (Reflect.ownKeys(descriptors).some(key => typeof key !== 'string' || !['count', 'attempt', 'durationMs', 'effect', 'correlation'].includes(key))) return undefined;
+      if (input === null || typeof input !== 'object') return undefined;
+      const descriptors = metadataDescriptors(input);
+      if (!descriptors) return undefined;
       const output: { count?: number; attempt?: number; durationMs?: number; effect?: Failure['effect']; correlation?: number } = {};
       for (const [key, descriptor] of Object.entries(descriptors)) {
         if (!Object.hasOwn(descriptor, 'value')) return undefined;
         const value: unknown = descriptor.value;
         if (value === undefined) continue;
-        if (key === 'correlation') {
-          if (value === null || typeof value !== 'object') return undefined;
-          const registered = this.correlations.get(value);
-          if (registered === undefined) return undefined; output.correlation = registered;
-        } else if (key === 'effect') {
-          if (value !== 'none' && value !== 'committed' && value !== 'uncertain') return undefined; output.effect = value;
-        } else {
-          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > (key === 'durationMs' ? 86_400_000 : 1_000_000) || (key !== 'durationMs' && !Number.isInteger(value))) return undefined;
-          if (key === 'count') output.count = value; else if (key === 'attempt') output.attempt = value; else output.durationMs = value;
-        }
+        if (!this.metadataField(output, key, value)) return undefined;
       }
       return Object.freeze(output);
     } catch { return undefined; }
+  }
+  private metadataField(output: { count?: number; attempt?: number; durationMs?: number; effect?: Failure['effect']; correlation?: number }, key: string, value: unknown): boolean {
+    if (key === 'correlation') {
+      if (value === null || typeof value !== 'object') return false;
+      const registered = this.correlations.get(value);
+      if (registered === undefined) return false;
+      output.correlation = registered; return true;
+    }
+    if (key === 'effect') {
+      if (value !== 'none' && value !== 'committed' && value !== 'uncertain') return false;
+      output.effect = value; return true;
+    }
+    return this.numericMetadata(output, key, value);
+  }
+  private numericMetadata(output: { count?: number; attempt?: number; durationMs?: number }, key: string, value: unknown): boolean {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return false;
+    if (key === 'durationMs') { if (value > 86_400_000) return false; output.durationMs = value; return true; }
+    if (value > 1_000_000 || !Number.isInteger(value)) return false;
+    if (key === 'count') output.count = value; else output.attempt = value;
+    return true;
+  }
+  private timestamp(): string | null {
+    try {
+      const value = this.now();
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && new Date(value).toISOString() === value) return value;
+    } catch { /* Invalid clock output is observed below. */ }
+    this.report('logging.clock', 'logging.record'); return null;
   }
   private record(level: Exclude<LogLevel, 'off'>, code: string, operation: string, input: unknown): boolean {
     if (this.writing || this.notifying || this.reporting) { this.reentrant++; return false; }
@@ -120,9 +144,7 @@ export class StructuredLogger {
     try {
     const metadata = this.metadata(input); if (!metadata) { this.reject(); return false; }
     if (levels[level] > levels[this.selected]) return false;
-    let timestamp: string | null = null;
-    try { const value = this.now(); if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && new Date(value).toISOString() === value) timestamp = value; else this.report('logging.clock', 'logging.record'); }
-    catch { this.report('logging.clock', 'logging.record'); }
+    const timestamp = this.timestamp();
     if (this.disposed) return false;
     const entry = Object.freeze({ sequence: ++this.sequence, timestamp, level, code, operation, metadata });
     if (this.records.length === this.capacity) { this.records.shift(); this.dropped++; }

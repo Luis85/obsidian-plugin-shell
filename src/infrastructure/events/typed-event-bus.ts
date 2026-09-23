@@ -96,6 +96,12 @@ export class TypedEventBus<M> implements EventPort<M> {
   publish(event: EventInput<M>): void {
     this.dispatch(event.type, event.payload);
   }
+  private deliver(entry: Subscription, payload: unknown): void {
+    try {
+      const result = entry.invoke(payload);
+      if (result) Promise.resolve(result).catch(() => this.errors.report('event.listener', 'event.dispatch'));
+    } catch { this.errors.report('event.listener', 'event.dispatch'); }
+  }
   private dispatch(type: keyof M | string, input: unknown): void {
     if (this.disposed) return;
     if (this.depth >= 32) {
@@ -120,12 +126,7 @@ export class TypedEventBus<M> implements EventPort<M> {
       // oxlint-disable-next-line unicorn/no-useless-spread
       for (const entry of [...(this.listeners.get(type) ?? [])]) {
         if (!entry.active) continue;
-        try {
-          const result = entry.invoke(payload);
-          if (result) Promise.resolve(result).catch(() => this.errors.report('event.listener', 'event.dispatch'));
-        } catch {
-          this.errors.report('event.listener', 'event.dispatch');
-        }
+        this.deliver(entry, payload);
       }
     } finally {
       this.depth--;

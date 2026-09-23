@@ -14,6 +14,14 @@ broader requirement. **Externally blocked** identifies an upstream or owner-held
 condition that this implementation cannot establish. A row marked implemented
 does not promote a historical acceptance ID or qualify a newly built candidate.
 
+The current [executable qualification milestone](EXECUTABLE-QUALIFICATION-PLAN.md)
+adds trusted framework/native evidence adapters and a 96-row additive crosswalk,
+full production maintainability measurements, resource-cycle assertions and native
+Items/performance protocols. Its [execution record](../testing/EXECUTABLE-QUALIFICATION.md)
+owns the current candidate's results. Historical missing-measurement statements
+below describe the baseline; they are not a claim that the new commands are absent.
+Remaining template-wide acceptance and release authorization are unchanged.
+
 Runtime-authoring integration updates the selected rows below. Its prior fixed
 candidate and exact evidence are in the [runtime-authoring record](../testing/RUNTIME-AUTHORING.md).
 Merging release operations and later dependency changes creates a new source
@@ -121,7 +129,7 @@ out explicitly. The AC table below retains every individual legacy condition.
 | HST-02–03, HST-06 | Implemented | Explicit isolated native provisioning and honest not-run/manual path; normal verify does not launch Obsidian. |
 | HST-05 | Intentionally bounded | Physical iOS/Android evidence missing; desktop-only declaration retained. |
 | QLT-01–04, QLT-06–11, QLT-13–17 | Implemented | Current code-line, strict types, real linters, coverage, complete fallow dead-code/boundary reports and negative fixtures. Supported dependency graph remains separately blocked. |
-| QLT-05, QLT-12 | Missing | Proposed cyclomatic/cognitive/duplication metrics and their reviewed denominators are not established by `check:analyzer`, which invokes fallow `dead-code`. |
+| QLT-05, QLT-12 | Partial | `check:maintainability` measures full production function cyclomatic/cognitive complexity and production duplication with pinned Fallow, separate tooling/fixture/template views and fail-closed inventories. Proposed 10/15/3% targets remain; current execution and template aggregate scope are recorded separately. `check:analyzer` remains the independent dead-code gate. |
 | BLD-01–04, DEP-01–07 | Implemented | CJS/exact three assets/notices/staged contained installation and last-good preservation; T/R/N. |
 | DEP-08 | Intentionally bounded | Optional official CLI path is not required by normal setup; no personal-vault inference. |
 | AGT-01–09, AGT-11 | Implemented | Root ownership/safety instructions, bounded commands and separate execution evidence; compliance remains per task. |
@@ -139,9 +147,9 @@ out explicitly. The AC table below retains every individual legacy condition.
 | TST-11 | Intentionally bounded | Legacy release readiness stays blocked. A new opt-in remote operation is not full-template release certification. |
 | POL-01–06 | Partial | Scope/recovery/generation policies retained; finite authoring and real-service evidence exist, full release/native/device matrix does not. |
 | NFR-01, NFR-06, NFR-09–10, NFR-12–13 | Implemented | Offline runtime, safe outcomes/gates/identity and bounded inputs; no cross-platform reproducible-build or signature claim. |
-| NFR-02–03 | Missing | Controlled 30-run warm initialization and 100-item readiness benchmarks absent. |
-| NFR-04 | Partial | R records JS 573567 bytes/CSS 88547 bytes below ceilings; serializer impact and compressed-size qualification remain separate. |
-| NFR-05 | Partial | Ownership tests/native cycles exist; the exact controlled 20-cycle resource baseline is not established here. |
+| NFR-02–03 | Partial | Opt-in native protocol retains three warmups and 30 samples for warm initialization and actual 100-item rendering. Current reference/shared-runner results belong to the executable qualification record; proposed budgets are not universal performance claims. |
+| NFR-04 | Partial | Read-only asset diagnostics report exact hashes, uncompressed/gzip/Brotli sizes and matching YAML build-graph attribution. Module rendered lengths are not an allocation of final compressed bytes; existing 1 MiB/100 KiB ceilings remain. |
+| NFR-05 | Partial | Four resource tests now exercise 20 complete real-view cycles, a usable sibling, native adapter EventRef registration, owned timers/dialogs/notices and late write outcomes. Host boundaries in these tests are doubles; actual native qualification remains separately identified. |
 | NFR-07–08, NFR-11 | Partial | Automated accessibility/Windows/Linux evidence exists; manual/device/wider-platform and measured onboarding targets remain. |
 
 ## Every legacy release-blocking acceptance condition
@@ -285,7 +293,7 @@ maintainer, with next review **2026-09-30** or earlier on a supported upstream r
 | Item | Observed evidence | Recommended disposition |
 | --- | --- | --- |
 | [PR #6](https://github.com/Luis85/obsidian-plugin-shell/pull/6), Node types 24.13.6 → 26.6.1 | Merged as `525ee264abf5f532e10592ea5d5f694e3c658abe` after the owner requested compatible dependency merges and all refreshed checks on current main passed. See [integration evidence](../testing/MAIN-INTEGRATION.md). | Deliberate declaration update only. Qualified runtime remains Node 24.21.0/npm 11.19.1; tests establish used-code compatibility, not availability of every Node 26 API. |
-| [PR #7](https://github.com/Luis85/obsidian-plugin-shell/pull/7), TypeScript 6.0.3 → 7.0.2 | Open; seven reported checks failed, three succeeded. [Showcase run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321920) fails strict installation with `ERESOLVE`: typescript-eslint 8.70.1 requires TypeScript `>=4.8.4 <6.1.0`. Current parser 8.70.1 has the same peer range. | Incompatible. Retain 6.0.3 until a supported compiler/parser family can install strictly and pass real negative gates, generated consumers and normal verification. No force/legacy-peer-deps or broad permanent ignore. |
+| [PR #7](https://github.com/Luis85/obsidian-plugin-shell/pull/7), TypeScript 6.0.3 → 7.0.2 | Closed without merging, confirmed at this milestone's live baseline. Its earlier seven failed checks and three successes remain historical evidence. [Showcase run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35857321920) failed strict installation with `ERESOLVE`: selected typescript-eslint 8.70.1 requires TypeScript `>=4.8.4 <6.1.0`. | Incompatible with the selected family. Retain 6.0.3 until a supported compiler/parser family can install strictly and pass real negative gates, generated consumers and normal verification. No force/legacy-peer-deps or broad permanent ignore. |
 | Nested ESLint 9.39.5 | Stable official Obsidian lint remains 0.4.2, importing SDL/import presets. SDL 1.1.0 declares ESLint `^9` and fixes React 7.37.3; import 2.32.0 peers end at `^9`; current React 7.37.5 ends at `^9.7`. | Externally blocked full-supported-graph criterion. Root ESLint 10 and a clean audit do not close it. Require a supported upstream replacement or separately reviewed maintained integration plus strict install/all gates/audit. |
 
 Registry responses were fetched directly after the web reader could not load the
@@ -303,7 +311,7 @@ lists major 9 as EOL from 2026-08-06; the
 2026-08-13 and declares that it is no longer maintained. Preserve the existing
 [exception record](ITERATION-TWO-DEPENDENCY-EXCEPTION.md).
 
-## Selected milestone and closure boundaries
+## Retained release-execution milestone and closure boundaries
 
 The selected concern is **opt-in execution of retained release operations**:
 authenticated read-only discovery, resumable draft uploads, and guarded promotion

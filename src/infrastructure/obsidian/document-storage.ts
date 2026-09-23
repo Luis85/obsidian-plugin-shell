@@ -35,22 +35,33 @@ export function nativeDocumentStorage(vault: DocumentVault): DocumentStorage {
     const name = collisionKey(path.slice(separator + 1));
     return parent.children.find(entry => collisionKey(entry.name) === name);
   };
-  async function create(path: string, markdown: string): Promise<Result<void>> {
-    if (!allowed(path)) return invalid();
+  async function ensureFolder(folder: string): Promise<Result<void>> {
+    const existing = existingPath(folder);
+    if (existing && (!(existing instanceof TFolder) || existing.path !== folder)) return failure('conflict', 'error.conflict');
+    if (!existing) {
+      try { await vault.createFolder(folder); }
+      catch { if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) return failure('storage', 'error.write'); }
+    }
+    return success(undefined);
+  }
+  async function prepareFolders(path: string): Promise<Result<void>> {
     try {
       if (existingPath(path)) return failure('conflict', 'error.conflict');
       const segments = path.split('/').slice(0, -1);
       for (let i = 1; i <= segments.length; i++) {
         const folder = segments.slice(0, i).join('/');
-        const existing = existingPath(folder);
-        if (existing && (!(existing instanceof TFolder) || existing.path !== folder)) return failure('conflict', 'error.conflict');
-        if (!existing) {
-          try { await vault.createFolder(folder); }
-          catch { if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) return failure('storage', 'error.write'); }
-        }
+        const prepared = await ensureFolder(folder);
+        if (!prepared.ok) return prepared;
       }
-      if (existingPath(path)) return failure('conflict', 'error.conflict');
+      return success(undefined);
     } catch { return failure('storage', 'error.write'); }
+  }
+  async function create(path: string, markdown: string): Promise<Result<void>> {
+    if (!allowed(path)) return invalid();
+    const prepared = await prepareFolders(path);
+    if (!prepared.ok) return prepared;
+    try { if (existingPath(path)) return failure('conflict', 'error.conflict'); }
+    catch { return failure('storage', 'error.write'); }
     try { await vault.create(path, markdown); return success(undefined); }
     catch {
       // Never retry: reconcile only this exact intended effect.
