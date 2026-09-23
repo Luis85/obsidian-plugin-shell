@@ -27,9 +27,7 @@ function libraryUpgradeDialog(){
  const {changes}=upgradedBrick(b,c);
  return dialogBody('Review content component upgrade',`<p><strong>${esc(c.name)}</strong> in ${esc(n.label)}: v${esc(b.version)} → v${esc(c.version)}</p><div class="library-upgrade-fields">${changes.map(x=>`<section><strong>${esc(x.field)}</strong>${badge(x.local?'Keep local override':x.before===x.after?'Unchanged':'Use new default',x.local?'purple':'')}<p>${esc(x.after||'Empty')}</p></section>`).join('')}</div><p>Only this instance is upgraded. Its ID, order, requirement links and implementation binding are preserved.</p><p class="error" role="alert">${esc(libraryUi.error)}</p>`,button('Cancel','close','','ghost')+button('Accept reviewed upgrade','library-upgrade-save','','primary'));
 }
-function libraryCardToolbar(n){
- return `<div class="flow-card-toolbar card-actions-compact nodrag nopan" role="group" aria-label="Actions for ${esc(n.label)}">${button('Edit','design-edit',n.id,'ghost small','settings')}${button('Add','library-card-add',n.id,'ghost small','plus')}${button('More','canvas-card-menu',n.id,'ghost small','menu')}</div>`;
-}
+function libraryCardToolbar(n){return "";}
 function libraryCardAddDialog(){
  const id=modalData||libraryUi.returnNode,n=design().nodes.find(n=>n.id===id);
  if(!n)return dialogBody('Select a card','Select a surface first.');

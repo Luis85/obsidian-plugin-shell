@@ -25,7 +25,7 @@ function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
  if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:236+Math.max(1,bricksOf(n).length)*(mode==='wireframes'?76:40)};
+ return {width:MAP_SIZE.w,height:110+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+4,0)};
 }
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){

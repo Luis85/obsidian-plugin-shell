@@ -9,9 +9,9 @@ function handleCanvasAction(action,value){
   case 'canvas-child':designUi.selected=value;startNodeForm('page');break;
   case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
-  case 'canvas-outline':canvasUi.outline=!canvasUi.outline;render();break;
+  case 'canvas-outline':referencePaneMode('structure');break;
   case 'canvas-expand':canvasUi.expanded=!canvasUi.expanded;render();fitMap();break;
-  case 'canvas-inspector':canvasUi.inspector=value;render();break;
+  case 'canvas-inspector':referenceUi.panel='inspector';canvasUi.inspector=value;render();break;
   case 'canvas-arrange':arrangeMap(c.layout);break;
   case 'canvas-collapse':toggleMapBranch(value);break;
   case 'canvas-expand-all':canvasCommit(v=>v.collapsed=[],'All branches expanded.');break;

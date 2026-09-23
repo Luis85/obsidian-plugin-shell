@@ -1,7 +1,7 @@
 // Pointer movement updates only world coordinates and SVG paths, never the full app.
 function mapPointerDown(event){
  if(event.target.closest('#vf-root'))return;
- const vp=event.target.closest('#map-viewport');if(!vp||event.button!==0||event.target.closest('button,input,select,.map-controls,.map-edge,.map-legend'))return;
+ const vp=event.target.closest('#map-viewport');if(!vp||event.button!==0||event.target.closest('button,input,select,.map-controls,.map-edge,.map-legend,.ref-node-toolbar,.ref-main-dock,.ref-canvas-top,.ref-panel'))return;
  if(canvasUi.connecting||canvasUi.placing)return;
  const card=event.target.closest('.map-node'),c=canvasState();
  if(card&&state.activeRun){notify('Finish or cancel the active simulation before moving a card.');return;}
@@ -12,7 +12,7 @@ function mapPointerDown(event){
 function paintMapSelection(){
  document.querySelectorAll('.map-node').forEach(el=>el.classList.toggle('selected',el.dataset.node===designUi.selected));
  const inspector=document.querySelector('.inspector-body'),n=selectedNode();
- if(inspector)inspector.innerHTML=flowInspector(design(),n);if(flowUi.api)syncFlowSelection();
+ if(inspector)inspector.innerHTML=flowInspector(design(),n);if(flowUi.api)syncFlowSelection();paintReferenceChrome();
  const wires=document.getElementById('map-wires');if(wires)wires.innerHTML=canvasWires(design(),visibleMapNodes());
 }
 function mapPointerMove(event){
@@ -93,5 +93,5 @@ document.addEventListener('keydown',mapKeyDown);
 document.addEventListener('wheel',mapWheel,{passive:false});
 document.addEventListener('contextmenu',event=>{const n=event.target.closest('.map-node');if(n){event.preventDefault();dispatch('canvas-card-menu',n.dataset.node);}});
 document.addEventListener('dblclick',event=>{const n=event.target.closest('.map-node');if(n&&!event.target.closest('button,.flow-port')){event.preventDefault();startNodeForm('view',n.dataset.node);}});
-document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){designUi.selected=n.dataset.node;paintMapSelection();revealDesignSelection();}});
+document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){designUi.selected=n.dataset.node;paintMapSelection();if(n.matches(':focus-visible')&&!flowUi.dragging)revealDesignSelection();}});
 window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});

@@ -1,46 +1,42 @@
-# Shell Workbench — component-library concept
+# Shell Workbench companion concept
 
-Concept 08, 2026-09-23. This is the current companion UI concept, not a native Obsidian plugin or a production scaffolder.
+> Concept 10 — reconciled workspace, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
 
-Open `index.html` in a modern desktop browser. Vue, Pinia, Vue Flow, styles and icons are embedded. No CDN, npm installation or runtime network request is required. GitHub displays HTML source rather than executing it.
+Open [index.html](index.html) locally in a desktop browser. All runtime scripts, styles and SVG icons are embedded, including the reviewed Vue, Pinia and Vue Flow bundles. No server, npm install or runtime CDN is needed. GitHub displays HTML source rather than executing it.
 
-## What changed
+## Review the current experience
 
-Content bricks now belong to the same component library as frontend contracts. The initial library contains fourteen content definitions and six UI contracts. A screen contains ordered, version-pinned instances of those definitions. Each instance retains its own ID, purpose, text, region and optional implementation binding.
+Start with **Explore example → Sitemap & views → Collection → Content editor**. The reference-led canvas uses compact, content-first cards, floating selection actions, an optional Structure panel and a synchronized full-page content draft. The existing handles, typed connections, library-backed content, PRDs and design-to-setup journey remain.
 
-Use **Component library → Content bricks** to create, edit, duplicate, version, deprecate or remove unused definitions. Preview, Definition and Usage separate visual planning, the shared contract and its consuming screens. The approved low-fidelity wireframes are retained. These are design definitions, not compiled Vue components or proof of tested business logic.
+The content editor supports ordered components, Markdown-source writing, per-instance purpose and region, library selection, preview navigation and one deliberate Save. Screen content is distinct from shared library definitions. Visual sections and card arrangement remain outside semantic generation inputs.
 
-An existing definition's content defaults cannot change without a version bump. Existing screen instances are not overwritten by a library edit. **Usage → Review upgrade** shows which fields keep a local override and which adopt the new default. Upgrading one instance preserves its ID, reading order and implementation binding. Stale pins block the illustrative boilerplate plan until reviewed.
+This reconciliation adds safe shortcut handling when discard confirmation is open, focused field errors, reversible removal, an explicit draft export, before/after reorder feedback, useful empty states and clearer popover dismissal. See [review](RECONCILIATION-REVIEW.md) and [current verification](RECONCILIATION-VERIFICATION.md).
 
-## Card interactions
+## Source and evidence
 
-The crowded floating toolbar is replaced by a single row inside the selected card: **Edit · Add · More**. Add distinguishes a content component, a connected card, a screen inside the container, and a code-level contract placement. Handle click menus and handle dragging remain available; containment and user-flow connections remain separate.
+Edit the readable modules under [src](src), not the generated HTML. Build with:
 
-Content grips are numbered. Drag a grip above or below another brick to reorder. An insertion marker indicates the destination without moving the card. A completed sort is one undoable operation. Earlier/Later controls appear on hover or keyboard focus; **Alt+Arrow Up/Down** works from a focused grip. Moving a screen in the map does not reorder its content. Reordering content changes reading order and invalidates the design's reviewed source plan.
+```sh
+python3 scripts/concepts/build-companion.py
+python3 scripts/concepts/build-companion.py --check
+```
 
-Top and bottom graph handles sit outside the footer hit area, preventing them from intercepting the Add action. The inspector's six tabs use two readable rows rather than six cramped labels.
+Run these browser suites from the repository root with pre-provisioned Python Playwright and Chromium:
 
-## Walkthrough
+```sh
+python3 tests/concepts/companion-reference.browser.py
+python3 tests/concepts/companion-reference-graph.browser.py
+python3 tests/concepts/companion-reconciliation.browser.py
+```
 
-1. Choose **Explore example → Sitemap & views**, select Collection and Focus.
-2. Click **Add → Content component** and choose a reusable definition. Review local content, then save the instance.
-3. Reorder with the numbered grip or Later/Earlier; compare Undo and Redo.
-4. Open **Component library**, filter Content bricks, duplicate Board and maintain a custom definition.
-5. Place it in a screen. Edit its defaults and increase the version. Review that screen's upgrade: local text remains yours.
-6. Continue to PRDs, connections, source review or setup. Those established workflows remain concept-only and do not execute commands.
+The current qualification is 92 scoped checks on one artifact, plus syntax checks for 42 authored JavaScript files. Historical evidence is not added to this total. Some older suites assert the pre-reference toolbar layout; they need deliberate locator migration and are not declared passing here.
 
-## Data and compatibility
+The template has advanced beyond the iteration-03 capabilities used by many concept fixtures. The concept's script inventory and source previews are illustrative, not live detection of current repository capabilities. Production authoring and readiness are documented in the [parent PRD](../../product/PRD.md); the [companion PRD](../../product/COMPANION-PLUGIN-PRD.md) remains a proposed product contract with its dated baseline.
 
-Legacy blueprints are upgraded additively when adopted. Authored text, IDs, order, notes and existing implementation references are preserved. A versioned marker prevents deliberately removed definitions from reappearing on every render. Unknown future schema versions and executable schema fields fail validation. A missing or deprecated starter definition gives recovery guidance rather than partially appending a stack.
+## Boundaries
 
-Library definition, screen instance and implementation contract are related but not interchangeable. The optional code-level component mapping is retained: a described content block can exist before its actual Vue implementation. No source file is silently removed when an instance or definition is removed.
+No real vault, filesystem adapter, template download, command execution, deployment, activation or publication is performed. Explicit exports download local Markdown/JSON supplied by the user; they do not transmit data. Do not enter secrets. The prototype is not a second production generator or proof that the native template consumes its design schema.
 
-Only the concept's own browser state is saved. Imported data grants no execution permission. The concept makes no remote requests. Explicit Markdown/JSON exports create local files, not a plugin installation.
+Browser state may be retained only through the existing opt-in demo preference. Invalid/future data is preserved for inspection; a dirty-form unload guard is a browser warning, not durable draft storage. File-origin persistence, native Obsidian behavior, complete accessibility and physical touch/pen/trackpad remain unqualified.
 
-## Source and qualification
-
-Edit `src/` and run `python scripts/concepts/build-companion.py` from the repository root. `--check` compares assembly with the committed HTML. Vendor bytes, licenses and source provenance are retained in `vendor/`; there are no font files.
-
-The root plugin remains TypeScript/Vue/Pinia/Nuxt UI with its existing architecture and scripts. This concept does not change its dependency lock, manifest, permissions, lifecycle contracts or production verification gates.
-
-See [the review and requirements](COMPONENT-LIBRARY-REVIEW.md), [verification](VERIFICATION-LIBRARY.md), the linked historical concept guides, and the [companion PRD](../../product/COMPANION-PLUGIN-PRD.md). Previous evidence remains historical, not automatic qualification of this version.
+Third-party runtime provenance and license notices remain under [vendor](vendor). No font binaries or extracted host stylesheet are added. The surrounding panels retain concept rendering; the sitemap is the real Vue Flow island, not a claim that the entire companion is already a production Vue/Nuxt UI application.

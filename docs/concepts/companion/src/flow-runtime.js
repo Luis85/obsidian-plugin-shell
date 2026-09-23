@@ -42,7 +42,7 @@ function mountFlow(){
    flowUi.drag={owner,revision:design().revision,id:node.id,startX:event.clientX,startY:event.clientY,before:designCopy(canvasState())};flowUi.dragging=true;flowUi.cancelled=false;
    designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
   });
-  api.onNodeDrag(()=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;refreshStructureRouting();}});
+  api.onNodeDrag(()=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;refreshStructureRouting();paintReferenceChrome();}});
   api.onNodeDragStop(({node,event})=>{
    if(!current())return;const drag=flowUi.drag;flowUi.drag=null;flowUi.dragging=false;if(drag&&!flowUi.cancelled&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<5){api.applyNodeChanges([{id:node.id,type:'position',position:drag.before.positions[node.id],dragging:false}]);flowUi.suppressClick=false;return;}flowUi.suppressClick=true;
    setTimeout(()=>{flowUi.suppressClick=false;},160);
@@ -77,7 +77,7 @@ function paintFlowChrome(){
  const z=document.getElementById('map-zoom-label');if(z)z.textContent=Math.round(c.zoom*100)+'%';
  if(root)root.style.setProperty('--map-inverse',1/c.zoom);
  vp.style.backgroundSize=(24*c.zoom)+'px '+(24*c.zoom)+'px';vp.style.backgroundPosition=c.pan.x+'px '+c.pan.y+'px';vp.style.backgroundImage=c.interaction.grid?'':'none';
- vp.dataset.wheel=c.interaction.wheel;
+ vp.dataset.wheel=c.interaction.wheel;vp.dataset.grid=String(c.interaction.grid);paintReferenceChrome();
 }
 function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>flowUi.syncing=false);}
 function syncFlowSelection(){

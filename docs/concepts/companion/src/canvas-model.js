@@ -2,6 +2,8 @@
 function emptyCanvas(){return {schema:1,layout:'vertical',positions:Object.create(null),pan:{x:32,y:28},zoom:1,snap:true,collapsed:[],edges:'selected',custom:false,arrangedFor:'',fitted:false};}
 function validCanvas(c){
  if(c===undefined)return true;
+ if(!c||typeof c!=='object'||Array.isArray(c))return false;
+ if(!validReferenceSections(c.sections))return false;
  if(c.brickDisplay!==undefined&&!['structure','labels','wireframes'].includes(c.brickDisplay))return false;
  const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isFinite(x)&&Math.abs(x)<=50000;
  return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x)&&num(c.pan.y)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
@@ -57,8 +59,10 @@ function canvasBounds(nodes=visibleMapNodes()){
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
  const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes(),b=canvasBounds(nodes);
- c.zoom=Math.max(.12,Math.min(selected?1.15:1,(pane.clientWidth-80)/b.w,(pane.clientHeight-(selected?160:100))/b.h));
- c.pan={x:(pane.clientWidth-b.w*c.zoom)/2-b.x*c.zoom,y:(pane.clientHeight-b.h*c.zoom)/2-b.y*c.zoom};c.fitted=true;paintMap();save();
+ const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
+ const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
+ c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));
+ c.pan={x:(width-b.w*c.zoom)/2-b.x*c.zoom,y:top+(height-top-bottom-b.h*c.zoom)/2-b.y*c.zoom};c.fitted=true;paintMap();save();
 }
 function zoomMap(factor,anchor=null){
  const pane=document.getElementById('map-viewport');if(!pane)return;
@@ -74,12 +78,14 @@ function paintMap(){
 }
 function afterCanvasRender(){
  document.body.classList.toggle('sitemap-workspace',state.view==='sitemap');document.body.classList.toggle('map-expanded',state.view==='sitemap'&&canvasUi.expanded);
- if(state.view==='sitemap'&&document.getElementById('map-viewport')){mountFlow();const c=canvasState();if(!c.fitted)fitMap();else paintMap();}
+ if(state.view==='sitemap'&&document.getElementById('map-viewport')){mountFlow();paintReferenceChrome();const c=canvasState();if(!c.fitted)fitMap();else paintMap();}
 }
 function revealDesignSelection(){
  const pane=document.getElementById('map-viewport'),n=selectedNode();if(!pane||!n)return;
- const c=canvasState(),p=c.positions[n.id],size=brickSurfaceSize(n),left=p.x*c.zoom+c.pan.x,top=p.y*c.zoom+c.pan.y;
- if(left<20||left+MAP_SIZE.w*c.zoom>pane.clientWidth-20||top<20||top+size.height*c.zoom>pane.clientHeight-20){c.pan={x:pane.clientWidth/2-(p.x+MAP_SIZE.w/2)*c.zoom,y:pane.clientHeight/2-(p.y+size.height/2)*c.zoom};paintMap();save();}
+ const c=canvasState(),p=c.positions[n.id],size=brickSurfaceSize(n),right=pane.clientWidth-(referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160));
+ const left=p.x*c.zoom+c.pan.x,top=p.y*c.zoom+c.pan.y,w=MAP_SIZE.w*c.zoom,h=size.height*c.zoom;
+ const dx=left<24?24-left:left+w>right-24?right-24-left-w:0;
+ const dy=top<90?90-top:top+h>pane.clientHeight-96?(h>pane.clientHeight-186?90-top:pane.clientHeight-96-top-h):0;
+ if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
-
 function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;return value;}

@@ -1,5 +1,6 @@
 // Bounded deterministic layouts for at most 60 concept surfaces. No external engine.
 function layoutPositions(d,mode){
+ if(mode==="sections")return sectionLayouts(d).positions;
  const out=Object.create(null),{w,gapX,gapY}=MAP_SIZE,h=Math.max(MAP_SIZE.h,...d.nodes.map(n=>brickSurfaceSize(n,d).height)),dx=w+gapX,dy=h+gapY;
  const ordered=designNodesInOrder(d),roots=d.nodes.filter(n=>!n.parent||!d.nodes.some(x=>x.id===n.parent));
  if(mode==='grid'||mode==='free'){

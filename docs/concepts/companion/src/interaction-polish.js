@@ -1,7 +1,8 @@
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
 }
 function rememberModalForm(){modalOriginal=TRACKED_FORMS.has(modalType)?formCheckpoint():null;}
@@ -36,3 +37,10 @@ function requirementsResults(p){const list=filteredRequirements(p);if(!list.leng
 function editPolishField(el){if(el.dataset.field!=='polish-requirement-search')return false;productUi.requirementSearch=el.value;document.getElementById('requirement-results').innerHTML=requirementsResults(selectedPrd());document.getElementById('requirement-count').textContent=filteredRequirements(selectedPrd()).length+' / '+selectedPrd().requirements.length;return true;}
 document.addEventListener('click',event=>{if(event.target.closest('[data-action="close"]')&&askDiscardForm()){event.preventDefault();event.stopImmediatePropagation();}},true);
 document.getElementById('modal').addEventListener('cancel',event=>{if(askDiscardForm()){event.preventDefault();event.stopImmediatePropagation();}},true);
+
+// A browser refresh must not silently discard a still-open editing draft.
+window.addEventListener('beforeunload',event=>{
+ if(document.getElementById('modal').open&&modalOriginal&&TRACKED_FORMS.has(modalType)&&formCheckpoint()!==modalOriginal){
+  event.preventDefault();event.returnValue='';
+ }
+});
