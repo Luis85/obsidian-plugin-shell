@@ -8,7 +8,12 @@ class OwnedModal extends Modal {
   constructor(app: App, private readonly presentation: ModalPresentation, private readonly callbacks: ModalCallbacks) {
     super(app); this.previous = this.contentEl.ownerDocument.activeElement; this.setTitle(presentation.title);
   }
-  onOpen(): void { this.content = mountModalContent(this.contentEl, this.presentation, this.callbacks, tag => this.contentEl.createEl(tag)); this.content.focus(); }
+  onOpen(): void { this.content = mountModalContent(this.contentEl, this.presentation, this.callbacks, tag => this.contentEl.createEl(tag)); }
+  openOwned(): void {
+    // Qualified Obsidian 1.13.7 selects its initial control after onOpen returns.
+    // Apply our choice after the public open lifecycle, without scheduling work.
+    this.open(); if (!this.closed) this.content?.focus();
+  }
   update(state: ModalState): void { this.content?.update(state); }
   dismiss(): void { if (!this.closed) this.close(); }
   onClose(): void {
@@ -21,7 +26,7 @@ class OwnedModal extends Modal {
 export function nativeModalSink(app: App): ModalSink {
   return { open(presentation, callbacks) {
     const modal = new OwnedModal(app, presentation, callbacks); let closed = false;
-    try { modal.open(); } catch (error) { try { modal.close(); } catch { /* Preserve the original opening failure. */ } throw error; }
+    try { modal.openOwned(); } catch (error) { try { modal.close(); } catch { /* Preserve the original opening failure. */ } throw error; }
     return { update: state => { if (!closed) modal.update(state); }, close() { if (closed) return; closed = true; modal.dismiss(); } };
   } };
 }

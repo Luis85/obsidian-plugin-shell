@@ -5,7 +5,7 @@ import { createFilePlan } from '../shared/file-plan.mjs';
 /** The pinned launcher 3.2.1 keeps copy:false vaults in place and creates a
  * fresh obsidian-launcher-config-* directory directly under os.tmpdir(). */
 export async function nativeScratch(root = process.cwd()) {
-  await createFilePlan(root, [{ path: '.native-cache/qualification/.ownership', content: null }]);
+  root = (await createFilePlan(root, [{ path: '.native-cache/qualification/.ownership', content: null }])).root;
   const base = resolve(root, '.native-cache/qualification'); await mkdir(base, { recursive: true });
   await createFilePlan(root, [{ path: '.native-cache/qualification/.ownership', content: null }]);
   return mkdtemp(join(base, 'run-'));

@@ -7,7 +7,8 @@ import { browserModalSink } from '../../harness/app/modal-sink';
 import { failure, success, type Result } from '../../src/domain/outcome';
 import { deferred } from './helpers';
 import type { ModalPresentation } from '../../src/application/modal-port';
-const native = vi.hoisted(() => ({ modals: [] as { containerEl: HTMLDivElement; contentEl: HTMLDivElement; open: Mock<() => void>; close: Mock<() => void> }[], failOpen: false }));
+const native = vi.hoisted(() => ({ modals: [] as { containerEl: HTMLDivElement; contentEl: HTMLDivElement; open: Mock<() => void>; close: Mock<() => void> }[],
+  failOpen: false, focusedByHost: [] as (Element | null)[], afterOpen: vi.fn<() => void>() }));
 vi.mock('obsidian', () => ({ App: class {}, Modal: class {
   containerEl = document.createElement('div'); contentEl = document.createElement('div'); titleEl = document.createElement('h2');
   constructor() {
@@ -16,10 +17,15 @@ vi.mock('obsidian', () => ({ App: class {}, Modal: class {
   }
   setTitle(value: string) { this.titleEl.textContent = value; return this; }
   onOpen() {} onClose() {}
-  open = vi.fn(() => { document.body.append(this.containerEl); if (native.failOpen) throw new Error('native open'); this.onOpen(); });
+  open = vi.fn(() => {
+    document.body.append(this.containerEl); if (native.failOpen) throw new Error('native open'); this.onOpen();
+    // Obsidian 1.13.7 performs its first-control focus after invoking onOpen.
+    this.contentEl.querySelector<HTMLInputElement | HTMLButtonElement>('input:not([disabled]), button:not([disabled])')?.focus();
+    native.focusedByHost.push(document.activeElement); native.afterOpen();
+  });
   close = vi.fn(() => { this.onClose(); this.containerEl.remove(); });
 } }));
-beforeEach(() => { native.modals = []; native.failOpen = false; });
+beforeEach(() => { native.modals = []; native.failOpen = false; native.focusedByHost = []; native.afterOpen.mockReset(); });
 afterEach(() => { document.body.replaceChildren(); vi.restoreAllMocks(); });
 const request = { owner: 'view', titleKey: 'title', messageKey: 'message' };
 it('[MODAL-ADAPTER-01] real native adapter uses public Modal with owned safe text, validation and focus restoration', async () => {
@@ -89,4 +95,17 @@ it('[MODAL-ADAPTER-05] failed focus restoration still settles and cleans an exte
     expect(await pending).toMatchObject({ status: 'failed' }); expect(document.querySelector('form')).toBeNull();
     expect(errors.report).toHaveBeenCalledExactlyOnceWith('modal.close', 'modal.close'); focus.mockRestore(); service.dispose(); trigger.remove();
   }
+});
+it('[MODAL-ADAPTER-06] native initial focus is applied after host opening and cannot revive a modal closed during opening', async () => {
+  const trigger = document.createElement('button'); document.body.append(trigger); trigger.focus();
+  const errors = { report: vi.fn() }; const service = new ModalService(nativeModalSink(new App()), key => key, errors);
+  try {
+    const pending = service.confirm(request); const content = native.modals[0]?.contentEl;
+    expect(native.focusedByHost[0]).toBe(content?.querySelector('button[type="button"]'));
+    expect(document.activeElement).toBe(content?.querySelector('button[type="submit"]'));
+    service.closeOwner(request.owner); expect(await pending).toEqual({ status: 'cancelled' }); expect(document.activeElement).toBe(trigger);
+    native.afterOpen.mockImplementationOnce(() => native.modals.at(-1)?.close());
+    expect(await service.confirm(request)).toEqual({ status: 'cancelled' }); expect(document.activeElement).toBe(trigger);
+    expect(document.querySelector('form')).toBeNull(); expect(native.modals[1]?.close).toHaveBeenCalledOnce(); expect(errors.report).not.toHaveBeenCalled();
+  } finally { service.dispose(); }
 });

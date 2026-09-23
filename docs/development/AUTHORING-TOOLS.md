@@ -89,8 +89,11 @@ Tooling tests cover deterministic dry runs, exact reruns, edited-file and stale
 registry conflicts, unsafe/case/symlink paths, shared locks and rollback ownership.
 An isolated differently named fixture generates three distinct note entities,
 runs the generated tests through the real codec/repository and checks the derived
-catalog after removing the original Task/Project entity sources and their registry
-entries. Generated tests use the generic entity fixture and storage ports, so they
+catalog after removing controlled seed examples and their registry entries.
+The fixtures copy only shared foundation code, never a consumer's live business
+folders or registry. A separate regression runs the maker suite from an actually
+extended consumer after removing those seeds and preserving a consumer edit.
+Generated tests use the generic entity fixture and storage ports, so they
 do not depend on the worked examples. Removing the entire showcase still requires
 the separately documented UI/context/localization cleanup; the fixture does not
 claim that broader removal flow is automatic.

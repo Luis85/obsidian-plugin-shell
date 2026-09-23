@@ -1,7 +1,7 @@
 import { constants } from 'node:fs';
 import { lstat, realpath, readdir, readFile, writeFile, mkdir, copyFile, rename, unlink, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { resolve, join, relative, isAbsolute } from 'node:path';
+import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
 
 const protectedRoots = new Set(['.git', 'node_modules', '.worktrees', '.qualification', '.dev-vault', '.native-runner', '.codex-authoring.lock']);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -34,10 +34,25 @@ async function inspect(root, path) {
   }
   throw new Error('PLAN_UNSAFE_PATH');
 }
+async function directoryChain(root) {
+  const ancestors = [];
+  for (let path = root; ; path = dirname(path)) { ancestors.push(path); if (dirname(path) === path) break; }
+  let entry;
+  for (const path of ancestors.toReversed()) {
+    entry = await lstat(path, { bigint: true });
+    if (!entry.isDirectory() || entry.isSymbolicLink()) throw new Error('PLAN_UNSAFE_ROOT');
+  }
+  return entry;
+}
 async function checkedRoot(input) {
-  const root = resolve(input);
-  const entry = await lstat(root);
-  if (!entry.isDirectory() || entry.isSymbolicLink() || await realpath(root) !== root) throw new Error('PLAN_UNSAFE_ROOT');
+  const requested = resolve(input);
+  const before = await directoryChain(requested);
+  // Windows case and 8.3 spellings identify the same directory without being
+  // redirects. Inspect links before canonicalizing so realpath cannot hide one.
+  const root = await realpath(requested);
+  const after = await directoryChain(requested);
+  const canonical = root === requested ? after : await directoryChain(root);
+  if (before.dev !== after.dev || before.ino !== after.ino || before.dev !== canonical.dev || before.ino !== canonical.ino) throw new Error('PLAN_UNSAFE_ROOT');
   return root;
 }
 /** Read-only: no lock, staging directory, report, or other file is created. */

@@ -2,7 +2,7 @@
 
 Version 0.3.0; integration base `307e3fd` (iteration 02 plus the subsequent quality-tool research). Worktree `.worktrees/iteration-three`, branch `build/iteration-three`. Local execution date: 2026-09-23.
 
-## Local Windows evidence
+## Initial local Windows evidence (5f9c0ce)
 
 Qualified worktree-local Node 24.21.0/npm 11.19.1, exact package-lock, no global installation or dependency upgrades. The live all-category audit reported zero vulnerabilities; the separate nested ESLint 9 support exception remains unresolved.
 
@@ -44,6 +44,13 @@ These are Windows-built assets, not proof that a native host loaded them. Hosted
 
 ## Findings corrected during qualification
 
+- Initial hosted qualification found Windows short-path rejection, maker fixture
+  contamination after consumer extension, and native modal focus ordering.
+  All have targeted regressions and fixes, detailed as R26–R28 in the review record.
+  The path suite passed actual Windows 8.3 and uppercase-alias setup CLI checks;
+  maker checks passed from an extended consumer; 17 modal service/adapter checks
+  passed with the real host's opening order modeled. Hosted reruns qualify the
+  corrected candidate separately from the initial local numbers above.
 - Independent architectural/data-safety review and regressions are recorded in [the review record](../development/ITERATION-THREE-REVIEW.md).
 - A served assertion retained obsolete create-only wording; it now expects the shared save error while retaining no-write/no-success checks.
 - Node's ESM loader rejected two identity-aware browser tests' JSON imports. Explicit JSON import attributes fixed discovery; the full 24-case run passed.
