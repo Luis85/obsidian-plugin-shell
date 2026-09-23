@@ -3,8 +3,10 @@
 Three bounded implementation workers own evidence, maintainability and
 performance/native qualification. Parent integration owns shared configuration,
 schemas approval, candidate delivery and cross-cutting preservation. A separate
-cross-owner review wave will inspect the final implementation and adversarial
-behavior; implementation summaries are not independent-review evidence.
+cross-owner review wave inspected the implementation and adversarial behavior;
+implementation summaries are not independent-review evidence. The final
+[execution record](../testing/EXECUTABLE-QUALIFICATION.md) binds the corrected
+code to its actual candidate, consumer and native results.
 
 The performance worker independently reviewed the maintainability implementation
 and all 21 production refactor diffs. The evidence worker separately reviewed the
@@ -27,6 +29,8 @@ remains necessary and separately recorded.
 | The document refactor reread projection getters after capturing their values | Validate the captured title/body primitives. A real regression first demonstrated false success for an invalid captured body; the corrected complete Documents/Items run passed 16/16 and independent review confirmed the original read order is restored. |
 | The Items browser test title claimed deletion survived reload, but reload happened only before deletion | Add independent service reconstruction after every unit mutation and actual browser reload after create, rename and delete, with fault assertions before each reload. Targeted unit and served results passed; independent review approved only AC-03's two whole links. |
 | The dependency-free source-limit fixture omitted the newly shared hash module | Add that required module to the isolated fixture's copy inventory. All 52 retained baseline cases then passed in each of three runs; thresholds, IDs and release blocking remain unchanged. |
+| The generated UI create function exceeded the unchanged complexity gate | Extract its cohesive result presentation; the create function measures 8 cyclomatic/6 cognitive and the result helper 5/4. Real generated-source catalog, types and behavior checks passed, followed by the complete consumer workflow. |
+| Literal archives exposed generated distribution files that Git checkouts implicitly ignored | Declare only the three generated distribution outputs in Fallow's ignore list. A transported Git-free archive passes; an extra source file in that directory still fails the real analyzer. Complete archive setup then passed in the consumer workflow. |
 | A crafted native parser fixture inherited the removed consumer's foundation profile | Make the isolated fixture own its reviewed profile, prove the mismatch is rejected, then test the explicit showcase context. Both affected adapter cases passed without relaxing product validation. |
 
 The reviewer also distinguished real native settings/item I/O from forced writer

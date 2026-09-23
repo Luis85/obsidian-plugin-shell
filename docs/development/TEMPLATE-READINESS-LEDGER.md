@@ -22,6 +22,13 @@ owns the current candidate's results. Historical missing-measurement statements
 below describe the baseline; they are not a claim that the new commands are absent.
 Remaining template-wide acceptance and release authorization are unchanged.
 
+At frozen code `fd59c80195dee549ddbaaa23c28a06c091b18274`, the linked execution
+record verifies AC-03 in its two required modes, retains 14 partial cases and
+81 not-run cases, and keeps release blocked. All 97 production inputs pass the
+maintainability and coverage gates. Real Items native checks and the controlled
+Windows initialization/100-item measurements are now recorded, with historical
+host failures and broader platform/manual/device gaps still open.
+
 Runtime-authoring integration updates the selected rows below. Its prior fixed
 candidate and exact evidence are in the [runtime-authoring record](../testing/RUNTIME-AUTHORING.md).
 Merging release operations and later dependency changes creates a new source

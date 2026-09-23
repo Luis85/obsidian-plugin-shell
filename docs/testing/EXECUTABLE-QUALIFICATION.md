@@ -1,140 +1,161 @@
 # Executable qualification record
 
-Implementation baseline: `2d4087e93289a21d797fab4cd641ecde6cf16a82`.
-Branch: `codex/executable-qualification`; development version 0.4.0.
-The [plan](../development/EXECUTABLE-QUALIFICATION-PLAN.md) defines ownership,
-contracts and acceptance. This record is being completed from actual executions;
-no final frozen candidate is qualified yet.
+Frozen code: `fd59c80195dee549ddbaaa23c28a06c091b18274`, branch `codex/executable-qualification`, development
+version 0.4.0. [PR #10](https://github.com/Luis85/obsidian-plugin-shell/pull/10).
+The evidence-only documentation commit follows this code checkpoint. Main remains
+on integration commit `2d4087e93289a21d797fab4cd641ecde6cf16a82`.
 
-## Provisioning and preliminary execution
+The milestone implements trusted structured evidence, full production
+maintainability gates, owned-resource checks and native reference measurements.
+It does not complete the entire template or authorize release operations.
 
-Windows x64, Node 24.21.0/npm 11.19.1. A fresh canonical
-`npm ci --strict-allow-scripts` installed 693 packages from the unchanged lockfile.
-An earlier install used `--ignore-scripts` and is retained as provisioning only;
-it is not the canonical qualification installation. The nested ESLint 9 support
-exception remains independent of npm's zero-vulnerability install summary.
+## Fixed candidate and actual checks
 
-The first production build and `vue-tsc --noEmit` passed during implementation.
-The build retains a hash-bound YAML module attribution report outside `dist`.
-These are preliminary changing-source checks, not an accepted fixed candidate.
+[Candidate qualification](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905384551) performed a fresh strict installation
+with Node 24.21.0/npm 11.19.1, complete `verify`, and one accepted production build.
+Later browser/native/size checks used the retained bytes without rebuilding.
+The [candidate audit](evidence/executable-qualification-candidate.json) records
+packet/report hashes and verification of raw receipts, coverage denominators,
+scope and source identities.
 
-The complete runtime run passed **309 tests in 53 files** after the production
-refactors. Strict types and source ESLint passed. Production coverage then passed
-all **97 inputs** at 99.46% lines, 97.43% statements, 97.52% functions and 94.93%
-branches; the separate stricter business-layer floors also passed. Four new
-resource scenarios include two twenty-cycle loops, late committed work and late
-uncertain failure with a surviving sibling. Real host APIs in the wiring scenario
-are explicitly doubled, not relabeled as native execution.
+| Scope | Executed result |
+| --- | --- |
+| Tooling, Linux | 169 cases: 165 passed, four exact Windows-only skips; no failures. Skips never establish acceptance links. |
+| Runtime | 310 tests in 53 files; three fresh producer executions with identical semantic inventories and no retries. |
+| Coverage | All 97 production inputs; 99.46% lines, 97.43% statements, 97.52% functions, 94.93% branches. Both existing coverage gates pass. |
+| Strict business scope | All 41 domain/application/features inputs; 99.91% lines, 97.92% statements, 98.87% functions, 96.40% branches. Unchanged stricter floors pass. |
+| Maintainability | 801 production functions, zero above 10 cyclomatic/15 cognitive. 33 duplicated lines / 4,393 eligible lines = 0.751195%, below 3%; 50-token/5-line minimums. |
+| Vue aggregate scope | Four actual template aggregates remain separately reported. They are not qualified as source functions; script/name impersonations fail. |
+| Legacy baseline | 52 cases in each of three executions. Original 96-row plan and blocked release profile retained. |
+| Served Chromium | 33 scenarios passed, no skip/failure/retry. |
+| Native Linux | Three fresh 31-check sessions, plus a separate performance session; zero renderer errors/cleanup failures in the qualified run. |
+| Security | Live all-category audit passed with zero vulnerabilities. Nested ESLint 9 support remains a separate upstream exception. |
+| Acceptance reconciliation | Ten passing producer packets; AC-03 verified in both required modes, 14 partial, 81 not run. All 96 rows retained; release blocked. |
 
-The live all-category `scripts/security/audit.mjs` passed with zero vulnerabilities.
-Source limits, locale parity, repository policy and reviewed removal dry run passed.
-The focused evidence adapter/CLI controls passed nine cases, followed by the
-additional actual hung-child timeout control; a deliberately faulty real Vitest
-run remains failed in its retained session. Three performance/asset tooling
-controls passed, including actual CLI rejection of oversized and empty assets.
+The meaningful native Items checks cover trimmed/invalid labels, stable-ID rename,
+cancelled/confirmed deletion, independent drafts, exact saved state/write counts,
+serialized preferences/entities and post-restart queries with zero writes.
+Controlled native-view save pauses/rejections are explicitly adapter faults, not
+native disk-failure evidence. Four deterministic resource tests include twenty
+real-view cycles, native adapter EventRef wiring, a usable sibling and late work.
 
-The actual served Chromium suite passed **33/33** scenarios with retries disabled.
-The complete analyzer passed with zero findings after retaining the dynamic
-reporter's exact entry point and sharing the existing dependency-free hash helper.
-Independent review corrections and their actual negative controls are recorded in
-the [review record](../development/EXECUTABLE-QUALIFICATION-REVIEW.md).
+## Retained assets and serializer measurement
 
-The first complete `verify` attempt passed 162/163 tooling cases with one explicit
-Windows file-symlink capability skip, static checks, the full maintainability gate,
-both coverage gates, tokens and artifacts. It then failed SRC-02 in each retained
-baseline repetition: the isolated source-limit fixture did not copy the new shared
-hash helper. The failed report remains under `reports/verification/` and the full
-log under `reports/qualification/verify-first.log`. After correcting the fixture,
-all **52 × 3** baseline cases passed; `Release blocked` remains.
+| File | Bytes | SHA-256 |
+| --- | ---: | --- |
+| main.js | 586834 | `d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef` |
+| styles.css | 88547 | `3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7` |
+| manifest.json | 280 | `84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380` |
 
-A later focused source regression demonstrated a repeated-getter validation error
-introduced by the document refactor. The corrected complete Documents/Items files
-passed **16/16**, strict types and affected typed lint passed, and the strengthened
-Items served scenarios passed **2/2** against a fresh harness build. Items now load
-saved state in independent services and reload the browser after all three CRUD
-mutations. Only AC-03's audited links gained whole extent; a current candidate
-must still execute both required modes. Final frozen-source CI qualification is
-separate from these cumulative local corrections.
+The unchanged 1 MiB JS and 100 KiB CSS budgets pass. JS gzip/Brotli sizes are
+174669/150287 bytes; CSS is 11702/9964 bytes. Compression is a read-only diagnostic.
+The matching accepted build graph contains 72 YAML module entries with a total
+rendered length of 171883. This is tree-shaken module attribution, not an additive
+allocation of minified/compressed bytes or a counterfactual saving from removal.
 
-## First frozen candidate and corrections
+These three asset hashes match the earlier 79d6688/456b49a/ef4fc41/8a350b1 packets.
+Source/protocol records remain distinct. Earlier Windows execution is reused only
+at the explicitly verified asset level; it is not relabeled as a new source run.
+No font binaries were found in the inspected retained evidence and source/plugin
+archives. Complete artifacts and failure attempts remain in ignored local reports
+and linked CI artifacts; hosted retention is seven days.
 
-Code checkpoint `79d668858612b0d631094f04306c6818e8fe066b` is proposed in
-[PR #10](https://github.com/Luis85/obsidian-plugin-shell/pull/10).
-[Candidate run 35895304729](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35895304729)
-passed its complete fixed-source rehearsal, repeated runtime producers, coverage,
-artifact/size checks, served browser producer and live security audit. Its first
-Linux native session passed 31 checks. The second reached all 31 checkpoints but
-failed on three captured `illegal access` renderer errors during pop-out closure;
-cleanup succeeded. The complete session correctly blocked acceptance reconciliation.
-The failed report and passing first attempt remain retained separately. A GPU
-process message also appears in the passing run, so it does not establish the cause.
+## Windows controlled reference and retained failure
 
-Both generated-consumer jobs exposed an actual maintainability violation in the
-ordinary generated `bookmarks-workspace.ts`: `create` measured 12/10. The maker
-now extracts committed-result presentation after the existing liveness guard.
-The real before-fix gate failed; the corrected generated corpus passed at 8/6
-for `create` and 5/4 for its helper. All six maker-catalog tests then passed,
-including actual types and 24 generated CRUD/pending/uncertain/disposal assertions.
-This is a generator correction, not a threshold exception or a native-host fix.
+[Curated Windows measurements](evidence/executable-qualification-windows.json)
+retain all 132 raw samples from both attempts, with exact report/driver hashes.
+The runtime candidate is `79d668858612b0d631094f04306c6818e8fe066b`; the diagnostic
+driver is `456b49a1f76174671aaca5b5a0d216a15e7d92c2` plus separately hashed read-only
+observers. No accepted asset was rebuilt.
 
-One Windows run on the retained 79d6688 assets completed 22 native checkpoints
-including Items CRUD and controlled adapter ownership, then reproduced the
-historical light-theme failure. The actual Appearance control reverted to Dark
-and host configuration remained `obsidian`; this observation does not establish
-the cause. No renderer error or cleanup failure was reported; cold restart was
-not reached. All 66 benchmark samples completed, with advisory/shared-runner p95
-17.80 ms warm initialization and 126.30 ms for the real 100-item UI. The host was
-busy, so these are not controlled-reference results. No failed attempt was retried
-or relabeled as passing.
+The controlled comparison ran on Windows 10.0.26200 x64, Intel i5-1135G7, about
+8 GiB RAM, Obsidian app/installer 1.13.7, launcher 3.2.1, Electron 43.3.0 and
+Chrome 150.0.7871.212, at 1023 × 800 and DPR 2. The user paused other work; a known
+unrelated performance task was left untouched and allowed to finish. Preflight
+recorded no known competing heavy job, 18% background CPU and 1,820,240 KiB free
+RAM. This states the actual environment, not automatic process isolation.
 
-Checkpoint `456b49a1f76174671aaca5b5a0d216a15e7d92c2` then passed the entire
-[candidate workflow](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35897423372),
-including three fresh 31-check Linux native sessions, the separate shared-runner
-performance run and all ten evidence packets. Reconciliation verified AC-03 in its
-two required modes, retained 14 partial rows and all 96 rows, and kept release
-blocked. Its three assets are byte-identical to the 79d6688 packet; neither that
-identity nor these later passes explains the earlier renderer/theme failures.
+Three retained warmups and 30 measured samples per metric use renderer monotonic
+time and nearest-rank p95. Initialization excludes host startup. Readiness waits
+for the real 100-item projection, exact labels, idle state and two animation frames.
 
-The corrected consumer passed full renamed/extended verification and served
-checks, then its literal archive exposed a configuration portability issue:
-Fallow reported zero findings plus a default-ignore diagnostic for generated
-`dist` output. Naming exactly the three existing generated install files in the
-analyzer configuration removes that ambiguity. A real transported archive passes;
-an added maintained file or extra source inside `dist` still fails the actual
-checker, and restored controls pass. No diagnostic filter or broad directory
-ignore was introduced.
+| Windows attempt | Initialization p95 | 100-item readiness p95 | Native outcome |
+| --- | ---: | ---: | --- |
+| Shared-load advisory | 17.80 ms | 126.30 ms | 22 checkpoints, then light-theme failure; cold restart not reached |
+| Controlled reference comparison | 22.70 ms | 146.70 ms | 31 checkpoints, zero renderer errors, cleanup complete, zero restart query writes |
 
-The ef4fc41 candidate workflow also passed in full. Its transported archive then
-passed, and the removed-example consumer exposed a separate parser-fixture
-coupling: the crafted showcase report inherited the consumer's foundation profile.
-The isolated test now owns its policy, explicitly proves the foundation mismatch
-is rejected, then selects the reviewed showcase policy for its synthetic parser
-controls. The two affected adapter cases passed; no product profile validation
-or consumer registration was relaxed.
+Both timing results are below the proposed 200/500 ms reference budgets. No raw
+sample or outlier was discarded. Heavy theme/foreground observers began only
+after performance measurement. Linux shared-runner timings remain advisory and
+are recorded separately in the candidate audit.
 
-The complete transformed-consumer workflow subsequently passed on 8a350b1 in
-[run 35901973632](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35901973632),
-including literal archive, removal, post-removal Reading and final evidence
-producers. The two Windows setup-policy matrix jobs instead exhausted their
-aggregate 15-minute job deadline near the end of the unchanged verification
-sequence. GitHub explicitly reported `The job has exceeded the maximum execution
-time of 15m0s`; assertion failures were not reported. The workflow budget is now
-20 minutes to accommodate fresh setup and standalone full verification plus the
-actual policy probes. Native assertion deadlines, producer timeouts, performance
-protocols and quality thresholds are unchanged.
+The initial Windows failure shows the real Appearance selector reverting to Dark
+while host configuration stayed `obsidian`. The passing comparison records the
+normal change handler, host config/CSS events and replacement of the select node;
+its independent foreground sampler did not establish an OS-focus cause. Neither
+that comparison nor later stock passes explains or erases the historical Windows
+failure. The first candidate also had one Linux native session with three captured
+`illegal access` renderer errors during pop-out closure; their cause remains open.
+No source fix, relaxed control or longer native assertion timeout is claimed.
 
-## Scope distinctions
+## Generated consumer and literal archive
 
-The original 96-case plan and blocked release profile are retained unchanged.
-Framework/unit/component, served browser, synthetic host boundary, actual native,
-artifact and generated-consumer results have distinct modes. Partial links do
-not complete a case. Hash validation is integrity checking, not proof of honest
-execution or release authorization.
+The [consumer audit](evidence/executable-qualification-consumer.json) identifies
+its independent source/asset hashes and actual workflow. Atlas Notes 1.0.0 starts
+from a fresh checkout, edits its Bookmarks entity, adds a local Reminder maker,
+event/listener and plugin-data Rating, then verifies and serves the result. Reviewed
+example removal preserves the edited feature, followed by a distinct Reading
+feature and complete verification/evidence production.
 
-Performance retains raw warmups and samples with explicit start/finish conditions.
-Shared CI timing is advisory; reference budget results require a declared controlled
-environment. Resource assertions and data-safety controls remain blocking.
+The audited [consumer push run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905384396)
+starts directly at `fd59c80195dee549ddbaaa23c28a06c091b18274`; its generated and
+edited inputs have separately recorded modified-content digests. The audit checks
+79 raw receipts and 1,903 per-input metric receipts. Its final consumer passes
+293 tests in 64 files, all
+103 production inputs and the independent business floors. Final production clone
+measurement is 2.9280286%, below the unchanged 3% gate. The edited Bookmarks hash
+remains `ba9b3f20d82192311eb7b409a36ef65037ac07a45fdaa87900f6d8dbff51fced`
+through editing, removal, Reading extension and the retained source.
 
-The historical Windows theme failure remains unexplained; later stock passes do
-not erase it. Device, macOS, third-party themes, manual screen readers, repository
-administration and public release operations remain unqualified.
+The literal archive proves absent Git discovery, adopts Archive Notes 1.0.0,
+performs fresh strict installation and complete setup verification, and produces
+actual runtime/artifact packets with `kind: archive` and null Git revision.
+It passes 310 tests in 53 files and all 97 production inputs. Its artifact hashes
+are retained; archive asset bytes were not separately uploaded. No archive-native
+or current consumer-native acceptance is inferred. Removed example links remain
+visible as unobserved rather than being promoted by unrelated consumer tests.
+
+All checks on this frozen code passed, including the separate
+[PR consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905390436),
+both showcase/baseline platforms and all four Windows/Linux combinations in the
+[setup matrix](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905390355).
+The qualified toolchain is Node 24.21.0/npm 11.19.1; the alternate matrix uses
+Node 24.15.0/npm 12.0.2. Windows setup jobs completed in 15m49s and 16m01s.
+
+Final evidence-only validation passed repository checks (seven workflows, nine
+stylesheets, 74 Markdown files and 330 local links), JSON parsing and whitespace
+checks. The complete execution-input digest still matches the frozen candidate:
+`f398573afaba453fc6e22946532fbb6346844b0683b8621119964c10106494ec`.
+
+## Corrections, failed attempts and remaining scope
+
+The [independent review record](../development/EXECUTABLE-QUALIFICATION-REVIEW.md)
+covers three implementation workers and cross-owner review. Concrete corrections
+include inconsistent/omitted report data, real Fallow template-name impersonation,
+clone denominator/totals, semantic repetition drift, Git/archive identity,
+projection getter reads, native write observation/cleanup, generator complexity,
+archive-generated-output classification and consumer-independent parser fixtures.
+Every numerical quality threshold remains unchanged.
+
+Failed local source-limit fixture runs, the pre-fix projection regression,
+79d6688 generator/native runs, 456b49a archive failure, ef4fc41 removed-fixture
+failure and 8a350b1 Windows setup job cancellations remain recorded. The Windows
+matrix exhausted its aggregate 15-minute job cap after successful checks; its
+budget is 20 minutes now. Per-test, native, producer and performance bounds were
+not increased, and no tests or diagnostics were suppressed.
+
+Full template acceptance, unresolved host errors, broader template-aggregate policy,
+manual screen readers, physical devices, macOS/third-party themes, repository
+administration, supported dependency-graph closure and authorized public release
+operations remain separate. Reports and integrity hashes are not signatures or
+publication credentials. Main stays clean; no merge, tag or publication occurred.

@@ -1,0 +1,988 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Read-only audit of retained successful fd59 push-consumer qualification; no producers or tests rerun.",
+  "sourceHead": "fd59c80195dee549ddbaaa23c28a06c091b18274",
+  "checkout": {
+    "revision": "fd59c80195dee549ddbaaa23c28a06c091b18274",
+    "kind": "modified",
+    "sourceHeadTree": "2b8c749db02f875c3ac99a76e4bcf5778d6f32d1",
+    "note": "Push workflow checked out this source commit; generated and edited consumer inputs have separate retained content digests."
+  },
+  "workflow": {
+    "runId": 35905384396,
+    "relatedPullRequestRunId": 35905390436,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905384396",
+    "conclusion": "success",
+    "stages": [
+      {
+        "name": "Adopt a distinct identity from a fresh checkout and run every setup gate",
+        "conclusion": "success"
+      },
+      {
+        "name": "Generate a new business feature through the public maker",
+        "conclusion": "success"
+      },
+      {
+        "name": "Extend consumer source and exercise local event and plugin-data authoring",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify the complete renamed and extended template",
+        "conclusion": "success"
+      },
+      {
+        "name": "Provision pinned Chromium and exercise served components",
+        "conclusion": "success"
+      },
+      {
+        "name": "Exercise literal source archive without ancestor Git discovery",
+        "conclusion": "success"
+      },
+      {
+        "name": "Remove reviewed examples while preserving the consumer feature",
+        "conclusion": "success"
+      },
+      {
+        "name": "Generate and qualify another working feature after removal",
+        "conclusion": "success"
+      },
+      {
+        "name": "Retain authoring evidence and the generated source",
+        "conclusion": "success"
+      }
+    ],
+    "artifact": {
+      "id": 10772161339,
+      "name": "renamed-template-authoring",
+      "githubDigest": "sha256:f6d081e833c2f9df20b175ac1fa24f386da0fd1dc2990a77cca452469bfc73da",
+      "sizeBytes": 5850579
+    }
+  },
+  "identity": {
+    "id": "atlas-notes",
+    "version": "1.0.0"
+  },
+  "stages": [
+    {
+      "stage": "initial-renamed",
+      "status": "passed",
+      "log": {
+        "file": "reports/template-authoring/setup.txt",
+        "sha256": "36bd1a0a938f327367e06dc8c57b5f210c49577a2de7bda35bae72e6ed75bb4e"
+      },
+      "runtimeRuns": [
+        310,
+        310
+      ],
+      "runtimeFiles": [
+        53,
+        53
+      ],
+      "productionInputs": 97,
+      "coverage": {
+        "production": {
+          "lines": {
+            "total": 2247,
+            "covered": 2235,
+            "pct": 99.46595460614152
+          },
+          "statements": {
+            "total": 3628,
+            "covered": 3535,
+            "pct": 97.43660418963616
+          },
+          "functions": {
+            "total": 888,
+            "covered": 866,
+            "pct": 97.52252252252252
+          },
+          "branches": {
+            "total": 2311,
+            "covered": 2194,
+            "pct": 94.93725659887495
+          }
+        },
+        "domainApplicationFeatures": {
+          "lines": {
+            "total": 1171,
+            "covered": 1170,
+            "pct": 99.91460290350128
+          },
+          "statements": {
+            "total": 1872,
+            "covered": 1833,
+            "pct": 97.91666666666667
+          },
+          "functions": {
+            "total": 444,
+            "covered": 439,
+            "pct": 98.87387387387388
+          },
+          "branches": {
+            "total": 1389,
+            "covered": 1339,
+            "pct": 96.40028797696185
+          }
+        }
+      },
+      "metricReport": {
+        "file": "reports/maintainability/2026-09-23T18-54-01-830Z/report.json",
+        "sha256": "9258e6199a720b61340045a4631975c75c62f5ce52cb4d6e6cbc173d40ba8b78"
+      },
+      "functions": 801,
+      "complexityViolations": 0,
+      "duplication": {
+        "percent": 0.7511950830867289,
+        "duplicatedLines": 33,
+        "totalLines": 4393
+      },
+      "sourceInputsDigest": "07e5db1195dea3d2341d4924e21a254ffa65adb3cdcfc57cde7a909511759172",
+      "baseline": {
+        "tests": 52,
+        "repetitions": 3,
+        "retries": 0,
+        "release": "blocked"
+      }
+    },
+    {
+      "stage": "edited-consumer",
+      "status": "passed",
+      "log": {
+        "file": "reports/template-authoring/verify.txt",
+        "sha256": "782ef7a604f7000017fe2c5498be44009c754b2a3aa3bbdda67d15e823aa0f63"
+      },
+      "runtimeRuns": [
+        323,
+        323
+      ],
+      "runtimeFiles": [
+        64,
+        64
+      ],
+      "productionInputs": 115,
+      "coverage": {
+        "production": {
+          "lines": {
+            "total": 2340,
+            "covered": 2330,
+            "pct": 99.57264957264957
+          },
+          "statements": {
+            "total": 3726,
+            "covered": 3638,
+            "pct": 97.638217928073
+          },
+          "functions": {
+            "total": 917,
+            "covered": 899,
+            "pct": 98.0370774263904
+          },
+          "branches": {
+            "total": 2377,
+            "covered": 2258,
+            "pct": 94.99368952461086
+          }
+        },
+        "domainApplicationFeatures": {
+          "lines": {
+            "total": 1213,
+            "covered": 1212,
+            "pct": 99.91755976916735
+          },
+          "statements": {
+            "total": 1917,
+            "covered": 1879,
+            "pct": 98.01773604590505
+          },
+          "functions": {
+            "total": 460,
+            "covered": 455,
+            "pct": 98.91304347826087
+          },
+          "branches": {
+            "total": 1404,
+            "covered": 1354,
+            "pct": 96.43874643874643
+          }
+        }
+      },
+      "metricReport": {
+        "file": "reports/maintainability/2026-09-23T18-58-22-842Z/report.json",
+        "sha256": "ccb35d96678ba512c771f8286b867f30bfdce905b1bfefab70044110934df1dd"
+      },
+      "functions": 827,
+      "complexityViolations": 0,
+      "duplication": {
+        "percent": 0.6828057107386716,
+        "duplicatedLines": 33,
+        "totalLines": 4833
+      },
+      "sourceInputsDigest": "a7bf88a17769629132eb3ca50c4501638325833e4791dbeb454b2f48778326d9",
+      "baseline": {
+        "tests": 52,
+        "repetitions": 3,
+        "retries": 0,
+        "release": "blocked"
+      }
+    },
+    {
+      "stage": "reviewed-removal",
+      "status": "passed",
+      "log": {
+        "file": "reports/template-authoring/foundation-verify.txt",
+        "sha256": "a21a9df421a584744b3c935fefcb1e3f7a7ae1ca0a49def107214d485eb4bab6"
+      },
+      "runtimeRuns": [
+        285,
+        285
+      ],
+      "runtimeFiles": [
+        58,
+        58
+      ],
+      "productionInputs": 95,
+      "coverage": {
+        "production": {
+          "lines": {
+            "total": 2033,
+            "covered": 2021,
+            "pct": 99.40973930152484
+          },
+          "statements": {
+            "total": 3213,
+            "covered": 3135,
+            "pct": 97.57236227824463
+          },
+          "functions": {
+            "total": 768,
+            "covered": 751,
+            "pct": 97.78645833333333
+          },
+          "branches": {
+            "total": 2011,
+            "covered": 1918,
+            "pct": 95.37543510691198
+          }
+        },
+        "domainApplicationFeatures": {
+          "lines": {
+            "total": 1184,
+            "covered": 1183,
+            "pct": 99.91554054054055
+          },
+          "statements": {
+            "total": 1879,
+            "covered": 1841,
+            "pct": 97.9776476849388
+          },
+          "functions": {
+            "total": 447,
+            "covered": 442,
+            "pct": 98.8814317673378
+          },
+          "branches": {
+            "total": 1380,
+            "covered": 1330,
+            "pct": 96.3768115942029
+          }
+        }
+      },
+      "metricReport": {
+        "file": "reports/maintainability/2026-09-23T19-06-56-587Z/report.json",
+        "sha256": "1220fb1850034247a79f5b6bc6c77db8bdf3d9a25cc0190e1c7d8a439313abd7"
+      },
+      "functions": 747,
+      "complexityViolations": 0,
+      "duplication": {
+        "percent": 0.7790368271954674,
+        "duplicatedLines": 33,
+        "totalLines": 4236
+      },
+      "sourceInputsDigest": "d216059e0824e2b8e3f2d242632dc0c2af99abd7f51f848e3b78c954b5e11eec",
+      "baseline": {
+        "tests": 52,
+        "repetitions": 3,
+        "retries": 0,
+        "release": "blocked"
+      }
+    },
+    {
+      "stage": "post-removal-reading",
+      "status": "passed",
+      "log": {
+        "file": "reports/template-authoring/extended-foundation-verify.txt",
+        "sha256": "94dd6ca2141549dc101aa0b5b782c670c449df36c7d59b98f9890f944f8a520c"
+      },
+      "runtimeRuns": [
+        293,
+        293
+      ],
+      "runtimeFiles": [
+        64,
+        64
+      ],
+      "productionInputs": 103,
+      "coverage": {
+        "production": {
+          "lines": {
+            "total": 2091,
+            "covered": 2079,
+            "pct": 99.4261119081779
+          },
+          "statements": {
+            "total": 3277,
+            "covered": 3199,
+            "pct": 97.6197741837046
+          },
+          "functions": {
+            "total": 784,
+            "covered": 767,
+            "pct": 97.83163265306122
+          },
+          "branches": {
+            "total": 2064,
+            "covered": 1969,
+            "pct": 95.39728682170542
+          }
+        },
+        "domainApplicationFeatures": {
+          "lines": {
+            "total": 1196,
+            "covered": 1195,
+            "pct": 99.91638795986623
+          },
+          "statements": {
+            "total": 1892,
+            "covered": 1854,
+            "pct": 97.99154334038055
+          },
+          "functions": {
+            "total": 452,
+            "covered": 447,
+            "pct": 98.89380530973452
+          },
+          "branches": {
+            "total": 1382,
+            "covered": 1332,
+            "pct": 96.38205499276411
+          }
+        }
+      },
+      "metricReport": {
+        "file": "reports/maintainability/2026-09-23T19-10-28-769Z/report.json",
+        "sha256": "b87d428ca606f108785a734385d30b12534e2a7e41d3a58bf2042a47f0d2cf59"
+      },
+      "functions": 760,
+      "complexityViolations": 0,
+      "duplication": {
+        "percent": 2.9280286097451946,
+        "duplicatedLines": 131,
+        "totalLines": 4474
+      },
+      "sourceInputsDigest": "328a05778ad69fd59072ded94406e115c3bb5a327c336e7f6e0e77685f3f46c6",
+      "baseline": {
+        "tests": 52,
+        "repetitions": 3,
+        "retries": 0,
+        "release": "blocked"
+      }
+    }
+  ],
+  "finalConsumer": {
+    "packets": [
+      {
+        "producer": "runtime",
+        "packet": {
+          "file": "reports/evidence/14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54/9604df14-e26c-4496-8a98-7cc1d4903af2/packet.json",
+          "sha256": "27caa9d3f2c3b9b870d6a759cd4d136005d71977c3cde135ab7c29efa343b3ec"
+        },
+        "id": "9604df14-e26c-4496-8a98-7cc1d4903af2",
+        "status": "passed",
+        "counts": {
+          "total": 293,
+          "passed": 293,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 64,
+        "modes": [
+          "unit",
+          "component"
+        ],
+        "sourceDigest": "14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54",
+        "sourceInputsDigest": "328a05778ad69fd59072ded94406e115c3bb5a327c336e7f6e0e77685f3f46c6",
+        "checkout": {
+          "kind": "modified",
+          "revision": "fd59c80195dee549ddbaaa23c28a06c091b18274"
+        },
+        "lockSha256": "ab1730a3585ba8402452597927c14a56a5f9ce2a3c02780312198c11dccb30b5",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "vitest": "5.0.1"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 219,
+            "sha256": "661df2728d018b54c474f19bce5f19c7ddeecd5b488fae2179db1fb50125255f"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "file": "raw-framework.txt",
+            "bytes": 121271,
+            "sha256": "c37ce812b631a80bcce31e45a6662b6e8616603b09ae0689f6c39c23175cf62b"
+          },
+          {
+            "file": "raw-attempts.txt",
+            "bytes": 85690,
+            "sha256": "a2686193de0b490a332e916e6c535a469efaf12081088d2583a26650d850b2d1"
+          }
+        ]
+      },
+      {
+        "producer": "coverage",
+        "packet": {
+          "file": "reports/evidence/14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54/586bfea2-33c4-4f31-9d67-f5b08d040fdd/packet.json",
+          "sha256": "20d79f8301e4abe1fa538d4307ef292e30f9dda6ae30a8d2b79c81027c6ef34f"
+        },
+        "id": "586bfea2-33c4-4f31-9d67-f5b08d040fdd",
+        "status": "passed",
+        "counts": {
+          "total": 293,
+          "passed": 293,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 64,
+        "modes": [
+          "unit",
+          "component"
+        ],
+        "sourceDigest": "14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54",
+        "sourceInputsDigest": "328a05778ad69fd59072ded94406e115c3bb5a327c336e7f6e0e77685f3f46c6",
+        "checkout": {
+          "kind": "modified",
+          "revision": "fd59c80195dee549ddbaaa23c28a06c091b18274"
+        },
+        "lockSha256": "ab1730a3585ba8402452597927c14a56a5f9ce2a3c02780312198c11dccb30b5",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "vitest": "5.0.1",
+          "@vitest/coverage-v8": "5.0.1"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 10643,
+            "sha256": "240adae36f0edc167e46181f0f6d4d05f9f1d0d576ce1e9df47bfd7ef6c9e33a"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "file": "raw-framework.txt",
+            "bytes": 935905,
+            "sha256": "a164d69336c45e3f39d8f0cc8e44a3fee78019980e06f69d512a09da1831c6ea"
+          },
+          {
+            "file": "raw-attempts.txt",
+            "bytes": 85690,
+            "sha256": "a2686193de0b490a332e916e6c535a469efaf12081088d2583a26650d850b2d1"
+          },
+          {
+            "file": "raw-coverage.txt",
+            "bytes": 35338,
+            "sha256": "dbec9192a37941d19b6d7c8ae60bc8c070d19c38bdcf54c9917fe2cb5158c780"
+          }
+        ]
+      },
+      {
+        "producer": "artifact",
+        "packet": {
+          "file": "reports/evidence/14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54/50b73841-599e-4928-afd1-c458dba75ff3/packet.json",
+          "sha256": "3fafb8ab124eb4d81c85bdb1a4097f0b8d6bb20cbd34e881526bec0288c05512"
+        },
+        "id": "50b73841-599e-4928-afd1-c458dba75ff3",
+        "status": "passed",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "artifact"
+        ],
+        "sourceDigest": "14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54",
+        "sourceInputsDigest": "328a05778ad69fd59072ded94406e115c3bb5a327c336e7f6e0e77685f3f46c6",
+        "checkout": {
+          "kind": "modified",
+          "revision": "fd59c80195dee549ddbaaa23c28a06c091b18274"
+        },
+        "lockSha256": "ab1730a3585ba8402452597927c14a56a5f9ce2a3c02780312198c11dccb30b5",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "postcss": "8.5.28",
+          "postcss-selector-parser": "7.1.6"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [
+          {
+            "file": "dist/main.js",
+            "bytes": 556049,
+            "sha256": "7f3e8b28ad9537da5936f18be22f0bb16e0114b1f06afe3b826f4f02be86ab0b"
+          },
+          {
+            "file": "dist/manifest.json",
+            "bytes": 289,
+            "sha256": "34cc3429f529e01fa446d6127751cc20e8fb82b47a88736c0db6494d270c927e"
+          },
+          {
+            "file": "dist/styles.css",
+            "bytes": 81735,
+            "sha256": "c8dd1592b53059dff04571420ba2c4dd9befff34eaa91f8fe48b3797a8fe61d2"
+          }
+        ],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 516,
+            "sha256": "a26c15fb0ae62dcf390141505cf0f37f2ddc7840d255cb83346b11181919ddd4"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "producer": "browser",
+        "packet": {
+          "file": "reports/evidence/14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54/90405cfd-6cf6-4042-9184-4b1614919a68/packet.json",
+          "sha256": "81df22261d0230c5e0c101d28e46e01117b8ecc43b99bb77589b47a76374b42b"
+        },
+        "id": "90405cfd-6cf6-4042-9184-4b1614919a68",
+        "status": "passed",
+        "counts": {
+          "total": 2,
+          "passed": 2,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "browser-integrated"
+        ],
+        "sourceDigest": "14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54",
+        "sourceInputsDigest": "328a05778ad69fd59072ded94406e115c3bb5a327c336e7f6e0e77685f3f46c6",
+        "checkout": {
+          "kind": "modified",
+          "revision": "fd59c80195dee549ddbaaa23c28a06c091b18274"
+        },
+        "lockSha256": "ab1730a3585ba8402452597927c14a56a5f9ce2a3c02780312198c11dccb30b5",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "@playwright/test": "1.63.0"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [
+          {
+            "file": "dist/main.js",
+            "bytes": 556049,
+            "sha256": "7f3e8b28ad9537da5936f18be22f0bb16e0114b1f06afe3b826f4f02be86ab0b"
+          },
+          {
+            "file": "dist/manifest.json",
+            "bytes": 289,
+            "sha256": "34cc3429f529e01fa446d6127751cc20e8fb82b47a88736c0db6494d270c927e"
+          },
+          {
+            "file": "dist/styles.css",
+            "bytes": 81735,
+            "sha256": "c8dd1592b53059dff04571420ba2c4dd9befff34eaa91f8fe48b3797a8fe61d2"
+          }
+        ],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 6573,
+            "sha256": "7eb3a4e137eeac4b4b1cbd5256c8b7c77f4e0ace5253b632f1bdac56588b979f"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      }
+    ],
+    "productionInputs": 103,
+    "coverage": {
+      "production": {
+        "lines": {
+          "total": 2091,
+          "covered": 2079,
+          "pct": 99.4261119081779
+        },
+        "statements": {
+          "total": 3277,
+          "covered": 3199,
+          "pct": 97.6197741837046
+        },
+        "functions": {
+          "total": 784,
+          "covered": 767,
+          "pct": 97.83163265306122
+        },
+        "branches": {
+          "total": 2064,
+          "covered": 1969,
+          "pct": 95.39728682170542
+        }
+      },
+      "domainApplicationFeatures": {
+        "lines": {
+          "total": 1196,
+          "covered": 1195,
+          "pct": 99.91638795986623
+        },
+        "statements": {
+          "total": 1892,
+          "covered": 1854,
+          "pct": 97.99154334038055
+        },
+        "functions": {
+          "total": 452,
+          "covered": 447,
+          "pct": 98.89380530973452
+        },
+        "branches": {
+          "total": 1382,
+          "covered": 1332,
+          "pct": 96.38205499276411
+        }
+      }
+    },
+    "strictFloors": {
+      "production": {
+        "lines": 90,
+        "statements": 90,
+        "functions": 90,
+        "branches": 85
+      },
+      "domainApplicationFeatures": {
+        "lines": 95,
+        "statements": 95,
+        "functions": 95,
+        "branches": 90
+      }
+    },
+    "assets": [
+      {
+        "file": "dist/main.js",
+        "bytes": 556049,
+        "sha256": "7f3e8b28ad9537da5936f18be22f0bb16e0114b1f06afe3b826f4f02be86ab0b"
+      },
+      {
+        "file": "dist/manifest.json",
+        "bytes": 289,
+        "sha256": "34cc3429f529e01fa446d6127751cc20e8fb82b47a88736c0db6494d270c927e"
+      },
+      {
+        "file": "dist/styles.css",
+        "bytes": 81735,
+        "sha256": "c8dd1592b53059dff04571420ba2c4dd9befff34eaa91f8fe48b3797a8fe61d2"
+      }
+    ],
+    "downloadedAssetBytesRehashed": true,
+    "acceptance": {
+      "report": {
+        "file": "reports/template-authoring/consumer-acceptance-14ad1c3d09d0fc5c50723f8af7b8ffa0e64fd7b4cc0a43460899f787ac935d54.json",
+        "sha256": "8ab9d36d4b1ec15f479c7ba0b0daac518b448e1dc0fd8547279621a04e5a6d8f"
+      },
+      "rows": 96,
+      "states": {
+        "not-run": 94,
+        "partial": 2
+      },
+      "release": "blocked"
+    }
+  },
+  "archive": {
+    "packets": [
+      {
+        "producer": "runtime",
+        "packet": {
+          "file": "reports/template-authoring/archive-reports/evidence/01a6d1bf6d99ae864c52732912558ce7828555dc592446844873b019e710ed03/5ac5cf3c-d647-47f9-843e-98dfa1bdcadd/packet.json",
+          "sha256": "bdda7c845535bfdb23db601302acd4764dc828a6b617a3a8bb989e0f5f39aa0e"
+        },
+        "id": "5ac5cf3c-d647-47f9-843e-98dfa1bdcadd",
+        "status": "passed",
+        "counts": {
+          "total": 310,
+          "passed": 310,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 53,
+        "modes": [
+          "unit",
+          "component"
+        ],
+        "sourceDigest": "01a6d1bf6d99ae864c52732912558ce7828555dc592446844873b019e710ed03",
+        "sourceInputsDigest": "685887dca9a95f36c882e47a3ad9d541d43a75dde672ad28b7e583e61b0851ef",
+        "checkout": {
+          "kind": "archive",
+          "revision": null
+        },
+        "lockSha256": "1b56cdadad3581a55e266e1977af31e74c5ed0fafb2ac9105d21b88571c90788",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "vitest": "5.0.1"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 214,
+            "sha256": "014ebea0eb9379c40692628a9f5c35da443143ba3838ea97e07d79359912033c"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "file": "raw-framework.txt",
+            "bytes": 126452,
+            "sha256": "6c3d92870a4861166c48d1e018a83cc283330bfa395b2ba6bfbf4691192669b1"
+          },
+          {
+            "file": "raw-attempts.txt",
+            "bytes": 89577,
+            "sha256": "594d5e298ade139a7728c1352068ef68a908763aab2e9e36aeec8a5eec0a292a"
+          }
+        ]
+      },
+      {
+        "producer": "artifact",
+        "packet": {
+          "file": "reports/template-authoring/archive-reports/evidence/01a6d1bf6d99ae864c52732912558ce7828555dc592446844873b019e710ed03/9c8d7e60-d982-4094-9773-4cb3a7e46464/packet.json",
+          "sha256": "766a17fbf9450917ce8c6f3a1cfc33f6827d68f082a10bdea05556505db57123"
+        },
+        "id": "9c8d7e60-d982-4094-9773-4cb3a7e46464",
+        "status": "passed",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "artifact"
+        ],
+        "sourceDigest": "01a6d1bf6d99ae864c52732912558ce7828555dc592446844873b019e710ed03",
+        "sourceInputsDigest": "685887dca9a95f36c882e47a3ad9d541d43a75dde672ad28b7e583e61b0851ef",
+        "checkout": {
+          "kind": "archive",
+          "revision": null
+        },
+        "lockSha256": "1b56cdadad3581a55e266e1977af31e74c5ed0fafb2ac9105d21b88571c90788",
+        "protocolSha256": "0a588fa99a70c77b077bf7bdaa18d257ce762ef0b7f2a04e47988b7ce74c962b",
+        "tools": {
+          "node": "24.21.0",
+          "postcss": "8.5.28",
+          "postcss-selector-parser": "7.1.6"
+        },
+        "execution": {
+          "exitCode": 0,
+          "signal": null,
+          "retry": 0,
+          "repetition": 0
+        },
+        "assets": [
+          {
+            "file": "dist/main.js",
+            "bytes": 586846,
+            "sha256": "d4dbb69841fb122b5676e9d21f7431104cae42a9dcb7c767912aab9fd33a121f"
+          },
+          {
+            "file": "dist/manifest.json",
+            "bytes": 292,
+            "sha256": "11de968dd438d6c5af6871f27f8ee025ba3fe04ce80cfe292e08d7fea6cc851c"
+          },
+          {
+            "file": "dist/styles.css",
+            "bytes": 92681,
+            "sha256": "c2ab5858e8c1fbcbcb07f7d9f87e0d4a60122fbca841b62e991153b79cb7e01a"
+          }
+        ],
+        "rawReceipts": [
+          {
+            "file": "raw-stdout.txt",
+            "bytes": 516,
+            "sha256": "1d190ee82e06e359c238af03a72c0ae09a9fac0decc0d0c8878a4a6c00b79c81"
+          },
+          {
+            "file": "raw-stderr.txt",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      }
+    ],
+    "checkout": {
+      "kind": "archive",
+      "revision": null
+    },
+    "setupLog": {
+      "file": "reports/template-authoring/archive-setup.txt",
+      "sha256": "6ec51a520ac681cb91e73811a803b5d4b3428f932606e0f70d56d3273824f458"
+    },
+    "productionInputs": 97,
+    "coverage": {
+      "production": {
+        "lines": {
+          "total": 2247,
+          "covered": 2235,
+          "pct": 99.46595460614152
+        },
+        "statements": {
+          "total": 3628,
+          "covered": 3535,
+          "pct": 97.43660418963616
+        },
+        "functions": {
+          "total": 888,
+          "covered": 866,
+          "pct": 97.52252252252252
+        },
+        "branches": {
+          "total": 2311,
+          "covered": 2194,
+          "pct": 94.93725659887495
+        }
+      },
+      "domainApplicationFeatures": {
+        "lines": {
+          "total": 1171,
+          "covered": 1170,
+          "pct": 99.91460290350128
+        },
+        "statements": {
+          "total": 1872,
+          "covered": 1833,
+          "pct": 97.91666666666667
+        },
+        "functions": {
+          "total": 444,
+          "covered": 439,
+          "pct": 98.87387387387388
+        },
+        "branches": {
+          "total": 1389,
+          "covered": 1339,
+          "pct": 96.40028797696185
+        }
+      }
+    },
+    "metricReport": {
+      "file": "reports/template-authoring/archive-reports/maintainability/2026-09-23T19-03-03-612Z/report.json",
+      "sha256": "0cec743687d8bec422ebc6bdf7e696dda907e5b28324ed82b18d1526db6af124"
+    },
+    "complexityViolations": 0,
+    "duplicationPercent": 0.7511950830867289,
+    "assets": [
+      {
+        "file": "dist/main.js",
+        "bytes": 586846,
+        "sha256": "d4dbb69841fb122b5676e9d21f7431104cae42a9dcb7c767912aab9fd33a121f"
+      },
+      {
+        "file": "dist/manifest.json",
+        "bytes": 292,
+        "sha256": "11de968dd438d6c5af6871f27f8ee025ba3fe04ce80cfe292e08d7fea6cc851c"
+      },
+      {
+        "file": "dist/styles.css",
+        "bytes": 92681,
+        "sha256": "c2ab5858e8c1fbcbcb07f7d9f87e0d4a60122fbca841b62e991153b79cb7e01a"
+      }
+    ],
+    "assetBytesRehashed": false
+  },
+  "consumerPreservation": {
+    "file": "src/features/bookmarks/bookmark.entity.ts",
+    "sha256": "ba9b3f20d82192311eb7b409a36ef65037ac07a45fdaa87900f6d8dbff51fced",
+    "checkedIn": [
+      "pre-removal hash receipt",
+      "edited-consumer metric inventory",
+      "removed-consumer metric inventory",
+      "post-Reading metric inventory",
+      "post-Reading baseline source inventory",
+      "downloaded final source bytes"
+    ]
+  },
+  "audit": {
+    "rawReceiptsValidated": 79,
+    "individualMetricCorpusReceiptsValidated": 1903,
+    "frameworkResultsReconciled": true,
+    "sourceInventoryDigestsRecomputed": true,
+    "sourceProtocolAndLockBindingsRecomputed": true,
+    "coverageDenominatorsAndBothFloorsRecomputed": true,
+    "assetBindingsMatchedAcrossArtifactAndBrowser": true
+  },
+  "priorAudit": {
+    "sourceHead": "8a350b1aa34c20dfeb44e313d21fe18258e60d4a",
+    "runId": 35901973632,
+    "sha256": "bc1d71a9a8d2ecc78c1cd37a964347530638b712a2481ea05287aa6d6b769b3d",
+    "preserved": "reports/qualification/final-consumer-summary-8a350b1.json"
+  },
+  "gaps": [
+    "No native or controlled-performance evidence is claimed for these renamed/generated consumers.",
+    "Archive runtime/artifact and full-verify evidence is present; archive browser/native modes were not run.",
+    "Archive asset hashes are bound by its actual artifact producer; archive dist bytes were not included in this downloaded artifact for independent byte rehashing.",
+    "The downloaded source is selected generated files, not a full consumer checkout; complete source hash inventories are retained and internally reconciled, with available Bookmarks and final consumer asset bytes independently rehashed.",
+    "All 96 acceptance rows remain; 94 are not-run and 2 partial in this consumer crosswalk. Release remains blocked.",
+    "The separate native/reference-performance candidate evidence is not supplied by this consumer workflow; no release authority follows from its passing checks."
+  ]
+}
