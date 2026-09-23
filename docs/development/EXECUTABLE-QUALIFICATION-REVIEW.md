@@ -27,6 +27,7 @@ remains necessary and separately recorded.
 | The document refactor reread projection getters after capturing their values | Validate the captured title/body primitives. A real regression first demonstrated false success for an invalid captured body; the corrected complete Documents/Items run passed 16/16 and independent review confirmed the original read order is restored. |
 | The Items browser test title claimed deletion survived reload, but reload happened only before deletion | Add independent service reconstruction after every unit mutation and actual browser reload after create, rename and delete, with fault assertions before each reload. Targeted unit and served results passed; independent review approved only AC-03's two whole links. |
 | The dependency-free source-limit fixture omitted the newly shared hash module | Add that required module to the isolated fixture's copy inventory. All 52 retained baseline cases then passed in each of three runs; thresholds, IDs and release blocking remain unchanged. |
+| A crafted native parser fixture inherited the removed consumer's foundation profile | Make the isolated fixture own its reviewed profile, prove the mismatch is rejected, then test the explicit showcase context. Both affected adapter cases passed without relaxing product validation. |
 
 The reviewer also distinguished real native settings/item I/O from forced writer
 interleavings. Controlled pending/failure scenarios must label their adapter

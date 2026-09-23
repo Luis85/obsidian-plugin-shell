@@ -104,6 +104,14 @@ an added maintained file or extra source inside `dist` still fails the actual
 checker, and restored controls pass. No diagnostic filter or broad directory
 ignore was introduced.
 
+The ef4fc41 candidate workflow also passed in full. Its transported archive then
+passed, and the removed-example consumer exposed a separate parser-fixture
+coupling: the crafted showcase report inherited the consumer's foundation profile.
+The isolated test now owns its policy, explicitly proves the foundation mismatch
+is rejected, then selects the reviewed showcase policy for its synthetic parser
+controls. The two affected adapter cases passed; no product profile validation
+or consumer registration was relaxed.
+
 ## Scope distinctions
 
 The original 96-case plan and blocked release profile are retained unchanged.

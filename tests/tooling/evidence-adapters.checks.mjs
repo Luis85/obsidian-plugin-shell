@@ -88,6 +88,10 @@ test('native performance adapter rejects crafted classification, budget, size, g
   // Samples/check completion and attribution below are explicit parser fixtures,
   // not native execution evidence. Asset compression is measured by the real code.
   const root = await evidenceFixture(t); await mkdir(join(root, 'dist')); await mkdir(join(root, 'reports/bundling'), { recursive: true });
+  // Reproduce the removed-consumer context regardless of this checkout's profile.
+  // Only this isolated fixture may select the profile for its crafted report.
+  const profilePath = join(root, 'scripts/testing/native-profile.json');
+  await writeFile(profilePath, JSON.stringify({ profile: 'foundation' }));
   const assets = [];
   for (const [file, bytes] of [['main.js', 'module.exports = {};\n'], ['styles.css', '.fixture{}'], ['manifest.json', '{}']]) {
     await writeFile(join(root, 'dist', file), bytes); assets.push({ file, sha256: sha256(bytes) });
@@ -110,6 +114,9 @@ test('native performance adapter rejects crafted classification, budget, size, g
       protocol: performanceProtocol, protocolSha256: sha256(JSON.stringify(performanceProtocol)), assets, samples,
       summary: summarizePerformance(samples), budgetStatus: 'within-proposed-budgets', sizes: await candidateSizes(join(root, 'dist'), join(root, 'reports/bundling')) } };
   const parse = value => adaptProducer('native', { native: JSON.stringify(value) }, root, ['scripts/testing/check-native.mjs'], 0);
+  await assert.rejects(parse(report), /EVIDENCE_NATIVE_PROFILE/);
+  await writeFile(profilePath, JSON.stringify({ profile: 'showcase' }));
+  report.performance.sourceInputsDigest = (await sourceInputs(root)).digest;
   assert.equal((await parse(report)).status, 'passed');
   for (const change of [
     value => { value.performance.classification = 'universally-qualified'; },
