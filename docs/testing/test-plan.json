@@ -65,7 +65,7 @@
         "SRC-02",
         "SRC-03"
       ],
-      "scope": "Input hashing and physical-line calculations; no AST architecture checks."
+      "scope": "Input hashing and dependency-free lexical code-line gates (comments/blanks excluded); physical lines retained as diagnostics, not AST architecture checks."
     },
     {
       "id": "child-runner",

@@ -2,6 +2,7 @@ import { ItemView, Menu, type WorkspaceLeaf } from 'obsidian';
 import type { PreferenceService } from '../../application/preference-service';
 import type { ErrorReporter } from '../../application/ports';
 import { bindViewHeader, SHOWCASE_VIEW } from './view-header';
+import { pluginIdentity } from '../plugin-identity';
 export { SHOWCASE_VIEW } from './view-header';
 export type MountView = (root: HTMLElement, showViewActions: (event: MouseEvent) => void) => () => void;
 interface ViewServices {
@@ -18,15 +19,15 @@ export class ShowcaseView extends ItemView {
   constructor(leaf: WorkspaceLeaf, private readonly mountUi: MountView, private readonly services: ViewServices,
     private readonly owned: (view: ShowcaseView, open: boolean) => void) { super(leaf); }
   getViewType(): string { return SHOWCASE_VIEW; }
-  getDisplayText(): string { return 'Plugin shell'; }
+  getDisplayText(): string { return pluginIdentity.name; }
   getIcon(): string { return 'blocks'; }
   async onOpen(): Promise<void> {
     this.disposeView();
     this.owned(this, true);
     try {
       this.contentEl.empty();
-      this.contentEl.addClass('plugin-shell-host');
-      this.root = this.contentEl.createDiv({ cls: 'plugin-shell' });
+      this.contentEl.addClass(pluginIdentity.hostClass);
+      this.root = this.contentEl.createDiv({ cls: pluginIdentity.rootClass });
       this.restoreHeader = bindViewHeader(this.containerEl, this.services.preferences, this.services.diagnostics);
       this.cleanup = this.mountUi(this.root, event => this.showViewActions(event));
     } catch (error) { this.disposeView(); throw error; }
@@ -59,7 +60,7 @@ export class ShowcaseView extends ItemView {
       this.menu = undefined; this.cleanup = undefined;
       this.restoreHeader?.(); this.restoreHeader = undefined;
       this.root?.remove(); this.root = undefined;
-      this.contentEl.removeClass('plugin-shell-host'); this.owned(this, false);
+      this.contentEl.removeClass(pluginIdentity.hostClass); this.owned(this, false);
     }
   }
   async onClose(): Promise<void> { this.disposeView(); }

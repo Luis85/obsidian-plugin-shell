@@ -1,15 +1,17 @@
 name: Setup npm policy compatibility
 on:
   push:
-    branches: [main, fix/setup-npm-policy, build/iteration-two]
+    branches: [main, fix/setup-npm-policy, build/iteration-three]
     paths:
       - 'package.json'
       - 'package-lock.json'
       - 'scripts/setup.mjs'
+      - 'scripts/setup/**'
       - 'scripts/shared/**'
       - 'scripts/testing/check-npm-install-policy.mjs'
       - 'scripts/testing/local-npm-registry.mjs'
       - 'tests/tooling/npm-install.checks.mjs'
+      - 'tests/tooling/setup-identity*.mjs'
       - '.github/workflows/setup-compatibility.yml'
   pull_request:
   workflow_dispatch:

@@ -7,5 +7,6 @@
 @import "./panels.css";
 @import "./layout.css";
 @import "./native-header.css";
+@import "./modal.css";
 @source "../presentation";
 @source "../../node_modules/.nuxt-ui";

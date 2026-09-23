@@ -7,7 +7,7 @@ export function mountHarnessLeaf(workspace: HTMLElement, services: Services, id:
   frame.className = 'harness-leaf'; frame.dataset.type = SHOWCASE_VIEW; frame.dataset.leaf = id;
   frame.setAttribute('aria-label', `Simulated plugin leaf ${id}`);
   const header = document.createElement('div'); header.className = 'view-header';
-  header.textContent = 'Native header simulation · Plugin shell';
+  header.textContent = `Native header simulation · ${services.identity.name}`;
   const root = document.createElement('div'); root.className = 'harness-plugin-root';
   if (id === 'primary') root.id = 'showcase-root';
   frame.append(header, root); workspace.append(frame);

@@ -2,23 +2,49 @@
 
 ## Current state
 
-Iteration 02 is a real Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-TWO.md), and [actual test record](docs/testing/ITERATION-TWO.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
+Iteration 03 adds reusable entity definitions, optional document recipes and Markdown repository CRUD to the Vue/Nuxt UI Obsidian showcase. Read [README](README.md), the [iteration guide](docs/development/ITERATION-THREE.md), and [actual test record](docs/testing/ITERATION-THREE.md) first. The [PRD](docs/product/PRD.md), retained baseline and normative companions remain the complete target, not a claim that all generators/mobile/release workflows exist.
 
-No full make catalog or identity migration is implemented. Setup installs the fixed showcase identity. Do not advertise pending capabilities or invent placeholder commands.
+Setup supports reviewed identity changes, browser/native profiles, verified resume
+and explicit disabled-plugin data migration inside the contained vault. Makers
+implement note-feature and entity --document recipes plus actual-source catalog
+checks. The full UI/custom-maker catalog remains pending. Do not advertise missing
+recipes or invent placeholder commands.
 
 ## Commands and environment
 
 Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
 
-`npm run verify` performs the current static/service/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` gates the selected core; `test:coverage:production` measures every production TS/Vue input separately and is report-only. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
+`npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
 
 Native smoke is optional and explicitly provisioned; use only its isolated scratch vault/config. Do not download/launch hosts against a personal vault. No task publishes, tags, submits listings, changes permissions or installs global packages unless specifically requested.
 
 ## Architecture
 
-Domain/application depend on framework-free contracts, never Obsidian/Vue/Pinia/browser/Node or concrete adapters. Bootstrap constructs and wires. main.ts is lifecycle composition, at most 100 physical lines. No manually detached leaves on unload.
+Domain/application depend on framework-free contracts, never Obsidian/Vue/Pinia/browser/Node or concrete adapters. Bootstrap constructs and wires. main.ts is lifecycle composition, at most 100 code lines. No manually detached leaves on unload.
 
 Application services own canonical data; Markdown is canonical for note-backed Tasks. Per-view Vue/Pinia own drafts and subscriptions. Typed bus is runtime-scoped, no global singleton. Publish committed facts after successful persistence; direct calls handle requests/results. Observe synchronous and asynchronous subscriber failures without relabeling an already committed write.
+
+Task/Project are example definitions, not branches inside generic services. Repository recipes must persist every entity field. Keep note IDs/paths/creation metadata, unrelated properties and body content when updating. Prevalidate full candidate bytes before persistence. Recheck folder/disposal after awaited preflight; use revision-checked native processing and reversible trash. Never claim cross-process atomic trash or use incomplete mappings as silent data loss.
+
+Keep feature-author code in `src/features/<name>` and expose the small shared
+authoring API through `src/features/api.ts`. One explicit registration in bootstrap
+constructs typed repositories and owns disposal. Features may depend only on
+feature/application/domain contracts, never concrete host/framework adapters.
+New business features should not require editing generic persistence services or
+main.ts; prove the extension path with a distinct test feature.
+
+Native modal/notice behavior belongs behind `services.modals` and `services.notices`;
+features must not construct host UI classes. Command/ribbon factories belong to
+features and join the explicit bootstrap command registry. Keep availability checks
+side-effect free and palette/ribbon execution shared. Structured logging accepts
+declared catalogs and safe metadata; diagnostic error observation stays independent
+of debug level and log delivery. Never export raw causes, note content or paths.
+
+All Vue files belong under `src/presentation/components` (including panels).
+Keep their scripts to imports, props and composable/template bindings. Place view
+behavior in TypeScript composables, per-view state in stores, and injection/types
+in context. Presentation TypeScript does not import Vue components; bootstrap
+assembles the component tree. `check:presentation` enforces this concern boundary.
 
 Validate unknown stored data, serialize preference writes, preserve corrupt/future data, and keep preview free of writes. Never overwrite conflicting notes, retry uncertain writes blindly, or turn failed opening into another create operation.
 
@@ -30,7 +56,9 @@ No Tailwind Preflight or broad host reset. Shared pipeline scopes selectors and 
 
 ## Quality and testing
 
-Handwritten runtime/CSS/scripts: 400 physical lines. Tests/helpers: 450. Count comments/blanks and complete SFCs. Generated application scaffolds will obey source limits; composed/vendor outputs have only the named provenance-backed exemptions.
+Handwritten runtime/CSS/scripts: 400 code lines. Tests/helpers: 450; main.ts: 100. Count nonblank lines containing code across complete SFCs, excluding comments. Comment markers inside strings, templates and regular expressions are code. Retain physical counts only as diagnostics. This owner-requested iteration 03 policy supersedes the older physical-line rule. Generated application scaffolds obey the same limits; composed/vendor outputs retain only their named provenance-backed exemptions.
+
+Name executable tests, scripts and workflows by behavior or responsibility, not iteration number. Historical iteration guides/evidence records may retain iteration names. Update imports, workflows and inventories whenever executable files are renamed.
 
 Do not weaken thresholds, suppress whole directories, remove meaningful tests, accept screenshot baselines, use unsafe casts, or disable both linters for convenience. Negative fixtures must prove actual checker failure. Native/browser/inline/fixture evidence have different scopes.
 

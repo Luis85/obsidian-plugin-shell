@@ -30,7 +30,7 @@ export class ShellSettingsTab extends PluginSettingTab {
       : key === 'notifySuccess' && typeof value === 'boolean' ? { notifySuccess: value } : null;
     if (!patch) return;
     const result = await this.services.preferences.update(patch);
-    if (!result.ok) this.services.notifications.show('native-settings', 'error', result.error.key, true);
+    if (!result.ok) this.services.notifications.show('native-settings', 'error', result.error.key, true, 'runtime');
     this.update();
   }
 }

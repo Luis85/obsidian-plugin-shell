@@ -1,19 +1,29 @@
 import { runNode } from '../shared/process.mjs';
+import { readdirSync } from 'node:fs';
+const toolingTests = readdirSync('tests/tooling').filter(name => /\.(checks|test)\.mjs$/.test(name)).sort().map(name => `tests/tooling/${name}`);
 const commands = [
-  ['--test', 'tests/tooling/npm-install.checks.mjs', 'tests/tooling/build.checks.mjs', 'tests/tooling/security.checks.mjs', 'tests/tooling/gates.checks.mjs', 'tests/tooling/coverage.checks.mjs'],
   ['scripts/security/check-dependencies.mjs'],
+  // The qualified build creates Nuxt's generated type inputs before type-aware
+  // lint probes inspect a fresh checkout. Verification never invents those types.
   ['scripts/bundling/build.mjs'],
+  // Tooling suites launch real compilers/installers; serialize them to avoid
+  // oversubscribed cold-start processes and cross-suite source-probe races.
+  ['--test', '--test-concurrency=1', ...toolingTests],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['node_modules/oxlint/bin/oxlint', 'src', '--deny-warnings'],
   ['node_modules/eslint/bin/eslint.js', 'src', '--max-warnings', '0'],
   ['scripts/quality/check-source.mjs'],
+  ['scripts/quality/check-presentation.mjs'],
   ['scripts/quality/check-architecture.mjs'],
   ['scripts/quality/check-analyzer.mjs'],
-  ['node_modules/vitest/vitest.mjs', 'run'],
+  ['scripts/makers/entities.mjs', '--check'],
+  ['node_modules/vitest/vitest.mjs', 'run', '--coverage'],
+  ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.production.config.mjs'],
+  ['scripts/quality/coverage-inventory.mjs'],
   ['scripts/styles/check-tokens.mjs'],
   ['scripts/quality/check-artifacts.mjs'],
   ['scripts/testing/verify-baseline.mjs', '--repeat', '3'],
   ['node_modules/vite/bin/vite.js', 'build', '--config', 'vite.harness.config.mjs'],
 ];
-try { for (const [path, ...args] of commands) { console.log(`\n▶ ${path} ${args.join(' ')}`); await runNode(path, args); } console.log('Iteration-02 static/service/artifact/analyzer/baseline verification passed. Run test:e2e for served-browser evidence. Native/device/release qualification is NOT implied.'); }
+try { for (const [path, ...args] of commands) { console.log(`\n▶ ${path} ${args.join(' ')}`); await runNode(path, args); } console.log('Iteration-03 static/service/production-coverage/artifact/analyzer/baseline verification passed. Run test:e2e for served-browser evidence. Native/device/release qualification is NOT implied.'); }
 catch (error) { console.error(error.message); process.exitCode = 1; }

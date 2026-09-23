@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import manifest from '../../manifest.json' with { type: 'json' };
 import '../../harness/app/test-api';
 const errors = new WeakMap<Page, string[]>();
 test.beforeEach(async ({ page }) => {
@@ -23,7 +24,7 @@ test('[UI-02-PENDING] controlled header checkbox waits for the actual persistenc
   await expect(toggle).toBeDisabled(); await expect(toggle).not.toBeChecked();
   await expect(page.getByText('Saving header preference…', { exact: true })).toBeVisible();
   await expect(header).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem('plugin-shell:harness:v1:settings'))).toBeNull();
+  expect(await page.evaluate(key => localStorage.getItem(key), `${manifest.id}:harness:v1:settings`)).toBeNull();
   await page.evaluate(() => window.__SHELL_TEST__.fault('none'));
   await expect(toggle).toBeChecked(); await expect(toggle).toBeEnabled();
   await expect(header).toBeHidden();

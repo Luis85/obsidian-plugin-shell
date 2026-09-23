@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { success, type Result } from '../../src/domain/outcome';
 import { TypedEventBus } from '../../src/infrastructure/events/typed-event-bus';
 import { DocumentCreationService } from '../../src/application/document-service';
-import { taskDefinition, type EntityInputs } from '../../src/application/task-document';
+import { taskDefinition, type EntityInputs } from '../../src/features/tasks/form';
 import { renderMarkdown } from '../../src/infrastructure/markdown';
 import type { ShellEvents } from '../../src/application/events';
 import type { HostActions } from '../../src/application/ports';

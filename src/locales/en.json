@@ -1,15 +1,16 @@
 {
+  "notification": { "overflow": "More notifications are waiting. Review the related views for details." },
   "app": {
     "title": "Plugin Shell",
     "tagline": "Your plugin starts here.",
     "intro": "A working foundation, not another blank canvas. Explore the services behind this view, then make them your own.",
     "showcase": "Capability showcase",
-    "iteration": "Iteration 02",
+    "iteration": "Iteration 03",
     "local": "Local-first · no account required",
     "ready": "Runtime ready",
     "browser": "Browser harness",
     "native": "Obsidian host",
-    "scope": "Iteration 02 · Responsive layout, optional native header and reliability improvements. Full makers, automatic releases and device qualification remain planned."
+    "scope": "Iteration 03 · Reusable entities, Markdown repositories and Task note editing. Full makers, automatic releases and device qualification remain planned."
   },
   "nav": {
     "overview": "Overview",
@@ -66,6 +67,31 @@
     "note": "Existing notes are never overwritten. Preview does not create files or folders.",
     "browserNote": "Harness mode: notes are stored in this browser’s synthetic vault, not a real Obsidian vault."
   },
+  "repo": {
+    "title": "Your Task notes",
+    "help": "Read and edit notes in your Task folder. Handwritten content and other properties are preserved.",
+    "reload": "Reload notes",
+    "initial": "Load your Task notes to view or edit them.",
+    "empty": "No Task notes in this folder. Create one above, then reload.",
+    "edit": "Edit",
+    "editNamed": "Edit {title}",
+    "editing": "Editing: {title}",
+    "editTitle": "Task title",
+    "editDue": "Task due date",
+    "editTags": "Task tags",
+    "status": "Status",
+    "todo": "To do",
+    "doing": "In progress",
+    "done": "Done",
+    "save": "Save changes",
+    "saved": "Task changes saved. The note path and handwritten content are unchanged.",
+    "delete": "Move to trash…",
+    "confirm": "Move “{title}” to the vault trash? Reload notes to review the latest content before deleting.",
+    "confirmDelete": "Confirm move to trash",
+    "cancel": "Cancel",
+    "deleted": "Task note moved to trash.",
+    "stale": "Your draft is retained. Reload notes to discard it and review the current note before editing again."
+  },
   "events": {
     "title": "See the wiring work",
     "subtitle": "Events carry facts. Commands perform actions. Every subscription has an owner.",
@@ -106,6 +132,10 @@
     "saved": "Task note created successfully."
   },
   "modal": {
+    "close": "Close", "confirm": "Confirm", "cancel": "Cancel", "input": "Example text", "invalid": "Enter a short, non-empty value.", "validating": "Checking input…",
+    "confirmTitle": "Confirm an example", "confirmText": "This example changes no documents. Confirm or cancel to inspect the typed outcome.",
+    "promptTitle": "Try a text prompt", "promptText": "Enter a short value. It stays in this example and is never written to your vault.",
+    "confirmed": "Example confirmed. No documents changed.", "cancelled": "Example cancelled. No documents changed.",
     "title": "One view, two environments",
     "text": "This dialog uses the Obsidian Modal API in the plugin and an isolated browser adapter in the harness. The application services do not depend on either implementation."
   },
@@ -113,7 +143,15 @@
     "open": "Open capability showcase",
     "toggleHeader": "Toggle Obsidian view header"
   },
+  "debug": {
+    "toggle": "Toggle debug logging",
+    "report": "Inspect debug report",
+    "title": "Debug report",
+    "enabled": "Debug logging enabled for this session.",
+    "disabled": "Debug logging disabled. Error diagnostics remain active."
+  },
   "error": {
+    "commandUnavailable": "This command is not available in the current context.",
     "title": "Enter a title with 1–120 characters.",
     "due": "Enter a valid calendar date (YYYY-MM-DD).",
     "tags": "Use up to 12 short tags with letters, numbers, hyphens or slashes.",
@@ -122,7 +160,10 @@
     "settingsRead": "Stored settings are protected. Resolve the read error before saving.",
     "settingsWrite": "Preferences were not saved. Your previous values remain active.",
     "conflict": "The destination already exists. No file was overwritten.",
-    "write": "The note was not created. Check the destination and permissions.",
+    "write": "The note could not be saved. Check the destination and permissions.",
+    "read": "The note could not be read. Check that it exists and is accessible, then reload notes.",
+    "duplicateIdentity": "Two notes share the same entity ID. Resolve the duplicate before editing; no notes were changed.",
+    "repositoryLimit": "This folder exceeds the 1,000-note inspection limit. Use a smaller dedicated folder.",
     "uncertain": "The write result is uncertain. Check the exact destination before trying a new submission.",
     "open": "The note is created, but could not be opened. Retry opening; do not create it again.",
     "stale": "This preview no longer matches the request or destination. Prepare a new preview.",

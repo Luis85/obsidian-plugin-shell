@@ -1,0 +1,66 @@
+// @vitest-environment happy-dom
+import { afterEach, expect, it } from 'vitest';
+import { componentFixture, click, input, settle } from './component-fixture';
+import { defaults } from '../../src/domain/preferences';
+import { deferred } from './helpers';
+afterEach(() => { document.body.replaceChildren(); });
+function controls(root: HTMLElement) {
+  const folder = root.querySelector<HTMLInputElement>('input[type="text"]');
+  const locale = root.querySelector<HTMLSelectElement>('select');
+  const checks = root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+  if (!folder || !locale || !checks[0] || !checks[1]) throw new Error('SETTINGS_CONTROLS_MISSING');
+  return { folder, locale, header: checks[0], notices: checks[1] };
+}
+it('[UI-03-04] real preferences preserve drafts across external commits and save only edited fields', async () => {
+  const f = await componentFixture();
+  try {
+    await click(f.root, 'Preferences'); const c = controls(f.root);
+    await input(c.folder, 'My/Tasks');
+    await f.services.preferences.update({ notifySuccess: false }); await settle();
+    expect(c.folder.value).toBe('My/Tasks'); expect(c.notices.checked).toBe(false);
+    await click(f.root, 'Save preferences');
+    expect(f.services.preferences.current).toMatchObject({ taskFolder: 'My/Tasks', notifySuccess: false });
+    c.locale.value = 'de'; c.locale.dispatchEvent(new Event('change', { bubbles: true })); await settle();
+    c.notices.click(); await settle(); await click(f.root, 'Save preferences');
+    expect(f.services.preferences.current.locale).toBe('de'); expect(f.root.querySelector('[lang="de"]')).not.toBeNull();
+    expect(f.observe).not.toHaveBeenCalled();
+  } finally { f.dispose(); }
+});
+it('[UI-03-05] failed and slow header writes do not display uncommitted state', async () => {
+  const f = await componentFixture(); const barrier = deferred();
+  try {
+    await click(f.root, 'Preferences'); const c = controls(f.root);
+    f.save.mockImplementationOnce(() => barrier.promise); c.header.click(); await settle();
+    expect(c.header.checked).toBe(false); expect(c.header.disabled).toBe(true);
+    expect(f.root.textContent).toContain('Saving header preference');
+    barrier.resolve(); await settle(); expect(c.header.checked).toBe(true); expect(c.header.disabled).toBe(false);
+    f.save.mockRejectedValueOnce(new Error('disk failure')); c.header.click(); await settle();
+    expect(c.header.checked).toBe(true); expect(f.root.querySelector('[role="alert"]')?.textContent).toContain('not saved');
+    expect(f.services.preferences.current.hideObsidianViewHeader).toBe(true); expect(f.observe).toHaveBeenCalledTimes(1);
+  } finally { f.dispose(); }
+});
+it('[UI-03-06] invalid preferences preserve committed values and readonly data disables every writer', async () => {
+  const f = await componentFixture();
+  try {
+    await click(f.root, 'Preferences'); await input(controls(f.root).folder, '../private'); await click(f.root, 'Save preferences');
+    expect(f.save).not.toHaveBeenCalled(); expect(f.root.querySelector('[role="alert"]')).not.toBeNull();
+    expect(f.services.preferences.current.taskFolder).toBe('Tasks');
+  } finally { f.dispose(); }
+  const readonly = await componentFixture({ schemaVersion: 200, preferences: defaults });
+  try {
+    await click(readonly.root, 'Preferences');
+    expect(Array.from(readonly.root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('.shell-form input, .shell-form select')).every(el => el.disabled)).toBe(true);
+    expect(readonly.save).not.toHaveBeenCalled();
+  } finally { readonly.dispose(); }
+});
+it('[UI-03-07] closing a view during a save never creates feedback or revives its form', async () => {
+  const f = await componentFixture(); const barrier = deferred();
+  try {
+    await click(f.root, 'Preferences'); await input(controls(f.root).folder, 'AfterClose');
+    f.save.mockImplementationOnce(() => barrier.promise);
+    f.root.querySelector<HTMLButtonElement>('button[type="submit"]')?.click(); await settle();
+    f.close(); barrier.resolve(); await settle();
+    expect(f.services.preferences.current.taskFolder).toBe('AfterClose');
+    expect(f.services.notifications.current).toEqual([]); expect(f.root.children.length).toBe(0); expect(f.observe).not.toHaveBeenCalled();
+  } finally { f.dispose(); }
+});

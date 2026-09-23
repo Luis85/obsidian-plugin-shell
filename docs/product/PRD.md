@@ -1,7 +1,8 @@
 # Product requirements: Obsidian Plugin Shell
 
-> **Version:** 0.8.0 · **Updated:** 2026-09-22 · **Owner:** Luis85  
-> **Implementation milestone:** Responsive layout/header/dependency/reliability milestone, plugin version 0.2.0. The complete GitHub-template product is not yet finished.
+> **Version:** 0.9.0 · **Updated:** 2026-09-22 · **Owner:** Luis85
+> **Implementation milestone:** Entity/repository and test-foundation milestone,
+> plugin version 0.3.0. The complete GitHub-template product is not yet finished.
 
 ## Product goal
 
@@ -11,7 +12,20 @@ The owner requested the first runnable iteration up to an openable showcase view
 
 ## Requirements remain in force
 
-The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../testing/ITERATION-TWO.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
+**Iteration 03 scope extension:** The owner's new request adds reusable entity
+definitions, optional document recipes and typed repository CRUD to the template.
+This supersedes the retained exclusion of a generic repository only for the
+bounded, entity-bound Markdown repository described in the
+[iteration plan](../development/ITERATION-THREE-PLAN.md). ORM/query languages,
+automatic migrations and whole-vault indexing remain excluded. Task is an example
+consumer; shared services must support another entity without special cases.
+
+The extension path is a first-class template capability: feature authors work in
+`src/features/<name>`, import a small public authoring API, and add one explicit
+registration. Shared dependencies/lifecycle are wired once. Business modules must
+not be buried in adapters or require editing generic repository/service code.
+
+The complete pre-implementation contract is retained verbatim in [SPECIFICATION-0.7.md](SPECIFICATION-0.7.md), incorporating [BASELINE-0.4.md](BASELINE-0.4.md) and all normative companions. Its historical capability/status paragraphs are superseded by this page and the current [iteration record](../testing/ITERATION-THREE.md); the numbered requirements, safety rules and intended final commands are not weakened or deleted.
 
 | Contract | Scope |
 | --- | --- |
@@ -29,29 +43,43 @@ The [machine plan](../testing/test-plan.json) remains the retained baseline inve
 
 ## Current capabilities
 
-| Capability | Status in iteration 02 |
+| Capability | Status in iteration 03 |
 | --- | --- |
-| Native plugin and open/focus command/ribbon | Implemented; native opening exercised in Obsidian1.13.7. |
+| Native plugin and open/focus command/ribbon | Implemented. Iteration 02 exercised native opening in Obsidian 1.13.7; the current candidate's native results are recorded separately. |
 | Nuxt UI showcase | Real Vue/Pinia components with four panels, not a parallel mock UI. |
-| Task DocumentCreationService | Working explicit Task definition, validation, exact preview/commit, complete Markdown write and separate opening. Full schema/catalog machinery still pending. |
+| Entity/document/repository foundation | Typed fields and explicit recipes, catalog validation, preview/commit and Markdown CRUD with revision checks. Task/Project share the same infrastructure. Note-feature makers and catalog CLI are implemented; alternate durable backends remain pending. |
 | Settings | Native declarative tab and Vue preferences use one validated queued service; English/German, local panel preference and persisted isolated native-header visibility. |
-| Event bus | Typed plugin-scoped facts, once/disposal/error observation; selected file-open bridge. Full catalog/bridge remains pending. |
-| Feedback | Owner-scoped local/native notification subset and bounded diagnostics. Full timer/action/queue specification remains pending. |
+| Event bus | Typed plugin-scoped facts and eight owned normalized native mappings; listener failures remain independently observable. |
+| Feedback | Owned local/native handles, progress delay, transient timing/queues, persistent recovery, locale refresh and single-flight action policies. Broader manual/accessibility qualification remains separate. |
+| Native service API | Dedicated ModalService info/confirm/prompt outcomes and native-first NoticeService helpers with owned cleanup and real browser/native adapter contracts. |
+| Commands and ribbon | Feature-owned typed descriptors join an explicit bootstrap registry; availability, shared single-flight execution, outcome handling and native cleanup are centralized. |
+| Logging and debugging | Runtime opt-in detail, typed feature catalogs, bounded redacted records, independent error diagnostics and explicit sanitized report commands. |
 | Styling | Native token roles, Nuxt UI containment, local icons, no Preflight/global head injection, one composed plugin CSS. |
 | Browser harness | Actual services/components with synthetic adapters, served Playwright tests and independent captured-defect observation. |
-| Setup and local install | Guided fixed-identity installer, dry run/noninteractive options, safe repository-contained asset installation. Full identity/resume/maker workflow remains pending. |
+| Setup and local install | Dependency-free identity/profile review, root-lock metadata preservation, verified resume, explicit disabled-plugin data migration and contained asset installation. |
+| Author tooling | Safe registered note-feature/entity recipes, real generated CRUD tests/fixtures, and actual-source entity catalog/check commands. Broader UI/custom makers remain pending. |
 | Tooling | Exact lockfile, Vite/Vitest, strict types, Oxlint/Obsidian-Vue ESLint, source/locales, real fallow architecture and artifact checks. |
-| Coverage and broad analysis | Selected core measured; full production thresholds/dead-code/complexity/duplication qualification pending. |
+| Coverage and broad analysis | Whole-production and stricter domain/application/features coverage gates; complete inventory and negative probes. Full fallow zero-finding analyzer, independent architecture and presentation-concern gates. Broader complexity/duplication qualification remains pending. |
 | CI | Read-only Linux/Windows verification, Linux served-browser and selected native smoke, temporary artifacts only. |
 | Mobile/release/template qualification | Pending. Manifest desktop-only, no public release or directory submission. |
 
-See [ITERATION-ONE.md](../development/ITERATION-ONE.md) for actual commands and installation. Do not invoke future maker/release commands from contract examples until implemented.
+See [ITERATION-THREE.md](../development/ITERATION-THREE.md) and [README](../../README.md)
+for actual APIs/commands. Do not invoke future maker/release commands from contract
+examples until implemented.
 
 ## Architecture invariants
 
 Presentation → application → domain remains the dependency direction; infrastructure implements inner ports and bootstrap wires concrete services. main.ts is nine lines of lifecycle composition. Runtime services own canonical data and the bus; each view owns Vue/Pinia state and cleanup. Task Markdown remains canonical, without a duplicate Task database in data.json.
 
-Handwritten source/CSS/scripts remain limited to 400 physical lines, tests/helpers450, main100. The current gates preserve these limits and test forbidden architecture edges. No native host stylesheet or harness tooling is packaged in the plugin. Failures cannot become false-success writes or unsafe retry actions.
+Handwritten source/CSS/scripts are limited to 400 code lines, tests/helpers 450,
+and main.ts 100. At the owner's iteration 03 request, comment-only and blank lines
+are excluded; all code regions in an SFC count together. Physical counts remain
+diagnostic. This explicitly supersedes the physical-line wording of retained
+ARC-01/QLT-01/QLT-02 without changing their numerical limits. Executable file names
+describe behavior/responsibility rather than iteration numbers; historical
+iteration documents keep their meaningful chronology. The gates still test
+forbidden architecture edges. No native stylesheet or harness tooling is packaged
+in the plugin, and failures cannot become false-success writes or unsafe retries.
 
 ## Nuxt UI and compatibility decisions
 
@@ -59,10 +87,20 @@ The first qualified graph uses Nuxt UI4.11.2, Vue3.5.43, Pinia4.0.3, Vite8.3.0, 
 
 Nuxt UI integrates through plain Vue/Vite without the Nuxt framework/router. A narrow source-hash-guarded build adapter removes two global-style-producing modules. CSS uses an owned root and native semantic variables; selected local SVG assets and dependency notices are bundled. Expanded components, package upgrades, additional overlay/portal behaviors and mobile require requalification.
 
-Current dependency/audit exceptions and their review boundary are in the [guide](../development/ITERATION-ONE.md). A lockfile is reproducibility, not proof that every transitive dependency has no advisory.
+The retained nested ESLint support exception and its review boundary are in the [dependency exception record](../development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md). Current audit results belong to the [executed verification record](../testing/ITERATION-THREE.md). A lockfile provides reproducibility, not proof that every transitive dependency has no advisory.
 
 ## Verification and definition of this milestone
 
-The [iteration test record](../testing/ITERATION-TWO.md) identifies actual checks, source/candidate identity, failures corrected and untested scope. `verify` currently covers static/service/artifact/retained-baseline/harness-build checks; served E2E is separate. Full PRD verification and release promotion are not implemented aliases to this partial gate.
+The [iteration test record](../testing/ITERATION-THREE.md) identifies actual checks,
+source/candidate identity, failures corrected and untested scope. `verify` covers
+static/service/production-coverage/artifact/retained-baseline/harness-build checks;
+served E2E and native qualification are separate. Full PRD verification and release
+promotion are not implemented aliases to this gate.
 
-The milestone is an openable working desktop showcase. Complete template qualification still requires the retained work packages: full setup/renaming/makers, broader runtime contracts, production-wide test thresholds and analyzers, expanded host/device/accessibility evidence, and fixed-asset release rehearsal. Existing native evidence is limited to named smoke cases and cannot certify all hosts, themes or devices.
+The milestone is a reusable entity/document foundation with a working desktop
+example. Identity setup, verified resume, explicit contained migration and note-feature
+makers are implemented. Complete template qualification still requires the broader
+UI/custom-maker catalog, automatic example removal, additional runtime contracts/analyzers,
+expanded host/device/accessibility evidence,
+and fixed-asset release rehearsal. Native evidence is limited to named checks and
+cannot certify all hosts, themes or devices.

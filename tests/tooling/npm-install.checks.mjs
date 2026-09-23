@@ -56,10 +56,10 @@ async function fixture() {
   const dir = await mkdtemp(join(tmpdir(), 'shell npm spaces ü-'));
   await mkdir(join(dir, 'scripts'), { recursive: true });
   await cp(join(root, 'scripts/setup.mjs'), join(dir, 'scripts/setup.mjs'));
+  await cp(join(root, 'scripts/setup'), join(dir, 'scripts/setup'), { recursive: true });
   await cp(join(root, 'scripts/shared'), join(dir, 'scripts/shared'), { recursive: true });
   await cp(join(root, 'package.json'), join(dir, 'package.json'));
-  await writeFile(join(dir, 'manifest.json'), '{"name":"Fixture","id":"fixture"}');
-  await writeFile(join(dir, 'package-lock.json'), '{}');
+  for (const name of ['manifest.json', 'package-lock.json', 'versions.json']) await cp(join(root, name), join(dir, name));
   return dir;
 }
 
@@ -67,16 +67,20 @@ test('[NPM-04] real setup CLI isolates npm env with stub tools and preserves str
   const dir = await fixture();
   try {
     const launcher = join(dir, 'npm launcher.mjs');
-    await writeFile(launcher, `import {writeFileSync} from 'node:fs';
+    await writeFile(launcher, `import {writeFileSync,mkdirSync} from 'node:fs';
+      if(process.argv[2] === '--version') { console.log('11.19.1'); process.exit(0); }
       if (Object.keys(process.env).some(k => k.toLowerCase().replaceAll('-', '_') === 'npm_config_allow_scripts')) {
         console.error('EALLOWSCRIPTS'); process.exit(1);
       }
+      mkdirSync('node_modules', {recursive:true});writeFileSync('node_modules/.package-lock.json', JSON.stringify({packages:{}}));
       writeFileSync('probe.json', JSON.stringify({args:process.argv.slice(2),
         ignore:process.env.npm_config_ignore_scripts, strict:process.env.npm_config_strict_allow_scripts}));`);
-    for (const path of ['scripts/bundling/build.mjs', 'node_modules/vue-tsc/bin/vue-tsc.js', 'node_modules/vitest/vitest.mjs']) {
+    for (const path of ['scripts/quality/verify.mjs']) {
       const target = join(dir, path);
       await mkdir(join(target, '..'), { recursive: true });
-      await writeFile(target, '// Stub: this test asserts the CLI boundary, not build or Vitest behavior.\n');
+      await writeFile(target, `// Stub: this test asserts the CLI boundary, not build or Vitest behavior.
+import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+mkdirSync('dist',{recursive:true});writeFileSync('dist/main.js','fixture');writeFileSync('dist/styles.css','.fixture{}');writeFileSync('dist/manifest.json',readFileSync('manifest.json'));`);
     }
     const result = spawnSync(process.execPath, [join(dir, 'scripts/setup.mjs'), '--yes', '--no-interaction', '--no-local'], {
       cwd: dir, encoding: 'utf8', timeout: 10000,

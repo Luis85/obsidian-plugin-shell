@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
+import { codeLines } from './code-lines.mjs';
 
 const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
 export const sha256 = (value) => createHash('sha256').update(value).digest('hex');
@@ -29,10 +30,11 @@ export async function sourceInputs(root, roots = inputRoots) {
       const decoded = name === vendorArchive ? decodeVendor(data) : null;
       const limit = lineLimit(name);
       files.push({ path: name, sha256: sha256(data), bytes: data.length,
-        lines: decoded ? physicalLines(decoded.toString('utf8')) : limit === null ? null : physicalLines(data.toString('utf8')), limit });
+        lines: decoded ? codeLines(decoded.toString('utf8'), 'vendor.css') : limit === null ? null : codeLines(data.toString('utf8'), name),
+        physicalLines: decoded ? physicalLines(decoded.toString('utf8')) : limit === null ? null : physicalLines(data.toString('utf8')), limit });
     } else throw new Error('SOURCE_NOT_REGULAR');
   }
   for (const path of roots) await visit(join(root, path));
   files.sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
-  return { algorithm: 'sha256', roots, files, digest: sha256(JSON.stringify(files)) };
+  return { algorithm: 'sha256', lineMetric: 'code-excluding-comments-and-blank-lines', roots, files, digest: sha256(JSON.stringify(files)) };
 }

@@ -4,23 +4,29 @@ import { mountShowcase } from './mount-ui';
 import { nativeAdapters } from '../infrastructure/obsidian/adapters';
 import { ShellSettingsTab } from '../infrastructure/obsidian/settings-tab';
 import { ShowcaseView, SHOWCASE_VIEW } from '../infrastructure/obsidian/showcase-view';
+import { bindHostEvents } from '../infrastructure/obsidian/event-bridge';
+import { bindCommands } from '../infrastructure/obsidian/commands';
+import { createCommands } from './commands';
 export async function initializePlugin(plugin: Plugin) {
   const services = await createServices(nativeAdapters(plugin));
   let disposed = false;
   const views = new Set<ShowcaseView>();
+  let stopHostEvents = () => {};
+  let stopCommands = () => {};
   const text = (key: string) => services.i18n.global.t(key);
   const dispose = () => {
     if (disposed) return;
     disposed = true;
+    stopCommands();
     for (const view of Array.from(views)) {
       try { view.disposeView(); } catch { services.diagnostics.report('view.dispose', 'view.close'); }
     }
-    services.dispose();
+    stopHostEvents(); services.dispose();
   };
   const toggleHeader = async () => {
     if (disposed) return;
     const result = await services.preferences.toggleViewHeader();
-    if (!result.ok) services.notifications.show('header-toggle', 'error', result.error.key, true);
+    if (!result.ok) services.notifications.show('header-toggle', 'error', result.error.key, true, 'runtime');
   };
   try {
     plugin.registerView(SHOWCASE_VIEW, leaf => new ShowcaseView(leaf,
@@ -38,16 +44,11 @@ export async function initializePlugin(plugin: Plugin) {
         const leaf = existing ?? plugin.app.workspace.getLeaf('tab');
         if (!existing) await leaf.setViewState({ type: SHOWCASE_VIEW, active: true });
         await plugin.app.workspace.revealLeaf(leaf);
-      } catch { services.diagnostics.report('view.open', 'view.open'); services.notifications.show('navigation', 'error', 'error.unexpected', true); }
+      } catch { services.diagnostics.report('view.open', 'view.open'); services.notifications.show('navigation', 'error', 'error.unexpected', true, 'runtime'); }
     };
-    plugin.addCommand({ id: 'open-showcase', name: text('command.open'), callback: () => { void open(); } });
-    plugin.addCommand({ id: 'toggle-view-header', name: text('command.toggleHeader'), callback: () => { void toggleHeader(); } });
-    plugin.addRibbonIcon('blocks', text('command.open'), () => { void open(); });
+    stopCommands = bindCommands(plugin, createCommands(services, { openShowcase: open, toggleHeader }), text, services.diagnostics);
     plugin.addSettingTab(new ShellSettingsTab(plugin, { preferences: services.preferences, notifications: services.notifications, text }));
-    plugin.app.workspace.onLayoutReady(() => {
-      if (disposed) return;
-      plugin.registerEvent(plugin.app.workspace.on('file-open', file => services.events.publish({ type: 'host.active-file-changed', payload: { available: file !== null } })));
-    });
-  } catch (error) { dispose(); new Notice('Plugin shell could not start. Check the installed version.'); throw error; }
+    stopHostEvents = bindHostEvents(plugin, services.events, services.diagnostics, services.scheduler);
+  } catch (error) { dispose(); new Notice(`${plugin.manifest.name} could not start. Check the installed version.`); throw error; }
   return { dispose, diagnosticSnapshot: () => services.diagnostics.current };
 }

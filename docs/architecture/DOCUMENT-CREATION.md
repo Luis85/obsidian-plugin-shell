@@ -1,7 +1,11 @@
 # Entity-driven DocumentCreationService
 
 > **Contract:** PRD 0.4 extension, requirements **DOC-01–20**.  
-> **Status:** Required design and acceptance behavior; no executable service is supplied by this document.  
+> **Status:** Normative target. Executable creation began in iteration 01;
+> iteration 03 extends the template with typed definitions and a separate CRUD
+> repository. See the [iteration plan](../development/ITERATION-THREE-PLAN.md).
+> Numbered requirements below remain in force; implementation and qualification
+> must be read from the relevant iteration record.
 > **Purpose:** Define an entity and its document representation once, then create valid, portable Markdown notes through one typed application service.  
 > **Related:** [PRD](../product/PRD.md), [developer recipe](../development/ENTITY-DOCUMENTS.md), [makers](../development/SETUP-AND-MAKERS.md), [events](EVENT-BUS.md), [styles](STYLES.md), [research](../research/2026-09-22-entity-documents.md).
 

@@ -150,7 +150,13 @@ A failed style build leaves the last good installed plugin asset set unchanged. 
 
 ## 8. Quality, size, and commands
 
-**CSS-11 — Source limits versus output limits.** Each handwritten CSS file remains at most **400 physical lines**. An entire `.vue` file remains at most 400, including template/script/style. Test files/helpers remain at most 450. Compiled `dist/styles.css` may exceed 400 lines because it is generated composition output; it remains subject to the artifact-size budget, complete-source provenance, and output validation. Do not exempt handwritten large files by naming them generated.
+**CSS-11 — Source limits versus output limits.** Each handwritten CSS file remains
+at most **400 code lines**, excluding comments and blank lines under the owner's
+iteration 03 amendment. An entire `.vue` file counts template/script/style code
+together. Tests/helpers remain at most 450 code lines. Compiled `dist/styles.css`
+may exceed 400 because it is generated composition output; it remains subject to
+artifact-size budgets, complete-source provenance and output validation. Do not
+exempt handwritten large files by naming them generated.
 
 The existing initial CSS artifact budget of 100 KiB remains a proposed target, not a substitute for source maintainability. Minification does not make an oversized source file comply with its line limit.
 

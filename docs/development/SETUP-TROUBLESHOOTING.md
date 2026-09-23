@@ -1,5 +1,9 @@
 # Setup: npm install-script policy
 
+For current identity/profile/resume behavior, use [Setup and identity](SETUP-IDENTITY.md).
+The original error report below predates the dependency remediation; historical
+warnings are distinguished from the current locked graph.
+
 ## EALLOWSCRIPTS during npm run setup
 
 The installer invokes `npm ci --no-fund`; it does not pass `--allow-scripts`. Some npm versions export persistent `.npmrc` values into lifecycle child environments. The resulting `npm_config_allow_scripts` is then interpreted by an inner project install as a forbidden one-off policy, even though the developer did not specify a CLI flag. This is reported in [npm/cli#9912](https://github.com/npm/cli/issues/9912) and matches the supplied failure. The exact originating user/global setting cannot be established from the terminal log alone.
@@ -12,7 +16,7 @@ The current locked graph has the following install hooks:
 
 | Policy entry | Decision |
 | --- | --- |
-| `esbuild@0.27.7: true` | Allow the locked build-tool binary setup/validation hook. |
+| `esbuild@0.28.2: true` | Allow the reviewed locked build-tool binary setup/validation hook. |
 | `vue-demi@0.14.10: true` | Allow the locked Vue compatibility redirect setup, including its three nested copies. |
 | `fsevents: false` | Keep the optional macOS-specific install hook disabled. No macOS-native qualification is claimed by this fix. |
 
@@ -24,9 +28,15 @@ For the previously installed checkout only, a temporary alternative is to review
 
 ## Other messages in the supplied log
 
-The ESLint 9.39.5 deprecation warning is genuine but is not EALLOWSCRIPTS. ESLint documents v9 as end-of-life from 2026-08-06 and v10 as current. Moving this project's lint stack to v10 needs its own compatibility verification, rather than bundling an untested major upgrade into an installer repair.
+The originally reported ESLint 9.39.5 warning is separate from EALLOWSCRIPTS. The
+root linter is now ESLint 10.11.0, qualified with real rule/parser probes. Nested
+ESLint 9.39.5 remains through the official Obsidian integration's peers; see the
+[unresolved support exception](ITERATION-TWO-DEPENDENCY-EXCEPTION.md).
 
-The one low-severity audit finding is also separate. Run `npm audit` for the actual advisory and dependency path. This repair leaves dependency versions and package-lock.json unchanged, does not suppress audit results, and does not claim the warning is harmless or fixed. Do not use `npm audit fix --force` as an installer workaround.
+The originally reported low-severity advisory was remediated separately through
+the reviewed esbuild override. A fresh `npm run check:security` establishes the
+current all-category audit result; historical audit evidence is not a permanent
+clean bill. Do not use `npm audit fix --force` as an installer workaround.
 
 ## Executable regression evidence
 
@@ -43,7 +53,9 @@ The npm version matters independently of the Node version; setup now prints both
 - [npm/cli#9912](https://github.com/npm/cli/issues/9912): lifecycle-forwarded configuration reproduction.
 - [ESLint support policy](https://eslint.org/version-support/): support status, separate from installation failure.
 
-Reviewed 2026-09-22. This patch changes installer/policy/test code, not the plugin's runtime behavior or its declared native/mobile support.
+The original installer-policy repair was reviewed on 2026-09-22. Its scope was
+installer/policy/test code; later runtime and dependency changes have their own
+iteration records and do not add mobile qualification.
 
 ## Iteration 02 toolchain and build notes
 

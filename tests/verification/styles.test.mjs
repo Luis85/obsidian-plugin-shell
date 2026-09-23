@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { physicalLines } from '../../scripts/testing/source-inputs.mjs';
+import { codeLines } from '../../scripts/testing/code-lines.mjs';
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 test('[CSS-01] explicit simulator entry retains its five original modules', async () => {
   const entry = await read('harness/styles/simulated.css');
@@ -10,7 +10,7 @@ test('[CSS-01] explicit simulator entry retains its five original modules', asyn
   for (const path of paths) {
     assert.match(path, /^\.\/obsidian\/[a-z]+\.css$/);
     const css = await read(`harness/styles/${path.slice(2)}`); assert.ok(css.trim());
-    assert.ok(physicalLines(css) <= 400);
+    assert.ok(codeLines(css, 'fixture.css') <= 400);
   }
 });
 test('[CSS-02] original simulator remains separately labeled with no native comparison', async () => {
