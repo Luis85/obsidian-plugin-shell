@@ -43,3 +43,20 @@ jobs:
           done
           test "$count" -gt 0
           echo "Syntax checked $count concept modules. Browser and native evidence are separate."
+      - name: Package exact review source without Git metadata or credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/companion-review-source.tar.gz"
+          git rev-parse HEAD > "$RUNNER_TEMP/companion-review-source.commit"
+          sha256sum "$RUNNER_TEMP/companion-review-source.tar.gz" > "$RUNNER_TEMP/companion-review-source.sha256"
+      - name: Preserve reproducible review source
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-review-source
+          path: |
+            ${{ runner.temp }}/companion-review-source.tar.gz
+            ${{ runner.temp }}/companion-review-source.commit
+            ${{ runner.temp }}/companion-review-source.sha256
+          retention-days: 7
+          if-no-files-found: error
