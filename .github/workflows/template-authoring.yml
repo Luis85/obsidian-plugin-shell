@@ -1,7 +1,7 @@
 name: Template authoring
 on:
   push:
-    branches: [main, build/template-foundation, build/runtime-authoring]
+    branches: [main, build/template-foundation, build/release-operations, build/runtime-authoring]
   pull_request:
   workflow_dispatch:
 permissions:

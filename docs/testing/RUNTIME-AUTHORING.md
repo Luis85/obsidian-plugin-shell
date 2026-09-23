@@ -5,6 +5,11 @@ Integration base: `386353f5ef3bc6ec94d19057bef159e4efa6e7a1`, branch
 execution implementation is included. Development version remains 0.4.0, host
 floor 1.13.7, desktop-only. Publication is not authorized.
 
+For the later integration after the owner merged PR #8 and requested dependency
+review, see [main integration](MAIN-INTEGRATION.md). The retained candidate below
+is historical evidence for its exact source; it is not automatically promoted to
+the updated merge or dependency graph.
+
 The [requirement inventory](runtime-authoring-plan.json),
 [implementation plan](../development/RUNTIME-AUTHORING-PLAN.md) and
 [independent review](../development/RUNTIME-AUTHORING-REVIEW.md) define this

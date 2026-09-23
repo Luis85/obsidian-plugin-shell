@@ -2,6 +2,11 @@
 
 **Runtime authoring milestone — event contracts and reference items, version 0.4.0.**
 
+The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
+from a retained candidate. [Readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md)
+tracks remaining requirements; real publication and the privileged Actions interface
+remain unqualified. No release has been published by this implementation task.
+
 A TypeScript/Vue/Pinia plugin with typed entity definitions, separate document
 recipes, Markdown CRUD and explicit plugin-data entities. Task is an optional example;
 Project proves reuse with number/boolean fields. The existing native view, typed
@@ -25,6 +30,7 @@ the shared services own persistence, native integration, feedback and cleanup.
 | Event contracts and subscriptions | [Typed event authoring](docs/architecture/EVENT-BUS.md), `events:catalog` and `events:check` |
 | Removing demonstrations | [Reviewed example removal](docs/development/EXAMPLE-REMOVAL.md) |
 | Maintenance and packaging | [Freshness reporting](docs/development/MAINTENANCE-OPERATIONS.md) and [fixed-candidate rehearsal](docs/development/RELEASE-REHEARSAL.md) |
+| Release operations | [Authenticated planning, explicit execution and recovery](docs/development/RELEASE-EXECUTION.md) |
 
 **Qualification:** See the [runtime-authoring record](docs/testing/RUNTIME-AUTHORING.md)
 and historical [iteration 04 verification record](docs/testing/ITERATION-FOUR.md)

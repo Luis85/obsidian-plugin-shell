@@ -26,8 +26,9 @@ npm run maintenance:status  Report stable dependency/host freshness and compatib
 npm run release:prepare -- --help  Plan consistent stable version metadata; no tag or publication
 npm run release:rehearse -- --help  Qualify and retain assets from one clean fixed source commit
 npm run release:plan -- --help  Validate an unexecuted draft/promotion plan and supplied evidence
+npm run release:operate -- --help  Discover remote state; execution needs explicit candidate-bound authorization
 
 Browser provisioning: node node_modules/@playwright/test/cli.js install chromium
 Open .dev-vault in Obsidian, deliberately enable the plugin, then run ${openCommand}.
 Native/device evidence and public release promotion remain separate explicit steps.
-No command here publishes a release or disables Restricted Mode.`);
+Release execution is opt-in; its default is read-only. Setup never disables Restricted Mode.`);
