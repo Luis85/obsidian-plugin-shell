@@ -1,0 +1,43 @@
+name: Commit reviewed companion concept
+on:
+  push:
+    branches: [docs/companion-plugin-prd]
+    paths: ['.concept-transfer/manifest.json']
+permissions:
+  contents: read
+concurrency:
+  group: companion-concept-assembly
+  cancel-in-progress: false
+jobs:
+  assemble:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Retrieve the exact previously qualified vendor artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api repos/Luis85/obsidian-plugin-shell/actions/artifacts/10748230981/zip > "$RUNNER_TEMP/companion-vendor.zip"
+      - name: Validate and reconstruct the reviewed source and HTML
+        run: python3 .concept-transfer/assemble.py "$RUNNER_TEMP/companion-vendor.zip"
+      - name: Commit expanded concept without replacing concurrent work
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          branch='docs/companion-plugin-prd'
+          current="$(git ls-remote origin "refs/heads/$branch" | cut -f1)"
+          test "$current" = "$EXPECTED_HEAD" || { echo 'Branch advanced; retain reviewed source for reconciliation.'; exit 1; }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/concepts/companion docs/product/COMPANION-COMPONENT-LIBRARY.md scripts/concepts tests/concepts
+          git rm -r .concept-transfer
+          git commit -m 'feat(concept): unify content components and polish sitemap cards'
+          git push origin "HEAD:refs/heads/$branch"
