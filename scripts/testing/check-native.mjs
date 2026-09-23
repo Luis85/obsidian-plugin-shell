@@ -1,3 +1,4 @@
+import { pendingNativeData } from './native-data.mjs';
 // Optional native smoke: only fresh temporary vault/config directories, never a personal vault.
 import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -109,15 +110,12 @@ try {
   await settings.locator('.vertical-tab-nav-item:visible').filter({ hasText: identity.settingsName }).click();
   const headerControl = settings.locator('.setting-item:visible').filter({ hasText: 'Hide Obsidian view header' }).locator('.checkbox-container');
   await expect(headerControl).toHaveClass(/is-enabled/); await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(false);
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.hideObsidianViewHeader).toBe(false);
   await expect(page.locator(`${identity.viewSelector} > .view-header:visible`)).toHaveCount(1);
   report.checks.push('native-settings-restoration-shares-canonical-service');
   const folderControl = settings.locator('.setting-item:visible').filter({ hasText: 'Task note folder' }).locator('input');
   await expect(folderControl).toHaveValue('Tasks'); await folderControl.fill('Native/Tasks'); await folderControl.press('Tab');
-  await expect.poll(async () => {
-    try { return JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.taskFolder; }
-    catch { return null; }
-  }).toBe('Native/Tasks');
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.taskFolder).toBe('Native/Tasks');
   await expect(folderControl).toHaveValue('Native/Tasks');
   report.checks.push('native-declarative-settings-use-application-writer');
   await settingsPage.screenshot({ path: join(output, 'native-settings.png') });
@@ -125,7 +123,7 @@ try {
   report.phase = 'cold-restart';
   // A cold process restart uses the same isolated vault and its already-installed assets.
   await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(true);
+  await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.hideObsidianViewHeader).toBe(true);
   const persistedVault = launched.vault ?? vault;
   const previousPid = launched.proc.pid;
   await browser.close(); browser = undefined;

@@ -286,7 +286,7 @@
     },
     {
       "path": "scripts/testing/check-native.mjs",
-      "sha256": "9585ce1856f93eadefe6ad35829059023f3774d500436ad15679e7bb59d46fe0",
+      "sha256": "17b2f613d5da08962466c7be128f26c83e6f40d1c77d91691e5d726522e1a81f",
       "template": "scripts__testing__check-native.mjs.txt"
     }
   ]

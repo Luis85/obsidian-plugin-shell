@@ -20,7 +20,9 @@ export async function setNativeTheme(page, context, theme) {
     return !!settingsPage;
   }, { timeout: 15000 }).toBe(true);
   await settingsPage.bringToFront();
-  await settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i }).click();
+  const appearance = settingsPage.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Appearance$/i });
+  // Reopening an already active native tab destroys its controls; preserve the current render.
+  if (!(await appearance.evaluate(element => element.classList.contains('is-active')))) await appearance.click();
   // A grouped native setting can contain both scheme and theme selectors. Match the actual options.
   const controls = settingsPage.locator('select:visible');
   writeFileSync('reports/native/theme-controls.json', JSON.stringify(await controls.evaluateAll(elements => elements.map(el => ({ options: Array.from(el.options).map(option => ({ label: option.label, value: option.value })) }))), null, 2));
