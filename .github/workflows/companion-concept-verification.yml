@@ -6,6 +6,8 @@ on:
       - 'scripts/concepts/**'
       - 'tests/concepts/**'
       - '.fallowrc.json'
+      - 'scripts/quality/maintainability-inventory.mjs'
+      - 'tests/tooling/maintainability.checks.mjs'
       - '.github/workflows/companion-concept-verification.yml'
   push:
     branches: [main]
@@ -14,6 +16,8 @@ on:
       - 'scripts/concepts/**'
       - 'tests/concepts/**'
       - '.fallowrc.json'
+      - 'scripts/quality/maintainability-inventory.mjs'
+      - 'tests/tooling/maintainability.checks.mjs'
       - '.github/workflows/companion-concept-verification.yml'
   workflow_dispatch:
 permissions:
@@ -33,10 +37,28 @@ jobs:
         with:
           node-version: '24.21.0'
           package-manager-cache: false
+      - name: Parse all concept Python sources without executing them or writing bytecode
+        shell: bash
+        run: |
+          python3 -B - <<'PYTHON'
+          import hashlib, json
+          from pathlib import Path
+          files = sorted(path for root in ['scripts/concepts', 'tests/concepts'] for path in Path(root).rglob('*.py'))
+          if not files:
+              raise SystemExit('No concept Python inputs found')
+          records = []
+          for path in files:
+              if path.is_symlink() or not path.is_file():
+                  raise SystemExit('Non-regular Python input: ' + str(path))
+              raw = path.read_bytes()
+              compile(raw, str(path), 'exec', dont_inherit=True)
+              records.append({'path': str(path), 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)})
+          print(json.dumps({'status': 'passed', 'scope': 'Python syntax only; no execution or JS complexity claim', 'files': records}))
+          PYTHON
       - name: Check exact offline concept assembly
         run: python3 scripts/concepts/build-companion.py --check
       - name: Exercise assembly, inventory and tamper rejection
-        run: python3 tests/concepts/companion-assembly.test.py
+        run: python3 -B tests/concepts/companion-assembly.test.py
       - name: Check authored JavaScript syntax without executing project operations
         shell: bash
         run: |
