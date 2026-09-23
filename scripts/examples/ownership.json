@@ -37,7 +37,7 @@
     },
     {
       "path": "src/features/showcase/commands.ts",
-      "sha256": "4ef38ad800945cf290c4e6f215efcb341f1f4da73b497b7bd5e2b36ce08e7264"
+      "sha256": "0ef3336eb3eb63b596ecaf9471557a51367d0ad640bb841a6afa8c00e0171da3"
     },
     {
       "path": "src/presentation/components/ShowcaseApp.vue",
@@ -89,7 +89,7 @@
     },
     {
       "path": "tests/runtime/components.test.ts",
-      "sha256": "858081935cef20622805e389b925ef03189982ef2e8f203ce5acdef426062da1"
+      "sha256": "dde7d20447dfe2666976b4f809b6ebba772b3eefe309a42cdcff8a638749375d"
     },
     {
       "path": "tests/runtime/presentation-composables.test.ts",
@@ -97,7 +97,7 @@
     },
     {
       "path": "tests/e2e/layout-and-header.spec.ts",
-      "sha256": "4eb64f6782e12c0b49eda195811eb847da0b7a2727b9ef731c5198811571e31f"
+      "sha256": "82b0c0ab20ad3eab0bc014b3423f6491c965ea59c3d11ec7d14331815763eb18"
     },
     {
       "path": "tests/e2e/modals.spec.ts",
@@ -109,11 +109,11 @@
     },
     {
       "path": "tests/e2e/repository.spec.ts",
-      "sha256": "99f6948340eda7f532ad9d68f8eb3ec9e494c3abad41aec9ce774331c37921df"
+      "sha256": "b9007bfc0357a6965320b56c5069f6bce24ad054778fc78f9ebe61877558d854"
     },
     {
       "path": "tests/e2e/showcase.spec.ts",
-      "sha256": "b466b5a4402e54b934ea5a6ce78875273c30c5d0ee8216dacd27bfe8185dbf12"
+      "sha256": "c8ac8c189cfe8b587441effaadc33f440887c44ec437cf50925eaa809f1b6e08"
     },
     {
       "path": "tests/e2e/accessibility.spec.ts",
@@ -121,7 +121,7 @@
     },
     {
       "path": "src/bootstrap/services.ts",
-      "sha256": "462f4246da390c68939c65750ba19c92db0c986082ad44bbc4e97f70abac01fd",
+      "sha256": "f5cecfcf13d14da07b6b6edf72d3f800628bef4b04bb5579857f9a88329fd1d5",
       "template": "src__bootstrap__services.ts.txt"
     },
     {
@@ -131,7 +131,7 @@
     },
     {
       "path": "src/bootstrap/commands.ts",
-      "sha256": "8785515d16a12868db3cddbaf33f728854d495a3511a3f46be781b618b0c90ba",
+      "sha256": "30ff660103658273ba9fd5eb3706d1e52b45a657fe7f8cc341c74ff37ef3bd1a",
       "template": "src__bootstrap__commands.ts.txt"
     },
     {
@@ -206,12 +206,12 @@
     },
     {
       "path": "tests/runtime/mount-lifecycle.test.ts",
-      "sha256": "9cbe0074571b76942ab71502a55b3787eab1b147ba654331c1713e81301c479c",
+      "sha256": "097062c66c76b27f3a1066f96413b6de91763846ae77cfc80fc1aadffa23fe08",
       "template": "tests__runtime__mount-lifecycle.test.ts.txt"
     },
     {
       "path": "tests/runtime/native-lifecycle.test.ts",
-      "sha256": "3bb00e6314f61d8032e37dc6cdd9564c5151245533b595ff9bb8ca78544e0935",
+      "sha256": "2e1df21855efc79117f77471600842c2713010a4ef9ed34a27014b91b15d3be3",
       "template": "tests__runtime__native-lifecycle.test.ts.txt"
     },
     {
@@ -286,7 +286,7 @@
     },
     {
       "path": "scripts/testing/check-native.mjs",
-      "sha256": "5163d0c2811b11a973e2bc5e2427fe07815156b91a0f013b21d665dc0e0112ee",
+      "sha256": "9585ce1856f93eadefe6ad35829059023f3774d500436ad15679e7bb59d46fe0",
       "template": "scripts__testing__check-native.mjs.txt"
     }
   ]

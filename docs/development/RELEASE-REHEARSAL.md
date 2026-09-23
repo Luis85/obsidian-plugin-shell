@@ -8,11 +8,12 @@ performed. Those remain explicit future work in the [full contract](MAINTENANCE-
 
 ## Prepare metadata
 
-Write reviewed release notes to a file, then run:
+Write reviewed release notes to a file and choose a version above the current
+package version. For a project currently at 0.4.0:
 
 ```sh
-npm run release:prepare -- --version 0.4.0 --notes-file release-notes.txt --dry-run
-npm run release:prepare -- --version 0.4.0 --notes-file release-notes.txt
+npm run release:prepare -- --version 0.4.1 --notes-file release-notes.txt --dry-run
+npm run release:prepare -- --version 0.4.1 --notes-file release-notes.txt
 git diff -- package.json package-lock.json manifest.json versions.json CHANGELOG.md
 ```
 
@@ -38,7 +39,7 @@ From a clean, committed checkout with exact Node 24.21.0/npm 11.19.1 and the str
 lockfile install, run:
 
 ```sh
-npm run release:rehearse -- --commit <full-40-character-HEAD-SHA> --version 0.4.0
+npm run release:rehearse -- --commit <full-40-character-HEAD-SHA> --version 0.4.1
 ```
 
 The command rejects aliases, a different commit and dirty/untracked source. It
@@ -68,7 +69,7 @@ along with its run/source identity.
 Inspect a downloaded retained directory without building or altering it:
 
 ```sh
-npm run release:rehearse -- --check <directory> --commit <full-source-SHA> --version 0.4.0
+npm run release:rehearse -- --check <directory> --commit <full-source-SHA> --version 0.4.1
 ```
 
 This checks the exact file set, source/version identity, qualification bindings,

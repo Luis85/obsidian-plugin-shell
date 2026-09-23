@@ -50,9 +50,9 @@ it('closing one view or failing sibling attachment cannot dispose runtime transl
     finally { failedInsert.mockRestore(); failedRoot.remove(); }
     await f.services.preferences.update({ locale: 'de' }); await settle();
     expect(root.querySelector('[data-testid="foundation"]')?.getAttribute('lang')).toBe('de'); expect(root.textContent).toContain('Einstellungen');
-    expect(f.services.i18n.global.t('nav.settings')).toBe('Einstellungen'); close(); expect(runtimeDispose).not.toHaveBeenCalled();
+    expect(f.services.i18n.global.t('nav.settings')).toBe('Einstellungen'); close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(f.runtimeEventCount);
   } finally { close(); root.remove(); f.dispose(); f.services.dispose(); }
-  expect(runtimeDispose).toHaveBeenCalledOnce();
+  expect(runtimeDispose).toHaveBeenCalledOnce(); expect(f.services.events.size).toBe(0);
 });
 it('runtime recovery remains visible and single-flight while preserving persisted data', async () => {
   const f = await componentFixture(); const available = deferred<boolean>();

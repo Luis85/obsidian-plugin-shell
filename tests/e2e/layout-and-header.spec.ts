@@ -58,7 +58,7 @@ for (const width of [320, 480, 768, 1280, 1920]) {
 test('[UI-02-DOC] preview expands in wide panes and stacks without page overflow on resize', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 }); await open(page);
   await primary(page).getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('A very long filename with German characters – Übersicht und zuverlässige Auslieferung');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill('A very long filename with German characters – Übersicht und zuverlässige Auslieferung');
   await page.getByRole('textbox', { name: 'Tags' }).fill('implementation,review,release');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   const pre = page.getByTestId('markdown-preview'); await expect(pre).toBeVisible();
@@ -113,7 +113,7 @@ test('[UI-02-FAIL] failed header save keeps presentation and checked state truth
 });
 test('[UI-02-NOTICE] notification failure preserves the created note and provides one inline fallback', async ({ page }) => {
   await open(page); await page.getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Successful write with failed notice');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill('Successful write with failed notice');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   const preview = await page.getByTestId('markdown-preview').innerText();
   expectedFault(page, 'notice.sink', 'notice.show'); await page.evaluate(() => window.__SHELL_TEST__.fault('notice'));
@@ -143,7 +143,7 @@ for (const width of [1920, 480]) for (const theme of ['dark', 'light']) test(`[U
     for (const panel of ['Documents', 'Preferences']) {
       await primary(page).getByRole('button', { name: panel, exact: true }).click();
       if (panel === 'Documents') {
-        await primary(page).getByRole('textbox', { name: 'Title' }).fill('Prepare the Iteration 02 release');
+        await primary(page).locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill('Prepare the Iteration 02 release');
         await primary(page).getByRole('button', { name: 'Preview Markdown', exact: true }).click();
       }
       for (const hidden of [false, true]) {

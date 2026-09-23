@@ -53,7 +53,7 @@ test('[MAKER-CATALOG] every integrated recipe generates executable source, real 
   };
   check([join(makerSourceRoot, 'node_modules/vue-tsc/bin/vue-tsc.js'), '--noEmit']);
   const runtime = check([join(makerSourceRoot, 'node_modules/vitest/vitest.mjs'), 'run']);
-  assert.match(runtime.stdout, /23 passed/);
+  assert.match(runtime.stdout, /24 passed/);
   check(['--test', 'tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']);
   const catalog = await loadCatalog(root);
   assert.equal(catalog.entities.find(entry => entry.entity === 'reference').backend, 'domain');

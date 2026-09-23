@@ -1,8 +1,9 @@
 import { defineCommand, defineRibbon } from '../api';
+import type { Result } from '../../domain/outcome';
 
 interface ShowcaseActions {
   openShowcase(): Promise<void>;
-  toggleHeader(): Promise<void>;
+  toggleHeader(): Promise<void | Result<unknown>>;
   canToggleHeader(): boolean;
 }
 /** Feature authors describe actions here; native handles never enter this module. */

@@ -77,7 +77,7 @@ try {
   await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill('Native smoke Task');
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill('Native smoke Task');
   await page.getByLabel('Due date', { exact: true }).fill('2026-09-30');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   const preview = await page.getByTestId('markdown-preview').innerText();

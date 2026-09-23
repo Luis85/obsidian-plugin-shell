@@ -63,9 +63,9 @@ it('[HOST-03-03] view actions own menus, preserve unrelated host state and recov
   } finally { view.disposeView(); services.dispose(); }
 });
 it('[HOST-03-04] native setting definitions use validated canonical preferences and report failed saves', async () => {
-  const p = plugin(); const services = await createServices(nativeAdapters(p)); const tab = new ShellSettingsTab(p, { ...services, text: key => key });
+  const p = plugin(); const services = await createServices(nativeAdapters(p)); const tab = new ShellSettingsTab(p, { ...services, settings: services.authoring.settings, text: key => key });
   try {
-    const definitions = tab.getSettingDefinitions(); expect(definitions).toHaveLength(4);
+    const definitions = tab.getSettingDefinitions().filter(item => 'control' in item && item.control && ['hideObsidianViewHeader', 'locale', 'taskFolder', 'notifySuccess'].includes(item.control.key)); expect(definitions).toHaveLength(4);
     for (const definition of definitions) {
       if (!('control' in definition) || !definition.control || Array.isArray(definition.control)) throw new Error('EXPECTED_SETTING_CONTROL');
       const control = definition.control;
@@ -79,7 +79,7 @@ it('[HOST-03-04] native setting definitions use validated canonical preferences 
     vi.mocked(p.saveData).mockRejectedValueOnce(new Error('settings disk failure')); await tab.setControlValue('locale', 'en');
     expect(services.preferences.current.locale).toBe('de'); expect(services.notifications.current[0]?.key).toBe('error.settingsWrite');
     expect(tab.update).toHaveBeenCalledTimes(5);
-  } finally { services.dispose(); }
+  } finally { tab.dispose(); services.dispose(); }
 });
 it('[HOST-03-05] failed registration disposes services and reports startup failure without leaving a live command', async () => {
   const p = plugin(); vi.spyOn(p, 'addSettingTab').mockImplementation(() => { throw new Error('register failed'); });

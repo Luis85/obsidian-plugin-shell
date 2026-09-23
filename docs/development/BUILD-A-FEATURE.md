@@ -16,7 +16,7 @@ Create `src/features/bookmarks/entity.ts`:
 import { defineEntity, fields } from '../api';
 
 export const bookmarkEntity = defineEntity('bookmark', 1, {
-  title: fields.text({ trim: true, min: 1, max: 120 }),
+  title: fields.text({ nonblank: true, min: 1, max: 120 }),
   favorite: fields.defaulted(fields.boolean(), false),
 });
 ```

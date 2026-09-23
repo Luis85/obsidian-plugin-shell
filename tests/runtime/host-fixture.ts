@@ -70,6 +70,7 @@ class HostItemView {
 class HostSettingsTab {
   constructor(public app: App, public plugin: HostPlugin) {}
   update = vi.fn();
+  hide() {}
 }
 class HostMenu {
   hide = vi.fn(); addSeparator = vi.fn(); showAtPosition = vi.fn();

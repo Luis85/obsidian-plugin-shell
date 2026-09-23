@@ -38,7 +38,7 @@ All child recipes take `<name> --feature <existing-owner>` unless stated otherwi
 | `usecase` | Feature-owned title normalization/validation action, called by an integrated prompt-and-preview command. Explicitly previews; it does not claim to persist. |
 | `command` | Localized native info command using the shared modal service; failed modal outcomes remain command failures. |
 | `modal` | Validated title prompt through `services.modals`, with validation, cancellation, failure and owner-cleanup tests. The shared adapter retains native focus/disposal behavior. |
-| `setting` | A new disabled-by-default boolean feature preference using an explicit plugin-data entity and toggle command. Reads/updates use the same serialized persistence owner as shared preferences. Optional `--preference notifySuccess\|hideObsidianViewHeader` binds a pre-existing shared preference instead. |
+| `setting` | A new boolean feature preference with a native declarative toggle, validated schema/default and an additional palette command. Both controls share the same plugin-data repository and serialized preference writer. Optional `--preference notifySuccess\|hideObsidianViewHeader` binds a pre-existing shared preference and its existing native control instead. |
 | `event` | Literal typed event and runtime payload validator, explicit command publisher, positive/negative payload and TypeScript contract tests. This is an explicitly requested local signal, not a fake persistence fact. |
 | `listener` | Requires `--event <existing-name>` in the same feature. Subscribes to that typed event through the shared runtime bus, displays localized feedback and unsubscribes on disposal. |
 | `style` | Requires `--view <existing-generated-view>`. Adds an owned CSS module and an actual SFC stylesheet import. No unused CSS output or global host reset. |
@@ -85,6 +85,24 @@ creates separate Pinia, i18n, portal and subscriptions. Feature source imports n
 host classes or Vue components. Note creation uses a new request identity for each
 deliberate submission, blocks uncertain outcomes for that view and ignores late
 UI updates after unmount. Repositories retain attempted-write deduplication.
+The generated note form locks its input and Reset action while a write is pending
+or uncertain. It displays the exact prepared note path and retains that path with
+uncertain feedback for reconciliation; validation feedback is linked to the input.
+
+Generated setting factories return a `BooleanSetting` from the public feature API
+in their explicit `settings` list. Bootstrap owns these descriptors and awaits
+their read-only initialization before native registration. The qualified Obsidian
+API reads controls synchronously through `getControlValue`; the controller keeps
+a last-committed projection for that getter, while setters await the real repository.
+The native checkbox and palette command use the same controller. Defaults come
+from the entity schema; reading an absent setting does not create a record.
+
+Corrupt/future data, duplicate setting records and failed reads disable the control
+with a localized error instead of replacing data with defaults. An uncertain save
+retains the last committed display and blocks further writes. Matching committed
+repository events refresh the projection. Native tab subscriptions are released on
+hide and unload, reacquired on reopen, and guarded against late updates. This is a
+bounded boolean setting API, not a general form or persistence framework.
 
 Generated messages contain English/German starting labels. Pending languages stay
 outside the selectable locale union. The pending-locale maker reads literal,

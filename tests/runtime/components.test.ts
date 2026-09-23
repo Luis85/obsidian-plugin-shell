@@ -64,9 +64,9 @@ it('[UI-03-13] closing a sibling view or failed attachment cannot dispose runtim
     await f.services.preferences.update({ locale: 'de' }); await settle();
     expect(root.querySelector('[data-testid="showcase"]')?.getAttribute('lang')).toBe('de'); expect(root.textContent).toContain('Dokumente');
     expect(f.services.i18n.global.t('nav.documents')).toBe('Dokumente');
-    close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(0);
+    close(); expect(runtimeDispose).not.toHaveBeenCalled(); expect(f.services.events.size).toBe(f.runtimeEventCount);
   } finally { close(); root.remove(); f.dispose(); f.services.dispose(); }
-  expect(runtimeDispose).toHaveBeenCalledOnce(); runtimeDispose.mockRestore();
+  expect(runtimeDispose).toHaveBeenCalledOnce(); expect(f.services.events.size).toBe(0); runtimeDispose.mockRestore();
 });
 it('[UI-03-10] runtime recovery stays visible inline with a keyboard button and single-flight owner action', async () => {
   const f = await componentFixture(); const available = deferred<boolean>();

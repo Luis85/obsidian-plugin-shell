@@ -7,7 +7,7 @@ async function open(page: Page) {
 }
 async function task(page: Page, title = 'Prepare release checklist') {
   await page.getByRole('button', { name: 'Documents', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Title' }).fill(title);
+  await page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' }).fill(title);
   await page.getByLabel('Due date', { exact: true }).fill('2026-09-30');
   await page.getByRole('textbox', { name: 'Tags' }).fill('work,release');
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
@@ -40,7 +40,7 @@ test('[UI-I02] validates, previews exact Markdown, commits once and persists rea
   await open(page); await page.getByRole('button', { name: 'Documents', exact: true }).click();
   await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Enter a title');
-  await expect(page.getByRole('textbox', { name: 'Title' })).toBeFocused();
+  await expect(page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title' })).toBeFocused();
   expect(await page.evaluate(() => Object.keys(window.__SHELL_TEST__.files()))).toHaveLength(0);
   await task(page);
   const preview = await page.getByTestId('markdown-preview').innerText();
@@ -60,7 +60,7 @@ test('[UI-I02] validates, previews exact Markdown, commits once and persists rea
 });
 test('[UI-FILENAME] unsafe titles stay visible for correction and never become sanitized filenames', async ({ page }) => {
   await open(page); await page.getByRole('button', { name: 'Documents', exact: true }).click();
-  const title = page.getByRole('textbox', { name: 'Title', exact: true });
+  const title = page.locator('.shell-document-grid').getByRole('textbox', { name: 'Title', exact: true });
   for (const invalid of ['Forbidden/name', 'CON', 'Title ']) {
     await title.fill(invalid); await page.getByRole('button', { name: 'Preview Markdown', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText('Use a nonblank note title');

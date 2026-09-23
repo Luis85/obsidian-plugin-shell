@@ -87,7 +87,7 @@ test('[MAKE-03-05] generated independent feature and second entity execute their
   await removeMakerExamples(root);
   const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
-  assert.match(run.stdout, /9 passed/);
+  assert.match(run.stdout, /10 passed/);
   const report = await loadCatalog(root);
   assert.deepEqual(report.entities.map(entity => entity.entity), ['bookmark', 'appointment', 'budget']);
   assert.equal(report.entities.find(entity => entity.entity === 'budget').fields.find(field => field.name === 'budget').default, 0);

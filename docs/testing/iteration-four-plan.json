@@ -5,6 +5,25 @@
   "legacyAcceptancePromotion": false,
   "families": [
     {
+      "id": "VERBATIM-NOTE-TITLES",
+      "files": [
+        "tests/runtime/note-repository-filenames.test.ts",
+        "tests/e2e/showcase.spec.ts"
+      ],
+      "modes": ["real-service", "served-browser", "native-host-separately"],
+      "scope": "Exact title filenames without ID suffixes; portable validation, alias conflicts and complete CRUD interoperability"
+    },
+    {
+      "id": "GENERATED-NATIVE-SETTINGS",
+      "files": [
+        "tests/runtime/boolean-setting.test.ts",
+        "tests/runtime/native-feature-settings.test.ts",
+        "tests/tooling/maker-catalog.checks.mjs"
+      ],
+      "modes": ["real-service", "synthetic-host", "generated-runtime", "consumer-native-separately"],
+      "scope": "One repository-backed native toggle and command, read-only initialization, corruption/uncertainty preservation and owned lifecycle"
+    },
+    {
       "id": "AUTHORING-CATALOG",
       "files": [
         "tests/tooling/maker-catalog.checks.mjs",

@@ -5,9 +5,10 @@ import { defineLogCatalog } from '../application/logging';
 import type { Services } from './services';
 import { authoringPanels } from './authoring';
 import { authoringViewCommands } from './authoring-views';
+import type { Result } from '../domain/outcome';
 
 /** Add one feature factory here; each factory receives only its required capabilities. */
-export function createCommands(services: Services, navigation: { openShowcase(): Promise<void>; toggleHeader(): Promise<void>; openAuthoring?(id: string): Promise<void> }) {
+export function createCommands(services: Services, navigation: { openShowcase(): Promise<void>; toggleHeader(): Promise<void | Result<unknown>>; openAuthoring?(id: string): Promise<void> }) {
   const correlations = new Map<string, ReturnType<Services['logger']['correlation']>>();
   const commands = new CommandService([
     createShowcaseCommands({ ...navigation, canToggleHeader: () => !services.preferences.readonly }),

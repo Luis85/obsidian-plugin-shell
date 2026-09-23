@@ -108,6 +108,7 @@ export async function createServices(adapters: ServiceAdapters) {
       repositories,
     });
     releases.push(() => authoring.dispose());
+    await authoring.initialize();
     return {
       identity: pluginIdentity,
       events,

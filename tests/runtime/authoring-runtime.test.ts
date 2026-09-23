@@ -1,6 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { createAuthoringRuntime } from '../../src/application/authoring';
 import { authoringFixture } from './authoring-fixture';
+import { booleanSettingFixture } from './boolean-setting-fixture';
 
 it('owns extension cleanup once in reverse order and observes independent failures', async () => {
   const f = await authoringFixture(); const order: string[] = [];
@@ -44,4 +45,19 @@ it('observes rejected asynchronous factories and releases fulfilled asynchronous
   expect(() => createAuthoringRuntime([async () => { throw new Error('rejected'); }], f.services)).toThrow('AUTHORING_ASYNC_FACTORY');
   await Promise.resolve(); expect(f.services.diagnostics.report).toHaveBeenCalledWith('authoring.factory', 'runtime.initialize');
   f.dispose();
+});
+it('initializes registered settings read-only and independently owns their disposal', async () => {
+  const f = await authoringFixture(); const control = booleanSettingFixture();
+  const runtime = createAuthoringRuntime([() => ({ commands: [], settings: [control.setting], dispose() {} })], f.services);
+  await runtime.initialize(); expect(control.setting.value).toBe(false); expect(control.storage.save).not.toHaveBeenCalled();
+  runtime.dispose(); expect(control.events.size).toBe(0); expect(control.setting.readonly).toBe(true);
+  await runtime.initialize(); control.dispose(); f.dispose();
+});
+it('rejects duplicate or malformed native setting registrations before exposing controls', async () => {
+  const f = await authoringFixture(); const first = booleanSettingFixture(); const second = booleanSettingFixture();
+  expect(() => createAuthoringRuntime([() => ({ commands: [], settings: [first.setting, second.setting], dispose() {} })], f.services)).toThrow('AUTHORING_SETTING_CATALOG');
+  expect(first.events.size).toBe(0); expect(second.events.size).toBe(0);
+  // @ts-expect-error Native settings must be explicit validated BooleanSetting instances.
+  expect(() => createAuthoringRuntime([() => ({ commands: [], settings: [{}], dispose() {} })], f.services)).toThrow('AUTHORING_INVALID_EXTENSION');
+  first.dispose(); second.dispose(); f.dispose();
 });

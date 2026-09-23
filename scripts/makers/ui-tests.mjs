@@ -46,7 +46,9 @@ it('blocks uncertain writes until the view is deliberately reopened', async () =
     f.create.mockResolvedValueOnce(failure('uncertain', 'error.uncertain'));
     f.model.model.draft = 'Uncertain'; await f.model.create();
     expect(f.model.blocked.value).toBe(true); expect(f.model.feedback.value).toBe('error.uncertain');
+    expect(f.model.destination.value).toBe(${key}Feature.defaultFolder + '/Uncertain.md');
     await f.model.create(); expect(f.create).toHaveBeenCalledOnce();
+    expect(f.model.destination.value).toBe(${key}Feature.defaultFolder + '/Uncertain.md');
   } finally { f.dispose(); }
 });
 it('keeps in-flight writes owned and suppresses view updates after unmount', async () => {

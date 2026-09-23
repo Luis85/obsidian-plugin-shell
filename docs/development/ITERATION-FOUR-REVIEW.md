@@ -29,9 +29,20 @@ not treated as evidence. Parent acceptance includes integration and consumer che
 | Example removal consumed comments outside reviewed registration expressions | Preserve AST trivia outside removed syntax; ambiguous inline edits conflict before mutation. |
 | Windows short paths confused generated DOM-test resolution | Validate the original scratch path, then use its canonical filesystem identity for all child paths and processes. Actual 8.3 regression runs the affected suites. |
 | Packaging tests confused build provenance with the copier's runtime | Keep the release runner's exact actual-toolchain guard; validate prior build metadata separately from the recorded packaging runtime. |
+| Repository CRUD rejected valid verbatim filenames as though they were folder segments | Validate the parent folder and document basename separately; real CRUD covers leading spaces, decomposed Unicode and long valid titles. |
+| Consumer-generated inputs made showcase Title selectors ambiguous | Scope browser/native selectors to the showcase document form; exercise the same tests with generated consumer panels present. |
+| Generated setting commands lacked an actual native settings row | Share one repository-backed BooleanSetting controller between the native toggle and command, initialize without writes, and test failure, uncertainty, hide/reopen and disposal. |
+| Settings cleanup could stop after a throwing unsubscribe | Release every owned subscription independently and clear view listeners; retain a caught-error record for the cleanup failure. |
+| A later native-setting subscription failure lost earlier acquired handles | Track each subscription immediately and roll back partial acquisition, preserving the original failure even when unlinking also fails. |
+| Failed unsubscription could let old callbacks update hidden, reopened or disposed settings tabs | Bind callbacks to the tab epoch and check hidden/disposed state before native updates; regressions exercise leaked callbacks as well as normal reopen. |
+| Lifecycle tests assumed no runtime-owned consumer listeners existed | Capture the real runtime baseline before mounting views, assert view deltas, and still require zero subscriptions after complete runtime disposal. |
 
 The final test record distinguishes targeted reproduction, complete source gates,
 served Chromium, synthetic native boundaries and actual native host evidence.
+The final bounded native-setting review reran the boolean controller, native-tab,
+authoring-runtime and service-lifecycle suites: 21 tests passed. Separate injected
+cleanup probes also passed. These are real service tests with synthetic host/port
+boundaries, not a claim of final real-host acceptance for the new native control.
 The nested ESLint support exception remains upstream-blocked. Native trash has no
 cross-process compare-and-trash guarantee; plugin-data serialization likewise
 coordinates one runtime, not external writers or devices.
