@@ -2,19 +2,18 @@ import { expect } from '@playwright/test';
 import { join } from 'node:path';
 import { nativeCommand as command } from './native-command.mjs';
 import { setNativeTheme } from './native-theme.mjs';
-const view = '.workspace-leaf-content[data-type="plugin-shell-showcase"]';
-const marker = 'plugin-shell-native-header-hidden';
-export async function assertDiagnostics(page) {
-  const entries = await page.evaluate(() => window.app.plugins.plugins['plugin-shell']?.runtime?.diagnosticSnapshot());
+export async function assertDiagnostics(page, identity) {
+  const entries = await page.evaluate(id => window.app.plugins.plugins[id]?.runtime?.diagnosticSnapshot(), identity.id);
   expect(entries, 'Independent native application diagnostics must be available').toBeDefined();
   expect(entries).toEqual([]);
 }
-export async function qualifyHeaders(page, context, report, output, notePath) {
+export async function qualifyHeaders(page, context, report, output, notePath, identity) {
+  const view = identity.viewSelector; const marker = identity.headerMarker;
   const owned = page.locator(view).first();
   await owned.getByRole('button', { name: 'Preferences', exact: true }).click();
   const header = owned.locator(':scope > .view-header');
   await expect(header).toBeVisible();
-  await expect(header).toContainText('Plugin shell');
+  await expect(header).toContainText(identity.name);
   report.headerContract = await header.evaluate(el => ({ tag: el.tagName, classes: el.className, ownerType: el.parentElement.dataset.type }));
   const tabs = await page.locator('.workspace-tabs').count();
   const controls = await page.locator('.titlebar-button').count();
@@ -99,26 +98,30 @@ export async function qualifyHeaders(page, context, report, output, notePath) {
   await setNativeTheme(popout, context, 'dark');
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/dark/);
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
-  await assertDiagnostics(page);
+  await assertDiagnostics(page, identity);
   report.checks.push('native-popout-inherits-preference-and-live-toggle');
   report.phase = 'popout-close';
   // Close by the actual owned view menu; its cleanup must not affect the other view.
   await popout.getByRole('button', { name: 'View actions', exact: true }).click();
   await popout.locator('.menu-item').filter({ hasText: 'Close this view' }).click();
   await expect(page.locator(`${view} > .view-header:visible`)).toHaveCount(0);
-  await assertDiagnostics(page);
+  await assertDiagnostics(page, identity);
   // Compare foreign controls within the same theme, not across a legitimate host theme change.
   const beforeUnload = await foreignStyles();
   report.phase = 'plugin-unload';
   // Record references before unload because Obsidian itself may replace view objects.
-  await page.evaluate(() => { window.__ownedHeadersBeforeUnload = Array.from(document.querySelectorAll('[data-type="plugin-shell-showcase"]')); });
-  await page.evaluate(async () => window.app.plugins.disablePlugin('plugin-shell'));
+  const captured = await page.evaluate(({ selector, marker }) => {
+    window.__ownedHeadersBeforeUnload = Array.from(document.querySelectorAll(selector));
+    return { count: window.__ownedHeadersBeforeUnload.length, hidden: window.__ownedHeadersBeforeUnload.every(el => el.classList.contains(marker)) };
+  }, { selector: view, marker });
+  expect(captured.count).toBeGreaterThan(0); expect(captured.hidden).toBe(true);
+  await page.evaluate(async id => window.app.plugins.disablePlugin(id), identity.id);
   expect(await page.evaluate(name => window.__ownedHeadersBeforeUnload.every(el => !el.classList.contains(name)), marker)).toBe(true);
   expect(await foreignStyles()).toEqual(beforeUnload);
   report.checks.push('native-unload-restores-retained-host-elements-without-foreign-mutation');
-  await page.evaluate(async () => window.app.plugins.enablePlugin('plugin-shell'));
+  await page.evaluate(async id => window.app.plugins.enablePlugin(id), identity.id);
   await command(page, 'Open capability showcase');
   await expect(page.locator(`${view} > .view-header:visible`)).toHaveCount(0);
-  await assertDiagnostics(page);
+  await assertDiagnostics(page, identity);
   report.checks.push('native-runtime-reload-restores-persisted-hidden-preference');
 }

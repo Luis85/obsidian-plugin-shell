@@ -1,6 +1,10 @@
 import { success, failure } from '../../src/domain/outcome';
 import type { ServiceAdapters } from '../../src/application/ports';
-const prefix = 'plugin-shell:harness:v1:';
+import { pluginIdentity } from '../../src/infrastructure/plugin-identity';
+import { browserDocumentStorage } from './document-storage';
+import { browserNotification } from './notification-sink';
+import { browserModalSink } from './modal-sink';
+const prefix = `${pluginIdentity.id}:harness:v1:`;
 export function browserAdapters() {
   let failWrite = false;
   let failOpen = false;
@@ -14,7 +18,17 @@ export function browserAdapters() {
   const errors: { code: string; operation: string }[] = [];
   const read = (key: string): unknown => { const value = localStorage.getItem(prefix + key); return value === null ? null : JSON.parse(value); };
   const write = (key: string, value: unknown) => localStorage.setItem(prefix + key, JSON.stringify(value));
-  const files = () => (read('files') ?? {}) as Record<string, string>;
+  const files = (): Record<string, string> => {
+    const value = read('files') ?? {};
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('INVALID_FILES');
+    const entries = Object.entries(value);
+    const result: Record<string, string> = {};
+    for (const [path, content] of entries) {
+      if (typeof content !== 'string') throw new Error('INVALID_FILES');
+      Object.defineProperty(result, path, { value: content, enumerable: true, writable: true, configurable: true });
+    }
+    return result;
+  };
   function dialog(title: string, text: string, code = false) {
     const previous = document.activeElement as HTMLElement | null;
     const el = document.createElement('dialog'); el.className = 'harness-modal';
@@ -29,6 +43,10 @@ export function browserAdapters() {
     kind: 'browser',
     async openDocument(path) { if (failOpen) return failure('storage', 'error.open'); const value = files()[path]; if (value === undefined) return failure('storage', 'error.open'); dialog(path, value, true); return success(undefined); },
     showModal: dialog,
+    notification(text, actions) {
+      if (failNotice) throw new Error('FIXTURE_NOTICE_FAILURE');
+      return browserNotification(text, actions, close => { disposers.add(close); return () => { disposers.delete(close); }; });
+    },
     notice(text, duration = 4000) {
       if (failNotice) throw new Error('FIXTURE_NOTICE_FAILURE');
       const el = document.createElement('div'); el.className = 'harness-native-notice'; el.textContent = text; el.setAttribute('role', 'status');
@@ -36,13 +54,14 @@ export function browserAdapters() {
       if (!container) { container = document.createElement('div'); container.className = 'harness-native-notices'; document.body.append(container); }
       container.append(el);
       const hide = () => { clearTimeout(timer); el.remove(); disposers.delete(hide); };
-      const timer = setTimeout(hide, duration); disposers.add(hide); return hide;
+      const timer = duration > 0 ? setTimeout(hide, duration) : undefined; disposers.add(hide); return hide;
     },
   };
   const adapters: ServiceAdapters = {
     settings: { async load() { return read('settings'); }, async save(value) { if (pauseSettings) await new Promise<void>(resolve => { finishSettings = resolve; }); if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
     local: { get: read, set: write }, host,
-    documents: { async create(path, markdown) { if (failWrite) return failure('storage', 'error.write'); const current = files(); if (current[path] !== undefined) return failure('conflict', 'error.conflict'); write('files', { ...current, [path]: markdown }); return success(undefined); } },
+    modals: browserModalSink(),
+    documents: browserDocumentStorage(files, current => write('files', current), () => failWrite),
     newId: () => { const sequence = Number(read('sequence') ?? 0) + 1; write('sequence', sequence); return `demo-${String(sequence).padStart(4, '0')}`; },
     now: () => '2026-09-22T12:00:00.000Z',
     observeError: entry => errors.push({ code: entry.code, operation: entry.operation }),

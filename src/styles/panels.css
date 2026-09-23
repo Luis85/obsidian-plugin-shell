@@ -52,3 +52,14 @@
 .shell-event-table td { overflow-wrap: anywhere; }
 .shell-preview pre { max-width: 100%; white-space: pre; }
 .shell-page-heading > p { max-width: 78ch; }
+.shell-repository { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--background-modifier-border); }
+.shell-repository > .shell-hint { margin-top: 12px; }
+.shell-note-list { list-style: none; padding: 0; margin: 20px 0; }
+.shell-note-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--background-modifier-border); }
+.shell-note-list li > div { min-width: 0; overflow-wrap: anywhere; }
+.shell-note-list small { display: block; margin-top: 6px; }
+.shell-note-editor { margin-top: 24px; max-width: 48rem; }
+.shell-note-editor code { overflow-wrap: anywhere; font-size: 12px; }
+.shell-note-editor fieldset { display: grid; gap: 20px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shell-note-editor select { color: var(--text-normal); background: var(--background-modifier-form-field); border: 1px solid var(--background-modifier-border); border-radius: var(--input-radius); min-height: 36px; padding: 8px 12px; font: inherit; }
+.shell-trash-confirm { padding: 16px; border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s); }

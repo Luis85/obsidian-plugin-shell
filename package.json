@@ -1,6 +1,6 @@
 {
   "name": "plugin-shell",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "devDependencies": {
@@ -41,6 +41,9 @@
   },
   "scripts": {
     "setup": "node scripts/setup.mjs",
+    "make": "node scripts/makers/cli.mjs",
+    "entities:check": "node scripts/makers/entities.mjs --check",
+    "entities:catalog": "node scripts/makers/entities.mjs",
     "dev:ui": "vite --config vite.harness.config.mjs --host 127.0.0.1 --open /harness/app/",
     "dev": "node scripts/dev/watch-local.mjs --no-local",
     "build": "node scripts/bundling/build.mjs",
@@ -56,6 +59,7 @@
     "test:baseline": "node scripts/testing/verify-baseline.mjs --repeat 3",
     "check:tokens": "node scripts/styles/check-tokens.mjs",
     "check:source": "node scripts/quality/check-source.mjs",
+    "check:presentation": "node scripts/quality/check-presentation.mjs",
     "check:artifacts": "node scripts/quality/check-artifacts.mjs",
     "lint": "oxlint src && eslint src",
     "analyze": "fallow dead-code",

@@ -1,0 +1,18 @@
+import { plainRecord } from '../../domain/entity';
+import { failure, type Result } from '../../domain/outcome';
+import type { DocumentDefinition } from '../../application/document-service';
+import { taskEntity, type TaskValues } from './entity';
+import { taskDocument } from './definition';
+
+/** Example UI conversion; the reusable repository accepts typed entity values. */
+export interface TaskInput { readonly title: string; readonly due: string; readonly tags: string }
+export interface EntityInputs { task: TaskInput }
+export function parseTask(input: TaskInput): Result<TaskValues> {
+  if (!plainRecord(input) || Object.keys(input).some(key => !['title', 'due', 'tags'].includes(key))) return failure('validation', 'error.entity');
+  if (typeof input.tags !== 'string' || input.tags.length > 300) return failure('validation', 'error.tags', 'tags');
+  if (typeof input.due !== 'string') return failure('validation', 'error.due', 'due');
+  return taskEntity.parse({ title: input.title, tags: [...new Set(input.tags.split(',').map(value => value.trim()).filter(Boolean))], ...(input.due ? { due: input.due } : {}) });
+}
+export const taskDefinition: DocumentDefinition<TaskInput> = {
+  project(input) { const parsed = parseTask(input); return parsed.ok ? taskDocument.project(parsed.value) : parsed; },
+};

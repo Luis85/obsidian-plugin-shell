@@ -1,5 +1,12 @@
 # Test strategy
 
+**Current applicability:** Historical statements below about the absence of
+runtime code describe the retained pre-implementation baseline. The repository
+now contains real Vue/application/native code; iteration 03 applies the retained
+production thresholds to it without changing baseline acceptance status. See the
+[iteration plan](../development/ITERATION-THREE-PLAN.md) and separate executed
+iteration records for actual evidence.
+
 **Version:** 1.0 · **Date:** 2026-09-22 · **Owner:** template maintainer  
 **Normative for:** PRD 0.6, TST-01–16 and AC-83–90; previous acceptance requirements remain.  
 **Execution design:** [Test concept](TEST-CONCEPT.md) · **Machine inventory:** [test-plan.json](test-plan.json)

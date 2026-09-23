@@ -1,15 +1,16 @@
 {
+  "notification": { "overflow": "Weitere Meldungen warten. Details finden Sie in den zugehörigen Ansichten." },
   "app": {
     "title": "Plugin Shell",
     "tagline": "Hier beginnt dein Plugin.",
     "intro": "Eine funktionierende Grundlage statt einer leeren Seite. Erkunde die Dienste hinter dieser Ansicht und entwickle dein eigenes Plugin.",
     "showcase": "Funktionsübersicht",
-    "iteration": "Iteration 02",
+    "iteration": "Iteration 03",
     "local": "Lokal · ohne Benutzerkonto",
     "ready": "Laufzeit bereit",
     "browser": "Browser-Testumgebung",
     "native": "Obsidian-Umgebung",
-    "scope": "Iteration 02 · Responsives Layout, optionaler Ansichtskopf und verbesserte Zuverlässigkeit. Vollständige Generatoren, automatische Releases und Gerätequalifizierung bleiben geplant."
+    "scope": "Iteration 03 · Wiederverwendbare Entitäten, Markdown-Repositories und Bearbeitung von Aufgabennotizen. Vollständige Generatoren, automatische Releases und Gerätequalifizierung bleiben geplant."
   },
   "nav": {
     "overview": "Übersicht",
@@ -66,6 +67,31 @@
     "note": "Bestehende Notizen werden nie überschrieben. Die Vorschau erzeugt weder Dateien noch Ordner.",
     "browserNote": "Testmodus: Notizen werden im simulierten Browser-Vault gespeichert, nicht in einem echten Obsidian-Vault."
   },
+  "repo": {
+    "title": "Deine Aufgabennotizen",
+    "help": "Notizen im Aufgabenordner lesen und bearbeiten. Eigene Inhalte und andere Eigenschaften bleiben erhalten.",
+    "reload": "Notizen neu laden",
+    "initial": "Lade deine Aufgabennotizen, um sie anzusehen oder zu bearbeiten.",
+    "empty": "Keine Aufgabennotizen in diesem Ordner. Erstelle oben eine und lade die Liste neu.",
+    "edit": "Bearbeiten",
+    "editNamed": "{title} bearbeiten",
+    "editing": "Bearbeiten: {title}",
+    "editTitle": "Aufgabentitel",
+    "editDue": "Fälligkeitsdatum der Aufgabe",
+    "editTags": "Aufgaben-Tags",
+    "status": "Status",
+    "todo": "Offen",
+    "doing": "In Bearbeitung",
+    "done": "Erledigt",
+    "save": "Änderungen speichern",
+    "saved": "Änderungen gespeichert. Pfad und eigene Notizinhalte bleiben unverändert.",
+    "delete": "In den Papierkorb…",
+    "confirm": "„{title}“ in den Tresor-Papierkorb verschieben? Lade die Notizen neu, um vor dem Löschen den aktuellen Inhalt zu prüfen.",
+    "confirmDelete": "Verschieben bestätigen",
+    "cancel": "Abbrechen",
+    "deleted": "Aufgabennotiz in den Papierkorb verschoben.",
+    "stale": "Dein Entwurf bleibt erhalten. Lade die Notizen neu, um ihn zu verwerfen und den aktuellen Inhalt vor der Bearbeitung zu prüfen."
+  },
   "events": {
     "title": "Verbindungen in Aktion",
     "subtitle": "Ereignisse melden Fakten. Befehle führen Aktionen aus. Jedes Abonnement hat einen Besitzer.",
@@ -106,6 +132,10 @@
     "saved": "Aufgabennotiz erfolgreich erstellt."
   },
   "modal": {
+    "close": "Schließen", "confirm": "Bestätigen", "cancel": "Abbrechen", "input": "Beispieltext", "invalid": "Geben Sie einen kurzen, nicht leeren Wert ein.", "validating": "Eingabe wird geprüft…",
+    "confirmTitle": "Beispiel bestätigen", "confirmText": "Dieses Beispiel verändert keine Dokumente. Bestätigen oder brechen Sie ab, um das typisierte Ergebnis zu prüfen.",
+    "promptTitle": "Texteingabe ausprobieren", "promptText": "Geben Sie einen kurzen Wert ein. Er bleibt in diesem Beispiel und wird nicht in den Vault geschrieben.",
+    "confirmed": "Beispiel bestätigt. Keine Dokumente geändert.", "cancelled": "Beispiel abgebrochen. Keine Dokumente geändert.",
     "title": "Eine Ansicht, zwei Umgebungen",
     "text": "Dieser Dialog verwendet im Plugin die Obsidian-Modal-API und im Browser einen isolierten Adapter. Die Anwendungsdienste sind von beiden Implementierungen unabhängig."
   },
@@ -113,7 +143,18 @@
     "open": "Funktionsübersicht öffnen",
     "toggleHeader": "Obsidian-Ansichtskopf umschalten"
   },
+  "debug": {
+    "toggle": "Debug-Protokollierung umschalten",
+    "report": "Debug-Bericht ansehen",
+    "title": "Debug-Bericht",
+    "enabled": "Debug-Protokollierung für diese Sitzung aktiviert.",
+    "disabled": "Debug-Protokollierung deaktiviert. Fehlerdiagnosen bleiben aktiv."
+  },
   "error": {
+    "commandUnavailable": "Dieser Befehl ist im aktuellen Kontext nicht verfügbar.",
+    "read": "Die Notiz konnte nicht gelesen werden. Prüfe, ob sie vorhanden und zugänglich ist, und lade die Notizen neu.",
+    "duplicateIdentity": "Zwei Notizen haben dieselbe Entitäts-ID. Behebe das Duplikat vor der Bearbeitung; keine Notizen wurden geändert.",
+    "repositoryLimit": "Dieser Ordner überschreitet die Prüfgrenze von 1.000 Notizen. Verwende einen kleineren, eigenen Ordner.",
     "title": "Gib einen Titel mit 1–120 Zeichen ein.",
     "due": "Gib ein gültiges Kalenderdatum ein (JJJJ-MM-TT).",
     "tags": "Verwende bis zu 12 kurze Tags aus Buchstaben, Zahlen, Bindestrichen oder Schrägstrichen.",
@@ -122,7 +163,7 @@
     "settingsRead": "Gespeicherte Einstellungen sind geschützt. Behebe den Lesefehler vor dem Speichern.",
     "settingsWrite": "Einstellungen wurden nicht gespeichert. Vorherige Werte bleiben aktiv.",
     "conflict": "Der Zielpfad existiert bereits. Keine Datei wurde überschrieben.",
-    "write": "Die Notiz wurde nicht erstellt. Prüfe Zielpfad und Berechtigungen.",
+    "write": "Die Notiz konnte nicht gespeichert werden. Prüfe Zielpfad und Berechtigungen.",
     "uncertain": "Das Schreibergebnis ist unklar. Prüfe den exakten Zielpfad vor einem neuen Versuch.",
     "open": "Die Notiz wurde erstellt, konnte aber nicht geöffnet werden. Wiederhole nur das Öffnen.",
     "stale": "Diese Vorschau passt nicht mehr zu Anfrage oder Zielpfad. Erstelle eine neue Vorschau.",

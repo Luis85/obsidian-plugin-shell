@@ -99,7 +99,12 @@ These commands exist independently of the future package.json/setup/Vite/Playwri
 
 Generated releases exclude all `harness/**`, fixture helpers/styles, server code, screenshots, reports and original host simulation. Production imports may reference only plugin-owned source styles. Never deploy the host shim as a user's plugin stylesheet.
 
-**HSS-12 — Qualification and limits.** All handwritten fixture CSS/JS/scripts obey 400 physical lines, tests/helpers 450. Test serving, headers, path rejection, CSS entry/module integrity, scope isolation, core interactive specimens and narrow rendering. Full CSS/SFC output, notifications, errors, native APIs, host parity and device behavior retain separate acceptance gates.
+**HSS-12 — Qualification and limits.** All handwritten fixture CSS/JS/scripts obey
+400 code lines, tests/helpers 450, excluding comments/blanks under the owner's
+iteration 03 amendment. Test serving, headers, path rejection, CSS entry/module
+integrity, scope isolation, core interactive specimens and narrow rendering. Full
+CSS/SFC output, notifications, errors, native APIs, host parity and device behavior
+retain separate acceptance gates.
 
 The current session's bounded results and its browser-navigation environment limitation are recorded in the product review. Passing focused fixture tests is not passing template verification, because the template runtime and toolchain do not exist yet.
 

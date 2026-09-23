@@ -56,7 +56,7 @@ test('[UI-I02] validates, previews exact Markdown, commits once and persists rea
 test('[UI-I03] known write failure produces no note and no success', async ({ page }) => {
   await open(page); await task(page); await page.evaluate(() => window.__SHELL_TEST__.fault('write'));
   await page.getByRole('button', { name: 'Create Task note', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('not created');
+  await expect(page.getByRole('alert')).toContainText('The note could not be saved.');
   expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual({});
   await expect(page.getByText('Task note created', { exact: true })).toHaveCount(0);
 });

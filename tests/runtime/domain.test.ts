@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isCalendarDate, parseTask } from '../../src/domain/task';
+import { isCalendarDate } from '../../src/domain/entity';
+import { parseTask } from '../../src/features/tasks/form';
 import { validateFolder, documentStem } from '../../src/domain/paths';
 import { defaults, parsePreferences } from '../../src/domain/preferences';
 import { input } from './helpers';

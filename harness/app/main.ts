@@ -6,6 +6,7 @@ import '../../src/styles/app.css';
 import './frame.css';
 const adapter = browserAdapters();
 const services = await createServices(adapter.adapters);
+document.title = `${services.identity.name} — live harness`;
 const workspace = document.getElementById('harness-workspace');
 if (!workspace) throw new Error('MISSING_WORKSPACE');
 const primary = mountHarnessLeaf(workspace, services, 'primary');

@@ -1,0 +1,16 @@
+{
+  "name": "template-node-qualification",
+  "detection": {
+    "type": "fileExists",
+    "pattern": "tests/tooling/*.{checks,test}.mjs"
+  },
+  "entryPointRole": "test",
+  "entryPoints": [
+    "tests/runtime/types.ts",
+    "tests/tooling/*.checks.mjs",
+    "tests/tooling/*.test.mjs",
+    "tests/verification/*.test.mjs",
+    "tests/harness-styles/*.test.mjs",
+    "tests/browser-specimen/specimen.checks.mjs"
+  ]
+}

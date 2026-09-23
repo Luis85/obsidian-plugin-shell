@@ -30,3 +30,10 @@ it('[THEME-02-03] failed owner registration restores initial presentation', () =
   expect(() => bindHostTheme(root, () => { throw new Error('registration'); })).toThrow('registration');
   expect(root.className).toBe('plugin-shell light');
 });
+it('[THEME-03-01] missing document ownership fails closed and captured refresh cannot revive disposed styling', () => {
+  const detached = document.implementation.createHTMLDocument('detached');
+  expect(() => bindHostTheme(detached.createElement('div'))).toThrow('VIEW_DOCUMENT_UNAVAILABLE');
+  const root = document.createElement('div'); root.className = 'dark'; let refresh = () => {};
+  const stop = bindHostTheme(root, callback => { refresh = callback; return () => undefined; });
+  stop(); refresh(); expect(root.className).toBe('dark');
+});

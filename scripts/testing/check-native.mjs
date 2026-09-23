@@ -1,6 +1,5 @@
 // Optional native smoke: only fresh temporary vault/config directories, never a personal vault.
-import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -9,15 +8,24 @@ import { chromium, expect } from '@playwright/test';
 import { qualifyHeaders, assertDiagnostics } from './native-header-checks.mjs';
 import { sizeNativeWindow } from './native-window.mjs';
 import { nativeCommand } from './native-command.mjs';
+import { qualifyRepository } from './native-repository.mjs';
+import { readNativeIdentity } from './native-identity.mjs';
+import { qualifyCommandRemoval } from './native-command-contract.mjs';
+import { qualifyModals } from './native-modals.mjs';
+import { qualifyDebugging } from './native-debugging.mjs';
+import { nativeScratch, nativeConfigDirectory, assertNativeVault } from './native-isolation.mjs';
 const flags = process.argv.slice(2);
 if (flags.length !== 1 || flags[0] !== '--allow-download') {
   console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. This may download the host. No test was run.'); process.exit(2);
 }
 const output = resolve('reports/native'); await mkdir(output, { recursive: true });
 const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', assets: [], checks: [], errors: [] };
-const scratch = await mkdtemp(join(tmpdir(), 'plugin-shell-native-'));
+const scratch = await nativeScratch();
 let launched; let browser; let activePage; const configDirectories = [];
 try {
+  const identity = await readNativeIdentity(); report.identity = { id: identity.id, name: identity.name, version: identity.version };
+  const provider = JSON.parse(await readFile('.native-runner/node_modules/obsidian-launcher/package.json', 'utf8'));
+  if (provider.version !== '3.2.1') throw new Error('UNQUALIFIED_NATIVE_LAUNCHER'); report.launcherVersion = provider.version;
   const module = await import(pathToFileURL(resolve('.native-runner/node_modules/obsidian-launcher/dist/index.js')).href);
   const Launcher = module.default ?? module.ObsidianLauncher;
   const launcher = new Launcher({ cacheDir: resolve('.native-cache'), interactive: false });
@@ -25,9 +33,10 @@ try {
   const server = createServer(); await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   const port = server.address().port; await new Promise(ok => server.close(ok));
   report.resolvedVersions = await launcher.resolveVersion('1.13.7', 'latest');
+  const [appVersion, installerVersion] = report.resolvedVersions;
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
-  launched = await launcher.launch({ appVersion: '1.13.7', installerVersion: 'latest', vault, plugins: [resolve('dist')], args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
-  configDirectories.push(launched.configDir);
+  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
+  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir));
   let log = ''; const capture = data => { log = (log + data.toString()).slice(-50000); };
   launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   const endpoint = `http://127.0.0.1:${port}`;
@@ -54,7 +63,7 @@ try {
   report.window = await sizeNativeWindow(page);
   report.installedAssets = [];
   for (const asset of report.assets) {
-    const sha256 = createHash('sha256').update(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell', asset.file))).digest('hex');
+    const sha256 = createHash('sha256').update(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, asset.file))).digest('hex');
     expect(sha256).toBe(asset.sha256); report.installedAssets.push({ file: asset.file, sha256 });
   }
   report.userAgent = await page.evaluate(() => navigator.userAgent);
@@ -65,6 +74,7 @@ try {
   await page.locator('.suggestion-item:visible').filter({ hasText: 'Open capability showcase' }).first().click();
   await expect(page.getByTestId('showcase')).toBeVisible({ timeout: 30000 });
   await expect(page.getByText('Obsidian host', { exact: true })).toBeAttached(); report.checks.push('native-command-opens-view');
+  await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();
   await page.getByRole('textbox', { name: 'Title' }).fill('Native smoke Task');
@@ -76,57 +86,56 @@ try {
   const path = await page.locator('.shell-destination code').innerText();
   expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview); report.checks.push('actual-vault-markdown-matches-preview');
   await page.screenshot({ path: join(output, 'native-document.png') });
+  await qualifyRepository(page, report, output, launched.vault ?? vault, identity);
+  expect(await readFile(join(launched.vault ?? vault, path), 'utf8')).toBe(preview);
   await page.getByRole('button', { name: 'Events & feedback', exact: true }).click();
   await page.getByRole('button', { name: 'Publish a typed event' }).click(); await expect(page.locator('.shell-event-table')).toContainText('showcase.ping'); report.checks.push('native-view-real-event');
-  await page.getByRole('button', { name: 'Open native modal', exact: true }).click();
-  await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.locator('.modal').filter({ hasText: 'One view, two environments' })).toHaveCount(0);
-  report.checks.push('native-modal-opens-and-dismisses');
-  await qualifyHeaders(page, context, report, output, path);
+  await qualifyModals(page, report, output, identity);
+  await qualifyDebugging(page, report, output, identity, path);
+  await qualifyHeaders(page, context, report, output, path, identity);
   report.phase = 'native-settings';
   // The command palette may belong to a different native window after pop-out use.
   await nativeCommand(page, 'Open settings');
   let settingsPage;
   await expect.poll(async () => {
     for (const candidate of context.pages()) {
-      if (await candidate.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Plugin shell$/i }).count()) { settingsPage = candidate; return true; }
+      if (await candidate.locator('.vertical-tab-nav-item:visible').filter({ hasText: identity.settingsName }).count()) { settingsPage = candidate; return true; }
     }
     return false;
   }, { timeout: 15000 }).toBe(true);
   activePage = settingsPage;
   const settings = settingsPage.locator('body');
-  await settings.locator('.vertical-tab-nav-item:visible').filter({ hasText: /^Plugin shell$/i }).click();
+  await settings.locator('.vertical-tab-nav-item:visible').filter({ hasText: identity.settingsName }).click();
   const headerControl = settings.locator('.setting-item:visible').filter({ hasText: 'Hide Obsidian view header' }).locator('.checkbox-container');
   await expect(headerControl).toHaveClass(/is-enabled/); await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell/data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(false);
-  await expect(page.locator('[data-type="plugin-shell-showcase"] > .view-header:visible')).toHaveCount(1);
+  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(false);
+  await expect(page.locator(`${identity.viewSelector} > .view-header:visible`)).toHaveCount(1);
   report.checks.push('native-settings-restoration-shares-canonical-service');
   const folderControl = settings.locator('.setting-item:visible').filter({ hasText: 'Task note folder' }).locator('input');
   await expect(folderControl).toHaveValue('Tasks'); await folderControl.fill('Native/Tasks'); await folderControl.press('Tab');
   await expect.poll(async () => {
-    try { return JSON.parse(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell/data.json'), 'utf8')).preferences.taskFolder; }
+    try { return JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.taskFolder; }
     catch { return null; }
   }).toBe('Native/Tasks');
   await expect(folderControl).toHaveValue('Native/Tasks');
   report.checks.push('native-declarative-settings-use-application-writer');
   await settingsPage.screenshot({ path: join(output, 'native-settings.png') });
-  await assertDiagnostics(page);
+  await assertDiagnostics(page, identity);
   report.phase = 'cold-restart';
   // A cold process restart uses the same isolated vault and its already-installed assets.
   await headerControl.click();
-  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, '.obsidian/plugins/plugin-shell/data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(true);
+  await expect.poll(async () => JSON.parse(await readFile(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json'), 'utf8')).preferences.hideObsidianViewHeader).toBe(true);
   const persistedVault = launched.vault ?? vault;
   const previousPid = launched.proc.pid;
   await browser.close(); browser = undefined;
-  if (launched.proc.exitCode === null) {
+  if (launched.proc.exitCode === null && launched.proc.signalCode === null) {
     const exited = new Promise(ok => launched.proc.once('exit', ok));
     if (process.platform !== 'win32') process.kill(-previousPid, 'SIGTERM'); else launched.proc.kill();
     await Promise.race([exited, new Promise((_, reject) => setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000))]);
   }
-  launched = await launcher.launch({ appVersion: '1.13.7', installerVersion: 'latest', vault: persistedVault, copy: false,
+  launched = await launcher.launch({ appVersion, installerVersion, vault: persistedVault, copy: false,
     args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
-  configDirectories.push(launched.configDir); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
+  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir)); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   expect(launched.proc.pid).not.toBe(previousPid);
   const restartDeadline = Date.now() + 90000;
   while (Date.now() < restartDeadline) {
@@ -140,15 +149,15 @@ try {
   if (!restarted) throw new Error('NATIVE_RESTART_PAGE'); activePage = restarted;
   await expect(restarted.locator('[aria-label="Open capability showcase"]')).toBeVisible({ timeout: 45000 });
   await nativeCommand(restarted, 'Open capability showcase');
-  const restartedView = restarted.locator('.workspace-leaf-content[data-type="plugin-shell-showcase"]').first();
+  const restartedView = restarted.locator(identity.viewSelector).first();
   await expect(restartedView.locator('[data-plugin-ui]')).toBeVisible();
   await expect(restartedView.locator(':scope > .view-header')).toBeHidden();
   await restartedView.getByRole('button', { name: 'Preferences', exact: true }).click();
   await expect(restartedView.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true })).toBeChecked();
   await expect(restartedView.getByRole('textbox', { name: 'Task note folder', exact: true })).toHaveValue('Native/Tasks');
-  for (const asset of report.assets) expect(createHash('sha256').update(await readFile(join(persistedVault, '.obsidian/plugins/plugin-shell', asset.file))).digest('hex')).toBe(asset.sha256);
+  for (const asset of report.assets) expect(createHash('sha256').update(await readFile(join(persistedVault, identity.pluginDirectory, asset.file))).digest('hex')).toBe(asset.sha256);
   expect(await readFile(join(persistedVault, path), 'utf8')).toBe(preview);
-  await assertDiagnostics(restarted); await restarted.screenshot({ path: join(output, 'native-cold-restart-header-hidden.png') });
+  await assertDiagnostics(restarted, identity); await restarted.screenshot({ path: join(output, 'native-cold-restart-header-hidden.png') });
   report.checks.push('native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets');
   for (const asset of report.assets) expect(createHash('sha256').update(await readFile(`dist/${asset.file}`)).digest('hex')).toBe(asset.sha256);
   if (report.errors.length) throw new Error('Native page reported unexpected errors; inspect report.');
@@ -164,8 +173,22 @@ try {
 }
 finally {
   if (browser) await browser.close().catch(() => undefined);
-  if (launched?.proc.pid) { try { if (process.platform !== 'win32') process.kill(-launched.proc.pid, 'SIGTERM'); else launched.proc.kill(); } catch { /* Already exited. */ } }
-  for (const directory of configDirectories.filter(Boolean)) await rm(directory, { recursive: true, force: true }).catch(() => undefined);
-  await rm(scratch, { recursive: true, force: true }); await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
+  if (launched?.proc.pid && launched.proc.exitCode === null && launched.proc.signalCode === null) {
+    let timeout;
+    try {
+      const stopped = new Promise(ok => launched.proc.once('exit', ok));
+      if (process.platform !== 'win32') process.kill(-launched.proc.pid, 'SIGTERM'); else launched.proc.kill();
+      await Promise.race([stopped, new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000); })]);
+    } catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_PROCESS_STOP_FAILED'; process.exitCode = 1; }
+    finally { clearTimeout(timeout); }
+  }
+  const stopped = !launched || launched.proc.exitCode !== null || launched.proc.signalCode !== null;
+  for (const directory of configDirectories) {
+    try { if (!stopped) throw new Error('NATIVE_STILL_RUNNING'); await rm(await nativeConfigDirectory(directory), { recursive: true, force: true }); }
+    catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_CONFIG_CLEANUP_FAILED'; process.exitCode = 1; }
+  }
+  if (stopped) await rm(scratch, { recursive: true, force: true });
+  else report.scratchPreserved = true;
+  await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

@@ -3,12 +3,7 @@
     "src/main.ts",
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
-    "tests/runtime/types.ts",
     "scripts/testing/node-reporter.mjs",
-    "tests/tooling/*.checks.mjs",
-    "tests/verification/*.test.mjs",
-    "tests/harness-styles/*.test.mjs",
-    "tests/browser-specimen/specimen.checks.mjs",
     "scripts/styles/export-host-css.mjs",
     "scripts/testing/check-browser-specimen.mjs",
     "scripts/harness/serve-style-fixture.mjs",
@@ -18,6 +13,9 @@
     "harness/styles/obsidian.css",
     "harness/styles/simulated.css",
     "harness/styles/host-adapter.css"
+  ],
+  "plugins": [
+    "scripts/quality/fallow-node-tests.json"
   ],
   "ignorePatterns": [
     "dist-harness/**",
@@ -38,6 +36,12 @@
         "name": "application",
         "patterns": [
           "src/application/**"
+        ]
+      },
+      {
+        "name": "features",
+        "patterns": [
+          "src/features/**"
         ]
       },
       {
@@ -100,6 +104,14 @@
         ]
       },
       {
+        "from": "features",
+        "allow": [
+          "features",
+          "application",
+          "domain"
+        ]
+      },
+      {
         "from": "infrastructure",
         "allow": [
           "infrastructure",
@@ -111,6 +123,7 @@
         "from": "presentation",
         "allow": [
           "presentation",
+          "features",
           "application",
           "domain",
           "styles"
@@ -119,20 +132,19 @@
       {
         "from": "bootstrap",
         "allow": [
+          "features",
           "domain",
           "application",
           "infrastructure",
           "presentation",
           "bootstrap",
-          "test",
-          "harness",
-          "tooling",
           "styles"
         ]
       },
       {
         "from": "test",
         "allow": [
+          "features",
           "domain",
           "application",
           "infrastructure",
@@ -147,6 +159,7 @@
       {
         "from": "harness",
         "allow": [
+          "features",
           "domain",
           "application",
           "infrastructure",
@@ -161,6 +174,7 @@
       {
         "from": "tooling",
         "allow": [
+          "features",
           "domain",
           "application",
           "infrastructure",

@@ -4,12 +4,13 @@ import { PreferenceService } from '../../src/application/preference-service';
 import { bindViewHeader, SHOWCASE_VIEW } from '../../src/infrastructure/obsidian/view-header';
 import { defaults, parsePreferences } from '../../src/domain/preferences';
 import { fixture, deferred } from './helpers';
-const marker = 'plugin-shell-native-header-hidden';
+import { pluginIdentity } from '../../src/infrastructure/plugin-identity';
+const marker = pluginIdentity.hiddenHeaderClass;
 function setup(raw: unknown = null) {
   const f = fixture(); const save = vi.fn(async (_value: unknown): Promise<void> => undefined);
   return { ...f, save, service: new PreferenceService({ load: async () => raw, save }, f.bus, f.errors) };
 }
-function leaf(type = SHOWCASE_VIEW, owner = document) {
+function leaf(type: string = SHOWCASE_VIEW, owner = document) {
   const el = owner.createElement('section'); el.dataset.type = type;
   const header = owner.createElement('div'); header.className = 'view-header';
   header.style.height = '37px'; header.setAttribute('aria-label', 'Host-owned title');

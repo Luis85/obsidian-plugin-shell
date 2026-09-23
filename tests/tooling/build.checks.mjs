@@ -44,3 +44,48 @@ test('[BLD-02-03] overlapping build processes cannot consume another process loc
     assert.deepEqual(await snapshot(root), before); assert.ok((await readdir(root)).includes('.shell-build-lock'));
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+test('[IDENTITY-INSTALL-01] a different installed plugin is never overwritten by a chosen target name', async () => {
+  const root = await fixture();
+  try {
+    const target = join(root, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(target, { recursive: true });
+    const existing = JSON.stringify({ id: 'unrelated-plugin', name: 'Unrelated', version: '1.0.0' });
+    await writeFile(join(target, 'manifest.json'), existing); await writeFile(join(target, 'main.js'), 'unrelated code');
+    await writeFile(join(target, 'data.json'), 'unrelated settings');
+    await assert.rejects(installLocal({ root, dryRun: true }), /INSTALLED_IDENTITY_CONFLICT/);
+    await assert.rejects(installLocal({ root }), /INSTALLED_IDENTITY_CONFLICT/);
+    assert.equal(await readFile(join(target, 'manifest.json'), 'utf8'), existing);
+    assert.equal(await readFile(join(target, 'main.js'), 'utf8'), 'unrelated code');
+    assert.equal(await readFile(join(target, 'data.json'), 'utf8'), 'unrelated settings');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('[INSTALL-RECOVERY-01] failed restoration retains last-good backups and blocks later installers', async () => {
+  const root = await fixture();
+  try {
+    const target = join(root, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(target, { recursive: true });
+    await writeFile(join(target, 'main.js'), 'last-good main');
+    let failure;
+    try { await installLocal({ root, beforePromote(_name, index) { if (index === 1) throw new Error('promotion failure'); }, beforeRestore() { throw new Error('restore failure'); } }); }
+    catch (error) { failure = error; }
+    assert.match(failure?.message ?? '', /INSTALL_RECOVERY_REQUIRED/);
+    assert.equal(await readFile(join(failure.report.recoveryPath, 'main.js.previous'), 'utf8'), 'last-good main');
+    assert.deepEqual(failure.report.preserved, ['main.js']);
+    assert.ok((await readdir(target)).includes('.shell-install-lock'));
+    await assert.rejects(installLocal({ root }), { code: 'EEXIST' });
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('[INSTALL-RECOVERY-02] rollback preserves an external edit and restores only still-owned bytes', async () => {
+  const root = await fixture();
+  try {
+    const target = join(root, '.dev-vault/.obsidian/plugins/plugin-shell'); await mkdir(target, { recursive: true });
+    await writeFile(join(target, 'main.js'), 'last-good main');
+    let failure;
+    try { await installLocal({ root, async beforePromote(_name, index) { if (index === 1) { await writeFile(join(target, 'main.js'), 'external edit'); throw new Error('promotion failure'); } } }); }
+    catch (error) { failure = error; }
+    assert.match(failure?.message ?? '', /INSTALL_RECOVERY_REQUIRED/);
+    assert.equal(await readFile(join(target, 'main.js'), 'utf8'), 'external edit');
+    assert.equal(await readFile(join(failure.report.recoveryPath, 'main.js.previous'), 'utf8'), 'last-good main');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

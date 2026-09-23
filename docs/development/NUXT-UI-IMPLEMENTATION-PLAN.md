@@ -92,7 +92,11 @@ harness/                     original shim + real component scenarios
 scripts/make/                existing planned makers and local templates
 ```
 
-Keep implementation files within 400 physical lines, tests/helpers within 450, and `main.ts` within 100. Do not create empty files for every possible component. Generated CSS is output, not manually edited source; its size budget remains separate.
+Keep implementation files within 400 code lines, tests/helpers within 450, and
+`main.ts` within 100. Exclude comments and blank lines under the owner's iteration
+03 amendment, counting all SFC regions together. Do not create empty files for
+every possible component. Generated CSS is output, not manually edited source;
+its size budget remains separate.
 
 ## 4. Build and runtime integration contract
 

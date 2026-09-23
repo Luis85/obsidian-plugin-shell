@@ -1,8 +1,9 @@
 import type { PreferenceService } from '../../application/preference-service';
 import type { ErrorReporter, Unsubscribe } from '../../application/ports';
+import { pluginIdentity } from '../plugin-identity';
 
-export const SHOWCASE_VIEW = 'plugin-shell-showcase';
-const hiddenClass = 'plugin-shell-native-header-hidden';
+export const SHOWCASE_VIEW = pluginIdentity.viewType;
+const hiddenClass = pluginIdentity.hiddenHeaderClass;
 /** The public View API has no header-visibility setter. Own only this view's marker.
  * The direct-child selector deliberately excludes tabs, OS chrome and other leaves.
  * No style/hidden attributes are overwritten; removing our marker restores host CSS.

@@ -1,7 +1,7 @@
 name: Showcase verification
 on:
   push:
-    branches: [main, build/iteration-one]
+    branches: [main, build/iteration-three]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -26,12 +26,19 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
+      - name: Select exact npm independently without global installation
+        shell: pwsh
+        run: |
+          $tool = Join-Path $env:RUNNER_TEMP 'showcase-npm'
+          npm install --prefix "$tool" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
       - name: Guided setup from a clean checkout without node_modules
-        run: npm run setup -- --yes --no-interaction
-      - name: Verify first iteration and retained baseline
-        run: npm run verify
-      - name: Measure declared core coverage
-        run: npm run test:coverage
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
+      - name: Verify production coverage, contracts and retained baseline
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM_CLI" run verify
       - name: Provision pinned Chromium
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -39,16 +46,18 @@ jobs:
           sudo apt-get install -y xdotool
       - name: Exercise the actual served showcase
         if: matrix.os == 'ubuntu-latest'
-        run: npm run test:e2e
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM_CLI" run test:e2e
       - name: Provision optional native smoke provider
         if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
-        run: npm install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
+        shell: pwsh
+        run: node "$env:QUALIFIED_NPM_CLI" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
       - name: Exercise exact candidate in isolated Obsidian
         if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
         run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download
       - name: Archive tracked source only
         if: always()
-        run: git archive --format=zip --output=iteration-one-source.zip HEAD
+        run: git archive --format=zip --output=candidate-source.zip HEAD
       - name: Retain candidate and scope-labeled evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -63,6 +72,6 @@ jobs:
             !reports/**/*.woff2
             dist/
             package-lock.json
-            iteration-one-source.zip
+            candidate-source.zip
           retention-days: 7
           if-no-files-found: error

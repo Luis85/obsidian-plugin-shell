@@ -1,0 +1,68 @@
+name: Template authoring
+on:
+  push:
+    branches: [main, build/iteration-three]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: template-authoring-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  renamed-feature:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Select exact npm in runner scratch
+        run: |
+          npm install --prefix "$RUNNER_TEMP/template-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/template-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Adopt a distinct identity from a fresh checkout and run every setup gate
+        run: |
+          mkdir -p reports/template-authoring
+          set -o pipefail
+          node "$QUALIFIED_NPM" run setup -- --id field-notes --name "Field Notes" --author "Template Qualification" --repo example/field-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
+      - name: Generate a new business feature through the public maker
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
+          node "$QUALIFIED_NPM" run entities:check
+      - name: Verify the complete renamed and extended template
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/verify.txt
+          node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
+      - name: Provision pinned Chromium and exercise served components
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Retain authoring evidence and the generated source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: renamed-template-authoring
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            src/features/bookmarks/
+            tests/runtime/generated/bookmarks-bookmark.test.ts
+            tests/fixtures/entities/bookmarks-bookmark.md
+            src/bootstrap/features.ts
+            PROJECT-IDENTITY.md
+            .template-state/setup.json
+            dist/
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: error

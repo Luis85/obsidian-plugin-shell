@@ -5,6 +5,14 @@
 
 ## 1. Current system under test
 
+**Applicability update (iteration 03):** The paragraphs below describe the retained
+pre-runtime baseline, not today's complete executable surface. Iteration 02
+introduced and qualified real Vue/application/native code. See the
+[iteration 03 plan](../development/ITERATION-THREE-PLAN.md) for the new entity,
+repository and production-coverage work, and the [iteration 02 evidence](ITERATION-TWO.md)
+for the last qualified candidate. Keep baseline results separate from runtime,
+served-browser and native-host results.
+
 The executable baseline consists of the original host-style specimen, its allowlisted HTTP server, and the verification utilities added with this concept. No production Obsidian plugin, settings service, DocumentCreationService, event bus, NotificationService, setup/maker runtime or native candidate exists yet.
 
 Do not write a pretend Task database or mock service that only returns success to fill those gaps. Mark planned suites explicitly. The baseline verifies its actual files, not the product described by the larger specification.
@@ -35,7 +43,11 @@ tests/
 reports/                         # ignored generated evidence
 ```
 
-All executable orchestration lives in scripts; assertions live in tests. Source and helpers stay below their 400/450 physical-line limits. The long JSON inventory is data, not executable code hidden from the limit. The original CSS remains modular.
+All executable orchestration lives in scripts; assertions live in tests. Source
+and helpers stay below their 400/450 code-line limits. Under the owner's iteration
+03 amendment, comments and blanks are excluded, while physical counts remain
+diagnostic. The long JSON inventory is data, not executable code hidden from the
+limit. The original CSS remains modular.
 
 ## 3. Machine-readable plan
 
@@ -60,7 +72,7 @@ The command performs the following stages:
 | --- | --- | --- |
 | Plan | Validate data shape, IDs, allowed modes and trace links. | Nonzero infrastructure/configuration error. |
 | Inputs | Read/hash harness, scripts, tests and machine policy; include new files and reject symlinks. | Missing/unsafe inputs fail. |
-| Source policy | Check executable source physical lines and test-file inventory. | Too-large/unregistered files fail. |
+| Source policy | Count nonblank code lines, excluding comments across full SFCs, and check test-file inventory. | Too-large/unregistered files fail. |
 | Execution | Spawn the explicit suites with Node, UTC, one test worker, strict unhandled rejection policy and deadline. | Child failure, timeout, malformed evidence or missing cases fail. |
 | Repetition | Re-run all suites in fresh processes without retries. | Any failed repetition or changed semantic digest fails. |
 | Final integrity | Rehash execution inputs. | Input edits during the run fail; old evidence does not match changed bytes. |

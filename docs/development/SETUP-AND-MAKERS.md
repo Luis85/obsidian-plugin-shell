@@ -1,6 +1,9 @@
 # Guided setup and maker tooling
 
-> **Contract:** PRD 0.4; required future behavior, not executable tooling in the current repository.  
+> **Contract:** Retained complete PRD 0.4 target. Iteration 03 implements reviewed
+> [identity setup/resume](SETUP-IDENTITY.md) and bounded
+> [note-feature/entity makers](AUTHORING-TOOLS.md). Recipes outside that supported
+> catalog remain planned; examples below are not blanket executable claims.
 > **Requirements:** TOOL-01–06, SETUP-01–12, MAKE-01–12, extended by DOC-19 for entities.  
 > **Related:** [PRD](../product/PRD.md), [entity documents](ENTITY-DOCUMENTS.md), [DocumentCreationService](../architecture/DOCUMENT-CREATION.md), [events](../architecture/EVENT-BUS.md), [styles](../architecture/STYLES.md), [research](../research/2026-09-22-setup-makers-events-styles.md).
 
@@ -97,7 +100,11 @@ Create exercised files, not empty decoration. Runtime event/document contracts a
 
 **TOOL-03:** Bootstrap .mjs uses JSDoc/checkJs and no compilation prerequisite. Post-install tools use the already qualified toolchain, not a second compiler for wrappers.
 
-**TOOL-04:** Handwritten tooling ≤400 physical lines, tooling tests/helpers ≤450. Generated plugin/entity code becomes ordinary maintained source, not an exemption. Template assets are bounded/reviewed; composed stylesheet output has its separately documented artifact policy.
+**TOOL-04:** Handwritten tooling ≤400 code lines, tooling tests/helpers ≤450;
+comments and blank lines are excluded under the owner's iteration 03 amendment.
+Generated plugin/entity code becomes ordinary maintained source, not an exemption.
+Template assets are bounded/reviewed; composed stylesheet output retains its
+separate artifact policy. Generated executable filenames describe their purpose.
 
 **TOOL-05:** Model genuine process entries and known template/fixture consumers in fallow. Template text files are not necessarily import entrypoints. No entire scripts exemption or all-source dynamic entry declaration.
 

@@ -1,6 +1,11 @@
 # Creating entity-backed Markdown documents
 
-> **Status:** Developer-facing API specification for PRD 0.4. The definitions, helper functions, commands, and service below are the intended implementation interface; they do not exist as executable code yet.
+> **Status:** Retained full developer-facing target for PRD 0.4. Creation exists
+> since iteration 01; iteration 03 implements a bounded entity/repository API.
+> The original builder shapes below retain the complete target. Use the
+> [authoring guide](BUILD-A-FEATURE.md) and [maker/catalog commands](AUTHORING-TOOLS.md)
+> for the implemented signatures and supported recipes. Broader maker variants
+> remain planned; the iteration guide states exact scope.
 
 The [DocumentCreationService contract](../architecture/DOCUMENT-CREATION.md) covers validation, safe writes, events, failure behavior, and tests. This guide explains the short developer path.
 

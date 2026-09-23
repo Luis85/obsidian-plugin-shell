@@ -1,59 +1,71 @@
-// Dependency-free first-run installer. The full identity/maker wizard remains a later package.
-import { readFile, access } from 'node:fs/promises';
+// Dependency-free entry: identity plans and help never require installation first.
 import { createInterface } from 'node:readline/promises';
-import { stdin, stdout } from 'node:process';
+import { stdin, stdout, stderr } from 'node:process';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { runNode } from './shared/process.mjs';
+import { setupOptions, resumeOptions, setupHelp } from './setup/options.mjs';
+import { planIdentity } from './setup/identity.mjs';
+import { readJournal } from './setup/journal.mjs';
+import { executeSetup, setupStages } from './setup/execute.mjs';
 import { projectInstallEnvironment } from './shared/npm-install.mjs';
-const accepted = new Set(['--yes', '--no-interaction', '--dry-run', '--skip-install', '--no-local', '--help']);
-async function setup() {
-  const flags = new Set(process.argv.slice(2));
-  for (const flag of flags) if (!accepted.has(flag)) throw new Error(`Unknown option: ${flag}`);
-  if (flags.has('--help')) { console.log('npm run setup -- [--yes --no-interaction] [--dry-run] [--skip-install] [--no-local]'); return; }
-  const [major, minor] = process.versions.node.split('.').map(Number);
-  if (major < 22 || (major === 22 && minor < 13)) throw new Error('Node 22.13+ is required. Node 24.21.0 is the qualified development version.');
-  const manifest = JSON.parse(await readFile('manifest.json', 'utf8')); await access('package-lock.json');
-  const local = !flags.has('--no-local');
-  const install = projectInstallEnvironment();
-  const pkg = JSON.parse(await readFile('package.json', 'utf8'));
-  if (!pkg.allowScripts || typeof pkg.allowScripts !== 'object' || Array.isArray(pkg.allowScripts))
-    throw new Error('Missing project allowScripts policy. Update package.json from the reviewed template before setup.');
-  const approvals = Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name);
-  const npmVersion = /(?:^|\s)npm\/([^\s]+)/.exec(process.env.npm_config_user_agent ?? '')?.[1] ?? 'unknown';
-  console.log(`Plugin Shell — iteration 02 setup
-Plugin: ${manifest.name} (${manifest.id})
-Node: ${process.version} | npm: ${npmVersion}
-1. Install the exact lockfile${flags.has('--skip-install') ? ' [explicitly skipped]' : ''}
-2. Build and type-check the Nuxt UI showcase
-3. Run the service tests
-4. ${local ? 'Install to .dev-vault/.obsidian/plugins/' + manifest.id : 'Browser-only profile'}
 
-Dependency lifecycle policy: package.json allowScripts (${approvals.join(', ')}).
-${install.removedKeys.length ? 'Nested install: discard the forwarded allow-scripts environment value; reload persistent policy. Other npm configuration is preserved.' : 'Nested install: use the persistent project policy; no one-off approvals are passed.'}
-No blanket script approval, npm configuration edits, notes, global packages, vault security changes or releases.
-The complete template-renaming and maker wizard remains planned; this installs the working showcase.
-`);
-  if (flags.has('--dry-run')) { console.log('Dry run: no writes, installation or network requests.'); return; }
-  if (!flags.has('--yes')) {
-    if (!stdin.isTTY || flags.has('--no-interaction')) throw new Error('Noninteractive setup requires --yes after reviewing --dry-run.');
-    const prompt = createInterface({ input: stdin, output: stdout });
-    try { if (!/^y(es)?$/i.test((await prompt.question('Continue with this plan? [y/N] ')).trim())) { console.log('Cancelled; no changes.'); return; } }
-    finally { prompt.close(); }
+let jsonOutput = process.argv.includes('--json');
+async function setup() {
+  let options = await setupOptions(process.argv.slice(2)); jsonOutput = Boolean(options.json);
+  if (options.help) { console.log(options.json ? JSON.stringify({ help: setupHelp }) : setupHelp); return; }
+  const [major, minor] = process.versions.node.split('.').map(Number);
+  if (major < 22 || (major === 22 && minor < 13)) throw new Error('Node 22.13+ is required; Node 24.21.0 is the qualified development version');
+  const root = process.cwd();
+  const existing = await readJournal(root);
+  const previous = options.resume ? existing : null;
+  if (options.resume && !previous) throw new Error('No setup journal exists; start setup without --resume');
+  if (previous) options = await resumeOptions(options, previous.options);
+  const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+  if (!pkg.allowScripts || typeof pkg.allowScripts !== 'object' || Array.isArray(pkg.allowScripts)) throw new Error('Missing reviewed package allowScripts policy');
+  if (!options.yes && !options['dry-run'] && (!stdin.isTTY || options['no-interaction'])) throw new Error('Noninteractive setup requires --yes after reviewing --dry-run');
+  let planned = await planIdentity(root, options, previous);
+  if (!options.yes && !options['dry-run'] && !options.resume && stdin.isTTY) {
+    const prompt = createInterface({ input: stdin, output: options.json ? stderr : stdout });
+    try {
+      for (const key of ['id', 'name', 'description', 'author', 'repo', 'version']) {
+        const answer = await prompt.question(`${key} [${planned.identity[key] ?? 'optional owner/repo'}]: `);
+        if (answer.trim()) options[key] = answer.trim();
+      }
+      options.identityRequested = ['id', 'name', 'description', 'author', 'repo', 'version'].some(key => options[key] !== undefined);
+      planned = await planIdentity(root, options, previous);
+    } finally { prompt.close(); }
   }
-  if (!flags.has('--skip-install')) {
-    const npm = process.env.npm_execpath;
-    if (!npm) throw new Error('Run setup through npm run setup so its npm launcher is known.');
-    await runNode(npm, ['ci', '--no-fund'], { env: install.env });
+  const plan = { status: 'planned', identity: planned.identity, profile: options.profile,
+    lifecycleHooks: { reviewedAllowlist: Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name),
+      persistentPolicyPreserved: true, installation: 'npm ci may replace node_modules; registry/network access and reviewed dependency hooks are part of the selected install stage' },
+    files: planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })),
+    migration: planned.migration ? { from: planned.migration.from, to: planned.migration.to, oldInstallationPreserved: true,
+      files: planned.migration.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path: `.dev-vault/.obsidian/plugins/${path}`, status, beforeHash, afterHash })) } : null,
+    stages: setupStages(options), exclusions: ['No personal vault, host install, global packages, PATH edits, Restricted Mode changes, enabling plugins, publishing, or dependency upgrades',
+      'Only root package-lock identity metadata changes; resolved dependency entries are retained', 'Multi-file edits, dependency installation and caches are separate stages, not one globally atomic transaction'],
+  };
+  const progress = options.json ? stderr : stdout;
+  if (options['dry-run']) { console.log(options.json ? JSON.stringify({ ...plan, dryRun: true }) : `Dry run: no writes, installation, network, child processes or reports.\n${JSON.stringify(plan, null, 2)}`); return; }
+  progress.write(`Reviewed setup plan\n${JSON.stringify(plan, null, 2)}\n`);
+  if (projectInstallEnvironment().removedKeys.length) progress.write('Nested install: discard the forwarded allow-scripts environment value; reload persistent policy. Other npm configuration is preserved.\n');
+  if (!options.yes) {
+    const prompt = createInterface({ input: stdin, output: progress });
+    try { if (!/^y(es)?$/i.test((await prompt.question('Apply this plan and run its selected stages? [y/N] ')).trim())) {
+      console.log(options.json ? JSON.stringify({ status: 'cancelled', written: false }) : 'Cancelled; no changes.'); return;
+    } } finally { prompt.close(); }
   }
-  await runNode('scripts/bundling/build.mjs');
-  await runNode('node_modules/vue-tsc/bin/vue-tsc.js', ['--noEmit']);
-  await runNode('node_modules/vitest/vitest.mjs', ['run']);
-  if (local) await runNode('scripts/dev/install-local.mjs', ['--no-build']);
-  console.log(`
-Setup completed.
-Browser: npm run dev:ui
-Obsidian: open ${resolve('.dev-vault')}, enable ${manifest.name}, then run “Open capability showcase”.
-Full browser/native/release qualification is separate: npm run help.`);
+  const result = await executeSetup(root, options, planned, existing);
+  const handoff = { status: result.status, identity: result.identity, toolchain: result.toolchain, profile: options.profile,
+    inputFingerprint: result.fingerprint, lockHash: result.lockHash,
+    scope: { staticServiceArtifactChecks: 'verified', servedBrowser: 'not-run', nativeHost: 'not-run', release: 'not-run' },
+    stages: result.stages, migration: result.migration, journal: '.template-state/setup.json',
+    vault: options.profile === 'native' ? resolve('.dev-vault') : null,
+    next: options.profile === 'native' ? `Open the contained vault and deliberately enable ${planned.identity.name}. Old migrated installation remains preserved and disabled.` : 'Run npm run dev:ui. Browser/native/device/release qualification remains separately scoped.' };
+  console.log(options.json ? JSON.stringify(handoff) : `Setup completed.\n${JSON.stringify(handoff, null, 2)}`);
 }
-setup().catch(error => { console.error(`Setup stopped: ${error.message}
-Completed steps are retained. Fix the reported issue and rerun; no user data is reset.`); process.exitCode = 1; });
+setup().catch(error => {
+  if (jsonOutput) console.log(JSON.stringify({ status: 'failed', code: 'setup.failed', message: error.message,
+    recovery: 'Completed stages and original vault data are preserved; inspect .template-state/setup.json and retry with --resume', ...(error.report ? { filePlan: error.report } : {}) }));
+  else console.error(`Setup stopped: ${error.message}\nCompleted stages are preserved. Correct the failed step, then use --resume. No user data is reset.`);
+  process.exitCode = 1;
+});

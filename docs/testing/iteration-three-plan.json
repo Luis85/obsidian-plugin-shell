@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "milestone": "0.3.0",
+  "legacyPlan": "test-plan.json",
+  "legacyAcceptancePromotion": false,
+  "families": [
+    {
+      "id": "NATIVE-SERVICE-API",
+      "files": ["tests/runtime/modal-service.test.ts", "tests/runtime/modal-adapters.test.ts", "tests/runtime/notification-sinks.test.ts", "tests/e2e/modals.spec.ts", "scripts/testing/native-modals.mjs"],
+      "modes": ["deterministic-service-and-adapter", "served-browser", "native-obsidian"],
+      "scope": "Dedicated modal outcomes, validation, caller snapshots, cancellation, focus/keyboard ownership, native-first notice helpers and independent execution scopes."
+    },
+    {
+      "id": "COMMAND-RIBBON",
+      "files": ["tests/runtime/commands.test.ts", "tests/runtime/native-commands.test.ts", "scripts/testing/native-command-contract.mjs"],
+      "modes": ["deterministic-command-and-adapter", "native-obsidian"],
+      "scope": "Explicit feature factories and registry, availability and shared single-flight dispatch, typed outcomes, partial registration cleanup and public local-ID removal semantics."
+    },
+    {
+      "id": "LOGGING-DEBUGGING",
+      "files": ["tests/runtime/logging.test.ts", "tests/runtime/debugging-commands.test.ts", "scripts/testing/native-debugging.mjs"],
+      "modes": ["deterministic-service", "native-obsidian"],
+      "scope": "Typed static catalogs, safe immutable metadata, bounded logs, independent diagnostics, reentry-safe delivery and attributable sanitized debug reports."
+    },
+    {
+      "id": "PRESENTATION-CONCERNS",
+      "files": ["tests/tooling/presentation.checks.mjs", "scripts/quality/check-presentation.mjs"],
+      "mode": "parser-backed-tooling-negative-fixtures",
+      "scope": "Minimal Vue bindings under components, TypeScript composables/stores/context, actual failing misplaced/imperative/reverse-dependency fixtures."
+    },
+    {
+      "id": "SETUP-IDENTITY",
+      "files": ["tests/tooling/setup-identity.checks.mjs", "tests/tooling/build.checks.mjs", "tests/runtime/identity.test.ts", "tests/tooling/identity-styles.checks.mjs"],
+      "modes": ["dependency-free-tooling", "synthetic-component", "build-contract"],
+      "scope": "Reviewed metadata and namespace changes, data-only answers, verified resume, contained disabled-plugin migration, no clobber, source fingerprints and retained rollback recovery."
+    },
+    {
+      "id": "AUTHOR-TOOLS",
+      "files": ["tests/tooling/file-plan.checks.mjs", "tests/tooling/makers.checks.mjs"],
+      "mode": "tooling-and-generated-repository-contract",
+      "scope": "Shared safe file plans, stale planning/apply protection, independent generated feature/entity CRUD, actual catalog validation, identical rerun and edited-file preservation."
+    },
+    {
+      "id": "RUNTIME-SERVICES",
+      "files": ["tests/runtime/host-events.test.ts", "tests/runtime/notification-policy.test.ts", "tests/runtime/notification-sinks.test.ts"],
+      "mode": "deterministic-service-and-host-contract",
+      "scope": "Eight owned native mappings; validated payloads, cleanup and layout coalescing; timed/queued notification handles, essential recovery, locale changes and guarded actions."
+    },
+    {
+      "id": "FEATURE-03",
+      "files": ["tests/runtime/feature-extension.test.ts"],
+      "mode": "deterministic-extension-contract",
+      "scope": "Third feature authored through the public API and one registration, real CRUD, inferred types, independent entities, catalog validation and cleanup after registration failure."
+    },
+    {
+      "id": "ENTITY-03",
+      "files": ["tests/runtime/entities.test.ts"],
+      "mode": "deterministic-contract",
+      "scope": "Typed field definitions, explicit mappings/catalog, Task/Project reuse, scalar fidelity and preserving YAML codec."
+    },
+    {
+      "id": "REPO-03",
+      "files": ["tests/runtime/repository.test.ts", "tests/runtime/repository-failures.test.ts"],
+      "mode": "deterministic-service",
+      "scope": "CRUD, exact writes, revision conflicts, uncertainty, metadata validation, disposal, queued destination changes and lossless mappings."
+    },
+    {
+      "id": "ADAPTER-03",
+      "files": ["tests/runtime/native-adapters.test.ts", "tests/runtime/native-adapters-host.test.ts", "tests/runtime/native-adapters-composition.test.ts", "tests/runtime/browser-storage.test.ts"],
+      "mode": "synthetic-host-contract",
+      "scope": "Production adapters against explicit host doubles, config-directory containment, process revisions, trash and fault semantics. Not native-host evidence."
+    },
+    {
+      "id": "FOUNDATION-03",
+      "files": ["tests/runtime/components.test.ts", "tests/runtime/settings-components.test.ts", "tests/runtime/native-lifecycle.test.ts", "tests/runtime/ownership-failures.test.ts", "tests/runtime/view-state.test.ts"],
+      "mode": "deterministic-component-lifecycle",
+      "scope": "Real services/actions and Vue components, settings, bootstrap, owned cleanup and independent error observation."
+    },
+    {
+      "id": "UI-03",
+      "files": ["tests/runtime/repository-panel.test.ts", "tests/e2e/repository.spec.ts"],
+      "modes": ["deterministic-component", "served-browser"],
+      "scope": "List/edit/status, persisted CRUD, stale drafts, explicit reversible deletion, folder changes and narrow/wide layouts."
+    },
+    {
+      "id": "COV-03",
+      "files": ["tests/tooling/coverage.checks.mjs", "scripts/quality/coverage-inventory.mjs"],
+      "mode": "tooling-negative-fixtures",
+      "scope": "All production inputs accounted for; independent production/domain thresholds computed from valid raw counts; actual failing CLI probes."
+    },
+    {
+      "id": "SOURCE-CODE-LINES",
+      "files": ["tests/verification/source.test.mjs", "scripts/testing/code-lines.mjs"],
+      "mode": "dependency-free-tooling-negative-fixtures",
+      "scope": "Code-only 100/400/450 gates; comments/blanks excluded, literals preserved, full SFC regions and compiler-valid adversarial fixtures."
+    },
+    {
+      "id": "NATIVE-REPOSITORY",
+      "files": ["scripts/testing/native-repository.mjs"],
+      "mode": "native-obsidian",
+      "scope": "Isolated host canonical reads, identity/body/property-preserving updates, cancellation and exact-byte reversible trash recovery; execution recorded separately."
+    }
+  ],
+  "thresholds": {
+    "production": { "lines": 90, "statements": 90, "functions": 90, "branches": 85 },
+    "domainApplicationFeatures": { "lines": 95, "statements": 95, "functions": 95, "branches": 90 },
+    "selectedCore": { "lines": 95, "statements": 90, "functions": 90, "branches": 90 }
+  },
+  "pendingTemplateScope": ["broader UI and custom-maker catalog", "automatic example removal", "plugin-data entity backend", "mobile/device qualification", "public release promotion"]
+}

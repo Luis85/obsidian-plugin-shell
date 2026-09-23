@@ -7,7 +7,7 @@
     {
       "id": "LAYOUT-02",
       "files": [
-        "tests/e2e/iteration-two.spec.ts"
+        "tests/e2e/layout-and-header.spec.ts"
       ],
       "cases": [
         "UI-02-L320",
@@ -25,7 +25,7 @@
       "id": "HEADER-02",
       "files": [
         "tests/runtime/header.test.ts",
-        "tests/e2e/iteration-two.spec.ts",
+        "tests/e2e/layout-and-header.spec.ts",
         "scripts/testing/native-header-checks.mjs"
       ],
       "cases": [
@@ -83,7 +83,7 @@
     {
       "id": "FEEDBACK-02",
       "files": [
-        "tests/e2e/iteration-two.spec.ts"
+        "tests/e2e/layout-and-header.spec.ts"
       ],
       "cases": [
         "UI-02-NOTICE"
