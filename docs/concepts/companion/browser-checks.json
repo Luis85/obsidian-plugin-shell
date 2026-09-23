@@ -1,0 +1,277 @@
+{
+  "scope": "embedded HTML concept; no native/runtime/backend qualification",
+  "browser": "144.0.7559.96",
+  "count": 52,
+  "tests": [
+    {
+      "name": "Fresh workspace renders with no prerequisites",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Storage denial falls back to memory",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Keyboard palette opens unbound workflow safely",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Plan distinguishes existing command from proposed binding",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Eight-stage creation journey completes",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Setup neither activates nor promotes unrun scopes",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Activation is a separate deliberate fixture action",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Maker file navigation displays the fixture",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Maker increments source and leaves old verification stale",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Identical maker rerun is no-op",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Entity-with-document targets selected group",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Verify updates only its named scope and build",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Source edit makes previous evidence stale",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Stale candidate cannot be deployed",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Target collision preserves installed candidate",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Deployment advances assets without changing activation",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Session ownership appears without a server",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Session stop releases fixture",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Tool catalog search",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "All 33 baseline scripts appear",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Attached project begins inspect-only",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Attached project requires execution trust",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Trust grant does not execute",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Note commit is explicit and duplicate-safe",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Handoff is labeled and excludes paths",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Explicit text export has correct filename",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Light theme affects the entire concept",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Missing Node blocks setup",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Offline acquisition reports failure",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Cached fixture is a separate acquisition route",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Companion ID is protected",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Reserved device name rejected",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Vault binding requires designation",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Stale plan revokes approval before run",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Dependency failure retains identity without deployment",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Reviewed resume keeps the failed receipt",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Cancellation is terminal and retains draft",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Edited scaffold is never overwritten",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Generated test failure preserves source",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Offline audit is failed, not clean",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Tour resumes without running work",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "User source text is escaped",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Controlled Storage fixture rehydrates project",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Controlled Storage fixture rehydrates wizard",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Future state is preserved",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Malformed state falls back safely",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "No document overflow at 1024px",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "No document overflow at 390px",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Narrow navigation closes after selection",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Narrow wizard fits viewport",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Zero console or page errors across tested routes",
+      "result": "passed",
+      "scope": "browser concept only"
+    },
+    {
+      "name": "Zero network requests across tested routes",
+      "result": "passed",
+      "scope": "browser concept only"
+    }
+  ],
+  "errors": [],
+  "networkRequests": [],
+  "limitations": [
+    "File/loopback navigation blocked by managed policy; HTML injected with set_content.",
+    "Persistence tests use a controlled Storage stand-in.",
+    "No real Obsidian, CLI, filesystem, process or screen-reader qualification."
+  ],
+  "artifact": "docs/concepts/companion/index.html",
+  "artifactSha256": "f3d1c226026aef5fa9a9d3197dd44cb993346fa98ac0c0c838850d2c20668a9c",
+  "artifactBytes": 122469
+}
