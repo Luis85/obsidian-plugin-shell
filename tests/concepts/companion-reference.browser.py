@@ -24,7 +24,9 @@ def check(name,condition,scope='browser interaction'):
 def act(p,name,value=None,scope=''):
     q=f'{scope} [data-action="{name}"]'
     if value is not None:q+=f'[data-value="{value}"]'
-    p.locator(q.strip()).first.click()
+    if name=='ref-content' and scope=='#ref-node-toolbar' and not p.locator('#ref-node-toolbar').is_visible():
+        p.locator(f'.map-node[data-node="{value}"] .ref-card-open').click()
+    else:p.locator(q.strip()).first.click()
 def js(p,expr):return p.evaluate(expr)
 def header(p,id='node-2'):
     p.locator(f'.map-node[data-node="{id}"] .map-card-title').click()
@@ -58,7 +60,7 @@ with sync_playwright() as pw:
     try:
         p=new()
         check('Actual Vue Flow runtime renders all five sample surfaces',p.locator('.vue-flow__node').count()==5 and js(p,'!!flowUi.api'))
-        check('All fifteen library-backed content instances remain',p.locator('.content-brick').count()==15)
+        check('All fifteen instances remain, with view-owned legacy content retained separately',js(p,'design().nodes.reduce((sum,n)=>sum+bricksOf(n).length,0)')==15 and p.locator('.content-brick').count()==12 and p.locator('.retained-view-content').count()==1)
         check('Canvas-first controls replace detached per-card toolbars',p.locator('.map-node .flow-card-toolbar').count()==0 and p.locator('.ref-main-dock').count()==1)
         check('Fresh canvas has a plain background and structure panel',js(p,'!canvasPreferences().grid') and p.locator('.outline-tree.ref-panel').is_visible())
         snap(p,'01-canvas-light.png')

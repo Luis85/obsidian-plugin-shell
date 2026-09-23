@@ -19,13 +19,13 @@ function handleConnectionAction(action,value){
 }
 function editConnectionField(el,commit){
  const key=el.dataset.field;if(!key?.startsWith('connection-'))return false;
- const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
+ const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-label'){connectionUi.structure.label=v;return true;}if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
  connectionUi.error='';const error=document.getElementById('connection-error');if(error)error.textContent='';
  if(k==='structure-parent'){if(connectionUi.structure)connectionUi.structure.parent=v||null;return true;}
  const f=connectionUi.form;if(!f)return true;
  f[k]=v;if(k==='slug')f.autoSlug=false;if(k==='actionLabel')f.autoAction=false;
  if(k==='label'){
-  if(f.autoSlug){f.slug=v.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);const input=document.getElementById('connection-slug');if(input)input.value=f.slug;}
+  if(f.autoSlug){f.slug=allocateSurfaceCode(design(),v);const input=document.getElementById('connection-slug');if(input)input.value=f.slug;}
   if(f.autoAction&&f.direction==='outgoing'){f.actionLabel='Open '+v;const input=document.getElementById('connection-actionLabel');if(input)input.value=f.actionLabel;}
   const summary=document.getElementById('connection-summary');const origin=design().nodes.find(n=>n.id===f.origin);
   if(summary&&origin)summary.innerHTML='<span>'+esc(f.direction==='incoming'?v:origin.label)+'</span>'+icon('arrow')+'<span>'+esc(f.direction==='incoming'?origin.label:v)+'</span>';

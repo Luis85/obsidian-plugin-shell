@@ -26,9 +26,12 @@ function bricksOf(n){return n?.bricks||[];}
 function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
- if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:128+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
+ if(n?.kind==='view')return {width:MAP_SIZE.w,height:bricksOf(n).length?326:300};
+ if(n?.kind==='group')return {width:MAP_SIZE.w,height:180};
+ if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:300};
+ return {width:MAP_SIZE.w,height:148+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
 }
+
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){
  const c=brickDefinition(d,kind);if(!c)throw Error('Restore an available '+BRICK_KINDS[kind].label+' definition in the component library first.');

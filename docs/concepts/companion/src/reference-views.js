@@ -1,7 +1,7 @@
 // Canvas-first shell, restrained overview cards and synchronized full-page editing.
 function referenceSelectionToolbar(n){
  return `<div class="ref-selection-name">${esc(n.label)}</div><div class="ref-selection-actions" role="toolbar" aria-label="Actions for ${esc(n.label)}">
- ${canHaveBricks(n)?referenceTool('Edit page content','ref-content',n.id,'content'):''}
+ ${n.kind==='view'?referenceTool('Configure view container','design-edit',n.id,'content'):canHaveBricks(n)?referenceTool('Edit page content','ref-content',n.id,'content'):''}
  ${referenceTool('Surface properties','design-edit',n.id,'properties')}
  ${referenceTool('Add component or screen','library-card-add',n.id,'plus')}
  ${n.kind!=='group'?referenceTool('Add connected card','connection-card-add',n.id,'link'):''}
@@ -71,7 +71,7 @@ function referenceCardContents(n,lib,children,collapsed){
  ${children?`<button class="flow-collapse ref-collapse nodrag nopan" data-action="canvas-collapse" data-value="${n.id}" aria-label="${collapsed?'Expand':'Collapse'} ${esc(n.label)} branch">${collapsed?'+':'−'}<span>${children}</span></button>`:''}</header>
  <div class="brick-stack ${mode}" data-brick-stack="${n.id}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')}</div>
  <button class="brick-add nodrag nopan" data-action="brick-add" data-value="${n.id}">${icon('plus')} ${items.length?'Add component':'Plan this screen'}</button>
- <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
+ <div class="card-layout-name" title="Layout template">${icon("layers")} ${esc(surfaceLayoutName(n))}</div><div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
 }
 function referenceSketch(kind){const extended=componentWireframe(kind);if(extended)return extended;
  const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`;

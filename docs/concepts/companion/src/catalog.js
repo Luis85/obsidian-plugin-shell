@@ -1,6 +1,6 @@
 // Data-only design catalog. Availability describes the repository backend, not this UI.
 const PLACEMENTS = {tab:'Main workspace',left:'Left sidebar',right:'Right sidebar',split:'Split pane',window:'Pop-out window'};
-const NODE_KINDS = {view:'Native view',page:'Internal screen',modal:'Dialog',settings:'Native settings',group:'Navigation group',action:'Action'};
+const NODE_KINDS = {view:'View container',page:'Internal screen',modal:'Dialog',settings:'Native settings',group:'Navigation group',action:'Action'};
 const LAYOUTS = [
  ['sidebar-left','Left navigation shell','Navigation rail and a content region inside one view.','adaptive'],
  ['sidebar-right','Right inspector shell','Content with an internal right inspector.','wide'],

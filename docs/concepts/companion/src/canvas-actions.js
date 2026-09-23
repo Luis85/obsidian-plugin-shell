@@ -6,7 +6,7 @@ function handleCanvasAction(action,value){
    if(flowUi.dragging||flowUi.suppressClick)return true;
    if(canvasUi.connecting){const target=d.nodes.find(x=>x.id===value);if(!target||target.kind==='group'){notify('Connect to a surface or action, not an organizing group.');break;}designUi.form={from:canvasUi.connecting,to:value,label:'Open '+target.label,owner:designOwner(),baseRevision:d.revision};canvasUi.connecting=null;designUi.error='';showModal('design-connect');}
    else {designUi.selected=value;canvasUi.edge=null;paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
-  case 'canvas-child':designUi.selected=value;startNodeForm('page');break;
+  case 'canvas-child':designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
   case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
   case 'canvas-outline':referencePaneMode('structure');break;
@@ -36,7 +36,7 @@ function handleCanvasAction(action,value){
   case 'canvas-remove-edge-confirm':if(!validDestructiveReview('canvas-edge-remove',value))break;closeModal();dispatch('design-unlink',value);canvasUi.edge=null;break;
   case 'canvas-card-menu':designUi.selected=value;showModal('canvas-card-menu',value);break;
   case 'canvas-menu-edit':closeModal();startNodeForm('view',value);break;
-  case 'canvas-menu-child':closeModal();designUi.selected=value;startNodeForm('page');break;
+  case 'canvas-menu-child':closeModal();designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
   case 'canvas-menu-remove':showModal('design-remove',value);break;
   case 'canvas-menu-duplicate':closeModal();dispatch('design-duplicate',value);break;
   case 'canvas-menu-entry':closeModal();dispatch('design-entry',value);break;

@@ -40,7 +40,7 @@ function sectionLayouts(d){
  const out=Object.create(null),bands=[];let y=72;
  for(const s of referenceSections(d)){
   const nodes=d.nodes.filter(n=>s.members.includes(n.id)),sub={...d,nodes:nodes.map(n=>({...n,parent:nodes.some(x=>x.id===n.parent)?n.parent:null}))};
-  const positions=layoutPositions(sub,'vertical');
+  const positions=layoutSectionNodes(sub,'vertical');
   const height=nodes.length?Math.max(...nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+104:300;
   for(const n of nodes)out[n.id]={x:positions[n.id].x+48,y:positions[n.id].y+y};
   bands.push({...s,y,height,width:Math.max(420,...nodes.map(n=>positions[n.id].x+MAP_SIZE.w+96))});y+=height+96;
@@ -78,7 +78,7 @@ function paintReferenceChrome(){
   const projection=flowUi.api?.getNodes.value.find(x=>x.id===n?.id);
   const p=projection?.position||c.positions[n?.id],size=n&&brickSurfaceSize(n);
   const visible=n&&p&&visibleMapNodes().some(x=>x.id===n.id);
-  toolbar.hidden=!visible||flowUi.dragging||flowUi.connecting;
+  toolbar.hidden=!visible||flowUi.dragging||flowUi.connecting||!!canvasUi.edge;
   if(visible){
    if(toolbar.dataset.node!==n.id){toolbar.dataset.node=n.id;toolbar.innerHTML=referenceSelectionToolbar(n);}
    const right=referenceUi.panel==='none'?vp.clientWidth-12:vp.clientWidth-294;
@@ -87,7 +87,7 @@ function paintReferenceChrome(){
    toolbar.style.left=Math.max(12,Math.min(right-toolbar.offsetWidth,cardX+MAP_SIZE.w*c.zoom/2-toolbar.offsetWidth/2))+'px';
    const width=toolbar.offsetWidth,height=toolbar.offsetHeight,vr=vp.getBoundingClientRect();
    const card={x:cardX,y:cardY,w:MAP_SIZE.w*c.zoom,h:size.height*c.zoom};
-   const obstacles=[card,...[...document.querySelectorAll('.ref-canvas-top,.ref-main-dock,.ref-zoom-dock,.ref-panel')].filter(e=>e.offsetWidth&&e.offsetHeight).map(e=>{const r=e.getBoundingClientRect();return {x:r.x-vr.x,y:r.y-vr.y,w:r.width,h:r.height};})];
+   const obstacles=[card,...[...document.querySelectorAll('.ref-canvas-top,.ref-main-dock,.ref-zoom-dock,.ref-panel,.flow-edge-label,.vue-flow__edgeupdater,.map-node')].filter(e=>e.getBoundingClientRect().width&&e.getBoundingClientRect().height).map(e=>{const r=e.getBoundingClientRect();return {x:r.x-vr.x,y:r.y-vr.y,w:r.width,h:r.height};})];
    const overlap=(x,y,r)=>x<r.x+r.w+5&&x+width>r.x-5&&y<r.y+r.h+5&&y+height>r.y-5;
    const center=cardX+card.w/2-width/2;
    const candidates=[[center,cardY-height-12],[center,cardY+card.h+12],[cardX+card.w+16,cardY],[cardX-width-16,cardY],[vp.clientWidth-width-14,12],[14,65]];

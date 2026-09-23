@@ -1,6 +1,23 @@
 // Bounded deterministic layouts for at most 60 concept surfaces. No external engine.
 function layoutPositions(d,mode){
- if(mode==="sections")return sectionLayouts(d).positions;
+ if(mode==='sections'||d.canvas?.sections?.length)return partitionedLayout(d,mode==='sections'?'vertical':mode);
+ return layoutSectionNodes(d,mode);
+}
+function partitionedLayout(d,mode){
+ const out=Object.create(null);let y=96;
+ for(const section of referenceSections(d)){
+  const nodes=d.nodes.filter(n=>section.members.includes(n.id));
+  const ids=new Set(nodes.map(n=>n.id));
+  const sub={...d,nodes:nodes.map(n=>({...n,parent:ids.has(n.parent)?n.parent:null}))};
+  const local=layoutSectionNodes(sub,mode),left=nodes.length?Math.min(...nodes.map(n=>local[n.id].x)):0;
+  const top=nodes.length?Math.min(...nodes.map(n=>local[n.id].y)):0;
+  for(const n of nodes)out[n.id]={x:local[n.id].x-left+88,y:local[n.id].y-top+y};
+  const bottom=nodes.length?Math.max(...nodes.map(n=>out[n.id].y+brickSurfaceSize(n,d).height)):y+176;
+  y=bottom+196;
+ }
+ return out;
+}
+function layoutSectionNodes(d,mode){
  const out=Object.create(null),{w,gapX,gapY}=MAP_SIZE,h=Math.max(MAP_SIZE.h,...d.nodes.map(n=>brickSurfaceSize(n,d).height)),dx=w+gapX,dy=h+gapY;
  const ordered=designNodesInOrder(d),roots=d.nodes.filter(n=>!n.parent||!d.nodes.some(x=>x.id===n.parent));
  if(mode==='grid'||mode==='free'){

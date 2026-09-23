@@ -30,7 +30,7 @@ function canvasCommit(fn,message){
 }
 function arrangeMap(layout){
  if(!Object.hasOwn(MAP_LAYOUTS,layout))return;
- const d=design();canvasCommit(c=>{c.layout=layout;if(layout!=='free')c.positions=layoutPositions(d,layout);c.custom=false;c.arrangedFor=canvasStructure(d);c.fitted=false;},'Applied '+MAP_LAYOUTS[layout]+'. Surface structure and generation plans are unchanged.');
+ const d=design();canvasCommit(c=>{c.layout=layout;if(layout!=='free'){c.positions=layoutPositions(d,layout);placeEmptySections(d);}c.custom=false;c.arrangedFor=canvasStructure(d);c.fitted=false;},'Applied '+MAP_LAYOUTS[layout]+'. Surface structure and generation plans are unchanged.');
 }
 function canvasAnnounce(text){
  const e=document.getElementById('canvas-live');if(e)e.textContent=text;
@@ -58,7 +58,7 @@ function canvasBounds(nodes=visibleMapNodes()){
 }
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
- const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&c.sections?.length){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
+ const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&(c.sections?.length||c.layout==='sections')){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
  const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
  const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
  c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));

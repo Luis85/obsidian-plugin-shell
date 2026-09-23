@@ -1,12 +1,16 @@
 # Shell Workbench companion concept
 
-> Concept 11 — unified components and stable spatial editing, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
+> Concept 12 — view containers and reviewed connections, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
 
 Open [index.html](index.html) locally in a desktop browser. All runtime scripts, styles and SVG icons are embedded, including the reviewed Vue, Pinia and Vue Flow bundles. No server, npm install or runtime CDN is needed. GitHub displays HTML source rather than executing it.
 
 ## Current iteration
 
-All components now use the content-brick workflow. The 44-entry library supports website/application patterns, editable tags and filtering/sorting. Sections are content-aware drop zones. Connector origins stay pinned while cards move; handles appear on hover, selection, focus or drawing. Alignment guides and independent magnetic snapping support precise placement. See [code/product review](UNIFIED-REVIEW.md) and [current verification](UNIFIED-VERIFICATION.md).
+Native views are depicted as **view containers** with a host layout, placement and child-screen outlet. Navigation groups are compact organizational nodes in every display. Screen cards show the selected layout name; complete Structure previews and shared dimensions prevent cropping and incorrect section padding. All automatic arrangements keep visual sections separate.
+
+New surface code names receive an incremental suffix only on collision. Connection captions are editable, modal deletion preserves surfaces, and selected lines expose draggable endpoints that open a review before saving. Existing anchor choices stay fixed during card movement. See [current product/code review](CONTAINERS-REVIEW.md) and [verification](CONTAINERS-VERIFICATION.md).
+
+The established 44-entry component library, ordered content editor, tags, guidelines, visual section drop zones and PRD-to-setup workflow remain available. Previously authored components on native views are retained explicitly rather than silently removed.
 
 ## Review the current experience
 
@@ -28,13 +32,14 @@ python3 scripts/concepts/build-companion.py --check
 Run these browser suites from the repository root with pre-provisioned Python Playwright and Chromium:
 
 ```sh
+python3 tests/concepts/companion-containers.browser.py
 python3 tests/concepts/companion-unified.browser.py
 python3 tests/concepts/companion-reference.browser.py
 python3 tests/concepts/companion-reference-graph.browser.py
 python3 tests/concepts/companion-reconciliation.browser.py
 ```
 
-The current qualification is 159 scoped checks on one artifact, plus syntax checks for 45 authored JavaScript files. Historical evidence is not added to this total. Some older suites assert the pre-reference toolbar layout; they need deliberate locator migration and are not declared passing here.
+The current qualification is 223 scoped checks on one artifact, plus syntax checks for 47 authored JavaScript files. Historical evidence is not added to this total. Some older suites assert the pre-reference toolbar layout; they need deliberate locator migration and are not declared passing here.
 
 The template has advanced beyond the iteration-03 capabilities used by many concept fixtures. The concept's script inventory and source previews are illustrative, not live detection of current repository capabilities. Production authoring and readiness are documented in the [parent PRD](../../product/PRD.md); the [companion PRD](../../product/COMPANION-PLUGIN-PRD.md) remains a proposed product contract with its dated baseline.
 

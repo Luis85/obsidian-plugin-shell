@@ -30,7 +30,7 @@ def js(p, code):
 
 def edit(p):
     p.locator('.map-node[data-node="node-2"] .map-card-title').click()
-    act(p, 'ref-content', 'node-2', '#ref-node-toolbar')
+    p.locator('.map-node[data-node="node-2"] .ref-card-open').click()
     p.wait_for_selector('.ref-editor')
 
 def canonical(p):

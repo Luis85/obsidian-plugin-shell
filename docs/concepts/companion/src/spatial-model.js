@@ -2,7 +2,7 @@
 const spatialUi={guides:[],zones:[],drop:null,last:null,alt:false,frame:0};
 function validAnchorMap(value){
  if(value===undefined)return true;
- return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=60&&Object.entries(value).every(([id,a])=>id.length<=140&&a&&typeof a.source==='string'&&typeof a.target==='string'&&a.source.length<=120&&a.target.length<=120&&/^structure-out-(left|right|top|bottom)$/.test(a.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(a.targetHandle));
+ return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=60&&Object.entries(value).every(([id,a])=>id.length<=140&&a&&typeof a.source==='string'&&typeof a.target==='string'&&a.source.length<=120&&a.target.length<=120&&(a.label===undefined||typeof a.label==='string'&&a.label.trim().length>0&&a.label.length<=120)&&/^structure-out-(left|right|top|bottom)$/.test(a.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(a.targetHandle));
 }
 function initialStructureAnchor(d,n){
  const c=d.canvas,points=c.positions,a=points[n.parent],b=points[n.id];let side=c.layout==='horizontal'?'right':'bottom';

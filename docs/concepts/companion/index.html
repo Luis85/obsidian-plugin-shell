@@ -1240,6 +1240,68 @@ body.sitemap-workspace #content:has(.ref-studio){overflow:hidden!important}
 .section-control .ref-tool{background:var(--ref-panel);width:30px;height:30px}
 .unified-tag-select{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
 .unified-tag-select select{width:150px}
+/* Geometry is authoritative for every display, including non-content surfaces. */
+#vf-root .map-node{box-sizing:border-box;height:var(--brick-height)!important;width:244px;padding:0;overflow:visible}
+#vf-root .map-node .flow-node-content{box-sizing:border-box;min-width:0;min-height:0;height:100%;padding:12px 14px;gap:0}
+#vf-root .map-node .map-card-layout{height:86px;min-height:86px;margin:5px 0 8px;overflow:visible;flex:none}
+#vf-root .map-node .surface-layout-svg{display:block;width:100%;height:100%;stroke:none;fill:var(--accent-soft)}
+.surface-layout-svg .outlet{fill:var(--raised);stroke:var(--line);stroke-width:1.2}
+.surface-layout-svg .rail{fill:var(--accent-soft);stroke:var(--accent);stroke-opacity:.3;stroke-width:1}
+#vf-root .map-node .map-card-title{flex:none;line-height:22px;margin:4px 0;max-height:44px}
+#vf-root .map-node .map-card-slug{flex:none;line-height:14px;margin-bottom:2px}
+#vf-root .map-node:not(.brick-page) .flow-card-intent{flex:none;min-height:16px;max-height:32px;font-size:11px;line-height:16px}
+#vf-root .map-node .flow-card-meta{flex:none;margin-top:4px;min-height:22px;font-size:10px;gap:6px;display:flex;align-items:center}
+#vf-root .map-node:not(.brick-page) .flow-card-bindings{margin-top:auto;max-height:21px;min-height:16px;overflow:hidden;font-size:10px}
+#vf-root .map-node.kind-view{border:2px solid var(--map-accent);border-radius:12px;background:var(--surface)}
+#vf-root .map-node.kind-view .flow-node-content{padding:12px;overflow:hidden;gap:3px}
+.container-heading{display:flex;align-items:center;justify-content:space-between;min-height:21px;color:var(--muted);font-size:10px;flex:none}
+.container-heading>span{display:flex;gap:6px;align-items:center}.container-heading svg{width:14px;height:14px;color:var(--accent)}
+.container-heading .ref-card-more{position:static!important;width:22px;height:20px;display:grid;place-items:center}
+.container-identity{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;min-height:18px;flex:none}
+.container-identity code{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;opacity:.75}
+.container-entry{color:var(--accent);font-size:9px;font-weight:600;white-space:nowrap}
+.container-layout{border:1px dashed var(--line);border-radius:6px;padding:7px;background:var(--bg);height:107px;flex:none;margin:6px 0}
+.container-layout-label{display:flex;align-items:center;justify-content:space-between;font-size:10px;line-height:17px;margin-bottom:4px;color:var(--text)}
+.container-layout-label small{font-size:8px;color:var(--muted)}
+#vf-root .map-node .container-layout .surface-layout-svg{height:68px!important;width:100%!important}
+.container-outlet{display:flex;justify-content:space-between;align-items:center;gap:7px;font-size:9px;color:var(--muted);line-height:16px;flex:none}
+.container-outlet span{display:flex;align-items:center;gap:5px}.container-outlet svg{width:12px;height:12px}
+.container-caption{font-size:9px!important;line-height:14px;margin:0!important;color:var(--muted);flex:none}
+.container-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto;min-height:25px;border-top:1px solid var(--line);padding-top:4px}
+.container-footer button{font-size:9px;line-height:16px;border:0;background:transparent;color:var(--accent);padding:2px 0;display:inline-flex;gap:3px;align-items:center}
+.container-footer svg{width:12px;height:12px}.container-footer .flow-collapse{position:static!important;margin-left:auto}
+.container-footer .retained-view-content{font-size:8px;color:var(--muted);margin-left:auto}
+#vf-root .map-node.kind-group{border:1px dashed var(--map-accent);background:var(--panel);border-radius:9px}
+#vf-root .kind-group .flow-node-content{padding:10px 12px;gap:1px}
+#vf-root .kind-group .map-card-title{font-size:15px;line-height:20px;margin:2px 0}
+.navigation-group-body{margin:3px 0;flex:1;min-height:0;overflow:auto;font-size:10px;color:var(--muted)}
+.container-child{display:flex;align-items:center;gap:5px;width:100%;border:0;background:transparent;color:var(--text);font-size:9px;padding:2px 0;text-align:left}
+.container-child span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.container-child svg{width:11px;height:11px}
+.card-layout-name{display:flex;align-items:center;justify-content:center;gap:4px;flex:0 0 20px;font-size:9px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-layout-name svg{width:11px;height:11px}
+#vf-root .brick-page .flow-node-content{padding:0;overflow:hidden}
+/* Each SVG lives in graph coordinates. Only the outer viewport clips to the visible canvas. */
+#vf-root svg.vue-flow__edges{overflow:visible!important;max-width:none;max-height:none}
+#vf-root .vue-flow__edgeupdater{fill:var(--surface);stroke:var(--map-accent);stroke-width:2;cursor:crosshair;pointer-events:all}
+#vf-root .vue-flow__edgeupdater:hover{fill:var(--accent-soft);stroke-width:3}
+#vf-root[data-reconnecting="true"] .flow-port{opacity:1!important;pointer-events:all!important}
+.edge-reconnect-hint{font-size:12px;line-height:1.6;background:var(--panel);padding:10px 12px;border-radius:6px}
+.spatial-zone-heading{top:12px;line-height:18px}
+
+#vf-root .flow-edge-label{max-width:176px;white-space:nowrap}
+#vf-root .flow-edge-label span{max-width:125px;overflow:hidden;text-overflow:ellipsis}
+
+/* Remove the obsolete space reserved for the former below-card toolbar. */
+#vf-root .map-node:not(.brick-page) .flow-node-content{padding:12px 14px}
+#vf-root .map-node .map-card-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:22px}
+#vf-root .map-node.kind-view .flow-node-content{padding:12px;gap:3px}
+#vf-root .map-node.kind-group .flow-node-content{padding:10px 12px;gap:1px}
+#vf-root .map-node .map-node-top{flex:none}
+.container-footer{flex:none}
+.surface-form-layout{max-width:360px;height:140px;margin:12px auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.surface-form-layout .surface-layout-svg{width:100%;height:100%}
+
+.spatial-zone-heading{min-width:0;overflow:hidden;line-height:1.4}.spatial-zone-heading strong{overflow:hidden;text-overflow:ellipsis}.spatial-zone-heading>span{font-size:.85em;flex:none}
 
 </style>
 <!--
@@ -1375,7 +1437,7 @@ THE SOFTWARE.
 <div class="app-frame">
 <aside class="ribbon" aria-label="Obsidian concept ribbon"><button class="ribbon-active" data-action="nav" data-value="projects" aria-label="Shell Workbench" title="Shell Workbench">◇</button><button data-action="palette" aria-label="Command palette" title="Command palette">⌘</button><button data-action="note" aria-label="Project handoff note" title="Project handoff note">▤</button><div class="ribbon-bottom"><button data-action="theme" aria-label="Toggle light or dark theme" title="Toggle theme">◐</button><button data-action="settings" aria-label="Workbench preferences" title="Preferences">⚙</button></div></aside>
 <aside class="sidebar" id="sidebar" aria-label="Workbench navigation"></aside>
-<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 11 · Unified components</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
+<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 12 · Containers & connections</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
 </div>
 <footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status"></span><span>Desktop concept · offline</span></footer>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
@@ -11616,9 +11678,12 @@ function bricksOf(n){return n?.bricks||[];}
 function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
- if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:128+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
+ if(n?.kind==='view')return {width:MAP_SIZE.w,height:bricksOf(n).length?326:300};
+ if(n?.kind==='group')return {width:MAP_SIZE.w,height:180};
+ if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:300};
+ return {width:MAP_SIZE.w,height:148+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
 }
+
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){
  const c=brickDefinition(d,kind);if(!c)throw Error('Restore an available '+BRICK_KINDS[kind].label+' definition in the component library first.');
@@ -11632,7 +11697,7 @@ function seedContentBricks(d){
 
 // Data-only design catalog. Availability describes the repository backend, not this UI.
 const PLACEMENTS = {tab:'Main workspace',left:'Left sidebar',right:'Right sidebar',split:'Split pane',window:'Pop-out window'};
-const NODE_KINDS = {view:'Native view',page:'Internal screen',modal:'Dialog',settings:'Native settings',group:'Navigation group',action:'Action'};
+const NODE_KINDS = {view:'View container',page:'Internal screen',modal:'Dialog',settings:'Native settings',group:'Navigation group',action:'Action'};
 const LAYOUTS = [
  ['sidebar-left','Left navigation shell','Navigation rail and a content region inside one view.','adaptive'],
  ['sidebar-right','Right inspector shell','Content with an internal right inspector.','wide'],
@@ -11889,7 +11954,7 @@ function makerCode(index){const g=state.generator;const group=g.kind==='feature'
 function makerReview(){const g=state.generator;const files=makerFiles();return dialogBody('Review generated changes',`<div class="row between"><p class="mb0">${esc(g.entity)} · ${esc(g.preset)} preset</p>${badge('5 illustrative files','purple')}</div><div class="grid2 mt16"><div class="file-list">${files.map((f,i)=>`<button class="file-row ${state.selectedFile===i?'active':''}" data-action="file-preview" data-value="${i}"><span class="plus">${i===2?'~':'+'}</span><code>${esc(f)}</code></button>`).join('')}</div><div class="code-panel"><div class="code-title">Illustrative source · not executable output</div><pre class="code-body">${esc(makerCode(state.selectedFile))}</pre></div></div><div class="mt16">${command(getMakerCommand(false))}</div><p class="scope-label">The real maker is authoritative for paths, validation and generated bytes. These snippets are UX fixtures only.</p><div class="mt16">${callout('Apply runs typecheck, the generated test and entity validation. Full verify is separate. Edited files must never be force-overwritten.')}</div><div id="maker-error" class="error" role="alert">${esc(g.error||'')}</div>`,`${button('Back to form','close','','ghost')}${button('Apply simulated changes','maker-apply','','primary','wand')}`);}
 
 // Concept section: dialogs
-function drawModal(){const factories={'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
+function drawModal(){const factories={'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return dialogBody('Choose a project',`<div class="modal-list">${state.projects.map(p=>`<button data-action="select-project" data-value="${esc(p.id)}"><span class="project-initial">${esc(initials(p.name))}</span><span class="grow">${esc(p.name)}<small>${esc(p.root)}</small></span>${p.id===state.activeId?badge('Selected','purple'):icon('arrow')}</button>`).join('')}</div>${state.projects.length?'':'<p>No projects yet. Create one or explore a clearly labeled example.</p>'}<div class="button-row">${button('Create a plugin','create','','primary','plus')}${button('Attach example project','attach','','','link')}</div>`);}
 function attachDialog(){return dialogBody('Attach an existing project',`<p>The production companion will read static metadata before asking to trust executable project code. This concept attaches a second, synthetic project.</p>${field('Example project name','attach-name','Garden Journal')}${field('Example source location','attach-root','/workspace/plugins/garden-journal')}<div id="attach-error" class="error" role="alert"></div>${callout('No directory picker or filesystem scan is implemented. Attaching grants no automatic execution trust.')}`,`${button('Cancel','close','','ghost')}${button('Attach fixture','attach-confirm','','primary','link')}`);}
@@ -11942,7 +12007,7 @@ function downloadText(){const {text,filename}=modalData;const blob=new Blob([tex
 
 // Concept section: interactions
 function dispatch(action,value){
- if(handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
+ if(handleEdgeEditingAction(action,value)||handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
  case 'nav':setView(value);break;
@@ -12025,6 +12090,112 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+// Presentation contracts: ownership containers are distinct from content-bearing screens.
+function allocateSurfaceCode(d,label,excludeId=null){
+ const base=String(label).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,54)||'screen';
+ const safe=/^[a-z]/.test(base)?base:'screen-'+base.slice(0,47);
+ const used=new Set(d.nodes.filter(n=>n.id!==excludeId).map(n=>n.slug.toLowerCase()));
+ let code=safe,index=2;while(used.has(code))code=safe+'-'+index++;
+ return code;
+}
+function surfaceLayoutName(n){return LAYOUTS.find(l=>l.id===n.layout)?.name||'Single pane';}
+function surfaceLayoutDiagram(layout){
+ const rect=(x,y,w,h,cls='outlet')=>`<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/>`;
+ let shapes='';
+ if(['sidebar-left','list-detail','sidebar-right','inspector'].includes(layout)){
+  const right=['sidebar-right','inspector'].includes(layout);shapes=rect(right?178:8,8,54,84,'rail')+rect(right?8:70,8,162,84);
+ }else if(layout==='three-pane'||layout==='canvas')shapes=rect(8,8,40,84,'rail')+rect(56,8,128,84)+rect(192,8,40,84,'rail');
+ else if(layout==='split')shapes=rect(8,8,108,84)+rect(124,8,108,84);
+ else if(layout==='board')shapes=[8,85,162].map(x=>rect(x,8,70,84)).join('');
+ else if(layout==='dashboard')shapes=[8,85,162].map(x=>rect(x,8,70,24,'rail')).join('')+rect(8,40,224,52);
+ else if(layout==='tabs'||layout==='wizard')shapes=[8,66,124].map(x=>rect(x,8,50,15,'rail')).join('')+rect(8,31,224,61);
+ else if(layout==='table')shapes=rect(8,8,224,18,'rail')+[34,54,74].map(y=>rect(8,y,224,12)).join('');
+ else if(layout==='form')shapes=rect(8,8,130,12,'rail')+[30,52].map(y=>rect(8,y,224,14)).join('')+rect(168,75,64,17,'rail');
+ else shapes=rect(8,8,140,13,'rail')+rect(8,29,224,63);
+ return `<svg class="surface-layout-svg" viewBox="0 0 240 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${shapes}</svg>`;
+}
+function containerCardContents(n,count,collapsed){
+ const group=n.kind==='group',d=design(),children=d.nodes.filter(x=>x.parent===n.id);
+ const list=children.slice(0,3).map(c=>`<button class="container-child nodrag nopan" data-action="design-select" data-value="${esc(c.id)}">${icon(c.kind==='group'?'layers':'file')}<span>${esc(c.label)}</span>${icon('arrow')}</button>`).join('');
+ const legacy=bricksOf(n).length;
+ return `<header class="container-heading"><span>${icon(group?'layers':'box')}${group?'Navigation group':'View container'}</span><button class="nodrag nopan ref-card-more" data-action="canvas-card-menu" data-value="${n.id}" aria-label="More actions for ${esc(n.label)}">${referenceIcon('more')}</button></header>
+ <strong class="map-card-title" title="${esc(n.label)}">${esc(n.label)}</strong><div class="container-identity"><code>${esc(n.slug)}</code>${n.entry?'<span class="container-entry">Plugin entry</span>':''}</div>
+ ${group?`<div class="navigation-group-body">${list||'<span>No screens grouped yet</span>'}</div><div class="container-caption">Organizes navigation · no screen content</div>`:
+ `<div class="container-layout"><div class="container-layout-label"><span>${esc(surfaceLayoutName(n))}</span><small>Host layout</small></div>${surfaceLayoutDiagram(n.layout)}</div><div class="container-outlet"><span>${icon('layers')} ${count} ${count===1?'child surface':'child surfaces'}</span><span>${esc(PLACEMENTS[n.placement])}</span></div><p class="container-caption">Screens inherit this view’s placement.</p>`}
+ <footer class="container-footer"><button class="nodrag nopan" data-action="canvas-child" data-value="${n.id}">${icon('plus')} Add screen</button>${count?`<button class="nodrag nopan flow-collapse" data-action="canvas-collapse" data-value="${n.id}" title="${collapsed?'Expand':'Collapse'} branch">${collapsed?'Expand':'Collapse'} ${count}</button>`:''}${legacy?`<button class="nodrag nopan retained-view-content" data-action="ref-content" data-value="${n.id}" title="Earlier view content is preserved; no automatic migration">${legacy} retained components</button>`:''}</footer>`;
+}
+function placeEmptySections(d){
+ // Empty sections need their own slot as well; never occupy a populated section's bounds.
+ let bottom=Math.max(72,...d.nodes.map(n=>(d.canvas.positions[n.id]?.y||0)+brickSurfaceSize(n,d).height))+112;
+ for(const s of d.canvas.sections||[]){if(sectionMembers(d,s).some(id=>d.nodes.some(n=>n.id===id)))continue;s.anchor={x:48,y:bottom};bottom+=360;}
+}
+
+// Reviewed reconnection uses Vue Flow's updater gesture, never a second graph database.
+const edgeEditing={reconnect:null,detach:null,error:''};
+function beginEdgeReconnect(edge){
+ if(state.activeRun)return;
+ closeConnectionMenu(false);flowUi.cancelled=false;connectionUi.committed=false;
+ edgeEditing.reconnect={id:edge.id,structure:edge.id.startsWith('contains-'),owner:designOwner(),revision:design().revision};
+ setFlowConnecting(true);document.getElementById('vf-root')?.setAttribute('data-reconnecting','true');
+}
+function endEdgeReconnect(){
+ edgeEditing.reconnect=null;setFlowConnecting(false);document.getElementById('vf-root')?.removeAttribute('data-reconnecting');
+}
+function normalizeStructureConnection(c){
+ const side=(id,prefix)=>String(id||'').replace(/^structure-/,'').replace(new RegExp('^'+prefix+'-'),'');
+ return {source:c.source,target:c.target,sourceHandle:'structure-out-'+side(c.sourceHandle,'out'),targetHandle:'structure-in-'+side(c.targetHandle,'in')};
+}
+function validStructureReconnect(connection){
+ const c=normalizeStructureConnection(connection),d=design();
+ if(!/^structure-out-(left|right|top|bottom)$/.test(c.sourceHandle)||!/^structure-in-(left|right|top|bottom)$/.test(c.targetHandle))return false;
+ const parent=d.nodes.find(n=>n.id===c.source),child=d.nodes.find(n=>n.id===c.target);
+ return !!parent&&!!child&&['view','page','group'].includes(parent.kind)&&parent.id!==child.id&&!nodeDescendants(d,child.id).has(parent.id);
+}
+function reviewEdgeReconnect(edge,connection){
+ const review=edgeEditing.reconnect;
+ if(!review||flowUi.cancelled||review.id!==edge.id||review.owner!==designOwner()||review.revision!==design().revision){endEdgeReconnect();return;}
+ connectionUi.committed=true;
+ if(!review.structure){endEdgeReconnect();reviewFlowConnection(connection,edge.id);return;}
+ if(!validStructureReconnect(connection)){endEdgeReconnect();notify('That structural attachment would be invalid. The original is retained.');return;}
+ const c=normalizeStructureConnection(connection),old=design().nodes.find(n=>'contains-'+n.id===edge.id);
+ // Structural identity belongs to its child. Retargeting to a different child would delete a different fact.
+ if(!old||c.target!==old.id){endEdgeReconnect();notify('A Contains relationship belongs to its child. Change the parent or choose another anchor on this child.');return;}
+ endEdgeReconnect();openStructureRelationship(old.id);
+ Object.assign(connectionUi.structure,{parent:c.source,sourceHandle:c.sourceHandle,targetHandle:c.targetHandle});redrawModal();
+}
+function requestEdgeRemoval(id){
+ if(askDiscardForm())return;
+ if(!id.startsWith('contains-')){showModal('canvas-edge-remove',id);return;}
+ const d=design(),child=d.nodes.find(n=>'contains-'+n.id===id);if(!child?.parent)return;
+ const alternatives=structureDetachParents(d,child);
+ edgeEditing.detach={id,child:child.id,owner:designOwner(),revision:d.revision,parent:child.parent,replacement:alternatives[0]?.id||''};edgeEditing.error='';
+ showModal('edge-detach');
+}
+function structureDetachParents(d,child){
+ return d.nodes.filter(n=>n.id!==child.parent&&['view','page','group'].includes(n.kind)&&!nodeDescendants(d,child.id).has(n.id)).filter(n=>{const test=designCopy(d);test.nodes.find(x=>x.id===child.id).parent=n.id;return !newDesignErrors(d,test).length;});
+}
+function edgeDetachDialog(){
+ const f=edgeEditing.detach,d=design(),child=d.nodes.find(n=>n.id===f?.child);if(!child)return dialogBody('Relationship unavailable','Select a current line.');
+ const needsOwner=child.kind==='page',alternatives=structureDetachParents(d,child);
+ const choices=(needsOwner?[]:[['','Plugin root — detach only']]).concat(alternatives.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]]));
+ return dialogBody('Remove this structural relationship?',`<p>Remove <strong>${esc(d.nodes.find(n=>n.id===child.parent)?.label||'Parent')} → ${esc(child.label)}</strong>. The screen, components and user-flow connections are kept.</p>${needsOwner?'<p>Internal screens still need a view container. Choose a replacement owner to remove the old relationship safely.</p>':''}${choices.length?`<label class="field">${needsOwner?'Replacement parent':'Keep this surface under'}<select id="detach-parent">${choices.map(([id,label])=>`<option value="${esc(id)}" ${id===f.replacement?'selected':''}>${esc(label)}</option>`).join('')}</select></label>`:'<p class="callout warn">No other valid owner exists. Add a view container first; a screen cannot be left orphaned.</p>'}<p class="error" role="alert">${esc(edgeEditing.error)}</p>`,button('Keep relationship','close','','ghost')+button('Remove relationship','edge-detach-confirm','','danger','trash',choices.length?'':'disabled'));
+}
+function confirmStructureRemoval(){
+ const d=design(),f=edgeEditing.detach,child=d.nodes.find(n=>n.id===f?.child);
+ const fail=m=>{edgeEditing.error=m;redrawModal();};
+ if(!child||state.activeRun||f.owner!==designOwner()||f.revision!==d.revision||child.parent!==f.parent)return fail('This review is stale. Reopen the current relationship.');
+ const parent=document.getElementById('detach-parent')?.value||null,candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=parent;
+ const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
+ if(parent===child.parent)return fail('Choose a different parent.');
+ recordDesign();child.parent=parent;delete canvasState().anchors[f.id];ensureStructureAnchors(d);designChanged();canvasUi.edge=null;closeModal();render();
+ canvasAnnounce('Old containment removed; surfaces and content preserved. Undo restores it.');
+}
+function handleEdgeEditingAction(action,value){
+ if(action==='edge-remove'){requestEdgeRemoval(value);return true;}
+ if(action==='edge-detach-confirm'){confirmStructureRemoval();return true;}
+ return false;
+}
+
 // All library entries use one component instance workflow. No executable templates.
 const unifiedUi={tags:[],sort:'name'};
 function normalizeComponentTags(value){
@@ -12134,7 +12305,7 @@ function retainedBindingNotice(n){
 const spatialUi={guides:[],zones:[],drop:null,last:null,alt:false,frame:0};
 function validAnchorMap(value){
  if(value===undefined)return true;
- return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=60&&Object.entries(value).every(([id,a])=>id.length<=140&&a&&typeof a.source==='string'&&typeof a.target==='string'&&a.source.length<=120&&a.target.length<=120&&/^structure-out-(left|right|top|bottom)$/.test(a.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(a.targetHandle));
+ return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=60&&Object.entries(value).every(([id,a])=>id.length<=140&&a&&typeof a.source==='string'&&typeof a.target==='string'&&a.source.length<=120&&a.target.length<=120&&(a.label===undefined||typeof a.label==='string'&&a.label.trim().length>0&&a.label.length<=120)&&/^structure-out-(left|right|top|bottom)$/.test(a.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(a.targetHandle));
 }
 function initialStructureAnchor(d,n){
  const c=d.canvas,points=c.positions,a=points[n.parent],b=points[n.id];let side=c.layout==='horizontal'?'right':'bottom';
@@ -12223,7 +12394,7 @@ function paintSpatialLayers(){
  const layer=document.getElementById('ref-section-layer'),vp=document.getElementById('map-viewport');if(!layer||!vp)return;
  const d=design(),c=canvasState(),positions={...c.positions,...spatialPositionMap()};
  const enabled=(c.sections||[]).length||c.layout==='sections';
- layer.innerHTML=enabled?sectionZones(d,positions).map(z=>`<section class="spatial-zone ${spatialUi.drop?.id===z.id?'drop-active':''}" data-section="${esc(z.id)}" aria-label="${esc(z.name)} drop zone" style="left:${z.x*c.zoom+c.pan.x}px;top:${z.y*c.zoom+c.pan.y}px;width:${z.width*c.zoom}px;height:${z.height*c.zoom}px"><div class="spatial-zone-heading"><strong>${esc(z.name)}</strong><span>${z.count} ${z.count===1?'card':'cards'}</span></div>${!z.count?'<p>Drop a card here<br><small>Visual grouping only</small></p>':''}${spatialUi.drop?.id===z.id?'<div class="spatial-drop-hint">Release to move this card into '+esc(z.name)+'</div>':''}</section>`).join(''):'';
+ layer.innerHTML=enabled?sectionZones(d,positions).map(z=>`<section class="spatial-zone ${spatialUi.drop?.id===z.id?'drop-active':''}" data-section="${esc(z.id)}" aria-label="${esc(z.name)} drop zone" style="left:${z.x*c.zoom+c.pan.x}px;top:${z.y*c.zoom+c.pan.y}px;width:${z.width*c.zoom}px;height:${z.height*c.zoom}px"><div class="spatial-zone-heading" style="top:${12*c.zoom}px;left:${16*c.zoom}px;font-size:${Math.max(9,12*c.zoom)}px;opacity:${c.zoom<.25?0:1}"><strong>${esc(z.name)}</strong><span>${z.count} ${z.count===1?'card':'cards'}</span></div>${!z.count?'<p>Drop a card here<br><small>Visual grouping only</small></p>':''}${spatialUi.drop?.id===z.id?'<div class="spatial-drop-hint">Release to move this card into '+esc(z.name)+'</div>':''}</section>`).join(''):'';
  let headers=document.getElementById('section-controls');if(!headers){headers=document.createElement('div');headers.id='section-controls';vp.append(headers);}
  headers.innerHTML=enabled?sectionZones(d,positions).filter(z=>z.id!=='main').map(z=>`<div class="section-control" style="left:${(z.x+z.width)*c.zoom+c.pan.x-44}px;top:${z.y*c.zoom+c.pan.y+8}px">${referenceTool('Edit '+z.name+' section','ref-section',z.id,'properties')}</div>`).join(''):'';
  let guides=document.getElementById('alignment-guides');if(!guides){guides=document.createElement('div');guides.id='alignment-guides';guides.setAttribute('aria-hidden','true');vp.append(guides);}
@@ -12235,7 +12406,7 @@ function setFlowConnecting(active){
 }
 function resetFlowConnection(announce=false){
  const was=flowUi.connecting||!!flowUi.api?.connectionStartHandle?.value;
- flowUi.cancelled=true;connectionUi.pointer=null;flowUi.api?.endConnection(undefined,true);setFlowConnecting(false);closeConnectionMenu(false);
+ flowUi.cancelled=true;edgeEditing.reconnect=null;document.getElementById("vf-root")?.removeAttribute("data-reconnecting");connectionUi.pointer=null;flowUi.api?.endConnection(undefined,true);setFlowConnecting(false);closeConnectionMenu(false);
  if(announce&&was)canvasAnnounce('Connection cancelled. Nothing changed.');
 }
 function scheduleHandleMeasure(id,serial){
@@ -12296,7 +12467,7 @@ function sectionLayouts(d){
  const out=Object.create(null),bands=[];let y=72;
  for(const s of referenceSections(d)){
   const nodes=d.nodes.filter(n=>s.members.includes(n.id)),sub={...d,nodes:nodes.map(n=>({...n,parent:nodes.some(x=>x.id===n.parent)?n.parent:null}))};
-  const positions=layoutPositions(sub,'vertical');
+  const positions=layoutSectionNodes(sub,'vertical');
   const height=nodes.length?Math.max(...nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+104:300;
   for(const n of nodes)out[n.id]={x:positions[n.id].x+48,y:positions[n.id].y+y};
   bands.push({...s,y,height,width:Math.max(420,...nodes.map(n=>positions[n.id].x+MAP_SIZE.w+96))});y+=height+96;
@@ -12334,7 +12505,7 @@ function paintReferenceChrome(){
   const projection=flowUi.api?.getNodes.value.find(x=>x.id===n?.id);
   const p=projection?.position||c.positions[n?.id],size=n&&brickSurfaceSize(n);
   const visible=n&&p&&visibleMapNodes().some(x=>x.id===n.id);
-  toolbar.hidden=!visible||flowUi.dragging||flowUi.connecting;
+  toolbar.hidden=!visible||flowUi.dragging||flowUi.connecting||!!canvasUi.edge;
   if(visible){
    if(toolbar.dataset.node!==n.id){toolbar.dataset.node=n.id;toolbar.innerHTML=referenceSelectionToolbar(n);}
    const right=referenceUi.panel==='none'?vp.clientWidth-12:vp.clientWidth-294;
@@ -12343,7 +12514,7 @@ function paintReferenceChrome(){
    toolbar.style.left=Math.max(12,Math.min(right-toolbar.offsetWidth,cardX+MAP_SIZE.w*c.zoom/2-toolbar.offsetWidth/2))+'px';
    const width=toolbar.offsetWidth,height=toolbar.offsetHeight,vr=vp.getBoundingClientRect();
    const card={x:cardX,y:cardY,w:MAP_SIZE.w*c.zoom,h:size.height*c.zoom};
-   const obstacles=[card,...[...document.querySelectorAll('.ref-canvas-top,.ref-main-dock,.ref-zoom-dock,.ref-panel')].filter(e=>e.offsetWidth&&e.offsetHeight).map(e=>{const r=e.getBoundingClientRect();return {x:r.x-vr.x,y:r.y-vr.y,w:r.width,h:r.height};})];
+   const obstacles=[card,...[...document.querySelectorAll('.ref-canvas-top,.ref-main-dock,.ref-zoom-dock,.ref-panel,.flow-edge-label,.vue-flow__edgeupdater,.map-node')].filter(e=>e.getBoundingClientRect().width&&e.getBoundingClientRect().height).map(e=>{const r=e.getBoundingClientRect();return {x:r.x-vr.x,y:r.y-vr.y,w:r.width,h:r.height};})];
    const overlap=(x,y,r)=>x<r.x+r.w+5&&x+width>r.x-5&&y<r.y+r.h+5&&y+height>r.y-5;
    const center=cardX+card.w/2-width/2;
    const candidates=[[center,cardY-height-12],[center,cardY+card.h+12],[cardX+card.w+16,cardY],[cardX-width-16,cardY],[vp.clientWidth-width-14,12],[14,65]];
@@ -12357,7 +12528,7 @@ function paintReferenceChrome(){
 // Canvas-first shell, restrained overview cards and synchronized full-page editing.
 function referenceSelectionToolbar(n){
  return `<div class="ref-selection-name">${esc(n.label)}</div><div class="ref-selection-actions" role="toolbar" aria-label="Actions for ${esc(n.label)}">
- ${canHaveBricks(n)?referenceTool('Edit page content','ref-content',n.id,'content'):''}
+ ${n.kind==='view'?referenceTool('Configure view container','design-edit',n.id,'content'):canHaveBricks(n)?referenceTool('Edit page content','ref-content',n.id,'content'):''}
  ${referenceTool('Surface properties','design-edit',n.id,'properties')}
  ${referenceTool('Add component or screen','library-card-add',n.id,'plus')}
  ${n.kind!=='group'?referenceTool('Add connected card','connection-card-add',n.id,'link'):''}
@@ -12427,7 +12598,7 @@ function referenceCardContents(n,lib,children,collapsed){
  ${children?`<button class="flow-collapse ref-collapse nodrag nopan" data-action="canvas-collapse" data-value="${n.id}" aria-label="${collapsed?'Expand':'Collapse'} ${esc(n.label)} branch">${collapsed?'+':'−'}<span>${children}</span></button>`:''}</header>
  <div class="brick-stack ${mode}" data-brick-stack="${n.id}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')}</div>
  <button class="brick-add nodrag nopan" data-action="brick-add" data-value="${n.id}">${icon('plus')} ${items.length?'Add component':'Plan this screen'}</button>
- <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
+ <div class="card-layout-name" title="Layout template">${icon("layers")} ${esc(surfaceLayoutName(n))}</div><div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
 }
 function referenceSketch(kind){const extended=componentWireframe(kind);if(extended)return extended;
  const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`;
@@ -13098,8 +13269,8 @@ function structureEdges(d,ids,positions=null){
  const prefs=canvasState(d).interaction;
  return d.nodes.filter(n=>ids.has(n.id)&&ids.has(n.parent)).map(n=>({
   id:'contains-'+n.id,source:n.parent,target:n.id,...structureRoute(d,n,positions),type:'structure',
-  selectable:true,focusable:true,updatable:false,selected:canvasUi.edge==='contains-'+n.id,
-  interactionWidth:24,class:'flow-containment',label:prefs.labels?'Contains':undefined,
+  selectable:true,focusable:true,updatable:!state.activeRun&&canvasUi.edge==='contains-'+n.id,selected:canvasUi.edge==='contains-'+n.id,
+  interactionWidth:24,class:'flow-containment',label:prefs.labels?(canvasState(d).anchors['contains-'+n.id].label||'Contains'):undefined,
   style:{stroke:'var(--muted)',strokeWidth:canvasUi.edge==='contains-'+n.id?2.5:1.5},
   data:{containment:true,shape:'smoothstep',title:'Contains: '+d.nodes.find(x=>x.id===n.parent).label+' → '+n.label}
  }));
@@ -13112,20 +13283,21 @@ function nearestScreenParent(d,n){
  return nodeOwner(d,n)?.id||d.nodes.find(x=>x.kind==='view')?.id||null;
 }
 function uniqueSurfaceName(d,kind){
- const base={page:'new-screen',view:'new-view',modal:'new-dialog',action:'new-action'}[kind]||'new-surface';
- let slug=base,i=2;while(d.nodes.some(n=>n.slug===slug))slug=base+'-'+i++;
- return {slug,label:slug.split('-').map(s=>s[0].toUpperCase()+s.slice(1)).join(' ')};
+ const label={page:'New screen',view:'New view',modal:'New dialog',group:'Navigation group',action:'New action',settings:'Settings'}[kind]||'New surface';
+ return {label,slug:allocateSurfaceCode(d,label)};
 }
-function proposedCardPosition(d,origin,side){
+
+function proposedCardPosition(d,origin,side,node=null){
  const c=canvasState(d),at=c.positions[origin];if(!at)return null;
  const horizontal=['left','right'].includes(side),sign=['left','top'].includes(side)?-1:1;
+ const size=brickSurfaceSize(node||{kind:'page',bricks:[]},d),originSize=brickSurfaceSize(d.nodes.find(n=>n.id===origin),d);
  for(let i=0;i<121;i++){
   const lane=i===0?0:(i%2?1:-1)*Math.ceil(i/2),step=c.snap?24:1;
-  let x=at.x+(horizontal?sign*(MAP_SIZE.w+144):lane*(MAP_SIZE.w+72));
-  let y=at.y+(horizontal?lane*(brickSurfaceSize(d.nodes.find(n=>n.id===origin),d).height+88):sign*(brickSurfaceSize(d.nodes.find(n=>n.id===origin),d).height+144));
+  let x=at.x+(horizontal?sign*((sign<0?size.width:originSize.width)+144):lane*(size.width+72));
+  let y=at.y+(horizontal?lane*(size.height+88):sign*((sign<0?size.height:originSize.height)+144));
   x=Math.round(x/step)*step;y=Math.round(y/step)*step;
   if(Math.abs(x)>50000||Math.abs(y)>50000)continue;
-  if(Object.entries(c.positions).every(([id,p])=>x+MAP_SIZE.w+32<=p.x||x>=p.x+MAP_SIZE.w+32||y+MAP_SIZE.h+32<=p.y||y>=p.y+brickSurfaceSize(d.nodes.find(n=>n.id===id),d).height+32))return {x,y};
+  if(Object.entries(c.positions).every(([id,p])=>x+size.width+32<=p.x||x>=p.x+MAP_SIZE.w+32||y+size.height+32<=p.y||y>=p.y+brickSurfaceSize(d.nodes.find(n=>n.id===id),d).height+32))return {x,y};
  }
  return null;
 }
@@ -13164,7 +13336,7 @@ function commitConnectedCard(){
  const {candidate,n,e}=connectedCardCandidate(d,f);
  if(!validIntentFields(n)||!validLinkFields(e))return fail('Intent, goals or connection details exceed their limits.');
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
- const position=proposedCardPosition(d,f.origin,f.side);if(!position)return fail('No free position near that handle. Move the source card and try again.');
+ const position=proposedCardPosition(d,f.origin,f.side,n);if(!position)return fail('No free position near that handle. Move the source card and try again.');
  recordDesign();d.nodes=candidate.nodes;d.links=candidate.links;d.nextId=candidate.nextId;
  const c=canvasState(d);c.positions[n.id]=position;c.custom=true;assignCardToSection(d,n.id,sectionForCard(d,f.origin));
  c.collapsed=c.collapsed.filter(id=>!nodeDescendants(d,id).has(n.id));
@@ -13173,19 +13345,23 @@ function commitConnectedCard(){
 }
 function openStructureRelationship(childId){
  const d=design(),child=d.nodes.find(n=>n.id===childId);if(!child?.parent)return;
- connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(structureRoute(d,child)),...structureRoute(d,child)};connectionUi.error='';
+ connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(canvasState(d).anchors['contains-'+child.id]),label:canvasState(d).anchors['contains-'+child.id].label||'Contains',...structureRoute(d,child)};connectionUi.error='';
  designUi.selected=child.id;canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
 }
 function saveStructureRelationship(){
  const d=design(),f=connectionUi.structure,child=d.nodes.find(n=>n.id===f?.child),fail=m=>{connectionUi.error=m;redrawModal();};
- if(state.activeRun)return fail('Finish the active simulation before reparenting.');
+ if(state.activeRun)return fail('Finish the active simulation before editing structure.');
  if(!child||f.owner!==designOwner()||f.revision!==d.revision)return fail('The relationship changed. Reopen it before saving.');
  if(!/^structure-out-(left|right|top|bottom)$/.test(f.sourceHandle)||!/^structure-in-(left|right|top|bottom)$/.test(f.targetHandle))return fail('Choose valid origin and destination connectors.');
- if(f.anchorSnapshot!==JSON.stringify(structureRoute(d,child)))return fail('The connector changed. Reopen its current settings.');
- if(child.parent===f.parent){const c=canvasState();if(f.sourceHandle===c.anchors['contains-'+child.id].sourceHandle&&f.targetHandle===c.anchors['contains-'+child.id].targetHandle){closeModal();return;}recordDesign();c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};save();closeModal();render();return;}
+ if(f.anchorSnapshot!==JSON.stringify(canvasState(d).anchors['contains-'+child.id]))return fail('The connector changed. Reopen its current settings.');
+ if(!String(f.label||'').trim()||f.label.length>120)return fail('Use a relationship label of 1–120 characters.');
+ const c=canvasState(),old=c.anchors['contains-'+child.id],next={source:f.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle,label:f.label.trim()};
  const candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=f.parent;
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
- recordDesign();child.parent=f.parent;const c=canvasState();if(child.parent)c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};designChanged();closeModal();render();canvasAnnounce('Containment updated. User-flow connections and existing source were preserved.');
+ if(child.parent===f.parent&&JSON.stringify({...old,label:old.label||'Contains'})===JSON.stringify(next)){closeModal();return;}
+ const reparent=child.parent!==f.parent;recordDesign();child.parent=f.parent;
+ if(child.parent)c.anchors['contains-'+child.id]=next;
+ if(reparent)designChanged();else save();closeModal();render();canvasAnnounce('Structural relationship saved. Labels and anchor sides do not change containment.');
 }
 
 function connectedCardDialog(){
@@ -13214,10 +13390,10 @@ function structureRelationshipDialog(){
  return dialogBody('Edit structural relationship',`<div class="relationship-family">${icon('layers')} <strong>Contains</strong><span>Structure, not a user action</span></div>
  <div class="connection-direction"><span>${esc(parent.label)}</span>${icon('arrow')}<span>${esc(child.label)}</span></div>
  <p>This line records where <strong>${esc(child.label)}</strong> lives. It was created by <strong>Add inside</strong>, not by drawing a user-flow connection.</p>
- ${connectionSelect('Parent container','structure-parent',[['','Plugin root'],...parents.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]])],f.parent||'')}
+ ${connectionInput('Connection label','structure-label',f.label||'Contains')}<p class="small muted">The caption is editable. The relationship remains structural containment.</p>${connectionSelect('Parent container','structure-parent',[['','Plugin root'],...parents.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]])],f.parent||'')}
  <p class="small muted">Reparenting updates the outline and source plan. Internal screens must still belong to a native view; cycles and incompatible parents are blocked.</p>
  <div class="connection-form-section"><h3>Looking for an editable action?</h3><p class="small muted">Use a separate typed connection for Navigate, Return, Open dialog or Pass context. Changing its type never changes containment.</p>${button('Add a user-flow connection…','connection-from-structure',child.id,'small','link')}</div>
- <div class="grid2">${connectionSelect('Origin connector','structure-source',Object.keys(SIDE_NAMES).map(s=>['structure-out-'+s,SIDE_NAMES[s]]),f.sourceHandle)}${connectionSelect('Destination connector','structure-target',Object.keys(SIDE_NAMES).map(s=>['structure-in-'+s,SIDE_NAMES[s]]),f.targetHandle)}</div><p class="connection-save-note">Attachment points stay fixed while cards move. Change them deliberately here; this does not change the relationship.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save parent','connection-structure-save','','primary','check'));
+ <div class="grid2">${connectionSelect('Origin connector','structure-source',Object.keys(SIDE_NAMES).map(s=>['structure-out-'+s,SIDE_NAMES[s]]),f.sourceHandle)}${connectionSelect('Destination connector','structure-target',Object.keys(SIDE_NAMES).map(s=>['structure-in-'+s,SIDE_NAMES[s]]),f.targetHandle)}</div><p class="connection-save-note">Attachment points stay fixed while cards move. Change them deliberately here; this does not change the relationship.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Remove relationship','edge-remove','contains-'+child.id,'danger','trash')+button('Cancel','close','','ghost')+button('Save relationship','connection-structure-save','','primary','check'));
 }
 function structureInspector(d,n){
  const parent=d.nodes.find(x=>x.id===n.parent),children=d.nodes.filter(x=>x.parent===n.id);
@@ -13315,13 +13491,13 @@ function handleConnectionAction(action,value){
 }
 function editConnectionField(el,commit){
  const key=el.dataset.field;if(!key?.startsWith('connection-'))return false;
- const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
+ const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-label'){connectionUi.structure.label=v;return true;}if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
  connectionUi.error='';const error=document.getElementById('connection-error');if(error)error.textContent='';
  if(k==='structure-parent'){if(connectionUi.structure)connectionUi.structure.parent=v||null;return true;}
  const f=connectionUi.form;if(!f)return true;
  f[k]=v;if(k==='slug')f.autoSlug=false;if(k==='actionLabel')f.autoAction=false;
  if(k==='label'){
-  if(f.autoSlug){f.slug=v.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);const input=document.getElementById('connection-slug');if(input)input.value=f.slug;}
+  if(f.autoSlug){f.slug=allocateSurfaceCode(design(),v);const input=document.getElementById('connection-slug');if(input)input.value=f.slug;}
   if(f.autoAction&&f.direction==='outgoing'){f.actionLabel='Open '+v;const input=document.getElementById('connection-actionLabel');if(input)input.value=f.actionLabel;}
   const summary=document.getElementById('connection-summary');const origin=design().nodes.find(n=>n.id===f.origin);
   if(summary&&origin)summary.innerHTML='<span>'+esc(f.direction==='incoming'?v:origin.label)+'</span>'+icon('arrow')+'<span>'+esc(f.direction==='incoming'?origin.label:v)+'</span>';
@@ -13440,7 +13616,7 @@ function flowSettingsDialog(){
 function flowToggle(label,key,value){return `<label class="toggle-line"><input type="checkbox" data-field="flow-${key}" ${value?'checked':''}> ${label}</label>`;}
 function typedConnectionDialog(){
  const f=designUi.form,d=design();if(!f)return dialogBody('Connection unavailable','Select a connection or draw one from a card handle.');const surfaces=d.nodes.filter(n=>n.kind!=='group'),target=d.nodes.find(n=>n.id===f.to);const kinds=allowedLinkKinds(target);f.kind=f.kind||linkKind(target);
- return dialogBody(f.editing?'Edit connection':'Declare connection',`<p>Give this line a meaning. It connects user experiences; it does not change which screen contains another.</p><div class="connection-direction">${icon('link')}<span>${esc(d.nodes.find(n=>n.id===f.from)?.label||'Source')}</span>${icon('arrow')}<span>${esc(target?.label||'Destination')}</span></div><div class="grid2">${designSelect('From','link-from',surfaces.map(n=>[n.id,n.label]),f.from)}${designSelect('To','link-to',surfaces.map(n=>[n.id,n.label]),f.to)}</div>${designSelect('Connection type','link-kind',kinds.map(k=>[k,LINK_TYPES[k].label]),f.kind)}<p class="connection-type-help">${esc(LINK_TYPES[f.kind]?.description||'Choose a type.')}</p>${designInput('Action label','link-label',f.label,'What does the user do? For example: View record or Save and return.')}${f.kind==='conditional'?designInput('Condition','link-condition',f.condition||'','Describe a business rule. This text is not evaluated as code.',true):''}${designInput('Context / interaction notes','link-description',f.description||'','Optional context to pass, state to preserve, or behavior to implement.',true)}<details class="connection-handle-details"><summary>Connector positions</summary><div class="grid2">${designSelect('Outgoing handle','link-sourceHandle',[['out-right','Right'],['out-bottom','Bottom']],f.sourceHandle||'out-right')}${designSelect('Incoming handle','link-targetHandle',[['in-left','Left'],['in-top','Top']],f.targetHandle||'in-left')}</div></details><p class="small muted">Line shape is a canvas preference. Connection type is saved in the blueprint. Business behavior remains unimplemented.</p><p class="error" id="design-error" role="alert">${esc(designUi.error)}</p>`,button('Cancel','close','','ghost')+button(f.editing?'Save connection':'Add connection','design-link-save','','primary','link'));
+ return dialogBody(f.editing?'Edit connection':'Declare connection',`<p class="edge-reconnect-hint">After closing this editor, drag either circular endpoint of the selected line to reconnect it. Cancelled drags keep the original.</p><p>Give this line a meaning. It connects user experiences; it does not change which screen contains another.</p><div class="connection-direction">${icon('link')}<span>${esc(d.nodes.find(n=>n.id===f.from)?.label||'Source')}</span>${icon('arrow')}<span>${esc(target?.label||'Destination')}</span></div><div class="grid2">${designSelect('From','link-from',surfaces.map(n=>[n.id,n.label]),f.from)}${designSelect('To','link-to',surfaces.map(n=>[n.id,n.label]),f.to)}</div>${designSelect('Connection type','link-kind',kinds.map(k=>[k,LINK_TYPES[k].label]),f.kind)}<p class="connection-type-help">${esc(LINK_TYPES[f.kind]?.description||'Choose a type.')}</p>${designInput('Action label','link-label',f.label,'What does the user do? For example: View record or Save and return.')}${f.kind==='conditional'?designInput('Condition','link-condition',f.condition||'','Describe a business rule. This text is not evaluated as code.',true):''}${designInput('Context / interaction notes','link-description',f.description||'','Optional context to pass, state to preserve, or behavior to implement.',true)}<details class="connection-handle-details"><summary>Connector positions</summary><div class="grid2">${designSelect('Outgoing handle','link-sourceHandle',[['out-right','Right'],['out-bottom','Bottom']],f.sourceHandle||'out-right')}${designSelect('Incoming handle','link-targetHandle',[['in-left','Left'],['in-top','Top']],f.targetHandle||'in-left')}</div></details><p class="small muted">Line shape is a canvas preference. Connection type is saved in the blueprint. Business behavior remains unimplemented.</p><p class="error" id="design-error" role="alert">${esc(designUi.error)}</p>`,(f.editing?button('Delete connection','edge-remove',f.id,'danger','trash'):'')+button('Cancel','close','','ghost')+button(f.editing?'Save connection':'Add connection','design-link-save','','primary','link'));
 }
 function flowIntentDialog(){const f=interactionUi.form,n=design().nodes.find(n=>n.id===f?.node);if(!f||!n)return dialogBody('Surface unavailable','Select a surface.');return dialogBody('User intent & goals',`<p>Describe ${esc(n.label)} from the user’s perspective.</p><label class="field" for="flow-intent-text">User intent<textarea id="flow-intent-text" data-field="flow-intent-text" rows="3" maxlength="1000" placeholder="When …, I want to …, so that …">${esc(f.intent)}</textarea><small>Why does the user arrive here? What situation are they in?</small></label><label class="field" for="flow-goals-text">User goals — one per line<textarea id="flow-goals-text" data-field="flow-goals-text" rows="6" maxlength="4000" placeholder="Find the relevant record\nUnderstand its status\nReturn without losing my filters">${esc(f.goals)}</textarea><small>Up to 12 observable outcomes. Link formal acceptance criteria in the PRD.</small></label><p class="error" role="alert">${esc(interactionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save intent & goals','flow-intent-save','','primary','check'));}
 function flowBindingDialog(){const f=interactionUi.binding,n=design().nodes.find(n=>n.id===f?.node),c=design().library.find(c=>c.id===f?.id);if(!n||!c)return dialogBody('Binding unavailable','Reopen the component from its surface.');return dialogBody(c.name+' in '+n.label,`<p>A versioned reference to the shared component, not a private copy.</p>${badge('Bound v'+f.version)} ${c.version!==f.version?badge('Library v'+c.version+' · review required','warn'):badge('Version current','good')}<p class="mt16">${esc(c.description)}</p><label class="field" for="flow-binding-region">Layout region<select id="flow-binding-region" data-field="flow-binding-slot">${componentSlots(n).map(s=>`<option ${f.slot===s?'selected':''}>${esc(s)}</option>`).join('')}</select></label><details><summary>Component contract</summary><pre class="mt16">${esc(c.props)}\n\nEmits\n${esc(c.events)}</pre></details><p class="error" role="alert">${esc(interactionUi.error)}</p>`,button('Remove binding','flow-binding-remove','','danger')+button('Cancel','close','','ghost')+button('Save region','flow-binding-save','','primary'));}
@@ -13481,24 +13657,25 @@ document.addEventListener('drop',event=>{const card=event.target.closest('.map-n
 
 // Real, pinned Vue Flow island. Canonical design remains in the shared concept model.
 const flowUi={app:null,api:null,store:null,pinia:null,owner:null,serial:0,dragging:false,drag:null,connecting:false,cancelled:false,suppressClick:false,saveTimer:null,syncing:false};
-function flowNodeProjection(d){const c=canvasState(d);return visibleMapNodes(d).map(n=>({id:n.id,type:'surface',position:{...c.positions[n.id]},data:{surface:designCopy(n),library:designCopy(d.library),dim:!mapMatch(n),collapsed:c.collapsed.includes(n.id),childCount:d.nodes.filter(x=>x.parent===n.id).length},selected:n.id===designUi.selected,draggable:!state.activeRun,selectable:true,connectable:n.kind!=='group',focusable:false,dimensions:brickSurfaceSize(n,d)}));}
+function flowNodeProjection(d){const c=canvasState(d);return visibleMapNodes(d).map(n=>({id:n.id,type:'surface',position:{...c.positions[n.id]},data:{surface:designCopy(n),library:designCopy(d.library),dim:!mapMatch(n),collapsed:c.collapsed.includes(n.id),childCount:d.nodes.filter(x=>x.parent===n.id).length},selected:n.id===designUi.selected,draggable:!state.activeRun,selectable:true,connectable:true,focusable:false,dimensions:brickSurfaceSize(n,d)}));}
 function flowEdgeProjection(d){
  const c=canvasState(d),p=c.interaction,ids=new Set(visibleMapNodes(d).map(n=>n.id)),shape=p.curve==='bezier'?'default':p.curve;
  const parents=structureEdges(d,ids);
- const links=d.links.filter(e=>ids.has(e.from)&&ids.has(e.to)&&c.edges!=='none'&&(c.edges==='all'||!designUi.selected||[e.from,e.to].includes(designUi.selected))).map(e=>({id:e.id,source:e.from,target:e.to,sourceHandle:e.sourceHandle||'out-right',targetHandle:e.targetHandle||'in-left',type:'transition',selectable:true,focusable:true,selected:e.id===canvasUi.edge,updatable:!state.activeRun,interactionWidth:24,class:'flow-transition flow-type-'+e.kind,label:p.labels?({navigate:'Navigate',return:'Return',conditional:'Condition',open:'Dialog',configure:'Configure',execute:'Action',data:'Context'}[e.kind]):undefined,labelStyle:{fill:'var(--text)',fontSize:11,fontWeight:500},labelBgStyle:{fill:'var(--surface)',stroke:'var(--line)'},labelBgPadding:[7,5],labelBgBorderRadius:5,markerEnd:{type:VueFlowCore.MarkerType.ArrowClosed,color:'var(--accent)',width:18,height:18},data:{semanticType:e.kind,actionLabel:e.label,title:LINK_TYPES[e.kind].label+' · '+e.label,shape,offset:parallelEdgeOffset(d,e)},style:{stroke:'var(--accent)',strokeWidth:e.id===canvasUi.edge?2.6:1.8,strokeDasharray:e.kind==='data'?'2 5':e.kind==='conditional'?'8 4':'6 4'}}));
+ const links=d.links.filter(e=>ids.has(e.from)&&ids.has(e.to)&&c.edges!=='none'&&(c.edges==='all'||!designUi.selected||[e.from,e.to].includes(designUi.selected))).map(e=>({id:e.id,source:e.from,target:e.to,sourceHandle:e.sourceHandle||'out-right',targetHandle:e.targetHandle||'in-left',type:'transition',selectable:true,focusable:true,selected:e.id===canvasUi.edge,updatable:!state.activeRun&&e.id===canvasUi.edge,interactionWidth:24,class:'flow-transition flow-type-'+e.kind,label:p.labels?({navigate:'Navigate',return:'Return',conditional:'Condition',open:'Dialog',configure:'Configure',execute:'Action',data:'Context'}[e.kind]):undefined,labelStyle:{fill:'var(--text)',fontSize:11,fontWeight:500},labelBgStyle:{fill:'var(--surface)',stroke:'var(--line)'},labelBgPadding:[7,5],labelBgBorderRadius:5,markerEnd:{type:VueFlowCore.MarkerType.ArrowClosed,color:'var(--accent)',width:18,height:18},data:{semanticType:e.kind,actionLabel:e.label,title:LINK_TYPES[e.kind].label+' · '+e.label,shape,offset:parallelEdgeOffset(d,e)},style:{stroke:'var(--accent)',strokeWidth:e.id===canvasUi.edge?2.6:1.8,strokeDasharray:e.kind==='data'?'2 5':e.kind==='conditional'?'8 4':'6 4'}}));
  return [...parents,...links];
 }
 function flowNodeContents(n,lib,children,collapsed){
+ if(n.kind==='view'||n.kind==='group')return containerCardContents(n,children,collapsed);
  if(brickDisplay()!=='structure'&&canHaveBricks(n))return brickCardContents(n,lib,children,collapsed);
  const bindings=bricksOf(n).map(b=>`<button class="flow-binding-chip nodrag nopan" data-action="brick-edit" data-value="${esc(n.id+':'+b.id)}" title="Edit this component instance">${esc(b.title)}<span>${esc(b.region)}</span></button>`).join('');
- return `<div class="map-node-top"><span>${icon(n.kind==='view'?'box':n.kind==='modal'?'layers':n.kind==='action'?'zap':'file')}${esc(NODE_KINDS[n.kind])}</span>${n.entry?'<span class="map-entry">Entry</span>':''}${children?`<button class="flow-collapse nodrag nopan" data-action="canvas-collapse" data-value="${esc(n.id)}" title="${collapsed?'Expand':'Collapse'} branch">${collapsed?'+':'−'} ${children}</button>`:''}</div><strong class="map-card-title">${esc(n.label)}</strong><code class="map-card-slug">${esc(n.slug)}</code><div class="map-card-layout map-card-sketch" aria-label="Schematic layout preview">${layoutThumbnail(n.layout)}</div><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${esc(n.id)}" title="Describe user intent and goals">${n.intent?esc(n.intent):'<span class="muted">What does the user want to do?</span>'}</button><div class="flow-card-meta"><button class="nodrag nopan flow-goals" data-action="flow-intent" data-value="${esc(n.id)}">${n.goals?.length||0} user goals</button><span>${esc(LAYOUTS.find(x=>x.id===n.layout)?.name||'No visual layout')}</span></div><div class="flow-card-bindings">${bindings||'<span class="tiny muted">No components placed</span>'}</div>${libraryCardToolbar(n)}`;
+ return `<div class="map-node-top"><span>${icon(n.kind==='view'?'box':n.kind==='modal'?'layers':n.kind==='action'?'zap':'file')}${esc(NODE_KINDS[n.kind])}</span>${n.entry?'<span class="map-entry">Entry</span>':''}${children?`<button class="flow-collapse nodrag nopan" data-action="canvas-collapse" data-value="${esc(n.id)}" title="${collapsed?'Expand':'Collapse'} branch">${collapsed?'+':'−'} ${children}</button>`:''}</div><strong class="map-card-title" title="${esc(n.label)}">${esc(n.label)}</strong><code class="map-card-slug">${esc(n.slug)}</code><div class="map-card-layout map-card-sketch" aria-label="Schematic layout preview">${surfaceLayoutDiagram(n.layout)}</div><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${esc(n.id)}" title="Describe user intent and goals">${n.intent?esc(n.intent):'<span class="muted">What does the user want to do?</span>'}</button><div class="flow-card-meta"><button class="nodrag nopan flow-goals" data-action="flow-intent" data-value="${esc(n.id)}">${n.goals?.length||0} user goals</button><span>${esc(LAYOUTS.find(x=>x.id===n.layout)?.name||'No visual layout')}</span></div><div class="flow-card-bindings">${bindings||'<span class="tiny muted">No components placed</span>'}</div>${libraryCardToolbar(n)}`;
 }
 function createFlowNodeComponent(){
  const {h,defineComponent,onMounted,watch}=Vue;const {Handle,Position}=VueFlowCore;
- return defineComponent({name:'CompanionSurfaceCard',props:['id','data','selected'],setup(props){const serial=flowUi.serial;onMounted(()=>scheduleHandleMeasure(props.id,serial));watch(()=>props.data.surface.bricks?.length,()=>scheduleHandleMeasure(props.id,serial));return ()=>{
-  const n=props.data.surface;const handles=Object.entries(PORTS).map(([side,port])=>h(Handle,{id:port.id,type:port.type,position:Position[side[0].toUpperCase()+side.slice(1)],connectable:n.kind!=='group'&&!state.activeRun,class:'flow-port flow-port-'+port.type,title:(port.type==='source'?'From ':'Into ')+n.label+' · '+side+'. Click for options; drag to connect.','aria-label':(port.type==='source'?'Outgoing':'Incoming')+' connector '+side+' on '+n.label+'; click for options or drag to connect',tabindex:0,role:'button','aria-haspopup':'menu','aria-expanded':'false','data-port-node':n.id,'data-port-side':side,onPointerdown:event=>portPointerDown(event,n.id,side),onClick:event=>portClick(event,n.id,side),onKeydown:event=>portKeyDown(event,n.id,side)}));
+ return defineComponent({name:'CompanionSurfaceCard',props:['id','data','selected'],setup(props){const serial=flowUi.serial;onMounted(()=>scheduleHandleMeasure(props.id,serial));watch(()=>JSON.stringify([props.data.surface.kind,props.data.surface.layout,props.data.surface.bricks]),()=>scheduleHandleMeasure(props.id,serial),{flush:'post'});return ()=>{
+  const n=props.data.surface;const handles=Object.entries(PORTS).map(([side,port])=>h(Handle,{id:port.id,type:port.type,position:Position[side[0].toUpperCase()+side.slice(1)],connectable:()=>!state.activeRun&&(n.kind!=='group'||!!edgeEditing.reconnect?.structure),class:'flow-port flow-port-'+port.type,title:(port.type==='source'?'From ':'Into ')+n.label+' · '+side+'. Click for options; drag to connect.','aria-label':(port.type==='source'?'Outgoing':'Incoming')+' connector '+side+' on '+n.label+'; click for options or drag to connect',tabindex:0,role:'button','aria-haspopup':'menu','aria-expanded':'false','data-port-node':n.id,'data-port-side':side,onPointerdown:event=>portPointerDown(event,n.id,side),onClick:event=>portClick(event,n.id,side),onKeydown:event=>portKeyDown(event,n.id,side)}));
   for(const side of Object.keys(SIDE_NAMES))for(const type of ['source','target'])handles.push(h(Handle,{id:'structure-'+(type==='source'?'out-':'in-')+side,type,position:Position[side[0].toUpperCase()+side.slice(1)],connectable:false,class:'flow-structural-port','aria-hidden':'true',tabindex:-1}));
-  return h('article',{class:['map-node','kind-'+n.kind,{'selected':props.selected,'search-dim':props.data.dim,'brick-page':brickDisplay()!=='structure'&&canHaveBricks(n)}],style:{'--brick-height':brickSurfaceSize(n).height+'px',width:brickSurfaceSize(n).width+'px'},tabindex:0,'data-node':n.id,'data-action':'canvas-select','data-value':n.id,'aria-label':n.label+' · '+NODE_KINDS[n.kind],role:'group','aria-current':props.selected?'true':undefined},[h('div',{class:'flow-node-content',innerHTML:flowNodeContents(n,props.data.library,props.data.childCount,props.data.collapsed)}),...handles]);
+  return h('article',{class:['map-node','kind-'+n.kind,{'selected':props.selected,'search-dim':props.data.dim,'brick-page':brickDisplay()!=='structure'&&canHaveBricks(n)&&n.kind!=='view'}],style:{'--brick-height':brickSurfaceSize(n).height+'px',width:brickSurfaceSize(n).width+'px',height:brickSurfaceSize(n).height+'px'},tabindex:0,'data-node':n.id,'data-action':'canvas-select','data-value':n.id,'aria-label':n.label+' · '+NODE_KINDS[n.kind],role:'group','aria-current':props.selected?'true':undefined},[h('div',{class:'flow-node-content',innerHTML:flowNodeContents(n,props.data.library,props.data.childCount,props.data.collapsed)}),...handles]);
  };}});
 }
 function mountFlow(){
@@ -13535,19 +13712,21 @@ function mountFlow(){
   });
   api.onConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
   api.onClickConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
-  api.onConnect(connection=>{if(current()&&!flowUi.cancelled){setFlowConnecting(false);connectionUi.committed=true;reviewFlowConnection(connection);}});
+  api.onConnect(connection=>{if(current()&&!flowUi.cancelled&&!edgeEditing.reconnect){setFlowConnecting(false);connectionUi.committed=true;reviewFlowConnection(connection);}});
   api.onConnectEnd(()=>{if(current())setFlowConnecting(false);});
   api.onClickConnectEnd(()=>{if(current())setFlowConnecting(false);});
   api.onEdgeClick(({edge,event})=>{if(!current())return;event.stopPropagation();dispatch('canvas-edge',edge.id);});
-  api.onEdgeUpdate(({edge,connection})=>{if(current())reviewFlowConnection(connection,edge.id);});
+  api.onEdgeUpdateStart(({edge})=>{if(current())beginEdgeReconnect(edge);});
+  api.onEdgeUpdate(({edge,connection})=>{if(current())reviewEdgeReconnect(edge,connection);});
+  api.onEdgeUpdateEnd(()=>{if(current())endEdgeReconnect();});
   api.onPaneClick(()=>{if(current()&&!flowUi.suppressClick&&!canvasUi.placing)deselectFlow();});
   api.onViewportChange(v=>{if(!current()||flowUi.syncing)return;const c=canvasState();c.pan={x:Math.max(-50000,Math.min(50000,v.x)),y:Math.max(-50000,Math.min(50000,v.y))};c.zoom=Math.max(.12,Math.min(2,v.zoom));c.fitted=true;paintFlowChrome();clearTimeout(flowUi.saveTimer);flowUi.saveTimer=setTimeout(()=>{if(current())save();},150);});
-  return ()=>h(VueFlow,{id:'companion-map-'+serial,nodes:store.nodes,edges:store.edges,nodeTypes,edgeTypes,applyDefault:false,connectionMode:ConnectionMode.Strict,connectOnClick:false,isValidConnection:validFlowConnection,panOnScroll:store.preferences.wheel==='pan',zoomOnScroll:store.preferences.wheel==='zoom',zoomOnPinch:store.preferences.pinch,zoomOnDoubleClick:false,zoomActivationKeyCode:['Control','Meta'],panOnDrag:store.preferences.panOnDrag,preventScrolling:store.preferences.wheel!=='page',minZoom:.12,maxZoom:2,snapToGrid:store.snap,snapGrid:[24,24],nodeDragThreshold:4,paneClickDistance:5,deleteKeyCode:null,selectionKeyCode:null,multiSelectionKeyCode:null,nodesFocusable:false,edgesFocusable:true,defaultViewport:{x:canvasState().pan.x,y:canvasState().pan.y,zoom:canvasState().zoom},noDragClassName:'nodrag',noPanClassName:'nopan',noWheelClassName:'nowheel'});
+  return ()=>h(VueFlow,{id:'companion-map-'+serial,nodes:store.nodes,edges:store.edges,nodeTypes,edgeTypes,applyDefault:false,connectionMode:ConnectionMode.Strict,edgeUpdaterRadius:14,connectOnClick:false,isValidConnection:validFlowConnection,panOnScroll:store.preferences.wheel==='pan',zoomOnScroll:store.preferences.wheel==='zoom',zoomOnPinch:store.preferences.pinch,zoomOnDoubleClick:false,zoomActivationKeyCode:['Control','Meta'],panOnDrag:store.preferences.panOnDrag,preventScrolling:store.preferences.wheel!=='page',minZoom:.12,maxZoom:2,snapToGrid:store.snap,snapGrid:[24,24],nodeDragThreshold:4,paneClickDistance:5,deleteKeyCode:null,selectionKeyCode:null,multiSelectionKeyCode:null,nodesFocusable:false,edgesFocusable:true,defaultViewport:{x:canvasState().pan.x,y:canvasState().pan.y,zoom:canvasState().zoom},noDragClassName:'nodrag',noPanClassName:'nopan',noWheelClassName:'nowheel'});
  }});
  flowUi.app=createApp(Component);flowUi.app.use(pinia);flowUi.app.mount(root);paintFlowChrome();
 }
 function destroyFlow(){
- closeConnectionMenu(false);resetFlowConnection(false);clearSpatialGesture();
+ closeConnectionMenu(false);resetFlowConnection(false);clearSpatialGesture();edgeEditing.reconnect=null;
  clearTimeout(flowUi.saveTimer);if(!flowUi.app)return;flowUi.serial++;
  if(flowUi.drag&&flowUi.owner===designOwner())design().canvas=flowUi.drag.before;
  const app=flowUi.app,store=flowUi.store,pinia=flowUi.pinia,api=flowUi.api;flowUi.app=null;flowUi.api=null;flowUi.store=null;flowUi.pinia=null;flowUi.drag=null;flowUi.dragging=false;flowUi.connecting=false;
@@ -13575,7 +13754,12 @@ function cancelFlowGesture(){
  return false;
 }
 
-function validFlowConnection(c){if(/^structure-out-(left|right|top|bottom)$/.test(c.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(c.targetHandle))return design().nodes.some(n=>n.id===c.target&&n.parent===c.source);return !connectionError(c.source,c.target,c.sourceHandle,c.targetHandle);}
+function validFlowConnection(c){
+ if(!c)return false;
+ if(edgeEditing.reconnect?.structure)return validStructureReconnect(c);
+ if(/^structure-out-(left|right|top|bottom)$/.test(c.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(c.targetHandle))return design().nodes.some(n=>n.id===c.target&&n.parent===c.source);
+ return !connectionError(c.source,c.target,c.sourceHandle,c.targetHandle);
+}
 
 // Keep parallel transitions independently inspectable; semantics never select geometry.
 function parallelEdgeOffset(d,e){const peers=d.links.filter(x=>x.from===e.from&&x.to===e.to&&(x.sourceHandle||'out-right')===(e.sourceHandle||'out-right')&&(x.targetHandle||'in-left')===(e.targetHandle||'in-left'));const i=peers.findIndex(x=>x.id===e.id);return i>0?(i%2?1:-1)*Math.ceil(i/2)*64:0;}
@@ -13596,7 +13780,7 @@ function createFlowEdgeComponent(){
    x=(p.sourceX+3*cx1+3*cx2+p.targetX)/8;y=(p.sourceY+3*cy1+3*cy2+p.targetY)/8;
    path=p.data.shape==='straight'?`M ${p.sourceX},${p.sourceY} L ${x},${y} L ${p.targetX},${p.targetY}`:p.data.shape==='smoothstep'?`M ${p.sourceX},${p.sourceY} L ${cx1},${p.sourceY} L ${cx1},${y} L ${cx2},${y} L ${cx2},${p.targetY} L ${p.targetX},${p.targetY}`:`M ${p.sourceX},${p.sourceY} C ${cx1},${cy1} ${cx2},${cy2} ${p.targetX},${p.targetY}`;
   }
-  if(p.label){const anchor=unobstructedEdgeLabel(path,x,y,p.data?.containment?45:100);x=anchor.x;y=anchor.y;}
+  if(p.label){const anchor=unobstructedEdgeLabel(path,x,y,p.data?.containment?45:100);x=anchor.x;y=anchor.y;const safe=avoidEdgeAnchorLabel(p,x,y);x=safe.x;y=safe.y;}
   return h(Vue.Fragment,null,[h(BaseEdge,{id:p.id,path,markerEnd:p.markerEnd,markerStart:p.markerStart,style:p.style,interactionWidth:p.interactionWidth}),p.label?h(EdgeLabelRenderer,null,{default:()=>h('button',{class:'flow-edge-label nodrag nopan','data-flow-edge':p.id,style:{transform:`translate(-50%,-50%) translate(${x}px,${y}px)`},onClick:event=>{event.stopPropagation();dispatch('canvas-edge',p.id);},title:(p.data?.containment?'Edit structure: ':'Edit connection type: ')+p.data.title,'aria-label':'Edit '+p.data.title},p.data?.containment?p.label:[h('strong',p.label),h('span',p.data.actionLabel)])}):null]);
  };}});
 }
@@ -13614,6 +13798,16 @@ function unobstructedEdgeLabel(path,x,y,halfWidth=45){
  const length=sample.getTotalLength();
  for(const fraction of [.35,.65,.2,.8,.12,.88,.06,.94]){const point=sample.getPointAtLength(length*fraction);if(clear(point))return point;}
  return {x,y};
+}
+
+// Labels must not cover reconnection targets, even on very short paths.
+function avoidEdgeAnchorLabel(p,x,y){
+ const width=p.data?.containment?64:176,half=width/2;
+ const portClear=q=>[[p.sourceX,p.sourceY],[p.targetX,p.targetY]].every(([px,py])=>Math.abs(q.x-px)>half+30||Math.abs(q.y-py)>38);
+ const nodeClear=q=>(flowUi.api?.getNodes.value||[]).every(n=>q.x+half<n.position.x||q.x-half>n.position.x+n.dimensions.width||q.y+16<n.position.y||q.y-16>n.position.y+n.dimensions.height);
+ for(const dy of [0,-36,36,-72,72,-108,108]){const q={x,y:y+dy};if(portClear(q)&&nodeClear(q))return q;}
+ for(const dy of [-36,36,-72,72,-108,108]){const q={x,y:y+dy};if(portClear(q))return q;}
+ return {x,y:y-48};
 }
 
 // Presentation-only task guidance. Counts describe design artifacts, never test completion.
@@ -13820,7 +14014,7 @@ function canvasCommit(fn,message){
 }
 function arrangeMap(layout){
  if(!Object.hasOwn(MAP_LAYOUTS,layout))return;
- const d=design();canvasCommit(c=>{c.layout=layout;if(layout!=='free')c.positions=layoutPositions(d,layout);c.custom=false;c.arrangedFor=canvasStructure(d);c.fitted=false;},'Applied '+MAP_LAYOUTS[layout]+'. Surface structure and generation plans are unchanged.');
+ const d=design();canvasCommit(c=>{c.layout=layout;if(layout!=='free'){c.positions=layoutPositions(d,layout);placeEmptySections(d);}c.custom=false;c.arrangedFor=canvasStructure(d);c.fitted=false;},'Applied '+MAP_LAYOUTS[layout]+'. Surface structure and generation plans are unchanged.');
 }
 function canvasAnnounce(text){
  const e=document.getElementById('canvas-live');if(e)e.textContent=text;
@@ -13848,7 +14042,7 @@ function canvasBounds(nodes=visibleMapNodes()){
 }
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
- const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&c.sections?.length){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
+ const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&(c.sections?.length||c.layout==='sections')){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
  const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
  const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
  c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));
@@ -13882,7 +14076,24 @@ function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas
 
 // Bounded deterministic layouts for at most 60 concept surfaces. No external engine.
 function layoutPositions(d,mode){
- if(mode==="sections")return sectionLayouts(d).positions;
+ if(mode==='sections'||d.canvas?.sections?.length)return partitionedLayout(d,mode==='sections'?'vertical':mode);
+ return layoutSectionNodes(d,mode);
+}
+function partitionedLayout(d,mode){
+ const out=Object.create(null);let y=96;
+ for(const section of referenceSections(d)){
+  const nodes=d.nodes.filter(n=>section.members.includes(n.id));
+  const ids=new Set(nodes.map(n=>n.id));
+  const sub={...d,nodes:nodes.map(n=>({...n,parent:ids.has(n.parent)?n.parent:null}))};
+  const local=layoutSectionNodes(sub,mode),left=nodes.length?Math.min(...nodes.map(n=>local[n.id].x)):0;
+  const top=nodes.length?Math.min(...nodes.map(n=>local[n.id].y)):0;
+  for(const n of nodes)out[n.id]={x:local[n.id].x-left+88,y:local[n.id].y-top+y};
+  const bottom=nodes.length?Math.max(...nodes.map(n=>out[n.id].y+brickSurfaceSize(n,d).height)):y+176;
+  y=bottom+196;
+ }
+ return out;
+}
+function layoutSectionNodes(d,mode){
  const out=Object.create(null),{w,gapX,gapY}=MAP_SIZE,h=Math.max(MAP_SIZE.h,...d.nodes.map(n=>brickSurfaceSize(n,d).height)),dx=w+gapX,dy=h+gapY;
  const ordered=designNodesInOrder(d),roots=d.nodes.filter(n=>!n.parent||!d.nodes.some(x=>x.id===n.parent));
  if(mode==='grid'||mode==='free'){
@@ -13952,7 +14163,7 @@ function handleCanvasAction(action,value){
    if(flowUi.dragging||flowUi.suppressClick)return true;
    if(canvasUi.connecting){const target=d.nodes.find(x=>x.id===value);if(!target||target.kind==='group'){notify('Connect to a surface or action, not an organizing group.');break;}designUi.form={from:canvasUi.connecting,to:value,label:'Open '+target.label,owner:designOwner(),baseRevision:d.revision};canvasUi.connecting=null;designUi.error='';showModal('design-connect');}
    else {designUi.selected=value;canvasUi.edge=null;paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
-  case 'canvas-child':designUi.selected=value;startNodeForm('page');break;
+  case 'canvas-child':designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
   case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
   case 'canvas-outline':referencePaneMode('structure');break;
@@ -13982,7 +14193,7 @@ function handleCanvasAction(action,value){
   case 'canvas-remove-edge-confirm':if(!validDestructiveReview('canvas-edge-remove',value))break;closeModal();dispatch('design-unlink',value);canvasUi.edge=null;break;
   case 'canvas-card-menu':designUi.selected=value;showModal('canvas-card-menu',value);break;
   case 'canvas-menu-edit':closeModal();startNodeForm('view',value);break;
-  case 'canvas-menu-child':closeModal();designUi.selected=value;startNodeForm('page');break;
+  case 'canvas-menu-child':closeModal();designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
   case 'canvas-menu-remove':showModal('design-remove',value);break;
   case 'canvas-menu-duplicate':closeModal();dispatch('design-duplicate',value);break;
   case 'canvas-menu-entry':closeModal();dispatch('design-entry',value);break;
@@ -14528,7 +14739,7 @@ function designNodeDialog(){
  const d=design(),f=designUi.form;if(!f)return dialogBody('No surface','Choose a surface first.');
  const excluded=nodeDescendants(d,f.id);const parents=d.nodes.filter(n=>!excluded.has(n.id)&&['view','page','group'].includes(n.kind));
  const layouts=LAYOUTS.filter(l=>f.kind==='settings'?l.id==='form':f.kind==='modal'?['single','form','wizard'].includes(l.id):true);
- return dialogBody(f.editing?'Edit '+f.label:'Add a surface',`<div class="grid2">${designSelect('Surface type','node-kind',Object.entries(NODE_KINDS),f.kind,'Native views register with Obsidian; internal screens belong inside one.')}${designInput('Display name','node-label',f.label)}${designInput('Stable code name','node-slug',f.slug,'Lowercase kebab-case. Renaming after scaffolding needs a reviewed migration.')}${designSelect('Parent','node-parent',[['','Plugin root'],...parents.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]])],f.parent||'')}${designSelect('Layout template','node-layout',layouts.map(l=>[l.id,l.name]),f.layout)}${f.kind==='view'?designSelect('Initial placement','node-placement',Object.entries(PLACEMENTS),f.placement,'A preference on first open; never force panes back after the user moves them.'):callout('Placement is inherited for internal screens. Dialogs and settings are separate host surfaces.')}${f.kind==='view'?designSelect('Opening policy','node-instance',[['reuse','Focus existing instance'],['multiple','Allow multiple instances']],f.instance):''}${designInput('Entity reference (optional)','node-entity',f.entity,'A reference only. Define the actual entity using Feature makers.')}</div>${layoutThumbnail(f.layout)}<div class="entry-options">${f.kind!=='group'?`<label><input type="checkbox" data-field="design-node-command" ${f.command?'checked':''}> Command palette entry</label><label><input type="checkbox" data-field="design-node-ribbon" ${f.ribbon?'checked':''}> Optional ribbon shortcut</label>`:''}${f.parent?`<label><input type="checkbox" data-field="design-node-nav" ${f.nav?'checked':''}> Show in parent navigation</label>`:''}${['view','modal','action'].includes(f.kind)?`<label><input type="checkbox" data-field="design-node-entry" ${f.entry?'checked':''}> Primary entry surface</label>`:''}</div>${designInput('User intent','node-intent',f.intent||'','Why does the user come to this screen?',true)}${designInput('User goals — one outcome per line','node-goals',(f.goals||[]).join('\n'),'Keep goals observable. They do not become implemented behavior.',true)}${designInput('User outcome / business logic','node-goal',f.goal,'Describe the behavior you will implement, not a shell command.',true)}${f.kind==='action'?designSelect('Initial action pattern','node-initialPattern',PATTERNS.map(p=>[p.id,p.name]),f.initialPattern||f.patterns[0]||'open-view'):''}<p class="error" id="design-error" role="alert">${esc(designUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save surface','design-save','','primary','check'));
+ return dialogBody(f.editing?'Edit '+f.label:'Add a surface',`<div class="grid2">${designSelect('Surface type','node-kind',Object.entries(NODE_KINDS),f.kind,'Native views register with Obsidian; internal screens belong inside one.')}${designInput('Display name','node-label',f.label)}${designInput('Stable code name','node-slug',f.slug,'Lowercase kebab-case. Renaming after scaffolding needs a reviewed migration.')}${designSelect('Parent','node-parent',[['','Plugin root'],...parents.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]])],f.parent||'')}${f.kind==='group'?callout('Navigation groups organize screens. They have no visual layout or component stack.'):designSelect(f.kind==='view'?'Host layout':'Layout template','node-layout',layouts.map(l=>[l.id,l.name]),f.layout)}${f.kind==='view'?designSelect('Initial placement','node-placement',Object.entries(PLACEMENTS),f.placement,'A preference on first open; never force panes back after the user moves them.'):callout('Placement is inherited for internal screens. Dialogs and settings are separate host surfaces.')}${f.kind==='view'?designSelect('Opening policy','node-instance',[['reuse','Focus existing instance'],['multiple','Allow multiple instances']],f.instance):''}${designInput('Entity reference (optional)','node-entity',f.entity,'A reference only. Define the actual entity using Feature makers.')}</div>${f.kind==='group'?'':`<div class="surface-form-layout" aria-label="Complete layout preview">${surfaceLayoutDiagram(f.layout)}</div>`}<div class="entry-options">${f.kind!=='group'?`<label><input type="checkbox" data-field="design-node-command" ${f.command?'checked':''}> Command palette entry</label><label><input type="checkbox" data-field="design-node-ribbon" ${f.ribbon?'checked':''}> Optional ribbon shortcut</label>`:''}${f.parent?`<label><input type="checkbox" data-field="design-node-nav" ${f.nav?'checked':''}> Show in parent navigation</label>`:''}${['view','modal','action'].includes(f.kind)?`<label><input type="checkbox" data-field="design-node-entry" ${f.entry?'checked':''}> Primary entry surface</label>`:''}</div>${designInput('User intent','node-intent',f.intent||'','Why does the user come to this screen?',true)}${designInput('User goals — one outcome per line','node-goals',(f.goals||[]).join('\n'),'Keep goals observable. They do not become implemented behavior.',true)}${designInput('User outcome / business logic','node-goal',f.goal,'Describe the behavior you will implement, not a shell command.',true)}${f.kind==='action'?designSelect('Initial action pattern','node-initialPattern',PATTERNS.map(p=>[p.id,p.name]),f.initialPattern||f.patterns[0]||'open-view'):''}<p class="error" id="design-error" role="alert">${esc(designUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save surface','design-save','','primary','check'));
 }
 function designConnectDialog(){return typedConnectionDialog();}
 
@@ -14541,11 +14752,13 @@ function startNodeForm(kind='view',editId=null){
  const d=design(),n=d.nodes.find(n=>n.id===editId),selected=selectedNode();
  const parent=kind==='page'?(selected&&['view','page','group'].includes(selected.kind)?selected.id:d.nodes.find(n=>n.kind==='view')?.id||null):null;
  designUi.form=n?{...designCopy(n),intent:n.intent||'',goals:n.goals||[],editing:true,owner:designOwner()}:{components:[],id:'node-'+d.nextId,label:kind==='view'?'New view':kind==='page'?'New screen':'New surface',slug:kind==='view'?'new-view':kind==='page'?'new-screen':'new-surface',kind,layout:'single',placement:'tab',parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:!d.nodes.some(n=>n.entry)&&kind==='view',instance:'reuse',patterns:[],goal:'',intent:'',goals:[],entity:'',editing:false,owner:designOwner()};
+ if(!n){Object.assign(designUi.form,uniqueSurfaceName(d,kind));designUi.form.autoSlug=true;}
  designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
 }
 function saveDesignNode(){
  const d=design(),f=designUi.form;designUi.error='';if(state.activeRun){designUi.error='Finish the active simulation before saving.';redrawModal();return;}
  if(f.owner!==designOwner()||f.baseRevision!==d.revision){designUi.error='The selected project changed. Reopen the surface editor.';redrawModal();return;}
+ if(!f.editing&&f.autoSlug)f.slug=allocateSurfaceCode(d,f.label);
  const keys=['components','id','slug','label','kind','layout','placement','parent','nav','command','ribbon','entry','instance','patterns','goal','entity','intent','goals'];
  const n=Object.fromEntries(keys.map(k=>[k,designCopy(f[k])]));if(f.bricks!==undefined)n.bricks=designCopy(f.bricks);
  if(n.kind==='action'&&!n.patterns.length)n.patterns=[f.initialPattern||'open-view'];
@@ -14564,6 +14777,8 @@ function editDesignField(el,commit){
  if(key==='design-goal'||key==='design-platform'){designUi.goalDraft[key.slice(7)]=value;return true;}
  if(key.startsWith('design-node-')){
   const k=key.slice(12),f=designUi.form;f[k]=k==='parent'?(value||null):k==='goals'?value.split('\n').filter(x=>x.trim()):value;
+  if(k==='slug')f.autoSlug=false;
+  if(k==='label'&&!f.editing&&f.autoSlug){f.slug=allocateSurfaceCode(design(),value);const input=document.getElementById('d-node-slug');if(input)input.value=f.slug;}
   if(k==='kind'){
    if(['modal','settings'].includes(value)){f.layout='form';f.parent=null;f.nav=false;f.command=false;f.ribbon=false;f.entry=false;}
    if(value==='group'){f.command=false;f.ribbon=false;f.entry=false;f.patterns=[];}
@@ -14599,7 +14814,7 @@ function handleDesignAction(action,value){
   }
   case 'design-duplicate':{
    if(d.nodes.length>=DESIGN_LIMITS.nodes){notify('The concept supports up to 60 surfaces.');break;}
-   const original=d.nodes.find(n=>n.id===value);recordDesign();let slug=original.slug+'-copy',i=2;while(d.nodes.some(n=>n.slug===slug))slug=original.slug+'-copy-'+i++;
+   const original=d.nodes.find(n=>n.id===value);recordDesign();const slug=allocateSurfaceCode(d,original.label);
    const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);canvasState(d);assignCardToSection(d,copy.id,sectionForCard(d,original.id));designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
   }
   case 'design-remove':showModal('design-remove',value);break;
