@@ -1,7 +1,7 @@
 name: Template authoring
 on:
   push:
-    branches: [main, build/template-foundation]
+    branches: [main, build/release-operations]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -35,6 +35,17 @@ jobs:
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
           node "$QUALIFIED_NPM" run entities:check
+      - name: Customize consumer source and exercise a local custom maker
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const path = 'src/features/bookmarks/bookmark.entity.ts';
+          const source = await readFile(path, 'utf8');
+          if (!source.includes('max: 120')) throw new Error('Expected generated title bound');
+          await writeFile(path, source.replace('max: 120', 'max: 100'));
+          NODE
+          node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --yes --no-interaction
       - name: Verify the complete renamed and extended template
         run: |
           set -o pipefail
