@@ -1,9 +1,60 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { mkdtemp, writeFile, readFile, mkdir, cp, rm, symlink } from 'node:fs/promises';
+import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
+
+test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unapproved archived source', async () => {
+  const scratch = await mkdtemp(join(tmpdir(), 'analyzer-archive-'));
+  const staging = join(scratch, 'staging'); const extracted = join(scratch, 'extracted');
+  const env = { ...process.env, GIT_CEILING_DIRECTORIES: scratch, FALLOW_TELEMETRY_DISABLED: '1' };
+  const command = (file, args, cwd) => {
+    const run = spawnSync(file, args, { cwd, env, encoding: 'utf8', timeout: 60000, maxBuffer: 12 * 1024 * 1024 });
+    assert.ifError(run.error); return run;
+  };
+  try {
+    await mkdir(staging); await mkdir(extracted);
+    const source = await sourceInputs(process.cwd());
+    for (const input of source.files) {
+      const target = join(staging, input.path); await mkdir(dirname(target), { recursive: true });
+      await cp(resolve(input.path), target);
+    }
+    // A local index/tree forms a real transport archive even when this test's
+    // parent is already a Git-free archive. No commit, author or remote is needed.
+    for (const args of [['init', '--quiet'], ['-c', 'core.autocrlf=false', 'add', '--all']]) {
+      const run = command('git', args, staging); assert.equal(run.status, 0, run.stderr);
+    }
+    const tree = command('git', ['write-tree'], staging); assert.equal(tree.status, 0, tree.stderr);
+    const archive = join(scratch, 'source.tar');
+    const packed = command('git', ['archive', '--format=tar', `--output=${archive}`, tree.stdout.trim()], staging);
+    assert.equal(packed.status, 0, packed.stderr);
+    const unpacked = command('tar', ['-xf', archive, '-C', extracted], scratch); assert.equal(unpacked.status, 0, unpacked.stderr);
+    assert.equal(command('git', ['rev-parse', '--show-toplevel'], extracted).status, 128);
+    assert.deepEqual((await sourceInputs(extracted)).files, source.files);
+    await cp(resolve('dist'), join(extracted, 'dist'), { recursive: true });
+    await symlink(resolve('node_modules'), join(extracted, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+    const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], extracted);
+    const valid = check(); assert.equal(valid.status, 0, valid.stdout + valid.stderr);
+    const diagnostic = async () => JSON.parse(await readFile(join(extracted, 'reports/analyzer/fallow.json'), 'utf8'));
+    assert.deepEqual((await diagnostic()).workspace_diagnostics ?? [], []);
+    const maintained = join(extracted, 'src/unreachable-archive-probe.ts');
+    await writeFile(maintained, 'export const unreachableArchiveProbe = 1;\n');
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).summary.unused_files > 0);
+    await rm(maintained);
+    const hidden = join(extracted, 'dist/unapproved-source.ts');
+    await writeFile(hidden, 'export const hiddenMaintainedSource = 1;\n');
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).workspace_diagnostics.some(row => row.kind === 'excluded-by-default-ignore' && row.path === 'dist'));
+    await rm(hidden);
+    const restored = check(); assert.equal(restored.status, 0, restored.stdout + restored.stderr);
+  } finally {
+    assert.equal(dirname(scratch), resolve(tmpdir()));
+    await rm(scratch, { recursive: true, force: true });
+  }
+});
 test('[GATE-02-01] full analyzer fails for real unused files and exports', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shell-analysis-'));
   try {

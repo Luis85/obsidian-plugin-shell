@@ -24,7 +24,9 @@ jobs:
   setup:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    # Fresh setup and standalone verification both run the complete gates. The
+    # measured Windows sequence exceeds 15 minutes with the new real-tool probes.
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:

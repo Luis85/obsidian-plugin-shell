@@ -1,11 +1,11 @@
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
+export { sha256 } from '../shared/hash.mjs';
 import { lstat, readFile, readdir, mkdir, writeFile, rename, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { stableVersion } from './prepare.mjs';
 
 export const assetNames = Object.freeze(['main.js', 'manifest.json', 'styles.css']);
-export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export function git(root, args) { return execFileSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true }).trim(); }
 export function fixedSource(root, commit) {
   if (!/^[a-f0-9]{40}$/.test(commit ?? '') || git(root, ['rev-parse', 'HEAD']) !== commit) throw new Error('FIXED_COMMIT_REQUIRED');

@@ -58,7 +58,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   report.themeTransitions = [];
   // Native host stylesheet transitions; each leaf retains its independent view state.
   for (const theme of ['dark', 'light']) {
-    await setNativeTheme(page, context, theme);
+    await setNativeTheme(page, context, theme, output);
     await expect(page.locator('body')).toHaveClass(new RegExp(`(?:^|\\s)theme-${theme}(?:\\s|$)`));
     for (const root of await page.locator(`${view} [data-plugin-ui]`).all()) await expect(root).toHaveClass(new RegExp(`(?:^|\\s)${theme}(?:\\s|$)`));
     report.themeTransitions.push(await page.evaluate(target => ({ target, bodyClass: document.body.className.slice(0, 2048),
@@ -66,7 +66,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
         ownerIsCurrentDocument: root.ownerDocument === document, ownerBodyClass: root.ownerDocument.body?.className.slice(0, 2048) })) }), theme));
     await page.screenshot({ path: join(output, `native-split-preferences-${theme}.png`) });
   }
-  await setNativeTheme(page, context, 'dark');
+  await setNativeTheme(page, context, 'dark', output);
   report.checks.push('native-split-pane-light-dark-theme-transition');
   for (const factor of [1.25, 1.5]) {
     await page.evaluate(value => window.require('electron').webFrame.setZoomFactor(value), factor);
@@ -97,9 +97,9 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
   report.phase = 'popout-theme';
-  await setNativeTheme(popout, context, 'light');
+  await setNativeTheme(popout, context, 'light', output);
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/(?:^|\s)light(?:\s|$)/);
-  await setNativeTheme(popout, context, 'dark');
+  await setNativeTheme(popout, context, 'dark', output);
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/(?:^|\s)dark(?:\s|$)/);
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page, identity);

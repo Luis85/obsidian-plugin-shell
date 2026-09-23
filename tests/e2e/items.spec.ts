@@ -22,6 +22,9 @@ test('item UI validates, synchronizes two views, retains drafts and persists ren
   await expect(panel.getByRole('status')).toHaveText('Waiting for this action to finish…');
   await page.evaluate(() => window.__SHELL_TEST__.fault('none'));
   await expect(panel.getByRole('status')).toHaveText('Item created.');
+  expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
+  await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
+  await expect(panel.getByRole('button', { name: 'Edit item: Shared item', exact: true })).toBeVisible();
   await page.evaluate(() => window.__SHELL_TEST__.mountSecond());
   const secondary = page.locator('[data-leaf="secondary"]');
   await secondary.getByRole('button', { name: 'Documents', exact: true }).click();
@@ -39,6 +42,7 @@ test('item UI validates, synchronizes two views, retains drafts and persists ren
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     await panel.screenshot({ path: `reports/e2e/harness-items-${width}.png` });
   }
+  expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
   await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
   await panel.getByRole('button', { name: 'Edit item: Renamed item', exact: true }).click();
   await panel.getByRole('button', { name: 'Delete item…', exact: true }).click();
@@ -48,6 +52,10 @@ test('item UI validates, synchronizes two views, retains drafts and persists ren
   await page.getByRole('dialog').getByRole('button', { name: 'Delete item', exact: true }).click();
   await expect(panel.getByRole('status')).toHaveText('Item deleted.');
   await expect(panel).toContainText('No items yet.');
+  expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
+  await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-ready', 'true');
+  await expect(panel).toContainText('No items yet.');
+  await expect(panel.getByRole('button', { name: 'Edit item: Renamed item', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => window.__SHELL_TEST__.files())).toEqual({});
   expect(errors).toEqual([]); expect(await page.evaluate(() => window.__SHELL_TEST__.faults)).toEqual([]);
 });

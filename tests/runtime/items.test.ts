@@ -10,6 +10,14 @@ import { itemsFixture, modalDecision } from './items-fixture';
 describe('Item reference actions and real per-view projections', () => {
   it('persists trimmed CRUD, stable IDs and concurrent preferences through the one writer without note writes or duplicate facts', async () => {
     const f = await itemsFixture(); const first = f.view(); const second = f.view();
+    const assertReload = async (expected: readonly { id: string; label: string }[]) => {
+      const restored = await itemsFixture(f.raw());
+      try {
+        const view = restored.view(); await flushPromises(); expect(view.state.loaded).toBe(true);
+        expect(view.state.items.map(item => ({ id: item.id, label: item.values.label }))).toEqual(expected);
+        expect(restored.storage.save).not.toHaveBeenCalled(); expect(restored.observe).not.toHaveBeenCalled();
+      } finally { restored.dispose(); }
+    };
     try {
       const facts: string[] = [];
       const stops = (['plugin-data.created', 'plugin-data.updated', 'plugin-data.deleted'] as const).map(type => f.services.events.on(type, () => { facts.push(type); }));
@@ -19,9 +27,11 @@ describe('Item reference actions and real per-view projections', () => {
       await flushPromises(); const item = first.state.items[0]; if (!item) throw new Error('Missing item');
       expect(item.values.label).toBe('One item'); expect(second.state.items[0]?.id).toBe(item.id);
       expect(first.state.createDraft).toBe(''); expect(second.state.createDraft).toBe('Other view draft');
+      await assertReload([{ id: item.id, label: 'One item' }]);
       first.state.edit(item); first.state.renameDraft = '  Renamed  '; await first.state.rename(); await flushPromises();
       expect(first.state.selected).toMatchObject({ id: item.id, createdAt: item.createdAt, values: { label: 'Renamed' } });
       expect(second.state.items[0]?.values.label).toBe('Renamed');
+      await assertReload([{ id: item.id, label: 'Renamed' }]);
       expect(JSON.stringify(f.raw())).toBe(JSON.stringify({ schemaVersion: 1, preferences: { hideObsidianViewHeader: false, locale: 'de', taskFolder: 'Tasks', notifySuccess: true }, pluginEntities: { schemaVersion: 1, collections: { item: { schemaVersion: 1, revision: 2, records: [{ id: item.id, revision: 2, createdAt: item.createdAt, values: { label: 'Renamed' } }] } } } }));
       const late = f.view(); await flushPromises(); expect(late.state.items[0]?.id).toBe(item.id);
       // Locale follows the real preference service; restore English for explicit dialog assertions.
@@ -32,6 +42,7 @@ describe('Item reference actions and real per-view projections', () => {
       expect(first.state.items).toEqual([]); expect(second.state.items).toEqual([]); expect(first.state.message).toBe('items.deleted');
       expect(facts).toEqual(['plugin-data.created', 'plugin-data.updated', 'plugin-data.deleted']);
       expect(f.storage.save).toHaveBeenCalledTimes(5); expect(f.memory.files.size).toBe(0);
+      await assertReload([]);
       for (const stop of stops) stop();
     } finally { f.dispose(); }
   });

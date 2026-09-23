@@ -1,16 +1,26 @@
 import { StructuredLogger } from './logging';
 import type { Diagnostic } from './ports';
 interface DebugIdentity { readonly id: string; readonly version: string; readonly host: 'browser' | 'obsidian' }
+function identityDescriptors(input: unknown): PropertyDescriptorMap {
+  if (input === null || typeof input !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(input))) throw new Error();
+  const descriptors = Object.getOwnPropertyDescriptors(input);
+  const fields = ['id', 'version', 'host'];
+  if (Reflect.ownKeys(descriptors).length !== 3 || Reflect.ownKeys(descriptors).some(key => typeof key !== 'string' || !fields.includes(key))) throw new Error();
+  for (const field of fields) if (!descriptors[field] || !Object.hasOwn(descriptors[field], 'value')) throw new Error();
+  return descriptors;
+}
+function identityId(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
+}
+function identityVersion(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 40 && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value);
+}
 function captureIdentity(input: DebugIdentity | undefined): DebugIdentity | undefined {
   if (input === undefined) return undefined;
   try {
-    if (input === null || typeof input !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(input))) throw new Error();
-    const descriptors = Object.getOwnPropertyDescriptors(input);
-    if (Reflect.ownKeys(descriptors).length !== 3 || Reflect.ownKeys(descriptors).some(key => typeof key !== 'string' || !['id', 'version', 'host'].includes(key))) throw new Error();
-    for (const field of ['id', 'version', 'host']) if (!descriptors[field] || !Object.hasOwn(descriptors[field], 'value')) throw new Error();
+    const descriptors = identityDescriptors(input);
     const id: unknown = descriptors.id?.value; const version: unknown = descriptors.version?.value; const host: unknown = descriptors.host?.value;
-    if (typeof id !== 'string' || id.length > 64 || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(id)
-      || typeof version !== 'string' || version.length > 40 || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version)
+    if (!identityId(id) || !identityVersion(version)
       || (host !== 'browser' && host !== 'obsidian')) throw new Error();
     return Object.freeze({ id, version, host });
   } catch { throw new Error('INVALID_DEBUG_IDENTITY'); }

@@ -4,6 +4,7 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",
+    "scripts/testing/evidence-vitest-reporter.mjs",
     "scripts/styles/export-host-css.mjs",
     "scripts/testing/check-browser-specimen.mjs",
     "scripts/harness/serve-style-fixture.mjs",
@@ -21,6 +22,9 @@
     "scripts/quality/fallow-node-tests.json"
   ],
   "ignorePatterns": [
+    "dist/main.js",
+    "dist/styles.css",
+    "dist/manifest.json",
     "dist-harness/**",
     "reports/**"
   ],

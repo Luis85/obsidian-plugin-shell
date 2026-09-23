@@ -92,10 +92,13 @@ export class BooleanSetting {
       const record = this.accept(rows.value); if (!record.ok) return record;
       const current = record.value?.values.enabled ?? this.definition.defaultValue; const enabled = next(current);
       if (enabled === current) { this.current = current; return success(undefined); }
-      const result = record.value ? await this.repository.update(record.value, { ...record.value.values, enabled }) : await this.repository.create({ enabled });
-      if (result.ok && !this.disposed) { this.current = result.value.values.enabled; this.problem = undefined; }
-      return result.ok ? success(undefined) : result;
+      return this.persist(record.value, enabled);
     });
+  }
+  private async persist(record: PluginDataSnapshot<Values> | undefined, enabled: boolean): Promise<Result<void>> {
+    const result = record ? await this.repository.update(record, { ...record.values, enabled }) : await this.repository.create({ enabled });
+    if (result.ok && !this.disposed) { this.current = result.value.values.enabled; this.problem = undefined; }
+    return result.ok ? success(undefined) : result;
   }
   dispose(): void {
     if (this.disposed) return;

@@ -61,11 +61,13 @@ function enumeration<const T extends string>(values: readonly T[]): Field<T, tru
 }
 function textList(options: { max?: number; itemMax?: number; pattern?: RegExp } = {}): Field<readonly string[], true> {
   options = Object.freeze({ ...options, ...(options.pattern ? { pattern: new RegExp(options.pattern.source, options.pattern.flags) } : {}) });
+  const pattern = options.pattern && new RegExp(options.pattern.source, options.pattern.flags.replace(/[gy]/g, ''));
+  const validItem = (item: unknown): item is string => typeof item === 'string' && item.length <= (options.itemMax ?? 1000) && (!pattern || pattern.test(item));
   return { required: true, kind: 'list', read(input) {
     if (!Array.isArray(input) || input.length > (options.max ?? 100)) return invalid();
     const values: string[] = [];
     for (const item of input) {
-      if (typeof item !== 'string' || item.length > (options.itemMax ?? 1000) || (options.pattern && !new RegExp(options.pattern.source, options.pattern.flags.replace(/[gy]/g, '')).test(item))) return invalid();
+      if (!validItem(item)) return invalid();
       if (!values.includes(item)) values.push(item);
     }
     return success(Object.freeze(values));

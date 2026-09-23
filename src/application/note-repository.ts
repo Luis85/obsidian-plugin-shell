@@ -17,6 +17,10 @@ export interface NoteSnapshot<V> {
 }
 interface SnapshotState { readonly markdown: string; readonly folder: string }
 interface Mutation<V> { readonly fingerprint: string; readonly work: Promise<Result<NoteSnapshot<V> | undefined>> }
+function creationTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)
+    && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().replace('.000Z', 'Z') === value.replace('.000Z', 'Z');
+}
 
 /** Bounded folder-scoped CRUD. Notes remain canonical; snapshots grant no overwrite authority. */
 export class NoteRepository<I, V> {
@@ -81,21 +85,24 @@ export class NoteRepository<I, V> {
       const paths = await this.storage.list(folder.value);
       if (!paths.ok) return paths;
       if (paths.value.length > 1000) return failure('validation', 'error.repositoryLimit');
+      return await this.readRows(paths.value, folder.value);
+    } catch { this.errors.report('repository.read', 'repository.list'); return failure('storage', 'error.read'); }
+  }
+  private async readRows(paths: readonly string[], folder: string): Promise<Result<readonly NoteSnapshot<V>[]>> {
       const rows: NoteSnapshot<V>[] = [];
       const identities = new Set<string>();
-      for (const path of [...paths.value].sort()) {
-        if (!this.contains(path, folder.value)) return failure('validation', 'error.folder');
+      for (const path of [...paths].sort()) {
+        if (!this.contains(path, folder)) return failure('validation', 'error.folder');
         const read = await this.storage.read(path);
         if (!read.ok) return read;
-        const decoded = this.decode(path, read.value, folder.value);
+        const decoded = this.decode(path, read.value, folder);
         if (!decoded.ok) return decoded;
         if (!decoded.value) continue;
         if (identities.has(decoded.value.id)) return failure('conflict', 'error.duplicateIdentity');
         identities.add(decoded.value.id); rows.push(decoded.value);
       }
-      if (this.folder() !== folder.value) return failure('stale', 'error.stale');
+      if (this.folder() !== folder) return failure('stale', 'error.stale');
       return success(Object.freeze(rows));
-    } catch { this.errors.report('repository.read', 'repository.list'); return failure('storage', 'error.read'); }
   }
   async get(path: string): Promise<Result<NoteSnapshot<V>>> {
     const rows = await this.list();
@@ -153,7 +160,7 @@ export class NoteRepository<I, V> {
     if (!read.ok) return read;
     if (!read.value || read.value.properties.type !== this.recipe.entity.key) return success(undefined);
     const { id, schema_version: version, created_at: createdAt } = read.value.properties;
-    if (typeof id !== 'string' || !/^[a-zA-Z0-9-]{1,80}$/.test(id) || version !== this.recipe.entity.schemaVersion || typeof createdAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(createdAt) || !Number.isFinite(Date.parse(createdAt)) || new Date(createdAt).toISOString().replace('.000Z', 'Z') !== createdAt.replace('.000Z', 'Z')) return failure('validation', 'error.entity');
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9-]{1,80}$/.test(id) || version !== this.recipe.entity.schemaVersion || !creationTimestamp(createdAt)) return failure('validation', 'error.entity');
     const values = this.recipe.decode(read.value.properties);
     if (!values.ok) return values;
     const snapshot = Object.freeze({ entity: this.recipe.entity.key, id, schemaVersion: version, path, values: values.value, revision: ++this.revision });

@@ -1,6 +1,12 @@
 # Obsidian Plugin Shell
 
-**Runtime authoring milestone — event contracts and reference items, version 0.4.0.**
+**Executable qualification milestone, version 0.4.0.**
+
+Executable qualification now adds input-bound framework evidence, case-specific
+acceptance reports, measured production maintainability, and explicit native
+performance/resource protocols. See the [plan](docs/development/EXECUTABLE-QUALIFICATION-PLAN.md)
+and [execution record](docs/testing/EXECUTABLE-QUALIFICATION.md) for actual results
+and remaining scope. This does not establish complete template release readiness.
 
 The integration baseline includes [opt-in release execution](docs/development/RELEASE-EXECUTION.md)
 from a retained candidate. [Readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md)

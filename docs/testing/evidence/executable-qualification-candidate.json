@@ -1,0 +1,544 @@
+{
+  "schemaVersion": 1,
+  "status": "audited",
+  "auditScope": "Read-only retained Linux artifact consistency audit; no tests rerun and no Windows freshness claim.",
+  "sourceCommit": "fd59c80195dee549ddbaaa23c28a06c091b18274",
+  "run": {
+    "id": 35905384551,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905384551",
+    "conclusion": "success",
+    "artifactId": 10770899610,
+    "archiveSha256": "1190e0644bc8498aa422d7cdec6358036bda1a00ea3a127e095a12bf6fd8fbe8"
+  },
+  "retainedCandidate": {
+    "sha256": "e4d6bd978e8d2f132d6661868c4972d37686724626a493c4a2f4b7575a9ee361",
+    "dependencyLockSha256": "a3441564d8f267be967fd1cec1156f701bd324353cd26f76ed159b510b03b723",
+    "tools": {
+      "node": "v24.21.0",
+      "npm": "11.19.1"
+    },
+    "assets": [
+      {
+        "file": "main.js",
+        "bytes": 586834,
+        "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+      },
+      {
+        "file": "manifest.json",
+        "bytes": 280,
+        "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+      },
+      {
+        "file": "styles.css",
+        "bytes": 88547,
+        "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+      }
+    ]
+  },
+  "executionEvidence": {
+    "sessionInputDigest": "f398573afaba453fc6e22946532fbb6346844b0683b8621119964c10106494ec",
+    "packets": 10,
+    "rawReceiptFilesVerified": 32,
+    "allRepeatedSemanticCaseSetsMatch": true,
+    "results": [
+      {
+        "id": "5a07439b-43cf-43a0-94d5-bb66286940cb",
+        "producer": "tooling",
+        "counts": {
+          "total": 169,
+          "passed": 165,
+          "expectedPlatformSkips": 4
+        },
+        "suites": 34,
+        "modes": [
+          "node-baseline",
+          "tooling-generated"
+        ],
+        "sha256": "400d2dcb137620315012b153ba75ecb6ca7554ee9d95e229c5c53a49cc1ec3fe"
+      },
+      {
+        "id": "96fd307a-21a1-4b47-8cd1-92f467daa5ec",
+        "producer": "runtime",
+        "counts": {
+          "total": 310,
+          "passed": 310,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 53,
+        "modes": [
+          "component",
+          "unit"
+        ],
+        "sha256": "aa057a493271f657c30a34876f6615b631ca26e622ad4bcc97c7dcf007d82e4c"
+      },
+      {
+        "id": "9ef49009-1093-4978-9bc2-9f7b21ff537f",
+        "producer": "runtime",
+        "counts": {
+          "total": 310,
+          "passed": 310,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 53,
+        "modes": [
+          "component",
+          "unit"
+        ],
+        "sha256": "cb2ec97c38832ba37d035ee60d05d97c50a62e1eeaf8db516816615327bb17da"
+      },
+      {
+        "id": "e3fe4656-8acb-4332-9754-07c65b46e935",
+        "producer": "runtime",
+        "counts": {
+          "total": 310,
+          "passed": 310,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 53,
+        "modes": [
+          "component",
+          "unit"
+        ],
+        "sha256": "f39aa160afe108d5e078acb9ff2b3658fe12543b4b87e39da40144790c47768d"
+      },
+      {
+        "id": "b995a886-70f4-4e66-8c19-9ed27fbbef4a",
+        "producer": "coverage",
+        "counts": {
+          "total": 310,
+          "passed": 310,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 53,
+        "modes": [
+          "component",
+          "unit"
+        ],
+        "sha256": "d87e102ab842819a349da8c033c351c5ea5d795e06f658722c0d40da9f2fee12"
+      },
+      {
+        "id": "a50531ab-5cc4-4287-af35-441968257ca7",
+        "producer": "artifact",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "artifact"
+        ],
+        "sha256": "047f31052a435a2c7e157bc3e90e4e231f93cc8efce1f89eacd69d9338d54733"
+      },
+      {
+        "id": "5e19caa6-2e04-4830-bc20-178ba9b4ea29",
+        "producer": "browser",
+        "counts": {
+          "total": 33,
+          "passed": 33,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 7,
+        "modes": [
+          "browser-integrated"
+        ],
+        "sha256": "c83b388452a69f2bcb15f6d2c4e3a729e1b263c068529d7965f0e1de41f7cff6"
+      },
+      {
+        "id": "94ada8c3-667a-4c52-b0f4-339fabf19ff9",
+        "producer": "native",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ],
+        "sha256": "afd5cb53b4a8ee20bbf9fb951c3314faf5b85f68c9c0829ac83c5ebecb91469f"
+      },
+      {
+        "id": "55fedd5a-be07-4ef1-8fa3-2a121a49edfd",
+        "producer": "native",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ],
+        "sha256": "f927dfd034241c1c7e7a3045e5a30be40b4f7b0150d071e84cf8790633d67ecc"
+      },
+      {
+        "id": "01c844cb-f9a4-4015-af42-606a59a457fe",
+        "producer": "native",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ],
+        "sha256": "17bd9790f8606de0142c6863853696f6935eab70f0e5b25e7e77d18f2ae36101"
+      }
+    ]
+  },
+  "native": {
+    "mode": "native-obsidian",
+    "platform": "linux",
+    "sessions": [
+      {
+        "id": "94ada8c3-667a-4c52-b0f4-339fabf19ff9",
+        "checks": 31,
+        "errors": 0,
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "itemsWrites": {
+          "calls": 6,
+          "active": 0,
+          "maximumActive": 1,
+          "failures": 0
+        },
+        "restartWrites": {
+          "calls": 0,
+          "active": 0,
+          "maximumActive": 0,
+          "failures": 0
+        },
+        "adapterScope": "controlled-adapter-in-native-host",
+        "reportSha256": "2b05019e9605fcb918ba776e1b818a680d54003f140ccdda3a61a9520aff467f"
+      },
+      {
+        "id": "55fedd5a-be07-4ef1-8fa3-2a121a49edfd",
+        "checks": 31,
+        "errors": 0,
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "itemsWrites": {
+          "calls": 6,
+          "active": 0,
+          "maximumActive": 1,
+          "failures": 0
+        },
+        "restartWrites": {
+          "calls": 0,
+          "active": 0,
+          "maximumActive": 0,
+          "failures": 0
+        },
+        "adapterScope": "controlled-adapter-in-native-host",
+        "reportSha256": "40467063e20e95d22699f07f2a289905a403ced66c837ebc3bd99f8530280425"
+      },
+      {
+        "id": "01c844cb-f9a4-4015-af42-606a59a457fe",
+        "checks": 31,
+        "errors": 0,
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "itemsWrites": {
+          "calls": 6,
+          "active": 0,
+          "maximumActive": 1,
+          "failures": 0
+        },
+        "restartWrites": {
+          "calls": 0,
+          "active": 0,
+          "maximumActive": 0,
+          "failures": 0
+        },
+        "adapterScope": "controlled-adapter-in-native-host",
+        "reportSha256": "9334dfda5fcc68379770437d0c6feb836433d3fc08e87a15b2a8fd9bf00ca6b6"
+      }
+    ],
+    "separatePerformanceSession": {
+      "checks": 31,
+      "errors": 0,
+      "report": {
+        "file": "reports/native/report.json",
+        "bytes": 41370,
+        "sha256": "f8766e5c98398069342402479455bb74ac51e407e0a34a78ad1529d0a56117dc"
+      }
+    }
+  },
+  "sourceCoverage": {
+    "productionInputs": 97,
+    "domainApplicationFeaturesInputs": 41,
+    "rawCountsIndependentlyRecomputed": true,
+    "percentages": {
+      "production": {
+        "lines": 99.46595460614152,
+        "statements": 97.43660418963616,
+        "functions": 97.52252252252252,
+        "branches": 94.93725659887495
+      },
+      "domainApplicationFeatures": {
+        "lines": 99.91460290350128,
+        "statements": 97.91666666666667,
+        "functions": 98.87387387387388,
+        "branches": 96.40028797696185
+      }
+    }
+  },
+  "maintainability": {
+    "report": {
+      "file": "reports/maintainability/2026-09-23T18-54-43-831Z/report.json",
+      "bytes": 406571,
+      "sha256": "e110494b9a199d38734527378d94b52bf749a7536b6474f46d95cc13bcc2b8bd"
+    },
+    "status": "passed",
+    "tool": "fallow",
+    "version": "3.28.0",
+    "policy": {
+      "version": 1,
+      "cyclomatic": 10,
+      "cognitive": 15,
+      "duplication": 3,
+      "minTokens": 50,
+      "minLines": 5,
+      "mode": "mild",
+      "ignoreImports": true,
+      "production": "every src JS/TS/Vue file, including generated consumers"
+    },
+    "views": {
+      "production": {
+        "inputs": 97,
+        "functions": 801,
+        "complexityFindings": 0,
+        "templateUnits": 9,
+        "templateFindings": [
+          {
+            "path": "src/presentation/components/panels/DocumentPanel.vue",
+            "name": "<template>",
+            "line": 14,
+            "cyclomatic": 29,
+            "cognitive": 18
+          },
+          {
+            "path": "src/presentation/components/panels/ItemsPanel.vue",
+            "name": "<template>",
+            "line": 12,
+            "cyclomatic": 24,
+            "cognitive": 25
+          },
+          {
+            "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
+            "name": "<template>",
+            "line": 10,
+            "cyclomatic": 20,
+            "cognitive": 19
+          },
+          {
+            "path": "src/presentation/components/ShowcaseApp.vue",
+            "name": "<template>",
+            "line": 18,
+            "cyclomatic": 13,
+            "cognitive": 18
+          }
+        ],
+        "duplicationPercent": 0.7511950830867289
+      },
+      "tooling": {
+        "inputs": 119,
+        "functions": 942,
+        "complexityFindings": 94,
+        "templateUnits": 0,
+        "templateFindings": [],
+        "duplicationPercent": 0.9256494475962974
+      },
+      "fixtures": {
+        "inputs": 127,
+        "functions": 2367,
+        "complexityFindings": 3,
+        "templateUnits": 0,
+        "templateFindings": [],
+        "duplicationPercent": 1.3123092573753814
+      },
+      "templates": {
+        "inputs": 29,
+        "functions": 360,
+        "complexityFindings": 0,
+        "templateUnits": 1,
+        "templateFindings": [],
+        "duplicationPercent": 4.2446941323345815
+      }
+    },
+    "scope": "Production function gate is independent from reported Vue-template findings and nonblocking tooling/fixture/template views."
+  },
+  "performance": {
+    "classification": "shared-runner",
+    "measuredSamples": 60,
+    "retainedWarmups": 6,
+    "rawSamples": 66,
+    "summary": [
+      {
+        "kind": "warm-initialization",
+        "samples": 30,
+        "p95Ms": 15.400000000023283,
+        "budgetMs": 200,
+        "withinProposedBudget": true
+      },
+      {
+        "kind": "items-readiness",
+        "samples": 30,
+        "p95Ms": 104.59999999997672,
+        "budgetMs": 500,
+        "withinProposedBudget": true
+      }
+    ],
+    "budgetStatus": "within-proposed-budgets",
+    "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
+    "qualification": "Shared-runner advisory timings only; not controlled-reference certification.",
+    "report": {
+      "file": "reports/native/attempts/2026-09-23T19-02-15.916Z-23093/performance.json",
+      "bytes": 31804,
+      "sha256": "0c56803bdbef02b678082255d7d5c64a9f5c08e97f3bce3e98159b1087f7717c"
+    }
+  },
+  "acceptance": {
+    "report": {
+      "file": "reports/candidate-qualification/acceptance-f398573afaba453fc6e22946532fbb6346844b0683b8621119964c10106494ec.json",
+      "bytes": 87381,
+      "sha256": "87fc1e3e8076d36d0660a1a320bb5ddcb54dd1bdf8061f02b1442f94feaa3455"
+    },
+    "total": 96,
+    "counts": {
+      "verified": 1,
+      "partial": 14,
+      "not-run": 81
+    },
+    "verifiedIds": [
+      "AC-03"
+    ],
+    "partialIds": [
+      "AC-04",
+      "AC-06",
+      "AC-11",
+      "AC-43",
+      "AC-44",
+      "AC-46",
+      "AC-83",
+      "AC-84",
+      "AC-85",
+      "AC-86",
+      "AC-87",
+      "AC-88",
+      "AC-89",
+      "AC-90"
+    ]
+  },
+  "legacyBaseline": {
+    "status": "passed",
+    "repetitions": 3,
+    "retries": 0,
+    "outcomeDigests": [
+      "ede3ab2558873d14de2b8074a2c456467e1e44810d96be2fb55a18bf92451dfe",
+      "ede3ab2558873d14de2b8074a2c456467e1e44810d96be2fb55a18bf92451dfe",
+      "ede3ab2558873d14de2b8074a2c456467e1e44810d96be2fb55a18bf92451dfe"
+    ],
+    "releaseStatus": "blocked"
+  },
+  "security": {
+    "report": {
+      "file": "reports/security/result.json",
+      "bytes": 245,
+      "sha256": "fe62f6d2323d06712cc06bb6b6bbd2aca751d3412c184ab886b5517b234ffca7"
+    },
+    "status": "passed",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "upstreamEslintSupportException": "Separate unresolved compatibility condition; zero audit vulnerabilities does not establish full dependency support."
+  },
+  "assetsDiagnostic": {
+    "sizes": [
+      {
+        "file": "main.js",
+        "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef",
+        "bytes": 586834,
+        "gzipBytes": 174669,
+        "brotliBytes": 150287,
+        "limitBytes": 1048576,
+        "withinBudget": true
+      },
+      {
+        "file": "styles.css",
+        "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7",
+        "bytes": 88547,
+        "gzipBytes": 11702,
+        "brotliBytes": 9964,
+        "limitBytes": 102400,
+        "withinBudget": true
+      },
+      {
+        "file": "manifest.json",
+        "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380",
+        "bytes": 280,
+        "gzipBytes": 211,
+        "brotliBytes": 155,
+        "limitBytes": null,
+        "withinBudget": true
+      }
+    ],
+    "yamlRenderedLength": 171883,
+    "attributionDefinition": "Rolldown renderedLength for tree-shaken YAML modules in this build graph. Not an additive allocation of final minified/compressed bytes or a counterfactual saving from removing YAML."
+  },
+  "release": {
+    "status": "blocked",
+    "authorization": "not-authorized",
+    "consumerQualification": "Separate artifact audit in executable-qualification-consumer.json; not included in this candidate-only audit."
+  },
+  "setupMatrix": {
+    "runId": 35905390355,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35905390355",
+    "conclusion": "success",
+    "cells": [
+      {
+        "platform": "windows-latest",
+        "node": "24.21.0",
+        "npm": "11.19.1",
+        "status": "success"
+      },
+      {
+        "platform": "ubuntu-latest",
+        "node": "24.21.0",
+        "npm": "11.19.1",
+        "status": "success"
+      },
+      {
+        "platform": "windows-latest",
+        "node": "24.15.0",
+        "npm": "12.0.2",
+        "status": "success"
+      },
+      {
+        "platform": "ubuntu-latest",
+        "node": "24.15.0",
+        "npm": "12.0.2",
+        "status": "success"
+      }
+    ],
+    "scope": "Observed hosted job outcomes; does not change the qualified release toolchain."
+  },
+  "previousSummary": {
+    "file": "reports/qualification/final-candidate-summary-8a350b1.json",
+    "sha256": "cddbd79a60d088f20331e4f068afd7228d674211306d2a456e6ed31db04a6f7e",
+    "assetHashesUnchanged": true
+  }
+}

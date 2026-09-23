@@ -2,7 +2,7 @@
 
 > **Version:** 0.11.0 · **Updated:** 2026-09-23 · **Owner:** Luis85
 > **Implementation milestone:** Authoring, optional examples, shared durable persistence
-> and release-preparation milestone, plugin version 0.4.0. Final platform/public-release
+> and executable qualification milestone, plugin version 0.4.0. Final platform/public-release
 > readiness remains evidence-bound.
 
 ## Product goal
@@ -12,6 +12,16 @@ A developer obtains the template, runs a guided setup, generates a feature, deve
 The owner requested the first runnable iteration up to an openable showcase view. That slice now implements the native view, selected Nuxt UI components, Task Markdown workflow, shared preferences, typed events, feedback, scoped CSS, setup/local installation and executable tests. Do not interpret a working showcase as completion of every v1 capability.
 
 ## Requirements remain in force
+
+**Executable qualification extension:** The [selected plan](../development/EXECUTABLE-QUALIFICATION-PLAN.md)
+addresses TST-08–11/15, QLT-05/12 and NFR-02–05 over the existing implementation.
+Trusted producer adapters bind actual framework/native results to source, tools,
+protocols and candidate assets. An additive crosswalk retains all 96 legacy
+acceptance rows and required modes. Full production function-complexity and clone
+measurements, ownership cycles and controlled-reference timing remain separate
+from execution rates and source coverage. See the
+[execution record](../testing/EXECUTABLE-QUALIFICATION.md) for measured results;
+unexecuted modes and the blocked release profile remain visible.
 
 **Runtime authoring extension:** Complete narrow publication/observation contracts,
 explicit event descriptor composition and source-derived catalog/check commands.
