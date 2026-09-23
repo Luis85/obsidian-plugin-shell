@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "milestone": "0.4.0",
+  "legacyPlan": "test-plan.json",
+  "legacyAcceptancePromotion": false,
+  "families": [
+    {
+      "id": "AUTHORING-CATALOG",
+      "files": [
+        "tests/tooling/maker-catalog.checks.mjs",
+        "tests/tooling/makers.checks.mjs"
+      ],
+      "modes": [
+        "tooling",
+        "generated-runtime"
+      ],
+      "scope": "All recipes, primitive composition, explicit registration, edited/rerun/precondition behavior and custom local plans"
+    },
+    {
+      "id": "EXAMPLE-REMOVAL",
+      "files": [
+        "tests/tooling/example-removal.checks.mjs"
+      ],
+      "modes": [
+        "tooling",
+        "consumer-qualified-separately"
+      ],
+      "scope": "Exact ownership, source/registration/template conflict safety and minimal consumer qualification"
+    },
+    {
+      "id": "PLUGIN-DATA",
+      "files": [
+        "tests/runtime/plugin-data.test.ts"
+      ],
+      "modes": [
+        "real-service"
+      ],
+      "scope": "Typed CRUD, shared serialized writer, revision conflicts, JSON/schema preservation and uncertain-write blocking"
+    },
+    {
+      "id": "DATA-PROPERTIES",
+      "files": [
+        "tests/runtime/data-properties.test.ts"
+      ],
+      "modes": [
+        "seeded-real-service"
+      ],
+      "scope": "Markdown roundtrip, preview/stale/uncertain safety; retained seed/replay"
+    },
+    {
+      "id": "RENDERED-ACCESSIBILITY",
+      "files": [
+        "tests/e2e/accessibility.spec.ts"
+      ],
+      "modes": [
+        "served-browser"
+      ],
+      "scope": "All panels/themes, overlays, associated errors, keyboard/focus, German/narrow/reduced-motion/forced-colors and negative control"
+    },
+    {
+      "id": "TARGETED-MUTATION",
+      "files": [
+        "scripts/quality/mutation-smoke.mjs"
+      ],
+      "modes": [
+        "domain-guard-mutation"
+      ],
+      "scope": "Three selected real-source guard corruptions and passing baseline; no whole-program score"
+    },
+    {
+      "id": "MAINTENANCE-RELEASE",
+      "files": [
+        "tests/tooling/maintenance.checks.mjs",
+        "tests/tooling/release.checks.mjs"
+      ],
+      "modes": [
+        "tooling",
+        "live-discovery-separately"
+      ],
+      "scope": "Freshness failures, safe version preparation, fixed source/assets/provenance and nonpublishing rehearsal"
+    }
+  ],
+  "thresholds": {
+    "production": {
+      "lines": 90,
+      "statements": 90,
+      "functions": 90,
+      "branches": 85
+    },
+    "domainApplicationFeatures": {
+      "lines": 95,
+      "statements": 95,
+      "functions": 95,
+      "branches": 90
+    },
+    "selectedCore": {
+      "lines": 95,
+      "statements": 90,
+      "functions": 90,
+      "branches": 90
+    }
+  },
+  "externalScope": [
+    "physical mobile devices",
+    "manual screen-reader acceptance",
+    "native platform scope per executed record",
+    "public release/tag/directory authorization",
+    "nested ESLint upstream support"
+  ]
+}

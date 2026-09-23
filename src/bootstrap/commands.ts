@@ -3,13 +3,17 @@ import { createShowcaseCommands } from '../features/showcase/commands';
 import { createDebugCommands } from '../features/debugging/commands';
 import { defineLogCatalog } from '../application/logging';
 import type { Services } from './services';
+import { authoringPanels } from './authoring';
+import { authoringViewCommands } from './authoring-views';
 
 /** Add one feature factory here; each factory receives only its required capabilities. */
-export function createCommands(services: Services, navigation: { openShowcase(): Promise<void>; toggleHeader(): Promise<void> }) {
+export function createCommands(services: Services, navigation: { openShowcase(): Promise<void>; toggleHeader(): Promise<void>; openAuthoring?(id: string): Promise<void> }) {
   const correlations = new Map<string, ReturnType<Services['logger']['correlation']>>();
   const commands = new CommandService([
     createShowcaseCommands({ ...navigation, canToggleHeader: () => !services.preferences.readonly }),
     createDebugCommands({ debugging: services.debugging, modals: services.modals, notices: services.notices }),
+    ...(navigation.openAuthoring ? [authoringViewCommands(authoringPanels, navigation.openAuthoring)] : []),
+    ...services.authoring.groups,
   ], services.diagnostics, {
     validKey: key => services.i18n.global.te(key),
     onFailure: (error, id) => { services.notifications.show(`command:${id}`, 'error', error.key, true, 'runtime'); },

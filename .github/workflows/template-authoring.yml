@@ -1,7 +1,7 @@
 name: Template authoring
 on:
   push:
-    branches: [main, build/iteration-three]
+    branches: [main, build/template-foundation]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -12,7 +12,7 @@ concurrency:
 jobs:
   renamed-feature:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -43,6 +43,21 @@ jobs:
       - name: Provision pinned Chromium and exercise served components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Remove reviewed examples while preserving the consumer feature
+        run: |
+          set -o pipefail
+          sha256sum src/features/bookmarks/bookmark.entity.ts > reports/template-authoring/consumer-before.sha256
+          node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
+          node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
+          sha256sum --check reports/template-authoring/consumer-before.sha256
+          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/foundation-verify.txt
+          node "$QUALIFIED_NPM" run test:e2e
+      - name: Generate and qualify another working feature after removal
+        run: |
+          set -o pipefail
+          node "$QUALIFIED_NPM" run make -- feature reading --entity reading-item --yes --no-interaction
+          node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
           node "$QUALIFIED_NPM" run test:e2e
       - name: Retain authoring evidence and the generated source
         if: always()

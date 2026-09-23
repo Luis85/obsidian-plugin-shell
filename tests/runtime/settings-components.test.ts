@@ -35,7 +35,7 @@ it('[UI-03-05] failed and slow header writes do not display uncommitted state', 
     expect(f.root.textContent).toContain('Saving header preference');
     barrier.resolve(); await settle(); expect(c.header.checked).toBe(true); expect(c.header.disabled).toBe(false);
     f.save.mockRejectedValueOnce(new Error('disk failure')); c.header.click(); await settle();
-    expect(c.header.checked).toBe(true); expect(f.root.querySelector('[role="alert"]')?.textContent).toContain('not saved');
+    expect(c.header.checked).toBe(true); expect(f.root.querySelector('[role="alert"]')?.textContent).toContain('save outcome is uncertain');
     expect(f.services.preferences.current.hideObsidianViewHeader).toBe(true); expect(f.observe).toHaveBeenCalledTimes(1);
   } finally { f.dispose(); }
 });

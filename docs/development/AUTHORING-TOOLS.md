@@ -1,73 +1,124 @@
-# Generate and inspect note features
+# Authoring tools
 
-The implemented maker catalog has two recipes: `feature` creates a grouped,
-registered note-backed feature; `entity --document` adds another note entity to
-an existing group. They use the public feature API and shared repository runtime.
-The full view/component/store/command/modal/style/locale/custom-maker catalog is
-still pending. Domain-only entities remain available through the manual
-`defineEntity` API; this maker rejects missing `--document` instead of generating
-an unused module.
-
-Use the qualified installed toolchain. Help works before dependency installation;
-planning uses the installed TypeScript parser to validate the actual registry.
-Nothing installs dependencies, fetches templates, publishes, or creates user notes.
+The maker catalog generates ordinary, registered source through one reviewed file
+planner. Feature authors keep domain rules in `src/features/<owner>`; Vue markup
+stays in `src/presentation/components`, with behavior in composables and per-view
+Pinia stores. The recipes use the existing services and exact installed toolchain.
+They never install dependencies, fetch templates, create user notes or publish.
 
 ```sh
 npm run make -- --list
 npm run make -- feature bookmarks --entity bookmark --dry-run
 npm run make -- feature bookmarks --entity bookmark --yes --no-interaction
-npm run make -- entity meeting --feature bookmarks --document --dry-run
-npm run make -- entity meeting --feature bookmarks --document --yes --no-interaction
 ```
 
-The optional `--preset title|task|project` chooses a tested small starting schema.
-The title preset supplies one required title; Task adds status/tags/optional due;
-Project supplies name/budget/archived. Defaults preserve zero and false. Change
-the ordinary generated source to express your actual business validation.
-`--folder` selects a safe default note folder. This is scaffolding, not a finished
-business application or a generated user interface.
+An interactive terminal without a recipe opens a chooser; noninteractive invocation
+prints help. `--help` and `--list` work before installation. Use
+`npm run --silent make -- ... --json` for clean machine output. Required missing
+owners/options, unknown flags, unsupported option combinations and invalid names
+fail with a prerequisite message. `--yes` applies the selected plan; it does not
+request downloads or new permissions.
 
-Each recipe creates a named entity module and document/feature definition inside
-`src/features/<group>`, one explicit typed registration in
-`src/bootstrap/features.ts`, a real-service CRUD test and an exact Markdown
-fixture. The returned repository is the creation/update/delete action surface;
-there is no orphan wrapper or extra dependency wiring for the author. No business
-logic enters `main.ts`. See [Build a feature](BUILD-A-FEATURE.md) for the manual API.
-When adding a UI to generated business logic, place Vue markup in
-`src/presentation/components` and behavior in `composables` or `stores`; keep the
-typed injection contract in `context`. The maker does not mix Vue behavior into
-the entity definition or invent a new UI framework. See
-[Presentation concerns](PRESENTATION-STRUCTURE.md) for the enforced layout.
+## Recipes and integration
 
-Apply runs the actual typecheck, generated Vitest test and entity check. Output
-records each executed check. Full `npm run verify` remains a separately listed
-next step and is never reported as passed without execution. A check failure
-returns nonzero and retains generated source for inspection and correction.
+All child recipes take `<name> --feature <existing-owner>` unless stated otherwise.
 
-For machine output use `npm run --silent make -- ... --json`. Human prompts go
-to stderr. Noninteractive apply needs `--yes`; missing input and unknown flags
-fail. `--dry-run` reads/prints the complete path/hash/change plan without locks,
-directories, reports, source writes or checks that would generate output.
+| Recipe | Generated behavior and integration |
+| --- | --- |
+| `feature` | Composes entity, store, component, localized command, scoped CSS and tests from the same primitives. Defaults to a Markdown title entity; its panel creates notes through the real repository. `--entity`, `--preset` and `--backend` select the schema/backend. |
+| `entity` | Defaults to a domain-only definition, validation tests and explicit domain catalog entry. `--document` or `--backend markdown` adds exact Markdown fixtures and real CRUD tests. `--backend plugin-data` selects canonical plugin data with real CRUD/conflict tests. |
+| `view` | Registered Vue draft editor, per-view Pinia state, native view type/open command, localized labels, stylesheet and rendered/ownership tests. This is an editable draft surface to extend, not an invented business workflow. |
+| `component` | Accessible localized SFC registered in the shared component host, with its own native view registration, stylesheet and rendered test. |
+| `store` | Per-view draft/reset store with isolation tests, consumed by a generated editable panel. No automatic persistence. |
+| `usecase` | Feature-owned title normalization/validation action, called by an integrated prompt-and-preview command. Explicitly previews; it does not claim to persist. |
+| `command` | Localized native info command using the shared modal service; failed modal outcomes remain command failures. |
+| `modal` | Validated title prompt through `services.modals`, with validation, cancellation, failure and owner-cleanup tests. The shared adapter retains native focus/disposal behavior. |
+| `setting` | A new disabled-by-default boolean feature preference using an explicit plugin-data entity and toggle command. Reads/updates use the same serialized persistence owner as shared preferences. Optional `--preference notifySuccess\|hideObsidianViewHeader` binds a pre-existing shared preference instead. |
+| `event` | Literal typed event and runtime payload validator, explicit command publisher, positive/negative payload and TypeScript contract tests. This is an explicitly requested local signal, not a fake persistence fact. |
+| `listener` | Requires `--event <existing-name>` in the same feature. Subscribes to that typed event through the shared runtime bus, displays localized feedback and unsubscribes on disposal. |
+| `style` | Requires `--view <existing-generated-view>`. Adds an owned CSS module and an actual SFC stylesheet import. No unused CSS output or global host reset. |
+| `locale` | Takes only a locale name. Copies every base and explicitly registered feature key into a pending translation skeleton, with nonselectable status metadata and a completeness test. Review and translate before deliberately enabling a language. Later added keys make the test fail until the draft is updated. |
+| `maker` | Takes only a recipe name. Creates a trusted local recipe in `scripts/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. |
 
-## Repeated runs and safe edits
+```sh
+npm run make -- entity reference --feature bookmarks
+npm run make -- entity rating --feature bookmarks --backend plugin-data
+npm run make -- entity meeting --feature bookmarks --document --preset task
+npm run make -- view dashboard --feature bookmarks
+npm run make -- setting compact --feature bookmarks
+npm run make -- event refreshed --feature bookmarks
+npm run make -- listener refresh-feedback --feature bookmarks --event refreshed
+npm run make -- style outline --feature bookmarks --view dashboard
+npm run make -- maker reminder
+npm run make -- reminder review --feature bookmarks
+npm run make -- locale fr
+```
 
-An identical, fully registered rerun is a no-op for source files. Modified
-scaffolds, conflicting names, case collisions, Windows device names, unsafe
-paths and symlinks fail before mutation. There is no force-overwrite option.
-Registry edits use the actual TypeScript syntax tree and accept only the explicit
-registration callback; unfamiliar structure fails with a manual-repair message.
-Unrelated source and registry text is retained.
+The title preset has a required trimmed title. Task adds status/tags/optional due;
+Project supplies name/budget/archived, preserving zero and false defaults.
+`--folder` selects a safe vault-relative Markdown folder. Customize these ordinary
+schemas and actions for the actual product; templates do not overwrite your edits.
+Domain-only and plugin-data features receive an editable draft panel when composed
+as a feature; that panel makes no claim of repository persistence.
 
-Setup and makers share the read-only file planner and `.codex-authoring.lock`.
-Apply stages complete bytes and rechecks original hashes before every write.
-On failure it restores only content still matching its own writes. Concurrent
-user edits are retained. Incomplete recovery keeps the lock, original/staged
-bytes and `recovery.json`; inspect those files and confirm no operation is running
-before any deliberate recovery. Locks are never removed automatically as stale.
-This coordinates cooperating tools, not all editors or a filesystem-wide atomic
-transaction. A failed run may leave newly created empty parent directories.
+## Registries and ownership
 
-## Inspect actual registered definitions
+`src/bootstrap/features.ts` constructs typed repositories once. Domain-only schemas
+join `src/bootstrap/authoring-domains.ts`. Runtime action factories and static Vue
+panel imports join `src/bootstrap/authoring.ts`; locale modules join
+`src/bootstrap/authoring-locales.ts`. No business code enters `main.ts` and no source
+scan discovers features at runtime.
+
+Each registered panel has an exact identity-derived native view type and an open
+command. The common native adapter owns headers, menus and disposal. Each mount
+creates separate Pinia, i18n, portal and subscriptions. Feature source imports no
+host classes or Vue components. Note creation uses a new request identity for each
+deliberate submission, blocks uncertain outcomes for that view and ignores late
+UI updates after unmount. Repositories retain attempted-write deduplication.
+
+Generated messages contain English/German starting labels. Pending languages stay
+outside the selectable locale union. The pending-locale maker reads literal,
+explicitly registered dictionaries without executing their source; unfamiliar
+computed dictionary code requires manual translation work rather than evaluation.
+
+## Review, formatting and conflicts
+
+`--dry-run` validates and prints exact paths, hashes, changes and planned checks.
+It writes no locks, directories, reports or generated source. The planner binds
+both edited files and read-only prerequisites to their reviewed hashes.
+
+Apply formats only planned source bytes with the pinned Prettier configuration,
+then runs types, the selected generated runtime/tooling tests and the entity
+catalog check. Exact Markdown fixtures remain untouched. Output records actual
+check outcomes. Full `npm run verify` remains a printed next step and is never
+reported as passed without execution. A failed check retains source for inspection.
+
+Identical registered reruns are source no-ops. Edited source or owned registrations,
+case collisions, reserved names, unsafe paths, symlinks and stale inputs fail before
+mutation. There is no force-overwrite switch. AST registry edits preserve unrelated
+entries and comments; unfamiliar shapes fail closed. Empty repository registries
+need no unused callback parameter; adding their first repository inserts one.
+
+Setup, makers and example removal share `.codex-authoring.lock` and the safe file
+planner. Writes recheck hashes. Recovery restores only bytes still matching the
+operation's own writes; concurrent user edits survive. Incomplete recovery retains
+the lock and recovery material for inspection. This is not a filesystem-wide
+transaction. Failed operations can leave newly created empty parent directories.
+
+## Local custom recipes
+
+The explicit `customMakers` registry contains metadata (`name`, `version`,
+`description`) and an async `plan(context, request)` method. Request name/owner
+are validated. Context supplies read-only source access and declarative
+`add`/`editArray` planning methods plus targeted test paths. Builtin primitives are
+reusable. The runner owns review, formatting, hashes, locking, writes and checks.
+
+Local recipe code is trusted developer code, not a sandbox. There is no remote
+loader, JSON command hook or automatic package installation. Recipes must return
+real integrated behavior and retain meaningful tests. Unknown/duplicate recipes
+fail; changing an existing custom recipe is an ordinary reviewed source edit.
+
+## Actual entity catalog and qualification
 
 ```sh
 npm run entities:check
@@ -75,31 +126,16 @@ npm run entities:catalog
 npm run --silent entities:catalog -- --json
 ```
 
-These commands follow the explicit feature registry, bundle the actual trusted
-source definitions with the installed Vite toolchain, and validate their real
-catalog. Output includes entity/schema identity, default folder and override,
-field types/defaults, and explicit document mappings. Duplicate registrations,
-incomplete mappings and conflicting property types fail. No runtime source scan,
-second editable schema database, host property-setting mutation or user note is
-involved. The catalog is derived stdout; redirect it deliberately if a file is
-wanted. Definitions are trusted developer code, not a sandbox for downloaded
-schemas or executable content stored in notes.
+The catalog derives actual source from explicit registries with the installed
+Vite toolchain. It reports backend, schema, fields/defaults and Markdown mappings
+where present. Domain/plugin-data entries need no document mapping. Duplicate
+entity identities and incomplete Markdown mappings fail; no second schema database
+or user-note mutation is involved.
 
-Tooling tests cover deterministic dry runs, exact reruns, edited-file and stale
-registry conflicts, unsafe/case/symlink paths, shared locks and rollback ownership.
-An isolated differently named fixture generates three distinct note entities,
-runs the generated tests through the real codec/repository and checks the derived
-catalog after removing controlled seed examples and their registry entries.
-The fixtures copy only shared foundation code, never a consumer's live business
-folders or registry. A separate regression runs the maker suite from an actually
-extended consumer after removing those seeds and preserving a consumer edit.
-Generated tests use the generic entity fixture and storage ports, so they
-do not depend on the worked examples. Removing the entire showcase still requires
-the separately documented UI/context/localization cleanup; the fixture does not
-claim that broader removal flow is automatic.
-
-Ordinary maker qualification runs only those generated tests and catalog checks,
-never another full verification that recursively invokes itself. It reuses the
-already installed exact dependency graph; that test alone
-does not claim a fresh install, browser/native UI, the full maker catalog, or the
-complete generated-template release qualification.
+Maker qualification uses an isolated owner, executes every recipe and a local
+custom recipe, checks generated formatting/types/tests/catalog, and proves exact
+reruns and edited/stale-input conflicts. Note actions test two distinct creates,
+exact bytes, no success on failed writes, uncertain lockout and late unmounts.
+The native adapter tests use a synthetic host and separately prove two mounted
+view owners. Browser, real-native and physical-device evidence remain distinct;
+see the current iteration test record for executed full-consumer qualification.

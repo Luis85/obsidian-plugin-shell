@@ -10,8 +10,11 @@ const commands = [
   // oversubscribed cold-start processes and cross-suite source-probe races.
   ['--test', '--test-concurrency=1', ...toolingTests],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
-  ['node_modules/oxlint/bin/oxlint', 'src', '--deny-warnings'],
+  ['scripts/quality/lint-source.mjs'],
   ['node_modules/eslint/bin/eslint.js', 'src', '--max-warnings', '0'],
+  ['node_modules/eslint/bin/eslint.js', 'tests/runtime', 'tests/e2e', 'harness/app', '--max-warnings', '0'],
+  ['scripts/quality/check-test-quality.mjs'],
+  ['scripts/quality/check-repository.mjs'],
   ['scripts/quality/check-source.mjs'],
   ['scripts/quality/check-presentation.mjs'],
   ['scripts/quality/check-architecture.mjs'],
@@ -25,5 +28,5 @@ const commands = [
   ['scripts/testing/verify-baseline.mjs', '--repeat', '3'],
   ['node_modules/vite/bin/vite.js', 'build', '--config', 'vite.harness.config.mjs'],
 ];
-try { for (const [path, ...args] of commands) { console.log(`\n▶ ${path} ${args.join(' ')}`); await runNode(path, args); } console.log('Iteration-03 static/service/production-coverage/artifact/analyzer/baseline verification passed. Run test:e2e for served-browser evidence. Native/device/release qualification is NOT implied.'); }
+try { for (const [path, ...args] of commands) { console.log(`\n▶ ${path} ${args.join(' ')}`); await runNode(path, args); } console.log('Static/service/production-coverage/artifact/analyzer/baseline verification passed. Run test:e2e for served-browser evidence and test:mutation for targeted guard qualification. Native/device/release qualification is NOT implied.'); }
 catch (error) { console.error(error.message); process.exitCode = 1; }

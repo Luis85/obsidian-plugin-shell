@@ -28,7 +28,7 @@ export class ShowcaseView extends ItemView {
       this.contentEl.empty();
       this.contentEl.addClass(pluginIdentity.hostClass);
       this.root = this.contentEl.createDiv({ cls: pluginIdentity.rootClass });
-      this.restoreHeader = bindViewHeader(this.containerEl, this.services.preferences, this.services.diagnostics);
+      this.restoreHeader = bindViewHeader(this.containerEl, this.services.preferences, this.services.diagnostics, this.getViewType());
       this.cleanup = this.mountUi(this.root, event => this.showViewActions(event));
     } catch (error) { this.disposeView(); throw error; }
   }
@@ -39,7 +39,7 @@ export class ShowcaseView extends ItemView {
     this.onPaneMenu(menu, 'more-options');
     menu.addSeparator();
     menu.addItem(item => item.setTitle(this.services.text('view.split')).setIcon('separator-vertical').onClick(async () => {
-      try { await this.app.workspace.getLeaf('split').setViewState({ type: SHOWCASE_VIEW, active: true }); }
+      try { await this.app.workspace.getLeaf('split').setViewState({ type: this.getViewType(), active: true }); }
       catch { this.services.diagnostics.report('view.split', 'view.open'); }
     }));
     menu.addItem(item => item.setTitle(this.services.text('view.popout')).setIcon('external-link').onClick(() => this.app.workspace.moveLeafToPopout(this.leaf)));
@@ -64,4 +64,13 @@ export class ShowcaseView extends ItemView {
     }
   }
   async onClose(): Promise<void> { this.disposeView(); }
+}
+
+/** ItemView calls virtual identity methods inside super(), before instance fields exist. */
+export function nativeViewClass(definition: { readonly type: string; readonly title: () => string }) {
+  const type = definition.type; const title = definition.title;
+  return class RegisteredView extends ShowcaseView {
+    override getViewType(): string { return type; }
+    override getDisplayText(): string { return title(); }
+  };
 }

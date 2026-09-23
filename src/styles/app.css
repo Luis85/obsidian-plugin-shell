@@ -1,5 +1,5 @@
 @import "tailwindcss/theme.css" prefix(ps);
-@import "tailwindcss/utilities.css" prefix(ps);
+@import "tailwindcss/utilities.css" prefix(ps) source(none);
 @import "@nuxt/ui";
 @import "./tokens.css";
 @import "./nuxt-bridge.css";

@@ -8,13 +8,18 @@ const hiddenClass = pluginIdentity.hiddenHeaderClass;
  * The direct-child selector deliberately excludes tabs, OS chrome and other leaves.
  * No style/hidden attributes are overwritten; removing our marker restores host CSS.
  */
-export function bindViewHeader(container: HTMLElement, preferences: PreferenceService, errors: ErrorReporter): Unsubscribe {
-  if (container.getAttribute('data-type') !== SHOWCASE_VIEW) throw new Error('HEADER_OWNER_MISMATCH');
+export function bindViewHeader(container: HTMLElement, preferences: PreferenceService, errors: ErrorReporter, ownedType: string = SHOWCASE_VIEW): Unsubscribe {
+  const prefix = `${pluginIdentity.id}-view-`;
+  const explicitType = ownedType === SHOWCASE_VIEW || (ownedType.startsWith(prefix) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(ownedType.slice(prefix.length)));
+  if (!explicitType || container.getAttribute('data-type') !== ownedType) throw new Error('HEADER_OWNER_MISMATCH');
+  const originalOwner = container.getAttribute('data-plugin-view-owner');
   const original = container.classList.contains(hiddenClass);
   const hadClassAttribute = container.hasAttribute('class');
   const restore = () => {
     container.classList.toggle(hiddenClass, original);
     if (!hadClassAttribute && !container.classList.length) container.removeAttribute('class');
+    if (originalOwner === null) container.removeAttribute('data-plugin-view-owner');
+    else container.setAttribute('data-plugin-view-owner', originalOwner);
   };
   let disposed = false;
   let reported = false;
@@ -28,7 +33,7 @@ export function bindViewHeader(container: HTMLElement, preferences: PreferenceSe
   const Observer = container.ownerDocument.defaultView?.MutationObserver;
   const observer = Observer ? new Observer(apply) : undefined;
   const stop = preferences.subscribe(apply);
-  try { apply(); observer?.observe(container, { childList: true }); }
+  try { if (ownedType !== SHOWCASE_VIEW) container.setAttribute('data-plugin-view-owner', pluginIdentity.id); apply(); observer?.observe(container, { childList: true }); }
   catch (error) { stop(); observer?.disconnect(); restore(); throw error; }
   return () => {
     if (disposed) return;

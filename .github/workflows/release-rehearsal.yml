@@ -1,0 +1,88 @@
+name: Release rehearsal
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Reviewed full commit SHA reachable from the default branch
+        required: true
+        type: string
+      version:
+        description: Exact stable version committed in the selected source
+        required: true
+        type: string
+      draft_snapshot:
+        description: Optional fresh reviewed remote-state JSON for a plan-only draft operation
+        required: false
+        default: ''
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-rehearsal-${{ inputs.version }}
+  cancel-in-progress: false
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SOURCE_COMMIT: ${{ inputs.source_commit }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve and freeze reviewed source
+        shell: bash
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+          git merge-base --is-ancestor "$SOURCE_COMMIT" "origin/$DEFAULT_BRANCH"
+          git checkout --detach "$SOURCE_COMMIT"
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          if git show-ref --verify --quiet "refs/tags/$RELEASE_VERSION"; then
+            echo 'Existing version tag: refuse automatic mutation or replacement.' >&2
+            exit 1
+          fi
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Select exact npm locally
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact graph
+        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+      - name: Qualify once and retain exact assets
+        run: node "$QUALIFIED_NPM" run release:rehearse -- --commit "$SOURCE_COMMIT" --version "$RELEASE_VERSION"
+      - name: Produce optional reviewed draft operation plan without execution
+        if: ${{ inputs.draft_snapshot != '' }}
+        env:
+          REMOTE_SNAPSHOT: ${{ inputs.draft_snapshot }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+          import { resolve } from 'node:path';
+          const commit = process.env.SOURCE_COMMIT;
+          const version = process.env.RELEASE_VERSION;
+          const input = { candidateDirectory: resolve('reports/release', version + '-' + commit), commit, version, mode: 'draft', remote: JSON.parse(process.env.REMOTE_SNAPSHOT) };
+          await writeFile('reports/release/draft-plan-input.json', JSON.stringify(input));
+          NODE
+          node scripts/release/promotion-plan.mjs --input reports/release/draft-plan-input.json > reports/release/draft-operation-plan.json
+      - name: Retain immutable rehearsal package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-rehearsal-${{ inputs.version }}-${{ inputs.source_commit }}
+          path: reports/release/
+          if-no-files-found: error
+      - name: Retain qualification logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-qualification-${{ inputs.version }}-${{ inputs.source_commit }}
+          path: |
+            reports/
+            coverage/
+          if-no-files-found: warn

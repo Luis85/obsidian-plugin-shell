@@ -35,7 +35,7 @@ try {
   report.resolvedVersions = await launcher.resolveVersion('1.13.7', 'latest');
   const [appVersion, installerVersion] = report.resolvedVersions;
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
-  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
+  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], localStorage: { language: 'en' }, args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
   await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir));
   let log = ''; const capture = data => { log = (log + data.toString()).slice(-50000); };
   launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
@@ -134,6 +134,7 @@ try {
     await Promise.race([exited, new Promise((_, reject) => setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000))]);
   }
   launched = await launcher.launch({ appVersion, installerVersion, vault: persistedVault, copy: false,
+    localStorage: { language: 'en' },
     args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
   await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir)); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   expect(launched.proc.pid).not.toBe(previousPid);
@@ -166,12 +167,25 @@ try {
 } catch (error) {
   report.status = 'failed'; report.reason = error.message; process.exitCode = 1;
   if (activePage) {
+    report.themeFailure = await activePage.evaluate(() => ({
+      bodyClass: document.body.className.slice(0, 2048),
+      bodyConnected: document.body.isConnected,
+      roots: Array.from(document.querySelectorAll('[data-plugin-ui]')).slice(0, 16).map(root => ({
+        className: String(root.className).slice(0, 2048), connected: root.isConnected,
+        ownerIsCurrentDocument: root.ownerDocument === document,
+        ownerBodyClass: root.ownerDocument.body?.className.slice(0, 2048),
+        ownerBodyIsCurrent: root.ownerDocument.body === document.body,
+        owningViewType: root.closest('[data-type]')?.getAttribute('data-type'),
+      })),
+    })).catch(() => ({ unavailable: true }));
     await activePage.screenshot({ path: join(output, 'native-failure.png') }).catch(() => undefined);
     report.nativeControlLabels = await activePage.locator('[aria-label]').evaluateAll(els => els.map(el => el.getAttribute('aria-label'))).catch(() => []);
     report.visibleText = await activePage.locator('body').innerText().then(value => value.slice(-12000)).catch(() => 'unavailable');
   }
 }
 finally {
+  // Preserve the primary outcome even when host processes delay filesystem cleanup.
+  await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   if (browser) await browser.close().catch(() => undefined);
   if (launched?.proc.pid && launched.proc.exitCode === null && launched.proc.signalCode === null) {
     let timeout;
@@ -187,8 +201,10 @@ finally {
     try { if (!stopped) throw new Error('NATIVE_STILL_RUNNING'); await rm(await nativeConfigDirectory(directory), { recursive: true, force: true }); }
     catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_CONFIG_CLEANUP_FAILED'; process.exitCode = 1; }
   }
-  if (stopped) await rm(scratch, { recursive: true, force: true });
-  else report.scratchPreserved = true;
+  if (stopped) {
+    try { await rm(scratch, { recursive: true, force: true }); }
+    catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_SCRATCH_CLEANUP_FAILED'; report.scratchPreserved = true; process.exitCode = 1; }
+  } else report.scratchPreserved = true;
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

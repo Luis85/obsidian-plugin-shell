@@ -7,7 +7,7 @@ import { fixture, deferred } from './helpers';
 import { pluginIdentity } from '../../src/infrastructure/plugin-identity';
 const marker = pluginIdentity.hiddenHeaderClass;
 function setup(raw: unknown = null) {
-  const f = fixture(); const save = vi.fn(async (_value: unknown): Promise<void> => undefined);
+  const f = fixture(); const save = vi.fn<(value: unknown) => Promise<void>>(async () => undefined);
   return { ...f, save, service: new PreferenceService({ load: async () => raw, save }, f.bus, f.errors) };
 }
 function leaf(type: string = SHOWCASE_VIEW, owner = document) {
@@ -18,6 +18,17 @@ function leaf(type: string = SHOWCASE_VIEW, owner = document) {
   el.append(header, content); owner.body.append(el); return el;
 }
 afterEach(() => { document.body.replaceChildren(); vi.restoreAllMocks(); });
+it('marks only the explicitly selected generated native view and restores its previous marker', async () => {
+  const f = setup(); const type = `${pluginIdentity.id}-view-feature-panel`; const container = leaf(type);
+  container.setAttribute('data-plugin-view-owner', 'prior-marker'); const original = container.outerHTML;
+  const stop = bindViewHeader(container, f.service, f.errors, type);
+  expect(container.getAttribute('data-plugin-view-owner')).toBe(pluginIdentity.id);
+  await f.service.toggleViewHeader(); expect(container.classList.contains(marker)).toBe(true);
+  stop(); expect(container.outerHTML).toBe(original);
+  for (const invalid of ['markdown', `${pluginIdentity.id}-view-`, `${pluginIdentity.id}-view-../foreign`, `${pluginIdentity.id}-view-other`]) {
+    expect(() => bindViewHeader(container, f.service, f.errors, invalid)).toThrow('HEADER_OWNER_MISMATCH');
+  }
+});
 describe('Iteration 02 header ownership and settings', () => {
   it('[HDR-02-01] migrates old schema-one preferences without a write; validates the new boolean', async () => {
     const old = { locale: 'de', taskFolder: 'Projects/Tasks', notifySuccess: false };
@@ -61,7 +72,8 @@ describe('Iteration 02 header ownership and settings', () => {
     const f = setup(); const el = leaf(); const stop = bindViewHeader(el, f.service, f.errors);
     f.save.mockRejectedValueOnce(new Error('write'));
     expect((await f.service.toggleViewHeader()).ok).toBe(false); expect(el.classList.contains(marker)).toBe(false);
-    expect((await f.service.toggleViewHeader()).ok).toBe(true);
+    expect((await f.service.toggleViewHeader()).ok).toBe(false); expect(f.save).toHaveBeenCalledOnce();
+    // The rejected adapter may already have committed; a fresh runtime reads actual storage.
     const stored = f.save.mock.calls.at(-1)?.[0]; stop(); f.service.dispose();
     const restarted = setup(stored); await restarted.service.load();
     const restored = bindViewHeader(el, restarted.service, restarted.errors); expect(el.classList.contains(marker)).toBe(true); restored();
@@ -70,11 +82,11 @@ describe('Iteration 02 header ownership and settings', () => {
     const f = setup(); const barrier = deferred(); f.save.mockImplementationOnce(async () => barrier.promise);
     const first = f.service.toggleViewHeader(); const second = f.service.toggleViewHeader();
     const patch = { taskFolder: 'Safe' }; const third = f.service.update(patch); patch.taskFolder = 'Mutated';
-    await Promise.resolve(); expect(f.save).toHaveBeenCalledTimes(1); barrier.resolve();
+    await vi.waitFor(() => expect(f.save).toHaveBeenCalledTimes(1)); barrier.resolve();
     await Promise.all([first, second, third]); expect(f.service.current).toMatchObject({ hideObsidianViewHeader: false, taskFolder: 'Safe' });
     const late = deferred(); f.save.mockImplementationOnce(async () => late.promise);
     const event = vi.fn(); f.bus.on('preferences.changed', event); const work = f.service.toggleViewHeader();
-    await Promise.resolve(); f.service.dispose(); late.resolve(); expect((await work).ok).toBe(true); expect(event).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(f.save).toHaveBeenCalledTimes(4)); f.service.dispose(); late.resolve(); expect((await work).ok).toBe(true); expect(event).not.toHaveBeenCalled();
   });
   it('[HDR-02-07] uses the owning document and preserves pre-existing namespaced state', async () => {
     const f = setup(); const frame = document.createElement('iframe'); document.body.append(frame);

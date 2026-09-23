@@ -30,7 +30,7 @@ export function cssOwnership(id = 'plugin-shell') {
           selectors.each(selector => {
             selector.walkClasses(node => { if (node.value === 'plugin-shell' || node.value.startsWith('plugin-shell-')) node.value = owned(node.value); });
             selector.walkAttributes(node => {
-              if ((node.attribute === 'data-plugin-ui' && node.value === 'plugin-shell') || (node.attribute === 'data-type' && node.value === 'plugin-shell-showcase')) node.setValue(owned(node.value), { quoteMark: '"' });
+              if ((['data-plugin-ui', 'data-plugin-view-owner'].includes(node.attribute) && node.value === 'plugin-shell') || (node.attribute === 'data-type' && node.value === 'plugin-shell-showcase')) node.setValue(owned(node.value), { quoteMark: '"' });
             });
             selector.walkPseudos(node => {
               if (node.value === ':root' || node.value === ':host') {

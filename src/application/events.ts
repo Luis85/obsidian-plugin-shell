@@ -1,5 +1,8 @@
 import type { Unsubscribe } from './ports';
 export interface ShellEvents {
+  'plugin-data.created': { readonly entity: string; readonly id: string; readonly schemaVersion: number; readonly revision: number };
+  'plugin-data.updated': { readonly entity: string; readonly id: string; readonly schemaVersion: number; readonly revision: number };
+  'plugin-data.deleted': { readonly entity: string; readonly id: string; readonly schemaVersion: number; readonly revision: number };
   'documents.created': { readonly entity: string; readonly id: string; readonly path: string; readonly schemaVersion: number };
   'documents.updated': { readonly entity: string; readonly id: string; readonly path: string; readonly schemaVersion: number };
   'documents.deleted': { readonly entity: string; readonly id: string; readonly path: string; readonly schemaVersion: number };

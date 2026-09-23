@@ -1,0 +1,102 @@
+{
+  "notification": {
+    "overflow": "Weitere Meldungen warten. Details finden Sie in den zugehörigen Ansichten."
+  },
+  "app": {
+    "title": "Plugin Shell",
+    "native": "Obsidian-Umgebung",
+    "browser": "Browser-Testumgebung"
+  },
+  "nav": {
+    "settings": "Einstellungen"
+  },
+  "settings": {
+    "title": "Passend zu deinem Workflow",
+    "subtitle": "Dieselben Einstellungen stehen in den nativen Plugin-Einstellungen von Obsidian bereit.",
+    "language": "Sprache",
+    "languageHelp": "Aktualisiert die Ansicht sofort. Befehlsnamen ändern sich nach dem Neuladen.",
+    "folder": "Standardordner für Notizen",
+    "folderHelp": "Ein sicherer Tresorordner für Funktionen, die diese Einstellung verwenden.",
+    "notices": "Erfolgshinweise",
+    "noticesHelp": "Nach erfolgreicher Erstellung zusätzlich einen nativen Hinweis anzeigen.",
+    "save": "Einstellungen speichern",
+    "saved": "Einstellungen gespeichert",
+    "theme": "Theme folgt Obsidian",
+    "themeHelp": "Kein eigener Farbmodus wird installiert. Komponenten verwenden die CSS-Variablen des Hosts.",
+    "blocked": "Plugin-Daten konnten nicht sicher gelesen oder ein Speichervorgang nicht bestätigt werden. Speichern bleibt zum Schutz der Daten gesperrt. Behebe das Problem und starte das Plugin vor weiteren Änderungen neu.",
+    "hideHeader": "Obsidian-Ansichtskopf ausblenden",
+    "hideHeaderHelp": "Gilt sofort für alle Plugin-Shell-Ansichten. Hier, in den nativen Einstellungen oder über die Befehlspalette wiederherstellen.",
+    "headerSaving": "Ansichtseinstellung wird gespeichert…"
+  },
+  "feedback": {
+    "dismiss": "Hinweis schließen",
+    "native": "Dieser Hinweis kommt über den Host-Adapter.",
+    "saved": "Vorgang abgeschlossen."
+  },
+  "modal": {
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "input": "Beispieltext",
+    "invalid": "Geben Sie einen kurzen, nicht leeren Wert ein.",
+    "validating": "Eingabe wird geprüft…",
+    "confirmTitle": "Beispiel bestätigen",
+    "confirmText": "Dieses Beispiel verändert keine Dokumente. Bestätigen oder brechen Sie ab, um das typisierte Ergebnis zu prüfen.",
+    "promptTitle": "Texteingabe ausprobieren",
+    "promptText": "Geben Sie einen kurzen Wert ein. Er bleibt in diesem Beispiel und wird nicht in den Vault geschrieben.",
+    "confirmed": "Beispiel bestätigt. Keine Dokumente geändert.",
+    "cancelled": "Beispiel abgebrochen. Keine Dokumente geändert.",
+    "title": "Eine Ansicht, zwei Umgebungen",
+    "text": "Dieser Dialog verwendet im Plugin die Obsidian-Modal-API und im Browser einen isolierten Adapter. Die Anwendungsdienste sind von beiden Implementierungen unabhängig."
+  },
+  "command": {
+    "open": "Plugin öffnen",
+    "toggleHeader": "Obsidian-Ansichtskopf umschalten"
+  },
+  "debug": {
+    "toggle": "Debug-Protokollierung umschalten",
+    "report": "Debug-Bericht ansehen",
+    "title": "Debug-Bericht",
+    "enabled": "Debug-Protokollierung für diese Sitzung aktiviert.",
+    "disabled": "Debug-Protokollierung deaktiviert. Fehlerdiagnosen bleiben aktiv."
+  },
+  "error": {
+    "commandUnavailable": "Dieser Befehl ist im aktuellen Kontext nicht verfügbar.",
+    "read": "Die Notiz konnte nicht gelesen werden. Prüfe, ob sie vorhanden und zugänglich ist, und lade die Notizen neu.",
+    "duplicateIdentity": "Zwei Notizen haben dieselbe Entitäts-ID. Behebe das Duplikat vor der Bearbeitung; keine Notizen wurden geändert.",
+    "repositoryLimit": "Dieser Ordner überschreitet die Prüfgrenze von 1.000 Notizen. Verwende einen kleineren, eigenen Ordner.",
+    "title": "Gib einen Titel mit 1–120 Zeichen ein.",
+    "due": "Gib ein gültiges Kalenderdatum ein (JJJJ-MM-TT).",
+    "tags": "Verwende bis zu 12 kurze Tags aus Buchstaben, Zahlen, Bindestrichen oder Schrägstrichen.",
+    "folder": "Verwende einen sicheren relativen Ordner ohne versteckte Namen oder unzulässige Zeichen.",
+    "preferences": "Diese Einstellungen sind ungültig.",
+    "settingsRead": "Gespeicherte Plugin-Daten sind geschützt. Behebe den Lesefehler vor dem Speichern.",
+    "settingsWrite": "Der Speicherstatus ist ungewiss. Speichern bleibt gesperrt, bis das Plugin neu startet und die gespeicherten Daten liest.",
+    "pluginDataRead": "Gespeicherte Entitätsdaten sind ungültig oder verwenden ein nicht unterstütztes Schema. Sie bleiben unverändert erhalten.",
+    "pluginDataMissing": "Diese Entität existiert nicht mehr. Lade die Sammlung neu, bevor du fortfährst.",
+    "pluginDataConflict": "Eine Entität mit dieser ID existiert bereits. Keine Entität wurde überschrieben.",
+    "pluginDataLimit": "Plugin-Daten überschreiten die unterstützte Größe, Datensatzanzahl oder Revisionsgrenze. Es wurden keine Änderungen gespeichert.",
+    "pluginDataStale": "Diese Entität wurde geändert oder ihr Stand stammt aus einer anderen Laufzeit. Lade sie neu und prüfe sie vor dem Speichern.",
+    "conflict": "Der Zielpfad existiert bereits. Keine Datei wurde überschrieben.",
+    "write": "Die Notiz konnte nicht gespeichert werden. Prüfe Zielpfad und Berechtigungen.",
+    "uncertain": "Das Schreibergebnis ist unklar. Prüfe den exakten Zielpfad vor einem neuen Versuch.",
+    "open": "Die Notiz wurde erstellt, konnte aber nicht geöffnet werden. Wiederhole nur das Öffnen.",
+    "stale": "Diese Vorschau passt nicht mehr zu Anfrage oder Zielpfad. Erstelle eine neue Vorschau.",
+    "disposed": "Diese Ansicht wurde geschlossen. Öffne das Plugin erneut.",
+    "request": "Ungültige Anfragekennung. Erstelle eine neue Vorschau.",
+    "entity": "Die Entitätsdefinition ist ungültig oder nicht verfügbar.",
+    "sessionLimit": "Das Limit von 100 Vorschauen dieser Sitzung ist erreicht. Lade das Plugin neu.",
+    "unexpected": "Ein unerwarteter Fehler wurde behandelt. Prüfe den Diagnosebereich.",
+    "render": "Beim Darstellen ist ein Fehler aufgetreten. Schließe und öffne die Ansicht erneut. Deine Dokumente bleiben unverändert."
+  },
+  "view": {
+    "actions": "Ansichtsaktionen",
+    "split": "Plugin in geteilter Ansicht öffnen",
+    "popout": "Ansicht in neues Fenster verschieben",
+    "close": "Diese Ansicht schließen"
+  },
+  "foundation": {
+    "title": "Dein Plugin",
+    "help": "Registrierte Funktionen erscheinen hier. Einstellungen und Laufzeitdienste sind bereit."
+  }
+}

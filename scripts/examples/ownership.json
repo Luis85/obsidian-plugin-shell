@@ -1,0 +1,293 @@
+{
+  "version": 1,
+  "registrations": [
+    {
+      "key": "task",
+      "local": "taskFeature",
+      "from": "../features/tasks/definition",
+      "expression": "register(taskFeature, () => preferences.current.taskFolder)"
+    },
+    {
+      "key": "project",
+      "local": "projectFeature",
+      "from": "../features/projects/definition",
+      "expression": "register(projectFeature)"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/features/tasks/entity.ts",
+      "sha256": "1eb98c457e7829d2fa2b2c3615a2a9984d90e9d2251744ea153908926c98cdee"
+    },
+    {
+      "path": "src/features/tasks/definition.ts",
+      "sha256": "2ba154b22be54c7780938b8accb63d03ec93037fbcb3303578a1cca7ae366016"
+    },
+    {
+      "path": "src/features/tasks/form.ts",
+      "sha256": "ae13e1b1dbd98602dfd8cbe2d2b039f9c73b3844172b41a97e0b7eb987adad49"
+    },
+    {
+      "path": "src/features/projects/entity.ts",
+      "sha256": "becd041294b08dfa323b77530a73e61493a8cf3339d0cdf2124c575c6a3710f4"
+    },
+    {
+      "path": "src/features/projects/definition.ts",
+      "sha256": "51433aa12efd61467ee6f3d7239f422d0acd3f826888538b51ca55a8346338f0"
+    },
+    {
+      "path": "src/features/showcase/commands.ts",
+      "sha256": "4ef38ad800945cf290c4e6f215efcb341f1f4da73b497b7bd5e2b36ce08e7264"
+    },
+    {
+      "path": "src/presentation/components/ShowcaseApp.vue",
+      "sha256": "24ceb57c00e7d8f77a3c34b93e8d5257b7f1244002935b2932edf173e64106f6"
+    },
+    {
+      "path": "src/presentation/components/panels/OverviewPanel.vue",
+      "sha256": "6435f3c0c17741cdb5805a823ed54621f1f8a3ba9101fb7c6c0ded3b61c0fed3"
+    },
+    {
+      "path": "src/presentation/components/panels/DocumentPanel.vue",
+      "sha256": "20a701b193aeb4f8248d2bbbff3e7666e5ad0642caaecb2fa7ce5c3859802c6c"
+    },
+    {
+      "path": "src/presentation/components/panels/EventsPanel.vue",
+      "sha256": "41d0d1986d79a28ee89d73a09de38816c32cf0845182d68de4c27a4a406613ca"
+    },
+    {
+      "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
+      "sha256": "974bff1c7d6d3fa5b017ea16607f3bd9094b0a6fa31b9fd2bc702d6867e686fb"
+    },
+    {
+      "path": "src/presentation/stores/showcase.ts",
+      "sha256": "3892185fde44b834767a07367f703171e0f8afff311a59b8fab00ff4ffa28843"
+    },
+    {
+      "path": "src/presentation/composables/use-document-form.ts",
+      "sha256": "fa55f407def621558445fa1834a0393910436f8f1a840d5f14029be7e89b9d11"
+    },
+    {
+      "path": "src/presentation/composables/use-showcase-actions.ts",
+      "sha256": "a2e98a6d5b5355e09726291459edcd2a41142604dc1e4535a6c4c1db1b472b4f"
+    },
+    {
+      "path": "src/presentation/composables/use-showcase-shell.ts",
+      "sha256": "1913829604e8e01c753dfca45fb253d6b4f85a09240e7665e9d8acc30cfa7763"
+    },
+    {
+      "path": "src/presentation/composables/use-task-repository.ts",
+      "sha256": "a1e617137aa41ee1b804d7ef44b600e6e807de91ed73235a52649cd8827fb061"
+    },
+    {
+      "path": "tests/runtime/view-state.test.ts",
+      "sha256": "ce32c6dffc156fde49e267d92960c5c80f2dfbce8d7adf1200911157a9f03593"
+    },
+    {
+      "path": "tests/runtime/repository-panel.test.ts",
+      "sha256": "b8fd7d066a3f9f64f4296cc9421e91617353eb025304fd96007421954581398f"
+    },
+    {
+      "path": "tests/runtime/components.test.ts",
+      "sha256": "ed9f83d17678ff5e35197c605ec5bf0a86de7ec511b6eb59ab19280818f6d8ae"
+    },
+    {
+      "path": "tests/runtime/presentation-composables.test.ts",
+      "sha256": "f8ee6707d7ecef27da5f4c4ecd806c8ad4cf9051fbf9b293f42a163e144b7922"
+    },
+    {
+      "path": "tests/e2e/layout-and-header.spec.ts",
+      "sha256": "d0e173b963af1de16d293c5c703fa1dc16cb7003444983f60e770963af761d84"
+    },
+    {
+      "path": "tests/e2e/modals.spec.ts",
+      "sha256": "ace09bfb357c8f89be019667eb2ed1eac6d8fc36b975e268c87c39ba97ea7be3"
+    },
+    {
+      "path": "tests/e2e/pending-preferences.spec.ts",
+      "sha256": "800f2aa1f806d152c1678dfd1a06529b9c2902d149eceb459c55d44b18a50512"
+    },
+    {
+      "path": "tests/e2e/repository.spec.ts",
+      "sha256": "99f6948340eda7f532ad9d68f8eb3ec9e494c3abad41aec9ce774331c37921df"
+    },
+    {
+      "path": "tests/e2e/showcase.spec.ts",
+      "sha256": "8344d59903a8d238f4309d79fad95aaf59848a5637adaf9494d68015e1472468"
+    },
+    {
+      "path": "tests/e2e/accessibility.spec.ts",
+      "sha256": "924570c60cbeeb2571ab3dd0fa9da84dad4427e2bbe7aa373f883c6563a572eb"
+    },
+    {
+      "path": "src/bootstrap/services.ts",
+      "sha256": "462f4246da390c68939c65750ba19c92db0c986082ad44bbc4e97f70abac01fd",
+      "template": "src__bootstrap__services.ts.txt"
+    },
+    {
+      "path": "src/bootstrap/mount-ui.ts",
+      "sha256": "a45a93b62aaa0a007d4d1494037117f1a7f6dbbd59553f4f98c37198f1974217",
+      "template": "src__bootstrap__mount-ui.ts.txt"
+    },
+    {
+      "path": "src/bootstrap/commands.ts",
+      "sha256": "8785515d16a12868db3cddbaf33f728854d495a3511a3f46be781b618b0c90ba",
+      "template": "src__bootstrap__commands.ts.txt"
+    },
+    {
+      "path": "src/features/shell/commands.ts",
+      "sha256": null,
+      "template": "src__features__shell__commands.ts.txt"
+    },
+    {
+      "path": "src/presentation/context/showcase-context.ts",
+      "sha256": "16f272213c3cdd9a09e6d80c0ace1c0de77401ac5aa4e9027b5e28c7eb9e6329",
+      "template": "src__presentation__context__showcase-context.ts.txt"
+    },
+    {
+      "path": "src/presentation/components/FoundationApp.vue",
+      "sha256": null,
+      "template": "src__presentation__components__FoundationApp.vue.txt"
+    },
+    {
+      "path": "src/presentation/composables/use-foundation-shell.ts",
+      "sha256": null,
+      "template": "src__presentation__composables__use-foundation-shell.ts.txt"
+    },
+    {
+      "path": "tests/fixtures/tasks/entity.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__entity.ts.txt"
+    },
+    {
+      "path": "tests/fixtures/tasks/definition.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__definition.ts.txt"
+    },
+    {
+      "path": "tests/fixtures/tasks/form.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__form.ts.txt"
+    },
+    {
+      "path": "tests/fixtures/projects/entity.ts",
+      "sha256": null,
+      "template": "tests__fixtures__projects__entity.ts.txt"
+    },
+    {
+      "path": "tests/fixtures/projects/definition.ts",
+      "sha256": null,
+      "template": "tests__fixtures__projects__definition.ts.txt"
+    },
+    {
+      "path": "tests/runtime/domain.test.ts",
+      "sha256": "c85b405ae7926819a1c548ac52053cbb6b8f12bc346451820ed4742939956c97",
+      "template": "tests__runtime__domain.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/entities.test.ts",
+      "sha256": "5ada9e6b180bdc793c3816d55e22c410a2c1341df70aaee54a8ffbad63d9aa53",
+      "template": "tests__runtime__entities.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/feature-extension.test.ts",
+      "sha256": "78d1d7ebee4331c0fd3bfc8fad53a3597d72c23a3a9684b3c983c41436110373",
+      "template": "tests__runtime__feature-extension.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/helpers.ts",
+      "sha256": "602e4d30dd4a5fb5ae7c578d39218fde2bba45032411510623209ab5c4fad5b4",
+      "template": "tests__runtime__helpers.ts.txt"
+    },
+    {
+      "path": "tests/runtime/identity.test.ts",
+      "sha256": "431549bc6bf688000727a6e53077fb40f408d0f6caa9dfa6a666b3b13577f2f3",
+      "template": "tests__runtime__identity.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/mount-lifecycle.test.ts",
+      "sha256": "9cbe0074571b76942ab71502a55b3787eab1b147ba654331c1713e81301c479c",
+      "template": "tests__runtime__mount-lifecycle.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/native-lifecycle.test.ts",
+      "sha256": "e8a44bcfdbf68d3019f434573b3a3669d1031c4a84b9b36b4b7c50d3978ff67d",
+      "template": "tests__runtime__native-lifecycle.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/repository-failures.test.ts",
+      "sha256": "dfb8d51fbd57fd4ccd941e1c8694fb3d999e15b739aaae089a35c37382391a75",
+      "template": "tests__runtime__repository-failures.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/repository-helpers.ts",
+      "sha256": "2c301c6fc9430f4d3e50890047af831550202120e297011861229abf52437aa6",
+      "template": "tests__runtime__repository-helpers.ts.txt"
+    },
+    {
+      "path": "tests/runtime/settings-components.test.ts",
+      "sha256": "48616bc46657be7b63243c3e2c566add6708dd7a4ca86207399e15e773f0c09c",
+      "template": "tests__runtime__settings-components.test.ts.txt"
+    },
+    {
+      "path": "tests/runtime/types.ts",
+      "sha256": "a9dfdd7ef2a97065d49728208397ea7706938c08fad7ba9e1eaa57b429cf4d83",
+      "template": "tests__runtime__types.ts.txt"
+    },
+    {
+      "path": "src/styles/shell.css",
+      "sha256": "38473795c3857d1698792dfdce61d48ecf9ac1a6af1b3e5faa0417f25eae9fec",
+      "template": "src__styles__shell.css.txt"
+    },
+    {
+      "path": "src/styles/panels.css",
+      "sha256": "959bf8bbd1a5d291a4daeaba4f6c0f6ec54afed17478cdaa8461c0535c5e19b9",
+      "template": "src__styles__panels.css.txt"
+    },
+    {
+      "path": "src/styles/layout.css",
+      "sha256": "c05dafdd6fdd51a7b741f25b50d5e9d82c2b419819f8bb4729de2b7bfd352e4f",
+      "template": "src__styles__layout.css.txt"
+    },
+    {
+      "path": "src/locales/en.json",
+      "sha256": "958f7adfd13ea24f5aefcbe18b4a1adb7b056b75e8bcc1d3ec3b8a577c5a9f64",
+      "template": "src__locales__en.json.txt"
+    },
+    {
+      "path": "src/locales/de.json",
+      "sha256": "faff8dce464c490260af607d18a02d7b78c3b02d021bce41b89faae7df26ef9b",
+      "template": "src__locales__de.json.txt"
+    },
+    {
+      "path": "README.md",
+      "sha256": "7b7ed54a9ff4384a4220f6455e7bcf8c5a8bd049f6f087dae41a95178aa9d0a3",
+      "template": "README.md.txt"
+    },
+    {
+      "path": "tests/runtime/foundation-view.test.ts",
+      "sha256": null,
+      "template": "tests__runtime__foundation-view.test.ts.txt"
+    },
+    {
+      "path": "tests/e2e/foundation.spec.ts",
+      "sha256": null,
+      "template": "tests__e2e__foundation.spec.ts.txt"
+    },
+    {
+      "path": "tests/runtime/native-adapters-composition.test.ts",
+      "sha256": "573722d6a6945e1916eb349b717a4ac8562b4f28a583662c00a60b584b09a6ab",
+      "template": "tests__runtime__native-adapters-composition.test.ts.txt"
+    },
+    {
+      "path": "scripts/testing/native-profile.json",
+      "sha256": null,
+      "template": "scripts__testing__native-profile.json.txt"
+    },
+    {
+      "path": "scripts/testing/check-native.mjs",
+      "sha256": "292945c6a02da6d26d78de847852f9e1766f76a8ae1c6b579e12a20ed73f1fca",
+      "template": "scripts__testing__check-native.mjs.txt"
+    }
+  ]
+}

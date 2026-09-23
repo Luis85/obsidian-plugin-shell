@@ -1,0 +1,13 @@
+/* One leaf-relative layout contract. Never query the application-window width. */
+.shell-app { --plugin-shell-gutter: var(--plugin-shell-space-xl); }
+@container plugin-shell-leaf (min-width: 1440px) {
+  .shell-app { --plugin-shell-gutter: var(--plugin-shell-space-2xl); }
+}
+@container plugin-shell-leaf (max-width: 1000px) {
+  .shell-setting-row { align-items: flex-start; flex-direction: column; gap: var(--plugin-shell-space-md); }
+  .shell-setting-row > :last-child:not([type="checkbox"]) { flex: initial; max-width: 28rem; }
+}
+@container plugin-shell-leaf (max-width: 600px) {
+  .shell-app { --plugin-shell-gutter: var(--plugin-shell-space-lg); flex-direction: column; }
+  .shell-header { min-height: 46px; gap: var(--plugin-shell-space-sm); padding-block: var(--plugin-shell-space-md); }
+}

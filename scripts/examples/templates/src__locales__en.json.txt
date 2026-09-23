@@ -1,0 +1,102 @@
+{
+  "notification": {
+    "overflow": "More notifications are waiting. Review the related views for details."
+  },
+  "app": {
+    "title": "Plugin Shell",
+    "native": "Obsidian host",
+    "browser": "Browser harness"
+  },
+  "nav": {
+    "settings": "Preferences"
+  },
+  "settings": {
+    "title": "Make it feel at home",
+    "subtitle": "The same preferences are available in Obsidian’s native plugin settings.",
+    "language": "Language",
+    "languageHelp": "Updates the view immediately. Registered command labels update after a plugin reload.",
+    "folder": "Default note folder",
+    "folderHelp": "A safe vault-relative folder for features that use this preference.",
+    "notices": "Success notices",
+    "noticesHelp": "Also show a native notice after successful document creation.",
+    "save": "Save preferences",
+    "saved": "Preferences saved",
+    "theme": "Theme follows Obsidian",
+    "themeHelp": "No independent color mode is installed. Components consume the host’s CSS variables.",
+    "blocked": "Stored plugin data could not be safely read, or a save could not be confirmed. Saving is disabled to preserve the data. Resolve the issue and restart the plugin before making further changes.",
+    "hideHeader": "Hide Obsidian view header",
+    "hideHeaderHelp": "Applies immediately to all Plugin Shell views. Restore it here, in native settings, or with the command palette.",
+    "headerSaving": "Saving header preference…"
+  },
+  "feedback": {
+    "dismiss": "Dismiss notification",
+    "native": "This notice came through the host adapter.",
+    "saved": "Operation completed."
+  },
+  "modal": {
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "input": "Example text",
+    "invalid": "Enter a short, non-empty value.",
+    "validating": "Checking input…",
+    "confirmTitle": "Confirm an example",
+    "confirmText": "This example changes no documents. Confirm or cancel to inspect the typed outcome.",
+    "promptTitle": "Try a text prompt",
+    "promptText": "Enter a short value. It stays in this example and is never written to your vault.",
+    "confirmed": "Example confirmed. No documents changed.",
+    "cancelled": "Example cancelled. No documents changed.",
+    "title": "One view, two environments",
+    "text": "This dialog uses the Obsidian Modal API in the plugin and an isolated browser adapter in the harness. The application services do not depend on either implementation."
+  },
+  "command": {
+    "open": "Open plugin",
+    "toggleHeader": "Toggle Obsidian view header"
+  },
+  "debug": {
+    "toggle": "Toggle debug logging",
+    "report": "Inspect debug report",
+    "title": "Debug report",
+    "enabled": "Debug logging enabled for this session.",
+    "disabled": "Debug logging disabled. Error diagnostics remain active."
+  },
+  "error": {
+    "commandUnavailable": "This command is not available in the current context.",
+    "title": "Enter a title with 1–120 characters.",
+    "due": "Enter a valid calendar date (YYYY-MM-DD).",
+    "tags": "Use up to 12 short tags with letters, numbers, hyphens or slashes.",
+    "folder": "Use a safe relative folder without hidden names, traversal or special filename characters.",
+    "preferences": "These preferences are not valid.",
+    "settingsRead": "Stored plugin data is protected. Resolve the read error before saving.",
+    "settingsWrite": "The save outcome is uncertain. Saving is disabled until the plugin restarts and reads the stored data.",
+    "pluginDataRead": "Stored entity data is invalid or uses an unsupported schema. It has been preserved without changes.",
+    "pluginDataMissing": "This entity no longer exists. Reload the collection before continuing.",
+    "pluginDataConflict": "An entity with this ID already exists. No entity was overwritten.",
+    "pluginDataLimit": "Plugin data exceeds its supported size, record count or revision limit. No changes were saved.",
+    "pluginDataStale": "This entity changed or its snapshot belongs to another runtime. Reload and review it before saving.",
+    "conflict": "The destination already exists. No file was overwritten.",
+    "write": "The note could not be saved. Check the destination and permissions.",
+    "read": "The note could not be read. Check that it exists and is accessible, then reload notes.",
+    "duplicateIdentity": "Two notes share the same entity ID. Resolve the duplicate before editing; no notes were changed.",
+    "repositoryLimit": "This folder exceeds the 1,000-note inspection limit. Use a smaller dedicated folder.",
+    "uncertain": "The write result is uncertain. Check the exact destination before trying a new submission.",
+    "open": "The note is created, but could not be opened. Retry opening; do not create it again.",
+    "stale": "This preview no longer matches the request or destination. Prepare a new preview.",
+    "disposed": "This view has closed. Reopen the plugin.",
+    "request": "Invalid submission identity. Prepare a new preview.",
+    "entity": "The entity definition is invalid or unavailable.",
+    "sessionLimit": "This session reached its 100-preview limit. Reopen the plugin before preparing more.",
+    "unexpected": "An unexpected error was contained. Check the diagnostic panel.",
+    "render": "This view encountered a rendering error. Close and reopen the view. Your documents are unchanged."
+  },
+  "view": {
+    "actions": "View actions",
+    "split": "Open plugin in a split",
+    "popout": "Move view to new window",
+    "close": "Close this view"
+  },
+  "foundation": {
+    "title": "Your plugin",
+    "help": "Registered features appear here. Preferences and runtime services are ready."
+  }
+}

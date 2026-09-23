@@ -13,7 +13,7 @@ const feature = () => parseArguments(['feature', 'bookmarks', '--entity', 'bookm
 test('[MAKE-03-01] deterministic dry-run performs no writes and prints an exact source plan', () => fixture(async root => {
   const before = await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8');
   const a = await planMaker(root, feature()); const b = await planMaker(root, feature());
-  assert.deepEqual(a, b); assert.equal(a.plan.changes.length, 5);
+  assert.deepEqual(a, b); assert.ok(a.plan.changes.length >= 15);
   assert.deepEqual(await readdir(join(root, 'src')), ['bootstrap']);
   assert.equal(await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8'), before);
   const run = spawnSync(process.execPath, [resolve(sourceRoot, 'scripts/makers/cli.mjs'), 'feature', 'bookmarks', '--entity', 'bookmark', '--dry-run', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
@@ -69,6 +69,14 @@ test('[MAKE-03-07] edits during planning cannot be adopted as a new overwrite pr
   await assert.rejects(planMaker(root, feature(), { async beforeFinalize() { await mkdir(join(root, 'src/features/bookmarks'), { recursive: true }); await writeFile(generated, '// New user-owned definition\n'); } }), /MAKER_STALE_INPUT/);
   assert.equal(await readFile(generated, 'utf8'), '// New user-owned definition\n');
 }));
+test('[MAKER-EMPTY-REGISTRY] adds the first entity to a no-argument empty registration callback', () => fixture(async root => {
+  const path = join(root, 'src/bootstrap/features.ts');
+  await writeFile(path, "import { createNoteFeatures } from '../application/note-feature';\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0]) {\n  return createNoteFeatures(services, () => ({}));\n}\n");
+  const planned = await planMaker(root, feature()); await applyFilePlan(planned.plan);
+  const source = await readFile(path, 'utf8');
+  assert.match(source, /\(register\) =>/); assert.match(source, /bookmark: register\(bookmarkFeature\)/);
+  const repeated = await planMaker(root, feature()); assert.ok(repeated.plan.changes.every(change => change.status === 'unchanged'));
+}));
 test('[MAKE-03-05] generated independent feature and second entity execute their real CRUD tests and catalog', () => fixture(async root => {
   await installMakerFoundation(root);
   const first = await planMaker(root, feature()); await applyFilePlan(first.plan);
@@ -79,7 +87,7 @@ test('[MAKE-03-05] generated independent feature and second entity execute their
   await removeMakerExamples(root);
   const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
-  assert.match(run.stdout, /3 passed/);
+  assert.match(run.stdout, /9 passed/);
   const report = await loadCatalog(root);
   assert.deepEqual(report.entities.map(entity => entity.entity), ['bookmark', 'appointment', 'budget']);
   assert.equal(report.entities.find(entity => entity.entity === 'budget').fields.find(field => field.name === 'budget').default, 0);

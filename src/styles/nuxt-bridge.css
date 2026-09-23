@@ -1,11 +1,12 @@
 /* Native semantic roles, on every owned view or portal root. No host palette override. */
 [data-plugin-ui="plugin-shell"] {
-  --ui-primary: var(--interactive-accent);
+  --plugin-shell-accent-contrast: var(--text-normal);
+  --ui-primary: color-mix(in srgb, var(--interactive-accent) 70%, var(--plugin-shell-accent-contrast));
   --ui-success: var(--text-success);
   --ui-info: var(--text-accent);
   --ui-warning: var(--text-warning);
   --ui-error: var(--text-error);
-  --ui-text-dimmed: var(--text-faint);
+  --ui-text-dimmed: var(--text-muted);
   --ui-text-muted: var(--text-muted);
   --ui-text-toned: var(--text-muted);
   --ui-text: var(--text-normal);
@@ -42,3 +43,14 @@
 [data-plugin-ui="plugin-shell"] h2,
 [data-plugin-ui="plugin-shell"] h3 { font-family: var(--font-interface); font-style: normal; font-variant: normal; }
 [data-plugin-ui="plugin-shell"] svg { flex-shrink: 0; }
+[data-plugin-ui="plugin-shell"].dark { --plugin-shell-accent-contrast: var(--background-primary); }
+/* Text uses readable host foregrounds; accent/status fills remain semantic cues. */
+[data-plugin-ui="plugin-shell"] [class~="ps:text-primary"],
+[data-plugin-ui="plugin-shell"] [class~="ps:text-success"] { color: var(--text-normal); }
+@media (forced-colors: active) {
+  [data-plugin-ui="plugin-shell"],
+  [data-plugin-ui="plugin-shell"] * { color: CanvasText !important; background-color: Canvas !important; border-color: CanvasText !important; }
+  [data-plugin-ui="plugin-shell"] button { color: ButtonText !important; background-color: ButtonFace !important; }
+  [data-plugin-ui="plugin-shell"] input,
+  [data-plugin-ui="plugin-shell"] select { color: FieldText !important; background-color: Field !important; }
+}

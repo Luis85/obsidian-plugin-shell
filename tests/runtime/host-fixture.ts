@@ -58,9 +58,13 @@ class HostItemView {
   containerEl = element(); contentEl = element(); app: HostApp;
   constructor(public leaf: WorkspaceLeaf) {
     this.app = new HostApp();
-    this.containerEl.dataset.type = pluginIdentity.viewType;
+    // Match ItemView: identity overrides are invoked before subclass fields initialize.
+    this.containerEl.dataset.type = this.getViewType();
+    this.containerEl.dataset.initialTitle = this.getDisplayText();
     const header = element(); header.className = 'view-header'; this.containerEl.append(header, this.contentEl); document.body.append(this.containerEl);
   }
+  getViewType(): string { return pluginIdentity.viewType; }
+  getDisplayText(): string { return pluginIdentity.name; }
   onPaneMenu() {}
 }
 class HostSettingsTab {

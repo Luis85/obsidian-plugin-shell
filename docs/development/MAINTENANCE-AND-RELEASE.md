@@ -1,6 +1,6 @@
 # Maintenance and release guide
 
-> **Status:** Implementation contract for the template's future workflows. No updater, CI job, release script, or publication workflow has been activated by adding this document.
+> **Status:** Full implementation contract. Iteration 04 implements [maintenance discovery/configuration](MAINTENANCE-OPERATIONS.md), safe version preparation and [fixed-commit retained-asset rehearsal](RELEASE-REHEARSAL.md). Remote release draft/publication and first/subsequent public-release qualification remain unimplemented; no publication or permissions change is authorized by this document.
 
 This guide implements the workflow intent of [PRD sections 5, 15, and 17](../product/PRD.md). [Research references R01–R35](../research/2026-09-22-template-research.md) identify the primary sources. Policy values below are chosen defaults, not vendor guarantees.
 

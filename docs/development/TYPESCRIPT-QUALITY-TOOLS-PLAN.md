@@ -1,11 +1,32 @@
 # TypeScript quality tools — adoption and verification plan
 
 **Date:** 2026-09-23  
-**Status:** proposed implementation work; this documentation change installs no tools  
+**Status:** adoption audited in iteration 04; the matrix below distinguishes implemented checks from remaining proposals
 **Baseline:** `8ea6e938d978d25328c6c3527a801af98265a573`  
 **Rationale and primary sources:** [Research report](../research/2026-09-23-typescript-quality-tools.md)
 
 ## 1. Scope and invariants
+
+## Iteration 04 adoption audit
+
+| Work package | Current decision and evidence |
+| --- | --- |
+| QT-00 | Preserve exact toolchain, complete coverage inventory and independent gates; current execution in [iteration record](../testing/ITERATION-FOUR.md). |
+| QT-01 | Extend real typed promise lint to tests/harness and add AST focused/skipped-test controls with negative fixtures. Existing compiler contract tests remain. Avoid overlapping test plugins and new ESLint peers. |
+| QT-02 | Prettier 3.9.9 formats staged generated TS/Vue/CSS/JSON/YAML; idempotence and defect detection tested. Exact Markdown fixtures and immutable vendor assets stay unchanged. Repository-wide historical reformat is deferred to a distinct concern. |
+| QT-03 | fast-check 4.10.2 runs bounded seeded properties against real Markdown/plugin-data services. Failure output carries seed and shrink paths. |
+| QT-04 | @axe-core/playwright 4.13.0 scans real panels and opened overlays; keyboard/focus checks and a deliberate unlabeled overlay control prove scope. |
+| QT-05 | Three explicit domain guard mutations execute through the actual source with a passing baseline and fail on survivors/empty execution. This is targeted evidence, not a whole-program mutation score. Stryker runner 10.0.0 advertises Vitest >=2; a broader runner/tool remains unnecessary for this bounded guard trial. |
+| QT-06/07 | Reuse installed PostCSS/YAML/TypeScript for bounded owned-style, Markdown-link and workflow/promise policies. [Scope and negative controls](QUALITY-ASSURANCE.md) state limitations. Full Stylelint/CSpell/actionlint/Gitleaks/CodeQL/dependency-review adoption remains separate; no external service or permission is silently enabled. |
+| QT-08 | Existing full Fallow, exact source-hash guards, complete artifact budgets and independent architecture remain blocking. Two exact dynamic authoring entrypoints are declared, without directory suppression. |
+
+Selection prioritizes gaps with direct data-safety, generated-source and rendered
+UI evidence. It does not install every researched package. Prettier's
+[documented language support](https://prettier.io/docs), fast-check's
+[replay configuration](https://fast-check.dev/docs/configuration/) and the
+[axe Playwright integration](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright)
+define the adopted tool interfaces. Physical-line wording in this historical plan
+is superseded by the unchanged numerical code-line policy in AGENTS.md.
 
 Extend the current quality system without replacing working checks or advertising unfinished capabilities. The [test strategy](../testing/TEST-STRATEGY.md), [test concept](../testing/TEST-CONCEPT.md), [agent instructions](../../AGENTS.md) and existing acceptance requirements remain authoritative. This plan does not change the current dependency-support exception or establish release readiness.
 

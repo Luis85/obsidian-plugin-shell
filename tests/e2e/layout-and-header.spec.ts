@@ -106,8 +106,9 @@ test('[UI-02-FAIL] failed header save keeps presentation and checked state truth
   await open(page); await page.getByRole('button', { name: 'Preferences', exact: true }).click();
   expectedFault(page, 'settings.write', 'settings.save'); await page.evaluate(() => window.__SHELL_TEST__.fault('settings'));
   await page.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('not saved');
+  await expect(page.getByRole('alert').filter({ hasText: 'save outcome is uncertain' })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true })).not.toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Hide Obsidian view header', exact: true })).toBeDisabled();
   await expect(primary(page).locator(':scope > .view-header')).toBeVisible();
 });
 test('[UI-02-NOTICE] notification failure preserves the created note and provides one inline fallback', async ({ page }) => {
@@ -134,10 +135,10 @@ test('[UI-02-SCALE] live themes and explicitly simulated 125/150 percent UI scal
     }
   }
 });
-test('[UI-02-EVIDENCE] capture actual served Documents and Preferences states', async ({ page }) => {
+for (const width of [1920, 480]) for (const theme of ['dark', 'light']) test(`[UI-02-EVIDENCE-${width}-${theme}] capture actual served Documents and Preferences states`, async ({ page }) => {
   await mkdir('reports/layout-and-header/screenshots', { recursive: true });
   await page.setViewportSize({ width: 1920, height: 1080 }); await open(page);
-  for (const width of [1920, 480]) for (const theme of ['dark', 'light']) {
+  {
     await page.evaluate(value => window.__SHELL_TEST__.leafWidth(value), width); await page.locator(`#theme-${theme}`).click();
     for (const panel of ['Documents', 'Preferences']) {
       await primary(page).getByRole('button', { name: panel, exact: true }).click();

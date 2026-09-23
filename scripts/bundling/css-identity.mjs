@@ -7,7 +7,7 @@ export function ownsSelector(selector, id) {
   // These two native adaptations target only explicitly marked owned containers.
   if (nodes.length === 1 && classIs(first, `${id}-host`)) return true;
   if (nodes.length === 4 && classIs(first, `${id}-native-header-hidden`)
-    && attributeIs(nodes[1], 'data-type', `${id}-showcase`)
+    && (attributeIs(nodes[1], 'data-type', `${id}-showcase`) || attributeIs(nodes[1], 'data-plugin-view-owner', id))
     && nodes[2].type === 'combinator' && nodes[2].value.trim() === '>'
     && classIs(nodes[3], 'view-header')) return true;
   const boundary = nodes.find(node => node.type === 'combinator');
