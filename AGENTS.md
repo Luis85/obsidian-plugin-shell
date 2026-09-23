@@ -6,7 +6,8 @@ The runtime-authoring milestone extends iteration 04 with narrow event contracts
 source-derived catalogs and an optional plugin-data Items workflow. Read
 [README](README.md), [authoring](docs/development/AUTHORING-TOOLS.md),
 [plugin-data semantics](docs/development/PLUGIN-DATA-ENTITIES.md), the
-[milestone plan](docs/development/RUNTIME-AUTHORING-PLAN.md) and the historical
+[milestone plan](docs/development/RUNTIME-AUTHORING-PLAN.md), the current
+[execution record](docs/testing/RUNTIME-AUTHORING.md) and the historical
 [iteration-four test record](docs/testing/ITERATION-FOUR.md) first. The
 [PRD](docs/product/PRD.md) and retained normative companions remain the complete
 target; qualification and release authorization are separate.

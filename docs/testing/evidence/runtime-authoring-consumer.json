@@ -1,0 +1,83 @@
+{
+  "sourceCommit": "a7dacca2cecc9ed7edde39b475a4caac65d8af4e",
+  "run": 35869175978,
+  "identity": {
+    "id": "atlas-notes",
+    "version": "1.0.0"
+  },
+  "preservedConsumerSource": "ba9b3f20d82192311eb7b409a36ef65037ac07a45fdaa87900f6d8dbff51fced",
+  "stages": {
+    "verify": {
+      "status": "passed",
+      "runtimePassCounts": [
+        318,
+        318
+      ]
+    },
+    "foundation-verify": {
+      "status": "passed",
+      "runtimePassCounts": [
+        284,
+        284
+      ]
+    },
+    "extended-foundation-verify": {
+      "status": "passed",
+      "runtimePassCounts": [
+        292,
+        292
+      ]
+    }
+  },
+  "coverage": {
+    "productionInputs": 103,
+    "total": {
+      "lines": {
+        "total": 2015,
+        "covered": 2004,
+        "skipped": 0,
+        "pct": 99.45
+      },
+      "statements": {
+        "total": 3181,
+        "covered": 3104,
+        "skipped": 0,
+        "pct": 97.57
+      },
+      "functions": {
+        "total": 726,
+        "covered": 709,
+        "skipped": 0,
+        "pct": 97.65
+      },
+      "branches": {
+        "total": 2048,
+        "covered": 1953,
+        "skipped": 0,
+        "pct": 95.36
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  },
+  "browser": {
+    "startTime": "2026-09-23T13:58:43.344Z",
+    "duration": 3951.3419999999996,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0,
+    "results": 2,
+    "allRetriesZero": true
+  },
+  "assets": {
+    "main.js": "c10ed49e9a7903e52452cc92e173c85bc5dfe16f3ada893577dd6578af4a7267",
+    "styles.css": "c8dd1592b53059dff04571420ba2c4dd9befff34eaa91f8fe48b3797a8fe61d2",
+    "manifest.json": "34cc3429f529e01fa446d6127751cc20e8fb82b47a88736c0db6494d270c927e"
+  },
+  "scope": "Hosted renamed/generated consumer; complete verify before/after reviewed removal and new feature afterward; final served foundation; no consumer-native acceptance"
+}
