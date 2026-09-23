@@ -1,8 +1,12 @@
 # Shell Workbench companion concept
 
-> Concept 10 — reconciled workspace, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
+> Concept 11 — unified components and stable spatial editing, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
 
 Open [index.html](index.html) locally in a desktop browser. All runtime scripts, styles and SVG icons are embedded, including the reviewed Vue, Pinia and Vue Flow bundles. No server, npm install or runtime CDN is needed. GitHub displays HTML source rather than executing it.
+
+## Current iteration
+
+All components now use the content-brick workflow. The 44-entry library supports website/application patterns, editable tags and filtering/sorting. Sections are content-aware drop zones. Connector origins stay pinned while cards move; handles appear on hover, selection, focus or drawing. Alignment guides and independent magnetic snapping support precise placement. See [code/product review](UNIFIED-REVIEW.md) and [current verification](UNIFIED-VERIFICATION.md).
 
 ## Review the current experience
 
@@ -10,7 +14,7 @@ Start with **Explore example → Sitemap & views → Collection → Content edit
 
 The content editor supports ordered components, Markdown-source writing, per-instance purpose and region, library selection, preview navigation and one deliberate Save. Screen content is distinct from shared library definitions. Visual sections and card arrangement remain outside semantic generation inputs.
 
-This reconciliation adds safe shortcut handling when discard confirmation is open, focused field errors, reversible removal, an explicit draft export, before/after reorder feedback, useful empty states and clearer popover dismissal. See [review](RECONCILIATION-REVIEW.md) and [current verification](RECONCILIATION-VERIFICATION.md).
+This reconciliation adds safe shortcut handling when discard confirmation is open, focused field errors, reversible removal, an explicit draft export, before/after reorder feedback, useful empty states and clearer popover dismissal. See [review](RECONCILIATION-REVIEW.md) and [historical reconciliation verification](RECONCILIATION-VERIFICATION.md).
 
 ## Source and evidence
 
@@ -24,12 +28,13 @@ python3 scripts/concepts/build-companion.py --check
 Run these browser suites from the repository root with pre-provisioned Python Playwright and Chromium:
 
 ```sh
+python3 tests/concepts/companion-unified.browser.py
 python3 tests/concepts/companion-reference.browser.py
 python3 tests/concepts/companion-reference-graph.browser.py
 python3 tests/concepts/companion-reconciliation.browser.py
 ```
 
-The current qualification is 92 scoped checks on one artifact, plus syntax checks for 42 authored JavaScript files. Historical evidence is not added to this total. Some older suites assert the pre-reference toolbar layout; they need deliberate locator migration and are not declared passing here.
+The current qualification is 159 scoped checks on one artifact, plus syntax checks for 45 authored JavaScript files. Historical evidence is not added to this total. Some older suites assert the pre-reference toolbar layout; they need deliberate locator migration and are not declared passing here.
 
 The template has advanced beyond the iteration-03 capabilities used by many concept fixtures. The concept's script inventory and source previews are illustrative, not live detection of current repository capabilities. Production authoring and readiness are documented in the [parent PRD](../../product/PRD.md); the [companion PRD](../../product/COMPANION-PLUGIN-PRD.md) remains a proposed product contract with its dated baseline.
 

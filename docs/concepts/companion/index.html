@@ -1167,6 +1167,79 @@ body.sitemap-workspace #content:has(.ref-studio){overflow:hidden!important}
 .ref-editor-heading .ref-tool{flex:none}
 #ref-content-error:focus{outline:2px solid var(--map-accent);outline-offset:4px}
 @media(max-width:760px){.ref-editor-footer{flex-wrap:wrap}.ref-editor-footer>div{margin-left:auto}.ref-draft-recovery{align-items:flex-start}}
+/* One measured card grid, independent of diagram zoom. */
+.ref-canvas .map-node.brick-page{padding:8px;box-sizing:border-box}
+.ref-canvas .flow-node-content{display:flex;flex-direction:column;min-width:0}
+.ref-card-header{flex:0 0 58px;padding:12px 26px 8px!important;height:58px}
+.ref-canvas .brick-stack{gap:5px;flex:none}
+.ref-canvas .content-brick{flex:none;box-sizing:border-box;border-radius:4px}
+.ref-canvas .brick-open{padding:8px 22px!important;box-sizing:border-box}
+.ref-canvas .brick-title-row{height:16px;min-width:0;margin:0 0 4px}
+.ref-canvas .brick-title-row strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:15px;min-width:0}
+.ref-canvas .brick-wireframe{width:100%;height:calc(100% - 20px);margin:0;overflow:hidden}
+.ref-canvas .brick-grip{left:0;top:0;bottom:0;width:20px;justify-content:center}
+.ref-canvas .brick-reorder-actions{right:1px;top:20px;width:20px}
+.ref-canvas .brick-reorder-actions button{width:18px;height:21px;padding:2px}
+.ref-canvas .brick-add{flex:0 0 28px;height:28px;min-height:28px;margin:5px 0 0;padding:0}
+.ref-card-footer{flex:0 0 18px;height:18px;min-height:18px;margin:0;align-items:center;padding:0 3px}
+.ref-canvas .brick-stack.labels .brick-open{padding:7px 22px!important}
+/* Handles retain dimensions and DOM identity. Do not use display:none. */
+#vf-root .map-node .flow-port{opacity:0!important;pointer-events:none;transition:opacity .12s ease}
+#vf-root .map-node:is(:hover,.selected,:focus-within) .flow-port,
+#vf-root .vue-flow__node:hover .flow-port,
+#vf-root[data-connecting="true"] .map-node .flow-port{opacity:1!important;pointer-events:all}
+#vf-root .flow-structural-port{opacity:0!important;pointer-events:none!important}
+#vf-root .flow-port{width:24px!important;height:24px!important;min-width:24px;min-height:24px}
+#vf-root .flow-port::after{inset:6px!important}
+#vf-root .flow-port:hover::after,#vf-root .flow-port:focus-visible::after{inset:4px!important}
+#vf-root .flow-port:focus-visible{outline:2px solid var(--map-accent);outline-offset:1px;border-radius:50%}
+/* Float behind nodes, while section headers stay clickable. */
+#ref-section-layer{z-index:0;overflow:visible;pointer-events:none}
+#vf-root{position:relative;z-index:1}
+.spatial-zone{position:absolute;border:1px dashed color-mix(in srgb,var(--map-accent) 40%,var(--ref-line));border-radius:16px;background:color-mix(in srgb,var(--map-accent) 3%,transparent);box-sizing:border-box;pointer-events:none}
+.spatial-zone.drop-active{border:2px solid var(--map-accent);background:color-mix(in srgb,var(--map-accent) 12%,transparent)}
+.spatial-zone-heading{position:absolute;top:12px;left:16px;right:16px;display:flex;gap:10px;align-items:center;white-space:nowrap;font-size:12px;color:var(--ref-ink)}
+.spatial-zone-heading>span{font-size:10px;color:var(--ref-muted)}
+.spatial-zone-heading .ref-tool{margin-left:auto;width:26px;height:26px;pointer-events:auto}
+.spatial-zone>p{position:absolute;inset:70px 10px 10px;display:grid;align-content:center;justify-content:center;text-align:center;color:var(--ref-muted);font-size:13px;line-height:1.8;margin:0}
+.spatial-drop-hint{position:absolute;bottom:8px;left:16px;font-size:11px;background:var(--ref-panel);padding:4px 8px;border-radius:4px;color:var(--map-accent)}
+#alignment-guides{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
+.alignment-guide{position:absolute;border-color:#be55cb;color:var(--ref-ink);font-size:10px}
+.alignment-guide.axis-x{top:0;bottom:0;border-left:1px dashed #be55cb}
+.alignment-guide.axis-y{left:0;right:0;border-top:1px dashed #be55cb}
+.alignment-guide span{position:absolute;background:var(--ref-panel);padding:3px 6px;border-radius:4px;white-space:nowrap;box-shadow:0 2px 8px #0002}
+.alignment-guide.axis-x span{top:65px;left:5px}.alignment-guide.axis-y span{right:16px;top:5px}
+.component-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.component-tags button{padding:5px 9px;min-height:28px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:11px}
+.component-tags button[aria-pressed="true"]{border-color:var(--accent);color:var(--text);background:var(--accent-soft)}
+.library-detail>.component-tags{margin:18px 0 16px}
+.unified-filterbar{gap:12px;flex-wrap:wrap;justify-content:flex-start}
+.unified-sort{margin-left:auto;display:flex;gap:7px;align-items:center;font-size:12px;color:var(--muted)}
+.unified-sort select{width:160px}
+.library-brick-preview .library-preview-block{min-height:100px}
+.library-brick-preview .brick-wireframe{width:100%;height:120px}
+.library-item{min-height:78px}
+.library-miniature .brick-wireframe{width:54px;height:42px}
+@media(max-width:760px){.unified-sort{margin-left:0}.spatial-zone-heading{font-size:10px;gap:5px}.spatial-zone-heading>span{display:none}}
+@media(prefers-reduced-motion:reduce){#vf-root .map-node .flow-port{transition:none}}
+/* Override the former ID-scoped card reset at its actual boundary. */
+#vf-root .map-node.brick-page{padding:8px!important;box-sizing:border-box}
+#vf-root .brick-page .flow-node-content{display:flex;padding:0;overflow:visible;min-width:0}
+#vf-root .brick-page .ref-card-header .map-card-title{display:block;font-size:15px;line-height:20px;margin:0;white-space:nowrap;max-width:100%;text-overflow:ellipsis}
+#vf-root .brick-page>.flow-port.vue-flow__handle-left{left:-1px!important}
+#vf-root .brick-page>.flow-port.vue-flow__handle-right{right:-1px!important}
+#vf-root .map-node>.flow-port.vue-flow__handle-top{top:-1px!important}
+#vf-root .map-node>.flow-port.vue-flow__handle-bottom{bottom:-1px!important}
+#vf-root .brick-page .brick-add{opacity:.7}
+#vf-root .brick-page .ref-card-footer{opacity:.8}
+#vf-root .brick-page .ref-card-footer .flow-card-intent{min-height:0!important;max-height:18px!important;display:flex!important;line-height:14px!important}
+#vf-root .brick-page .brick-add:hover{opacity:1}
+
+#section-controls{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.section-control{position:absolute;pointer-events:auto}
+.section-control .ref-tool{background:var(--ref-panel);width:30px;height:30px}
+.unified-tag-select{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.unified-tag-select select{width:150px}
 
 </style>
 <!--
@@ -1302,7 +1375,7 @@ THE SOFTWARE.
 <div class="app-frame">
 <aside class="ribbon" aria-label="Obsidian concept ribbon"><button class="ribbon-active" data-action="nav" data-value="projects" aria-label="Shell Workbench" title="Shell Workbench">◇</button><button data-action="palette" aria-label="Command palette" title="Command palette">⌘</button><button data-action="note" aria-label="Project handoff note" title="Project handoff note">▤</button><div class="ribbon-bottom"><button data-action="theme" aria-label="Toggle light or dark theme" title="Toggle theme">◐</button><button data-action="settings" aria-label="Workbench preferences" title="Preferences">⚙</button></div></aside>
 <aside class="sidebar" id="sidebar" aria-label="Workbench navigation"></aside>
-<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 10 · Reconciled workspace</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
+<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 11 · Unified components</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
 </div>
 <footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status"></span><span>Desktop concept · offline</span></footer>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
@@ -11534,6 +11607,8 @@ const BRICK_KINDS={
  notice:{label:'Status / recovery',group:'feedback',help:'Plan progress, failure and recovery communication.'}
 };
 const BRICK_GROUPS={navigation:'Navigation',content:'Content',data:'Data',input:'Input',action:'Action',feedback:'Feedback'};
+Object.assign(BRICK_KINDS,{"hero": {"label": "Hero / introduction", "group": "content", "help": "Plan hero / introduction content and behavior."}, "features": {"label": "Feature grid", "group": "content", "help": "Plan feature grid content and behavior."}, "pricing": {"label": "Pricing plans", "group": "data", "help": "Plan pricing plans content and behavior."}, "testimonials": {"label": "Testimonials", "group": "content", "help": "Plan testimonials content and behavior."}, "faq": {"label": "Accordion / FAQ", "group": "content", "help": "Plan accordion / faq content and behavior."}, "footer": {"label": "Footer links", "group": "navigation", "help": "Plan footer links content and behavior."}, "gallery": {"label": "Image gallery", "group": "content", "help": "Plan image gallery content and behavior."}, "breadcrumb": {"label": "Breadcrumbs", "group": "navigation", "help": "Plan breadcrumbs content and behavior."}, "sidebar": {"label": "Application navigation", "group": "navigation", "help": "Plan application navigation content and behavior."}, "tabs": {"label": "Tabs", "group": "navigation", "help": "Plan tabs content and behavior."}, "metrics": {"label": "Metric summary", "group": "data", "help": "Plan metric summary content and behavior."}, "timeline": {"label": "Activity timeline", "group": "data", "help": "Plan activity timeline content and behavior."}, "calendar": {"label": "Calendar", "group": "data", "help": "Plan calendar content and behavior."}, "upload": {"label": "File upload", "group": "input", "help": "Plan file upload content and behavior."}, "profile": {"label": "Profile summary", "group": "data", "help": "Plan profile summary content and behavior."}, "code": {"label": "Code editor", "group": "input", "help": "Plan code editor content and behavior."}, "chat": {"label": "Conversation", "group": "content", "help": "Plan conversation content and behavior."}, "progress": {"label": "Step progress", "group": "feedback", "help": "Plan step progress content and behavior."}});
+const COMPONENT_HEIGHTS={"hero": 112, "features": 106, "pricing": 112, "testimonials": 88, "faq": 90, "footer": 60, "gallery": 98, "breadcrumb": 42, "sidebar": 104, "tabs": 48, "metrics": 74, "timeline": 104, "calendar": 112, "upload": 90, "profile": 86, "code": 106, "chat": 106, "progress": 64};
 const BRICK_LIMITS={perSurface:24,total:400,title:100,purpose:800,content:4000};
 const brickUi={form:null,error:'',selected:null,node:null,query:'',move:null,drag:null};
 function canHaveBricks(n){return !!n&&['view','page','modal','settings'].includes(n.kind);}
@@ -11542,7 +11617,7 @@ function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
  if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:110+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+4,0)};
+ return {width:MAP_SIZE.w,height:128+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
 }
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){
@@ -11642,7 +11717,7 @@ const canvasUi={owner:null,selected:null,search:'',edge:null,connecting:null,out
 // Semantic connection types are independent of Vue Flow's visual edge shape.
 const LINK_TYPES={navigate:{label:'Navigate',description:'Open or focus the destination screen.'},return:{label:'Return',description:'Return to a previous screen; preserve the relevant context.'},conditional:{label:'Conditional navigation',description:'Navigate only when the declared condition is met.'},open:{label:'Open dialog',description:'Open a transient dialog with a separate result.'},configure:{label:'Configure',description:'Open the native settings surface.'},execute:{label:'Execute action',description:'Invoke a shared application action.'},data:{label:'Pass context',description:'Describe a data/context dependency. This is not a navigation route.'}};
 const PORTS={left:{type:'target',id:'in-left'},top:{type:'target',id:'in-top'},right:{type:'source',id:'out-right'},bottom:{type:'source',id:'out-bottom'}};
-function defaultCanvasPreferences(){return {schema:1,wheel:'pan',panOnDrag:true,pinch:true,grid:false,curve:'bezier',labels:true};}
+function defaultCanvasPreferences(){return {schema:1,wheel:'pan',panOnDrag:true,pinch:true,grid:false,guides:true,guideSnap:true,curve:'bezier',labels:true};}
 
 let dialogReturnFocus=null;
 // Concept section: model
@@ -11867,7 +11942,7 @@ function downloadText(){const {text,filename}=modalData;const blob=new Blob([tex
 
 // Concept section: interactions
 function dispatch(action,value){
- if(handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
+ if(handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
  case 'nav':setView(value);break;
@@ -11935,7 +12010,7 @@ function dispatch(action,value){
  default:notify('This action is outside the current concept.');
  }
 }
-function updateField(el,commit=false){if(editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
+function updateField(el,commit=false){if(editUnifiedField(el)||editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
  if(key?.startsWith('w-')){const w=state.wizard;const fieldName=key.slice(2);w[fieldName]=value;w.error='';if(!['trusted','approved'].includes(fieldName)){w.rev++;w.plan=null;w.approved=false;if(fieldName==='source'||fieldName==='root')w.acquired=false;}if(fieldName==='trusted'&&!value){w.plan=null;w.approved=false;}save();if(commit&&(el.type==='checkbox'||el.tagName==='SELECT'))redrawModal();}
  if(key?.startsWith('g-')){state.generator[key.slice(2)]=value;state.generator.plan=null;state.generator.error='';save();}
  if(key==='tool-search'){state.search=value;document.getElementById('tool-results').innerHTML=toolResults();}
@@ -11950,6 +12025,235 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+// All library entries use one component instance workflow. No executable templates.
+const unifiedUi={tags:[],sort:'name'};
+function normalizeComponentTags(value){
+ const raw=Array.isArray(value)?value:String(value||'').split(',');
+ return [...new Set(raw.map(t=>String(t).trim().toLowerCase()).filter(Boolean))].sort();
+}
+function validComponentTags(tags){return tags===undefined||Array.isArray(tags)&&tags.length<=16&&new Set(tags).size===tags.length&&tags.every(t=>typeof t==='string'&&/^[a-z0-9][a-z0-9 -]{0,31}$/.test(t));}
+function componentTagDefaults(c){return normalizeComponentTags(['application',String(c.category||'content').toLowerCase()]);}
+function componentSearchText(c){return [c.id,c.name,c.category,c.description,c.contentSpec?.title,...(c.tags||[])].join(' ').toLowerCase();}
+function expandedComponents(){
+ const rows=[
+ ['site-header','SiteHeader','Site header','navigation','Navigation','website,navigation,header','Brand, primary links, and the main call to action.'],
+ ['hero','HeroSection','Hero / introduction','hero','Content','website,landing,marketing','Explain the value and the next useful action.'],
+ ['feature-grid','FeatureGrid','Feature grid','features','Content','website,marketing,overview','Group capabilities around customer outcomes.'],
+ ['pricing','PricingPlans','Pricing plans','pricing','Data','website,pricing,comparison','Compare plan limits, pricing assumptions, and actions.'],
+ ['testimonials','Testimonials','Customer stories','testimonials','Content','website,trust,marketing','Attributed quotes and evidence; illustrative until supplied.'],
+ ['faq','FaqAccordion','Frequently asked questions','faq','Content','website,help,disclosure','Questions and expandable answers with keyboard support.'],
+ ['site-footer','SiteFooter','Footer / related links','footer','Navigation','website,navigation,footer','Secondary links, support, and legal destinations.'],
+ ['image-gallery','ImageGallery','Image gallery','gallery','Content','website,media,portfolio','Describe images, captions, and alternative text.'],
+ ['contact','ContactForm','Contact form','form','Input','website,form,contact','Contact details, validation, consent, and submission outcomes.'],
+ ['newsletter','NewsletterSignup','Newsletter signup','actions','Action','website,form,marketing','One deliberate subscription action and clear feedback.'],
+ ['article','ArticleBody','Article / documentation','text','Content','website,documentation,reading','Readable structured content with meaningful headings.'],
+ ['breadcrumbs','BreadcrumbTrail','Breadcrumbs','breadcrumb','Navigation','website,application,navigation','Show the current location without replacing primary navigation.'],
+ ['app-sidebar','AppSidebar','Application navigation','sidebar','Navigation','application,navigation,sidebar','Persistent modules and a visible current selection.'],
+ ['tab-strip','TabStrip','Tabs','tabs','Navigation','application,navigation,tabs','Switch related panels and retain local state.'],
+ ['metric-summary','MetricSummary','Metric summary','metrics','Data','application,dashboard,metrics','Named values with units, period, and data freshness.'],
+ ['activity-timeline','ActivityTimeline','Activity timeline','timeline','Data','application,activity,history','Chronological events with actors and timestamps.'],
+ ['calendar','CalendarView','Calendar','calendar','Data','application,scheduling,calendar','Date-based work with an accessible list alternative.'],
+ ['file-upload','FileUpload','File upload','upload','Input','application,website,files','Selection, validation, upload progress, and recoverable failure.'],
+ ['profile','UserProfile','Profile summary','profile','Data','application,profile,account','Identity, contextual details, and allowed actions.'],
+ ['code-editor','CodeEditor','Code / query editor','code','Input','application,developer,editor','Editable source with explicit apply and error feedback.'],
+ ['conversation','Conversation','Conversation','chat','Content','application,messaging,communication','Messages, author identity, and deliberate send behavior.'],
+ ['progress','ProgressTracker','Step progress','progress','Feedback','application,onboarding,workflow','Show completed, current, and remaining steps truthfully.'],
+ ['command-search','CommandSearch','Command search','toolbar','Navigation','application,search,commands','Search actions with keyboard selection and clear context.'],
+ ['permissions','PermissionsTable','Permissions matrix','table','Data','application,admin,access','Explain role permissions; editing requires business validation.']
+ ];
+ return rows.map(([slug,name,title,kind,category,tags,description])=>({id:'pattern-'+slug,name,category,preview:'brick',description,props:'title:string',events:'',slots:'content',variants:'default',a11y:'Use meaningful labels, keyboard access and explicit empty/error states.',version:'1.0.0',revision:1,status:'ready',origin:'starter',replacement:'',tokens:'--text-normal\n--background-primary',tags:normalizeComponentTags(tags),contentSpec:brickSpec(kind,title,description)}));
+}
+function adoptUnifiedLibrary(d){
+ if(d.librarySchema===3)return d;
+ // Add metadata without replacing the existing public contract or version.
+ for(const c of d.library){
+  if(!c.contentSpec)c.contentSpec=brickSpec(({record:'detail',empty:'empty',notice:'notice',toolbar:'toolbar',form:'form'})[c.preview]||'text',c.name,c.description);
+  c.preview='brick';if(!c.tags)c.tags=componentTagDefaults(c);
+ }
+ for(const n of d.nodes){
+  if(!canHaveBricks(n))continue;n.bricks=n.bricks||[];
+  const retained=[];
+  for(const binding of n.components||[]){
+   // A historical implementation mapping is retained, but never shown as a second palette.
+   if(n.bricks.some(b=>b.component===binding.id&&b.region===binding.slot)){retained.push(binding);continue;}
+   const c=d.library.find(c=>c.id===binding.id);
+   if(!c||n.bricks.length>=BRICK_LIMITS.perSurface||d.nodes.reduce((sum,x)=>sum+bricksOf(x).length,0)>=BRICK_LIMITS.total){retained.push(binding);continue;}
+   const b={schema:1,id:freshBrickId(d),...designCopy(c.contentSpec),region:binding.slot,component:null};
+   attachBrickDefinition(b,c);b.version=binding.version;n.bricks.push(b);
+  }
+  n.components=retained;
+ }
+ for(const c of expandedComponents())if(!d.library.some(x=>x.id===c.id||x.name===c.name)&&d.library.length<LIBRARY_LIMIT)d.library.push(c);
+ d.librarySchema=3;return d;
+}
+function componentTagChips(c){return `<div class="component-tags">${(c.tags||[]).map(t=>`<button type="button" data-action="unified-tag" data-value="${esc(t)}" aria-pressed="${unifiedUi.tags.includes(t)}">${esc(t)}</button>`).join('')}</div>`;}
+function handleUnifiedAction(action,value){
+ if(action==='unified-tag'){unifiedUi.tags=unifiedUi.tags.includes(value)?unifiedUi.tags.filter(t=>t!==value):[...unifiedUi.tags,value];render();return true;}
+ if(action==='unified-clear'){unifiedUi.tags=[];productUi.filter='';render();return true;}
+ return false;
+}
+function editUnifiedField(el){
+ const k=el.dataset.field;
+ if(k==='unified-section'){if(!state.activeRun&&sectionForCard(design(),el.dataset.node)!==el.value){recordDesign();assignCardToSection(design(),el.dataset.node,el.value);save();render();}return true;}
+ if(k==='unified-tag-select'){if(el.value&&!unifiedUi.tags.includes(el.value)){unifiedUi.tags.push(el.value);render();}return true;}
+ if(k==='unified-sort'){unifiedUi.sort=el.value;render();return true;}
+ if(k==='unified-tags'){productUi.form.tags=normalizeComponentTags(el.value);return true;}
+ return false;
+}
+function componentWireframe(kind){
+ const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`,box=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`;
+ const shapes={
+  hero:line(12,12,94)+line(12,22,72)+line(12,37,84)+line(12,45,76)+box(12,57,45,15)+box(124,10,74,63),
+  features:[12,78,144].map(x=>box(x,9,54,61)+box(x+8,17,15,14)+line(x+8,43,36)+line(x+8,52,30)).join(''),
+  pricing:[12,78,144].map((x,i)=>box(x,6,54,70)+line(x+8,17,31)+line(x+8,30,21)+line(x+8,43,36)+box(x+8,56,37,10)).join(''),
+  testimonials:box(12,8,186,66)+line(26,23,136)+line(26,33,113)+'<circle cx="32" cy="56" r="8"/>'+line(50,54,69),
+  faq:[8,32,56].map(y=>box(12,y,186,18)+line(23,y+8,128)+`<path d="m180 ${y+7} 4 4 4-4"/>`).join(''),
+  footer:[12,76,140].map(x=>[15,27,39,51].map(y=>line(x,y,46)).join('')).join(''),
+  gallery:[12,77,142].flatMap(x=>[8,43].map(y=>box(x,y,56,29))).join(''),
+  breadcrumb:line(12,33,37)+'<path d="m61 29 5 4-5 4"/>'+line(80,33,47)+'<path d="m141 29 5 4-5 4"/>'+line(162,33,33),
+  sidebar:box(12,6,57,69)+[17,31,45,59].map(y=>line(21,y,36)).join('')+box(80,6,118,18)+box(80,33,118,42),
+  tabs:[12,61,110].map(x=>box(x,8,46,17)).join('')+'<path d="M12 29h185"/>'+line(12,49,153)+line(12,60,103),
+  metrics:[12,78,144].map(x=>box(x,15,54,45)+line(x+8,25,35)+box(x+8,37,27,13)).join(''),
+  timeline:'<path d="M24 12v54"/>'+[14,37,60].map(y=>`<circle cx="24" cy="${y}" r="5"/>`+line(43,y-2,137)+line(43,y+6,92)).join(''),
+  calendar:box(12,6,186,68)+[22,35,48,61].map(y=>line(12,y,186)).join('')+[38,65,92,119,146,172].map(x=>`<path d="M${x} 22v52"/>`).join('')+box(70,39,17,6)+box(125,54,40,5),
+  upload:box(12,7,186,65)+'<path d="M105 45V19m-12 12 12-12 12 12M78 51v9h54v-9"/>',
+  profile:'<circle cx="41" cy="37" r="23"/>'+line(81,22,87)+line(81,36,109)+box(81,49,52,13),
+  code:box(12,6,186,68)+[18,30,42,54,66].map((y,i)=>line(i%2?40:24,y,[82,132,106,145,64][i])).join(''),
+  chat:box(12,6,129,18)+box(75,31,123,18)+box(12,56,140,18),
+  progress:'<path d="M30 33h150"/>'+[30,105,180].map(x=>`<circle cx="${x}" cy="33" r="10"/>`).join('')+line(12,55,37)+line(85,55,39)+line(159,55,40)
+ };
+ return shapes[kind]?`<svg class="brick-wireframe ref-wireframe" viewBox="0 0 212 82" aria-hidden="true">${shapes[kind]}</svg>`:null;
+}
+
+function retainedBindingNotice(n){
+ const pending=(n.components||[]).filter(b=>!bricksOf(n).some(x=>x.component===b.id&&x.region===b.slot));
+ return pending.length?`<div class="callout warn"><div><strong>${pending.length} older placement(s) preserved</strong><p>These references could not be converted because a definition is missing or the content limit was reached. No binding was deleted. Review their usage in the library before generating.</p>${pending.map(b=>`<code>${esc(b.id)} · ${esc(b.slot)} · v${esc(b.version)}</code>`).join('<br>')}</div></div>`:'';
+}
+
+// Spatial metadata: anchors, sections and guides never generate business code.
+const spatialUi={guides:[],zones:[],drop:null,last:null,alt:false,frame:0};
+function validAnchorMap(value){
+ if(value===undefined)return true;
+ return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=60&&Object.entries(value).every(([id,a])=>id.length<=140&&a&&typeof a.source==='string'&&typeof a.target==='string'&&a.source.length<=120&&a.target.length<=120&&/^structure-out-(left|right|top|bottom)$/.test(a.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(a.targetHandle));
+}
+function initialStructureAnchor(d,n){
+ const c=d.canvas,points=c.positions,a=points[n.parent],b=points[n.id];let side=c.layout==='horizontal'?'right':'bottom';
+ if(c.custom&&a&&b){const dx=b.x-a.x,dy=b.y-a.y;side=Math.abs(dx)>Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');}
+ return {source:n.parent,target:n.id,sourceHandle:'structure-out-'+side,targetHandle:'structure-in-'+OPPOSITE_SIDE[side]};
+}
+function ensureStructureAnchors(d){
+ const c=d.canvas;c.anchors=Object.assign(Object.create(null),c.anchors||{});
+ const live=new Set();for(const n of d.nodes){if(!n.parent)continue;const id='contains-'+n.id;live.add(id);
+  if(c.anchors[id]?.source!==n.parent||c.anchors[id]?.target!==n.id)c.anchors[id]=initialStructureAnchor(d,n);
+ }
+ for(const id of Object.keys(c.anchors))if(!live.has(id))delete c.anchors[id];
+}
+function sectionMembers(d,s){return s.members||[...new Set((s.roots||[]).flatMap(id=>[...nodeDescendants(d,id)]))];}
+function adoptSections(d){
+ if(!d.canvas?.sections)return;
+ for(const s of d.canvas.sections){if(!s.members)s.members=sectionMembers(d,s);s.roots=[];}
+}
+function spatialPositionMap(){return Object.fromEntries((flowUi.api?.getNodes.value||[]).map(n=>[n.id,n.position]));}
+function sectionZones(d,positions=d.canvas.positions){
+ const sections=referenceSections(d);let nextX=48;
+ return sections.map(s=>{
+  const members=d.nodes.filter(n=>s.members.includes(n.id));
+  const boxes=members.map(n=>({...(positions[n.id]||d.canvas.positions[n.id]),...brickSurfaceSize(n,d)}));
+  const anchor=(d.canvas.sections||[]).find(x=>x.id===s.id)?.anchor;
+  const x=boxes.length?Math.min(...boxes.map(p=>p.x))-40:anchor?.x??nextX;
+  const y=boxes.length?Math.min(...boxes.map(p=>p.y))-64:anchor?.y??72;
+  const width=boxes.length?Math.max(360,Math.max(...boxes.map(p=>p.x+p.width))+40-x):360;
+  const height=boxes.length?Math.max(240,Math.max(...boxes.map(p=>p.y+p.height))+40-y):240;
+  nextX=Math.max(nextX,x+width+80);
+  return {...s,x,y,width,height,count:members.length};
+ });
+}
+function sectionForCard(d,id){return referenceSections(d).find(s=>s.members.includes(id))?.id||'main';}
+function assignCardToSection(d,nodeId,sectionId){
+ const list=d.canvas.sections||[];if(sectionId!=='main'&&!list.some(s=>s.id===sectionId))return false;
+ if(sectionForCard(d,nodeId)===sectionId)return false;
+ for(const s of list)s.members=sectionMembers(d,s).filter(id=>id!==nodeId);
+ if(sectionId!=='main')list.find(s=>s.id===sectionId).members.push(nodeId);
+ return true;
+}
+function sectionAtPoint(zones,point,origin){
+ // Prefer a different explicit section over the original expanding group.
+ return zones.filter(z=>z.id!==origin&&point.x>=z.x&&point.x<=z.x+z.width&&point.y>=z.y&&point.y<=z.y+z.height)
+  .sort((a,b)=>(a.id==='main')-(b.id==='main')||a.width*a.height-b.width*b.height||a.id.localeCompare(b.id))[0]||null;
+}
+function alignPosition(position,size,others,zoom,snap=true){
+ const axes={x:[0,size.width/2,size.width],y:[0,size.height/2,size.height]},best={x:null,y:null};
+ const threshold=7/zoom;
+ for(const axis of ['x','y'])for(const other of [...others].sort((a,b)=>a.id.localeCompare(b.id))){
+  const length=axis==='x'?other.width:other.height;
+  for(const offset of axes[axis])for(const peer of [0,length/2,length]){
+   const line=other[axis]+peer,delta=line-(position[axis]+offset);
+   if(Math.abs(delta)<=threshold&&(!best[axis]||Math.abs(delta)<Math.abs(best[axis].delta)))best[axis]={axis,line,delta,id:other.id};
+  }
+ }
+ return {position:{x:position.x+(snap?(best.x?.delta||0):0),y:position.y+(snap?(best.y?.delta||0):0)},guides:Object.values(best).filter(Boolean)};
+}
+function alignFlowChanges(changes){
+ const drag=flowUi.drag;if(!drag||flowUi.cancelled)return changes;
+ const d=design(),prefs=canvasPreferences(),nodes=flowUi.api?.getNodes.value||[];
+ return changes.map(change=>{
+  if(change.type!=='position'||change.id!==drag.id||!change.position)return change;
+  const surface=d.nodes.find(n=>n.id===drag.id);if(!surface)return change;
+  const others=nodes.filter(n=>n.id!==drag.id).map(n=>({id:n.id,...n.position,...brickSurfaceSize(d.nodes.find(s=>s.id===n.id),d)}));
+  const aligned=prefs.guides!==false&&!spatialUi.alt?alignPosition(change.position,brickSurfaceSize(surface,d),others,canvasState().zoom,prefs.guideSnap!==false):{position:change.position,guides:[]};
+  spatialUi.guides=aligned.guides;spatialUi.last=aligned.position;queueSpatialPaint();return {...change,position:aligned.position};
+ });
+}
+function beginSpatialDrag(id){
+ const d=design();spatialUi.zones=sectionZones(d);spatialUi.origin=sectionForCard(d,id);spatialUi.drop=null;spatialUi.last=null;spatialUi.guides=[];
+}
+function updateSpatialDrag(event){
+ const vp=document.getElementById('map-viewport');if(!vp||!event)return;
+ const r=vp.getBoundingClientRect(),c=canvasState(),point={x:(event.clientX-r.x-c.pan.x)/c.zoom,y:(event.clientY-r.y-c.pan.y)/c.zoom};
+ spatialUi.drop=sectionAtPoint(spatialUi.zones,point,spatialUi.origin);queueSpatialPaint();
+}
+function clearSpatialGesture(){spatialUi.guides=[];spatialUi.drop=null;spatialUi.zones=[];spatialUi.last=null;queueSpatialPaint();}
+
+// View-local rendering and bounded input lifecycle. No timers survive graph disposal.
+function queueSpatialPaint(){
+ if(spatialUi.frame)return;
+ spatialUi.frame=requestAnimationFrame(()=>{spatialUi.frame=0;if(state.view==='sitemap')paintReferenceChrome();});
+}
+function paintSpatialLayers(){
+ const layer=document.getElementById('ref-section-layer'),vp=document.getElementById('map-viewport');if(!layer||!vp)return;
+ const d=design(),c=canvasState(),positions={...c.positions,...spatialPositionMap()};
+ const enabled=(c.sections||[]).length||c.layout==='sections';
+ layer.innerHTML=enabled?sectionZones(d,positions).map(z=>`<section class="spatial-zone ${spatialUi.drop?.id===z.id?'drop-active':''}" data-section="${esc(z.id)}" aria-label="${esc(z.name)} drop zone" style="left:${z.x*c.zoom+c.pan.x}px;top:${z.y*c.zoom+c.pan.y}px;width:${z.width*c.zoom}px;height:${z.height*c.zoom}px"><div class="spatial-zone-heading"><strong>${esc(z.name)}</strong><span>${z.count} ${z.count===1?'card':'cards'}</span></div>${!z.count?'<p>Drop a card here<br><small>Visual grouping only</small></p>':''}${spatialUi.drop?.id===z.id?'<div class="spatial-drop-hint">Release to move this card into '+esc(z.name)+'</div>':''}</section>`).join(''):'';
+ let headers=document.getElementById('section-controls');if(!headers){headers=document.createElement('div');headers.id='section-controls';vp.append(headers);}
+ headers.innerHTML=enabled?sectionZones(d,positions).filter(z=>z.id!=='main').map(z=>`<div class="section-control" style="left:${(z.x+z.width)*c.zoom+c.pan.x-44}px;top:${z.y*c.zoom+c.pan.y+8}px">${referenceTool('Edit '+z.name+' section','ref-section',z.id,'properties')}</div>`).join(''):'';
+ let guides=document.getElementById('alignment-guides');if(!guides){guides=document.createElement('div');guides.id='alignment-guides';guides.setAttribute('aria-hidden','true');vp.append(guides);}
+ guides.innerHTML=spatialUi.guides.map(g=>`<div class="alignment-guide axis-${g.axis}" style="${g.axis==='x'?'left':'top'}:${g.line*c.zoom+(g.axis==='x'?c.pan.x:c.pan.y)}px"><span>${g.axis==='x'?'Vertical':'Horizontal'} align</span></div>`).join('');
+}
+function setFlowConnecting(active){
+ flowUi.connecting=active;document.getElementById('vf-root')?.setAttribute('data-connecting',String(active));
+ if(!active)flowUi.api?.endConnection();paintReferenceChrome();
+}
+function resetFlowConnection(announce=false){
+ const was=flowUi.connecting||!!flowUi.api?.connectionStartHandle?.value;
+ flowUi.cancelled=true;connectionUi.pointer=null;flowUi.api?.endConnection(undefined,true);setFlowConnecting(false);closeConnectionMenu(false);
+ if(announce&&was)canvasAnnounce('Connection cancelled. Nothing changed.');
+}
+function scheduleHandleMeasure(id,serial){
+ requestAnimationFrame(()=>{if(serial===flowUi.serial&&flowUi.api)flowUi.api.updateNodeInternals([id]);});
+}
+function abortSpatialInput(){
+ resetFlowConnection(false);
+ if(flowUi.drag){const drag=flowUi.drag;flowUi.cancelled=true;flowUi.drag=null;flowUi.dragging=false;if(drag.owner===designOwner())design().canvas=drag.before;const owner=flowUi.owner,serial=flowUi.serial;queueMicrotask(()=>{if(state.view==='sitemap'&&owner===designOwner()&&serial===flowUi.serial)render();});}
+ clearSpatialGesture();
+}
+window.addEventListener('blur',abortSpatialInput);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)abortSpatialInput();});
+document.addEventListener('pointercancel',abortSpatialInput,true);
+document.addEventListener('keydown',event=>{spatialUi.alt=event.altKey;if(event.key==='Escape'&&flowUi.connecting){event.preventDefault();event.stopImmediatePropagation();resetFlowConnection(true);}},true);
+document.addEventListener('keyup',event=>{spatialUi.alt=event.altKey;});
+// A release outside the canvas must not leave a preview line active.
+document.addEventListener('pointerup',()=>{if(!flowUi.connecting)return;const serial=flowUi.serial;setTimeout(()=>{if(serial===flowUi.serial&&flowUi.connecting)resetFlowConnection(false);},0);},true);
+
 // Reference-led canvas presentation; canonical plugin architecture stays unchanged.
 const referenceUi={panel:window.innerWidth<950?'none':'structure',sectionForm:null,sectionError:'',content:null,contentError:'',libraryQuery:'',editorTab:'content',drag:null};
 function referenceIcon(name){
@@ -11973,38 +12277,36 @@ function referenceTool(label,action,value,ic,extra=''){
  return `<button class="ref-tool" type="button" data-action="${action}" data-value="${esc(value||'')}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}>${referenceIcon(ic)}<span class="ref-tooltip">${esc(label)}</span></button>`;
 }
 function referenceBrickHeight(kind,mode='wireframes'){
- if(mode!=='wireframes')return 40;
+ if(mode!=='wireframes')return 40;if(COMPONENT_HEIGHTS[kind])return COMPONENT_HEIGHTS[kind];
  return {navigation:44,toolbar:50,heading:62,text:80,list:114,table:108,board:90,detail:100,form:94,chart:96,media:102,actions:68,empty:68,notice:58}[kind]||76;
 }
 function validReferenceSections(sections){
- if(sections===undefined)return true;
- if(!Array.isArray(sections)||sections.length>12)return false;
- const ids=new Set(),assigned=new Set();
- return sections.every(s=>s&&typeof s.id==='string'&&/^section-[1-9][0-9]*$/.test(s.id)&&!ids.has(s.id)&&ids.add(s.id)&&
-  typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=80&&Array.isArray(s.roots)&&s.roots.length<=60&&
-  s.roots.every(id=>typeof id==='string'&&id.length<=120&&!assigned.has(id)&&assigned.add(id))&&
-  Object.keys(s).every(k=>['id','name','roots'].includes(k)));
+ if(sections===undefined)return true;if(!Array.isArray(sections)||sections.length>12)return false;
+ const ids=new Set(),assigned=new Set(),coord=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=50000&&Math.abs(p.y)<=50000;
+ return sections.every(s=>s&&typeof s.id==='string'&&/^section-[1-9][0-9]*$/.test(s.id)&&!ids.has(s.id)&&ids.add(s.id)&&typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=80&&Array.isArray(s.roots)&&s.roots.length<=60&&(s.members===undefined||Array.isArray(s.members)&&s.members.length<=60)&&(s.members||s.roots).every(id=>typeof id==='string'&&id.length<=120&&!assigned.has(id)&&assigned.add(id))&&(s.anchor===undefined||coord(s.anchor))&&Object.keys(s).every(k=>['id','name','roots','members','anchor'].includes(k)));
 }
+
 function referenceSections(d){
- const roots=d.nodes.filter(n=>!n.parent),stored=d.canvas?.sections||[],claimed=new Set(stored.flatMap(s=>s.roots));
- return [{id:'main',name:'Main workspace',roots:roots.filter(n=>!claimed.has(n.id)).map(n=>n.id)},...stored].map(s=>({...s,roots:s.roots.filter(id=>roots.some(n=>n.id===id))}));
+ const known=new Set(d.nodes.map(n=>n.id)),stored=(d.canvas?.sections||[]).map(s=>({...s,members:sectionMembers(d,s).filter(id=>known.has(id))}));
+ const claimed=new Set(stored.flatMap(s=>s.members));
+ return [{id:'main',name:'Main workspace',roots:[],members:d.nodes.filter(n=>!claimed.has(n.id)).map(n=>n.id)},...stored].map(s=>({...s,roots:s.members}));
 }
+
 function sectionLayouts(d){
  const out=Object.create(null),bands=[];let y=72;
- for(const section of referenceSections(d)){
-  const ids=new Set(section.roots.flatMap(id=>[...nodeDescendants(d,id)]));
-  const sub={...d,nodes:d.nodes.filter(n=>ids.has(n.id))};
+ for(const s of referenceSections(d)){
+  const nodes=d.nodes.filter(n=>s.members.includes(n.id)),sub={...d,nodes:nodes.map(n=>({...n,parent:nodes.some(x=>x.id===n.parent)?n.parent:null}))};
   const positions=layoutPositions(sub,'vertical');
-  const height=sub.nodes.length?Math.max(...sub.nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+64:160;
-  for(const n of sub.nodes)out[n.id]={x:positions[n.id].x,y:positions[n.id].y+y};
-  bands.push({...section,y,height,width:Math.max(740,...sub.nodes.map(n=>positions[n.id].x+MAP_SIZE.w+50))});
-  y+=height+96;
+  const height=nodes.length?Math.max(...nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+104:300;
+  for(const n of nodes)out[n.id]={x:positions[n.id].x+48,y:positions[n.id].y+y};
+  bands.push({...s,y,height,width:Math.max(420,...nodes.map(n=>positions[n.id].x+MAP_SIZE.w+96))});y+=height+96;
  }
  return {positions:out,bands};
 }
+
 function openSectionEditor(id=null){
  const s=(canvasState().sections||[]).find(s=>s.id===id);
- referenceUi.sectionForm={id:s?.id||null,name:s?.name||'New section',roots:[...(s?.roots||[])],owner:designOwner(),fingerprint:JSON.stringify(canvasState().sections||[]),revision:design().revision};
+ referenceUi.sectionForm={id:s?.id||null,name:s?.name||'New section',roots:[...(s?sectionMembers(design(),s):[])],owner:designOwner(),fingerprint:JSON.stringify(canvasState().sections||[]),revision:design().revision};
  referenceUi.sectionError='';showModal('ref-section');
 }
 function saveSectionEditor(remove=false){
@@ -12016,11 +12318,11 @@ function saveSectionEditor(remove=false){
  const sections=designCopy(c.sections||[]);
  if(!f.id&&sections.length>=12)return fail('This concept supports up to 12 sections.');
  let id=f.id;if(!id){let i=1;while(sections.some(s=>s.id==='section-'+i))i++;id='section-'+i;}
- const next=sections.filter(s=>s.id!==id).map(s=>({...s,roots:remove?s.roots:s.roots.filter(r=>!f.roots.includes(r))}));
- if(!remove)next.splice(f.id?Math.max(0,sections.findIndex(s=>s.id===f.id)):next.length,0,{id,name:f.name.trim(),roots:f.roots});
+ const next=sections.filter(s=>s.id!==id).map(s=>({...s,roots:[],members:remove?sectionMembers(d,s):sectionMembers(d,s).filter(r=>!f.roots.includes(r))}));
+ if(!remove)next.splice(f.id?Math.max(0,sections.findIndex(s=>s.id===f.id)):next.length,0,{id,name:f.name.trim(),roots:[],members:f.roots,anchor:sections.find(s=>s.id===id)?.anchor||{x:Math.max(48,...sectionZones(d).map(z=>z.x+z.width+80)),y:72}});
  if(!validReferenceSections(next))return fail('Section assignments are not valid.');
  modalOriginal=null;closeModal();
- canvasCommit(c=>{c.sections=next;c.layout='sections';c.positions=layoutPositions(d,'sections');c.custom=false;c.fitted=false;c.arrangedFor=canvasStructure(d);},remove?'Section removed. All views and content were retained.':'Section saved. Plugin structure and source approval are unchanged.');
+ canvasCommit(c=>{c.sections=next;c.fitted=false;},remove?'Section removed. All views and content were retained.':'Section saved. Plugin structure and source approval are unchanged.');
 }
 function referencePaneMode(panel){referenceUi.panel=referenceUi.panel===panel?'none':panel;canvasUi.outline=referenceUi.panel==='structure';render();}
 function paintReferenceChrome(){
@@ -12049,10 +12351,7 @@ function paintReferenceChrome(){
    if(place){toolbar.style.left=place.x+'px';toolbar.style.top=place.y+'px';}else toolbar.hidden=true;
   }
  }
- const layer=document.getElementById('ref-section-layer');
- if(layer){
-  const c=canvasState();layer.innerHTML=c.layout==='sections'?sectionLayouts(design()).bands.map(s=>`<div class="ref-section-line" style="top:${s.y*c.zoom+c.pan.y}px;left:${c.pan.x+36*c.zoom}px;width:${s.width*c.zoom}px"><span>${esc(s.name)}</span>${s.id!=='main'?referenceTool('Edit section','ref-section',s.id,'properties'):''}</div>`).join(''):'';
- }
+ paintSpatialLayers();
 }
 
 // Canvas-first shell, restrained overview cards and synchronized full-page editing.
@@ -12074,7 +12373,7 @@ function referenceSitemapView(){
  <aside class="outline-tree ref-panel" aria-label="Structure panel">${referenceStructure(d)}</aside>
  <aside class="node-inspector polish-inspector ref-panel" aria-label="Selected surface">
  <div class="ref-panel-heading"><strong>Inspector</strong>${referenceTool('Close inspector','ref-panel-close','','close')}</div>
- <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Content'],['intent','Intent'],['components','Components'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
+ <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Components'],['intent','Intent'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
  </div><footer class="ref-map-footer"><span id="map-status-message" role="status">Drag cards to arrange · Click a block to write · Use handles to connect</span><div>${button('Change blueprint','nav','blueprints','ghost small')}${referenceTool('Map help','canvas-help','','help')}</div></footer><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
 }
 function referenceMap(d){
@@ -12112,10 +12411,10 @@ function referenceStructure(d){
 }
 function referenceSectionDialog(){
  const f=referenceUi.sectionForm;
- return dialogBody(f.id?'Edit visual section':'New visual section',`<p>Arrange related root views in a separate band. Their screens follow them. No view is reparented and no source plan changes.</p>
+ return dialogBody(f.id?'Edit visual section':'New visual section',`<p>Group cards visually. Drag a card into a section or select cards here. Sections grow around their content; containment and connections are unchanged.</p>
  <label class="field">Section name<input data-field="ref-section-name" value="${esc(f.name)}" maxlength="80"></label>
- <fieldset class="ref-section-roots"><legend>Include root surfaces</legend>${design().nodes.filter(n=>!n.parent).map(n=>`<label><input type="checkbox" data-field="ref-section-root" data-id="${n.id}" ${f.roots.includes(n.id)?'checked':''}>${esc(n.label)} <small>${NODE_KINDS[n.kind]}</small></label>`).join('')}</fieldset>
- <p class="small muted">Assigning a root here moves it out of its previous visual section. Deleting a section returns its views to Main workspace.</p><p role="alert" class="error">${esc(referenceUi.sectionError)}</p>`,
+ <fieldset class="ref-section-roots"><legend>Include cards</legend>${design().nodes.map(n=>`<label><input type="checkbox" data-field="ref-section-root" data-id="${n.id}" ${f.roots.includes(n.id)?'checked':''}>${esc(n.label)} <small>${NODE_KINDS[n.kind]}</small></label>`).join('')}</fieldset>
+ <p class="small muted">Each card belongs to one visual section. Deleting a section returns its cards to Main workspace without deleting them.</p><p role="alert" class="error">${esc(referenceUi.sectionError)}</p>`,
  (f.id?button('Remove section','ref-section-remove','','danger'):'')+button('Cancel','close','','ghost')+button('Save section','ref-section-save','','primary'));
 }
 function referenceCardContents(n,lib,children,collapsed){
@@ -12128,9 +12427,9 @@ function referenceCardContents(n,lib,children,collapsed){
  ${children?`<button class="flow-collapse ref-collapse nodrag nopan" data-action="canvas-collapse" data-value="${n.id}" aria-label="${collapsed?'Expand':'Collapse'} ${esc(n.label)} branch">${collapsed?'+':'−'}<span>${children}</span></button>`:''}</header>
  <div class="brick-stack ${mode}" data-brick-stack="${n.id}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')}</div>
  <button class="brick-add nodrag nopan" data-action="brick-add" data-value="${n.id}">${icon('plus')} ${items.length?'Add component':'Plan this screen'}</button>
- <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${n.components?.length||0} bindings</button></div>`;
+ <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
 }
-function referenceSketch(kind){
+function referenceSketch(kind){const extended=componentWireframe(kind);if(extended)return extended;
  const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`;
  const box=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
  const row=(y,flip=false)=>box(flip?140:10,y,60,25)+[0,7,14].map((v,i)=>line(flip?10:84,y+4+v,[113,94,69][i])).join('');
@@ -12195,7 +12494,7 @@ function referenceEditorLibrary(){
  <div id="ref-library-list">${referenceLibraryItems(q)}</div></div>`;
 }
 function referenceLibraryItems(q=''){
- return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&(c.name+' '+c.contentSpec.title).toLowerCase().includes(q)).map(c=>`<button class="ref-library-item" data-action="ref-block-add" data-value="${c.id}" data-group="${BRICK_KINDS[c.contentSpec.kind].group}"><span>${referenceSketch(c.contentSpec.kind)}</span><strong>${esc(c.contentSpec.title)}<small>${esc(c.name)} · v${esc(c.version)}</small></strong>${icon('plus')}</button>`).join('')||'<p>No matching components.</p>';
+ return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&componentSearchText(c).includes(q)).map(c=>`<button class="ref-library-item" data-action="ref-block-add" data-value="${c.id}" data-group="${BRICK_KINDS[c.contentSpec.kind].group}"><span>${referenceSketch(c.contentSpec.kind)}</span><strong>${esc(c.contentSpec.title)}<small>${esc(c.name)} · v${esc(c.version)}</small></strong>${icon('plus')}</button>`).join('')||'<p>No matching components.</p>';
 }
 function referenceContentDialog(){
  const f=referenceUi.content,n=design().nodes.find(n=>n.id===f?.node);
@@ -12393,7 +12692,7 @@ function brickSpec(kind,title,purpose='',content='',region='content'){
  return {schema:1,kind,title,purpose,content,region};
 }
 function defaultBrickComponents(){
- return Object.entries(BRICK_KINDS).map(([kind,s])=>({
+ return Object.entries(BRICK_KINDS).filter(([kind])=>!COMPONENT_HEIGHTS[kind]).map(([kind,s])=>({
   id:'content-'+kind,name:kind[0].toUpperCase()+kind.slice(1)+'Block',category:BRICK_GROUPS[s.group],
   preview:'brick',description:s.help,props:'title:string',events:'',slots:'content',variants:'default',
   a11y:'Name this content region. Preserve reading order and keyboard access.',
@@ -12429,7 +12728,7 @@ function ensureBrickLibrary(d){
   d.librarySchema=2;
  }
  for(const n of d.nodes)for(const b of bricksOf(n))if(!b.definition)attachBrickDefinition(b,brickDefinition(d,b.kind));
- return d;
+ return adoptUnifiedLibrary(d);
 }
 function libraryBrickRefs(d,id){
  return d.nodes.flatMap(node=>bricksOf(node).filter(brick=>brick.definition===id).map(brick=>({node,brick})));
@@ -12488,13 +12787,16 @@ function componentContentDefaults(c){
 
 function libraryComponents(){
  const q=productUi.filter.trim().toLowerCase();
- return design().library.filter(c=>(libraryUi.filter==='all'||isBrickComponent(c)===(libraryUi.filter==='bricks'))&&
-  (libraryUi.includeDeprecated||c.status!=='deprecated')&&
-  (c.name+' '+c.category+' '+c.description+' '+(c.contentSpec?.title||'')).toLowerCase().includes(q));
+ const result=design().library.filter(c=>(libraryUi.includeDeprecated||c.status!=='deprecated')&&componentSearchText(c).includes(q)&&unifiedUi.tags.every(t=>(c.tags||[]).includes(t)));
+ const key=c=>(c.contentSpec?.title||c.name).toLowerCase();
+ return result.sort((a,b)=>unifiedUi.sort==='tag'?String(a.tags?.[0]||'~').localeCompare(String(b.tags?.[0]||'~'))||key(a).localeCompare(key(b)):unifiedUi.sort==='category'?a.category.localeCompare(b.category)||key(a).localeCompare(key(b)):unifiedUi.sort==='usage'?componentUses(b.id).length-componentUses(a.id).length||key(a).localeCompare(key(b)):unifiedUi.sort==='recent'?b.revision-a.revision||key(a).localeCompare(key(b)):key(a).localeCompare(key(b)));
 }
+
 function libraryFilters(){
- const d=design();return `<div class="library-filterbar"><div class="segmented" role="group" aria-label="Component type">${[['all','All',d.library.length],['bricks','Content bricks',d.library.filter(isBrickComponent).length],['contracts','UI contracts',d.library.filter(c=>!isBrickComponent(c)).length]].map(([id,label,count])=>`<button data-action="library-filter" data-value="${id}" class="${libraryUi.filter===id?'selected':''}" aria-pressed="${libraryUi.filter===id}">${label} <span>${count}</span></button>`).join('')}</div><button class="btn ghost small" data-action="library-deprecated" aria-pressed="${libraryUi.includeDeprecated}">${libraryUi.includeDeprecated?'Hide':'Show'} deprecated</button>${button('Review boilerplate','design-plan','','ghost small','wand')}${libraryUi.returnNode?button('Back to screen','library-return','','ghost small','arrow'):''}</div>`;
+ const tags=[...new Set(design().library.flatMap(c=>c.tags||[]))].sort();
+ return `<div class="library-filterbar unified-filterbar"><div class="component-tags" aria-label="Filter by tags">${['website','application','navigation','dashboard','form'].filter(t=>tags.includes(t)).map(t=>`<button data-action="unified-tag" data-value="${t}" aria-pressed="${unifiedUi.tags.includes(t)}">${t}</button>`).join('')}${unifiedUi.tags.filter(t=>!['website','application','navigation','dashboard','form'].includes(t)).map(t=>`<button data-action="unified-tag" data-value="${esc(t)}" aria-pressed="true">${esc(t)} ×</button>`).join('')}</div><label class="unified-tag-select">Tag<select aria-label="Add tag filter" data-field="unified-tag-select"><option value="">Choose tag…</option>${tags.filter(t=>!unifiedUi.tags.includes(t)).map(t=>`<option>${esc(t)}</option>`).join('')}</select></label><label class="unified-sort">Sort<select data-field="unified-sort" aria-label="Sort components">${[['name','Name A–Z'],['category','Category'],['tag','Tag A–Z'],['usage','Most used'],['recent','Revision (newest)']].map(([v,l])=>`<option value="${v}" ${unifiedUi.sort===v?'selected':''}>${l}</option>`).join('')}</select></label><span class="small muted" role="status">${libraryComponents().length} / ${design().library.length}</span>${button('Clear filters','unified-clear','','ghost small')}<button class="btn ghost small" data-action="library-deprecated" aria-pressed="${libraryUi.includeDeprecated}">${libraryUi.includeDeprecated?'Hide':'Show'} deprecated</button>${libraryUi.returnNode?button('Back to screen','library-return','','ghost small','arrow'):''}</div>`;
 }
+
 function brickDefinitionPreview(c){
  const s=c.contentSpec;return `<div class="library-brick-preview" data-group="${BRICK_KINDS[s.kind].group}"><div class="library-preview-context"><span>${icon('layers')} Content component</span><span>v${esc(c.version)}</span></div><div class="library-preview-block"><strong>${esc(s.title)}</strong>${brickSketch(s.kind)}<small>${esc(BRICK_KINDS[s.kind].label)} · ${esc(s.region)}</small></div><p>${esc(s.purpose||c.description)}</p></div>`;
 }
@@ -12519,7 +12821,7 @@ function libraryCardToolbar(n){return "";}
 function libraryCardAddDialog(){
  const id=modalData||libraryUi.returnNode,n=design().nodes.find(n=>n.id===id);
  if(!n)return dialogBody('Select a card','Select a surface first.');
- return dialogBody('Add to '+n.label,`<div class="card-add-choices">${canHaveBricks(n)?`<button data-action="brick-add" data-value="${n.id}">${icon('box')}<span><strong>Content component</strong><small>Choose a reusable brick from your library.</small></span>${icon('arrow')}</button>`:''}${n.kind!=='group'?`<button data-action="connection-card-add" data-value="${n.id}">${icon('link')}<span><strong>Connected card</strong><small>Create the next screen and describe the interaction.</small></span>${icon('arrow')}</button>`:''}${['view','page','group'].includes(n.kind)?`<button data-action="canvas-child" data-value="${n.id}">${icon('layers')}<span><strong>Screen inside</strong><small>Add a child to this container, not a navigation link.</small></span>${icon('arrow')}</button>`:''}${['view','page','modal'].includes(n.kind)?`<button data-action="library-contracts" data-value="${n.id}">${icon('code')}<span><strong>UI contract placement</strong><small>Bind a code-level component to a layout region.</small></span>${icon('arrow')}</button>`:''}</div>`,button('Close','close','','ghost'));
+ return dialogBody('Add to '+n.label,`<div class="card-add-choices">${canHaveBricks(n)?`<button data-action="brick-add" data-value="${n.id}">${icon('box')}<span><strong>Component</strong><small>Choose any component from your library.</small></span>${icon('arrow')}</button>`:''}${n.kind!=='group'?`<button data-action="connection-card-add" data-value="${n.id}">${icon('link')}<span><strong>Connected card</strong><small>Create the next screen and describe the interaction.</small></span>${icon('arrow')}</button>`:''}${['view','page','group'].includes(n.kind)?`<button data-action="canvas-child" data-value="${n.id}">${icon('layers')}<span><strong>Screen inside</strong><small>Add a child to this container, not a navigation link.</small></span>${icon('arrow')}</button>`:''}</div>`,button('Close','close','','ghost'));
 }
 
 function handleLibraryAction(action,value){
@@ -12544,7 +12846,7 @@ function handleLibraryAction(action,value){
   }
   case 'library-pick':{const [node,id]=value.split(':');beginLibraryBrick(node,id);break;}
   case 'library-open':productUi.component=value;libraryUi.filter='all';productUi.filter='';closeModal();setView('components');break;
-  case 'library-manage':libraryUi.returnNode=value||designUi.selected;libraryUi.filter='bricks';productUi.filter='';closeModal();setView('components');break;
+  case 'library-manage':libraryUi.returnNode=value||designUi.selected;libraryUi.filter='all';productUi.filter='';closeModal();setView('components');break;
   case 'library-return':designUi.selected=libraryUi.returnNode||designUi.selected;setView('sitemap');revealDesignSelection();break;
   case 'library-upgrade':beginBrickUpgrade(value);break;
   case 'library-upgrade-save':applyBrickUpgrade();break;
@@ -12604,7 +12906,7 @@ function failBrick(message){brickUi.error=message;redrawModal();return false;}
 function ensureBrickBinding(d,n,b){
  if(!b.component)return;
  if(!['view','page','modal'].includes(n.kind))throw Error('Native settings do not mount custom Vue components in this concept.');
- const c=d.library.find(c=>c.id===b.component);if(!c||isBrickComponent(c)||c.status==='deprecated')throw Error('Choose an available component from the library.');
+ const c=d.library.find(c=>c.id===b.component);if(!c||c.status==='deprecated')throw Error('Choose an available component from the library.');
  const binding=n.components.find(x=>x.id===b.component&&x.slot===b.region);
  if(binding&&binding.version!==c.version)throw Error('Review the existing component version in the library before mapping it.');
  if(!binding){if(n.components.length>=20)throw Error('This surface already has 20 component placements.');n.components.push({id:c.id,slot:b.region,version:c.version});}
@@ -12654,7 +12956,7 @@ function contentOutlineMarkdown(d){
 }
 
 // Original low-fidelity diagrams: no copied Octopus artwork or remote assets.
-function brickSketch(kind){
+function brickSketch(kind){const extended=componentWireframe(kind);if(extended)return extended;
  const shapes={
  heading:'<rect x="12" y="7" width="82" height="7" rx="2"/><rect x="12" y="23" width="160" height="3" rx="1"/><rect x="12" y="31" width="126" height="3" rx="1"/>',
  text:'<path d="M12 9h180M12 18h166M12 27h180M12 36h118"/>',
@@ -12680,17 +12982,17 @@ function brickTile(n,b,index,mode){
 function brickCardContents(n,lib,children,collapsed){return referenceCardContents(n,lib,children,collapsed);}
 function brickViewControl(){const m=brickDisplay();return `<div class="brick-display-bar"><div class="segmented" role="group" aria-label="Card content display">${[['structure','Structure'],['labels','Content blocks'],['wireframes','Wireframes']].map(([id,label])=>`<button data-action="brick-display" data-value="${id}" aria-pressed="${m===id}" class="${m===id?'selected':''}">${label}</button>`).join('')}</div><div class="brick-legend" aria-label="Content roles">${Object.entries(BRICK_GROUPS).map(([id,label])=>`<span data-group="${id}"><i></i>${label}</span>`).join('')}</div>${button('Method','brick-method','','ghost small','help')}</div>`;}
 function brickPalette(n){
- const q=brickUi.query.toLowerCase();return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&(c.name+' '+c.contentSpec.title+' '+c.description).toLowerCase().includes(q)).map(c=>`<button class="brick-palette-item" data-action="library-pick" data-value="${esc(n.id+':'+c.id)}" data-brick-kind="${c.contentSpec.kind}" data-brick-definition="${esc(c.id)}" data-brick-palette-node="${esc(n.id)}" draggable="true" data-group="${BRICK_KINDS[c.contentSpec.kind].group}">${brickSketch(c.contentSpec.kind)}<span><strong>${esc(c.contentSpec.title)}</strong><small>${esc(c.name)} · v${esc(c.version)}<br>${esc(c.description)}</small></span>${icon('plus')}</button>`).join('')||'<p class="small muted">No available components match. Clear the search or add one to your library.</p>';
+ const q=brickUi.query.toLowerCase();return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&componentSearchText(c).includes(q)).map(c=>`<button class="brick-palette-item" data-action="library-pick" data-value="${esc(n.id+':'+c.id)}" data-brick-kind="${c.contentSpec.kind}" data-brick-definition="${esc(c.id)}" data-brick-palette-node="${esc(n.id)}" draggable="true" data-group="${BRICK_KINDS[c.contentSpec.kind].group}">${brickSketch(c.contentSpec.kind)}<span><strong>${esc(c.contentSpec.title)}</strong><small>${esc(c.name)} · v${esc(c.version)}<br>${esc(c.description)}</small></span>${icon('plus')}</button>`).join('')||'<p class="small muted">No available components match. Clear the search or add one to your library.</p>';
 }
 function brickInspector(d,n){
- if(!n)return `<div class="flow-empty-selection"><h2>Structure + content</h2><p>Each card is a screen. Its bricks show what the user sees and does, in order.</p><h3>Start with the main screen</h3><p>Describe the primary experience, then connect the next screens.</p>${button('Focus entry screen','brick-entry','','primary','arrow')}<h3 class="mt24">Or start with the structure</h3><p>Add the key views first, then fill their content stacks.</p>${button('Add a view','design-add','view','small','plus')}<p class="small muted mt24">Bricks describe content. Component mappings are optional and explicitly reviewed.</p></div>`;
+ if(!n)return `<div class="flow-empty-selection"><h2>Structure + content</h2><p>Each card is a screen. Its bricks show what the user sees and does, in order.</p><h3>Start with the main screen</h3><p>Describe the primary experience, then connect the next screens.</p>${button('Focus entry screen','brick-entry','','primary','arrow')}<h3 class="mt24">Or start with the structure</h3><p>Add the key views first, then fill their content stacks.</p>${button('Add a view','design-add','view','small','plus')}<p class="small muted mt24">Every block is a versioned component. Implementation details are maintained on its library definition.</p></div>`;
  if(!canHaveBricks(n))return '<h2>Content is planned on screens</h2><p class="muted">Navigation groups and application actions do not contain visual content. Select a view, internal screen, dialog or settings surface.</p>';
- const items=bricksOf(n);return `<div class="section-head"><h2>Content components</h2>${badge(items.length+'/24')}</div><p class="small muted">${esc(n.label)} · Drag the grip to reorder, or use Earlier / Later.</p><div class="brick-inspector-list">${items.map((b,i)=>`<section class="brick-inspector-item" data-group="${BRICK_KINDS[b.kind].group}"><button class="brick-inspector-open" data-action="brick-edit" data-value="${n.id+':'+b.id}"><span>${i+1}</span><strong>${esc(b.title)}</strong></button><p>${esc(b.purpose||BRICK_KINDS[b.kind].label)}</p><div class="row wrap">${button('Earlier','brick-up',n.id+':'+b.id,'ghost small','',i===0?'disabled':'')}${button('Later','brick-down',n.id+':'+b.id,'ghost small','',i===items.length-1?'disabled':'')}${button('Move / copy','brick-transfer',n.id+':'+b.id,'ghost small')}${button('Definition','library-open',b.definition||'','ghost small')}${design().library.find(c=>c.id===b.definition)?.version!==b.version?button('Review upgrade','library-upgrade',n.id+':'+b.id,'small'):''}${button('Remove','brick-delete',n.id+':'+b.id,'ghost small')}</div></section>`).join('')||'<p class="small muted">No content components placed. Choose one from the library to start this screen.</p>'}</div><div class="row wrap mt16">${button('Add a brick','brick-add',n.id,'primary','plus')}${button('Starter stack','brick-starter',n.id,'small')}</div><details class="brick-inline-palette inspector-section"><summary>Add from block palette</summary><p class="small muted">Click to configure, or drag a block onto a screen.</p>${brickPalette(n)}</details><section class="inspector-section"><h3>One shared component library</h3><p class="small muted">Every brick is a versioned component instance. Reuse its definition, or customize only this screen. Existing code bindings are retained.</p>${button('Manage content components','library-manage',n.id,'ghost small','box')}</section>`;
+ const items=bricksOf(n);return `<div class="section-head"><h2>Content components</h2>${badge(items.length+'/24')}</div><p class="small muted">${esc(n.label)} · Drag the grip to reorder, or use Earlier / Later.</p>${retainedBindingNotice(n)}<div class="brick-inspector-list">${items.map((b,i)=>`<section class="brick-inspector-item" data-group="${BRICK_KINDS[b.kind].group}"><button class="brick-inspector-open" data-action="brick-edit" data-value="${n.id+':'+b.id}"><span>${i+1}</span><strong>${esc(b.title)}</strong></button><p>${esc(b.purpose||BRICK_KINDS[b.kind].label)}</p><div class="row wrap">${button('Earlier','brick-up',n.id+':'+b.id,'ghost small','',i===0?'disabled':'')}${button('Later','brick-down',n.id+':'+b.id,'ghost small','',i===items.length-1?'disabled':'')}${button('Move / copy','brick-transfer',n.id+':'+b.id,'ghost small')}${button('Definition','library-open',b.definition||'','ghost small')}${design().library.find(c=>c.id===b.definition)?.version!==b.version?button('Review upgrade','library-upgrade',n.id+':'+b.id,'small'):''}${button('Remove','brick-delete',n.id+':'+b.id,'ghost small')}</div></section>`).join('')||'<p class="small muted">No content components placed. Choose one from the library to start this screen.</p>'}</div><div class="row wrap mt16">${button('Add component','brick-add',n.id,'primary','plus')}${button('Starter stack','brick-starter',n.id,'small')}</div><details class="brick-inline-palette inspector-section"><summary>Add from component library</summary><p class="small muted">Click to configure, or drag a block onto a screen.</p>${brickPalette(n)}</details><section class="inspector-section"><h3>One shared component library</h3><p class="small muted">Every brick is a versioned component instance. Reuse its definition, or customize only this screen. Existing code bindings are retained.</p>${button('Manage component library','library-manage',n.id,'ghost small','box')}</section>`;
 }
 function brickField(label,key,value,rows=0,max=800){return `<label class="field" for="brick-${key}">${label}${rows?`<textarea id="brick-${key}" data-field="brick-${key}" rows="${rows}" maxlength="${max}">${esc(value||'')}</textarea>`:`<input id="brick-${key}" data-field="brick-${key}" value="${esc(value||'')}" maxlength="${max}">`}</label>`;}
 function brickEditDialog(){
  const f=brickUi.form,n=design().nodes.find(n=>n.id===f?.node);if(!n)return dialogBody('Brick unavailable','Select its screen again.');
- const comps=design().library.filter(c=>c.status!=='deprecated'&&!isBrickComponent(c));return dialogBody(f.id?'Edit content brick':'Add content brick',`<div class="brick-editor-intro"><span data-group="${BRICK_KINDS[f.kind].group}">${brickSketch(f.kind)}</span><div><strong>${esc(n.label)}</strong><p>This is a screen instance of a reusable library component.</p></div></div>${f.definition?`<div class="library-instance-note">${icon('box')}<span><strong>${esc(design().library.find(c=>c.id===f.definition)?.name||f.definition)}</strong> · v${esc(f.version)}<small>Changes here affect only this screen. Manage shared defaults in the component library.</small></span></div>`:''}<div class="grid2"><label class="field" for="brick-kind">Block type<select id="brick-kind" data-field="brick-kind">${Object.entries(BRICK_KINDS).map(([id,s])=>`<option value="${id}" ${f.kind===id?'selected':''}>${s.label}</option>`).join('')}</select></label><label class="field" for="brick-region">Layout region<select id="brick-region" data-field="brick-region">${componentSlots(n).map(s=>`<option ${s===f.region?'selected':''}>${esc(s)}</option>`).join('')}</select></label></div>${brickField('Block name','title',f.title,0,100)}${brickField('User purpose','purpose',f.purpose,2,800)}${brickField('Content / data / behavior notes','content',f.content,4,4000)}<label class="field" for="brick-component">Optional implementation contract<select id="brick-component" data-field="brick-component" ${n.kind==='settings'?'disabled':''}><option value="">Unmapped — content intent only</option>${comps.map(c=>`<option value="${esc(c.id)}" ${f.component===c.id?'selected':''}>${esc(c.name)} · v${esc(c.version)}</option>`).join('')}</select></label><p class="small muted">${n.kind==='settings'?'Native settings use the host adapter, not custom Vue component mounting.':'Saving a mapping reuses or adds a versioned placement in this region. Clearing or changing it retains previous placements for explicit review.'}</p><p class="error" id="brick-error" role="alert">${esc(brickUi.error)}</p>`,(f.id?button('Duplicate','brick-duplicate',n.id+':'+f.id,'ghost'):'')+button('Cancel','close','','ghost')+button('Save brick','brick-save','','primary','check'));
+ return dialogBody(f.id?'Edit component instance':'Add component',`<div class="brick-editor-intro"><span data-group="${BRICK_KINDS[f.kind].group}">${brickSketch(f.kind)}</span><div><strong>${esc(n.label)}</strong><p>This is a screen instance of a reusable library component.</p></div></div>${f.definition?`<div class="library-instance-note">${icon('box')}<span><strong>${esc(design().library.find(c=>c.id===f.definition)?.name||f.definition)}</strong> · v${esc(f.version)}<small>Changes here affect only this screen. Manage shared defaults in the component library.</small></span></div>`:''}<div class="grid2"><label class="field" for="brick-kind">Block type<select id="brick-kind" data-field="brick-kind">${Object.entries(BRICK_KINDS).map(([id,s])=>`<option value="${id}" ${f.kind===id?'selected':''}>${s.label}</option>`).join('')}</select></label><label class="field" for="brick-region">Layout region<select id="brick-region" data-field="brick-region">${componentSlots(n).map(s=>`<option ${s===f.region?'selected':''}>${esc(s)}</option>`).join('')}</select></label></div>${brickField('Block name','title',f.title,0,100)}${brickField('User purpose','purpose',f.purpose,2,800)}${brickField('Content / data / behavior notes','content',f.content,4,4000)}${f.component?'<p class="small muted">Preserved implementation link: '+esc(f.component)+'. This is metadata on the same component instance.</p>':''}<p class="error" id="brick-error" role="alert">${esc(brickUi.error)}</p>`,(f.id?button('Duplicate','brick-duplicate',n.id+':'+f.id,'ghost'):'')+button('Cancel','close','','ghost')+button('Save component','brick-save','','primary','check'));
 }
 function brickPaletteDialog(){const n=design().nodes.find(n=>n.id===brickUi.node);if(!n)return dialogBody('Choose a surface','Select a visual surface first.');return dialogBody('Add content to '+n.label,`<p>Choose a block, describe its purpose, then save. Wireframes are schematic; they do not execute component code.</p><label class="field" for="brick-search">Find a content block<input id="brick-search" type="search" data-field="brick-search" value="${esc(brickUi.query)}" placeholder="Table, form, empty state…"></label><div class="brick-palette-grid" id="brick-palette-results">${brickPalette(n)}</div>`,button('Manage library','library-manage',n.id,'ghost','box')+button('Cancel','close','','ghost'));}
 function brickTransferDialog(){const f=brickUi.move,n=design().nodes.find(n=>n.id===f?.target);if(!f)return dialogBody('Transfer unavailable','Select a content brick.');return dialogBody('Move or copy content',`<p>Transfer this content brick between screens. Connections and screen hierarchy stay unchanged.</p><label class="field" for="brick-target">Destination<select id="brick-target" data-field="brick-target">${design().nodes.filter(n=>canHaveBricks(n)&&n.id!==f.source).map(n=>`<option value="${n.id}" ${n.id===f.target?'selected':''}>${esc(n.label)}</option>`).join('')}</select></label><label class="field" for="brick-move-region">Destination region<select id="brick-move-region" data-field="brick-move-region">${n?componentSlots(n).map(s=>`<option ${s===f.region?'selected':''}>${s}</option>`).join(''):''}</select></label><label class="toggle-line"><input type="checkbox" data-field="brick-copy" ${f.copy?'checked':''}> Keep a copy on the original screen</label><p class="small muted">Mapped components reuse the same library definition. Existing source placements are retained; they are not automatically deleted.</p><p class="error" role="alert">${esc(brickUi.error)}</p>`,button('Cancel','close','','ghost')+button('Confirm transfer','brick-transfer-save','','primary', '',n?'':'disabled'));
@@ -12787,15 +13089,11 @@ function newDesignErrors(before,after){
  const existing=new Set(designIssues(before).filter(i=>i.level==='error').map(key));
  return designIssues(after).filter(i=>i.level==='error'&&!existing.has(key(i)));
 }
-function structureRoute(d,n,positions=null){
- const c=canvasState(d);
- if(!positions&&!c.custom&&['vertical','horizontal'].includes(c.layout))return c.layout==='horizontal'?{sourceHandle:'structure-out-right',targetHandle:'structure-in-left'}:{sourceHandle:'structure-out-bottom',targetHandle:'structure-in-top'};
- const points=positions||c.positions,a=points[n.parent],b=points[n.id];
- if(!a||!b)return {sourceHandle:'structure-out-bottom',targetHandle:'structure-in-top'};
- const dx=b.x-a.x,dy=(b.y+brickSurfaceSize(n,d).height/2)-(a.y+brickSurfaceSize(d.nodes.find(x=>x.id===n.parent),d).height/2);
- const side=Math.abs(dx)/MAP_SIZE.w>Math.abs(dy)/MAP_SIZE.h?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');
- return {sourceHandle:'structure-out-'+side,targetHandle:'structure-in-'+OPPOSITE_SIDE[side]};
+function structureRoute(d,n){
+ const c=canvasState(d),a=c.anchors['contains-'+n.id];
+ return {sourceHandle:a.sourceHandle,targetHandle:a.targetHandle};
 }
+
 function structureEdges(d,ids,positions=null){
  const prefs=canvasState(d).interaction;
  return d.nodes.filter(n=>ids.has(n.id)&&ids.has(n.parent)).map(n=>({
@@ -12806,12 +13104,8 @@ function structureEdges(d,ids,positions=null){
   data:{containment:true,shape:'smoothstep',title:'Contains: '+d.nodes.find(x=>x.id===n.parent).label+' → '+n.label}
  }));
 }
-function refreshStructureRouting(){
- if(!flowUi.api||!flowUi.store)return;
- const positions=Object.fromEntries(flowUi.api.getNodes.value.map(n=>[n.id,n.position]));
- const ids=new Set(visibleMapNodes().map(n=>n.id));
- flowUi.store.edges=[...structureEdges(design(),ids,positions),...flowUi.store.edges.filter(e=>!e.data?.containment)];
-}
+function refreshStructureRouting(){queueSpatialPaint();}
+
 function nearestScreenParent(d,n){
  if(n.kind==='view')return n.id;
  if(n.kind==='page')return n.parent;
@@ -12872,24 +13166,26 @@ function commitConnectedCard(){
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  const position=proposedCardPosition(d,f.origin,f.side);if(!position)return fail('No free position near that handle. Move the source card and try again.');
  recordDesign();d.nodes=candidate.nodes;d.links=candidate.links;d.nextId=candidate.nextId;
- const c=canvasState(d);c.positions[n.id]=position;c.custom=true;
+ const c=canvasState(d);c.positions[n.id]=position;c.custom=true;assignCardToSection(d,n.id,sectionForCard(d,f.origin));
  c.collapsed=c.collapsed.filter(id=>!nodeDescendants(d,id).has(n.id));
  designChanged();designUi.selected=n.id;canvasUi.edge=e.id;canvasUi.inspector='links';closeModal();render();
  revealDesignSelection();focusMapNode(n.id);canvasAnnounce('Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.');
 }
 function openStructureRelationship(childId){
  const d=design(),child=d.nodes.find(n=>n.id===childId);if(!child?.parent)return;
- connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent};connectionUi.error='';
+ connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(structureRoute(d,child)),...structureRoute(d,child)};connectionUi.error='';
  designUi.selected=child.id;canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
 }
 function saveStructureRelationship(){
  const d=design(),f=connectionUi.structure,child=d.nodes.find(n=>n.id===f?.child),fail=m=>{connectionUi.error=m;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before reparenting.');
  if(!child||f.owner!==designOwner()||f.revision!==d.revision)return fail('The relationship changed. Reopen it before saving.');
- if(child.parent===f.parent){closeModal();return;}
+ if(!/^structure-out-(left|right|top|bottom)$/.test(f.sourceHandle)||!/^structure-in-(left|right|top|bottom)$/.test(f.targetHandle))return fail('Choose valid origin and destination connectors.');
+ if(f.anchorSnapshot!==JSON.stringify(structureRoute(d,child)))return fail('The connector changed. Reopen its current settings.');
+ if(child.parent===f.parent){const c=canvasState();if(f.sourceHandle===c.anchors['contains-'+child.id].sourceHandle&&f.targetHandle===c.anchors['contains-'+child.id].targetHandle){closeModal();return;}recordDesign();c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};save();closeModal();render();return;}
  const candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=f.parent;
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
- recordDesign();child.parent=f.parent;designChanged();closeModal();render();canvasAnnounce('Containment updated. User-flow connections and existing source were preserved.');
+ recordDesign();child.parent=f.parent;const c=canvasState();if(child.parent)c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};designChanged();closeModal();render();canvasAnnounce('Containment updated. User-flow connections and existing source were preserved.');
 }
 
 function connectedCardDialog(){
@@ -12921,7 +13217,7 @@ function structureRelationshipDialog(){
  ${connectionSelect('Parent container','structure-parent',[['','Plugin root'],...parents.map(n=>[n.id,n.label+' · '+NODE_KINDS[n.kind]])],f.parent||'')}
  <p class="small muted">Reparenting updates the outline and source plan. Internal screens must still belong to a native view; cycles and incompatible parents are blocked.</p>
  <div class="connection-form-section"><h3>Looking for an editable action?</h3><p class="small muted">Use a separate typed connection for Navigate, Return, Open dialog or Pass context. Changing its type never changes containment.</p>${button('Add a user-flow connection…','connection-from-structure',child.id,'small','link')}</div>
- <p class="connection-save-note">The line chooses the nearest sides as cards move. Layout is not locked bottom-to-top.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save parent','connection-structure-save','','primary','check'));
+ <div class="grid2">${connectionSelect('Origin connector','structure-source',Object.keys(SIDE_NAMES).map(s=>['structure-out-'+s,SIDE_NAMES[s]]),f.sourceHandle)}${connectionSelect('Destination connector','structure-target',Object.keys(SIDE_NAMES).map(s=>['structure-in-'+s,SIDE_NAMES[s]]),f.targetHandle)}</div><p class="connection-save-note">Attachment points stay fixed while cards move. Change them deliberately here; this does not change the relationship.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save parent','connection-structure-save','','primary','check'));
 }
 function structureInspector(d,n){
  const parent=d.nodes.find(x=>x.id===n.parent),children=d.nodes.filter(x=>x.parent===n.id);
@@ -12939,7 +13235,7 @@ function portClick(event,node,side){
  const p=connectionUi.pointer;const moved=p&&(p.moved||Math.hypot(event.clientX-p.x,event.clientY-p.y)>=5);
  connectionUi.pointer=null;
  if(moved||connectionUi.committed||flowUi.cancelled||document.getElementById('modal').open)return;
- flowUi.api?.endConnection();flowUi.connecting=false;openConnectionMenu(node,side,event.currentTarget);
+ setFlowConnecting(false);openConnectionMenu(node,side,event.currentTarget);
 }
 function portKeyDown(event,node,side){
  if(['Enter',' ','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();openConnectionMenu(node,side,event.currentTarget);}
@@ -13019,7 +13315,7 @@ function handleConnectionAction(action,value){
 }
 function editConnectionField(el,commit){
  const key=el.dataset.field;if(!key?.startsWith('connection-'))return false;
- const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;
+ const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
  connectionUi.error='';const error=document.getElementById('connection-error');if(error)error.textContent='';
  if(k==='structure-parent'){if(connectionUi.structure)connectionUi.structure.parent=v||null;return true;}
  const f=connectionUi.form;if(!f)return true;
@@ -13051,7 +13347,7 @@ document.addEventListener('keydown',event=>{
 const interactionUi={componentQuery:'',binding:null,form:null,error:'',settingsOwner:null};
 function validIntentFields(n){return (n.intent===undefined||typeof n.intent==='string'&&n.intent.length<=1000)&&(n.goals===undefined||Array.isArray(n.goals)&&n.goals.length<=12&&n.goals.every(g=>typeof g==='string'&&g.trim().length>0&&g.length<=300));}
 function validLinkFields(e){return Object.hasOwn(LINK_TYPES,e.kind)&&(e.condition===undefined||typeof e.condition==='string'&&e.condition.length<=1000)&&(e.description===undefined||typeof e.description==='string'&&e.description.length<=1500)&&(e.sourceHandle===undefined||['out-right','out-bottom'].includes(e.sourceHandle))&&(e.targetHandle===undefined||['in-left','in-top'].includes(e.targetHandle));}
-function validCanvasPreferences(p){return p===undefined||p&&p.schema===1&&['pan','zoom','page'].includes(p.wheel)&&['panOnDrag','pinch','grid','labels'].every(k=>typeof p[k]==='boolean')&&['bezier','smoothstep','straight'].includes(p.curve);}
+function validCanvasPreferences(p){return p===undefined||p&&p.schema===1&&['pan','zoom','page'].includes(p.wheel)&&['panOnDrag','pinch','grid','labels'].every(k=>typeof p[k]==='boolean')&&['bezier','smoothstep','straight'].includes(p.curve)&&['guides','guideSnap'].every(k=>p[k]===undefined||typeof p[k]==='boolean');}
 function canvasPreferences(){return canvasState().interaction;}
 function allowedLinkKinds(n){if(!n||n.kind==='group')return [];return n.kind==='modal'?['open','data']:n.kind==='settings'?['configure','data']:n.kind==='action'?['execute','data']:['navigate','return','conditional','data'];}
 function nForFocus(){return selectedNode();}
@@ -13113,15 +13409,8 @@ function saveSurfaceIntent(){
  if(JSON.stringify([n.intent||'',n.goals||[]])===JSON.stringify([next.intent,next.goals])){closeModal();return;}
  recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();designUi.selected=n.id;canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
 }
-function beginBindingReview(nodeId,componentId){
- if(isBrickComponent(design().library.find(c=>c.id===componentId))){beginLibraryBrick(nodeId,componentId);return;}
- if(state.activeRun){notify('Finish the active simulation before placing a component.');return;}
- const n=design().nodes.find(n=>n.id===nodeId),c=design().library.find(c=>c.id===componentId);
- if(!n||!['view','page','modal'].includes(n.kind)||!c||c.status==='deprecated'){notify('Choose a view, screen or dialog and an available library component.');return;}
- designUi.selected=n.id;const slots=componentSlots(n),slot=slots.find(slot=>!n.components.some(b=>b.id===c.id&&b.slot===slot));
- if(!slot){notify('This component is already placed in every available region.');return;}
- beginProductForm('product-bind',{id:c.id,node:n.id,slot});
-}
+function beginBindingReview(nodeId,componentId){beginLibraryBrick(nodeId,componentId);}
+
 function reviewExistingBinding(value){
  const [node,id,slot]=value.split(':'),n=design().nodes.find(n=>n.id===node),binding=n?.components.find(b=>b.id===id&&b.slot===slot);if(!binding)return;
  interactionUi.binding={owner:designOwner(),revision:design().revision,node,id,originalSlot:slot,slot,version:binding.version};interactionUi.error='';showModal('flow-binding');
@@ -13142,13 +13431,11 @@ function flowInspector(d,n){
  return mapInspector(d,n);
 }
 function surfaceIntentPanel(n){return `<div class="section-head">${badge(NODE_KINDS[n.kind],'purple')}${button('Edit','flow-intent',n.id,'small','settings')}</div><h2>${esc(n.label)}</h2><section class="inspector-section"><h3>User intent</h3><p class="flow-intent-copy">${esc(n.intent||'Describe why someone comes to this surface and what prompted them.')}</p></section><section class="inspector-section"><h3>User goals</h3>${n.goals?.length?'<ol class="flow-goals-list">'+n.goals.map(g=>'<li>'+esc(g)+'</li>').join('')+'</ol>':'<p>Describe the outcomes a user should be able to achieve.</p>'}</section><section class="inspector-section"><h3>Business behavior</h3><p>${esc(n.goal||'No business behavior described yet.')}</p>${button('Edit surface behavior','design-edit',n.id,'ghost small')}</section><p class="tiny muted mt16">Intent and goals travel with the blueprint and source plan. They do not mark requirements implemented or tested.</p>`;}
-function surfaceComponentsPanel(d,n){
- if(!['view','page','modal'].includes(n.kind))return '<h2>No frontend regions</h2><p class="small muted">This surface is a structural group, native settings declaration or application action. Place components on a view, screen or dialog.</p>';
- return `<div class="section-head"><h2>Components</h2>${badge(n.components.length+' placed')}</div><p class="small muted">Compose ${esc(n.label)} from versioned library components.</p><div class="surface-bindings">${n.components.map(b=>{const c=d.library.find(c=>c.id===b.id);return `<button class="flow-binding-row" data-action="flow-binding" data-value="${esc(n.id+':'+b.id+':'+b.slot)}">${icon('box')}<span><strong>${esc(c?.name||b.id)}</strong><small>${esc(b.slot)} · v${esc(b.version)}${c?.version!==b.version?' · Review version':''}</small></span>${icon('settings')}</button>`;}).join('')||'<p class="small muted">Nothing placed yet. Choose a component below, then review its layout region.</p>'}</div><section class="inspector-section"><label for="flow-component-search">Add from library</label><input id="flow-component-search" type="search" data-field="flow-component-query" placeholder="Find a component…" value="${esc(interactionUi.componentQuery)}"><div id="flow-component-options">${componentPalette(d,n)}</div></section><p class="tiny muted">Click + to choose a region, or drag a library item onto a card. This creates a reference, never a copy.</p>${button('Manage library','nav','components','ghost small','box')}`;
-}
-function componentPalette(d,n){return d.library.filter(c=>(c.name+' '+c.category).toLowerCase().includes(interactionUi.componentQuery.toLowerCase())).map(c=>`<button class="flow-palette-item" data-component="${esc(c.id)}" data-action="flow-place-component" data-value="${esc(n.id+':'+c.id)}" draggable="${c.status!=='deprecated'}" ${c.status==='deprecated'?'disabled':''}><span class="component-palette-icon">${icon('box')}</span><span><strong>${esc(c.name)}</strong><small>${esc(c.category)} · v${esc(c.version)}</small></span><span class="palette-add" aria-hidden="true">+</span></button>`).join('')||'<p class="small muted mt16">No matching components. Clear the search or add a component in the library.</p>';}
+function surfaceComponentsPanel(d,n){return brickInspector(d,n);}
+
+function componentPalette(d,n){return d.library.filter(c=>componentSearchText(c).includes(interactionUi.componentQuery.toLowerCase())).map(c=>`<button class="flow-palette-item" data-component="${esc(c.id)}" data-action="flow-place-component" data-value="${esc(n.id+':'+c.id)}" draggable="${c.status!=='deprecated'}" ${c.status==='deprecated'?'disabled':''}><span class="component-palette-icon">${icon('box')}</span><span><strong>${esc(c.name)}</strong><small>${esc(c.category)} · v${esc(c.version)}</small></span><span class="palette-add" aria-hidden="true">+</span></button>`).join('')||'<p class="small muted mt16">No matching components. Clear the search or add a component in the library.</p>';}
 function flowSettingsDialog(){
- const p=canvasPreferences();return dialogBody('Canvas interaction settings',`<p>Choose how the sitemap responds to your mouse or trackpad. Changes apply immediately to this outline only.</p><div class="settings-section"><h3>Navigation</h3><label class="field" for="flow-wheel">Mouse wheel<select id="flow-wheel" data-field="flow-wheel">${[['pan','Pan the canvas'],['zoom','Zoom toward the pointer'],['page','Scroll the page (canvas wheel off)']].map(([v,l])=>`<option value="${v}" ${p.wheel===v?'selected':''}>${l}</option>`).join('')}</select></label><p class="small muted">Ctrl/⌘ + wheel zooms in Pan mode. Fit and zoom buttons always remain available.</p>${flowToggle('Drag blank canvas to pan','panOnDrag',p.panOnDrag)}${flowToggle('Allow trackpad pinch zoom','pinch',p.pinch)}</div><div class="settings-section"><h3>Drawing</h3>${flowToggle('Show background grid','grid',p.grid)}<label class="toggle-line"><input type="checkbox" data-field="flow-snap" ${canvasState().snap?'checked':''}> Snap cards to a 24-unit grid</label>${flowToggle('Show connection labels and types','labels',p.labels)}<label class="field" for="flow-curve">Line shape<select id="flow-curve" data-field="flow-curve">${[['bezier','Curved'],['smoothstep','Orthogonal'],['straight','Straight']].map(([v,l])=>`<option value="${v}" ${p.curve===v?'selected':''}>${l}</option>`).join('')}</select></label></div><div class="flow-settings-note">${icon('shield')}<p>These are interaction preferences, not source settings. They do not change containment, connections or generation approval.</p></div>`,button('Restore defaults','flow-settings-reset','','ghost')+button('Done','close','','primary'));
+ const p=canvasPreferences();return dialogBody('Canvas interaction settings',`<p>Choose how the sitemap responds to your mouse or trackpad. Changes apply immediately to this outline only.</p><div class="settings-section"><h3>Navigation</h3><label class="field" for="flow-wheel">Mouse wheel<select id="flow-wheel" data-field="flow-wheel">${[['pan','Pan the canvas'],['zoom','Zoom toward the pointer'],['page','Scroll the page (canvas wheel off)']].map(([v,l])=>`<option value="${v}" ${p.wheel===v?'selected':''}>${l}</option>`).join('')}</select></label><p class="small muted">Ctrl/⌘ + wheel zooms in Pan mode. Fit and zoom buttons always remain available.</p>${flowToggle('Drag blank canvas to pan','panOnDrag',p.panOnDrag)}${flowToggle('Allow trackpad pinch zoom','pinch',p.pinch)}</div><div class="settings-section"><h3>Drawing</h3>${flowToggle('Show alignment guides while moving','guides',p.guides!==false)}${flowToggle('Snap to alignment guides (hold Alt to bypass)','guideSnap',p.guideSnap!==false)}${flowToggle('Show background grid','grid',p.grid)}<label class="toggle-line"><input type="checkbox" data-field="flow-snap" ${canvasState().snap?'checked':''}> Snap cards to a 24-unit grid</label>${flowToggle('Show connection labels and types','labels',p.labels)}<label class="field" for="flow-curve">Line shape<select id="flow-curve" data-field="flow-curve">${[['bezier','Curved'],['smoothstep','Orthogonal'],['straight','Straight']].map(([v,l])=>`<option value="${v}" ${p.curve===v?'selected':''}>${l}</option>`).join('')}</select></label></div><div class="flow-settings-note">${icon('shield')}<p>These are interaction preferences, not source settings. They do not change containment, connections or generation approval.</p></div>`,button('Restore defaults','flow-settings-reset','','ghost')+button('Done','close','','primary'));
 }
 function flowToggle(label,key,value){return `<label class="toggle-line"><input type="checkbox" data-field="flow-${key}" ${value?'checked':''}> ${label}</label>`;}
 function typedConnectionDialog(){
@@ -13165,7 +13452,7 @@ function handleFlowAction(action,value){
  switch(action){
  case 'flow-settings':interactionUi.settingsOwner=designOwner();showModal('flow-settings');break;
  case 'flow-settings-reset':design().canvas.interaction=defaultCanvasPreferences();canvasState().snap=true;save();refreshFlowConfig();redrawModal();break;
- case 'flow-components':designUi.selected=value;canvasUi.edge=null;canvasUi.inspector='components';interactionUi.componentQuery='';render();break;
+ case 'flow-components':designUi.selected=value;canvasUi.edge=null;canvasUi.inspector='bricks';interactionUi.componentQuery='';render();break;
  case 'flow-place-component':{const [node,id]=value.split(':');beginBindingReview(node,id);break;}
  case 'flow-binding':reviewExistingBinding(value);break;
  case 'flow-binding-save':saveBindingRegion();break;
@@ -13203,21 +13490,21 @@ function flowEdgeProjection(d){
 }
 function flowNodeContents(n,lib,children,collapsed){
  if(brickDisplay()!=='structure'&&canHaveBricks(n))return brickCardContents(n,lib,children,collapsed);
- const bindings=(n.components||[]).map(b=>{const comp=lib.find(x=>x.id===b.id);return `<button class="flow-binding-chip nodrag nopan" data-action="flow-binding" data-value="${esc(n.id+':'+b.id+':'+b.slot)}" title="Edit ${esc(comp?.name||b.id)} placement in ${esc(b.slot)}">${esc(comp?.name||b.id)}<span>${esc(b.slot)}</span></button>`;}).join('');
+ const bindings=bricksOf(n).map(b=>`<button class="flow-binding-chip nodrag nopan" data-action="brick-edit" data-value="${esc(n.id+':'+b.id)}" title="Edit this component instance">${esc(b.title)}<span>${esc(b.region)}</span></button>`).join('');
  return `<div class="map-node-top"><span>${icon(n.kind==='view'?'box':n.kind==='modal'?'layers':n.kind==='action'?'zap':'file')}${esc(NODE_KINDS[n.kind])}</span>${n.entry?'<span class="map-entry">Entry</span>':''}${children?`<button class="flow-collapse nodrag nopan" data-action="canvas-collapse" data-value="${esc(n.id)}" title="${collapsed?'Expand':'Collapse'} branch">${collapsed?'+':'−'} ${children}</button>`:''}</div><strong class="map-card-title">${esc(n.label)}</strong><code class="map-card-slug">${esc(n.slug)}</code><div class="map-card-layout map-card-sketch" aria-label="Schematic layout preview">${layoutThumbnail(n.layout)}</div><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${esc(n.id)}" title="Describe user intent and goals">${n.intent?esc(n.intent):'<span class="muted">What does the user want to do?</span>'}</button><div class="flow-card-meta"><button class="nodrag nopan flow-goals" data-action="flow-intent" data-value="${esc(n.id)}">${n.goals?.length||0} user goals</button><span>${esc(LAYOUTS.find(x=>x.id===n.layout)?.name||'No visual layout')}</span></div><div class="flow-card-bindings">${bindings||'<span class="tiny muted">No components placed</span>'}</div>${libraryCardToolbar(n)}`;
 }
 function createFlowNodeComponent(){
- const {h,defineComponent}=Vue;const {Handle,Position}=VueFlowCore;
- return defineComponent({name:'CompanionSurfaceCard',props:['id','data','selected'],setup(props){return ()=>{
+ const {h,defineComponent,onMounted,watch}=Vue;const {Handle,Position}=VueFlowCore;
+ return defineComponent({name:'CompanionSurfaceCard',props:['id','data','selected'],setup(props){const serial=flowUi.serial;onMounted(()=>scheduleHandleMeasure(props.id,serial));watch(()=>props.data.surface.bricks?.length,()=>scheduleHandleMeasure(props.id,serial));return ()=>{
   const n=props.data.surface;const handles=Object.entries(PORTS).map(([side,port])=>h(Handle,{id:port.id,type:port.type,position:Position[side[0].toUpperCase()+side.slice(1)],connectable:n.kind!=='group'&&!state.activeRun,class:'flow-port flow-port-'+port.type,title:(port.type==='source'?'From ':'Into ')+n.label+' · '+side+'. Click for options; drag to connect.','aria-label':(port.type==='source'?'Outgoing':'Incoming')+' connector '+side+' on '+n.label+'; click for options or drag to connect',tabindex:0,role:'button','aria-haspopup':'menu','aria-expanded':'false','data-port-node':n.id,'data-port-side':side,onPointerdown:event=>portPointerDown(event,n.id,side),onClick:event=>portClick(event,n.id,side),onKeydown:event=>portKeyDown(event,n.id,side)}));
   for(const side of Object.keys(SIDE_NAMES))for(const type of ['source','target'])handles.push(h(Handle,{id:'structure-'+(type==='source'?'out-':'in-')+side,type,position:Position[side[0].toUpperCase()+side.slice(1)],connectable:false,class:'flow-structural-port','aria-hidden':'true',tabindex:-1}));
-  return h('article',{class:['map-node','kind-'+n.kind,{'selected':props.selected,'search-dim':props.data.dim,'brick-page':brickDisplay()!=='structure'&&canHaveBricks(n)}],style:{'--brick-height':brickSurfaceSize(n).height+'px'},tabindex:0,'data-node':n.id,'data-action':'canvas-select','data-value':n.id,'aria-label':n.label+' · '+NODE_KINDS[n.kind],role:'group','aria-current':props.selected?'true':undefined},[h('div',{class:'flow-node-content',innerHTML:flowNodeContents(n,props.data.library,props.data.childCount,props.data.collapsed)}),...handles]);
+  return h('article',{class:['map-node','kind-'+n.kind,{'selected':props.selected,'search-dim':props.data.dim,'brick-page':brickDisplay()!=='structure'&&canHaveBricks(n)}],style:{'--brick-height':brickSurfaceSize(n).height+'px',width:brickSurfaceSize(n).width+'px'},tabindex:0,'data-node':n.id,'data-action':'canvas-select','data-value':n.id,'aria-label':n.label+' · '+NODE_KINDS[n.kind],role:'group','aria-current':props.selected?'true':undefined},[h('div',{class:'flow-node-content',innerHTML:flowNodeContents(n,props.data.library,props.data.childCount,props.data.collapsed)}),...handles]);
  };}});
 }
 function mountFlow(){
  const root=document.getElementById('vf-root');if(!root||flowUi.app)return;
  if(!window.Vue||!window.VueFlowCore||!window.Pinia){root.innerHTML='<p class="flow-runtime-error">The embedded graph runtime did not load. The outline remains available.</p>';return;}
- const owner=designOwner(),serial=++flowUi.serial;flowUi.owner=owner;flowUi.cancelled=false;flowUi.dragging=false;flowUi.connecting=false;
+ const owner=designOwner(),serial=++flowUi.serial;flowUi.owner=owner;flowUi.cancelled=false;flowUi.dragging=false;flowUi.connecting=false;flowUi.suppressClick=false;spatialUi.alt=false;
  const {h,createApp,defineComponent,markRaw,nextTick}=Vue;const {VueFlow,useVueFlow,ConnectionMode}=VueFlowCore;
  const pinia=Pinia.createPinia();flowUi.pinia=pinia;
  const useProjection=Pinia.defineStore('companion-canvas-'+serial,{state:()=>({nodes:flowNodeProjection(design()),edges:flowEdgeProjection(design()),preferences:{...canvasPreferences()},snap:canvasState().snap})});
@@ -13227,44 +13514,44 @@ function mountFlow(){
   const api=useVueFlow('companion-map-'+serial);flowUi.api=api;
   const nodeTypes={surface:markRaw(createFlowNodeComponent())};const edgeTypes={transition:markRaw(createFlowEdgeComponent()),structure:markRaw(createFlowEdgeComponent())};
   api.onError(error=>{if(current())console.error('[Sitemap] '+error.message);});
-  api.onNodesChange(changes=>{if(current())api.applyNodeChanges(changes.filter(x=>['dimensions','position','select'].includes(x.type)));});
+  api.onNodesChange(changes=>{if(current())api.applyNodeChanges(alignFlowChanges(changes.filter(x=>['dimensions','position','select'].includes(x.type))));});
   api.onEdgesChange(changes=>{if(current())api.applyEdgeChanges(changes.filter(x=>x.type==='select'));});
-  api.onInit(()=>{nextTick(()=>{if(current())paintFlowViewport();});});
-  api.onNodesInitialized(()=>{nextTick(()=>{if(current())paintFlowViewport();});});
+  api.onInit(()=>{nextTick(()=>{if(current()&&!flowUi.dragging&&!flowUi.connecting)paintFlowViewport();});});
+  api.onNodesInitialized(()=>{nextTick(()=>{if(current()&&!flowUi.dragging&&!flowUi.connecting)paintFlowViewport();});});
   api.onNodeDragStart(({node,event})=>{
    if(!current()||state.activeRun)return;
    flowUi.drag={owner,revision:design().revision,id:node.id,startX:event.clientX,startY:event.clientY,before:designCopy(canvasState())};flowUi.dragging=true;flowUi.cancelled=false;
-   designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
+   beginSpatialDrag(node.id);designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
   });
-  api.onNodeDrag(()=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;refreshStructureRouting();paintReferenceChrome();}});
+  api.onNodeDrag(({event})=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;updateSpatialDrag(event);queueSpatialPaint();}});
   api.onNodeDragStop(({node,event})=>{
-   if(!current())return;const drag=flowUi.drag;flowUi.drag=null;flowUi.dragging=false;if(drag&&!flowUi.cancelled&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<5){api.applyNodeChanges([{id:node.id,type:'position',position:drag.before.positions[node.id],dragging:false}]);flowUi.suppressClick=false;return;}flowUi.suppressClick=true;
-   setTimeout(()=>{flowUi.suppressClick=false;},160);
+   if(!current())return;const drag=flowUi.drag;flowUi.drag=null;flowUi.dragging=false;if(drag&&!flowUi.cancelled&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<5){api.applyNodeChanges([{id:node.id,type:'position',position:drag.before.positions[node.id],dragging:false}]);flowUi.suppressClick=false;clearSpatialGesture();return;}flowUi.suppressClick=true;
+   setTimeout(()=>{if(current())flowUi.suppressClick=false;},160);
    if(!drag||drag.owner!==designOwner())return;
-   if(flowUi.cancelled||drag.revision!==design().revision){design().canvas=drag.before;flowUi.cancelled=false;render();canvasAnnounce('Movement cancelled. Previous position restored.');return;}
-   const pos={x:Math.max(-50000,Math.min(50000,node.position.x)),y:Math.max(-50000,Math.min(50000,node.position.y))};
-   if(JSON.stringify(pos)!==JSON.stringify(drag.before.positions[node.id])){recordDesign();canvasState().positions[node.id]=pos;canvasState().custom=true;save();}
-   render();canvasAnnounce('Card moved. One undo restores its position; structure is unchanged.');focusMapNode(node.id);
+   if(flowUi.cancelled||drag.revision!==design().revision){design().canvas=drag.before;flowUi.cancelled=false;clearSpatialGesture();render();canvasAnnounce('Movement cancelled. Previous position restored.');return;}
+   const live=spatialUi.last||api.findNode(node.id)?.position||node.position;const pos={x:Math.max(-50000,Math.min(50000,live.x)),y:Math.max(-50000,Math.min(50000,live.y))};
+   if(JSON.stringify(pos)!==JSON.stringify(drag.before.positions[node.id])){recordDesign();canvasState().positions[node.id]=pos;canvasState().custom=true;if(spatialUi.drop)assignCardToSection(design(),node.id,spatialUi.drop.id);save();}
+   clearSpatialGesture();render();canvasAnnounce('Card moved. One undo restores its position; structure is unchanged.');focusMapNode(node.id);
   });
-  api.onConnectStart(()=>{if(current()){flowUi.cancelled=false;flowUi.connecting=true;}});
-  api.onClickConnectStart(()=>{if(current()){flowUi.cancelled=false;flowUi.connecting=true;}});
-  api.onConnect(connection=>{if(current()&&!flowUi.cancelled){flowUi.connecting=false;connectionUi.committed=true;reviewFlowConnection(connection);}});
-  api.onConnectEnd(()=>{if(current())flowUi.connecting=false;});
-  api.onClickConnectEnd(()=>{if(current())flowUi.connecting=false;});
+  api.onConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
+  api.onClickConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
+  api.onConnect(connection=>{if(current()&&!flowUi.cancelled){setFlowConnecting(false);connectionUi.committed=true;reviewFlowConnection(connection);}});
+  api.onConnectEnd(()=>{if(current())setFlowConnecting(false);});
+  api.onClickConnectEnd(()=>{if(current())setFlowConnecting(false);});
   api.onEdgeClick(({edge,event})=>{if(!current())return;event.stopPropagation();dispatch('canvas-edge',edge.id);});
   api.onEdgeUpdate(({edge,connection})=>{if(current())reviewFlowConnection(connection,edge.id);});
   api.onPaneClick(()=>{if(current()&&!flowUi.suppressClick&&!canvasUi.placing)deselectFlow();});
   api.onViewportChange(v=>{if(!current()||flowUi.syncing)return;const c=canvasState();c.pan={x:Math.max(-50000,Math.min(50000,v.x)),y:Math.max(-50000,Math.min(50000,v.y))};c.zoom=Math.max(.12,Math.min(2,v.zoom));c.fitted=true;paintFlowChrome();clearTimeout(flowUi.saveTimer);flowUi.saveTimer=setTimeout(()=>{if(current())save();},150);});
-  return ()=>h(VueFlow,{id:'companion-map-'+serial,nodes:store.nodes,edges:store.edges,nodeTypes,edgeTypes,applyDefault:false,connectionMode:ConnectionMode.Strict,connectOnClick:false,isValidConnection:validFlowConnection,panOnScroll:store.preferences.wheel==='pan',zoomOnScroll:store.preferences.wheel==='zoom',zoomOnPinch:store.preferences.pinch,zoomOnDoubleClick:false,zoomActivationKeyCode:['Control','Meta'],panOnDrag:store.preferences.panOnDrag,preventScrolling:store.preferences.wheel!=='page',minZoom:.12,maxZoom:2,snapToGrid:store.snap,snapGrid:[24,24],nodeDragThreshold:0,paneClickDistance:5,deleteKeyCode:null,selectionKeyCode:null,multiSelectionKeyCode:null,nodesFocusable:false,edgesFocusable:true,defaultViewport:{x:canvasState().pan.x,y:canvasState().pan.y,zoom:canvasState().zoom},noDragClassName:'nodrag',noPanClassName:'nopan',noWheelClassName:'nowheel'});
+  return ()=>h(VueFlow,{id:'companion-map-'+serial,nodes:store.nodes,edges:store.edges,nodeTypes,edgeTypes,applyDefault:false,connectionMode:ConnectionMode.Strict,connectOnClick:false,isValidConnection:validFlowConnection,panOnScroll:store.preferences.wheel==='pan',zoomOnScroll:store.preferences.wheel==='zoom',zoomOnPinch:store.preferences.pinch,zoomOnDoubleClick:false,zoomActivationKeyCode:['Control','Meta'],panOnDrag:store.preferences.panOnDrag,preventScrolling:store.preferences.wheel!=='page',minZoom:.12,maxZoom:2,snapToGrid:store.snap,snapGrid:[24,24],nodeDragThreshold:4,paneClickDistance:5,deleteKeyCode:null,selectionKeyCode:null,multiSelectionKeyCode:null,nodesFocusable:false,edgesFocusable:true,defaultViewport:{x:canvasState().pan.x,y:canvasState().pan.y,zoom:canvasState().zoom},noDragClassName:'nodrag',noPanClassName:'nopan',noWheelClassName:'nowheel'});
  }});
  flowUi.app=createApp(Component);flowUi.app.use(pinia);flowUi.app.mount(root);paintFlowChrome();
 }
 function destroyFlow(){
- closeConnectionMenu(false);
+ closeConnectionMenu(false);resetFlowConnection(false);clearSpatialGesture();
  clearTimeout(flowUi.saveTimer);if(!flowUi.app)return;flowUi.serial++;
  if(flowUi.drag&&flowUi.owner===designOwner())design().canvas=flowUi.drag.before;
- const app=flowUi.app,store=flowUi.store,pinia=flowUi.pinia;flowUi.app=null;flowUi.api=null;flowUi.store=null;flowUi.pinia=null;flowUi.drag=null;flowUi.dragging=false;flowUi.connecting=false;
- app.unmount();store?.$dispose();if(Pinia.disposePinia)Pinia.disposePinia(pinia);
+ const app=flowUi.app,store=flowUi.store,pinia=flowUi.pinia,api=flowUi.api;flowUi.app=null;flowUi.api=null;flowUi.store=null;flowUi.pinia=null;flowUi.drag=null;flowUi.dragging=false;flowUi.connecting=false;
+ app.unmount();api?.$destroy();store?.$dispose();if(Pinia.disposePinia)Pinia.disposePinia(pinia);
 }
 function paintFlowChrome(){
  const c=canvasState(),root=document.getElementById('vf-root'),vp=document.getElementById('map-viewport');if(!vp)return;
@@ -13273,7 +13560,7 @@ function paintFlowChrome(){
  vp.style.backgroundSize=(24*c.zoom)+'px '+(24*c.zoom)+'px';vp.style.backgroundPosition=c.pan.x+'px '+c.pan.y+'px';vp.style.backgroundImage=c.interaction.grid?'':'none';
  vp.dataset.wheel=c.interaction.wheel;vp.dataset.grid=String(c.interaction.grid);paintReferenceChrome();
 }
-function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>flowUi.syncing=false);}
+function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>{if(api===flowUi.api)flowUi.syncing=false;});}
 function syncFlowSelection(){
  if(!flowUi.store)return;const selected=designUi.selected;
  for(const n of flowUi.store.nodes){n.selected=n.id===selected;n.data.dim=!mapMatch(n);}
@@ -13284,7 +13571,7 @@ function syncFlowSelection(){
 function refreshFlowConfig(){const toggle=document.querySelector('[data-field="canvas-snap"]');if(toggle)toggle.checked=canvasState().snap;if(!flowUi.store)return;flowUi.store.preferences={...canvasPreferences()};flowUi.store.snap=canvasState().snap;flowUi.store.edges=flowEdgeProjection(design());paintFlowChrome();}
 function cancelFlowGesture(){
  if(flowUi.dragging&&flowUi.drag){flowUi.cancelled=true;const drag=flowUi.drag;flowUi.api.applyNodeChanges([{id:drag.id,type:'position',position:drag.before.positions[drag.id],dragging:false}]);canvasAnnounce('Drag cancelled. Release the pointer to finish.');return true;}
- if(flowUi.connecting){flowUi.cancelled=true;flowUi.connecting=false;flowUi.api?.endConnection();flowUi.api?.endConnection(undefined,true);canvasAnnounce('Connection cancelled. Nothing changed.');return true;}
+ if(flowUi.connecting){resetFlowConnection(false);canvasAnnounce('Connection cancelled. Nothing changed.');return true;}
  return false;
 }
 
@@ -13506,7 +13793,7 @@ function emptyCanvas(){return {schema:1,layout:'vertical',positions:Object.creat
 function validCanvas(c){
  if(c===undefined)return true;
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
- if(!validReferenceSections(c.sections))return false;
+ if(!validReferenceSections(c.sections)||!validAnchorMap(c.anchors))return false;
  if(c.brickDisplay!==undefined&&!['structure','labels','wireframes'].includes(c.brickDisplay))return false;
  const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isFinite(x)&&Math.abs(x)<=50000;
  return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x)&&num(c.pan.y)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
@@ -13514,12 +13801,12 @@ function validCanvas(c){
 function canvasStructure(d){return JSON.stringify(d.nodes.map(n=>[n.id,n.parent,n.kind]));}
 function canvasState(d=design()){
  if(!validCanvas(d.canvas)||!d.canvas)d.canvas=emptyCanvas();
- const c=d.canvas;if(!c.interaction)c.interaction=defaultCanvasPreferences();const known=new Set(d.nodes.map(n=>n.id));
+ const c=d.canvas;if(!c.interaction)c.interaction=defaultCanvasPreferences();if(c.interaction.guides===undefined)c.interaction.guides=true;if(c.interaction.guideSnap===undefined)c.interaction.guideSnap=true;const known=new Set(d.nodes.map(n=>n.id));
  if(Object.getPrototypeOf(c.positions)!==null)c.positions=Object.assign(Object.create(null),c.positions);
  for(const id of Object.keys(c.positions))if(!known.has(id))delete c.positions[id];
  c.collapsed=c.collapsed.filter(id=>known.has(id));
  if(d.nodes.some(n=>!Object.hasOwn(c.positions,n.id))){const fresh=layoutPositions(d,c.layout==='free'?'grid':c.layout);for(const n of d.nodes)if(!Object.hasOwn(c.positions,n.id))c.positions[n.id]=fresh[n.id]||{x:48,y:48};}
- if(!c.arrangedFor)c.arrangedFor=canvasStructure(d);
+ adoptSections(d);ensureStructureAnchors(d);if(!c.arrangedFor)c.arrangedFor=canvasStructure(d);
  if(canvasUi.owner!==designOwner()){canvasUi.owner=designOwner();flowUi.cancelled=false;canvasUi.edge=null;canvasUi.connecting=null;canvasUi.placing=null;canvasUi.search='';}
  return c;
 }
@@ -13561,7 +13848,7 @@ function canvasBounds(nodes=visibleMapNodes()){
 }
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
- const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes(),b=canvasBounds(nodes);
+ const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&c.sections?.length){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
  const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
  const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
  c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));
@@ -13650,7 +13937,7 @@ function mapCard(d,n,issues,requirements){
 }
 function mapInspector(d,n){
  const c=canvasState(d),p=c.positions[n.id],parent=d.nodes.find(x=>x.id===n.parent),siblings=d.nodes.filter(x=>x.parent===n.parent);
- return `<div class="section-head">${badge(NODE_KINDS[n.kind],'purple')}${n.entry?badge('Start','good'):''}</div><h2>${esc(n.label)}</h2><code class="surface-code">${esc(n.slug)}</code><div class="row wrap mt16">${button('Edit surface','design-edit',n.id,'primary small','settings')}${button('More actions','canvas-card-menu',n.id,'ghost small')}</div><div class="inspector-section"><label>USER OUTCOME</label><p>${esc(n.goal||'What should a user accomplish here? Add the outcome when editing this surface.')}</p></div><div class="inspector-section"><label>CONTENT LAYOUT</label>${layoutThumbnail(n.layout)}<div class="row between"><strong class="small">${esc(LAYOUTS.find(l=>l.id===n.layout)?.name)}</strong>${button('Change','design-edit',n.id,'ghost small')}</div><p class="tiny muted">Inside ${esc(['view','page'].includes(n.kind)?PLACEMENTS[nodePlacement(d,n)]:NODE_KINDS[n.kind])}. Separate from the map arrangement.</p></div><div class="inspector-section"><label>CONTAINMENT</label><div class="row between"><span class="small">${esc(parent?.label||'Plugin root')}</span>${button('Reparent','design-edit',n.id,'ghost small')}</div>${d.nodes.some(x=>x.parent===n.id)?button(c.collapsed.includes(n.id)?'Expand branch':'Collapse branch','canvas-collapse',n.id,'small'):''}<div class="row wrap mt16">${button('Earlier','design-move',n.id+':-1','small','',siblings[0]?.id===n.id?'disabled':'')}${button('Later','design-move',n.id+':1','small','',siblings.at(-1)?.id===n.id?'disabled':'')}</div><p class="tiny muted">Earlier / later changes sibling order. Dragging only moves the card.</p></div><details class="inspector-section"><summary>Position & movement</summary><div class="position-fields"><label>X<input id="map-position-x" type="number" value="${Math.round(p.x)}" min="-50000" max="50000"></label><label>Y<input id="map-position-y" type="number" value="${Math.round(p.y)}" min="-50000" max="50000"></label>${button('Apply','canvas-position',n.id,'small')}</div><div class="row wrap">${[['←','-24,0'],['↑','0,-24'],['↓','0,24'],['→','24,0']].map(([label,delta])=>button(label,'canvas-nudge',delta,'small','',`aria-label="Move card ${label==='←'?'left':label==='→'?'right':label==='↑'?'up':'down'}"`)).join('')}${button('Place by click','canvas-place',n.id,'small')}</div></details><details class="inspector-section" ${(n.components?.length||allRequirements(d).some(r=>r.nodes.includes(n.id)))?'open':''}><summary>Requirements & components</summary>${nodeProductInspector(d,n)}</details><details class="inspector-section"><summary>Actions & patterns (${n.patterns.length})</summary><p class="small">${n.command?'Command palette entry. ':''}${n.ribbon?'Ribbon shortcut. ':''}${n.nav?'In parent navigation.':''}</p>${n.patterns.map(id=>`<p class="small">${esc(PATTERNS.find(x=>x.id===id)?.name||id)}</p>`).join('')}${button('Manage patterns','nav','patterns','small')}</details>`;
+ return `<div class="section-head">${badge(NODE_KINDS[n.kind],'purple')}${n.entry?badge('Start','good'):''}</div><h2>${esc(n.label)}</h2><code class="surface-code">${esc(n.slug)}</code><div class="row wrap mt16">${button('Edit surface','design-edit',n.id,'primary small','settings')}${button('More actions','canvas-card-menu',n.id,'ghost small')}</div><div class="inspector-section"><label>USER OUTCOME</label><p>${esc(n.goal||'What should a user accomplish here? Add the outcome when editing this surface.')}</p></div><div class="inspector-section"><label>CONTENT LAYOUT</label>${layoutThumbnail(n.layout)}<div class="row between"><strong class="small">${esc(LAYOUTS.find(l=>l.id===n.layout)?.name)}</strong>${button('Change','design-edit',n.id,'ghost small')}</div><p class="tiny muted">Inside ${esc(['view','page'].includes(n.kind)?PLACEMENTS[nodePlacement(d,n)]:NODE_KINDS[n.kind])}. Separate from the map arrangement.</p></div><div class="inspector-section"><label>CONTAINMENT</label><div class="row between"><span class="small">${esc(parent?.label||'Plugin root')}</span>${button('Reparent','design-edit',n.id,'ghost small')}</div>${d.nodes.some(x=>x.parent===n.id)?button(c.collapsed.includes(n.id)?'Expand branch':'Collapse branch','canvas-collapse',n.id,'small'):''}<div class="row wrap mt16">${button('Earlier','design-move',n.id+':-1','small','',siblings[0]?.id===n.id?'disabled':'')}${button('Later','design-move',n.id+':1','small','',siblings.at(-1)?.id===n.id?'disabled':'')}</div><p class="tiny muted">Earlier / later changes sibling order. Dragging only moves the card.</p></div><div class="inspector-section"><label class="field">Visual section<select data-field="unified-section" data-node="${n.id}">${referenceSections(d).map(s=>`<option value="${s.id}" ${sectionForCard(d,n.id)===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label><p class="tiny muted">Or drag this card into a section. Its parent and relationships stay unchanged.</p></div><details class="inspector-section"><summary>Position & movement</summary><div class="position-fields"><label>X<input id="map-position-x" type="number" value="${Math.round(p.x)}" min="-50000" max="50000"></label><label>Y<input id="map-position-y" type="number" value="${Math.round(p.y)}" min="-50000" max="50000"></label>${button('Apply','canvas-position',n.id,'small')}</div><div class="row wrap">${[['←','-24,0'],['↑','0,-24'],['↓','0,24'],['→','24,0']].map(([label,delta])=>button(label,'canvas-nudge',delta,'small','',`aria-label="Move card ${label==='←'?'left':label==='→'?'right':label==='↑'?'up':'down'}"`)).join('')}${button('Place by click','canvas-place',n.id,'small')}</div></details><details class="inspector-section" ${(n.components?.length||allRequirements(d).some(r=>r.nodes.includes(n.id)))?'open':''}><summary>Requirements & components</summary>${nodeProductInspector(d,n)}</details><details class="inspector-section"><summary>Actions & patterns (${n.patterns.length})</summary><p class="small">${n.command?'Command palette entry. ':''}${n.ribbon?'Ribbon shortcut. ':''}${n.nav?'In parent navigation.':''}</p>${n.patterns.map(id=>`<p class="small">${esc(PATTERNS.find(x=>x.id===id)?.name||id)}</p>`).join('')}${button('Manage patterns','nav','patterns','small')}</details>`;
 }
 function mapConnections(d,n){const edges=d.links.filter(e=>e.from===n.id||e.to===n.id);return `<h2>User-flow connections</h2><p class="small muted">Actions involving ${esc(n.label)}. These do not define containment.</p>${button('Connect from this card','canvas-connect-from',n.id,'primary small','link',n.kind==='group'?'disabled':'')}<div class="mt16">${edges.map(e=>`<article class="map-link-row ${e.id===canvasUi.edge?'selected':''}"><span class="eyebrow">${esc(LINK_TYPES[e.kind]?.label||e.kind)} · ${e.from===n.id?'OUTGOING':'INCOMING'}</span><strong>${esc(e.label)}</strong><p>${esc(d.nodes.find(x=>x.id===e.from)?.label||'Missing')} → ${esc(d.nodes.find(x=>x.id===e.to)?.label||'Missing')}</p><div class="row">${button('Edit','canvas-edit-edge',e.id,'small')}${button('Remove','canvas-remove-edge',e.id,'ghost small')}</div></article>`).join('')||'<p class="small muted">No explicit action connections yet. Use Connect, then click a destination card, or use the form in the toolbar.</p>'}</div>`;}
 function mapNodeChecks(d,n){const issues=designIssues(d).filter(i=>!i.node||i.node===n.id);return `<h2>Design checks</h2><p class="small muted">For ${esc(n.label)} and the plugin. Not executed application tests.</p>${issues.map(i=>`<div class="map-check-row">${badge(i.level,i.level==='error'?'bad':'warn')}<p>${esc(i.message)}</p></div>`).join('')||'<p>Structure is consistent.</p>'}${button('All outline checks','design-mode','issues','small')}`;}
@@ -13888,10 +14175,10 @@ function parseMembers(text,kind){
  const names=new Set();return rows.map(row=>{const m=row.match(/^([a-z][a-zA-Z0-9]*)(\?)?:(string|number|boolean|void)$/);if(!m||names.has(m[1])||(kind==='props'&&m[3]==='void'))throw Error('Use unique name:type entries; types: string, number, boolean'+(kind==='events'?', void':'')+'.');names.add(m[1]);return {name:m[1],optional:!!m[2],type:m[3]};});
 }
 function productShape(d){
- if(d.librarySchema!==undefined&&d.librarySchema!==2)return false;
+ if(d.librarySchema!==undefined&&![2,3].includes(d.librarySchema))return false;
  const text=(v,max=4000)=>typeof v==='string'&&v.length<=max;
  const refs=v=>Array.isArray(v)&&v.length<=120&&v.every(s=>text(s,100));
- const comp=c=>c&&['id','name','category','preview','description','props','events','slots','variants','a11y','version','status','origin','replacement','tokens'].every(k=>text(c[k]))&&Number.isInteger(c.revision)&&c.revision>0&&['draft','ready','deprecated'].includes(c.status)&&['starter','project'].includes(c.origin)&&['record','form','empty','toolbar','notice','brick'].includes(c.preview)&&(c.contentSpec===undefined||validContentSpec(c.contentSpec))&&(c.preview!=='brick'||!!c.contentSpec);
+ const comp=c=>c&&['id','name','category','preview','description','props','events','slots','variants','a11y','version','status','origin','replacement','tokens'].every(k=>text(c[k]))&&Number.isInteger(c.revision)&&c.revision>0&&['draft','ready','deprecated'].includes(c.status)&&['starter','project'].includes(c.origin)&&['record','form','empty','toolbar','notice','brick'].includes(c.preview)&&validComponentTags(c.tags)&&(c.contentSpec===undefined||validContentSpec(c.contentSpec))&&(c.preview!=='brick'||!!c.contentSpec);
  const req=r=>r&&['id','title','priority','status','acceptance','kind'].every(k=>text(r[k]))&&['must','should','could','wont'].includes(r.priority)&&['draft','designed','implemented','tested','done','deferred'].includes(r.status)&&['functional','quality','constraint'].includes(r.kind)&&refs(r.nodes)&&refs(r.components)&&refs(r.patterns);
  const prd=p=>p&&['id','title','version','status','problem','audience','goals','nonGoals','notes'].every(k=>text(p[k],12000))&&Number.isInteger(p.revision)&&p.revision>0&&Number.isInteger(p.nextReq)&&p.nextReq>0&&['draft','review','approved','archived'].includes(p.status)&&Array.isArray(p.requirements)&&p.requirements.length<=80&&p.requirements.every(req)&&Array.isArray(p.baselines)&&p.baselines.length<=10&&p.baselines.every(b=>b&&Number.isInteger(b.revision)&&text(b.markdown,100000)&&text(b.label,120));
  if(d.library!==undefined&&(!Array.isArray(d.library)||d.library.length>LIBRARY_LIMIT||!d.library.every(comp)))return false;
@@ -13923,16 +14210,16 @@ function componentLibraryView(){
  const d=design(),visible=libraryComponents();
  if(!visible.some(c=>c.id===productUi.component))productUi.component=visible[0]?.id||null;
  const c=visible.find(c=>c.id===productUi.component);
- return heading('Your component library','Reusable content bricks and UI contracts. Define once; compose ordered instances in your screens.','<div class="row wrap">'+button('New UI contract','product-component-new','','small','code')+button('New content brick','library-new-brick','','primary','plus')+'</div>')+
-  libraryFilters()+`<div class="library-workspace"><aside class="library-list"><label for="component-filter">Find a component</label><input id="component-filter" type="search" data-field="product-component-filter" value="${esc(productUi.filter)}" placeholder="Name, purpose or category…"><div id="component-results">${componentList()}</div></aside><section id="component-detail" class="library-detail">${c?componentDetail(c):'<div class="library-empty"><h2>No matching components</h2><p>Change the filter or search, or create a component. Existing definitions have not been removed.</p></div>'}</section></div>`;
+ return heading('Your component library','Build websites and applications from one library. Place, write and reorder every component the same way.','<div class="row wrap">'+button('New component','library-new-brick','','primary','plus')+'</div>')+
+  libraryFilters()+`<div class="library-workspace"><aside class="library-list"><label for="component-filter">Find a component</label><input id="component-filter" type="search" data-field="product-component-filter" value="${esc(productUi.filter)}" placeholder="Name, purpose or tag…"><div id="component-results">${componentList()}</div></aside><section id="component-detail" class="library-detail">${c?componentDetail(c):'<div class="library-empty"><h2>No matching components</h2><p>Change the filter or search, or create a component. Existing definitions have not been removed.</p></div>'}</section></div>`;
 }
-function componentList(){return libraryComponents().map(c=>`<button class="library-item ${c.id===productUi.component?'selected':''}" data-action="product-component-select" data-value="${esc(c.id)}" aria-pressed="${c.id===productUi.component}"><span class="library-miniature" ${isBrickComponent(c)?'data-group="'+BRICK_KINDS[c.contentSpec.kind].group+'"':''}>${isBrickComponent(c)?brickSketch(c.contentSpec.kind):icon('box')}</span><span class="grow"><strong>${esc(c.contentSpec?.title||c.name)}</strong><small>${isBrickComponent(c)?'Content brick':esc(c.category)} · v${esc(c.version)}</small></span>${c.status==='deprecated'?badge('Deprecated','warn'):''}</button>`).join('')||'<p class="small muted mt16">No matching components. Clear the search or change the filter.</p>';}
+function componentList(){return libraryComponents().map(c=>`<button class="library-item ${c.id===productUi.component?'selected':''}" data-action="product-component-select" data-value="${esc(c.id)}" aria-pressed="${c.id===productUi.component}"><span class="library-miniature" ${isBrickComponent(c)?'data-group="'+BRICK_KINDS[c.contentSpec.kind].group+'"':''}>${isBrickComponent(c)?brickSketch(c.contentSpec.kind):icon('box')}</span><span class="grow"><strong>${esc(c.contentSpec?.title||c.name)}</strong><small>${esc(c.category)} · v${esc(c.version)}</small></span>${c.status==='deprecated'?badge('Deprecated','warn'):''}</button>`).join('')||'<p class="small muted mt16">No matching components. Clear the search or change the filter.</p>';}
 function componentDetail(c){
  const uses=componentUses(c.id),reqs=requirementUses(c.id),tab=workflowUi.componentTab,brick=isBrickComponent(c),editable=c.origin==='project'||brick;
  const tabs=[['preview','Preview'],['contract',brick?'Definition':'Contract'],['usage','Usage · '+uses.length]];
  const usedIn=new Set(uses.map(u=>u.node.id)).size;
- return `<div class="section-head component-detail-head"><div><span class="component-family">${brick?'Content brick':'UI contract'} · ${esc(c.category)}</span><h2>${esc(c.contentSpec?.title||c.name)}</h2><p>${esc(c.description)}</p><span class="small muted"><code>${esc(c.name)}</code> · v${esc(c.version)} · ${esc(c.status)} · design contract, not implementation evidence</span></div><div class="row wrap">${editable?button(brick?'Edit definition':'Edit contract','product-component-edit',c.id,'small','settings'):badge('Starter contract')}${button('Duplicate','product-component-duplicate',c.id,'small')}${button('Place in a view',brick?'library-place':'product-component-bind',c.id,'primary small','plus',c.status==='deprecated'?'disabled':'')}</div></div>
- <div class="component-tabs segmented" role="group" aria-label="Component details">${tabs.map(([id,label])=>`<button data-action="workflow-component-tab" data-value="${id}" class="${tab===id?'selected':''}" aria-pressed="${tab===id}">${label}</button>`).join('')}</div>
+ return `<div class="section-head component-detail-head"><div><span class="component-family">Component · ${esc(c.category)}</span><h2>${esc(c.contentSpec?.title||c.name)}</h2><p>${esc(c.description)}</p><span class="small muted"><code>${esc(c.name)}</code> · v${esc(c.version)} · ${esc(c.status)} · design contract, not implementation evidence</span></div><div class="row wrap">${editable?button(brick?'Edit definition':'Edit contract','product-component-edit',c.id,'small','settings'):badge('Starter contract')}${button('Duplicate','product-component-duplicate',c.id,'small')}${button('Place in a view',brick?'library-place':'product-component-bind',c.id,'primary small','plus',c.status==='deprecated'?'disabled':'')}</div></div>
+ ${componentTagChips(c)}<div class="component-tabs segmented" role="group" aria-label="Component details">${tabs.map(([id,label])=>`<button data-action="workflow-component-tab" data-value="${id}" class="${tab===id?'selected':''}" aria-pressed="${tab===id}">${label}</button>`).join('')}</div>
  ${tab==='preview'?`<div class="component-stage"><div class="stage-toolbar">${brick?'<span class="small">Reusable content definition</span>':`<div class="segmented" aria-label="Preview state">${['default','loading','empty','error','disabled'].map(s=>`<button data-action="product-story" data-value="${s}" class="${productUi.story===s?'selected':''}" aria-pressed="${productUi.story===s}">${s}</button>`).join('')}</div>`}<span class="tiny muted">Local sketch · not a rendered application component</span></div><div class="story-preview">${componentSketch(c,productUi.story)}</div></div><p class="small muted">${brick?'Each placement has its own ID, content and reading order. Editing a screen instance never changes this definition.':'Preview the intended states. The Contract records the implementation boundary; Usage keeps every binding visible.'}</p>`:''}
  ${tab==='contract'?`${brick?`<section class="library-definition-summary"><h3>Default screen content</h3><dl><dt>Block name</dt><dd>${esc(c.contentSpec.title)}</dd><dt>Wireframe</dt><dd>${esc(BRICK_KINDS[c.contentSpec.kind].label)}</dd><dt>Region</dt><dd>${esc(c.contentSpec.region)}</dd><dt>User purpose</dt><dd>${esc(c.contentSpec.purpose||'Not specified')}</dd><dt>Notes</dt><dd>${esc(c.contentSpec.content||'Not specified')}</dd></dl><p class="small muted">Default changes require a new version. Existing placements keep their authored content until a reviewed upgrade.</p></section>`:''}<div class="component-contract"><section><h3>Props</h3><pre>${esc(c.props||'No inputs')}</pre><h3>Emits</h3><pre>${esc(c.events||'No events')}</pre></section><section><h3>Slots & variants</h3><p>${esc(c.slots||'No named slots')}<br>${esc(c.variants)}</p><h3>Host tokens</h3><pre>${esc(c.tokens)}</pre></section></div><section class="contract-accessibility"><h3>Accessibility expectations</h3><p>${esc(c.a11y)}</p></section>`:''}
  ${tab==='usage'?`<div class="section-head mt24"><h3>${uses.length} instance(s) across ${usedIn} surface(s)</h3>${badge('One shared definition')}</div>${uses.map(({node,binding,brick:b})=>`<div class="usage-row"><button class="btn ghost small" data-action="${b?'library-instance':'product-go-node'}" data-value="${esc(b?node.id+':'+b.id:node.id)}">${esc(node.label)}${b?' / '+esc(b.title):''}</button><span>${esc(binding.slot)} · v${esc(binding.version)}</span><span class="grow"></span>${binding.version!==c.version?button('Review upgrade',b?'library-upgrade':'product-component-upgrade',b?node.id+':'+b.id:node.id+':'+c.id,'small'):''}${button(b?'Remove instance':'Remove binding',b?'brick-delete':'product-component-unbind',b?node.id+':'+b.id:node.id+':'+c.id+':'+binding.slot,'ghost small')}</div>`).join('')||'<p class="small muted">Not placed yet. Use Place in a view to create an instance, not another definition.</p>'}<div class="usage-row"><strong>${reqs.length} linked requirement(s)</strong><span class="grow"></span>${button('Trace requirements','nav','prds','ghost small','file')}</div>`:''}
@@ -13950,7 +14237,7 @@ function componentSketch(c,story='default'){
  if(c.preview==='notice')return `<div class="callout"><div><strong>Your changes are saved</strong><p class="mb0">A local feedback sketch, not a persistence result.</p></div></div>`;
  return `<div class="sketch-record"><div class="row"><span class="icon-tile">${icon('file')}</span><div class="grow"><strong>Design a better capture flow</strong><p class="small mb0">Product notes · edited just now</p></div>${badge('Draft')}</div><p class="mt16 small">This component displays data. It does not own domain rules or write to the vault.</p>${button('Open record','product-demo-event','select','small','arrow',disabled)}</div>`;
 }
-function componentFormDialog(){const f=productUi.form;return dialogBody(f.editing?'Edit component contract':'New reusable component',`<p>Data-only contract. JavaScript, remote URLs and executable templates are not accepted.</p><div class="grid2">${productInput('Component name','name',f.name,'PascalCase, for example TaskCard.')}${productInput('Stable ID','id',f.id,'Kebab-case. The ID is immutable after creation.',false,f.editing)}${productSelect('Category','category',['Content','Data','Data display','Forms','Feedback','Navigation','Input','Action','Actions'],f.category)}${isBrickComponent(f)?'<div class="field"><label>Component family</label><p>Content brick · ordered screen instance</p></div>':productSelect('Local sketch type','preview',['record','form','empty','toolbar','notice'],f.preview)}${productInput('Version','version',f.version,'Use x.y.z. Contract changes require a new version.')}${productSelect('Lifecycle','status',['draft','ready','deprecated'],f.status)}</div>${productInput('Purpose','description',f.description,'',true)}${libraryDefaultsEditor(f)}<div class="grid2">${productInput('Props: one name:type per line','props',f.props,'string, number, boolean; optional: name?:type',true)}${productInput('Events: one name:type per line','events',f.events,'string, number, boolean, void',true)}${productInput('Slots','slots',f.slots,'Comma-separated slot names.')}${productInput('Variants','variants',f.variants,'Document named variants; these are not runtime code.')}</div>${productInput('Accessibility expectations','a11y',f.a11y,'',true)}${productInput('Host token names','tokens',f.tokens,'One CSS variable name per line.',true)}${productInput('Replacement component ID','replacement',f.replacement,'Optional; must reference an existing component.')}<p class="error" role="alert">${esc(productUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save component','product-component-save','','primary','check'));}
+function componentFormDialog(){const f=productUi.form;return dialogBody(f.editing?'Edit component contract':'New reusable component',`<p>Data-only contract. JavaScript, remote URLs and executable templates are not accepted.</p><div class="grid2">${productInput('Component name','name',f.name,'PascalCase, for example TaskCard.')}${productInput('Stable ID','id',f.id,'Kebab-case. The ID is immutable after creation.',false,f.editing)}${productSelect('Category','category',['Content','Data','Data display','Forms','Feedback','Navigation','Input','Action','Actions'],f.category)}<label class="field" for="component-tags">Tags<input id="component-tags" data-field="unified-tags" value="${esc((f.tags||[]).join(', '))}" placeholder="application, dashboard, data"><small>Comma-separated. Tags filter and organize the library.</small></label>${productInput('Version','version',f.version,'Use x.y.z. Contract changes require a new version.')}${productSelect('Lifecycle','status',['draft','ready','deprecated'],f.status)}</div>${productInput('Purpose','description',f.description,'',true)}${libraryDefaultsEditor(f)}<div class="grid2">${productInput('Props: one name:type per line','props',f.props,'string, number, boolean; optional: name?:type',true)}${productInput('Events: one name:type per line','events',f.events,'string, number, boolean, void',true)}${productInput('Slots','slots',f.slots,'Comma-separated slot names.')}${productInput('Variants','variants',f.variants,'Document named variants; these are not runtime code.')}</div>${productInput('Accessibility expectations','a11y',f.a11y,'',true)}${productInput('Host token names','tokens',f.tokens,'One CSS variable name per line.',true)}${productInput('Replacement component ID','replacement',f.replacement,'Optional; must reference an existing component.')}<p class="error" role="alert">${esc(productUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save component','product-component-save','','primary','check'));}
 function componentBindDialog(){const f=productUi.form,n=design().nodes.find(n=>n.id===f.node),c=design().library.find(c=>c.id===f.id);return dialogBody('Place '+c.name,`<p>Bind a versioned component to a layout region. This does not duplicate its source.</p>${productSelect('Surface','node',design().nodes.filter(n=>['view','page','modal'].includes(n.kind)).map(n=>[n.id,n.label]),f.node)}${productSelect('Layout region','slot',(n?componentSlots(n):['content']),f.slot)}${componentSketch(c,'default')}<p class="error" role="alert">${esc(productUi.error)}</p>`,button('Cancel','close','','ghost')+button('Add binding','product-component-bind-save','','primary','plus'));}
 function productInput(label,key,value,help='',multi=false,readonly=false){return `<div class="field"><label for="p-${key}">${esc(label)}</label>${multi?`<textarea id="p-${key}" data-field="product-form-${key}" rows="3" maxlength="12000">${esc(value||'')}</textarea>`:`<input id="p-${key}" data-field="product-form-${key}" value="${esc(value||'')}" maxlength="250" ${readonly?'readonly':''}>`}${help?`<small>${esc(help)}</small>`:''}</div>`;}
 function productSelect(label,key,options,value){return `<div class="field"><label for="p-${key}">${esc(label)}</label><select id="p-${key}" data-field="product-form-${key}">${options.map(o=>{const [id,name]=Array.isArray(o)?o:[o,o];return `<option value="${esc(id)}" ${id===value?'selected':''}>${esc(name)}</option>`;}).join('')}</select></div>`;}
@@ -14003,11 +14290,11 @@ function handleProductAction(action,value){
  case 'product-requirement-screen':{
   const r=p.requirements.find(r=>r.id===value);productUi.returnTo={prd:p.id,requirement:r.id,owner:designOwner()};startNodeForm('view');designUi.form.label=r.title;designUi.form.goal=r.acceptance;let slug=r.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-$/,'').slice(0,48).replace(/-$/,'')||'requirement-view';if(!/^[a-z]/.test(slug))slug='view-'+slug;while(d.nodes.some(n=>n.slug===slug))slug+='-new';designUi.form.slug=slug;redrawModal();break;}
  case 'product-component-select':productUi.component=value;productUi.story='default';render();break;
- case 'product-component-new':beginProductForm('product-component',nextCustomComponent());break;
+ case 'product-component-new':beginProductForm('product-component',newBrickDefinition());break;
  case 'product-component-duplicate':beginProductForm('product-component',nextCustomComponent(d.library.find(c=>c.id===value)));break;
  case 'product-component-edit':{const item=d.library.find(c=>c.id===value);if(item&&(item.origin==='project'||isBrickComponent(item)))beginProductForm('product-component',{...item,editing:true});break;}
  case 'product-component-save':{
-  const f=productUi.form;productCommit(next=>{const item=Object.fromEntries(['id','name','category','preview','description','props','events','slots','variants','a11y','version','revision','status','origin','replacement','tokens'].map(k=>[k,designCopy(f[k])]));if(f.contentSpec)item.contentSpec=designCopy(f.contentSpec);if(!item.name.trim()||!safeSlug(item.id))throw Error('Use a PascalCase name and a portable component ID.');if(item.slots.split(',').some(s=>s.trim()&&!/^[a-z][a-z0-9-]*$/.test(s.trim())))throw Error('Use simple named slots separated by commas.');if(item.tokens.split('\n').some(t=>t.trim()&&!/^--[a-z][a-z0-9-]*$/.test(t.trim())))throw Error('Tokens must be CSS variable names, not CSS declarations.');if(f.editing){const old=next.library.find(c=>c.id===f.id);if(old.origin!=='project'&&!isBrickComponent(old))throw Error('Starter contracts are read-only.');const contract=x=>JSON.stringify([x.name,x.props,x.events,x.slots,x.variants,x.preview,x.contentSpec]);if(contract(old)!==contract(item)&&old.version===item.version)throw Error('Bump the component version when changing its public contract.');item.revision++;item.origin='project';next.library[next.library.indexOf(old)]=item;}else{if(next.library.length>=LIBRARY_LIMIT)throw Error('Use at most 64 library components.');next.library.push(item);}productUi.component=item.id;});break;}
+  const f=productUi.form;productCommit(next=>{const item=Object.fromEntries(['id','name','category','preview','description','props','events','slots','variants','a11y','version','revision','status','origin','replacement','tokens'].map(k=>[k,designCopy(f[k])]));item.tags=normalizeComponentTags(f.tags);if(!validComponentTags(item.tags))throw Error('Use up to 16 unique tags of 1–32 lowercase letters, digits, spaces or hyphens.');if(f.contentSpec)item.contentSpec=designCopy(f.contentSpec);if(!item.name.trim()||!safeSlug(item.id))throw Error('Use a PascalCase name and a portable component ID.');if(item.slots.split(',').some(s=>s.trim()&&!/^[a-z][a-z0-9-]*$/.test(s.trim())))throw Error('Use simple named slots separated by commas.');if(item.tokens.split('\n').some(t=>t.trim()&&!/^--[a-z][a-z0-9-]*$/.test(t.trim())))throw Error('Tokens must be CSS variable names, not CSS declarations.');if(f.editing){const old=next.library.find(c=>c.id===f.id);if(old.origin!=='project'&&!isBrickComponent(old))throw Error('Starter contracts are read-only.');const contract=x=>JSON.stringify([x.name,x.props,x.events,x.slots,x.variants,x.preview,x.contentSpec]);if(contract(old)!==contract(item)&&old.version===item.version)throw Error('Bump the component version when changing its public contract.');item.revision++;item.origin='project';next.library[next.library.indexOf(old)]=item;}else{if(next.library.length>=LIBRARY_LIMIT)throw Error('Use at most 64 library components.');next.library.push(item);}productUi.component=item.id;});break;}
  case 'product-story':productUi.story=value;render();break;
  case 'product-demo-event':notify('Preview event: '+value+'. No application action or vault write was executed.');break;
  case 'product-component-bind':{
@@ -14041,16 +14328,18 @@ function productPlanFiles(d){
   const type=`// CONCEPT CONTRACT. Review before implementation.\nexport interface ${c.name}Props {\n${props.map(p=>'  '+p.name+(p.optional?'?':'')+': '+p.type+';').join('\n')}\n}\nexport interface ${c.name}Events {\n${events.map(e=>'  '+e.name+': '+e.type+';').join('\n')}\n}\n`;
   put(`src/presentation/context/components/${c.name}.ts`,type,c.id,'Shared typed component contract');
   put(`src/presentation/components/library/${c.name}.vue`,`<!-- CONCEPT SKETCH. Component behavior and binding are not implemented. -->\n<template>\n  <section class="component-${c.id}">\n    <slot />\n    <!-- ${c.a11y.replace(/-->|[\r\n]/g,' ')} -->\n  </section>\n</template>\n`,c.id,'Reusable component markup (one definition)');
-  put(`docs/components/${c.id}.md`,`# ${c.name}\n\nVersion: ${c.version} · ${c.status} · source: ${c.origin}\n\n${c.description}\n\n${c.contentSpec?'## Content defaults\n'+componentContentDefaults(c)+'\n\n':''}## Inputs\n\n\`\`\`text\n${c.props}\n\`\`\`\n\n## Events\n\n\`\`\`text\n${c.events}\n\`\`\`\n\n## Slots and variants\n${c.slots}\n${c.variants}\n\n## Accessibility\n${c.a11y}\n\n## Required stories\nDefault, loading, empty, error, disabled; keyboard, theme, narrow pane.\n\nThese are story obligations, not an executed Storybook suite.\n`,c.id,'Component contract and story obligations');
+  put(`docs/components/${c.id}.md`,`# ${c.name}\n\nVersion: ${c.version} · ${c.status} · source: ${c.origin}\n\n${c.description}\n\nTags: ${(c.tags||[]).join(', ')||'None'}\n\n${c.contentSpec?'## Content defaults\n'+componentContentDefaults(c)+'\n\n':''}## Inputs\n\n\`\`\`text\n${c.props}\n\`\`\`\n\n## Events\n\n\`\`\`text\n${c.events}\n\`\`\`\n\n## Slots and variants\n${c.slots}\n${c.variants}\n\n## Accessibility\n${c.a11y}\n\n## Required stories\nDefault, loading, empty, error, disabled; keyboard, theme, narrow pane.\n\nThese are story obligations, not an executed Storybook suite.\n`,c.id,'Component contract and story obligations');
  }
- put('src/bootstrap/component-bindings.ts','// CONCEPT INPUT. No current shared binding compiler is asserted.\nexport const componentBindings = '+JSON.stringify(d.nodes.filter(n=>n.components.length).map(n=>({node:n.id,components:n.components})),null,2)+' as const;\n','blueprint','Versioned component placement intent');
+ put('src/bootstrap/component-bindings.ts','// CONCEPT INPUT. No current shared binding compiler is asserted.\nexport const componentBindings = '+JSON.stringify(d.nodes.filter(n=>bricksOf(n).length||n.components.length).map(n=>({node:n.id,components:bricksOf(n).map(b=>({instance:b.id,definition:b.definition,version:b.version,region:b.region})),retainedImplementationLinks:n.components})),null,2)+' as const;\n','blueprint','Versioned component placement intent');
  for(const p of d.prds)put(`docs/requirements/${p.id}.md`,prdMarkdown(p),p.id,'PRD snapshot for handoff (canonical vault note remains separate)');
  const rows=allRequirements(d).map(r=>'| '+[r.id,r.title,r.nodes.join(', ')||'Unmapped',r.components.join(', ')||'None',r.patterns.join(', ')||'None','Not verified'].map(x=>x.replace(/[\n\r|]/g,' ')).join(' | ')+' |').join('\n');
  put('docs/REQUIREMENTS-TRACEABILITY.md','# Requirements → experience → code\n\nDesign traceability only. Links do not certify implementation or passing tests.\n\n| ID | Requirement | Surfaces | Components | Patterns | Evidence |\n| --- | --- | --- | --- | --- | --- |\n'+rows+'\n','blueprint','Traceability and explicit missing evidence');
  return out;
 }
-function nodeProductInspector(d,n){const rs=allRequirements(d).filter(r=>r.nodes.includes(n.id));return `<h3 class="mt24">Components</h3>${(n.components||[]).map(b=>{const c=d.library.find(c=>c.id===b.id);return `<div class="connection-row"><span><strong>${esc(c?.name||b.id)}</strong><small>${esc(b.slot)} · v${esc(b.version)}</small></span>${button('Open','product-go-component',b.id,'ghost small')}</div>`;}).join('')||'<p class="small muted">No reusable components placed.</p>'}${button('Component library','nav','components','ghost small','box')}<h3 class="mt24">Linked requirements</h3>${rs.map(r=>`<div class="connection-row"><span><code>${esc(r.id)}</code><small>${esc(r.title)}</small></span>${button('Open','product-go-prd',r.prdId,'ghost small')}</div>`).join('')||'<p class="small muted">No requirement links yet.</p>'}${button('Manage PRDs','nav','prds','ghost small','file')}`;}
-function nodeComponentPreview(d,n){return (n.components||[]).length?`<div class="surface-components"><h3>Reusable components in this surface</h3>${n.components.map(b=>{const c=d.library.find(c=>c.id===b.id);return `<section class="bound-component"><div class="row between"><strong>${esc(c?.name||b.id)}</strong><span class="tiny muted">${esc(b.slot)} · v${esc(b.version)}</span></div>${c?componentSketch(c,'default'):callout('Component is missing.','bad')}</section>`;}).join('')}</div>`:'';}
+function nodeProductInspector(d,n){const rs=allRequirements(d).filter(r=>r.nodes.includes(n.id));return `<h3 class="mt24">Components</h3>${bricksOf(n).map(b=>`<div class="connection-row"><span><strong>${esc(b.title)}</strong><small>${esc(b.region)} · v${esc(b.version)}</small></span>${button('Open','brick-edit',n.id+':'+b.id,'ghost small')}</div>`).join('')||'<p class="small muted">No components placed.</p>'}${retainedBindingNotice(n)}${button('Component library','nav','components','ghost small','box')}<h3 class="mt24">Linked requirements</h3>${rs.map(r=>`<div class="connection-row"><span><code>${esc(r.id)}</code><small>${esc(r.title)}</small></span>${button('Open','product-go-prd',r.prdId,'ghost small')}</div>`).join('')||'<p class="small muted">No requirement links yet.</p>'}${button('Manage PRDs','nav','prds','ghost small','file')}`;}
+
+function nodeComponentPreview(d,n){return bricksOf(n).length?`<div class="surface-components"><h3>Components in reading order</h3>${bricksOf(n).map(b=>`<section class="bound-component"><div class="row between"><strong>${esc(b.title)}</strong><span class="tiny muted">${esc(b.region)} · v${esc(b.version)}</span></div>${brickSketch(b.kind)}<p>${esc(b.purpose)}</p>${button('Edit instance','brick-edit',n.id+':'+b.id,'ghost small')}</section>`).join('')}</div>`:retainedBindingNotice(n);}
+
 function linkCreatedRequirement(node){const ref=productUi.returnTo;if(!ref||ref.owner!==designOwner())return;const p=design().prds.find(p=>p.id===ref.prd),r=p?.requirements.find(r=>r.id===ref.requirement);if(r){r.nodes=[...new Set([...r.nodes,node.id])];p.revision++;if(p.status==='approved')p.status='draft';}productUi.returnTo=null;}
 function replacementDesign(id){const d=design(),fresh=createDesign(id),mapping=new Map();for(const n of fresh.nodes){const old=n.id;n.id='node-'+d.nextId++;mapping.set(old,n.id);}for(const n of fresh.nodes){n.parent=mapping.get(n.parent)||null;}for(const e of fresh.links){e.id='edge-'+d.nextId++;e.from=mapping.get(e.from);e.to=mapping.get(e.to);}return {...designSnapshot(fresh),nextId:d.nextId,library:designCopy(d.library),prds:designCopy(d.prds)};}
 
@@ -14265,7 +14554,7 @@ function saveDesignNode(){
  if(n.entry)candidate.nodes.forEach(x=>{if(x.id!==n.id)x.entry=false;});
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
- recordDesign();d.nodes=candidate.nodes;if(!f.editing)d.nextId++;linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
+ recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
 function editDesignField(el,commit){
  const key=el.dataset.field,value=el.type==='checkbox'?el.checked:el.value;
@@ -14311,7 +14600,7 @@ function handleDesignAction(action,value){
   case 'design-duplicate':{
    if(d.nodes.length>=DESIGN_LIMITS.nodes){notify('The concept supports up to 60 surfaces.');break;}
    const original=d.nodes.find(n=>n.id===value);recordDesign();let slug=original.slug+'-copy',i=2;while(d.nodes.some(n=>n.slug===slug))slug=original.slug+'-copy-'+i++;
-   const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
+   const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);canvasState(d);assignCardToSection(d,copy.id,sectionForCard(d,original.id));designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
   }
   case 'design-remove':showModal('design-remove',value);break;
   case 'design-remove-confirm':{if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}

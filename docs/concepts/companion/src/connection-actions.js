@@ -19,7 +19,7 @@ function handleConnectionAction(action,value){
 }
 function editConnectionField(el,commit){
  const key=el.dataset.field;if(!key?.startsWith('connection-'))return false;
- const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;
+ const k=key.slice(11),v=el.type==='checkbox'?el.checked:el.value;if(k==='structure-source'){connectionUi.structure.sourceHandle=v;return true;}if(k==='structure-target'){connectionUi.structure.targetHandle=v;return true;}
  connectionUi.error='';const error=document.getElementById('connection-error');if(error)error.textContent='';
  if(k==='structure-parent'){if(connectionUi.structure)connectionUi.structure.parent=v||null;return true;}
  const f=connectionUi.form;if(!f)return true;

@@ -32,7 +32,7 @@ function saveDesignNode(){
  if(n.entry)candidate.nodes.forEach(x=>{if(x.id!==n.id)x.entry=false;});
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
- recordDesign();d.nodes=candidate.nodes;if(!f.editing)d.nextId++;linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
+ recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
 function editDesignField(el,commit){
  const key=el.dataset.field,value=el.type==='checkbox'?el.checked:el.value;

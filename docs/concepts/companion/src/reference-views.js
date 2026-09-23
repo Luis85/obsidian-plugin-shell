@@ -17,7 +17,7 @@ function referenceSitemapView(){
  <aside class="outline-tree ref-panel" aria-label="Structure panel">${referenceStructure(d)}</aside>
  <aside class="node-inspector polish-inspector ref-panel" aria-label="Selected surface">
  <div class="ref-panel-heading"><strong>Inspector</strong>${referenceTool('Close inspector','ref-panel-close','','close')}</div>
- <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Content'],['intent','Intent'],['components','Components'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
+ <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Components'],['intent','Intent'],['links','Links'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
  </div><footer class="ref-map-footer"><span id="map-status-message" role="status">Drag cards to arrange · Click a block to write · Use handles to connect</span><div>${button('Change blueprint','nav','blueprints','ghost small')}${referenceTool('Map help','canvas-help','','help')}</div></footer><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
 }
 function referenceMap(d){
@@ -55,10 +55,10 @@ function referenceStructure(d){
 }
 function referenceSectionDialog(){
  const f=referenceUi.sectionForm;
- return dialogBody(f.id?'Edit visual section':'New visual section',`<p>Arrange related root views in a separate band. Their screens follow them. No view is reparented and no source plan changes.</p>
+ return dialogBody(f.id?'Edit visual section':'New visual section',`<p>Group cards visually. Drag a card into a section or select cards here. Sections grow around their content; containment and connections are unchanged.</p>
  <label class="field">Section name<input data-field="ref-section-name" value="${esc(f.name)}" maxlength="80"></label>
- <fieldset class="ref-section-roots"><legend>Include root surfaces</legend>${design().nodes.filter(n=>!n.parent).map(n=>`<label><input type="checkbox" data-field="ref-section-root" data-id="${n.id}" ${f.roots.includes(n.id)?'checked':''}>${esc(n.label)} <small>${NODE_KINDS[n.kind]}</small></label>`).join('')}</fieldset>
- <p class="small muted">Assigning a root here moves it out of its previous visual section. Deleting a section returns its views to Main workspace.</p><p role="alert" class="error">${esc(referenceUi.sectionError)}</p>`,
+ <fieldset class="ref-section-roots"><legend>Include cards</legend>${design().nodes.map(n=>`<label><input type="checkbox" data-field="ref-section-root" data-id="${n.id}" ${f.roots.includes(n.id)?'checked':''}>${esc(n.label)} <small>${NODE_KINDS[n.kind]}</small></label>`).join('')}</fieldset>
+ <p class="small muted">Each card belongs to one visual section. Deleting a section returns its cards to Main workspace without deleting them.</p><p role="alert" class="error">${esc(referenceUi.sectionError)}</p>`,
  (f.id?button('Remove section','ref-section-remove','','danger'):'')+button('Cancel','close','','ghost')+button('Save section','ref-section-save','','primary'));
 }
 function referenceCardContents(n,lib,children,collapsed){
@@ -71,9 +71,9 @@ function referenceCardContents(n,lib,children,collapsed){
  ${children?`<button class="flow-collapse ref-collapse nodrag nopan" data-action="canvas-collapse" data-value="${n.id}" aria-label="${collapsed?'Expand':'Collapse'} ${esc(n.label)} branch">${collapsed?'+':'−'}<span>${children}</span></button>`:''}</header>
  <div class="brick-stack ${mode}" data-brick-stack="${n.id}">${items.map((b,i)=>brickTile(n,b,i,mode)).join('')}</div>
  <button class="brick-add nodrag nopan" data-action="brick-add" data-value="${n.id}">${icon('plus')} ${items.length?'Add component':'Plan this screen'}</button>
- <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${n.components?.length||0} bindings</button></div>`;
+ <div class="ref-card-footer"><button class="flow-card-intent nodrag nopan" data-action="flow-intent" data-value="${n.id}" title="${esc(n.intent||'Describe user intent and goals')}">${referenceIcon('eye')} ${n.goals?.length||0} goals</button><button class="nodrag nopan" data-action="ref-inspect" data-value="${n.id}" title="Inspect implementation bindings">${bricksOf(n).length} components</button></div>`;
 }
-function referenceSketch(kind){
+function referenceSketch(kind){const extended=componentWireframe(kind);if(extended)return extended;
  const line=(x,y,w)=>`<path d="M${x} ${y}h${w}"/>`;
  const box=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
  const row=(y,flip=false)=>box(flip?140:10,y,60,25)+[0,7,14].map((v,i)=>line(flip?10:84,y+4+v,[113,94,69][i])).join('');

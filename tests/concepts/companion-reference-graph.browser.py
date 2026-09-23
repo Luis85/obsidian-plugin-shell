@@ -27,6 +27,7 @@ with sync_playwright() as pw:
   before=j(p,'({rev:design().revision,links:design().links.length})')
   a=p.locator('[data-port-node="node-3"][data-port-side="right"]')
   z=p.locator('[data-port-node="node-5"][data-port-side="left"]')
+  p.locator('.map-node[data-node="node-3"]').hover()
   x,y=point(a.bounding_box());tx,ty=point(z.bounding_box())
   p.mouse.move(x,y);p.mouse.down();p.mouse.move(tx,ty,steps=12);p.mouse.up()
   p.wait_for_selector('#modal[open] [data-action="design-link-save"]')
@@ -36,7 +37,9 @@ with sync_playwright() as pw:
   ok('Confirming drawn connection creates exactly one typed relationship',j(p,'design().links.length')==before['links']+1)
   edge=j(p,'design().links[design().links.length-1].id')
   p.wait_for_timeout(100)
-  p.locator(f'.vue-flow__edge[data-id="{edge}"] .vue-flow__edge-interaction').click(force=True)
+  target=p.evaluate('''id=>{const path=document.querySelector('.vue-flow__edge[data-id="'+CSS.escape(id)+'"] .vue-flow__edge-interaction');const m=path.getScreenCTM(),length=path.getTotalLength();for(const fraction of [.5,.35,.65,.2,.8,.1,.9]){const q=path.getPointAtLength(length*fraction),pt=new DOMPoint(q.x,q.y).matrixTransform(m),el=document.elementFromPoint(pt.x,pt.y);if(el?.closest('.vue-flow__edge')?.getAttribute('data-id')===id)return {x:pt.x,y:pt.y};}return null}''',edge)
+  assert target,'No unobstructed point on the actual SVG interaction path'
+  p.mouse.click(target['x'],target['y'])
   p.wait_for_selector('#modal[open] [data-action="design-link-save"]')
   p.locator('[data-field="design-link-label"]').fill('Review settings')
   act(p,'design-link-save',scope='#modal')

@@ -8,7 +8,7 @@ function portClick(event,node,side){
  const p=connectionUi.pointer;const moved=p&&(p.moved||Math.hypot(event.clientX-p.x,event.clientY-p.y)>=5);
  connectionUi.pointer=null;
  if(moved||connectionUi.committed||flowUi.cancelled||document.getElementById('modal').open)return;
- flowUi.api?.endConnection();flowUi.connecting=false;openConnectionMenu(node,side,event.currentTarget);
+ setFlowConnecting(false);openConnectionMenu(node,side,event.currentTarget);
 }
 function portKeyDown(event,node,side){
  if(['Enter',' ','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();openConnectionMenu(node,side,event.currentTarget);}

@@ -7,15 +7,11 @@ function newDesignErrors(before,after){
  const existing=new Set(designIssues(before).filter(i=>i.level==='error').map(key));
  return designIssues(after).filter(i=>i.level==='error'&&!existing.has(key(i)));
 }
-function structureRoute(d,n,positions=null){
- const c=canvasState(d);
- if(!positions&&!c.custom&&['vertical','horizontal'].includes(c.layout))return c.layout==='horizontal'?{sourceHandle:'structure-out-right',targetHandle:'structure-in-left'}:{sourceHandle:'structure-out-bottom',targetHandle:'structure-in-top'};
- const points=positions||c.positions,a=points[n.parent],b=points[n.id];
- if(!a||!b)return {sourceHandle:'structure-out-bottom',targetHandle:'structure-in-top'};
- const dx=b.x-a.x,dy=(b.y+brickSurfaceSize(n,d).height/2)-(a.y+brickSurfaceSize(d.nodes.find(x=>x.id===n.parent),d).height/2);
- const side=Math.abs(dx)/MAP_SIZE.w>Math.abs(dy)/MAP_SIZE.h?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');
- return {sourceHandle:'structure-out-'+side,targetHandle:'structure-in-'+OPPOSITE_SIDE[side]};
+function structureRoute(d,n){
+ const c=canvasState(d),a=c.anchors['contains-'+n.id];
+ return {sourceHandle:a.sourceHandle,targetHandle:a.targetHandle};
 }
+
 function structureEdges(d,ids,positions=null){
  const prefs=canvasState(d).interaction;
  return d.nodes.filter(n=>ids.has(n.id)&&ids.has(n.parent)).map(n=>({
@@ -26,12 +22,8 @@ function structureEdges(d,ids,positions=null){
   data:{containment:true,shape:'smoothstep',title:'Contains: '+d.nodes.find(x=>x.id===n.parent).label+' → '+n.label}
  }));
 }
-function refreshStructureRouting(){
- if(!flowUi.api||!flowUi.store)return;
- const positions=Object.fromEntries(flowUi.api.getNodes.value.map(n=>[n.id,n.position]));
- const ids=new Set(visibleMapNodes().map(n=>n.id));
- flowUi.store.edges=[...structureEdges(design(),ids,positions),...flowUi.store.edges.filter(e=>!e.data?.containment)];
-}
+function refreshStructureRouting(){queueSpatialPaint();}
+
 function nearestScreenParent(d,n){
  if(n.kind==='view')return n.id;
  if(n.kind==='page')return n.parent;
@@ -92,22 +84,24 @@ function commitConnectedCard(){
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  const position=proposedCardPosition(d,f.origin,f.side);if(!position)return fail('No free position near that handle. Move the source card and try again.');
  recordDesign();d.nodes=candidate.nodes;d.links=candidate.links;d.nextId=candidate.nextId;
- const c=canvasState(d);c.positions[n.id]=position;c.custom=true;
+ const c=canvasState(d);c.positions[n.id]=position;c.custom=true;assignCardToSection(d,n.id,sectionForCard(d,f.origin));
  c.collapsed=c.collapsed.filter(id=>!nodeDescendants(d,id).has(n.id));
  designChanged();designUi.selected=n.id;canvasUi.edge=e.id;canvasUi.inspector='links';closeModal();render();
  revealDesignSelection();focusMapNode(n.id);canvasAnnounce('Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.');
 }
 function openStructureRelationship(childId){
  const d=design(),child=d.nodes.find(n=>n.id===childId);if(!child?.parent)return;
- connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent};connectionUi.error='';
+ connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(structureRoute(d,child)),...structureRoute(d,child)};connectionUi.error='';
  designUi.selected=child.id;canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
 }
 function saveStructureRelationship(){
  const d=design(),f=connectionUi.structure,child=d.nodes.find(n=>n.id===f?.child),fail=m=>{connectionUi.error=m;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before reparenting.');
  if(!child||f.owner!==designOwner()||f.revision!==d.revision)return fail('The relationship changed. Reopen it before saving.');
- if(child.parent===f.parent){closeModal();return;}
+ if(!/^structure-out-(left|right|top|bottom)$/.test(f.sourceHandle)||!/^structure-in-(left|right|top|bottom)$/.test(f.targetHandle))return fail('Choose valid origin and destination connectors.');
+ if(f.anchorSnapshot!==JSON.stringify(structureRoute(d,child)))return fail('The connector changed. Reopen its current settings.');
+ if(child.parent===f.parent){const c=canvasState();if(f.sourceHandle===c.anchors['contains-'+child.id].sourceHandle&&f.targetHandle===c.anchors['contains-'+child.id].targetHandle){closeModal();return;}recordDesign();c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};save();closeModal();render();return;}
  const candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=f.parent;
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
- recordDesign();child.parent=f.parent;designChanged();closeModal();render();canvasAnnounce('Containment updated. User-flow connections and existing source were preserved.');
+ recordDesign();child.parent=f.parent;const c=canvasState();if(child.parent)c.anchors['contains-'+child.id]={source:child.parent,target:child.id,sourceHandle:f.sourceHandle,targetHandle:f.targetHandle};designChanged();closeModal();render();canvasAnnounce('Containment updated. User-flow connections and existing source were preserved.');
 }

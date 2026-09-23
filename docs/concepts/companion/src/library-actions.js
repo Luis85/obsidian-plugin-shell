@@ -20,7 +20,7 @@ function handleLibraryAction(action,value){
   }
   case 'library-pick':{const [node,id]=value.split(':');beginLibraryBrick(node,id);break;}
   case 'library-open':productUi.component=value;libraryUi.filter='all';productUi.filter='';closeModal();setView('components');break;
-  case 'library-manage':libraryUi.returnNode=value||designUi.selected;libraryUi.filter='bricks';productUi.filter='';closeModal();setView('components');break;
+  case 'library-manage':libraryUi.returnNode=value||designUi.selected;libraryUi.filter='all';productUi.filter='';closeModal();setView('components');break;
   case 'library-return':designUi.selected=libraryUi.returnNode||designUi.selected;setView('sitemap');revealDesignSelection();break;
   case 'library-upgrade':beginBrickUpgrade(value);break;
   case 'library-upgrade-save':applyBrickUpgrade();break;

@@ -40,7 +40,7 @@ function referenceEditorLibrary(){
  <div id="ref-library-list">${referenceLibraryItems(q)}</div></div>`;
 }
 function referenceLibraryItems(q=''){
- return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&(c.name+' '+c.contentSpec.title).toLowerCase().includes(q)).map(c=>`<button class="ref-library-item" data-action="ref-block-add" data-value="${c.id}" data-group="${BRICK_KINDS[c.contentSpec.kind].group}"><span>${referenceSketch(c.contentSpec.kind)}</span><strong>${esc(c.contentSpec.title)}<small>${esc(c.name)} · v${esc(c.version)}</small></strong>${icon('plus')}</button>`).join('')||'<p>No matching components.</p>';
+ return design().library.filter(c=>isBrickComponent(c)&&c.status!=='deprecated'&&componentSearchText(c).includes(q)).map(c=>`<button class="ref-library-item" data-action="ref-block-add" data-value="${c.id}" data-group="${BRICK_KINDS[c.contentSpec.kind].group}"><span>${referenceSketch(c.contentSpec.kind)}</span><strong>${esc(c.contentSpec.title)}<small>${esc(c.name)} · v${esc(c.version)}</small></strong>${icon('plus')}</button>`).join('')||'<p>No matching components.</p>';
 }
 function referenceContentDialog(){
  const f=referenceUi.content,n=design().nodes.find(n=>n.id===f?.node);

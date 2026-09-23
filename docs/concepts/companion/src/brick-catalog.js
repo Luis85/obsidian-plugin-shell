@@ -17,6 +17,8 @@ const BRICK_KINDS={
  notice:{label:'Status / recovery',group:'feedback',help:'Plan progress, failure and recovery communication.'}
 };
 const BRICK_GROUPS={navigation:'Navigation',content:'Content',data:'Data',input:'Input',action:'Action',feedback:'Feedback'};
+Object.assign(BRICK_KINDS,{"hero": {"label": "Hero / introduction", "group": "content", "help": "Plan hero / introduction content and behavior."}, "features": {"label": "Feature grid", "group": "content", "help": "Plan feature grid content and behavior."}, "pricing": {"label": "Pricing plans", "group": "data", "help": "Plan pricing plans content and behavior."}, "testimonials": {"label": "Testimonials", "group": "content", "help": "Plan testimonials content and behavior."}, "faq": {"label": "Accordion / FAQ", "group": "content", "help": "Plan accordion / faq content and behavior."}, "footer": {"label": "Footer links", "group": "navigation", "help": "Plan footer links content and behavior."}, "gallery": {"label": "Image gallery", "group": "content", "help": "Plan image gallery content and behavior."}, "breadcrumb": {"label": "Breadcrumbs", "group": "navigation", "help": "Plan breadcrumbs content and behavior."}, "sidebar": {"label": "Application navigation", "group": "navigation", "help": "Plan application navigation content and behavior."}, "tabs": {"label": "Tabs", "group": "navigation", "help": "Plan tabs content and behavior."}, "metrics": {"label": "Metric summary", "group": "data", "help": "Plan metric summary content and behavior."}, "timeline": {"label": "Activity timeline", "group": "data", "help": "Plan activity timeline content and behavior."}, "calendar": {"label": "Calendar", "group": "data", "help": "Plan calendar content and behavior."}, "upload": {"label": "File upload", "group": "input", "help": "Plan file upload content and behavior."}, "profile": {"label": "Profile summary", "group": "data", "help": "Plan profile summary content and behavior."}, "code": {"label": "Code editor", "group": "input", "help": "Plan code editor content and behavior."}, "chat": {"label": "Conversation", "group": "content", "help": "Plan conversation content and behavior."}, "progress": {"label": "Step progress", "group": "feedback", "help": "Plan step progress content and behavior."}});
+const COMPONENT_HEIGHTS={"hero": 112, "features": 106, "pricing": 112, "testimonials": 88, "faq": 90, "footer": 60, "gallery": 98, "breadcrumb": 42, "sidebar": 104, "tabs": 48, "metrics": 74, "timeline": 104, "calendar": 112, "upload": 90, "profile": 86, "code": 106, "chat": 106, "progress": 64};
 const BRICK_LIMITS={perSurface:24,total:400,title:100,purpose:800,content:4000};
 const brickUi={form:null,error:'',selected:null,node:null,query:'',move:null,drag:null};
 function canHaveBricks(n){return !!n&&['view','page','modal','settings'].includes(n.kind);}
@@ -25,7 +27,7 @@ function brickDisplay(d=design()){return d.canvas?.brickDisplay||'wireframes';}
 function brickSurfaceSize(n,d=design()){
  const mode=brickDisplay(d);
  if(mode==='structure'||!canHaveBricks(n))return {width:MAP_SIZE.w,height:MAP_SIZE.h};
- return {width:MAP_SIZE.w,height:110+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+4,0)};
+ return {width:MAP_SIZE.w,height:128+bricksOf(n).reduce((sum,b)=>sum+referenceBrickHeight(b.kind,mode)+5,0)};
 }
 function freshBrickId(d){let id;do{id='brick-'+d.nextId++;}while(d.nodes.some(n=>bricksOf(n).some(b=>b.id===id)));return id;}
 function blankBrick(d,n,kind='text'){

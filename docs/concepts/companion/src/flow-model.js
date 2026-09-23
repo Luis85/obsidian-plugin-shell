@@ -2,7 +2,7 @@
 const interactionUi={componentQuery:'',binding:null,form:null,error:'',settingsOwner:null};
 function validIntentFields(n){return (n.intent===undefined||typeof n.intent==='string'&&n.intent.length<=1000)&&(n.goals===undefined||Array.isArray(n.goals)&&n.goals.length<=12&&n.goals.every(g=>typeof g==='string'&&g.trim().length>0&&g.length<=300));}
 function validLinkFields(e){return Object.hasOwn(LINK_TYPES,e.kind)&&(e.condition===undefined||typeof e.condition==='string'&&e.condition.length<=1000)&&(e.description===undefined||typeof e.description==='string'&&e.description.length<=1500)&&(e.sourceHandle===undefined||['out-right','out-bottom'].includes(e.sourceHandle))&&(e.targetHandle===undefined||['in-left','in-top'].includes(e.targetHandle));}
-function validCanvasPreferences(p){return p===undefined||p&&p.schema===1&&['pan','zoom','page'].includes(p.wheel)&&['panOnDrag','pinch','grid','labels'].every(k=>typeof p[k]==='boolean')&&['bezier','smoothstep','straight'].includes(p.curve);}
+function validCanvasPreferences(p){return p===undefined||p&&p.schema===1&&['pan','zoom','page'].includes(p.wheel)&&['panOnDrag','pinch','grid','labels'].every(k=>typeof p[k]==='boolean')&&['bezier','smoothstep','straight'].includes(p.curve)&&['guides','guideSnap'].every(k=>p[k]===undefined||typeof p[k]==='boolean');}
 function canvasPreferences(){return canvasState().interaction;}
 function allowedLinkKinds(n){if(!n||n.kind==='group')return [];return n.kind==='modal'?['open','data']:n.kind==='settings'?['configure','data']:n.kind==='action'?['execute','data']:['navigate','return','conditional','data'];}
 function nForFocus(){return selectedNode();}
@@ -64,15 +64,8 @@ function saveSurfaceIntent(){
  if(JSON.stringify([n.intent||'',n.goals||[]])===JSON.stringify([next.intent,next.goals])){closeModal();return;}
  recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();designUi.selected=n.id;canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
 }
-function beginBindingReview(nodeId,componentId){
- if(isBrickComponent(design().library.find(c=>c.id===componentId))){beginLibraryBrick(nodeId,componentId);return;}
- if(state.activeRun){notify('Finish the active simulation before placing a component.');return;}
- const n=design().nodes.find(n=>n.id===nodeId),c=design().library.find(c=>c.id===componentId);
- if(!n||!['view','page','modal'].includes(n.kind)||!c||c.status==='deprecated'){notify('Choose a view, screen or dialog and an available library component.');return;}
- designUi.selected=n.id;const slots=componentSlots(n),slot=slots.find(slot=>!n.components.some(b=>b.id===c.id&&b.slot===slot));
- if(!slot){notify('This component is already placed in every available region.');return;}
- beginProductForm('product-bind',{id:c.id,node:n.id,slot});
-}
+function beginBindingReview(nodeId,componentId){beginLibraryBrick(nodeId,componentId);}
+
 function reviewExistingBinding(value){
  const [node,id,slot]=value.split(':'),n=design().nodes.find(n=>n.id===node),binding=n?.components.find(b=>b.id===id&&b.slot===slot);if(!binding)return;
  interactionUi.binding={owner:designOwner(),revision:design().revision,node,id,originalSlot:slot,slot,version:binding.version};interactionUi.error='';showModal('flow-binding');

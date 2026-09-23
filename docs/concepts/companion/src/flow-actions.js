@@ -4,7 +4,7 @@ function handleFlowAction(action,value){
  switch(action){
  case 'flow-settings':interactionUi.settingsOwner=designOwner();showModal('flow-settings');break;
  case 'flow-settings-reset':design().canvas.interaction=defaultCanvasPreferences();canvasState().snap=true;save();refreshFlowConfig();redrawModal();break;
- case 'flow-components':designUi.selected=value;canvasUi.edge=null;canvasUi.inspector='components';interactionUi.componentQuery='';render();break;
+ case 'flow-components':designUi.selected=value;canvasUi.edge=null;canvasUi.inspector='bricks';interactionUi.componentQuery='';render();break;
  case 'flow-place-component':{const [node,id]=value.split(':');beginBindingReview(node,id);break;}
  case 'flow-binding':reviewExistingBinding(value);break;
  case 'flow-binding-save':saveBindingRegion();break;

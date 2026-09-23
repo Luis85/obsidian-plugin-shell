@@ -6,7 +6,7 @@ function brickSpec(kind,title,purpose='',content='',region='content'){
  return {schema:1,kind,title,purpose,content,region};
 }
 function defaultBrickComponents(){
- return Object.entries(BRICK_KINDS).map(([kind,s])=>({
+ return Object.entries(BRICK_KINDS).filter(([kind])=>!COMPONENT_HEIGHTS[kind]).map(([kind,s])=>({
   id:'content-'+kind,name:kind[0].toUpperCase()+kind.slice(1)+'Block',category:BRICK_GROUPS[s.group],
   preview:'brick',description:s.help,props:'title:string',events:'',slots:'content',variants:'default',
   a11y:'Name this content region. Preserve reading order and keyboard access.',
@@ -42,7 +42,7 @@ function ensureBrickLibrary(d){
   d.librarySchema=2;
  }
  for(const n of d.nodes)for(const b of bricksOf(n))if(!b.definition)attachBrickDefinition(b,brickDefinition(d,b.kind));
- return d;
+ return adoptUnifiedLibrary(d);
 }
 function libraryBrickRefs(d,id){
  return d.nodes.flatMap(node=>bricksOf(node).filter(brick=>brick.definition===id).map(brick=>({node,brick})));

@@ -28,7 +28,7 @@ function failBrick(message){brickUi.error=message;redrawModal();return false;}
 function ensureBrickBinding(d,n,b){
  if(!b.component)return;
  if(!['view','page','modal'].includes(n.kind))throw Error('Native settings do not mount custom Vue components in this concept.');
- const c=d.library.find(c=>c.id===b.component);if(!c||isBrickComponent(c)||c.status==='deprecated')throw Error('Choose an available component from the library.');
+ const c=d.library.find(c=>c.id===b.component);if(!c||c.status==='deprecated')throw Error('Choose an available component from the library.');
  const binding=n.components.find(x=>x.id===b.component&&x.slot===b.region);
  if(binding&&binding.version!==c.version)throw Error('Review the existing component version in the library before mapping it.');
  if(!binding){if(n.components.length>=20)throw Error('This surface already has 20 component placements.');n.components.push({id:c.id,slot:b.region,version:c.version});}

@@ -21,38 +21,36 @@ function referenceTool(label,action,value,ic,extra=''){
  return `<button class="ref-tool" type="button" data-action="${action}" data-value="${esc(value||'')}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}>${referenceIcon(ic)}<span class="ref-tooltip">${esc(label)}</span></button>`;
 }
 function referenceBrickHeight(kind,mode='wireframes'){
- if(mode!=='wireframes')return 40;
+ if(mode!=='wireframes')return 40;if(COMPONENT_HEIGHTS[kind])return COMPONENT_HEIGHTS[kind];
  return {navigation:44,toolbar:50,heading:62,text:80,list:114,table:108,board:90,detail:100,form:94,chart:96,media:102,actions:68,empty:68,notice:58}[kind]||76;
 }
 function validReferenceSections(sections){
- if(sections===undefined)return true;
- if(!Array.isArray(sections)||sections.length>12)return false;
- const ids=new Set(),assigned=new Set();
- return sections.every(s=>s&&typeof s.id==='string'&&/^section-[1-9][0-9]*$/.test(s.id)&&!ids.has(s.id)&&ids.add(s.id)&&
-  typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=80&&Array.isArray(s.roots)&&s.roots.length<=60&&
-  s.roots.every(id=>typeof id==='string'&&id.length<=120&&!assigned.has(id)&&assigned.add(id))&&
-  Object.keys(s).every(k=>['id','name','roots'].includes(k)));
+ if(sections===undefined)return true;if(!Array.isArray(sections)||sections.length>12)return false;
+ const ids=new Set(),assigned=new Set(),coord=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=50000&&Math.abs(p.y)<=50000;
+ return sections.every(s=>s&&typeof s.id==='string'&&/^section-[1-9][0-9]*$/.test(s.id)&&!ids.has(s.id)&&ids.add(s.id)&&typeof s.name==='string'&&s.name.trim().length>0&&s.name.length<=80&&Array.isArray(s.roots)&&s.roots.length<=60&&(s.members===undefined||Array.isArray(s.members)&&s.members.length<=60)&&(s.members||s.roots).every(id=>typeof id==='string'&&id.length<=120&&!assigned.has(id)&&assigned.add(id))&&(s.anchor===undefined||coord(s.anchor))&&Object.keys(s).every(k=>['id','name','roots','members','anchor'].includes(k)));
 }
+
 function referenceSections(d){
- const roots=d.nodes.filter(n=>!n.parent),stored=d.canvas?.sections||[],claimed=new Set(stored.flatMap(s=>s.roots));
- return [{id:'main',name:'Main workspace',roots:roots.filter(n=>!claimed.has(n.id)).map(n=>n.id)},...stored].map(s=>({...s,roots:s.roots.filter(id=>roots.some(n=>n.id===id))}));
+ const known=new Set(d.nodes.map(n=>n.id)),stored=(d.canvas?.sections||[]).map(s=>({...s,members:sectionMembers(d,s).filter(id=>known.has(id))}));
+ const claimed=new Set(stored.flatMap(s=>s.members));
+ return [{id:'main',name:'Main workspace',roots:[],members:d.nodes.filter(n=>!claimed.has(n.id)).map(n=>n.id)},...stored].map(s=>({...s,roots:s.members}));
 }
+
 function sectionLayouts(d){
  const out=Object.create(null),bands=[];let y=72;
- for(const section of referenceSections(d)){
-  const ids=new Set(section.roots.flatMap(id=>[...nodeDescendants(d,id)]));
-  const sub={...d,nodes:d.nodes.filter(n=>ids.has(n.id))};
+ for(const s of referenceSections(d)){
+  const nodes=d.nodes.filter(n=>s.members.includes(n.id)),sub={...d,nodes:nodes.map(n=>({...n,parent:nodes.some(x=>x.id===n.parent)?n.parent:null}))};
   const positions=layoutPositions(sub,'vertical');
-  const height=sub.nodes.length?Math.max(...sub.nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+64:160;
-  for(const n of sub.nodes)out[n.id]={x:positions[n.id].x,y:positions[n.id].y+y};
-  bands.push({...section,y,height,width:Math.max(740,...sub.nodes.map(n=>positions[n.id].x+MAP_SIZE.w+50))});
-  y+=height+96;
+  const height=nodes.length?Math.max(...nodes.map(n=>positions[n.id].y+brickSurfaceSize(n,d).height))+104:300;
+  for(const n of nodes)out[n.id]={x:positions[n.id].x+48,y:positions[n.id].y+y};
+  bands.push({...s,y,height,width:Math.max(420,...nodes.map(n=>positions[n.id].x+MAP_SIZE.w+96))});y+=height+96;
  }
  return {positions:out,bands};
 }
+
 function openSectionEditor(id=null){
  const s=(canvasState().sections||[]).find(s=>s.id===id);
- referenceUi.sectionForm={id:s?.id||null,name:s?.name||'New section',roots:[...(s?.roots||[])],owner:designOwner(),fingerprint:JSON.stringify(canvasState().sections||[]),revision:design().revision};
+ referenceUi.sectionForm={id:s?.id||null,name:s?.name||'New section',roots:[...(s?sectionMembers(design(),s):[])],owner:designOwner(),fingerprint:JSON.stringify(canvasState().sections||[]),revision:design().revision};
  referenceUi.sectionError='';showModal('ref-section');
 }
 function saveSectionEditor(remove=false){
@@ -64,11 +62,11 @@ function saveSectionEditor(remove=false){
  const sections=designCopy(c.sections||[]);
  if(!f.id&&sections.length>=12)return fail('This concept supports up to 12 sections.');
  let id=f.id;if(!id){let i=1;while(sections.some(s=>s.id==='section-'+i))i++;id='section-'+i;}
- const next=sections.filter(s=>s.id!==id).map(s=>({...s,roots:remove?s.roots:s.roots.filter(r=>!f.roots.includes(r))}));
- if(!remove)next.splice(f.id?Math.max(0,sections.findIndex(s=>s.id===f.id)):next.length,0,{id,name:f.name.trim(),roots:f.roots});
+ const next=sections.filter(s=>s.id!==id).map(s=>({...s,roots:[],members:remove?sectionMembers(d,s):sectionMembers(d,s).filter(r=>!f.roots.includes(r))}));
+ if(!remove)next.splice(f.id?Math.max(0,sections.findIndex(s=>s.id===f.id)):next.length,0,{id,name:f.name.trim(),roots:[],members:f.roots,anchor:sections.find(s=>s.id===id)?.anchor||{x:Math.max(48,...sectionZones(d).map(z=>z.x+z.width+80)),y:72}});
  if(!validReferenceSections(next))return fail('Section assignments are not valid.');
  modalOriginal=null;closeModal();
- canvasCommit(c=>{c.sections=next;c.layout='sections';c.positions=layoutPositions(d,'sections');c.custom=false;c.fitted=false;c.arrangedFor=canvasStructure(d);},remove?'Section removed. All views and content were retained.':'Section saved. Plugin structure and source approval are unchanged.');
+ canvasCommit(c=>{c.sections=next;c.fitted=false;},remove?'Section removed. All views and content were retained.':'Section saved. Plugin structure and source approval are unchanged.');
 }
 function referencePaneMode(panel){referenceUi.panel=referenceUi.panel===panel?'none':panel;canvasUi.outline=referenceUi.panel==='structure';render();}
 function paintReferenceChrome(){
@@ -97,8 +95,5 @@ function paintReferenceChrome(){
    if(place){toolbar.style.left=place.x+'px';toolbar.style.top=place.y+'px';}else toolbar.hidden=true;
   }
  }
- const layer=document.getElementById('ref-section-layer');
- if(layer){
-  const c=canvasState();layer.innerHTML=c.layout==='sections'?sectionLayouts(design()).bands.map(s=>`<div class="ref-section-line" style="top:${s.y*c.zoom+c.pan.y}px;left:${c.pan.x+36*c.zoom}px;width:${s.width*c.zoom}px"><span>${esc(s.name)}</span>${s.id!=='main'?referenceTool('Edit section','ref-section',s.id,'properties'):''}</div>`).join(''):'';
- }
+ paintSpatialLayers();
 }

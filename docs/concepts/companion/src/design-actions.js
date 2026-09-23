@@ -23,7 +23,7 @@ function handleDesignAction(action,value){
   case 'design-duplicate':{
    if(d.nodes.length>=DESIGN_LIMITS.nodes){notify('The concept supports up to 60 surfaces.');break;}
    const original=d.nodes.find(n=>n.id===value);recordDesign();let slug=original.slug+'-copy',i=2;while(d.nodes.some(n=>n.slug===slug))slug=original.slug+'-copy-'+i++;
-   const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
+   const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);canvasState(d);assignCardToSection(d,copy.id,sectionForCard(d,original.id));designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
   }
   case 'design-remove':showModal('design-remove',value);break;
   case 'design-remove-confirm':{if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}
