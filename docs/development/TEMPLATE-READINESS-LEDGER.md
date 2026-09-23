@@ -1,5 +1,17 @@
 # Template readiness ledger
 
+The subsequent [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
+[execution record](../testing/ACCEPTANCE-CLOSURE.md) own the current assertion
+audit and results. The requirement inventory and earlier candidate figures below
+remain historical context; unlinked evidence is not absent implementation.
+
+Current frozen code `e14c1c303df75a80a8a287ee8d8a66d4efb9b738` has a complete
+Linux evidence session with **2 verified / 54 partial / 40 not-run**: AC-06 joins
+AC-03 as verified, while audited links advance 41 previously unlinked cases to partial.
+The [96-row finish ledger](ACCEPTANCE-CLOSURE-LEDGER.md) retains missing clauses
+and modes. Both historical native failure classes and a separate Windows
+production-coverage timeout remain unresolved. Full-template release stays blocked.
+
 Reviewed 2026-09-23 against merged iteration-four source and its retained
 [execution record](../testing/ITERATION-FOUR.md). This is a requirement inventory,
 not a replacement acceptance report or permission to release. The

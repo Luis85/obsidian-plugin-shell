@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-archive-cleanup-failure-and-diagnostic-correction",
+  "sourceHead": "7a292e40dde61dc6ea4134caa9b5b88093fc3cb7",
+  "run": {
+    "id": 35916883304,
+    "jobId": 107370549388,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35916883304/job/107370549388",
+    "conclusion": "failure",
+    "artifactId": 10775662546,
+    "archiveSha256": "308db9ba0e1c1aed15a2eafa4983d166e50d339ad71cbf56601f7c847a4298dd"
+  },
+  "observation": {
+    "test": "[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unapproved archived source",
+    "elapsedMs": 61771.4366,
+    "errorCode": "EBUSY",
+    "operation": "rmdir",
+    "location": "owned temporary Git staging directory",
+    "bodyOutcome": "unknown; command receipts absent",
+    "priorTimeout": "not established",
+    "rootCause": "unknown",
+    "log": {
+      "file": "reports/acceptance-closure/evidence-head-showcase-failed.log",
+      "bytes": 246720,
+      "sha256": "13f2be32c6a162a3efff5901d9c1a9256494a215bb86f16a562f5f502770fc4c"
+    }
+  },
+  "controls": [
+    {
+      "hypothesis": "A surviving owned descendant explains the lock",
+      "outcome": "not demonstrated; recorded descendant was already stopped after direct timeout",
+      "report": {
+        "file": "reports/acceptance-closure/analyzer-owned-child-repro.json",
+        "bytes": 1479,
+        "sha256": "95beff16d968f8efb4fc3608a0a6b13613dd10333657b8c8956ed0e417bb2dd8"
+      },
+      "cleanup": "completed"
+    },
+    {
+      "hypothesis": "An owned locked directory can expose error masking",
+      "outcome": "control itself failed final cleanup; planned structured report was not written",
+      "stderr": {
+        "file": "reports/acceptance-closure/analyzer-error-masking-repro-stderr.log",
+        "bytes": 457,
+        "sha256": "b2f33c6728824bbdb2cc6f54c1551caaa4b86ffd9445fc8bac66fbe03519a562"
+      },
+      "stdout": {
+        "file": "reports/acceptance-closure/analyzer-error-masking-repro-stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "remaining": "contained .qualification/cleanup-masking-repro-SeD42d",
+      "processInspection": "No known fixture-command process remained in subsequent read-only inspection",
+      "cleanupReview": {
+        "status": "rejected",
+        "reason": "blocked by policy",
+        "specificReason": "not supplied",
+        "action": "manual recursive cleanup of the contained residual scratch",
+        "retry": "not attempted"
+      }
+    }
+  ],
+  "correction": {
+    "scope": "Archive test fixture only; diagnostic and error preservation, no claim of fixing original lock/stall",
+    "defaultTimeoutMs": 60000,
+    "defaultMaxBufferBytes": 12582912,
+    "spawnBehavior": "unchanged",
+    "automaticRetries": 0,
+    "assertions": "all prior analyzer positive and negative assertions preserved",
+    "changes": [
+      "write unique command-start/result receipts",
+      "distinguish work completion from cleanup failure",
+      "preserve primary and cleanup errors together",
+      "retain child error and command outcome if receipt writing fails",
+      "clean acquired scratch when diagnostic setup fails"
+    ],
+    "verification": {
+      "helperControls": {
+        "passed": 5,
+        "failed": 0
+      },
+      "actualGates": {
+        "passed": 3,
+        "failed": 0,
+        "archiveDurationMs": 36910
+      },
+      "archiveAttempt": "reports/analyzer-archive/f27ee38b-c198-405f-b619-856e5e5c5c36",
+      "commandReceipts": 10,
+      "independentReview": "both initial reporting-failure findings corrected and re-reviewed"
+    }
+  },
+  "qualification": "A new frozen candidate is required after this executable-input change. Previous e14 candidate/consumer evidence remains retained separately."
+}

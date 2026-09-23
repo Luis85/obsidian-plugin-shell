@@ -1,3 +1,4 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { join } from 'node:path';
 import { nativeCommand as command } from './native-command.mjs';
@@ -8,6 +9,7 @@ export async function assertDiagnostics(page, identity) {
   expect(entries).toEqual([]);
 }
 export async function qualifyHeaders(page, context, report, output, notePath, identity) {
+  noteNativePhase(report, 'native-headers');
   const view = identity.viewSelector; const marker = identity.headerMarker;
   const owned = page.locator(view).first();
   await owned.getByRole('button', { name: 'Preferences', exact: true }).click();
@@ -54,7 +56,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
     expect(await foreignStyles()).toEqual(before);
   }
   report.checks.push('native-command-palette-repeat-toggle-all-leaves-foreign-isolation');
-  report.phase = 'theme-transitions';
+  noteNativePhase(report, 'theme-transitions');
   report.themeTransitions = [];
   // Native host stylesheet transitions; each leaf retains its independent view state.
   for (const theme of ['dark', 'light']) {
@@ -79,7 +81,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   }
   await page.evaluate(() => window.require('electron').webFrame.setZoomFactor(1));
   report.checks.push('native-electron-125-150-percent-zoom-no-clipped-language-control');
-  report.phase = 'popout-create';
+  noteNativePhase(report, 'popout-create');
   // The host may move this exact ItemView into another document rather than remount.
   const pagesBefore = new Set(context.pages());
   await owned.getByRole('button', { name: 'View actions', exact: true }).click();
@@ -90,13 +92,13 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
     return !!popout && await popout.locator(view).count() === 1;
   }, { timeout: 15000 }).toBe(true);
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
-  report.phase = 'popout-toggle';
+  noteNativePhase(report, 'popout-toggle');
   await popout.screenshot({ path: join(output, 'native-popout-created.png') });
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeVisible();
   await command(page, 'Toggle Obsidian view header');
   await expect(popout.locator(`${view} > .view-header`)).toBeHidden();
-  report.phase = 'popout-theme';
+  noteNativePhase(report, 'popout-theme');
   await setNativeTheme(popout, context, 'light', output);
   await expect(popout.locator(`${view} [data-plugin-ui]`)).toHaveClass(/(?:^|\s)light(?:\s|$)/);
   await setNativeTheme(popout, context, 'dark', output);
@@ -104,7 +106,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   await popout.screenshot({ path: join(output, 'native-popout-header-hidden.png') });
   await assertDiagnostics(page, identity);
   report.checks.push('native-popout-inherits-preference-and-live-toggle');
-  report.phase = 'popout-close';
+  noteNativePhase(report, 'popout-close');
   // Close by the actual owned view menu; its cleanup must not affect the other view.
   await popout.getByRole('button', { name: 'View actions', exact: true }).click();
   await popout.locator('.menu-item').filter({ hasText: 'Close this view' }).click();
@@ -112,7 +114,7 @@ export async function qualifyHeaders(page, context, report, output, notePath, id
   await assertDiagnostics(page, identity);
   // Compare foreign controls within the same theme, not across a legitimate host theme change.
   const beforeUnload = await foreignStyles();
-  report.phase = 'plugin-unload';
+  noteNativePhase(report, 'plugin-unload');
   // Record references before unload because Obsidian itself may replace view objects.
   const captured = await page.evaluate(({ selector, marker }) => {
     window.__ownedHeadersBeforeUnload = Array.from(document.querySelectorAll(selector));

@@ -1,6 +1,11 @@
 # Obsidian Plugin Shell
 
-**Executable qualification milestone, version 0.4.0.**
+**Acceptance closure and native reliability milestone, version 0.4.0.**
+
+The [closure plan](docs/development/ACCEPTANCE-CLOSURE-PLAN.md) audits all 96
+legacy cases against actual assertions and required modes. Current results belong
+to the [closure execution record](docs/testing/ACCEPTANCE-CLOSURE.md); the previous
+qualification and its failed native attempts remain retained separately.
 
 Executable qualification now adds input-bound framework evidence, case-specific
 acceptance reports, measured production maintainability, and explicit native
