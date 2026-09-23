@@ -1,15 +1,20 @@
 # Acceptance closure execution record
 
 Frozen corrected code: `e2758ae47723cc7496fabd0074b76b03db5c4ee2`, development version 0.4.0.
-[PR #11](https://github.com/Luis85/obsidian-plugin-shell/pull/11), branch
-`codex/acceptance-closure`, now targets **main**. It began stacked on then-open
+[Code PR #11](https://github.com/Luis85/obsidian-plugin-shell/pull/11) was merged
+externally at 21:41:14 UTC as `fc3400473d4183d3668d8525c6d5ed18a9b4667d`,
+before the final evidence commit was pushed. The final records are delivered in
+[evidence PR #12](https://github.com/Luis85/obsidian-plugin-shell/pull/12), branch
+`codex/acceptance-closure`, targeting **main**. The work began stacked on then-open
 PR #10 at `b426bbdddd4d966fd6ce430996d2542bd7511aaf`. PR #10 was merged externally
 at 19:52:23 UTC while this task was running. After confirming the merge and the
 unchanged baseline tree, the clean main checkout was fast-forwarded to
-`3d9a46046e01509b5285c5d986d54e8a7be2c689` and PR #11 was retargeted. The original
+`3d9a46046e01509b5285c5d986d54e8a7be2c689` and PR #11 was retargeted. After the
+external PR #11 merge, clean main was fast-forwarded again to `fc340047`;
+its tree exactly equals the qualified code checkpoint. The original
 qualification worktree/evidence remains preserved as specifically requested.
-The evidence-only documentation commit follows this frozen code; no runtime
-assets were rebuilt for that commit.
+The evidence-only commits follow this frozen code; no runtime assets were rebuilt
+for those commits. The active worktree contains the unmerged evidence follow-up.
 No merge, tag, publication, listing or permission change is authorized.
 
 ## Acceptance results and exact advancement
