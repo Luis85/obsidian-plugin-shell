@@ -7,7 +7,7 @@ and assertion inventory, not an execution report. Current observations require
 the complete trusted producer session for the final source and policy bytes.
 The historical comparison is **1 verified / 14 partial / 81 not-run** at
 `fd59c80195dee549ddbaaa23c28a06c091b18274`; it is not implementation coverage.
-At frozen code `e14c1c303df75a80a8a287ee8d8a66d4efb9b738`, the complete Linux
+At frozen code `e2758ae47723cc7496fabd0074b76b03db5c4ee2`, the complete Linux
 producer session reports **2 verified / 54 partial / 40 not-run**, with all 96
 crosswalk links observed. AC-03 and AC-06 are verified; a separate Windows CI
 timeout remains unresolved. The [execution record](../testing/ACCEPTANCE-CLOSURE.md)

@@ -1,13 +1,6 @@
 # Acceptance closure execution record
 
-**Follow-up qualification pending:** the later evidence-head Windows showcase
-check exposed missing archive-command diagnostics and a cleanup `EBUSY`. A narrow
-test-fixture correction now preserves command outcomes, reporting failures and
-primary/cleanup errors without changing limits or retries. The accepted results
-below remain bound to `e14c1c3`; they do not qualify the corrected source until its
-new frozen-candidate run completes. Earlier reports/assets are retained.
-
-Frozen code: `e14c1c303df75a80a8a287ee8d8a66d4efb9b738`, development version 0.4.0.
+Frozen corrected code: `e2758ae47723cc7496fabd0074b76b03db5c4ee2`, development version 0.4.0.
 [PR #11](https://github.com/Luis85/obsidian-plugin-shell/pull/11), branch
 `codex/acceptance-closure`, now targets **main**. It began stacked on then-open
 PR #10 at `b426bbdddd4d966fd6ce430996d2542bd7511aaf`. PR #10 was merged externally
@@ -15,24 +8,24 @@ at 19:52:23 UTC while this task was running. After confirming the merge and the
 unchanged baseline tree, the clean main checkout was fast-forwarded to
 `3d9a46046e01509b5285c5d986d54e8a7be2c689` and PR #11 was retargeted. The original
 qualification worktree/evidence remains preserved as specifically requested.
-The evidence-only documentation
-commit follows this frozen code; no runtime assets were rebuilt for that commit.
+The evidence-only documentation commit follows this frozen code; no runtime
+assets were rebuilt for that commit.
 No merge, tag, publication, listing or permission change is authorized.
 
 ## Acceptance results and exact advancement
 
-The [candidate workflow](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913168402)
+The [candidate workflow](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589427)
 passed. Read-only audit rehashed all 32 raw receipt files in its ten registered
 producer packets, reparsed framework results, checked repeated semantic inventories,
 and independently reproduced its complete acceptance report exactly. Source and
-policy input digest is `5b029e21c04080bd7b64f8672421afb1e932ed47b7f6036c1bae086b3a24e3ec`.
+policy input digest is `66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811`.
 The [compact audit](evidence/acceptance-closure-candidate.json) retains every row,
 mode, transition, source/asset identity and remaining classification.
 
 | Complete producer session | Verified | Partial | Not-run |
 | --- | ---: | ---: | ---: |
 | Previous qualified `fd59c80195dee549ddbaaa23c28a06c091b18274` | 1 | 14 | 81 |
-| Current frozen `e14c1c3` | 2 | 54 | 40 |
+| Current frozen `e2758ae` | 2 | 54 | 40 |
 
 These are evidence-linkage counts, not implementation percentages. The previous
 counts were also recomputed from the retained original raw acceptance report.
@@ -76,13 +69,13 @@ not release authorization credentials.
 
 The candidate performed a fresh exact-lock `npm ci --strict-allow-scripts` using
 Node **24.21.0** and npm **11.19.1**, then the real
-`npm run release:rehearse -- --commit e14c1c303df75a80a8a287ee8d8a66d4efb9b738 --version 0.4.0`.
+`npm run release:rehearse -- --commit e2758ae47723cc7496fabd0074b76b03db5c4ee2 --version 0.4.0`.
 That command runs full `npm run verify` and retains its accepted build once.
 
 | Command/scope | Actual result |
 | --- | --- |
 | Full `npm run verify` | Passed static/types/linters/analyzer/repository/presentation/source/catalog/token/artifact gates, tooling, both coverage gates, retained baseline and harness build. |
-| Trusted tooling producer inside verify | 173 cases: 169 passed, four exact Windows-only skips on Linux; zero failures. Skips establish no acceptance link. |
+| Trusted tooling producer inside verify | 178 cases: 174 passed, four exact Windows-only skips on Linux; zero failures. Skips establish no acceptance link. |
 | `evidence run runtime`, three fresh processes | 312/312 in 54 files each; identical semantic inventories, zero retries. |
 | `test:coverage` and `evidence run coverage` | Both unchanged gates passed. All 97 production inputs: 99.46% lines, 97.43% statements, 97.52% functions, 94.93% branches. Independent domain/application/features floors passed. |
 | `check:maintainability` | 801 production functions, zero function findings; 33/4,393 duplicated eligible lines = 0.751195%. Four Vue template aggregate findings remain separately reported, not promoted to source-function qualification. |
@@ -90,7 +83,7 @@ That command runs full `npm run verify` and retains its accepted build once.
 | `evidence run browser` (actual Playwright served tests) | 35/35 in eight files; zero skips/failures/retries. |
 | `evidence run artifact` | Matching complete assets and provenance/size checks passed. |
 | `evidence run native`, three sessions | 31/31 each in isolated Linux Obsidian; zero recorded renderer errors or cleanup failures. |
-| Separate `test:native --allow-download --performance` | 31 checks; all 66 samples retained (six warmups, 60 measured), p95 9.10 ms initialization / 85.70 ms Items readiness. Shared-runner advisory, not controlled-reference certification. |
+| Separate `test:native --allow-download --performance` | 31 checks; all 66 samples retained (six warmups, 60 measured), p95 16.10 ms initialization / 102.30 ms Items readiness. Shared-runner advisory, not controlled-reference certification. |
 | `npm run check:security` | Live all-category audit passed with zero vulnerabilities. Nested ESLint 9 support remains a separate unresolved exception. |
 | Qualified `release:rehearse --check` on downloaded packet | Passed read-only source/lock/asset integrity validation; no rebuild or publication. |
 
@@ -110,12 +103,12 @@ remain preserved as development evidence rather than relabeled current execution
 | styles.css | 88547 | `3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7` |
 | manifest.json | 280 | `84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380` |
 
-Candidate record hash: `33b82299f9948fc3f7ae12f616434b6e26e0609f5dd629d43bbaba712944db39`.
+Candidate record hash: `809aaf261c9851612ffc51eb611df387c23d16b5af0be85baa7cbdab7d619474`.
 Downloaded qualified archive hash, independently matched to GitHub's digest:
-`72420d56630aea47ca4c14da93b0c7e1ff40648f7f96ca40c4996e7fbbb55c84`.
-Source ZIP: `5d2edd0b345e2df581ebf7b4d81a23848d1e964329034f963bfcb44a2e17ede5`.
-Installable ZIP: `3bc82f9830363aa1a1ee0bc2f2bee16f96fc62aafc8c6f234da6779f063bdb54`.
-The audit inspected 1,340 evidence archive entries, 601 source ZIP entries and
+`5507416317b61a7524587f2a91e47fbe0593e05f058f850b420f0b583b3232a7`.
+Source ZIP: `1bdd700c987e293878eccee2fbc8fa032a19d0c43efde5388c99a772583b8f93`.
+Installable ZIP: `39f44412a4e2cc3f2ba9bbbe8428806cee58d57f663ae51c48251267b6c6f7b9`.
+The audit inspected 1,365 evidence archive entries, 610 source ZIP entries and
 four plugin ZIP entries with no font-file entries.
 
 The three runtime asset hashes equal the prior qualified assets. This is explicit
@@ -137,8 +130,9 @@ received on the main renderer during `popout-close`; its GPU warning also occurs
 in a passing session and is not a causal discriminator.
 
 Current diagnostic timelines provide stable page IDs, driver receipt times and
-phase transitions. All four current native reports contain 25 events ending in
-observer disposal. Every canonical error still fails, and inconsistent diagnostic
+phase transitions. All four current native reports contain 27 events ending in
+observer disposal, including all five observed pages closing. Every canonical
+error still fails, and inconsistent diagnostic
 receipts are rejected. Renderer observation ends at CDP disconnect; subsequent
 host-process termination is outside that channel. Final already-received host
 logs are retained. The generated foundation driver now preserves separate attempts.
@@ -196,46 +190,54 @@ rerun of a failed product test.
 
 ## Generated consumer and archive
 
-The [direct frozen-source consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913168383)
-and separate [PR consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221382)
+The [direct corrected-source consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589679)
+and separate [PR consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593882)
 passed. The [consumer audit](evidence/acceptance-closure-consumer.json) rehashed
-19 raw producer receipts, 60 metric raw receipts and 1,934 individual corpus
-receipts; all six producer packets reparse consistently. These are independent
-modified/archive identities, not the base candidate's asset or acceptance claims.
+19 raw producer receipts, 60 metric raw receipts and 1,944 individual corpus
+receipts; all six packets reparse consistently. It additionally checked all 44
+uploaded source files against their final inventory. These modified/archive
+identities are separate from the base candidate's asset and acceptance claims.
 
 Atlas Notes 1.0.0 installs freshly, edits Bookmarks to a 100-character limit,
 adds a local Reminder maker, typed event/listener and plugin-data Rating,
 removes reviewed examples, then adds Reading. All five full verification stages
 passed both runtime coverage executions: initial 312 tests/54 files, edited
 325/65, removed 285/58, post-Reading 293/64, and literal archive 312/54. Each
-stage also passed the separate 52-case baseline three times. Served counts are
-35 before removal, two after removal and two in the final browser producer.
-Every count retains its actual log or structured-reporter scope in the audit.
+stage passed the separate 52-case baseline three times. Served counts are 35
+before removal, two after removal and two in the final browser producer.
 
 The final consumer retains 103 production inputs and unchanged independent
 business/coverage/maintainability floors. Its edited Bookmarks bytes remain
 `ba9b3f20d82192311eb7b409a36ef65037ac07a45fdaa87900f6d8dbff51fced`
-across the pre-removal receipt, source/metric snapshots and final downloaded file.
+across pre-removal receipt, source/metric snapshots and final downloaded bytes.
 Both new example-dependent acceptance tests are removed by the reviewed plan;
-the shared diagnostic helpers and their foundation-driver regressions survive.
+shared diagnostic helpers and their foundation-driver regressions survive.
+All five real archive-analysis attempts retained their 100 command-start/result
+receipts, completed their bodies and cleaned their scratch directories at the
+unchanged limits. This does not explain the earlier Windows lock.
 
 The literal source archive proves absent ancestor Git discovery, freshly adopts
 Archive Notes and executes setup/verify plus real runtime/artifact producers with
 `kind: archive` and null Git revision. Its assets have their own hashes; no archive
 or current consumer native execution is claimed. Final consumer acceptance remains
-0 verified / 16 partial / 80 not-run: absent example links stay unobserved rather
-than inheriting the base candidate's two verified rows.
+0 verified / 16 partial / 80 not-run: absent example links stay unobserved.
 
-The downloaded consumer archive SHA-256 is
-`a53ae1776153f36c9dc91a2463aa3106194a1c36b7fa96a99ff12ed74bb74312`.
-The first read-only audit invocation rejected ANSI-colored log formatting; its
-output remains retained. Correcting that ignored reader allowed the audit to
-complete; no consumer test, source or retained report was rerun or edited.
+The consumer archive SHA-256 is
+`1be3271299ae8380c02ebb582d0dcc747d3a5fcbc2a5b2f08777c66868a7bae8`.
+Earlier [e14 candidate](evidence/acceptance-closure-e14c1c3-candidate.json) and
+[consumer](evidence/acceptance-closure-e14c1c3-consumer.json) audits and their complete
+raw archives remain preserved. The initial consumer reader's ANSI-format error
+and all earlier failed diagnostic attempts remain recorded; no source or producer
+output was edited to obtain passing audit results.
 
-All code-head checks completed: eleven successful, one failed Windows setup job
-described above. The evidence-only commit retains this historical failure even
-if later independent checks pass. Final source-input verification still matches
-`faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1`.
+All **12 checks on corrected code e2758ae passed**. The original e14 Windows
+component timeout and later 7a Windows archive cleanup failure remain unexplained
+and retained; subsequent passing checks do not close their causes. The corrected
+source-input digest is
+`b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3`.
+An interrupted download of the corrected candidate was retried against the same
+immutable artifact ID and accepted only after matching its original digest;
+no qualification test was rerun for that transport failure.
 
 ## Ordered next milestone
 
