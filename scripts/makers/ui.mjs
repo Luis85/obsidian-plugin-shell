@@ -29,6 +29,11 @@ export async function component(context, { owner, name, editable = false, reposi
   const invalid = ref(false); const destination = ref('');
   let sequence = 0; let active = true;
   onScopeDispose(() => { active = false; });
+  function presentResult(result: Awaited<ReturnType<Repository['commit']>>) {
+    if (!result.ok && result.error.effect === 'uncertain') blocked.value = true;
+    feedback.value = t(result.ok ? '${prefix}.created' : result.error.key);
+    if (result.ok) model.reset();
+  }
   async function create() {
     if (!active || busy.value || blocked.value) return;
     busy.value = true; feedback.value = ''; invalid.value = false; destination.value = '';
@@ -41,9 +46,7 @@ export async function component(context, { owner, name, editable = false, reposi
       destination.value = prepared.value.path;
       const result = await repository.commit(prepared.value);
       if (!active) return;
-      if (!result.ok && result.error.effect === 'uncertain') blocked.value = true;
-      feedback.value = t(result.ok ? '${prefix}.created' : result.error.key);
-      if (result.ok) model.reset();
+      presentResult(result);
     } finally { if (active) busy.value = false; }
   }
   return { t, inputId, model, busy, blocked, feedback, invalid, destination, create };`;

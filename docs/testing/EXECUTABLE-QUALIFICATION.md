@@ -58,6 +58,39 @@ separate from these cumulative local corrections.
 
 ## Scope distinctions
 
+## First frozen candidate and corrections
+
+Code checkpoint `79d668858612b0d631094f04306c6818e8fe066b` is proposed in
+[PR #10](https://github.com/Luis85/obsidian-plugin-shell/pull/10).
+[Candidate run 35895304729](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35895304729)
+passed its complete fixed-source rehearsal, repeated runtime producers, coverage,
+artifact/size checks, served browser producer and live security audit. Its first
+Linux native session passed 31 checks. The second reached all 31 checkpoints but
+failed on three captured `illegal access` renderer errors during pop-out closure;
+cleanup succeeded. The complete session correctly blocked acceptance reconciliation.
+The failed report and passing first attempt remain retained separately. A GPU
+process message also appears in the passing run, so it does not establish the cause.
+
+Both generated-consumer jobs exposed an actual maintainability violation in the
+ordinary generated `bookmarks-workspace.ts`: `create` measured 12/10. The maker
+now extracts committed-result presentation after the existing liveness guard.
+The real before-fix gate failed; the corrected generated corpus passed at 8/6
+for `create` and 5/4 for its helper. All six maker-catalog tests then passed,
+including actual types and 24 generated CRUD/pending/uncertain/disposal assertions.
+This is a generator correction, not a threshold exception or a native-host fix.
+
+One Windows run on the retained 79d6688 assets completed 22 native checkpoints
+including Items CRUD and controlled adapter ownership, then reproduced the
+historical light-theme failure. The actual Appearance control reverted to Dark
+and host configuration remained `obsidian`; this observation does not establish
+the cause. No renderer error or cleanup failure was reported; cold restart was
+not reached. All 66 benchmark samples completed, with advisory/shared-runner p95
+17.80 ms warm initialization and 126.30 ms for the real 100-item UI. The host was
+busy, so these are not controlled-reference results. No failed attempt was retried
+or relabeled as passing.
+
+## Scope distinctions
+
 The original 96-case plan and blocked release profile are retained unchanged.
 Framework/unit/component, served browser, synthetic host boundary, actual native,
 artifact and generated-consumer results have distinct modes. Partial links do
