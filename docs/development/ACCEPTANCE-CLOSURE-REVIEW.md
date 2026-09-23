@@ -36,3 +36,21 @@ Every original failed output is retained in `reports/acceptance-closure/`.
 Schema/reporter controls are synthetic evidence-tool tests, not native execution
 or cryptographic proof of report authenticity. No quality threshold, native
 deadline, active-Appearance guard or error observation was relaxed.
+
+## Frozen output and independent audits
+
+The inventory auditor supplied a read-only receipt/framework/session audit that
+reproduced all 96 case states from the retained Linux candidate. Parent executed
+it successfully, checked candidate/assets and the actual metric checker in
+read-only mode. The native investigator separately audited all three native
+reports and the performance session, every diagnostic timeline, all 66 samples
+and unchanged historical failure hashes. The acceptance test author independently
+audited the consumer/archive receipts, exact edited-feature preservation and
+reviewed removal of the new example tests. All executed results belong to the
+[current record](../testing/ACCEPTANCE-CLOSURE.md).
+
+A separate Windows setup job timed out in an unchanged preferences-component
+test. A single explicitly bounded full production-coverage diagnostic retained
+stage timings and passed without reproducing the timeout. Review found no
+demonstrable corrective source edit; the failure remains unresolved. Its deadline
+and isolation were not changed, and later passes cannot erase it.

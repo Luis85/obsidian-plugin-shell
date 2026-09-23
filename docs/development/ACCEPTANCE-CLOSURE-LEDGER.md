@@ -7,7 +7,12 @@ and assertion inventory, not an execution report. Current observations require
 the complete trusted producer session for the final source and policy bytes.
 The historical comparison is **1 verified / 14 partial / 81 not-run** at
 `fd59c80195dee549ddbaaa23c28a06c091b18274`; it is not implementation coverage.
-The parent-owned execution record supplies final observed counts and identities.
+At frozen code `e14c1c303df75a80a8a287ee8d8a66d4efb9b738`, the complete Linux
+producer session reports **2 verified / 54 partial / 40 not-run**, with all 96
+crosswalk links observed. AC-03 and AC-06 are verified; a separate Windows CI
+timeout remains unresolved. The [execution record](../testing/ACCEPTANCE-CLOSURE.md)
+and [candidate audit](../testing/evidence/acceptance-closure-candidate.json)
+retain exact source identities, all transitions and the qualification boundary.
 
 Normative scope: [baseline AC-01–62](../product/BASELINE-0.4.md),
 [AC-63–96 and companions](../product/SPECIFICATION-0.7.md), and current
@@ -132,10 +137,11 @@ Paths are repository-relative; `runtime/`, `e2e/`, `tooling/`, `verification/` a
 
 ## Ordered finish list
 
-1. Qualify focused persistence/concurrency/recovery tests and audit their exact
-   current producer identities. Replace an existing partial link only when the
-   stronger assertion actually covers its prior clauses; adding a whole link next
-   to a partial link does not make this schema's row verified.
+1. Preserve this completed assertion audit and qualify every later source change
+   afresh. Current runtime/browser producers observed the focused persistence,
+   concurrency and recovery tests; AC-06's stronger whole link replaced its prior
+   partial browser link. AC-05/66 remain partial. Resolve the retained Windows
+   coverage timeout through bounded diagnostics, without extending its deadline.
 2. Close implemented behavior with missing assertions: corrupt/future browser
    storage, typed entity/YAML browser negatives, lifecycle resources, locale/modal
    breadth, diagnostic redaction and contained-defect controls. Keep controlled

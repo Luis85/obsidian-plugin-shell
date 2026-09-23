@@ -1,7 +1,7 @@
 # Native reliability investigation
 
 Investigation date: 2026-09-23. Neither historical failure has a demonstrated
-root cause. The Windows failure includes unchanged host configuration, not just
+root cause. The later 79d6688 Windows failure includes unchanged host configuration, not just
 an incorrectly styled plugin view. The Linux errors were received by the main
 renderer during the driver phase named `popout-close`; their empty stacks do not
 identify the throwing code. Later successful runs do not close either issue.
@@ -19,10 +19,12 @@ retry, error filter or screenshot baseline changed during this investigation.
 All local paths below are relative to the preserved sibling worktree
 `.worktrees/executable-qualification`. The original candidate workflow is
 [35895304729](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35895304729).
-This is distinct from the older PR #8 Windows failure described in
-[the previous investigation](RUNTIME-AUTHORING-NATIVE.md), whose raw checkout
-is not present at the historical relative path. That older report is not
-reconstructed or represented as newly inspected evidence.
+The [earliest Windows audit](NATIVE-RELIABILITY-EARLIEST-WINDOWS.md) separately
+inspects the preserved original PR #8 failure and every subsequent comparison.
+Its original worktree moved into the contained qualification archive; the raw
+report hash still matches. Its Appearance window showed Light while main stayed
+dark, unlike the later failure's Dark selector. Neither a shared cause nor the
+earlier host configuration can be inferred from the later observations.
 
 ## Retained identities and outcomes
 

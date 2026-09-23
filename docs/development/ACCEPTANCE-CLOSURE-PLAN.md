@@ -50,3 +50,14 @@ failures and corrected results are retained. Final heavy qualification runs in
 the existing read-only fixed-source candidate and consumer/archive workflows;
 local focused tests, full runtime/browser producers, strict types and gates run
 before push. This avoids competing heavy jobs on the limited-RAM editing host.
+
+## Integration state change during execution
+
+The initial baseline above was observed correctly: PR #10 was open. It was merged
+externally at 2026-09-23 19:52:23 UTC as
+`3d9a46046e01509b5285c5d986d54e8a7be2c689`. A later live check confirmed that its
+tree exactly equals `b426bbd`. Parent fetched/pruned, fast-forwarded clean main and
+retargeted PR #11 to main. No merge was performed by this task and the frozen
+`e14c1c3` candidate was not rebased/rebuilt. The specifically requested preservation
+of the prior qualification worktree and raw evidence takes precedence over routine
+worktree cleanup; both remain in their original paths.
