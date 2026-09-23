@@ -56,8 +56,6 @@ mutations. Only AC-03's audited links gained whole extent; a current candidate
 must still execute both required modes. Final frozen-source CI qualification is
 separate from these cumulative local corrections.
 
-## Scope distinctions
-
 ## First frozen candidate and corrections
 
 Code checkpoint `79d668858612b0d631094f04306c6818e8fe066b` is proposed in
@@ -88,6 +86,23 @@ not reached. All 66 benchmark samples completed, with advisory/shared-runner p95
 17.80 ms warm initialization and 126.30 ms for the real 100-item UI. The host was
 busy, so these are not controlled-reference results. No failed attempt was retried
 or relabeled as passing.
+
+Checkpoint `456b49a1f76174671aaca5b5a0d216a15e7d92c2` then passed the entire
+[candidate workflow](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35897423372),
+including three fresh 31-check Linux native sessions, the separate shared-runner
+performance run and all ten evidence packets. Reconciliation verified AC-03 in its
+two required modes, retained 14 partial rows and all 96 rows, and kept release
+blocked. Its three assets are byte-identical to the 79d6688 packet; neither that
+identity nor these later passes explains the earlier renderer/theme failures.
+
+The corrected consumer passed full renamed/extended verification and served
+checks, then its literal archive exposed a configuration portability issue:
+Fallow reported zero findings plus a default-ignore diagnostic for generated
+`dist` output. Naming exactly the three existing generated install files in the
+analyzer configuration removes that ambiguity. A real transported archive passes;
+an added maintained file or extra source inside `dist` still fails the actual
+checker, and restored controls pass. No diagnostic filter or broad directory
+ignore was introduced.
 
 ## Scope distinctions
 

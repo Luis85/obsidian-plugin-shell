@@ -22,6 +22,9 @@
     "scripts/quality/fallow-node-tests.json"
   ],
   "ignorePatterns": [
+    "dist/main.js",
+    "dist/styles.css",
+    "dist/manifest.json",
     "dist-harness/**",
     "reports/**"
   ],
