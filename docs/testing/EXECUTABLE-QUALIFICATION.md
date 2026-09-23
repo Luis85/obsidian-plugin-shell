@@ -1,5 +1,10 @@
 # Executable qualification record
 
+This is the retained previous milestone. See the current
+[acceptance closure record](ACCEPTANCE-CLOSURE.md) for the subsequent source,
+assertion audit and native reliability investigation. Results below remain bound
+to their original candidate and are not silently promoted to the new source.
+
 Frozen code: `fd59c80195dee549ddbaaa23c28a06c091b18274`, branch `codex/executable-qualification`, development
 version 0.4.0. [PR #10](https://github.com/Luis85/obsidian-plugin-shell/pull/10).
 The evidence-only documentation commit follows this code checkpoint. Main remains

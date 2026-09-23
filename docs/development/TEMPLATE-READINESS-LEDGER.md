@@ -1,5 +1,10 @@
 # Template readiness ledger
 
+The subsequent [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
+[execution record](../testing/ACCEPTANCE-CLOSURE.md) own the current assertion
+audit and results. The requirement inventory and earlier candidate figures below
+remain historical context; unlinked evidence is not absent implementation.
+
 Reviewed 2026-09-23 against merged iteration-four source and its retained
 [execution record](../testing/ITERATION-FOUR.md). This is a requirement inventory,
 not a replacement acceptance report or permission to release. The
