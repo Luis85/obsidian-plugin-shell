@@ -2,6 +2,7 @@
 Chromium runs exact HTML injection. Model/geometry fixtures are labelled separately.
 No native host, CLI, generation or file-origin persistence claim.
 """
+import os
 import hashlib,json,traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -45,7 +46,7 @@ def positions(p):
  js(p,"""referenceUi.panel='none';canvasState().brickDisplay='structure';canvasState().snap=false;canvasState().interaction.guides=false;canvasState().edges='all';canvasState().positions={'node-1':{x:100,y:50},'node-2':{x:100,y:480},'node-3':{x:530,y:480},'node-5':{x:970,y:50},'node-7':{x:970,y:480}};render();fitMap();""");wait(p)
 
 with sync_playwright() as pw:
- browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+ browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
  def new(width=1600,height=1100):
   p=browser.new_page(viewport={'width':width,'height':height});p.set_default_timeout(6500)
   p.on('pageerror',lambda e:errors.append(str(e)))

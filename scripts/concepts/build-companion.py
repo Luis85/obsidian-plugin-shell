@@ -1,5 +1,5 @@
 from pathlib import Path
-import argparse, hashlib
+import argparse, hashlib, json
 ROOT=Path(__file__).resolve().parents[2] / "docs/concepts/companion"
 
 def build(output: Path, check: bool = False):
@@ -8,7 +8,7 @@ def build(output: Path, check: bool = False):
   nonlocal s
   if s.count(old)!=1:raise ValueError(f'Expected one baseline seam, got {s.count(old)}: {old[:90]}')
   s=s.replace(old,new,1)
- change('Concept 01','Concept 12 · Containers & connections')
+ change('Concept 01','Concept · Review & recovery')
  change('<!-- Standalone concept. The named inline sections are its editable source; no build step or external runtime is required. -->','<!-- Generated standalone concept. Edit src/ modules, then rebuild. No network or external runtime is required. -->')
  change("['overview','box','Overview'],","['overview','box','Overview'],['prds','file','Product requirements'],['sitemap','layers','Sitemap & views'],['components','box','Component library'],['blueprints','grid','Blueprints'],['patterns','spark','Action patterns'],")
  change("const views={projects:projectsView,overview:overviewView,", "const views={prds:prdWorkspaceView,components:componentLibraryView,sitemap:sitemapView,blueprints:blueprintView,patterns:patternLibrary,projects:workflowStartView,overview:workflowOverview,")
@@ -52,7 +52,14 @@ def build(output: Path, check: bool = False):
  change("el?.focus();}\nfunction closeModal", "el?.focus();if(modalOriginal===null)rememberModalForm();workflowModalPolish();}\nfunction closeModal")
  change("document.getElementById('modal').innerHTML=(factories[modalType]", "document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]")
  # Insert the new modules before the final render, so no runtime override/eval is needed.
- modules=['surface-view.js','edge-editing.js','unified-library.js','spatial-model.js','spatial-runtime.js','reference-model.js','reference-views.js','reference-content.js','reference-actions.js','library-model.js','library-views.js','library-actions.js','brick-model.js','brick-views.js','brick-actions.js','connection-model.js','connection-views.js','connection-menu.js','connection-actions.js','flow-model.js','flow-views.js','flow-actions.js','flow-runtime.js','flow-edge.js','workflow-model.js','workflow-views.js','workflow-actions.js','canvas-model.js','canvas-layout.js','canvas-view.js','canvas-actions.js','canvas-pointer.js','interaction-polish.js','product-model.js','component-views.js','prd-views.js','product-actions.js','product-plan.js','design-model.js','design-plan.js','design-views.js','design-dialogs.js','design-actions.js']
+ modules=['state-safety.js','surface-view.js','edge-editing.js','unified-library.js','spatial-model.js','spatial-runtime.js','reference-model.js','reference-views.js','reference-content.js','reference-actions.js','library-model.js','library-views.js','library-actions.js','brick-model.js','brick-views.js','brick-actions.js','connection-model.js','connection-views.js','connection-menu.js','connection-actions.js','flow-model.js','flow-views.js','flow-actions.js','flow-runtime.js','flow-edge.js','workflow-model.js','workflow-views.js','workflow-actions.js','canvas-model.js','canvas-layout.js','canvas-view.js','canvas-actions.js','canvas-pointer.js','interaction-polish.js','product-model.js','component-views.js','prd-views.js','product-actions.js','product-plan.js','design-model.js','design-plan.js','design-views.js','design-dialogs.js','design-actions.js']
+ # Register exactly the fragments this non-module browser assembly executes.
+ inputs=set(modules+['brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js'])
+ config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text())
+ prefix='docs/concepts/companion/src/'
+ registered={entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix)}
+ if inputs!=registered or inputs!={file.name for file in (ROOT/'src').glob('*.js')}:
+  raise ValueError('Concept assembly/analyzer entry inventory differs; do not hide unassembled source')
  extension='\n'.join((ROOT/'src'/m).read_text() for m in modules)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
  change('<script>','<script>\n'+(ROOT/'src/brick-catalog.js').read_text()+'\n'+(ROOT/'src/catalog.js').read_text()+'\n'+(ROOT/'src/canvas-catalog.js').read_text()+'\n'+(ROOT/'src/flow-catalog.js').read_text()+'\nlet dialogReturnFocus=null;\n')

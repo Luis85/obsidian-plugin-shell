@@ -2,6 +2,7 @@
 Uses the exact inline HTML in Chromium. File navigation is not required.
 No install, source generation, network service, or production CLI is executed.
 """
+import os
 import argparse
 import hashlib
 import json
@@ -10,7 +11,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser()
-parser.add_argument('--browser',default='/usr/bin/chromium')
+parser.add_argument('--browser',default=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'))
 parser.add_argument('--report',default=str(ROOT/'reports/concepts/reference/checks.json'))
 parser.add_argument('--screenshots',default=str(ROOT/'reports/concepts/reference/screenshots'))
 args=parser.parse_args()

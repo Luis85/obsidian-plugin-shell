@@ -42,7 +42,7 @@ function saveTypedConnection(){
  if(f.editing&&!d.links.some(e=>e.id===f.id))return fail('The original connection no longer exists.');
  const edge={id:f.editing?f.id:'edge-'+d.nextId,from:f.from,to:f.to,label:f.label.trim(),kind,sourceHandle:sh,targetHandle:th,condition:kind==='conditional'?f.condition.trim():'',description:(f.description||'').trim()};
  if(!validLinkFields(edge))return fail('Connection details exceed their limits.');
- if(f.editing&&JSON.stringify(d.links.find(e=>e.id===f.id))===JSON.stringify(edge)){closeModal();return;}
+ if(f.editing&&JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))===JSON.stringify(connectionEditIdentity(edge))){closeModal();return;}
  recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();designUi.selected=edge.from;canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
 }
 function deselectFlow(){
@@ -75,3 +75,5 @@ function saveBindingRegion(){
  const b=n.components.find(b=>b.id===f.id&&b.slot===f.originalSlot);if(!b||!componentSlots(n).includes(f.slot)||n.components.some(x=>x!==b&&x.id===f.id&&x.slot===f.slot)){interactionUi.error='Choose an available region for this component.';redrawModal();return;}
  if(b.slot===f.slot){closeModal();return;}recordDesign();b.slot=f.slot;designChanged();closeModal();render();
 }
+
+function connectionEditIdentity(e){return [e.id,e.from,e.to,e.label,e.kind,e.sourceHandle||'out-right',e.targetHandle||'in-left',e.condition||'',e.description||''];}

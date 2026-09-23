@@ -5,12 +5,15 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'tests/concepts/**'
+      - '.fallowrc.json'
       - '.github/workflows/companion-concept-verification.yml'
   push:
     branches: [main]
     paths:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
+      - 'tests/concepts/**'
+      - '.fallowrc.json'
       - '.github/workflows/companion-concept-verification.yml'
   workflow_dispatch:
 permissions:
@@ -32,6 +35,8 @@ jobs:
           package-manager-cache: false
       - name: Check exact offline concept assembly
         run: python3 scripts/concepts/build-companion.py --check
+      - name: Exercise assembly, inventory and tamper rejection
+        run: python3 tests/concepts/companion-assembly.test.py
       - name: Check authored JavaScript syntax without executing project operations
         shell: bash
         run: |
@@ -58,5 +63,43 @@ jobs:
             ${{ runner.temp }}/companion-review-source.tar.gz
             ${{ runner.temp }}/companion-review-source.commit
             ${{ runner.temp }}/companion-review-source.sha256
+          retention-days: 7
+          if-no-files-found: error
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/companion-browsers
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Provision isolated pinned browser test tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/companion-browser-env"
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m playwright install chromium
+          "$RUNNER_TEMP/companion-browser-env/bin/python" - <<'PYTHON'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+          PYTHON
+      - name: Exercise current concept and real-origin storage on one exact artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --real-storage
+      - name: Retain concept evidence even when a check fails
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-browser-evidence
+          path: |
+            reports/concepts/
+            docs/concepts/companion/index.html
           retention-days: 7
           if-no-files-found: error

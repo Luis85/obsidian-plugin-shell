@@ -15,7 +15,55 @@
     "harness/styles/host-adapter.css",
     "scripts/makers/custom/registry.mjs",
     "src/bootstrap/authoring-domains.ts",
-    "src/bootstrap/event-catalog.ts"
+    "src/bootstrap/event-catalog.ts",
+    "docs/concepts/companion/src/brick-actions.js",
+    "docs/concepts/companion/src/brick-catalog.js",
+    "docs/concepts/companion/src/brick-model.js",
+    "docs/concepts/companion/src/brick-views.js",
+    "docs/concepts/companion/src/canvas-actions.js",
+    "docs/concepts/companion/src/canvas-catalog.js",
+    "docs/concepts/companion/src/canvas-layout.js",
+    "docs/concepts/companion/src/canvas-model.js",
+    "docs/concepts/companion/src/canvas-pointer.js",
+    "docs/concepts/companion/src/canvas-view.js",
+    "docs/concepts/companion/src/catalog.js",
+    "docs/concepts/companion/src/component-views.js",
+    "docs/concepts/companion/src/connection-actions.js",
+    "docs/concepts/companion/src/connection-menu.js",
+    "docs/concepts/companion/src/connection-model.js",
+    "docs/concepts/companion/src/connection-views.js",
+    "docs/concepts/companion/src/design-actions.js",
+    "docs/concepts/companion/src/design-dialogs.js",
+    "docs/concepts/companion/src/design-model.js",
+    "docs/concepts/companion/src/design-plan.js",
+    "docs/concepts/companion/src/design-views.js",
+    "docs/concepts/companion/src/edge-editing.js",
+    "docs/concepts/companion/src/flow-actions.js",
+    "docs/concepts/companion/src/flow-catalog.js",
+    "docs/concepts/companion/src/flow-edge.js",
+    "docs/concepts/companion/src/flow-model.js",
+    "docs/concepts/companion/src/flow-runtime.js",
+    "docs/concepts/companion/src/flow-views.js",
+    "docs/concepts/companion/src/interaction-polish.js",
+    "docs/concepts/companion/src/library-actions.js",
+    "docs/concepts/companion/src/library-model.js",
+    "docs/concepts/companion/src/library-views.js",
+    "docs/concepts/companion/src/prd-views.js",
+    "docs/concepts/companion/src/product-actions.js",
+    "docs/concepts/companion/src/product-model.js",
+    "docs/concepts/companion/src/product-plan.js",
+    "docs/concepts/companion/src/reference-actions.js",
+    "docs/concepts/companion/src/reference-content.js",
+    "docs/concepts/companion/src/reference-model.js",
+    "docs/concepts/companion/src/reference-views.js",
+    "docs/concepts/companion/src/spatial-model.js",
+    "docs/concepts/companion/src/spatial-runtime.js",
+    "docs/concepts/companion/src/state-safety.js",
+    "docs/concepts/companion/src/surface-view.js",
+    "docs/concepts/companion/src/unified-library.js",
+    "docs/concepts/companion/src/workflow-actions.js",
+    "docs/concepts/companion/src/workflow-model.js",
+    "docs/concepts/companion/src/workflow-views.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -89,6 +137,12 @@
         "name": "styles",
         "patterns": [
           "src/styles/**"
+        ]
+      },
+      {
+        "name": "companion-concept",
+        "patterns": [
+          "docs/concepts/companion/src/**"
         ]
       }
     ],
@@ -194,6 +248,10 @@
         "allow": [
           "styles"
         ]
+      },
+      {
+        "from": "companion-concept",
+        "allow": []
       }
     ]
   },

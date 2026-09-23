@@ -1,4 +1,5 @@
 """Retained graph editing through the refined canvas; browser concept only."""
+import os
 import argparse,hashlib,json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -15,7 +16,7 @@ def act(p,name,value=None,scope=''):
 def j(p,x):return p.evaluate(x)
 def point(box):return box['x']+box['width']/2,box['y']+box['height']/2
 with sync_playwright() as pw:
- b=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+ b=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
  p=b.new_page(viewport={'width':1600,'height':1000});p.set_default_timeout(6000)
  p.on('pageerror',lambda e:errors.append(str(e)))
  p.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)

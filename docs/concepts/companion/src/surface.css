@@ -60,3 +60,13 @@
 .surface-form-layout .surface-layout-svg{width:100%;height:100%}
 
 .spatial-zone-heading{min-width:0;overflow:hidden;line-height:1.4}.spatial-zone-heading strong{overflow:hidden;text-overflow:ellipsis}.spatial-zone-heading>span{font-size:.85em;flex:none}
+
+body{display:flex;flex-direction:column;height:100dvh}
+.concept-bar,.host-title,.host-status{flex-shrink:0}
+.app-frame{height:auto;flex:1;min-height:0}
+/* Recovery stays visible even in narrow panes; never hide a persistence failure. */
+#storage-recovery{font-size:11px;min-height:26px;border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:2px 8px;white-space:nowrap}
+#storage-recovery[hidden]{display:none}
+.host-status.storage-warning{height:auto;min-height:32px;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:5px 12px}
+.host-status.storage-warning #storage-status{display:block;flex:1;min-width:160px;white-space:normal;line-height:1.5;color:var(--text)}
+@media(max-width:650px){.host-status.storage-warning #status-left,.host-status.storage-warning>span:last-child{display:none}.host-status.storage-warning{font-size:11px;gap:6px}}

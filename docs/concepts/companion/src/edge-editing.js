@@ -3,7 +3,7 @@ const edgeEditing={reconnect:null,detach:null,error:''};
 function beginEdgeReconnect(edge){
  if(state.activeRun)return;
  closeConnectionMenu(false);flowUi.cancelled=false;connectionUi.committed=false;
- edgeEditing.reconnect={id:edge.id,structure:edge.id.startsWith('contains-'),owner:designOwner(),revision:design().revision};
+ edgeEditing.reconnect={id:edge.id,structure:edge.id.startsWith('contains-'),owner:designOwner(),revision:design().revision,snapshot:edgeReviewSnapshot(edge.id)};
  setFlowConnecting(true);document.getElementById('vf-root')?.setAttribute('data-reconnecting','true');
 }
 function endEdgeReconnect(){
@@ -22,6 +22,7 @@ function validStructureReconnect(connection){
 function reviewEdgeReconnect(edge,connection){
  const review=edgeEditing.reconnect;
  if(!review||flowUi.cancelled||review.id!==edge.id||review.owner!==designOwner()||review.revision!==design().revision){endEdgeReconnect();return;}
+ if(review.snapshot!==edgeReviewSnapshot(edge.id)){endEdgeReconnect();notify('The relationship changed during this drag. The newer relationship is retained; reopen it to review.');return;}
  connectionUi.committed=true;
  if(!review.structure){endEdgeReconnect();reviewFlowConnection(connection,edge.id);return;}
  if(!validStructureReconnect(connection)){endEdgeReconnect();notify('That structural attachment would be invalid. The original is retained.');return;}
@@ -36,7 +37,7 @@ function requestEdgeRemoval(id){
  if(!id.startsWith('contains-')){showModal('canvas-edge-remove',id);return;}
  const d=design(),child=d.nodes.find(n=>'contains-'+n.id===id);if(!child?.parent)return;
  const alternatives=structureDetachParents(d,child);
- edgeEditing.detach={id,child:child.id,owner:designOwner(),revision:d.revision,parent:child.parent,replacement:alternatives[0]?.id||''};edgeEditing.error='';
+ edgeEditing.detach={id,child:child.id,owner:designOwner(),revision:d.revision,parent:child.parent,snapshot:edgeReviewSnapshot(id),replacement:alternatives[0]?.id||''};edgeEditing.error='';
  showModal('edge-detach');
 }
 function structureDetachParents(d,child){
@@ -51,7 +52,7 @@ function edgeDetachDialog(){
 function confirmStructureRemoval(){
  const d=design(),f=edgeEditing.detach,child=d.nodes.find(n=>n.id===f?.child);
  const fail=m=>{edgeEditing.error=m;redrawModal();};
- if(!child||state.activeRun||f.owner!==designOwner()||f.revision!==d.revision||child.parent!==f.parent)return fail('This review is stale. Reopen the current relationship.');
+ if(!child||state.activeRun||f.owner!==designOwner()||f.revision!==d.revision||child.parent!==f.parent||f.snapshot!==edgeReviewSnapshot(f.id))return fail('This review is stale. Reopen the current relationship.');
  const parent=document.getElementById('detach-parent')?.value||null,candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=parent;
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  if(parent===child.parent)return fail('Choose a different parent.');
@@ -63,3 +64,5 @@ function handleEdgeEditingAction(action,value){
  if(action==='edge-detach-confirm'){confirmStructureRemoval();return true;}
  return false;
 }
+
+function edgeReviewSnapshot(id){return JSON.stringify(id.startsWith('contains-')?canvasState().anchors[id]:design().links.find(e=>e.id===id));}

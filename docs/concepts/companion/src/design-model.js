@@ -14,8 +14,8 @@ function structuralDesign(value){
  if(!value||value.schema!==1||!Array.isArray(value.nodes)||value.nodes.length>DESIGN_LIMITS.nodes||!Array.isArray(value.links)||value.links.length>DESIGN_LIMITS.links)return false;
  if(typeof value.goal!=='string'||value.goal.length>1000||!['desktop','mobile-ready'].includes(value.platform)||!BLUEPRINTS.some(b=>b.id===value.blueprint))return false;
  const text=(x,max=120)=>typeof x==='string'&&x.length<=max;
- if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&NODE_KINDS[n.kind]&&LAYOUTS.some(l=>l.id===n.layout)&&PLACEMENTS[n.placement]&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
- if(!value.links.every(e=>e&&text(e.id)&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
+ if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&Object.hasOwn(NODE_KINDS,n.kind)&&LAYOUTS.some(l=>l.id===n.layout)&&Object.hasOwn(PLACEMENTS,n.placement)&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
+ if(!value.links.every(e=>e&&text(e.id)&&e.id.length>0&&!e.id.startsWith('contains-')&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
  return productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total;
 }
 function designIssues(d){
@@ -70,9 +70,18 @@ function importDesign(text){
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error');if(issues.length)throw Error(issues[0].message);
- const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,canvas:clean.canvas||emptyCanvas(),nextId:Math.max(1,...clean.nodes.map(n=>Number(n.id.replace('node-',''))||0),...clean.links.map(e=>Number(e.id.replace('edge-',''))||0))+1});designChanged();designUi.selected=d.nodes[0]?.id;return d;
+ const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
 }
 function validSavedDesign(d){
  const plain=o=>o&&typeof o==='object'&&!Array.isArray(o);
- return structuralDesign(d)&&Number.isInteger(d.revision)&&d.revision>0&&Number.isInteger(d.nextId)&&d.nextId>0&&plain(d.emitted)&&Object.keys(d.emitted).length<=600&&Object.values(d.emitted).every(f=>plain(f)&&typeof f.owner==='string'&&typeof f.content==='string'&&f.content.length<100000&&typeof f.protected==='boolean')&&Array.isArray(d.history)&&d.history.length<=20&&Array.isArray(d.future)&&d.future.length<=20&&[...d.history,...d.future].every(s=>structuralDesign({...s,schema:1}));
+ return structuralDesign(d)&&Number.isInteger(d.revision)&&d.revision>0&&Number.isSafeInteger(d.nextId)&&d.nextId>0&&d.nextId<Number.MAX_SAFE_INTEGER-100000&&plain(d.emitted)&&Object.keys(d.emitted).length<=600&&Object.values(d.emitted).every(f=>plain(f)&&typeof f.owner==='string'&&typeof f.content==='string'&&f.content.length<100000&&typeof f.protected==='boolean')&&Array.isArray(d.history)&&d.history.length<=20&&Array.isArray(d.future)&&d.future.length<=20&&[...d.history,...d.future].every(s=>structuralDesign({...s,schema:1}));
+}
+
+function importCounter(d){
+ let max=0;
+ for(const item of [...d.nodes,...d.links,...d.nodes.flatMap(bricksOf)]){
+  const match=/^(?:node|edge|brick)-([0-9]+)$/.exec(item.id);if(!match)continue;
+  const n=Number(match[1]);if(!Number.isSafeInteger(n)||n>=Number.MAX_SAFE_INTEGER-100000)throw Error('Blueprint IDs exceed the safe numeric range. Nothing was imported.');max=Math.max(max,n);
+ }
+ return max+1;
 }

@@ -5,8 +5,8 @@ function validCanvas(c){
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
  if(!validReferenceSections(c.sections)||!validAnchorMap(c.anchors))return false;
  if(c.brickDisplay!==undefined&&!['structure','labels','wireframes'].includes(c.brickDisplay))return false;
- const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isFinite(x)&&Math.abs(x)<=50000;
- return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x)&&num(c.pan.y)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
+ const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=(x,limit=CANVAS_LIMITS.world)=>Number.isFinite(x)&&Math.abs(x)<=limit;
+ return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x,CANVAS_LIMITS.pan)&&num(c.pan.y,CANVAS_LIMITS.pan)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
 }
 function canvasStructure(d){return JSON.stringify(d.nodes.map(n=>[n.id,n.parent,n.kind]));}
 function canvasState(d=design()){
@@ -70,6 +70,7 @@ function zoomMap(factor,anchor=null){
  c.pan={x:p.x-(p.x-c.pan.x)*z/c.zoom,y:p.y-(p.y-c.pan.y)*z/c.zoom};c.zoom=z;c.fitted=true;paintMap();save();
 }
 function paintMap(){
+ const camera=design().canvas;if(camera)camera.pan=boundedCameraPan(camera.pan);
  if(flowUi.api){paintFlowViewport();return;}
  const world=document.getElementById('map-world');if(!world)return;
  const c=canvasState();world.style.setProperty('--map-zoom',c.zoom);world.style.setProperty('--map-inverse',1/c.zoom);world.style.transform=`translate(${c.pan.x}px,${c.pan.y}px) scale(${c.zoom})`;
@@ -89,3 +90,5 @@ function revealDesignSelection(){
  if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
 function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;return value;}
+
+function boundedCameraPan(p){return {x:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.x)),y:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.y))};}

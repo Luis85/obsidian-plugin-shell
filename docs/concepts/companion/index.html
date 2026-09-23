@@ -1303,6 +1303,16 @@ body.sitemap-workspace #content:has(.ref-studio){overflow:hidden!important}
 
 .spatial-zone-heading{min-width:0;overflow:hidden;line-height:1.4}.spatial-zone-heading strong{overflow:hidden;text-overflow:ellipsis}.spatial-zone-heading>span{font-size:.85em;flex:none}
 
+body{display:flex;flex-direction:column;height:100dvh}
+.concept-bar,.host-title,.host-status{flex-shrink:0}
+.app-frame{height:auto;flex:1;min-height:0}
+/* Recovery stays visible even in narrow panes; never hide a persistence failure. */
+#storage-recovery{font-size:11px;min-height:26px;border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:2px 8px;white-space:nowrap}
+#storage-recovery[hidden]{display:none}
+.host-status.storage-warning{height:auto;min-height:32px;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:5px 12px}
+.host-status.storage-warning #storage-status{display:block;flex:1;min-width:160px;white-space:normal;line-height:1.5;color:var(--text)}
+@media(max-width:650px){.host-status.storage-warning #status-left,.host-status.storage-warning>span:last-child{display:none}.host-status.storage-warning{font-size:11px;gap:6px}}
+
 </style>
 <!--
 # Third-party notices — offline concept
@@ -1437,9 +1447,9 @@ THE SOFTWARE.
 <div class="app-frame">
 <aside class="ribbon" aria-label="Obsidian concept ribbon"><button class="ribbon-active" data-action="nav" data-value="projects" aria-label="Shell Workbench" title="Shell Workbench">◇</button><button data-action="palette" aria-label="Command palette" title="Command palette">⌘</button><button data-action="note" aria-label="Project handoff note" title="Project handoff note">▤</button><div class="ribbon-bottom"><button data-action="theme" aria-label="Toggle light or dark theme" title="Toggle theme">◐</button><button data-action="settings" aria-label="Workbench preferences" title="Preferences">⚙</button></div></aside>
 <aside class="sidebar" id="sidebar" aria-label="Workbench navigation"></aside>
-<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 12 · Containers & connections</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
+<div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept · Review & recovery</span></div><header class="workbench-header" id="header"></header><div id="workflow-rail-holder"></div><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
 </div>
-<footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status"></span><span>Desktop concept · offline</span></footer>
+<footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status" role="status" aria-live="polite"></span><button id="storage-recovery" data-action="storage-recovery" hidden>Export recovery</button><span>Desktop concept · offline</span></footer>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
 <dialog id="tour" aria-labelledby="tour-title"></dialog>
 <div id="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -11775,6 +11785,7 @@ function createDesign(blueprint='workspace') {
  return ensureProductModel(d);
 }
 
+const CANVAS_LIMITS={world:50000,pan:200000,minZoom:.12,maxZoom:2};
 const MAP_LAYOUTS={vertical:'Hierarchy · top down',horizontal:'Hierarchy · left to right',lanes:'Surface lanes',grid:'Compact grid',free:'Freeform',sections:'Sections'};
 const MAP_SIZE={w:244,h:216,gapX:92,gapY:96};
 const canvasUi={owner:null,selected:null,search:'',edge:null,connecting:null,outline:false,inspector:'details',expanded:false,drag:null,suppressClick:false,liveTimer:null,metrics:{moves:0,frames:0}};
@@ -11850,6 +11861,7 @@ const SERVICES = [
 const SCOPES = [['verify','Project verification','Static, service, coverage & artifact checks'],['browser','Browser E2E','Served real-component harness'],['native','Native Obsidian','Isolated host fixture only'],['security','Security audit','Live registry scope in the real product']];
 const STAGES = ['Validate approved inputs','Apply project identity','Install locked dependencies','Verify and build candidate','Stage complete artifacts','Deploy to bound fixture vault'];
 const STEPS = ['Welcome','Environment','Template','Identity','Development vault','Trust & review','Set up','First working loop'];
+let persistenceSnapshot=null;
 let storageWarning = '', toastTimer, runTimer = null, modalType = '', modalData = null, activeTour = false;
 const freshState = () => ({schema:1,designDraft:null,view:'projects',projects:[],activeId:null,runs:[],activeRun:null,sequence:0,wizard:null,generator:{kind:'feature',name:'bookmarks',entity:'bookmark',preset:'title',folder:'Bookmarks',group:'',plan:null},settings:{theme:'dark',remember:true},scenario:'happy',tourIndex:0,toolTab:'services',toolFilter:'all',search:'',selectedFile:0});
 function validState(s){
@@ -11862,7 +11874,7 @@ function validState(s){
 }
 function loadState(){
  let raw;
- try{raw=localStorage.getItem(STORAGE_KEY);}catch{storageWarning='Browser storage unavailable. This session is in memory only.';return freshState();}
+ try{raw=localStorage.getItem(STORAGE_KEY);persistenceSnapshot=raw;}catch{storageWarning='Browser storage unavailable. This session is in memory only.';return freshState();}
  if(!raw)return freshState();
  try{if(raw.length>5000000)throw Error('Bounded storage limit');const parsed=JSON.parse(raw);if(!validState(parsed))throw Error('Unknown demo state');return parsed;}
  catch{storageWarning='Stored demo unavailable; original storage preserved until explicit reset.';return freshState();}
@@ -11871,7 +11883,7 @@ let state = loadState();
 // Fixture sessions never survive page unload as a hidden running daemon.
 state.projects.forEach(p=>{p.sessions=[];p.notes=p.notes||[];});
 if(state.activeRun){const r=state.runs.find(x=>x.id===state.activeRun);if(r){r.status='interrupted';r.logs.push('[demo] Page closed before completion. No real process existed.');}state.activeRun=null;if(state.wizard?.step===6)state.wizard.status='interrupted';}
-function save(){if(storageWarning)return;try{if(state.settings.remember)localStorage.setItem(STORAGE_KEY,JSON.stringify(state));else localStorage.removeItem(STORAGE_KEY);}catch{storageWarning='Browser storage unavailable. This session is in memory only.';}}
+function save(){saveConceptState();}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function icon(n){return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[n]||ICONS.box}"/></svg>`;}
 function button(label,action,value='',kind='',ico='',extra=''){return `<button class="btn ${kind}" data-action="${esc(action)}" data-value="${esc(value)}" ${extra}>${ico?icon(ico):''}${esc(label)}</button>`;}
@@ -12003,7 +12015,7 @@ function attachProject(){const name=document.getElementById('f-attach-name').val
 async function copyText(text){try{if(!navigator.clipboard)throw Error();await navigator.clipboard.writeText(text);notify('Copied. Nothing was executed.');}catch{showModal('copy',{text});}}
 function handoffText(){const p=project();return `# Shell Workbench concept handoff\n\n**Browser simulation only. Not project verification evidence.**\n\n## Fixture project\n\nPlugin: ${p?.id||'none'}\nVersion: ${p?.version||'none'}\nSource revision: ${p?.rev||0}\nBuilt revision: ${p?.builtRev||0}\nInstalled revision: ${p?.installedRev||0}\n\n## Simulated scopes\n\n${SCOPES.map(([k,t])=>`${t}: ${p?.quality[k]?p.quality[k].rev!==p.rev?'stale':p.quality[k].status:'not run'}`).join('\n')}\n\n## Outstanding implementation gates\n\nCommunity policy interpretation; shared bound-vault deployment; independent template export; real CLI parity; desktop qualification.\n\nNo tag, release, host activation or directory submission occurred.\nAbsolute source paths, author names and raw logs are omitted.\n`;}
 function diagnosticText(){return JSON.stringify({kind:'concept-only-diagnostics',schema:1,realOperationsExecuted:0,runs:state.runs.map(r=>({id:r.id,kind:r.kind,status:r.status,stageCount:r.stages.length})),note:'No paths, project names, raw logs, credentials or environment fields included.'},null,2);}
-function downloadText(){const {text,filename}=modalData;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Concept text exported. This is not real project evidence.');}
+function downloadText(data=modalData){const {text,filename}=data;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Concept text exported. This is not real project evidence.');}
 
 // Concept section: interactions
 function dispatch(action,value){
@@ -12066,7 +12078,8 @@ function dispatch(action,value){
  case 'export-diagnostics':showModal('copy',{title:'Sanitized structural demo data only. No raw logs or paths.',text:diagnosticText(),filename:'shell-workbench-concept-diagnostics.json'});break;
  case 'download-text':downloadText();break;
  case 'reset':showModal('reset');break;
- case 'reset-confirm':if(state.activeRun)break;clearTimeout(runTimer);try{localStorage.removeItem(STORAGE_KEY);}catch{}storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');break;
+ case 'reset-confirm':resetConceptState();break;
+ case 'storage-recovery':showModal('copy',{title:'Recovery snapshot of committed concept state, including simulated project locations. Unsubmitted form drafts are not included. Keep this file private; it is not an installable plugin or verification evidence.',text:JSON.stringify(state,null,2),filename:'shell-workbench-recovery.json'});break;
  case 'tour':startTour();break;
  case 'tour-pause':pauseTour();break;
  case 'tour-back':state.tourIndex=Math.max(0,state.tourIndex-1);renderTour();break;
@@ -12090,6 +12103,39 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+// Concept-only persistence. Never claim native host storage or distributed locking.
+function paintStorageState(){
+ const status=document.getElementById('storage-status'),recovery=document.getElementById('storage-recovery');
+ const message=storageWarning||(state.settings.remember?'Demo state saved only in this browser':'Memory-only demo session');
+ if(status){if(status.textContent!==message)status.textContent=message;status.className=storageWarning?'storage-alert':'';}
+ if(recovery)recovery.hidden=!storageWarning;
+ document.querySelector('.host-status')?.classList.toggle('storage-warning',!!storageWarning);
+}
+function saveConceptState(){
+ if(storageWarning){paintStorageState();return false;}
+ try{
+  const retained=localStorage.getItem(STORAGE_KEY);
+  if(retained!==persistenceSnapshot){storageWarning='Saved data changed in another window. This session is retained in memory; export recovery before reloading.';paintStorageState();return false;}
+  const next=state.settings.remember?JSON.stringify(state):null;
+  if(next!==null&&next.length>5000000){storageWarning='This session exceeds the browser-state limit. The last saved copy is preserved; export recovery now.';paintStorageState();return false;}
+  // Avoid rewriting identical snapshots during repeated renders and camera events.
+  if(next!==retained){if(next===null)localStorage.removeItem(STORAGE_KEY);else localStorage.setItem(STORAGE_KEY,next);}
+  persistenceSnapshot=next;paintStorageState();return true;
+ }catch{storageWarning='Browser storage unavailable. This session is in memory only.';paintStorageState();return false;}
+}
+function resetConceptState(){
+ if(state.activeRun)return;
+ try{localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');}
+ catch{storageWarning='Reset could not remove browser data. Your current session is retained. Export recovery before closing.';paintStorageState();notify(storageWarning);return;}
+ clearTimeout(runTimer);persistenceSnapshot=null;storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');
+}
+window.addEventListener('storage',event=>{
+ if((event.key===STORAGE_KEY||event.key===null)&&!storageWarning){
+  try{if(localStorage.getItem(STORAGE_KEY)===persistenceSnapshot)return;}catch{/* save reports the unavailable store */}
+  saveConceptState();
+ }
+});
+
 // Presentation contracts: ownership containers are distinct from content-bearing screens.
 function allocateSurfaceCode(d,label,excludeId=null){
  const base=String(label).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,54)||'screen';
@@ -12135,7 +12181,7 @@ const edgeEditing={reconnect:null,detach:null,error:''};
 function beginEdgeReconnect(edge){
  if(state.activeRun)return;
  closeConnectionMenu(false);flowUi.cancelled=false;connectionUi.committed=false;
- edgeEditing.reconnect={id:edge.id,structure:edge.id.startsWith('contains-'),owner:designOwner(),revision:design().revision};
+ edgeEditing.reconnect={id:edge.id,structure:edge.id.startsWith('contains-'),owner:designOwner(),revision:design().revision,snapshot:edgeReviewSnapshot(edge.id)};
  setFlowConnecting(true);document.getElementById('vf-root')?.setAttribute('data-reconnecting','true');
 }
 function endEdgeReconnect(){
@@ -12154,6 +12200,7 @@ function validStructureReconnect(connection){
 function reviewEdgeReconnect(edge,connection){
  const review=edgeEditing.reconnect;
  if(!review||flowUi.cancelled||review.id!==edge.id||review.owner!==designOwner()||review.revision!==design().revision){endEdgeReconnect();return;}
+ if(review.snapshot!==edgeReviewSnapshot(edge.id)){endEdgeReconnect();notify('The relationship changed during this drag. The newer relationship is retained; reopen it to review.');return;}
  connectionUi.committed=true;
  if(!review.structure){endEdgeReconnect();reviewFlowConnection(connection,edge.id);return;}
  if(!validStructureReconnect(connection)){endEdgeReconnect();notify('That structural attachment would be invalid. The original is retained.');return;}
@@ -12168,7 +12215,7 @@ function requestEdgeRemoval(id){
  if(!id.startsWith('contains-')){showModal('canvas-edge-remove',id);return;}
  const d=design(),child=d.nodes.find(n=>'contains-'+n.id===id);if(!child?.parent)return;
  const alternatives=structureDetachParents(d,child);
- edgeEditing.detach={id,child:child.id,owner:designOwner(),revision:d.revision,parent:child.parent,replacement:alternatives[0]?.id||''};edgeEditing.error='';
+ edgeEditing.detach={id,child:child.id,owner:designOwner(),revision:d.revision,parent:child.parent,snapshot:edgeReviewSnapshot(id),replacement:alternatives[0]?.id||''};edgeEditing.error='';
  showModal('edge-detach');
 }
 function structureDetachParents(d,child){
@@ -12183,7 +12230,7 @@ function edgeDetachDialog(){
 function confirmStructureRemoval(){
  const d=design(),f=edgeEditing.detach,child=d.nodes.find(n=>n.id===f?.child);
  const fail=m=>{edgeEditing.error=m;redrawModal();};
- if(!child||state.activeRun||f.owner!==designOwner()||f.revision!==d.revision||child.parent!==f.parent)return fail('This review is stale. Reopen the current relationship.');
+ if(!child||state.activeRun||f.owner!==designOwner()||f.revision!==d.revision||child.parent!==f.parent||f.snapshot!==edgeReviewSnapshot(f.id))return fail('This review is stale. Reopen the current relationship.');
  const parent=document.getElementById('detach-parent')?.value||null,candidate=designCopy(d);candidate.nodes.find(n=>n.id===child.id).parent=parent;
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  if(parent===child.parent)return fail('Choose a different parent.');
@@ -12195,6 +12242,8 @@ function handleEdgeEditingAction(action,value){
  if(action==='edge-detach-confirm'){confirmStructureRemoval();return true;}
  return false;
 }
+
+function edgeReviewSnapshot(id){return JSON.stringify(id.startsWith('contains-')?canvasState().anchors[id]:design().links.find(e=>e.id===id));}
 
 // All library entries use one component instance workflow. No executable templates.
 const unifiedUi={tags:[],sort:'name'};
@@ -13563,7 +13612,7 @@ function saveTypedConnection(){
  if(f.editing&&!d.links.some(e=>e.id===f.id))return fail('The original connection no longer exists.');
  const edge={id:f.editing?f.id:'edge-'+d.nextId,from:f.from,to:f.to,label:f.label.trim(),kind,sourceHandle:sh,targetHandle:th,condition:kind==='conditional'?f.condition.trim():'',description:(f.description||'').trim()};
  if(!validLinkFields(edge))return fail('Connection details exceed their limits.');
- if(f.editing&&JSON.stringify(d.links.find(e=>e.id===f.id))===JSON.stringify(edge)){closeModal();return;}
+ if(f.editing&&JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))===JSON.stringify(connectionEditIdentity(edge))){closeModal();return;}
  recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();designUi.selected=edge.from;canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
 }
 function deselectFlow(){
@@ -13596,6 +13645,8 @@ function saveBindingRegion(){
  const b=n.components.find(b=>b.id===f.id&&b.slot===f.originalSlot);if(!b||!componentSlots(n).includes(f.slot)||n.components.some(x=>x!==b&&x.id===f.id&&x.slot===f.slot)){interactionUi.error='Choose an available region for this component.';redrawModal();return;}
  if(b.slot===f.slot){closeModal();return;}recordDesign();b.slot=f.slot;designChanged();closeModal();render();
 }
+
+function connectionEditIdentity(e){return [e.id,e.from,e.to,e.label,e.kind,e.sourceHandle||'out-right',e.targetHandle||'in-left',e.condition||'',e.description||''];}
 
 function flowInspector(d,n){
  if(canvasUi.inspector==='bricks')return brickInspector(d,n);
@@ -13720,7 +13771,7 @@ function mountFlow(){
   api.onEdgeUpdate(({edge,connection})=>{if(current())reviewEdgeReconnect(edge,connection);});
   api.onEdgeUpdateEnd(()=>{if(current())endEdgeReconnect();});
   api.onPaneClick(()=>{if(current()&&!flowUi.suppressClick&&!canvasUi.placing)deselectFlow();});
-  api.onViewportChange(v=>{if(!current()||flowUi.syncing)return;const c=canvasState();c.pan={x:Math.max(-50000,Math.min(50000,v.x)),y:Math.max(-50000,Math.min(50000,v.y))};c.zoom=Math.max(.12,Math.min(2,v.zoom));c.fitted=true;paintFlowChrome();clearTimeout(flowUi.saveTimer);flowUi.saveTimer=setTimeout(()=>{if(current())save();},150);});
+  api.onViewportChange(v=>{if(!current()||flowUi.syncing)return;const c=canvasState();c.pan=boundedCameraPan(v);c.zoom=Math.max(.12,Math.min(2,v.zoom));c.fitted=true;paintFlowChrome();clearTimeout(flowUi.saveTimer);flowUi.saveTimer=setTimeout(()=>{if(current())save();},150);});
   return ()=>h(VueFlow,{id:'companion-map-'+serial,nodes:store.nodes,edges:store.edges,nodeTypes,edgeTypes,applyDefault:false,connectionMode:ConnectionMode.Strict,edgeUpdaterRadius:14,connectOnClick:false,isValidConnection:validFlowConnection,panOnScroll:store.preferences.wheel==='pan',zoomOnScroll:store.preferences.wheel==='zoom',zoomOnPinch:store.preferences.pinch,zoomOnDoubleClick:false,zoomActivationKeyCode:['Control','Meta'],panOnDrag:store.preferences.panOnDrag,preventScrolling:store.preferences.wheel!=='page',minZoom:.12,maxZoom:2,snapToGrid:store.snap,snapGrid:[24,24],nodeDragThreshold:4,paneClickDistance:5,deleteKeyCode:null,selectionKeyCode:null,multiSelectionKeyCode:null,nodesFocusable:false,edgesFocusable:true,defaultViewport:{x:canvasState().pan.x,y:canvasState().pan.y,zoom:canvasState().zoom},noDragClassName:'nodrag',noPanClassName:'nopan',noWheelClassName:'nowheel'});
  }});
  flowUi.app=createApp(Component);flowUi.app.use(pinia);flowUi.app.mount(root);paintFlowChrome();
@@ -13989,8 +14040,8 @@ function validCanvas(c){
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
  if(!validReferenceSections(c.sections)||!validAnchorMap(c.anchors))return false;
  if(c.brickDisplay!==undefined&&!['structure','labels','wireframes'].includes(c.brickDisplay))return false;
- const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isFinite(x)&&Math.abs(x)<=50000;
- return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x)&&num(c.pan.y)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
+ const plain=x=>x&&typeof x==='object'&&!Array.isArray(x),num=(x,limit=CANVAS_LIMITS.world)=>Number.isFinite(x)&&Math.abs(x)<=limit;
+ return plain(c)&&c.schema===1&&Object.hasOwn(MAP_LAYOUTS,c.layout)&&plain(c.positions)&&Object.keys(c.positions).length<=60&&Object.entries(c.positions).every(([id,p])=>typeof id==='string'&&id.length<=120&&plain(p)&&num(p.x)&&num(p.y))&&plain(c.pan)&&num(c.pan.x,CANVAS_LIMITS.pan)&&num(c.pan.y,CANVAS_LIMITS.pan)&&Number.isFinite(c.zoom)&&c.zoom>=0.12&&c.zoom<=2&&typeof c.snap==='boolean'&&Array.isArray(c.collapsed)&&c.collapsed.length<=60&&c.collapsed.every(id=>typeof id==='string'&&id.length<=120)&&['none','selected','all'].includes(c.edges)&&typeof c.custom==='boolean'&&typeof c.arrangedFor==='string'&&c.arrangedFor.length<=16000&&typeof c.fitted==='boolean'&&validCanvasPreferences(c.interaction);
 }
 function canvasStructure(d){return JSON.stringify(d.nodes.map(n=>[n.id,n.parent,n.kind]));}
 function canvasState(d=design()){
@@ -14054,6 +14105,7 @@ function zoomMap(factor,anchor=null){
  c.pan={x:p.x-(p.x-c.pan.x)*z/c.zoom,y:p.y-(p.y-c.pan.y)*z/c.zoom};c.zoom=z;c.fitted=true;paintMap();save();
 }
 function paintMap(){
+ const camera=design().canvas;if(camera)camera.pan=boundedCameraPan(camera.pan);
  if(flowUi.api){paintFlowViewport();return;}
  const world=document.getElementById('map-world');if(!world)return;
  const c=canvasState();world.style.setProperty('--map-zoom',c.zoom);world.style.setProperty('--map-inverse',1/c.zoom);world.style.transform=`translate(${c.pan.x}px,${c.pan.y}px) scale(${c.zoom})`;
@@ -14073,6 +14125,8 @@ function revealDesignSelection(){
  if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
 function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;return value;}
+
+function boundedCameraPan(p){return {x:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.x)),y:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.y))};}
 
 // Bounded deterministic layouts for at most 60 concept surfaces. No external engine.
 function layoutPositions(d,mode){
@@ -14318,7 +14372,7 @@ window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});
 
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
@@ -14570,8 +14624,8 @@ function structuralDesign(value){
  if(!value||value.schema!==1||!Array.isArray(value.nodes)||value.nodes.length>DESIGN_LIMITS.nodes||!Array.isArray(value.links)||value.links.length>DESIGN_LIMITS.links)return false;
  if(typeof value.goal!=='string'||value.goal.length>1000||!['desktop','mobile-ready'].includes(value.platform)||!BLUEPRINTS.some(b=>b.id===value.blueprint))return false;
  const text=(x,max=120)=>typeof x==='string'&&x.length<=max;
- if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&NODE_KINDS[n.kind]&&LAYOUTS.some(l=>l.id===n.layout)&&PLACEMENTS[n.placement]&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
- if(!value.links.every(e=>e&&text(e.id)&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
+ if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&Object.hasOwn(NODE_KINDS,n.kind)&&LAYOUTS.some(l=>l.id===n.layout)&&Object.hasOwn(PLACEMENTS,n.placement)&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
+ if(!value.links.every(e=>e&&text(e.id)&&e.id.length>0&&!e.id.startsWith('contains-')&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
  return productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total;
 }
 function designIssues(d){
@@ -14626,11 +14680,20 @@ function importDesign(text){
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error');if(issues.length)throw Error(issues[0].message);
- const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,canvas:clean.canvas||emptyCanvas(),nextId:Math.max(1,...clean.nodes.map(n=>Number(n.id.replace('node-',''))||0),...clean.links.map(e=>Number(e.id.replace('edge-',''))||0))+1});designChanged();designUi.selected=d.nodes[0]?.id;return d;
+ const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
 }
 function validSavedDesign(d){
  const plain=o=>o&&typeof o==='object'&&!Array.isArray(o);
- return structuralDesign(d)&&Number.isInteger(d.revision)&&d.revision>0&&Number.isInteger(d.nextId)&&d.nextId>0&&plain(d.emitted)&&Object.keys(d.emitted).length<=600&&Object.values(d.emitted).every(f=>plain(f)&&typeof f.owner==='string'&&typeof f.content==='string'&&f.content.length<100000&&typeof f.protected==='boolean')&&Array.isArray(d.history)&&d.history.length<=20&&Array.isArray(d.future)&&d.future.length<=20&&[...d.history,...d.future].every(s=>structuralDesign({...s,schema:1}));
+ return structuralDesign(d)&&Number.isInteger(d.revision)&&d.revision>0&&Number.isSafeInteger(d.nextId)&&d.nextId>0&&d.nextId<Number.MAX_SAFE_INTEGER-100000&&plain(d.emitted)&&Object.keys(d.emitted).length<=600&&Object.values(d.emitted).every(f=>plain(f)&&typeof f.owner==='string'&&typeof f.content==='string'&&f.content.length<100000&&typeof f.protected==='boolean')&&Array.isArray(d.history)&&d.history.length<=20&&Array.isArray(d.future)&&d.future.length<=20&&[...d.history,...d.future].every(s=>structuralDesign({...s,schema:1}));
+}
+
+function importCounter(d){
+ let max=0;
+ for(const item of [...d.nodes,...d.links,...d.nodes.flatMap(bricksOf)]){
+  const match=/^(?:node|edge|brick)-([0-9]+)$/.exec(item.id);if(!match)continue;
+  const n=Number(match[1]);if(!Number.isSafeInteger(n)||n>=Number.MAX_SAFE_INTEGER-100000)throw Error('Blueprint IDs exceed the safe numeric range. Nothing was imported.');max=Math.max(max,n);
+ }
+ return max+1;
 }
 
 // A deterministic browser-only compiler preview, NOT a production generator.
@@ -14747,11 +14810,11 @@ function linkKind(n){return n?.kind==='modal'?'open':n?.kind==='settings'?'confi
 function designGoalDialog(){return dialogBody('Define the product intent',`${designInput('What should the plugin help people do?','goal',designUi.goalDraft.goal,'This guides the business-logic handoff; no behavior is inferred from prose.',true)}${designSelect('Target ambition','platform',[['desktop','Desktop-first'],['mobile-ready','Mobile-ready design (requires qualification)']],designUi.goalDraft.platform,'This changes design checks, not the manifest or tested-platform claims.')}<p class="error" role="alert">${esc(designUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save intent','design-goal-save','','primary'));}
 function designReplaceDialog(){const b=BLUEPRINTS.find(b=>b.id===modalData);return dialogBody('Use '+b.name+'?',`${layoutThumbnail(b.layout,true)}<p>${b.description}</p>${callout('This replaces the editable sitemap only. PRDs and components are preserved. Existing requirement links to replaced surfaces become explicit blockers; no source files are deleted. Undo restores the previous outline.','warn')}`,button('Cancel','close','','ghost')+button('Use blueprint','blueprint-apply',b.id,'primary','check'));}
 function designRemoveDialog(){const n=design().nodes.find(n=>n.id===modalData);if(!n)return dialogBody('Surface not found','It may already have been removed.');const nodes=nodeDescendants(design(),n.id);return dialogBody('Remove '+n.label+'?',`<p>This removes ${nodes.size} surface(s) and ${design().links.filter(e=>nodes.has(e.from)||nodes.has(e.to)).length} related user-flow connection(s) from the outline.</p><p class="small muted">${allRequirements().filter(r=>r.nodes.some(id=>nodes.has(id))).length} requirement reference(s) are retained and will need remapping. Shared component definitions are kept.</p>${callout('Previously scaffolded files are retained. This is not a code deletion or migration. You can undo the outline change.','warn')}`,button('Cancel','close','','ghost')+button('Remove from outline','design-remove-confirm',n.id,'danger'));}
-function designTransferDialog(){return dialogBody('Portable plugin blueprint',`<p>Export the sitemap, layouts, patterns and product intent as data. No paths, execution trust, credentials or test results are included. Import validates schema and structure before replacing the outline.</p><label for="blueprint-json">Blueprint JSON</label><textarea id="blueprint-json" class="mono transfer-area" spellcheck="false">${esc(JSON.stringify(portableDesign(),null,2))}</textarea><p id="design-error" class="error" role="alert">${esc(designUi.error)}</p>`,button('Close','close','','ghost')+button('Import reviewed JSON','design-import','','','upload')+button('Download blueprint','design-export','','primary','download'));}
+function designTransferDialog(){return dialogBody('Portable plugin blueprint',`<p>Export the sitemap, layouts, patterns and product intent as data. No paths, execution trust, credentials or test results are included. Import validates schema and structure before replacing the outline.</p><label for="blueprint-json">Blueprint JSON</label><textarea id="blueprint-json" data-field="design-transfer-json" aria-describedby="design-error" aria-invalid="${!!designUi.error}" class="mono transfer-area" spellcheck="false">${esc(designUi.transfer?.text??JSON.stringify(portableDesign(),null,2))}</textarea><p id="design-error" class="error" role="alert">${esc(designUi.error)}</p>`,button('Close','close','','ghost')+button('Import reviewed JSON','design-import','','','upload')+button('Download saved blueprint','design-export','','primary','download'));}
 function startNodeForm(kind='view',editId=null){
  const d=design(),n=d.nodes.find(n=>n.id===editId),selected=selectedNode();
  const parent=kind==='page'?(selected&&['view','page','group'].includes(selected.kind)?selected.id:d.nodes.find(n=>n.kind==='view')?.id||null):null;
- designUi.form=n?{...designCopy(n),intent:n.intent||'',goals:n.goals||[],editing:true,owner:designOwner()}:{components:[],id:'node-'+d.nextId,label:kind==='view'?'New view':kind==='page'?'New screen':'New surface',slug:kind==='view'?'new-view':kind==='page'?'new-screen':'new-surface',kind,layout:'single',placement:'tab',parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:!d.nodes.some(n=>n.entry)&&kind==='view',instance:'reuse',patterns:[],goal:'',intent:'',goals:[],entity:'',editing:false,owner:designOwner()};
+ designUi.form=n?{...designCopy(n),intent:n.intent||'',goals:n.goals||[],editing:true,owner:designOwner()}:{components:[],id:'node-'+d.nextId,label:kind==='view'?'New view':kind==='page'?'New screen':'New surface',slug:kind==='view'?'new-view':kind==='page'?'new-screen':'new-surface',kind,layout:kind==='settings'?'form':'single',placement:'tab',parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:!d.nodes.some(n=>n.entry)&&kind==='view',instance:'reuse',patterns:[],goal:'',intent:'',goals:[],entity:'',editing:false,owner:designOwner()};
  if(!n){Object.assign(designUi.form,uniqueSurfaceName(d,kind));designUi.form.autoSlug=true;}
  designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
 }
@@ -14767,12 +14830,14 @@ function saveDesignNode(){
  if(n.entry)candidate.nodes.forEach(x=>{if(x.id!==n.id)x.entry=false;});
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
+ if(f.editing&&JSON.stringify(d.nodes.map(surfaceEditIdentity))===JSON.stringify(candidate.nodes.map(surfaceEditIdentity))){closeModal();return;}
  recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
 function editDesignField(el,commit){
  const key=el.dataset.field,value=el.type==='checkbox'?el.checked:el.value;
  if(key==='pattern-search'||key==='pattern-category'){designUi[key==='pattern-search'?'filter':'category']=value;document.getElementById('pattern-results').innerHTML=patternResults();return true;}
  if(!key?.startsWith('design-'))return false;
+ if(key==='design-transfer-json'){if(designUi.transfer)designUi.transfer.text=value;return true;}
  if(key==='design-approve'){if(designUi.plan)designUi.plan.approved=value;return true;}
  if(key==='design-goal'||key==='design-platform'){designUi.goalDraft[key.slice(7)]=value;return true;}
  if(key.startsWith('design-node-')){
@@ -14789,6 +14854,9 @@ function editDesignField(el,commit){
  if(key.startsWith('design-link-')){const k=key.slice(12);designUi.form[k]=value;if(k==='to'&&!allowedLinkKinds(design().nodes.find(n=>n.id===value)).includes(designUi.form.kind))designUi.form.kind=linkKind(design().nodes.find(n=>n.id===value));if(commit&&el.tagName==='SELECT')redrawModal();return true;}
  return true;
 }
+
+// Compare editable values, not object insertion order or absent optional defaults.
+function surfaceEditIdentity(n){return ['components','id','slug','label','kind','layout','placement','parent','nav','command','ribbon','entry','instance','patterns','goal','entity'].map(k=>n[k]).concat([n.intent||'',n.goals||[],n.bricks||[]]);}
 
 function handleDesignAction(action,value){
  if(!action.startsWith('design-')&&!action.startsWith('blueprint-')&&action!=='outline-start')return false;
@@ -14812,11 +14880,7 @@ function handleDesignAction(action,value){
    const [id,delta]=value.split(':');const node=d.nodes.find(n=>n.id===id);const siblings=d.nodes.filter(n=>n.parent===node.parent);const si=siblings.indexOf(node),other=siblings[si+Number(delta)];
    if(other){recordDesign();const a=d.nodes.indexOf(node),b=d.nodes.indexOf(other);[d.nodes[a],d.nodes[b]]=[d.nodes[b],d.nodes[a]];designChanged();render();}else notify('Already at the edge of this group.');break;
   }
-  case 'design-duplicate':{
-   if(d.nodes.length>=DESIGN_LIMITS.nodes){notify('The concept supports up to 60 surfaces.');break;}
-   const original=d.nodes.find(n=>n.id===value);recordDesign();const slug=allocateSurfaceCode(d,original.label);
-   const copy={...designCopy(original),id:'node-'+d.nextId++,slug,label:original.label+' copy',entry:false};if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(d)}));d.nodes.push(copy);canvasState(d);assignCardToSection(d,copy.id,sectionForCard(d,original.id));designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');break;
-  }
+  case 'design-duplicate':duplicateDesignSurface(value);break;
   case 'design-remove':showModal('design-remove',value);break;
   case 'design-remove-confirm':{if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}
   case 'design-connect':{
@@ -14832,9 +14896,9 @@ function handleDesignAction(action,value){
   case 'design-plan':workflowUi.fileQuery='';workflowUi.fileStatus='all';reviewDesignPlan();break;
   case 'design-file':designUi.file=Number(value);redrawModal();break;
   case 'design-apply':simulateDesignApply();break;
-  case 'design-transfer':designUi.error='';showModal('design-transfer');break;
-  case 'design-import':try{importDesign(document.getElementById('blueprint-json').value);closeModal();render();notify('Validated blueprint imported. Execution trust was not imported.');}catch(e){designUi.error=e.message;redrawModal();}break;
-  case 'design-export':showModal('copy',{title:'Data-only plugin blueprint. No paths, approval or executable code.',text:JSON.stringify(portableDesign(),null,2),filename:'plugin-blueprint.json'});break;
+  case 'design-transfer':designUi.error='';designUi.transfer={text:JSON.stringify(portableDesign(),null,2),owner:designOwner(),revision:d.revision,snapshot:JSON.stringify(designSnapshot(d))};showModal('design-transfer');break;
+  case 'design-import':importReviewedBlueprint();break;
+  case 'design-export':if(modalType==='design-transfer'){downloadText({text:JSON.stringify(portableDesign(),null,2),filename:'plugin-blueprint.json'});break;}showModal('copy',{title:'Data-only plugin blueprint. No paths, approval or executable code.',text:JSON.stringify(portableDesign(),null,2),filename:'plugin-blueprint.json'});break;
   case 'design-bundle':showModal('copy',{title:'Concept preview bundle. NOT an installable plugin; business hooks and test obligations remain incomplete.',text:JSON.stringify({kind:'concept-scaffold-preview',schema:1,executable:false,blueprint:portableDesign(),files:designUi.plan?.changes||[],realCommandsExecuted:0},null,2),filename:'companion-scaffold-preview.json'});break;
   case 'design-create':{
    if(project()){notify('The outline already belongs to a project. Use Review boilerplate to extend it.');break;}
@@ -14851,6 +14915,24 @@ function createWizardFromDesign(){const w=state.wizard||newWizard();w.rev++;w.pl
 function wizardBlueprintSection(){const w=state.wizard,b=BLUEPRINTS.find(b=>b.id===(w.blueprint||'workspace'));return `<div class="card mt16"><div class="section-head"><h3>Plugin shell blueprint</h3>${badge('Design only','purple')}</div><p>${esc(b.name)} · ${w.design?.nodes.length??createDesign(b.id).nodes.length} outlined surfaces</p>${button('Design sitemap & layouts','design-open-from-wizard','','small','layers')}<p class="tiny muted mt16 mb0">Source version and shell blueprint are separate choices. Setup uses the existing CLI; sitemap generation requires a new shared maker.</p></div>`;}
 function outlineOverviewCard(){const d=design();return `<section class="card outline-overview"><div><span class="eyebrow">PLUGIN BLUEPRINT</span><h2>${esc(BLUEPRINTS.find(b=>b.id===d.blueprint)?.name||'Custom outline')}</h2><p class="mb0">${d.nodes.filter(n=>n.kind==='view').length} native views · ${d.nodes.filter(n=>n.kind==='page').length} internal screens · ${d.nodes.reduce((n,x)=>n+x.patterns.length,0)} pattern selections</p></div><div class="row wrap">${button('Edit sitemap','nav','sitemap','primary small','layers')}${button('Add a view','design-add','view','small','plus')}</div></section>`;}
 
+
+function importReviewedBlueprint(){
+ const f=designUi.transfer,d=design();
+ if(f)f.text=document.getElementById('blueprint-json')?.value??f.text;
+ try{
+  if(!f||f.owner!==designOwner()||f.revision!==d.revision||f.snapshot!==JSON.stringify(designSnapshot(d)))throw Error('The outline changed after this import review opened. Copy your draft and reopen the review. Nothing was replaced.');
+  importDesign(f.text);closeModal();render();notify('Validated blueprint imported. Execution trust was not imported.');
+ }catch(e){designUi.error=e instanceof SyntaxError?'Invalid JSON. Correct the syntax below; your pasted text has been kept.':e.message;redrawModal();document.getElementById('blueprint-json')?.focus();}
+}
+function duplicateDesignSurface(id){
+ const d=design(),original=d.nodes.find(n=>n.id===id);if(!original)return;
+ if(d.nodes.length>=DESIGN_LIMITS.nodes){notify('The concept supports up to 60 surfaces.');return;}
+ if(d.nodes.reduce((sum,n)=>sum+bricksOf(n).length,0)+bricksOf(original).length>BRICK_LIMITS.total){notify('Cannot duplicate: the outline would exceed 400 content blocks. Your existing content is unchanged.');return;}
+ const candidate=designCopy(d),copy={...designCopy(original),id:'node-'+candidate.nextId++,slug:allocateSurfaceCode(d,original.label),label:original.label.slice(0,115)+' copy',entry:false};
+ if(copy.bricks)copy.bricks=copy.bricks.map(b=>({...b,id:freshBrickId(candidate)}));candidate.nodes.push(copy);
+ const errors=newDesignErrors(d,candidate);if(errors.length){notify('Cannot duplicate: '+errors[0].message);return;}
+ recordDesign();d.nodes=candidate.nodes;d.nextId=candidate.nextId;canvasState(d);assignCardToSection(d,copy.id,sectionForCard(d,original.id));designChanged();designUi.selected=copy.id;render();notify('Surface duplicated. Children and connections are not duplicated.');
+}
 
 render();
 </script>

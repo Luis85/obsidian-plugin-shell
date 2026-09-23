@@ -33,7 +33,7 @@
 <aside class="sidebar" id="sidebar" aria-label="Workbench navigation"></aside>
 <div class="main-column"><div class="host-tabs"><div class="host-tab"><span class="tab-mark">◇</span> Shell Workbench <span class="muted">⋮</span></div><span class="tabs-right">Concept 01</span></div><header class="workbench-header" id="header"></header><div class="content-layout"><main id="content" tabindex="-1"></main><aside class="context-panel" id="context" aria-label="Project context"></aside></div></div>
 </div>
-<footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status"></span><span>Desktop concept · offline</span></footer>
+<footer class="host-status"><span id="status-left">Plugin Lab · 0 connected projects</span><span id="storage-status" role="status" aria-live="polite"></span><button id="storage-recovery" data-action="storage-recovery" hidden>Export recovery</button><span>Desktop concept · offline</span></footer>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
 <dialog id="tour" aria-labelledby="tour-title"></dialog>
 <div id="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -102,6 +102,7 @@ const SERVICES = [
 const SCOPES = [['verify','Project verification','Static, service, coverage & artifact checks'],['browser','Browser E2E','Served real-component harness'],['native','Native Obsidian','Isolated host fixture only'],['security','Security audit','Live registry scope in the real product']];
 const STAGES = ['Validate approved inputs','Apply project identity','Install locked dependencies','Verify and build candidate','Stage complete artifacts','Deploy to bound fixture vault'];
 const STEPS = ['Welcome','Environment','Template','Identity','Development vault','Trust & review','Set up','First working loop'];
+let persistenceSnapshot=null;
 let storageWarning = '', toastTimer, runTimer = null, modalType = '', modalData = null, activeTour = false;
 const freshState = () => ({schema:1,view:'projects',projects:[],activeId:null,runs:[],activeRun:null,sequence:0,wizard:null,generator:{kind:'feature',name:'bookmarks',entity:'bookmark',preset:'title',folder:'Bookmarks',group:'',plan:null},settings:{theme:'dark',remember:true},scenario:'happy',tourIndex:0,toolTab:'services',toolFilter:'all',search:'',selectedFile:0});
 function validState(s){
@@ -114,7 +115,7 @@ function validState(s){
 }
 function loadState(){
  let raw;
- try{raw=localStorage.getItem(STORAGE_KEY);}catch{storageWarning='Browser storage unavailable. This session is in memory only.';return freshState();}
+ try{raw=localStorage.getItem(STORAGE_KEY);persistenceSnapshot=raw;}catch{storageWarning='Browser storage unavailable. This session is in memory only.';return freshState();}
  if(!raw)return freshState();
  try{const parsed=JSON.parse(raw);if(!validState(parsed))throw Error('Unknown demo state');return parsed;}
  catch{storageWarning='Stored demo unavailable; original storage preserved until explicit reset.';return freshState();}
@@ -123,7 +124,7 @@ let state = loadState();
 // Fixture sessions never survive page unload as a hidden running daemon.
 state.projects.forEach(p=>{p.sessions=[];p.notes=p.notes||[];});
 if(state.activeRun){const r=state.runs.find(x=>x.id===state.activeRun);if(r){r.status='interrupted';r.logs.push('[demo] Page closed before completion. No real process existed.');}state.activeRun=null;if(state.wizard?.step===6)state.wizard.status='interrupted';}
-function save(){if(storageWarning)return;try{if(state.settings.remember)localStorage.setItem(STORAGE_KEY,JSON.stringify(state));else localStorage.removeItem(STORAGE_KEY);}catch{storageWarning='Browser storage unavailable. This session is in memory only.';}}
+function save(){saveConceptState();}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function icon(n){return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[n]||ICONS.box}"/></svg>`;}
 function button(label,action,value='',kind='',ico='',extra=''){return `<button class="btn ${kind}" data-action="${esc(action)}" data-value="${esc(value)}" ${extra}>${ico?icon(ico):''}${esc(label)}</button>`;}
@@ -255,7 +256,7 @@ function attachProject(){const name=document.getElementById('f-attach-name').val
 async function copyText(text){try{if(!navigator.clipboard)throw Error();await navigator.clipboard.writeText(text);notify('Copied. Nothing was executed.');}catch{showModal('copy',{text});}}
 function handoffText(){const p=project();return `# Shell Workbench concept handoff\n\n**Browser simulation only. Not project verification evidence.**\n\n## Fixture project\n\nPlugin: ${p?.id||'none'}\nVersion: ${p?.version||'none'}\nSource revision: ${p?.rev||0}\nBuilt revision: ${p?.builtRev||0}\nInstalled revision: ${p?.installedRev||0}\n\n## Simulated scopes\n\n${SCOPES.map(([k,t])=>`${t}: ${p?.quality[k]?p.quality[k].rev!==p.rev?'stale':p.quality[k].status:'not run'}`).join('\n')}\n\n## Outstanding implementation gates\n\nCommunity policy interpretation; shared bound-vault deployment; independent template export; real CLI parity; desktop qualification.\n\nNo tag, release, host activation or directory submission occurred.\nAbsolute source paths, author names and raw logs are omitted.\n`;}
 function diagnosticText(){return JSON.stringify({kind:'concept-only-diagnostics',schema:1,realOperationsExecuted:0,runs:state.runs.map(r=>({id:r.id,kind:r.kind,status:r.status,stageCount:r.stages.length})),note:'No paths, project names, raw logs, credentials or environment fields included.'},null,2);}
-function downloadText(){const {text,filename}=modalData;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Concept text exported. This is not real project evidence.');}
+function downloadText(data=modalData){const {text,filename}=data;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Concept text exported. This is not real project evidence.');}
 
 // Concept section: interactions
 function dispatch(action,value){
@@ -317,7 +318,8 @@ function dispatch(action,value){
  case 'export-diagnostics':showModal('copy',{title:'Sanitized structural demo data only. No raw logs or paths.',text:diagnosticText(),filename:'shell-workbench-concept-diagnostics.json'});break;
  case 'download-text':downloadText();break;
  case 'reset':showModal('reset');break;
- case 'reset-confirm':if(state.activeRun)break;clearTimeout(runTimer);try{localStorage.removeItem(STORAGE_KEY);}catch{}storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');break;
+ case 'reset-confirm':resetConceptState();break;
+ case 'storage-recovery':showModal('copy',{title:'Recovery snapshot of committed concept state, including simulated project locations. Unsubmitted form drafts are not included. Keep this file private; it is not an installable plugin or verification evidence.',text:JSON.stringify(state,null,2),filename:'shell-workbench-recovery.json'});break;
  case 'tour':startTour();break;
  case 'tour-pause':pauseTour();break;
  case 'tour-back':state.tourIndex=Math.max(0,state.tourIndex-1);renderTour();break;
