@@ -6,6 +6,13 @@ import type { BooleanSetting } from '../../application/boolean-setting';
 import type { ErrorReporter, Unsubscribe } from '../../application/ports';
 import { validateFolder } from '../../domain/paths';
 interface SettingsServices { preferences: PreferenceService; notifications: NotificationService; diagnostics: ErrorReporter; settings?: readonly BooleanSetting[]; text(key: string): string }
+function preferencePatch(key: string, value: unknown): Partial<Preferences> | null {
+  if (key === 'hideObsidianViewHeader' && typeof value === 'boolean') return { hideObsidianViewHeader: value };
+  if (key === 'locale' && (value === 'en' || value === 'de')) return { locale: value };
+  if (key === 'taskFolder' && typeof value === 'string') return { taskFolder: value };
+  if (key === 'notifySuccess' && typeof value === 'boolean') return { notifySuccess: value };
+  return null;
+}
 export class ShellSettingsTab extends PluginSettingTab {
   private readonly releases = new Set<Unsubscribe>();
   private closed = false;
@@ -79,21 +86,19 @@ export class ShellSettingsTab extends PluginSettingTab {
     const epoch = this.epoch; const setting = this.featureSetting(key);
     if (setting) {
       const result = await setting.set(value);
-      if (this.closed || this.hidden || epoch !== this.epoch) return;
+      if (!this.currentEpoch(epoch)) return;
       if (!result.ok) this.services.notifications.show('native-settings', 'error', result.error.key, true, 'runtime');
       // Render-owned handles update in place, even while the toggle has focus.
       return;
     }
-    const patch: Partial<Preferences> | null = key === 'hideObsidianViewHeader' && typeof value === 'boolean' ? { hideObsidianViewHeader: value }
-      : key === 'locale' && (value === 'en' || value === 'de') ? { locale: value }
-      : key === 'taskFolder' && typeof value === 'string' ? { taskFolder: value }
-      : key === 'notifySuccess' && typeof value === 'boolean' ? { notifySuccess: value } : null;
+    const patch = preferencePatch(key, value);
     if (!patch) return;
     const result = await this.services.preferences.update(patch);
-    if (this.closed || this.hidden || epoch !== this.epoch) return;
+    if (!this.currentEpoch(epoch)) return;
     if (!result.ok) this.services.notifications.show('native-settings', 'error', result.error.key, true, 'runtime');
     this.update();
   }
+  private currentEpoch(epoch: number): boolean { return !this.closed && !this.hidden && epoch === this.epoch; }
   private featureSetting(key: string): BooleanSetting | undefined { return this.services.settings?.find(setting => `authoring:${setting.definition.id}` === key); }
   private stop(): void {
     for (const release of Array.from(this.releases)) {

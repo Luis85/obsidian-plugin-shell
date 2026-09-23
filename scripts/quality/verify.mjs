@@ -8,7 +8,9 @@ const commands = [
   ['scripts/bundling/build.mjs'],
   // Tooling suites launch real compilers/installers; serialize them to avoid
   // oversubscribed cold-start processes and cross-suite source-probe races.
-  ['--test', '--test-concurrency=1', ...toolingTests],
+  process.env.SHELL_EVIDENCE_TOOLING === '1'
+    ? ['scripts/testing/evidence-cli.mjs', 'run', 'tooling']
+    : ['--test', '--test-concurrency=1', ...toolingTests],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
   ['node_modules/eslint/bin/eslint.js', 'src', '--max-warnings', '0'],
@@ -19,6 +21,7 @@ const commands = [
   ['scripts/quality/check-presentation.mjs'],
   ['scripts/quality/check-architecture.mjs'],
   ['scripts/quality/check-analyzer.mjs'],
+  ['scripts/quality/check-maintainability.mjs'],
   ['scripts/makers/entities.mjs', '--check'],
   ['scripts/events/catalog.mjs', '--check'],
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage'],

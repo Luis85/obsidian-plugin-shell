@@ -4,6 +4,17 @@ These checks supplement the full coverage, compiler, architecture, official
 Obsidian lint, artifact, browser and native gates. They have deliberately stated
 scope and positive/negative fixtures; passing them is not full release acceptance.
 
+Fallow explicitly excludes only the three generated install files
+`dist/main.js`, `dist/styles.css` and `dist/manifest.json`. These were already
+outside its maintained-source graph through built-in defaults; naming them avoids
+an ambiguous default-ignore diagnostic in literal Git-free archives. The complete
+artifact gate independently verifies that exact file set, hashes, ownership and
+budgets. Additional source inside `dist` still produces a blocking diagnostic.
+The real transported-archive regression checks valid inputs, unreachable maintained
+source, an extra `dist` source file, and restored controls. The template maintainer
+must review these exact names if the artifact layout changes; no maintained source
+directory or unknown analyzer diagnostic is suppressed.
+
 The Oxlint gate receives a complete explicit inventory of `src` JS/TS/Vue paths.
 This prevents an archive under an ignored parent from silently checking no files.
 Empty input and symlinks fail; actual ignored-parent positive/negative controls

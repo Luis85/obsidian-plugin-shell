@@ -1,8 +1,34 @@
 import { expect } from '@playwright/test';
 import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { nativeCommand } from './native-command.mjs';
+const observations = new Map();
+async function observeTheme(context, theme, phase, output) {
+  const windows = await Promise.all(context.pages().map(async candidate => {
+    try {
+      return await candidate.evaluate(() => ({ at: new Date().toISOString(), monotonicMs: performance.now(), url: location.href,
+        visibility: document.visibilityState, focus: document.hasFocus(), bodyClass: document.body.className,
+        background: getComputedStyle(document.body).backgroundColor,
+        viewport: { width: innerWidth, height: innerHeight, devicePixelRatio },
+        hostConfig: window.app ? { theme: window.app.vault.getConfig('theme'), cssTheme: window.app.vault.getConfig('cssTheme') } : { unavailable: true },
+        selects: Array.from(document.querySelectorAll('select')).map(select => ({ value: select.value, visible: !!select.getClientRects().length,
+          options: Array.from(select.options).map(option => ({ label: option.label, value: option.value })) })),
+        roots: Array.from(document.querySelectorAll('[data-plugin-ui]')).map(root => ({ classes: String(root.className), ownerBody: root.ownerDocument.body.className })),
+      }));
+    } catch (error) { return { unavailable: true, reason: String(error.message).slice(0, 300) }; }
+  }));
+  const trace = observations.get(output) ?? []; trace.push({ theme, phase, at: new Date().toISOString(), windows, independentForegroundHwnd: 'not-captured' }); observations.set(output, trace);
+  writeFileSync(join(output, 'theme-observations.json'), JSON.stringify(trace, null, 2));
+}
 /** Change the real supported Appearance setting; do not invent private theme IDs/commands. */
-export async function setNativeTheme(page, context, theme) {
+export async function setNativeTheme(page, context, theme, output = 'reports/native') {
+  // Observations bracket the unchanged action/assertion sequence; no added readiness wait.
+  await observeTheme(context, theme, 'before-action', output);
+  try { await applyNativeTheme(page, context, theme, output); }
+  catch (error) { await observeTheme(context, theme, 'failed-action', output); throw error; }
+  await observeTheme(context, theme, 'after-assertion', output);
+}
+async function applyNativeTheme(page, context, theme, output) {
   if (!['light', 'dark'].includes(theme)) throw new Error('INVALID_THEME_TEST');
   let settingsPage;
   for (const candidate of context.pages()) {
@@ -25,7 +51,7 @@ export async function setNativeTheme(page, context, theme) {
   if (!(await appearance.evaluate(element => element.classList.contains('is-active')))) await appearance.click();
   // A grouped native setting can contain both scheme and theme selectors. Match the actual options.
   const controls = settingsPage.locator('select:visible');
-  writeFileSync('reports/native/theme-controls.json', JSON.stringify(await controls.evaluateAll(elements => elements.map(el => ({ options: Array.from(el.options).map(option => ({ label: option.label, value: option.value })) }))), null, 2));
+  writeFileSync(join(output, 'theme-controls.json'), JSON.stringify(await controls.evaluateAll(elements => elements.map(el => ({ options: Array.from(el.options).map(option => ({ label: option.label, value: option.value })) }))), null, 2));
   const scheme = controls.filter({ has: settingsPage.locator('option').filter({ hasText: /^Dark$/i }) });
   await expect(scheme).toHaveCount(1);
   const value = await scheme.evaluate((el, target) => {
@@ -45,7 +71,7 @@ export async function setNativeTheme(page, context, theme) {
     await scheme.press('Tab');
   }
   await expect(scheme).toHaveValue(value);
-  await settingsPage.screenshot({ path: `reports/native/native-appearance-${theme}.png` });
+  await settingsPage.screenshot({ path: join(output, `native-appearance-${theme}.png`) });
   // Retain the real settings window for subsequent transitions. Await the host's paint work
   // rather than closing its realm immediately after a class mutation. The isolated native
   // process is stopped by the owning fixture during restart/teardown; no errors are ignored.

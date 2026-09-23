@@ -16,6 +16,7 @@ export function useItemsController() {
   let alive = true;
   const actions = createItemActions(repository, services.modals, owner, () => alive);
   let generation = 0;
+  const currentQuery = (current: number) => alive && current === generation;
   function failed(error: Failure) {
     state.error.value = error;
     if (error.effect === 'uncertain') state.blocked.value = true;
@@ -26,7 +27,7 @@ export function useItemsController() {
     state.loading.value = true;
     try {
       const result = await repository.list();
-      if (!alive || current !== generation) return;
+      if (!currentQuery(current)) return;
       if (!result.ok) { failed(result.error); return; }
       state.items.value = result.value; state.loaded.value = true;
       if (review) {
@@ -35,8 +36,8 @@ export function useItemsController() {
       }
     } catch {
       services.diagnostics.report('items.read', 'items.refresh');
-      if (alive && current === generation) failed({ code: 'unexpected', key: 'error.unexpected', effect: 'none' });
-    } finally { if (alive && current === generation) state.loading.value = false; }
+      if (currentQuery(current)) failed({ code: 'unexpected', key: 'error.unexpected', effect: 'none' });
+    } finally { if (currentQuery(current)) state.loading.value = false; }
   }
   // Subscribe before querying. Every newer fact invalidates older query results.
   const stops = (['plugin-data.created', 'plugin-data.updated', 'plugin-data.deleted'] as const).map(type =>

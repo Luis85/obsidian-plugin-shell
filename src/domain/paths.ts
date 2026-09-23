@@ -18,9 +18,11 @@ export function validateDocumentTitle(input: unknown): Result<string> {
   const invalid = () => failure('validation', 'error.filename', 'title');
   if (typeof input !== 'string' || !input.trim() || input.length > 252 || input.startsWith('.') || /[ .]$/.test(input)
     || input.includes('/') || forbidden.test(input) || /^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?: *\.| *$)/i.test(input)) return invalid();
+  return fitsFilenameBytes(input) ? success(input) : invalid();
+}
+function fitsFilenameBytes(input: string): boolean {
   // .md adds three bytes to the common 255-byte filesystem component limit.
   // URI encoding counts UTF-8 bytes and rejects unpaired surrogate code units.
-  try { if (encodeURIComponent(input).replace(/%[\dA-F]{2}/g, 'x').length > 252) return invalid(); }
-  catch { return invalid(); }
-  return success(input);
+  try { return encodeURIComponent(input).replace(/%[\dA-F]{2}/g, 'x').length <= 252; }
+  catch { return false; }
 }

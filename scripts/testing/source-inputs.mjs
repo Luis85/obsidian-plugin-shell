@@ -1,12 +1,12 @@
 /** Hash actual executable inputs, including new files. Not a whole-repository attestation. */
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
+export { sha256 } from '../shared/hash.mjs';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 import { codeLines } from './code-lines.mjs';
 
 const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
-export const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 export function physicalLines(text) {
   if (!text) return 0;
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');

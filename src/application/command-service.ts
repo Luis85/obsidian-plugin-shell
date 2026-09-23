@@ -10,21 +10,31 @@ interface CommandOptions {
   readonly onFailure?: (error: Failure, commandId: string) => void | Promise<void>;
 }
 /** Snapshot data descriptors without executing accessors or retaining arbitrary result payloads. */
-function resultSnapshot(value: unknown): unknown {
+function dataDescriptors(value: unknown): PropertyDescriptorMap | undefined {
   if (!plainRecord(value)) return undefined;
   const result = Object.getOwnPropertyDescriptors(value);
   if (Object.values(result).some(property => !Object.hasOwn(property, 'value'))) return undefined;
+  return result;
+}
+function resultSnapshot(value: unknown): unknown {
+  const result = dataDescriptors(value);
+  if (!result) return undefined;
   if (result.ok?.value === true) return Object.freeze({ ok: true, value: undefined });
-  if (result.ok?.value !== false || !plainRecord(result.error?.value)) return undefined;
-  const error = Object.getOwnPropertyDescriptors(result.error.value);
-  if (Object.values(error).some(property => !Object.hasOwn(property, 'value'))) return undefined;
+  if (result.ok?.value !== false) return undefined;
+  return failureSnapshot(result.error?.value);
+}
+function failureSnapshot(value: unknown): unknown {
+  const error = dataDescriptors(value);
+  if (!error) return undefined;
   return Object.freeze({ ok: false, error: Object.freeze({ code: error.code?.value, key: error.key?.value, effect: error.effect?.value, field: error.field?.value }) });
 }
 function returnedResult(value: unknown): value is Result<unknown> {
   if (!plainRecord(value)) return false;
   if (value.ok === true) return true;
   if (value.ok !== false || !plainRecord(value.error)) return false;
-  const error = value.error;
+  return returnedFailure(value.error);
+}
+function returnedFailure(error: Record<string, unknown>): boolean {
   return typeof error.code === 'string' && ['validation', 'conflict', 'storage', 'uncertain', 'stale', 'disposed', 'unexpected'].includes(error.code)
     && typeof error.key === 'string' && typeof error.effect === 'string' && ['none', 'committed', 'uncertain'].includes(error.effect)
     && (error.field === undefined || typeof error.field === 'string');
@@ -79,18 +89,25 @@ export class CommandService {
     let result: Result<void>;
     try {
       const raw: unknown = await command.execute();
-      const returned = resultSnapshot(raw);
-      if (raw === undefined) result = success(undefined);
-      else if (returnedResult(returned)) result = returned.ok ? success(undefined) : { ok: false, error: this.failureValue(returned.error) };
-      else { this.errors.report('command.result', 'command.execute'); result = { ok: false, error: { code: 'unexpected', key: 'error.unexpected', effect: 'uncertain' } }; }
+      result = this.interpret(raw);
     } catch {
       this.errors.report('command.execute', 'command.execute');
       result = { ok: false, error: { code: 'unexpected', key: 'error.unexpected', effect: 'uncertain' } };
     }
+    return this.complete(command.id, result);
+  }
+  private interpret(raw: unknown): Result<void> {
+    const returned = resultSnapshot(raw);
+    if (raw === undefined) return success(undefined);
+    if (returnedResult(returned)) return returned.ok ? success(undefined) : { ok: false, error: this.failureValue(returned.error) };
+    this.errors.report('command.result', 'command.execute');
+    return { ok: false, error: { code: 'unexpected', key: 'error.unexpected', effect: 'uncertain' } };
+  }
+  private async complete(id: string, result: Result<void>): Promise<Result<void>> {
     if (!this.disposed) {
-      this.observe({ id: command.id, phase: result.ok ? 'completed' : 'failed', ...(!result.ok ? { effect: result.error.effect } : {}) });
+      this.observe({ id, phase: result.ok ? 'completed' : 'failed', ...(!result.ok ? { effect: result.error.effect } : {}) });
       if (!result.ok && !this.disposed) {
-        try { await this.options.onFailure?.(result.error, command.id); }
+        try { await this.options.onFailure?.(result.error, id); }
         catch { this.errors.report('command.feedback', 'command.feedback'); }
       }
     }

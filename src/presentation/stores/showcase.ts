@@ -68,12 +68,13 @@ export const useShowcase = defineStore('showcase', () => {
   }
   async function openCreated() {
     const current = receipt.value;
+    const stillCurrent = () => alive && receipt.value === current;
     if (!alive || !current || opening.value) return;
     opening.value = true; error.value = undefined;
     try {
       const result = await services.host.openDocument(current.path);
-      if (alive && receipt.value === current && !result.ok) error.value = { ...result.error, effect: 'committed' };
-    } catch { if (alive && receipt.value === current) error.value = { code: 'unexpected', key: 'error.open', effect: 'committed' }; services.diagnostics.report('document.open', 'document.open'); }
+      if (stillCurrent() && !result.ok) error.value = { ...result.error, effect: 'committed' };
+    } catch { if (stillCurrent()) error.value = { code: 'unexpected', key: 'error.open', effect: 'committed' }; services.diagnostics.report('document.open', 'document.open'); }
     finally { if (alive) opening.value = false; }
   }
   function reset() { if (!busy.value && error.value?.effect !== 'uncertain') { if (prepared.value) services.documents.discard(prepared.value); prepared.value = undefined; receipt.value = undefined; error.value = undefined; } }

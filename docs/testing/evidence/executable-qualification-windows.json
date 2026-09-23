@@ -1,0 +1,1506 @@
+{
+  "schemaVersion": 1,
+  "kind": "reviewed-windows-reference-measurements",
+  "candidateSource": "79d668858612b0d631094f04306c6818e8fe066b",
+  "diagnosticDriverHead": "456b49a1f76174671aaca5b5a0d216a15e7d92c2",
+  "comparisonPreflight": {
+    "cpuPercent": 18,
+    "freeMemoryKiB": 1820240,
+    "knownCompetingJobs": 0,
+    "userRequestedQuietWindow": true
+  },
+  "extraDiagnosticCode": [
+    {
+      "path": "prepare.mjs",
+      "sha256": "6a131abf11f9088a582817f6e8d1dee12cef09855189624b0c7b3831d52e6ee4"
+    },
+    {
+      "path": "run.mjs",
+      "sha256": "aea20376873190175770f4845b0560542e3939e1db7d85b720fdcb1c6b4b221c"
+    },
+    {
+      "path": "observe.mjs",
+      "sha256": "522feb31be975122464d8b425e406e3de519ca122fd1bb30d97b7b4706e6c5c9"
+    },
+    {
+      "path": "foreground.ps1",
+      "sha256": "59b687cb94b1dd4d81fbacdca5956d9fe6246855164e68833f20185ebf454a02"
+    },
+    {
+      "path": "inspect-host.mjs",
+      "sha256": "0c17bdb517690239347c1d6239fa5746692499839eae9aba0caa0cb74f2ab546"
+    }
+  ],
+  "diagnosticEvidenceHashes": [
+    {
+      "File": "report.json",
+      "Sha256": "e53287e26d52de8cc87ac98a1b079bfa1301419b335a60beb1f6b8cb80ef719b"
+    },
+    {
+      "File": "performance.json",
+      "Sha256": "217d887a13fc2b5ab2678c0263a57c321d9e3237c544f669f90931ae015cea77"
+    },
+    {
+      "File": "observations.json",
+      "Sha256": "c2b0008608a718982d99d68dad433a49fe2d1da969d9c249c03734fbb32609c6"
+    },
+    {
+      "File": "foreground.jsonl",
+      "Sha256": "bbf6d9cadfbec2f43934698aa267d9b4baf6b9fe0ec58d6fe6a0c04e5b7a9604"
+    },
+    {
+      "File": "diagnostic-driver.json",
+      "Sha256": "c9be1cac825b83c0500694a13ae1940c45de1460cd69fddf9e2b70b84ea719ce"
+    }
+  ],
+  "postStartupQueryWrites": {
+    "calls": 0,
+    "active": 0,
+    "maximumActive": 0,
+    "failures": 0
+  },
+  "attempts": [
+    {
+      "directory": "reports/native/attempts/2026-09-23T17-31-48.785Z-14636",
+      "candidateSource": "79d668858612b0d631094f04306c6818e8fe066b",
+      "nativeStatus": "failed",
+      "completedCheckpoints": [
+        "native-command-opens-view",
+        "native-items-invalid-and-trimmed-create-one-write",
+        "native-items-stable-id-rename-two-view-projection-independent-draft",
+        "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+        "native-items-settings-entity-serialized-writes-retain-current-state",
+        "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+        "native-items-controlled-adapter-rejection-retains-draft-no-success",
+        "native-public-command-local-id-removal-before-plugin-unload",
+        "actual-vault-verbatim-title-and-markdown-match-preview",
+        "native-repository-list-reads-canonical-manually-edited-note",
+        "native-repository-update-preserves-path-identity-user-properties-and-body",
+        "native-repository-trash-cancellation-preserves-exact-note",
+        "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+        "native-host-bridge-publishes-normalized-crud-observations",
+        "native-view-real-event",
+        "native-modal-opens-and-dismisses",
+        "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+        "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+        "native-debug-commands-toggle-and-export-attributable-redacted-report",
+        "native-exact-title-row-hidden-not-tabs-or-window-controls",
+        "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+        "native-command-palette-repeat-toggle-all-leaves-foreign-isolation"
+      ],
+      "rendererErrors": 0,
+      "cleanupFailure": null,
+      "failure": "The real Appearance light request reverted to Dark; host config remained obsidian. Cause unresolved; cold restart was not reached.",
+      "classification": "shared-runner",
+      "performanceStatus": "passed",
+      "sourceInputsDigest": "650c06b21ec3246234f477add8b107d1d9f115fcd62e8ab3dc1255c9e41f73d0",
+      "dependencyLockSha256": "a3441564d8f267be967fd1cec1156f701bd324353cd26f76ed159b510b03b723",
+      "environment": {
+        "platform": "win32",
+        "release": "10.0.26200",
+        "arch": "x64",
+        "cpus": [
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz"
+        ],
+        "totalMemory": 8393850880,
+        "node": "v24.21.0",
+        "playwright": "1.63.0",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "viewport": {
+          "width": 1023,
+          "height": 800,
+          "devicePixelRatio": 2,
+          "visibility": "visible"
+        },
+        "isolation": "Shared-runner diagnostic; timing budgets are advisory."
+      },
+      "assets": [
+        {
+          "file": "main.js",
+          "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+        },
+        {
+          "file": "styles.css",
+          "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+        },
+        {
+          "file": "manifest.json",
+          "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+        }
+      ],
+      "protocol": {
+        "schemaVersion": 1,
+        "warmups": 3,
+        "samples": 30,
+        "clock": "renderer performance.now()",
+        "percentile": "nearest-rank: sorted[ceil(0.95 * n) - 1]",
+        "itemCount": 100,
+        "initialization": "Immediately before await plugins.enablePlugin(id), after awaited disable; finish after runtime registration and empty diagnostics; excludes host startup and unload.",
+        "readiness": "Immediately before workspace.getLeaf(tab).setViewState; finish after Documents click, 100 exact fixture labels, aria-busy=false and two animation frames; includes mount, query, render and paint opportunity.",
+        "fixture": "100 stable-ID plugin-data item records, labels Reference item 001 through 100; schema 1; collection revision 100; each record revision 1.",
+        "policy": "Three retained warmups then 30 sequential samples per metric; no retries, outlier removal or early readiness marker. Correctness failures abort and retain partial results.",
+        "budgets": {
+          "warm-initialization": 200,
+          "items-readiness": 500
+        }
+      },
+      "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
+      "rawSamples": [
+        {
+          "kind": "warm-initialization",
+          "index": 0,
+          "warmup": true,
+          "startMs": 13294.5,
+          "endMs": 13305.79999999702,
+          "durationMs": 11.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 1,
+          "warmup": true,
+          "startMs": 13324.79999999702,
+          "endMs": 13340.29999999702,
+          "durationMs": 15.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 2,
+          "warmup": true,
+          "startMs": 13361.09999999404,
+          "endMs": 13392.29999999702,
+          "durationMs": 31.200000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 3,
+          "warmup": false,
+          "startMs": 13411.70000000298,
+          "endMs": 13428.59999999404,
+          "durationMs": 16.899999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 4,
+          "warmup": false,
+          "startMs": 13453.90000000596,
+          "endMs": 13465.20000000298,
+          "durationMs": 11.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 5,
+          "warmup": false,
+          "startMs": 13483.20000000298,
+          "endMs": 13492.40000000596,
+          "durationMs": 9.200000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 6,
+          "warmup": false,
+          "startMs": 13521.59999999404,
+          "endMs": 13529.09999999404,
+          "durationMs": 7.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 7,
+          "warmup": false,
+          "startMs": 13556.90000000596,
+          "endMs": 13566.59999999404,
+          "durationMs": 9.699999988079071,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 8,
+          "warmup": false,
+          "startMs": 13590.79999999702,
+          "endMs": 13625,
+          "durationMs": 34.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 9,
+          "warmup": false,
+          "startMs": 13644.5,
+          "endMs": 13660.70000000298,
+          "durationMs": 16.200000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 10,
+          "warmup": false,
+          "startMs": 13677.29999999702,
+          "endMs": 13692.79999999702,
+          "durationMs": 15.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 11,
+          "warmup": false,
+          "startMs": 13711.40000000596,
+          "endMs": 13727,
+          "durationMs": 15.599999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 12,
+          "warmup": false,
+          "startMs": 13743.09999999404,
+          "endMs": 13758,
+          "durationMs": 14.900000005960464,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 13,
+          "warmup": false,
+          "startMs": 13775.5,
+          "endMs": 13790.20000000298,
+          "durationMs": 14.700000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 14,
+          "warmup": false,
+          "startMs": 13809.09999999404,
+          "endMs": 13823,
+          "durationMs": 13.900000005960464,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 15,
+          "warmup": false,
+          "startMs": 13843.29999999702,
+          "endMs": 13857.90000000596,
+          "durationMs": 14.600000008940697,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 16,
+          "warmup": false,
+          "startMs": 13877.40000000596,
+          "endMs": 13891.20000000298,
+          "durationMs": 13.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 17,
+          "warmup": false,
+          "startMs": 13909.40000000596,
+          "endMs": 13925.09999999404,
+          "durationMs": 15.699999988079071,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 18,
+          "warmup": false,
+          "startMs": 13942.40000000596,
+          "endMs": 13957.20000000298,
+          "durationMs": 14.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 19,
+          "warmup": false,
+          "startMs": 13976.20000000298,
+          "endMs": 13992.70000000298,
+          "durationMs": 16.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 20,
+          "warmup": false,
+          "startMs": 14023.5,
+          "endMs": 14032.79999999702,
+          "durationMs": 9.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 21,
+          "warmup": false,
+          "startMs": 14056.09999999404,
+          "endMs": 14073.29999999702,
+          "durationMs": 17.200000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 22,
+          "warmup": false,
+          "startMs": 14093.09999999404,
+          "endMs": 14105.20000000298,
+          "durationMs": 12.100000008940697,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 23,
+          "warmup": false,
+          "startMs": 14127.59999999404,
+          "endMs": 14143.40000000596,
+          "durationMs": 15.800000011920929,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 24,
+          "warmup": false,
+          "startMs": 14174,
+          "endMs": 14185.29999999702,
+          "durationMs": 11.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 25,
+          "warmup": false,
+          "startMs": 14207.20000000298,
+          "endMs": 14222.09999999404,
+          "durationMs": 14.899999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 26,
+          "warmup": false,
+          "startMs": 14241.79999999702,
+          "endMs": 14259.59999999404,
+          "durationMs": 17.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 27,
+          "warmup": false,
+          "startMs": 14289.5,
+          "endMs": 14299.40000000596,
+          "durationMs": 9.900000005960464,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 28,
+          "warmup": false,
+          "startMs": 14327.79999999702,
+          "endMs": 14338.20000000298,
+          "durationMs": 10.400000005960464,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 29,
+          "warmup": false,
+          "startMs": 14356.90000000596,
+          "endMs": 14363.40000000596,
+          "durationMs": 6.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 30,
+          "warmup": false,
+          "startMs": 14386.5,
+          "endMs": 14393.29999999702,
+          "durationMs": 6.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 31,
+          "warmup": false,
+          "startMs": 14407.70000000298,
+          "endMs": 14421.5,
+          "durationMs": 13.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 32,
+          "warmup": false,
+          "startMs": 14439.09999999404,
+          "endMs": 14446,
+          "durationMs": 6.9000000059604645,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 0,
+          "warmup": true,
+          "startMs": 14463.79999999702,
+          "endMs": 14863.90000000596,
+          "durationMs": 400.1000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 1,
+          "warmup": true,
+          "startMs": 14904.20000000298,
+          "endMs": 15007.90000000596,
+          "durationMs": 103.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 2,
+          "warmup": true,
+          "startMs": 15037.29999999702,
+          "endMs": 15135.20000000298,
+          "durationMs": 97.90000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 3,
+          "warmup": false,
+          "startMs": 15167.90000000596,
+          "endMs": 15275.40000000596,
+          "durationMs": 107.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 4,
+          "warmup": false,
+          "startMs": 15307.29999999702,
+          "endMs": 15423.5,
+          "durationMs": 116.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 5,
+          "warmup": false,
+          "startMs": 15457.79999999702,
+          "endMs": 15566.40000000596,
+          "durationMs": 108.6000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 6,
+          "warmup": false,
+          "startMs": 15591.5,
+          "endMs": 15722.70000000298,
+          "durationMs": 131.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 7,
+          "warmup": false,
+          "startMs": 15750.59999999404,
+          "endMs": 15848.40000000596,
+          "durationMs": 97.80000001192093,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 8,
+          "warmup": false,
+          "startMs": 15871.90000000596,
+          "endMs": 15987.29999999702,
+          "durationMs": 115.3999999910593,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 9,
+          "warmup": false,
+          "startMs": 16016.29999999702,
+          "endMs": 16119.70000000298,
+          "durationMs": 103.40000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 10,
+          "warmup": false,
+          "startMs": 16149.40000000596,
+          "endMs": 16249.40000000596,
+          "durationMs": 100,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 11,
+          "warmup": false,
+          "startMs": 16275.90000000596,
+          "endMs": 16361.40000000596,
+          "durationMs": 85.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 12,
+          "warmup": false,
+          "startMs": 16389.5,
+          "endMs": 16487.79999999702,
+          "durationMs": 98.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 13,
+          "warmup": false,
+          "startMs": 16515.29999999702,
+          "endMs": 16617.90000000596,
+          "durationMs": 102.6000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 14,
+          "warmup": false,
+          "startMs": 16647.59999999404,
+          "endMs": 16771.59999999404,
+          "durationMs": 124,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 15,
+          "warmup": false,
+          "startMs": 16804.40000000596,
+          "endMs": 16900.59999999404,
+          "durationMs": 96.19999998807907,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 16,
+          "warmup": false,
+          "startMs": 16926.20000000298,
+          "endMs": 17026.20000000298,
+          "durationMs": 100,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 17,
+          "warmup": false,
+          "startMs": 17055.5,
+          "endMs": 17154.40000000596,
+          "durationMs": 98.90000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 18,
+          "warmup": false,
+          "startMs": 17205.79999999702,
+          "endMs": 17309.40000000596,
+          "durationMs": 103.6000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 19,
+          "warmup": false,
+          "startMs": 17338.5,
+          "endMs": 17428,
+          "durationMs": 89.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 20,
+          "warmup": false,
+          "startMs": 17458.79999999702,
+          "endMs": 17540.5,
+          "durationMs": 81.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 21,
+          "warmup": false,
+          "startMs": 17569.70000000298,
+          "endMs": 17680.59999999404,
+          "durationMs": 110.8999999910593,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 22,
+          "warmup": false,
+          "startMs": 17705.29999999702,
+          "endMs": 17818.70000000298,
+          "durationMs": 113.40000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 23,
+          "warmup": false,
+          "startMs": 17846.20000000298,
+          "endMs": 17972.5,
+          "durationMs": 126.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 24,
+          "warmup": false,
+          "startMs": 18000.79999999702,
+          "endMs": 18093.5,
+          "durationMs": 92.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 25,
+          "warmup": false,
+          "startMs": 18121.79999999702,
+          "endMs": 18233.40000000596,
+          "durationMs": 111.6000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 26,
+          "warmup": false,
+          "startMs": 18259.79999999702,
+          "endMs": 18342.5,
+          "durationMs": 82.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 27,
+          "warmup": false,
+          "startMs": 18372.79999999702,
+          "endMs": 18479.5,
+          "durationMs": 106.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 28,
+          "warmup": false,
+          "startMs": 18506,
+          "endMs": 18618.20000000298,
+          "durationMs": 112.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 29,
+          "warmup": false,
+          "startMs": 18656.90000000596,
+          "endMs": 18777.20000000298,
+          "durationMs": 120.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 30,
+          "warmup": false,
+          "startMs": 18803.90000000596,
+          "endMs": 18891.29999999702,
+          "durationMs": 87.3999999910593,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 31,
+          "warmup": false,
+          "startMs": 18923.79999999702,
+          "endMs": 19023.09999999404,
+          "durationMs": 99.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 32,
+          "warmup": false,
+          "startMs": 19055,
+          "endMs": 19149.40000000596,
+          "durationMs": 94.40000000596046,
+          "status": "passed"
+        }
+      ],
+      "summary": [
+        {
+          "kind": "warm-initialization",
+          "samples": 30,
+          "p95Ms": 17.799999997019768,
+          "budgetMs": 200,
+          "withinProposedBudget": true
+        },
+        {
+          "kind": "items-readiness",
+          "samples": 30,
+          "p95Ms": 126.29999999701977,
+          "budgetMs": 500,
+          "withinProposedBudget": true
+        }
+      ],
+      "budgetStatus": "within-proposed-budgets",
+      "rawReportSha256": "662b8887b65cadc5ab13b4dc44b20485de4786b55ee1d2b213b50593b0658cd6",
+      "rawPerformanceSha256": "5de117188d3c02a4cc57844feed5b09df87427697191a7fa19a385a778c9b3d8"
+    },
+    {
+      "directory": "reports/native/attempts/2026-09-23T17-48-10.979Z-6172",
+      "candidateSource": "79d668858612b0d631094f04306c6818e8fe066b",
+      "nativeStatus": "passed",
+      "completedCheckpoints": [
+        "native-command-opens-view",
+        "native-items-invalid-and-trimmed-create-one-write",
+        "native-items-stable-id-rename-two-view-projection-independent-draft",
+        "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+        "native-items-settings-entity-serialized-writes-retain-current-state",
+        "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+        "native-items-controlled-adapter-rejection-retains-draft-no-success",
+        "native-public-command-local-id-removal-before-plugin-unload",
+        "actual-vault-verbatim-title-and-markdown-match-preview",
+        "native-repository-list-reads-canonical-manually-edited-note",
+        "native-repository-update-preserves-path-identity-user-properties-and-body",
+        "native-repository-trash-cancellation-preserves-exact-note",
+        "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+        "native-host-bridge-publishes-normalized-crud-observations",
+        "native-view-real-event",
+        "native-modal-opens-and-dismisses",
+        "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+        "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+        "native-debug-commands-toggle-and-export-attributable-redacted-report",
+        "native-exact-title-row-hidden-not-tabs-or-window-controls",
+        "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+        "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+        "native-split-pane-light-dark-theme-transition",
+        "native-electron-125-150-percent-zoom-no-clipped-language-control",
+        "native-popout-inherits-preference-and-live-toggle",
+        "native-unload-restores-retained-host-elements-without-foreign-mutation",
+        "native-runtime-reload-restores-persisted-hidden-preference",
+        "native-settings-restoration-shares-canonical-service",
+        "native-declarative-settings-use-application-writer",
+        "native-items-cold-restart-current-state-load-without-writes",
+        "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+      ],
+      "rendererErrors": 0,
+      "cleanupFailure": null,
+      "failure": null,
+      "classification": "controlled-reference",
+      "performanceStatus": "passed",
+      "sourceInputsDigest": "fb62f9569aa96b0426cabe4258f0a3fbe1ed6205ba9b5a63d6dfe11642015861",
+      "dependencyLockSha256": "a3441564d8f267be967fd1cec1156f701bd324353cd26f76ed159b510b03b723",
+      "environment": {
+        "platform": "win32",
+        "release": "10.0.26200",
+        "arch": "x64",
+        "cpus": [
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+          "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz"
+        ],
+        "totalMemory": 8393850880,
+        "node": "v24.21.0",
+        "playwright": "1.63.0",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "viewport": {
+          "width": 1023,
+          "height": 800,
+          "devicePixelRatio": 2,
+          "visibility": "visible"
+        },
+        "isolation": "Operator explicitly requested an otherwise idle reference host; no claim of automatic process isolation."
+      },
+      "assets": [
+        {
+          "file": "main.js",
+          "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+        },
+        {
+          "file": "styles.css",
+          "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+        },
+        {
+          "file": "manifest.json",
+          "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+        }
+      ],
+      "protocol": {
+        "schemaVersion": 1,
+        "warmups": 3,
+        "samples": 30,
+        "clock": "renderer performance.now()",
+        "percentile": "nearest-rank: sorted[ceil(0.95 * n) - 1]",
+        "itemCount": 100,
+        "initialization": "Immediately before await plugins.enablePlugin(id), after awaited disable; finish after runtime registration and empty diagnostics; excludes host startup and unload.",
+        "readiness": "Immediately before workspace.getLeaf(tab).setViewState; finish after Documents click, 100 exact fixture labels, aria-busy=false and two animation frames; includes mount, query, render and paint opportunity.",
+        "fixture": "100 stable-ID plugin-data item records, labels Reference item 001 through 100; schema 1; collection revision 100; each record revision 1.",
+        "policy": "Three retained warmups then 30 sequential samples per metric; no retries, outlier removal or early readiness marker. Correctness failures abort and retain partial results.",
+        "budgets": {
+          "warm-initialization": 200,
+          "items-readiness": 500
+        }
+      },
+      "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
+      "rawSamples": [
+        {
+          "kind": "warm-initialization",
+          "index": 0,
+          "warmup": true,
+          "startMs": 9273.90000000596,
+          "endMs": 9284,
+          "durationMs": 10.099999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 1,
+          "warmup": true,
+          "startMs": 9306.40000000596,
+          "endMs": 9322.20000000298,
+          "durationMs": 15.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 2,
+          "warmup": true,
+          "startMs": 9348.800000011921,
+          "endMs": 9372.90000000596,
+          "durationMs": 24.099999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 3,
+          "warmup": false,
+          "startMs": 9409.800000011921,
+          "endMs": 9417.10000000894,
+          "durationMs": 7.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 4,
+          "warmup": false,
+          "startMs": 9449.40000000596,
+          "endMs": 9457.10000000894,
+          "durationMs": 7.700000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 5,
+          "warmup": false,
+          "startMs": 9488.300000011921,
+          "endMs": 9497.10000000894,
+          "durationMs": 8.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 6,
+          "warmup": false,
+          "startMs": 9523.300000011921,
+          "endMs": 9536.90000000596,
+          "durationMs": 13.599999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 7,
+          "warmup": false,
+          "startMs": 9569.40000000596,
+          "endMs": 9580.90000000596,
+          "durationMs": 11.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 8,
+          "warmup": false,
+          "startMs": 9616.800000011921,
+          "endMs": 9624.60000000894,
+          "durationMs": 7.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 9,
+          "warmup": false,
+          "startMs": 9661.300000011921,
+          "endMs": 9670.70000000298,
+          "durationMs": 9.399999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 10,
+          "warmup": false,
+          "startMs": 9691.60000000894,
+          "endMs": 9705.20000000298,
+          "durationMs": 13.599999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 11,
+          "warmup": false,
+          "startMs": 9722,
+          "endMs": 9740.70000000298,
+          "durationMs": 18.700000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 12,
+          "warmup": false,
+          "startMs": 9772.40000000596,
+          "endMs": 9780.90000000596,
+          "durationMs": 8.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 13,
+          "warmup": false,
+          "startMs": 9814,
+          "endMs": 9820.800000011921,
+          "durationMs": 6.800000011920929,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 14,
+          "warmup": false,
+          "startMs": 9859.300000011921,
+          "endMs": 9873.300000011921,
+          "durationMs": 14,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 15,
+          "warmup": false,
+          "startMs": 9918.800000011921,
+          "endMs": 9930.20000000298,
+          "durationMs": 11.399999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 16,
+          "warmup": false,
+          "startMs": 9957.90000000596,
+          "endMs": 9980.60000000894,
+          "durationMs": 22.700000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 17,
+          "warmup": false,
+          "startMs": 10004.90000000596,
+          "endMs": 10023.60000000894,
+          "durationMs": 18.700000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 18,
+          "warmup": false,
+          "startMs": 10051.300000011921,
+          "endMs": 10057.90000000596,
+          "durationMs": 6.5999999940395355,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 19,
+          "warmup": false,
+          "startMs": 10083.5,
+          "endMs": 10120,
+          "durationMs": 36.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 20,
+          "warmup": false,
+          "startMs": 10140.40000000596,
+          "endMs": 10162.60000000894,
+          "durationMs": 22.200000002980232,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 21,
+          "warmup": false,
+          "startMs": 10184.800000011921,
+          "endMs": 10205.5,
+          "durationMs": 20.69999998807907,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 22,
+          "warmup": false,
+          "startMs": 10235,
+          "endMs": 10248.5,
+          "durationMs": 13.5,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 23,
+          "warmup": false,
+          "startMs": 10270.10000000894,
+          "endMs": 10290.90000000596,
+          "durationMs": 20.799999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 24,
+          "warmup": false,
+          "startMs": 10317.60000000894,
+          "endMs": 10331,
+          "durationMs": 13.399999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 25,
+          "warmup": false,
+          "startMs": 10351.90000000596,
+          "endMs": 10369.5,
+          "durationMs": 17.599999994039536,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 26,
+          "warmup": false,
+          "startMs": 10389.300000011921,
+          "endMs": 10406,
+          "durationMs": 16.69999998807907,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 27,
+          "warmup": false,
+          "startMs": 10431,
+          "endMs": 10439.300000011921,
+          "durationMs": 8.300000011920929,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 28,
+          "warmup": false,
+          "startMs": 10465.20000000298,
+          "endMs": 10473.5,
+          "durationMs": 8.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 29,
+          "warmup": false,
+          "startMs": 10500.60000000894,
+          "endMs": 10510.90000000596,
+          "durationMs": 10.299999997019768,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 30,
+          "warmup": false,
+          "startMs": 10535.70000000298,
+          "endMs": 10541.300000011921,
+          "durationMs": 5.600000008940697,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 31,
+          "warmup": false,
+          "startMs": 10558.300000011921,
+          "endMs": 10570.5,
+          "durationMs": 12.199999988079071,
+          "status": "passed"
+        },
+        {
+          "kind": "warm-initialization",
+          "index": 32,
+          "warmup": false,
+          "startMs": 10588.60000000894,
+          "endMs": 10601.5,
+          "durationMs": 12.899999991059303,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 0,
+          "warmup": true,
+          "startMs": 10617.800000011921,
+          "endMs": 10891.60000000894,
+          "durationMs": 273.79999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 1,
+          "warmup": true,
+          "startMs": 10923.800000011921,
+          "endMs": 11055.10000000894,
+          "durationMs": 131.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 2,
+          "warmup": true,
+          "startMs": 11085.60000000894,
+          "endMs": 11178.90000000596,
+          "durationMs": 93.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 3,
+          "warmup": false,
+          "startMs": 11218.10000000894,
+          "endMs": 11313.70000000298,
+          "durationMs": 95.59999999403954,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 4,
+          "warmup": false,
+          "startMs": 11345.70000000298,
+          "endMs": 11457,
+          "durationMs": 111.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 5,
+          "warmup": false,
+          "startMs": 11495.40000000596,
+          "endMs": 11613.20000000298,
+          "durationMs": 117.79999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 6,
+          "warmup": false,
+          "startMs": 11643,
+          "endMs": 11741.10000000894,
+          "durationMs": 98.1000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 7,
+          "warmup": false,
+          "startMs": 11778.70000000298,
+          "endMs": 11877.20000000298,
+          "durationMs": 98.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 8,
+          "warmup": false,
+          "startMs": 11909.70000000298,
+          "endMs": 12027.40000000596,
+          "durationMs": 117.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 9,
+          "warmup": false,
+          "startMs": 12053.300000011921,
+          "endMs": 12169.90000000596,
+          "durationMs": 116.59999999403954,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 10,
+          "warmup": false,
+          "startMs": 12208.10000000894,
+          "endMs": 12323.300000011921,
+          "durationMs": 115.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 11,
+          "warmup": false,
+          "startMs": 12366.10000000894,
+          "endMs": 12450.60000000894,
+          "durationMs": 84.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 12,
+          "warmup": false,
+          "startMs": 12485.800000011921,
+          "endMs": 12588.90000000596,
+          "durationMs": 103.09999999403954,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 13,
+          "warmup": false,
+          "startMs": 12626.40000000596,
+          "endMs": 12737.60000000894,
+          "durationMs": 111.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 14,
+          "warmup": false,
+          "startMs": 12769.60000000894,
+          "endMs": 12872.10000000894,
+          "durationMs": 102.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 15,
+          "warmup": false,
+          "startMs": 12898.20000000298,
+          "endMs": 12995.60000000894,
+          "durationMs": 97.40000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 16,
+          "warmup": false,
+          "startMs": 13025.60000000894,
+          "endMs": 13120.20000000298,
+          "durationMs": 94.59999999403954,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 17,
+          "warmup": false,
+          "startMs": 13145.60000000894,
+          "endMs": 13232.60000000894,
+          "durationMs": 87,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 18,
+          "warmup": false,
+          "startMs": 13257,
+          "endMs": 13346.800000011921,
+          "durationMs": 89.80000001192093,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 19,
+          "warmup": false,
+          "startMs": 13370.90000000596,
+          "endMs": 13465.40000000596,
+          "durationMs": 94.5,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 20,
+          "warmup": false,
+          "startMs": 13489.20000000298,
+          "endMs": 13600.300000011921,
+          "durationMs": 111.1000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 21,
+          "warmup": false,
+          "startMs": 13644.20000000298,
+          "endMs": 13749.10000000894,
+          "durationMs": 104.90000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 22,
+          "warmup": false,
+          "startMs": 13786.800000011921,
+          "endMs": 13870.800000011921,
+          "durationMs": 84,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 23,
+          "warmup": false,
+          "startMs": 13898.70000000298,
+          "endMs": 13997.300000011921,
+          "durationMs": 98.6000000089407,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 24,
+          "warmup": false,
+          "startMs": 14029.5,
+          "endMs": 14183.20000000298,
+          "durationMs": 153.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 25,
+          "warmup": false,
+          "startMs": 14213,
+          "endMs": 14347.20000000298,
+          "durationMs": 134.20000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 26,
+          "warmup": false,
+          "startMs": 14382.20000000298,
+          "endMs": 14494.10000000894,
+          "durationMs": 111.90000000596046,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 27,
+          "warmup": false,
+          "startMs": 14519.10000000894,
+          "endMs": 14632.40000000596,
+          "durationMs": 113.29999999701977,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 28,
+          "warmup": false,
+          "startMs": 14662.300000011921,
+          "endMs": 14759.90000000596,
+          "durationMs": 97.59999999403954,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 29,
+          "warmup": false,
+          "startMs": 14784.60000000894,
+          "endMs": 14906.60000000894,
+          "durationMs": 122,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 30,
+          "warmup": false,
+          "startMs": 14939.40000000596,
+          "endMs": 15032.40000000596,
+          "durationMs": 93,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 31,
+          "warmup": false,
+          "startMs": 15059.70000000298,
+          "endMs": 15159.40000000596,
+          "durationMs": 99.70000000298023,
+          "status": "passed"
+        },
+        {
+          "kind": "items-readiness",
+          "index": 32,
+          "warmup": false,
+          "startMs": 15183.300000011921,
+          "endMs": 15330,
+          "durationMs": 146.69999998807907,
+          "status": "passed"
+        }
+      ],
+      "summary": [
+        {
+          "kind": "warm-initialization",
+          "samples": 30,
+          "p95Ms": 22.700000002980232,
+          "budgetMs": 200,
+          "withinProposedBudget": true
+        },
+        {
+          "kind": "items-readiness",
+          "samples": 30,
+          "p95Ms": 146.69999998807907,
+          "budgetMs": 500,
+          "withinProposedBudget": true
+        }
+      ],
+      "budgetStatus": "within-proposed-budgets",
+      "rawReportSha256": "e53287e26d52de8cc87ac98a1b079bfa1301419b335a60beb1f6b8cb80ef719b",
+      "rawPerformanceSha256": "217d887a13fc2b5ab2678c0263a57c321d9e3237c544f669f90931ae015cea77"
+    }
+  ],
+  "limitations": [
+    "One advisory attempt followed by one explicitly authorized instrumented reference comparison; no retry until green.",
+    "Extra theme and independent foreground observers started after all performance samples.",
+    "Later passing runs do not explain or erase the historical/current Windows theme failure or first-candidate Linux renderer errors.",
+    "The reference host had background desktop/system activity; the preflight is not proof of automatic process isolation.",
+    "This curated measurement record is not a release authorization or a replacement for raw retained reports."
+  ]
+}

@@ -61,7 +61,7 @@ test('[SRC-02] dependency-free actual source gate enforces exact 100, 400 and 45
     if (directories.has(path)) await mkdir(join(dir, path), { recursive: true });
     else { await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), '{}'); }
   }
-  for (const path of ['scripts/quality/check-source.mjs', 'scripts/testing/source-inputs.mjs', 'scripts/testing/code-lines.mjs', 'scripts/styles/vendor-policy.mjs']) {
+  for (const path of ['scripts/quality/check-source.mjs', 'scripts/testing/source-inputs.mjs', 'scripts/testing/code-lines.mjs', 'scripts/styles/vendor-policy.mjs', 'scripts/shared/hash.mjs']) {
     await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), await readFile(join(project, path)));
   }
   await mkdir(join(dir, 'src/locales')); for (const locale of ['en', 'de']) await writeFile(join(dir, `src/locales/${locale}.json`), '{}');

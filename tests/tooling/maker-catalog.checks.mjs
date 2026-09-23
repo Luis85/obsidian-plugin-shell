@@ -11,12 +11,30 @@ import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
 import { checkGenerated } from '../../scripts/quality/format-generated.mjs';
 import { createMakerContext } from '../../scripts/makers/engine.mjs';
 import { pathToFileURL } from 'node:url';
+import { measureMaintainability } from '../../scripts/quality/check-maintainability.mjs';
 
 async function apply(root, args) {
   const planned = await planMaker(root, parseArguments(args));
   assert.deepEqual(await checkGenerated(planned.plan.changes.filter(change => change.status !== 'unchanged')), []);
   await applyFilePlan(planned.plan); return planned;
 }
+
+test('[MAKER-MAINTAINABILITY] generated maintained production passes the complete unchanged metric gate', () => makerFixture(async root => {
+  await installMakerFoundation(root);
+  await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
+  await mkdir(join(root, 'harness'), { recursive: true });
+  await cp(join(makerSourceRoot, 'package-lock.json'), join(root, 'package-lock.json'));
+  await writeFile(join(root, '.fallowrc.json'), '{}\n');
+  const generated = join(root, 'src/features/bookmarks/bookmark.entity.ts');
+  const source = await readFile(generated, 'utf8');
+  const edited = source.replace('max: 120', 'max: 100');
+  assert.notEqual(edited, source); await writeFile(generated, edited);
+  const result = await measureMaintainability(root, { tool: join(makerSourceRoot, 'node_modules/fallow/bin/fallow'),
+    output: join(makerSourceRoot, 'reports/qualification', `maker-metrics-${Date.now()}`) });
+  assert.equal(result.report.status, 'passed', JSON.stringify(result.report.failures));
+  assert.ok(result.report.views.production.inputs.some(input => input.path === 'src/presentation/composables/bookmarks-workspace.ts'));
+  assert.deepEqual(result.report.views.production.health.findings, []);
+}));
 test('[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns', () => makerFixture(async root => {
   await installMakerFoundation(root); await copyMakerSuite(root);
   await mkdir(join(root, 'src/locales'), { recursive: true });
