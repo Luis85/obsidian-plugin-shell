@@ -7,6 +7,7 @@ import { parseArguments } from '../../scripts/makers/arguments.mjs';
 import { planMaker } from '../../scripts/makers/plan.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { loadCatalog } from '../../scripts/makers/load-catalog.mjs';
+import { loadEventCatalog } from '../../scripts/events/load-catalog.mjs';
 import { makerFixture as fixture, makerSourceRoot as sourceRoot, installMakerFoundation, removeMakerExamples, copyMakerSuite } from './maker-fixture.mjs';
 
 const feature = () => parseArguments(['feature', 'bookmarks', '--entity', 'bookmark']);
@@ -93,27 +94,58 @@ test('[MAKE-03-05] generated independent feature and second entity execute their
   assert.equal(report.entities.find(entity => entity.entity === 'budget').fields.find(field => field.name === 'budget').default, 0);
   assert.ok(report.entities.every(entity => entity.mappings.length));
 }));
+test('[MAKE-EVENT-01] isolated event and listener compile and run on the real bus without inherited consumer registrations', () => fixture(async root => {
+  await installMakerFoundation(root);
+  await mkdir(join(root, 'src/features/isolated'), { recursive: true });
+  for (const args of [
+    ['event', 'finished', '--feature', 'isolated'],
+    ['listener', 'observe', '--feature', 'isolated', '--event', 'finished'],
+  ]) await applyFilePlan((await planMaker(root, parseArguments(args))).plan);
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ compilerOptions: {
+    target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,
+    noUncheckedIndexedAccess: true, skipLibCheck: true, noEmit: true, types: ['node'],
+  }, include: ['src/**/*.ts', 'tests/runtime/**/*.ts'] }));
+  for (const args of [
+    [join(sourceRoot, 'node_modules/typescript/bin/tsc'), '--noEmit'],
+    [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'],
+  ]) {
+    const run = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
+    assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
+    if (args.includes('run')) assert.match(run.stdout, /3 passed/);
+  }
+  const names = (await loadEventCatalog(root)).events.map(event => event.name);
+  assert.ok(names.includes('isolated.finished')); assert.ok(names.includes('preferences.changed'));
+  assert.ok(!names.includes('showcase.ping')); assert.ok(!names.includes('bookmarks.refreshed'));
+}));
 test('[MAKE-03-08] maker checks remain isolated after a consumer extends and removes feature examples', () => fixture(async root => {
   await installMakerFoundation(root);
   await copyMakerSuite(root);
   await applyFilePlan((await planMaker(root, feature())).plan);
   await applyFilePlan((await planMaker(root, parseArguments(['feature', 'workspaces', '--entity', 'workspace']))).plan);
+  await applyFilePlan((await planMaker(root, parseArguments(['event', 'refreshed', '--feature', 'bookmarks']))).plan);
+  await applyFilePlan((await planMaker(root, parseArguments(['listener', 'observe', '--feature', 'bookmarks', '--event', 'refreshed']))).plan);
   await removeMakerExamples(root);
+  await assert.rejects(readFile(join(root, 'src/features/tasks/definition.ts')), { code: 'ENOENT' });
+  await assert.rejects(readFile(join(root, 'src/features/showcase/events.ts')), { code: 'ENOENT' });
   const bookmarkPath = join(root, 'src/features/bookmarks/bookmark.entity.ts');
   const consumerSource = (await readFile(bookmarkPath, 'utf8')) + '\n// Consumer-owned validation notes.\n';
   await writeFile(bookmarkPath, consumerSource);
   const registryPath = join(root, 'src/bootstrap/features.ts'); const consumerRegistry = await readFile(registryPath, 'utf8');
+  const eventPaths = ['src/bootstrap/authoring.ts', 'src/bootstrap/events.ts', 'src/bootstrap/event-catalog.ts'];
+  const eventSources = await Promise.all(eventPaths.map(path => readFile(join(root, path), 'utf8')));
+  assert.match(eventSources[0], /bookmarksObserveListener/); assert.match(eventSources[1], /bookmarksRefreshedEventDefinition/);
   assert.deepEqual((await loadCatalog(root)).entities.map(entity => entity.entity), ['bookmark', 'workspace']);
-  // Fixed one-level qualification: execute the seven actual maker checks, not
+  // Fixed one-level qualification: execute the actual maker and event checks, not
   // this wrapper again and never a recursively generated full verify command.
-  const selected = '^\\[MAKE-03-(01|02|03|04|05|06|07)\\]';
+  const selected = '^\\[(MAKE-03-(01|02|03|04|05|06|07)|MAKE-EVENT-01)\\]';
   const env = { ...process.env, FORCE_COLOR: '0' };
   // This is a new runner, not a worker of the outer node:test process.
   delete env.NODE_TEST_CONTEXT;
   const run = spawnSync(process.execPath, ['--test', '--test-reporter=spec', `--test-name-pattern=${selected}`, 'tests/tooling/makers.checks.mjs'], { cwd: root, env, encoding: 'utf8', timeout: 180000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
   for (const id of ['01', '02', '03', '04', '05', '06', '07']) assert.ok(run.stdout.includes(`[MAKE-03-${id}]`), run.stdout);
-  assert.match(run.stdout, /pass 7\b/); assert.doesNotMatch(run.stdout, /\[MAKE-03-08\]/);
+  assert.match(run.stdout, /pass 8\b/); assert.doesNotMatch(run.stdout, /\[MAKE-03-08\]/);
   assert.equal(await readFile(bookmarkPath, 'utf8'), consumerSource);
   assert.equal(await readFile(registryPath, 'utf8'), consumerRegistry);
+  assert.deepEqual(await Promise.all(eventPaths.map(path => readFile(join(root, path), 'utf8'))), eventSources);
 }));

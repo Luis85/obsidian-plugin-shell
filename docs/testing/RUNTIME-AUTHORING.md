@@ -56,6 +56,25 @@ passed 11/11. The complete first-attempt log remains in
 `reports/runtime-authoring/verify-first.txt`; intermediate lint/analyzer failures
 and their corrected runs are also retained. No suppression or threshold changed.
 
+## Candidate attempts and consumer correction
+
+Initial code commit `9b0be67f8562be552621cebf3c58bf20e997afed` opened
+[PR #9](https://github.com/Luis85/obsidian-plugin-shell/pull/9). Its hosted
+[candidate run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35868195957)
+passed the fixed-source rehearsal's complete `verify`, repeated runtime processes
+and both coverage runs before later qualification stages. It is superseded by the
+consumer correction and is not the final accepted candidate.
+
+The [consumer run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35868195894)
+failed because isolated maker fixtures copied a consumer's event registry without
+the referenced custom feature source. The fixture also depended on removable
+showcase source. Test-owned registries and empty example catalogs correct both
+dependencies. The strengthened nested regression creates a custom event/listener,
+runs production reviewed removal against synthetic ownership, then exercises the
+actual compiler, production bus and catalog in a fresh fixture. All 15 focused
+maker checks passed, with exact consumer-source preservation and independent
+review. The failed hosted log remains retained locally and at the linked run.
+
 ## Native scope
 
 The [Windows diagnosis](RUNTIME-AUTHORING-NATIVE.md) used retained historical PR #8

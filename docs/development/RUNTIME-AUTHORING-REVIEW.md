@@ -17,6 +17,7 @@ regressions remain distinct evidence.
 | A foundation test supplied observer-only services to a publishing repository | Give the test-owned repository a production bus and assert actual committed facts and no diagnostics | Foundation compiler/runtime verification |
 | A browser cleanup baseline preceded lazy acquisition of the surviving view's item store | Compare initialized views, assert no growth across navigation, exact sibling cleanup and zero on final disposal | Independent source review and corrected full served suite |
 | A negative fixture's string replacement became a no-op after formatting | Use whitespace-tolerant mutations and assert source bytes actually change | Actual compiler/checker controls pass; first failed attempt retained |
+| Maker fixtures copied a consumer's live event/authoring registries and required removable showcase source | Seed test-owned registries and empty example catalogs; use production removal against reviewed synthetic ownership | Hosted consumer reproduced missing custom imports; nested generated compiler/runtime/catalog regression verifies isolation |
 
 Parent integration also corrected type variance at narrowed repository publication
 boundaries using typed forwarding functions, and changed a UI fault injection to

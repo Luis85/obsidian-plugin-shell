@@ -35,15 +35,18 @@ The bus is not the owner of canonical application data. Late subscribers load a 
 ```text
 src/
   application/
-    events/                    # framework-free bus ports and shared event contracts
-    example/events/            # feature-owned fact declarations
+    events.ts                  # framework-free publication/observation ports
+    event-definition.ts        # compact descriptor contracts
+    event-definitions/         # shared core and host payload guards
+  features/<owner>/            # feature-owned fact declarations and actions
   infrastructure/
     events/                    # small in-process implementation
-    obsidian/events/           # native-to-typed mapping and EventRef ownership
+    obsidian/event-bridge.ts   # native-to-typed mapping and EventRef ownership
   presentation/
     composables/               # Vue-owned subscription cleanup
   bootstrap/
-    events/                    # explicit catalog composition and wiring
+    events.ts                  # explicit compact runtime composition
+    event-catalog.ts           # tooling-only metadata composition
 ```
 
 **EVT-01 — Instance scope.** Bootstrap creates one bus per plugin runtime, shared by that runtime's views/services. No exported global singleton, `window` property, Node EventEmitter dependency, or cross-vault shared instance. Harness instances use separate buses unless a multi-view scenario intentionally shares one runtime.
