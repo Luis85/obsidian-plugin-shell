@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scope": "Supplemental local focused checks. Not a full-tree, native or pinned-environment qualification.",
+  "baseImplementationCommit": "afbc4119f34639db8d1b6e62c7632a7ed1f1a3ce",
+  "environment": {
+    "node": "v22.16.0",
+    "npm": "10.9.2",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "results": [
+    {
+      "command": "node --test tests/tooling/capability-discovery.checks.mjs tests/tooling/preconversion-tasks.checks.mjs",
+      "exitCode": 0,
+      "tests": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node scripts/quality/check-source.mjs",
+      "exitCode": 0,
+      "inputs": 495,
+      "localeKeys": 191
+    }
+  ],
+  "sha256": {
+    "package.json": "848f41bacbb0e598cf0a41df476085023fba05635e2a717e8dad7f9167916916",
+    "package-lock.json": "7f43b723ad145457979a1e7a8fba078febabf3efb078896a43f2af596699fbc7",
+    ".github/workflows/candidate-qualification.yml": "867dfdb596016e944f563725e549590379a1ae6751fe256885a6a36c57fa53f1",
+    "scripts/makers/arguments.mjs": "def37cd413d187fd954c58f59556f4bbddc1e41a44b16cc99c1bc20dec9dd8d7",
+    "scripts/makers/plan.mjs": "6faf26bb5c6c69f6d9048a6be742cc27f7fad83987ff69b927cc85f4b3fb34a1",
+    "scripts/makers/dispatch.mjs": "b42bc35d8e39c4553f0a8f3dc37ee1ec00702c30b8ffe8954786edf497ca63f5",
+    "scripts/makers/recipes.json": "03f0970a97c26bfea27e3f8ac5d47be1265dee94f105fa64e9ac3970578341be",
+    "scripts/contracts/json-data.mjs": "154ccdccbb4cf6ce388c54bebf18ec0ef03a2b8b78779e45cad0ac27fc30bb6f",
+    "scripts/operations/catalog.mjs": "cd0b7b6fc86dc3ffc4d68173b95a52d1cdb551a61d51a2f835dd59b1856cd598",
+    "scripts/operations/protocol.mjs": "cdbf20f3508fc116da1b14f6d266498772238a22f6df5e7dac1ada6489d6c1c0",
+    "scripts/operations/cli.mjs": "ce2e98eed758fc972d9f128f20f652b5323427e181778aa6ab51116d85cf90ba",
+    "scripts/operations/operations.json": "9f944afa623a445de85cb5da604573002c8d522084cbacd981e0d536c9f5330a",
+    "tests/tooling/capability-discovery.checks.mjs": "db8d951c1bf60127832aed9f9fd6fce35f2a4c9329f42756563d22eadc1a8dfa",
+    "tests/tooling/preconversion-tasks.checks.mjs": "1a8effb498b0adb0c4013f22e02619033b154795de0fa05711e9711ae90a45a0",
+    "docs/development/preconversion-acceptance-tasks.json": "0723b75f08084c646e27f3619a7945360899582d310a018d340878ade4c57263"
+  }
+}

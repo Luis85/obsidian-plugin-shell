@@ -1,3 +1,4 @@
+import { createNativeDiagnosticObserver, noteNativePhase } from './native-diagnostic-observer.mjs';
 import { pendingNativeData } from './native-data.mjs';
 // Optional native smoke: only fresh temporary vault/config directories, never a personal vault.
 import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
@@ -27,6 +28,8 @@ if (!flags.includes('--allow-download') || new Set(flags).size !== flags.length 
 }
 const output = resolve('reports/native/attempts', `${new Date().toISOString().replaceAll(':', '-')}-${process.pid}`); await mkdir(output, { recursive: true });
 const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', attemptDirectory: output, assets: [], checks: [], errors: [] };
+const diagnostics = createNativeDiagnosticObserver(report);
+const contextObservers = [];
 const scratch = await nativeScratch();
 let launched; let browser; let activePage; let log = ''; const configDirectories = [];
 try {
@@ -59,10 +62,10 @@ try {
     if (observedPages.has(candidate)) return;
     observedPages.add(candidate);
     candidate.setDefaultTimeout(15000); candidate.setDefaultNavigationTimeout(45000);
-    candidate.on('pageerror', error => report.errors.push({ message: error.message.slice(0, 300), stack: error.stack?.slice(0, 3000), url: candidate.url(), phase: report.phase ?? 'initial-smoke' }));
+    diagnostics.observe(candidate);
   };
   for (const candidate of context.pages()) observe(candidate);
-  context.on('page', observe);
+  context.on('page', observe); contextObservers.push(() => context.off('page', observe));
   let page = context.pages().find(value => value.url().startsWith('app:')) ?? context.pages()[0];
   if (!page) page = await context.waitForEvent('page', { timeout: 30000 });
   activePage = page;
@@ -104,7 +107,7 @@ try {
   await qualifyModals(page, report, output, identity);
   await qualifyDebugging(page, report, output, identity, path);
   await qualifyHeaders(page, context, report, output, path, identity);
-  report.phase = 'native-settings';
+  noteNativePhase(report, 'native-settings');
   // The command palette may belong to a different native window after pop-out use.
   await nativeCommand(page, 'Open settings');
   let settingsPage;
@@ -129,7 +132,7 @@ try {
   report.checks.push('native-declarative-settings-use-application-writer');
   await settingsPage.screenshot({ path: join(output, 'native-settings.png') });
   await assertDiagnostics(page, identity);
-  report.phase = 'cold-restart';
+  noteNativePhase(report, 'cold-restart');
   // A cold process restart uses the same isolated vault and its already-installed assets.
   await headerControl.click();
   await expect.poll(async () => (await pendingNativeData(join(launched.vault ?? vault, identity.pluginDirectory, 'data.json')))?.preferences?.hideObsidianViewHeader).toBe(true);
@@ -153,7 +156,7 @@ try {
   }
   if (!browser) throw new Error('NATIVE_RESTART_ENDPOINT');
   const restartedContext = browser.contexts()[0];
-  for (const candidate of restartedContext.pages()) observe(candidate); restartedContext.on('page', observe);
+  for (const candidate of restartedContext.pages()) observe(candidate); restartedContext.on('page', observe); contextObservers.push(() => restartedContext.off('page', observe));
   const restarted = restartedContext.pages().find(value => value.url().startsWith('app:')) ?? restartedContext.pages()[0];
   if (!restarted) throw new Error('NATIVE_RESTART_PAGE'); activePage = restarted;
   await expect(restarted.locator('[aria-label="Open capability showcase"]')).toBeVisible({ timeout: 45000 });
@@ -196,6 +199,7 @@ try {
   }
 }
 finally {
+  noteNativePhase(report, 'cleanup');
   // Preserve the primary outcome even when host processes delay filesystem cleanup.
   await writeFile(join(output, 'host.log'), log);
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
@@ -218,7 +222,11 @@ finally {
     try { await rm(scratch, { recursive: true, force: true }); }
     catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_SCRATCH_CLEANUP_FAILED'; report.scratchPreserved = true; process.exitCode = 1; }
   } else report.scratchPreserved = true;
+  for (const dispose of contextObservers) dispose();
+  diagnostics.dispose();
+  if (report.errors.length) { report.status = 'failed'; report.reason ??= 'Native page reported unexpected errors; inspect report.'; process.exitCode = 1; }
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
+  await writeFile(join(output, 'host.log'), log);
   await writeFile(resolve('reports/native/report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

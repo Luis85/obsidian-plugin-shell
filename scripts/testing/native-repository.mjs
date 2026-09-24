@@ -1,3 +1,4 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { parse } from 'yaml';
@@ -6,7 +7,7 @@ import { assertDiagnostics } from './native-header-checks.mjs';
 
 /** Uses a second synthetic note; the original cold-restart fixture is never changed. */
 export async function qualifyRepository(page, report, output, vault, identity) {
-  report.phase = 'native-repository';
+  noteNativePhase(report, 'native-repository');
   const owned = page.locator(identity.viewSelector).first();
   await owned.getByRole('button', { name: 'Create another', exact: true }).click();
   await owned.getByRole('textbox', { name: 'Title', exact: true }).fill('Native repository Task');

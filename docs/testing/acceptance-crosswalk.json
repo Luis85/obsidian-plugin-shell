@@ -7,8 +7,17 @@
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Different identity installs/builds/verifies and dry run is read-only. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/setup-identity.checks.mjs",
+          "name": "[IDENTITY-01] dependency-free dry run plans exact portable identity without child processes or file writes",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Dependency-free identity dry run uses a nonexistent child launcher, returns the five exact planned identity files and leaves the entire fixture snapshot unchanged. It does not install/build/verify the differently named consumer."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind one current differently named generated consumer through actual install/build/verify; CLI stubs and dry-run identity assertions alone do not establish readiness. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-02",
@@ -16,7 +25,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Native command/ribbon opens without duplicate registration. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Actual candidate native command and ribbon opening/focusing, duplicate-registration and unload/reload assertions must all pass; unit dispatch is not native evidence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-03",
@@ -42,7 +51,7 @@
           "assertions": "Served production Items components/services create and rename a real item, synchronize a sibling while retaining its draft, cancel then confirm deletion, and reload the entire page after create, rename and delete to assert the durable populated/empty state. Independent fault observations are checked before every reload and page errors remain observed across reloads; browser storage is the declared harness boundary."
         }
       ],
-      "gap": "The audited unit and served-browser assertions cover this bounded CRUD-through-reload acceptance case in both required modes. Verification still requires passing current-input runtime and browser producer packets in one consistent session; source edits, failed repetitions or absent mode evidence prevent completion. This case does not establish native/device qualification or release authority."
+      "gap": "Audit classes E (see ACCEPTANCE-CLOSURE-LEDGER.md). Rerun both existing whole links together on current source; no native or release qualification is inferred. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-04",
@@ -77,7 +86,7 @@
           "assertions": "Served Items UI shows English inline guidance for whitespace-only input while the canonical harness settings storage key remains absent. This is browser persistence, not native I/O or non-default-locale qualification."
         }
       ],
-      "gap": "English no-write guidance is now linked in component, served-browser and native modes. Inline invalid-label guidance after changing to a non-default supported locale is not asserted by these links; native completion additionally requires the actual retained-candidate run to pass."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert invalid inline guidance after switching to a supported non-default locale in every required mode, retaining zero-write checks. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-05",
@@ -85,8 +94,57 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Failed persistence preserves data and truthful outcomes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/acceptance-closure.test.ts",
+          "name": "[AC-CLOSE-05] failed note persistence preserves existing bytes and permits deliberate recovery without false success",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real note actions preserve pre-existing exact Markdown on known persistence failure, show no receipt/fact/success notice, cache failed submission without another call and allow one deliberate new-plan recovery. Shared plugin-data failure preservation remains a separate clause."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/acceptance-closure.spec.ts",
+          "name": "[AC-CLOSE-05-66] failed and uncertain creates preserve bytes and expose only safe recovery",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served note actions preserve an existing note through known failed create, offer deliberate editing recovery, preserve committed bytes through failed/retried open, and retain bytes after a post-persistence acknowledgment loss with create controls disabled. Exact storage write list and reload are checked; shared plugin-data failure remains separate."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-05-01] failed note mutations retain exact bytes and identity until deliberate fresh-snapshot recovery",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Exact original note bytes and authenticated identity survive known failed update/trash with no facts; uncertain shared saves before/after persistence block queued mutations, preserve exact durable envelopes and permit deliberate reconstructed recovery. Individual cases establish their named boundary, not all DAT clauses."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-05-02] uncertain shared saves block queued writes and reconstruct the actual acknowledged-or-unacknowledged bytes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Exact original note bytes and authenticated identity survive known failed update/trash with no facts; uncertain shared saves before/after persistence block queued mutations, preserve exact durable envelopes and permit deliberate reconstructed recovery. Individual cases establish their named boundary, not all DAT clauses."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B05] rejected shared save before persistence retains drafts and reconstructs only actual bytes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Real served Items actions reject before/after Storage persistence, preserve prior record and drafts, block blind retry and false success, check exact attempted/durable envelopes, then independently reload actual bytes and deliberately recover. Controlled browser storage, not native disk failure."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B05] rejected shared save after persistence retains drafts and reconstructs only actual bytes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Real served Items actions reject before/after Storage persistence, preserve prior record and drafts, block blind retry and false success, check exact attempted/durable envelopes, then independently reload actual bytes and deliberately recover. Controlled browser storage, not native disk failure."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Current complete producer linkage plus complete absent/corrupt/inaccessible/future recovery contract remains necessary; known failure and uncertain acknowledgment must stay distinct. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-06",
@@ -105,14 +163,14 @@
         },
         {
           "producer": "browser",
-          "file": "tests/e2e/items.spec.ts",
-          "name": "item UI validates, synchronizes two views, retains drafts and persists rename/delete through reload",
+          "file": "tests/e2e/acceptance-closure.spec.ts",
+          "name": "[AC-CLOSE-06] overlapping item and preference saves retain exact envelope and independent drafts",
           "mode": "browser-integrated",
-          "extent": "partial",
-          "assertions": "Served real Items components and services; validation, sibling drafts, stable-ID rename/delete and local persistence reload. Browser storage is not native I/O."
+          "extent": "whole",
+          "assertions": "A real item save is paused while another view submits preferences; no storage write occurs before release. Exactly two complete JSON envelopes preserve the item and new preference, sibling item/note drafts remain unchanged, a late view sees both values, and browser reload retains exact bytes without initialization saves. Browser Storage is the explicit adapter boundary."
         }
       ],
-      "gap": "The unit link covers concurrent settings/item writes, the exact combined envelope, independent drafts and late-view current state. The browser link covers sibling drafts/projections but never overlaps a preference mutation with an item save; browser concurrency remains partial."
+      "gap": "Audited whole unit and browser assertions cover concurrent settings/item persistence, exact combined stored state, independent drafts and late-view/reloaded current state. Verification requires passing current-input runtime and browser producer packets in one complete consistent session; retained baseline evidence stays separate."
     },
     {
       "id": "AC-07",
@@ -120,8 +178,81 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Corrupt/future data is preserved. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/plugin-data-preservation.test.ts",
+          "name": "Plugin-data preservation and bounds preserves malformed and future root data without writes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual shared plugin-data store/repository and preferences reject malformed/future root values, retain the original raw identity, call save zero times and record exactly one settings.read/settings.load failure per input. Browser mode is absent."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/plugin-data-preservation.test.ts",
+          "name": "Plugin-data preservation and bounds preserves unsupported registry/collection data and never reconstructs invalid entities",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Malformed/future registry and collection cases reject list/get/create without any save and retain the original raw value. Includes unsafe revisions, duplicated records and invalid field values; no browser execution is implied."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-01] corrupt and future root bytes survive real actions and independent bootstrap with zero writes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-02] opaque registry and collection schemas block item mutation while permitted preferences retain their data",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-03] absent storage waits for explicit mutation while inaccessible existing bytes remain protected until readable",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] corrupt JSON retains exact raw bytes and disables durable mutations across reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future envelope retains exact raw bytes and disables durable mutations across reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future registry disables Items while preference saves preserve its opaque payload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future collection disables Items while preference saves preserve its opaque payload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Broader ordered migrations and category-specific recovery remain unproved; do not infer them from protected storage or common error text. Every new link is partial and needs current producer output. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-08",
@@ -130,7 +261,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Local storage failure is nonfatal and namespaces isolate. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert nonfatal local-preference denial and independent namespaces together in U/B; document-storage failure and DOM identity alone do not prove local preference fallback. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-09",
@@ -140,7 +271,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Locale/fallback/long text/native labels behave correctly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes A,I,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete fallback/host-locale mapping, long text and native labels; pending locale-maker drafts are not reviewed supported languages. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-10",
@@ -149,8 +280,17 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Modal cancellation, submission, focus and cleanup. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/modals.spec.ts",
+          "name": "[MODAL-E2E-01] real service dialogs validate, contain keyboard focus, cancel and restore their trigger without writes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Real browser modal service confirms/cancels/reopens dialogs, traps Tab focus, restores initiating control focus, retains invalid prompt feedback and commits no notes. Native and component modes remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Audit full cancel/submit/reopen/focus/cleanup sequence in all modes, especially actual native dialogs; mocked native classes cannot satisfy N. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-11",
@@ -206,9 +346,17 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served production views preserve the bus subscription count across panel navigation, acquire distinct DOM IDs and additional subscriptions for a sibling, restore the first-view count when the sibling closes, and return bus size to zero only after final runtime disposal. The harness resourceCount measures bus subscriptions only."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B11-71] twenty served view cycles release measured owned timers dialogs notices and subscriptions",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Twenty served real-view cycles return actual browser scheduler, dialog, notice, subscription and leaf measurements to a live sibling baseline; unload leaves an unrelated DOM sentinel. Ordinary notice action count is zero; native windows and nonempty action registries are not established."
         }
       ],
-      "gap": "Linked unit tests cover twenty view cycles, all measured owner resources, late success/failure and synthetic native EventRefs with a live sibling. The served-browser link measures one sibling cycle and bus subscriptions only; it does not measure all owned timers/dialogs/notices/window references over twenty browser cycles or establish full pop-out ownership."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Window/pop-out ownership, partial startup and complete deferred resource behavior remain; zero ordinary action count is not proof of nonempty recovery registry cleanup. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-12",
@@ -216,7 +364,7 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Physical source limits count full SFC and CRLF correctly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Existing baseline assertions have L scope, not T. Add a generated-source gate scenario covering full SFC and CRLF at/beyond the unchanged code limits. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-13",
@@ -224,7 +372,7 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Real resolved architecture checks reject violations. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Required T needs actual resolved alias/re-export/unclassified negative fixtures; the existing U tool invocation cannot be relabeled. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-14",
@@ -232,16 +380,34 @@
         "tooling-generated",
         "component"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Real Vue/async/native lint and locales reject defects. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/gates.checks.mjs",
+          "name": "[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rules/parsers",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Runs the actual ESLint process with TypeScript, Vue and Obsidian rules; requires exit 1, all three exact violation IDs and zero fatal parser errors. Does not assert locale defects or the required component mode."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add audited locale-negative assertions and component-mode defect checks; passing real lint negatives alone does not satisfy both modes. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-15",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Tests do not hide unused runtime code. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/gates.checks.mjs",
+          "name": "[GATE-02-01] full analyzer fails for real unused files and exports",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Actual Fallow process exits 1 with unused_files and unused_exports above zero for maintained fixture source. Does not yet test production exports whose only consumers are tests."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add a production export referenced only by tests and assert the actual gate still rejects it; ordinary unreachable exports do not establish the test-only reachability clause. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-16",
@@ -251,7 +417,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Unexpected browser failures generate failed current evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Inject actual contained/uncontained browser/native defects and assert failed current artifacts; parser fixtures do not exercise the served UI or native renderer. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-17",
@@ -259,8 +425,17 @@
         "artifact",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Correct CJS/composed assets without development leakage. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I01] real Nuxt components render without global CSS, head injection or network dependencies",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production components render with zero head style tags; disabling built plugin styles leaves a host control font/radius unchanged. Artifact CJS/asset-set/dev-leak obligations are not established by this browser assertion."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind exact CJS/complete composed assets, absence of extra chunks/dev code and served asset parity; sentinel containment alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-18",
@@ -268,16 +443,34 @@
         "tooling-generated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Local install preserves data/notes/plugins/security. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/build.checks.mjs",
+          "name": "[BLD-02-02] promotion and local installation use one complete version and preserve user data",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Real staged promotion and installer copy exactly three matching assets while preserving existing data.json bytes. This fixture does not inspect every note, unrelated plugin/security setting or actual host execution."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Add whole install snapshot assertions for notes, all unrelated plugins and security preferences; qualify actual contained native install separately. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-19",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Unsafe destination/config/build causes no destructive replacement. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/build.checks.mjs",
+          "name": "[BLD-02-01] compilation and incomplete output failures preserve the complete previous candidate",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Actual staged builder rejects thrown compilation and incomplete output; all prior three candidate assets remain byte-identical and temporary output directories do not survive. Unsafe destination/config and rollback clauses remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Combine unsafe destination/config and rollback/intervening-edit assertions with failed-build preservation in one whole audited T scenario; no destructive replacement. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-20",
@@ -286,7 +479,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Unavailable host or crashed tool is never pass. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Preserve baseline scope; native prerequisite-unavailable and actual host-crash reports must remain nonpassing with cleanup and candidate identity. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-21",
@@ -294,8 +487,17 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Bounded redacted local diagnostics without upload. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/feedback.test.ts",
+          "name": "Feedback and diagnostics [LOG-I01] diagnostics are bounded and strip unsafe fields before observation",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Diagnostics retains 200 records after 210 reports while the observer is called 210 times. After unsafe-looking code/operation input, the final retained record JSON is asserted not to contain the literal substring private. This assertion does not inspect observer payload redaction or prove all unsafe fields, exported diagnostics or no-upload behavior."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add B assertions for bounded sanitized explicit export and no upload, plus getter/circular/raw-content negatives; bounded safe-code storage alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-22",
@@ -304,8 +506,17 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Keyboard/narrow/light/dark interaction is usable. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/accessibility.spec.ts",
+          "name": "[A11Y-03] German narrow view, reduced motion and forced colors remain keyboard usable",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real German preferences at 360px with explicitly simulated reduced motion and forced colors remain keyboard operable, have no axe findings or horizontal document overflow, and retain an empty independent fault ledger. Component and native breadth remains."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete component and actual candidate native light/dark/narrow/keyboard matrix; browser simulation is not native Appearance evidence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-23",
@@ -313,15 +524,24 @@
         "device"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Claimed mobile support has candidate-bound device evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes Q,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Keep mobile unclaimed. Any later iOS/Android claim requires separately provisioned candidate-bound physical-device qualification. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-24",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Example removal leaves no orphan source/registrations. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/example-removal.checks.mjs",
+          "name": "removal plan deletes only reviewed files, preserves consumer registration and reruns without changes",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Reviewed example plan deletes the expected fixture file/Task-Project registrations, retains exact consumer source/registration and applies as a no-op on repetition. Does not qualify complete resulting catalogs/styles/dependencies and built consumer."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Qualify resulting consumer with no orphan catalogs/styles/locales/dependencies using complete verify/build and retained asset identity; deletion fixture alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-25",
@@ -329,7 +549,7 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: New developer completes the short first-change workflow. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes A,Q,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Record a measured fresh-developer first-change workflow without requiring the entire PRD; define observer/timing and actual successful output. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-26",
@@ -338,7 +558,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Stable and beta discovery/API usage remain distinct. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Current tests are T, not U/N; audit selected runtime API usage and actual minimum/public host with no silent beta-only dependency. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-27",
@@ -346,15 +566,24 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Searchable native settings use shared validated writer. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Actual native searchable/indexed settings, failed save and shared validated writer need candidate-bound assertions; fixture metadata is insufficient. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-28",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Locked installs and family updates run relevant checks. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/npm-install.checks.mjs",
+          "name": "[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Exact lockfile install-hook inventory must match reviewed pinned approvals and package scripts must omit recursive install/prepare/setup hooks. Does not qualify a representative dependency update or upstream support."
+        }
+      ],
+      "gap": "Audit classes E,A,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Representative supported update-family qualification remains; nested ESLint support exception cannot be closed by audit success or lock reproducibility. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-29",
@@ -362,7 +591,7 @@
         "unit"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Freshness reports blocked/cooldown/outage honestly. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Existing checks are T and cannot satisfy required U. Add an appropriate unit producer binding without relabeling tools or changing the normative mode. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-30",
@@ -370,15 +599,24 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Optional CLI only targets configured test vault. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes Q,X (see ACCEPTANCE-CLOSURE-LEDGER.md). If the optional CLI is claimed, explicitly provision it and prove every command targets only the configured fixture vault; isolation helper is not CLI execution. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-31",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Release preparation is consistent without publication. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/release.checks.mjs",
+          "name": "prepare reviews all five files without writes then preserves history on apply",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Version planner returns five changes without changing package bytes, then reviewed apply preserves historical version mappings and changelog entries. No claim that this fixture executes a release or proves all absent Git/remote side effects."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add explicit before/after Git refs/status and remote-mutation observation proving no implicit commit/tag/push/publication, alongside all consistent version files. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-32",
@@ -386,8 +624,17 @@
         "artifact",
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Fixed-commit drafts have individually installable assets. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/release-plan.checks.mjs",
+          "name": "first and subsequent drafts plan exact target and retained uploads without executing",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "First/subsequent fixtures plan exact source-target draft and five retained uploads, forbid clobber and assert executed=false/authorization=not-granted. Fake planning is not real remote draft qualification or installable artifact execution."
+        }
+      ],
+      "gap": "Audit classes E,A,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Retained package and fake-remote checks are partial; separately authorized real first/subsequent drafts must contain individually installable exact assets. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-33",
@@ -396,8 +643,17 @@
         "native",
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Promotion rejects missing/mismatched evidence without rebuilding. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/release-plan.checks.mjs",
+          "name": "promotion plans only retained draft with bound native scenarios, minimum host and review record",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Promotion plan uses retained matching source and rejects absent review/native evidence, skipped native checks and mismatched platform/minimum host. It remains plan-only; actual native and artifact modes are not supplied by these constructed packets."
+        }
+      ],
+      "gap": "Audit classes E,A,I,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Actual candidate native acceptance and trusted publication authorization/Actions surface remain separate; no rebuild and exact uploaded assets need authorized real qualification. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-34",
@@ -405,8 +661,17 @@
         "artifact",
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Release retry/permissions/upload preserve published versions. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/release-plan.checks.mjs",
+          "name": "rejects published versions, duplicate releases/assets, wrong tags, source and changed uploads",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Planner rejects published releases, duplicate releases/assets, wrong tags/source and changed uploads before yielding mutation operations. Real permission failures, uncertain transport and authorized remote recovery remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Execute authorized real permission/upload/resume failure matrix without touching public versions; synthetic remote success is not GitHub authorization evidence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-35",
@@ -415,31 +680,66 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Listing validation rejects invalid metadata and missing assets. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes I,A,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Implement complete executable listing readiness for required docs/assets/current route; actual submission is owner-authorized external work. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-36",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Fresh dependency-free setup reaches declared readiness. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/npm-install.checks.mjs",
+          "name": "[NPM-04] real setup CLI isolates npm env with stub tools and preserves stricter controls",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Actual dependency-free setup CLI strips only forwarded approval configuration and preserves strict/ignore-script controls. npm and verification are explicitly stubbed; this cannot establish real profile readiness."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind a fresh no-node_modules real setup through exact install, selected-profile verify and optional native provisioning; stub readiness cannot be whole. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-37",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Setup help/dry run avoids side effects/hangs/recursion. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/npm-install.checks.mjs",
+          "name": "[NPM-05] dry-run needs no dependency installation and does not launch npm",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Real setup dry run succeeds with a nonexistent npm launcher and no installed lockfile, demonstrating no installation launch. Dependency-free help, TTY behavior and lifecycle recursion are separate clauses."
+        },
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/npm-install.checks.mjs",
+          "name": "[NPM-03] reviewed pins cover the lockfile hooks without blanket approvals",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Package install/prepare/setup lifecycle hooks are absent and lockfile install scripts require exact reviewed pins. Combined with dry-run coverage this remains partial until help and interaction behavior are linked."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add complete dependency-free help and noninteractive/TTY behavior to existing no-install/no-recursion assertions before whole linkage. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-38",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Setup recovery preserves edits and resumes only valid stages. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/setup-identity.checks.mjs",
+          "name": "[IDENTITY-04] reviewed plans reject intervening edits and preserve original metadata on owned write failure",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Reviewed identity apply failure restores the complete original snapshot; an intervening manifest edit makes the plan stale and retains that exact external edit. Interruption/resume/profile reporting is outside this assertion."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Link actual interruption, valid-only resume, failed recovery lock and explicit skipped-profile assertions together; safe identity planning alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-39",
@@ -447,31 +747,58 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Tool scripts live in scripts and obey source limits. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert thin root configs/workflows and scripts/helpers/templates layout using current generated output; unrelated workflow security checks are not a whole layout audit. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-40",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Makers produce registered functioning code and tests. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/maker-catalog.checks.mjs",
+          "name": "[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Real explicit built-in/composed recipe list generates source, checks formatting, type-checks, runs generated runtime/custom/locale tests and verifies reruns unchanged. It is finite generated-consumer evidence; suite counts alone do not establish each complete acceptance clause."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). This is finite generated-code evidence; bind each intended maker's complete registration/event/style behavior, then qualify the final generated consumer. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-41",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Maker plan/conflict/concurrency/failure preserves work. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/maker-catalog.checks.mjs",
+          "name": "[MAKER-CONFLICTS] owner/event/style prerequisites, stale reads and edited files preserve source",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Missing owner/event/style prerequisites reject; edited command bytes and altered registry identity survive refused reruns; concurrent message edits reject stale plans. Concurrent application and rollback-failure matrix remains separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Include concurrent plan application, owned rollback failures and no-op reruns across maker mutations; edited-source rejection alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-42",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Custom machine maker uses the same safe plan engine. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/maker-catalog.checks.mjs",
+          "name": "[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Generates a local custom reminder recipe through the shared planner and runs its generated Node check alongside integrated recipes. Explicit machine/noninteractive and no remote-code/install assertions remain incomplete."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add explicit machine/noninteractive custom maker and no remote code/install assertions through the shared planner; local custom success covers only that branch. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-43",
@@ -489,7 +816,7 @@
           "assertions": "Actual registered descriptors and boundary payload validation; compiler and browser obligations remain partial."
         }
       ],
-      "gap": "The linked unit case verifies the registered catalog and boundary payload validators. Negative compiler checks for keys/payloads/correlated unions, duplicate registration and feature extension without bus-core edits are not linked here; browser-integrated evidence is also unlinked."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). T compiler evidence cannot replace required U/B. Add served extension assertions and remaining typed key/union/duplicate rights coverage in appropriate modes. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-44",
@@ -547,7 +874,7 @@
           "assertions": "Real bus assertion named by this case; whole requirement still needs browser-integrated mode."
         }
       ],
-      "gap": "Six real-bus unit cases are linked. No served-browser links cover dispatch order and registration mutation, once/reentrancy, thrown/rejected listeners, immutable snapshots, disposal and runtime isolation; the required browser-integrated mode remains incomplete."
+      "gap": "Audit classes E,A,I (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete browser equivalents and retained EVT-10 bus-generated envelope metadata; payload-only snapshots do not implement event ID/time/instance/origin metadata. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-45",
@@ -555,7 +882,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Native bridge startup/null/file-folder/rename/unload safety. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Execute these startup/null/rename/unload cases against real isolated native host; unit bridge tests cannot qualify N. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-46",
@@ -579,9 +906,25 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served real Items components and services; validation, sibling drafts, stable-ID rename/delete and local persistence reload. Browser storage is not native I/O."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-46-01] concurrent real actions publish only persisted envelopes with stable revisions and isolated runtime events",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Three overlapping real actions persist exact envelopes before publishing exact facts/revisions; independent runtime receives no facts or state updates, and reconstruction reads durable identities without writes. Separate failure and per-view projection assertions remain necessary."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B46] committed facts refresh two views without crossing an independently mounted browser runtime",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Paused persistence creates no visible committed row; two real served views refresh only after release while retaining a sibling draft. A separate same-origin runtime does not receive the fact and sees durable state only on reload, with no write or unexpected fault."
         }
       ],
-      "gap": "Linked successful writes refresh both views with independent drafts. The links do not establish absence of committed facts on failed saves or isolation between independent runtimes in each required mode; these assertions must be linked before whole evidence is claimed."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Maintain case-specific combined post-commit/failure/projection/isolation evidence. Each individual new assertion covers part of the row; no automatic promotion from multiple partial links. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-47",
@@ -590,7 +933,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Ordered CSS/SFC produces one complete safe artifact. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind ordered source/SFC composition and exact single output to served bytes, self-contained imports/icons/fonts and no host leakage. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-48",
@@ -599,7 +942,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Style maker/HMR/removal/failure/candidate parity. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Add live style add/edit/remove HMR, failed rebuild and retained candidate parity in required A/B modes; source generator success is T only. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-49",
@@ -608,7 +951,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: CSS/SFC limits versus output budget, no native leakage. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Explicit full SFC/CSS input versus composed output-budget assertions and actual pop-out style containment remain; browser scope cannot establish native breadth. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-50",
@@ -616,8 +959,25 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Entity types correlate and duplicate mappings fail. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/entities.test.ts",
+          "name": "Registered entity definitions [ENT-03-04] rejects invalid definitions and protected/duplicate mappings",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Rejects invalid entity definitions, managed/prototype property mappings and duplicate field/property mappings. Does not supply every type-correlation or served-browser assertion."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/entities.test.ts",
+          "name": "Registered entity definitions [ENT-03-06] registration rejects duplicate recipes and conflicting property meanings",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real registration accepts Task/Project together but rejects duplicate recipes, conflicting property types and missing mapped fields. Required browser evidence remains absent."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add required served-browser negative registration/input scenarios; compile-time type correlations in `runtime/types.ts` are not runtime producer assertions. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-51",
@@ -625,8 +985,25 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Entity defaults/date-only/falsy/null semantics. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/entities.test.ts",
+          "name": "Registered entity definitions [ENT-03-01] derives typed defaults while preserving false, zero and optional absence",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual entity parsing applies Task/Project defaults while preserving false, zero, optional absence and an explicitly empty string. Date/null/browser clauses are separate."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/domain.test.ts",
+          "name": "Domain invariants [DOM-01] handles Gregorian leap years without timezone conversion",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Date-only validator accepts Gregorian leap-year boundaries and rejects impossible/invalid dates without timezone conversion. Browser and remaining default/null scenarios are not supplied by this assertion."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert the complete default/date/falsy/null matrix via served real entity actions as well as U; UI task happy path does not cover all semantics. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-52",
@@ -634,8 +1011,17 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Real YAML round-trip and safe property projection. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/entities.test.ts",
+          "name": "Safe Markdown codec [YAML-03-01] round trips ambiguous scalars and preserves exact body bytes during patch",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual YAML codec preserves exact CRLF body/comment/unrelated properties while patching and round-trips ambiguous scalar strings, Unicode, zero and false through both codec and YAML parser. Managed overrides/unsupported values/browser mode remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add browser real YAML semantic/unsupported-value/managed-override negatives; exact displayed preview equality alone is not the whole scalar matrix. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-53",
@@ -643,8 +1029,25 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Prepare is read-only and accepted commit uses the same plan. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I02] preserves preview identity and commits once under concurrent confirmation",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Two concurrent commits of the identical accepted plan cause exactly one writer.create(path, markdown); no fact occurs before the barrier and one occurs afterward; repeated commit returns cached outcome. Browser stale-plan assertions remain."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I02] validates, previews exact Markdown, commits once and persists real browser storage",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Actual served preview creates no files; confirmed create stores exactly the preview under the accepted path, survives reload and conflict leaves existing bytes intact. It does not test browser stale or forged plans."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Browser needs explicit stale-plan and same identity/request assertions; existing read-only preview and exact persisted bytes support partial linkage. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-54",
@@ -652,8 +1055,17 @@
         "unit",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Complete host create with no premature created fact. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I02] preserves preview identity and commits once under concurrent confirmation",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "One complete create call receives exact accepted Markdown/path and publication is absent while persistence is pending, then occurs once on success. Actual native failure/no-empty-workaround evidence remains separate."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind real native complete create bytes and controlled failure with no empty-note workaround or premature fact, retaining one-write observation. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-55",
@@ -662,7 +1074,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Unsafe document paths/folder/race conflicts never overwrite. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Full native unsafe folder/file/case/race conflict and safe cleanup matrix requires current candidate evidence; no cross-process atomicity claim. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-56",
@@ -670,8 +1082,17 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Duplicate/uncertain submissions never create blind duplicates. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I04] uncertainty is cached and never emits a created fact or blindly retries",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A rejected create produces uncertain effect, caches the attempted outcome, retries the same plan without another write and emits no created fact. Mismatched request and browser concurrent duplicate matrix is separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Browser still needs true overlapping duplicate submission and mismatched request-key assertions; disabled-button and uncertain outcome alone are partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-57",
@@ -679,8 +1100,25 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Creation success survives cache/open/listener failures. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I07] a failing subscriber cannot relabel a committed write as failure",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A throwing committed-fact subscriber is independently observed as event.listener/event.dispatch while the confirmed create still returns success. Cache lag, browser equivalents and host dedup are not covered here."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I04] opening failure preserves successful document creation",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served document creation stays visibly successful with exact unchanged persisted files after injected open failure. Cache/listener failure and host/service double-counting are separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add served cache-lag/listener-error and host/service dedup observations; open-failure preservation covers one follow-up class. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-58",
@@ -688,16 +1126,34 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Second entity reuses service, Markdown stays canonical. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I06] second entity uses the same service and preserves false/zero/string scalars",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A distinct Meeting projection uses the same generic DocumentCreationService and actual YAML serializer, preserving ambiguous strings/false/zero before successful commit. No browser second-entity or no-seeding/plugin-data authority claim is made."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Serve a second entity through generic infrastructure and assert Markdown authority, no automatic seed and no duplicate Task plugin-data collection. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-59",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Entity maker creates code/fixtures but no user notes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/maker-catalog.checks.mjs",
+          "name": "[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Real maker catalog generates integrated project/domain/plugin-data entities and executes type/runtime checks, verifying backend/default metadata. User-note snapshot/no-write assertions remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert definition/action/fixture integration together with an unchanged user-vault snapshot; generated source is not evidence of user-note writes or their absence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-60",
@@ -705,7 +1161,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Schemas do not rewrite old notes/global property types. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Actual native existing-note bytes and vault-wide property-type configuration must remain unchanged across schema/type-hint startup and use. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-61",
@@ -714,8 +1170,25 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Actual emitted Markdown and native Properties verified. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I01] preview produces exact valid YAML and has no write effects",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Prepared actual Markdown is parsed by the real YAML library and compared to exact managed/entity values, quoted date and expected path while writer remains untouched. Native Properties/source interpretation is not asserted."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I02] validates, previews exact Markdown, commits once and persists real browser storage",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served emitted Markdown exactly equals preview, persists through actual browser reload and preserves prior files on conflict. It does not establish native Properties behavior."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Candidate-bound native Properties and Source semantics on every claimed platform remain; generated strings/host doubles are not native Properties evidence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-62",
@@ -723,8 +1196,41 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Cancellation preserves actual outcome/privacy/disposed UI. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "[DOC-02-01] abandoning a preview releases only an unattempted request",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Discard releases an unused plan so later commit fails; a committed plan cannot be discarded or rewritten and repeated commit leaves create count at one. During-write cancellation, disposed UI/privacy and browser mode remain incomplete."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-62-01] discarded previews write nothing and in-flight unload preserves the actual host outcome without replay",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real document service distinguishes discarded preview from started write and preserves committed/failed/uncertain outcomes during runtime disposal; companion assertion checks bounded request retention and selected redacted exports. Each scenario is partial; view ownership and all DOC-18 bounds remain separate."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-62-02] request retention is bounded and exported diagnostics exclude private plans after committed listener failures",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real document service distinguishes discarded preview from started write and preserves committed/failed/uncertain outcomes during runtime disposal; companion assertion checks bounded request retention and selected redacted exports. Each scenario is partial; view ownership and all DOC-18 bounds remain separate."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B62] cancelled preview and closed writing owner preserve exact Markdown and live sibling draft",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Cancel before create writes nothing; a paused actual Markdown write survives initiating-view close with exact bytes and one write, a committed event, unchanged sibling draft, explicit note reload and independent storage reload. Browser adapter and selected resources only."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete privacy/input/template/collision bounds and window ownership remain; string length is not a UTF-8 byte budget. Separate Task editor retained actions need a disposal audit. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-63",
@@ -732,8 +1238,17 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Canonical failures preserve category, identity and effect. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/documents.test.ts",
+          "name": "DocumentCreationService [DOC-I04] uncertainty is cached and never emits a created fact or blindly retries",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Unknown thrown write maps to code=uncertain/effect=uncertain without success fact or second write. The full canonical category/correlation/safe-identity matrix and browser mode remain incomplete."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Full category/effect/correlation/report identity matrix including non-Error/cross-realm throws needs U/B assertions; strings in notices do not prove canonical failure identity. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-64",
@@ -743,7 +1258,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Persistent field guidance without one toast per field. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert associated persistent fields/summary and zero per-field toast burst in all modes; visible alert alone does not prove association or notification count. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-65",
@@ -753,7 +1268,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: One updating progress/terminal notice per operation. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Add real component/browser/native per-operation handle observations including progress-to-terminal replacement; U policy checks do not satisfy C/B/N. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-66",
@@ -761,8 +1276,41 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Uncertain create has no unsafe retry; open retry stays separate. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/acceptance-closure.test.ts",
+          "name": "[AC-CLOSE-66] uncertain create preserves written bytes and blocks retries while open recovery never recreates",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real note actions persist bytes then lose acknowledgment: uncertainty has no receipt/success, reset/preview/recommit/open cannot create again. Separate confirmed creation retains its receipt through open failure; two concurrent retry-open calls coalesce to one host action and preserve exactly one complete create. Stale/disposed recovery and owner closure during pending work are not exercised by this active-owner assertion."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/acceptance-closure.spec.ts",
+          "name": "[AC-CLOSE-05-66] failed and uncertain creates preserve bytes and expose only safe recovery",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served actions expose safe deliberate recovery after a known failed write; failed opening retains confirmed success and offers only opening, whose retry leaves exact bytes and create count unchanged. A post-persist lost acknowledgment leaves the exact note durable, no success/open action, all create/reset/preview controls disabled, and exact bytes survive reload without additional writes. Stale/disposed recovery and owner closure during pending work are not exercised by this active-owner assertion."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-66-01] retained disposed view actions cannot prepare, create, reset or reopen committed documents",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Retained disposed production view actions cannot navigate, prepare, commit, reset or reopen: exact call-through service/local-write counts and unchanged state prevent dedup hiding a missing guard, while a sibling remains usable. Active uncertainty and stale follow-up behavior remain separately linked."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B66] open-only recovery ignores stale and disposed completions without recreating Markdown",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served committed open failure offers only open follow-up; pending stale/disposed open completion cannot replace a new draft, invoke another open or create another note. Exact Markdown and write/open counts remain authoritative."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Keep active/pending/disposed outcomes distinct and qualify all required clauses together. Safe host opening is follow-up only; retained Task repository-editor actions remain a separate follow-up. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-67",
@@ -770,8 +1318,17 @@
         "unit",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Reporter/translator/sink failures are bounded/nonrecursive. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/notification-policy.test.ts",
+          "name": "[NTF-03-08] sink/update/hide and observer failures remain observable without hiding recovery state",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real notification policy retains visible inline recovery and reports sink/update/hide/observer/translation failures independently, using a bounded translation fallback. Required browser and full reporter-recursion matrix remain separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add browser reporter/translator/sink failure combinations with exact independent code/scope/count and no recursive notifications; selected unit sink fallback is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-68",
@@ -781,7 +1338,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Contained Vue defects fail through independent ledger. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Deliberate contained Vue defect must fail an ordinary served/native scenario through independent ledger, with current failed artifacts retained; component containment alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-69",
@@ -790,7 +1347,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Fault scenarios reject missing/extra faults and overflow. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add real U/B ledger negative assertions for missing/extra/count/scope/overflow; baseline parser/control evidence cannot be relabeled. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-70",
@@ -800,7 +1357,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Notice burst/dedup/expiry preserves recovery/evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Required component/browser/native burst/dedup/expiry/dismiss tests must retain recovery and independent evidence; U fake-timer policy is supporting evidence only. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-71",
@@ -809,8 +1366,25 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Disposal removes only owned handles/actions/timers. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/lifecycle-recovery-components.test.ts",
+          "name": "[PL-C71] disposing runtime recovery invalidates pending and retained sink actions while leaving an unrelated notice intact",
+          "mode": "component",
+          "extent": "partial",
+          "assertions": "Production services and real browser sink retain a runtime recovery after view close, invalidate pending and retained action callbacks at runtime disposal, dismiss their sink and preserve an unrelated DOM sentinel. No full timer/native/foreign-plugin ownership inference."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B11-71] twenty served view cycles release measured owned timers dialogs notices and subscriptions",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Twenty served view cycles release actual synthetic notice/dialog/timer handles with sibling and unrelated DOM retained. Ordinary action count remains zero, so nonempty recovery registry and native ownership require separate evidence."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Native owned notices/actions/timers and foreign Notice preservation remain missing; current native diagnostics are a bounded production buffer, not the independent fault observer. Browser ordinary actions are zero and DOM sentinel is not a foreign native Notice. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-72",
@@ -820,8 +1394,17 @@
         "native",
         "manual"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Keyboard/focus/live announcement/recovery behavior. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/modals.spec.ts",
+          "name": "[MODAL-E2E-01] real service dialogs validate, contain keyboard focus, cancel and restore their trigger without writes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Actual served modal actions are keyboard reachable, contain focus and return it after cancel/confirm; invalid prompt remains focused with associated invalid semantics and no note writes. Manual screen-reader/live-announcement and native qualification remain."
+        }
+      ],
+      "gap": "Audit classes E,A,Q,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Manual actual screen-reader/live announcement and native recovery/timing review remain mandatory; axe/ARIA assertions cannot substitute. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-73",
@@ -829,7 +1412,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Native Notice limitations modeled without private APIs. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Qualify real public Notice create/update/hide and accessible owning-view recovery; never assume private manager or target-window APIs. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-74",
@@ -837,8 +1420,17 @@
         "artifact",
         "browser-integrated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Host fixture is original/scoped/labeled and not packaged. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/showcase.spec.ts",
+          "name": "[UI-I01] real Nuxt components render without global CSS, head injection or network dependencies",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Actual served plugin UI creates no head styles and leaves host sentinel computed font/radius unchanged when plugin CSS is disabled. Artifact exclusion and extracted/original provenance are separate."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind artifact exclusion and explicit extracted-versus-original profile labeling; do not call extracted upstream CSS original authored simulation. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-75",
@@ -847,7 +1439,7 @@
         "browser-integrated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Missing host/plugin CSS or wrong identifiers fail checks. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add wrong identity and missing host/plugin CSS negatives for actual served production components and package shim rejection; specimen/Baseline tests do not fill B/A. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-76",
@@ -856,8 +1448,17 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Themes/narrow/long text/media cases label evidence mode. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "browser",
+          "file": "tests/e2e/accessibility.spec.ts",
+          "name": "[A11Y-03] German narrow view, reduced motion and forced colors remain keyboard usable",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Explicit browser media emulation and German 360px view test keyboard state, scanner findings, horizontal overflow and independent faults. No native media/theme or full long-text/component claim is made."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete long-text/theme/media cases in every required mode and retain exact real-host identities; simulated scaling cannot prove native zoom. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-77",
@@ -865,7 +1466,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Specimen is not reported as native/Vue/service evidence. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Retained baseline must remain visibly separate; add exact trusted L control link only after auditing full specimen-versus-service/component labels. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-78",
@@ -873,7 +1474,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Host comparison records actual identity or remains unverified. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Actual native comparison needs resolved host/installer/candidate identity or explicit unverified state; manifest-derived selectors are not proof of executing host version. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-79",
@@ -881,7 +1482,7 @@
         "tooling-generated"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Makers use shared errors/notifications and cleanup tests. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Audit generated canonical failure/notification mapping and real cleanup assertions for each relevant maker; generator success count alone is not whole. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-80",
@@ -890,7 +1491,7 @@
         "native"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Freshness/release excludes specimen-only success. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,X (see ACCEPTANCE-CLOSURE-LEDGER.md). Retain blocked release; exact artifact/native freshness and authorized promotion must reject specimen-only input. Fake review packets do not grant authority. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-81",
@@ -898,15 +1499,24 @@
         "http-specimen"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Loopback server serves only declared assets and rejects writes. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Existing retained H baseline links remain separate; a trusted H producer is not provided by runtime/tooling/browser adapters. Preserve platform execution scope. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-82",
       "requiredModes": [
         "tooling-generated"
       ],
-      "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Scenario coverage and generated qualification remain finite. Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "links": [
+        {
+          "producer": "tooling",
+          "file": "tests/tooling/maker-catalog.checks.mjs",
+          "name": "[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns",
+          "mode": "tooling-generated",
+          "extent": "partial",
+          "assertions": "Executes a finite explicit recipe list, verifies idempotent reruns and runs generated checks. Does not by itself prove the entire generated qualification policy cannot recurse."
+        }
+      ],
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert generated qualification does not recursively generate more projects or omit required finite scenarios; fixed test count alone does not establish policy completeness. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-83",
@@ -939,7 +1549,7 @@
           "assertions": "The actual framework adapters reject unknown shapes, empty or incomplete case inventories and mode substitutions; this parser control supplies no application acceptance claim."
         }
       ],
-      "gap": "Current Node/Vitest schema, inventory and contradictory-status controls are linked. Missing/duplicate legacy acceptance rows and unknown legacy test IDs remain tested by the independent POL baseline; those results remain separate from current packet evidence."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Preserve legacy links; add a current trusted L assertion covering the entire inventory rejection contract rather than promoting one fixture's happy path. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-84",
@@ -980,7 +1590,7 @@
           "assertions": "A genuine Playwright test fails its first attempt and passes its configured retry; every result is retained and the real producer/checker remain nonpassing. Reporter-only fixture launches no browser UI."
         }
       ],
-      "gap": "Cold Node semantic repetition, first-failure retention and genuine Vitest/Playwright retry/repeat controls are now linked. This proves the implemented rejection paths; candidate qualification still requires the declared complete producer runs and their matching case inventories, with no claim for runs not executed."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Existing linked producer repetition control remains partial: it does not establish complete repeated cold-run determinism across the retained baseline suite. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-85",
@@ -1005,7 +1615,7 @@
           "assertions": "The public reporter and real JSON must agree on every case status; an extra independently reported unhandled error makes frameworkPassed false and prevents validation. Exact application fault code/scope expectations remain a separate ledger concern."
         }
       ],
-      "gap": "Actual child-ledger overflow and independent Vitest error/status rejection are linked. Exact missing/extra application fault codes, scopes and counts remain covered by the independent ERR baseline and production tests; they are not inferred from generic framework failure counts."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Full exact code/scope/count/missing/extra and overflow contract must be observed in trusted L evidence; one overflowing child is only partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-86",
@@ -1046,7 +1656,7 @@
           "assertions": "Crafted native-parser samples are checked against genuinely measured fixture asset/compression bytes; altered asset hashes, serializer contribution, on-disk attribution graph and resolved-host identity are rejected. This is identity-control evidence, not native execution."
         }
       ],
-      "gap": "New/modified source, malformed own-Git metadata, actual asset drift and crafted native asset/attribution/host identity controls are linked. Tool-install version mismatch and changed config/protocol/lockfile identities are enforced by hashing but do not yet have separate substitution controls linked here."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Retain partial scope unless the complete modified/new-input hashing and stale-report contract is asserted together in current L producer output. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-87",
@@ -1095,7 +1705,7 @@
           "assertions": "Real framework failures/skips and malformed or contradictory reporter counts/statuses fail; matching real pass output remains a nearby valid control."
         }
       ],
-      "gap": "Node/Vitest failure, skip, empty, malformed, contradictory and missing registered-run paths are linked. An abruptly crashing real reporter and native-host partial/missing-output scenarios have not been independently injected through every producer; passing fixture parsers cannot establish those executions."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete crash/missing reporter-result scenarios and all empty/skip/malformed variants need whole audited binding; no automatic promotion from suite status. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-88",
@@ -1112,7 +1722,7 @@
           "assertions": "A real hung child uses a one-second producer deadline; the owned runner returns EVIDENCE_TIMEOUT, retains the failed packet and cannot pass the read-only checker."
         }
       ],
-      "gap": "The linked real hung Node producer times out, returns a retained failed verdict and cannot pass validation. The additive row does not yet link timeout-injection results for browser or native-host process trees; the retained RUN-06 baseline stays separate."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Preserve partial unless all owned descendant cleanup observations establish bounded termination; timeout classification alone is not proof of no surviving process. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-89",
@@ -1137,7 +1747,7 @@
           "assertions": "All individual executions can pass while their changed semantic inventory fails the session; every acceptance row remains not-run, proving that passing execution counts alone do not promote acceptance."
         }
       ],
-      "gap": "Linked reports keep execution/acceptance/source coverage distinct, and passing individual runs with changed inventories cannot promote any acceptance row. A populated production-coverage report has not been independently used to assert that high measured coverage cannot promote incomplete acceptance."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert source coverage, acceptance and execution denominators remain distinct in actual current report, including partial/not-run rows. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-90",
@@ -1170,7 +1780,7 @@
           "assertions": "Unit-mode data is rejected by the native adapter, and native-mode data is rejected by the artifact adapter. These mode-control assertions are Node baseline evidence only."
         }
       ],
-      "gap": "Passing sessions retain blocked release, and actual packet/native/artifact mode-substitution controls are linked. The independent legacy inline/specimen guard remains unchanged; no current link establishes administrative/public-release authorization, and no packet grants it."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete baseline/inline/specimen rejection in release/native requirements; keep release permanently blocked in this milestone. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-91",
@@ -1178,7 +1788,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Reviewed native token contract and scoped aliases Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Preserve narrow retained token-baseline scope; current trusted L linkage must inspect sourced reference and scoped aliases together. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-92",
@@ -1186,7 +1796,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Extracted source integrity and narrow vendor exception Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind exact integrity/exception behavior in current L output; do not exempt other vendor-looking files or infer host compatibility. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-93",
@@ -1194,7 +1804,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Host/plugin separation and profile load order Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Whole requires load order plus isolated profiles with no fallback; retained single load-order link is not the entire assertion set. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-94",
@@ -1202,7 +1812,7 @@
         "browser-specimen"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Theme override and missing-style browser checks Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Rerun in actual declared S environment and retain its own artifacts; B producer cannot substitute merely because both use Chromium. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-95",
@@ -1210,7 +1820,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Provenance does not claim unknown host or transfer upstream license Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Current provenance assertions must remain bound to exact vendor input; do not turn unknown source version into a native comparison claim. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-96",
@@ -1218,7 +1828,7 @@
         "node-baseline"
       ],
       "links": [],
-      "gap": "No reviewed additive assertion link establishes the full requirement: Deprecated/missing aliases fail verification Retained baseline evidence remains separately scoped; required modes are unchanged."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Bind current complete alias drift negatives under L; preserve exact token grammar and avoid claiming general CSS lint coverage. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     }
   ]
 }

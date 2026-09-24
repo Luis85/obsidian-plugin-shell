@@ -19,7 +19,7 @@ export function useItemsController() {
   const currentQuery = (current: number) => alive && current === generation;
   function failed(error: Failure) {
     state.error.value = error;
-    if (error.effect === 'uncertain') state.blocked.value = true;
+    if (error.effect === 'uncertain' || error.key === 'error.settingsRead' || error.key === 'error.pluginDataRead') state.blocked.value = true;
   }
   async function refresh(review = false) {
     if (!alive) return;

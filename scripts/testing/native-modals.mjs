@@ -1,9 +1,10 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { join } from 'node:path';
 import { assertDiagnostics } from './native-header-checks.mjs';
 /** Actual native Modal keyboard/owner behavior; no DOM substitute or test service. */
 export async function qualifyModals(page, report, output, identity) {
-  const owned = page.locator(identity.viewSelector).first(); report.phase = 'native-modal-services';
+  const owned = page.locator(identity.viewSelector).first(); noteNativePhase(report, 'native-modal-services');
   const infoTrigger = owned.getByRole('button', { name: 'Open native modal', exact: true }); await infoTrigger.focus(); await infoTrigger.press('Enter');
   const info = page.locator('.modal').filter({ hasText: 'One view, two environments' }); await expect(info).toBeVisible();
   await page.keyboard.press('Escape'); await expect(info).toHaveCount(0); await expect(infoTrigger).toBeFocused();

@@ -55,6 +55,16 @@ Distribution topology, public metadata and execution-policy acceptance must be r
 
 No tags, releases, directory submission, automatic activation, permissions changes or global package installation are authorized by this document.
 
+## Retained newer concept requirements
+
+The [0.4 detailed requirements](COMPANION-REQUIREMENTS-0.4.md) preserve the complete
+PR #5 `6a39dd0` requirements, including test-data tooling and design-system export,
+without replacing the [0.3 baseline](COMPANION-REQUIREMENTS-0.3.md). These are additive
+requirements, not shell or native implementation evidence. The shell-first
+[delivery strategy](DELIVERY-STRATEGY.md) supersedes earlier sequencing. Shell
+installer work retains `.dev-vault`; the concept can explicitly select `.test-vault`
+without changing that default. No installer or fixture target is renamed or moved
+by this reconciliation.
 
 ## Test data and design-system extension (2026-09-24)
 

@@ -1,5 +1,25 @@
 # Template readiness ledger
 
+The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
+and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) track the current focused
+milestone. Frozen `7f14292871efb07ddace131fb9b5603de4122394` has **2 verified /
+55 partial / 39 not-run** after a complete audited session: AC-71 now has partial
+component/browser evidence, while its native ownership clauses remain open.
+The earlier candidate figures below remain historical; partial assertion
+improvements are not full-template readiness.
+
+The subsequent [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
+[execution record](../testing/ACCEPTANCE-CLOSURE.md) own the current assertion
+audit and results. The requirement inventory and earlier candidate figures below
+remain historical context; unlinked evidence is not absent implementation.
+
+Previous frozen code `e2758ae47723cc7496fabd0074b76b03db5c4ee2` has a complete
+Linux evidence session with **2 verified / 54 partial / 40 not-run**: AC-06 joins
+AC-03 as verified, while audited links advance 41 previously unlinked cases to partial.
+The [96-row finish ledger](ACCEPTANCE-CLOSURE-LEDGER.md) retains missing clauses
+and modes. Both historical native failure classes and a separate Windows
+production-coverage timeout remain unresolved. Full-template release stays blocked.
+
 Reviewed 2026-09-23 against merged iteration-four source and its retained
 [execution record](../testing/ITERATION-FOUR.md). This is a requirement inventory,
 not a replacement acceptance report or permission to release. The

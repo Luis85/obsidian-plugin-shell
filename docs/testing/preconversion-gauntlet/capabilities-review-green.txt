@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: [CAP-01] catalog enumerates the actual fourteen maker handlers and preserves legacy parsing
+ok 1 - [CAP-01] catalog enumerates the actual fourteen maker handlers and preserves legacy parsing
+  ---
+  duration_ms: 31.987989
+  type: 'test'
+  ...
+# Subtest: [CAP-02] missing handlers, duplicate IDs/aliases, unsupported schemas and false implementation claims fail
+ok 2 - [CAP-02] missing handlers, duplicate IDs/aliases, unsupported schemas and false implementation claims fail
+  ---
+  duration_ms: 39.338578
+  type: 'test'
+  ...
+# Subtest: [CAP-03] data-only CLI discovery never imports custom recipes or executes consumer scripts/configuration
+ok 3 - [CAP-03] data-only CLI discovery never imports custom recipes or executes consumer scripts/configuration
+  ---
+  duration_ms: 896.075951
+  type: 'test'
+  ...
+# Subtest: [CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets
+ok 4 - [CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets
+  ---
+  duration_ms: 234.767274
+  type: 'test'
+  ...
+# Subtest: [CAP-05] supported discovery uses identical protocol results and cannot mutate the shared catalog
+ok 5 - [CAP-05] supported discovery uses identical protocol results and cannot mutate the shared catalog
+  ---
+  duration_ms: 339.25481
+  type: 'test'
+  ...
+# Subtest: [CAP-06] future/malformed envelopes and executable or machine-local input fail before any handler
+ok 6 - [CAP-06] future/malformed envelopes and executable or machine-local input fail before any handler
+  ---
+  duration_ms: 62.356143
+  type: 'test'
+  ...
+# Subtest: [CAP-07] unknown, planned and CLI-only operations are visible but never executed by the protocol
+ok 7 - [CAP-07] unknown, planned and CLI-only operations are visible but never executed by the protocol
+  ---
+  duration_ms: 64.307402
+  type: 'test'
+  ...
+# Subtest: [CAP-08] protocol validates progress, receipts and error/result invariants, not only requests
+ok 8 - [CAP-08] protocol validates progress, receipts and error/result invariants, not only requests
+  ---
+  duration_ms: 17.644272
+  type: 'test'
+  ...
+# Subtest: [CAP-09] malformed, oversized and deep stdin fail with bounded non-leaking JSON errors
+ok 9 - [CAP-09] malformed, oversized and deep stdin fail with bounded non-leaking JSON errors
+  ---
+  duration_ms: 894.28804
+  type: 'test'
+  ...
+# Subtest: [CAP-10] data-only catalog input schemas and entrypoints match declared current CLI contracts
+ok 10 - [CAP-10] data-only catalog input schemas and entrypoints match declared current CLI contracts
+  ---
+  duration_ms: 408.845669
+  type: 'test'
+  ...
+# Subtest: [CAP-11] original maker list/help entrypoints and recipe option contracts remain usable
+ok 11 - [CAP-11] original maker list/help entrypoints and recipe option contracts remain usable
+  ---
+  duration_ms: 406.113117
+  type: 'test'
+  ...
+# Subtest: [CAP-12] accessors, custom prototypes, non-finite values, sparse arrays and cycles cannot cross JSON boundaries
+ok 12 - [CAP-12] accessors, custom prototypes, non-finite values, sparse arrays and cycles cannot cross JSON boundaries
+  ---
+  duration_ms: 71.801313
+  type: 'test'
+  ...
+# Subtest: [CAP-13] protocol registration drift, malformed descriptors and falsified outputs are rejected
+ok 13 - [CAP-13] protocol registration drift, malformed descriptors and falsified outputs are rejected
+  ---
+  duration_ms: 49.084133
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3780.32725

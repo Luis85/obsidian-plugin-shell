@@ -1,3 +1,4 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -21,7 +22,7 @@ async function observeWrites(page, identity) {
     restore: () => page.evaluate(() => { window.__qualificationItems?.restore(); delete window.__qualificationItems; }) };
 }
 export async function qualifyItems(page, report, output, vault, identity) {
-  report.phase = 'native-items';
+  noteNativePhase(report, 'native-items');
   const path = join(vault, identity.pluginDirectory, 'data.json');
   const owned = page.locator(identity.viewSelector).first();
   const observation = await observeWrites(page, identity); const counts = observation.counts;

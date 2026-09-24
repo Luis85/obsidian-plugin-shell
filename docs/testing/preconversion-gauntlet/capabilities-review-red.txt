@@ -1,0 +1,108 @@
+TAP version 13
+# Subtest: [CAP-01] catalog enumerates the actual fourteen maker handlers and preserves legacy parsing
+ok 1 - [CAP-01] catalog enumerates the actual fourteen maker handlers and preserves legacy parsing
+  ---
+  duration_ms: 32.771128
+  type: 'test'
+  ...
+# Subtest: [CAP-02] missing handlers, duplicate IDs/aliases, unsupported schemas and false implementation claims fail
+ok 2 - [CAP-02] missing handlers, duplicate IDs/aliases, unsupported schemas and false implementation claims fail
+  ---
+  duration_ms: 28.653066
+  type: 'test'
+  ...
+# Subtest: [CAP-03] data-only CLI discovery never imports custom recipes or executes consumer scripts/configuration
+ok 3 - [CAP-03] data-only CLI discovery never imports custom recipes or executes consumer scripts/configuration
+  ---
+  duration_ms: 882.869718
+  type: 'test'
+  ...
+# Subtest: [CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets
+ok 4 - [CAP-04] fresh Git-free copy discovers capabilities without installed packages or concept assets
+  ---
+  duration_ms: 224.079906
+  type: 'test'
+  ...
+# Subtest: [CAP-05] supported discovery uses identical protocol results and cannot mutate the shared catalog
+ok 5 - [CAP-05] supported discovery uses identical protocol results and cannot mutate the shared catalog
+  ---
+  duration_ms: 272.454208
+  type: 'test'
+  ...
+# Subtest: [CAP-06] future/malformed envelopes and executable or machine-local input fail before any handler
+ok 6 - [CAP-06] future/malformed envelopes and executable or machine-local input fail before any handler
+  ---
+  duration_ms: 58.456878
+  type: 'test'
+  ...
+# Subtest: [CAP-07] unknown, planned and CLI-only operations are visible but never executed by the protocol
+ok 7 - [CAP-07] unknown, planned and CLI-only operations are visible but never executed by the protocol
+  ---
+  duration_ms: 66.140463
+  type: 'test'
+  ...
+# Subtest: [CAP-08] protocol validates progress, receipts and error/result invariants, not only requests
+ok 8 - [CAP-08] protocol validates progress, receipts and error/result invariants, not only requests
+  ---
+  duration_ms: 17.972595
+  type: 'test'
+  ...
+# Subtest: [CAP-09] malformed, oversized and deep stdin fail with bounded non-leaking JSON errors
+ok 9 - [CAP-09] malformed, oversized and deep stdin fail with bounded non-leaking JSON errors
+  ---
+  duration_ms: 898.316664
+  type: 'test'
+  ...
+# Subtest: [CAP-10] data-only catalog input schemas and entrypoints match declared current CLI contracts
+ok 10 - [CAP-10] data-only catalog input schemas and entrypoints match declared current CLI contracts
+  ---
+  duration_ms: 427.878085
+  type: 'test'
+  ...
+# Subtest: [CAP-11] original maker list/help entrypoints and recipe option contracts remain usable
+ok 11 - [CAP-11] original maker list/help entrypoints and recipe option contracts remain usable
+  ---
+  duration_ms: 373.953312
+  type: 'test'
+  ...
+# Subtest: [CAP-12] accessors, custom prototypes, non-finite values, sparse arrays and cycles cannot cross JSON boundaries
+not ok 12 - [CAP-12] accessors, custom prototypes, non-finite values, sparse arrays and cycles cannot cross JSON boundaries
+  ---
+  duration_ms: 47.390162
+  type: 'test'
+  location: '<repository>/tests/tooling/capability-discovery.checks.mjs:193:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'result' !== 'error'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'error'
+  actual: 'result'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repository>/tests/tooling/capability-discovery.checks.mjs:201:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: [CAP-13] protocol registration drift, malformed descriptors and falsified outputs are rejected
+ok 13 - [CAP-13] protocol registration drift, malformed descriptors and falsified outputs are rejected
+  ---
+  duration_ms: 38.453121
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 12
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3634.455871
