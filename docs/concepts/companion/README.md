@@ -1,8 +1,14 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · three-editor correctness and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · cross-surface consistency and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
+
+## Cross-surface consistency
+
+The [workbench polishing review](WORKBENCH-POLISH-REVIEW.md) records shared control and spacing ownership, escaped form helpers, dialog-focus recovery, protected command shortcuts, responsive navigation and the verification boundary. The existing editor and generator behaviors are retained, not replaced by a visual mock.
+
+Shared shell CSS now lives in `src/workbench.css`, assembled first; feature styles own their local layout and graph geometry. `src/ui-fields.js` supplies consistent named controls and helper-text associations without changing field routes or validation. Dialog redraws preserve repeated-row identity, text selection and scroll position. Design System previews remain scoped to the authored sample, never the host shell.
 
 ## Three-editor review
 
@@ -16,7 +22,7 @@ Open an initially empty folder as an Obsidian vault, install the companion, then
 
 The fresh overview offers **Start designing**. Define the project, capture requirements, choose a blueprint and edit the existing sitemap/components without Node/npm. The vault identity stays visible, but there is no project picker, external attachment or second-project creation. Other projects are other Obsidian vaults.
 
-**Prepare project** stages a template and reviews additive source-root changes, not a clone over the vault. Existing host configuration, project notes and the full authored design survive. Conflicts and stale approvals block writes. Interruption/resume keeps the same project. Generated-plugin testing uses the separate contained `.dev-vault`; installing the companion is not enabling the output plugin.
+**Prepare project** stages a template and reviews additive source-root changes, not a clone over the vault. Existing host configuration, project notes and the full authored design survive. Conflicts and stale approvals block writes. Interruption/resume keeps the same project. New-project testing uses the separate contained `.test-vault/`; existing `.dev-vault` targets remain explicit rather than being moved. Installing the companion is not enabling the output plugin.
 
 Read the [single-vault decision and native implementation contract](SINGLE-VAULT.md), [updated companion PRD](../../product/COMPANION-PLUGIN-PRD.md) and [current verification](SINGLE-VAULT-VERIFICATION.md). Historical reviews retain their dated evidence; their old counts and launcher assumptions are not current acceptance results.
 
@@ -68,7 +74,7 @@ CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-ch
 
 The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suites use HTML injection and explicit controlled-storage fixtures; actual-origin storage is a separately reported suite. Exported-kit filesystem and loopback HTTP tests are separate executable-tooling evidence. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-The builder and Fallow inventory agree on **103 exact inputs: 74 maintained JS, 17 maintained CSS, 7 test-kit ES modules and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
+The builder and Fallow inventory agree on **105 exact inputs: 75 maintained JS, 18 maintained CSS, 7 test-kit ES modules and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 

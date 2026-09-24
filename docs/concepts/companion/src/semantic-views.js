@@ -1,5 +1,11 @@
-function erInput(label,key,value,help='',multi=false,readonly=false){return `<label class="field" for="er-${key}">${esc(label)}${multi?`<textarea id="er-${key}" data-field="er-${key}" maxlength="1000" rows="3">${esc(value||'')}</textarea>`:`<input id="er-${key}" data-field="er-${key}" value="${esc(value||'')}" maxlength="120" ${['x','y'].includes(key)?'type="number" min="-100000" max="100000" step="any"':''} ${readonly?'readonly':''}>`}${help?`<small>${esc(help)}</small>`:''}</label>`;}
-function erSelect(label,key,options,value){return `<label class="field" for="er-${key}">${esc(label)}<select id="er-${key}" data-field="er-${key}">${options.map(([id,name])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;}
+function erInput(label, key, value, help = '', multi = false, readonly = false) {
+  const numeric = ['x', 'y'].includes(key) && !multi;
+  const extra = `maxlength="${multi ? 1000 : 120}" ${numeric ? 'min="-100000" max="100000" step="any"' : ''} ${readonly ? 'readonly' : ''}`;
+  return uiInput(label, 'er-' + key, value, { hint: help, multiline: multi, type: numeric ? 'number' : 'text', extra });
+}
+function erSelect(label, key, options, value) {
+  return uiSelect(label, 'er-' + key, options, value);
+}
 function erEditButton(label,action,value='',style='',iconName=''){return button(label,action,value,style,iconName,state.activeRun?'disabled':'');}
 function semanticView(){
  const m=semanticModel(),issues=semanticIssues(design()),empty=!m.entities.length,map=erUi.mode==='map';

@@ -1,6 +1,12 @@
-function sgField(label,key,value,type='text',hint='',extra=''){return `<label class="field" for="sg-${key}">${label}<input id="sg-${key}" data-field="sg-${key}" type="${type}" value="${esc(value??'')}" ${extra}>${hint?`<small>${esc(hint)}</small>`:''}</label>`;}
-function sgArea(label,key,value,max=2000){return `<label class="field" for="sg-${key}">${label}<textarea id="sg-${key}" data-field="sg-${key}" rows="4" maxlength="${max}">${esc(value)}</textarea></label>`;}
-function sgSelect(label,key,value,options){return `<label class="field" for="sg-${key}">${label}<select id="sg-${key}" data-field="sg-${key}">${options.map(([id,name])=>`<option value="${id}" ${value===id?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;}
+function sgField(label, key, value, type = 'text', hint = '', extra = '') {
+  return uiInput(label, 'sg-' + key, value, { type, hint, extra });
+}
+function sgArea(label, key, value, max = 2000) {
+  return uiInput(label, 'sg-' + key, value, { multiline: true, rows: 4, extra: `maxlength="${max}"` });
+}
+function sgSelect(label, key, value, options) {
+  return uiSelect(label, 'sg-' + key, options, value);
+}
 function styleGuideView(){
  const s=styleGuide();
  const actions=button('Export Markdown','sg-export','md','small','download',!s?'disabled':'')+button('Export HTML','sg-export','html','small','download',!s?'disabled':'');
@@ -23,7 +29,7 @@ function sgRow(group,r,s){
 function sgContrastView(s){const pairs=sgContrastPairs(s);return `<section class="sg-contrast"><h3>Declared palette contrast</h3><p class="small muted">Checks the saved text/background, muted/background and accent-text/accent pairs only. This does not certify host themes, every interaction state or complete accessibility.</p>${pairs.length?`<div>${pairs.map(p=>`<p><span>${esc(p.label)} · ${p.mode}</span><strong>${p.ratio.toFixed(2)}:1</strong><span class="${p.ratio>=4.5?'':'error'}">${p.ratio>=4.5?'Meets 4.5:1':'Below 4.5:1'}</span></p>`).join('')}</div>`:'<p>Add colors using the keys above to calculate these pairs.</p>'}</section>`;}
 function styleGuideForm(){
  const f=sgUi.form;if(!f)return dialogBody('Design declaration unavailable','Reopen the saved declaration.');
- if(f.removal)return dialogBody('Remove '+esc(f.record.name)+'?',`<p>Only the saved design declaration will be removed. Previously exported documents and source files are kept. Unsaved edits are not applied.</p><p class="error" role="alert" id="sg-error" tabindex="-1">${esc(sgUi.error)}</p>`,button('Keep editing','sg-keep','','ghost')+button('Remove declaration','sg-confirm-remove','','danger','trash'));
+ if(f.removal)return dialogBody('Remove '+f.record.name+'?',`<p>Only the saved design declaration will be removed. Previously exported documents and source files are kept. Unsaved edits are not applied.</p><p class="error" role="alert" id="sg-error" tabindex="-1">${esc(sgUi.error)}</p>`,button('Keep editing','sg-keep','','ghost')+button('Remove declaration','sg-confirm-remove','','danger','trash'));
  const r=f.record,g=f.group;let body='';
  if(g==='overview')body=sgField('Design-system name','name',r.name,'text','','maxlength="100"')+sgArea('Description','description',r.description)+sgArea('Principles','principles',r.principles,4000);
  else {
