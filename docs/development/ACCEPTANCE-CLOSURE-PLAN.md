@@ -1,5 +1,9 @@
 # Acceptance closure and native reliability plan
 
+This historical plan is followed by the
+[persistence/lifecycle milestone](PERSISTENCE-LIFECYCLE-PLAN.md). Its baseline and
+results below remain tied to the original candidates.
+
 Baseline inspected 2026-09-23: clean main/origin/main `2d4087e93289a21d797fab4cd641ecde6cf16a82`; PR #10 is OPEN at `b426bbdddd4d966fd6ce430996d2542bd7511aaf`, following qualified code `fd59c80195dee549ddbaaa23c28a06c091b18274`. Work only in `.worktrees/acceptance-closure`, branch `codex/acceptance-closure`. The new PR targets `codex/executable-qualification`; do not merge either PR. No `.codex/` instructions exist. Preserve the previous worktree and all raw evidence.
 
 ## Contract and ownership agreed before implementation

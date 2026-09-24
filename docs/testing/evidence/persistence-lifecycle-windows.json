@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-windows-prescribed-verification-audit",
+  "status": "audited",
+  "sourceHead": "7f14292871efb07ddace131fb9b5603de4122394",
+  "checkoutCommit": "2502e41e47847f22782b3c09b89d39d65402c011",
+  "checkoutTree": "604dff044836468a06c6e25d5fb12be91e4aacad",
+  "treeEqualsFrozen": true,
+  "run": {
+    "id": 35965722920,
+    "jobId": 107523742730,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722920/job/107523742730",
+    "artifactId": 10794806268,
+    "archiveSha256": "05424cc04311e9212e000c2224a330abd1265489d3ffbc72e9f7a92e183c086d"
+  },
+  "workflowLogSha256": "4a569dd22261c687d60e402d701e6995f1a92e972f832f874186f33f823eec6b",
+  "runtimeCoverageSummaries": [
+    325,
+    325,
+    325,
+    325
+  ],
+  "archiveAttempts": [
+    {
+      "directory": "437113c9-54d6-4438-87c3-7444df2ab8a3",
+      "reportSha256": "1d5155a7efb9b6dccd5decb0b59d1f9f01f2331644f46faa2666b26a5dcff1ee",
+      "startedAt": "2026-09-24T06:50:49.603Z",
+      "finishedAt": "2026-09-24T06:50:57.535Z",
+      "bodyCompleted": true,
+      "workStatus": "passed",
+      "cleanupStatus": "passed",
+      "commands": [
+        {
+          "startedSha256": "b831c7f7e9676c4dc164450faa761787e28f4ff4fc08dd1bbd7db57486210771",
+          "resultSha256": "d5dc3a30c3ad6c312eaf25003d2af6c60da01da9ad2ae4da20f37c0739b581a4",
+          "status": 0,
+          "durationMs": 57.21100000000001
+        },
+        {
+          "startedSha256": "1d03f0a3322a7e4674c07e21522d437ccea2f5f626f209218a591e412071be3f",
+          "resultSha256": "ee40b559a8cd616c87f19e5e504bdbb78d7cd6b88243ee4b65bb1113ad5c3474",
+          "status": 0,
+          "durationMs": 2848.1801
+        },
+        {
+          "startedSha256": "33369c2e778828e850287139d4bb9ec8aec32b60dd001bdebc4825f7829e045c",
+          "resultSha256": "066d8ee73580286096da4e4be700f464434f12c4505d614fa579b23c79626343",
+          "status": 0,
+          "durationMs": 414.90670000000046
+        },
+        {
+          "startedSha256": "2300b9b3c8ae729371768aa409557e0550e64de202fffda37164f862f45cbbca",
+          "resultSha256": "0d78964dfca522509b3d804c17cd7c64f6206ba757ca94bec7794630b69de86e",
+          "status": 0,
+          "durationMs": 125.51149999999961
+        },
+        {
+          "startedSha256": "3a20bdec9856cf6ff2c6a7ed386116794d835b5902055f908d181f82c5fc1a53",
+          "resultSha256": "b78d41b5ac2dbbb5142ab5a07cb79ae62955c45569522473776f45c71122bff8",
+          "status": 0,
+          "durationMs": 286.6291000000001
+        },
+        {
+          "startedSha256": "162baf754c4d180196a756e83592a9adbc1a92120fb8e49577303e0d3a428173",
+          "resultSha256": "af2318c2415aa5d29d232b27a89c216e5404cfc644aa2c4976c4d2fc40d6b68a",
+          "status": 128,
+          "durationMs": 36.21630000000005
+        },
+        {
+          "startedSha256": "640834ca9cddc052851876d9f8a09e52f61500756df2382cef54fbea264902d0",
+          "resultSha256": "2ef6bd46889ee77fad440c3683751c226c70b87ee52431b7a485fa18f4e125c4",
+          "status": 0,
+          "durationMs": 593.7281000000003
+        },
+        {
+          "startedSha256": "a73e8e3a58db51e9205b82da2382d21b854a5a6e4e83d48d064bd2ecda15badf",
+          "resultSha256": "4e2d635aba4f05a5be213c56fd049e968c36d94518958b42609908abd4aeab48",
+          "status": 1,
+          "durationMs": 520.1329999999998
+        },
+        {
+          "startedSha256": "b2066c0c28032a4cd8dd0d929a2ff668ac6343c5bfdf74525490c915fe22f61b",
+          "resultSha256": "c426782904d8c6cb61d1642d004ca47320c2dbcc1705c19d02f221698207503d",
+          "status": 1,
+          "durationMs": 523.9664000000002
+        },
+        {
+          "startedSha256": "9c762f906792b7f0826edfed0282b6dfd23338814bb1d3e806256c784bd55ae7",
+          "resultSha256": "3d812e7ca7fc568e7f6aedc9dd27414cee92655b7d026277f3a57351bc892ef7",
+          "status": 0,
+          "durationMs": 434.97200000000066
+        }
+      ]
+    },
+    {
+      "directory": "c28b865a-a3a2-4be5-8ec7-fbe5b216210b",
+      "reportSha256": "e41331ea12f84da1e8456c0d824260b92061a421dffe1108767e297f6125de1c",
+      "startedAt": "2026-09-24T06:43:43.206Z",
+      "finishedAt": "2026-09-24T06:43:52.113Z",
+      "bodyCompleted": true,
+      "workStatus": "passed",
+      "cleanupStatus": "passed",
+      "commands": [
+        {
+          "startedSha256": "c7ec6393cb5e9e93202b81c00f2ed1336f2a884ab8905935cfb71079ea82ef80",
+          "resultSha256": "fe05d11d85490ccafa53df8474e27ad46583aff8ed363fb96b3dbdb2f11d25ee",
+          "status": 0,
+          "durationMs": 61.23890000000006
+        },
+        {
+          "startedSha256": "d801903781ad794c85bef6461fd195e6c60b9acfdc30a30285baab971004c9a1",
+          "resultSha256": "e3192aec534a7d490936fa9b2e63257f276d4698d4ec979d773d6c7d61e971a7",
+          "status": 0,
+          "durationMs": 3022.4727
+        },
+        {
+          "startedSha256": "ebe3ef963f5b50ba2269a26542a36376a3e275d90e5cded3cc4fa667282714d7",
+          "resultSha256": "29c867da6024d32376ab7362b3f4be440f80eb78c5342b326e1782784de98b24",
+          "status": 0,
+          "durationMs": 419.85369999999966
+        },
+        {
+          "startedSha256": "5a85eda61aa13f64d64b011f7595127cd47144c172421956cc9fa04bae958390",
+          "resultSha256": "a62906473d0f4495f29ae3990f0fb426aaab7a634bc82b493c7e647421f6ec96",
+          "status": 0,
+          "durationMs": 137.66550000000007
+        },
+        {
+          "startedSha256": "a0db5a4fdb95d52edecc6da1238d4f8523575a153fef2e54346c99ce7709112f",
+          "resultSha256": "d6d958af8f636ae828a940bf67005aeac86efc0a7e3f7351fdb57676e1fcc503",
+          "status": 0,
+          "durationMs": 356.1112000000003
+        },
+        {
+          "startedSha256": "645c89abc0082987d4b6839fab248b4b5a1aa3cb8d5594c0e4060db80c638341",
+          "resultSha256": "360197d70151331ee293c2fc4e52dcc9a09321ffab6656abe706d29d1c096810",
+          "status": 128,
+          "durationMs": 37.37010000000009
+        },
+        {
+          "startedSha256": "d35120fc45a608ad0a40163af3436e7067bd03384e05871e1b15b7d965a2b4cd",
+          "resultSha256": "666551e252dede9e186f30f6a3708e5938e27b91f5e59fccdc3a7cef40863880",
+          "status": 0,
+          "durationMs": 779.8741
+        },
+        {
+          "startedSha256": "4c3570ca0009f2d3e66bebd1bb72edcb327e5a5e4c2b37ca3d089eac91d0f5e3",
+          "resultSha256": "4bf77a90a862a451aece94269d62c6d27a49ea1c7049d0f20fe73c2b452c9ad8",
+          "status": 1,
+          "durationMs": 540.4694
+        },
+        {
+          "startedSha256": "ef769e8a083e51d3be8ad9b574c4ad0728477ecc74cd97af4441612f5bfc5c74",
+          "resultSha256": "504ecc22fb61a990184189e59e0b145c2a1253175a6aa9e2f0501504496750d1",
+          "status": 1,
+          "durationMs": 534.146099999999
+        },
+        {
+          "startedSha256": "88a0f07a7c60a1ff043df2df9e63478c8e7ce19cd816bcc94a4c86b230866424",
+          "resultSha256": "f119b088453ded49c325588ce1940e528405f79c51d8ae076370797b4eb79805",
+          "status": 0,
+          "durationMs": 437.09810000000107
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "file": "main.js",
+      "sha256": "72822e9d5de1ea56668ee7c2df1da2324ddc0fc00297ea270592df07eb55559a",
+      "matchesFrozen": false,
+      "bytes": 586958,
+      "crlfCount": 43,
+      "matchesAfterCrlfNormalization": true
+    },
+    {
+      "file": "styles.css",
+      "sha256": "36e84ec0ac83d16df657a8fe80bffbf1fe2ed683b0ba9bbf00fd0aef85a24b32",
+      "matchesFrozen": false,
+      "bytes": 88514,
+      "crlfCount": 0,
+      "matchesAfterCrlfNormalization": false
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "ebd4f5839429dad5dbe7b173ea0b9627f13f49722160038c406489b187e1e1b3",
+      "matchesFrozen": false,
+      "bytes": 289,
+      "crlfCount": 9,
+      "matchesAfterCrlfNormalization": true
+    }
+  ],
+  "limits": [
+    "These are the existing setup/verify stages, not extra causal reruns.",
+    "Current Windows archive bodies and cleanup completed at unchanged limits; historical EBUSY body outcome/cause remains unknown.",
+    "Whole runtime suites passed, but this job has no UI-03-04 stage trace; the original coverage timeout remains unexplained.",
+    "No Windows native host was launched or qualified.",
+    "Exact Git tree equality and asset hashes do not establish honest execution or release authorization.",
+    "Windows rebuilt asset bytes differ from frozen Linux assets; no fixed-byte Windows native qualification is claimed. Normalization comparison is diagnostic only."
+  ]
+}

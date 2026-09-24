@@ -1,0 +1,4540 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-retained-candidate-audit",
+  "status": "audited",
+  "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+  "scope": "Read-only retained Linux CI artifact consistency audit. No test/host/producers rerun; no local environment freshness, honest-execution attestation or release authorization claim.",
+  "run": {
+    "id": 35965718824,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965718824",
+    "conclusion": "success",
+    "artifactId": 10794241824,
+    "archiveSha256": "666f07a68c2023eef277e912970c6eb7fd998420c628dc0b51dfb022380607fb"
+  },
+  "candidate": {
+    "recordSha256": "ddb602824c40c15cf2d90baf61576618b6f4a9f9630a99a19d431d68838414e9",
+    "lockSha256": "7f43b723ad145457979a1e7a8fba078febabf3efb078896a43f2af596699fbc7",
+    "tools": {
+      "node": "v24.21.0",
+      "npm": "11.19.1"
+    },
+    "assets": [
+      {
+        "file": "main.js",
+        "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58",
+        "bytes": 586915,
+        "gzipBytes": 174699,
+        "brotliBytes": 150396,
+        "limitBytes": 1048576,
+        "withinBudget": true
+      },
+      {
+        "file": "styles.css",
+        "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7",
+        "bytes": 88547,
+        "gzipBytes": 11702,
+        "brotliBytes": 9964,
+        "limitBytes": 102400,
+        "withinBudget": true
+      },
+      {
+        "file": "manifest.json",
+        "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380",
+        "bytes": 280,
+        "gzipBytes": 211,
+        "brotliBytes": 155,
+        "limitBytes": null,
+        "withinBudget": true
+      }
+    ],
+    "serializerModules": 72,
+    "serializerRenderedLength": 171883
+  },
+  "execution": {
+    "inputDigest": "d32e2b2c6c6bb9e2147ffb78025ad3d4f458697f0bd58386c09e0dcdb2d460ce",
+    "sourceInputsDigest": "b45e43dd26a4e734e5e93b1676e0d659d11504d5e4556ecf3c496e6c627ad930",
+    "rawReceiptFilesVerified": 32,
+    "totalRuns": 10,
+    "packets": [
+      {
+        "id": "b73c36ec-0813-4641-ac47-e3a46e4a7f74",
+        "producer": "tooling",
+        "sha256": "c7b6522cf967f9cb770aa49d55f983f681397d569d3e80b79ceefc28200b6358",
+        "counts": {
+          "total": 178,
+          "passed": 174,
+          "expectedPlatformSkips": 4
+        },
+        "suites": 38,
+        "modes": [
+          "node-baseline",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "891955dc-600c-443f-953f-160dad7fc115",
+        "producer": "runtime",
+        "sha256": "52f147db480ebd1a70ba16bcd1a76b3e8509524e393ebaa5b354880a7ef78103",
+        "counts": {
+          "total": 325,
+          "passed": 325,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 57,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "240c4f91-28d4-488f-b8e3-968745edf246",
+        "producer": "runtime",
+        "sha256": "ff9f09cc371167f8c2bf8c211c94d5c537c262c256022a35535a9feb9aa733c7",
+        "counts": {
+          "total": 325,
+          "passed": 325,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 57,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "c7e213de-3940-4d1e-b27f-56cec0b942cd",
+        "producer": "runtime",
+        "sha256": "696f52579f227bda696014520fa33b86da52132c8654f9999eaf28fc53f08791",
+        "counts": {
+          "total": 325,
+          "passed": 325,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 57,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "5818747d-2a29-4fe7-ab8a-42b6fa8e273a",
+        "producer": "coverage",
+        "sha256": "c60727ed29760aca12aeb2a4e87ea7b0b1ed6fbd932b6f82c1cef0960f6d1cd1",
+        "counts": {
+          "total": 325,
+          "passed": 325,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 57,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "78b071d2-c94b-4f76-ac3d-9f67f1141b6e",
+        "producer": "artifact",
+        "sha256": "64072b2c6f41f6d912f729fa480ba0091124c08c28842fda9459a3beda6fac4a",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "artifact"
+        ]
+      },
+      {
+        "id": "a10578a6-2ca5-48a4-99ee-cb3ccb2aaf84",
+        "producer": "browser",
+        "sha256": "3837d6df0ac35b1d562d21c62e4d1814ae5c75ce4d0a612becb04ed1f9e011a5",
+        "counts": {
+          "total": 45,
+          "passed": 45,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 9,
+        "modes": [
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "10fee6f2-bb24-446d-8833-0262cd9f5a8c",
+        "producer": "native",
+        "sha256": "988dcf54e0a9e6f26eee1e63811571e7f25db1547aee732140a1fc7b7098ae65",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      },
+      {
+        "id": "87303d33-f206-4bc5-b88d-57aba091b7f9",
+        "producer": "native",
+        "sha256": "3f3d6545a543aa5cd4768640a3f7b4f3b2668cb37c9c42f9463684078c9ae54f",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      },
+      {
+        "id": "c8d2117c-8614-4305-9736-cf14de9c8d16",
+        "producer": "native",
+        "sha256": "9a6a192bf1e9404d867906db709b61aad2f167e771830c6de113a06d2b186c9d",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      }
+    ],
+    "allRepeatedSemanticCaseSetsMatch": true
+  },
+  "acceptance": {
+    "previous": {
+      "verified": 2,
+      "partial": 54,
+      "not-run": 40
+    },
+    "current": {
+      "verified": 2,
+      "partial": 55,
+      "not-run": 39
+    },
+    "counts": {
+      "verified": 2,
+      "partial": 55,
+      "not-run": 39
+    },
+    "report": {
+      "sha256": "abcf8e7fd73d804dca7c39d412990a95076ab3b047165a684996e314d36c0a16",
+      "bytes": 140322,
+      "exactRecomputationMatches": true
+    },
+    "verifiedIds": [
+      "AC-03",
+      "AC-06"
+    ],
+    "partialIds": [
+      "AC-01",
+      "AC-04",
+      "AC-05",
+      "AC-07",
+      "AC-10",
+      "AC-11",
+      "AC-14",
+      "AC-15",
+      "AC-17",
+      "AC-18",
+      "AC-19",
+      "AC-21",
+      "AC-22",
+      "AC-24",
+      "AC-28",
+      "AC-31",
+      "AC-32",
+      "AC-33",
+      "AC-34",
+      "AC-36",
+      "AC-37",
+      "AC-38",
+      "AC-40",
+      "AC-41",
+      "AC-42",
+      "AC-43",
+      "AC-44",
+      "AC-46",
+      "AC-50",
+      "AC-51",
+      "AC-52",
+      "AC-53",
+      "AC-54",
+      "AC-56",
+      "AC-57",
+      "AC-58",
+      "AC-59",
+      "AC-61",
+      "AC-62",
+      "AC-63",
+      "AC-66",
+      "AC-67",
+      "AC-71",
+      "AC-72",
+      "AC-74",
+      "AC-76",
+      "AC-82",
+      "AC-83",
+      "AC-84",
+      "AC-85",
+      "AC-86",
+      "AC-87",
+      "AC-88",
+      "AC-89",
+      "AC-90"
+    ],
+    "transitions": [
+      {
+        "id": "AC-71",
+        "before": "not-run",
+        "after": "partial"
+      }
+    ],
+    "rows": [
+      {
+        "id": "AC-01",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-02",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-03",
+        "state": "verified",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": []
+      },
+      {
+        "id": "AC-04",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-05",
+        "state": "partial",
+        "observedLinks": 6,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-06",
+        "state": "verified",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": []
+      },
+      {
+        "id": "AC-07",
+        "state": "partial",
+        "observedLinks": 9,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-08",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-09",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-10",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-11",
+        "state": "partial",
+        "observedLinks": 7,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-12",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-13",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-14",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated",
+          "component"
+        ]
+      },
+      {
+        "id": "AC-15",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-16",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-17",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-18",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-19",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-20",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-21",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-22",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-23",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "device"
+        ]
+      },
+      {
+        "id": "AC-24",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-25",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-26",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-27",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-28",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-29",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit"
+        ]
+      },
+      {
+        "id": "AC-30",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-31",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-32",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-33",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "native",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-34",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-35",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-36",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-37",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-38",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-39",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-40",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-41",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-42",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-43",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-44",
+        "state": "partial",
+        "observedLinks": 6,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-45",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-46",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-47",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-48",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-49",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-50",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-51",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-52",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-53",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-54",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-55",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-56",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-57",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-58",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-59",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-60",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-61",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-62",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-63",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-64",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-65",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-66",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-67",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-68",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-69",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-70",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-71",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-72",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native",
+          "manual"
+        ]
+      },
+      {
+        "id": "AC-73",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-74",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-75",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-76",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-77",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-78",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-79",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-80",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-81",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "http-specimen"
+        ]
+      },
+      {
+        "id": "AC-82",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-83",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-84",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-85",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-86",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-87",
+        "state": "partial",
+        "observedLinks": 5,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-88",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-89",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-90",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-91",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-92",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-93",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-94",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "browser-specimen"
+        ]
+      },
+      {
+        "id": "AC-95",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-96",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      }
+    ],
+    "remainingGroups": {
+      "E": [
+        "AC-01",
+        "AC-02",
+        "AC-04",
+        "AC-05",
+        "AC-07",
+        "AC-08",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-24",
+        "AC-26",
+        "AC-27",
+        "AC-28",
+        "AC-29",
+        "AC-31",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-36",
+        "AC-37",
+        "AC-38",
+        "AC-39",
+        "AC-40",
+        "AC-41",
+        "AC-42",
+        "AC-43",
+        "AC-44",
+        "AC-45",
+        "AC-46",
+        "AC-47",
+        "AC-48",
+        "AC-49",
+        "AC-50",
+        "AC-51",
+        "AC-52",
+        "AC-53",
+        "AC-54",
+        "AC-55",
+        "AC-56",
+        "AC-57",
+        "AC-58",
+        "AC-59",
+        "AC-60",
+        "AC-61",
+        "AC-62",
+        "AC-63",
+        "AC-64",
+        "AC-65",
+        "AC-66",
+        "AC-67",
+        "AC-68",
+        "AC-69",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-74",
+        "AC-75",
+        "AC-76",
+        "AC-77",
+        "AC-78",
+        "AC-79",
+        "AC-80",
+        "AC-81",
+        "AC-82",
+        "AC-83",
+        "AC-84",
+        "AC-85",
+        "AC-86",
+        "AC-87",
+        "AC-88",
+        "AC-89",
+        "AC-90",
+        "AC-91",
+        "AC-92",
+        "AC-93",
+        "AC-94",
+        "AC-95",
+        "AC-96"
+      ],
+      "A": [
+        "AC-01",
+        "AC-04",
+        "AC-05",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-24",
+        "AC-25",
+        "AC-26",
+        "AC-27",
+        "AC-28",
+        "AC-29",
+        "AC-31",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-35",
+        "AC-36",
+        "AC-37",
+        "AC-38",
+        "AC-39",
+        "AC-40",
+        "AC-41",
+        "AC-42",
+        "AC-43",
+        "AC-44",
+        "AC-45",
+        "AC-46",
+        "AC-47",
+        "AC-48",
+        "AC-49",
+        "AC-50",
+        "AC-51",
+        "AC-52",
+        "AC-53",
+        "AC-54",
+        "AC-55",
+        "AC-56",
+        "AC-57",
+        "AC-58",
+        "AC-59",
+        "AC-60",
+        "AC-61",
+        "AC-62",
+        "AC-63",
+        "AC-64",
+        "AC-65",
+        "AC-66",
+        "AC-67",
+        "AC-68",
+        "AC-69",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-74",
+        "AC-75",
+        "AC-76",
+        "AC-77",
+        "AC-78",
+        "AC-79",
+        "AC-80",
+        "AC-81",
+        "AC-82",
+        "AC-83",
+        "AC-84",
+        "AC-85",
+        "AC-86",
+        "AC-87",
+        "AC-88",
+        "AC-89",
+        "AC-90",
+        "AC-91",
+        "AC-92",
+        "AC-93",
+        "AC-94",
+        "AC-95",
+        "AC-96"
+      ],
+      "I": [
+        "AC-09",
+        "AC-33",
+        "AC-35",
+        "AC-44"
+      ],
+      "Q": [
+        "AC-02",
+        "AC-04",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-16",
+        "AC-18",
+        "AC-20",
+        "AC-22",
+        "AC-23",
+        "AC-25",
+        "AC-26",
+        "AC-27",
+        "AC-30",
+        "AC-36",
+        "AC-45",
+        "AC-48",
+        "AC-49",
+        "AC-54",
+        "AC-55",
+        "AC-60",
+        "AC-61",
+        "AC-64",
+        "AC-65",
+        "AC-68",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-76",
+        "AC-78",
+        "AC-94"
+      ],
+      "X": [
+        "AC-23",
+        "AC-25",
+        "AC-28",
+        "AC-30",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-35",
+        "AC-72",
+        "AC-80"
+      ]
+    },
+    "groupDefinitions": {
+      "E": "existing assertion/current evidence",
+      "A": "missing automated assertion or mode binding",
+      "I": "missing implementation",
+      "Q": "native/manual/environment qualification",
+      "X": "external or owner prerequisite"
+    },
+    "groupsOverlap": true,
+    "release": {
+      "status": "blocked",
+      "reason": "Legacy release guard and unexecuted normative modes remain; evidence grants no release authority."
+    }
+  },
+  "coverage": {
+    "status": "passed",
+    "productionInputs": 97,
+    "totals": {
+      "lines": {
+        "total": 2248,
+        "covered": 2236,
+        "skipped": 0,
+        "pct": 99.46
+      },
+      "statements": {
+        "total": 3630,
+        "covered": 3538,
+        "skipped": 0,
+        "pct": 97.46
+      },
+      "functions": {
+        "total": 888,
+        "covered": 867,
+        "skipped": 0,
+        "pct": 97.63
+      },
+      "branches": {
+        "total": 2319,
+        "covered": 2203,
+        "skipped": 0,
+        "pct": 94.99
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "scopes": {
+      "production": {
+        "lines": {
+          "total": 2248,
+          "covered": 2236,
+          "pct": 99.4661921708185
+        },
+        "statements": {
+          "total": 3630,
+          "covered": 3538,
+          "pct": 97.46556473829202
+        },
+        "functions": {
+          "total": 888,
+          "covered": 867,
+          "pct": 97.63513513513513
+        },
+        "branches": {
+          "total": 2319,
+          "covered": 2203,
+          "pct": 94.99784389823199
+        }
+      },
+      "domainApplicationFeatures": {
+        "lines": {
+          "total": 1171,
+          "covered": 1170,
+          "pct": 99.91460290350128
+        },
+        "statements": {
+          "total": 1872,
+          "covered": 1833,
+          "pct": 97.91666666666667
+        },
+        "functions": {
+          "total": 444,
+          "covered": 439,
+          "pct": 98.87387387387388
+        },
+        "branches": {
+          "total": 1389,
+          "covered": 1339,
+          "pct": 96.40028797696185
+        }
+      }
+    }
+  },
+  "maintainability": {
+    "report": "reports/maintainability/2026-09-24T06-44-29-040Z/report.json",
+    "sha256": "180f5ebf7d05220af5c2dcabccfd5ba754824afee43074f28bb5b6a64a0fd199",
+    "status": "passed",
+    "policy": {
+      "version": 1,
+      "cyclomatic": 10,
+      "cognitive": 15,
+      "duplication": 3,
+      "minTokens": 50,
+      "minLines": 5,
+      "mode": "mild",
+      "ignoreImports": true,
+      "production": "every src JS/TS/Vue file, including generated consumers"
+    },
+    "productionInputs": 97,
+    "functions": 801,
+    "functionFindings": [],
+    "templateUnits": 9,
+    "templateFindings": [
+      {
+        "path": "src/presentation/components/panels/DocumentPanel.vue",
+        "name": "<template>",
+        "line": 14,
+        "cyclomatic": 29,
+        "cognitive": 18
+      },
+      {
+        "path": "src/presentation/components/panels/ItemsPanel.vue",
+        "name": "<template>",
+        "line": 12,
+        "cyclomatic": 24,
+        "cognitive": 25
+      },
+      {
+        "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
+        "name": "<template>",
+        "line": 10,
+        "cyclomatic": 20,
+        "cognitive": 19
+      },
+      {
+        "path": "src/presentation/components/ShowcaseApp.vue",
+        "name": "<template>",
+        "line": 18,
+        "cyclomatic": 13,
+        "cognitive": 18
+      }
+    ],
+    "duplication": {
+      "eligibleLines": 4394,
+      "duplicatedLines": 33,
+      "percentage": 0.7510241238051889
+    },
+    "readOnlyCheck": "passed; source/tool/policy/raw/per-input receipts checked without rerunning metrics"
+  },
+  "native": {
+    "schemaVersion": 1,
+    "kind": "independent-read-only-native-artifact-audit",
+    "status": "passed",
+    "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+    "artifact": "D:\\Projects\\obsidian-plugin-shell\\.worktrees\\persistence-lifecycle\\reports\\persistence-lifecycle\\qualified-7f14292",
+    "startedAt": "2026-09-24T06:55:07.072Z",
+    "files": [
+      {
+        "file": "dist/main.js",
+        "bytes": 586915,
+        "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+      },
+      {
+        "file": "dist/styles.css",
+        "bytes": 88547,
+        "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+      },
+      {
+        "file": "dist/manifest.json",
+        "bytes": 280,
+        "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+      },
+      {
+        "file": "reports/native-run-1/attempts/2026-09-24T06-51-09.805Z-23173/report.json",
+        "bytes": 12211,
+        "sha256": "1067dc6c9cddee22d1dc7c18eea42bc808aaa64c9a521eafecebf33f2f8a7bd1"
+      },
+      {
+        "file": "reports/native-run-1/report.json",
+        "bytes": 12211,
+        "sha256": "1067dc6c9cddee22d1dc7c18eea42bc808aaa64c9a521eafecebf33f2f8a7bd1"
+      },
+      {
+        "file": "reports/native-run-1/attempts/2026-09-24T06-51-09.805Z-23173/host.log",
+        "bytes": 910,
+        "sha256": "12551cb26409b33b60852c91f91b5c632a2e7b97239976b043e041182fd3c798"
+      },
+      {
+        "file": "reports/native-run-1/attempts/2026-09-24T06-51-09.805Z-23173/theme-observations.json",
+        "bytes": 51526,
+        "sha256": "84d587f30bf8b7d2419035b2724bf45d882e02247248a471e859dea06cd39fab"
+      },
+      {
+        "file": "reports/native-run-2/attempts/2026-09-24T06-51-39.450Z-23451/report.json",
+        "bytes": 12193,
+        "sha256": "febb59713d14c0b491cb9f5300b0d923b45ef9380f552081ed45be660f86c3e7"
+      },
+      {
+        "file": "reports/native-run-2/report.json",
+        "bytes": 12193,
+        "sha256": "febb59713d14c0b491cb9f5300b0d923b45ef9380f552081ed45be660f86c3e7"
+      },
+      {
+        "file": "reports/native-run-2/attempts/2026-09-24T06-51-39.450Z-23451/host.log",
+        "bytes": 910,
+        "sha256": "3110bd3f4b04e27e99ea62a32dda7076432bd843767c3ca59735399cafb10c0c"
+      },
+      {
+        "file": "reports/native-run-2/attempts/2026-09-24T06-51-39.450Z-23451/theme-observations.json",
+        "bytes": 51500,
+        "sha256": "5fbb6d29abc718d8158c363961f446e4453a82168e13ae6e330bbf00adb63346"
+      },
+      {
+        "file": "reports/native-run-3/attempts/2026-09-24T06-52-01.584Z-23719/report.json",
+        "bytes": 12192,
+        "sha256": "cd515fae39ded2907b0c0232a0ca8e155018754951a2135ccc2a170cdb166beb"
+      },
+      {
+        "file": "reports/native-run-3/report.json",
+        "bytes": 12192,
+        "sha256": "cd515fae39ded2907b0c0232a0ca8e155018754951a2135ccc2a170cdb166beb"
+      },
+      {
+        "file": "reports/native-run-3/attempts/2026-09-24T06-52-01.584Z-23719/host.log",
+        "bytes": 910,
+        "sha256": "3cf98f2620b025878742b4a8d5aad91cb3dbd4d223106ebebfd291b7e3509da2"
+      },
+      {
+        "file": "reports/native-run-3/attempts/2026-09-24T06-52-01.584Z-23719/theme-observations.json",
+        "bytes": 51551,
+        "sha256": "681c81efdf434b93608c3dc73c60266f9f2405abcefb44c0229b406b55f2bc2a"
+      },
+      {
+        "file": "reports/native/attempts/2026-09-24T06-52-01.584Z-23719/report.json",
+        "bytes": 12192,
+        "sha256": "cd515fae39ded2907b0c0232a0ca8e155018754951a2135ccc2a170cdb166beb"
+      },
+      {
+        "file": "reports/native/attempts/2026-09-24T06-52-23.369Z-23980/report.json",
+        "bytes": 46990,
+        "sha256": "4b91cb23699da93a30ce18dadc8f32326ac26b98dae795482fbe0bf0a4c66d39"
+      },
+      {
+        "file": "reports/native/report.json",
+        "bytes": 46990,
+        "sha256": "4b91cb23699da93a30ce18dadc8f32326ac26b98dae795482fbe0bf0a4c66d39"
+      },
+      {
+        "file": "reports/native/attempts/2026-09-24T06-52-23.369Z-23980/performance.json",
+        "bytes": 32414,
+        "sha256": "90d772cd679f67c29751785eb9576a789777880cb2cce7a89fd9ed34962b2594"
+      },
+      {
+        "file": "reports/native/attempts/2026-09-24T06-52-23.369Z-23980/host.log",
+        "bytes": 910,
+        "sha256": "c4ee69e604c9a54bd9339231c368ed268924b7fdc6f8b6634581742b42df7557"
+      },
+      {
+        "file": "reports/native/attempts/2026-09-24T06-52-23.369Z-23980/theme-observations.json",
+        "bytes": 51583,
+        "sha256": "6793004d05ccf526ad0f96ada8f441f69d72ef06dea69eb0f66fcffe24309678"
+      }
+    ],
+    "sessions": [
+      {
+        "index": 1,
+        "discoveredAttempts": [
+          {
+            "path": "reports\\native-run-1\\attempts\\2026-09-24T06-51-09.805Z-23173\\report.json",
+            "status": "passed"
+          }
+        ],
+        "status": "passed",
+        "attemptDirectory": "/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell/reports/native/attempts/2026-09-24T06-51-09.805Z-23173",
+        "checkCount": 31,
+        "checks": [
+          "native-command-opens-view",
+          "native-items-invalid-and-trimmed-create-one-write",
+          "native-items-stable-id-rename-two-view-projection-independent-draft",
+          "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+          "native-items-settings-entity-serialized-writes-retain-current-state",
+          "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+          "native-items-controlled-adapter-rejection-retains-draft-no-success",
+          "native-public-command-local-id-removal-before-plugin-unload",
+          "actual-vault-verbatim-title-and-markdown-match-preview",
+          "native-repository-list-reads-canonical-manually-edited-note",
+          "native-repository-update-preserves-path-identity-user-properties-and-body",
+          "native-repository-trash-cancellation-preserves-exact-note",
+          "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+          "native-host-bridge-publishes-normalized-crud-observations",
+          "native-view-real-event",
+          "native-modal-opens-and-dismisses",
+          "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+          "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+          "native-debug-commands-toggle-and-export-attributable-redacted-report",
+          "native-exact-title-row-hidden-not-tabs-or-window-controls",
+          "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+          "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+          "native-split-pane-light-dark-theme-transition",
+          "native-electron-125-150-percent-zoom-no-clipped-language-control",
+          "native-popout-inherits-preference-and-live-toggle",
+          "native-unload-restores-retained-host-elements-without-foreign-mutation",
+          "native-runtime-reload-restores-persisted-hidden-preference",
+          "native-settings-restoration-shares-canonical-service",
+          "native-declarative-settings-use-application-writer",
+          "native-items-cold-restart-current-state-load-without-writes",
+          "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+        ],
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "window": {
+          "width": 1912,
+          "height": 1076,
+          "pixelRatio": 1,
+          "inventory": [
+            {
+              "id": "543",
+              "title": ""
+            },
+            {
+              "id": "2097155",
+              "title": "New tab - vault - Obsidian 1.13.7"
+            }
+          ],
+          "mode": "actual-native-window-not-browser-viewport-emulation"
+        },
+        "capturedRendererErrors": [],
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "controlledAdapter": {
+          "mode": "controlled-adapter-in-native-host",
+          "nativeDiskFailure": false,
+          "status": "passed",
+          "counts": {
+            "calls": 2,
+            "completed": 1,
+            "failed": 1
+          },
+          "diagnostics": [
+            {
+              "sequence": 1,
+              "code": "settings.write",
+              "operation": "settings.save"
+            }
+          ]
+        },
+        "items": {
+          "collection": {
+            "schemaVersion": 1,
+            "revision": 4,
+            "records": [
+              {
+                "id": "4de1fe3d-0a92-439e-97d0-438b809b5d34",
+                "revision": 4,
+                "createdAt": "2026-09-24T06:51:19.226Z",
+                "values": {
+                  "label": "Independent native draft"
+                }
+              }
+            ]
+          },
+          "savedBytesSha256": "770d6c8830d62dad15ae1e20461bcadba5e21b6ac59970c3f72a84ea6297368e",
+          "writes": {
+            "calls": 6,
+            "active": 0,
+            "maximumActive": 1,
+            "failures": 0
+          },
+          "mode": "real-native-io-with-read-only-call-observer",
+          "restartQueryWrites": {
+            "calls": 0,
+            "active": 0,
+            "maximumActive": 0,
+            "failures": 0
+          }
+        },
+        "phases": [
+          "initial-smoke",
+          "native-items",
+          "native-items-controlled-adapter-ownership",
+          "native-repository",
+          "native-modal-services",
+          "native-debugging",
+          "native-headers",
+          "theme-transitions",
+          "popout-create",
+          "popout-toggle",
+          "popout-theme",
+          "popout-close",
+          "plugin-unload",
+          "native-settings",
+          "cold-restart",
+          "cleanup"
+        ],
+        "observedPageIds": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "closedPageIds": [
+          3,
+          1,
+          2,
+          4,
+          5
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "events": [
+            {
+              "at": "2026-09-24T06:51:09.806Z",
+              "monotonicMs": 390.116363,
+              "kind": "phase",
+              "phase": "initial-smoke"
+            },
+            {
+              "at": "2026-09-24T06:51:16.678Z",
+              "monotonicMs": 7261.911908,
+              "kind": "page-observed",
+              "phase": "initial-smoke",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:18.305Z",
+              "monotonicMs": 8888.798198,
+              "kind": "phase",
+              "phase": "native-items"
+            },
+            {
+              "at": "2026-09-24T06:51:19.570Z",
+              "monotonicMs": 10153.754196,
+              "kind": "phase",
+              "phase": "native-items-controlled-adapter-ownership"
+            },
+            {
+              "at": "2026-09-24T06:51:20.918Z",
+              "monotonicMs": 11501.683383,
+              "kind": "phase",
+              "phase": "native-repository"
+            },
+            {
+              "at": "2026-09-24T06:51:21.863Z",
+              "monotonicMs": 12447.002987,
+              "kind": "phase",
+              "phase": "native-modal-services"
+            },
+            {
+              "at": "2026-09-24T06:51:22.198Z",
+              "monotonicMs": 12782.383736,
+              "kind": "phase",
+              "phase": "native-debugging"
+            },
+            {
+              "at": "2026-09-24T06:51:22.761Z",
+              "monotonicMs": 13345.068599,
+              "kind": "phase",
+              "phase": "native-headers"
+            },
+            {
+              "at": "2026-09-24T06:51:24.093Z",
+              "monotonicMs": 14677.066366,
+              "kind": "phase",
+              "phase": "theme-transitions"
+            },
+            {
+              "at": "2026-09-24T06:51:24.221Z",
+              "monotonicMs": 14804.865749,
+              "kind": "page-observed",
+              "phase": "theme-transitions",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:25.944Z",
+              "monotonicMs": 16527.631491,
+              "kind": "phase",
+              "phase": "popout-create"
+            },
+            {
+              "at": "2026-09-24T06:51:26.067Z",
+              "monotonicMs": 16650.830459,
+              "kind": "page-observed",
+              "phase": "popout-create",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:26.252Z",
+              "monotonicMs": 16835.964393,
+              "kind": "phase",
+              "phase": "popout-toggle"
+            },
+            {
+              "at": "2026-09-24T06:51:26.647Z",
+              "monotonicMs": 17231.300103,
+              "kind": "phase",
+              "phase": "popout-theme"
+            },
+            {
+              "at": "2026-09-24T06:51:27.380Z",
+              "monotonicMs": 17964.39134,
+              "kind": "phase",
+              "phase": "popout-close"
+            },
+            {
+              "at": "2026-09-24T06:51:27.451Z",
+              "monotonicMs": 18034.839111,
+              "kind": "page-close",
+              "phase": "popout-close",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:27.497Z",
+              "monotonicMs": 18080.563598,
+              "kind": "phase",
+              "phase": "plugin-unload"
+            },
+            {
+              "at": "2026-09-24T06:51:27.764Z",
+              "monotonicMs": 18348.140346,
+              "kind": "phase",
+              "phase": "native-settings"
+            },
+            {
+              "at": "2026-09-24T06:51:28.102Z",
+              "monotonicMs": 18685.567271,
+              "kind": "phase",
+              "phase": "cold-restart"
+            },
+            {
+              "at": "2026-09-24T06:51:28.167Z",
+              "monotonicMs": 18751.093424,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:28.167Z",
+              "monotonicMs": 18751.148567,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:31.077Z",
+              "monotonicMs": 21660.583682,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:31.650Z",
+              "monotonicMs": 22233.7376,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:32.415Z",
+              "monotonicMs": 22999.431618,
+              "kind": "phase",
+              "phase": "cleanup"
+            },
+            {
+              "at": "2026-09-24T06:51:32.419Z",
+              "monotonicMs": 23003.141166,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:32.419Z",
+              "monotonicMs": 23003.1918,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:34.651Z",
+              "monotonicMs": 25234.73274,
+              "kind": "observer-disposed",
+              "phase": "cleanup"
+            }
+          ]
+        },
+        "observationScope": "Driver receipt timestamps are not renderer throw times; renderer observation ends at CDP disconnect before subsequent host termination.",
+        "reportSha256": "1067dc6c9cddee22d1dc7c18eea42bc808aaa64c9a521eafecebf33f2f8a7bd1"
+      },
+      {
+        "index": 2,
+        "discoveredAttempts": [
+          {
+            "path": "reports\\native-run-2\\attempts\\2026-09-24T06-51-39.450Z-23451\\report.json",
+            "status": "passed"
+          }
+        ],
+        "status": "passed",
+        "attemptDirectory": "/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell/reports/native/attempts/2026-09-24T06-51-39.450Z-23451",
+        "checkCount": 31,
+        "checks": [
+          "native-command-opens-view",
+          "native-items-invalid-and-trimmed-create-one-write",
+          "native-items-stable-id-rename-two-view-projection-independent-draft",
+          "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+          "native-items-settings-entity-serialized-writes-retain-current-state",
+          "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+          "native-items-controlled-adapter-rejection-retains-draft-no-success",
+          "native-public-command-local-id-removal-before-plugin-unload",
+          "actual-vault-verbatim-title-and-markdown-match-preview",
+          "native-repository-list-reads-canonical-manually-edited-note",
+          "native-repository-update-preserves-path-identity-user-properties-and-body",
+          "native-repository-trash-cancellation-preserves-exact-note",
+          "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+          "native-host-bridge-publishes-normalized-crud-observations",
+          "native-view-real-event",
+          "native-modal-opens-and-dismisses",
+          "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+          "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+          "native-debug-commands-toggle-and-export-attributable-redacted-report",
+          "native-exact-title-row-hidden-not-tabs-or-window-controls",
+          "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+          "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+          "native-split-pane-light-dark-theme-transition",
+          "native-electron-125-150-percent-zoom-no-clipped-language-control",
+          "native-popout-inherits-preference-and-live-toggle",
+          "native-unload-restores-retained-host-elements-without-foreign-mutation",
+          "native-runtime-reload-restores-persisted-hidden-preference",
+          "native-settings-restoration-shares-canonical-service",
+          "native-declarative-settings-use-application-writer",
+          "native-items-cold-restart-current-state-load-without-writes",
+          "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+        ],
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "window": {
+          "width": 1912,
+          "height": 1076,
+          "pixelRatio": 1,
+          "inventory": [
+            {
+              "id": "543",
+              "title": ""
+            },
+            {
+              "id": "2097155",
+              "title": "vault - Obsidian 1.13.7"
+            }
+          ],
+          "mode": "actual-native-window-not-browser-viewport-emulation"
+        },
+        "capturedRendererErrors": [],
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "controlledAdapter": {
+          "mode": "controlled-adapter-in-native-host",
+          "nativeDiskFailure": false,
+          "status": "passed",
+          "counts": {
+            "calls": 2,
+            "completed": 1,
+            "failed": 1
+          },
+          "diagnostics": [
+            {
+              "sequence": 1,
+              "code": "settings.write",
+              "operation": "settings.save"
+            }
+          ]
+        },
+        "items": {
+          "collection": {
+            "schemaVersion": 1,
+            "revision": 4,
+            "records": [
+              {
+                "id": "34545437-e8e2-4300-9f81-858642334b17",
+                "revision": 4,
+                "createdAt": "2026-09-24T06:51:41.592Z",
+                "values": {
+                  "label": "Independent native draft"
+                }
+              }
+            ]
+          },
+          "savedBytesSha256": "005817d9380ced5cc3913653e8c89841b845b2ecd737fb007d5dcbfc7ea9f34b",
+          "writes": {
+            "calls": 6,
+            "active": 0,
+            "maximumActive": 1,
+            "failures": 0
+          },
+          "mode": "real-native-io-with-read-only-call-observer",
+          "restartQueryWrites": {
+            "calls": 0,
+            "active": 0,
+            "maximumActive": 0,
+            "failures": 0
+          }
+        },
+        "phases": [
+          "initial-smoke",
+          "native-items",
+          "native-items-controlled-adapter-ownership",
+          "native-repository",
+          "native-modal-services",
+          "native-debugging",
+          "native-headers",
+          "theme-transitions",
+          "popout-create",
+          "popout-toggle",
+          "popout-theme",
+          "popout-close",
+          "plugin-unload",
+          "native-settings",
+          "cold-restart",
+          "cleanup"
+        ],
+        "observedPageIds": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "closedPageIds": [
+          3,
+          1,
+          2,
+          4,
+          5
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "events": [
+            {
+              "at": "2026-09-24T06:51:39.451Z",
+              "monotonicMs": 384.431994,
+              "kind": "phase",
+              "phase": "initial-smoke"
+            },
+            {
+              "at": "2026-09-24T06:51:39.985Z",
+              "monotonicMs": 918.68651,
+              "kind": "page-observed",
+              "phase": "initial-smoke",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:40.680Z",
+              "monotonicMs": 1613.955913,
+              "kind": "phase",
+              "phase": "native-items"
+            },
+            {
+              "at": "2026-09-24T06:51:41.934Z",
+              "monotonicMs": 2867.03503,
+              "kind": "phase",
+              "phase": "native-items-controlled-adapter-ownership"
+            },
+            {
+              "at": "2026-09-24T06:51:43.302Z",
+              "monotonicMs": 4235.060102,
+              "kind": "phase",
+              "phase": "native-repository"
+            },
+            {
+              "at": "2026-09-24T06:51:44.262Z",
+              "monotonicMs": 5195.190618,
+              "kind": "phase",
+              "phase": "native-modal-services"
+            },
+            {
+              "at": "2026-09-24T06:51:44.581Z",
+              "monotonicMs": 5514.655738,
+              "kind": "phase",
+              "phase": "native-debugging"
+            },
+            {
+              "at": "2026-09-24T06:51:45.177Z",
+              "monotonicMs": 6110.428082,
+              "kind": "phase",
+              "phase": "native-headers"
+            },
+            {
+              "at": "2026-09-24T06:51:46.491Z",
+              "monotonicMs": 7424.248991,
+              "kind": "phase",
+              "phase": "theme-transitions"
+            },
+            {
+              "at": "2026-09-24T06:51:46.638Z",
+              "monotonicMs": 7571.515108,
+              "kind": "page-observed",
+              "phase": "theme-transitions",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:48.356Z",
+              "monotonicMs": 9289.753366,
+              "kind": "phase",
+              "phase": "popout-create"
+            },
+            {
+              "at": "2026-09-24T06:51:48.476Z",
+              "monotonicMs": 9409.647673,
+              "kind": "page-observed",
+              "phase": "popout-create",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:48.662Z",
+              "monotonicMs": 9595.457886,
+              "kind": "phase",
+              "phase": "popout-toggle"
+            },
+            {
+              "at": "2026-09-24T06:51:48.991Z",
+              "monotonicMs": 9924.230338,
+              "kind": "phase",
+              "phase": "popout-theme"
+            },
+            {
+              "at": "2026-09-24T06:51:49.646Z",
+              "monotonicMs": 10579.911294,
+              "kind": "phase",
+              "phase": "popout-close"
+            },
+            {
+              "at": "2026-09-24T06:51:49.714Z",
+              "monotonicMs": 10647.595611,
+              "kind": "page-close",
+              "phase": "popout-close",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:49.752Z",
+              "monotonicMs": 10685.559277,
+              "kind": "phase",
+              "phase": "plugin-unload"
+            },
+            {
+              "at": "2026-09-24T06:51:49.995Z",
+              "monotonicMs": 10928.583963,
+              "kind": "phase",
+              "phase": "native-settings"
+            },
+            {
+              "at": "2026-09-24T06:51:50.298Z",
+              "monotonicMs": 11231.724539,
+              "kind": "phase",
+              "phase": "cold-restart"
+            },
+            {
+              "at": "2026-09-24T06:51:50.355Z",
+              "monotonicMs": 11288.472394,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:50.355Z",
+              "monotonicMs": 11288.534359,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:53.041Z",
+              "monotonicMs": 13974.809866,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:53.541Z",
+              "monotonicMs": 14474.894933,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:54.209Z",
+              "monotonicMs": 15142.369499,
+              "kind": "phase",
+              "phase": "cleanup"
+            },
+            {
+              "at": "2026-09-24T06:51:54.211Z",
+              "monotonicMs": 15144.932702,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:51:54.212Z",
+              "monotonicMs": 15145.015166,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:51:56.412Z",
+              "monotonicMs": 17345.293263,
+              "kind": "observer-disposed",
+              "phase": "cleanup"
+            }
+          ]
+        },
+        "observationScope": "Driver receipt timestamps are not renderer throw times; renderer observation ends at CDP disconnect before subsequent host termination.",
+        "reportSha256": "febb59713d14c0b491cb9f5300b0d923b45ef9380f552081ed45be660f86c3e7"
+      },
+      {
+        "index": 3,
+        "discoveredAttempts": [
+          {
+            "path": "reports\\native-run-3\\attempts\\2026-09-24T06-52-01.584Z-23719\\report.json",
+            "status": "passed"
+          }
+        ],
+        "status": "passed",
+        "attemptDirectory": "/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell/reports/native/attempts/2026-09-24T06-52-01.584Z-23719",
+        "checkCount": 31,
+        "checks": [
+          "native-command-opens-view",
+          "native-items-invalid-and-trimmed-create-one-write",
+          "native-items-stable-id-rename-two-view-projection-independent-draft",
+          "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+          "native-items-settings-entity-serialized-writes-retain-current-state",
+          "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+          "native-items-controlled-adapter-rejection-retains-draft-no-success",
+          "native-public-command-local-id-removal-before-plugin-unload",
+          "actual-vault-verbatim-title-and-markdown-match-preview",
+          "native-repository-list-reads-canonical-manually-edited-note",
+          "native-repository-update-preserves-path-identity-user-properties-and-body",
+          "native-repository-trash-cancellation-preserves-exact-note",
+          "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+          "native-host-bridge-publishes-normalized-crud-observations",
+          "native-view-real-event",
+          "native-modal-opens-and-dismisses",
+          "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+          "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+          "native-debug-commands-toggle-and-export-attributable-redacted-report",
+          "native-exact-title-row-hidden-not-tabs-or-window-controls",
+          "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+          "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+          "native-split-pane-light-dark-theme-transition",
+          "native-electron-125-150-percent-zoom-no-clipped-language-control",
+          "native-popout-inherits-preference-and-live-toggle",
+          "native-unload-restores-retained-host-elements-without-foreign-mutation",
+          "native-runtime-reload-restores-persisted-hidden-preference",
+          "native-settings-restoration-shares-canonical-service",
+          "native-declarative-settings-use-application-writer",
+          "native-items-cold-restart-current-state-load-without-writes",
+          "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+        ],
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "window": {
+          "width": 1912,
+          "height": 1076,
+          "pixelRatio": 1,
+          "inventory": [
+            {
+              "id": "543",
+              "title": ""
+            },
+            {
+              "id": "2097155",
+              "title": "vault - Obsidian 1.13.7"
+            }
+          ],
+          "mode": "actual-native-window-not-browser-viewport-emulation"
+        },
+        "capturedRendererErrors": [],
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "controlledAdapter": {
+          "mode": "controlled-adapter-in-native-host",
+          "nativeDiskFailure": false,
+          "status": "passed",
+          "counts": {
+            "calls": 2,
+            "completed": 1,
+            "failed": 1
+          },
+          "diagnostics": [
+            {
+              "sequence": 1,
+              "code": "settings.write",
+              "operation": "settings.save"
+            }
+          ]
+        },
+        "items": {
+          "collection": {
+            "schemaVersion": 1,
+            "revision": 4,
+            "records": [
+              {
+                "id": "941436fb-bfc5-43a3-8edb-10feb11a5f28",
+                "revision": 4,
+                "createdAt": "2026-09-24T06:52:03.691Z",
+                "values": {
+                  "label": "Independent native draft"
+                }
+              }
+            ]
+          },
+          "savedBytesSha256": "c41aa40b811cba19d3725b550d6af2f75ceb4945f09eadf3920965516f5d436d",
+          "writes": {
+            "calls": 6,
+            "active": 0,
+            "maximumActive": 1,
+            "failures": 0
+          },
+          "mode": "real-native-io-with-read-only-call-observer",
+          "restartQueryWrites": {
+            "calls": 0,
+            "active": 0,
+            "maximumActive": 0,
+            "failures": 0
+          }
+        },
+        "phases": [
+          "initial-smoke",
+          "native-items",
+          "native-items-controlled-adapter-ownership",
+          "native-repository",
+          "native-modal-services",
+          "native-debugging",
+          "native-headers",
+          "theme-transitions",
+          "popout-create",
+          "popout-toggle",
+          "popout-theme",
+          "popout-close",
+          "plugin-unload",
+          "native-settings",
+          "cold-restart",
+          "cleanup"
+        ],
+        "observedPageIds": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "closedPageIds": [
+          3,
+          1,
+          2,
+          4,
+          5
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "events": [
+            {
+              "at": "2026-09-24T06:52:01.585Z",
+              "monotonicMs": 381.406191,
+              "kind": "phase",
+              "phase": "initial-smoke"
+            },
+            {
+              "at": "2026-09-24T06:52:02.108Z",
+              "monotonicMs": 904.912992,
+              "kind": "page-observed",
+              "phase": "initial-smoke",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:52:02.798Z",
+              "monotonicMs": 1594.908589,
+              "kind": "phase",
+              "phase": "native-items"
+            },
+            {
+              "at": "2026-09-24T06:52:04.035Z",
+              "monotonicMs": 2831.500238,
+              "kind": "phase",
+              "phase": "native-items-controlled-adapter-ownership"
+            },
+            {
+              "at": "2026-09-24T06:52:05.400Z",
+              "monotonicMs": 4197.209336,
+              "kind": "phase",
+              "phase": "native-repository"
+            },
+            {
+              "at": "2026-09-24T06:52:06.395Z",
+              "monotonicMs": 5191.413552,
+              "kind": "phase",
+              "phase": "native-modal-services"
+            },
+            {
+              "at": "2026-09-24T06:52:06.714Z",
+              "monotonicMs": 5510.904448,
+              "kind": "phase",
+              "phase": "native-debugging"
+            },
+            {
+              "at": "2026-09-24T06:52:07.276Z",
+              "monotonicMs": 6073.068901,
+              "kind": "phase",
+              "phase": "native-headers"
+            },
+            {
+              "at": "2026-09-24T06:52:08.623Z",
+              "monotonicMs": 7419.969936,
+              "kind": "phase",
+              "phase": "theme-transitions"
+            },
+            {
+              "at": "2026-09-24T06:52:08.754Z",
+              "monotonicMs": 7551.232528,
+              "kind": "page-observed",
+              "phase": "theme-transitions",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:10.474Z",
+              "monotonicMs": 9271.243081,
+              "kind": "phase",
+              "phase": "popout-create"
+            },
+            {
+              "at": "2026-09-24T06:52:10.593Z",
+              "monotonicMs": 9390.151112,
+              "kind": "page-observed",
+              "phase": "popout-create",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:10.786Z",
+              "monotonicMs": 9582.531579,
+              "kind": "phase",
+              "phase": "popout-toggle"
+            },
+            {
+              "at": "2026-09-24T06:52:11.116Z",
+              "monotonicMs": 9913.086389,
+              "kind": "phase",
+              "phase": "popout-theme"
+            },
+            {
+              "at": "2026-09-24T06:52:11.794Z",
+              "monotonicMs": 10590.71489,
+              "kind": "phase",
+              "phase": "popout-close"
+            },
+            {
+              "at": "2026-09-24T06:52:11.865Z",
+              "monotonicMs": 10661.549512,
+              "kind": "page-close",
+              "phase": "popout-close",
+              "pageId": 3,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:11.907Z",
+              "monotonicMs": 10704.218976,
+              "kind": "phase",
+              "phase": "plugin-unload"
+            },
+            {
+              "at": "2026-09-24T06:52:12.162Z",
+              "monotonicMs": 10958.576643,
+              "kind": "phase",
+              "phase": "native-settings"
+            },
+            {
+              "at": "2026-09-24T06:52:12.464Z",
+              "monotonicMs": 11260.778684,
+              "kind": "phase",
+              "phase": "cold-restart"
+            },
+            {
+              "at": "2026-09-24T06:52:12.520Z",
+              "monotonicMs": 11316.457558,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 1,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:52:12.520Z",
+              "monotonicMs": 11316.515286,
+              "kind": "page-close",
+              "phase": "cold-restart",
+              "pageId": 2,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:15.221Z",
+              "monotonicMs": 14017.304315,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:52:15.727Z",
+              "monotonicMs": 14523.413203,
+              "kind": "page-observed",
+              "phase": "cold-restart",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:16.427Z",
+              "monotonicMs": 15223.80769,
+              "kind": "phase",
+              "phase": "cleanup"
+            },
+            {
+              "at": "2026-09-24T06:52:16.430Z",
+              "monotonicMs": 15226.759392,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 4,
+              "url": "app://obsidian.md/index.html"
+            },
+            {
+              "at": "2026-09-24T06:52:16.430Z",
+              "monotonicMs": 15226.82287,
+              "kind": "page-close",
+              "phase": "cleanup",
+              "pageId": 5,
+              "url": "about:blank"
+            },
+            {
+              "at": "2026-09-24T06:52:18.582Z",
+              "monotonicMs": 17378.805092,
+              "kind": "observer-disposed",
+              "phase": "cleanup"
+            }
+          ]
+        },
+        "observationScope": "Driver receipt timestamps are not renderer throw times; renderer observation ends at CDP disconnect before subsequent host termination.",
+        "reportSha256": "cd515fae39ded2907b0c0232a0ca8e155018754951a2135ccc2a170cdb166beb"
+      }
+    ],
+    "performance": {
+      "status": "passed",
+      "attemptDirectory": "/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell/reports/native/attempts/2026-09-24T06-52-23.369Z-23980",
+      "checkCount": 31,
+      "checks": [
+        "native-command-opens-view",
+        "native-items-invalid-and-trimmed-create-one-write",
+        "native-items-stable-id-rename-two-view-projection-independent-draft",
+        "native-items-cancel-byte-preservation-confirmed-delete-one-write",
+        "native-items-settings-entity-serialized-writes-retain-current-state",
+        "native-items-controlled-adapter-pending-owner-close-sibling-commit",
+        "native-items-controlled-adapter-rejection-retains-draft-no-success",
+        "native-public-command-local-id-removal-before-plugin-unload",
+        "actual-vault-verbatim-title-and-markdown-match-preview",
+        "native-repository-list-reads-canonical-manually-edited-note",
+        "native-repository-update-preserves-path-identity-user-properties-and-body",
+        "native-repository-trash-cancellation-preserves-exact-note",
+        "native-repository-delete-removes-active-note-and-retains-exact-local-trash-bytes",
+        "native-host-bridge-publishes-normalized-crud-observations",
+        "native-view-real-event",
+        "native-modal-opens-and-dismisses",
+        "native-modal-confirmation-keyboard-containment-cancellation-and-focus-return",
+        "native-modal-prompt-validation-confirmation-and-owned-focus-return",
+        "native-debug-commands-toggle-and-export-attributable-redacted-report",
+        "native-exact-title-row-hidden-not-tabs-or-window-controls",
+        "native-essential-actions-accessible-and-new-leaf-inherits-hidden",
+        "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+        "native-split-pane-light-dark-theme-transition",
+        "native-electron-125-150-percent-zoom-no-clipped-language-control",
+        "native-popout-inherits-preference-and-live-toggle",
+        "native-unload-restores-retained-host-elements-without-foreign-mutation",
+        "native-runtime-reload-restores-persisted-hidden-preference",
+        "native-settings-restoration-shares-canonical-service",
+        "native-declarative-settings-use-application-writer",
+        "native-items-cold-restart-current-state-load-without-writes",
+        "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets"
+      ],
+      "assets": [
+        {
+          "file": "main.js",
+          "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+        },
+        {
+          "file": "styles.css",
+          "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+        },
+        {
+          "file": "manifest.json",
+          "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+        }
+      ],
+      "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+      "host": [
+        "1.13.7",
+        "1.13.7"
+      ],
+      "launcher": "3.2.1",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+      "window": {
+        "width": 1912,
+        "height": 1076,
+        "pixelRatio": 1,
+        "inventory": [
+          {
+            "id": "543",
+            "title": ""
+          },
+          {
+            "id": "2097155",
+            "title": "vault - Obsidian 1.13.7"
+          }
+        ],
+        "mode": "actual-native-window-not-browser-viewport-emulation"
+      },
+      "capturedRendererErrors": [],
+      "cleanupFailure": null,
+      "scratchPreserved": false,
+      "controlledAdapter": {
+        "mode": "controlled-adapter-in-native-host",
+        "nativeDiskFailure": false,
+        "status": "passed",
+        "counts": {
+          "calls": 2,
+          "completed": 1,
+          "failed": 1
+        },
+        "diagnostics": [
+          {
+            "sequence": 1,
+            "code": "settings.write",
+            "operation": "settings.save"
+          }
+        ]
+      },
+      "items": {
+        "collection": {
+          "schemaVersion": 1,
+          "revision": 4,
+          "records": [
+            {
+              "id": "8ea36c51-f1c5-4e59-9f4a-a7220d845fc3",
+              "revision": 4,
+              "createdAt": "2026-09-24T06:52:31.373Z",
+              "values": {
+                "label": "Independent native draft"
+              }
+            }
+          ]
+        },
+        "savedBytesSha256": "429c305c2d3d366653d9a5ddf560996d884ce33709404e425bf903e204be3c75",
+        "writes": {
+          "calls": 6,
+          "active": 0,
+          "maximumActive": 1,
+          "failures": 0
+        },
+        "mode": "real-native-io-with-read-only-call-observer",
+        "restartQueryWrites": {
+          "calls": 0,
+          "active": 0,
+          "maximumActive": 0,
+          "failures": 0
+        }
+      },
+      "phases": [
+        "initial-smoke",
+        "native-items",
+        "native-items-controlled-adapter-ownership",
+        "native-repository",
+        "native-modal-services",
+        "native-debugging",
+        "native-headers",
+        "theme-transitions",
+        "popout-create",
+        "popout-toggle",
+        "popout-theme",
+        "popout-close",
+        "plugin-unload",
+        "native-settings",
+        "cold-restart",
+        "cleanup"
+      ],
+      "observedPageIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "closedPageIds": [
+        3,
+        1,
+        2,
+        4,
+        5
+      ],
+      "timeline": {
+        "schemaVersion": 1,
+        "clock": "driver Date/performance.now receipt time; not renderer throw time",
+        "events": [
+          {
+            "at": "2026-09-24T06:52:23.370Z",
+            "monotonicMs": 422.075007,
+            "kind": "phase",
+            "phase": "initial-smoke"
+          },
+          {
+            "at": "2026-09-24T06:52:23.905Z",
+            "monotonicMs": 956.919646,
+            "kind": "page-observed",
+            "phase": "initial-smoke",
+            "pageId": 1,
+            "url": "app://obsidian.md/index.html"
+          },
+          {
+            "at": "2026-09-24T06:52:30.400Z",
+            "monotonicMs": 7452.148258,
+            "kind": "phase",
+            "phase": "native-items"
+          },
+          {
+            "at": "2026-09-24T06:52:31.698Z",
+            "monotonicMs": 8750.185085,
+            "kind": "phase",
+            "phase": "native-items-controlled-adapter-ownership"
+          },
+          {
+            "at": "2026-09-24T06:52:33.067Z",
+            "monotonicMs": 10119.170914,
+            "kind": "phase",
+            "phase": "native-repository"
+          },
+          {
+            "at": "2026-09-24T06:52:33.993Z",
+            "monotonicMs": 11045.274799,
+            "kind": "phase",
+            "phase": "native-modal-services"
+          },
+          {
+            "at": "2026-09-24T06:52:34.302Z",
+            "monotonicMs": 11354.120151,
+            "kind": "phase",
+            "phase": "native-debugging"
+          },
+          {
+            "at": "2026-09-24T06:52:34.875Z",
+            "monotonicMs": 11927.321769,
+            "kind": "phase",
+            "phase": "native-headers"
+          },
+          {
+            "at": "2026-09-24T06:52:36.225Z",
+            "monotonicMs": 13276.796689,
+            "kind": "phase",
+            "phase": "theme-transitions"
+          },
+          {
+            "at": "2026-09-24T06:52:36.394Z",
+            "monotonicMs": 13446.278236,
+            "kind": "page-observed",
+            "phase": "theme-transitions",
+            "pageId": 2,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:38.173Z",
+            "monotonicMs": 15225.015451,
+            "kind": "phase",
+            "phase": "popout-create"
+          },
+          {
+            "at": "2026-09-24T06:52:38.347Z",
+            "monotonicMs": 15399.088279,
+            "kind": "page-observed",
+            "phase": "popout-create",
+            "pageId": 3,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:38.487Z",
+            "monotonicMs": 15538.973877,
+            "kind": "phase",
+            "phase": "popout-toggle"
+          },
+          {
+            "at": "2026-09-24T06:52:38.834Z",
+            "monotonicMs": 15886.256275,
+            "kind": "phase",
+            "phase": "popout-theme"
+          },
+          {
+            "at": "2026-09-24T06:52:39.433Z",
+            "monotonicMs": 16485.291023,
+            "kind": "phase",
+            "phase": "popout-close"
+          },
+          {
+            "at": "2026-09-24T06:52:39.514Z",
+            "monotonicMs": 16565.899209,
+            "kind": "page-close",
+            "phase": "popout-close",
+            "pageId": 3,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:39.557Z",
+            "monotonicMs": 16608.797119,
+            "kind": "phase",
+            "phase": "plugin-unload"
+          },
+          {
+            "at": "2026-09-24T06:52:39.810Z",
+            "monotonicMs": 16861.683531,
+            "kind": "phase",
+            "phase": "native-settings"
+          },
+          {
+            "at": "2026-09-24T06:52:40.113Z",
+            "monotonicMs": 17165.62491,
+            "kind": "phase",
+            "phase": "cold-restart"
+          },
+          {
+            "at": "2026-09-24T06:52:40.171Z",
+            "monotonicMs": 17222.960463,
+            "kind": "page-close",
+            "phase": "cold-restart",
+            "pageId": 1,
+            "url": "app://obsidian.md/index.html"
+          },
+          {
+            "at": "2026-09-24T06:52:40.171Z",
+            "monotonicMs": 17223.030183,
+            "kind": "page-close",
+            "phase": "cold-restart",
+            "pageId": 2,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:42.946Z",
+            "monotonicMs": 19998.125636,
+            "kind": "page-observed",
+            "phase": "cold-restart",
+            "pageId": 4,
+            "url": "app://obsidian.md/index.html"
+          },
+          {
+            "at": "2026-09-24T06:52:43.434Z",
+            "monotonicMs": 20486.546796,
+            "kind": "page-observed",
+            "phase": "cold-restart",
+            "pageId": 5,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:44.140Z",
+            "monotonicMs": 21191.92154,
+            "kind": "phase",
+            "phase": "cleanup"
+          },
+          {
+            "at": "2026-09-24T06:52:44.142Z",
+            "monotonicMs": 21194.603464,
+            "kind": "page-close",
+            "phase": "cleanup",
+            "pageId": 4,
+            "url": "app://obsidian.md/index.html"
+          },
+          {
+            "at": "2026-09-24T06:52:44.143Z",
+            "monotonicMs": 21194.679406,
+            "kind": "page-close",
+            "phase": "cleanup",
+            "pageId": 5,
+            "url": "about:blank"
+          },
+          {
+            "at": "2026-09-24T06:52:46.425Z",
+            "monotonicMs": 23477.107475,
+            "kind": "observer-disposed",
+            "phase": "cleanup"
+          }
+        ]
+      },
+      "observationScope": "Driver receipt timestamps are not renderer throw times; renderer observation ends at CDP disconnect before subsequent host termination.",
+      "reportSha256": "4b91cb23699da93a30ce18dadc8f32326ac26b98dae795482fbe0bf0a4c66d39",
+      "measurement": {
+        "schemaVersion": 1,
+        "mode": "native-obsidian",
+        "status": "passed",
+        "classification": "shared-runner",
+        "protocol": {
+          "schemaVersion": 1,
+          "warmups": 3,
+          "samples": 30,
+          "clock": "renderer performance.now()",
+          "percentile": "nearest-rank: sorted[ceil(0.95 * n) - 1]",
+          "itemCount": 100,
+          "initialization": "Immediately before await plugins.enablePlugin(id), after awaited disable; finish after runtime registration and empty diagnostics; excludes host startup and unload.",
+          "readiness": "Immediately before workspace.getLeaf(tab).setViewState; finish after Documents click, 100 exact fixture labels, aria-busy=false and two animation frames; includes mount, query, render and paint opportunity.",
+          "fixture": "100 stable-ID plugin-data item records, labels Reference item 001 through 100; schema 1; collection revision 100; each record revision 1.",
+          "policy": "Three retained warmups then 30 sequential samples per metric; no retries, outlier removal or early readiness marker. Correctness failures abort and retain partial results.",
+          "budgets": {
+            "warm-initialization": 200,
+            "items-readiness": 500
+          }
+        },
+        "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "sourceInputsDigest": "b45e43dd26a4e734e5e93b1676e0d659d11504d5e4556ecf3c496e6c627ad930",
+        "dependencyLockSha256": "7f43b723ad145457979a1e7a8fba078febabf3efb078896a43f2af596699fbc7",
+        "driverInputs": [
+          {
+            "path": "scripts/testing/check-native.mjs",
+            "sha256": "2058e76d7f9624987d198fbcc59cbd3202e9542e794d14eb71c0cde48ecea4a9",
+            "bytes": 18607,
+            "lines": 227,
+            "physicalLines": 232,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-command-contract.mjs",
+            "sha256": "dab446ede1bf0593982734161154992228d36bf1d6db139edcadd3e720476436",
+            "bytes": 2135,
+            "lines": 32,
+            "physicalLines": 35,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-command.mjs",
+            "sha256": "219dcd970f42e771b7f89560786cf6fc95ab8404717082afafdc87998987a9aa",
+            "bytes": 1509,
+            "lines": 28,
+            "physicalLines": 32,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-data.mjs",
+            "sha256": "cfa554cd4bf9c2d90fade34bd7e11ea91eac6f54f1d7b1de008e3f5fefe89029",
+            "bytes": 453,
+            "lines": 8,
+            "physicalLines": 10,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-debugging.mjs",
+            "sha256": "6b9db1aace4907e59d8f66d5519fc7e24a76508029bfec88cfdc10dc815daed7",
+            "bytes": 2320,
+            "lines": 31,
+            "physicalLines": 33,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-diagnostic-observer.mjs",
+            "sha256": "3d631d409adcd71d1d74c218e3e81efce4d17636fd304f1d7f62eb1c4b64b5d6",
+            "bytes": 1965,
+            "lines": 50,
+            "physicalLines": 54,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-diagnostic-validation.mjs",
+            "sha256": "acc734a6808b803fed8f92a412ed30c28512b5c37fa23967bfb61a6184cba198",
+            "bytes": 2450,
+            "lines": 37,
+            "physicalLines": 38,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-header-checks.mjs",
+            "sha256": "325c9b75847418a473bb0f0bfe66ccc5537bf0376f49dda6516726d31b0aa9dd",
+            "bytes": 9521,
+            "lines": 125,
+            "physicalLines": 133,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-identity.mjs",
+            "sha256": "100068fa8b20cf083092eac61df1db1232e9f0a3132a7a4f4fe340b61c77d79b",
+            "bytes": 1462,
+            "lines": 18,
+            "physicalLines": 20,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-isolation.mjs",
+            "sha256": "5568568d2147f18ab6ae0a15b2275f25c0777f4978d7569572b85620ee0b14f3",
+            "bytes": 1471,
+            "lines": 19,
+            "physicalLines": 21,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-item-ownership.mjs",
+            "sha256": "8931512c43025707aa5660be660147ee3fc7c1cf7db05b196b016c3cea0dc347",
+            "bytes": 7060,
+            "lines": 87,
+            "physicalLines": 93,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-items.mjs",
+            "sha256": "18c7c4cb5f5ca05bc13b4d1ba2fbdb64746cf2e7a473a01501cacc5c590f6325",
+            "bytes": 8578,
+            "lines": 120,
+            "physicalLines": 126,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-modals.mjs",
+            "sha256": "e6d947486421074cb263c18b510aed1b6c2e5ccac7cc1256a2831808d73c77f8",
+            "bytes": 3020,
+            "lines": 31,
+            "physicalLines": 32,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-performance.mjs",
+            "sha256": "f0fe51b1e84e9a293a6ff2ee36500d36ada04cb43da3f87056fb3e572e46be41",
+            "bytes": 7729,
+            "lines": 94,
+            "physicalLines": 96,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-repository.mjs",
+            "sha256": "9b39ec3806cb8d51f5ada78a0b9eb4686af40f6a3ce7d34333f1e4e2413198c6",
+            "bytes": 5927,
+            "lines": 74,
+            "physicalLines": 82,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-theme.mjs",
+            "sha256": "d7d07203150ccd35e0837dcd3e8776e9bf12459c5bf5c040bd5bf494a659899b",
+            "bytes": 6202,
+            "lines": 76,
+            "physicalLines": 89,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/native-window.mjs",
+            "sha256": "85a7fe0b22cb639e0c99ad6e46262efaf88408d14a0041c14962a6edfccd9069",
+            "bytes": 2132,
+            "lines": 29,
+            "physicalLines": 32,
+            "limit": 400
+          },
+          {
+            "path": "scripts/testing/performance-report.mjs",
+            "sha256": "efbf4cdaffbac89a8913f2d66c2c7ca43c17667598056dde9479697d69f680a4",
+            "bytes": 5785,
+            "lines": 70,
+            "physicalLines": 75,
+            "limit": 400
+          }
+        ],
+        "environment": {
+          "platform": "linux",
+          "release": "6.17.0-1022-azure",
+          "arch": "x64",
+          "cpus": [
+            "AMD EPYC 7763 64-Core Processor",
+            "AMD EPYC 7763 64-Core Processor",
+            "AMD EPYC 7763 64-Core Processor",
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "totalMemory": 16766410752,
+          "node": "v24.21.0",
+          "playwright": "1.63.0",
+          "host": [
+            "1.13.7",
+            "1.13.7"
+          ],
+          "launcher": "3.2.1",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+          "viewport": {
+            "width": 1912,
+            "height": 1076,
+            "devicePixelRatio": 1,
+            "visibility": "visible"
+          },
+          "isolation": "Shared-runner diagnostic; timing budgets are advisory."
+        },
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "samples": [
+          {
+            "kind": "warm-initialization",
+            "index": 0,
+            "warmup": true,
+            "startMs": 2286.5999999999767,
+            "endMs": 2295.5,
+            "durationMs": 8.900000000023283,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 1,
+            "warmup": true,
+            "startMs": 2305.3000000000466,
+            "endMs": 2320.0999999999767,
+            "durationMs": 14.79999999993015,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 2,
+            "warmup": true,
+            "startMs": 2325.0999999999767,
+            "endMs": 2334.6999999999534,
+            "durationMs": 9.599999999976717,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 3,
+            "warmup": false,
+            "startMs": 2339,
+            "endMs": 2346.4000000000233,
+            "durationMs": 7.400000000023283,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 4,
+            "warmup": false,
+            "startMs": 2355.0999999999767,
+            "endMs": 2363.3000000000466,
+            "durationMs": 8.20000000006985,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 5,
+            "warmup": false,
+            "startMs": 2371.8000000000466,
+            "endMs": 2378.5999999999767,
+            "durationMs": 6.799999999930151,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 6,
+            "warmup": false,
+            "startMs": 2388,
+            "endMs": 2395.0999999999767,
+            "durationMs": 7.099999999976717,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 7,
+            "warmup": false,
+            "startMs": 2404.4000000000233,
+            "endMs": 2412.3000000000466,
+            "durationMs": 7.900000000023283,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 8,
+            "warmup": false,
+            "startMs": 2422,
+            "endMs": 2430,
+            "durationMs": 8,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 9,
+            "warmup": false,
+            "startMs": 2438.5,
+            "endMs": 2446.9000000000233,
+            "durationMs": 8.400000000023283,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 10,
+            "warmup": false,
+            "startMs": 2455.5,
+            "endMs": 2461.1999999999534,
+            "durationMs": 5.699999999953434,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 11,
+            "warmup": false,
+            "startMs": 2469.0999999999767,
+            "endMs": 2475.8000000000466,
+            "durationMs": 6.700000000069849,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 12,
+            "warmup": false,
+            "startMs": 2480,
+            "endMs": 2487.3000000000466,
+            "durationMs": 7.300000000046566,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 13,
+            "warmup": false,
+            "startMs": 2491.0999999999767,
+            "endMs": 2499.3000000000466,
+            "durationMs": 8.20000000006985,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 14,
+            "warmup": false,
+            "startMs": 2503.5,
+            "endMs": 2511.3000000000466,
+            "durationMs": 7.800000000046566,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 15,
+            "warmup": false,
+            "startMs": 2515.4000000000233,
+            "endMs": 2520.9000000000233,
+            "durationMs": 5.5,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 16,
+            "warmup": false,
+            "startMs": 2524.5,
+            "endMs": 2532,
+            "durationMs": 7.5,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 17,
+            "warmup": false,
+            "startMs": 2535.8000000000466,
+            "endMs": 2542.0999999999767,
+            "durationMs": 6.299999999930151,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 18,
+            "warmup": false,
+            "startMs": 2545.4000000000233,
+            "endMs": 2560.5999999999767,
+            "durationMs": 15.199999999953434,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 19,
+            "warmup": false,
+            "startMs": 2579.5999999999767,
+            "endMs": 2596.4000000000233,
+            "durationMs": 16.800000000046566,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 20,
+            "warmup": false,
+            "startMs": 2604.8000000000466,
+            "endMs": 2612.8000000000466,
+            "durationMs": 8,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 21,
+            "warmup": false,
+            "startMs": 2622.4000000000233,
+            "endMs": 2629.5999999999767,
+            "durationMs": 7.199999999953434,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 22,
+            "warmup": false,
+            "startMs": 2637.8000000000466,
+            "endMs": 2644.6999999999534,
+            "durationMs": 6.899999999906868,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 23,
+            "warmup": false,
+            "startMs": 2652.8000000000466,
+            "endMs": 2660.4000000000233,
+            "durationMs": 7.599999999976717,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 24,
+            "warmup": false,
+            "startMs": 2664.3000000000466,
+            "endMs": 2671.1999999999534,
+            "durationMs": 6.899999999906868,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 25,
+            "warmup": false,
+            "startMs": 2674.8000000000466,
+            "endMs": 2682.6999999999534,
+            "durationMs": 7.899999999906868,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 26,
+            "warmup": false,
+            "startMs": 2686.6999999999534,
+            "endMs": 2694.3000000000466,
+            "durationMs": 7.600000000093132,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 27,
+            "warmup": false,
+            "startMs": 2698.3000000000466,
+            "endMs": 2705.6999999999534,
+            "durationMs": 7.399999999906868,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 28,
+            "warmup": false,
+            "startMs": 2709.3000000000466,
+            "endMs": 2717.6999999999534,
+            "durationMs": 8.399999999906868,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 29,
+            "warmup": false,
+            "startMs": 2721.5,
+            "endMs": 2726.9000000000233,
+            "durationMs": 5.400000000023283,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 30,
+            "warmup": false,
+            "startMs": 2730.0999999999767,
+            "endMs": 2735.6999999999534,
+            "durationMs": 5.599999999976717,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 31,
+            "warmup": false,
+            "startMs": 2738.9000000000233,
+            "endMs": 2744.5,
+            "durationMs": 5.599999999976717,
+            "status": "passed"
+          },
+          {
+            "kind": "warm-initialization",
+            "index": 32,
+            "warmup": false,
+            "startMs": 2748.4000000000233,
+            "endMs": 2754.4000000000233,
+            "durationMs": 6,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 0,
+            "warmup": true,
+            "startMs": 2756.5999999999767,
+            "endMs": 2946.8000000000466,
+            "durationMs": 190.20000000006985,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 1,
+            "warmup": true,
+            "startMs": 2962,
+            "endMs": 3076.5,
+            "durationMs": 114.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 2,
+            "warmup": true,
+            "startMs": 3088.8000000000466,
+            "endMs": 3193.1999999999534,
+            "durationMs": 104.39999999990687,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 3,
+            "warmup": false,
+            "startMs": 3214.3000000000466,
+            "endMs": 3304.1999999999534,
+            "durationMs": 89.89999999990687,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 4,
+            "warmup": false,
+            "startMs": 3317.4000000000233,
+            "endMs": 3407.3000000000466,
+            "durationMs": 89.90000000002328,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 5,
+            "warmup": false,
+            "startMs": 3428.3000000000466,
+            "endMs": 3516.8000000000466,
+            "durationMs": 88.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 6,
+            "warmup": false,
+            "startMs": 3528.0999999999767,
+            "endMs": 3625.4000000000233,
+            "durationMs": 97.30000000004657,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 7,
+            "warmup": false,
+            "startMs": 3637.0999999999767,
+            "endMs": 3718.4000000000233,
+            "durationMs": 81.30000000004657,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 8,
+            "warmup": false,
+            "startMs": 3729.4000000000233,
+            "endMs": 3821.3000000000466,
+            "durationMs": 91.90000000002328,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 9,
+            "warmup": false,
+            "startMs": 3833.9000000000233,
+            "endMs": 3972.0999999999767,
+            "durationMs": 138.19999999995343,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 10,
+            "warmup": false,
+            "startMs": 3989.1999999999534,
+            "endMs": 4072,
+            "durationMs": 82.80000000004657,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 11,
+            "warmup": false,
+            "startMs": 4083.9000000000233,
+            "endMs": 4171.5,
+            "durationMs": 87.59999999997672,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 12,
+            "warmup": false,
+            "startMs": 4184.400000000023,
+            "endMs": 4267.900000000023,
+            "durationMs": 83.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 13,
+            "warmup": false,
+            "startMs": 4278.199999999953,
+            "endMs": 4376.5,
+            "durationMs": 98.30000000004657,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 14,
+            "warmup": false,
+            "startMs": 4388,
+            "endMs": 4467.599999999977,
+            "durationMs": 79.59999999997672,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 15,
+            "warmup": false,
+            "startMs": 4479.599999999977,
+            "endMs": 4575.800000000047,
+            "durationMs": 96.20000000006985,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 16,
+            "warmup": false,
+            "startMs": 4587.300000000047,
+            "endMs": 4668.099999999977,
+            "durationMs": 80.79999999993015,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 17,
+            "warmup": false,
+            "startMs": 4678.900000000023,
+            "endMs": 4771.5,
+            "durationMs": 92.59999999997672,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 18,
+            "warmup": false,
+            "startMs": 4783.599999999977,
+            "endMs": 4864.5,
+            "durationMs": 80.90000000002328,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 19,
+            "warmup": false,
+            "startMs": 4884.900000000023,
+            "endMs": 4968.199999999953,
+            "durationMs": 83.29999999993015,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 20,
+            "warmup": false,
+            "startMs": 4979.199999999953,
+            "endMs": 5059.699999999953,
+            "durationMs": 80.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 21,
+            "warmup": false,
+            "startMs": 5081,
+            "endMs": 5161.900000000023,
+            "durationMs": 80.90000000002328,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 22,
+            "warmup": false,
+            "startMs": 5173,
+            "endMs": 5263.699999999953,
+            "durationMs": 90.69999999995343,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 23,
+            "warmup": false,
+            "startMs": 5275.599999999977,
+            "endMs": 5357.199999999953,
+            "durationMs": 81.59999999997672,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 24,
+            "warmup": false,
+            "startMs": 5368.699999999953,
+            "endMs": 5459.199999999953,
+            "durationMs": 90.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 25,
+            "warmup": false,
+            "startMs": 5471.400000000023,
+            "endMs": 5552.900000000023,
+            "durationMs": 81.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 26,
+            "warmup": false,
+            "startMs": 5565,
+            "endMs": 5660.599999999977,
+            "durationMs": 95.59999999997672,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 27,
+            "warmup": false,
+            "startMs": 5670.900000000023,
+            "endMs": 5754.800000000047,
+            "durationMs": 83.90000000002328,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 28,
+            "warmup": false,
+            "startMs": 5766.699999999953,
+            "endMs": 5865.199999999953,
+            "durationMs": 98.5,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 29,
+            "warmup": false,
+            "startMs": 5876.099999999977,
+            "endMs": 5963.900000000023,
+            "durationMs": 87.80000000004657,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 30,
+            "warmup": false,
+            "startMs": 5986.699999999953,
+            "endMs": 6071.699999999953,
+            "durationMs": 85,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 31,
+            "warmup": false,
+            "startMs": 6083.400000000023,
+            "endMs": 6162.400000000023,
+            "durationMs": 79,
+            "status": "passed"
+          },
+          {
+            "kind": "items-readiness",
+            "index": 32,
+            "warmup": false,
+            "startMs": 6181.099999999977,
+            "endMs": 6259.699999999953,
+            "durationMs": 78.59999999997672,
+            "status": "passed"
+          }
+        ],
+        "sizes": {
+          "schemaVersion": 1,
+          "mode": "retained-asset-size",
+          "compression": {
+            "gzipLevel": 9,
+            "brotliQuality": 11,
+            "node": "v24.21.0"
+          },
+          "assets": [
+            {
+              "file": "main.js",
+              "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58",
+              "bytes": 586915,
+              "gzipBytes": 174699,
+              "brotliBytes": 150396,
+              "limitBytes": 1048576,
+              "withinBudget": true
+            },
+            {
+              "file": "styles.css",
+              "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7",
+              "bytes": 88547,
+              "gzipBytes": 11702,
+              "brotliBytes": 9964,
+              "limitBytes": 102400,
+              "withinBudget": true
+            },
+            {
+              "file": "manifest.json",
+              "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380",
+              "bytes": 280,
+              "gzipBytes": 211,
+              "brotliBytes": 155,
+              "limitBytes": null,
+              "withinBudget": true
+            }
+          ],
+          "serializerAttribution": {
+            "schemaVersion": 1,
+            "mode": "build-module-attribution",
+            "asset": {
+              "file": "main.js",
+              "sha256": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58",
+              "bytes": 586915
+            },
+            "tools": {
+              "node": "v24.21.0",
+              "vite": "8.3.0",
+              "rolldown": "1.2.9"
+            },
+            "serializer": {
+              "package": "yaml",
+              "version": "2.9.1",
+              "modules": [
+                {
+                  "id": "yaml/browser/dist/compose/compose-collection.js",
+                  "renderedLength": 2371
+                },
+                {
+                  "id": "yaml/browser/dist/compose/compose-doc.js",
+                  "renderedLength": 1158
+                },
+                {
+                  "id": "yaml/browser/dist/compose/compose-node.js",
+                  "renderedLength": 2994
+                },
+                {
+                  "id": "yaml/browser/dist/compose/compose-scalar.js",
+                  "renderedLength": 2545
+                },
+                {
+                  "id": "yaml/browser/dist/compose/composer.js",
+                  "renderedLength": 5103
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-block-map.js",
+                  "renderedLength": 3509
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-block-scalar.js",
+                  "renderedLength": 5536
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-block-seq.js",
+                  "renderedLength": 1272
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-end.js",
+                  "renderedLength": 884
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-flow-collection.js",
+                  "renderedLength": 5970
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-flow-scalar.js",
+                  "renderedLength": 5202
+                },
+                {
+                  "id": "yaml/browser/dist/compose/resolve-props.js",
+                  "renderedLength": 3802
+                },
+                {
+                  "id": "yaml/browser/dist/compose/util-contains-newline.js",
+                  "renderedLength": 766
+                },
+                {
+                  "id": "yaml/browser/dist/compose/util-empty-scalar-position.js",
+                  "renderedLength": 535
+                },
+                {
+                  "id": "yaml/browser/dist/compose/util-flow-indent-check.js",
+                  "renderedLength": 395
+                },
+                {
+                  "id": "yaml/browser/dist/compose/util-map-includes.js",
+                  "renderedLength": 400
+                },
+                {
+                  "id": "yaml/browser/dist/doc/anchors.js",
+                  "renderedLength": 1414
+                },
+                {
+                  "id": "yaml/browser/dist/doc/applyReviver.js",
+                  "renderedLength": 1067
+                },
+                {
+                  "id": "yaml/browser/dist/doc/createNode.js",
+                  "renderedLength": 2117
+                },
+                {
+                  "id": "yaml/browser/dist/doc/directives.js",
+                  "renderedLength": 3976
+                },
+                {
+                  "id": "yaml/browser/dist/doc/Document.js",
+                  "renderedLength": 6949
+                },
+                {
+                  "id": "yaml/browser/dist/errors.js",
+                  "renderedLength": 1618
+                },
+                {
+                  "id": "yaml/browser/dist/index.js",
+                  "renderedLength": 0
+                },
+                {
+                  "id": "yaml/browser/dist/log.js",
+                  "renderedLength": 171
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/addPairToJSMap.js",
+                  "renderedLength": 1568
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/Alias.js",
+                  "renderedLength": 2673
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/Collection.js",
+                  "renderedLength": 3014
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/identity.js",
+                  "renderedLength": 1284
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/Node.js",
+                  "renderedLength": 956
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/Pair.js",
+                  "renderedLength": 817
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/Scalar.js",
+                  "renderedLength": 585
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/toJS.js",
+                  "renderedLength": 652
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/YAMLMap.js",
+                  "renderedLength": 3046
+                },
+                {
+                  "id": "yaml/browser/dist/nodes/YAMLSeq.js",
+                  "renderedLength": 2066
+                },
+                {
+                  "id": "yaml/browser/dist/parse/cst-scalar.js",
+                  "renderedLength": 0
+                },
+                {
+                  "id": "yaml/browser/dist/parse/cst-visit.js",
+                  "renderedLength": 1580
+                },
+                {
+                  "id": "yaml/browser/dist/parse/cst.js",
+                  "renderedLength": 1103
+                },
+                {
+                  "id": "yaml/browser/dist/parse/lexer.js",
+                  "renderedLength": 14066
+                },
+                {
+                  "id": "yaml/browser/dist/parse/line-counter.js",
+                  "renderedLength": 689
+                },
+                {
+                  "id": "yaml/browser/dist/parse/parser.js",
+                  "renderedLength": 21438
+                },
+                {
+                  "id": "yaml/browser/dist/public-api.js",
+                  "renderedLength": 1667
+                },
+                {
+                  "id": "yaml/browser/dist/schema/common/map.js",
+                  "renderedLength": 350
+                },
+                {
+                  "id": "yaml/browser/dist/schema/common/null.js",
+                  "renderedLength": 403
+                },
+                {
+                  "id": "yaml/browser/dist/schema/common/seq.js",
+                  "renderedLength": 351
+                },
+                {
+                  "id": "yaml/browser/dist/schema/common/string.js",
+                  "renderedLength": 380
+                },
+                {
+                  "id": "yaml/browser/dist/schema/core/bool.js",
+                  "renderedLength": 524
+                },
+                {
+                  "id": "yaml/browser/dist/schema/core/float.js",
+                  "renderedLength": 1175
+                },
+                {
+                  "id": "yaml/browser/dist/schema/core/int.js",
+                  "renderedLength": 1242
+                },
+                {
+                  "id": "yaml/browser/dist/schema/core/schema.js",
+                  "renderedLength": 202
+                },
+                {
+                  "id": "yaml/browser/dist/schema/json/schema.js",
+                  "renderedLength": 1541
+                },
+                {
+                  "id": "yaml/browser/dist/schema/Schema.js",
+                  "renderedLength": 1070
+                },
+                {
+                  "id": "yaml/browser/dist/schema/tags.js",
+                  "renderedLength": 1892
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/binary.js",
+                  "renderedLength": 1490
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/bool.js",
+                  "renderedLength": 708
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/float.js",
+                  "renderedLength": 1257
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/int.js",
+                  "renderedLength": 1821
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/merge.js",
+                  "renderedLength": 1582
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/omap.js",
+                  "renderedLength": 1662
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/pairs.js",
+                  "renderedLength": 1810
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/schema.js",
+                  "renderedLength": 284
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/set.js",
+                  "renderedLength": 2152
+                },
+                {
+                  "id": "yaml/browser/dist/schema/yaml-1.1/timestamp.js",
+                  "renderedLength": 2586
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/foldFlowLines.js",
+                  "renderedLength": 2917
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringify.js",
+                  "renderedLength": 3442
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyCollection.js",
+                  "renderedLength": 4180
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyComment.js",
+                  "renderedLength": 525
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyDocument.js",
+                  "renderedLength": 2074
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyNumber.js",
+                  "renderedLength": 703
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyPair.js",
+                  "renderedLength": 3946
+                },
+                {
+                  "id": "yaml/browser/dist/stringify/stringifyString.js",
+                  "renderedLength": 8495
+                },
+                {
+                  "id": "yaml/browser/dist/visit.js",
+                  "renderedLength": 4161
+                },
+                {
+                  "id": "yaml/browser/index.js",
+                  "renderedLength": 0
+                }
+              ],
+              "renderedLength": 171883
+            },
+            "definition": "Rolldown renderedLength for tree-shaken YAML modules in this build graph. Not an additive allocation of final minified/compressed bytes or a counterfactual saving from removing YAML.",
+            "status": "measured",
+            "reportSha256": "dd4a8bcb007891da210b5cefe773e341bc2059a6a6bc34ef2518f0f7851eaff0"
+          },
+          "status": "passed"
+        },
+        "fixtureSha256": "f4ffad70b31f200d7aac6e1a3add8f95a3a225eee03d8404811a3f9065c542b1",
+        "summary": [
+          {
+            "kind": "warm-initialization",
+            "samples": 30,
+            "p95Ms": 15.199999999953434,
+            "budgetMs": 200,
+            "withinProposedBudget": true
+          },
+          {
+            "kind": "items-readiness",
+            "samples": 30,
+            "p95Ms": 98.5,
+            "budgetMs": 500,
+            "withinProposedBudget": true
+          }
+        ],
+        "budgetStatus": "within-proposed-budgets"
+      }
+    },
+    "limits": [
+      "Integrity and source-bound report validation; not signed proof of honest execution or release authorization.",
+      "Driver receipt timestamps are not renderer throw times; renderer observation ends at CDP disconnect before subsequent host termination.",
+      "Native controlled save rejection uses an injected adapter; it is not native disk-failure evidence.",
+      "Native diagnosticSnapshot is a bounded production last-200-record buffer, not the independent caught-error/overflow ledger.",
+      "Historical earliest Windows Appearance, later Windows Appearance, Linux illegal access, Windows coverage timeout and archive EBUSY causes remain unresolved.",
+      "Shared-runner performance is advisory and is not an idle Windows reference measurement."
+    ],
+    "nativeDirectoryInventory": [
+      {
+        "path": "reports\\native\\attempts\\2026-09-24T06-52-01.584Z-23719\\report.json",
+        "status": "passed",
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "performance": false
+      },
+      {
+        "path": "reports\\native\\attempts\\2026-09-24T06-52-23.369Z-23980\\report.json",
+        "status": "passed",
+        "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+        "performance": true
+      }
+    ],
+    "sourceInputsDigest": "b45e43dd26a4e734e5e93b1676e0d659d11504d5e4556ecf3c496e6c627ad930",
+    "assetHashes": {
+      "main.js": "ddff7ecc664a84c9a4b3fa317c5d15d7838be9b2bc4caf85dd301d2f83c6fd58",
+      "styles.css": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7",
+      "manifest.json": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+    },
+    "finishedAt": "2026-09-24T06:55:07.993Z"
+  },
+  "security": {
+    "status": "passed",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "node": "v24.21.0",
+    "jsonExit": 0,
+    "ordinaryExit": 0,
+    "capturedAt": "2026-09-24T06:52:56.620Z"
+  },
+  "archiveInventory": {
+    "artifactEntries": 1377,
+    "source": {
+      "file": "reports/candidate-qualification/candidate-source.zip",
+      "entries": 620,
+      "sha256": "a805fa785f74c54ae7e0be167f5e75f2c529edf213208506908b1b69eae4c5fd",
+      "fontEntries": 0
+    },
+    "plugin": {
+      "file": "candidate-plugin.zip",
+      "entries": 4,
+      "sha256": "e064a180c681b9bde0facacaf0976240c97c9849e4e84009ffc134b4a9be468f",
+      "fontEntries": 0
+    }
+  },
+  "archiveCommandAudit": [
+    {
+      "directory": "9409e045-93a5-4216-a9a2-e0b3c345b8ac",
+      "status": "passed",
+      "bodyCompleted": true,
+      "cleanupStatus": "passed",
+      "commands": 10,
+      "receipts": [
+        {
+          "file": "01-started.json",
+          "sha256": "590cbda4847b617e6af7d3bca55f410124256b26323a301980c2d8be31234454"
+        },
+        {
+          "file": "01-result.json",
+          "sha256": "226a2aed200784185448cdfbc8dea4303c066b0f02b54e7d94bb0ae566a8f82b"
+        },
+        {
+          "file": "02-started.json",
+          "sha256": "ae2a5d0ef6f6d438140f6cbc10f9982eedbc067cf0d950d3db3cd5a4d45c5e6b"
+        },
+        {
+          "file": "02-result.json",
+          "sha256": "04aa67a168893c3097ce36d1f50c2c63e6e2436edb52c90451ff4f69e2541e5b"
+        },
+        {
+          "file": "03-started.json",
+          "sha256": "e0ee7651d1344bd8c3d64b07bd5b2d55cb9b7e22b6bce251cc0790bbd13b8f9a"
+        },
+        {
+          "file": "03-result.json",
+          "sha256": "9d90a720e21a71c299e29a0a4fddf7280e3e6ac7056bf766a7027f130c1c71ad"
+        },
+        {
+          "file": "04-started.json",
+          "sha256": "8f8faa5dfb0d7b8367f9f31af952723cdbb25087f0a9c6fd80d46f5b72f6d4cf"
+        },
+        {
+          "file": "04-result.json",
+          "sha256": "01936a0f520ced1f0e3a8c5bfbac58ac488f0a7eb3f8d8f301f308b2afb5c114"
+        },
+        {
+          "file": "05-started.json",
+          "sha256": "0dbed29701c7d3e3901e875457dad0e85e270b36d4e49e9e876bee7bb943b3bc"
+        },
+        {
+          "file": "05-result.json",
+          "sha256": "9a76e0c6371d81a5821c14cd68a5b0a377cdc8acb878b6bb13a5297be89b94d1"
+        },
+        {
+          "file": "06-started.json",
+          "sha256": "a845af07ac19d1ec4d09a40d38ee8a8f480e2b8be18fffd358bb1bfe41d2416d"
+        },
+        {
+          "file": "06-result.json",
+          "sha256": "dc41a6dec5d9b138ee5236b7acc8496ea6e7d2a9180a3a4bf06e7659d585faf7"
+        },
+        {
+          "file": "07-started.json",
+          "sha256": "c1cc6813e9e0a46c8e59adf134f6fa9b466e5e035a3c5b71df7a70a353ebb6a2"
+        },
+        {
+          "file": "07-result.json",
+          "sha256": "b2f9ff649a7d72b2158ee38b0d1335f451fb27350993be0619ff527fdb9a8652"
+        },
+        {
+          "file": "08-started.json",
+          "sha256": "ea862e5d5f0d71027e6958c31b22beb7a6ed7501c39f4a74dbb2ebd96f7f481a"
+        },
+        {
+          "file": "08-result.json",
+          "sha256": "76137c42861781a7570026eb0a9af591f5f0daf14f370b9fc346533b64766b93"
+        },
+        {
+          "file": "09-started.json",
+          "sha256": "915aea1646018bb9a3634ec6cb32252738daa690f60a19846e0b03958ba46284"
+        },
+        {
+          "file": "09-result.json",
+          "sha256": "2ede865a653c199423e01bcdd5ba5238e4f73543e8b8c4732a52559088ead7e3"
+        },
+        {
+          "file": "10-started.json",
+          "sha256": "82dd977d07d259541fca01c1d8677291beb55749cba97bbd3160e2ff30e782bb"
+        },
+        {
+          "file": "10-result.json",
+          "sha256": "55619e16c070546538a88e37ab48fffcb3a8be226445f39b09a1eff373429f66"
+        }
+      ]
+    }
+  ],
+  "qualificationLimits": [
+    "No full selected-case promotion. AC-71 now partial; native resource/action/foreign-notice clauses remain unproved.",
+    "Native diagnostic snapshot is a bounded production buffer, not independent caught-error observer.",
+    "All four historical native/Windows causes remain unresolved; later passes do not explain them.",
+    "New JavaScript hash differs from old Windows assets; no old Windows source or runtime qualification is reused.",
+    "Generated consumer and archive have separately audited identities; no consumer native qualification.",
+    "Read-only integrity audit is not proof of honest execution or release authorization."
+  ],
+  "codeHeadChecks": {
+    "sourceCommit": "7f14292871efb07ddace131fb9b5603de4122394",
+    "status": "all-passed",
+    "checks": [
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722920/job/107523742730",
+        "name": "Showcase / windows-latest",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722780/job/107523742107",
+        "name": "Baseline / windows-latest",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722780/job/107523742296",
+        "name": "Baseline / ubuntu-latest",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722794/job/107523742068",
+        "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722920/job/107523742466",
+        "name": "Showcase / ubuntu-latest",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722844/job/107523742316",
+        "name": "renamed-feature",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722794/job/107523741955",
+        "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722794/job/107523742125",
+        "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965722794/job/107523742009",
+        "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://dashboard.gitguardian.com",
+        "name": "GitGuardian Security Checks",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965718824/job/107523729610",
+        "name": "candidate",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35965718757/job/107523729274",
+        "name": "renamed-feature",
+        "state": "SUCCESS"
+      }
+    ]
+  }
+}

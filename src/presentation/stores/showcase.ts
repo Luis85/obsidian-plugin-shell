@@ -42,18 +42,19 @@ export const useShowcase = defineStore('showcase', () => {
   ];
   onScopeDispose(() => { alive = false; if (prepared.value) services.documents.discard(prepared.value); for (const stop of stops) stop(); for (const item of services.notifications.current) { if (item.owner.startsWith(`${owner}:`)) services.notifications.dismiss(item.id); } });
   function navigate(next: Page) {
+    if (!alive) return;
     page.value = next;
     try { services.local.set('page', next); } catch { services.diagnostics.report('local.write', 'preferences.local'); }
   }
   function preview(input: TaskInput) {
-    if (busy.value || error.value?.effect === 'uncertain') return;
+    if (!alive || busy.value || error.value?.effect === 'uncertain') return;
     if (prepared.value) services.documents.discard(prepared.value);
     error.value = undefined; receipt.value = undefined;
     const result = services.documents.prepare('task', input, preferences.value.taskFolder, services.newId());
     if (result.ok) prepared.value = result.value; else { error.value = result.error; prepared.value = undefined; }
   }
   async function commit() {
-    if (!prepared.value || busy.value) return;
+    if (!alive || !prepared.value || busy.value) return;
     busy.value = true; error.value = undefined;
     try {
       const result = await services.documents.commit(prepared.value, services.preferences.current.taskFolder);
@@ -77,6 +78,6 @@ export const useShowcase = defineStore('showcase', () => {
     } catch { if (stillCurrent()) error.value = { code: 'unexpected', key: 'error.open', effect: 'committed' }; services.diagnostics.report('document.open', 'document.open'); }
     finally { if (alive) opening.value = false; }
   }
-  function reset() { if (!busy.value && error.value?.effect !== 'uncertain') { if (prepared.value) services.documents.discard(prepared.value); prepared.value = undefined; receipt.value = undefined; error.value = undefined; } }
+  function reset() { if (alive && !busy.value && error.value?.effect !== 'uncertain') { if (prepared.value) services.documents.discard(prepared.value); prepared.value = undefined; receipt.value = undefined; error.value = undefined; } }
   return { owner, draft, page, navigate, preferences, feedback, diagnostics, stream, createdCount, eventCount, prepared, receipt, error, busy, opening, preview, commit, openCreated, reset };
 });

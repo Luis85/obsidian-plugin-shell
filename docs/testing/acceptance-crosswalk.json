@@ -110,9 +110,41 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served note actions preserve an existing note through known failed create, offer deliberate editing recovery, preserve committed bytes through failed/retried open, and retain bytes after a post-persistence acknowledgment loss with create controls disabled. Exact storage write list and reload are checked; shared plugin-data failure remains separate."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-05-01] failed note mutations retain exact bytes and identity until deliberate fresh-snapshot recovery",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Exact original note bytes and authenticated identity survive known failed update/trash with no facts; uncertain shared saves before/after persistence block queued mutations, preserve exact durable envelopes and permit deliberate reconstructed recovery. Individual cases establish their named boundary, not all DAT clauses."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-05-02] uncertain shared saves block queued writes and reconstruct the actual acknowledged-or-unacknowledged bytes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Exact original note bytes and authenticated identity survive known failed update/trash with no facts; uncertain shared saves before/after persistence block queued mutations, preserve exact durable envelopes and permit deliberate reconstructed recovery. Individual cases establish their named boundary, not all DAT clauses."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B05] rejected shared save before persistence retains drafts and reconstructs only actual bytes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Real served Items actions reject before/after Storage persistence, preserve prior record and drafts, block blind retry and false success, check exact attempted/durable envelopes, then independently reload actual bytes and deliberately recover. Controlled browser storage, not native disk failure."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B05] rejected shared save after persistence retains drafts and reconstructs only actual bytes",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Real served Items actions reject before/after Storage persistence, preserve prior record and drafts, block blind retry and false success, check exact attempted/durable envelopes, then independently reload actual bytes and deliberately recover. Controlled browser storage, not native disk failure."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Establish existing-data preservation, no false success and safe deliberate recovery in both modes; distinguish known failure from acknowledged-uncertain persistence. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Current complete producer linkage plus complete absent/corrupt/inaccessible/future recovery contract remains necessary; known failure and uncertain acknowledgment must stay distinct. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-06",
@@ -162,9 +194,65 @@
           "mode": "unit",
           "extent": "partial",
           "assertions": "Malformed/future registry and collection cases reject list/get/create without any save and retain the original raw value. Includes unsafe revisions, duplicated records and invalid field values; no browser execution is implied."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-01] corrupt and future root bytes survive real actions and independent bootstrap with zero writes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-02] opaque registry and collection schemas block item mutation while permitted preferences retain their data",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-07-03] absent storage waits for explicit mutation while inaccessible existing bytes remain protected until readable",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real bootstrap/actions preserve malformed/future root bytes or opaque registry/collection data, distinguish absent initialization from denied read, block related writes and reconstruct actual persisted bytes. Individual scenarios remain partial; ordered migration and complete recovery contracts are not inferred."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] corrupt JSON retains exact raw bytes and disables durable mutations across reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future envelope retains exact raw bytes and disables durable mutations across reload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future registry disables Items while preference saves preserve its opaque payload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B07] future collection disables Items while preference saves preserve its opaque payload",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Add served-browser corrupt/future storage cases asserting exact original raw bytes, disabled mutation and no default save; unit preservation is only one required mode. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Broader ordered migrations and category-specific recovery remain unproved; do not infer them from protected storage or common error text. Every new link is partial and needs current producer output. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-08",
@@ -258,9 +346,17 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served production views preserve the bus subscription count across panel navigation, acquire distinct DOM IDs and additional subscriptions for a sibling, restore the first-view count when the sibling closes, and return bus size to zero only after final runtime disposal. The harness resourceCount measures bus subscriptions only."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B11-71] twenty served view cycles release measured owned timers dialogs notices and subscriptions",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Twenty served real-view cycles return actual browser scheduler, dialog, notice, subscription and leaf measurements to a live sibling baseline; unload leaves an unrelated DOM sentinel. Ordinary notice action count is zero; native windows and nonempty action registries are not established."
         }
       ],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Add browser twenty-cycle timers/dialogs/notices/window ownership measurements and pop-out lifecycle; retain live sibling and runtime baseline. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Window/pop-out ownership, partial startup and complete deferred resource behavior remain; zero ordinary action count is not proof of nonempty recovery registry cleanup. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-12",
@@ -810,9 +906,25 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served real Items components and services; validation, sibling drafts, stable-ID rename/delete and local persistence reload. Browser storage is not native I/O."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-outcomes.test.ts",
+          "name": "[PERSIST-46-01] concurrent real actions publish only persisted envelopes with stable revisions and isolated runtime events",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Three overlapping real actions persist exact envelopes before publishing exact facts/revisions; independent runtime receives no facts or state updates, and reconstruction reads durable identities without writes. Separate failure and per-view projection assertions remain necessary."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B46] committed facts refresh two views without crossing an independently mounted browser runtime",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Paused persistence creates no visible committed row; two real served views refresh only after release while retaining a sibling draft. A separate same-origin runtime does not receive the fact and sees durable state only on reload, with no write or unexpected fault."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Assert independent runtime isolation and failed-save no-success facts in both required modes; successful two-view synchronization alone is partial. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Maintain case-specific combined post-commit/failure/projection/isolation evidence. Each individual new assertion covers part of the row; no automatic promotion from multiple partial links. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-47",
@@ -1092,9 +1204,33 @@
           "mode": "unit",
           "extent": "partial",
           "assertions": "Discard releases an unused plan so later commit fails; a committed plan cannot be discarded or rewritten and repeated commit leaves create count at one. During-write cancellation, disposed UI/privacy and browser mode remain incomplete."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-62-01] discarded previews write nothing and in-flight unload preserves the actual host outcome without replay",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real document service distinguishes discarded preview from started write and preserves committed/failed/uncertain outcomes during runtime disposal; companion assertion checks bounded request retention and selected redacted exports. Each scenario is partial; view ownership and all DOC-18 bounds remain separate."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-62-02] request retention is bounded and exported diagnostics exclude private plans after committed listener failures",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real document service distinguishes discarded preview from started write and preserves committed/failed/uncertain outcomes during runtime disposal; companion assertion checks bounded request retention and selected redacted exports. Each scenario is partial; view ownership and all DOC-18 bounds remain separate."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B62] cancelled preview and closed writing owner preserve exact Markdown and live sibling draft",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Cancel before create writes nothing; a paused actual Markdown write survives initiating-view close with exact bytes and one write, a committed event, unchanged sibling draft, explicit note reload and independent storage reload. Browser adapter and selected resources only."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Combine cancellation before/during actual write, preserved note, disposed UI and bounded privacy-safe retained operation state in both U/B. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete privacy/input/template/collision bounds and window ownership remain; string length is not a UTF-8 byte budget. Separate Task editor retained actions need a disposal audit. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-63",
@@ -1156,9 +1292,25 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served actions expose safe deliberate recovery after a known failed write; failed opening retains confirmed success and offers only opening, whose retry leaves exact bytes and create count unchanged. A post-persist lost acknowledgment leaves the exact note durable, no success/open action, all create/reset/preview controls disabled, and exact bytes survive reload without additional writes. Stale/disposed recovery and owner closure during pending work are not exercised by this active-owner assertion."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-lifecycle.test.ts",
+          "name": "[PERSIST-66-01] retained disposed view actions cannot prepare, create, reset or reopen committed documents",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Retained disposed production view actions cannot navigate, prepare, commit, reset or reopen: exact call-through service/local-write counts and unchanged state prevent dedup hiding a missing guard, while a sibling remains usable. Active uncertainty and stale follow-up behavior remain separately linked."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B66] open-only recovery ignores stale and disposed completions without recreating Markdown",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served committed open failure offers only open follow-up; pending stale/disposed open completion cannot replace a new draft, invoke another open or create another note. Exact Markdown and write/open counts remain authoritative."
         }
       ],
-      "gap": "Audit classes E,A. New active-owner uncertainty and retry-open assertions remain partial under ERR-09–11/NTF-10: add stale/disposed retry rejection, pending-owner closure and truthful committed follow-up failures in both unit and served-browser modes. Existing VIEW-03-07/09 unit assertions do not establish browser ownership. Current complete producer-session observations remain required."
+      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Keep active/pending/disposed outcomes distinct and qualify all required clauses together. Safe host opening is follow-up only; retained Task repository-editor actions remain a separate follow-up. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-67",
@@ -1214,8 +1366,25 @@
         "browser-integrated",
         "native"
       ],
-      "links": [],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Add full C/B/N owned notice/action/timer cleanup with unrelated owner retained and late callbacks suppressed; bus-only counts and U tests cannot fill all modes. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "links": [
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/lifecycle-recovery-components.test.ts",
+          "name": "[PL-C71] disposing runtime recovery invalidates pending and retained sink actions while leaving an unrelated notice intact",
+          "mode": "component",
+          "extent": "partial",
+          "assertions": "Production services and real browser sink retain a runtime recovery after view close, invalidate pending and retained action callbacks at runtime disposal, dismiss their sink and preserve an unrelated DOM sentinel. No full timer/native/foreign-plugin ownership inference."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/persistence-lifecycle.spec.ts",
+          "name": "[PL-B11-71] twenty served view cycles release measured owned timers dialogs notices and subscriptions",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Twenty served view cycles release actual synthetic notice/dialog/timer handles with sibling and unrelated DOM retained. Ordinary action count remains zero, so nonempty recovery registry and native ownership require separate evidence."
+        }
+      ],
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Native owned notices/actions/timers and foreign Notice preservation remain missing; current native diagnostics are a bounded production buffer, not the independent fault observer. Browser ordinary actions are zero and DOM sentinel is not a foreign native Notice. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-72",
