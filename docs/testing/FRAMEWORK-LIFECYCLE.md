@@ -8,7 +8,10 @@ findings, reproduced controls and correction scope.
 The [framework guide](../development/FRAMEWORK-GUIDE.md) documents the available
 developer contracts and their boundaries. Prior qualification remains bound to
 `7f14292871efb07ddace131fb9b5603de4122394`: 2 verified / 55 partial / 39 not-run.
-Current frozen qualification is pending in this implementation checkpoint.
+The first complete source qualification is
+`1c20f7ba00f997953d2c4dcfd252c4e6edba04ff`: **2 verified / 55 partial / 39 not-run**,
+with all 147 then-current links observed. Four subsequently audited native partial
+links extend the crosswalk to 151; that policy change requires a fresh final session.
 
 ## Implemented scope
 
@@ -286,3 +289,81 @@ passed. The lint process briefly left about 200 MiB free memory but completed
 naturally with exit 0 before an attempted guarded stop; no process was terminated.
 The new declaration file is removed together with the optional native helper and
 recovery demonstration. The corrected browser/native paths still require fresh CI.
+
+## First complete frozen qualification
+
+[Candidate run 36019321164](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36019321164)
+passed at `1c20f7ba00f997953d2c4dcfd252c4e6edba04ff`. The independent audit matched
+all 603 archive files to Git blobs, all 10 registered packets and 32 raw receipts,
+and the exact CI acceptance report. Qualified Node 24.21.0/npm 11.19.1 installed the
+committed lock through strict policy; all 23 verify stages passed. Tooling had 210
+passes and four designated Linux platform skips. Runtime passed 398 cases in each
+of three fresh processes; separate production coverage also ran 398 cases, and
+served Chromium passed 47 cases including the real grouped-CDP recovery helper.
+The 52-case legacy baseline passed in all three repetitions; release remains blocked.
+
+All 103 production and 47 selected-core coverage inputs met their unchanged gates.
+Independent maintainability validation rehashed 12 raw metric reports and 424
+per-input receipts: 863 production functions had no function-gate findings, with
+33/4740 duplicated lines (0.6962%). These records establish the defined gates, not
+universal maintainability or supported dependency peers. Live all-category security
+passed with zero vulnerabilities; the retained nested ESLint support exception stays.
+
+Three fresh native sessions passed all 37 checks against identical candidate and
+installed asset hashes. A separate shared-runner performance session also completed
+the protocol and retained all 66 samples: p95 initialization 16.8 ms and item
+readiness 103.9 ms. These are advisory shared-runner measurements, not idle-reference
+or Windows budgets. Eight prelaunch resource snapshots and each foreign fixture's
+source, installed and report-copied bytes matched. Each run used two independent
+experiment ledgers (Items and resources) with eight checkpoints, for 32 checkpoint
+snapshots across four runs. These are not 32 independent observation channels.
+
+The native ledgers retained exact expected faults, zero loss/gaps/observer failures,
+real owner-close/unload cleanup and unchanged late-handler replay. Native action
+calls were two while availability was pending and one after closure. The Items
+write rejection remains a controlled adapter inside the host, not a native disk
+failure. No renderer or cleanup failures were captured. Each complete host log still
+contains two GPU-process fatal messages and two host-labelled ignored ENOENT config
+messages, spanning initial and cold launches. Those messages remain preserved;
+passing UI assertions do not make stderr empty or explain historical host failures.
+
+Artifact 10816019245 has SHA-256
+`4bddaeefd6330148d070232f5a03bec13f5c240e756f0d9c1aff16a044800974`.
+The retained candidate, installed native files and packaged plugin match:
+
+| Asset | SHA-256 |
+| --- | --- |
+| main.js | `ef43606fc3b4e208e6cc2a2f0c3e6efd9439a3d6b8d1d5cca1f4c69483a3bac9` |
+| manifest.json | `84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380` |
+| styles.css | `3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7` |
+
+Both d8826fd and a5c4aac consumer checkpoints independently passed all five full
+verification stages: renamed setup, edited Bookmarks, literal Git-free archive,
+reviewed removal and a new Reading feature. Their production source and asset bytes
+match, while Git trees and execution inputs differ; neither run substitutes for the
+other. The 1c20f7b direct consumer also completed all five stages: 398 setup, 411
+edited-feature, 398 archive, 331 foundation and 339 Reading tests, each in both
+coverage runs. Served stages passed 47/2/2 cases. Its audit verified six packets,
+19 raw receipts, 60 metric and 2129 per-input receipts, all 44 uploaded source files,
+all ten new demonstration removals and nine unchanged generic tests that executed.
+Bookmarks remained byte-identical through Reading. Artifact 10817810533 has SHA-256
+`08819a3fe27b6787d177618e3f9bea83af21706adfce0edf80e85e279c0d0a8b`.
+No consumer native-host qualification is inferred from these browser flows.
+
+The four new native links are observed partial assertions for AC-71. Together with
+the 30 unit/component/browser additions, they strengthen AC-05/07/11/46/62/66/71
+without promoting any whole row. All 96 rows/modes, 117 historical links, the Nuxt
+matrix and blocked release are retained. The final crosswalk policy must be frozen
+and requalified; this successful earlier source is not relabelled as that execution.
+
+The final freeze also corrects a demonstrated CI-trigger gap: the prior blanket
+documentation exclusion skipped the crosswalk, native check catalog, baseline plan
+and design-token JSON even though they are execution inputs. Ordered include/exclude
+paths now re-include those four files while narrative/evidence-only documents retain
+their existing lighter checks. The focused trigger regression failed on the original
+filter and passed after correction, including hidden executable configuration and
+negative narrative paths. Pattern ordering follows the [GitHub workflow contract](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onpushpull_requestpull_request_targetpathspaths-ignore).
+Only this qualification trigger and its regression change executable inputs beyond
+1c20f7b; implementation source remains identical. Static checks preserve all 96
+mode sets, every exact historical link and the blocked release, with 34 new partial
+links and no execution evidence supplied to that static validation.

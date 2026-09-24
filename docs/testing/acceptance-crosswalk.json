@@ -340,7 +340,7 @@
           "assertions": "Actual native settings adapter with public-host doubles reads the configured default plugin directory, distinguishes reported absence from an exists rejection or read rejection after reported existence, performs no initialization saves and records exactly one read fault for each inaccessible case. It does not delete a real file between calls; adapter-double scope only."
         }
       ],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Ordered historical migrations remain unimplemented. Exact-text readers distinguish present null and absence; legacy decoded-only adapters retain sentinel ambiguity. Require current full unit/browser category/recovery assertions, not preservation alone. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,I (see ACCEPTANCE-CLOSURE-LEDGER.md). Ordered historical migrations remain unimplemented. Complete browser category/recovery clauses and retain decoded-only adapter sentinel limitations; storage preservation alone does not prove migrations. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-08",
@@ -1622,9 +1622,41 @@
           "mode": "component",
           "extent": "partial",
           "assertions": "The real modal cancellation event cancels delayed progress, removes feedback and permits a deliberate fresh example. Closing the owner during the second example releases its sink with no independent fault. Component scope with controlled scheduler and browser modal adapter."
+        },
+        {
+          "producer": "native",
+          "file": "scripts/testing/check-native.mjs",
+          "name": "native-owned-notice-modal-expiry-timer-close-preserves-live-sibling-and-foreign-notice",
+          "mode": "native",
+          "extent": "partial",
+          "assertions": "Actual native owner detachment closes its modal, ordinary/progress notices and recovery registry; modal cancellation settles its pending availability. The sibling notice/timer and a separately owned fixture-plugin Notice remain live. The sibling still publishes a typed event. Independent loss-checked resource/fault observations and actual retained DOM nodes are asserted; this is not a global host-resource census."
+        },
+        {
+          "producer": "native",
+          "file": "scripts/testing/check-native.mjs",
+          "name": "native-unload-releases-observed-plugin-handles-with-independent-zero-fault-ledger-and-retains-foreign-notice",
+          "mode": "native",
+          "extent": "partial",
+          "assertions": "Actual candidate unload removes its tracked remaining notice/timer and leaves both owned notice nodes disconnected. A separate fixture plugin updates its retained persistent native Notice successfully. The independent ledger reports no unexpected faults, lost events or outstanding tracked resources; driver observation ends before CDP disconnect and does not explain historical renderer failures."
+        },
+        {
+          "producer": "native",
+          "file": "scripts/testing/check-native.mjs",
+          "name": "native-delayed-progress-cancelled-before-display-on-owner-close",
+          "mode": "native",
+          "extent": "partial",
+          "assertions": "The actual recovery button and owner detachment run in one renderer turn. Its real delayed-progress timer is acquired then released, no progress notice is acquired, and modal/action/initial notice resources settle to zero. Later native experiment history cannot reacquire resources for that closed owner; no manual invocation of a cancelled native timer callback is claimed."
+        },
+        {
+          "producer": "native",
+          "file": "scripts/testing/check-native.mjs",
+          "name": "native-pending-recovery-action-closed-owner-rejects-retained-native-handler",
+          "mode": "native",
+          "extent": "partial",
+          "assertions": "Public CDP retains the actual registered native recovery click function. Two invocations while modal-backed availability is pending yield one availability acquisition; owner closure cancels the modal and releases recovery/progress resources. Invoking that same retained function after closure leaves the independent ledger unchanged and displays no success. This does not substitute for unit controls of late true or rejected availability."
         }
       ],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Require current fixed-candidate native resource/recovery observations and complete component/browser/native clause audit. Actual Notice/action/timer/modal/foreign ownership, delayed progress and retained callbacks must be asserted in their real mode; independent fault evidence cannot be replaced by the production diagnostic ring. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Four new native partial links require final source/policy reconciliation. Audit complete coverage of framework-owned registrations, partial startup and secondary-window paths before whole-row promotion. Native resource evidence covers the declared owned set, not a global host census. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-72",

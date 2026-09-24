@@ -26,6 +26,7 @@ contracts, consumer preservation, policies and frozen evidence.
 | Inherited fresh configuration paths were outside the codebase and cleanup could overwrite errors. | Scope the launcher's public temporary-directory environment, validate returned paths, sample current resources at each launch and preserve primary plus subsequent cleanup failures without ancestor retry. |
 | The contained temporary prefix made Chromium's singleton socket path too long on Linux. | Preserve the original startup failure, use a short contained `.nq/<six>` namespace, and preflight the qualified host's UTF-8 socket-path budget before launch; do not escape containment or retry the rejected path. |
 | Public CDP returned no usable retained-handler selection with an unnamed node group. | Match Chromium's named-object-group contract, retain safe selection counts and all cleanup errors, and exercise the same helper through served Chromium before the next native attempt. The original ambiguous report did not record zero versus multiple listeners. |
+| Candidate CI treated execution-policy JSON as narrative documentation and skipped it. | A reproduced trigger regression now verifies all four declared JSON inputs and hidden executable configuration trigger qualification, while narrative/evidence documents retain their lighter checks. |
 
 The final C affected batch passed 34/34 tests in four files, including all sixteen
 reentrancy controls; four tooling ledger negatives passed. Earlier 40/40, 49/49
@@ -43,7 +44,7 @@ Generator and foundation templates preserve the new capabilities. Full checks an
 consumer qualification are owned by the [execution record](../testing/FRAMEWORK-LIFECYCLE.md).
 
 No review result promotes incomplete acceptance. At the initial review checkpoint,
-the native UI exercised
+the native driver was designed to exercise
 ordinary notice expiry, modal, sibling and foreign Notice ownership; native delayed
 progress, pending recovery and forced late callbacks were explicit gaps. The
 subsequent agreed amendment adds the real modal-backed recovery recipe, a public-CDP
@@ -51,3 +52,9 @@ retained native callback control and same-turn delayed-progress cancellation.
 Its additional source review and execution receipts belong to the current record;
 the initial passing tests above do not qualify those later changes. Source
 review and unit/native doubles do not substitute for those modes or release authority.
+
+The independent 1c20f7b artifact audit subsequently observed all 37 native checks
+in three fresh sessions and the separate performance session. Four scoped native
+AC-71 links were added only after that audit, retaining partial extent and requiring
+fresh qualification of the changed policy. There is no whole-row promotion or
+historical Windows/renderer cause closure.

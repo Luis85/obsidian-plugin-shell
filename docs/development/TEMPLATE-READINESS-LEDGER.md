@@ -4,16 +4,20 @@ The active [framework lifecycle increment](FRAMEWORK-LIFECYCLE-PLAN.md) exposes
 reusable owner permits, precise recovery/presence reads and read-only resource
 observation through the [developer guide](FRAMEWORK-GUIDE.md). Its
 [execution record](../testing/FRAMEWORK-LIFECYCLE.md) owns current qualification;
-the figures below remain historical until the changed inputs pass a fresh session.
-Migration breadth, native pending-recovery/delayed-progress, manual/device and
-external release/dependency prerequisites remain open.
+the first complete frozen source is `1c20f7b`, with **2 verified / 55 partial /
+39 not-run** and all 147 then-current links observed. Native pending recovery,
+delayed progress and foreign-owner cleanup now have actual scoped evidence. Four
+new native partial links make the final policy 151 links and require fresh
+reconciliation. Migration breadth, complete assertion coverage, reference/device
+qualification and external release/dependency prerequisites remain open.
 
 The public authoring entry now survives example removal with its intentionally
 unused developer contracts intact; unrelated implementation dead code remains
-checked. Frozen d4c8c5 passed offline/served stages but failed native qualification,
-and its consumer failed the removed-foundation API analysis. Corrected tooling,
-containment and analyzer semantics require a fresh complete qualification; the
-historical acceptance counts are not promoted by those partial runs.
+checked. Independent d8826fd and a5c4aac consumer runs passed all five stages,
+preserving the edited feature and generating a new working feature after removal.
+The earlier failures remain in the execution record. Complete fixed-byte Windows
+native qualification and all historical host/timeout/cleanup causes remain open;
+later Linux passes do not resolve them. No final-template readiness is claimed.
 
 The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
 and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) track the current focused
