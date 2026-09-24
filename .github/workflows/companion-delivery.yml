@@ -6,47 +6,35 @@ on:
 permissions:
   contents: read
 jobs:
-  recover:
+  candidate:
     if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - name: Read previously prepared Git objects as data only
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 3
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Recover only the hash-bound reviewed manifest
         env:
           GH_READ_TOKEN: ${{ github.token }}
-        run: |
-          python3 - <<'PY'
-          import base64, hashlib, json, os, urllib.request
-          from pathlib import Path
-          ids = '''62174f08186f748f93e8410035cdae32cc93bc77
-          0112fe476bbaa4676171173297514ae31926dbf3
-          e5aae8f5c417e8eaa42c9a2386a3925a26a5ef68
-          e2a00e05d07c7926de7fbda6b2ae091a1cb7600b
-          9c45b59f75890624d6ff503a42df482f18f476df
-          cc4d73f47560f52ca16b2c9dc202bf9d94ffdfb6
-          a22950f38bd21fe79a0d7d47505585cbd2a81321
-          df15a1ea3609774dd3a6204e9f6498263b8770e9
-          2165c8426b14302f60cfa416626806bb58942634
-          31d0d95e47f6c135013e1229e18653151dbf091e
-          ae74626b9f748bc472f6bf93c718bc5200039d87
-          021102fa9e62cf4e5353aab5cbdf485879b3a26e'''.split()
-          out = Path(os.environ['RUNNER_TEMP']) / 'prepared-delivery'
-          out.mkdir()
-          for index, sha in enumerate(ids):
-              request = urllib.request.Request('https://api.github.com/repos/Luis85/obsidian-plugin-shell/git/blobs/' + sha,
-                  headers={'Authorization': 'Bearer ' + os.environ['GH_READ_TOKEN'], 'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(request, timeout=30) as response:
-                  item = json.load(response)
-              assert item['sha'] == sha and item['encoding'] == 'base64'
-              data = base64.b64decode(item['content'])
-              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
-              (out / str(index)).write_bytes(data)
-              print(index, sha, len(data), repr(data[:48]), repr(data[-48:]))
-          PY
-      - name: Retain prepared objects for exact local comparison
+        run: python3 -B .github/companion-delivery.py recover
+      - name: Apply and verify exact sources without an API token
+        run: python3 -B .github/companion-delivery.py apply
+      - name: Create verified Git objects without updating any ref
+        env:
+          GH_WRITE_TOKEN: ${{ github.token }}
+        run: python3 -B .github/companion-delivery.py publish
+      - name: Preserve exact delivery receipt for explicit fast-forward
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: companion-prepared-objects
-          path: ${{ runner.temp }}/prepared-delivery/
-          retention-days: 1
+          name: companion-delivery-receipt
+          path: ${{ runner.temp }}/delivery-receipt.json
+          retention-days: 7
           if-no-files-found: error
