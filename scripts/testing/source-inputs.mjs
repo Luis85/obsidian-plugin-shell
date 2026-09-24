@@ -17,7 +17,26 @@ export function lineLimit(path) {
   if (path === 'src/main.ts') return 100;
   return path.startsWith('tests/') ? 450 : 400;
 }
-export async function sourceInputs(root, roots = inputRoots) {
+// This optional executable sidecar is present with the companion concept. It
+// must participate in archive transport and evidence freshness when installed.
+// Missing concept content is valid in a foundation-only checkout; links are not.
+async function defaultRoots(root) {
+  const roots = [...inputRoots];
+  const sidecar = 'docs/concepts/companion/test-kit';
+  let path = root;
+  for (const part of sidecar.split('/')) {
+    path = join(path, part);
+    let stat;
+    try { stat = await lstat(path); }
+    catch (error) { if (error.code === 'ENOENT') return roots; throw error; }
+    if (stat.isSymbolicLink()) throw new Error('SOURCE_SYMLINK');
+    if (!stat.isDirectory()) throw new Error('SOURCE_NOT_DIRECTORY');
+  }
+  roots.push(sidecar);
+  return roots;
+}
+export async function sourceInputs(root, roots) {
+  roots = roots ?? await defaultRoots(root);
   const files = [];
   async function visit(path) {
     const stat = await lstat(path);

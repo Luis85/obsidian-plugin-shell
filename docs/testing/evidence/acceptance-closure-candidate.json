@@ -1,0 +1,2739 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-retained-candidate-audit",
+  "status": "audited",
+  "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+  "scope": "Read-only retained Linux CI artifact consistency audit. No test/host/producers rerun; no local environment freshness, honest-execution attestation or release authorization claim.",
+  "run": {
+    "id": 35920589427,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589427",
+    "conclusion": "success",
+    "artifactId": 10777636160,
+    "archiveSha256": "5507416317b61a7524587f2a91e47fbe0593e05f058f850b420f0b583b3232a7"
+  },
+  "candidate": {
+    "recordSha256": "809aaf261c9851612ffc51eb611df387c23d16b5af0be85baa7cbdab7d619474",
+    "lockSha256": "a3441564d8f267be967fd1cec1156f701bd324353cd26f76ed159b510b03b723",
+    "tools": {
+      "node": "v24.21.0",
+      "npm": "11.19.1"
+    },
+    "assets": [
+      {
+        "file": "main.js",
+        "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef",
+        "bytes": 586834,
+        "gzipBytes": 174669,
+        "brotliBytes": 150287,
+        "limitBytes": 1048576,
+        "withinBudget": true
+      },
+      {
+        "file": "styles.css",
+        "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7",
+        "bytes": 88547,
+        "gzipBytes": 11702,
+        "brotliBytes": 9964,
+        "limitBytes": 102400,
+        "withinBudget": true
+      },
+      {
+        "file": "manifest.json",
+        "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380",
+        "bytes": 280,
+        "gzipBytes": 211,
+        "brotliBytes": 155,
+        "limitBytes": null,
+        "withinBudget": true
+      }
+    ],
+    "serializerModules": 72,
+    "serializerRenderedLength": 171883
+  },
+  "execution": {
+    "inputDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+    "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
+    "rawReceiptFilesVerified": 32,
+    "totalRuns": 10,
+    "packets": [
+      {
+        "id": "1a5170a1-ae83-4eb4-b0b4-a688d2114975",
+        "producer": "tooling",
+        "sha256": "b78a1cc960f5fa8c6a22b43122a8aae26112054db77e579468d63266e192bf0b",
+        "counts": {
+          "total": 178,
+          "passed": 174,
+          "expectedPlatformSkips": 4
+        },
+        "suites": 38,
+        "modes": [
+          "node-baseline",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "a9f07fb8-06db-4f5d-ac66-94bfce3f144c",
+        "producer": "runtime",
+        "sha256": "798ff0b52feae54e5a5f4693ed3677bce5c79d721633fc0d8d1334483716f66b",
+        "counts": {
+          "total": 312,
+          "passed": 312,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 54,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "3a6e75cd-7cdb-4c5a-951c-4f3d34621530",
+        "producer": "runtime",
+        "sha256": "a56819f30ec4d1d5734cf678b0c8caac928637539223320c7aae465c8d3867e0",
+        "counts": {
+          "total": 312,
+          "passed": 312,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 54,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "be356918-0afe-40e7-8f33-8e06cc93836e",
+        "producer": "runtime",
+        "sha256": "6221c66847de5205aef413b5246f41f87209c405e191e113ef958452dc722d47",
+        "counts": {
+          "total": 312,
+          "passed": 312,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 54,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "8668b6a1-9d40-4122-adec-505a829fbf87",
+        "producer": "coverage",
+        "sha256": "fb925bac1d5774ff1460d59ed8905322bdf1eeffe1a933d9f3ff624820b4fc92",
+        "counts": {
+          "total": 312,
+          "passed": 312,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 54,
+        "modes": [
+          "component",
+          "unit"
+        ]
+      },
+      {
+        "id": "a6c2ddb7-0f92-4005-91cb-65d17ad3283a",
+        "producer": "artifact",
+        "sha256": "6ba8de847a079b511140df7989b043b13af4985240381ffb65ce6cc008d94d84",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "artifact"
+        ]
+      },
+      {
+        "id": "36781b32-21e6-4172-a26b-2e9f9f6c3660",
+        "producer": "browser",
+        "sha256": "dda0a1f8cb094ee5a8f194de04dda518608bbe12e37f2f1c0a3d6c2f5a1d3aca",
+        "counts": {
+          "total": 35,
+          "passed": 35,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 8,
+        "modes": [
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "7a2f643b-322a-46b4-bcea-c7aae7d2eced",
+        "producer": "native",
+        "sha256": "b5a35ca661cd536cf3a691687f0da84818e71ae482c50b0c4167e26752ec830d",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      },
+      {
+        "id": "89ea2fea-bd46-4660-be2d-fb580ad99f97",
+        "producer": "native",
+        "sha256": "86a3ef7b4de0cbab14e8a635cee9558762ff95316a16028be8dbb52ba5ee48f4",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      },
+      {
+        "id": "d6350ac1-ccb1-49e2-97b5-f852890da9ed",
+        "producer": "native",
+        "sha256": "7374c19f42e226a6b8c364ea15248f0223c0e6696c4312e475ccb16442ea3499",
+        "counts": {
+          "total": 31,
+          "passed": 31,
+          "expectedPlatformSkips": 0
+        },
+        "suites": 1,
+        "modes": [
+          "native"
+        ]
+      }
+    ],
+    "allRepeatedSemanticCaseSetsMatch": true
+  },
+  "acceptance": {
+    "previous": {
+      "verified": 1,
+      "partial": 14,
+      "not-run": 81
+    },
+    "current": {
+      "verified": 2,
+      "partial": 54,
+      "not-run": 40
+    },
+    "report": {
+      "sha256": "0b119cdfc3886595f9065dbb539b0f687def5a07ff6e84d7306acd1bff96a9ed",
+      "bytes": 126397,
+      "exactRecomputationMatches": true
+    },
+    "verifiedIds": [
+      "AC-03",
+      "AC-06"
+    ],
+    "transitions": [
+      {
+        "id": "AC-01",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-05",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-06",
+        "before": "partial",
+        "after": "verified"
+      },
+      {
+        "id": "AC-07",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-10",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-14",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-15",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-17",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-18",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-19",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-21",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-22",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-24",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-28",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-31",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-32",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-33",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-34",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-36",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-37",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-38",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-40",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-41",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-42",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-50",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-51",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-52",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-53",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-54",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-56",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-57",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-58",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-59",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-61",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-62",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-63",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-66",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-67",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-72",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-74",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-76",
+        "before": "not-run",
+        "after": "partial"
+      },
+      {
+        "id": "AC-82",
+        "before": "not-run",
+        "after": "partial"
+      }
+    ],
+    "rows": [
+      {
+        "id": "AC-01",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-02",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-03",
+        "state": "verified",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": []
+      },
+      {
+        "id": "AC-04",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-05",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-06",
+        "state": "verified",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": []
+      },
+      {
+        "id": "AC-07",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-08",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-09",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-10",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-11",
+        "state": "partial",
+        "observedLinks": 6,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-12",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-13",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-14",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated",
+          "component"
+        ]
+      },
+      {
+        "id": "AC-15",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-16",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-17",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-18",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-19",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-20",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-21",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-22",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-23",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "device"
+        ]
+      },
+      {
+        "id": "AC-24",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-25",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-26",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-27",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-28",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-29",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit"
+        ]
+      },
+      {
+        "id": "AC-30",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-31",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-32",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-33",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "native",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-34",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-35",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-36",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-37",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-38",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-39",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-40",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-41",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-42",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-43",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-44",
+        "state": "partial",
+        "observedLinks": 6,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-45",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-46",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-47",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-48",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-49",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-50",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-51",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-52",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-53",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-54",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-55",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-56",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-57",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-58",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-59",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-60",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-61",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-62",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-63",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-64",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-65",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-66",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-67",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-68",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-69",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "unit",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-70",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-71",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-72",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native",
+          "manual"
+        ]
+      },
+      {
+        "id": "AC-73",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-74",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-75",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "browser-integrated"
+        ]
+      },
+      {
+        "id": "AC-76",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "component",
+          "browser-integrated",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-77",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-78",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "native"
+        ]
+      },
+      {
+        "id": "AC-79",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-80",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "artifact",
+          "native"
+        ]
+      },
+      {
+        "id": "AC-81",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "http-specimen"
+        ]
+      },
+      {
+        "id": "AC-82",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "tooling-generated"
+        ]
+      },
+      {
+        "id": "AC-83",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-84",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-85",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-86",
+        "state": "partial",
+        "observedLinks": 4,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-87",
+        "state": "partial",
+        "observedLinks": 5,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-88",
+        "state": "partial",
+        "observedLinks": 1,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-89",
+        "state": "partial",
+        "observedLinks": 2,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-90",
+        "state": "partial",
+        "observedLinks": 3,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-91",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-92",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-93",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-94",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "browser-specimen"
+        ]
+      },
+      {
+        "id": "AC-95",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      },
+      {
+        "id": "AC-96",
+        "state": "not-run",
+        "observedLinks": 0,
+        "unobservedLinks": 0,
+        "missingModes": [
+          "node-baseline"
+        ]
+      }
+    ],
+    "remainingGroups": {
+      "E": [
+        "AC-01",
+        "AC-02",
+        "AC-04",
+        "AC-05",
+        "AC-07",
+        "AC-08",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-24",
+        "AC-26",
+        "AC-27",
+        "AC-28",
+        "AC-29",
+        "AC-31",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-36",
+        "AC-37",
+        "AC-38",
+        "AC-39",
+        "AC-40",
+        "AC-41",
+        "AC-42",
+        "AC-43",
+        "AC-44",
+        "AC-45",
+        "AC-46",
+        "AC-47",
+        "AC-48",
+        "AC-49",
+        "AC-50",
+        "AC-51",
+        "AC-52",
+        "AC-53",
+        "AC-54",
+        "AC-55",
+        "AC-56",
+        "AC-57",
+        "AC-58",
+        "AC-59",
+        "AC-60",
+        "AC-61",
+        "AC-62",
+        "AC-63",
+        "AC-64",
+        "AC-65",
+        "AC-66",
+        "AC-67",
+        "AC-68",
+        "AC-69",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-74",
+        "AC-75",
+        "AC-76",
+        "AC-77",
+        "AC-78",
+        "AC-79",
+        "AC-80",
+        "AC-81",
+        "AC-82",
+        "AC-83",
+        "AC-84",
+        "AC-85",
+        "AC-86",
+        "AC-87",
+        "AC-88",
+        "AC-89",
+        "AC-90",
+        "AC-91",
+        "AC-92",
+        "AC-93",
+        "AC-94",
+        "AC-95",
+        "AC-96"
+      ],
+      "A": [
+        "AC-01",
+        "AC-04",
+        "AC-05",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-24",
+        "AC-25",
+        "AC-26",
+        "AC-27",
+        "AC-28",
+        "AC-29",
+        "AC-31",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-35",
+        "AC-36",
+        "AC-37",
+        "AC-38",
+        "AC-39",
+        "AC-40",
+        "AC-41",
+        "AC-42",
+        "AC-43",
+        "AC-44",
+        "AC-45",
+        "AC-46",
+        "AC-47",
+        "AC-48",
+        "AC-49",
+        "AC-50",
+        "AC-51",
+        "AC-52",
+        "AC-53",
+        "AC-54",
+        "AC-55",
+        "AC-56",
+        "AC-57",
+        "AC-58",
+        "AC-59",
+        "AC-60",
+        "AC-61",
+        "AC-62",
+        "AC-63",
+        "AC-64",
+        "AC-65",
+        "AC-66",
+        "AC-67",
+        "AC-68",
+        "AC-69",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-74",
+        "AC-75",
+        "AC-76",
+        "AC-77",
+        "AC-78",
+        "AC-79",
+        "AC-80",
+        "AC-81",
+        "AC-82",
+        "AC-83",
+        "AC-84",
+        "AC-85",
+        "AC-86",
+        "AC-87",
+        "AC-88",
+        "AC-89",
+        "AC-90",
+        "AC-91",
+        "AC-92",
+        "AC-93",
+        "AC-94",
+        "AC-95",
+        "AC-96"
+      ],
+      "I": [
+        "AC-09",
+        "AC-33",
+        "AC-35",
+        "AC-44"
+      ],
+      "Q": [
+        "AC-02",
+        "AC-04",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-16",
+        "AC-18",
+        "AC-20",
+        "AC-22",
+        "AC-23",
+        "AC-25",
+        "AC-26",
+        "AC-27",
+        "AC-30",
+        "AC-36",
+        "AC-45",
+        "AC-48",
+        "AC-49",
+        "AC-54",
+        "AC-55",
+        "AC-60",
+        "AC-61",
+        "AC-64",
+        "AC-65",
+        "AC-68",
+        "AC-70",
+        "AC-71",
+        "AC-72",
+        "AC-73",
+        "AC-76",
+        "AC-78",
+        "AC-94"
+      ],
+      "X": [
+        "AC-23",
+        "AC-25",
+        "AC-28",
+        "AC-30",
+        "AC-32",
+        "AC-33",
+        "AC-34",
+        "AC-35",
+        "AC-72",
+        "AC-80"
+      ]
+    },
+    "groupDefinitions": {
+      "E": "existing assertion/current evidence",
+      "A": "missing automated assertion or mode binding",
+      "I": "missing implementation",
+      "Q": "native/manual/environment qualification",
+      "X": "external or owner prerequisite"
+    },
+    "groupsOverlap": true,
+    "release": {
+      "status": "blocked",
+      "reason": "Legacy release guard and unexecuted normative modes remain; evidence grants no release authority."
+    }
+  },
+  "coverage": {
+    "status": "passed",
+    "productionInputs": 97,
+    "totals": {
+      "lines": {
+        "total": 2247,
+        "covered": 2235,
+        "skipped": 0,
+        "pct": 99.46
+      },
+      "statements": {
+        "total": 3628,
+        "covered": 3535,
+        "skipped": 0,
+        "pct": 97.43
+      },
+      "functions": {
+        "total": 888,
+        "covered": 866,
+        "skipped": 0,
+        "pct": 97.52
+      },
+      "branches": {
+        "total": 2311,
+        "covered": 2194,
+        "skipped": 0,
+        "pct": 94.93
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "scopes": {
+      "production": {
+        "lines": {
+          "total": 2247,
+          "covered": 2235,
+          "pct": 99.46595460614152
+        },
+        "statements": {
+          "total": 3628,
+          "covered": 3535,
+          "pct": 97.43660418963616
+        },
+        "functions": {
+          "total": 888,
+          "covered": 866,
+          "pct": 97.52252252252252
+        },
+        "branches": {
+          "total": 2311,
+          "covered": 2194,
+          "pct": 94.93725659887495
+        }
+      },
+      "domainApplicationFeatures": {
+        "lines": {
+          "total": 1171,
+          "covered": 1170,
+          "pct": 99.91460290350128
+        },
+        "statements": {
+          "total": 1872,
+          "covered": 1833,
+          "pct": 97.91666666666667
+        },
+        "functions": {
+          "total": 444,
+          "covered": 439,
+          "pct": 98.87387387387388
+        },
+        "branches": {
+          "total": 1389,
+          "covered": 1339,
+          "pct": 96.40028797696185
+        }
+      }
+    }
+  },
+  "maintainability": {
+    "report": "reports/maintainability/2026-09-23T21-11-54-340Z/report.json",
+    "sha256": "6027a1f5ed40a51ef2ba13e8e88fd44aa62cb0e96ae2c0f6ba5ba80722d1574a",
+    "status": "passed",
+    "policy": {
+      "version": 1,
+      "cyclomatic": 10,
+      "cognitive": 15,
+      "duplication": 3,
+      "minTokens": 50,
+      "minLines": 5,
+      "mode": "mild",
+      "ignoreImports": true,
+      "production": "every src JS/TS/Vue file, including generated consumers"
+    },
+    "productionInputs": 97,
+    "functions": 801,
+    "functionFindings": [],
+    "templateUnits": 9,
+    "templateFindings": [
+      {
+        "path": "src/presentation/components/panels/DocumentPanel.vue",
+        "name": "<template>",
+        "line": 14,
+        "cyclomatic": 29,
+        "cognitive": 18
+      },
+      {
+        "path": "src/presentation/components/panels/ItemsPanel.vue",
+        "name": "<template>",
+        "line": 12,
+        "cyclomatic": 24,
+        "cognitive": 25
+      },
+      {
+        "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
+        "name": "<template>",
+        "line": 10,
+        "cyclomatic": 20,
+        "cognitive": 19
+      },
+      {
+        "path": "src/presentation/components/ShowcaseApp.vue",
+        "name": "<template>",
+        "line": 18,
+        "cyclomatic": 13,
+        "cognitive": 18
+      }
+    ],
+    "duplication": {
+      "eligibleLines": 4393,
+      "duplicatedLines": 33,
+      "percentage": 0.7511950830867289
+    },
+    "scope": "Production thresholds block. Tooling, fixtures and removal templates are separate measured diagnostic views; CSS/markup/data are inventoried without function/clone qualification.",
+    "readOnlyCheck": {
+      "command": "node scripts/quality/check-maintainability.mjs --check <retained-report-directory>",
+      "status": "passed",
+      "scope": "Current matching source inventory, policy, tool identity, raw and per-input metric receipts; no metrics rerun."
+    }
+  },
+  "native": {
+    "scope": [
+      "Not a new native execution or trusted producer packet. No host launched; retained evidence read-only.",
+      "Page errors observable only while CDP connected; close receipts do not establish postdisconnect renderer behavior.",
+      "No cleanup failure recorded is original driver output, not independent process inventory.",
+      "Later qualification does not explain or erase earlier Windows theme or Linux illegal-access failures.",
+      "Separate performance session is shared-runner advisory, not controlled reference.",
+      "Earlier e14 audit remains separately retained; none of its executions are relabeled as e2758ae."
+    ],
+    "reports": [
+      {
+        "file": "reports/native-run-1/report.json",
+        "bytes": 12197,
+        "sha256": "0a0a7e803ff392f51f4a5f17ce7c972b8344d24f0abcd0f70a4dd7f5c2c47994",
+        "attempt": "2026-09-23T21-18-12.492Z-22665",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "status": "passed",
+        "checkCount": 31,
+        "rendererErrorCount": 0,
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "targetApp": "1.13.7",
+        "launcherVersion": "3.2.1",
+        "resolvedVersions": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "installedAssets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "eventCount": 27,
+          "kindCounts": [
+            {
+              "kind": "observer-disposed",
+              "count": 1
+            },
+            {
+              "kind": "page-close",
+              "count": 5
+            },
+            {
+              "kind": "page-observed",
+              "count": 5
+            },
+            {
+              "kind": "phase",
+              "count": 16
+            }
+          ],
+          "observedPageIds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "closedPageIds": [
+            3,
+            1,
+            2,
+            4,
+            5
+          ],
+          "phaseSequence": [
+            "initial-smoke",
+            "native-items",
+            "native-items-controlled-adapter-ownership",
+            "native-repository",
+            "native-modal-services",
+            "native-debugging",
+            "native-headers",
+            "theme-transitions",
+            "popout-create",
+            "popout-toggle",
+            "popout-theme",
+            "popout-close",
+            "plugin-unload",
+            "native-settings",
+            "cold-restart",
+            "cleanup"
+          ],
+          "lastKind": "observer-disposed",
+          "lastPhase": "cleanup",
+          "monotonicAndUtcOrderVerified": true
+        },
+        "hostLog": {
+          "file": "reports/native-run-1/attempts/2026-09-23T21-18-12.492Z-22665/host.log",
+          "bytes": 910,
+          "sha256": "e94e14bbbbe9300d978fc31c5ce514e8cf9c085d626047d7414549d5e846dbb8"
+        }
+      },
+      {
+        "file": "reports/native-run-2/report.json",
+        "bytes": 12194,
+        "sha256": "9f88ec23dbdd5715b068c4b561865126d8449f485999079616f583e55cb74759",
+        "attempt": "2026-09-23T21-18-39.343Z-22944",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "status": "passed",
+        "checkCount": 31,
+        "rendererErrorCount": 0,
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "targetApp": "1.13.7",
+        "launcherVersion": "3.2.1",
+        "resolvedVersions": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "installedAssets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "eventCount": 27,
+          "kindCounts": [
+            {
+              "kind": "observer-disposed",
+              "count": 1
+            },
+            {
+              "kind": "page-close",
+              "count": 5
+            },
+            {
+              "kind": "page-observed",
+              "count": 5
+            },
+            {
+              "kind": "phase",
+              "count": 16
+            }
+          ],
+          "observedPageIds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "closedPageIds": [
+            3,
+            1,
+            2,
+            4,
+            5
+          ],
+          "phaseSequence": [
+            "initial-smoke",
+            "native-items",
+            "native-items-controlled-adapter-ownership",
+            "native-repository",
+            "native-modal-services",
+            "native-debugging",
+            "native-headers",
+            "theme-transitions",
+            "popout-create",
+            "popout-toggle",
+            "popout-theme",
+            "popout-close",
+            "plugin-unload",
+            "native-settings",
+            "cold-restart",
+            "cleanup"
+          ],
+          "lastKind": "observer-disposed",
+          "lastPhase": "cleanup",
+          "monotonicAndUtcOrderVerified": true
+        },
+        "hostLog": {
+          "file": "reports/native-run-2/attempts/2026-09-23T21-18-39.343Z-22944/host.log",
+          "bytes": 910,
+          "sha256": "3bc0147254a4a7aa68dfa65d5fd7b1e02482d7823664742c996005d94089a225"
+        }
+      },
+      {
+        "file": "reports/native-run-3/report.json",
+        "bytes": 12192,
+        "sha256": "21bcc9ecd253a3aa96caab345d3f7002416241c8c966a8d646a461af20a8e4fd",
+        "attempt": "2026-09-23T21-19-02.161Z-23215",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "status": "passed",
+        "checkCount": 31,
+        "rendererErrorCount": 0,
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "targetApp": "1.13.7",
+        "launcherVersion": "3.2.1",
+        "resolvedVersions": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "installedAssets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "eventCount": 27,
+          "kindCounts": [
+            {
+              "kind": "observer-disposed",
+              "count": 1
+            },
+            {
+              "kind": "page-close",
+              "count": 5
+            },
+            {
+              "kind": "page-observed",
+              "count": 5
+            },
+            {
+              "kind": "phase",
+              "count": 16
+            }
+          ],
+          "observedPageIds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "closedPageIds": [
+            3,
+            1,
+            2,
+            4,
+            5
+          ],
+          "phaseSequence": [
+            "initial-smoke",
+            "native-items",
+            "native-items-controlled-adapter-ownership",
+            "native-repository",
+            "native-modal-services",
+            "native-debugging",
+            "native-headers",
+            "theme-transitions",
+            "popout-create",
+            "popout-toggle",
+            "popout-theme",
+            "popout-close",
+            "plugin-unload",
+            "native-settings",
+            "cold-restart",
+            "cleanup"
+          ],
+          "lastKind": "observer-disposed",
+          "lastPhase": "cleanup",
+          "monotonicAndUtcOrderVerified": true
+        },
+        "hostLog": {
+          "file": "reports/native-run-3/attempts/2026-09-23T21-19-02.161Z-23215/host.log",
+          "bytes": 910,
+          "sha256": "7ca20146397c9c66d034f21af8319134d02e96445e46d61a1c960a44e261fb71"
+        }
+      },
+      {
+        "file": "reports/native/report.json",
+        "bytes": 47014,
+        "sha256": "0e88a7d812279ebc0ac340807f5acb8dc3ad16b51d447c4609e7a83fb4af242d",
+        "attempt": "2026-09-23T21-19-24.266Z-23469",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "status": "passed",
+        "checkCount": 31,
+        "rendererErrorCount": 0,
+        "cleanupFailure": null,
+        "scratchPreserved": false,
+        "targetApp": "1.13.7",
+        "launcherVersion": "3.2.1",
+        "resolvedVersions": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "assets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "installedAssets": [
+          {
+            "file": "main.js",
+            "sha256": "d2f069ec4b4352b9794f9907a6b9988ee42c57359785a8fc8c81e4bdadd330ef"
+          },
+          {
+            "file": "styles.css",
+            "sha256": "3a09390ad8f4570c6b9947bd0c9231075ae5357dbf14ade4387bc5d7ac8316e7"
+          },
+          {
+            "file": "manifest.json",
+            "sha256": "84c725b25a67053a3ca5652b0111270ba5e3b3d4ff7f06f870352a2ff2018380"
+          }
+        ],
+        "timeline": {
+          "schemaVersion": 1,
+          "clock": "driver Date/performance.now receipt time; not renderer throw time",
+          "eventCount": 27,
+          "kindCounts": [
+            {
+              "kind": "observer-disposed",
+              "count": 1
+            },
+            {
+              "kind": "page-close",
+              "count": 5
+            },
+            {
+              "kind": "page-observed",
+              "count": 5
+            },
+            {
+              "kind": "phase",
+              "count": 16
+            }
+          ],
+          "observedPageIds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "closedPageIds": [
+            3,
+            1,
+            2,
+            4,
+            5
+          ],
+          "phaseSequence": [
+            "initial-smoke",
+            "native-items",
+            "native-items-controlled-adapter-ownership",
+            "native-repository",
+            "native-modal-services",
+            "native-debugging",
+            "native-headers",
+            "theme-transitions",
+            "popout-create",
+            "popout-toggle",
+            "popout-theme",
+            "popout-close",
+            "plugin-unload",
+            "native-settings",
+            "cold-restart",
+            "cleanup"
+          ],
+          "lastKind": "observer-disposed",
+          "lastPhase": "cleanup",
+          "monotonicAndUtcOrderVerified": true
+        },
+        "hostLog": {
+          "file": "reports/native/attempts/2026-09-23T21-19-24.266Z-23469/host.log",
+          "bytes": 910,
+          "sha256": "e5576a53745e0e1dc663f93a85cc89aa6adeb6a6a7a65df7a9519473a7c8d952"
+        }
+      }
+    ],
+    "packets": [
+      {
+        "id": "7a2f643b-322a-46b4-bcea-c7aae7d2eced",
+        "status": "passed",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
+        "unchangedBeforeAfter": true,
+        "exitCode": 0,
+        "retry": 0,
+        "rawNative": {
+          "file": "raw-native.txt",
+          "bytes": 12197,
+          "sha256": "0a0a7e803ff392f51f4a5f17ce7c972b8344d24f0abcd0f70a4dd7f5c2c47994"
+        }
+      },
+      {
+        "id": "89ea2fea-bd46-4660-be2d-fb580ad99f97",
+        "status": "passed",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
+        "unchangedBeforeAfter": true,
+        "exitCode": 0,
+        "retry": 0,
+        "rawNative": {
+          "file": "raw-native.txt",
+          "bytes": 12194,
+          "sha256": "9f88ec23dbdd5715b068c4b561865126d8449f485999079616f583e55cb74759"
+        }
+      },
+      {
+        "id": "d6350ac1-ccb1-49e2-97b5-f852890da9ed",
+        "status": "passed",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
+        "unchangedBeforeAfter": true,
+        "exitCode": 0,
+        "retry": 0,
+        "rawNative": {
+          "file": "raw-native.txt",
+          "bytes": 12192,
+          "sha256": "21bcc9ecd253a3aa96caab345d3f7002416241c8c966a8d646a461af20a8e4fd"
+        }
+      }
+    ],
+    "uniqueAttempts": 4,
+    "performance": {
+      "file": "reports/native/attempts/2026-09-23T21-19-24.266Z-23469/performance.json",
+      "bytes": 32442,
+      "sha256": "cbeb2be17a6bce2967d0adda810fd88ca1bc81dc3991d948777c9bbdce8f96be",
+      "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+      "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
+      "status": "passed",
+      "classification": "shared-runner",
+      "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
+      "protocol": {
+        "schemaVersion": 1,
+        "warmups": 3,
+        "samples": 30,
+        "clock": "renderer performance.now()",
+        "percentile": "nearest-rank: sorted[ceil(0.95 * n) - 1]",
+        "itemCount": 100,
+        "initialization": "Immediately before await plugins.enablePlugin(id), after awaited disable; finish after runtime registration and empty diagnostics; excludes host startup and unload.",
+        "readiness": "Immediately before workspace.getLeaf(tab).setViewState; finish after Documents click, 100 exact fixture labels, aria-busy=false and two animation frames; includes mount, query, render and paint opportunity.",
+        "fixture": "100 stable-ID plugin-data item records, labels Reference item 001 through 100; schema 1; collection revision 100; each record revision 1.",
+        "policy": "Three retained warmups then 30 sequential samples per metric; no retries, outlier removal or early readiness marker. Correctness failures abort and retain partial results.",
+        "budgets": {
+          "warm-initialization": 200,
+          "items-readiness": 500
+        }
+      },
+      "environment": {
+        "platform": "linux",
+        "release": "6.17.0-1022-azure",
+        "arch": "x64",
+        "cpus": [
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "totalMemory": 16766414848,
+        "node": "v24.21.0",
+        "playwright": "1.63.0",
+        "host": [
+          "1.13.7",
+          "1.13.7"
+        ],
+        "launcher": "3.2.1",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+        "viewport": {
+          "width": 1912,
+          "height": 1076,
+          "devicePixelRatio": 1,
+          "visibility": "visible"
+        },
+        "isolation": "Shared-runner diagnostic; timing budgets are advisory."
+      },
+      "sampleCount": 66,
+      "everyDurationRecomputed": true,
+      "metrics": [
+        {
+          "kind": "warm-initialization",
+          "total": 33,
+          "warmups": 3,
+          "measured": 30,
+          "failed": 0,
+          "indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "p95Ms": 16.099999999976717,
+          "minMeasuredMs": 5.699999999953434,
+          "maxMeasuredMs": 16.79999999993015,
+          "reported": {
+            "kind": "warm-initialization",
+            "samples": 30,
+            "p95Ms": 16.099999999976717,
+            "budgetMs": 200,
+            "withinProposedBudget": true
+          }
+        },
+        {
+          "kind": "items-readiness",
+          "total": 33,
+          "warmups": 3,
+          "measured": 30,
+          "failed": 0,
+          "indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "p95Ms": 102.30000000004657,
+          "minMeasuredMs": 79.80000000004657,
+          "maxMeasuredMs": 140.40000000002328,
+          "reported": {
+            "kind": "items-readiness",
+            "samples": 30,
+            "p95Ms": 102.30000000004657,
+            "budgetMs": 500,
+            "withinProposedBudget": true
+          }
+        }
+      ]
+    },
+    "historicalFailureChecks": [
+      {
+        "file": "../executable-qualification/reports/native/attempts/2026-09-23T17-31-48.785Z-14636/report.json",
+        "sha256": "662b8887b65cadc5ab13b4dc44b20485de4786b55ee1d2b213b50593b0658cd6",
+        "unchanged": true,
+        "status": "failed"
+      },
+      {
+        "file": "../executable-qualification/reports/ci-79d6688-full-35895304729/reports/native/attempts/2026-09-23T17-31-26.151Z-20961/report.json",
+        "sha256": "8294aafd39fd317fabe6119c7a9a7bf36cf780ea58c7d8921ba4ac1b0a59dfe7",
+        "unchanged": true,
+        "status": "failed"
+      }
+    ]
+  },
+  "security": {
+    "status": "passed",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "node": "v24.21.0",
+    "jsonExit": 0,
+    "ordinaryExit": 0,
+    "capturedAt": "2026-09-23T21:19:58.018Z"
+  },
+  "archiveInventory": [
+    {
+      "file": "reports/acceptance-closure/qualified-e2758ae.zip",
+      "sha256": "5507416317b61a7524587f2a91e47fbe0593e05f058f850b420f0b583b3232a7",
+      "entries": 1365,
+      "fontEntries": []
+    },
+    {
+      "file": "reports/acceptance-closure/qualified-e2758ae/reports/candidate-qualification/candidate-source.zip",
+      "sha256": "1bdd700c987e293878eccee2fbc8fa032a19d0c43efde5388c99a772583b8f93",
+      "entries": 610,
+      "fontEntries": []
+    },
+    {
+      "file": "reports/acceptance-closure/qualified-e2758ae/candidate-plugin.zip",
+      "sha256": "39f44412a4e2cc3f2ba9bbbe8428806cee58d57f663ae51c48251267b6c6f7b9",
+      "entries": 4,
+      "fontEntries": []
+    }
+  ],
+  "qualificationLimits": [
+    "Separate Windows setup-matrix UI-03-04 timeout remains unresolved after one non-reproducing bounded diagnostic; the Linux session does not erase it.",
+    "Prior native failures remain unresolved; no runtime fix or current Windows native execution is claimed.",
+    "Production Vue template aggregates remain separate from source-function limits.",
+    "Unsupported nested ESLint graph, manual/device breadth and owner-authorized release operations remain open.",
+    "Prior Windows archive-fixture EBUSY remains unexplained; corrected command/error receipts establish diagnostic preservation, not a root-cause fix."
+  ],
+  "archiveCommandAudit": {
+    "schemaVersion": 1,
+    "status": "audited",
+    "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+    "scope": "Read-only retained Linux archive-analyzer command receipts; no rerun and no explanation of historical Windows EBUSY.",
+    "attempts": [
+      {
+        "id": "c6138f4d-79fe-42da-87fd-758c8b152dd6",
+        "reportSha256": "367115633e835c8cea6c58f6d70431635e4ec942f3ab8a1afe52cb963ceea25c",
+        "workStatus": "passed",
+        "bodyCompleted": true,
+        "cleanupStatus": "passed",
+        "receipts": [
+          {
+            "index": 1,
+            "file": "git",
+            "args": [
+              "init",
+              "--quiet"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 6.051351999999952,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "352e31cf86648b0ec5205ff11848342102ba6110bf25610b75b9032665695e09",
+            "resultSha256": "f0b77adfe78730d0cfa0c97e44c0ba167bd62fa5292ee57df6f86e49f909b7d7"
+          },
+          {
+            "index": 2,
+            "file": "git",
+            "args": [
+              "-c",
+              "core.autocrlf=false",
+              "add",
+              "--all"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 105.368832,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "7da059a1d0a5468aad89320e6ecef7ce1a6aefc7ffef603917d11dc42e6e1725",
+            "resultSha256": "ee91bc3d38381beb769ecddeb6aefbe0d4ab94ce99fe78429c2333f3cfdd8d21"
+          },
+          {
+            "index": 3,
+            "file": "git",
+            "args": [
+              "write-tree"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 15.851162000000045,
+            "stdoutBytes": 41,
+            "stderrBytes": 0,
+            "startedSha256": "d7daa13326c454d4e15823335dcc9ed6291d0b2bb0908a644a96f71dc1da7d8a",
+            "resultSha256": "7f4e8f10d12d556ab53c49aed897b8905eacb30218e3485f6b8f4330a50db3f5"
+          },
+          {
+            "index": 4,
+            "file": "git",
+            "args": [
+              "archive",
+              "--format=tar",
+              "--output=/tmp/analyzer-archive-5mXVpo/source.tar",
+              "e086d95f23043b162db05cd293038bb06c305c60"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 32.77882499999998,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "5856a8e0555a9d3fd1234fe565ceb43698f8cb0ba384e67f7c4ec41cd8656557",
+            "resultSha256": "36b742f04ae92fa5f57dc5d4e5e5a0600a61935ec49596f3c2fca26f31334711"
+          },
+          {
+            "index": 5,
+            "file": "tar",
+            "args": [
+              "-xf",
+              "/tmp/analyzer-archive-5mXVpo/source.tar",
+              "-C",
+              "/tmp/analyzer-archive-5mXVpo/extracted"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 17.89435100000003,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "45db359a259a965f65dab69d7e25819fad6f85d992b1e6ac18fb149aa46b1c26",
+            "resultSha256": "cbb4e3cf6f461cded2340e1234b89959cf779cbe1cd0318fa022f9d988b72b9b"
+          },
+          {
+            "index": 6,
+            "file": "git",
+            "args": [
+              "rev-parse",
+              "--show-toplevel"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 128,
+            "durationMs": 3.0558619999999337,
+            "stdoutBytes": 0,
+            "stderrBytes": 69,
+            "startedSha256": "cde6dcaaca3130cfcf7e3b306c2f9f61f5f52c3f27f9f3678821ebb877b32bb3",
+            "resultSha256": "62daa75b58153b9c1d6c7ea0fff4b17504d923e7e6374d583926ac1edb8ef89b"
+          },
+          {
+            "index": 7,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 325.8995319999999,
+            "stdoutBytes": 100,
+            "stderrBytes": 0,
+            "startedSha256": "2e73363777d5d413340d0a7c52235c830559cf2a899b75a8a5ea9b53302d33fa",
+            "resultSha256": "c10cf09ba601d4768548ff7ba189b4a4df33eba652c1299b5cb70f617e6ab87d"
+          },
+          {
+            "index": 8,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 1,
+            "durationMs": 264.552553,
+            "stdoutBytes": 0,
+            "stderrBytes": 3147,
+            "startedSha256": "67d3065d17dc24f0fde9f9064834635cdd658115878e88486c090c6c797b965b",
+            "resultSha256": "9f1131871f7cc163ceb53551a2cf8d6a9ecfeb8c769c17037cea3961fc478920"
+          },
+          {
+            "index": 9,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 1,
+            "durationMs": 274.25939900000003,
+            "stdoutBytes": 0,
+            "stderrBytes": 3251,
+            "startedSha256": "594323b6cf9be93f3efd01926e26f69303151b9e43716bda19da4e004be436a7",
+            "resultSha256": "603a5c621babd0b177da002bad48260b86c7fa0f06665963fa9a3030a1392b65"
+          },
+          {
+            "index": 10,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 243.33399000000009,
+            "stdoutBytes": 100,
+            "stderrBytes": 0,
+            "startedSha256": "da4d3ac0b0fb9e85ce8207bfbda5328fbd3005a5439a756bba971adb6f3e7806",
+            "resultSha256": "f7ff470c88e7f7da87320c2b7097632f240d3285cb4c7a3931f23cbdc81bc026"
+          }
+        ]
+      }
+    ]
+  },
+  "previousMilestoneCheckpoints": {
+    "qualifiedCode": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+    "evidenceOnly": "7a292e40dde61dc6ea4134caa9b5b88093fc3cb7",
+    "candidateAudit": "acceptance-closure-e14c1c3-candidate.json",
+    "consumerAudit": "acceptance-closure-e14c1c3-consumer.json"
+  },
+  "codeHeadChecks": {
+    "headRefOid": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+    "baseRefName": "main",
+    "checks": [
+      {
+        "name": "candidate",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589427/job/107383236064"
+      },
+      {
+        "name": "Baseline / ubuntu-latest",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593871/job/107383248020"
+      },
+      {
+        "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248576"
+      },
+      {
+        "name": "Showcase / ubuntu-latest",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593968/job/107383248554"
+      },
+      {
+        "name": "renamed-feature",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593882/job/107383248029"
+      },
+      {
+        "name": "renamed-feature",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589679/job/107383233118"
+      },
+      {
+        "name": "Baseline / windows-latest",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593871/job/107383247901"
+      },
+      {
+        "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248840"
+      },
+      {
+        "name": "Showcase / windows-latest",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593968/job/107383248059"
+      },
+      {
+        "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248481"
+      },
+      {
+        "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248722"
+      },
+      {
+        "name": "GitGuardian Security Checks",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://dashboard.gitguardian.com"
+      }
+    ]
+  }
+}

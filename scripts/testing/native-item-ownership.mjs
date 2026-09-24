@@ -1,3 +1,4 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -21,7 +22,7 @@ export function installItemBoundary(id) {
 }
 /** Actual native views with explicitly controlled persistence boundaries; injected failures are not native disk evidence. */
 export async function qualifyItemOwnership(page, report, output, vault, identity) {
-  report.phase = 'native-items-controlled-adapter-ownership';
+  noteNativePhase(report, 'native-items-controlled-adapter-ownership');
   report.itemOwnership = { mode: 'controlled-adapter-in-native-host', nativeDiskFailure: false, status: 'running' };
   let failed = false;
   const path = join(vault, identity.pluginDirectory, 'data.json'); const originalBytes = await readFile(path);

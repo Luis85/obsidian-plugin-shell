@@ -25,6 +25,7 @@ const testApi: HarnessApi = {
   mountSecond() { if (!second && !disposed) second = mountHarnessLeaf(workspace, services, 'secondary'); },
   closeSecond,
   resourceCount: () => services.events.size, files: adapter.files, faults: adapter.errors, fault: adapter.fault,
+  resources: () => ({ ...adapter.resources(), subscriptions: services.events.size, leaves: Number(!disposed) + Number(!!second) }),
   leafWidth(width) { primary.frame.style.flex = width === undefined ? '' : 'none'; primary.frame.style.width = width === undefined ? '' : `${width}px`; },
   async setPreferences(patch) { return (await services.preferences.update(patch)).ok; },
   async toggleHeader() { return (await services.preferences.toggleViewHeader()).ok; },

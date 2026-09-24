@@ -44,6 +44,14 @@ Browser state is now a schema-2 singleton under `shell-workbench-single-vault-v2
 
 Native implementation will use one Project.md descriptor and Markdown entities in project-owned folders. The browser's virtual file map and project-note export demonstrate that contract but **do not write native vault files or form an installable template**. Recovery exports can contain private paths and notes; do not enter secrets. Export covers committed state, not unsubmitted modal drafts. Observed storage conflicts are blocked without claiming atomic cross-window locking.
 
+## Test data and Design System
+
+**Design → Test data** derives operation recipes from Data Sources and shared entity shapes. Preview deterministic fixtures, try the isolated in-memory behavior, and export a runnable Node kit with safe `.test-vault` seeding/reset, a loopback API server/client and database-style memory ports. Build/install explicitly with `npm run build:local -- --vault .test-vault`; native activation and application-port wiring remain explicit. See [TEST-DATA.md](TEST-DATA.md).
+
+**Design → Design System** describes font roles/stacks, typography, spacing, sizes, radii, light/dark colors and usage guidelines. Export saved declarations to Markdown or a self-contained HTML style guide. No font binaries, remote requests or automatic host-theme changes. See [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md).
+
+The browser remains a concept, but its downloaded test-data kit is executable tooling. The kit is isolated from production imports, includes no live endpoint or credential configuration, and defaults to a dry plan. Its real filesystem/HTTP tests are separate from UI and native-host acceptance. See [TEST-DATA-DESIGN-VERIFICATION.md](TEST-DATA-DESIGN-VERIFICATION.md).
+
 ## Source and verification
 
 Edit [src](src), not generated HTML. From repository root:
@@ -52,14 +60,15 @@ Edit [src](src), not generated HTML. From repository root:
 python3 -B scripts/concepts/build-companion.py
 python3 -B scripts/concepts/build-companion.py --check
 python3 -B tests/concepts/companion-assembly.test.py
+node --test tests/tooling/test-data-*.checks.mjs
 CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py
 # Require actual browser Storage, loopback HTTP and two pages as well:
 CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
-The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suite uses HTML injection and explicit controlled-storage fixtures because this environment blocks direct loopback navigation. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
+The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suites use HTML injection and explicit controlled-storage fixtures; actual-origin storage is a separately reported suite. Exported-kit filesystem and loopback HTTP tests are separate executable-tooling evidence. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-The builder and Fallow inventory agree on **86 exact inputs: 66 maintained JS, 15 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
+The builder and Fallow inventory agree on **103 exact inputs: 74 maintained JS, 17 maintained CSS, 7 test-kit ES modules and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 

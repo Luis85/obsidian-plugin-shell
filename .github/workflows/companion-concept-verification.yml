@@ -5,6 +5,7 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'tests/concepts/**'
+      - 'tests/tooling/test-data-*'
       - '.fallowrc.json'
       - 'scripts/quality/maintainability-inventory.mjs'
       - 'tests/tooling/maintainability.checks.mjs'
@@ -15,6 +16,7 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'tests/concepts/**'
+      - 'tests/tooling/test-data-*'
       - '.fallowrc.json'
       - 'scripts/quality/maintainability-inventory.mjs'
       - 'tests/tooling/maintainability.checks.mjs'
@@ -70,6 +72,8 @@ jobs:
           done
           test "$count" -gt 0
           echo "Syntax checked $count concept modules. Browser and native evidence are separate."
+      - name: Exercise real test-data generators, file safety and loopback adapters
+        run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |

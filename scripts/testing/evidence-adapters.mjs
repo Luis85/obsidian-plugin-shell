@@ -1,3 +1,4 @@
+import { validateNativeDiagnostics } from './native-diagnostic-validation.mjs';
 import { relative, resolve } from 'node:path';
 
 export function object(value, keys, code = 'EVIDENCE_SCHEMA') {
@@ -108,8 +109,9 @@ function assetRecords(assets, requireBytes = false) {
   return assets;
 }
 export function nativeReport(raw, expectedChecks) {
-  object(raw, ['mode', 'status', 'sourceCommit', 'targetApp', 'attemptDirectory', 'assets', 'checks', 'errors', 'identity', 'launcherVersion', 'resolvedVersions', 'window', 'installedAssets', 'userAgent', 'headerContract', 'themeTransitions', 'phase', 'reason', 'themeFailure', 'nativeControlLabels', 'visibleText', 'cleanupFailure', 'scratchPreserved', 'profile', 'generatedViewCommands', 'repository', 'items', 'itemOwnership', 'performance']);
+  object(raw, ['mode', 'status', 'sourceCommit', 'targetApp', 'attemptDirectory', 'assets', 'checks', 'errors', 'identity', 'launcherVersion', 'resolvedVersions', 'window', 'installedAssets', 'userAgent', 'headerContract', 'themeTransitions', 'phase', 'reason', 'themeFailure', 'nativeControlLabels', 'visibleText', 'cleanupFailure', 'scratchPreserved', 'profile', 'generatedViewCommands', 'repository', 'items', 'itemOwnership', 'performance', 'nativeDiagnostics']);
   if (raw.mode !== 'native-obsidian' || !Array.isArray(raw.checks) || !Array.isArray(raw.errors) || !Array.isArray(raw.assets)) throw new Error('EVIDENCE_NATIVE');
+  validateNativeDiagnostics(raw);
   assetRecords(raw.assets); assetRecords(raw.installedAssets);
   if (new Set(raw.checks).size !== raw.checks.length || JSON.stringify([...raw.checks].sort()) !== JSON.stringify([...expectedChecks].sort())) throw new Error('EVIDENCE_NATIVE_CHECKS');
   if (raw.launcherVersion !== '3.2.1' || raw.targetApp !== '1.13.7' || !Array.isArray(raw.resolvedVersions) || raw.resolvedVersions.length !== 2 || !Array.isArray(raw.installedAssets) || raw.assets.length !== 3 || raw.installedAssets.length !== 3 || raw.assets.some(asset => !raw.installedAssets.some(installed => installed.file === asset.file && installed.sha256 === asset.sha256))) throw new Error('EVIDENCE_NATIVE_IDENTITY');

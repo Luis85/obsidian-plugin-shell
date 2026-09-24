@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "kind": "unresolved-hosted-timeout-and-bounded-diagnostic",
+  "status": "unresolved",
+  "sourceHead": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+  "checkoutCommit": "b5c0fd0d044cb83ef572310c6262a93007e53080",
+  "sourceTree": "a614a5d66a7e7e119d75d2deced65bd0aae4cd2a",
+  "checkoutTreeEqualsHead": true,
+  "failedRun": {
+    "id": 35913221327,
+    "jobId": 107358065660,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221327/job/107358065660",
+    "platform": "windows-latest",
+    "node": "24.21.0",
+    "npm": "11.19.1",
+    "stage": "full production coverage during fresh setup",
+    "test": "[UI-03-04] real preferences preserve drafts across external commits and save only edited fields",
+    "file": "tests/runtime/settings-components.test.ts",
+    "timeoutMs": 5000,
+    "counts": {
+      "passed": 311,
+      "failed": 1,
+      "total": 312
+    },
+    "log": {
+      "file": "reports/acceptance-closure/setup-windows-24-failed.log",
+      "bytes": 115736,
+      "sha256": "082a3a8b02ae9751e241322c7d3d6559c182e3e259999fbe633a52cd9da2a254"
+    }
+  },
+  "observations": [
+    "Earlier complete runtime/selected-core invocation in the same job passed 312 tests; the settings file took 530 ms.",
+    "The failing production settings file took 7478 ms; the first case exceeded 5000 ms and the following header-write case took 2073 ms.",
+    "New acceptance tests executed after the failed settings test in that process; file isolation remained enabled.",
+    "Other independent Windows jobs passed without explaining this failure."
+  ],
+  "diagnostic": {
+    "kind": "controlled-source-transform-diagnostic",
+    "startedAt": "2026-09-23T20:15:12.1909836Z",
+    "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+    "node": "v24.21.0",
+    "npm": "11.19.1",
+    "configSha256": "28650ed58137f165cecfed0be21f08f6e0d1c623d78d52351393428838e3a9b0",
+    "testTimeoutMs": 5000,
+    "sourceChanged": false,
+    "command": "node node_modules/vitest/vitest.mjs run --coverage --config reports/acceptance-closure/settings-diagnostic.config.mjs",
+    "interpretation": "Full production-coverage suite with report-only timing transforms; not frozen-candidate evidence or reproduction proof.",
+    "exitCode": 0,
+    "endedAt": "2026-09-23T20:17:35.6972995Z",
+    "scope": "Exactly one local full production-coverage run with report-only source transforms; no candidate acceptance or root-cause closure.",
+    "counts": {
+      "total": 312,
+      "passed": 312,
+      "failed": 0
+    },
+    "settingsTests": [
+      {
+        "title": "[UI-03-04] real preferences preserve drafts across external commits and save only edited fields",
+        "status": "passed",
+        "duration": 321.6609000000001
+      },
+      {
+        "title": "[UI-03-05] failed and slow header writes do not display uncommitted state",
+        "status": "passed",
+        "duration": 98.05899999999974
+      },
+      {
+        "title": "[UI-03-06] invalid preferences preserve committed values and readonly data disables every writer",
+        "status": "passed",
+        "duration": 121.23750000000018
+      },
+      {
+        "title": "[UI-03-07] closing a view during a save never creates feedback or revives its form",
+        "status": "passed",
+        "duration": 65.59069999999974
+      }
+    ],
+    "config": {
+      "file": "reports/acceptance-closure/settings-diagnostic.config.mjs",
+      "bytes": 3305,
+      "sha256": "28650ed58137f165cecfed0be21f08f6e0d1c623d78d52351393428838e3a9b0"
+    },
+    "reports": [
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/metadata.json",
+        "bytes": 696,
+        "sha256": "3c320fd41434e12c3b1f96fd723497665dbed821ba0c23175587db368b35f9b0"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/findings.json",
+        "bytes": 3758,
+        "sha256": "2ab0a1eaa56644ac164b2d4571facddc2a1b9305e7b0020372d9f573c3c12bd5"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/results.json",
+        "bytes": 1034568,
+        "sha256": "123366953425c83765c1d871d056f92b8f51cf74f4f342afcb483ebd3008d5b5"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/stages.json",
+        "bytes": 22946,
+        "sha256": "7422ad49fd2778640bca340c3819b02dd6dfd697016f719e160f4dbdc3789099"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/stage-summary.json",
+        "bytes": 19555,
+        "sha256": "9f1d3ee75414610ff2eabed19fbc315ba0251defe588d0253c21549868da4e3f"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/stdout.log",
+        "bytes": 92866,
+        "sha256": "ada968285e25277b81e9f5f85b91080161b57cea535107705d9e47321b33ada5"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "reports/acceptance-closure/settings-diagnostic/environment-sample.json",
+        "bytes": 178,
+        "sha256": "d30168adc64ac56a4ede52b83eec3d063e756770c39eac9b2aad717a28f7f0d5"
+      }
+    ]
+  },
+  "conclusion": "Hosted timeout not reproduced in one controlled full-suite run. No test or production correction is supported by available evidence. New acceptance tests executed after failed settings test in the original hosted production-coverage process; file isolation is enabled. Do not treat this transformed-source local run as frozen-candidate evidence or erase the failed CI result.",
+  "nextExperiment": "One separately bounded hosted-profile run with stage/resource observations and unchanged limits; retain its first outcome. No speculative runtime edit, timeout increase, isolation weakening or repeat-until-green is justified."
+}

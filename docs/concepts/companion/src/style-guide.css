@@ -1,0 +1,47 @@
+/* Design declarations preview locally; no authored value is assigned to :root. */
+.sg-workspace { min-width: 0; max-width: 1400px; margin: 0 auto; }
+.sg-workspace .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.sg-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 28px; margin-top: 16px; }
+.sg-navigation { display: flex; flex-direction: column; align-self: start; gap: 4px; }
+.sg-navigation > button { display: flex; align-items: center; justify-content: space-between; min-height: 38px; text-align: left; border: 1px solid transparent; border-radius: 6px; padding: 8px 12px; background: transparent; color: var(--text); cursor: pointer; }
+.sg-navigation > button:hover { background: var(--hover); border-color: var(--line); }
+.sg-navigation > button.selected { background: var(--accent-soft); color: var(--text); border-color: var(--accent); font-weight: 600; }
+.sg-navigation > button:active:not(:disabled) { background: var(--accent-soft); }
+.sg-navigation > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sg-navigation small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.sg-history { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+.sg-content { min-width: 0; border-left: 1px solid var(--line); padding-left: 28px; }
+.sg-content h2 { margin-top: 0; }
+.sg-content > h3 { margin-top: 28px; }
+.sg-content p { max-width: 75ch; }
+.sg-prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sg-empty { max-width: 750px; padding: 32px 0; }
+.sg-empty p { line-height: 1.6; }
+.sg-empty-list { border-top: 1px solid var(--line); padding: 28px 0; color: var(--muted); }
+.sg-entry { padding: 20px 0; border-top: 1px solid var(--line); }
+.sg-entry-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.sg-entry-heading h3 { margin: 0 0 6px; }
+.sg-entry-heading code { color: var(--muted); white-space: normal; overflow-wrap: anywhere; }
+.sg-entry > p { color: var(--muted); margin-bottom: 0; }
+.sg-sample { padding: 14px 0 4px; overflow: auto; max-width: 100%; }
+.sg-type-sample, .sg-font-sample { overflow-wrap: anywhere; }
+.sg-font-sample { font-size: 20px; margin-bottom: 8px; }
+.sg-swatches { display: flex; gap: 28px; flex-wrap: wrap; }
+.sg-swatches > div { display: flex; align-items: center; gap: 10px; }
+.sg-swatches > div > span { width: 44px; height: 44px; display: block; border: 1px solid var(--line); border-radius: 8px; }
+.sg-measure { height: 16px; min-width: 1px; max-width: 100%; background: var(--accent); margin-bottom: 8px; }
+.sg-radius { width: 96px; height: 60px; border: 2px solid var(--accent); }
+.sg-overview-preview { padding: 20px; border: 1px solid var(--line); border-radius: 12px; margin-top: 24px; overflow: auto; }
+.sg-overview-preview > span { display: block; color: var(--muted); margin-bottom: 16px; font-size: 12px; }
+.sg-overview-preview > div { margin-top: 12px; overflow-wrap: anywhere; }
+.sg-contrast { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 20px; }
+.sg-contrast > div > p { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; padding: 6px 0; margin: 0; }
+.sg-contrast strong { font-variant-numeric: tabular-nums; }
+.sg-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.sg-form-grid > *, .sg-form-grid input, .sg-form-grid select { min-width: 0; }
+.sg-draft-preview { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 16px; overflow: auto; }
+.sg-draft-preview:empty { display: none; }
+.sg-draft-preview > small { color: var(--muted); }
+.sg-draft-preview .sg-entry { border-top: 0; padding: 12px 0; }
+@media (max-width: 980px) { .sg-layout { grid-template-columns: 1fr; gap: 20px; } .sg-navigation { flex-direction: row; flex-wrap: wrap; gap: 6px; } .sg-navigation > button { gap: 10px; } .sg-history { border: 0; margin: 0; padding: 0; } .sg-content { border-left: 0; padding-left: 0; } }
+@media (max-width: 560px) { .sg-form-grid { grid-template-columns: 1fr; } .sg-workspace .page-heading .row { width: 100%; } .sg-workspace .page-heading .btn { flex: 1; } .sg-entry-heading { gap: 8px; } }

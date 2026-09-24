@@ -57,7 +57,7 @@ function handleVaultAction(action,value){
  if(action==='vault-legacy-export'){downloadText({text:modalData.snapshot,filename:'previous-workbench-recovery.json'});return true;}
  if(['nav','palette-nav','outline-start'].includes(action)&&!project()){
   const target=action==='outline-start'?'prds':value;
-  if(['prds','sitemap','entities','components','patterns','blueprints','prepare'].includes(target)){openVaultIdentity(target==='prepare'?'overview':target);return true;}
+  if(['prds','sitemap','entities','sources','testdata','designsystem','components','patterns','blueprints','prepare'].includes(target)){openVaultIdentity(target==='prepare'?'overview':target);return true;}
  }
  return false;
 }
