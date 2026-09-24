@@ -13,7 +13,7 @@ function validVaultFiles(files){
 function validVaultRelativePath(path){return typeof path==='string'&&path.length>0&&path.length<=240&&!path.startsWith('/')&&!/[\\\x00-\x1f:]/.test(path)&&path.split('/').every(part=>part&&part!=='.'&&part!=='..'&&!['__proto__','constructor','prototype'].includes(part));}
 function validVaultScope(s,validateProject){
  return s.schema===2&&s.vaultKey===CONCEPT_VAULT.key&&!['projects','activeId','designDraft'].some(k=>Object.hasOwn(s,k))&&validVaultFiles(s.vaultFiles)&&typeof s.legacyHandled==='boolean'&&
-  (s.project===null||(validateProject(s.project)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&[vaultTestRoot(),vaultRoot()+'/.dev-vault'].includes(s.project.vault)&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
+  (s.project===null||(validateProject(s.project)&&validCompanionProjectFolders(s.project.folders)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&[vaultTestRoot(),vaultRoot()+'/.dev-vault'].includes(s.project.vault)&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
 }
 function projectNoteText(p){return '---\ntype: obsidian-plugin-project\nschema: 1\nproject_id: '+JSON.stringify(p.key)+'\nplugin_id: '+JSON.stringify(p.id)+'\nname: '+JSON.stringify(p.name)+'\nsource_root: "."\ndesign_folder: "project"\n---\n\n# '+p.name+'\n\n'+p.description+'\n\nOne project in this vault. Design artifacts belong under `project/`.\n';}
 function projectIdentity(p){return JSON.stringify([p?.key,p?.id,p?.name,p?.author,p?.description,p?.version,p?.root,p?.vault,p?.config]);}

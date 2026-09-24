@@ -1,10 +1,16 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · product audit and workflow/recovery polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · full-project JSON, companion self-project and read-only shell handoff — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
-## Current product audit
+## Project JSON and companion self-project
+
+Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files.
+
+[PROJECT-JSON.md](PROJECT-JSON.md) explains the UI, seed content and limits; [companion-project.json](companion-project.json) is the importable self-project. The [shell contract](../../development/COMPANION-PROJECT-JSON.md) documents the command and safety boundary. This extends the existing single-project model, not a multi-project launcher.
+
+## Previous product audit
 
 [PRODUCT-AUDIT.md](PRODUCT-AUDIT.md) reviews eleven workflow steps and twelve product perspectives, records eighteen implemented corrections, and separates concept acceptance from shell qualification, native conversion and publication. [PRODUCT-AUDIT-VERIFICATION.md](PRODUCT-AUDIT-VERIFICATION.md) records exact-artifact verification and environment limits.
 

@@ -3,6 +3,7 @@ const openCommand = JSON.parse(readFileSync(new URL('../src/locales/en.json', im
 console.log(`Obsidian plugin template — available commands
 npm run setup             Review identity/profile, install exact dependencies and verify
 npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
+npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing
 npm run make -- --list    Discover integrated source recipes and their prerequisites
 npm run examples:remove -- --dry-run  Review optional-example removal without deleting user features
 npm run entities:check    Validate actual registered entity/document definitions

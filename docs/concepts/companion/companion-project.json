@@ -1,0 +1,4503 @@
+{
+  "kind": "obsidian-companion-project",
+  "schemaVersion": 1,
+  "executable": false,
+  "project": {
+    "id": "plugin-companion",
+    "name": "Plugin Companion",
+    "author": "Luis Mendez",
+    "version": "0.1.0",
+    "description": "Design one Obsidian plugin in its vault, describe its contracts and export a reviewed project to the independent shell."
+  },
+  "settings": {
+    "codebaseFolder": "src",
+    "testsFolder": "tests"
+  },
+  "design": {
+    "schema": 1,
+    "blueprint": "workspace",
+    "goal": "Help developers turn a plugin idea into a consistent, reviewable design and portable handoff without requiring build tools during discovery.",
+    "platform": "desktop",
+    "nodes": [
+      {
+        "id": "node-1",
+        "slug": "workbench",
+        "label": "Companion workbench",
+        "kind": "view",
+        "layout": "sidebar-left",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": true,
+        "entry": true,
+        "instance": "reuse",
+        "patterns": [
+          "open-view"
+        ],
+        "goal": "Open the one-vault workspace and retain the selected design context.",
+        "entity": "",
+        "intent": "Open the one-vault workspace and retain the selected design context.",
+        "goals": [
+          "Open the one-vault workspace and retain the selected design context."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "workflow-rail",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-2",
+            "kind": "heading",
+            "title": "Companion workbench",
+            "purpose": "Open the one-vault workspace and retain the selected design context.",
+            "content": "Open the one-vault workspace and retain the selected design context.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "navigation",
+            "title": "WorkflowRail",
+            "purpose": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
+            "content": "",
+            "region": "content",
+            "id": "brick-58",
+            "component": "workflow-rail",
+            "definition": "workflow-rail",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "navigation",
+              "title": "WorkflowRail",
+              "purpose": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-3",
+        "slug": "overview",
+        "label": "Project overview",
+        "kind": "page",
+        "layout": "dashboard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Understand the next useful action, review blockers and advisory findings.",
+        "entity": "er-entity-1",
+        "intent": "Understand the next useful action, review blockers and advisory findings.",
+        "goals": [
+          "Understand the next useful action, review blockers and advisory findings."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "review-findings",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-4",
+            "kind": "heading",
+            "title": "Project overview",
+            "purpose": "Understand the next useful action, review blockers and advisory findings.",
+            "content": "Understand the next useful action, review blockers and advisory findings.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "detail",
+            "title": "ReviewFindings",
+            "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
+            "content": "",
+            "region": "content",
+            "id": "brick-59",
+            "component": "review-findings",
+            "definition": "review-findings",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "ReviewFindings",
+              "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-5",
+        "slug": "requirements",
+        "label": "Product requirements",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Describe outcomes and verifiable acceptance criteria, then map them to screens and components.",
+        "entity": "er-entity-7",
+        "intent": "Describe outcomes and verifiable acceptance criteria, then map them to screens and components.",
+        "goals": [
+          "Describe outcomes and verifiable acceptance criteria, then map them to screens and components."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "requirements-panel",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-6",
+            "kind": "heading",
+            "title": "Product requirements",
+            "purpose": "Describe outcomes and verifiable acceptance criteria, then map them to screens and components.",
+            "content": "Describe outcomes and verifiable acceptance criteria, then map them to screens and components.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "table",
+            "title": "RequirementsPanel",
+            "purpose": "Capture requirements, acceptance, priority and screen/component traceability.",
+            "content": "",
+            "region": "content",
+            "id": "brick-61",
+            "component": "requirements-panel",
+            "definition": "requirements-panel",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "table",
+              "title": "RequirementsPanel",
+              "purpose": "Capture requirements, acceptance, priority and screen/component traceability.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-7",
+        "slug": "sitemap",
+        "label": "Sitemap & views",
+        "kind": "page",
+        "layout": "canvas",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Arrange native containers and internal screens; keep containment, navigation and data flows distinct.",
+        "entity": "er-entity-12",
+        "intent": "Arrange native containers and internal screens; keep containment, navigation and data flows distinct.",
+        "goals": [
+          "Arrange native containers and internal screens; keep containment, navigation and data flows distinct."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "diagram-inspector",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-8",
+            "kind": "heading",
+            "title": "Sitemap & views",
+            "purpose": "Arrange native containers and internal screens; keep containment, navigation and data flows distinct.",
+            "content": "Arrange native containers and internal screens; keep containment, navigation and data flows distinct.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "DiagramInspector",
+            "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+            "content": "",
+            "region": "content",
+            "id": "brick-62",
+            "component": "diagram-inspector",
+            "definition": "diagram-inspector",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "DiagramInspector",
+              "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-9",
+        "slug": "entities",
+        "label": "Entity relationships",
+        "kind": "page",
+        "layout": "canvas",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
+        "entity": "er-entity-22",
+        "intent": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
+        "goals": [
+          "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "diagram-inspector",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-10",
+            "kind": "heading",
+            "title": "Entity relationships",
+            "purpose": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
+            "content": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "DiagramInspector",
+            "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+            "content": "",
+            "region": "content",
+            "id": "brick-63",
+            "component": "diagram-inspector",
+            "definition": "diagram-inspector",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "DiagramInspector",
+              "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-11",
+        "slug": "sources",
+        "label": "Data Sources",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Describe vault, API and database ports, operations and payloads without contacting live services.",
+        "entity": "er-entity-27",
+        "intent": "Describe vault, API and database ports, operations and payloads without contacting live services.",
+        "goals": [
+          "Describe vault, API and database ports, operations and payloads without contacting live services."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "source-operation-editor",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-12",
+            "kind": "heading",
+            "title": "Data Sources",
+            "purpose": "Describe vault, API and database ports, operations and payloads without contacting live services.",
+            "content": "Describe vault, API and database ports, operations and payloads without contacting live services.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "SourceOperationEditor",
+            "purpose": "Describe operations and payloads; never collect live credentials.",
+            "content": "",
+            "region": "content",
+            "id": "brick-64",
+            "component": "source-operation-editor",
+            "definition": "source-operation-editor",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "SourceOperationEditor",
+              "purpose": "Describe operations and payloads; never collect live credentials.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-13",
+        "slug": "test-data",
+        "label": "Test Data",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
+        "entity": "er-entity-37",
+        "intent": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
+        "goals": [
+          "Configure seeded recipes, try isolated operations and export reviewed test tooling."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "test-operation-panel",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-14",
+            "kind": "heading",
+            "title": "Test Data",
+            "purpose": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
+            "content": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "TestOperationPanel",
+            "purpose": "Select an operation, run or cancel it, and separate live status from JSON results.",
+            "content": "",
+            "region": "content",
+            "id": "brick-65",
+            "component": "test-operation-panel",
+            "definition": "test-operation-panel",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "TestOperationPanel",
+              "purpose": "Select an operation, run or cancel it, and separate live status from JSON results.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-15",
+        "slug": "design-system",
+        "label": "Design System",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+        "entity": "er-entity-41",
+        "intent": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+        "goals": [
+          "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "design-token-editor",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-16",
+            "kind": "heading",
+            "title": "Design System",
+            "purpose": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+            "content": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "DesignTokenEditor",
+            "purpose": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
+            "content": "",
+            "region": "content",
+            "id": "brick-66",
+            "component": "design-token-editor",
+            "definition": "design-token-editor",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "DesignTokenEditor",
+              "purpose": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-17",
+        "slug": "components",
+        "label": "Component library",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
+        "entity": "er-entity-17",
+        "intent": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
+        "goals": [
+          "Describe reusable component contracts, content and named variants; review pinned upgrades."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "component-contract-panel",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-18",
+            "kind": "heading",
+            "title": "Component library",
+            "purpose": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
+            "content": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "detail",
+            "title": "ComponentContractPanel",
+            "purpose": "Edit props, events, slots, variants and reusable content; review version changes.",
+            "content": "",
+            "region": "content",
+            "id": "brick-67",
+            "component": "component-contract-panel",
+            "definition": "component-contract-panel",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "ComponentContractPanel",
+              "purpose": "Edit props, events, slots, variants and reusable content; review version changes.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-19",
+        "slug": "blueprints",
+        "label": "Blueprints",
+        "kind": "page",
+        "layout": "dashboard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Choose a layout starting point while retaining ownership of the current design.",
+        "entity": "",
+        "intent": "Choose a layout starting point while retaining ownership of the current design.",
+        "goals": [
+          "Choose a layout starting point while retaining ownership of the current design."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-20",
+            "kind": "heading",
+            "title": "Blueprints",
+            "purpose": "Choose a layout starting point while retaining ownership of the current design.",
+            "content": "Choose a layout starting point while retaining ownership of the current design.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-21",
+        "slug": "patterns",
+        "label": "Action patterns",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Attach established actions to shared application behavior with accessible entry points.",
+        "entity": "",
+        "intent": "Attach established actions to shared application behavior with accessible entry points.",
+        "goals": [
+          "Attach established actions to shared application behavior with accessible entry points."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-22",
+            "kind": "heading",
+            "title": "Action patterns",
+            "purpose": "Attach established actions to shared application behavior with accessible entry points.",
+            "content": "Attach established actions to shared application behavior with accessible entry points.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-23",
+        "slug": "prepare",
+        "label": "Prepare project",
+        "kind": "page",
+        "layout": "wizard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Review additive template preparation, trust and an isolated test vault before any native execution.",
+        "entity": "",
+        "intent": "Review additive template preparation, trust and an isolated test vault before any native execution.",
+        "goals": [
+          "Review additive template preparation, trust and an isolated test vault before any native execution."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "shell-handoff-panel",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-24",
+            "kind": "heading",
+            "title": "Prepare project",
+            "purpose": "Review additive template preparation, trust and an isolated test vault before any native execution.",
+            "content": "Review additive template preparation, trust and an isolated test vault before any native execution.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "detail",
+            "title": "ShellHandoffPanel",
+            "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+            "content": "",
+            "region": "content",
+            "id": "brick-71",
+            "component": "shell-handoff-panel",
+            "definition": "shell-handoff-panel",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "ShellHandoffPanel",
+              "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-25",
+        "slug": "generate",
+        "label": "Generate a feature",
+        "kind": "page",
+        "layout": "form",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Preview independent shell makers without equating scaffolding with implementation.",
+        "entity": "",
+        "intent": "Preview independent shell makers without equating scaffolding with implementation.",
+        "goals": [
+          "Preview independent shell makers without equating scaffolding with implementation."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-26",
+            "kind": "heading",
+            "title": "Generate a feature",
+            "purpose": "Preview independent shell makers without equating scaffolding with implementation.",
+            "content": "Preview independent shell makers without equating scaffolding with implementation.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-27",
+        "slug": "develop",
+        "label": "Development",
+        "kind": "page",
+        "layout": "dashboard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Keep source, built and installed revisions distinct through the first development loop.",
+        "entity": "",
+        "intent": "Keep source, built and installed revisions distinct through the first development loop.",
+        "goals": [
+          "Keep source, built and installed revisions distinct through the first development loop."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-28",
+            "kind": "heading",
+            "title": "Development",
+            "purpose": "Keep source, built and installed revisions distinct through the first development loop.",
+            "content": "Keep source, built and installed revisions distinct through the first development loop.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-29",
+        "slug": "quality",
+        "label": "Quality & verification",
+        "kind": "page",
+        "layout": "dashboard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
+        "entity": "",
+        "intent": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
+        "goals": [
+          "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "review-findings",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-30",
+            "kind": "heading",
+            "title": "Quality & verification",
+            "purpose": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
+            "content": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "detail",
+            "title": "ReviewFindings",
+            "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
+            "content": "",
+            "region": "content",
+            "id": "brick-60",
+            "component": "review-findings",
+            "definition": "review-findings",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "ReviewFindings",
+              "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-31",
+        "slug": "capabilities",
+        "label": "Shell capabilities",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Discover CLI commands and shared shell services without requiring the companion.",
+        "entity": "",
+        "intent": "Discover CLI commands and shared shell services without requiring the companion.",
+        "goals": [
+          "Discover CLI commands and shared shell services without requiring the companion."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-32",
+            "kind": "heading",
+            "title": "Shell capabilities",
+            "purpose": "Discover CLI commands and shared shell services without requiring the companion.",
+            "content": "Discover CLI commands and shared shell services without requiring the companion.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-33",
+        "slug": "release",
+        "label": "Release readiness",
+        "kind": "page",
+        "layout": "dashboard",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Inspect publication prerequisites only after shell and native qualification.",
+        "entity": "",
+        "intent": "Inspect publication prerequisites only after shell and native qualification.",
+        "goals": [
+          "Inspect publication prerequisites only after shell and native qualification."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-34",
+            "kind": "heading",
+            "title": "Release readiness",
+            "purpose": "Inspect publication prerequisites only after shell and native qualification.",
+            "content": "Inspect publication prerequisites only after shell and native qualification.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-35",
+        "slug": "runs",
+        "label": "Runs & recovery",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Inspect bounded execution history and preserve private recovery copies before reset.",
+        "entity": "",
+        "intent": "Inspect bounded execution history and preserve private recovery copies before reset.",
+        "goals": [
+          "Inspect bounded execution history and preserve private recovery copies before reset."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-36",
+            "kind": "heading",
+            "title": "Runs & recovery",
+            "purpose": "Inspect bounded execution history and preserve private recovery copies before reset.",
+            "content": "Inspect bounded execution history and preserve private recovery copies before reset.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-37",
+        "slug": "preferences",
+        "label": "Workbench preferences",
+        "kind": "settings",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [
+          "settings"
+        ],
+        "goal": "Configure codebase and tests folders, appearance, import/export and explicit recovery.",
+        "entity": "",
+        "intent": "Configure codebase and tests folders, appearance, import/export and explicit recovery.",
+        "goals": [
+          "Configure codebase and tests folders, appearance, import/export and explicit recovery."
+        ],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-38",
+        "slug": "import-project",
+        "label": "Import project JSON",
+        "kind": "modal",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Validate and review a full project, then explicitly replace the current authoring project.",
+        "entity": "",
+        "intent": "Validate and review a full project, then explicitly replace the current authoring project.",
+        "goals": [
+          "Validate and review a full project, then explicitly replace the current authoring project."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "project-json-review",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-39",
+            "kind": "heading",
+            "title": "Import project JSON",
+            "purpose": "Validate and review a full project, then explicitly replace the current authoring project.",
+            "content": "Validate and review a full project, then explicitly replace the current authoring project.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "ProjectJsonReview",
+            "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+            "content": "",
+            "region": "content",
+            "id": "brick-68",
+            "component": "project-json-review",
+            "definition": "project-json-review",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "ProjectJsonReview",
+              "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-40",
+        "slug": "export-project",
+        "label": "Export project JSON",
+        "kind": "modal",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Export all saved design data and folder settings without machine trust or execution receipts.",
+        "entity": "",
+        "intent": "Export all saved design data and folder settings without machine trust or execution receipts.",
+        "goals": [
+          "Export all saved design data and folder settings without machine trust or execution receipts."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "project-json-review",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-41",
+            "kind": "heading",
+            "title": "Export project JSON",
+            "purpose": "Export all saved design data and folder settings without machine trust or execution receipts.",
+            "content": "Export all saved design data and folder settings without machine trust or execution receipts.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "form",
+            "title": "ProjectJsonReview",
+            "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+            "content": "",
+            "region": "content",
+            "id": "brick-69",
+            "component": "project-json-review",
+            "definition": "project-json-review",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "form",
+              "title": "ProjectJsonReview",
+              "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-42",
+        "slug": "shell-handoff",
+        "label": "Shell JSON handoff",
+        "kind": "modal",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
+        "entity": "",
+        "intent": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
+        "goals": [
+          "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          },
+          {
+            "id": "shell-handoff-panel",
+            "version": "0.1.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-43",
+            "kind": "heading",
+            "title": "Shell JSON handoff",
+            "purpose": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
+            "content": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          },
+          {
+            "schema": 1,
+            "kind": "detail",
+            "title": "ShellHandoffPanel",
+            "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+            "content": "",
+            "region": "content",
+            "id": "brick-70",
+            "component": "shell-handoff-panel",
+            "definition": "shell-handoff-panel",
+            "version": "0.1.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "detail",
+              "title": "ShellHandoffPanel",
+              "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "id": "edge-44",
+        "from": "node-3",
+        "to": "node-5",
+        "label": "Define the outcome",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-45",
+        "from": "node-5",
+        "to": "node-7",
+        "label": "Shape the experience",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-46",
+        "from": "node-7",
+        "to": "node-9",
+        "label": "Describe meaning",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-47",
+        "from": "node-9",
+        "to": "node-11",
+        "label": "Bind a source contract",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-48",
+        "from": "node-11",
+        "to": "node-13",
+        "label": "Try a source operation",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-49",
+        "from": "node-17",
+        "to": "node-7",
+        "label": "Place a component",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-50",
+        "from": "node-15",
+        "to": "node-17",
+        "label": "Review component guidance",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-51",
+        "from": "node-3",
+        "to": "node-38",
+        "label": "Import a project",
+        "kind": "open"
+      },
+      {
+        "id": "edge-52",
+        "from": "node-3",
+        "to": "node-40",
+        "label": "Export the full project",
+        "kind": "open"
+      },
+      {
+        "id": "edge-53",
+        "from": "node-23",
+        "to": "node-42",
+        "label": "Review CLI handoff",
+        "kind": "open"
+      },
+      {
+        "id": "edge-54",
+        "from": "node-42",
+        "to": "node-40",
+        "label": "Save project JSON",
+        "kind": "open"
+      },
+      {
+        "id": "edge-55",
+        "from": "node-23",
+        "to": "node-27",
+        "label": "Continue after preparation",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-56",
+        "from": "node-27",
+        "to": "node-29",
+        "label": "Inspect current evidence",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-57",
+        "from": "node-29",
+        "to": "node-33",
+        "label": "Review publication gates",
+        "kind": "navigate"
+      }
+    ],
+    "nextId": 72,
+    "library": [
+      {
+        "id": "record-card",
+        "name": "RecordCard",
+        "category": "Data display",
+        "preview": "brick",
+        "description": "A selectable summary of a note-backed record.",
+        "props": "title:string\nselected:boolean",
+        "events": "select:string",
+        "slots": "actions",
+        "variants": "default, selected",
+        "a11y": "Name the selection target; do not rely on color.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "detail",
+          "title": "RecordCard",
+          "purpose": "A selectable summary of a note-backed record.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data display"
+        ]
+      },
+      {
+        "id": "capture-form",
+        "name": "CaptureForm",
+        "category": "Forms",
+        "preview": "brick",
+        "description": "Validated capture with separate submit and cancel outcomes.",
+        "props": "title:string\nbusy:boolean",
+        "events": "submit:string\ncancel:void",
+        "slots": "footer",
+        "variants": "default, compact",
+        "a11y": "Associate errors with fields; preserve drafts on failure.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "CaptureForm",
+          "purpose": "Validated capture with separate submit and cancel outcomes.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "forms"
+        ]
+      },
+      {
+        "id": "empty-state",
+        "name": "EmptyState",
+        "category": "Feedback",
+        "preview": "brick",
+        "description": "Explain an empty collection and offer its next action.",
+        "props": "title:string\ndescription:string",
+        "events": "create:void",
+        "slots": "illustration",
+        "variants": "default, compact",
+        "a11y": "Use a meaningful heading and a named primary action.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "empty",
+          "title": "EmptyState",
+          "purpose": "Explain an empty collection and offer its next action.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "feedback"
+        ]
+      },
+      {
+        "id": "filter-toolbar",
+        "name": "FilterToolbar",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Search and filter a collection without losing context.",
+        "props": "query:string\ncount:number",
+        "events": "search:string\nclear:void",
+        "slots": "actions",
+        "variants": "default, compact",
+        "a11y": "Label search; announce result counts without stealing focus.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "toolbar",
+          "title": "FilterToolbar",
+          "purpose": "Search and filter a collection without losing context.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "navigation"
+        ]
+      },
+      {
+        "id": "status-notice",
+        "name": "StatusNotice",
+        "category": "Feedback",
+        "preview": "brick",
+        "description": "A scoped status or recoverable error.",
+        "props": "message:string\nbusy:boolean",
+        "events": "retry:void",
+        "slots": "details",
+        "variants": "info, success, error",
+        "a11y": "Use polite announcements; only blocking failures use alert.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "notice",
+          "title": "StatusNotice",
+          "purpose": "A scoped status or recoverable error.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "feedback"
+        ]
+      },
+      {
+        "id": "property-editor",
+        "name": "PropertyEditor",
+        "category": "Forms",
+        "preview": "brick",
+        "description": "Edit declared fields through a typed application action.",
+        "props": "label:string\nvalue:string",
+        "events": "change:string\ncancel:void",
+        "slots": "help",
+        "variants": "default, readonly",
+        "a11y": "Label inputs and expose both validation and cancellation.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "PropertyEditor",
+          "purpose": "Edit declared fields through a typed application action.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "forms"
+        ]
+      },
+      {
+        "id": "content-heading",
+        "name": "HeadingBlock",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Orient the user: title, context and supporting copy.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "heading",
+          "title": "Heading & context",
+          "purpose": "Orient the user: title, context and supporting copy.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "content"
+        ]
+      },
+      {
+        "id": "content-text",
+        "name": "TextBlock",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Describe the information or guidance the user needs.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "text",
+          "title": "Text & explanation",
+          "purpose": "Describe the information or guidance the user needs.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "content"
+        ]
+      },
+      {
+        "id": "content-navigation",
+        "name": "NavigationBlock",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Plan entry points within this surface.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "navigation",
+          "title": "Navigation",
+          "purpose": "Plan entry points within this surface.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "navigation"
+        ]
+      },
+      {
+        "id": "content-toolbar",
+        "name": "ToolbarBlock",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Locate content and adjust the current collection.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "toolbar",
+          "title": "Search & filters",
+          "purpose": "Locate content and adjust the current collection.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "navigation"
+        ]
+      },
+      {
+        "id": "content-list",
+        "name": "ListBlock",
+        "category": "Data",
+        "preview": "brick",
+        "description": "A scannable collection of records or notes.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "list",
+          "title": "Record list",
+          "purpose": "A scannable collection of records or notes.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data"
+        ]
+      },
+      {
+        "id": "content-table",
+        "name": "TableBlock",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Compare records across meaningful columns.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "table",
+          "title": "Data table",
+          "purpose": "Compare records across meaningful columns.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data"
+        ]
+      },
+      {
+        "id": "content-board",
+        "name": "BoardBlock",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Organize records into declared groups or states.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "board",
+          "title": "Board",
+          "purpose": "Organize records into declared groups or states.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data"
+        ]
+      },
+      {
+        "id": "content-detail",
+        "name": "DetailBlock",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Explain one record, its properties and context.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "detail",
+          "title": "Record details",
+          "purpose": "Explain one record, its properties and context.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data"
+        ]
+      },
+      {
+        "id": "content-form",
+        "name": "FormBlock",
+        "category": "Input",
+        "preview": "brick",
+        "description": "Describe input, validation and cancellation requirements.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "Input form",
+          "purpose": "Describe input, validation and cancellation requirements.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "input"
+        ]
+      },
+      {
+        "id": "content-chart",
+        "name": "ChartBlock",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Name the question the visualization must answer.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "chart",
+          "title": "Chart / summary",
+          "purpose": "Name the question the visualization must answer.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "data"
+        ]
+      },
+      {
+        "id": "content-media",
+        "name": "MediaBlock",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Plan a visual or document without fetching an asset.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "media",
+          "title": "Image / attachment",
+          "purpose": "Plan a visual or document without fetching an asset.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "content"
+        ]
+      },
+      {
+        "id": "content-actions",
+        "name": "ActionsBlock",
+        "category": "Action",
+        "preview": "brick",
+        "description": "Describe user decisions and expected outcomes.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "actions",
+          "title": "Primary actions",
+          "purpose": "Describe user decisions and expected outcomes.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "action",
+          "application"
+        ]
+      },
+      {
+        "id": "content-empty",
+        "name": "EmptyBlock",
+        "category": "Feedback",
+        "preview": "brick",
+        "description": "Explain why there is no content and what to do next.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "empty",
+          "title": "Empty state",
+          "purpose": "Explain why there is no content and what to do next.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "feedback"
+        ]
+      },
+      {
+        "id": "content-notice",
+        "name": "NoticeBlock",
+        "category": "Feedback",
+        "preview": "brick",
+        "description": "Plan progress, failure and recovery communication.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Name this content region. Preserve reading order and keyboard access.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "notice",
+          "title": "Status / recovery",
+          "purpose": "Plan progress, failure and recovery communication.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "application",
+          "feedback"
+        ]
+      },
+      {
+        "id": "pattern-site-header",
+        "name": "SiteHeader",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Brand, primary links, and the main call to action.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "header",
+          "navigation",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "navigation",
+          "title": "Site header",
+          "purpose": "Brand, primary links, and the main call to action.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-hero",
+        "name": "HeroSection",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Explain the value and the next useful action.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "landing",
+          "marketing",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "hero",
+          "title": "Hero / introduction",
+          "purpose": "Explain the value and the next useful action.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-feature-grid",
+        "name": "FeatureGrid",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Group capabilities around customer outcomes.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "marketing",
+          "overview",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "features",
+          "title": "Feature grid",
+          "purpose": "Group capabilities around customer outcomes.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-pricing",
+        "name": "PricingPlans",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Compare plan limits, pricing assumptions, and actions.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "comparison",
+          "pricing",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "pricing",
+          "title": "Pricing plans",
+          "purpose": "Compare plan limits, pricing assumptions, and actions.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-testimonials",
+        "name": "Testimonials",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Attributed quotes and evidence; illustrative until supplied.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "marketing",
+          "trust",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "testimonials",
+          "title": "Customer stories",
+          "purpose": "Attributed quotes and evidence; illustrative until supplied.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-faq",
+        "name": "FaqAccordion",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Questions and expandable answers with keyboard support.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "disclosure",
+          "help",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "faq",
+          "title": "Frequently asked questions",
+          "purpose": "Questions and expandable answers with keyboard support.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-site-footer",
+        "name": "SiteFooter",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Secondary links, support, and legal destinations.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "footer",
+          "navigation",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "footer",
+          "title": "Footer / related links",
+          "purpose": "Secondary links, support, and legal destinations.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-image-gallery",
+        "name": "ImageGallery",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Describe images, captions, and alternative text.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "media",
+          "portfolio",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "gallery",
+          "title": "Image gallery",
+          "purpose": "Describe images, captions, and alternative text.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-contact",
+        "name": "ContactForm",
+        "category": "Input",
+        "preview": "brick",
+        "description": "Contact details, validation, consent, and submission outcomes.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "contact",
+          "form",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "Contact form",
+          "purpose": "Contact details, validation, consent, and submission outcomes.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-newsletter",
+        "name": "NewsletterSignup",
+        "category": "Action",
+        "preview": "brick",
+        "description": "One deliberate subscription action and clear feedback.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "form",
+          "marketing",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "actions",
+          "title": "Newsletter signup",
+          "purpose": "One deliberate subscription action and clear feedback.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-article",
+        "name": "ArticleBody",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Readable structured content with meaningful headings.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "documentation",
+          "reading",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "text",
+          "title": "Article / documentation",
+          "purpose": "Readable structured content with meaningful headings.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-breadcrumbs",
+        "name": "BreadcrumbTrail",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Show the current location without replacing primary navigation.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "navigation",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "breadcrumb",
+          "title": "Breadcrumbs",
+          "purpose": "Show the current location without replacing primary navigation.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-app-sidebar",
+        "name": "AppSidebar",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Persistent modules and a visible current selection.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "navigation",
+          "sidebar"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "sidebar",
+          "title": "Application navigation",
+          "purpose": "Persistent modules and a visible current selection.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-tab-strip",
+        "name": "TabStrip",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Switch related panels and retain local state.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "navigation",
+          "tabs"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "tabs",
+          "title": "Tabs",
+          "purpose": "Switch related panels and retain local state.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-metric-summary",
+        "name": "MetricSummary",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Named values with units, period, and data freshness.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "dashboard",
+          "metrics"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "metrics",
+          "title": "Metric summary",
+          "purpose": "Named values with units, period, and data freshness.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-activity-timeline",
+        "name": "ActivityTimeline",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Chronological events with actors and timestamps.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "activity",
+          "application",
+          "history"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "timeline",
+          "title": "Activity timeline",
+          "purpose": "Chronological events with actors and timestamps.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-calendar",
+        "name": "CalendarView",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Date-based work with an accessible list alternative.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "calendar",
+          "scheduling"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "calendar",
+          "title": "Calendar",
+          "purpose": "Date-based work with an accessible list alternative.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-file-upload",
+        "name": "FileUpload",
+        "category": "Input",
+        "preview": "brick",
+        "description": "Selection, validation, upload progress, and recoverable failure.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "files",
+          "website"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "upload",
+          "title": "File upload",
+          "purpose": "Selection, validation, upload progress, and recoverable failure.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-profile",
+        "name": "UserProfile",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Identity, contextual details, and allowed actions.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "account",
+          "application",
+          "profile"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "profile",
+          "title": "Profile summary",
+          "purpose": "Identity, contextual details, and allowed actions.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-code-editor",
+        "name": "CodeEditor",
+        "category": "Input",
+        "preview": "brick",
+        "description": "Editable source with explicit apply and error feedback.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "developer",
+          "editor"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "code",
+          "title": "Code / query editor",
+          "purpose": "Editable source with explicit apply and error feedback.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-conversation",
+        "name": "Conversation",
+        "category": "Content",
+        "preview": "brick",
+        "description": "Messages, author identity, and deliberate send behavior.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "communication",
+          "messaging"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "chat",
+          "title": "Conversation",
+          "purpose": "Messages, author identity, and deliberate send behavior.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-progress",
+        "name": "ProgressTracker",
+        "category": "Feedback",
+        "preview": "brick",
+        "description": "Show completed, current, and remaining steps truthfully.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "onboarding",
+          "workflow"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "progress",
+          "title": "Step progress",
+          "purpose": "Show completed, current, and remaining steps truthfully.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-command-search",
+        "name": "CommandSearch",
+        "category": "Navigation",
+        "preview": "brick",
+        "description": "Search actions with keyboard selection and clear context.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "application",
+          "commands",
+          "search"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "toolbar",
+          "title": "Command search",
+          "purpose": "Search actions with keyboard selection and clear context.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "pattern-permissions",
+        "name": "PermissionsTable",
+        "category": "Data",
+        "preview": "brick",
+        "description": "Explain role permissions; editing requires business validation.",
+        "props": "title:string",
+        "events": "",
+        "slots": "content",
+        "variants": "default",
+        "a11y": "Use meaningful labels, keyboard access and explicit empty/error states.",
+        "version": "1.0.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "starter",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary",
+        "tags": [
+          "access",
+          "admin",
+          "application"
+        ],
+        "contentSpec": {
+          "schema": 1,
+          "kind": "table",
+          "title": "Permissions matrix",
+          "purpose": "Explain role permissions; editing requires business validation.",
+          "content": "",
+          "region": "content"
+        }
+      },
+      {
+        "id": "workflow-rail",
+        "name": "WorkflowRail",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "navigation",
+          "title": "WorkflowRail",
+          "purpose": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "review-findings",
+        "name": "ReviewFindings",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Show blocking and advisory totals with repair links to the owning editor.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "detail",
+          "title": "ReviewFindings",
+          "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "requirements-panel",
+        "name": "RequirementsPanel",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Capture requirements, acceptance, priority and screen/component traceability.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "table",
+          "title": "RequirementsPanel",
+          "purpose": "Capture requirements, acceptance, priority and screen/component traceability.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "diagram-inspector",
+        "name": "DiagramInspector",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "DiagramInspector",
+          "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "source-operation-editor",
+        "name": "SourceOperationEditor",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Describe operations and payloads; never collect live credentials.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "SourceOperationEditor",
+          "purpose": "Describe operations and payloads; never collect live credentials.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "test-operation-panel",
+        "name": "TestOperationPanel",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Select an operation, run or cancel it, and separate live status from JSON results.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "TestOperationPanel",
+          "purpose": "Select an operation, run or cancel it, and separate live status from JSON results.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "design-token-editor",
+        "name": "DesignTokenEditor",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "DesignTokenEditor",
+          "purpose": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "component-contract-panel",
+        "name": "ComponentContractPanel",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Edit props, events, slots, variants and reusable content; review version changes.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "detail",
+          "title": "ComponentContractPanel",
+          "purpose": "Edit props, events, slots, variants and reusable content; review version changes.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "project-json-review",
+        "name": "ProjectJsonReview",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "form",
+          "title": "ProjectJsonReview",
+          "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      },
+      {
+        "id": "shell-handoff-panel",
+        "name": "ShellHandoffPanel",
+        "category": "Companion",
+        "preview": "brick",
+        "description": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+        "props": "title:string\nbusy:boolean",
+        "events": "select:string\ncancel:void",
+        "slots": "content",
+        "variants": "default, compact",
+        "a11y": "Named region, visible focus, labelled controls and explicit loading/error/empty feedback.",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "ready",
+        "origin": "project",
+        "replacement": "",
+        "tokens": "--text-normal\n--background-primary\n--interactive-accent",
+        "contentSpec": {
+          "schema": 1,
+          "kind": "detail",
+          "title": "ShellHandoffPanel",
+          "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
+          "content": "",
+          "region": "content"
+        },
+        "tags": [
+          "companion",
+          "authoring"
+        ]
+      }
+    ],
+    "prds": [
+      {
+        "id": "prd-1",
+        "title": "Product & workspace",
+        "version": "0.1.0",
+        "status": "draft",
+        "problem": "A plugin idea, its requirements and its implementation context are otherwise scattered across tools.",
+        "audience": "Obsidian plugin developers, product owners and designers.",
+        "goals": "One vault owns one project\nCapture requirements and acceptance\nAuthor screens and transitions\nDeclare domain relationships\nUse reusable components\nSelect blueprints and patterns",
+        "nonGoals": "No native conversion, live service access or release authorization from the browser concept.",
+        "notes": "Design specification, not implementation evidence.",
+        "revision": 1,
+        "nextReq": 7,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "companion-1-1",
+            "title": "One vault owns one project",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Opening this workspace exposes one project; loading another definition requires review and never adds a second active project.",
+            "nodes": [
+              "node-3"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-1-2",
+            "title": "Capture requirements and acceptance",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Create, revise, map and export PRDs with testable requirements, priorities and retained review baselines.",
+            "nodes": [
+              "node-5"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-1-3",
+            "title": "Author screens and transitions",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Edit screens, containers, content sections and transitions with keyboard and pointer controls, Undo and Redo.",
+            "nodes": [
+              "node-7"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-1-4",
+            "title": "Declare domain relationships",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Define properties and explicit cardinalities while keeping diagram arrangement separate from persistence semantics.",
+            "nodes": [
+              "node-9"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-1-5",
+            "title": "Use reusable components",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Place pinned component versions and variants with local content; preview and deliberately apply upgrades.",
+            "nodes": [
+              "node-17"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-1-6",
+            "title": "Select blueprints and patterns",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Use a reviewed starter and shared action patterns without overwriting an existing design silently.",
+            "nodes": [
+              "node-19"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          }
+        ]
+      },
+      {
+        "id": "prd-2",
+        "title": "Data & visual contracts",
+        "version": "0.1.0",
+        "status": "draft",
+        "problem": "Developers need explicit data and visual contracts before implementation can be safely generated.",
+        "audience": "Obsidian plugin developers, product owners and designers.",
+        "goals": "Describe every source port\nReuse source operations\nGenerate deterministic test data\nExercise isolated operations\nExport isolated test tooling\nAuthor the design system\nExport a readable design guide",
+        "nonGoals": "No native conversion, live service access or release authorization from the browser concept.",
+        "notes": "Design specification, not implementation evidence.",
+        "revision": 1,
+        "nextReq": 8,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "companion-2-1",
+            "title": "Describe every source port",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.",
+            "nodes": [
+              "node-11"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-2",
+            "title": "Reuse source operations",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "A screen references a declared source operation through a named directional data flow, not a duplicate source definition.",
+            "nodes": [
+              "node-7"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-3",
+            "title": "Generate deterministic test data",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.",
+            "nodes": [
+              "node-13"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-4",
+            "title": "Exercise isolated operations",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.",
+            "nodes": [
+              "node-13"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-5",
+            "title": "Export isolated test tooling",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Export fixtures and adapters with a read-only plan and explicit ownership checks before applying or cleaning files.",
+            "nodes": [
+              "node-13"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-6",
+            "title": "Author the design system",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Persist font declarations, typography, sizes, spacing, radii, paired colors and usage guidance.",
+            "nodes": [
+              "node-15"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-2-7",
+            "title": "Export a readable design guide",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs.",
+            "nodes": [
+              "node-15"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          }
+        ]
+      },
+      {
+        "id": "prd-3",
+        "title": "Project JSON & shell handoff",
+        "version": "0.1.0",
+        "status": "draft",
+        "problem": "A developer needs one complete portable definition that both the design tool and shell can read.",
+        "audience": "Obsidian plugin developers, product owners and designers.",
+        "goals": "Describe the companion itself\nExport the complete saved project\nImport a full project safely\nConfigure project folders\nAccept JSON at the shell boundary\nKeep generation a separate stage",
+        "nonGoals": "No native conversion, live service access or release authorization from the browser concept.",
+        "notes": "Design specification, not implementation evidence.",
+        "revision": 1,
+        "nextReq": 7,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "companion-3-1",
+            "title": "Describe the companion itself",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "The bundled companion project uses the same editable model, screens, requirements, entities, sources and design system as user projects.",
+            "nodes": [
+              "node-3"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-3-2",
+            "title": "Export the complete saved project",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "The versioned JSON preserves identity, folder settings, PRDs, screen content, variants, arrangements, entities, source operations, test recipes, tokens and notes.",
+            "nodes": [
+              "node-40"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-3-3",
+            "title": "Import a full project safely",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "File and pasted JSON are bounded and validated before review; invalid input, cancelled review or stale state leaves the project unchanged.",
+            "nodes": [
+              "node-38"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-3-4",
+            "title": "Configure project folders",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Codebase defaults to src and tests to tests. Valid custom folders persist and survive a JSON round trip; invalid or overlapping paths are rejected.",
+            "nodes": [
+              "node-37"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "companion-3-5",
+            "title": "Accept JSON at the shell boundary",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "The v1 script accepts the export and a target inside an explicitly selected vault, prints original JSON bytes, and performs zero filesystem writes.",
+            "nodes": [
+              "node-42"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-3-6",
+            "title": "Keep generation a separate stage",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.",
+            "nodes": [
+              "node-23"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          }
+        ]
+      },
+      {
+        "id": "prd-4",
+        "title": "Safety & qualification",
+        "version": "0.1.0",
+        "status": "draft",
+        "problem": "A convincing prototype must not imply that simulated execution or stored data is native evidence.",
+        "audience": "Obsidian plugin developers, product owners and designers.",
+        "goals": "Preserve drafts and keyboard context\nProtect recovery copies\nKeep test-vault boundaries\nKeep verification scopes separate\nTeach the complete workflow\nPublish only after native acceptance",
+        "nonGoals": "No native conversion, live service access or release authorization from the browser concept.",
+        "notes": "Design specification, not implementation evidence.",
+        "revision": 1,
+        "nextReq": 7,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "companion-4-1",
+            "title": "Preserve drafts and keyboard context",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Closing dirty forms asks for confirmation; modal feedback is visible and focus returns to a meaningful control.",
+            "nodes": [
+              "node-37"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-2",
+            "title": "Protect recovery copies",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "A stale window cannot reset newer retained state; current and retained data can be exported separately before reload.",
+            "nodes": [
+              "node-35"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-3",
+            "title": "Keep test-vault boundaries",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Authoring files, host configuration and test-target data are preserved; no silent path migration or plugin activation.",
+            "nodes": [
+              "node-23"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-4",
+            "title": "Keep verification scopes separate",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Build, browser, native and security evidence have explicit scope and revision. Import never grants trust or carries simulated passes forward.",
+            "nodes": [
+              "node-29"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-5",
+            "title": "Teach the complete workflow",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "A dismissible and resumable guided tour covers all main design, test and preparation stages.",
+            "nodes": [
+              "node-3"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-6",
+            "title": "Publish only after native acceptance",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Shell qualification comes first, then native companion conversion and acceptance, then publication. No design action publishes.",
+            "nodes": [
+              "node-33"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          }
+        ]
+      }
+    ],
+    "librarySchema": 3,
+    "canvas": {
+      "schema": 1,
+      "layout": "vertical",
+      "positions": {},
+      "pan": {
+        "x": 32,
+        "y": 28
+      },
+      "zoom": 1,
+      "snap": true,
+      "collapsed": [],
+      "edges": "selected",
+      "custom": false,
+      "arrangedFor": "",
+      "fitted": false
+    },
+    "semantic": {
+      "schema": 1,
+      "nextId": 53,
+      "entities": [
+        {
+          "id": "er-entity-1",
+          "slug": "plugin-project",
+          "name": "Plugin Project",
+          "folder": "Companion/PluginProject",
+          "description": "Authoring contract for plugin project; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-2",
+              "key": "plugin_id",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-3",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-4",
+              "key": "description",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-5",
+              "key": "codebase_folder",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-6",
+              "key": "tests_folder",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-7",
+          "slug": "requirement",
+          "name": "Requirement",
+          "folder": "Companion/Requirement",
+          "description": "Authoring contract for requirement; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-8",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-9",
+              "key": "acceptance",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-10",
+              "key": "priority",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-11",
+              "key": "status",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-12",
+          "slug": "screen",
+          "name": "Screen",
+          "folder": "Companion/Screen",
+          "description": "Authoring contract for screen; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-13",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-14",
+              "key": "code_name",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-15",
+              "key": "layout",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-16",
+              "key": "surface_kind",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-17",
+          "slug": "component",
+          "name": "Component",
+          "folder": "Companion/Component",
+          "description": "Authoring contract for component; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-18",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-19",
+              "key": "version",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-20",
+              "key": "content",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-21",
+              "key": "accessibility",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-22",
+          "slug": "entity-definition",
+          "name": "Entity Definition",
+          "folder": "Companion/EntityDefinition",
+          "description": "Authoring contract for entity definition; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-23",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-24",
+              "key": "code_name",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-25",
+              "key": "note_folder",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-26",
+              "key": "description",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-27",
+          "slug": "data-source",
+          "name": "Data Source",
+          "folder": "Companion/DataSource",
+          "description": "Authoring contract for data source; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-28",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-29",
+              "key": "source_kind",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-30",
+              "key": "locator",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-31",
+              "key": "credential_ref",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-32",
+          "slug": "source-operation",
+          "name": "Source Operation",
+          "folder": "Companion/SourceOperation",
+          "description": "Authoring contract for source operation; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-33",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-34",
+              "key": "direction",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-35",
+              "key": "input_shape",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-36",
+              "key": "output_shape",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-37",
+          "slug": "test-recipe",
+          "name": "Test Recipe",
+          "folder": "Companion/TestRecipe",
+          "description": "Authoring contract for test recipe; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-38",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-39",
+              "key": "scenario",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-40",
+              "key": "dataset",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-41",
+          "slug": "design-token",
+          "name": "Design Token",
+          "folder": "Companion/DesignToken",
+          "description": "Authoring contract for design token; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-42",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-43",
+              "key": "token_group",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-44",
+              "key": "value",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-45",
+              "key": "usage",
+              "type": "text",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "relationships": [
+        {
+          "id": "er-relationship-46",
+          "name": "requirement → plugin-project",
+          "source": "er-entity-7",
+          "target": "er-entity-1",
+          "key": "project_ref",
+          "sourceCard": "0..*",
+          "targetCard": "0..1",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-47",
+          "name": "screen → plugin-project",
+          "source": "er-entity-12",
+          "target": "er-entity-1",
+          "key": "project_ref",
+          "sourceCard": "0..*",
+          "targetCard": "0..1",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-48",
+          "name": "requirement → screen",
+          "source": "er-entity-7",
+          "target": "er-entity-12",
+          "key": "screen_refs",
+          "sourceCard": "0..*",
+          "targetCard": "0..*",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-49",
+          "name": "screen → component",
+          "source": "er-entity-12",
+          "target": "er-entity-17",
+          "key": "component_refs",
+          "sourceCard": "0..*",
+          "targetCard": "0..*",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-50",
+          "name": "source-operation → data-source",
+          "source": "er-entity-32",
+          "target": "er-entity-27",
+          "key": "source_ref",
+          "sourceCard": "0..*",
+          "targetCard": "0..1",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-51",
+          "name": "test-recipe → source-operation",
+          "source": "er-entity-37",
+          "target": "er-entity-32",
+          "key": "operation_ref",
+          "sourceCard": "0..*",
+          "targetCard": "0..1",
+          "onDelete": "restrict"
+        },
+        {
+          "id": "er-relationship-52",
+          "name": "design-token → plugin-project",
+          "source": "er-entity-41",
+          "target": "er-entity-1",
+          "key": "project_ref",
+          "sourceCard": "0..*",
+          "targetCard": "0..1",
+          "onDelete": "restrict"
+        }
+      ],
+      "sections": [],
+      "canvas": {
+        "positions": {
+          "er-entity-1": {
+            "x": 60,
+            "y": 60
+          },
+          "er-entity-7": {
+            "x": 490,
+            "y": 60
+          },
+          "er-entity-12": {
+            "x": 920,
+            "y": 60
+          },
+          "er-entity-17": {
+            "x": 60,
+            "y": 504
+          },
+          "er-entity-22": {
+            "x": 490,
+            "y": 504
+          },
+          "er-entity-27": {
+            "x": 920,
+            "y": 504
+          },
+          "er-entity-32": {
+            "x": 60,
+            "y": 898
+          },
+          "er-entity-37": {
+            "x": 490,
+            "y": 898
+          },
+          "er-entity-41": {
+            "x": 920,
+            "y": 898
+          }
+        },
+        "viewport": {
+          "x": 40,
+          "y": 40,
+          "zoom": 1
+        },
+        "snap": true
+      }
+    },
+    "dataSources": {
+      "schema": 1,
+      "nextId": 8,
+      "sources": [
+        {
+          "id": "ds-source-1",
+          "slug": "authoring-vault",
+          "name": "Companion authoring vault",
+          "kind": "vault",
+          "status": "active",
+          "description": "Proposed native adapter over project authoring notes. The HTML only declares this port.",
+          "locator": "vault://active",
+          "auth": "none",
+          "credentialRef": "",
+          "operations": [
+            {
+              "id": "ds-operation-2",
+              "slug": "list-requirements",
+              "name": "List requirements",
+              "direction": "read",
+              "method": "adapter",
+              "resource": "Companion/Requirement",
+              "description": "Read the declared authoring records through the vault port.",
+              "input": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "output": {
+                "mode": "entity",
+                "entity": "er-entity-7",
+                "many": true,
+                "fields": [],
+                "schema": null
+              }
+            },
+            {
+              "id": "ds-operation-4",
+              "slug": "list-sitemap",
+              "name": "List sitemap",
+              "direction": "read",
+              "method": "adapter",
+              "resource": "Companion/Screen",
+              "description": "Read the declared authoring records through the vault port.",
+              "input": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "output": {
+                "mode": "entity",
+                "entity": "er-entity-12",
+                "many": true,
+                "fields": [],
+                "schema": null
+              }
+            },
+            {
+              "id": "ds-operation-6",
+              "slug": "list-components",
+              "name": "List components",
+              "direction": "read",
+              "method": "adapter",
+              "resource": "Companion/Component",
+              "description": "Read the declared authoring records through the vault port.",
+              "input": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "output": {
+                "mode": "entity",
+                "entity": "er-entity-17",
+                "many": true,
+                "fields": [],
+                "schema": null
+              }
+            }
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "id": "ds-flow-3",
+          "source": "ds-source-1",
+          "operation": "ds-operation-2",
+          "card": "node-5",
+          "direction": "read",
+          "label": "Load requirements",
+          "trigger": "on-open",
+          "notes": "Declared native interaction. No live vault access in this prototype."
+        },
+        {
+          "id": "ds-flow-5",
+          "source": "ds-source-1",
+          "operation": "ds-operation-4",
+          "card": "node-7",
+          "direction": "read",
+          "label": "Load sitemap",
+          "trigger": "on-open",
+          "notes": "Declared native interaction. No live vault access in this prototype."
+        },
+        {
+          "id": "ds-flow-7",
+          "source": "ds-source-1",
+          "operation": "ds-operation-6",
+          "card": "node-17",
+          "direction": "read",
+          "label": "Load components",
+          "trigger": "on-open",
+          "notes": "Declared native interaction. No live vault access in this prototype."
+        }
+      ],
+      "positions": {
+        "ds-source-1": {
+          "x": 900,
+          "y": 80
+        }
+      },
+      "testing": {
+        "schema": 1,
+        "seed": 42,
+        "referenceDate": "2026-01-01T00:00:00.000Z",
+        "locale": "en",
+        "count": 5,
+        "recipes": [
+          {
+            "source": "ds-source-1",
+            "operation": "ds-operation-2",
+            "enabled": true,
+            "behavior": "list",
+            "dataset": "requirement",
+            "keyField": "id",
+            "scenario": "populated",
+            "latencyMs": 0,
+            "errorStatus": 503,
+            "rules": []
+          },
+          {
+            "source": "ds-source-1",
+            "operation": "ds-operation-4",
+            "enabled": true,
+            "behavior": "list",
+            "dataset": "screen",
+            "keyField": "id",
+            "scenario": "populated",
+            "latencyMs": 0,
+            "errorStatus": 503,
+            "rules": []
+          },
+          {
+            "source": "ds-source-1",
+            "operation": "ds-operation-6",
+            "enabled": true,
+            "behavior": "list",
+            "dataset": "component",
+            "keyField": "id",
+            "scenario": "populated",
+            "latencyMs": 0,
+            "errorStatus": 503,
+            "rules": []
+          }
+        ]
+      }
+    },
+    "designSystem": {
+      "schema": 1,
+      "name": "Companion workbench design system",
+      "description": "Host-friendly design declarations for the companion. Tokens are authored intent, not automatic component styling.",
+      "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+      "fonts": [
+        {
+          "id": "interface",
+          "name": "Interface",
+          "source": "interface",
+          "families": "",
+          "fallback": "system-ui",
+          "usage": "Navigation, controls and labels.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "body",
+          "name": "Reading",
+          "source": "text",
+          "families": "",
+          "fallback": "sans-serif",
+          "usage": "Descriptions and long-form content.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "code",
+          "name": "Code",
+          "source": "mono",
+          "families": "",
+          "fallback": "monospace",
+          "usage": "Identifiers, paths and code samples.",
+          "license": "Host font preference. No font files are embedded."
+        }
+      ],
+      "typography": [
+        {
+          "id": "page-title",
+          "name": "Page title",
+          "font": "interface",
+          "size": 24,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.25,
+          "letterSpacing": 0,
+          "usage": "One primary heading per view."
+        },
+        {
+          "id": "section-title",
+          "name": "Section title",
+          "font": "interface",
+          "size": 18,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Group related controls or content."
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "font": "body",
+          "size": 16,
+          "unit": "px",
+          "weight": 400,
+          "lineHeight": 1.5,
+          "letterSpacing": 0,
+          "usage": "Main descriptive copy."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "font": "interface",
+          "size": 14,
+          "unit": "px",
+          "weight": 500,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Form labels; do not rely on placeholders."
+        }
+      ],
+      "spacing": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": 4,
+          "unit": "px",
+          "usage": "Related inline items"
+        },
+        {
+          "id": "sm",
+          "name": "SM",
+          "value": 8,
+          "unit": "px",
+          "usage": "Within a control group"
+        },
+        {
+          "id": "md",
+          "name": "MD",
+          "value": 16,
+          "unit": "px",
+          "usage": "Between related blocks"
+        },
+        {
+          "id": "lg",
+          "name": "LG",
+          "value": 24,
+          "unit": "px",
+          "usage": "Between sections"
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": 32,
+          "unit": "px",
+          "usage": "Major content separation"
+        }
+      ],
+      "sizes": [
+        {
+          "id": "control",
+          "name": "Control height",
+          "value": 36,
+          "unit": "px",
+          "usage": "Proposed default, not an accessibility guarantee."
+        },
+        {
+          "id": "icon",
+          "name": "Icon",
+          "value": 18,
+          "unit": "px",
+          "usage": "Glyph size, not the clickable target."
+        },
+        {
+          "id": "inspector",
+          "name": "Inspector width",
+          "value": 320,
+          "unit": "px",
+          "usage": "Preferred width; adapt for narrower panes."
+        }
+      ],
+      "radii": [
+        {
+          "id": "control",
+          "name": "Control radius",
+          "value": 6,
+          "unit": "px",
+          "usage": "Inputs and compact actions."
+        },
+        {
+          "id": "surface",
+          "name": "Surface radius",
+          "value": 12,
+          "unit": "px",
+          "usage": "Standalone panels."
+        }
+      ],
+      "colors": [
+        {
+          "id": "background",
+          "name": "Background",
+          "light": "#FFFFFF",
+          "dark": "#1E1E24",
+          "host": "--background-primary",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "text",
+          "name": "Primary text",
+          "light": "#202027",
+          "dark": "#ECECF2",
+          "host": "--text-normal",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "muted",
+          "name": "Secondary text",
+          "light": "#595964",
+          "dark": "#B6B6C4",
+          "host": "--text-muted",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "light": "#6550B9",
+          "dark": "#B7A3FF",
+          "host": "--interactive-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent-text",
+          "name": "Text on accent",
+          "light": "#FFFFFF",
+          "dark": "#17131F",
+          "host": "--text-on-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "interaction",
+          "name": "Interaction states",
+          "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+        },
+        {
+          "id": "components",
+          "name": "Component usage",
+          "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+        }
+      ]
+    }
+  },
+  "notes": [
+    "# Companion implementation boundary\n\nShell qualification precedes native companion conversion. Publication is last. The first project-handoff script validates and returns JSON only; no boilerplate is generated by that script yet.\n"
+  ]
+}

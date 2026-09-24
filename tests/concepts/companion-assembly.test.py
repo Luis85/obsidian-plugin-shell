@@ -19,6 +19,7 @@ class AssemblyContract(unittest.TestCase):
         shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
+        shutil.copytree(ROOT / 'scripts/companion', self.root / 'scripts/companion')
         shutil.copy(ROOT / '.fallowrc.json', self.root / '.fallowrc.json')
         spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'scripts/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
@@ -103,6 +104,23 @@ class AssemblyContract(unittest.TestCase):
         value['entry'].append('docs/concepts/companion/src/state-safety.js')
         config.write_text(json.dumps(value))
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
+            self.build()
+
+    def test_shared_project_contract_changes_the_generated_artifact(self):
+        self.build()
+        before = self.output.read_bytes()
+        shared = self.root / 'scripts/companion/project-contract.mjs'
+        shared.write_text(shared.read_text() + '\n// exact shared contract change\n')
+        self.build()
+        self.assertNotEqual(before, self.output.read_bytes())
+        self.assertIn(b'exact shared contract change', self.output.read_bytes())
+
+    def test_shared_project_contract_requires_analyzer_entry(self):
+        config = self.root / '.fallowrc.json'
+        value = json.loads(config.read_text())
+        value['entry'].remove('scripts/companion/project-contract.mjs')
+        config.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError, 'Shared project contract'):
             self.build()
 
     def test_stale_generated_output_is_rejected(self):

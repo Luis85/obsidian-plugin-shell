@@ -12586,6 +12586,91 @@ Edge: ${id2}`,
 }({}, Vue);
 </script>
 <script>
+// Shared by the standalone concept and read-only shell entrypoint. No host I/O.
+const COMPANION_FORMAT = 'obsidian-companion-project';
+const COMPANION_VERSION = 1;
+const COMPANION_MAX_BYTES = 4_000_000;
+const COMPANION_DEFAULT_FOLDERS = Object.freeze({ codebaseFolder: 'src', testsFolder: 'tests' });
+const companionDesignKeys = ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId',
+  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem'];
+
+function companionRequire(condition, message) {
+  if (!condition) throw new Error('COMPANION_INVALID: ' + message);
+}
+function companionObject(value, keys, required = keys) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) &&
+    Object.keys(value).every(key => keys.includes(key)) && required.every(key => Object.hasOwn(value, key));
+}
+function companionText(value, limit, nonempty = false) {
+  return typeof value === 'string' && value.length <= limit && (!nonempty || value.trim().length > 0);
+}
+
+function companionRelativeFolder(value, allowRoot = false) {
+  if (allowRoot && value === '.') return true;
+  if (typeof value !== 'string' || value.length > 240 || value.length === 0) return false;
+  const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
+  const protectedNames = new Set(['.obsidian', '.git', 'node_modules', '.test-vault', '.dev-vault', '__proto__', 'prototype', 'constructor']);
+  return value.split('/').every(part => /^[A-Za-z0-9][A-Za-z0-9 _.-]*$/.test(part) &&
+    !/[. ]$/.test(part) && !reserved.test(part) && !protectedNames.has(part.toLowerCase()));
+}
+function validateCompanionFolders(value) {
+  companionRequire(companionObject(value, ['codebaseFolder', 'testsFolder']), 'Expected codebaseFolder and testsFolder.');
+  companionRequire(Object.values(value).every(path => companionRelativeFolder(path)), 'Folders must be portable relative paths outside protected vault folders.');
+  const a = value.codebaseFolder.toLowerCase(), b = value.testsFolder.toLowerCase();
+  companionRequire(a !== b && !a.startsWith(b + '/') && !b.startsWith(a + '/'), 'Codebase and tests folders must not overlap.');
+  return value;
+}
+
+// Bound recursion/allocation and reject prototype keys at every level. No merging,
+// evaluation, dynamic imports, HTML execution or source acquisition is performed.
+function companionSafeTree(value, depth = 0, budget = { count: 0 }) {
+  companionRequire(depth <= 40 && ++budget.count <= 120_000, 'Document nesting or item limit exceeded.');
+  if (value === null || typeof value === 'boolean' || typeof value === 'string') return;
+  if (typeof value === 'number') { companionRequire(Number.isFinite(value), 'Non-finite number.'); return; }
+  companionRequire(typeof value === 'object', 'Only JSON data is supported.');
+  for (const [key, item] of Object.entries(value)) {
+    companionRequire(!['__proto__', 'constructor', 'prototype'].includes(key), 'Unsafe object key.');
+    companionSafeTree(item, depth + 1, budget);
+  }
+}
+function validateCompanionIdentity(value) {
+  companionRequire(companionObject(value, ['id', 'name', 'author', 'version', 'description']), 'Unsupported project identity.');
+  companionRequire(companionText(value.id, 60) && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.id) &&
+    companionRelativeFolder(value.id), 'Use a portable lowercase plugin ID.');
+  companionRequire(companionText(value.name, 80, true) && !/[\r\n]/.test(value.name), 'Use a single-line project name.');
+  companionRequire(companionText(value.author, 80) && companionText(value.description, 400), 'Project description or author exceeds its limit.');
+  companionRequire(companionText(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), 'Expected an x.y.z project version.');
+}
+function validateCompanionDesign(value) {
+  companionRequire(companionObject(value, companionDesignKeys, ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId', 'library', 'prds']), 'Unsupported design envelope.');
+  companionRequire(value.schema === 1 && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
+    ['desktop', 'mobile-ready'].includes(value.platform), 'Unsupported design schema or platform.');
+  companionRequire(Number.isSafeInteger(value.nextId) && value.nextId > 0 && value.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid design counter.');
+  for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', 12]]) {
+    companionRequire(Array.isArray(value[key]) && value[key].length <= limit && value[key].every(item =>
+      item !== null && typeof item === 'object' && !Array.isArray(item) && companionText(item.id, 120, true)), 'Invalid design collection: ' + key);
+    companionRequire(new Set(value[key].map(item => item.id)).size === value[key].length, 'Duplicate IDs in ' + key + '.');
+  }
+}
+function validateCompanionDocument(value) {
+  companionSafeTree(value);
+  companionRequire(companionObject(value, ['kind', 'schemaVersion', 'executable', 'project', 'settings', 'design', 'notes']), 'Expected a full companion project, not a blueprint or recovery snapshot.');
+  companionRequire(value.kind === COMPANION_FORMAT && value.schemaVersion === COMPANION_VERSION && value.executable === false,
+    'Unsupported companion format/version or executable flag.');
+  validateCompanionIdentity(value.project);
+  validateCompanionFolders(value.settings);
+  validateCompanionDesign(value.design);
+  companionRequire(Array.isArray(value.notes) && value.notes.length <= 100 && value.notes.every(note => companionText(note, 100000)), 'Invalid project notes.');
+  companionRequire(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');
+  return value;
+}
+function parseCompanionDocument(text) {
+  companionRequire(typeof text === 'string' && new TextEncoder().encode(text).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB input limit.');
+  let value;
+  try { value = JSON.parse(text); } catch { throw new Error('COMPANION_INVALID: Expected valid UTF-8 JSON.'); }
+  return validateCompanionDocument(value);
+}
+
 const LIBRARY_LIMIT=64;
 // Content planning units, not executable components or inferred business logic.
 const BRICK_KINDS={
@@ -12736,7 +12821,7 @@ function validVaultFiles(files){
 function validVaultRelativePath(path){return typeof path==='string'&&path.length>0&&path.length<=240&&!path.startsWith('/')&&!/[\\\x00-\x1f:]/.test(path)&&path.split('/').every(part=>part&&part!=='.'&&part!=='..'&&!['__proto__','constructor','prototype'].includes(part));}
 function validVaultScope(s,validateProject){
  return s.schema===2&&s.vaultKey===CONCEPT_VAULT.key&&!['projects','activeId','designDraft'].some(k=>Object.hasOwn(s,k))&&validVaultFiles(s.vaultFiles)&&typeof s.legacyHandled==='boolean'&&
-  (s.project===null||(validateProject(s.project)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&[vaultTestRoot(),vaultRoot()+'/.dev-vault'].includes(s.project.vault)&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
+  (s.project===null||(validateProject(s.project)&&validCompanionProjectFolders(s.project.folders)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&[vaultTestRoot(),vaultRoot()+'/.dev-vault'].includes(s.project.vault)&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
 }
 function projectNoteText(p){return '---\ntype: obsidian-plugin-project\nschema: 1\nproject_id: '+JSON.stringify(p.key)+'\nplugin_id: '+JSON.stringify(p.id)+'\nname: '+JSON.stringify(p.name)+'\nsource_root: "."\ndesign_folder: "project"\n---\n\n# '+p.name+'\n\n'+p.description+'\n\nOne project in this vault. Design artifacts belong under `project/`.\n';}
 function projectIdentity(p){return JSON.stringify([p?.key,p?.id,p?.name,p?.author,p?.description,p?.version,p?.root,p?.vault,p?.config]);}
@@ -13335,13 +13420,13 @@ function makerCode(index){const g=state.generator;const group=g.kind==='feature'
 function makerReview(){const g=state.generator;const files=makerFiles();return dialogBody('Review generated changes',`<div class="row between"><p class="mb0">${esc(g.entity)} · ${esc(g.preset)} preset</p>${badge('5 illustrative files','purple')}</div><div class="grid2 mt16"><div class="file-list">${files.map((f,i)=>`<button class="file-row ${state.selectedFile===i?'active':''}" data-action="file-preview" data-value="${i}"><span class="plus">${i===2?'~':'+'}</span><code>${esc(f)}</code></button>`).join('')}</div><div class="code-panel"><div class="code-title">Illustrative source · not executable output</div><pre class="code-body">${esc(makerCode(state.selectedFile))}</pre></div></div><div class="mt16">${command(getMakerCommand(false))}</div><p class="scope-label">The real maker is authoritative for paths, validation and generated bytes. These snippets are UX fixtures only.</p><div class="mt16">${callout('Apply runs typecheck, the generated test and entity validation. Full verify is separate. Edited files must never be force-overwritten.')}</div><div id="maker-error" class="error" role="alert">${esc(g.error||'')}</div>`,`${button('Back to form','close','','ghost')}${button('Apply simulated changes','maker-apply','','primary','wand')}`);}
 
 // Concept section: dialogs
-function drawModal(){const factories={'style-guide-form':styleGuideForm,'test-data-form':testDataForm,'test-data-target':testDataTargetForm,'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('test-data-modal',modalType==='test-data-form');document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
+function drawModal(){const factories={'project-import':companionImportDialog,'project-folders':companionFoldersDialog,'project-handoff':companionHandoffDialog,'style-guide-form':styleGuideForm,'test-data-form':testDataForm,'test-data-target':testDataTargetForm,'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('test-data-modal',modalType==='test-data-form');document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return vaultContextDialog();}
 function attachDialog(){return vaultContextDialog();}
-function settingsDialog(){return dialogBody('Workbench preferences',`<div class="grid2"><div class="card"><h3>Appearance</h3><p>Host-inspired dark and light themes. No fonts or assets are fetched.</p><div class="button-row">${button(state.settings.theme==='dark'?'Switch to light':'Switch to dark','theme','','','sun')}</div></div><div class="card"><h3>Local demo state</h3><p>Only this concept’s inputs are stored in your browser. No actual workspace is connected.</p><label class="checkbox"><input type="checkbox" data-field="remember" ${state.settings.remember?'checked':''}><span>Remember the demo on this browser</span></label></div></div><div class="mt24">${callout('This concept is English-only. Production requirements include English/German, validated settings, machine-local trust and platform-specific executable paths.')}</div>${storageWarning?`<p class="error">${esc(storageWarning)}</p>`:''}<div class="button-row">${button('Export this session','storage-recovery','','','download')}${storageWarning?button('Export retained browser data','storage-retained','','','download'):''}${button('Review scenario controls','lab','','','settings')}${button('Reset demo state','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`);}
+function settingsDialog(){return dialogBody('Workbench preferences',`<div class="grid2"><div class="card"><h3>Appearance</h3><p>Host-inspired dark and light themes. No fonts or assets are fetched.</p><div class="button-row">${button(state.settings.theme==='dark'?'Switch to light':'Switch to dark','theme','','','sun')}</div></div><div class="card"><h3>Local demo state</h3><p>Only this concept’s inputs are stored in your browser. No actual workspace is connected.</p><label class="checkbox"><input type="checkbox" data-field="remember" ${state.settings.remember?'checked':''}><span>Remember the demo on this browser</span></label></div></div>${companionSettingsCard()}<div class="mt24">${callout('This concept is English-only. Production requirements include English/German, validated settings, machine-local trust and platform-specific executable paths.')}</div>${storageWarning?`<p class="error">${esc(storageWarning)}</p>`:''}<div class="button-row">${button('Export this session','storage-recovery','','','download')}${storageWarning?button('Export retained browser data','storage-retained','','','download'):''}${button('Review scenario controls','lab','','','settings')}${button('Reset demo state','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`);}
 function paletteDialog(){return dialogBody('Find an action',`<label class="small muted" for="palette-search">Search workspace actions</label><input autofocus class="palette-input" id="palette-search" placeholder="Type an action or screen…" data-field="palette-search" autocomplete="off"><div id="palette-results" class="modal-list">${paletteResults('')}</div><p class="scope-label mt16">Ctrl / ⌘ K to open · arrow keys to move · Enter to choose · Escape to close</p>`);}
-function paletteResults(q){const rows=[['vault-init','','Project details','Identity for this vault’s one project','settings'],['vault-prepare','','Prepare this vault','Review additive template files and build tools','terminal'],...NAV.map(([v,ic,t])=>['palette-nav',v,t,'Open workspace view',ic]),['storage-recovery','','Export this session','Private recovery snapshot; saved design only, not form drafts','download'],['tour','','Resume guided tour','Explain the workbench','help'],['lab','','Review scenarios','Exercise failure and recovery states','settings']].filter(a=>(a[2]+' '+a[3]).toLowerCase().includes(q.toLowerCase()));return rows.length?rows.map(([a,v,t,d,ic])=>`<button data-action="${a}" data-value="${v}">${icon(ic)}<span>${t}<small>${d}</small></span></button>`).join(''):'<p class="no-results">No matching action.</p>';}
+function paletteResults(q){const rows=[['project-example','','Load companion project','Review an editable definition of the companion itself','box'],['project-import','','Import project JSON','Review a full portable project before replacing this one','file'],['project-export','','Export project JSON','Complete saved authoring data and folder settings','download'],['project-handoff','','Project JSON to shell','Version one prints the supplied JSON only','terminal'],['vault-init','','Project details','Identity for this vault’s one project','settings'],['vault-prepare','','Prepare this vault','Review additive template files and build tools','terminal'],...NAV.map(([v,ic,t])=>['palette-nav',v,t,'Open workspace view',ic]),['storage-recovery','','Export this session','Private recovery snapshot; saved design only, not form drafts','download'],['tour','','Resume guided tour','Explain the workbench','help'],['lab','','Review scenarios','Exercise failure and recovery states','settings']].filter(a=>(a[2]+' '+a[3]).toLowerCase().includes(q.toLowerCase()));return rows.length?rows.map(([a,v,t,d,ic])=>`<button data-action="${a}" data-value="${v}">${icon(ic)}<span>${t}<small>${d}</small></span></button>`).join(''):'<p class="no-results">No matching action.</p>';}
 function activationDialog(){const p=project();return dialogBody('Generated plugin activation',`<div class="dialog-simulation">Simulated host settings — not real Obsidian</div><h3 class="mt16">Authoring vault: ${esc(CONCEPT_VAULT.name)}</h3><p>Shell Workbench is already installed and enabled here. This is not evidence that the plugin you are developing has been installed or tested.</p><h3 class="mt24">Isolated test vault: ${esc(vaultDisplayTarget())}</h3><div class="context-path">${esc(p?.vault||vaultTestRoot())}/.obsidian/plugins/${esc(p?.id||'my-plugin')}/</div><div class="card mt16"><h3>${esc(p?.name||'Your plugin')}</h3>${vaultProjectPrepared()?button(p.enabled?'Disable in demo':'Enable in demo','enable-demo',p.id,p.enabled?'small':'primary small',p.enabled?'stop':'play'):badge('Prepare this project first')}</div><p class="scope-label mt16">Changes browser fixture state only. No Restricted Mode change, real enablement or native qualification occurs.</p>`,button(state.wizard?.step===7?'Return to preparation':'Back to workspace',state.wizard?.step===7?'return-wizard':'close','','ghost'));}
 function checkDialog(){const p=project();const key=modalData;const cmd=key==='browser'?'test:e2e':key==='native'?'test:native':key==='security'?'check:security':key;return dialogBody('Review a verification run',`<div class="row between"><h3 class="mb0">${esc(TOOLS.find(t=>t[0]===cmd)?.[1]||cmd)}</h3>${badge('Simulated execution','purple')}</div><div class="mt16">${command('npm run '+cmd)}</div><dl class="receipt"><dt>Project</dt><dd>${esc(p?.name||'No project')}</dd><dt>Working directory</dt><dd><code>${esc(p?.root||'Not bound')}</code></dd><dt>Source revision</dt><dd>${p?.rev||'—'}</dd><dt>Execution</dt><dd>None. Only fixture results are recorded.</dd></dl>${key==='native'?callout('Production native checks require a separately provisioned, isolated test vault. Never use a personal vault.','warn'):key==='security'?callout('A real security audit uses the registry. An offline or failed query must not be reported as a clean audit.','warn'):callout('Only this named scope will receive a fixture result. No other tests are marked as passed.')}<div id="operation-error" class="error" role="alert"></div>`,`${button('Cancel','close','','ghost')}${button('Simulate this run','check-confirm',key,'primary','play',(!p||state.activeRun)?'disabled':'')}`);}
 function toolDialog(){const t=TOOLS.find(t=>t[0]===modalData);if(!t)return dialogBody('Unknown tool','This tool is not in the baseline catalog.');const [cmd,title,cat,desc]=t;const routes={setup:['create',''],make:['maker-nav',''],'entities:catalog':['catalog',''],'dev:ui':['session','dev:ui'],dev:['session','dev'],'dev:local':['session','dev:local'],'build:local':['deploy',''],'test-build':['deploy',''],help:['tools',''],'test:watch':['session','test:watch'],'harness:preview':['session','harness:preview']};const act=routes[cmd]||['check',cmd==='test:e2e'?'browser':cmd==='test:native'?'native':cmd==='check:security'?'security':cmd];return dialogBody(title,`<p>${esc(desc)}</p>${command('npm run '+cmd)}<div class="mt24">${callout(`<strong>Existing CLI, proposed companion adapter.</strong> ${cat==='maintainer'?'This belongs in a guarded maintainer workflow.':'The UI must invoke the same project-local implementation.'} This concept never executes it.`)}</div>${cmd==='test-build'?'<p class="mt16">The name is a compatibility alias for local installation, not test evidence.</p>':''}${cmd==='entities:catalog'||cmd==='entities:check'?'<p class="mt16">The actual catalog bundles and evaluates trusted source. It is not an untrusted data-only scan.</p>':''}`,`${button('Close','close','','ghost')}${button('Open workflow',act[0],act[1],'primary','arrow')}`);}
@@ -13388,7 +13473,7 @@ function downloadText(data=modalData){const {text,filename}=data;const blob=new 
 
 // Concept section: interactions
 function dispatch(action,value){
- if(action==='editor-keep-editing'){restoreInlineRemoval();return;}if(handleVaultAction(action,value))return;
+ if(action==='editor-keep-editing'){restoreInlineRemoval();return;}if(handleCompanionTransfer(action))return;if(handleVaultAction(action,value))return;
  if(handleStyleGuideAction(action,value)||handleTestDataAction(action,value)||handleDataSourceAction(action,value)||handleSemanticAction(action,value)||handleVariantAction(action,value)||handleEdgeEditingAction(action,value)||handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
@@ -13459,7 +13544,7 @@ function dispatch(action,value){
  default:notify('This action is outside the current concept.');
  }
 }
-function updateField(el,commit=false){if(editVaultField(el))return;if(editStyleGuideField(el)||editTestDataField(el)||editDataSourceField(el)||editSemanticField(el)||editVariantField(el)||editUnifiedField(el)||editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
+function updateField(el,commit=false){if(editCompanionTransfer(el)||editVaultField(el))return;if(editStyleGuideField(el)||editTestDataField(el)||editDataSourceField(el)||editSemanticField(el)||editVariantField(el)||editUnifiedField(el)||editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
  if(key?.startsWith('w-')){const w=state.wizard;const fieldName=key.slice(2);if(!['name','id','author','description','version','source','bound','trusted','approved'].includes(fieldName))return;w[fieldName]=value;w.error='';if(!['trusted','approved'].includes(fieldName)){w.rev++;w.plan=null;w.approved=false;if(fieldName==='source'||fieldName==='root')w.acquired=false;}if(fieldName==='trusted'&&!value){w.plan=null;w.approved=false;}save();if(commit&&(el.type==='checkbox'||el.tagName==='SELECT'))redrawModal();}
  if(key?.startsWith('g-')){state.generator[key.slice(2)]=value;state.generator.plan=null;state.generator.error='';save();}
  if(key==='tool-search'){state.search=value;document.getElementById('tool-results').innerHTML=toolResults();}
@@ -13744,6 +13829,384 @@ function createFixtureAdapter(manifest, options = {}) {
     return Object.freeze(Object.fromEntries(selected.map(op => [op.slug, (input, options) => execute(op.id, input, options)])));
   }
   return Object.freeze({ execute, port, reset() { check(); initialize(); }, captured() { check(); return clone(captures); }, dispose() { disposed = true; stores.clear(); captures.length = 0; } });
+}
+
+// Portable authoring documents are deliberately separate from recovery snapshots.
+const projectTransferUi = { text: '', filename: '', candidate: null, snapshot: '', error: '', serial: 0, loading: false };
+let projectFoldersDraft = null;
+function companionFolders(p = project()) { return { ...(p?.folders || COMPANION_DEFAULT_FOLDERS) }; }
+function validCompanionProjectFolders(value) {
+  if (value === undefined) return true;
+  try { validateCompanionFolders(value); return true; } catch { return false; }
+}
+function companionProjectDocument(p = project()) {
+  if (!p) throw Error('Define a project before exporting.');
+  const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
+  return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
+    project: identity, settings: companionFolders(p), design: { schema: 1, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
+}
+function companionJson(p = project()) {
+  const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
+  parseCompanionDocument(text); // Count the actual pretty-printed UTF-8 bytes too.
+  return text;
+}
+function companionExport() {
+  if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation before exporting.');
+  try {
+    const text = companionJson();
+    showModal('copy', { title: 'Full project JSON — saved authoring data and folder settings. Keep private. No trust, source files, approvals or verification receipts.',
+      text, filename: project().id + '.companion.json' });
+  } catch (error) { notify(error.message); }
+}
+function companionProjectToken() { return JSON.stringify({ project: project(), files: state.vaultFiles }); }
+function companionCanReplace(snapshot) {
+  if (state.activeRun || tdUi.busy) throw Error('Finish or cancel the current operation first.');
+  if (snapshot !== companionProjectToken()) throw Error('The current project changed. Review the import again; nothing was replaced.');
+  if (storageWarning || localStorage.getItem(STORAGE_KEY) !== persistenceSnapshot) throw Error('Resolve the browser-storage warning or conflict before replacing a project. Export both copies first.');
+  const p = project(), files = state.vaultFiles;
+  if (p ? files['Project.md'] !== p.projectNote : Object.keys(files).some(path => /^project\.md(?:\/|$)/i.test(path))) {
+    throw Error('Project.md is not an unchanged owned record. Nothing was replaced.');
+  }
+}
+function companionCandidate(text) {
+  const document = parseCompanionDocument(text);
+  const d = document.design;
+  if (!structuralDesign(d)) throw Error('The design contains unsupported or malformed fields. Nothing was imported.');
+  if (d.nextId < importCounter(d)) throw Error('The design counter could reuse an existing ID. Nothing was imported.');
+  const p = newPlanningProject(document.project);
+  Object.assign(p.design, designCopy(d));
+  p.folders = designCopy(document.settings);
+  p.notes = designCopy(document.notes);
+  if (!validSavedDesign(p.design)) throw Error('The imported design cannot be retained safely.');
+  return p;
+}
+function openCompanionImport(example = false) {
+  if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation first.');
+  Object.assign(projectTransferUi, { text: example ? companionJson(companionExampleProject()) : '',
+    filename: example ? 'Bundled companion project' : '', candidate: null, snapshot: companionProjectToken(),
+    error: '', loading: false, serial: projectTransferUi.serial + 1 });
+  showModal('project-import');
+  if (example) reviewCompanionImport();
+}
+function companionTransferError(error) {
+  projectTransferUi.error = error instanceof Error ? error.message : 'The project could not be read.';
+  redrawModal();
+  document.getElementById('project-transfer-error')?.focus();
+}
+function reviewCompanionImport() {
+  try {
+    if (projectTransferUi.loading) return;
+    const snapshot = companionProjectToken();
+    companionCanReplace(snapshot);
+    projectTransferUi.snapshot = snapshot;
+    projectTransferUi.candidate = companionCandidate(projectTransferUi.text);
+    projectTransferUi.error = '';
+    redrawModal();
+    document.getElementById('project-import-summary')?.focus();
+  } catch (error) { projectTransferUi.candidate = null; companionTransferError(error); }
+}
+function applyCompanionImport() {
+  const u = projectTransferUi;
+  try {
+    if (!u.candidate || u.loading || !document.getElementById('project-import-confirm')?.checked) throw Error('Review the project and confirm the replacement first.');
+    companionCanReplace(u.snapshot);
+    const p = companionCandidate(u.text); // Never trust a cached or edited review.
+    const before = state;
+    state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
+      wizard: null, generator: { ...state.generator, plan: null }, runs: [], view: 'overview' };
+    if (!saveConceptState()) { state = before; throw Error('The project could not be saved. The current project is unchanged; export recovery before closing.'); }
+    tdDropSession(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
+    designUi.error = ''; productUi.prd = null; productUi.component = null;
+    dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
+    u.serial++; u.candidate = null; modalOriginal = null; closeModal(); setView('overview');
+    notify('Project imported into this vault’s workspace. No source was generated, acquired or activated.');
+  } catch (error) { companionTransferError(error); }
+}
+async function readCompanionImportFile(file) {
+  const u = projectTransferUi, serial = ++u.serial;
+  u.candidate = null; u.error = ''; u.loading = true; u.text = ''; u.filename = file?.name || '';
+  redrawModal();
+  try {
+    if (!file || file.size > COMPANION_MAX_BYTES) throw Error('Choose a JSON file no larger than 4 MB.');
+    const bytes = await file.arrayBuffer();
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    if (serial !== u.serial || modalType !== 'project-import') return;
+    u.text = text; u.loading = false; reviewCompanionImport();
+  } catch (error) {
+    if (serial !== u.serial || modalType !== 'project-import') return;
+    u.loading = false; companionTransferError(error);
+  }
+}
+function companionSettingsCard() {
+  const p = project(), folders = companionFolders();
+  return `<section class="card mt16"><h3>Project files &amp; JSON handoff</h3><p>${p ? 'Saved folder settings travel with the full project export.' : 'Load the companion example, import a full project, or start a blank project.'}</p>
+    ${p ? `<dl class="receipt"><dt>Codebase folder</dt><dd><code>${esc(folders.codebaseFolder)}/</code></dd><dt>Tests folder</dt><dd><code>${esc(folders.testsFolder)}/</code></dd></dl>` : ''}
+    <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Load companion project', 'project-example', '', 'small', 'box')}</div>
+    <p class="small muted">Import replaces the one project only after review. Recovery snapshots below are a different format. The shell handoff currently prints JSON only.</p></section>`;
+}
+function companionImportDialog() {
+  const u = projectTransferUi, p = u.candidate, current = project();
+  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
+    <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
+  return dialogBody('Import a full project', `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
+    <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
+    <p class="small" role="status">${u.loading ? 'Reading selected file…' : esc(u.filename)}</p>
+    <div class="field"><label for="project-import-text">Or paste the full project JSON</label><textarea id="project-import-text" rows="7" data-field="project-import-text" spellcheck="false" ${u.loading ? 'disabled' : ''}>${esc(u.text)}</textarea></div>
+    <p class="small muted">Includes saved identity, requirements, screens, component content/variants, entities, source operations, test recipes, design tokens, arrangement, notes and folders. Excludes unsubmitted drafts, execution trust, machine paths, generated files and test receipts.</p>
+    <div class="error" id="project-transfer-error" role="alert" tabindex="-1">${esc(u.error)}</div>${summary}`,
+    button('Cancel', 'close', '', 'ghost') + (current ? button('Export current project', 'project-backup', '', '', 'download') : '') +
+    button('Review JSON', 'project-import-review', '', '', 'search', u.loading ? 'disabled' : '') +
+    button(current ? 'Replace project' : 'Import project', 'project-import-apply', '', 'primary', 'file', !p || u.loading ? 'disabled' : ''));
+}
+function openCompanionFolders() {
+  if (!project() || state.activeRun || tdUi.busy) return notify('Define a project and finish any current operation first.');
+  projectFoldersDraft = { ...companionFolders(), snapshot: companionProjectToken(), error: '' };
+  showModal('project-folders');
+}
+function companionFoldersDialog() {
+  const f = projectFoldersDraft;
+  return dialogBody('Project folders', `<p>Paths are relative to the future project target inside your vault. They do not relocate the current shell, rename source files, or change your test-vault target.</p>
+    ${field('Codebase folder', 'project-codebase-folder', f.codebaseFolder, 'Default: src. Example: plugin/src.')}
+    ${field('Tests folder', 'project-tests-folder', f.testsFolder, 'Default: tests. Example: plugin/tests.')}
+    <p class="small muted">Use separate portable relative folders. Absolute paths, parent traversal, reserved host folders and overlapping folders are rejected. Existing illustrative scaffold previews retain their legacy src/tests layout; this setting belongs to the new JSON handoff.</p>
+    <div class="error" role="alert" id="project-folders-error" tabindex="-1">${esc(f.error)}</div>`, button('Cancel', 'close', '', 'ghost') + button('Save folders', 'project-folders-save', '', 'primary'));
+}
+function saveCompanionFolders() {
+  const f = projectFoldersDraft;
+  try {
+    companionCanReplace(f.snapshot);
+    const folders = validateCompanionFolders({ codebaseFolder: f.codebaseFolder, testsFolder: f.testsFolder });
+    const before = state, p = project();
+    state = { ...state, project: { ...p, folders, rev: p.rev + 1 }, wizard: null, generator: { ...state.generator, plan: null } };
+    if (!saveConceptState()) { state = before; throw Error('Folder settings could not be saved. The previous settings are unchanged.'); }
+    designUi.plan = null; modalOriginal = null; closeModal(); render(); notify('Project folder settings saved. No files were moved or generated.');
+  } catch (error) { f.error = error.message; redrawModal(); document.getElementById('project-folders-error')?.focus(); }
+}
+function handleCompanionTransfer(action) {
+  const actions = { 'project-export': companionExport, 'project-import': openCompanionImport,
+    'project-example': () => openCompanionImport(true), 'project-import-review': reviewCompanionImport,
+    'project-import-apply': applyCompanionImport, 'project-folders': openCompanionFolders, 'project-folders-save': saveCompanionFolders,
+    'project-handoff': () => showModal('project-handoff'),
+    'project-backup': () => downloadText({ text: companionJson(), filename: project().id + '.companion.json' }) };
+  if (!Object.hasOwn(actions, action)) return false;
+  actions[action](); return true;
+}
+function editCompanionTransfer(el) {
+  if (el.dataset.field === 'project-import-text') {
+    projectTransferUi.serial++; projectTransferUi.text = el.value; projectTransferUi.candidate = null;
+    projectTransferUi.error = '';
+    // Keep a large pasted document in its existing textarea, preserving caret and
+    // avoiding a full modal replacement on every keystroke.
+    document.getElementById('project-import-summary')?.remove();
+    document.getElementById('project-transfer-error').textContent = '';
+    document.querySelector('#modal [data-action="project-import-apply"]').disabled = true;
+    return true;
+  }
+  const key = { 'project-codebase-folder': 'codebaseFolder', 'project-tests-folder': 'testsFolder' }[el.dataset.field];
+  if (!key || !projectFoldersDraft) return false;
+  projectFoldersDraft[key] = el.value; return true;
+}
+document.addEventListener('change', event => {
+  if (event.target.id === 'project-import-file') void readCompanionImportFile(event.target.files[0]);
+});
+document.getElementById('modal').addEventListener('close', () => { projectTransferUi.serial++; });
+function companionHandoffDialog() {
+  const folders = companionFolders(), filename = (project()?.id || 'my-plugin') + '.companion.json';
+  return dialogBody('Project JSON → shell script', `<p>Export the full project, save it locally, then run this command from the shell checkout. Use your actual vault directory.</p>
+    ${command('npm run --silent companion:generate -- --input "' + filename + '" --vault "/path/to/vault" --target "."')}
+    <p><strong>Version 1 returns the supplied JSON only.</strong> It validates the envelope and contained target, prints the original bytes to stdout, and writes nothing. Full boilerplate generation is the next implementation stage.</p>
+    <dl class="receipt"><dt>Future codebase</dt><dd>&lt;target&gt;/${esc(folders.codebaseFolder)}/</dd><dt>Future tests</dt><dd>&lt;target&gt;/${esc(folders.testsFolder)}/</dd></dl>
+    <p class="small muted">Use a nested relative target such as plugins/companion when needed. Target and folder checks do not authorize installation or execution. The browser never launches the shell.</p>`,
+    button('Close', 'close', '', 'ghost') + (project() ? button('Export project JSON', 'project-export', '', 'primary', 'download') : ''));
+}
+
+// The companion described with the same project model as a user's plugin.
+// This is an editable design seed, never a second active project or hidden runtime.
+function companionExampleProject() {
+  const p = newPlanningProject({ id: 'plugin-companion', name: 'Plugin Companion', author: 'Luis Mendez',
+    version: '0.1.0', description: 'Design one Obsidian plugin in its vault, describe its contracts and export a reviewed project to the independent shell.' });
+  p.folders = { ...COMPANION_DEFAULT_FOLDERS };
+  const d = p.design;
+  d.blueprint = 'workspace';
+  d.goal = 'Help developers turn a plugin idea into a consistent, reviewable design and portable handoff without requiring build tools during discovery.';
+  const surfaces = {};
+  function surface(key, label, layout, goal, kind = 'page') {
+    const node = { id: 'node-' + d.nextId++, slug: key, label, kind, layout, placement: 'tab',
+      parent: kind === 'page' ? surfaces.workbench.id : null, nav: kind === 'page', command: kind === 'view' || kind === 'modal',
+      ribbon: kind === 'view', entry: kind === 'view', instance: 'reuse', patterns: kind === 'view' ? ['open-view'] : kind === 'settings' ? ['settings'] : [],
+      goal, entity: '', intent: goal, goals: [goal], components: [], bricks: [] };
+    d.nodes.push(node); surfaces[key] = node;
+    if (kind !== 'settings') {
+      const block = { schema: 1, id: 'brick-' + d.nextId++, kind: 'heading', title: label, purpose: goal,
+        content: goal, region: 'content', component: null };
+      attachBrickDefinition(block, brickDefinition(d, 'heading')); node.bricks.push(block);
+      node.components.push({ id: 'status-notice', version: '1.0.0', slot: 'content' });
+    }
+    return node;
+  }
+  surface('workbench', 'Companion workbench', 'sidebar-left', 'Open the one-vault workspace and retain the selected design context.', 'view');
+  const screens = [
+    ['overview', 'Project overview', 'dashboard', 'Understand the next useful action, review blockers and advisory findings.'],
+    ['requirements', 'Product requirements', 'list-detail', 'Describe outcomes and verifiable acceptance criteria, then map them to screens and components.'],
+    ['sitemap', 'Sitemap & views', 'canvas', 'Arrange native containers and internal screens; keep containment, navigation and data flows distinct.'],
+    ['entities', 'Entity relationships', 'canvas', 'Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.'],
+    ['sources', 'Data Sources', 'list-detail', 'Describe vault, API and database ports, operations and payloads without contacting live services.'],
+    ['test-data', 'Test Data', 'list-detail', 'Configure seeded recipes, try isolated operations and export reviewed test tooling.'],
+    ['design-system', 'Design System', 'list-detail', 'Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.'],
+    ['components', 'Component library', 'list-detail', 'Describe reusable component contracts, content and named variants; review pinned upgrades.'],
+    ['blueprints', 'Blueprints', 'dashboard', 'Choose a layout starting point while retaining ownership of the current design.'],
+    ['patterns', 'Action patterns', 'list-detail', 'Attach established actions to shared application behavior with accessible entry points.'],
+    ['prepare', 'Prepare project', 'wizard', 'Review additive template preparation, trust and an isolated test vault before any native execution.'],
+    ['generate', 'Generate a feature', 'form', 'Preview independent shell makers without equating scaffolding with implementation.'],
+    ['develop', 'Development', 'dashboard', 'Keep source, built and installed revisions distinct through the first development loop.'],
+    ['quality', 'Quality & verification', 'dashboard', 'Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.'],
+    ['capabilities', 'Shell capabilities', 'list-detail', 'Discover CLI commands and shared shell services without requiring the companion.'],
+    ['release', 'Release readiness', 'dashboard', 'Inspect publication prerequisites only after shell and native qualification.'],
+    ['runs', 'Runs & recovery', 'list-detail', 'Inspect bounded execution history and preserve private recovery copies before reset.'],
+  ];
+  for (const args of screens) surface(...args);
+  surface('preferences', 'Workbench preferences', 'form', 'Configure codebase and tests folders, appearance, import/export and explicit recovery.', 'settings');
+  surface('import-project', 'Import project JSON', 'form', 'Validate and review a full project, then explicitly replace the current authoring project.', 'modal');
+  surface('export-project', 'Export project JSON', 'form', 'Export all saved design data and folder settings without machine trust or execution receipts.', 'modal');
+  surface('shell-handoff', 'Shell JSON handoff', 'form', 'Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.', 'modal');
+  function link(from, to, label) {
+    d.links.push({ id: 'edge-' + d.nextId++, from: surfaces[from].id, to: surfaces[to].id, label,
+      kind: surfaces[to].kind === 'modal' ? 'open' : 'navigate' });
+  }
+  for (const [from, to, label] of [
+    ['overview', 'requirements', 'Define the outcome'], ['requirements', 'sitemap', 'Shape the experience'],
+    ['sitemap', 'entities', 'Describe meaning'], ['entities', 'sources', 'Bind a source contract'],
+    ['sources', 'test-data', 'Try a source operation'], ['components', 'sitemap', 'Place a component'],
+    ['design-system', 'components', 'Review component guidance'], ['overview', 'import-project', 'Import a project'],
+    ['overview', 'export-project', 'Export the full project'], ['prepare', 'shell-handoff', 'Review CLI handoff'],
+    ['shell-handoff', 'export-project', 'Save project JSON'], ['prepare', 'develop', 'Continue after preparation'],
+    ['develop', 'quality', 'Inspect current evidence'], ['quality', 'release', 'Review publication gates'],
+  ]) link(from, to, label);
+  companionExampleComponents(d, surfaces);
+  companionExampleRequirements(d, surfaces);
+  companionExampleEntities(d, surfaces);
+  d.designSystem = sgStarter(); d.designSystem.name = 'Companion workbench design system';
+  d.designSystem.description = 'Host-friendly design declarations for the companion. Tokens are authored intent, not automatic component styling.';
+  d.canvas = emptyCanvas();
+  p.notes = ['# Companion implementation boundary\n\nShell qualification precedes native companion conversion. Publication is last. The first project-handoff script validates and returns JSON only; no boilerplate is generated by that script yet.\n'];
+  return p;
+}
+function companionExampleRequirements(d, surfaces) {
+  const groups = [
+    ['Product & workspace', 'A plugin idea, its requirements and its implementation context are otherwise scattered across tools.', [
+      ['One vault owns one project', 'overview', 'Opening this workspace exposes one project; loading another definition requires review and never adds a second active project.'],
+      ['Capture requirements and acceptance', 'requirements', 'Create, revise, map and export PRDs with testable requirements, priorities and retained review baselines.'],
+      ['Author screens and transitions', 'sitemap', 'Edit screens, containers, content sections and transitions with keyboard and pointer controls, Undo and Redo.'],
+      ['Declare domain relationships', 'entities', 'Define properties and explicit cardinalities while keeping diagram arrangement separate from persistence semantics.'],
+      ['Use reusable components', 'components', 'Place pinned component versions and variants with local content; preview and deliberately apply upgrades.'],
+      ['Select blueprints and patterns', 'blueprints', 'Use a reviewed starter and shared action patterns without overwriting an existing design silently.'],
+    ]],
+    ['Data & visual contracts', 'Developers need explicit data and visual contracts before implementation can be safely generated.', [
+      ['Describe every source port', 'sources', 'Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.'],
+      ['Reuse source operations', 'sitemap', 'A screen references a declared source operation through a named directional data flow, not a duplicate source definition.'],
+      ['Generate deterministic test data', 'test-data', 'Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.'],
+      ['Exercise isolated operations', 'test-data', 'Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.'],
+      ['Export isolated test tooling', 'test-data', 'Export fixtures and adapters with a read-only plan and explicit ownership checks before applying or cleaning files.'],
+      ['Author the design system', 'design-system', 'Persist font declarations, typography, sizes, spacing, radii, paired colors and usage guidance.'],
+      ['Export a readable design guide', 'design-system', 'Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs.'],
+    ]],
+    ['Project JSON & shell handoff', 'A developer needs one complete portable definition that both the design tool and shell can read.', [
+      ['Describe the companion itself', 'overview', 'The bundled companion project uses the same editable model, screens, requirements, entities, sources and design system as user projects.'],
+      ['Export the complete saved project', 'export-project', 'The versioned JSON preserves identity, folder settings, PRDs, screen content, variants, arrangements, entities, source operations, test recipes, tokens and notes.'],
+      ['Import a full project safely', 'import-project', 'File and pasted JSON are bounded and validated before review; invalid input, cancelled review or stale state leaves the project unchanged.'],
+      ['Configure project folders', 'preferences', 'Codebase defaults to src and tests to tests. Valid custom folders persist and survive a JSON round trip; invalid or overlapping paths are rejected.'],
+      ['Accept JSON at the shell boundary', 'shell-handoff', 'The v1 script accepts the export and a target inside an explicitly selected vault, prints original JSON bytes, and performs zero filesystem writes.'],
+      ['Keep generation a separate stage', 'prepare', 'Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.'],
+    ]],
+    ['Safety & qualification', 'A convincing prototype must not imply that simulated execution or stored data is native evidence.', [
+      ['Preserve drafts and keyboard context', 'preferences', 'Closing dirty forms asks for confirmation; modal feedback is visible and focus returns to a meaningful control.'],
+      ['Protect recovery copies', 'runs', 'A stale window cannot reset newer retained state; current and retained data can be exported separately before reload.'],
+      ['Keep test-vault boundaries', 'prepare', 'Authoring files, host configuration and test-target data are preserved; no silent path migration or plugin activation.'],
+      ['Keep verification scopes separate', 'quality', 'Build, browser, native and security evidence have explicit scope and revision. Import never grants trust or carries simulated passes forward.'],
+      ['Teach the complete workflow', 'overview', 'A dismissible and resumable guided tour covers all main design, test and preparation stages.'],
+      ['Publish only after native acceptance', 'release', 'Shell qualification comes first, then native companion conversion and acceptance, then publication. No design action publishes.'],
+    ]],
+  ];
+  d.prds = groups.map(([title, problem, rows], index) => ({ id: 'prd-' + (index + 1), title, version: '0.1.0', status: 'draft',
+    problem, audience: 'Obsidian plugin developers, product owners and designers.', goals: rows.map(row => row[0]).join('\n'),
+    nonGoals: 'No native conversion, live service access or release authorization from the browser concept.', notes: 'Design specification, not implementation evidence.',
+    revision: 1, nextReq: rows.length + 1, baselines: [], requirements: rows.map(([name, key, acceptance], i) => ({
+      id: 'companion-' + (index + 1) + '-' + (i + 1), title: name, priority: 'must', status: 'designed', kind: 'functional', acceptance,
+      nodes: [surfaces[key].id], components: key === 'preferences' ? [] : ['status-notice'], patterns: [] })) }));
+}
+function companionExampleEntities(d, surfaces) {
+  const m = emptySemantic(), entities = {};
+  const definitions = [
+    ['plugin-project', 'Plugin Project', ['plugin_id', 'title', 'description', 'codebase_folder', 'tests_folder']],
+    ['requirement', 'Requirement', ['title', 'acceptance', 'priority', 'status']],
+    ['screen', 'Screen', ['title', 'code_name', 'layout', 'surface_kind']],
+    ['component', 'Component', ['title', 'version', 'content', 'accessibility']],
+    ['entity-definition', 'Entity Definition', ['title', 'code_name', 'note_folder', 'description']],
+    ['data-source', 'Data Source', ['title', 'source_kind', 'locator', 'credential_ref']],
+    ['source-operation', 'Source Operation', ['title', 'direction', 'input_shape', 'output_shape']],
+    ['test-recipe', 'Test Recipe', ['title', 'scenario', 'dataset']],
+    ['design-token', 'Design Token', ['title', 'token_group', 'value', 'usage']],
+  ];
+  for (const [slug, name, keys] of definitions) {
+    const entity = { id: semanticId(m, 'entity'), slug, name, folder: 'Companion/' + semanticPascal(slug),
+      description: 'Authoring contract for ' + name.toLowerCase() + '; not an existing native repository.', section: null,
+      properties: keys.map(key => ({ id: semanticId(m, 'property'), key, type: 'text', required: key === 'title' })) };
+    m.entities.push(entity); entities[slug] = entity;
+  }
+  for (const [source, target, key, many] of [['requirement', 'plugin-project', 'project_ref', false],
+    ['screen', 'plugin-project', 'project_ref', false], ['requirement', 'screen', 'screen_refs', true],
+    ['screen', 'component', 'component_refs', true], ['source-operation', 'data-source', 'source_ref', false],
+    ['test-recipe', 'source-operation', 'operation_ref', false], ['design-token', 'plugin-project', 'project_ref', false]]) {
+    m.relationships.push({ id: semanticId(m, 'relationship'), name: source + ' → ' + target, source: entities[source].id,
+      target: entities[target].id, key, sourceCard: '0..*', targetCard: many ? '0..*' : '0..1', onDelete: 'restrict' });
+  }
+  semanticArrange(m); d.semantic = m;
+  for (const [key, entity] of [['overview', 'plugin-project'], ['requirements', 'requirement'], ['sitemap', 'screen'],
+    ['components', 'component'], ['entities', 'entity-definition'], ['sources', 'data-source'], ['test-data', 'test-recipe'], ['design-system', 'design-token']]) surfaces[key].entity = entities[entity].id;
+  const sources = emptyDataSources(); d.dataSources = sources;
+  const source = { id: dsNext(sources, 'source'), slug: 'authoring-vault', name: 'Companion authoring vault', kind: 'vault', status: 'active',
+    description: 'Proposed native adapter over project authoring notes. The HTML only declares this port.', locator: 'vault://active', auth: 'none', credentialRef: '', operations: [] };
+  sources.sources.push(source); sources.positions[source.id] = { x: 900, y: 80 };
+  sources.testing = { ...tdDefaults(), count: 5 };
+  for (const [key, entity] of [['requirements', 'requirement'], ['sitemap', 'screen'], ['components', 'component']]) {
+    const op = { id: dsNext(sources, 'operation'), slug: 'list-' + key, name: 'List ' + key, direction: 'read', method: 'adapter',
+      resource: entities[entity].folder, description: 'Read the declared authoring records through the vault port.',
+      input: dsNewShape('none'), output: { ...dsNewShape('entity'), entity: entities[entity].id, many: true } };
+    source.operations.push(op);
+    sources.flows.push({ id: dsNext(sources, 'flow'), source: source.id, operation: op.id, card: surfaces[key].id,
+      direction: 'read', label: 'Load ' + key, trigger: 'on-open', notes: 'Declared native interaction. No live vault access in this prototype.' });
+    sources.testing.recipes.push({ source: source.id, operation: op.id, enabled: true, behavior: 'list', dataset: entity,
+      keyField: 'id', scenario: 'populated', latencyMs: 0, errorStatus: 503, rules: [] });
+  }
+}
+
+function companionExampleComponents(d, surfaces) {
+  const definitions = [
+    ['workflow-rail', 'WorkflowRail', 'navigation', ['workbench'], 'Move between Define, Structure, Compose, Review and Prepare without losing context.'],
+    ['review-findings', 'ReviewFindings', 'detail', ['overview', 'quality'], 'Show blocking and advisory totals with repair links to the owning editor.'],
+    ['requirements-panel', 'RequirementsPanel', 'table', ['requirements'], 'Capture requirements, acceptance, priority and screen/component traceability.'],
+    ['diagram-inspector', 'DiagramInspector', 'form', ['sitemap', 'entities'], 'Edit selected objects and relationships with precise controls and non-drag alternatives.'],
+    ['source-operation-editor', 'SourceOperationEditor', 'form', ['sources'], 'Describe operations and payloads; never collect live credentials.'],
+    ['test-operation-panel', 'TestOperationPanel', 'form', ['test-data'], 'Select an operation, run or cancel it, and separate live status from JSON results.'],
+    ['design-token-editor', 'DesignTokenEditor', 'form', ['design-system'], 'Edit grouped visual tokens with scoped previews and coverage disclosure.'],
+    ['component-contract-panel', 'ComponentContractPanel', 'detail', ['components'], 'Edit props, events, slots, variants and reusable content; review version changes.'],
+    ['project-json-review', 'ProjectJsonReview', 'form', ['import-project', 'export-project'], 'Review portable project data and explicitly confirm replacement; preserve a backup first.'],
+    ['shell-handoff-panel', 'ShellHandoffPanel', 'detail', ['shell-handoff', 'prepare'], 'Show the export path, target and source/test folder settings; disclose read-only v1 behavior.'],
+  ];
+  for (const [id, name, kind, keys, description] of definitions) {
+    const component = { id, name, category: 'Companion', preview: 'brick', description,
+      props: 'title:string\nbusy:boolean', events: 'select:string\ncancel:void', slots: 'content', variants: 'default, compact',
+      a11y: 'Named region, visible focus, labelled controls and explicit loading/error/empty feedback.',
+      version: '0.1.0', revision: 1, status: 'ready', origin: 'project', replacement: '',
+      tokens: '--text-normal\n--background-primary\n--interactive-accent', contentSpec: brickSpec(kind, name, description),
+      tags: ['companion', 'authoring'] };
+    d.library.push(component);
+    for (const key of keys) {
+      const node = surfaces[key]; node.components.push({ id, version: component.version, slot: 'content' });
+      const brick = { ...brickSpec(kind, name, description), id: 'brick-' + d.nextId++, component: id };
+      attachBrickDefinition(brick, component); node.bricks.push(brick);
+    }
+  }
 }
 
 /** Shared escaped form markup. Extra attributes are trusted template literals, never user HTML. */
@@ -15220,14 +15683,14 @@ function vaultRuntimeGuard(action){
 let vaultIdentityDraft=null;
 function vaultLocationCard(){return `<section class="vault-location"><span class="icon-tile">${icon('folder')}</span><div class="grow"><strong>${esc(CONCEPT_VAULT.name)}</strong><small>Current Obsidian vault · simulated host context</small><code>${esc(vaultRoot())}</code></div>${badge('One vault · one project','purple')}</section>`;}
 function vaultWelcomeView(){return heading('This vault. One project.','Start with the idea. Prepare the development toolchain when the design is ready.')+vaultLocationCard()+
- `<section class="start-workspace"><div class="start-head"><div class="eyebrow">YOUR PROJECT WORKSPACE</div><h2>Design first.<br>Build when you are ready.</h2><p>Your empty folder is already open as an Obsidian vault, and the companion is installed. Define this project, capture requirements and shape its screens before obtaining the template.</p><div class="row wrap">${button('Start designing','vault-init','','primary','layers')}${button('Use example outline','sample','','ghost','box')}</div><p class="start-disclosure">No Node, npm, Git or account is needed for design. This browser concept does not detect a real vault or write native files.</p></div><div class="start-process" aria-label="Vault-first project journey">${[['check','Open a folder as a vault','Completed before entering the plugin.'],['file','Define this project','A brief, requirements and a connected design.'],['layers','Shape the experience','Sitemap, layouts, content and shared components.'],['terminal','Prepare this vault','Review additive template files; then install and verify.']].map(([ic,t,d],i)=>`<div class="start-process-row"><span class="process-icon">${icon(ic)}</span><span><strong>${t}</strong><small>${d}</small></span><span class="process-order">${i+1}</span></div>`).join('')}</div></section>${vaultLegacyBanner()}<footer class="start-footer"><span>For a different project, open a different vault using Obsidian.</span>${button('Take a tour','tour','','ghost small','help')}</footer>`;}
+ `<section class="start-workspace"><div class="start-head"><div class="eyebrow">YOUR PROJECT WORKSPACE</div><h2>Design first.<br>Build when you are ready.</h2><p>Your empty folder is already open as an Obsidian vault, and the companion is installed. Define this project, capture requirements and shape its screens before obtaining the template.</p><div class="row wrap">${button('Start designing','vault-init','','primary','layers')}${button('Use example outline','sample','','ghost','box')}${button('Load companion project','project-example','','ghost','box')}${button('Import project JSON','project-import','','ghost','file')}</div><p class="start-disclosure">No Node, npm, Git or account is needed for design. This browser concept does not detect a real vault or write native files.</p></div><div class="start-process" aria-label="Vault-first project journey">${[['check','Open a folder as a vault','Completed before entering the plugin.'],['file','Define this project','A brief, requirements and a connected design.'],['layers','Shape the experience','Sitemap, layouts, content and shared components.'],['terminal','Prepare this vault','Review additive template files; then install and verify.']].map(([ic,t,d],i)=>`<div class="start-process-row"><span class="process-icon">${icon(ic)}</span><span><strong>${t}</strong><small>${d}</small></span><span class="process-order">${i+1}</span></div>`).join('')}</div></section>${vaultLegacyBanner()}<footer class="start-footer"><span>For a different project, open a different vault using Obsidian.</span>${button('Take a tour','tour','','ghost small','help')}</footer>`;}
 function vaultLegacyBanner(){return legacyAvailable()?`<section class="callout warn"><div class="grow"><strong>Previous multi-project concept data found</strong><p>The original remains untouched. Bring one outline into this vault, or export the old workspace before deciding.</p></div>${button('Review old workspace','vault-legacy','','small')}</section>`:'';}
 function vaultPreparationView(){
  const p=project();if(!p)return vaultWelcomeView();
  const inProgress=state.wizard&&state.wizard.status!=='succeeded';
  return heading('Prepare this vault','Turn this project’s design into a reviewed development workspace.')+vaultLocationCard()+
  `<section class="next-task"><span class="next-task-icon">${icon('terminal')}</span><div class="grow"><h2>${vaultProjectPrepared()?'This project is prepared':'Your design is already a project'}</h2><p>${vaultProjectPrepared()?'Continue in the existing workspace; initialization will not create another project.':'Preparation adds the template here. It does not create a second folder or replace the current design.'}</p></div>${button(vaultProjectPrepared()?'Open development':inProgress?'Resume preparation':'Review preparation',vaultProjectPrepared()?'nav':'vault-prepare',vaultProjectPrepared()?'develop':'','primary','arrow')}</section>
- <div class="grid2"><section class="card"><h2>Preserved in this vault</h2><p>Obsidian configuration, the companion installation, Project.md and your requirements, sitemap and components.</p><div class="context-path">${esc(CONCEPT_VAULT.config)}/ · Project.md · project/</div><p class="small muted">Existing files are compared before writes. Conflicts stop preparation; there is no force-overwrite option.</p></section><section class="card"><h2>Added after review</h2><p>Template source, build scripts and locked dependencies. Runtime testing uses an isolated vault, not the project’s authoring vault.</p><div class="context-path">src/ · scripts/ · package.json<br>Test target: ${esc(vaultDisplayTarget(vaultTestRoot()))}/</div><p class="small muted">Template acquisition, source writes, dependency installation, testing and activation are separate stages.</p></section></div><div class="button-row">${button('Back to the design','nav','sitemap','','layers')}${button('Project details','vault-init','','ghost','settings')}${button('Project record','vault-record','','ghost','file')}</div>`;
+ <div class="grid2"><section class="card"><h2>Preserved in this vault</h2><p>Obsidian configuration, the companion installation, Project.md and your requirements, sitemap and components.</p><div class="context-path">${esc(CONCEPT_VAULT.config)}/ · Project.md · project/</div><p class="small muted">Existing files are compared before writes. Conflicts stop preparation; there is no force-overwrite option.</p></section><section class="card"><h2>Added after review</h2><p>Template source, build scripts and locked dependencies. Runtime testing uses an isolated vault, not the project’s authoring vault.</p><div class="context-path">src/ · scripts/ · package.json<br>Test target: ${esc(vaultDisplayTarget(vaultTestRoot()))}/</div><p class="small muted">Template acquisition, source writes, dependency installation, testing and activation are separate stages.</p></section></div><div class="button-row">${button('Project JSON → shell','project-handoff','','primary','terminal')}${button('Back to the design','nav','sitemap','','layers')}${button('Project details','vault-init','','ghost','settings')}${button('Project record','vault-record','','ghost','file')}</div>`;
 }
 function vaultContextView(){const p=project();return `<div class="eyebrow">CURRENT VAULT</div><div class="context-block"><h3>${esc(CONCEPT_VAULT.name)}</h3><div class="context-path">${esc(vaultRoot())}</div><p>This is the project root. The native plugin uses the opened vault, never a project picker.</p>${badge('Simulated host context','purple')}</div><div class="context-block"><h3>${p?'This project':'Before the first design'}</h3><p>${p?esc(p.name)+' · '+esc(p.id):'Define one project here. Node, npm and Git are not needed for planning.'}</p>${badge(p?(vaultProjectPrepared()?'Prepared · demo':'Designing'):'Not initialized',vaultProjectPrepared()?'good':'')}<p class="small">Project.md and project/ are the proposed native authoring records. Browser state is not native vault persistence.</p></div><div class="context-block"><h3>Generated-plugin test target</h3><div class="context-path">${esc(p?.vault||vaultTestRoot())}</div><p>Separate host context. Installing the companion does not install or enable the plugin you are designing.</p></div><p class="small">Another project? Open another vault through Obsidian. CLI development stays independent of the companion.</p>`;}
 function vaultContextDialog(){return dialogBody('This vault’s project',vaultLocationCard()+vaultContextView(),button('Close','close','','ghost')+(project()?button('Project record','vault-record','','ghost','file')+button('Project overview','palette-nav','overview','primary'):button('Start designing','vault-init','','primary')));}
@@ -17156,7 +17619,7 @@ function workflowStartView(){return vaultWelcomeView();}
 function workflowOverview(){
  if(!project())return vaultWelcomeView();
  const f=workflowFacts(),n=workflowNext();
- return heading(f.p?.name||'Your plugin workspace','The current vault is your project root. Design and source stay together.',button('Project details','vault-init','','small','folder'))+
+ return heading(f.p?.name||'Your plugin workspace','The current vault is your project root. Design and source stay together.','<div class="row wrap">'+button('Project details','vault-init','','small','folder')+button('Export project JSON','project-export','','small','download')+button('Import project JSON','project-import','','small','file')+'</div>')+
  `${vaultLocationCard()}<section class="next-task"><span class="next-task-icon">${icon('arrow')}</span><div class="grow"><h2>${n.title}</h2><p>${n.description}</p></div>${workflowActionButton(n)}</section>
  <div class="work-overview"><section class="workflow-ledger"><div class="section-head"><h2>Design to implementation</h2><span class="small muted">Revisit any stage</span></div>${WORKFLOW_STAGES.map((s,i)=>`<button class="ledger-step" data-action="workflow-stage" data-value="${s.id}"><span class="ledger-number">${i+1}</span><span class="grow"><strong>${s.detail}</strong><small>${workflowStatus(s.id,f)}</small></span>${icon('arrow')}</button>`).join('')}<p class="ledger-note">These describe your design and fixture state, not production readiness.</p></section>
  <section class="overview-detail"><h2>Review attention</h2>${workflowAttention(f)}
@@ -17597,8 +18060,9 @@ window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});
 
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['project-import','project-folders','style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='project-import')return JSON.stringify(projectTransferUi.text);
  if(modalType==='style-guide-form')return JSON.stringify(sgUi.form?.record||null);
  if(modalType==='test-data-form')return JSON.stringify(tdUi.form?.record||null);
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
