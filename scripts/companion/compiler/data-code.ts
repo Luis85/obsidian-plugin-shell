@@ -1,5 +1,6 @@
+import type { Schema } from '../runtime/contract.ts';
 import { posix } from 'node:path';
-import { literal, json, symbol, type Model, type Schema } from './model.ts';
+import { literal, json, symbol, type Model } from './model.ts';
 import { typeCode, sampleCode } from './schema-code.ts';
 export interface Entry { path: string; content: string; encoding?: 'base64'; ownership: 'managed' | 'extension' | 'framework' }
 export type Add = (path: string, content: string, ownership?: Entry['ownership']) => void;

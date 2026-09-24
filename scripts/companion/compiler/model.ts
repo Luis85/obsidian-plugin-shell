@@ -1,8 +1,7 @@
-import { matches } from '../runtime/contract.ts';
+import { matches, type Schema } from '../runtime/contract.ts';
 import { createHash } from 'node:crypto';
 import { validateCompanionDocument, companionRelativeFolder } from '../project-contract.mjs';
 export type Row = Record<string, unknown>;
-export interface Schema { type: string | string[]; properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean; items?: Schema; enum?: unknown[]; format?: string }
 export interface Entity { id: string; slug: string; name: string; folder: string; schema: Schema }
 export interface Operation { id: string; slug: string; name: string; direction: string; input: Schema | null; output: Schema | null; contract: Row }
 export interface Source { id: string; slug: string; name: string; kind: string; operations: Operation[]; contract: Row }
@@ -17,10 +16,10 @@ export function requireValue(value: unknown, message: string): asserts value { i
 export function row(value: unknown): Row { requireValue(value && typeof value === 'object' && !Array.isArray(value), 'Expected object.'); return value as Row; }
 export function text(value: unknown, max = 1000): string { requireValue(typeof value === 'string' && value.length <= max, 'Expected bounded text.'); return value; }
 export function rows(value: unknown, max = 200): Row[] { requireValue(Array.isArray(value) && value.length <= max, 'Expected bounded collection.'); return value.map(row); }
-export function slug(value: unknown): string { const name = text(value, 60); requireValue(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) && !['constructor','prototype'].includes(name) && companionRelativeFolder(name), 'Unsafe or missing slug: ' + name); return name; }
-export function unique<T>(items: T[], key: (item: T) => string): void { const seen = new Set<string>(); for (const item of items) { const id = key(item).toLowerCase(); requireValue(!seen.has(id), 'Duplicate identity: ' + id); seen.add(id); } }
-export function names(value: unknown): string[] { requireValue(Array.isArray(value), 'Expected references.'); return value.map(v => text(v, 120)); }
-export function fieldName(value: unknown): string { const key = text(value, 60); requireValue(/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) && !['constructor', 'prototype', '__proto__'].includes(key), 'Unsafe property name.'); return key; }
+function slug(value: unknown): string { const name = text(value, 60); requireValue(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) && !['constructor','prototype'].includes(name) && companionRelativeFolder(name), 'Unsafe or missing slug: ' + name); return name; }
+function unique<T>(items: T[], key: (item: T) => string): void { const seen = new Set<string>(); for (const item of items) { const id = key(item).toLowerCase(); requireValue(!seen.has(id), 'Duplicate identity: ' + id); seen.add(id); } }
+function names(value: unknown): string[] { requireValue(Array.isArray(value), 'Expected references.'); return value.map(v => text(v, 120)); }
+function fieldName(value: unknown): string { const key = text(value, 60); requireValue(/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) && !['constructor', 'prototype', '__proto__'].includes(key), 'Unsafe property name.'); return key; }
 export function schema(value: unknown, depth = 0, budget = { count: 0 }): Schema {
   requireValue(depth <= 6 && ++budget.count <= 120, 'Schema exceeds its complexity limit.');
   const v = row(value); const types = Array.isArray(v.type) ? v.type : [v.type];

@@ -1,4 +1,5 @@
-import { literal, type Schema } from './model.ts';
+import type { Schema } from '../runtime/contract.ts';
+import { literal } from './model.ts';
 export function typeCode(s: Schema | null): string {
   if (!s) return 'undefined';
   if (s.enum) return s.enum.map(literal).join(' | ');
