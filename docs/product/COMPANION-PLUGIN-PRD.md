@@ -54,3 +54,13 @@ Concept assertions, mocked host tests, compiled consumers, real native runs and 
 Distribution topology, public metadata and execution-policy acceptance must be resolved before publication, not by renaming the root manifest during concept development. A user-run CLI handoff remains a viable implementation boundary. No policy exemption or marketplace acceptance is asserted here. Recheck current primary-source rules in the publication tasks.
 
 No tags, releases, directory submission, automatic activation, permissions changes or global package installation are authorized by this document.
+
+## Retained newer concept requirements
+
+The [0.4 detailed requirements](COMPANION-REQUIREMENTS-0.4.md) preserve the complete
+PR #5 `6a39dd0` requirements, including test-data tooling and design-system export,
+without replacing the [0.3 baseline](COMPANION-REQUIREMENTS-0.3.md). These are additive
+requirements, not shell or native implementation evidence. The shell-first
+[delivery strategy](DELIVERY-STRATEGY.md) supersedes earlier sequencing and the
+concept test kit's `.test-vault` default: shell work retains `.dev-vault`; no installer
+or fixture target is renamed by this reconciliation.

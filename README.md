@@ -12,7 +12,7 @@ A reusable TypeScript/Vue/Pinia/Nuxt UI foundation for building Obsidian plugins
 | Shell Workbench companion | Interactive browser concept and proposed product contracts; features are still being developed | Continue concept work, then implement the agreed scope on the qualified shell. |
 | Public distribution | Future milestone, not an available companion installation route | Qualify and explicitly authorize publication after both preceding gates. |
 
-The companion is not feature-complete or an installable native product merely because its browser concept works. This documentation update does not change runtime code, manifests, versions, dependency pins or release authorization.
+The companion is not feature-complete or an installable native product merely because its browser concept works. See the implementation checkpoint below for actual changes and qualification limits. No conversion or publication is authorized by this milestone.
 
 Start with the [delivery strategy](docs/product/DELIVERY-STRATEGY.md), [revised improvement plan](docs/product/COMPANION-IMPROVEMENT-PLAN.md) and [individual task backlog](docs/tasks/README.md). These establish the current execution order; earlier companion-first scheduling recommendations are superseded, not the retained functional requirements.
 
@@ -55,3 +55,12 @@ The [concept roadmap](docs/concepts/companion/ROADMAP.md) keeps feature explorat
 Read [AGENTS.md](AGENTS.md) and select a task from [docs/tasks](docs/tasks/README.md). Tasks record dependencies, acceptance criteria and required evidence. A planned task does not mean its entire capability is missing: inspect existing implementation and close only the demonstrated gap.
 
 Shell work has highest priority. Concept improvements may continue without displacing shell prerequisites. Native conversion follows the shell gate; publication follows native qualification and separate owner authorization. Existing release tooling is retained, but this plan neither runs it nor authorizes tags, publishing, directory submissions or permission changes.
+
+## Current implementation reconciliation
+
+The pre-conversion implementation combines planning PR #16 with the newer PR #5
+concept and current main implementation, without merging either prerequisite PR.
+Use the [current template operational guide](TEMPLATE-GUIDE-CURRENT.md)
+for the main `9a56505` milestone. `TEMPLATE-GUIDE.md` preserves the original planning
+baseline unchanged. See the [execution checkpoint](docs/development/PRECONVERSION-GAUNTLET.md)
+for candidate identity, task evidence and the next executable step.

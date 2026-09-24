@@ -2,7 +2,7 @@
 
 **Order:** shell first → real companion on shell → publication last. **Concept status:** still evolving; not feature-complete or natively implemented. See [strategy](../product/DELIVERY-STRATEGY.md), [plan](../product/COMPANION-IMPROVEMENT-PLAN.md) and [traceability](TRACEABILITY.md).
 
-There are **44 individual task files**. Every task starts as `planned`; these files do not report completed implementation. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
+There are **44 individual task files**. Tasks were initially `planned`; read current frontmatter and linked evidence for execution status. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
 
 ## Working rules
 
