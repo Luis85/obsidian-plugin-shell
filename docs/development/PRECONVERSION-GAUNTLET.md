@@ -43,3 +43,12 @@ SH-022 and CX-007 remain blocked by their mandatory prerequisites and evidence.
 At resume, inspect live main/PR #5/#15/#16/implementation head, task frontmatter,
 this checkpoint and failed/finished CI. Revalidate changed contracts; do not reconstruct
 an older head or accept pending checks as passed. No background continuation is promised.
+
+## First integrated candidate and consumer repair
+
+The frozen `80a426f` candidate completed its hosted verification/browser/native/security
+workflow, but the separate full consumer workflow failed at example removal because
+the intentional README change had not updated its reviewed ownership hash. The
+containing repair commit updates that preimage without relaxing edited-file guards;
+see [exact results and repair](../testing/preconversion-gauntlet/INTEGRATION-80a426f.md).
+Recheck the repaired head's complete consumer workflow before advancing SH-011.
