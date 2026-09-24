@@ -168,3 +168,14 @@ These samples do not establish idle-reference performance. Failed primary or cle
 attempts preserve scratch state, retain every cleanup error and never retry a failed
 configuration deletion through its ancestor. Native execution must still establish
 the new common containment/resource check and all ownership assertions.
+
+The first fully contained attempt exposed Chromium's Linux Unix-socket path bound
+before renderer connection: its singleton pathname was 133 UTF-8 bytes. Use the
+short dedicated `.nq/<six-random-characters>` scratch namespace, leaving host
+downloads under `.native-cache` and all earlier scratch directories untouched.
+Before each scoped Linux launch, check the known Obsidian 1.13.7 socket suffix
+against the 107-byte pathname budget (108-byte address storage including NUL).
+The current hosted checkout then requires 105 bytes. An overlong checkout fails
+with guidance to use a shorter checkout path; it never escapes to OS temp or a
+symlink alias. Host upgrades must recheck the suffix assumption. This Linux
+prerequisite is not macOS/Windows native qualification or an idle-host claim.

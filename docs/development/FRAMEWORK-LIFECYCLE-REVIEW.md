@@ -24,6 +24,7 @@ contracts, consumer preservation, policies and frozen evidence.
 | A failed native adaptation was mislabeled as a candidate-source mismatch. | Preserve the first execution/adapter failure; two red controls reproduce masking and the corrected three-case plus two real-CLI integration checks pass. Raw failure/identity receipts remain. |
 | Native global require cannot import the plugin-scoped host API. | Use a separate qualification plugin's supported import and owned commands; keep its source/installed hashes separate and the candidate observer read-only. Fresh native execution remains required. |
 | Inherited fresh configuration paths were outside the codebase and cleanup could overwrite errors. | Scope the launcher's public temporary-directory environment, validate returned paths, sample current resources at each launch and preserve primary plus subsequent cleanup failures without ancestor retry. |
+| The contained temporary prefix made Chromium's singleton socket path too long on Linux. | Preserve the original startup failure, use a short contained `.nq/<six>` namespace, and preflight the qualified host's UTF-8 socket-path budget before launch; do not escape containment or retry the rejected path. |
 
 The final C affected batch passed 34/34 tests in four files, including all sixteen
 reentrancy controls; four tooling ledger negatives passed. Earlier 40/40, 49/49

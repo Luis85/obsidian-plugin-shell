@@ -223,3 +223,34 @@ This source has no accepted candidate or acceptance promotion.
 The exact archive failure was reproduced locally. The corrected focused archive
 test passed with all ten command receipts and both original negative probes;
 `archive-policy-red-01.txt` and `archive-policy-green-01.txt` remain retained.
+
+Frozen `d8826fd3bf6a58ac06c171f8cf508ceab28dc48a`, candidate run
+[36010839664](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36010839664),
+passed the complete offline rehearsal, three runtime repetitions, separate coverage,
+served-browser qualification and native-provider provisioning. Its first native
+producer failed before connecting to a renderer or executing any check: Chromium
+reported `Socket path too long` for the 133-byte singleton socket pathname beneath
+the contained temporary directory. No further native session or performance run
+started. The one prelaunch sample recorded 15,331,536,896 free bytes of
+16,765,378,560 total bytes and four available processors; it does not imply idle
+conditions. The separate witness source and installed hashes matched, cleanup
+reported no further error, and the failed scratch directory was preserved.
+
+Artifact 10812998302 is retained with SHA-256
+`28a097386387eb8df6057c02f530028162ec19c246772b5b9f4e7e2e6de19156`.
+The retained offline candidate record hashes to
+`1bcede111179aeef655c8ef689ee8363edfaebbe7042d93c9a0fe7316c4ecbfe`;
+all three asset bytes match d4c8c5 exactly. Asset equality does not reuse earlier
+source/policy qualification. The complete d882 session remains failed.
+
+The bounded next experiment shortens the dedicated contained temporary namespace
+and preflights the platform's socket-path budget. It keeps all candidate asset
+bytes and the original resource experiment unchanged, retains earlier scratch
+directories, and must stop on its first native failure for analysis. It will not
+fall back to OS-temp configuration, a symlink alias or an unrelated host vault.
+The short-path correction passed 13 focused tests, including the real overlong
+contained-directory wrapper control under an explicit tooling-only Linux platform
+argument, exact UTF-8 boundaries, environment restoration, lock reuse and original
+failed-attempt retention. Production driver calls use the actual platform by
+default. Full source/analyzer/repository checks passed; these local controls do not
+claim a successful Linux kernel socket or native host launch.

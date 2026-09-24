@@ -1,13 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, realpath, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, realpath, symlink, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative, sep } from 'node:path';
-import { nativeScratch, nativeScratchDirectory, nativeConfigDirectory, assertNativeVault, withNativeTemporaryDirectory } from '../../scripts/testing/native-isolation.mjs';
+import { nativeScratch, nativeScratchDirectory, nativeConfigDirectory, assertNativeVault, assertNativeSocketBudget, withNativeTemporaryDirectory } from '../../scripts/testing/native-isolation.mjs';
 test('[NATIVE-ISOLATION-01] vault scratch remains inside its codebase and returned-vault mismatch fails', async t => {
   const root = await mkdtemp(join(tmpdir(), 'native-codebase-')); t.after(() => rm(root, { recursive: true, force: true }));
   const canonical = await realpath(root);
-  const scratch = await nativeScratch(root); assert.ok(relative(canonical, scratch).startsWith(`.native-cache${sep}qualification${sep}run-`));
+  const legacy = join(root, '.native-cache/qualification/run-legacy'); await mkdir(legacy, { recursive: true });
+  await writeFile(join(legacy, 'preserved.txt'), 'retained prior attempt');
+  const scratch = await nativeScratch(root); assert.match(relative(canonical, scratch).replaceAll(sep, '/'), /^\.nq\/[a-zA-Z0-9]{6}$/);
+  assert.equal(await readFile(join(legacy, 'preserved.txt'), 'utf8'), 'retained prior attempt');
   const vault = join(scratch, 'vault'); await mkdir(vault); await assertNativeVault(vault, vault);
   await assert.rejects(assertNativeVault(undefined, vault), /UNSAFE_NATIVE_VAULT/);
   await assert.rejects(assertNativeVault(root, vault), /UNSAFE_NATIVE_VAULT/);
@@ -15,7 +18,7 @@ test('[NATIVE-ISOLATION-01] vault scratch remains inside its codebase and return
 test('[NATIVE-ISOLATION-03] Windows case aliases produce canonical requested vault paths', { skip: process.platform !== 'win32' }, async t => {
   const root = await mkdtemp(join(tmpdir(), 'native-case-')); t.after(() => rm(root, { recursive: true, force: true }));
   const canonical = await realpath(root); const scratch = await nativeScratch(canonical.toUpperCase());
-  assert.equal(scratch, await realpath(scratch)); assert.ok(relative(canonical, scratch).startsWith(`.native-cache${sep}`));
+  assert.equal(scratch, await realpath(scratch)); assert.ok(relative(canonical, scratch).startsWith(`.nq${sep}`));
   const vault = join(scratch, 'vault'); await mkdir(vault); await assertNativeVault(vault, vault);
 });
 test('[NATIVE-ISOLATION-02] configuration cleanup accepts only a real direct child of its contained scratch', async t => {
@@ -32,7 +35,7 @@ test('[NATIVE-ISOLATION-02] configuration cleanup accepts only a real direct chi
   await assert.rejects(nativeConfigDirectory(file, scratch, root), /UNSAFE_NATIVE_CONFIG/);
   const link = join(scratch, 'obsidian-launcher-config-link'); await symlink(outside, link, process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(nativeConfigDirectory(link, scratch, root), /UNSAFE_NATIVE_CONFIG/);
-  const alias = join(root, '.native-cache/qualification/run-link'); await symlink(outside, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const alias = join(root, '.nq/ABC123'); await symlink(outside, alias, process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(nativeScratchDirectory(alias, root), /UNSAFE_NATIVE_SCRATCH/);
 });
 
@@ -70,4 +73,28 @@ test('[NATIVE-ISOLATION-05] overlapping temp scopes fail before acquisition and 
   const outside = join(root, 'run-outside'); await mkdir(outside);
   await assert.rejects(withNativeTemporaryDirectory(outside, async () => assert.fail('outside launch'), root), /UNSAFE_NATIVE_SCRATCH/);
   assert.deepEqual(environment(), before);
+});
+
+test('[NATIVE-ISOLATION-06] Linux socket prerequisites use UTF8 bytes and reject the retained long-path failure before launch', () => {
+  const root = '/home/runner/work/obsidian-plugin-shell/obsidian-plugin-shell';
+  assert.equal(assertNativeSocketBudget(`${root}/.nq/ABC123`, 'linux'), 105);
+  assert.throws(() => assertNativeSocketBudget(`${root}/.nq/run-ABC123`, 'linux'), /109 bytes exceeds/);
+  assert.throws(() => assertNativeSocketBudget(`${root}/.native-cache/qualification/run-QuTgOB`, 'linux'), /133 bytes exceeds/);
+  const exact = `/${'a'.repeat(73)}`;
+  assert.equal(assertNativeSocketBudget(exact, 'linux'), 107);
+  assert.throws(() => assertNativeSocketBudget(`${exact}a`, 'linux'), /108 bytes exceeds/);
+  assert.throws(() => assertNativeSocketBudget(`/${'a'.repeat(72)}é`, 'linux'), /108 bytes exceeds/);
+  assert.doesNotThrow(() => assertNativeSocketBudget(`${exact}${'a'.repeat(100)}`, 'win32'));
+});
+
+test('[NATIVE-ISOLATION-07] controlled Linux prerequisite rejects a real overlong contained root before callback and restores scope', async t => {
+  const owned = await mkdtemp(join(tmpdir(), 'ns-')); t.after(() => rm(owned, { recursive: true, force: true }));
+  const root = join(owned, 'long-native-root-'.repeat(5)); await mkdir(root);
+  const scratch = await nativeScratch(root); const before = environment(); let callbacks = 0;
+  // Only the tooling platform parameter is controlled; no Linux kernel or host execution is claimed.
+  await assert.rejects(withNativeTemporaryDirectory(scratch, async () => { callbacks++; }, root, 'linux'), /NATIVE_SOCKET_PATH_TOO_LONG/);
+  assert.equal(callbacks, 0); assert.deepEqual(environment(), before);
+  const next = await nativeScratch(owned);
+  assert.equal(await withNativeTemporaryDirectory(next, async () => { callbacks++; return 'available'; }, owned), 'available');
+  assert.equal(callbacks, 1); assert.deepEqual(environment(), before);
 });
