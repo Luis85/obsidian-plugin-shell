@@ -57,6 +57,10 @@ function extendsLedger(previous, next) {
   if (!equal(previous.baseline, next.baseline) || next.events.length < previous.events.length
     || !equal(previous.events, next.events.slice(0, previous.events.length))) fail();
 }
+function remainClosed(previous, final, owners) {
+  const later = final.events.slice(previous.events.length);
+  if (later.some(event => event.kind === 'lifecycle' && event.entry.phase === 'acquired' && (!owners || owners.has(event.entry.owner)))) fail();
+}
 function passed(value, mode, fields) {
   shape(value, ['status', 'mode', ...fields]);
   if (value.status !== 'passed' || value.mode !== mode) fail();
@@ -98,6 +102,8 @@ function validateResources(value, enhanced) {
   const owner = `${first.owner.slice(0, -':showcase-notice'.length)}:${enhanced ? 'recovery' : 'modal'}`;
   if (modal.owner !== owner) fail();
   if (!equal(closed, retained) || unloaded.length || final.length) fail();
+  remainClosed(value.closed, value.finalObservation, new Set([first.owner, owner]));
+  remainClosed(value.unloaded, value.finalObservation);
   if (enhanced) validateRecovery(value, opened, owner);
 }
 function validateRecovery(value, opened, owner) {
@@ -109,6 +115,7 @@ function validateRecovery(value, opened, owner) {
   const acquired = cancelled.filter(entry => entry.phase === 'acquired');
   if (!equal(acquired.map(entry => entry.resource).sort(), ['action', 'modal', 'notice', 'timer'])
     || new Set(acquired.map(entry => entry.owner)).size !== 1) fail();
+  remainClosed(value.cancelledProgress, value.finalObservation, new Set(acquired.map(entry => entry.owner)));
   if (acquired.find(entry => entry.resource === 'timer')?.operation !== 'progress'
     || acquired.some(entry => entry.resource === 'notice' && entry.operation === 'progress')) fail();
   const recovery = opened.filter(entry => entry.owner === owner);

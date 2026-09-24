@@ -72,6 +72,32 @@ its original source session and cannot establish current acceptance.
 
 ## Qualification and remaining limits
 
+First frozen source `5d94a143d24449fc8ed13724cc8a4ee611af95f6` was pushed in
+[PR #15](https://github.com/Luis85/obsidian-plugin-shell/pull/15). Its
+[candidate run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36003179773)
+stopped during the actual tooling producer: 192 cases, 187 passed, four designated
+Linux platform skips and one failed performance-parser fixture. That existing
+fixture constructed the older native report shape while using the current check
+inventory, so the stricter ownership validator correctly rejected it before the
+intended performance assertions. Runtime/coverage/browser/native qualification
+stages were skipped; no accepted candidate or acceptance advancement is claimed.
+The first consumer and compatibility runs encountered the same fixture failure.
+Both baseline jobs passed; the candidate's live all-category security audit passed.
+
+The failed artifact is preserved locally and matches GitHub artifact 10808988302,
+SHA-256 `4c9330b6da99c8ba18a52879fee52e13a8564c9e1746bde529fe3ca440a99b71`
+(188 entries, no font-named files). A shared explicit synthetic ownership fixture
+now supplies the complete schema to both parser suites, retaining every original
+performance negative. The exact failing test was reproduced locally and corrected.
+
+A separate negative control reproduced a validator gap: a closed owner's late
+acquire/release pair could return the terminal resource count to zero. Check the
+entire later history for revoked owners, and reject any acquisition after plugin
+unload. Controls distinguish transient acquisition before unload from sibling/new
+owner acquisition after unload. The corrected combined parser suite passed 15/15,
+and the full analyzer/source checks passed. These are protocol/parser corrections,
+not evidence that a native runtime actually resurrected UI.
+
 The filename-guidance correction passed both affected files (7/7). The final
 optional recovery demo passed 27/27 focused runtime cases and 11/11 public-CDP/
 parser controls. After two measured 11-complexity notification functions were

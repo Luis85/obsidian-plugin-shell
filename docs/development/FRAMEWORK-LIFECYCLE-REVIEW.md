@@ -18,6 +18,8 @@ contracts, consumer preservation, policies and frozen evidence.
 | Resource observers can reenter closure/replacement during acquisition or release. | Pair actual handles with successful cleanup receipts; detach prior registrations before callbacks, recheck exact ownership before acquiring successors, preserve replacement registries and outstanding failed cleanup. Multiple original red controls remain retained. |
 | Final native ledgers could be recorded without validation. | Validate exact faults, sequence, loss and observer failures before detachment/reconstruction, retaining primary and cleanup errors separately. Native execution remains separately required. |
 | A retained runtime observer could subscribe after unload; its first regression unsubscribed too early to prove the guard. | Reject post-disposal subscriptions and keep the attempted subscription present while emitting the control event. |
+| Existing performance-parser fixtures used the older ownership report despite the new complete inventory. | First frozen CI rejected the fixture. Shared complete synthetic ownership data preserves the performance negatives and reaches their intended assertions; no validator was loosened. |
+| A terminal zero-resource count could hide transient resource recreation after closure or unload. | A failing negative control reproduced acceptance of an acquire/release pair. Validate the complete later history for closed owners and reject any acquisition after plugin unload; the affected parser suite passed 15/15. |
 
 The final C affected batch passed 34/34 tests in four files, including all sixteen
 reentrancy controls; four tooling ledger negatives passed. Earlier 40/40, 49/49
