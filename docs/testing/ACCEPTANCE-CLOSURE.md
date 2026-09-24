@@ -1,5 +1,10 @@
 # Acceptance closure execution record
 
+This is the retained previous milestone. The current
+[persistence/lifecycle record](PERSISTENCE-LIFECYCLE.md) preserves these results
+while qualifying its changed source separately. PR #12 was subsequently merged;
+the historical sequence below describes the original execution and delivery.
+
 Frozen corrected code: `e2758ae47723cc7496fabd0074b76b03db5c4ee2`, development version 0.4.0.
 [Code PR #11](https://github.com/Luis85/obsidian-plugin-shell/pull/11) was merged
 externally at 21:41:14 UTC as `fc3400473d4183d3668d8525c6d5ed18a9b4667d`,

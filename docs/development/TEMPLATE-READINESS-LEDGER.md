@@ -1,5 +1,10 @@
 # Template readiness ledger
 
+The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
+and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) track the current focused
+milestone. The candidate figures below remain historical until its frozen session
+is reconciled; partial assertion improvements are not full-template readiness.
+
 The subsequent [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
 [execution record](../testing/ACCEPTANCE-CLOSURE.md) own the current assertion
 audit and results. The requirement inventory and earlier candidate figures below

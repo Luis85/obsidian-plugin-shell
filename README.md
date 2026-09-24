@@ -1,10 +1,17 @@
 # Obsidian Plugin Shell
 
-**Acceptance closure and native reliability milestone, version 0.4.0.**
+**Persistence/lifecycle acceptance milestone, version 0.4.0.**
+
+The [current plan](docs/development/PERSISTENCE-LIFECYCLE-PLAN.md) focuses on
+exact durable outcomes, protected data and disposed view capabilities. Its
+[cross-owner review](docs/development/PERSISTENCE-LIFECYCLE-REVIEW.md) and
+[bounded Windows/native investigation](docs/testing/PERSISTENCE-LIFECYCLE-NATIVE.md)
+retain assertion and environment limits; qualification belongs to the
+[current execution record](docs/testing/PERSISTENCE-LIFECYCLE.md).
 
 The [closure plan](docs/development/ACCEPTANCE-CLOSURE-PLAN.md) audits all 96
-legacy cases against actual assertions and required modes. Current results belong
-to the [closure execution record](docs/testing/ACCEPTANCE-CLOSURE.md); the previous
+legacy cases against actual assertions and required modes. Previous results belong
+to the [closure execution record](docs/testing/ACCEPTANCE-CLOSURE.md); the earlier
 qualification and its failed native attempts remain retained separately.
 
 Executable qualification now adds input-bound framework evidence, case-specific

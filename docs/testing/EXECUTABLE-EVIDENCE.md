@@ -116,8 +116,10 @@ against the untouched legacy plan on every report.
 
 AC-06's unit link has whole extent: the assertion overlaps an item create with a
 preference update, checks their exact combined stored envelope, preserves the
-sibling draft and queries current state from a late view. AC-06 remains partial
-because its browser link does not overlap preference and item persistence.
+sibling draft and queries current state from a late view. The later AC-CLOSE-06
+served assertion overlaps preference and item persistence and checks exact saved
+envelopes plus restored UI. Both whole links established AC-06 in the prior
+qualified session; any changed source requires a fresh complete session.
 AC-03's two links now have whole extent after an assertion audit: the unit test
 constructs independent services from saved data after create, rename and delete,
 checks the expected stable IDs/labels or absence, and asserts zero initialization

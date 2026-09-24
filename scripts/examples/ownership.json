@@ -67,7 +67,7 @@
     },
     {
       "path": "src/presentation/stores/showcase.ts",
-      "sha256": "4e2b369910b1d3743e99a1415634f5bba8f94f9f2501689d983ec5e4f4ebd535"
+      "sha256": "a39922c6b5816763d215b205318fde58f532a04ca16c63ce67a38164eb4db764"
     },
     {
       "path": "src/presentation/composables/use-document-form.ts",
@@ -267,7 +267,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "2766b93fc44e5a079aeba5ee88dfb28fc4b1ef7517ba3754d121ed782da9b7cc",
+      "sha256": "a9ddfc76c03b6152ef1711a94cae31c28f1bc9d5de80d066f2b878ab15fa375e",
       "template": "README.md.txt"
     },
     {
@@ -313,7 +313,7 @@
     },
     {
       "path": "src/presentation/composables/use-items-controller.ts",
-      "sha256": "56024f968653a59028fafec99497d2c2caa0277dd6966e8910f9e0e4a7ba08c3"
+      "sha256": "14c51c8b447f99e496bb57e43aa2f580a2942edbfadf6c42681a418d0e09cdd7"
     },
     {
       "path": "src/presentation/components/panels/ItemsPanel.vue",
@@ -376,6 +376,26 @@
     {
       "path": "tests/e2e/acceptance-closure.spec.ts",
       "sha256": "5e3b1297865c53700409014bf9fb81737da0d8ffb0284be34c71fd748268a371"
+    },
+    {
+      "path": "tests/runtime/persistence-outcomes.test.ts",
+      "sha256": "d9b6478825ca758b47113e3cc4248efbe3ffe25e067e6dd2320f6855116ee236"
+    },
+    {
+      "path": "tests/runtime/document-lifecycle.test.ts",
+      "sha256": "4d5d5d4b9fc8ec0dc85ed30f962dd452cc6a89fcba59ab4c7dedfb49fb31923a"
+    },
+    {
+      "path": "tests/runtime/lifecycle-recovery-components.test.ts",
+      "sha256": "59f17baafc9412e49d31c0399f696a35defb147e6839398216a03dfcfc92d87e"
+    },
+    {
+      "path": "tests/e2e/persistence-lifecycle.spec.ts",
+      "sha256": "bb946099a9db6a67bfecc2c26469bcaca041d95602ecf2e16a00260a6203e610"
+    },
+    {
+      "path": "tests/e2e/persistence-lifecycle-fixture.ts",
+      "sha256": "e45870998b091cb87557eeba7fa4ce8bb937aeb1955ab2e5faed8d1c63d337dc"
     }
   ]
 }
