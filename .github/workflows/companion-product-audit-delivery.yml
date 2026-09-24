@@ -9,16 +9,16 @@ permissions:
   contents: write
 concurrency:
   group: companion-product-audit-delivery
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   deliver:
     if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
@@ -38,8 +38,9 @@ jobs:
           helpers.add('.github/workflows/companion-product-audit-delivery.yml')
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
-          if git('rev-parse', 'HEAD') != os.environ['EXPECTED_EVENT'] or git('rev-parse', 'HEAD^') != base:
-              raise SystemExit('Delivery head or parent moved; refusing to apply')
+          if git('rev-parse', 'HEAD') != os.environ['EXPECTED_EVENT']:
+              raise SystemExit('Delivery head moved; refusing to apply')
+          subprocess.run(['git', 'merge-base', '--is-ancestor', base, 'HEAD'], check=True)
           if set(git('diff', '--name-only', base, 'HEAD').splitlines()) != helpers:
               raise SystemExit('Unexpected changes in delivery envelope')
           encoded = ''.join(Path(f'.github/companion-product-audit-delivery/part-{i}.b64').read_text() for i in range(3))
