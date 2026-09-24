@@ -206,3 +206,20 @@ foundation failed-attempt test first failed because it expected scratch deletion
 its updated assertions require two distinct preserved scratch directories, original
 report/log bytes, no provider and no launch samples. That corrected real-driver
 pre-provisioning test passes; no local host was launched.
+
+Frozen `d6649938a47ab569171ff40f509cb54609df4ba4`, candidate run
+[36009968062](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36009968062),
+stopped at tooling: 210 cases, 205 passes, four expected platform skips and one
+`ANALYZER-ARCHIVE` failure. Its fixture packaged the executable-source inventory but
+omitted separately hashed evidence-policy JSON. The new explicit policy URL in a
+parser test made that missing archive dependency visible to Fallow. Package both
+policy files explicitly and assert their original/extracted byte parity; do not
+hide the dependency with an opaque path or ignore. The existing negative archive
+checks remain. Both consumer runs found the same failure during initial setup;
+all later candidate browser/native stages were skipped. Live security passed.
+Artifact 10811754621 retains SHA-256
+`fe0b2e89980d810ad47b118e703f40f1dde75ec9a90954e65b6d50adbf628557`.
+This source has no accepted candidate or acceptance promotion.
+The exact archive failure was reproduced locally. The corrected focused archive
+test passed with all ten command receipts and both original negative probes;
+`archive-policy-red-01.txt` and `archive-policy-green-01.txt` remain retained.

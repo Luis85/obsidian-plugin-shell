@@ -18,6 +18,14 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
       const target = join(staging, input.path); await mkdir(dirname(target), { recursive: true });
       await cp(resolve(input.path), target);
     }
+    // These execution policies are fingerprinted separately from sourceInputs;
+    // the transport fixture still needs their real bytes for explicit consumers.
+    const policies = await Promise.all(['docs/testing/native-evidence-checks.json', 'docs/testing/acceptance-crosswalk.json']
+      .map(async path => ({ path, bytes: await readFile(resolve(path)) })));
+    for (const policy of policies) {
+      const target = join(staging, policy.path); await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, policy.bytes);
+    }
     // A local index/tree forms a real transport archive even when this test's
     // parent is already a Git-free archive. No commit, author or remote is needed.
     for (const args of [['init', '--quiet'], ['-c', 'core.autocrlf=false', 'add', '--all']]) {
@@ -30,6 +38,7 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     const unpacked = command('tar', ['-xf', archive, '-C', extracted], scratch); assert.equal(unpacked.status, 0, unpacked.stderr);
     assert.equal(command('git', ['rev-parse', '--show-toplevel'], extracted).status, 128);
     assert.deepEqual((await sourceInputs(extracted)).files, source.files);
+    for (const policy of policies) assert.deepEqual(await readFile(join(extracted, policy.path)), policy.bytes);
     await cp(resolve('dist'), join(extracted, 'dist'), { recursive: true });
     await symlink(resolve('node_modules'), join(extracted, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], extracted);
