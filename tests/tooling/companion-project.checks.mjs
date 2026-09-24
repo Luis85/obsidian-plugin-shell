@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,10 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'scripts/companion/generate.mjs');
 const seed = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
 const document = JSON.parse(seed);
+// Build an own JSON property, not an object-literal prototype or a newline-dependent splice.
+function unsafeRootDocument(text, key = '__proto__') {
+  return JSON.stringify({ ...JSON.parse(text), [key]: {} }, null, 2);
+}
 function run(args, cwd = root) { return spawnSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 5_000_000 }); }
 async function fixture(t) {
   const dir = await mkdtemp(join(tmpdir(), 'companion-project-'));
@@ -53,12 +57,22 @@ test('[COMPANION-CLI] original Unicode/whitespace bytes returned, zero writes ev
   assert.equal(result.stdout, text); assert.equal(result.stderr, '');
   assert.deepEqual(await snapshot(f.dir), before);
 });
-test('[COMPANION-READ] exported service returns data and resolved target without reformatting', async t => {
-  const f = await fixture(t);
-  const result = await readCompanionProject({ input: f.input, vault: f.vault, target: '.' });
-  assert.equal(result.content.toString(), seed);
-  assert.deepEqual(result.document, document);
-  assert.equal(result.target, resolve(f.vault));
+test('[COMPANION-READ] exported service returns data and canonical targets without reformatting', async t => {
+  const f = await fixture(t), canonicalRoot = await realpath(f.vault);
+  const alias = join(f.dir, 'vault-alias');
+  await symlink(f.vault, alias, 'junction');
+  const before = await snapshot(f.dir);
+  // Keep the supplied spelling, including a Windows 8.3 temp path, as the input.
+  for (const vault of [f.vault, alias]) {
+    for (const target of ['.', 'plugins/new companion']) {
+      const result = await readCompanionProject({ input: f.input, vault, target });
+      assert.equal(result.content.toString(), seed);
+      assert.deepEqual(result.document, document);
+      assert.equal(result.vault, canonicalRoot);
+      assert.equal(result.target, resolve(canonicalRoot, target));
+    }
+  }
+  assert.deepEqual(await snapshot(f.dir), before);
 });
 test('[COMPANION-CWD] explicit vault and default current-vault invocation work outside the shell', async t => {
   const f = await fixture(t);
@@ -102,7 +116,7 @@ test('[COMPANION-INVALID] malformed/future/wrong-kind/authority documents produc
   }
 });
 test('[COMPANION-BOUNDS] size, nesting, unsafe keys and invalid UTF-8 fail closed', async t => {
-  assert.throws(() => parseCompanionDocument(seed.slice(0, -2) + ',"__proto__":{}}'), /Unsafe object key/);
+  assert.throws(() => parseCompanionDocument(unsafeRootDocument(seed)), /Unsafe object key/);
   const value = structuredClone(document); value.notes = [JSON.parse('{"constructor":1}')];
   assert.throws(() => parseCompanionDocument(JSON.stringify(value)), /Unsafe object key/);
   assert.throws(() => parseCompanionDocument(' '.repeat(COMPANION_MAX_BYTES) + seed), /limit/);
@@ -113,6 +127,35 @@ test('[COMPANION-BOUNDS] size, nesting, unsafe keys and invalid UTF-8 fail close
     await writeFile(f.input, bytes);
     const result = run(['--input', f.input, '--vault', f.vault, '--target', '.']);
     assert.notEqual(result.status, 0); assert.equal(result.stdout, '');
+  }
+});
+test('[COMPANION-EOL] LF, CRLF and trailing whitespace preserve bytes and unsafe-key checks', async t => {
+  const f = await fixture(t);
+  for (const eol of ['\n', '\r\n']) {
+    for (const trailing of ['', eol, eol + ' \t' + eol]) {
+      const text = JSON.stringify(document, null, 2).replace(/\n/g, eol) + trailing;
+      assert.deepEqual(parseCompanionDocument(text), document);
+      await writeFile(f.input, text);
+      const before = await snapshot(f.dir);
+      const result = run(['--input', f.input, '--vault', f.vault, '--target', 'not-created']);
+      assert.equal(result.error, undefined, result.error?.message);
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stdout, text); assert.equal(result.stderr, '');
+      assert.deepEqual(await snapshot(f.dir), before);
+      for (const key of ['__proto__', 'constructor', 'prototype']) {
+        const unsafe = unsafeRootDocument(text, key).replace(/\n/g, eol) + trailing;
+        // A valid JSON fixture must reach the unsafe-key guard, not a syntax error.
+        assert.equal(Object.hasOwn(JSON.parse(unsafe), key), true);
+        assert.throws(() => parseCompanionDocument(unsafe), /COMPANION_INVALID: Unsafe object key/);
+        await writeFile(f.input, unsafe);
+        const retained = await snapshot(f.dir);
+        const rejected = run(['--input', f.input, '--vault', f.vault, '--target', 'not-created']);
+        assert.equal(rejected.error, undefined, rejected.error?.message);
+        assert.equal(rejected.status, 1); assert.equal(rejected.stdout, '');
+        assert.match(rejected.stderr, /COMPANION_INVALID: Unsafe object key/);
+        assert.deepEqual(await snapshot(f.dir), retained);
+      }
+    }
   }
 });
 test('[COMPANION-LINKS] target links, child-folder redirects and input links are refused', async t => {
