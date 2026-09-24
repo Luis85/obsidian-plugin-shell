@@ -1,0 +1,53 @@
+name: Exact test-kit integration artifact (temporary)
+on:
+  push:
+    branches: [docs/companion-plugin-prd]
+    paths: [.github/workflows/testdata-design-integration.yml]
+permissions:
+  contents: read
+jobs:
+  artifact:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Verify exact inputs and rebuild without an API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 26cff1d66d56d1f4f66fb59f56fdc12b279719aa
+          test "$(git hash-object scripts/testing/source-inputs.mjs)" = 303da278456f31f2993044e58604a2805fa08037
+          test "$(git hash-object docs/concepts/companion/test-kit/cli.mjs)" = 6e9dfb1b80a1ffd2ced159c2144e59ee8c05ae20
+          test "$(git hash-object tests/tooling/test-data-inventory.checks.mjs)" = a4ab49c4a8a12099176721bb5eade47ce20d04f1
+          python3 -B scripts/concepts/build-companion.py
+          python3 -B tests/concepts/companion-assembly.test.py
+          node --test tests/tooling/test-data-*.checks.mjs
+          git diff --check
+          test "$(git hash-object docs/concepts/companion/index.html)" = 550937748ee9288f47b7ff8ab0d8df6207454c6d
+      - name: Preserve only verified HTML as a Git blob, without commits or ref changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -B - <<'PYTHON'
+          import hashlib,json,os,urllib.request
+          from pathlib import Path
+          raw=Path('docs/concepts/companion/index.html').read_bytes()
+          assert len(raw)==1481847
+          assert hashlib.sha256(raw).hexdigest()=='bafc145477742b5faadcfb08ef8642fc7445c3e28c6e3d60b964c71907c948ae'
+          request=urllib.request.Request('https://api.github.com/repos/Luis85/obsidian-plugin-shell/git/blobs',data=json.dumps({'content':raw.decode(),'encoding':'utf-8'}).encode(),method='POST',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'})
+          with urllib.request.urlopen(request,timeout=60) as response: result=json.load(response)
+          assert result['sha']=='550937748ee9288f47b7ff8ab0d8df6207454c6d'
+          print('Verified HTML blob '+result['sha']+'; no commit or ref updated.')
+          PYTHON

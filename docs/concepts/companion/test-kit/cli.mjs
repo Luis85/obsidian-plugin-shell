@@ -4,11 +4,14 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { planFixtures, applyFixtures } from './storage.mjs';
 import { startFixtureServer } from './server.mjs';
-export async function runTestData(args, { root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), manifestPath = new URL('./manifest.json', import.meta.url) } = {}) {
+export async function runTestData(args, { root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), manifestPath = resolve(dirname(fileURLToPath(import.meta.url)), 'manifest.json') } = {}) {
   const command = args[0] || 'plan';
   if (!['plan', 'apply', 'reset-plan', 'reset', 'serve'].includes(command)) throw new Error('Use plan, apply --approve HASH, reset-plan, reset --approve HASH, or serve.');
   if (args.length > 1 && (!['apply', 'reset'].includes(command) || args.length !== 3 || args[1] !== '--approve' || !/^[a-f0-9]{64}$/.test(args[2]))) throw new Error('Invalid arguments. Apply/reset require the exact plan hash.');
-  const text = await readFile(manifestPath, 'utf8');
+  // The manifest is generated project data, not a bundled module or static asset.
+  let text;
+  try { text = await readFile(manifestPath, 'utf8'); }
+  catch (error) { if (error.code === 'ENOENT') throw new Error('Test-data manifest missing. Export the kit with configured source recipes before running it.'); throw error; }
   if (text.length > 2000000) throw new Error('Test-data manifest exceeds 2 MB.');
   const manifest = JSON.parse(text);
   if (command === 'serve') {
