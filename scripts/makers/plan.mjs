@@ -1,12 +1,8 @@
 import { lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { slug, title, symbol } from './arguments.mjs';
+import { slug, title, recipeOptions } from './arguments.mjs';
 import { createMakerContext } from './engine.mjs';
-import { entityRecipe } from './entities-recipe.mjs';
-import { action } from './primitives.mjs';
-import { component } from './ui.mjs';
-import { customMaker, runCustom, styleRecipe, localeRecipe } from './extra-recipes.mjs';
-import { settingRecipe } from './setting.mjs';
+import { dispatchMaker } from './dispatch.mjs';
 
 export async function planMaker(root, { maker, name, options }, { beforeFinalize } = {}) {
   slug(maker, 'recipe name');
@@ -15,19 +11,7 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
     throw new Error('--feature belongs to child recipes; feature uses its positional group name');
   if (maker === 'entity' && options['--entity'] !== undefined)
     throw new Error('--entity belongs to the feature recipe; entity uses its positional entity name');
-  const allowed = new Set([
-    '--dry-run',
-    '--yes',
-    '--no-interaction',
-    '--json',
-    '--help',
-    '--list',
-    ...(maker === 'feature' ? ['--entity'] : ['maker', 'locale'].includes(maker) ? [] : ['--feature']),
-    ...(['feature', 'entity'].includes(maker) ? ['--backend', '--document', '--folder', '--preset'] : []),
-    ...(maker === 'setting' ? ['--preference'] : []),
-    ...(maker === 'listener' ? ['--event'] : []),
-    ...(maker === 'style' ? ['--view'] : []),
-  ]);
+  const allowed = new Set(recipeOptions(maker));
   for (const option of Object.keys(options))
     if (!allowed.has(option)) throw new Error(`${option} is not supported by the ${maker} recipe`);
   const owner = ['maker', 'locale'].includes(maker)
@@ -81,39 +65,7 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
       throw new Error(`Feature ${owner} does not exist. Create it first with make feature ${owner}.`);
   }
   const context = createMakerContext(root);
-  if (maker === 'feature' || maker === 'entity') {
-    await entityRecipe(context, { owner, entity, folder, preset, backend });
-    if (maker === 'feature') {
-      if (backend === 'markdown')
-        await component(context, {
-          owner,
-          name: 'workspace',
-          editable: true,
-          repository: {
-            key: symbol(entity),
-            entity,
-            label: preset === 'project' ? 'name' : 'title',
-          },
-        });
-      else await component(context, { owner, name: 'workspace', editable: true });
-      await action(context, { owner, name: 'about', kind: 'command' });
-    }
-  } else if (['view', 'component', 'store'].includes(maker)) {
-    await component(context, { owner, name, editable: maker !== 'component' });
-  } else if (['usecase', 'command', 'modal', 'setting', 'event', 'listener'].includes(maker)) {
-    const preference = options['--preference'];
-    if (maker === 'setting' && preference === undefined) await settingRecipe(context, owner, name);
-    else {
-      if (maker === 'setting' && !['notifySuccess', 'hideObsidianViewHeader'].includes(preference))
-        throw new Error('Unknown --preference; select notifySuccess|hideObsidianViewHeader');
-      const event = maker === 'listener' ? slug(options['--event'], 'existing event name (--event)') : undefined;
-      await action(context, { owner, name, kind: maker, preference, event });
-    }
-  } else if (maker === 'style')
-    await styleRecipe(context, owner, name, slug(options['--view'], 'existing view name (--view)'));
-  else if (maker === 'locale') await localeRecipe(context, name);
-  else if (maker === 'maker') await customMaker(context, name);
-  else await runCustom(context, { maker, name, owner });
+  await dispatchMaker(context, { maker, name, options, owner, entity, folder, preset, backend });
   const plan = await context.finish(beforeFinalize);
   if (maker === 'feature' && ownerExists && plan.changes.some((change) => change.status === 'create'))
     throw new Error(`Feature ${owner} already exists. Use a child recipe to extend it.`);
