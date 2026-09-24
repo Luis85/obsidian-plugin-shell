@@ -1,0 +1,36 @@
+name: Exact Data Sources delivery (temporary)
+on:
+  push:
+    branches: [docs/companion-plugin-prd]
+    paths: [.github/workflows/data-source-delivery.yml]
+permissions:
+  contents: read
+jobs:
+  candidate:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Apply and verify hash-bound source without an API token
+        run: python3 -B .github/data-source-delivery/finalize.py apply
+      - name: Create verified Git objects without updating a branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B .github/data-source-delivery/finalize.py publish
+      - name: Preserve candidate receipt for explicit fast-forward
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: data-source-delivery-receipt
+          path: ${{ runner.temp }}/data-source-delivery-receipt.json
+          retention-days: 7
+          if-no-files-found: error
