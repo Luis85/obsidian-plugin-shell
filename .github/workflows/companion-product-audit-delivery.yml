@@ -1,7 +1,8 @@
 name: Temporary companion product-audit delivery
 on:
-  push:
-    branches: [docs/companion-plugin-prd]
+  pull_request:
+    branches: [main]
+    types: [synchronize]
     paths:
       - '.github/companion-product-audit-delivery/**'
       - '.github/workflows/companion-product-audit-delivery.yml'
@@ -12,13 +13,14 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deliver:
-    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
-    runs-on: ubuntu-24.04
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.event.pull_request.number == 5 && github.event.pull_request.head.ref == 'docs/companion-plugin-prd' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
@@ -26,22 +28,22 @@ jobs:
       - name: Apply only the reviewed, checksum-locked concept files
         shell: bash
         env:
-          EXPECTED_EVENT: ${{ github.sha }}
+          EXPECTED_EVENT: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           python3 -B - <<'PYTHON'
           import base64, hashlib, json, lzma, os, subprocess
           from pathlib import Path
           base = 'a27dc75102ea2832e723fe66abdca6bf4e67eff5'
+          accepted = 'c3a9f2cf5d306101181b01f7dea913dc375adec1'
           digest = 'f663810a48ea072d117558f279859f17dcc9748394c69f37a2e8b43a2e00dad4'
-          helpers = {f'.github/companion-product-audit-delivery/part-{i}.b64' for i in range(3)}
-          helpers.add('.github/workflows/companion-product-audit-delivery.yml')
+          envelope = {'.github/workflows/companion-product-audit-delivery.yml'}
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
           if git('rev-parse', 'HEAD') != os.environ['EXPECTED_EVENT']:
               raise SystemExit('Delivery head moved; refusing to apply')
-          subprocess.run(['git', 'merge-base', '--is-ancestor', base, 'HEAD'], check=True)
-          if set(git('diff', '--name-only', base, 'HEAD').splitlines()) != helpers:
+          subprocess.run(['git', 'merge-base', '--is-ancestor', accepted, 'HEAD'], check=True)
+          if set(git('diff', '--name-only', accepted, 'HEAD').splitlines()) != envelope:
               raise SystemExit('Unexpected changes in delivery envelope')
           encoded = ''.join(Path(f'.github/companion-product-audit-delivery/part-{i}.b64').read_text() for i in range(3))
           raw = lzma.decompress(base64.b64decode(encoded, validate=True), memlimit=128 * 1024 * 1024)
