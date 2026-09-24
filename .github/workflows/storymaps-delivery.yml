@@ -1,0 +1,147 @@
+name: Storymaps isolated delivery verification
+on:
+  push:
+    branches: [agent/storymaps-delivery-20260924]
+permissions:
+  contents: read
+concurrency:
+  group: storymaps-delivery-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  assemble-and-verify:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/agent/storymaps-delivery-20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Apply hash-verified text edits to the pinned PR baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = b0f50ecb6ef1c1db75f5d1358185d860d8801742
+          python3 -B - <<'PY'
+          import hashlib, json, lzma
+          from pathlib import Path, PurePosixPath
+          payload = b''.join(Path(f'.storymaps-delivery/part-{i}.xz').read_bytes() for i in range(4))
+          assert hashlib.sha256(payload).hexdigest() == 'c8435cd982c7e1fe37abe737b4f955fa662547e85da9989b83a47e92ca54e80f'
+          edits = json.loads(lzma.decompress(payload))
+          assert len(edits) == 39 and len({row['path'] for row in edits}) == 39
+          for row in edits:
+              name = row['path']; relative = PurePosixPath(name)
+              assert not relative.is_absolute() and '..' not in relative.parts
+              assert name.startswith(('docs/', 'scripts/', 'tests/')) or name in {'.fallowrc.json', '.github/workflows/companion-concept-verification.yml'}
+              path = Path(name)
+              assert not any(p.is_symlink() for p in [path, *path.parents])
+              if row['before'] is None:
+                  assert not path.exists(), name
+                  old = ''
+              else:
+                  original = path.read_bytes()
+                  assert hashlib.sha256(original).hexdigest() == row['before'], name
+                  old = original.decode('utf-8')
+              text = old; previous = len(old)
+              for start, end, insert in reversed(row['edits']):
+                  assert 0 <= start <= end <= previous <= len(old), name
+                  text = text[:start] + insert + text[end:]
+                  previous = start
+              output = text.encode('utf-8')
+              assert hashlib.sha256(output).hexdigest() == row['after'], name
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(output)
+          print('Applied 39 validated paths; retained unrelated baseline files.')
+          PY
+          python3 -B scripts/concepts/build-companion.py
+          echo '745451fca9d2a21c6dcfdfbddcba2cd23c93c1245fb9783a72b5da7719410bd3  docs/concepts/companion/index.html' | sha256sum -c -
+          echo 'a1e0c4cf1b8da82a94b9cf232190f4763f7980cae9b68d3cd9f7c4368df9311f  docs/concepts/companion/companion-project.json' | sha256sum -c -
+          git rm -r -- .storymaps-delivery .github/workflows/storymaps-delivery.yml
+          git add -A
+          git diff --cached --check
+          test "$(git write-tree)" = d63efbca50d0c52f5a4110c5ab8fb8eafec52c31
+      - name: Verify source syntax, assembly, contracts and executable handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/concepts
+          python3 -B scripts/concepts/build-companion.py --check
+          python3 -B tests/concepts/companion-assembly.test.py 2>&1 | tee reports/concepts/assembly.log
+          for file in docs/concepts/companion/src/*.js; do node --check "$file"; done
+          python3 -B - <<'PY'
+          from pathlib import Path
+          files = [p for root in ['scripts/concepts', 'tests/concepts'] for p in Path(root).rglob('*.py')]
+          for path in files:
+              compile(path.read_bytes(), str(path), 'exec', dont_inherit=True)
+          print(f'Parsed {len(files)} Python sources.')
+          PY
+          node --test tests/tooling/companion-project.checks.mjs tests/tooling/storymap-contract.checks.mjs tests/tooling/test-data-*.checks.mjs 2>&1 | tee reports/concepts/tooling.log
+      - name: Provision isolated pinned browser tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/storymap-browsers"
+          printf 'PLAYWRIGHT_BROWSERS_PATH=%s\n' "$PLAYWRIGHT_BROWSERS_PATH" >> "$GITHUB_ENV"
+          python3 -m venv "$RUNNER_TEMP/storymap-browser-env"
+          "$RUNNER_TEMP/storymap-browser-env/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/storymap-browser-env/bin/python" -m playwright install chromium
+          "$RUNNER_TEMP/storymap-browser-env/bin/python" - <<'PY'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
+          PY
+      - name: Verify browser authoring and real-origin two-window persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/storymap-browser-env/bin/python" -B scripts/concepts/run-browser-checks.py --real-storage
+      - name: Retain the verified clean tree on the isolated staging branch only
+        shell: bash
+        env:
+          DELIVERY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/agent/storymaps-delivery-20260924
+          git add -A
+          test "$(git write-tree)" = d63efbca50d0c52f5a4110c5ab8fb8eafec52c31
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(concept): verified storymap authoring and project handoff'
+          header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$DELIVERY_TOKEN" | base64 -w0)"
+          remote_head="$(git -c "http.https://github.com/.extraheader=$header" ls-remote origin "$GITHUB_REF" | cut -f1)"
+          test "$remote_head" = "$GITHUB_SHA"
+          git -c "http.https://github.com/.extraheader=$header" push origin "HEAD:$GITHUB_REF"
+          unset header DELIVERY_TOKEN
+          git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/storymaps-source.tar.gz"
+          git rev-parse HEAD > "$RUNNER_TEMP/storymaps-source.commit"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/storymaps-source.tree"
+          sha256sum "$RUNNER_TEMP/storymaps-source.tar.gz" > "$RUNNER_TEMP/storymaps-source.sha256"
+      - name: Preserve exact clean review source
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: storymaps-staging-source
+          path: |
+            ${{ runner.temp }}/storymaps-source.tar.gz
+            ${{ runner.temp }}/storymaps-source.commit
+            ${{ runner.temp }}/storymaps-source.tree
+            ${{ runner.temp }}/storymaps-source.sha256
+          retention-days: 7
+          if-no-files-found: error
+      - name: Preserve actual verification evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: storymaps-staging-evidence
+          path: |
+            reports/concepts/
+            docs/concepts/companion/index.html
+          retention-days: 7
+          if-no-files-found: error
