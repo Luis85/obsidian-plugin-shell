@@ -48,7 +48,7 @@ it('[UI-03-06] invalid preferences preserve committed values and readonly data d
   } finally { f.dispose(); }
   const readonly = await componentFixture({ schemaVersion: 200, preferences: defaults });
   try {
-    
+    expect(readonly.root.querySelector('[role="alert"]')?.textContent).toContain('newer schema');
     expect(Array.from(readonly.root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('.shell-settings-card input, .shell-settings-card select')).every(el => el.disabled)).toBe(true);
     expect(readonly.save).not.toHaveBeenCalled();
   } finally { readonly.dispose(); }

@@ -142,9 +142,57 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Real served Items actions reject before/after Storage persistence, preserve prior record and drafts, block blind retry and false success, check exact attempted/durable envelopes, then independently reload actual bytes and deliberately recover. Controlled browser storage, not native disk failure."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-recovery.test.ts",
+          "name": "[RECOVERY-05-01] uncertain saves retain their effect and recovery guidance on every blocked operation until saved-byte reconstruction",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual serialized bytes distinguish rejection before persistence from lost acknowledgment after persistence. Shared subsequent operations retain uncertain effect/guidance and acquire no further saves or facts; deliberate reconstruction reads actual stored bytes with zero initialization writes. Controlled storage boundary, not native disk fault evidence."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-02] independent feature update rechecks the captured owner after awaited preflight",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The named independent-feature update or delete operation rechecks its captured owner permit after actual awaited read preflight. Invalidating that context preserves exact original bytes and publishes no facts; a deliberate fresh snapshot can subsequently be saved."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-02] independent feature delete rechecks the captured owner after awaited preflight",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The named independent-feature update or delete operation rechecks its captured owner permit after actual awaited read preflight. Invalidating that context preserves exact original bytes and publishes no facts; a deliberate fresh snapshot can subsequently be saved."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-03] queued closed-owner work acquires no preflight while started persistence keeps its committed result",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A real queued repository mutation acquires no preflight after its owner closes, while an already-started mutation returns committed values and exact canonical bytes with exactly one persistence call and committed fact."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-04] independent feature preserves failed outcomes after its owner closes during persistence",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual generic note repository preserves the named known failed, effect-none outcome after initiating owner closure. It checks exact unchanged bytes, suppresses committed facts, rejects replay by the retained permit and asserts the precise independent error count. Controlled storage fault scope."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-04] independent feature preserves uncertain outcomes after its owner closes during persistence",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual generic note repository preserves the named uncertain lost-acknowledgment outcome after initiating owner closure. It checks exact actually persisted bytes, suppresses committed facts, rejects replay by the retained permit and asserts the precise independent error count. Controlled storage fault scope."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Current complete producer linkage plus complete absent/corrupt/inaccessible/future recovery contract remains necessary; known failure and uncertain acknowledgment must stay distinct. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Current complete unit/browser linkage and complete recovery clauses remain necessary. Exact bytes, known failure and uncertain acknowledgment stay distinct; raw presence and category-specific guidance have bounded unit assertions. Broader recovery and native I/O are separate. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-06",
@@ -250,9 +298,49 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served production controls protect corrupt/future root data without default writes across reload, or disable Items for future registry/collection while an explicit preference save preserves opaque payload. Each named scenario retains exact bytes and independent fault checks."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-recovery.test.ts",
+          "name": "[RECOVERY-07-01] absent corrupt inaccessible and future storage expose distinct protected states without initialization writes",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real shared store/preferences classify absent, corrupt syntax/semantics, inaccessible and future raw inputs with distinct status and recovery keys. Exact protected original bytes remain, loading performs no saves/facts, blocked writes cannot mutate the frozen failure, and each failed read emits one independent settings.read record. Controlled storage, not native disk evidence or migrations."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-recovery.test.ts",
+          "name": "[RECOVERY-07-03] present JSON null is protected as corrupt through the presence-aware read port rather than treated as missing",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The exact-text reader interprets the present bytes null as corrupt, blocks preference writes and preserves those original bytes with no save. This named case exercises present null through a controlled reader, not actual file absence or native execution."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-recovery.test.ts",
+          "name": "[RECOVERY-07-02] protected opaque collections remain unchanged through permitted preference writes and actual saved-byte reconstruction",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "An unsupported opaque entity registry retains its values during one permitted preference save. The test checks the exact expected serialized envelope, one preference fact, no read faults and independent reconstruction with zero initialization writes; it does not preserve the original pretty-printed envelope bytes across that permitted write."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/settings-storage.test.ts",
+          "name": "SETTINGS-RAW-01 preserves present null and malformed bytes using the host manifest directory and one writer",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual native settings adapter with public-host doubles reads exact null/malformed JSON from the manifest directory, protects it without initialization writes or loadData fallback, observes exact read faults, and separately delegates deliberate saves to the single saveData writer. Adapter-double scope only."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/settings-storage.test.ts",
+          "name": "SETTINGS-RAW-02 distinguishes confirmed absence from a file disappearing or becoming inaccessible during read",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual native settings adapter with public-host doubles reads the configured default plugin directory, distinguishes reported absence from an exists rejection or read rejection after reported existence, performs no initialization saves and records exactly one read fault for each inaccessible case. It does not delete a real file between calls; adapter-double scope only."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Broader ordered migrations and category-specific recovery remain unproved; do not infer them from protected storage or common error text. Every new link is partial and needs current producer output. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Ordered historical migrations remain unimplemented. Exact-text readers distinguish present null and absence; legacy decoded-only adapters retain sentinel ambiguity. Require current full unit/browser category/recovery assertions, not preservation alone. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-08",
@@ -354,9 +442,25 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Twenty served real-view cycles return actual browser scheduler, dialog, notice, subscription and leaf measurements to a live sibling baseline; unload leaves an unrelated DOM sentinel. Ordinary notice action count is zero; native windows and nonempty action registries are not established."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/lifecycle-observation.test.ts",
+          "name": "[LIFECYCLE-OBS-01] counts actual owned sinks, delayed timer and pending availability independently through owner close and settlement",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real notice/modal services and captured sink/scheduler callbacks count owned notices, delayed timer, modal, action registry and pending availability. Owner closure releases owned handles while a sibling stays live, cancelled callbacks cannot reacquire sinks and late availability cannot run recovery. Controlled adapter unit scope."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/lifecycle-observation.test.ts",
+          "name": "[LIFECYCLE-OBS-02] failed handle cleanup stays outstanding and exact independent faults survive disposal",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Thrown timer/notice/modal cleanup produces exact independent faults and outstanding resource receipts after the notice/modal services are disposed. A later natural timer callback settles its receipt while failed notice/modal cleanup remains outstanding. This named case does not dispose the diagnostic service or establish successful cleanup."
         }
       ],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Window/pop-out ownership, partial startup and complete deferred resource behavior remain; zero ordinary action count is not proof of nonempty recovery registry cleanup. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Window/pop-out ownership, partial startup and complete deferred resource behavior remain case-specific. Real nonempty recovery registries and pending availability now have unit assertions; served/native execution and whole-mode audit remain separate. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-12",
@@ -922,6 +1026,14 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Paused persistence creates no visible committed row; two real served views refresh only after release while retaining a sibling draft. A separate same-origin runtime does not receive the fact and sees durable state only on reload, with no write or unexpected fault."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/persistence-recovery.test.ts",
+          "name": "[RECOVERY-05-01] uncertain saves retain their effect and recovery guidance on every blocked operation until saved-byte reconstruction",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual serialized bytes distinguish rejection before persistence from lost acknowledgment after persistence. Shared subsequent operations retain uncertain effect/guidance and acquire no further saves or facts; deliberate reconstruction reads actual stored bytes with zero initialization writes. Controlled storage boundary, not native disk fault evidence."
         }
       ],
       "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Maintain case-specific combined post-commit/failure/projection/isolation evidence. Each individual new assertion covers part of the row; no automatic promotion from multiple partial links. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
@@ -1228,9 +1340,89 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Cancel before create writes nothing; a paused actual Markdown write survives initiating-view close with exact bytes and one write, a committed event, unchanged sibling draft, explicit note reload and independent storage reload. Browser adapter and selected resources only."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-01] independent feature permits prevent disposed owners replaying cached update and delete results",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A distinct Experiment feature uses the public scope API and real generic repository. Revoked permits are rejected before cached update/delete results, with exact saved bytes, IDs, revisions, writer counts and independent live-owner use."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-02] independent feature update rechecks the captured owner after awaited preflight",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The named independent-feature update or delete operation rechecks its captured owner permit after actual awaited read preflight. Invalidating that context preserves exact original bytes and publishes no facts; a deliberate fresh snapshot can subsequently be saved."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-02] independent feature delete rechecks the captured owner after awaited preflight",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The named independent-feature update or delete operation rechecks its captured owner permit after actual awaited read preflight. Invalidating that context preserves exact original bytes and publishes no facts; a deliberate fresh snapshot can subsequently be saved."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-03] queued closed-owner work acquires no preflight while started persistence keeps its committed result",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "A real queued repository mutation acquires no preflight after its owner closes, while an already-started mutation returns committed values and exact canonical bytes with exactly one persistence call and committed fact."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-04] independent feature preserves failed outcomes after its owner closes during persistence",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual generic note repository preserves the named known failed, effect-none outcome after initiating owner closure. It checks exact unchanged bytes, suppresses committed facts, rejects replay by the retained permit and asserts the precise independent error count. Controlled storage fault scope."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/note-operation-permits.test.ts",
+          "name": "[FRAMEWORK-NOTE-04] independent feature preserves uncertain outcomes after its owner closes during persistence",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Actual generic note repository preserves the named uncertain lost-acknowledgment outcome after initiating owner closure. It checks exact actually persisted bytes, suppresses committed facts, rejects replay by the retained permit and asserts the precise independent error count. Controlled storage fault scope."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-byte-bounds.test.ts",
+          "name": "[BOUND-62-04] framework-free UTF-8 validation counts scalars, rejects invalid input and stops at exact budgets",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "The framework-free UTF-8 helper matches independently measured scalar byte lengths at boundaries, rejects lone surrogates, nonstrings and invalid budgets, and accepts valid combining/supplementary scalars. This unit algorithm test alone does not prove persistence or every DOC-18 bound."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-byte-bounds.test.ts",
+          "name": "[BOUND-62-01] multibyte and malformed bodies fail before preview acquires a write or publishes a fact",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real document preparation rejects oversized multibyte or malformed-surrogate bodies before creating a plan, acquiring a writer or publishing facts. No body repair or preview write is inferred."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-byte-bounds.test.ts",
+          "name": "[BOUND-62-02] ASCII and multibyte complete documents accept the exact UTF-8 boundary and reject one extra byte",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real service/codec accepts complete ASCII and two/three/four-byte documents at exactly 1,000,000 UTF-8 bytes and rejects one extra byte. Independent Buffer.byteLength checks the budget; accepted commit uses exact planned bytes once, while oversized preparation creates no write/fact."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/document-byte-bounds.test.ts",
+          "name": "[BOUND-62-03] multibyte updates prevalidate complete candidate bytes and preserve original note identity and body",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real repository update of an existing near-limit multibyte note validates the full patched candidate before replace, rejects overflow, emits no update fact and preserves exact original body/bytes/path/identity with no fault report."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Complete privacy/input/template/collision bounds and window ownership remain; string length is not a UTF-8 byte budget. Separate Task editor retained actions need a disposal audit. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). UTF-8 body/full-Markdown bounds and retained Task/editor plus independent-feature permits now have focused assertions. Complete privacy/input/template/collision bounds and window ownership remain; no individual partial link closes the entire row. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-63",
@@ -1308,9 +1500,17 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Served committed open failure offers only open follow-up; pending stale/disposed open completion cannot replace a new draft, invoke another open or create another note. Exact Markdown and write/open counts remain authoritative."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/independent-fault-observation.test.ts",
+          "name": "[FAULT-OBS-02] independent faults distinguish late availability rejection from a stale successful availability result",
+          "mode": "unit",
+          "extent": "partial",
+          "assertions": "Real recovery policy holds two actual pending availability results, revokes their owner registries, then distinguishes a late true result from a rejected availability promise. Neither runs recovery or updates a stale notice; independent evidence contains exactly one notice.action fault."
         }
       ],
-      "gap": "Audit classes E,A (see ACCEPTANCE-CLOSURE-LEDGER.md). Keep active/pending/disposed outcomes distinct and qualify all required clauses together. Safe host opening is follow-up only; retained Task repository-editor actions remain a separate follow-up. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Qualify active, pending, disposed and failed recovery clauses together. Retained Task editor recovery and action availability are now covered by scoped assertions; safe opening remains separate from creating or retrying a document. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-67",
@@ -1384,7 +1584,7 @@
           "assertions": "Twenty served view cycles release actual synthetic notice/dialog/timer handles with sibling and unrelated DOM retained. Ordinary action count remains zero, so nonempty recovery registry and native ownership require separate evidence."
         }
       ],
-      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Native owned notices/actions/timers and foreign Notice preservation remain missing; current native diagnostics are a bounded production buffer, not the independent fault observer. Browser ordinary actions are zero and DOM sentinel is not a foreign native Notice. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
+      "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Require current fixed-candidate native resource/recovery observations and complete component/browser/native clause audit. Actual Notice/action/timer/modal/foreign ownership, delayed progress and retained callbacks must be asserted in their real mode; independent fault evidence cannot be replaced by the production diagnostic ring. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
     },
     {
       "id": "AC-72",

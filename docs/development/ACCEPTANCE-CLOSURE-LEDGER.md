@@ -1,5 +1,11 @@
 # Acceptance closure ledger
 
+Current work: [framework lifecycle plan](FRAMEWORK-LIFECYCLE-PLAN.md) and
+[execution record](../testing/FRAMEWORK-LIFECYCLE.md). Retained-action permits,
+presence-aware reads, truthful uncertain guidance, UTF-8 bounds and independent
+native observations strengthen selected clauses. Historical counts below do not
+qualify the changed source; new links require actual producer output.
+
 Assertion audit of all 96 retained cases, 2026-09-23. This ledger supplements the
 [crosswalk](../testing/acceptance-crosswalk.json) and preserves the
 [normative machine inventory](../testing/test-plan.json). It is an implementation

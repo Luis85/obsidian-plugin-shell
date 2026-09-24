@@ -86,6 +86,15 @@ Use the composed instance rather than constructing services inside components.
 Existing low-level `host.showModal`/`host.notice` methods remain adapter compatibility
 surfaces; the showcase and debugging features use the dedicated services.
 
+Feature factories receive these convenience methods plus `registerActions` and
+`invoke` through `AuthoringServices` in the public authoring API. Register recovery
+under a unique owner and retain its returned release function. During cleanup,
+release the registry, dismiss that owner's notices and close its dialogs. A pending
+availability check can still settle after cleanup, but it cannot invoke a revoked
+action. Use an [action scope](FRAMEWORK-GUIDE.md) to guard your own asynchronous
+continuations. Read-only lifecycle observers receive metadata, never these handles
+or action capabilities; keep qualification ledgers independent of production logs.
+
 ## Qualification
 
 Service tests cover confirmed/cancelled/failed outcomes, request snapshots, capacity,

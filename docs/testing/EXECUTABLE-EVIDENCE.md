@@ -76,6 +76,14 @@ example links remain visibly unobserved with their gaps. Native performance, whe
 present, is checked against the independent controlled-reference protocol and raw
 sample validator; timing budget qualification remains separate from test counts.
 
+Enhanced native ownership claims additionally require an independent live ledger,
+closed nested schemas, exact fault counts, consecutive event sequences, zero lost
+entries/subscriber failures and matching resource acquisition/release metadata
+across immutable checkpoint prefixes. The real recovery example supplies delayed
+progress and pending availability; public CDP retains its actual Notice listener
+for invocation after closure. Protocol/parser fixtures alone cannot establish
+native execution. See [the native ownership protocol](FRAMEWORK-LIFECYCLE-NATIVE.md).
+
 ## Packet and session integrity
 
 Schema 1 packets record the producer, run UUID, UTC interval, actual exit/signal,

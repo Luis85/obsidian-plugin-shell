@@ -1,5 +1,6 @@
 import type { Failure, Result } from '../domain/outcome';
-import type { ErrorReporter } from './ports';
+import type { ErrorReporter, LifecycleObservation } from './ports';
+import { LifecycleObservations } from './lifecycle-observation';
 import type { ModalHandle, ModalPresentation, ModalSink, ModalState } from './modal-port';
 export type ModalOutcome<T> = { readonly status: 'confirmed'; readonly value: T } | { readonly status: 'cancelled' } | { readonly status: 'failed'; readonly error: Failure };
 export type ModalRequest = { readonly owner: string; readonly titleKey: string; readonly confirmKey?: string; readonly cancelKey?: string }
@@ -21,8 +22,10 @@ function validRequest(request: PromptRequest, maxLength: number): boolean {
 export class ModalService {
   private disposed = false;
   private readonly owners = new Map<string, Owned>();
+  private readonly resources: LifecycleObservations;
   constructor(private readonly sink: ModalSink | undefined, private readonly text: (key: string) => string, private readonly errors: ErrorReporter,
-    private readonly validKey: (key: string) => boolean = token) {}
+    private readonly validKey: (key: string) => boolean = token,
+    observeLifecycle?: (entry: LifecycleObservation) => unknown) { this.resources = new LifecycleObservations(errors, observeLifecycle); }
   info(request: ModalRequest): Promise<ModalOutcome<void>> { return this.open(request, 'info', () => undefined); }
   confirm(request: ModalRequest): Promise<ModalOutcome<boolean>> { return this.open(request, 'confirm', () => true); }
   prompt(request: PromptRequest): Promise<ModalOutcome<string>> { return this.open(request, 'prompt', value => value); }
@@ -94,9 +97,11 @@ export class ModalService {
       finally { busy = false; }
     };
     try {
-      handle = this.sink.open(this.presentation(request, kind, labels),
+      const opened = this.sink.open(this.presentation(request, kind, labels),
       { submit: value => { if (opening) earlySubmit = { value }; else void submit(value); }, cancel: () => { if (opening) earlyCancel = true; else finish({ status: 'cancelled' }); },
         failed: () => { this.errors.report('modal.close', 'modal.close'); finish(this.failed()); } });
+      const release = this.resources.acquire('modal', request.owner, kind);
+      handle = { update: state => opened.update(state), close() { opened.close(); release(); } };
       opening = false;
       if (earlyCancel) finish({ status: 'cancelled' }); else if (earlySubmit) void submit(earlySubmit.value);
       // A synchronous host cancellation during open must still release its handle.

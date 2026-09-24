@@ -4,11 +4,13 @@ import { failure, success } from '../../domain/outcome';
 import type { ModalOutcome } from '../../application/modal-service';
 import { useServices } from '../context/use-services';
 import { useShowcase } from '../stores/showcase';
+import { useRecoveryExample } from './use-recovery-example';
 
 export function useShowcaseActions() {
   const { t } = useI18n();
   const services = useServices();
   const model = useShowcase();
+  const recovery = useRecoveryExample(model.owner);
   const owner = `${model.owner}:modal`; let alive = true;
   onScopeDispose(() => { alive = false; services.modals.closeOwner(owner); services.notices.dismissOwner(owner); });
   function ping() { services.showcase.ping(model.eventCount + 1); }
@@ -26,5 +28,5 @@ export function useShowcaseActions() {
     result(await services.modals.prompt({ owner, titleKey: 'modal.promptTitle', messageKey: 'modal.promptText', maxLength: 80,
       validate: value => value.trim() ? success(value.trim()) : failure('validation', 'modal.invalid') }));
   }
-  return { t, ping, notice, expected, modal, confirm, prompt };
+  return { t, ping, notice, expected, modal, confirm, prompt, ...recovery };
 }

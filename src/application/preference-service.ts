@@ -2,7 +2,11 @@ import { defaults, parsePreferences, type Preferences } from '../domain/preferen
 import { success, type Result } from '../domain/outcome';
 import type { SettingsStorage, Unsubscribe, ErrorReporter } from './ports';
 import type { EventPublisher, ShellEvents } from './events';
-import { PluginDataStore } from './plugin-data-store';
+import { PluginDataStore, type PluginDataStatus } from './plugin-data-store';
+const recoveryKeys: Partial<Record<PluginDataStatus, string>> = {
+  corrupt: 'settings.recoveryCorrupt', future: 'settings.recoveryFuture',
+  inaccessible: 'settings.recoveryInaccessible', uncertain: 'settings.recoveryUncertain',
+};
 export class PreferenceService {
   private value: Preferences = defaults;
   private disposed = false;
@@ -14,6 +18,9 @@ export class PreferenceService {
   }
   get current(): Preferences { return this.value; }
   get readonly(): boolean { return this.disposed || this.data.readonly; }
+  get persistenceStatus(): PluginDataStatus { return this.data.status; }
+  get readErrorKey(): string | undefined { return this.data.readErrorKey; }
+  get recoveryKey(): string | undefined { return recoveryKeys[this.data.status]; }
   async load(): Promise<void> {
     await this.data.load();
     if (!this.disposed) this.value = this.data.current.preferences;

@@ -1,5 +1,13 @@
 # Template readiness ledger
 
+The active [framework lifecycle increment](FRAMEWORK-LIFECYCLE-PLAN.md) exposes
+reusable owner permits, precise recovery/presence reads and read-only resource
+observation through the [developer guide](FRAMEWORK-GUIDE.md). Its
+[execution record](../testing/FRAMEWORK-LIFECYCLE.md) owns current qualification;
+the figures below remain historical until the changed inputs pass a fresh session.
+Migration breadth, native pending-recovery/delayed-progress, manual/device and
+external release/dependency prerequisites remain open.
+
 The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
 and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) track the current focused
 milestone. Frozen `7f14292871efb07ddace131fb9b5603de4122394` has **2 verified /

@@ -84,7 +84,7 @@ it('reflects a failed shared preference write without allowing a second persiste
   try {
     f.storage.save.mockRejectedValueOnce(new Error('shared writer uncertain'));
     await f.preferences.update({ notifySuccess: false });
-    expect(f.setting.value).toBe(false); expect(f.setting.readonly).toBe(true); expect(f.setting.errorKey).toBe('error.settingsRead');
+    expect(f.setting.value).toBe(false); expect(f.setting.readonly).toBe(true); expect(f.setting.errorKey).toBe('error.settingsWrite');
     expect((await f.setting.set(true)).ok).toBe(false); expect(f.storage.save).toHaveBeenCalledOnce();
   } finally { f.dispose(); }
 });

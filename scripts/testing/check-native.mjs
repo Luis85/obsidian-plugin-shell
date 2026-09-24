@@ -18,6 +18,7 @@ import { qualifyDebugging } from './native-debugging.mjs';
 import { qualifyItems, qualifyItemsRestart } from './native-items.mjs';
 import { qualifyPerformance } from './native-performance.mjs';
 import { qualifyItemOwnership } from './native-item-ownership.mjs';
+import { qualifyResourceOwnership } from './native-resource-ownership.mjs';
 import { nativeScratch, nativeConfigDirectory, assertNativeVault } from './native-isolation.mjs';
 const flags = process.argv.slice(2);
 if (flags.length === 1 && flags[0] === '--help') {
@@ -87,6 +88,7 @@ try {
   await expect(page.getByText('Obsidian host', { exact: true })).toBeAttached(); report.checks.push('native-command-opens-view');
   await qualifyItems(page, report, output, launched.vault ?? vault, identity);
   await qualifyItemOwnership(page, report, output, launched.vault ?? vault, identity);
+  await qualifyResourceOwnership(page, report, output, identity);
   await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();

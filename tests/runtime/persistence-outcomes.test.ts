@@ -108,7 +108,7 @@ it('[PERSIST-05-02] uncertain shared saves block queued writes and reconstruct t
       release.resolve();
       expect(await changing).toMatchObject({ ok: false, error: { code: 'uncertain', effect: 'uncertain' } });
       for (const result of await Promise.all([queuedPreference, queuedItem, f.actions.rename(original, 'Blind retry')])) {
-        expect(result).toMatchObject({ ok: false, error: { code: 'storage', effect: 'none' } });
+        expect(result).toMatchObject({ ok: false, error: { code: 'uncertain', effect: 'uncertain', key: 'error.settingsWrite' } });
       }
       const changed = { ...originalItem, revision: 5, values: { label: 'Changed' } };
       const candidate = envelope([changed], 5);

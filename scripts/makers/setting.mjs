@@ -11,7 +11,7 @@ export async function settingRecipe(context, owner, name) {
   await registerEntity(context, { key: local, local: definition, from: `../features/${owner}/${name}.setting-definition` });
   await context.add(`src/features/${owner}/${name}.setting.ts`, `import { BooleanSetting, defineCommand } from '../api';
 import type { PluginDataRepository } from '../../application/plugin-data-repository';
-import type { AuthoringServices } from '../../application/authoring';
+import type { AuthoringServices } from '../api';
 import { ${definition} } from './${name}.setting-definition';
 
 export function ${local}(repository: PluginDataRepository<{ enabled?: boolean }, { readonly enabled: boolean }>, services: Pick<AuthoringServices, 'events' | 'diagnostics' | 'preferences'>) {
@@ -19,7 +19,8 @@ export function ${local}(repository: PluginDataRepository<{ enabled?: boolean },
   if (!defaults.ok) throw new Error('INVALID_SETTING_DEFAULT');
   const setting = new BooleanSetting({ id: '${owner}-${name}-setting', entity: ${definition}.entity.key,
     titleKey: '${prefix}.settingTitle', descriptionKey: '${prefix}.description', defaultValue: defaults.value.enabled }, repository,
-    { events: services.events, diagnostics: services.diagnostics, readonly: () => services.preferences.readonly });
+    { events: services.events, diagnostics: services.diagnostics, readonly: () => services.preferences.readonly,
+      readErrorKey: () => services.preferences.readErrorKey });
   const command = defineCommand({ id: '${owner}-${name}-setting', titleKey: '${prefix}.title',
     available: () => !setting.readonly, execute: () => setting.toggle(),
   });

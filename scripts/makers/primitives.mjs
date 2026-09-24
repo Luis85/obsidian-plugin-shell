@@ -60,7 +60,7 @@ export async function action(context, { owner, name, kind, preference, event }) 
   const id = `${owner}-${name}-${kind}`;
   const imports = [
     `import { defineCommand } from '../api';`,
-    `import type { AuthoringServices } from '../../application/authoring';`,
+    `import type { AuthoringServices } from '../api';`,
   ];
   let setup = '';
   let execute;

@@ -68,6 +68,7 @@ export async function createServices(adapters: ServiceAdapters) {
     const notifications = new NoticeService(adapters.host, (key) => i18n.global.t(key), diagnostics, {
       scheduler,
       validKey: (key) => i18n.global.te(key),
+      observeLifecycle: adapters.observeLifecycle,
     });
     releases.push(() => notifications.dispose());
     const modals = new ModalService(
@@ -75,6 +76,7 @@ export async function createServices(adapters: ServiceAdapters) {
       (key) => i18n.global.t(key),
       diagnostics,
       (key) => i18n.global.te(key),
+      adapters.observeLifecycle,
     );
     releases.push(() => modals.dispose());
     const off = preferences.subscribe((value) => {
