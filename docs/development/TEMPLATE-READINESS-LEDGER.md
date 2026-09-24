@@ -8,6 +8,13 @@ the figures below remain historical until the changed inputs pass a fresh sessio
 Migration breadth, native pending-recovery/delayed-progress, manual/device and
 external release/dependency prerequisites remain open.
 
+The public authoring entry now survives example removal with its intentionally
+unused developer contracts intact; unrelated implementation dead code remains
+checked. Frozen d4c8c5 passed offline/served stages but failed native qualification,
+and its consumer failed the removed-foundation API analysis. Corrected tooling,
+containment and analyzer semantics require a fresh complete qualification; the
+historical acceptance counts are not promoted by those partial runs.
+
 The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
 and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) track the current focused
 milestone. Frozen `7f14292871efb07ddace131fb9b5603de4122394` has **2 verified /

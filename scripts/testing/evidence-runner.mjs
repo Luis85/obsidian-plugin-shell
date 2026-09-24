@@ -5,6 +5,17 @@ import { join } from 'node:path';
 import { evidenceIdentity, assetIdentity, suiteInventory, fileIdentity, candidateIdentity } from './evidence-identity.mjs';
 import { producerCommand, adaptProducer } from './evidence-producers.mjs';
 
+export function evidenceFailure(failure, before, after, assets, finalAssets, result, candidate) {
+  // A missing adapted result is not a candidate mismatch. Preserve the first
+  // execution/adapter fault; raw output and both identities retain other facts.
+  if (failure) return failure;
+  if (JSON.stringify(before) !== JSON.stringify(after)) failure = 'EVIDENCE_SOURCE_CHANGED';
+  if (JSON.stringify(assets) !== JSON.stringify(finalAssets)) failure = 'EVIDENCE_ASSETS_CHANGED';
+  if (result?.assets && result.assets.some(asset => !assets.some(expected => expected.file === asset.file && expected.sha256 === asset.sha256 && (asset.bytes === undefined || expected.bytes === asset.bytes)))) failure = 'EVIDENCE_ASSET_MISMATCH';
+  if (candidate && result?.candidateSource !== candidate.sourceCommit) failure = 'EVIDENCE_CANDIDATE_SOURCE';
+  return failure;
+}
+
 async function execute(root, args, output, candidate, timeoutMs) {
   return await new Promise(resolve => {
     const env = { ...process.env, TZ: 'UTC', LANG: 'C.UTF-8', NODE_OPTIONS: '', FORCE_COLOR: '0', SHELL_EVIDENCE_OUTPUT: output };
@@ -71,10 +82,7 @@ export async function runEvidence(root, producer, { allowDownload = false, candi
   }
   const after = await evidenceIdentity(root, producer);
   const finalAssets = assets.length ? await assetIdentity(root) : [];
-  if (JSON.stringify(before) !== JSON.stringify(after)) failure = 'EVIDENCE_SOURCE_CHANGED';
-  if (JSON.stringify(assets) !== JSON.stringify(finalAssets)) failure = 'EVIDENCE_ASSETS_CHANGED';
-  if (result?.assets && result.assets.some(asset => !assets.some(expected => expected.file === asset.file && expected.sha256 === asset.sha256 && (asset.bytes === undefined || expected.bytes === asset.bytes)))) failure = 'EVIDENCE_ASSET_MISMATCH';
-  if (candidate && result?.candidateSource !== candidate.sourceCommit) failure = 'EVIDENCE_CANDIDATE_SOURCE';
+  failure = evidenceFailure(failure, before, after, assets, finalAssets, result, candidate);
   const packet = { schemaVersion: 1, producer, id, startedAt, finishedAt: new Date().toISOString(), before, after,
     suites, assets, candidate, execution: { exitCode: execution.exitCode, signal: execution.signal, retry: 0, repetition: 0 },
     raw: rawPaths, result, failure, status: !failure && result?.status === 'passed' ? 'passed' : 'failed' };

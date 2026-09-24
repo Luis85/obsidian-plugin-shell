@@ -458,6 +458,14 @@
           "mode": "unit",
           "extent": "partial",
           "assertions": "Thrown timer/notice/modal cleanup produces exact independent faults and outstanding resource receipts after the notice/modal services are disposed. A later natural timer callback settles its receipt while failed notice/modal cleanup remains outstanding. This named case does not dispose the diagnostic service or establish successful cleanup."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/recovery-example.spec.ts",
+          "name": "[RECOVERY-BROWSER] owned recovery completes, cancels and rejects a retained actual action after owner close",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real components complete and cancel the optional recovery demo, invoke the retained actual action twice while availability is pending, close its owner and invoke it again. Dialogs, notices, displayed notice actions and timers remain zero, the sibling publishes an event, no file/settings writes occur and independent fault/page-error observations remain empty. Browser harness adapters, not native Obsidian resources or disk-failure recovery."
         }
       ],
       "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Window/pop-out ownership, partial startup and complete deferred resource behavior remain case-specific. Real nonempty recovery registries and pending availability now have unit assertions; served/native execution and whole-mode audit remain separate. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
@@ -1508,6 +1516,14 @@
           "mode": "unit",
           "extent": "partial",
           "assertions": "Real recovery policy holds two actual pending availability results, revokes their owner registries, then distinguishes a late true result from a rejected availability promise. Neither runs recovery or updates a stale notice; independent evidence contains exactly one notice.action fault."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/recovery-example.spec.ts",
+          "name": "[RECOVERY-BROWSER] owned recovery completes, cancels and rejects a retained actual action after owner close",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real components complete and cancel the optional recovery demo, invoke the retained actual action twice while availability is pending, close its owner and invoke it again. Dialogs, notices, displayed notice actions and timers remain zero, the sibling publishes an event, no file/settings writes occur and independent fault/page-error observations remain empty. Browser harness adapters, not native Obsidian resources or disk-failure recovery."
         }
       ],
       "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Qualify active, pending, disposed and failed recovery clauses together. Retained Task editor recovery and action availability are now covered by scoped assertions; safe opening remains separate from creating or retrying a document. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."
@@ -1582,6 +1598,30 @@
           "mode": "browser-integrated",
           "extent": "partial",
           "assertions": "Twenty served view cycles release actual synthetic notice/dialog/timer handles with sibling and unrelated DOM retained. Ordinary action count remains zero, so nonempty recovery registry and native ownership require separate evidence."
+        },
+        {
+          "producer": "browser",
+          "file": "tests/e2e/recovery-example.spec.ts",
+          "name": "[RECOVERY-BROWSER] owned recovery completes, cancels and rejects a retained actual action after owner close",
+          "mode": "browser-integrated",
+          "extent": "partial",
+          "assertions": "Served real components complete and cancel the optional recovery demo, invoke the retained actual action twice while availability is pending, close its owner and invoke it again. Dialogs, notices, displayed notice actions and timers remain zero, the sibling publishes an event, no file/settings writes occur and independent fault/page-error observations remain empty. Browser harness adapters, not native Obsidian resources or disk-failure recovery."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/recovery-example-components.test.ts",
+          "name": "[RECOVERY-CLOSE] retained real sink callbacks and start handle cannot revive a closed owner while sibling remains usable",
+          "mode": "component",
+          "extent": "partial",
+          "assertions": "Mounted production components use the real recovery controller, notice policy and modal service. After owner closure, retained sink action, start handle and scheduler callbacks cannot revive feedback; pending UI state remains frozen, the sibling publishes a real event and exact zero writes/faults are asserted. Controlled modal/notification/scheduler adapters in component scope."
+        },
+        {
+          "producer": "runtime",
+          "file": "tests/runtime/recovery-example-components.test.ts",
+          "name": "[RECOVERY-CANCEL] actual modal cancellation cancels delayed progress and permits a deliberate fresh example",
+          "mode": "component",
+          "extent": "partial",
+          "assertions": "The real modal cancellation event cancels delayed progress, removes feedback and permits a deliberate fresh example. Closing the owner during the second example releases its sink with no independent fault. Component scope with controlled scheduler and browser modal adapter."
         }
       ],
       "gap": "Audit classes E,A,Q (see ACCEPTANCE-CLOSURE-LEDGER.md). Require current fixed-candidate native resource/recovery observations and complete component/browser/native clause audit. Actual Notice/action/timer/modal/foreign ownership, delayed progress and retained callbacks must be asserted in their real mode; independent fault evidence cannot be replaced by the production diagnostic ring. Current complete producer-session observations remain required; retained baseline evidence stays separately scoped."

@@ -292,7 +292,7 @@
     },
     {
       "path": "scripts/testing/check-native.mjs",
-      "sha256": "5bf68d8ebb1a5bffd617ede2a0d6f27ee05fb8b8bc4bfe9da477beb2d067f398",
+      "sha256": "b1517d5831c4daa832f644f9b9f4cd5d58098852b6d04912f9dfaeeb4414dc2a",
       "template": "scripts__testing__check-native.mjs.txt"
     },
     {
@@ -403,7 +403,7 @@
     },
     {
       "path": "scripts/testing/native-resource-ownership.mjs",
-      "sha256": "da47a31502df981af53c89ea7663f58fdbb32557b4fcb8c74b9f21b5743baf3c"
+      "sha256": "8ad86d28cc0d0ee6e9c0fb267119897856c296a240489a5f36257b09239e8155"
     },
     {
       "path": "src/presentation/composables/use-recovery-example.ts",
@@ -424,6 +424,14 @@
     {
       "path": "tests/tooling/native-recovery-handles.checks.mjs",
       "sha256": "4a596c4d84468081103907ed3a0d6c51953481de3ea28ac8f105d81f2dceef79"
+    },
+    {
+      "path": "scripts/testing/native-foreign-notice.mjs",
+      "sha256": "596f23330b675751a263534ba62448819998b28187521e047de1d6c96c15b52f"
+    },
+    {
+      "path": "tests/tooling/native-foreign-notice.checks.mjs",
+      "sha256": "db353e2ed82b24134388f3c00687a560b7b8055695061ff8d4024d75f144cf4a"
     }
   ]
 }

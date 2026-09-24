@@ -9,6 +9,7 @@ import { adaptProducer } from '../../scripts/testing/evidence-producers.mjs';
 import { performanceProtocol, summarizePerformance, candidateSizes } from '../../scripts/testing/performance-report.mjs';
 import { sourceInputs, sha256 } from '../../scripts/testing/source-inputs.mjs';
 import { nativeOwnershipFixture } from './native-ownership-fixture.mjs';
+import { nativeLaunchFixture, nativeForeignNoticeFixture } from './native-launch-fixture.mjs';
 
 test('real Vitest JSON and public reporter diagnostics qualify a genuine pass and reject failure, retry, repeat and skip', async t => {
   for (const [body, passing] of [
@@ -105,7 +106,7 @@ test('native performance adapter rejects crafted classification, budget, size, g
   const checks = JSON.parse(await readFile(join(root, 'docs/testing/native-evidence-checks.json'))).profiles.showcase;
   const samples = Object.keys(performanceProtocol.budgets).flatMap(kind => Array.from({ length: 33 }, (_, index) => ({ kind, index,
     warmup: index < 3, startMs: index * 20, endMs: index * 20 + 10, durationMs: 10, status: 'passed' })));
-  const report = { ...nativeOwnershipFixture(true), mode: 'native-obsidian', status: 'passed', sourceCommit: 'a'.repeat(40), targetApp: '1.13.7', launcherVersion: '3.2.1',
+  const report = { ...nativeOwnershipFixture(true), ...nativeLaunchFixture(), ...nativeForeignNoticeFixture(), mode: 'native-obsidian', status: 'passed', sourceCommit: 'a'.repeat(40), targetApp: '1.13.7', launcherVersion: '3.2.1',
     resolvedVersions: ['1.13.7', '1.13.7'], assets, installedAssets: assets, checks, errors: [],
     items: { mode: 'real-native-io-with-read-only-call-observer', restartQueryWrites: { calls: 0, active: 0, maximumActive: 0, failures: 0 } },
     performance: { schemaVersion: 1, mode: 'native-obsidian', status: 'passed', classification: 'shared-runner', sourceCommit: 'a'.repeat(40),

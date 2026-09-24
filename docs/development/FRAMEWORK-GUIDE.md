@@ -5,6 +5,13 @@ the public building blocks from `src/features/api.ts`. Generated source is ordin
 editable TypeScript/Vue. Bootstrap supplies host adapters and runtime ownership;
 feature code does not import Obsidian or create another persistence path.
 
+`src/features/api.ts` is an explicit public library entry for static analysis.
+Its reviewed exports remain available when all demonstrations are removed and
+before a consumer uses each contract. Add only intentional developer contracts
+to this surface. Implementation exports and unrelated feature files remain
+subject to the full unused-code gate; do not register feature directories as
+additional entry points to hide unused scaffolding.
+
 ## From idea to a tested feature
 
 1. Run `npm run setup` with the documented qualified toolchain. Start the actual

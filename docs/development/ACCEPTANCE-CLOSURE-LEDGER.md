@@ -6,6 +6,13 @@ presence-aware reads, truthful uncertain guidance, UTF-8 bounds and independent
 native observations strengthen selected clauses. Historical counts below do not
 qualify the changed source; new links require actual producer output.
 
+Thirty additive partial links now identify observed unit, component and served
+recovery assertions. The second frozen session retains a failed native attempt and
+therefore grants no acceptance advancement; source-bound reconciliation must pass
+for the corrected candidate. Its separate foreign-notice fixture and launch-resource
+protocol are qualification tooling, not new production capabilities or idle-host
+performance proof.
+
 Assertion audit of all 96 retained cases, 2026-09-23. This ledger supplements the
 [crosswalk](../testing/acceptance-crosswalk.json) and preserves the
 [normative machine inventory](../testing/test-plan.json). It is an implementation

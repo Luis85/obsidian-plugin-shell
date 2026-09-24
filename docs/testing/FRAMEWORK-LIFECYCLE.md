@@ -138,3 +138,71 @@ candidate hashes, code/evidence SHAs, generated-consumer/archive results, check
 status and current acceptance. Until then this record makes no current-source
 acceptance advancement claim. All 96 cases/modes, baseline, separate Nuxt matrix
 and blocked release remain unchanged. No publication or merge is authorized.
+
+## Second frozen attempt and demonstrated corrections
+
+Source `d4c8c5fe4cde4211fb3f12ad07f70460f63d52ee` completed all 23 offline
+verification stages, 398 runtime cases in each of three fresh processes, a separate
+398-case production coverage producer, 47 served-browser cases and the live security
+gate. The actual tooling producer reported 190 passes and four designated Linux
+platform skips. An independent read-only audit matched all 593 source files to Git,
+rehash-checked all 26 raw receipts from eight registered attempts, and checked 12
+maintainability reports plus 414 per-input receipts. All 103 production inputs and
+47 selected-core inputs met coverage floors; 863 production functions had no gate
+findings, with duplication 33/4740 (0.6962%). These completed stages do not make
+the complete candidate session pass.
+
+The cancellation request for [run 36005818649](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36005818649)
+raced with native startup. Obsidian 1.13.7 **did launch**, and eight native checks
+completed before the foreign-notice fixture failed: renderer-global
+`window.require('obsidian')` could not resolve the plugin API. The failed raw report
+has the correct candidate source SHA. The wrapper subsequently replaced its adapter
+failure with `EVIDENCE_CANDIDATE_SOURCE` because there was no adapted result. Preserve
+both original outputs; the correction preserves the first execution/adapter failure
+and retains source/asset identities for further inspection. Three focused controls
+include two reproduced red cases before correction. None of these report/parser
+controls is native execution evidence.
+
+The inherited launcher used a fresh OS-temporary configuration outside the codebase.
+That did not meet this increment's explicit containment requirement. Subsequent
+launches scope the public launcher's temporary-directory environment to a fresh
+canonical contained run directory, restore the environment after the awaited call,
+and validate the actual returned vault/configuration paths. Fresh resource snapshots
+are taken immediately before each initial/restart launch. Windows load averages
+are explicitly unavailable; samples are shared-runner diagnostics, not an idle-host
+or performance-budget qualification. Failed attempts retain scratch state; cleanup
+preserves the first error and all later cleanup errors and does not recursively
+remove an ancestor after a configuration cleanup failure.
+
+The foreign-notice correction installs a separate, owned qualification fixture
+plugin in the isolated vault. Its public plugin module imports Obsidian normally;
+its own commands create, update and dismiss its own persistent Notice. Its source
+and installed hashes are recorded separately from candidate assets. The candidate's
+runtime observation remains read-only and no production test global is introduced.
+
+The failed candidate artifact is retained as GitHub artifact 10811171175, SHA-256
+`aac8c10a5a10789137ebed1409eb2337c2208d3adb8f38bbe159f4b2a8681da9`.
+Its failed full-session reconciliation grants **0 verified / 0 partial / 96 not-run**;
+this failed-attempt result does not replace the historical qualified **2 / 55 / 39**.
+Five additional partial links record actual passing served/component recovery
+assertions from that source; all 96 required-mode sets and historical links remain.
+
+[Consumer run 36005818876](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36005818876)
+passed its initial, edited-feature and literal Git-free archive verification stages,
+then failed after reviewed removal because three intentional public type exports
+had no remaining example consumers. Declare only `src/features/api.ts` as a public
+analyzer entry, retaining developer contracts in the empty foundation. A real
+checker regression accepts that API and still rejects an unrelated feature file,
+private implementation export and private type. No implementation directory is
+excluded. The failed consumer artifact 10810968011 is retained with SHA-256
+`53293ff81a44bdb49fd430b63e40f60170fad71a18f08dffb7f182691e92a8cd`.
+Fresh qualification of the corrected executable/policy inputs remains required.
+
+The correction checkpoint passed 29 serialized native-isolation/receipt/parser/
+fixture tests, the existing performance-fixture integration, two real evidence-CLI
+controls, full source/analyzer/repository checks and the 103-input production lint
+gate. The 94-entry removal dry run includes both new foreign-fixture files. The
+foundation failed-attempt test first failed because it expected scratch deletion;
+its updated assertions require two distinct preserved scratch directories, original
+report/log bytes, no provider and no launch samples. That corrected real-driver
+pre-provisioning test passes; no local host was launched.

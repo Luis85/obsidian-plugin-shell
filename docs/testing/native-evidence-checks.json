@@ -6,6 +6,7 @@
       "native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets",
       "native-command-opens-view",
       "native-command-palette-repeat-toggle-all-leaves-foreign-isolation",
+      "native-contained-config-fresh-launch-resource-snapshots",
       "native-debug-commands-toggle-and-export-attributable-redacted-report",
       "native-declarative-settings-use-application-writer",
       "native-delayed-progress-cancelled-before-display-on-owner-close",
@@ -40,6 +41,7 @@
       "native-view-real-event"
     ],
     "foundation": [
+      "native-contained-config-fresh-launch-resource-snapshots",
       "native-foundation-cold-restart-persists-preferences-and-identical-installed-assets",
       "native-foundation-command-opens-real-view",
       "native-foundation-header-ownership-preserves-tabs",

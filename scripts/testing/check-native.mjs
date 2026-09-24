@@ -19,7 +19,9 @@ import { qualifyItems, qualifyItemsRestart } from './native-items.mjs';
 import { qualifyPerformance } from './native-performance.mjs';
 import { qualifyItemOwnership } from './native-item-ownership.mjs';
 import { qualifyResourceOwnership } from './native-resource-ownership.mjs';
-import { nativeScratch, nativeConfigDirectory, assertNativeVault } from './native-isolation.mjs';
+import { nativeScratch, nativeScratchDirectory, nativeConfigDirectory, assertNativeVault, withNativeTemporaryDirectory } from './native-isolation.mjs';
+import { nativeLaunchResources } from './native-launch-resources.mjs';
+import { createNativeForeignNotice } from './native-foreign-notice.mjs';
 const flags = process.argv.slice(2);
 if (flags.length === 1 && flags[0] === '--help') {
   console.log('Usage: npm run test:native -- --allow-download [--performance [--controlled-reference]]\nRequires provisioned obsidian-launcher 3.2.1 and retained dist assets; uses isolated vault/config only.\nPerformance: 3 warmups + 30 samples each of warm initialization and real 100-item readiness. Budgets are reported separately.\nUse --controlled-reference only on an otherwise idle reference host. All attempts are retained under reports/native/attempts.'); process.exit(0);
@@ -28,11 +30,22 @@ if (!flags.includes('--allow-download') || new Set(flags).size !== flags.length 
   console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. Optional flags: --performance [--controlled-reference]. This may download the host. No test was run.'); process.exit(2);
 }
 const output = resolve('reports/native/attempts', `${new Date().toISOString().replaceAll(':', '-')}-${process.pid}`); await mkdir(output, { recursive: true });
-const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', attemptDirectory: output, assets: [], checks: [], errors: [] };
+const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', attemptDirectory: output, assets: [], checks: [], errors: [], launchResources: [] };
 const diagnostics = createNativeDiagnosticObserver(report);
 const contextObservers = [];
 const scratch = await nativeScratch();
 let launched; let browser; let activePage; let log = ''; const configDirectories = [];
+function cleanupFailure(code, error) {
+  report.status = 'failed'; report.cleanupFailure ??= code;
+  (report.cleanupFailures ??= []).push({ code, message: String(error?.message ?? error) }); process.exitCode = 1;
+}
+async function launchObserved(launcher, options, phase) {
+  await withNativeTemporaryDirectory(scratch, async () => {
+    report.launchResources.push(nativeLaunchResources(phase));
+    await writeFile(join(output, 'launch-resources.json'), JSON.stringify(report.launchResources, null, 2));
+    launched = await launcher.launch(options);
+  });
+}
 try {
   const identity = await readNativeIdentity(); report.identity = { id: identity.id, name: identity.name, version: identity.version };
   const provider = JSON.parse(await readFile('.native-runner/node_modules/obsidian-launcher/package.json', 'utf8'));
@@ -46,8 +59,16 @@ try {
   report.resolvedVersions = await launcher.resolveVersion('1.13.7', 'latest');
   const [appVersion, installerVersion] = report.resolvedVersions;
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
-  launched = await launcher.launch({ appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist')], localStorage: { language: 'en' }, args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
-  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir));
+  const witness = await createNativeForeignNotice(scratch, identity.id);
+  report.foreignNoticeFixture = { id: witness.id, assets: witness.assets, installedAssets: [] };
+  for (const asset of witness.assets) await writeFile(join(output, `foreign-notice-${asset.file}`), await readFile(join(witness.directory, asset.file)));
+  await launchObserved(launcher, { appVersion, installerVersion, vault, copy: false, plugins: [resolve('dist'), witness.directory], localStorage: { language: 'en' }, args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } }, 'initial');
+  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir, scratch));
+  for (const asset of witness.assets) {
+    const bytes = await readFile(join(vault, '.obsidian/plugins', witness.id, asset.file));
+    const installed = { file: asset.file, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };
+    expect(installed).toEqual(asset); report.foreignNoticeFixture.installedAssets.push(installed);
+  }
   const capture = data => { log = (log + data.toString()).slice(-50000); };
   launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
   const endpoint = `http://127.0.0.1:${port}`;
@@ -88,7 +109,7 @@ try {
   await expect(page.getByText('Obsidian host', { exact: true })).toBeAttached(); report.checks.push('native-command-opens-view');
   await qualifyItems(page, report, output, launched.vault ?? vault, identity);
   await qualifyItemOwnership(page, report, output, launched.vault ?? vault, identity);
-  await qualifyResourceOwnership(page, report, output, identity);
+  await qualifyResourceOwnership(page, report, output, identity, witness.id);
   await qualifyCommandRemoval(page, report, identity);
   await page.screenshot({ path: join(output, 'native-overview.png') });
   await page.getByRole('button', { name: 'Create your first Task note' }).click();
@@ -146,10 +167,11 @@ try {
     if (process.platform !== 'win32') process.kill(-previousPid, 'SIGTERM'); else launched.proc.kill();
     await Promise.race([exited, new Promise((_, reject) => setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000))]);
   }
-  launched = await launcher.launch({ appVersion, installerVersion, vault: persistedVault, copy: false,
+  await launchObserved(launcher, { appVersion, installerVersion, vault: persistedVault, copy: false,
     localStorage: { language: 'en' },
-    args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } });
-  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir)); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
+    args: [`--remote-debugging-port=${port}`], spawnOptions: { detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] } }, 'cold-restart');
+  await assertNativeVault(launched.vault, vault); configDirectories.push(await nativeConfigDirectory(launched.configDir, scratch)); launched.proc.stdout?.on('data', capture); launched.proc.stderr?.on('data', capture);
+  expect(new Set(configDirectories).size).toBe(2);
   expect(launched.proc.pid).not.toBe(previousPid);
   const restartDeadline = Date.now() + 90000;
   while (Date.now() < restartDeadline) {
@@ -174,6 +196,8 @@ try {
   expect(await readFile(join(persistedVault, path), 'utf8')).toBe(preview);
   await assertDiagnostics(restarted, identity); await restarted.screenshot({ path: join(output, 'native-cold-restart-header-hidden.png') });
   report.checks.push('native-cold-process-restart-persists-header-folder-note-and-identical-installed-assets');
+  expect(report.launchResources.map(sample => sample.phase)).toEqual(['initial', 'cold-restart']);
+  report.checks.push('native-contained-config-fresh-launch-resource-snapshots');
   for (const asset of report.assets) expect(createHash('sha256').update(await readFile(`dist/${asset.file}`)).digest('hex')).toBe(asset.sha256);
   if (report.errors.length) throw new Error('Native page reported unexpected errors; inspect report.');
   report.status = 'passed';
@@ -205,25 +229,28 @@ finally {
   // Preserve the primary outcome even when host processes delay filesystem cleanup.
   await writeFile(join(output, 'host.log'), log);
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
-  if (browser) await browser.close().catch(() => undefined);
+  if (browser) { try { await browser.close(); } catch (error) { cleanupFailure('NATIVE_BROWSER_DISCONNECT_FAILED', error); } }
   if (launched?.proc.pid && launched.proc.exitCode === null && launched.proc.signalCode === null) {
     let timeout;
     try {
       const stopped = new Promise(ok => launched.proc.once('exit', ok));
       if (process.platform !== 'win32') process.kill(-launched.proc.pid, 'SIGTERM'); else launched.proc.kill();
       await Promise.race([stopped, new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('NATIVE_STOP_TIMEOUT')), 10000); })]);
-    } catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_PROCESS_STOP_FAILED'; process.exitCode = 1; }
+    } catch (error) { cleanupFailure('NATIVE_PROCESS_STOP_FAILED', error); }
     finally { clearTimeout(timeout); }
   }
   const stopped = !launched || launched.proc.exitCode !== null || launched.proc.signalCode !== null;
-  for (const directory of configDirectories) {
-    try { if (!stopped) throw new Error('NATIVE_STILL_RUNNING'); await rm(await nativeConfigDirectory(directory), { recursive: true, force: true }); }
-    catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_CONFIG_CLEANUP_FAILED'; process.exitCode = 1; }
+  if (stopped && report.status === 'passed' && !report.errors.length && !report.cleanupFailure) {
+    for (const directory of configDirectories) {
+      try { await rm(await nativeConfigDirectory(directory, scratch), { recursive: true, force: true }); }
+      catch (error) { cleanupFailure('NATIVE_CONFIG_CLEANUP_FAILED', error); }
+    }
+    if (!report.cleanupFailure) {
+      try { await rm(await nativeScratchDirectory(scratch), { recursive: true, force: true }); }
+      catch (error) { cleanupFailure('NATIVE_SCRATCH_CLEANUP_FAILED', error); }
+    }
   }
-  if (stopped) {
-    try { await rm(scratch, { recursive: true, force: true }); }
-    catch { report.status = 'failed'; report.cleanupFailure = 'NATIVE_SCRATCH_CLEANUP_FAILED'; report.scratchPreserved = true; process.exitCode = 1; }
-  } else report.scratchPreserved = true;
+  if (!stopped || report.status !== 'passed' || report.errors.length || report.cleanupFailure) report.scratchPreserved = true;
   for (const dispose of contextObservers) dispose();
   diagnostics.dispose();
   if (report.errors.length) { report.status = 'failed'; report.reason ??= 'Native page reported unexpected errors; inspect report.'; process.exitCode = 1; }

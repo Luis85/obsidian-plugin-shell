@@ -149,3 +149,22 @@ timeout/archive EBUSY as separately retained failure classes. The existing
 receipt/timeline/error tooling is reused. Receipt time is not throw time; CDP
 disconnect ends observation; EBUSY proves neither an earlier timeout nor an orphan.
 A later pass cannot establish any historical cause or fixed-byte Windows coverage.
+
+The second frozen Linux attempt did enter the host before its cancellation request
+took effect. It completed eight checks, then failed because renderer-global require
+does not provide the plugin-scoped Obsidian API. The original raw failure and the
+wrapper's misleading candidate-source verdict are both retained in the current
+[execution record](FRAMEWORK-LIFECYCLE.md). Subsequent qualification uses a separate
+scratch-vault plugin that imports the public API in its own module and owns one
+persistent Notice; create/update/dismiss use its registered commands. Its source and
+installed receipts remain distinct from the unchanged candidate's three assets.
+
+Both initial and cold-restart launches now use fresh configuration directories
+inside the canonical scratch directory. The public launcher reads the scoped
+temporary-directory environment; it is restored after each awaited launch without
+private host-manager changes. Current memory/parallelism/load snapshots precede
+each launch, with unsupported Windows load data explicitly marked unavailable.
+These samples do not establish idle-reference performance. Failed primary or cleanup
+attempts preserve scratch state, retain every cleanup error and never retry a failed
+configuration deletion through its ancestor. Native execution must still establish
+the new common containment/resource check and all ownership assertions.

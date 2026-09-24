@@ -4,9 +4,10 @@ import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { nativeCommand } from './native-command.mjs';
 import { attachRuntimeObservation, assertIndependentObservation, observedResources } from './native-runtime-observation.mjs';
 import { retainNativeAction, startAndCloseRecovery } from './native-recovery-handles.mjs';
+import { foreignNoticeCommands } from './native-foreign-notice.mjs';
 
 /** Exact installed plugin bytes; public UI/native resources, no global resource sweeps. */
-export async function qualifyResourceOwnership(page, report, output, identity) {
+export async function qualifyResourceOwnership(page, report, output, identity, witnessId) {
   noteNativePhase(report, 'native-resource-ownership');
   report.resourceOwnership = { status: 'running', mode: 'native-public-ui', unexecuted: [] };
   const observation = await page.evaluateHandle(attachRuntimeObservation, identity.id);
@@ -14,12 +15,10 @@ export async function qualifyResourceOwnership(page, report, output, identity) {
   let foreign; let initiating; let ownNotice; let siblingNotice; let retainedAction; let failed = false; let disabled = false;
   try {
     assertIndependentObservation(await read());
-    foreign = await page.evaluateHandle(() => {
-      const { Notice } = window.require('obsidian');
-      const handle = new Notice('Independent qualification owner', 0);
-      return { connected: () => handle.noticeEl.isConnected, update: () => handle.setMessage('Independent qualification owner remains usable'), close: () => handle.hide() };
-    });
-    expect(await foreign.evaluate(handle => handle.connected())).toBe(true);
+    await nativeCommand(page, foreignNoticeCommands.create);
+    const foreignNotice = page.locator('.notice').filter({ hasText: 'Independent qualification owner' });
+    await expect(foreignNotice).toHaveCount(1); await expect(foreignNotice).toBeVisible(); foreign = await foreignNotice.elementHandle();
+    expect(await foreign.evaluate(element => element.isConnected)).toBe(true);
     const original = page.locator(identity.viewSelector).first();
     await original.getByRole('button', { name: 'View actions', exact: true }).click();
     await page.locator('.menu-item').filter({ hasText: 'Open showcase in a split' }).click();
@@ -74,7 +73,7 @@ export async function qualifyResourceOwnership(page, report, output, identity) {
     await expect(page.locator(identity.viewSelector)).toHaveCount(1); await expect(modal).toHaveCount(0);
     await expect.poll(() => ownNotice.evaluate(element => element.isConnected)).toBe(false);
     expect(await siblingNotice.evaluate(element => element.isConnected)).toBe(true);
-    expect(await foreign.evaluate(handle => handle.connected())).toBe(true);
+    expect(await foreign.evaluate(element => element.isConnected)).toBe(true);
     const closed = await read(); assertIndependentObservation(closed);
     report.resourceOwnership.closed = closed;
     const remaining = observedResources(closed);
@@ -96,7 +95,9 @@ export async function qualifyResourceOwnership(page, report, output, identity) {
     await expect.poll(() => siblingNotice.evaluate(element => element.isConnected)).toBe(false);
     const unloaded = await read(); assertIndependentObservation(unloaded); expect(observedResources(unloaded)).toEqual([]);
     report.resourceOwnership.unloaded = unloaded;
-    expect(await foreign.evaluate(handle => { handle.update(); return handle.connected(); })).toBe(true);
+    await nativeCommand(page, foreignNoticeCommands.update);
+    expect(await foreign.evaluate(element => element.isConnected && element.textContent.includes('Independent qualification owner remains usable'))).toBe(true);
+    await expect(page.locator('.notice').filter({ hasText: 'Independent qualification owner remains usable' })).toBeVisible();
     expect(await ownNotice.evaluate(element => element.isConnected)).toBe(false);
     report.resourceOwnership = { ...report.resourceOwnership, status: 'passed', cancelledProgress, opened, closed, replayed, unloaded, retainedActionCalls };
     report.checks.push('native-unload-releases-observed-plugin-handles-with-independent-zero-fault-ledger-and-retains-foreign-notice');
@@ -112,7 +113,10 @@ export async function qualifyResourceOwnership(page, report, output, identity) {
       if (!failed) assertIndependentObservation(report.resourceOwnership.finalObservation);
     } catch (error) { cleanupFailures.push(String(error.message)); }
     try { await observation.evaluate(handle => handle.stop()); } catch (error) { cleanupFailures.push(String(error.message)); }
-    try { if (foreign) await foreign.evaluate(handle => handle.close()); } catch (error) { cleanupFailures.push(String(error.message)); }
+    try {
+      await page.evaluate(async id => window.app.plugins.disablePlugin(id), witnessId);
+      if (foreign) await expect.poll(() => foreign.evaluate(element => element.isConnected)).toBe(false);
+    } catch (error) { cleanupFailures.push(String(error.message)); }
     try { await retainedAction?.dispose(); } catch (error) { cleanupFailures.push(String(error.message)); }
     for (const handle of [observation, foreign, initiating, ownNotice, siblingNotice]) {
       try { await handle?.dispose(); } catch (error) { cleanupFailures.push(String(error.message)); }
