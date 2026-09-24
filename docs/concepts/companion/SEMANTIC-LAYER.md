@@ -1,6 +1,6 @@
 # Semantic layer and component variants
 
-> Product contract and implemented browser concept, 2026-09-24. Extends the [one-vault project workspace](SINGLE-VAULT.md) without changing the installed root-template runtime. Current verification is recorded [separately](SINGLE-VAULT-VERIFICATION.md). Native adapters and the shared blueprint compiler remain implementation work.
+> Product contract and implemented browser concept, 2026-09-24. Extends the [one-vault project workspace](SINGLE-VAULT.md) without changing the installed root-template runtime. Current entity-editor verification is recorded [separately](ER-EDITOR-VERIFICATION.md); the [original single-vault record](SINGLE-VAULT-VERIFICATION.md) is historical. Native adapters and the shared blueprint compiler remain implementation work.
 
 ## 1. Product model
 
@@ -18,11 +18,11 @@ Each entity has a stable internal ID, immutable saved code name, editable displa
 
 **Add entity** opens an isolated draft. Add/remove property rows, select type, required intent and optional typed defaults, then Save. Invalid fields retain the draft. Close/Escape requires an explicit discard choice after edits. Keeping a draft preserves its entered data. Unchanged saves do not create false source revisions or history.
 
-**Connect entities** provides a keyboard-accessible relationship form. Dragging a right/source handle to a left/target handle opens the same review; it does not immediately mutate the model. Selecting a line exposes its endpoints, label, storage key and cardinalities. Endpoint changes are reviewed in that editor. ER endpoint-updater dragging, custom routing and SQL database execution are not part of this implementation.
+**Connect entities** provides a keyboard-accessible relationship form. Dragging a source handle to a target handle opens the same review; it does not immediately mutate the model. Selecting a line exposes its endpoints, label, storage key and cardinalities. Endpoint changes are reviewed in that editor. Facing ports and bounded custom orthogonal routing keep endpoint geometry explicit; circle/bar/fork marks and two-direction sentences explain the counts. ER endpoint-updater dragging and SQL database execution remain outside this implementation.
 
 **Add section** creates a named visual group. Assign entities through the entity editor. Arrange sections lays out each group's members together, then packs groups into independent bands. Removing a section ungroups its entities; it never deletes entities or relationships. Card dragging, camera movement and section labels/membership do not alter generated contracts. Undo/Redo records authored entity/relationship/grouping changes and card arrangement; camera navigation is presentation state.
 
-**Entity list** supplies an alternate non-drag editing path. The same stable entity IDs appear in the sitemap's optional **Declared entity** field. Legacy free-text entity hints remain explicitly unbound rather than being discarded or treated as a complete schema.
+**Entity list** and **Relationships** supply alternate non-drag editing paths. Position / align provides numeric positioning and alignment buttons. Guidelines snap entity edges/centers within six screen pixels, then optional Grid snap uses 20-unit spacing. Alt bypasses both; Escape cancels a gesture. Arrow keys nudge by one unit, Shift by twenty. These controls do not edit schema. See the [research and interaction contract](ER-EDITOR-REVIEW.md). The same stable entity IDs appear in the sitemap's optional **Declared entity** field. Legacy free-text entity hints remain explicitly unbound rather than being discarded or treated as a complete schema.
 
 ## 3. Obsidian property compatibility
 
@@ -42,7 +42,7 @@ Property type is shared by name throughout an Obsidian vault. Conflicting declar
 
 The portable generator subset uses lowercase snake_case property keys, even though Obsidian itself permits broader names. Managed `id` and `type`, dangerous prototype keys and duplicate keys cannot be authored again. `aliases` and `cssclasses` require List. Relationship storage may not repurpose these metadata keys or `tags`. Nested objects, executable defaults, arbitrary custom type names and inferred computed properties are rejected.
 
-The current defaults editor accepts primitive text/date values and JSON literals for number, checkbox and list/tag values. It validates before committing and preserves both false and zero. It accepts a conservative portable folder/tag subset; rejecting a character is not a claim that all Obsidian filenames or tags forbid that character.
+The defaults editor uses typed numeric/date/date-time controls, a true/false checkbox-default selector, text inputs and JSON arrays for list/tag values. Common property presets and Save & add another are optional speed aids, not inferred schema. It validates before committing and preserves both false and zero. It accepts a conservative portable folder/tag subset; rejecting a character is not a claim that all Obsidian filenames or tags forbid that character.
 
 ## 4. Relationship contract
 

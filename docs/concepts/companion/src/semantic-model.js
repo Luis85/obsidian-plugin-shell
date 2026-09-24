@@ -20,7 +20,7 @@ function erShape(m){
  if(!m.entities.every(e=>erKeys(e,['id','name','slug','folder','description','section','properties'])&&id(e.id,'entity')&&erText(e.name,80)&&erText(e.slug,60)&&erText(e.folder,120)&&erText(e.description,1000)&&(e.section===null||id(e.section,'section'))&&Array.isArray(e.properties)&&e.properties.length<=ER_LIMITS.properties&&e.properties.every(p=>erKeys(p,['id','key','type','required','defaultValue'])&&id(p.id,'property')&&erText(p.key,60)&&Object.hasOwn(ER_TYPES,p.type)&&typeof p.required==='boolean'&&(!Object.hasOwn(p,'defaultValue')||erDefaultValid(p.type,p.defaultValue)))))return false;
  if(!m.relationships.every(r=>erKeys(r,['id','name','source','target','key','sourceCard','targetCard','onDelete'])&&id(r.id,'relationship')&&erText(r.name,80)&&id(r.source,'entity')&&id(r.target,'entity')&&erText(r.key,60)&&ER_CARDS.includes(r.sourceCard)&&ER_CARDS.includes(r.targetCard)&&r.onDelete==='restrict'))return false;
  if(!m.sections.every(s=>erKeys(s,['id','name'])&&id(s.id,'section')&&erText(s.name,80)))return false;
- const c=m.canvas;if(!erKeys(c,['positions','viewport','snap'])||!erPlain(c.positions)||Object.keys(c.positions).length>60||!Object.entries(c.positions).every(([k,p])=>id(k,'entity')&&erKeys(p,['x','y'])&&[p.x,p.y].every(n=>Number.isFinite(n)&&Math.abs(n)<=100000))||typeof c.snap!=='boolean')return false;
+ const c=m.canvas;if(!erKeys(c,['positions','viewport','snap','guides'])||!erPlain(c.positions)||Object.keys(c.positions).length>60||!Object.entries(c.positions).every(([k,p])=>id(k,'entity')&&erKeys(p,['x','y'])&&[p.x,p.y].every(n=>Number.isFinite(n)&&Math.abs(n)<=100000))||typeof c.snap!=='boolean'||(c.guides!==undefined&&typeof c.guides!=='boolean'))return false;
  return erKeys(c.viewport,['x','y','zoom'])&&[c.viewport.x,c.viewport.y].every(n=>Number.isFinite(n)&&Math.abs(n)<=200000)&&Number.isFinite(c.viewport.zoom)&&c.viewport.zoom>=.15&&c.viewport.zoom<=2;
 }
 function erDefaultValid(type,value){
@@ -68,7 +68,7 @@ function semanticIssues(d){
 function semanticArrange(m){
  let y=60;const groups=[null,...m.sections.map(s=>s.id)];
  for(const group of groups){const items=m.entities.filter(e=>e.section===group);if(!items.length)continue;
-  let rowY=y;for(let i=0;i<items.length;i+=3){const row=items.slice(i,i+3);row.forEach((e,j)=>m.canvas.positions[e.id]={x:60+j*350,y:rowY});rowY+=Math.max(...row.map(e=>erCardHeight(e,m)))+70;}y=rowY+70;
+  let rowY=y;for(let i=0;i<items.length;i+=3){const row=items.slice(i,i+3);row.forEach((e,j)=>m.canvas.positions[e.id]={x:60+j*430,y:rowY});rowY+=Math.max(...row.map(e=>erCardHeight(e,m)))+100;}y=rowY+70;
  }
 }
 function erCardHeight(e,m){return 144+(Math.min(erFields(e,m).length,8)+2)*25+(erFields(e,m).length>8?28:0);}

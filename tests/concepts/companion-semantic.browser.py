@@ -193,7 +193,10 @@ with sync_playwright() as pw:
             index=page.locator('.er-property-row').count()-1
             page.locator(f'#er-p-{index}-key').fill(key);page.locator(f'#er-p-{index}-type').select_option(kind)
             page.locator(f'[data-field="er-prop-hasDefault"][data-index="{index}"]').check()
-            page.locator(f'#er-p-{index}-default').fill(value)
+            if kind == 'checkbox':
+                page.locator(f'#er-p-{index}-default').select_option(value)
+            else:
+                page.locator(f'#er-p-{index}-default').fill(value)
         act(page,'er-save',scope='#modal')
         ok('Property form saves false and zero without converting them to strings', js(page, 'semanticModel().entities[0].properties.some(p=>p.key==="completed"&&p.defaultValue===false)&&semanticModel().entities[0].properties.some(p=>p.key==="estimate"&&p.defaultValue===0)'))
         # Variant drafts use the same explicit discard boundary.

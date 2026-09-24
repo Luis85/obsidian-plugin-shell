@@ -14,6 +14,7 @@ OUT = ROOT / 'reports/concepts'
 SUITES = [
     ('single-vault', 'single-vault/checks.json'),
     ('semantic', 'semantic/checks.json'),
+    ('er-polish', 'er-polish/checks.json'),
     ('containers', 'containers/checks.json'),
     ('reference', 'reference/checks.json'),
     ('reference-graph', 'reference/graph-checks.json'),

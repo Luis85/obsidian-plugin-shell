@@ -1,6 +1,6 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · semantic design and variants — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · entity-editor review and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
@@ -24,11 +24,13 @@ The retained editor supports view containers, internal screens, navigation group
 
 ## Entity relationships and component variants
 
-**Design → Entity relationships** opens the semantic editor: entities, typed properties/defaults, runtime note folders, explicit relationships/cardinalities and visual sections. Drag handles to review a connection, or use Connect entities. Arrange sections, Fit, Undo/Redo, the inspector and Entity list provide alternate editing paths. **Review generator** includes declared entity interfaces, document-recipe inputs, frontmatter examples and relationship mappings in the same source plan as the sitemap.
+**Design → Entity relationships** opens the semantic editor: entities, typed properties/defaults, runtime note folders, explicit relationships/cardinalities and visual sections. Drag handles to review a connection, or use Connect entities. Live alignment Guidelines, optional Grid snap, Alt free movement, Position / align, keyboard nudges, Arrange sections, Fit and Undo/Redo support arrangement. Entity list and Relationships provide non-canvas editing paths. Hover/select a relationship to highlight its endpoints and stored property; both cardinalities are explained in words. Quick property presets and Save & add another reduce repeated entry. **Review generator** includes declared entity interfaces, document-recipe inputs, frontmatter examples and relationship mappings in the same source plan as the sitemap.
 
 **Component library → Variants** adds reusable named variants with validated typed prop defaults and content overrides. Choose a variant for preview or placement. Existing placements retain their pinned version/defaults and local content until reviewed upgrades. Miniatures stay within their bounded boxes at wide and narrow pane widths.
 
 The [semantic-layer specification](SEMANTIC-LAYER.md) covers native property compatibility, single ownership of relationship fields, generation, limits and native implementation packages. These are concept source previews, not a working native blueprint CLI compiler.
+
+Read the [research and comprehensive entity-editor review](ER-EDITOR-REVIEW.md) and [current verification](ER-EDITOR-VERIFICATION.md) for connector fixes, interaction states, acceptance evidence and remaining native/scale limitations.
 
 ## Data and recovery
 
@@ -51,7 +53,7 @@ CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-ch
 
 The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suite uses HTML injection and explicit controlled-storage fixtures because this environment blocks direct loopback navigation. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-The builder and Fallow inventory agree on **76 exact inputs: 57 maintained JS, 14 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
+The builder and Fallow inventory agree on **78 exact inputs: 59 maintained JS, 14 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 

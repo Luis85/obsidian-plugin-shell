@@ -92,7 +92,9 @@
     "docs/concepts/companion/vendor/vue-flow-core.iife.js",
     "docs/concepts/companion/vendor/vue-flow.css",
     "docs/concepts/companion/vendor/vue-flow.scoped.css",
-    "docs/concepts/companion/vendor/vue.runtime.global.prod.js"
+    "docs/concepts/companion/vendor/vue.runtime.global.prod.js",
+    "docs/concepts/companion/src/semantic-geometry.js",
+    "docs/concepts/companion/src/semantic-interaction.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
