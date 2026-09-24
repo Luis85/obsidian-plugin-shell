@@ -1,35 +1,56 @@
+import { randomUUID } from 'node:crypto';
+
+async function releaseSession(session, objectGroup) {
+  const failures = [];
+  try { await session.send('Runtime.releaseObjectGroup', { objectGroup }); } catch (error) { failures.push(error); }
+  try { await session.detach(); } catch (error) { failures.push(error); }
+  return failures;
+}
+const message = error => String(error?.message ?? error);
+function cleanupError(code, errors) {
+  return new AggregateError(errors, `${code}: ${errors.map(message).join(' | ')}`);
+}
+function requireHandler(listeners) {
+  const clicks = listeners.filter(listener => listener.type === 'click');
+  const handlers = clicks.filter(listener => listener.handler?.objectId);
+  if (clicks.length === 1 && handlers.length === 1) return handlers[0].handler.objectId;
+  const details = { listenerCount: listeners.length, clickListeners: clicks.length, callableHandlers: handlers.length,
+    originalHandlers: clicks.filter(listener => listener.originalHandler?.objectId).length,
+    listeners: listeners.map(listener => ({ type: listener.type === 'click' ? 'click' : 'other',
+      hasHandler: !!listener.handler?.objectId, hasOriginalHandler: !!listener.originalHandler?.objectId })) };
+  const code = clicks.length > 1 ? 'NATIVE_RECOVERY_HANDLER_AMBIGUOUS' : 'NATIVE_RECOVERY_HANDLER_MISSING';
+  throw new Error(`${code}: ${JSON.stringify(details)}`);
+}
 /** Public CDP handles retain the real registered function after DOM listeners are removed. */
-export async function retainNativeAction(page, label) {
-  const session = await page.context().newCDPSession(page); const objects = [];
+export async function retainNativeAction(page, label, selector = '.notice button') {
+  const session = await page.context().newCDPSession(page); const objectGroup = `native-recovery:${randomUUID()}`;
   try {
+    // Chromium 150's DOMDebugger exposes handler objects only for a named node group.
+    // https://raw.githubusercontent.com/chromium/chromium/150.0.7871.212/third_party/blink/renderer/core/inspector/inspector_dom_debugger_agent.cc
     const button = await session.send('Runtime.evaluate', {
-      expression: `Array.from(document.querySelectorAll('.notice button')).find(button => button.textContent.trim() === ${JSON.stringify(label)})`,
-      returnByValue: false,
+      expression: `Array.from(document.querySelectorAll(${JSON.stringify(selector)})).find(button => button.textContent.trim() === ${JSON.stringify(label)})`,
+      returnByValue: false, objectGroup,
     });
     if (button.exceptionDetails || !button.result?.objectId) throw new Error('NATIVE_RECOVERY_BUTTON_MISSING');
-    objects.push(button.result.objectId);
     const { listeners } = await session.send('DOMDebugger.getEventListeners', { objectId: button.result.objectId });
-    const handlers = listeners.filter(listener => listener.type === 'click' && listener.handler?.objectId);
-    if (handlers.length !== 1) throw new Error('NATIVE_RECOVERY_HANDLER_AMBIGUOUS');
-    const handler = handlers[0].handler.objectId; objects.push(handler); let calls = 0;
+    const handler = requireHandler(listeners); let calls = 0; let disposed = false;
     return {
       async invoke() {
+        if (disposed) throw new Error('NATIVE_RECOVERY_HANDLE_DISPOSED');
         const result = await session.send('Runtime.callFunctionOn', { objectId: handler,
-          functionDeclaration: 'function () { return this(); }', awaitPromise: true, returnByValue: true });
+          functionDeclaration: 'function () { return this(); }', awaitPromise: true, returnByValue: true, objectGroup });
         if (result.exceptionDetails) throw new Error('NATIVE_RECOVERY_HANDLER_FAILED'); calls++;
       },
       calls: () => calls,
       async dispose() {
-        const failures = [];
-        for (const objectId of objects) {
-          try { await session.send('Runtime.releaseObject', { objectId }); } catch (error) { failures.push(error); }
-        }
-        try { await session.detach(); } catch (error) { failures.push(error); }
-        if (failures.length) throw new AggregateError(failures, 'NATIVE_RECOVERY_HANDLE_CLEANUP');
+        if (disposed) return; disposed = true;
+        const failures = await releaseSession(session, objectGroup);
+        if (failures.length) throw cleanupError('NATIVE_RECOVERY_HANDLE_CLEANUP', failures);
       },
     };
   } catch (error) {
-    try { await session.detach(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'NATIVE_RECOVERY_HANDLE_SETUP'); }
+    const failures = await releaseSession(session, objectGroup);
+    if (failures.length) throw cleanupError('NATIVE_RECOVERY_HANDLE_SETUP', [error, ...failures]);
     throw error;
   }
 }

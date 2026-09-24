@@ -415,15 +415,15 @@
     },
     {
       "path": "tests/e2e/recovery-example.spec.ts",
-      "sha256": "45847d67e4a3d713d93415a7aea1dfb93ef1a909ee1cf9aca805e26e9ca1df50"
+      "sha256": "06c3a4896f884af5940951dad4b066b36d06e1e1bb79624f9cbe226a6451669e"
     },
     {
       "path": "scripts/testing/native-recovery-handles.mjs",
-      "sha256": "619970f318e17d63fe0944bb454a005c18a83e93988a30a7c1a1146bee455cbb"
+      "sha256": "f6006b6886088f05193e1d842df494f94dc58dcc4412be8e2f18cfb28e714450"
     },
     {
       "path": "tests/tooling/native-recovery-handles.checks.mjs",
-      "sha256": "4a596c4d84468081103907ed3a0d6c51953481de3ea28ac8f105d81f2dceef79"
+      "sha256": "b3cb3270e2fcc82f0630b10555bbc9dc7f7f940ca90bad9cc2c2e709bb7a89be"
     },
     {
       "path": "scripts/testing/native-foreign-notice.mjs",
@@ -432,6 +432,10 @@
     {
       "path": "tests/tooling/native-foreign-notice.checks.mjs",
       "sha256": "db353e2ed82b24134388f3c00687a560b7b8055695061ff8d4024d75f144cf4a"
+    },
+    {
+      "path": "scripts/testing/native-recovery-handles.d.mts",
+      "sha256": "265e3f8efaa4baface8bc325afe2a3e54c5f7663f70240e3fd20d8ece9b21c82"
     }
   ]
 }

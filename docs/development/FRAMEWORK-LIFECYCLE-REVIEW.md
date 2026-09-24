@@ -25,6 +25,7 @@ contracts, consumer preservation, policies and frozen evidence.
 | Native global require cannot import the plugin-scoped host API. | Use a separate qualification plugin's supported import and owned commands; keep its source/installed hashes separate and the candidate observer read-only. Fresh native execution remains required. |
 | Inherited fresh configuration paths were outside the codebase and cleanup could overwrite errors. | Scope the launcher's public temporary-directory environment, validate returned paths, sample current resources at each launch and preserve primary plus subsequent cleanup failures without ancestor retry. |
 | The contained temporary prefix made Chromium's singleton socket path too long on Linux. | Preserve the original startup failure, use a short contained `.nq/<six>` namespace, and preflight the qualified host's UTF-8 socket-path budget before launch; do not escape containment or retry the rejected path. |
+| Public CDP returned no usable retained-handler selection with an unnamed node group. | Match Chromium's named-object-group contract, retain safe selection counts and all cleanup errors, and exercise the same helper through served Chromium before the next native attempt. The original ambiguous report did not record zero versus multiple listeners. |
 
 The final C affected batch passed 34/34 tests in four files, including all sixteen
 reentrancy controls; four tooling ledger negatives passed. Earlier 40/40, 49/49

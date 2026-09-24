@@ -254,3 +254,35 @@ argument, exact UTF-8 boundaries, environment restoration, lock reuse and origin
 failed-attempt retention. Production driver calls use the actual platform by
 default. Full source/analyzer/repository checks passed; these local controls do not
 claim a successful Linux kernel socket or native host launch.
+
+Frozen `a5c4aac191c61a6f868ec39bc3431ab661111d0d`, candidate run
+[36014645907](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36014645907),
+passed offline verification, runtime 398×3, coverage and 47 served-browser cases.
+Tooling reported 208 passes and four designated platform skips. The short-path
+experiment reached Obsidian 1.13.7 (Chrome 150.0.7871.212 / Electron 43.3.0): nine
+native checks completed, including real same-turn delayed-progress cancellation.
+It then failed with `NATIVE_RECOVERY_HANDLER_AMBIGUOUS` before pending availability
+or retained-handler replay. No subsequent session or performance run started.
+The independent resource history retained 16 records, with no faults, lost events
+or sequence gaps; this interrupted history does not prove owner-close/unload cleanup.
+
+Artifact 10814174196 is retained with SHA-256
+`d1e7e84271aca6adaae9e83e9936cb1d7de5bd6d5784b379a0e16e13da0717f6`.
+All 602 source files and 26 raw receipts across eight attempts were independently
+checked; failed-session acceptance remains suppressed. The original report did not
+retain listener counts, so it does not establish zero versus multiple listeners.
+
+The [matching Chromium implementation](https://raw.githubusercontent.com/chromium/chromium/150.0.7871.212/third_party/blink/renderer/core/inspector/inspector_dom_debugger_agent.cc)
+exposes handler references only when the queried node belongs to a named object
+group. The driver omitted that group. Correct the public-CDP contract with a unique
+group, release the group and connection on every path, preserve primary and cleanup
+errors, and report safe listener counts on further selection failure. A source-matched
+protocol double reproduced the old failure. The next bounded experiment also uses
+the same helper in the served recovery test, preserving its original `onclick`
+retention assertion; served Chromium remains distinct from native Obsidian evidence.
+The grouped protocol/parser controls passed 15/15; strict type checking, targeted
+served-test lint, source/analyzer/repository checks and the 95-entry removal plan
+passed. The lint process briefly left about 200 MiB free memory but completed
+naturally with exit 0 before an attempted guarded stop; no process was terminated.
+The new declaration file is removed together with the optional native helper and
+recovery demonstration. The corrected browser/native paths still require fresh CI.

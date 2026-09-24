@@ -179,3 +179,14 @@ The current hosted checkout then requires 105 bytes. An overlong checkout fails
 with guidance to use a shorter checkout path; it never escapes to OS temp or a
 symlink alias. Host upgrades must recheck the suffix assumption. This Linux
 prerequisite is not macOS/Windows native qualification or an idle-host claim.
+
+The next short-path attempt reached nine native checks, including actual cancelled
+progress, before retained-handler selection failed. Its report lacked listener
+counts. Matching Chromium 150 source requires a named object group before exposing
+callable handler references; the driver had queried an unnamed node. Use one unique
+group per retained handle and release both group and CDP connection on every path.
+Further selection failures record safe counts and preserve primary plus cleanup
+messages. The served recovery test exercises the same helper against its browser
+adapter in addition to its original `onclick` retention. Passing that browser
+boundary is still distinct from native Obsidian execution; the corrected frozen
+source must run both producers before any qualification claim.
