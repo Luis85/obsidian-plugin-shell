@@ -160,7 +160,12 @@ with sync_playwright() as pw:
         recovered = json.loads(p.locator('#copy-text').input_value())
         check('Recovery includes the current in-memory project, not stale stored data', recovered['project']['design']['goal'] == 'Local unpersisted edit')
         close(p)
-        p.evaluate('__storage.removeFail=true;dispatch("reset")')
+        p.evaluate('dispatch("reset")')
+        act(p, 'reset-confirm', scope='#modal')
+        check('Reset blocks a stale window before attempting to remove newer saved data', p.evaluate('!!state.project&&__storage.value==="external-newer-snapshot"&&storageWarning.startsWith("Reset blocked")'), 'controlled concurrency/storage fixture')
+        # Isolate removal failure from the conflict above. This snapshot stands for
+        # the raw state accepted on load; it is not a conflict-resolution UI path.
+        p.evaluate('persistenceSnapshot=__storage.value;__storage.removeFail=true')
         act(p, 'reset-confirm', scope='#modal')
         check('Failed reset retains memory and does not claim saved data was removed', p.evaluate('!!state.project&&__storage.value==="external-newer-snapshot"&&storageWarning.includes("Reset could not")'), 'controlled storage failure fixture')
         p.evaluate('__storage.removeFail=false')

@@ -359,3 +359,10 @@ input:read-only,textarea:read-only{color:var(--muted)}
 #sidebar{overscroll-behavior:contain;scrollbar-gutter:stable}
 #toasts{max-width:calc(100vw - 32px)}
 @media(max-width:650px){.page-heading>div:first-child{flex-basis:auto}.dialog-footer{gap:var(--space-2)}.dialog-footer>.btn{white-space:normal}.sidebar.show{top:66px;bottom:32px}.page-heading>.row{width:100%}}
+
+/* Product-audit improvements use the shared rhythm and palette. */
+.skip-link{position:fixed;left:12px;top:8px;z-index:1000;transform:translateY(-160%);padding:8px 16px;background:var(--surface);color:var(--text);border:1px solid var(--accent);border-radius:var(--control-radius)}
+.skip-link:focus{transform:none}
+.dialog-feedback{position:sticky;top:0;z-index:5;border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--text);padding:var(--space-3);margin:0 0 var(--space-4);overflow-wrap:anywhere}
+.attention-severity{font-size:11px;font-weight:600;color:var(--amber);padding-top:2px}
+.attention-severity.error{color:var(--red)}

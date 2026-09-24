@@ -868,6 +868,13 @@ input:read-only,textarea:read-only{color:var(--muted)}
 #sidebar{overscroll-behavior:contain;scrollbar-gutter:stable}
 #toasts{max-width:calc(100vw - 32px)}
 @media(max-width:650px){.page-heading>div:first-child{flex-basis:auto}.dialog-footer{gap:var(--space-2)}.dialog-footer>.btn{white-space:normal}.sidebar.show{top:66px;bottom:32px}.page-heading>.row{width:100%}}
+
+/* Product-audit improvements use the shared rhythm and palette. */
+.skip-link{position:fixed;left:12px;top:8px;z-index:1000;transform:translateY(-160%);padding:8px 16px;background:var(--surface);color:var(--text);border:1px solid var(--accent);border-radius:var(--control-radius)}
+.skip-link:focus{transform:none}
+.dialog-feedback{position:sticky;top:0;z-index:5;border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--text);padding:var(--space-3);margin:0 0 var(--space-4);overflow-wrap:anywhere}
+.attention-severity{font-size:11px;font-weight:600;color:var(--amber);padding-top:2px}
+.attention-severity.error{color:var(--red)}
 /* Concept-only workspace styling; production uses the scoped shell pipeline. */
 body.design-workspace .context-panel{display:none}
 body.design-workspace #content{padding:25px 26px 38px}
@@ -1273,7 +1280,7 @@ body.sitemap-workspace #content{padding:14px 18px 10px}.sitemap-heading{margin-b
 @media(max-width:1200px){.workflow-context span{max-width:100px}.workflow-step{font-size:11px;padding:8px}.workflow-rail{padding:0 14px}.start-workspace{gap:24px}.start-process{padding-left:22px}.map-workspace{grid-template-columns:minmax(0,1fr) 238px}.map-workspace.with-outline{grid-template-columns:155px minmax(0,1fr) 238px}.map-tools{gap:6px}.map-tools select{min-width:138px;max-width:160px}.map-search{max-width:153px}.map-search input{width:110px}.component-detail-head{flex-wrap:wrap}.component-stage .stage-toolbar{flex-wrap:wrap}.work-overview{gap:24px}.workflow-ledger{padding-right:22px}}
 @media(max-width:1000px){.workflow-context{display:none}.workflow-step{font-size:11px;gap:5px}.workflow-step .step-number{width:17px;min-width:17px;height:18px}.start-workspace{grid-template-columns:1fr;padding-top:15px;gap:25px}.start-process{border-left:0;border-top:1px solid var(--line);padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.start-process-row{padding:16px 0}.start-head>p{max-width:64ch}.map-search{max-width:185px}.work-overview{grid-template-columns:1fr}.workflow-ledger{border:0;padding:0}.library-workspace{grid-template-columns:200px minmax(0,1fr)}.library-item .badge{display:none}.plan-filter-bar{flex-wrap:wrap}.plan-filter-bar label{min-width:220px}}
 @media(max-width:800px){.map-workspace,.map-workspace.with-outline{display:flex;flex-direction:column}.map-workspace .map-main{min-height:460px}.map-workspace .polish-inspector{min-height:290px;border-left:0;border-top:1px solid var(--line)}.map-workspace .outline-tree{max-height:210px;flex-shrink:0}.map-workspace{overflow:auto}.workflow-rail{overflow-x:auto;justify-content:flex-start}.workflow-step{padding:8px 7px}.workflow-step:nth-child(5){min-width:101px}body.sitemap-workspace #content{overflow:auto}.sitemap-studio{min-height:950px;height:auto}.map-viewport{min-height:340px}.map-expanded .sitemap-studio{min-height:0;height:100%}.map-expanded .map-workspace{display:flex;min-height:0}.map-expanded .map-main{min-height:0;flex:1}.map-expanded .map-viewport{min-height:180px}.map-expanded .polish-inspector{display:none}.map-expanded .map-footer{display:none}.sitemap-context{flex-wrap:wrap;gap:6px 10px}.sitemap-context .grow{display:none}.library-workspace{grid-template-columns:1fr}.library-list{max-height:230px}.component-detail-head .row{flex-wrap:wrap}.runtime-revisions{flex-wrap:wrap;gap:18px 30px}.next-task{flex-wrap:wrap}.handoff-bar{align-items:flex-start}}
-@media(max-width:640px){.concept-bar{height:27px;padding:0 11px}.app-frame{height:calc(100dvh - 55px)}.host-title{display:none}.workbench-header{min-height:47px;padding:8px 11px}.host-tabs{height:30px}.host-tab{height:27px}.tabs-right{display:none}.workflow-rail{min-height:42px;padding:0 8px}.workflow-step{min-height:40px;padding:7px 8px;gap:5px}.workflow-step .step-number{display:none}.workflow-step:nth-child(5){min-width:auto}.content-layout main{padding:20px 15px 25px}.start-head h1{font-size:34px;letter-spacing:-.8px}.start-head>p{font-size:14px}.start-workspace{padding:10px 0 20px}.start-process{grid-template-columns:1fr}.start-process-row{padding:13px 0}.start-process-row:nth-child(3){border-bottom:1px solid var(--line)}.project-row{flex-wrap:wrap;gap:11px}.project-row-state{display:none}.resume-strip{align-items:flex-start;flex-wrap:wrap}.next-task{padding:18px}.workflow-ledger .section-head{flex-wrap:wrap}.overview-facts{grid-template-columns:95px minmax(0,1fr)}.handoff-bar{flex-direction:column;gap:12px}.component-contract{grid-template-columns:1fr;gap:0}.story-preview{padding:18px;min-height:180px}.stage-toolbar .segmented{flex-wrap:wrap}.library-detail{padding:18px 14px}.component-detail-head h2{font-size:21px}.plan-filter-bar>label{min-width:100%;flex:1}.map-workspace .map-main{min-height:480px}.map-workspace .map-tools{justify-content:flex-start}.map-tools .row{flex-wrap:wrap;gap:6px}.map-search{max-width:100%}.map-legend{display:none}.map-secondary-tools{gap:6px}.sitemap-heading{align-items:flex-start;flex-wrap:wrap}.sitemap-heading .row{width:100%;gap:7px}.sitemap-heading h1{font-size:22px}.map-main-toolbar{gap:8px}.map-main-toolbar>.row{flex-wrap:wrap}.map-footer{flex-wrap:wrap}.map-card-actions .btn{min-height:28px}.host-status #status-left{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}.context-next p{font-size:12px}.component-maintenance{flex-wrap:wrap}}
+@media(max-width:640px){.concept-bar{height:27px;padding:0 11px}.app-frame{height:calc(100dvh - 55px)}.host-title{display:none}.workbench-header{min-height:47px;padding:8px 11px}.host-tabs{height:30px}.host-tab{height:27px}.tabs-right{display:none}.workflow-rail{min-height:42px;padding:0 8px}.workflow-step{min-height:40px;padding:7px 8px;gap:5px}.workflow-step .step-number{display:none}.workflow-step:nth-child(5){min-width:auto}.content-layout main{padding:20px 15px 25px}.start-head h1{font-size:34px;letter-spacing:-.8px}.start-head>p{font-size:14px}.start-workspace{padding:10px 0 20px}.start-process{grid-template-columns:1fr}.start-process-row{padding:13px 0}.start-process-row:nth-child(3){border-bottom:1px solid var(--line)}.project-row{flex-wrap:wrap;gap:11px}.project-row-state{display:none}.resume-strip{align-items:flex-start;flex-wrap:wrap}.next-task{padding:18px;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start}.next-task>.btn{grid-column:2;justify-self:start;max-width:100%;white-space:normal}.attention-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}.attention-item .attention-severity{grid-column:1}.attention-item p{grid-column:1;grid-row:2}.attention-item .btn{grid-column:2;grid-row:1 / span 2}.workflow-ledger .section-head{flex-wrap:wrap}.overview-facts{grid-template-columns:95px minmax(0,1fr)}.handoff-bar{flex-direction:column;gap:12px}.component-contract{grid-template-columns:1fr;gap:0}.story-preview{padding:18px;min-height:180px}.stage-toolbar .segmented{flex-wrap:wrap}.library-detail{padding:18px 14px}.component-detail-head h2{font-size:21px}.plan-filter-bar>label{min-width:100%;flex:1}.map-workspace .map-main{min-height:480px}.map-workspace .map-tools{justify-content:flex-start}.map-tools .row{flex-wrap:wrap;gap:6px}.map-search{max-width:100%}.map-legend{display:none}.map-secondary-tools{gap:6px}.sitemap-heading{align-items:flex-start;flex-wrap:wrap}.sitemap-heading .row{width:100%;gap:7px}.sitemap-heading h1{font-size:22px}.map-main-toolbar{gap:8px}.map-main-toolbar>.row{flex-wrap:wrap}.map-footer{flex-wrap:wrap}.map-card-actions .btn{min-height:28px}.host-status #status-left{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}.context-next p{font-size:12px}.component-maintenance{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 /* Card cover fills the card; prevent legacy flex alignment shrinking its content. */
@@ -2359,6 +2366,7 @@ THE SOFTWARE.
 -->
 </head>
 <body>
+<a class="skip-link" href="#content">Skip to workspace content</a>
 <a class="skip" href="#content">Skip to workbench</a>
 <div class="concept-bar"><span class="concept-dot"></span><strong>INTERACTIVE CONCEPT</strong><span class="concept-copy">Offline designer · exports only · no live services or vault access</span><button data-action="lab" id="lab-trigger">Review scenarios <span aria-hidden="true">↗</span></button></div>
 <div class="host-title"><span class="host-logo">◇</span><span>Plugin Workspace</span><span class="muted"> / Obsidian</span><span class="title-end">Developer vault <span class="small-dot"></span></span></div>
@@ -12815,6 +12823,12 @@ function sgContrastPairs(s){return [['text','background'],['muted','background']
 function sgUnique(group,s){let id='new-'+group.replace(/s$/,''),i=2;const keys=new Set(s[group].map(r=>r.id));while(keys.has(id))id='new-'+group.replace(/s$/,'')+'-'+i++;return id;}
 function sgNew(group,s){const common={id:sgUnique(group,s),name:'',usage:''};if(group==='fonts')return {...common,source:'custom',families:'',fallback:'sans-serif',license:''};if(group==='typography')return {...common,font:s.fonts[0]?.id||'',size:16,unit:'px',weight:400,lineHeight:1.5,letterSpacing:0};if(group==='colors')return {...common,light:'#000000',dark:'#FFFFFF',host:''};if(group==='guidelines')return common;return {...common,value:8,unit:'px'};}
 
+function sgContrastCoverage(s){
+ const keys=new Set(s.colors.map(c=>c.id));
+ const missing=[['text','background'],['muted','background'],['accent-text','accent']].filter(pair=>pair.some(key=>!keys.has(key))).map(pair=>pair.join(' / '));
+ return missing.length?'Not evaluated: '+missing.join('; ')+'. Declare these exact color keys to evaluate all default pairs.':'All 3 default pairs evaluated in light and dark. This is not a full accessibility audit.';
+}
+
 // Persistent, data-only recipes are independent from canvas placement and live credentials.
 const TD_PROVIDERS=Object.freeze({auto:'From shape / entity default',sequence:'Sequence / prefix',name:'Synthetic person name',email:'Reserved-domain email',integer:'Integer',boolean:'Checkbox / boolean',date:'Date',uuid:'Stable UUID',literal:'Literal JSON value'});
 function tdDefaults(){return {schema:1,seed:42,referenceDate:'2026-01-01T00:00:00.000Z',locale:'en',count:12,recipes:[]};}
@@ -13203,6 +13217,19 @@ const SERVICES = [
 const SCOPES = [['verify','Project verification','Static, service, coverage & artifact checks'],['browser','Browser E2E','Served real-component harness'],['native','Native Obsidian','Isolated host fixture only'],['security','Security audit','Live registry scope in the real product']];
 const STAGES = ['Recheck the vault-bound plan','Add reviewed template files','Install locked dependencies','Verify and build candidate','Stage complete artifacts','Install into the isolated test vault'];
 const STEPS = ['This project','Build tools','Template staging','Plugin identity','Isolated test vault','Review changes','Prepare','First working loop'];
+const TOUR_STEPS=[
+ ['overview','project','One vault, one project','The current vault is your project root. Start designing defines its single project. Another project belongs in another Obsidian vault.'],
+ ['prds','prds','Define the product before the toolchain','Capture the problem, requirements and verifiable acceptance criteria. Mapping a requirement to a screen is design traceability, not evidence that it works.'],
+ ['sitemap','sitemap','Shape the experience','Separate native views, internal screens, containment, navigation and data flows. Select cards and use their inspectors; drag is not the only editing path.'],
+ ['entities','entities','Model the things your plugin manages','Declare entities, Obsidian-compatible properties and relationships. The entity and relationship lists provide alternatives to the diagram. This is a schema, not live records.'],
+ ['sources','sources','Describe data without connecting live services','Declare source operations and input/output contracts, then reuse them in the sitemap. Credentials are symbolic references only. No live source is contacted.'],
+ ['components','components','Reuse components deliberately','Place reusable components and named variants. Existing placements retain pinned versions and local content until you review an upgrade.'],
+ ['designsystem','designsystem','Describe your visual language','Record fonts, typography, spacing, colors and usage guidance. Markdown and HTML exports contain saved declarations, not font files or automatically applied styles.'],
+ ['testdata','testdata','Exercise contracts with isolated test data','Enable source recipes, preview deterministic fixtures and export the runnable test kit. Browser operation tests are in-memory. Apply and cleanup in .test-vault require their own reviewed approval.'],
+ ['prepare','prepare','Prepare this vault deliberately','Review additive template files and conflicts in the current root. Preserve Obsidian configuration and design notes. Test targets are separate and are never silently moved.'],
+ ['quality','quality','A pass has a scope','Preparation, build, verification, browser checks and native tests are distinct. Installing the companion does not enable the generated plugin. Shell qualification precedes native companion conversion and publication.'],
+ ['overview','lab','Keep a private recovery copy','Preferences and Find an action offer Export this session before anything goes wrong. Form drafts are not included. On a storage conflict, also export retained browser data before reloading. Reset is not recovery.']
+];
 let persistenceSnapshot=null;
 let storageWarning = '', toastTimer, runTimer = null, modalType = '', modalData = null, activeTour = false;
 const freshState = () => ({schema:2,vaultKey:CONCEPT_VAULT.key,vaultFiles:freshVaultFiles(),legacyHandled:false,view:'overview',project:null,runs:[],activeRun:null,sequence:0,wizard:null,generator:{kind:'feature',name:'bookmarks',entity:'bookmark',preset:'title',folder:'Bookmarks',group:'',plan:null},settings:{theme:'dark',remember:true},scenario:'happy',tourIndex:0,toolTab:'services',toolFilter:'all',search:'',selectedFile:0});
@@ -13212,7 +13239,7 @@ function validState(s){
  const proj=p=>p&&['id','name','root','vault','version','config'].every(k=>text(p[k]))&&Number.isFinite(p.rev)&&p.rev>=1&&Array.isArray(p.features)&&p.features.every(feature)&&p.quality&&typeof p.quality==='object'&&Array.isArray(p.sessions)&&Array.isArray(p.notes);
  const run=r=>r&&text(r.id)&&text(r.label)&&text(r.kind)&&text(r.status)&&Array.isArray(r.logs)&&r.logs.every(text)&&Array.isArray(r.stages);
  const wizard=w=>!w||(Number.isInteger(w.step)&&w.step>=0&&w.step<8&&['name','id','root','vault','version','author','description','config'].every(k=>text(w[k]))&&Array.isArray(w.completed)&&Number.isFinite(w.rev));
- return s&&validVaultScope(s,proj)&&Array.isArray(s.runs)&&s.runs.length<=100&&s.runs.every(run)&&s.settings&&['dark','light'].includes(s.settings.theme)&&NAV.some(n=>n[0]===s.view)&&wizard(s.wizard)&&(!s.wizard?.design||validSavedDesign(s.wizard.design))&&s.generator&&['kind','name','entity','folder','preset','group'].every(k=>text(s.generator[k]))&&SCENARIOS.some(c=>c[0]===s.scenario)&&Number.isInteger(s.tourIndex)&&s.tourIndex>=0&&s.tourIndex<6&&Number.isFinite(s.sequence);
+ return s&&validVaultScope(s,proj)&&Array.isArray(s.runs)&&s.runs.length<=100&&s.runs.every(run)&&s.settings&&['dark','light'].includes(s.settings.theme)&&NAV.some(n=>n[0]===s.view)&&wizard(s.wizard)&&(!s.wizard?.design||validSavedDesign(s.wizard.design))&&s.generator&&['kind','name','entity','folder','preset','group'].every(k=>text(s.generator[k]))&&SCENARIOS.some(c=>c[0]===s.scenario)&&Number.isInteger(s.tourIndex)&&s.tourIndex>=0&&s.tourIndex<TOUR_STEPS.length&&Number.isFinite(s.sequence);
 }
 function loadState(){
  readLegacyWorkspace();
@@ -13238,7 +13265,7 @@ function field(label,key,value,help='',type='text'){return uiInput(label,'f-'+ke
 function project(){return state.project;}
 function initials(s){return s.split(/\s+/).map(v=>v[0]).join('').slice(0,2).toUpperCase();}
 function setView(view){if(view==='projects')view='overview';state.view=view;state.search='';document.getElementById('sidebar').classList.remove('show');save();render();document.getElementById('content').scrollTop=0;document.getElementById('content').focus();}
-function notify(text){clearTimeout(toastTimer);document.getElementById('toasts').innerHTML=`<div class="toast">${esc(text)}</div>`;toastTimer=setTimeout(()=>document.getElementById('toasts').replaceChildren(),4000);}
+function notify(text){workbenchNotify(text);}
 function stamp(){return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}
 function addRun(label,kind,cmd,status='running'){const r={id:`demo-${String(++state.sequence).padStart(3,'0')}`,projectId:project()?.key||null,label,kind,cmd,status,time:stamp(),logs:['[simulation] No command or filesystem operation is executed.'],stages:[]};state.runs.unshift(r);state.runs=state.runs.slice(0,60);save();return r;}
 function evidence(p,key){const q=p?.quality[key];if(!q)return badge('Not run');if(q.rev!==p.rev)return badge('Stale · demo','warn');return badge(q.status==='passed'?'Passed · demo':'Failed · demo',q.status==='passed'?'good':'bad');}
@@ -13312,9 +13339,9 @@ function drawModal(){const factories={'style-guide-form':styleGuideForm,'test-da
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return vaultContextDialog();}
 function attachDialog(){return vaultContextDialog();}
-function settingsDialog(){return dialogBody('Workbench preferences',`<div class="grid2"><div class="card"><h3>Appearance</h3><p>Host-inspired dark and light themes. No fonts or assets are fetched.</p><div class="button-row">${button(state.settings.theme==='dark'?'Switch to light':'Switch to dark','theme','','','sun')}</div></div><div class="card"><h3>Local demo state</h3><p>Only this concept’s inputs are stored in your browser. No actual workspace is connected.</p><label class="checkbox"><input type="checkbox" data-field="remember" ${state.settings.remember?'checked':''}><span>Remember the demo on this browser</span></label></div></div><div class="mt24">${callout('This concept is English-only. Production requirements include English/German, validated settings, machine-local trust and platform-specific executable paths.')}</div>${storageWarning?`<p class="error">${esc(storageWarning)}</p>`:''}<div class="button-row">${button('Review scenario controls','lab','','','settings')}${button('Reset demo state','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`);}
+function settingsDialog(){return dialogBody('Workbench preferences',`<div class="grid2"><div class="card"><h3>Appearance</h3><p>Host-inspired dark and light themes. No fonts or assets are fetched.</p><div class="button-row">${button(state.settings.theme==='dark'?'Switch to light':'Switch to dark','theme','','','sun')}</div></div><div class="card"><h3>Local demo state</h3><p>Only this concept’s inputs are stored in your browser. No actual workspace is connected.</p><label class="checkbox"><input type="checkbox" data-field="remember" ${state.settings.remember?'checked':''}><span>Remember the demo on this browser</span></label></div></div><div class="mt24">${callout('This concept is English-only. Production requirements include English/German, validated settings, machine-local trust and platform-specific executable paths.')}</div>${storageWarning?`<p class="error">${esc(storageWarning)}</p>`:''}<div class="button-row">${button('Export this session','storage-recovery','','','download')}${storageWarning?button('Export retained browser data','storage-retained','','','download'):''}${button('Review scenario controls','lab','','','settings')}${button('Reset demo state','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`);}
 function paletteDialog(){return dialogBody('Find an action',`<label class="small muted" for="palette-search">Search workspace actions</label><input autofocus class="palette-input" id="palette-search" placeholder="Type an action or screen…" data-field="palette-search" autocomplete="off"><div id="palette-results" class="modal-list">${paletteResults('')}</div><p class="scope-label mt16">Ctrl / ⌘ K to open · arrow keys to move · Enter to choose · Escape to close</p>`);}
-function paletteResults(q){const rows=[['vault-init','','Project details','Identity for this vault’s one project','settings'],['vault-prepare','','Prepare this vault','Review additive template files and build tools','terminal'],...NAV.map(([v,ic,t])=>['palette-nav',v,t,'Open workspace view',ic]),['tour','','Resume guided tour','Explain the workbench','help'],['lab','','Review scenarios','Exercise failure and recovery states','settings']].filter(a=>(a[2]+' '+a[3]).toLowerCase().includes(q.toLowerCase()));return rows.length?rows.map(([a,v,t,d,ic])=>`<button data-action="${a}" data-value="${v}">${icon(ic)}<span>${t}<small>${d}</small></span></button>`).join(''):'<p class="no-results">No matching action.</p>';}
+function paletteResults(q){const rows=[['vault-init','','Project details','Identity for this vault’s one project','settings'],['vault-prepare','','Prepare this vault','Review additive template files and build tools','terminal'],...NAV.map(([v,ic,t])=>['palette-nav',v,t,'Open workspace view',ic]),['storage-recovery','','Export this session','Private recovery snapshot; saved design only, not form drafts','download'],['tour','','Resume guided tour','Explain the workbench','help'],['lab','','Review scenarios','Exercise failure and recovery states','settings']].filter(a=>(a[2]+' '+a[3]).toLowerCase().includes(q.toLowerCase()));return rows.length?rows.map(([a,v,t,d,ic])=>`<button data-action="${a}" data-value="${v}">${icon(ic)}<span>${t}<small>${d}</small></span></button>`).join(''):'<p class="no-results">No matching action.</p>';}
 function activationDialog(){const p=project();return dialogBody('Generated plugin activation',`<div class="dialog-simulation">Simulated host settings — not real Obsidian</div><h3 class="mt16">Authoring vault: ${esc(CONCEPT_VAULT.name)}</h3><p>Shell Workbench is already installed and enabled here. This is not evidence that the plugin you are developing has been installed or tested.</p><h3 class="mt24">Isolated test vault: ${esc(vaultDisplayTarget())}</h3><div class="context-path">${esc(p?.vault||vaultTestRoot())}/.obsidian/plugins/${esc(p?.id||'my-plugin')}/</div><div class="card mt16"><h3>${esc(p?.name||'Your plugin')}</h3>${vaultProjectPrepared()?button(p.enabled?'Disable in demo':'Enable in demo','enable-demo',p.id,p.enabled?'small':'primary small',p.enabled?'stop':'play'):badge('Prepare this project first')}</div><p class="scope-label mt16">Changes browser fixture state only. No Restricted Mode change, real enablement or native qualification occurs.</p>`,button(state.wizard?.step===7?'Return to preparation':'Back to workspace',state.wizard?.step===7?'return-wizard':'close','','ghost'));}
 function checkDialog(){const p=project();const key=modalData;const cmd=key==='browser'?'test:e2e':key==='native'?'test:native':key==='security'?'check:security':key;return dialogBody('Review a verification run',`<div class="row between"><h3 class="mb0">${esc(TOOLS.find(t=>t[0]===cmd)?.[1]||cmd)}</h3>${badge('Simulated execution','purple')}</div><div class="mt16">${command('npm run '+cmd)}</div><dl class="receipt"><dt>Project</dt><dd>${esc(p?.name||'No project')}</dd><dt>Working directory</dt><dd><code>${esc(p?.root||'Not bound')}</code></dd><dt>Source revision</dt><dd>${p?.rev||'—'}</dd><dt>Execution</dt><dd>None. Only fixture results are recorded.</dd></dl>${key==='native'?callout('Production native checks require a separately provisioned, isolated test vault. Never use a personal vault.','warn'):key==='security'?callout('A real security audit uses the registry. An offline or failed query must not be reported as a clean audit.','warn'):callout('Only this named scope will receive a fixture result. No other tests are marked as passed.')}<div id="operation-error" class="error" role="alert"></div>`,`${button('Cancel','close','','ghost')}${button('Simulate this run','check-confirm',key,'primary','play',(!p||state.activeRun)?'disabled':'')}`);}
 function toolDialog(){const t=TOOLS.find(t=>t[0]===modalData);if(!t)return dialogBody('Unknown tool','This tool is not in the baseline catalog.');const [cmd,title,cat,desc]=t;const routes={setup:['create',''],make:['maker-nav',''],'entities:catalog':['catalog',''],'dev:ui':['session','dev:ui'],dev:['session','dev'],'dev:local':['session','dev:local'],'build:local':['deploy',''],'test-build':['deploy',''],help:['tools',''],'test:watch':['session','test:watch'],'harness:preview':['session','harness:preview']};const act=routes[cmd]||['check',cmd==='test:e2e'?'browser':cmd==='test:native'?'native':cmd==='check:security'?'security':cmd];return dialogBody(title,`<p>${esc(desc)}</p>${command('npm run '+cmd)}<div class="mt24">${callout(`<strong>Existing CLI, proposed companion adapter.</strong> ${cat==='maintainer'?'This belongs in a guarded maintainer workflow.':'The UI must invoke the same project-local implementation.'} This concept never executes it.`)}</div>${cmd==='test-build'?'<p class="mt16">The name is a compatibility alias for local installation, not test evidence.</p>':''}${cmd==='entities:catalog'||cmd==='entities:check'?'<p class="mt16">The actual catalog bundles and evaluates trusted source. It is not an untrusted data-only scan.</p>':''}`,`${button('Close','close','','ghost')}${button('Open workflow',act[0],act[1],'primary','arrow')}`);}
@@ -13326,8 +13353,8 @@ function previewDialog(){const p=project();return dialogBody('Generated plugin �
 function projectNote(){const p=project();return `---\ntype: development-handoff\nproject_id: ${p?.id||'example'}\ntemplate_revision: d755745\nstatus: concept-only\n---\n\n# ${p?.name||'Example'} development handoff\n\nThis note is a browser-only concept fixture.\nNo real project operation has been performed.\n\n## Next steps\n\nReview source, generate a feature, and verify each scope separately.\n\n## Notes\n\nHandwritten notes belong here and should survive future updates.\n`;}
 function noteDialog(){const p=project();return dialogBody('Preview a project handoff note',`<p>Production dogfooding uses the shared DocumentCreationService and Markdown repository. Here, commit adds one note to browser memory only.</p><div class="code-panel"><div class="code-title">Workbench / ${esc(p?.id||'example')}-handoff.md · preview only</div><pre class="code-body" style="color:var(--muted)">${esc(p?.notes?.[0]||projectNote())}</pre></div><div class="mt16">${callout('Preview does not create a note. Repeated commit does not create duplicates. No actual vault is connected.')}</div>`,`${button('Close','close','','ghost')}${button(p?.notes?.length?'Demo note already exists':'Create demo note','commit-note','','primary','file',(!p||p.notes?.length)?'disabled':'')}`);}
 function copyDialog(){return dialogBody('Copy or export text',`<p>${esc(modalData.title||'Clipboard access is unavailable here. Select and copy the text manually.')}</p><label for="copy-text" class="small muted">Text preview</label><textarea id="copy-text" readonly autofocus style="min-height:230px">${esc(modalData.text)}</textarea>`,`${button('Close','close','','ghost')}${modalData.filename?button('Download this text','download-text','','primary','download'):''}`);}
-function resetDialog(){return dialogBody('Reset the concept?',`<p>Remove only this concept’s saved browser state and return to the fresh-vault screen. No real files, plugins or other browser keys are touched.</p>${storageWarning?callout('This also discards the preserved incompatible demo state.','warn'):''}`,`${button('Keep my demo','close','','ghost')}${button('Reset demo','reset-confirm','','danger','refresh',state.activeRun?'disabled':'')}`);}
-const TOUR_STEPS=[['overview','project','One vault, one project','The current vault is your project root. Start designing defines its single project. Another project belongs in another Obsidian vault.'],['prds','prds','Define the product before the toolchain','Capture the problem and requirements first. No external Node, npm or template is needed for design. This tour does not create the project for you.'],['sitemap','sitemap','Shape the experience','Connect views, arrange screens and reuse components. Requirements and design stay attached to the same project during preparation.'],['prepare','prepare','Prepare this vault deliberately','Review additive template files and conflicts in the current root. Preserve Obsidian configuration and design notes. New projects use a separate .test-vault; existing legacy targets remain explicit.'],['quality','quality','A pass has a scope','Preparation, build, verification, browser checks and native tests are distinct. Installing the companion does not enable the generated plugin.'],['overview','lab','Recovery preserves your work','Use Review scenarios for missing tools, stale plans, collisions and interruptions. Resume the existing project rather than creating another one.']];
+function resetDialog(){return dialogBody('Reset the concept?',`<p>Remove only this concept’s saved browser state and return to the fresh-vault screen. No real files, plugins or other browser keys are touched.</p><p>Export before resetting. Only the snapshot loaded by this session can be removed; newer data from another window blocks reset.</p>${storageWarning?callout('Unchanged incompatible browser data is also removed by an explicit reset. Export the retained data first.','warn'):''}<div class="row wrap">${button('Export this session','storage-recovery','','small','download')}${button('Export retained browser data','storage-retained','','small','download')}</div>`,`${button('Keep my demo','close','','ghost')}${button('Reset demo','reset-confirm','','danger','refresh',state.activeRun?'disabled':'')}`);}
+
 function startTour(){closeModal();activeTour=true;state.tourIndex=Math.min(state.tourIndex,TOUR_STEPS.length-1);renderTour();}
 function renderTour(){document.querySelectorAll('.tour-focus').forEach(el=>el.classList.remove('tour-focus'));const [view,target,title,text]=TOUR_STEPS[state.tourIndex];state.view=view;render();const el=target==='lab'?document.getElementById('lab-trigger'):document.querySelector(`[data-tour="${target}"]`);el?.classList.add('tour-focus');const d=document.getElementById('tour');d.innerHTML=`<div class="tour-meter">${TOUR_STEPS.map((_,i)=>`<i class="${i<=state.tourIndex?'active':''}"></i>`).join('')}</div><div class="eyebrow">WORKSPACE TOUR · ${state.tourIndex+1} OF ${TOUR_STEPS.length}</div><h2 id="tour-title">${title}</h2><p>${text}</p><p class="scope-label">Navigation is illustrative. No operation is run by this tour.</p><div class="tour-nav">${button('Pause tour','tour-pause','','ghost small')}${state.tourIndex?button('Back','tour-back','','small'):''}${button(state.tourIndex===TOUR_STEPS.length-1?'Finish':'Next','tour-next','','primary small','arrow')}</div>`;if(!d.open)d.showModal();d.querySelector('[data-action="tour-next"]').focus();save();}
 function pauseTour(){activeTour=false;document.getElementById('tour').close();document.querySelectorAll('.tour-focus').forEach(el=>el.classList.remove('tour-focus'));save();document.getElementById('content').focus();}
@@ -13422,6 +13449,7 @@ function dispatch(action,value){
  case 'download-text':downloadText();break;
  case 'reset':showModal('reset');break;
  case 'reset-confirm':resetConceptState();break;
+ case 'storage-retained':exportRetainedBrowserData();break;
  case 'storage-recovery':showModal('copy',{title:'Recovery snapshot of committed concept state, including simulated project locations. Unsubmitted form drafts are not included. Keep this file private; it is not an installable plugin or verification evidence.',text:JSON.stringify(state,null,2),filename:'shell-workbench-recovery.json'});break;
  case 'tour':startTour();break;
  case 'tour-pause':pauseTour();break;
@@ -13439,10 +13467,10 @@ function updateField(el,commit=false){if(editVaultField(el))return;if(editStyleG
  if(key==='palette-search')document.getElementById('palette-results').innerHTML=paletteResults(value);
  if(key==='remember'){state.settings.remember=value;save();render();}
 }
-document.addEventListener('click',event=>{const b=event.target.closest('[data-action]');if(!b||b.disabled)return;try{dispatch(b.dataset.action,b.dataset.value||'');}catch(error){console.error('Concept interaction failed',error);notify('The concept encountered an error. Reload or reset the demo; no real operation was performed.');}});
+document.addEventListener('click',event=>{const b=event.target.closest('[data-action]');if(!b||b.disabled)return;try{dispatch(b.dataset.action,b.dataset.value||'');}catch(error){console.error('Concept interaction failed',error);notify('The concept encountered an error. Export this session from Preferences before reloading. Do not reset as a recovery step; no real operation was performed.');}});
 document.addEventListener('input',event=>{if(event.target.dataset.field&&event.target.type!=='checkbox'&&event.target.tagName!=='SELECT')updateField(event.target);});
 document.addEventListener('change',event=>{if(event.target.dataset.field&&(event.target.type==='checkbox'||event.target.tagName==='SELECT'))updateField(event.target,true);});
-document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();if(document.querySelector('dialog[open]')){notify('Finish or close the current dialog before opening the command palette.');return;}if(activeTour)pauseTour();showModal('palette');}if(modalType==='palette'&&['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();const buttons=[...document.querySelectorAll('#palette-results button')];const i=buttons.indexOf(document.activeElement);buttons[(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}});
+document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();if(document.querySelector('dialog[open]')){notify('Finish or close the current dialog before opening the command palette.');return;}if(activeTour)pauseTour();showModal('palette');}if(modalType==='palette'&&['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();const buttons=[...document.querySelectorAll('#palette-results button')];const i=buttons.indexOf(document.activeElement);const next=i<0?(event.key==='ArrowDown'?0:buttons.length-1):(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}});
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
@@ -13819,7 +13847,7 @@ function sgRow(group,r,s){
  else if(group!=='guidelines'){meta+=' · '+r.value+r.unit;sample=group==='radii'?`<div class="sg-radius" style="border-radius:${r.value}${r.unit}"></div>`:`<div class="sg-measure" style="width:${Math.min(240,r.value*(r.unit==='rem'?16:1))}px"></div><small>Visual measure capped at 240 px; token value is exact.</small>`;}
  return `<article class="sg-entry"><div class="sg-entry-heading"><div><h3>${esc(r.name)}</h3><code>${esc(meta)}</code></div>${button('Edit','sg-edit',group+':'+r.id,'small','settings')}</div>${sample?`<div class="sg-sample">${sample}</div>`:''}<p class="sg-prose">${esc(r.usage||'No usage notes yet.')}</p></article>`;
 }
-function sgContrastView(s){const pairs=sgContrastPairs(s);return `<section class="sg-contrast"><h3>Declared palette contrast</h3><p class="small muted">Checks the saved text/background, muted/background and accent-text/accent pairs only. This does not certify host themes, every interaction state or complete accessibility.</p>${pairs.length?`<div>${pairs.map(p=>`<p><span>${esc(p.label)} · ${p.mode}</span><strong>${p.ratio.toFixed(2)}:1</strong><span class="${p.ratio>=4.5?'':'error'}">${p.ratio>=4.5?'Meets 4.5:1':'Below 4.5:1'}</span></p>`).join('')}</div>`:'<p>Add colors using the keys above to calculate these pairs.</p>'}</section>`;}
+function sgContrastView(s){const pairs=sgContrastPairs(s);return `<section class="sg-contrast"><h3>Declared palette contrast</h3><p class="small muted">Checks the saved text/background, muted/background and accent-text/accent pairs only. This does not certify host themes, every interaction state or complete accessibility.</p><p class="small sg-contrast-coverage">${esc(sgContrastCoverage(s))}</p>${pairs.length?`<div>${pairs.map(p=>`<p><span>${esc(p.label)} · ${p.mode}</span><strong>${p.ratio.toFixed(2)}:1</strong><span class="${p.ratio>=4.5?'':'error'}">${p.ratio>=4.5?'Meets 4.5:1':'Below 4.5:1'}</span></p>`).join('')}</div>`:'<p>Add colors using the keys above to calculate these pairs.</p>'}</section>`;}
 function styleGuideForm(){
  const f=sgUi.form;if(!f)return dialogBody('Design declaration unavailable','Reopen the saved declaration.');
  if(f.removal)return dialogBody('Remove '+f.record.name+'?',`<p>Only the saved design declaration will be removed. Previously exported documents and source files are kept. Unsaved edits are not applied.</p><p class="error" role="alert" id="sg-error" tabindex="-1">${esc(sgUi.error)}</p>`,button('Keep editing','sg-keep','','ghost')+button('Remove declaration','sg-confirm-remove','','danger','trash'));
@@ -13854,6 +13882,7 @@ function sgMarkdown(source){
  out+='## Colors\n\n'+sgTable(['Key','Name','Light','Dark','Host variable','Usage'],s.colors.map(c=>[c.id,c.name,c.light,c.dark,c.host,c.usage]))+'\n';
  out+='## Usage guidelines\n\n'+s.guidelines.map(g=>'### '+sgMarkdownCell(g.name)+'\n\n'+sgMarkdownCell(g.usage)).join('\n\n')+'\n\n';
  const pairs=sgContrastPairs(s);out+='## Declared palette contrast\n\n'+(pairs.length?sgTable(['Pair','Mode','Ratio','Normal text 4.5:1'],pairs.map(p=>[p.label,p.mode,p.ratio.toFixed(2)+':1',p.ratio>=4.5?'Meets numeric threshold':'Below threshold'])):'Add text/background or accent-text/accent tokens to compute the default pairs.\n');
+ out+='\n'+sgContrastCoverage(s)+'\n';
  return out+'\n## Handoff boundaries\n\nValues describe the target plugin; they do not override the companion or Obsidian theme. Named fonts are references only and require separate licensing and availability review. No font binaries or remote assets are included. The HTML guide uses a 16 px root for rem previews and local fallbacks for host fonts. Palette ratios test only the declared solid colors, not the actual host, every state, or complete accessibility conformance. Component implementation and automatic token application are separate work. Exports include saved declarations only.\n';
 }
 function sgHtml(source){
@@ -13863,7 +13892,7 @@ function sgHtml(source){
  body+=`<section id="fonts"><h2>Fonts</h2>${s.fonts.map(f=>row(f.name,f.id+' · '+SG_FONT_SOURCES[f.source],`<div style="font-family:${e(sgFontCSS(f,false))}">The quick brown fox · 0123456789</div><p>${e(f.families||f.fallback)}<br>${e(f.license)}</p>`,f.usage)).join('')||'<p>No fonts declared.</p>'}</section>`;
  body+=`<section id="typography"><h2>Typography</h2>${s.typography.map(t=>row(t.name,`${t.id} · ${t.font} · ${t.size}${t.unit} / ${t.lineHeight} · ${t.weight} · ${t.letterSpacing}px tracking`,`<div style="${e(sgTypeCSS(t,s,false))}">Design for understanding.</div>`,t.usage)).join('')||'<p>No type styles declared.</p>'}</section>`;
  for(const group of ['spacing','sizes','radii'])body+=`<section id="${group}"><h2>${SG_GROUPS[group]}</h2>${s[group].map(t=>row(t.name,t.id+' · '+t.value+t.unit,group==='radii'?`<div class="radius" style="border-radius:${t.value}${t.unit}"></div>`:`<div class="measure" style="width:${Math.min(320,t.value*(t.unit==='rem'?16:1))}px"></div>`,t.usage)).join('')||'<p>No values declared.</p>'}<p class="muted">${group==='radii'?'Corners shown on a fixed sample.':'Long measures are visually capped at 320 px; the printed token value is exact.'}</p></section>`;
- body+=`<section id="colors"><h2>Colors</h2>${s.colors.map(c=>row(c.name,c.id+(c.host?' · '+c.host:''),`<div class="swatches">${['light','dark'].map(mode=>`<div><span class="swatch" style="background:${c[mode]}"></span><span>${mode}: <code>${c[mode]}</code></span></div>`).join('')}</div>`,c.usage)).join('')||'<p>No colors declared.</p>'}<h3>Declared palette contrast</h3><ul>${sgContrastPairs(s).map(p=>`<li>${e(p.label)} · ${p.mode}: <strong>${p.ratio.toFixed(2)}:1</strong> — ${p.ratio>=4.5?'meets':'below'} the 4.5:1 normal-text threshold</li>`).join('')||'<li>No default pairs declared.</li>'}</ul></section>`;
+ body+=`<section id="colors"><h2>Colors</h2>${s.colors.map(c=>row(c.name,c.id+(c.host?' · '+c.host:''),`<div class="swatches">${['light','dark'].map(mode=>`<div><span class="swatch" style="background:${c[mode]}"></span><span>${mode}: <code>${c[mode]}</code></span></div>`).join('')}</div>`,c.usage)).join('')||'<p>No colors declared.</p>'}<h3>Declared palette contrast</h3><p>${e(sgContrastCoverage(s))}</p><ul>${sgContrastPairs(s).map(p=>`<li>${e(p.label)} · ${p.mode}: <strong>${p.ratio.toFixed(2)}:1</strong> — ${p.ratio>=4.5?'meets':'below'} the 4.5:1 normal-text threshold</li>`).join('')||'<li>No default pairs declared.</li>'}</ul></section>`;
  body+=`<section id="guidelines"><h2>Usage guidelines</h2>${s.guidelines.map(g=>`<article><h3>${e(g.name)}</h3><p class="prose">${e(g.usage)}</p></article>`).join('')||'<p>No guidelines declared.</p>'}</section><section><h2>Implementation notes</h2><p>This is a saved design contract, not an applied Obsidian theme. Custom fonts use installed family names and fallbacks; no fonts, scripts or remote assets are embedded. This guide uses 1rem = 16px. Host font variables resolve to documented fallbacks here. Declared color ratios do not establish complete accessibility conformance or host-theme contrast.</p><p>Exports contain saved declarations only. Component styling and production token integration require implementation and review.</p></section></main><footer>Project design-system handoff · schema 1 · generated locally</footer>`;
  const css=`:root{font-size:16px;color-scheme:light dark;--bg:#fff;--fg:#24242b;--muted:#5b5b68;--border:#d8d8e0;--accent:#6651b4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}header,main,footer{max-width:1120px;margin:auto;padding:32px}header{padding-top:56px}h1{font-size:2.5rem;line-height:1.2}h2{margin-top:0}h3{font-size:1rem;margin:0 0 6px}p{max-width:75ch;overflow-wrap:anywhere}nav{display:flex;gap:16px;flex-wrap:wrap}a{color:var(--accent);text-underline-offset:3px}a:focus-visible{outline:2px solid;outline-offset:4px}section{margin:0 0 48px;scroll-margin-top:16px}article{border-top:1px solid var(--border);padding:20px 0;display:grid;grid-template-columns:minmax(140px,1fr) minmax(0,2fr);gap:12px 28px;break-inside:avoid}article>p{grid-column:2;margin:0;color:var(--muted);white-space:pre-wrap}.sample{min-width:0;overflow:auto;padding:4px}.prose{white-space:pre-wrap}code{font:13px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.meta code{color:var(--muted)}.swatches{display:flex;gap:24px;flex-wrap:wrap}.swatches>div{display:flex;align-items:center;gap:10px}.swatch{width:44px;height:44px;display:inline-block;border:1px solid var(--border);border-radius:8px}.measure{background:var(--accent);height:16px;min-width:1px;max-width:100%}.radius{width:96px;height:60px;border:2px solid var(--accent)}.muted,footer{color:var(--muted)}footer{border-top:1px solid var(--border)}@media(prefers-color-scheme:dark){:root{--bg:#1e1e24;--fg:#ededf3;--muted:#b9b9c7;--border:#41414d;--accent:#c0aaff}}@media(max-width:640px){header,main,footer{padding:20px}h1{font-size:2rem}article{grid-template-columns:1fr}article>p{grid-column:1}}@media print{:root{color-scheme:light;--bg:#fff;--fg:#000;--muted:#444;--border:#ccc;--accent:#333}nav{display:none}header{padding-top:0}main,header,footer{padding:12px}.sample{overflow:visible}a{color:inherit}}`;
  return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src \'none\'; font-src \'none\'; base-uri \'none\'; form-action \'none\'"><meta name="color-scheme" content="light dark"><title>'+e(s.name)+'</title><style>'+css+'<\/style></head><body>'+body+'</body></html>\n';
@@ -13871,9 +13900,9 @@ function sgHtml(source){
 function sgFiles(d){const s=styleGuide(d);return s?[{path:'docs/design/DESIGN-SYSTEM.md',content:sgMarkdown(s),owner:'design-system',role:'Saved design-system Markdown handoff'},{path:'docs/design/design-system.html',content:sgHtml(s),owner:'design-system',role:'Self-contained inert HTML style guide'}]:[];}
 function sgDownload(format){try{const s=styleGuide(),html=format==='html',content=html?sgHtml(s):sgMarkdown(s),blob=new Blob([content],{type:html?'text/html;charset=utf-8':'text/markdown;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='design-system.'+(html?'html':'md');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Saved design system exported. No host styles or vault files were changed.');}catch(error){sgFail(error.message);}}
 
-const tdUi={source:null,form:null,error:'',preview:null,file:0,session:null,sessionKey:null,operation:null,input:'',output:'',busy:false,abort:null,target:null};
+const tdUi={source:null,form:null,error:'',preview:null,file:0,session:null,sessionKey:null,operation:null,input:'',output:'',status:'',busy:false,abort:null,target:null};
 function tdFail(message){tdUi.error=message;if(document.getElementById('modal').open&&modalType==='test-data-form'){redrawModal();document.getElementById('td-error')?.focus();}else {render();document.getElementById('td-page-error')?.focus();}return false;}
-function tdDropSession(){tdUi.abort?.abort();tdUi.abort=null;tdUi.session?.dispose();tdUi.session=null;tdUi.sessionKey=null;tdUi.busy=false;tdUi.output='';}
+function tdDropSession(){tdUi.abort?.abort();tdUi.abort=null;tdUi.session?.dispose();tdUi.session=null;tdUi.sessionKey=null;tdUi.busy=false;tdUi.output='';tdUi.status='';}
 function tdCommit(candidate){
  if(state.activeRun)return tdFail('Finish the active project simulation first.');
  if(!tdValidSettings(candidate,dataSources()))return tdFail('Check the seed, date, record count and generator settings.');
@@ -13909,15 +13938,15 @@ async function tdSimulate(){
   key=tdFingerprint();if(!tdUi.session||tdUi.sessionKey!==key){tdDropSession();tdUi.session=createFixtureAdapter(tdManifest());tdUi.sessionKey=key;}
   session=tdUi.session;const op=tdManifest().operations.find(o=>o.id===tdUi.operation);if(!op)throw Error('Select an enabled API or database operation.');
   let input;try{input=op.input.none?undefined:JSON.parse(tdUi.input);}catch{throw Error('Enter valid JSON request data.');}
-  tdUi.busy=true;controller=new AbortController();tdUi.abort=controller;tdUi.output='Running in the in-memory test session…';tdPaintSimulation();
+  tdUi.busy=true;controller=new AbortController();tdUi.abort=controller;tdUi.output='Running in the in-memory test session…';tdUi.status='Running in memory. No live service is contacted.';tdPaintSimulation();
   const result=await session.execute(op.id,input,{signal:controller.signal});
   if(tdUi.session!==session||tdUi.abort!==controller||tdFingerprint()!==key)return;
-  tdUi.output=result===undefined?'No payload':JSON.stringify(result,null,2);
- }catch(error){if(!controller||tdUi.abort===controller)tdUi.output=(error.status?'Simulated status '+error.status+': ':'')+error.message;}
+  tdUi.output=result===undefined?'No payload':JSON.stringify(result,null,2);tdUi.status='Operation completed in memory. Inspect the result below.';
+ }catch(error){if(!controller||tdUi.abort===controller){tdUi.output=(error.status?'Simulated status '+error.status+': ':'')+error.message;tdUi.status=controller?.signal.aborted?'Request cancelled. No live fallback.':'Operation failed. Inspect the result and input contract.';}}
  finally{if(!controller||tdUi.abort===controller){tdUi.busy=false;tdUi.abort=null;tdPaintSimulation();}}
 }
 function tdChooseOperation(id){
- tdUi.abort?.abort();tdUi.abort=null;tdUi.busy=false;tdUi.operation=id;tdUi.output='';
+ tdUi.abort?.abort();tdUi.abort=null;tdUi.busy=false;tdUi.operation=id;tdUi.output='';tdUi.status='';
  try{const op=createFixtureEngine().generate(tdManifest()).operations.find(o=>o.id===id);tdUi.input=op?.inputValue===undefined?'':JSON.stringify(op.inputValue,null,2);}catch{tdUi.input='';}
 }
 function handleTestDataAction(action,value=''){
@@ -13935,15 +13964,15 @@ function handleTestDataAction(action,value=''){
   case 'td-export':{const p=tdUi.preview;if(!p||p.fingerprint!==tdFingerprint()){tdFail('Preview the current recipes before exporting. The previous preview is stale.');break;}tdDownloadKit(p.manifest);break;}
   case 'td-simulate':void tdSimulate();break;
   case 'td-cancel':tdUi.abort?.abort(new Error('Test request cancelled. No live fallback.'));break;
-  case 'td-reset-session':tdDropSession();tdUi.output='In-memory session reset. Files on disk were not changed.';tdPaintSimulation();break;
+  case 'td-reset-session':tdDropSession();tdUi.output='In-memory session reset. Files on disk were not changed.';tdUi.status=tdUi.output;tdPaintSimulation();break;
   case 'td-target':if(state.activeRun){tdFail('Finish the active project simulation first.');break;}tdUi.target={owner:designOwner(),revision:project().rev,vault:project().vault};showModal('test-data-target');break;
-  case 'td-target-confirm':{const p=project(),t=tdUi.target;if(state.activeRun||!t||t.owner!==designOwner()||t.revision!==p.rev||t.vault!==p.vault){notify('Development target review is stale or a run is active. Reopen the target review.');break;}tdUi.target=null;p.vault=vaultTestRoot();invalidateProject(p);state.wizard=null;modalOriginal=null;closeModal();render();notify('Development target set to .test-vault. Existing .dev-vault files were not moved or deleted.');break;}
+  case 'td-target-confirm':{const p=project(),t=tdUi.target;if(state.activeRun||!t||t.owner!==designOwner()||t.revision!==p.rev||t.vault!==p.vault){notify('Development target review is stale or a run is active. Reopen the target review.');break;}const previous=vaultDisplayTarget();tdUi.target=null;p.vault=vaultTestRoot();invalidateProject(p);state.wizard=null;modalOriginal=null;closeModal();render();notify('Development target set to .test-vault. Existing '+previous+' files were not moved or deleted.');break;}
  }
  return true;
 }
 function editTestDataField(el){
  const key=el.dataset.field;if(!key?.startsWith('td-'))return false;
- if(key==='td-operation'){tdChooseOperation(el.value);tdPaintSimulation();return true;}
+ if(key==='td-operation'){if(tdUi.busy)return true;tdChooseOperation(el.value);tdPaintSimulation();return true;}
  if(key==='td-input'){tdUi.input=el.value;return true;}
  const f=tdUi.form;if(!f)return true;
  if(key.startsWith('td-rule-')){
@@ -13963,15 +13992,15 @@ function editTestDataField(el){
 function tdField(label, name, value, type = 'text', hint = '', extra = '') {
   return uiInput(label, 'td-' + name, value, { type, hint, extra });
 }
-function tdSelect(label, name, values, current) {
-  return uiSelect(label, 'td-' + name, values, current);
+function tdSelect(label, name, values, current, extra = '') {
+  return uiSelect(label, 'td-' + name, values, current, extra);
 }
 function testDataView(){
  const settings=tdSettings(),sources=dataSources().sources,selected=sources.find(s=>s.id===tdUi.source)||sources[0];if(selected)tdUi.source=selected.id;
  const preview=tdUi.preview,current=preview?.fingerprint===tdFingerprint(),enabled=settings.recipes.filter(r=>r.enabled).length;
  return `<section class="td-workspace"><header class="page-heading"><div><h1>Test data</h1><p>Give your plugin realistic inputs before connecting a live service.</p></div><div class="row wrap">${button('Data Sources','nav','sources','small')}${button('Preview test kit','td-preview','','primary small','play',!enabled?'disabled':'')}</div></header>
  <div class="td-safety"><strong>Only <code>.test-vault/</code></strong><span>Vault notes are seeded by the exported runner. API and database behavior is simulated. Live sources are never contacted.</span></div>
- ${project().vault!==vaultTestRoot()?`<div class="callout warn"><div><strong>Earlier development target retained</strong><p>This project still points at <code>.dev-vault</code>. Test data always uses <code>.test-vault</code>. Switch the development target before installing this plugin for testing.</p>${button('Use .test-vault','td-target','','small')}</div></div>`:''}
+ ${project().vault!==vaultTestRoot()?`<div class="callout warn"><div><strong>Earlier development target retained</strong><p>This project still points at <code>${esc(vaultDisplayTarget())}</code>. Test data always uses <code>.test-vault</code>. Switch the development target before installing this plugin for testing.</p>${button('Use .test-vault','td-target','','small')}</div></div>`:''}
  <div class="td-settings"><div><strong>${settings.count} records</strong><span>Shared entity identities and valid links</span></div><div><strong>Seed ${settings.seed} · ${settings.locale}</strong><span>Reference date ${esc(settings.referenceDate.slice(0,10))}</span></div><div><strong>${enabled} enabled recipes</strong><span>Explicit opt-in; no live fallback</span></div>${button('Generation settings','td-settings','','small','settings')}</div>
  <p class="error" role="alert" id="td-page-error" tabindex="-1">${esc(tdUi.error)}</p>
  ${!sources.length?`<div class="td-empty"><h2>Start with a data-source contract</h2><p>Add a source and declare what each operation accepts and returns. Its shapes become your test-data recipe.</p>${button('Define data sources','nav','sources','primary')}</div>`:
@@ -13980,16 +14009,24 @@ function testDataView(){
  <section class="td-preview"><div class="row between wrap"><div><h2>Preview and export</h2><p>Review generated data and boilerplate before creating any files.</p></div>${button('Export runnable test kit','td-export','','small','download',!current?'disabled':'')}</div>
  ${preview?`<p class="${current?'':'error'}">${current?'Current preview':'Stale preview — rebuild before exporting'} · ${preview.generated.files.length} fixture files · ${(preview.generated.bytes/1024).toFixed(1)} KiB · built-in deterministic provider</p><div class="td-files"><div class="td-file-list" aria-label="Preview files">${preview.generated.files.slice(0,150).map((f,i)=>`<button data-action="td-file" data-value="${i}" class="${tdUi.file===i?'selected':''}" aria-pressed="${tdUi.file===i}">${esc(f.path)}</button>`).join('')}${preview.generated.files.length>150?'<p class="small muted">First 150 listed. All files are present in the exported runner plan.</p>':''}</div><pre tabindex="0" aria-label="Fixture content">${esc(preview.generated.files[tdUi.file]?.content||'No files for these shapes.')}</pre></div>`:'<p class="td-empty">Enable the needed recipes and select Preview test kit. Incomplete shapes block generation without discarding your design.</p>'}
  <p class="small muted">The ZIP contains editable Node generators and the exact manifest, not an installed plugin. The runner defaults to a dry plan; apply and cleanup both require an approval hash. Existing notes, plugin settings and edited fixtures are preserved.</p></section>
- <section class="td-simulation"><h2>Try an operation</h2><p>In-memory preview only. Use the exported localhost server to exercise the actual HTTP transport.</p><div id="td-simulation-panel">${tdSimulation()}</div></section></section>`;
+ <section class="td-simulation"><h2>Try an operation</h2><p>In-memory preview only. Use the exported localhost server to exercise the actual HTTP transport.</p><p id="td-operation-status" class="small" role="status" aria-live="polite" aria-atomic="true">${esc(tdUi.status)}</p><div id="td-simulation-panel">${tdSimulation()}</div></section></section>`;
 }
 function tdSimulation(){
  let operations=[];try{operations=tdManifest().operations.filter(o=>o.kind!=='vault');}catch{/* Readiness errors appear in preview, not as destructive input replacement. */}
  if(!operations.length)return '<p class="muted">Enable an API or database recipe to try its behavior. Vault recipes are exercised through actual seeded files and your plugin’s vault repository.</p>';
  if(!operations.some(o=>o.id===tdUi.operation))tdChooseOperation(operations[0].id);
  const op=operations.find(o=>o.id===tdUi.operation);
- return `<div class="td-simulation-grid"><div>${tdSelect('Operation','operation',operations.map(o=>[o.id,o.source+' / '+o.slug]),tdUi.operation)}<label class="field" for="td-input">Input JSON<textarea id="td-input" data-field="td-input" rows="6" ${op.input.none?'disabled':''} placeholder="${op.input.none?'This operation has no input.':'JSON matching the input contract'}">${esc(tdUi.input)}</textarea></label><div class="row wrap">${button(tdUi.busy?'Running…':'Run in-memory test','td-simulate','','primary small','play',tdUi.busy?'disabled':'')}${button('Cancel','td-cancel','','small','',tdUi.busy?'':'disabled')}${button('Reset test session','td-reset-session','','ghost small','',tdUi.busy?'disabled':'')}</div></div><div><h3>Result</h3><pre class="td-result" tabindex="0" role="status" aria-live="polite">${esc(tdUi.output||'Run an operation to inspect its result. Fixed-response recipes capture writes; choose list/upsert/delete and a shared dataset for read-after-write behavior.')}</pre></div></div>`;
+ return `<div class="td-simulation-grid"><div>${tdSelect('Operation','operation',operations.map(o=>[o.id,o.source+' / '+o.slug]),tdUi.operation,tdUi.busy?'disabled':'')}<label class="field" for="td-input">Input JSON<textarea id="td-input" data-field="td-input" rows="6" ${op.input.none||tdUi.busy?'disabled':''} placeholder="${op.input.none?'This operation has no input.':'JSON matching the input contract'}">${esc(tdUi.input)}</textarea></label><div class="row wrap">${button(tdUi.busy?'Running…':'Run in-memory test','td-simulate','','primary small','play',tdUi.busy?'disabled':'')}${button('Cancel','td-cancel','','small','',tdUi.busy?'':'disabled')}${button('Reset test session','td-reset-session','','ghost small','',tdUi.busy?'disabled':'')}</div></div><div><h3>Result</h3><pre class="td-result" tabindex="0" aria-label="Operation result">${esc(tdUi.output||'Run an operation to inspect its result. Fixed-response recipes capture writes; choose list/upsert/delete and a shared dataset for read-after-write behavior.')}</pre></div></div>`;
 }
-function tdPaintSimulation(){const p=document.getElementById('td-simulation-panel');if(p)p.innerHTML=tdSimulation();}
+function tdPaintSimulation(){
+ const panel=document.getElementById('td-simulation-panel');if(!panel)return;
+ const inside=panel.contains(document.activeElement),token=inside?uiFocusRecord(document.activeElement,panel):null;
+ const output=panel.querySelector('.td-result'),offset={top:output?.scrollTop||0,left:output?.scrollLeft||0};
+ panel.innerHTML=tdSimulation();
+ const status=document.getElementById('td-operation-status');if(status)status.textContent=tdUi.status;
+ if(inside&&!focusUiControl(token,panel))panel.querySelector(tdUi.busy?'[data-action="td-cancel"]':'[data-action="td-simulate"]')?.focus({preventScroll:true});
+ const result=panel.querySelector('.td-result');if(result){result.scrollTop=offset.top;result.scrollLeft=offset.left;}
+}
 function testDataForm(){
  const f=tdUi.form;if(!f)return dialogBody('Test recipe unavailable','Reopen the current source.');const r=f.record;
  let body;
@@ -14002,7 +14039,7 @@ function testDataForm(){
  }
  return dialogBody(f.kind==='settings'?'Test-data settings':'Test-data recipe',body+`<p class="error" role="alert" id="td-error" tabindex="-1">${esc(tdUi.error)}</p>`,button('Cancel','close','','ghost')+button(f.kind==='settings'?'Save settings':'Save recipe','td-save','','primary'));
 }
-function testDataTargetForm(){return dialogBody('Use .test-vault for development?', '<p>This changes the declared build/install target, not its files. Existing <code>.dev-vault</code> notes and plugin installations remain untouched. An unfinished preparation review will be cleared and must be reviewed again.</p><p>Install explicitly with <code>npm run build:local -- --vault .test-vault</code>, then open that directory as a separate vault.</p>',button('Cancel','close','','ghost')+button('Use .test-vault','td-target-confirm','','primary'));}
+function testDataTargetForm(){return dialogBody('Use .test-vault for development?', '<p>This changes the declared build/install target, not its files. Existing <code>'+esc(vaultDisplayTarget())+'</code> notes and plugin installations remain untouched. An unfinished preparation review will be cleared and must be reviewed again.</p><p>Install explicitly with <code>npm run build:local -- --vault .test-vault</code>, then open that directory as a separate vault.</p>',button('Cancel','close','','ghost')+button('Use .test-vault','td-target-confirm','','primary'));}
 
 // Export inert, readable Node sources. No eval, dynamic loading or API requests in this UI.
 function tdToolSources(){return JSON.parse(document.getElementById('test-data-tool-sources').textContent);}
@@ -15275,7 +15312,13 @@ function saveConceptState(){
 }
 function resetConceptState(){
  if(state.activeRun)return;
- try{localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');}
+ try{
+  if(localStorage.getItem(STORAGE_KEY)!==persistenceSnapshot){
+   storageWarning='Reset blocked: saved data changed in another window. Export this session and the retained browser data before reloading.';
+   paintStorageState();notify(storageWarning);return;
+  }
+  localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');
+ }
  catch{storageWarning='Reset could not remove browser data. Your current session is retained. Export recovery before closing.';paintStorageState();notify(storageWarning);return;}
  clearTimeout(runTimer);destroyFlow();persistenceSnapshot=null;storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');
 }
@@ -15285,6 +15328,14 @@ window.addEventListener('storage',event=>{
   saveConceptState();
  }
 });
+
+function exportRetainedBrowserData(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(raw===null){notify('No retained browser snapshot is available. Export this session instead.');return;}
+  showModal('copy',{title:'Retained browser data — may belong to another window or use an unsupported schema. Keep private; no import or execution is performed.',text:raw,filename:'shell-workbench-retained-browser-data.json'});
+ }catch{notify('Browser storage cannot be read. Export this session instead; no retained data was changed.');}
+}
 
 // Presentation contracts: ownership containers are distinct from content-bearing screens.
 function allocateSurfaceCode(d,label,excludeId=null){
@@ -17041,18 +17092,19 @@ function workflowHasDesign(){return Boolean(project()?.design);}
 function workflowFacts(){
  const d=design(),p=project(),active=d.prds.filter(x=>x.status!=='archived');
  const requirements=active.flatMap(x=>x.requirements).filter(r=>r.status!=='deferred');
- const issues=designIssues(d),blockers=issues.filter(x=>x.level==='error');
+ const issues=designIssues(d),blockers=issues.filter(x=>x.level==='error'),warnings=issues.filter(x=>x.level==='warning');
  const used=d.nodes.reduce((sum,n)=>sum+n.components.length,0);
  const mapped=requirements.filter(r=>r.nodes.length||r.components.length||r.patterns.length).length;
- return {d,p,active,requirements,issues,blockers,used,mapped,hasBrief:active.some(x=>x.problem.trim())||Boolean(d.goal.trim()),
+ return {d,p,active,requirements,issues,blockers,warnings,used,mapped,hasBrief:active.some(x=>x.problem.trim())||Boolean(d.goal.trim()),
   generated:d.generatedRevision===d.revision&&Object.keys(d.emitted||{}).length>0};
 }
 function workflowStage(){
  if(modalType==='design-plan')return 'review';
  if(['prds'].includes(state.view))return 'brief';
- if(['sitemap','entities','blueprints'].includes(state.view))return 'structure';
- if(['components','patterns'].includes(state.view))return 'components';
- return ['generate','develop','quality','release','runs'].includes(state.view)?'build':null;
+ if(['sitemap','entities','sources','blueprints'].includes(state.view))return 'structure';
+ if(['components','designsystem','patterns'].includes(state.view))return 'components';
+ if(state.view==='testdata')return 'review';
+ return ['prepare','generate','develop','quality','capabilities','release','runs'].includes(state.view)?'build':null;
 }
 function workflowStatus(id,f=workflowFacts()){
  if(id==='brief')return f.hasBrief?(f.requirements.length+' requirement'+(f.requirements.length===1?'':'s')):'Start with the problem';
@@ -17068,6 +17120,7 @@ function workflowNext(){
  if(!f.hasBrief)return {title:'Clarify the problem you are solving',description:'A lean brief keeps screens and generated hooks connected to a real user outcome.',label:'Define the plugin',stage:'brief'};
  if(!f.d.nodes.length)return {title:'Choose a starting structure',description:'Use a shell blueprint, or add your first view. You can revise either later.',label:'Choose a blueprint',action:'nav',value:'blueprints'};
  if(f.blockers.length)return {title:'Resolve '+f.blockers.length+' outline issue'+(f.blockers.length===1?'':'s'),description:'Review broken links, incompatible surfaces or component version changes before scaffolding.',label:'Review outline issues',action:'workflow-checks'};
+ if(!f.requirements.length)return {title:'Make the outcome testable',description:'Add a requirement and acceptance criteria before business implementation. This is guidance, not a blocker: the source review remains available.',label:'Capture requirements',stage:'brief'};
  if(!f.generated)return {title:'Review what the template will prepare',description:'Inspect file changes and protected business hooks. A preview is not an implementation.',label:'Review boilerplate',stage:'review'};
  if(!vaultProjectPrepared())return {title:'Prepare this vault for development',description:'Add reviewed template files to this root without replacing the design or Obsidian configuration.',label:'Prepare this vault',action:'vault-prepare'};
  return {title:'Continue the first development loop',description:'Implement an application action, then verify the relevant scopes. The concept only simulates execution.',label:'Open development',action:'nav',value:'develop'};
@@ -17081,9 +17134,12 @@ function filteredPlanFiles(){
  return plan.changes.map((file,index)=>({file,index})).filter(({file})=>(workflowUi.fileStatus==='all'||file.status===workflowUi.fileStatus)&&(!q||(file.path+' '+file.role).toLowerCase().includes(q)));
 }
 function workflowIssueDestination(issue){
+ const code=issue.code||'';
+ if(code.startsWith('semantic-'))return {action:'nav',value:'entities'};
+ if(code.startsWith('data-source-'))return {action:'nav',value:'sources'};
+ if(/requirement|prd|acceptance/.test(code)||code==='goal')return {action:'nav',value:'prds'};
  if(issue.node)return {action:'workflow-node',value:issue.node};
- if(/component|binding|version|slot/.test(issue.code||''))return {action:'nav',value:'components'};
- if(/requirement|prd/.test(issue.code||''))return {action:'nav',value:'prds'};
+ if(/component|binding|version|slot/.test(code))return {action:'nav',value:'components'};
  return {action:'workflow-checks',value:''};
 }
 function workflowInlineSummary(){
@@ -17103,8 +17159,8 @@ function workflowOverview(){
  return heading(f.p?.name||'Your plugin workspace','The current vault is your project root. Design and source stay together.',button('Project details','vault-init','','small','folder'))+
  `${vaultLocationCard()}<section class="next-task"><span class="next-task-icon">${icon('arrow')}</span><div class="grow"><h2>${n.title}</h2><p>${n.description}</p></div>${workflowActionButton(n)}</section>
  <div class="work-overview"><section class="workflow-ledger"><div class="section-head"><h2>Design to implementation</h2><span class="small muted">Revisit any stage</span></div>${WORKFLOW_STAGES.map((s,i)=>`<button class="ledger-step" data-action="workflow-stage" data-value="${s.id}"><span class="ledger-number">${i+1}</span><span class="grow"><strong>${s.detail}</strong><small>${workflowStatus(s.id,f)}</small></span>${icon('arrow')}</button>`).join('')}<p class="ledger-note">These describe your design and fixture state, not production readiness.</p></section>
- <section class="overview-detail"><h2>Review attention</h2>${f.blockers.length?f.blockers.slice(0,4).map(i=>{const dest=workflowIssueDestination(i);return `<div class="attention-item">${icon('shield')}<p>${esc(i.message)}</p>${button('Review',dest.action,dest.value,'small')}</div>`;}).join(''):`<div class="attention-clear">${icon('check')}<div><strong>No structural blockers</strong><p>Business behavior, usability and native compatibility still need verification.</p></div></div>`}
- <dl class="overview-facts"><dt>Brief</dt><dd>${f.active.length} active PRD(s)</dd><dt>Traceability</dt><dd>${f.mapped} / ${f.requirements.length} requirements mapped</dd><dt>Frontend</dt><dd>${f.d.nodes.filter(x=>x.kind==='view').length} native views · ${f.d.nodes.filter(x=>x.kind==='page').length} internal screens</dd><dt>Semantic layer</dt><dd>${f.d.semantic?.entities.length||0} entities · ${f.d.semantic?.relationships.length||0} relationships</dd><dt>Data Sources</dt><dd>${f.d.dataSources?.sources.length||0} sources · ${f.d.dataSources?.flows.length||0} data flows</dd><dt>Components</dt><dd>${f.used} bindings · ${f.d.library.length} contracts</dd><dt>Source plan</dt><dd>${f.generated?'Preview recorded at current design revision':'Review needed before scaffold preview'}</dd></dl>
+ <section class="overview-detail"><h2>Review attention</h2>${workflowAttention(f)}
+ <dl class="overview-facts"><dt>Brief</dt><dd>${f.active.length} active PRD(s)</dd><dt>Traceability</dt><dd>${f.requirements.length?f.mapped+' / '+f.requirements.length+' requirements mapped':'No active requirements yet'}</dd><dt>Frontend</dt><dd>${f.d.nodes.filter(x=>x.kind==='view').length} native views · ${f.d.nodes.filter(x=>x.kind==='page').length} internal screens</dd><dt>Semantic layer</dt><dd>${f.d.semantic?.entities.length||0} entities · ${f.d.semantic?.relationships.length||0} relationships</dd><dt>Data Sources</dt><dd>${f.d.dataSources?.sources.length||0} sources · ${f.d.dataSources?.flows.length||0} data flows</dd><dt>Components</dt><dd>${f.used} bindings · ${f.d.library.length} contracts</dd><dt>Source plan</dt><dd>${f.generated?'Preview recorded at current design revision':'Review needed before scaffold preview'}</dd></dl>
  <div class="overview-shortcuts">${button('Add a view','design-add','view','small','plus')}${button('Open sitemap','nav','sitemap','small','layers')}${button('Entity relationships','nav','entities','small','layers')}${vaultProjectPrepared()?button('Generate a feature','nav','generate','small','wand'):button('Choose a blueprint','nav','blueprints','small','grid')}</div></section></div>
  ${vaultProjectPrepared()?`<section class="runtime-summary"><h2>Development evidence <span>simulated</span></h2><div class="runtime-revisions"><div><span>Source</span><strong>r${f.p.rev}</strong></div><div><span>Built candidate</span><strong>r${f.p.builtRev}</strong></div><div><span>Installed candidate</span><strong>r${f.p.installedRev}</strong></div><div><span>Activation</span><strong>${f.p.enabled?'Enabled fixture':'Not enabled'}</strong></div></div><div class="row wrap">${button('Develop','nav','develop','small','terminal')}${button('Inspect quality scopes','nav','quality','small','shield')}${button('Runs & recovery','nav','runs','ghost small','clock')}</div></section>`:''}${f.p?'<div class="section-head mt24"><h2>Recent activity</h2>'+button('All runs','nav','runs','ghost small','arrow')+'</div>'+recentRuns(3):''}`;
 }
@@ -17131,6 +17187,16 @@ function workflowDecorate(){
  const breadcrumb=document.querySelector('.breadcrumb .muted');if(breadcrumb)breadcrumb.textContent=project()?.name||CONCEPT_VAULT.name;
  const main=content;if(main)main.setAttribute('aria-label',NAV.find(x=>x[0]===state.view)?.[2]||'Workspace');
  workflowMapSearchFeedback();
+}
+
+// Show severity and destinations without turning optional design guidance into a gate.
+function workflowAttention(f) {
+ const issues=[...f.blockers,...f.warnings];
+ if(!issues.length)return '<div class="attention-clear">'+icon('check')+'<div><strong>No structural findings</strong><p>Business behavior, usability and native compatibility still need verification.</p></div></div>';
+ return `<p class="small muted">${f.blockers.length} blocking · ${f.warnings.length} advisory. Advisories do not prevent source review.</p>`+
+ issues.slice(0,4).map(issue=>{const dest=workflowIssueDestination(issue);return `<div class="attention-item"><span class="attention-severity ${issue.level==='error'?'error':''}">${issue.level==='error'?'Blocking':'Advisory'}</span><p>${esc(issue.message)}</p>${button('Review',dest.action,dest.value,'small')}</div>`;}).join('')+
+ (issues.length>4?`<p class="small muted">Showing 4 of ${issues.length} findings.</p>`:'')+
+ button('All outline findings','workflow-checks','','ghost small');
 }
 
 // Navigation between established capabilities. This module never generates files.
@@ -17686,6 +17752,23 @@ window.addEventListener('beforeunload',event=>{
  }
 });
 
+// A native modal makes background notices inert; feedback belongs in its active layer.
+function workbenchNotify(text){
+ clearTimeout(toastTimer);
+ const host=document.getElementById('toasts');host.replaceChildren();
+ document.querySelectorAll('.dialog-feedback').forEach(el=>el.remove());
+ const dialog=[...document.querySelectorAll('dialog[open]')].at(-1);
+ if(dialog){
+  const feedback=document.createElement('p');feedback.className='dialog-feedback';
+  feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');feedback.setAttribute('aria-atomic','true');
+  const body=dialog.querySelector('.dialog-body,.wizard-body')||dialog;
+  body.prepend(feedback);
+  // Mount the live region before populating it; never move the user's focus.
+  requestAnimationFrame(()=>{if(feedback.isConnected)feedback.textContent=text;});
+ }else host.innerHTML=`<div class="toast">${esc(text)}</div>`;
+ toastTimer=setTimeout(()=>{host.replaceChildren();document.querySelectorAll('.dialog-feedback').forEach(el=>el.remove());},6000);
+}
+
 // Local concept data only. Production PRDs are Markdown; components are source-backed.
 const productUi={tab:'document',prd:null,component:null,story:'default',filter:'',form:null,error:'',returnTo:null};
 function defaultLibrary(){return [
@@ -17744,7 +17827,7 @@ function componentLibraryView(){
  const d=design(),visible=libraryComponents();
  if(!visible.some(c=>c.id===productUi.component))productUi.component=visible[0]?.id||null;
  const c=visible.find(c=>c.id===productUi.component);
- return heading('Your component library','Build websites and applications from one library. Place, write and reorder every component the same way.','<div class="row wrap">'+button('New component','library-new-brick','','primary','plus')+'</div>')+
+ return heading('Your component library','Design reusable plugin interfaces. Place components into screens, edit their content and review shared variants.','<div class="row wrap">'+button('New component','library-new-brick','','primary','plus')+'</div>')+
   libraryFilters()+`<div class="library-workspace"><aside class="library-list"><label for="component-filter">Find a component</label><input id="component-filter" type="search" data-field="product-component-filter" value="${esc(productUi.filter)}" placeholder="Name, purpose or tag…"><div id="component-results">${componentList()}</div></aside><section id="component-detail" class="library-detail">${c?componentDetail(c):'<div class="library-empty"><h2>No matching components</h2><p>Change the filter or search, or create a component. Existing definitions have not been removed.</p></div>'}</section></div>`;
 }
 function componentList(){return libraryComponents().map(c=>`<button class="library-item ${c.id===productUi.component?'selected':''}" data-action="product-component-select" data-value="${esc(c.id)}" aria-pressed="${c.id===productUi.component}"><span class="library-miniature" ${isBrickComponent(c)?'data-group="'+BRICK_KINDS[c.contentSpec.kind].group+'"':''}>${isBrickComponent(c)?brickSketch(c.contentSpec.kind):icon('box')}</span><span class="grow"><strong>${esc(c.contentSpec?.title||c.name)}</strong><small>${esc(c.category)} · v${esc(c.version)}</small></span>${c.status==='deprecated'?badge('Deprecated','warn'):''}</button>`).join('')||'<p class="small muted mt16">No matching components. Clear the search or change the filter.</p>';}

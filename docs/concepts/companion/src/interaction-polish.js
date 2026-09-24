@@ -154,3 +154,20 @@ window.addEventListener('beforeunload',event=>{
   event.preventDefault();event.returnValue='';
  }
 });
+
+// A native modal makes background notices inert; feedback belongs in its active layer.
+function workbenchNotify(text){
+ clearTimeout(toastTimer);
+ const host=document.getElementById('toasts');host.replaceChildren();
+ document.querySelectorAll('.dialog-feedback').forEach(el=>el.remove());
+ const dialog=[...document.querySelectorAll('dialog[open]')].at(-1);
+ if(dialog){
+  const feedback=document.createElement('p');feedback.className='dialog-feedback';
+  feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');feedback.setAttribute('aria-atomic','true');
+  const body=dialog.querySelector('.dialog-body,.wizard-body')||dialog;
+  body.prepend(feedback);
+  // Mount the live region before populating it; never move the user's focus.
+  requestAnimationFrame(()=>{if(feedback.isConnected)feedback.textContent=text;});
+ }else host.innerHTML=`<div class="toast">${esc(text)}</div>`;
+ toastTimer=setTimeout(()=>{host.replaceChildren();document.querySelectorAll('.dialog-feedback').forEach(el=>el.remove());},6000);
+}

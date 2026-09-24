@@ -1,8 +1,14 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · cross-surface consistency and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · product audit and workflow/recovery polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
+
+## Current product audit
+
+[PRODUCT-AUDIT.md](PRODUCT-AUDIT.md) reviews eleven workflow steps and twelve product perspectives, records eighteen implemented corrections, and separates concept acceptance from shell qualification, native conversion and publication. [PRODUCT-AUDIT-VERIFICATION.md](PRODUCT-AUDIT-VERIFICATION.md) records exact-artifact verification and environment limits.
+
+The overview now exposes advisories and incomplete requirements, the workflow/tour include the expanded editors, keyboard users can skip the shell and retain focus during operation tests, and modal feedback stays inside the active dialog. Preferences offers private session export before failures; conflict recovery also exposes the retained browser copy, and stale reset cannot silently delete it. Narrow next-step layouts remain readable. Incomplete palette contrast checks and retained test-vault targets are described accurately in their relevant views/exports.
 
 ## Cross-surface consistency
 

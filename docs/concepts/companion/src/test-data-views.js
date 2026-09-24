@@ -1,15 +1,15 @@
 function tdField(label, name, value, type = 'text', hint = '', extra = '') {
   return uiInput(label, 'td-' + name, value, { type, hint, extra });
 }
-function tdSelect(label, name, values, current) {
-  return uiSelect(label, 'td-' + name, values, current);
+function tdSelect(label, name, values, current, extra = '') {
+  return uiSelect(label, 'td-' + name, values, current, extra);
 }
 function testDataView(){
  const settings=tdSettings(),sources=dataSources().sources,selected=sources.find(s=>s.id===tdUi.source)||sources[0];if(selected)tdUi.source=selected.id;
  const preview=tdUi.preview,current=preview?.fingerprint===tdFingerprint(),enabled=settings.recipes.filter(r=>r.enabled).length;
  return `<section class="td-workspace"><header class="page-heading"><div><h1>Test data</h1><p>Give your plugin realistic inputs before connecting a live service.</p></div><div class="row wrap">${button('Data Sources','nav','sources','small')}${button('Preview test kit','td-preview','','primary small','play',!enabled?'disabled':'')}</div></header>
  <div class="td-safety"><strong>Only <code>.test-vault/</code></strong><span>Vault notes are seeded by the exported runner. API and database behavior is simulated. Live sources are never contacted.</span></div>
- ${project().vault!==vaultTestRoot()?`<div class="callout warn"><div><strong>Earlier development target retained</strong><p>This project still points at <code>.dev-vault</code>. Test data always uses <code>.test-vault</code>. Switch the development target before installing this plugin for testing.</p>${button('Use .test-vault','td-target','','small')}</div></div>`:''}
+ ${project().vault!==vaultTestRoot()?`<div class="callout warn"><div><strong>Earlier development target retained</strong><p>This project still points at <code>${esc(vaultDisplayTarget())}</code>. Test data always uses <code>.test-vault</code>. Switch the development target before installing this plugin for testing.</p>${button('Use .test-vault','td-target','','small')}</div></div>`:''}
  <div class="td-settings"><div><strong>${settings.count} records</strong><span>Shared entity identities and valid links</span></div><div><strong>Seed ${settings.seed} · ${settings.locale}</strong><span>Reference date ${esc(settings.referenceDate.slice(0,10))}</span></div><div><strong>${enabled} enabled recipes</strong><span>Explicit opt-in; no live fallback</span></div>${button('Generation settings','td-settings','','small','settings')}</div>
  <p class="error" role="alert" id="td-page-error" tabindex="-1">${esc(tdUi.error)}</p>
  ${!sources.length?`<div class="td-empty"><h2>Start with a data-source contract</h2><p>Add a source and declare what each operation accepts and returns. Its shapes become your test-data recipe.</p>${button('Define data sources','nav','sources','primary')}</div>`:
@@ -18,16 +18,24 @@ function testDataView(){
  <section class="td-preview"><div class="row between wrap"><div><h2>Preview and export</h2><p>Review generated data and boilerplate before creating any files.</p></div>${button('Export runnable test kit','td-export','','small','download',!current?'disabled':'')}</div>
  ${preview?`<p class="${current?'':'error'}">${current?'Current preview':'Stale preview — rebuild before exporting'} · ${preview.generated.files.length} fixture files · ${(preview.generated.bytes/1024).toFixed(1)} KiB · built-in deterministic provider</p><div class="td-files"><div class="td-file-list" aria-label="Preview files">${preview.generated.files.slice(0,150).map((f,i)=>`<button data-action="td-file" data-value="${i}" class="${tdUi.file===i?'selected':''}" aria-pressed="${tdUi.file===i}">${esc(f.path)}</button>`).join('')}${preview.generated.files.length>150?'<p class="small muted">First 150 listed. All files are present in the exported runner plan.</p>':''}</div><pre tabindex="0" aria-label="Fixture content">${esc(preview.generated.files[tdUi.file]?.content||'No files for these shapes.')}</pre></div>`:'<p class="td-empty">Enable the needed recipes and select Preview test kit. Incomplete shapes block generation without discarding your design.</p>'}
  <p class="small muted">The ZIP contains editable Node generators and the exact manifest, not an installed plugin. The runner defaults to a dry plan; apply and cleanup both require an approval hash. Existing notes, plugin settings and edited fixtures are preserved.</p></section>
- <section class="td-simulation"><h2>Try an operation</h2><p>In-memory preview only. Use the exported localhost server to exercise the actual HTTP transport.</p><div id="td-simulation-panel">${tdSimulation()}</div></section></section>`;
+ <section class="td-simulation"><h2>Try an operation</h2><p>In-memory preview only. Use the exported localhost server to exercise the actual HTTP transport.</p><p id="td-operation-status" class="small" role="status" aria-live="polite" aria-atomic="true">${esc(tdUi.status)}</p><div id="td-simulation-panel">${tdSimulation()}</div></section></section>`;
 }
 function tdSimulation(){
  let operations=[];try{operations=tdManifest().operations.filter(o=>o.kind!=='vault');}catch{/* Readiness errors appear in preview, not as destructive input replacement. */}
  if(!operations.length)return '<p class="muted">Enable an API or database recipe to try its behavior. Vault recipes are exercised through actual seeded files and your plugin’s vault repository.</p>';
  if(!operations.some(o=>o.id===tdUi.operation))tdChooseOperation(operations[0].id);
  const op=operations.find(o=>o.id===tdUi.operation);
- return `<div class="td-simulation-grid"><div>${tdSelect('Operation','operation',operations.map(o=>[o.id,o.source+' / '+o.slug]),tdUi.operation)}<label class="field" for="td-input">Input JSON<textarea id="td-input" data-field="td-input" rows="6" ${op.input.none?'disabled':''} placeholder="${op.input.none?'This operation has no input.':'JSON matching the input contract'}">${esc(tdUi.input)}</textarea></label><div class="row wrap">${button(tdUi.busy?'Running…':'Run in-memory test','td-simulate','','primary small','play',tdUi.busy?'disabled':'')}${button('Cancel','td-cancel','','small','',tdUi.busy?'':'disabled')}${button('Reset test session','td-reset-session','','ghost small','',tdUi.busy?'disabled':'')}</div></div><div><h3>Result</h3><pre class="td-result" tabindex="0" role="status" aria-live="polite">${esc(tdUi.output||'Run an operation to inspect its result. Fixed-response recipes capture writes; choose list/upsert/delete and a shared dataset for read-after-write behavior.')}</pre></div></div>`;
+ return `<div class="td-simulation-grid"><div>${tdSelect('Operation','operation',operations.map(o=>[o.id,o.source+' / '+o.slug]),tdUi.operation,tdUi.busy?'disabled':'')}<label class="field" for="td-input">Input JSON<textarea id="td-input" data-field="td-input" rows="6" ${op.input.none||tdUi.busy?'disabled':''} placeholder="${op.input.none?'This operation has no input.':'JSON matching the input contract'}">${esc(tdUi.input)}</textarea></label><div class="row wrap">${button(tdUi.busy?'Running…':'Run in-memory test','td-simulate','','primary small','play',tdUi.busy?'disabled':'')}${button('Cancel','td-cancel','','small','',tdUi.busy?'':'disabled')}${button('Reset test session','td-reset-session','','ghost small','',tdUi.busy?'disabled':'')}</div></div><div><h3>Result</h3><pre class="td-result" tabindex="0" aria-label="Operation result">${esc(tdUi.output||'Run an operation to inspect its result. Fixed-response recipes capture writes; choose list/upsert/delete and a shared dataset for read-after-write behavior.')}</pre></div></div>`;
 }
-function tdPaintSimulation(){const p=document.getElementById('td-simulation-panel');if(p)p.innerHTML=tdSimulation();}
+function tdPaintSimulation(){
+ const panel=document.getElementById('td-simulation-panel');if(!panel)return;
+ const inside=panel.contains(document.activeElement),token=inside?uiFocusRecord(document.activeElement,panel):null;
+ const output=panel.querySelector('.td-result'),offset={top:output?.scrollTop||0,left:output?.scrollLeft||0};
+ panel.innerHTML=tdSimulation();
+ const status=document.getElementById('td-operation-status');if(status)status.textContent=tdUi.status;
+ if(inside&&!focusUiControl(token,panel))panel.querySelector(tdUi.busy?'[data-action="td-cancel"]':'[data-action="td-simulate"]')?.focus({preventScroll:true});
+ const result=panel.querySelector('.td-result');if(result){result.scrollTop=offset.top;result.scrollLeft=offset.left;}
+}
 function testDataForm(){
  const f=tdUi.form;if(!f)return dialogBody('Test recipe unavailable','Reopen the current source.');const r=f.record;
  let body;
@@ -40,4 +48,4 @@ function testDataForm(){
  }
  return dialogBody(f.kind==='settings'?'Test-data settings':'Test-data recipe',body+`<p class="error" role="alert" id="td-error" tabindex="-1">${esc(tdUi.error)}</p>`,button('Cancel','close','','ghost')+button(f.kind==='settings'?'Save settings':'Save recipe','td-save','','primary'));
 }
-function testDataTargetForm(){return dialogBody('Use .test-vault for development?', '<p>This changes the declared build/install target, not its files. Existing <code>.dev-vault</code> notes and plugin installations remain untouched. An unfinished preparation review will be cleared and must be reviewed again.</p><p>Install explicitly with <code>npm run build:local -- --vault .test-vault</code>, then open that directory as a separate vault.</p>',button('Cancel','close','','ghost')+button('Use .test-vault','td-target-confirm','','primary'));}
+function testDataTargetForm(){return dialogBody('Use .test-vault for development?', '<p>This changes the declared build/install target, not its files. Existing <code>'+esc(vaultDisplayTarget())+'</code> notes and plugin installations remain untouched. An unfinished preparation review will be cleared and must be reviewed again.</p><p>Install explicitly with <code>npm run build:local -- --vault .test-vault</code>, then open that directory as a separate vault.</p>',button('Cancel','close','','ghost')+button('Use .test-vault','td-target-confirm','','primary'));}

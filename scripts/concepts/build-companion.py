@@ -34,7 +34,7 @@ def build(output: Path, check: bool = False):
  change("!g.plan||g.plan.rev!==p.rev", "!g.plan||g.plan.owner!==p.id||g.plan.rev!==p.rev")
  change("function showModal(type,data=null){modalType=type;", "function showModal(type,data=null){if(!document.getElementById('modal').open)dialogReturnFocus=uiFocusRecord(document.activeElement);prepareDestructiveReview(type,data);modalOriginal=null;modalType=type;")
  change("modalData=null;save();document.getElementById('content').focus();", "modalData=null;save();if(!focusUiControl(dialogReturnFocus))document.getElementById('content').focus();")
- # Enhance the existing tour without changing its storage schema or length.
+ # Retain any older authoring seam; tour resume validation uses its declared steps.
  change("['generate','generate','Generate, then review'", "['sitemap','sitemap','Outline, then scaffold'") if "['generate','generate','Generate, then review'" in s else None
  # Keep focus across same-view re-renders and add explicit unsaved-form protection.
  change("function render(){", "function render(){if(state.view!=='testdata'||tdUi.sessionKey&&tdUi.sessionKey!==tdFingerprint())tdDropSession();const uiFocus=captureUiFocus();erDestroy();destroyFlow();if(project())normalizeSitemapSelection();")

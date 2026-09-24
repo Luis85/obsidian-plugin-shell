@@ -1,6 +1,6 @@
-const tdUi={source:null,form:null,error:'',preview:null,file:0,session:null,sessionKey:null,operation:null,input:'',output:'',busy:false,abort:null,target:null};
+const tdUi={source:null,form:null,error:'',preview:null,file:0,session:null,sessionKey:null,operation:null,input:'',output:'',status:'',busy:false,abort:null,target:null};
 function tdFail(message){tdUi.error=message;if(document.getElementById('modal').open&&modalType==='test-data-form'){redrawModal();document.getElementById('td-error')?.focus();}else {render();document.getElementById('td-page-error')?.focus();}return false;}
-function tdDropSession(){tdUi.abort?.abort();tdUi.abort=null;tdUi.session?.dispose();tdUi.session=null;tdUi.sessionKey=null;tdUi.busy=false;tdUi.output='';}
+function tdDropSession(){tdUi.abort?.abort();tdUi.abort=null;tdUi.session?.dispose();tdUi.session=null;tdUi.sessionKey=null;tdUi.busy=false;tdUi.output='';tdUi.status='';}
 function tdCommit(candidate){
  if(state.activeRun)return tdFail('Finish the active project simulation first.');
  if(!tdValidSettings(candidate,dataSources()))return tdFail('Check the seed, date, record count and generator settings.');
@@ -36,15 +36,15 @@ async function tdSimulate(){
   key=tdFingerprint();if(!tdUi.session||tdUi.sessionKey!==key){tdDropSession();tdUi.session=createFixtureAdapter(tdManifest());tdUi.sessionKey=key;}
   session=tdUi.session;const op=tdManifest().operations.find(o=>o.id===tdUi.operation);if(!op)throw Error('Select an enabled API or database operation.');
   let input;try{input=op.input.none?undefined:JSON.parse(tdUi.input);}catch{throw Error('Enter valid JSON request data.');}
-  tdUi.busy=true;controller=new AbortController();tdUi.abort=controller;tdUi.output='Running in the in-memory test session…';tdPaintSimulation();
+  tdUi.busy=true;controller=new AbortController();tdUi.abort=controller;tdUi.output='Running in the in-memory test session…';tdUi.status='Running in memory. No live service is contacted.';tdPaintSimulation();
   const result=await session.execute(op.id,input,{signal:controller.signal});
   if(tdUi.session!==session||tdUi.abort!==controller||tdFingerprint()!==key)return;
-  tdUi.output=result===undefined?'No payload':JSON.stringify(result,null,2);
- }catch(error){if(!controller||tdUi.abort===controller)tdUi.output=(error.status?'Simulated status '+error.status+': ':'')+error.message;}
+  tdUi.output=result===undefined?'No payload':JSON.stringify(result,null,2);tdUi.status='Operation completed in memory. Inspect the result below.';
+ }catch(error){if(!controller||tdUi.abort===controller){tdUi.output=(error.status?'Simulated status '+error.status+': ':'')+error.message;tdUi.status=controller?.signal.aborted?'Request cancelled. No live fallback.':'Operation failed. Inspect the result and input contract.';}}
  finally{if(!controller||tdUi.abort===controller){tdUi.busy=false;tdUi.abort=null;tdPaintSimulation();}}
 }
 function tdChooseOperation(id){
- tdUi.abort?.abort();tdUi.abort=null;tdUi.busy=false;tdUi.operation=id;tdUi.output='';
+ tdUi.abort?.abort();tdUi.abort=null;tdUi.busy=false;tdUi.operation=id;tdUi.output='';tdUi.status='';
  try{const op=createFixtureEngine().generate(tdManifest()).operations.find(o=>o.id===id);tdUi.input=op?.inputValue===undefined?'':JSON.stringify(op.inputValue,null,2);}catch{tdUi.input='';}
 }
 function handleTestDataAction(action,value=''){
@@ -62,15 +62,15 @@ function handleTestDataAction(action,value=''){
   case 'td-export':{const p=tdUi.preview;if(!p||p.fingerprint!==tdFingerprint()){tdFail('Preview the current recipes before exporting. The previous preview is stale.');break;}tdDownloadKit(p.manifest);break;}
   case 'td-simulate':void tdSimulate();break;
   case 'td-cancel':tdUi.abort?.abort(new Error('Test request cancelled. No live fallback.'));break;
-  case 'td-reset-session':tdDropSession();tdUi.output='In-memory session reset. Files on disk were not changed.';tdPaintSimulation();break;
+  case 'td-reset-session':tdDropSession();tdUi.output='In-memory session reset. Files on disk were not changed.';tdUi.status=tdUi.output;tdPaintSimulation();break;
   case 'td-target':if(state.activeRun){tdFail('Finish the active project simulation first.');break;}tdUi.target={owner:designOwner(),revision:project().rev,vault:project().vault};showModal('test-data-target');break;
-  case 'td-target-confirm':{const p=project(),t=tdUi.target;if(state.activeRun||!t||t.owner!==designOwner()||t.revision!==p.rev||t.vault!==p.vault){notify('Development target review is stale or a run is active. Reopen the target review.');break;}tdUi.target=null;p.vault=vaultTestRoot();invalidateProject(p);state.wizard=null;modalOriginal=null;closeModal();render();notify('Development target set to .test-vault. Existing .dev-vault files were not moved or deleted.');break;}
+  case 'td-target-confirm':{const p=project(),t=tdUi.target;if(state.activeRun||!t||t.owner!==designOwner()||t.revision!==p.rev||t.vault!==p.vault){notify('Development target review is stale or a run is active. Reopen the target review.');break;}const previous=vaultDisplayTarget();tdUi.target=null;p.vault=vaultTestRoot();invalidateProject(p);state.wizard=null;modalOriginal=null;closeModal();render();notify('Development target set to .test-vault. Existing '+previous+' files were not moved or deleted.');break;}
  }
  return true;
 }
 function editTestDataField(el){
  const key=el.dataset.field;if(!key?.startsWith('td-'))return false;
- if(key==='td-operation'){tdChooseOperation(el.value);tdPaintSimulation();return true;}
+ if(key==='td-operation'){if(tdUi.busy)return true;tdChooseOperation(el.value);tdPaintSimulation();return true;}
  if(key==='td-input'){tdUi.input=el.value;return true;}
  const f=tdUi.form;if(!f)return true;
  if(key.startsWith('td-rule-')){

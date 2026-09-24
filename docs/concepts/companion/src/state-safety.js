@@ -20,7 +20,13 @@ function saveConceptState(){
 }
 function resetConceptState(){
  if(state.activeRun)return;
- try{localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');}
+ try{
+  if(localStorage.getItem(STORAGE_KEY)!==persistenceSnapshot){
+   storageWarning='Reset blocked: saved data changed in another window. Export this session and the retained browser data before reloading.';
+   paintStorageState();notify(storageWarning);return;
+  }
+  localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');
+ }
  catch{storageWarning='Reset could not remove browser data. Your current session is retained. Export recovery before closing.';paintStorageState();notify(storageWarning);return;}
  clearTimeout(runTimer);destroyFlow();persistenceSnapshot=null;storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');
 }
@@ -30,3 +36,11 @@ window.addEventListener('storage',event=>{
   saveConceptState();
  }
 });
+
+function exportRetainedBrowserData(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(raw===null){notify('No retained browser snapshot is available. Export this session instead.');return;}
+  showModal('copy',{title:'Retained browser data — may belong to another window or use an unsupported schema. Keep private; no import or execution is performed.',text:raw,filename:'shell-workbench-retained-browser-data.json'});
+ }catch{notify('Browser storage cannot be read. Export this session instead; no retained data was changed.');}
+}

@@ -55,3 +55,9 @@ function sgContrast(a,b){
 function sgContrastPairs(s){return [['text','background'],['muted','background'],['accent-text','accent']].flatMap(([fg,bg])=>{const a=s.colors.find(c=>c.id===fg),b=s.colors.find(c=>c.id===bg);return !a||!b?[]:['light','dark'].map(mode=>({label:a.name+' / '+b.name,mode,ratio:sgContrast(a[mode],b[mode])}));});}
 function sgUnique(group,s){let id='new-'+group.replace(/s$/,''),i=2;const keys=new Set(s[group].map(r=>r.id));while(keys.has(id))id='new-'+group.replace(/s$/,'')+'-'+i++;return id;}
 function sgNew(group,s){const common={id:sgUnique(group,s),name:'',usage:''};if(group==='fonts')return {...common,source:'custom',families:'',fallback:'sans-serif',license:''};if(group==='typography')return {...common,font:s.fonts[0]?.id||'',size:16,unit:'px',weight:400,lineHeight:1.5,letterSpacing:0};if(group==='colors')return {...common,light:'#000000',dark:'#FFFFFF',host:''};if(group==='guidelines')return common;return {...common,value:8,unit:'px'};}
+
+function sgContrastCoverage(s){
+ const keys=new Set(s.colors.map(c=>c.id));
+ const missing=[['text','background'],['muted','background'],['accent-text','accent']].filter(pair=>pair.some(key=>!keys.has(key))).map(pair=>pair.join(' / '));
+ return missing.length?'Not evaluated: '+missing.join('; ')+'. Declare these exact color keys to evaluate all default pairs.':'All 3 default pairs evaluated in light and dark. This is not a full accessibility audit.';
+}
