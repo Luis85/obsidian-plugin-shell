@@ -1789,8 +1789,98 @@ body{display:flex;flex-direction:column;height:100dvh}
 
 #vf-root[data-data-visible="false"] .map-node .ds-port { opacity: 0 !important; pointer-events: none !important; }
 #vf-root .ds-port[aria-disabled="true"]::after { opacity: .45; }
+.td-workspace { max-width: 1450px; margin: 0 auto; }
+.td-safety { display:flex; flex-wrap:wrap; gap:12px; padding:16px 0; border-block:1px solid var(--line); margin-bottom:24px; }
+.td-safety strong { color:var(--green); }
+.td-safety span { color:var(--muted); max-width:80ch; }
+.td-settings { display:flex; flex-wrap:wrap; align-items:center; gap:24px; margin-bottom:22px; }
+.td-settings > div { flex:1; min-width:170px; }
+.td-settings strong,.td-settings span { display:block; }
+.td-settings span { color:var(--muted); font-size:12px; }
+.td-layout { display:grid; grid-template-columns:260px minmax(0,1fr); gap:28px; }
+.td-sources { border-right:1px solid var(--line); padding-right:16px; }
+.td-source { width:100%; display:flex; gap:10px; align-items:start; text-align:left; padding:14px 10px; margin-bottom:6px; background:transparent; border:1px solid transparent; border-radius:8px; }
+.td-source span { min-width:0; }
+.td-source strong,.td-source small { display:block; overflow-wrap:anywhere; }
+.td-source small { color:var(--muted); }
+.td-source svg { color:var(--ds-accent); margin-top:3px; }
+.td-source:hover:not(:disabled),.td-file-list button:hover:not(:disabled) { background:var(--hover); }
+.td-source.selected,.td-file-list button.selected { background:var(--accent-soft); border-color:var(--accent); }
+.td-workspace button:active:not(:disabled),.test-data-modal button:active:not(:disabled) { background:var(--accent-soft); transform:translateY(1px); }
+.td-workspace button:focus-visible,.test-data-modal input:focus-visible,.test-data-modal select:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.td-detail,.td-preview,.td-simulation { min-width:0; }
+.td-recipe { display:flex; justify-content:space-between; gap:16px; padding:18px 0; border-top:1px solid var(--line); }
+.td-recipe > button { align-self:start; flex-shrink:0; }
+.td-recipe p { margin-bottom:8px; font-size:12px; }
+.td-recipe small { display:block; color:var(--muted); margin-top:10px; overflow-wrap:anywhere; }
+.td-preview,.td-simulation { margin-top:32px; padding-top:24px; border-top:1px solid var(--line); }
+.td-empty { padding:24px 0; color:var(--muted); }
+.td-files { display:grid; grid-template-columns:minmax(160px,32%) minmax(0,1fr); max-height:390px; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin:16px 0; }
+.td-files pre { overflow:auto; padding:18px; background:var(--bg); min-width:0; }
+.td-file-list { overflow:auto; background:var(--panel); padding:8px; }
+.td-file-list button { display:block; width:100%; text-align:left; border:1px solid transparent; border-radius:5px; background:transparent; font:11px/1.6 ui-monospace,monospace; overflow-wrap:anywhere; padding:8px; }
+.td-simulation-grid,.td-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.td-result { min-height:180px; max-height:400px; overflow:auto; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; }
+.test-data-modal { width:min(900px,calc(100vw - 40px)); }
+.td-rules { display:grid; gap:14px; margin-top:16px; }
+.td-rule { display:grid; grid-template-columns:minmax(120px,1fr) minmax(150px,1fr) minmax(100px,1fr); gap:10px; border-bottom:1px solid var(--line); padding-bottom:12px; align-items:center; }
+.td-rule label { overflow-wrap:anywhere; margin:0; font-size:12px; }
+.td-rule small { display:block; color:var(--muted); font-weight:400; }
+.test-data-modal .dialog-content { min-height:0; }
+.td-workspace .page-heading p { max-width:75ch; }
+@media(max-width:1000px) { .td-layout { grid-template-columns:210px minmax(0,1fr);gap:20px; }.td-recipe { flex-wrap:wrap; } }
+@media(max-width:720px) { .td-layout,.td-simulation-grid,.td-form-grid { grid-template-columns:1fr; }.td-sources { border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px;display:flex;overflow-x:auto;gap:8px; }.td-source { flex:0 0 220px; }.td-files { grid-template-columns:1fr;max-height:480px; }.td-file-list { max-height:130px; }.td-files pre { max-height:300px; }.td-rule { grid-template-columns:1fr; }.td-settings { gap:16px; }.test-data-modal { width:calc(100vw - 24px); } }
+@media(prefers-reduced-motion:reduce) { .td-workspace button:active:not(:disabled),.test-data-modal button:active:not(:disabled) { transform:none; } }
+/* Design declarations preview locally; no authored value is assigned to :root. */
+.sg-workspace { min-width: 0; max-width: 1400px; margin: 0 auto; }
+.sg-workspace .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.sg-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 28px; margin-top: 16px; }
+.sg-navigation { display: flex; flex-direction: column; align-self: start; gap: 4px; }
+.sg-navigation > button { display: flex; align-items: center; justify-content: space-between; min-height: 38px; text-align: left; border: 1px solid transparent; border-radius: 6px; padding: 8px 12px; background: transparent; color: var(--text); cursor: pointer; }
+.sg-navigation > button:hover { background: var(--hover); border-color: var(--line); }
+.sg-navigation > button.selected { background: var(--accent-soft); color: var(--text); border-color: var(--accent); font-weight: 600; }
+.sg-navigation > button:active:not(:disabled) { background: var(--accent-soft); }
+.sg-navigation > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sg-navigation small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.sg-history { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+.sg-content { min-width: 0; border-left: 1px solid var(--line); padding-left: 28px; }
+.sg-content h2 { margin-top: 0; }
+.sg-content > h3 { margin-top: 28px; }
+.sg-content p { max-width: 75ch; }
+.sg-prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sg-empty { max-width: 750px; padding: 32px 0; }
+.sg-empty p { line-height: 1.6; }
+.sg-empty-list { border-top: 1px solid var(--line); padding: 28px 0; color: var(--muted); }
+.sg-entry { padding: 20px 0; border-top: 1px solid var(--line); }
+.sg-entry-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.sg-entry-heading h3 { margin: 0 0 6px; }
+.sg-entry-heading code { color: var(--muted); white-space: normal; overflow-wrap: anywhere; }
+.sg-entry > p { color: var(--muted); margin-bottom: 0; }
+.sg-sample { padding: 14px 0 4px; overflow: auto; max-width: 100%; }
+.sg-type-sample, .sg-font-sample { overflow-wrap: anywhere; }
+.sg-font-sample { font-size: 20px; margin-bottom: 8px; }
+.sg-swatches { display: flex; gap: 28px; flex-wrap: wrap; }
+.sg-swatches > div { display: flex; align-items: center; gap: 10px; }
+.sg-swatches > div > span { width: 44px; height: 44px; display: block; border: 1px solid var(--line); border-radius: 8px; }
+.sg-measure { height: 16px; min-width: 1px; max-width: 100%; background: var(--accent); margin-bottom: 8px; }
+.sg-radius { width: 96px; height: 60px; border: 2px solid var(--accent); }
+.sg-overview-preview { padding: 20px; border: 1px solid var(--line); border-radius: 12px; margin-top: 24px; overflow: auto; }
+.sg-overview-preview > span { display: block; color: var(--muted); margin-bottom: 16px; font-size: 12px; }
+.sg-overview-preview > div { margin-top: 12px; overflow-wrap: anywhere; }
+.sg-contrast { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 20px; }
+.sg-contrast > div > p { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; padding: 6px 0; margin: 0; }
+.sg-contrast strong { font-variant-numeric: tabular-nums; }
+.sg-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.sg-form-grid > *, .sg-form-grid input, .sg-form-grid select { min-width: 0; }
+.sg-draft-preview { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 16px; overflow: auto; }
+.sg-draft-preview:empty { display: none; }
+.sg-draft-preview > small { color: var(--muted); }
+.sg-draft-preview .sg-entry { border-top: 0; padding: 12px 0; }
+@media (max-width: 980px) { .sg-layout { grid-template-columns: 1fr; gap: 20px; } .sg-navigation { flex-direction: row; flex-wrap: wrap; gap: 6px; } .sg-navigation > button { gap: 10px; } .sg-history { border: 0; margin: 0; padding: 0; } .sg-content { border-left: 0; padding-left: 0; } }
+@media (max-width: 560px) { .sg-form-grid { grid-template-columns: 1fr; } .sg-workspace .page-heading .row { width: 100%; } .sg-workspace .page-heading .btn { flex: 1; } .sg-entry-heading { gap: 8px; } }
 
 </style>
+<script type="application/json" id="test-data-tool-sources">{"engine.mjs": "/** Shared deterministic fixture engine. Pure data in/out; never executes expressions or I/O. */\nexport function createFixtureEngine() {\n  const version = 'shell-fixtures/1';\n  const copy = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));\n  const plain = value => value !== null && typeof value === 'object' && !Array.isArray(value);\n  const key = value => typeof value === 'string' && /^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/.test(value) && !['constructor', 'prototype', '__proto__'].includes(value);\n  const slug = value => typeof value === 'string' && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && value.length \u003c= 60;\n  const fail = message => { throw new Error(message); };\n  function folder(value) {\n    return typeof value === 'string' && value.length > 0 && value.length \u003c= 180 && value.split('/').every(part => /^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(part) && !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(part));\n  }\n  function hash(text) {\n    let value = 2166136261;\n    for (let i = 0; i \u003c text.length; i++) { value ^= text.charCodeAt(i); value = Math.imul(value, 16777619); }\n    return value >>> 0;\n  }\n  function schemaValid(s, depth = 0, budget = { count: 0 }) {\n    if (!plain(s) || depth > 6 || ++budget.count > 160) return false;\n    const allowed = ['type', 'properties', 'required', 'additionalProperties', 'items', 'description', 'format', 'enum', '$schema', 'const', 'default'];\n    if (Object.keys(s).some(k => !allowed.includes(k))) return false;\n    const types = Array.isArray(s.type) ? s.type : [s.type];\n    if (!types.length || types.some(t => !['string', 'number', 'integer', 'boolean', 'null', 'object', 'array'].includes(t))) return false;\n    if (types.length > 1 && types.some(t => ['object', 'array'].includes(t))) return false;\n    if (s.format && (s.type !== 'string' || !['date', 'date-time', 'uuid', 'email', 'uri'].includes(s.format))) return false;\n    if (s.type === 'object') {\n      if (!plain(s.properties) || Object.keys(s.properties).length > 80 || !Object.entries(s.properties).every(([k, v]) => key(k) && schemaValid(v, depth + 1, budget))) return false;\n      if (!Array.isArray(s.required) || !s.required.every(k => Object.hasOwn(s.properties, k))) return false;\n    }\n    if (s.type === 'array' && !schemaValid(s.items, depth + 1, budget)) return false;\n    if (s.enum && (!Array.isArray(s.enum) || !s.enum.length || s.enum.length > 30)) return false;\n    return true;\n  }\n  function matches(value, s, depth = 0) {\n    if (!s || depth > 7) return false;\n    if (Object.hasOwn(s, 'const') && JSON.stringify(value) !== JSON.stringify(s.const)) return false;\n    if (s.enum && !s.enum.some(v => JSON.stringify(v) === JSON.stringify(value))) return false;\n    if (Array.isArray(s.type)) return s.type.some(type => matches(value, { ...s, type }, depth + 1));\n    if (s.type === 'null') return value === null;\n    if (s.type === 'boolean') return typeof value === 'boolean';\n    if (s.type === 'number') return typeof value === 'number' && Number.isFinite(value);\n    if (s.type === 'integer') return Number.isSafeInteger(value);\n    if (s.type === 'array') return Array.isArray(value) && value.length \u003c= 500 && value.every(v => matches(v, s.items, depth + 1));\n    if (s.type === 'object') return plain(value) && Object.keys(value).length \u003c= 100 && (s.required || []).every(k => Object.hasOwn(value, k)) && Object.entries(value).every(([k, v]) => key(k) && (s.properties[k] ? matches(v, s.properties[k], depth + 1) : s.additionalProperties !== false));\n    if (typeof value !== 'string' || value.length > 10000) return false;\n    if (s.format === 'date') return /^\\d{4}-\\d{2}-\\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;\n    if (s.format === 'date-time') return /^\\d{4}-\\d{2}-\\d{2}T/.test(value) && !Number.isNaN(Date.parse(value));\n    if (s.format === 'uuid') return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);\n    if (s.format === 'email') return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);\n    if (s.format === 'uri') { try { return new URL(value).protocol === 'https:'; } catch { return false; } }\n    return true;\n  }\n  function validate(manifest) {\n    if (!plain(manifest) || manifest.schema !== 1 || manifest.engine !== version || manifest.target !== '.test-vault') fail('Unsupported test-data manifest or target.');\n    if (!Number.isSafeInteger(manifest.seed) || manifest.seed \u003c 0 || manifest.seed > 2147483647 || !Number.isInteger(manifest.count) || manifest.count \u003c 1 || manifest.count > 100) fail('Use a seed from 0 to 2147483647 and 1\u2013100 records.');\n    if (!['en', 'de'].includes(manifest.locale) || !/^\\d{4}-\\d{2}-\\d{2}T00:00:00\\.000Z$/.test(manifest.referenceDate) || Number.isNaN(Date.parse(manifest.referenceDate)) || new Date(manifest.referenceDate).toISOString() !== manifest.referenceDate) fail('Choose a supported locale and a fixed UTC reference date.');\n    if (!Array.isArray(manifest.entities) || manifest.entities.length > 60 || !Array.isArray(manifest.operations) || manifest.operations.length > 288) fail('Fixture inventory exceeds its bounded limit.');\n    const entities = new Map();\n    for (const e of manifest.entities) {\n      if (!slug(e.id) || entities.has(e.id) || !slug(e.slug) || !folder(e.folder) || !schemaValid(e.schema) || e.schema.type !== 'object') fail('Invalid entity fixture contract.');\n      if (!Array.isArray(e.relationships) || e.relationships.length > 160 || !e.relationships.every(r => key(r.key) && slug(r.target) && typeof r.many === 'boolean')) fail('Invalid fixture relationship.');\n      entities.set(e.id, e);\n    }\n    for (const e of entities.values()) for (const r of e.relationships) if (!entities.has(r.target)) fail('A fixture relationship target is missing.');\n    const ids = new Set(), names = new Set();\n    for (const op of manifest.operations) {\n      if (!slug(op.source) || !slug(op.slug) || !slug(op.id) || ids.has(op.id) || !['api', 'database', 'vault'].includes(op.kind) || !['read', 'write', 'both'].includes(op.direction)) fail('Invalid source operation.');\n      if (!['fixture', 'list', 'upsert', 'delete'].includes(op.behavior) || !slug(op.dataset) || !key(op.keyField) || !['populated', 'empty', 'error', 'slow'].includes(op.scenario)) fail('Invalid fixture recipe.');\n      if (!Number.isInteger(op.latencyMs) || op.latencyMs \u003c 0 || op.latencyMs > 5000 || !Number.isInteger(op.errorStatus) || op.errorStatus \u003c 400 || op.errorStatus > 599) fail('Invalid simulated failure or delay.');\n      if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'adapter'].includes(op.method)) fail('Invalid test method.');\n      if (typeof op.resource !== 'string' || op.resource.length > 240 || /[\\\\\\x00-\\x1f?#]/.test(op.resource) || op.resource.split('/').some(p => ['..', '.'].includes(p))) fail('Invalid test resource.');\n      if (op.kind === 'api' && (!/^\\/[a-zA-Z0-9_\\-/{},.]*$/.test(op.resource) || op.method === 'adapter')) fail('API simulation needs an HTTP method and absolute resource path.');\n      if (op.kind !== 'api' && op.method !== 'adapter') fail('Non-API operations use an application adapter.');\n      for (const side of ['input', 'output']) {\n        const s = op[side];\n        if (!plain(s) || (s.none !== true && !schemaValid(s.schema)) || s.entity && !entities.has(s.entity)) fail('Declare complete input and output shapes before generating.');\n      }\n      if (op.scenario === 'empty' && op.kind !== 'vault' && !op.output.none && op.output.schema.type !== 'array') fail('Empty responses require a collection output; use the error scenario for a missing single record.');\n      if (op.method === 'HEAD' && !op.output.none) fail('HEAD operations must declare no output payload.');\n      if (op.kind === 'api') {\n        const segments = op.resource.split('/').slice(1), params = segments.filter(v => /^\\{[a-zA-Z][a-zA-Z0-9_]*\\}$/.test(v)).map(v => v.slice(1, -1));\n        if (segments.some(v => !/^[a-zA-Z0-9_,.-]*$/.test(v) && !/^\\{[a-zA-Z][a-zA-Z0-9_]*\\}$/.test(v)) || new Set(params).size !== params.length) fail('Mock path parameters must occupy a complete unique path segment.');\n        if (params.length && (op.input.none || op.input.schema.type !== 'object' || params.some(k => !op.input.schema.properties[k] || !['string', 'number', 'integer', 'boolean'].includes(op.input.schema.properties[k].type)))) fail('Every mock path parameter needs a declared scalar input property.');\n        if (['GET', 'HEAD'].includes(op.method) && !op.input.none && op.input.schema.type !== 'object') fail('HTTP query inputs must be an object of named fields.');\n        if (['GET', 'HEAD'].includes(op.method) && ['upsert', 'delete'].includes(op.behavior)) fail('Safe HTTP methods cannot mutate a test dataset.');\n      }\n      if (op.behavior === 'list' && (op.output.none || op.output.schema.type !== 'array' || !op.input.none)) fail('List behavior needs a collection output and no input; custom filtering is not inferred.');\n      if (['upsert', 'delete'].includes(op.behavior) && (op.input.none || op.input.schema.type !== 'object' || !op.input.schema.properties[op.keyField])) fail('Write behavior needs an object input containing the declared key.');\n      if (op.behavior !== 'fixture' && op.direction === 'read' && op.behavior !== 'list') fail('Read-only recipes cannot mutate a test dataset.');\n      if (op.kind === 'vault' && !folder(op.resource)) fail('Vault fixtures need an explicit safe note folder.');\n      if (!Array.isArray(op.rules) || op.rules.length > 80) fail('Invalid generator rules.');\n      const paths = new Set();\n      for (const r of op.rules) {\n        if (!['input', 'output'].includes(r.side) || typeof r.path !== 'string' || r.path.length > 200 || !/^(\\/(?:[a-zA-Z][a-zA-Z0-9_-]*|\\*))*$/.test(r.path) || paths.has(r.side + r.path)) fail('Invalid or duplicate field rule.');\n        if (!['auto', 'sequence', 'name', 'email', 'integer', 'boolean', 'date', 'uuid', 'literal'].includes(r.provider) || typeof r.argument !== 'string' || r.argument.length > 1000) fail('Unsupported generator provider.');\n        if (op[r.side].entity && r.provider !== 'auto') fail('Entity values are shared across sources: define their defaults in Entities. Operation overrides apply to custom DTO shapes.');\n        let node = op[r.side].schema;\n        for (const segment of r.path.split('/').slice(1)) node = segment === '*' ? node?.items : node?.properties?.[segment];\n        if (!node) fail('A generator rule references a removed field. Reopen its recipe.');\n        paths.add(r.side + r.path);\n      }\n      if (names.has(op.source + '/' + op.slug)) fail('Duplicate operation method name.');\n      names.add(op.source + '/' + op.slug); ids.add(op.id);\n    }\n    return manifest;\n  }\n  function scalar(s, context, rule, provider) {\n    const n = hash(context.token), name = context.path.split('/').at(-1) || 'value';\n    if (rule?.provider === 'literal') { try { return JSON.parse(rule.argument); } catch { fail('Literal generators need a valid JSON value.'); } }\n    if (Object.hasOwn(s, 'const')) return copy(s.const);\n    if (Object.hasOwn(s, 'default') && (!rule || rule.provider === 'auto')) return copy(s.default);\n    if (s.enum) return copy(s.enum[n % s.enum.length]);\n    const type = Array.isArray(s.type) ? s.type.find(t => t !== 'null') || 'null' : s.type;\n    const selected = rule?.provider && rule.provider !== 'auto' ? rule.provider : s.format || (type === 'string' && /email/i.test(name) ? 'email' : type === 'string' && /name/i.test(name) ? 'name' : type);\n    if (provider && ['name', 'email'].includes(selected)) return provider({ ...context, seed: n, kind: selected });\n    if (selected === 'sequence') return (rule.argument || name + '-') + String(context.index + 1).padStart(4, '0');\n    if (selected === 'uuid' || name === 'id' && type === 'string') {\n      const h = Array.from({ length: 4 }, (_, i) => hash(context.token + ':' + i).toString(16).padStart(8, '0')).join('');\n      return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20)}`;\n    }\n    if (selected === 'email') return `fixture-${n.toString(36)}@example.invalid`;\n    if (selected === 'name') return (context.locale === 'de' ? ['Alex', 'Mika', 'Kim', 'Lena'] : ['Alex', 'Jordan', 'Casey', 'Sam'])[n % 4] + ' Example ' + (context.index + 1);\n    if (selected === 'date' || selected === 'date-time') { const date = new Date(Date.parse(context.referenceDate) + (n % 365) * 86400000).toISOString(); return selected === 'date' ? date.slice(0, 10) : date; }\n    if (selected === 'uri') return `https://example.invalid/fixture/${n}`;\n    if (selected === 'boolean') return n % 2 === 0;\n    if (selected === 'number' || selected === 'integer') return selected === 'integer' ? n % 10000 : (n % 100000) / 100;\n    if (selected === 'null') return null;\n    return `${name}-${(context.index + 1).toString().padStart(4, '0')}-${n.toString(36)}`;\n  }\n  function value(s, context, rules, provider, budget) {\n    if (++budget.values > 200000) fail('Fixture expansion exceeds 200,000 values. Reduce count or simplify nested arrays.');\n    const rule = rules.find(r => r.path === context.path && r.side === context.side);\n    if (rule?.provider === 'literal' || Object.hasOwn(s, 'const') || Object.hasOwn(s, 'default') && (!rule || rule.provider === 'auto') || s.enum) return scalar(s, context, rule, provider);\n    if (s.type === 'object') return Object.fromEntries(Object.entries(s.properties).map(([k, field]) => [k, value(field, { ...context, path: context.path + '/' + k, token: context.token + '/' + k }, rules, provider, budget)]));\n    if (s.type === 'array') return Array.from({ length: 2 }, (_, i) => value(s.items, { ...context, index: i, path: context.path + '/*', token: context.token + '/' + i }, rules, provider, budget));\n    return scalar(s, context, rule, provider);\n  }\n  function generate(input, options = {}) {\n    const m = validate(copy(input)), budget = { values: 0, bytes: 0 }, files = new Map(), pools = new Map(), entityMap = new Map(m.entities.map(e => [e.id, e]));\n    const context = (token, index, side = 'output') => ({ token: `${m.seed}|${token}|${index}`, index, path: '', side, locale: m.locale, referenceDate: m.referenceDate });\n    const notePath = (e, i) => `${e.folder}/fixture-${e.slug}-${String(i + 1).padStart(4, '0')}.md`;\n    function put(path, content, owner) {\n      if ([...files.keys()].some(p => p !== path && p.toLowerCase() === path.toLowerCase())) fail('Case-insensitive fixture collision.');\n      if (files.has(path) && files.get(path).content !== content) fail('Fixture file collision: ' + path);\n      if (!files.has(path)) budget.bytes += new TextEncoder().encode(content).length;\n      if (files.size >= 3000 && !files.has(path) || budget.bytes > 5000000) fail('Fixture preview exceeds 3,000 files or 5 MB. Reduce record count or enabled recipes.');\n      files.set(path, { path, content, owner });\n    }\n    for (const e of m.entities) pools.set(e.id, Array.from({ length: m.count }, (_, i) => value(e.schema, context(e.id, i), [], options.provider, budget)));\n    // Allocate every identity first; cyclic/self relationships do not recurse.\n    for (const e of m.entities) pools.get(e.id).forEach((record, i) => {\n      for (const r of e.relationships) {\n        const target = entityMap.get(r.target), link = '[[' + notePath(target, i).slice(0, -3) + ']]';\n        record[r.key] = r.many ? [link] : link;\n      }\n      if (!matches(record, e.schema)) fail('Generated entity violates its declared property types: ' + e.slug);\n    });\n    const needed = new Set();\n    function requireEntity(id) { if (needed.has(id)) return; needed.add(id); for (const r of entityMap.get(id).relationships) requireEntity(r.target); }\n    function payload(op, side) {\n      const shape = op[side]; if (shape.none) return undefined;\n      if (shape.entity) return copy(shape.many ? pools.get(shape.entity) : pools.get(shape.entity)[0]);\n      const c = context(op.source + ':' + op.id + ':' + side, 0, side);\n      return shape.schema.type === 'array' ? Array.from({ length: m.count }, (_, i) => value(shape.schema.items, { ...c, index: i, path: '/*', token: c.token + '/' + i }, op.rules, options.provider, budget)) : value(shape.schema, c, op.rules, options.provider, budget);\n    }\n    const operations = m.operations.map(op => {\n      const inputValue = payload(op, 'input'); let outputValue = payload(op, 'output');\n      if (op.scenario === 'empty' && !op.output.none && op.output.schema.type === 'array') outputValue = [];\n      for (const [side, generated] of [['input', inputValue], ['output', outputValue]]) if (!op[side].none && !matches(generated, op[side].schema)) fail('Generated ' + side + ' does not match ' + op.source + '/' + op.slug + '. Check its field rules.');\n      const base = `.fixtures/${op.source}/${op.slug}`;\n      for (const [side, generated] of [['input', inputValue], ['output', outputValue]]) if (generated !== undefined) put(base + '-' + side + '.json', JSON.stringify(generated, null, 2) + '\\n', op.id);\n      if (op.kind === 'vault' && !['empty', 'error'].includes(op.scenario)) {\n        const side = op.direction === 'write' ? 'input' : 'output', shape = op[side];\n        if (shape.none) fail('Vault recipe has no record payload.');\n        if (shape.entity) {\n          if (entityMap.get(shape.entity).folder !== op.resource) fail('Vault operation folder and entity folder differ. Declare one explicit folder before seeding.');\n          requireEntity(shape.entity);\n        } else {\n          const records = Array.isArray(side === 'input' ? inputValue : outputValue) ? (side === 'input' ? inputValue : outputValue) : [side === 'input' ? inputValue : outputValue];\n          records.forEach((r, i) => put(`${op.resource}/fixture-${op.source}-${op.slug}-${String(i + 1).padStart(4, '0')}.md`, markdown(r), op.id));\n        }\n      }\n      return { ...op, inputValue, outputValue };\n    });\n    for (const id of needed) pools.get(id).forEach((record, i) => put(notePath(entityMap.get(id), i), markdown(record), id));\n    const items = [...files.values()].sort((a, b) => a.path.localeCompare(b.path, 'en'));\n    const lower = new Set(); let bytes = 0;\n    for (const file of items) { if (lower.has(file.path.toLowerCase())) fail('Case-insensitive output collision.'); lower.add(file.path.toLowerCase()); bytes += new TextEncoder().encode(file.content).length; }\n    if (items.length > 3000 || bytes > 5000000) fail('Fixture preview exceeds 3,000 files or 5 MB. Reduce record count or enabled recipes.');\n    return { engine: version, seed: m.seed, count: m.count, locale: m.locale, referenceDate: m.referenceDate, files: items, operations, bytes, provider: options.providerName || 'builtin-v1' };\n  }\n  function markdown(record) {\n    const scalarValue = v => v === null || typeof v === 'string' || typeof v === 'boolean' || typeof v === 'number' && Number.isFinite(v);\n    if (!plain(record) || !Object.entries(record).every(([k, v]) => key(k) && (scalarValue(v) || Array.isArray(v) && v.every(scalarValue)))) fail('Vault notes need a flat object of Obsidian-compatible scalar/list properties. Nested DTOs need an explicit mapping.');\n    return '---\\n' + Object.entries(record).map(([k, v]) => JSON.stringify(k) + ': ' + JSON.stringify(v)).join('\\n') + '\\n---\\n\\nSynthetic test fixture. Do not use as production data.\\n';\n  }\n  return Object.freeze({ version, validate, generate, matches, markdown });\n}\n", "adapters.mjs": "/** Development-only application-port simulator. Never falls back to a live source. */\nimport { createFixtureEngine } from './engine.mjs';\nexport function createFixtureAdapter(manifest, options = {}) {\n  const engine = createFixtureEngine(), generated = engine.generate(manifest, options);\n  const clone = v => v === undefined ? undefined : structuredClone(v);\n  const operations = new Map(generated.operations.map(op => [op.id, op]));\n  const stores = new Map(), captures = [];\n  let disposed = false;\n  function error(message, status = 422) { const e = new Error(message); e.status = status; throw e; }\n  function dataset(op) { return op.source + '/' + op.dataset; }\n  function initialize() {\n    stores.clear(); captures.length = 0;\n    for (const op of operations.values()) {\n      if (op.behavior !== 'list') continue;\n      const id = dataset(op), schema = op.output.schema.items;\n      const keySchema = schema.type === 'object' && schema.properties[op.keyField];\n      if (!keySchema || !['string', 'integer', 'number'].includes(keySchema.type)) error('Stateful datasets require a scalar identity field on an object collection.');\n      const previous = stores.get(id);\n      if (previous && (JSON.stringify(previous.schema) !== JSON.stringify(schema) || previous.keyField !== op.keyField)) error('Incompatible list contracts share a test dataset.');\n      const records = clone(op.outputValue);\n      if (previous && JSON.stringify(previous.records) !== JSON.stringify(records)) error('Different list fixtures cannot initialize the same dataset. Use one list recipe per dataset.');\n      if (new Set(records.map(r => r[op.keyField])).size !== records.length || records.some(r => r[op.keyField] === undefined)) error('Dataset identifiers must be present and unique.');\n      stores.set(id, { schema, keyField: op.keyField, records });\n    }\n    for (const op of operations.values()) if (['upsert', 'delete'].includes(op.behavior)) {\n      const store = stores.get(dataset(op));\n      if (!store || store.keyField !== op.keyField) error('Stateful writes need a list recipe with the same source, dataset and identity key.');\n      if (op.behavior === 'upsert' && !engine.matches(op.inputValue, store.schema)) error('Upsert input cannot satisfy its dataset schema. Declare an explicit mapping instead.');\n    }\n  }\n  initialize();\n  function check() { if (disposed) error('Test adapter has been disposed.', 410); }\n  async function delay(ms, signal) {\n    if (signal?.aborted) throw signal.reason || new Error('Aborted');\n    if (!ms) return;\n    await new Promise((resolve, reject) => {\n      const cleanup = () => signal?.removeEventListener('abort', cancel);\n      const timer = setTimeout(() => { cleanup(); resolve(); }, ms);\n      const cancel = () => { clearTimeout(timer); cleanup(); reject(signal.reason || new Error('Aborted')); };\n      signal?.addEventListener('abort', cancel, { once: true });\n    });\n  }\n  async function execute(id, input, { signal } = {}) {\n    check(); const op = operations.get(id);\n    if (!op) error('Unknown or disabled test operation. Live fallback is forbidden.', 404);\n    if (op.kind === 'vault') error('Vault recipes seed real notes. Use the generated plugin\u2019s vault repository, not this memory adapter.', 400);\n    if (op.input.none ? input !== undefined : !engine.matches(input, op.input.schema)) error('Input does not match the declared test operation contract.');\n    await delay(op.scenario === 'slow' ? Math.max(1000, op.latencyMs) : op.latencyMs, signal);\n    check(); if (signal?.aborted) throw signal.reason || new Error('Aborted');\n    if (op.scenario === 'error') error('Deliberate synthetic failure.', op.errorStatus);\n    const store = stores.get(dataset(op)); let output = clone(op.outputValue);\n    if (op.behavior === 'list') output = clone(store.records);\n    if (['upsert', 'delete'].includes(op.behavior)) {\n      const k = input[op.keyField];\n      if (!['string', 'number'].includes(typeof k)) error('A write needs the dataset identity key.');\n      const index = store.records.findIndex(r => r[op.keyField] === k);\n      if (op.behavior === 'delete') { if (index \u003c 0) error('Synthetic record not found.', 404); store.records.splice(index, 1); }\n      else {\n        if (!engine.matches(input, store.schema)) error('Input needs an explicit mapping to the stored record shape.');\n        if (index >= 0) store.records[index] = clone(input);\n        else { if (store.records.length >= 1000) error('Test dataset capacity reached.', 409); store.records.push(clone(input)); }\n      }\n    }\n    if (!op.output.none && !engine.matches(output, op.output.schema)) error('Simulator output violated its declared shape.', 500);\n    captures.push({ operation: id, direction: op.direction, input: clone(input) }); if (captures.length > 100) captures.shift();\n    return output;\n  }\n  function port(source) {\n    const selected = [...operations.values()].filter(op => op.source === source && op.kind !== 'vault');\n    if (!selected.length) error('No enabled simulator operations for this source.', 404);\n    return Object.freeze(Object.fromEntries(selected.map(op => [op.slug, (input, options) => execute(op.id, input, options)])));\n  }\n  return Object.freeze({ execute, port, reset() { check(); initialize(); }, captured() { check(); return clone(captures); }, dispose() { disposed = true; stores.clear(); captures.length = 0; } });\n}\n", "storage.mjs": "/** Scoped .test-vault writer. Preview and approval are separate; foreign/edited files fail closed. */\nimport { lstat, realpath, readFile, mkdir, writeFile, rename, unlink, rmdir, readdir } from 'node:fs/promises';\nimport { join, resolve, dirname } from 'node:path';\nimport { createHash, randomBytes } from 'node:crypto';\nimport { createFixtureEngine } from './engine.mjs';\nconst receiptName = '.shell-fixtures.json', lockName = '.shell-fixtures-lock';\nconst digest = value => createHash('sha256').update(value).digest('hex');\nasync function stat(path) { try { return await lstat(path); } catch (e) { if (e.code === 'ENOENT') return null; throw e; } }\nfunction safePath(path) {\n  if (typeof path !== 'string' || path.length > 240 || /[\\\\:\\x00-\\x1f]/.test(path)) return false;\n  const parts = path.split('/');\n  if (parts.some(p => !p || p === '.' || p === '..')) return false;\n  if (parts[0] === '.fixtures') return parts.length === 3 && /^[a-z][a-z0-9-]{0,59}$/.test(parts[1]) && /^[a-z][a-z0-9-]{0,59}-(input|output)\\.json$/.test(parts[2]);\n  return parts.length > 1 && parts.slice(0, -1).every(p => /^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(p) && !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(p)) && /^fixture-[a-z0-9-]+-\\d{4}\\.md$/.test(parts.at(-1));\n}\nasync function targetRoot(root) {\n  root = resolve(root);\n  if ((await stat(root))?.isSymbolicLink() || await realpath(root) !== root) throw new Error('Project root must be a real, non-symlink directory.');\n  return join(root, '.test-vault');\n}\nasync function checked(root, relative) {\n  const allowed = relative === receiptName || safePath(relative);\n  if (!allowed) throw new Error('Target is outside the reserved test-fixture paths.');\n  const target = await targetRoot(root), parts = ['.test-vault', ...relative.split('/')]; let path = resolve(root);\n  for (const [index, part] of parts.entries()) {\n    const parentStat = await stat(path);\n    if (parentStat) {\n      const match = (await readdir(path)).find(name => name.toLowerCase() === part.toLowerCase() && name !== part);\n      if (match) throw new Error('Case-insensitive fixture path collision.');\n    }\n    path = join(path, part); const entry = await stat(path), last = index === parts.length - 1;\n    if (entry?.isSymbolicLink() || entry && (last ? !entry.isFile() || entry.nlink !== 1 : !entry.isDirectory())) throw new Error('Symlink, hardlink or nonregular fixture target.');\n  }\n  return { path, target };\n}\nasync function read(root, path) {\n  const target = await checked(root, path);\n  const info = await stat(target.path); if (!info) return null;\n  if (info.size > 5000000) throw new Error('Existing test fixture exceeds the 5 MB safety bound.');\n  return readFile(target.path);\n}\nasync function receipt(root) {\n  const raw = await read(root, receiptName); if (!raw) return { raw: null, files: {} };\n  const value = JSON.parse(raw.toString('utf8'));\n  if (value?.schema !== 1 || value.target !== '.test-vault' || !value.files || Array.isArray(value.files) || Object.keys(value.files).length > 3000) throw new Error('Invalid ownership receipt; no files changed.');\n  if (!Object.entries(value.files).every(([p, h]) => safePath(p) && /^[0-9a-f]{64}$/.test(h))) throw new Error('Unsafe ownership receipt; no files changed.');\n  const folded = Object.keys(value.files).map(p => p.toLowerCase());\n  if (new Set(folded).size !== folded.length) throw new Error('Ambiguous ownership receipt.');\n  return { raw, files: value.files };\n}\nexport async function planFixtures(root, manifest, { reset = false, ignoreLock = false, ...options } = {}) {\n  const engine = createFixtureEngine(); engine.validate(manifest);\n  const target = await targetRoot(root), entry = await stat(target);\n  if (entry && (!entry.isDirectory() || entry.isSymbolicLink())) throw new Error('The test vault is not a safe directory.');\n  if (!ignoreLock && await stat(join(target, lockName))) throw new Error('A fixture operation or recovery is already in progress.');\n  const retained = await receipt(root), output = reset ? { files: [], bytes: 0, provider: 'reset' } : engine.generate(manifest, options);\n  const desired = new Map(output.files.map(f => [f.path, f.content])), paths = [...new Set([...desired.keys(), ...Object.keys(retained.files)])].sort();\n  const changes = [];\n  for (const path of paths) {\n    const current = await read(root, path), before = current === null ? null : digest(current), after = desired.has(path) ? digest(desired.get(path)) : null;\n    let status = 'retain';\n    if (reset) status = before === null ? 'absent' : retained.files[path] === before ? 'remove' : 'conflict';\n    else if (desired.has(path)) status = before === null ? 'create' : retained.files[path] !== before ? 'conflict' : after === before ? 'unchanged' : 'update';\n    changes.push({ path, before, after, status });\n  }\n  const identity = { schema: 1, mode: reset ? 'reset' : 'seed', target: '.test-vault', manifest, provider: output.provider, receipt: retained.raw === null ? null : digest(retained.raw), changes };\n  return { target, mode: identity.mode, approval: digest(JSON.stringify(identity)), changes, bytes: output.bytes, blockers: changes.filter(c => c.status === 'conflict').map(c => c.path), desired, retained };\n}\nasync function atomicWrite(root, path, bytes, expected) {\n  let target = await checked(root, path);\n  await mkdir(dirname(target.path), { recursive: true }); target = await checked(root, path);\n  const temp = join(dirname(target.path), '.fixture-stage-' + randomBytes(8).toString('hex'));\n  try {\n    await writeFile(temp, bytes, { flag: 'wx', mode: 0o600 });\n    const current = await read(root, path);\n    if ((current === null ? null : digest(current)) !== expected) throw new Error('Target changed after review; preserving the current file.');\n    await checked(root, path); await rename(temp, target.path);\n  } finally { if (await stat(temp)) await unlink(temp); }\n}\nexport async function applyFixtures(root, manifest, approval, options = {}) {\n  const preview = await planFixtures(root, manifest, options);\n  if (preview.approval !== approval) throw new Error('Stale or missing approval. Review a fresh plan.');\n  if (preview.blockers.length) throw new Error('Foreign or edited fixtures are preserved. Resolve conflicts before applying.');\n  if (preview.mode === 'reset' && preview.retained.raw === null) return { written: 0, unchanged: true };\n  await mkdir(preview.target, { recursive: true }); await checked(root, receiptName);\n  const lock = join(preview.target, lockName); await mkdir(lock); let preserveLock = false;\n  const completed = [], backups = new Map();\n  try {\n    const plan = await planFixtures(root, manifest, { ...options, ignoreLock: true });\n    if (plan.approval !== approval || plan.blockers.length) throw new Error('Test fixtures changed before the lock was acquired.');\n    for (const c of plan.changes) {\n      if (!['create', 'update', 'remove'].includes(c.status)) continue;\n      const current = await read(root, c.path);\n      if ((current === null ? null : digest(current)) !== c.before) throw new Error('Fixture changed since the approved plan.');\n      backups.set(c.path, current);\n      if (c.status === 'remove') await unlink((await checked(root, c.path)).path);\n      else await atomicWrite(root, c.path, plan.desired.get(c.path), c.before);\n      completed.push(c);\n    }\n    const files = { ...plan.retained.files };\n    for (const c of plan.changes) {\n      if (['create', 'update', 'unchanged'].includes(c.status)) files[c.path] = c.after;\n      else if (['remove', 'absent'].includes(c.status)) delete files[c.path];\n    }\n    const beforeReceipt = plan.retained.raw === null ? null : digest(plan.retained.raw);\n    if (plan.mode === 'reset') {\n      const current = await read(root, receiptName);\n      if (current === null || digest(current) !== beforeReceipt) throw new Error('Ownership receipt changed during reset.');\n      await unlink((await checked(root, receiptName)).path);\n    } else {\n      const value = JSON.stringify({ schema: 1, target: '.test-vault', engine: manifest.engine, sourceHash: digest(JSON.stringify(manifest)), files }, null, 2) + '\\n';\n      if (digest(value) !== beforeReceipt) await atomicWrite(root, receiptName, value, beforeReceipt);\n    }\n    return { written: completed.length, unchanged: completed.length === 0, retained: plan.changes.filter(c => c.status === 'retain').length };\n  } catch (error) {\n    const recovery = [];\n    for (const c of [...completed].reverse()) {\n      try {\n        const current = await read(root, c.path), expected = c.status === 'remove' ? null : c.after;\n        if ((current === null ? null : digest(current)) !== expected) throw new Error('Edited after write.');\n        const previous = backups.get(c.path);\n        if (previous === null) await unlink((await checked(root, c.path)).path);\n        else await atomicWrite(root, c.path, previous, expected);\n      } catch { recovery.push({ path: c.path, previousBase64: backups.get(c.path)?.toString('base64') ?? null }); }\n    }\n    if (recovery.length) {\n      preserveLock = true; await writeFile(join(lock, 'recovery.json'), JSON.stringify(recovery, null, 2), { flag: 'wx', mode: 0o600 });\n      throw new Error('Fixture recovery required. Current files preserved; backups retained in the test-vault lock directory.');\n    }\n    throw error;\n  } finally { if (!preserveLock) await rmdir(lock); }\n}\n", "server.mjs": "/** Loopback HTTP simulator: explicit start, bounded bodies, token required, no proxy. */\nimport http from 'node:http';\nimport { randomBytes, timingSafeEqual } from 'node:crypto';\nimport { createFixtureAdapter } from './adapters.mjs';\nexport async function startFixtureServer(manifest, { port = 0, ...options } = {}) {\n  if (!Number.isInteger(port) || port \u003c 0 || port > 65535) throw new Error('Invalid loopback port.');\n  const adapter = createFixtureAdapter(manifest, options), token = randomBytes(24).toString('hex');\n  const operations = manifest.operations.filter(op => op.kind === 'api');\n  const routes = new Set();\n  for (const op of operations) {\n    const normalized = op.method + ':' + op.source + op.resource.replace(/\\{[^}]+\\}/g, '{}');\n    if (routes.has(normalized)) throw new Error('Ambiguous mock route. Use distinct method/resource contracts.');\n    routes.add(normalized);\n  }\n  function route(op, pathname) {\n    const expected = ('/sources/' + op.source + op.resource).split('/'), actual = pathname.split('/');\n    if (expected.length !== actual.length) return null;\n    const params = {};\n    for (let i = 0; i \u003c expected.length; i++) {\n      if (/^\\{[a-zA-Z][a-zA-Z0-9_]*\\}$/.test(expected[i])) params[expected[i].slice(1, -1)] = decodeURIComponent(actual[i]);\n      else if (expected[i] !== actual[i]) return null;\n    }\n    return params;\n  }\n  async function body(req) {\n    let size = 0; const buffers = [];\n    for await (const chunk of req) { size += chunk.length; if (size > 65536) { const e = new Error('Test request exceeds 64 KiB.'); e.status = 413; throw e; } buffers.push(chunk); }\n    const text = Buffer.concat(buffers).toString('utf8');\n    if (!text) return undefined;\n    try { return JSON.parse(text); } catch { const e = new Error('Invalid JSON input.'); e.status = 400; throw e; }\n  }\n  function decode(text, schema) {\n    if (schema?.type === 'string') return text;\n    try { return JSON.parse(text); } catch { return text; }\n  }\n  function send(res, status, data, head = false) {\n    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });\n    res.end(head || data === undefined ? '' : JSON.stringify(data));\n  }\n  const server = http.createServer({ maxHeaderSize: 8192, requestTimeout: 10000, headersTimeout: 10000 }, async (req, res) => {\n    const abort = new AbortController(); res.on('close', () => abort.abort());\n    try {\n      const host = `127.0.0.1:${server.address().port}`;\n      if (req.headers.host !== host || req.headers.origin && req.headers.origin !== 'app://obsidian.md') return send(res, 403, { error: 'Local test requests only.' });\n      if (req.headers.origin === 'app://obsidian.md') {\n        res.setHeader('Access-Control-Allow-Origin', 'app://obsidian.md'); res.setHeader('Vary', 'Origin');\n        if (req.method === 'OPTIONS') {\n          const method = req.headers['access-control-request-method'];\n          const requested = (req.headers['access-control-request-headers'] || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);\n          if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].includes(method) || requested.some(k => !['authorization', 'content-type'].includes(k))) return send(res, 403, { error: 'Unsupported test preflight.' });\n          res.setHeader('Access-Control-Allow-Methods', method); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return send(res, 204);\n        }\n      }\n      const provided = Buffer.from(req.headers.authorization || ''), expected = Buffer.from('Bearer ' + token);\n      if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) return send(res, 401, { error: 'Explicit test-session token required.' });\n      const url = new URL(req.url, 'http://' + host);\n      if (url.host !== host) return send(res, 403, { error: 'Live proxying is forbidden.' });\n      const matches = operations.map(op => ({ op, params: route(op, url.pathname) })).filter(x => x.params !== null && x.op.method === req.method);\n      if (matches.length !== 1) return send(res, 404, { error: 'No unambiguous enabled fixture route.' });\n      const { op, params } = matches[0]; let input;\n      if (['GET', 'HEAD'].includes(req.method)) {\n        if ([...url.searchParams.keys()].some(k => Object.hasOwn(params, k) || url.searchParams.getAll(k).length !== 1)) return send(res, 422, { error: 'Path identifiers and query fields must be unambiguous.' });\n        const values = { ...params, ...Object.fromEntries(url.searchParams) };\n        input = op.input.none && !Object.keys(values).length ? undefined : Object.fromEntries(Object.entries(values).map(([k, v]) => [k, decode(v, op.input.schema?.properties?.[k])]));\n      } else {\n        input = await body(req);\n        // Path identifiers must also be declared in the JSON input, not silently injected.\n        if (Object.keys(params).some(k => String(input?.[k]) !== params[k])) return send(res, 422, { error: 'Body identity must match the declared path parameter.' });\n      }\n      const output = await adapter.execute(op.id, input, { signal: abort.signal });\n      if (!res.destroyed) send(res, 200, output, req.method === 'HEAD');\n    } catch (error) { if (!res.destroyed) send(res, error.status || 500, { error: error.status ? error.message : 'Synthetic adapter failure.' }); }\n  });\n  await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', () => { server.removeListener('error', reject); resolve(); }); });\n  return { url: `http://127.0.0.1:${server.address().port}`, token, adapter, async close() { adapter.dispose(); await new Promise((resolve, reject) => { server.close(e => e ? reject(e) : resolve()); server.closeAllConnections(); }); } };\n}\n", "cli.mjs": "/** Run from scripts/test-data after exporting the kit. Default is a read-only plan. */\nimport { readFile } from 'node:fs/promises';\nimport { resolve, dirname } from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nimport { planFixtures, applyFixtures } from './storage.mjs';\nimport { startFixtureServer } from './server.mjs';\nexport async function runTestData(args, { root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), manifestPath = new URL('./manifest.json', import.meta.url) } = {}) {\n  const command = args[0] || 'plan';\n  if (!['plan', 'apply', 'reset-plan', 'reset', 'serve'].includes(command)) throw new Error('Use plan, apply --approve HASH, reset-plan, reset --approve HASH, or serve.');\n  if (args.length > 1 && (!['apply', 'reset'].includes(command) || args.length !== 3 || args[1] !== '--approve' || !/^[a-f0-9]{64}$/.test(args[2]))) throw new Error('Invalid arguments. Apply/reset require the exact plan hash.');\n  const text = await readFile(manifestPath, 'utf8');\n  if (text.length > 2000000) throw new Error('Test-data manifest exceeds 2 MB.');\n  const manifest = JSON.parse(text);\n  if (command === 'serve') {\n    const server = await startFixtureServer(manifest);\n    console.log(JSON.stringify({ mode: 'local-test-only', url: server.url, token: server.token, note: 'Use this session token only for the loopback test adapter; no real credentials.' }, null, 2));\n    const stop = () => server.close().catch(e => { console.error(e.message); process.exitCode = 1; });\n    process.once('SIGINT', stop); process.once('SIGTERM', stop);\n    return server;\n  }\n  const options = { reset: command.startsWith('reset') };\n  if (['apply', 'reset'].includes(command)) return applyFixtures(root, manifest, args[2], options);\n  const plan = await planFixtures(root, manifest, options);\n  return { mode: plan.mode, target: plan.target, approval: plan.approval, blockers: plan.blockers, changes: plan.changes, bytes: plan.bytes, note: 'No data written. Apply/reset revalidate this exact plan and ownership.' };\n}\nif (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {\n  runTestData(process.argv.slice(2)).then(result => { if (process.argv[2] !== 'serve') console.log(JSON.stringify(result, null, 2)); }).catch(error => { console.error(error.message); process.exitCode = 1; });\n}\n", "faker-provider.mjs": "/** Optional dependency-injection seam; Faker is tooling-only, never a production import. */\nexport function createFakerProvider(faker, version) {\n  if (version !== '10.5.0') throw new Error('Requalify and pin the Faker version before changing fixture identities.');\n  return ({ seed, kind, referenceDate }) => {\n    faker.seed(seed); faker.setDefaultRefDate(referenceDate);\n    if (kind === 'name') return faker.person.fullName();\n    // Synthetic, reserved-domain addresses: never addresses which could be contacted.\n    if (kind === 'email') return 'fixture-' + faker.string.alphanumeric(12).toLowerCase() + '@example.invalid';\n    throw new Error('Provider is not in the supported allowlist.');\n  };\n}\n", "client.mjs": "/** Development-only HTTP port. Explicit loopback URL/token; never contacts a live endpoint. */\nimport { createFixtureEngine } from './engine.mjs';\nexport function createTestHttpPort(manifest, source, { url, token, transport = fetch, timeoutMs = 8000 } = {}) {\n  const engine = createFixtureEngine(); engine.validate(manifest);\n  const base = new URL(url);\n  if (base.protocol !== 'http:' || base.hostname !== '127.0.0.1' || !base.port || base.username || base.password || base.search || base.hash || base.pathname !== '/') throw new Error('An explicit loopback origin is required. Live fallback is forbidden.');\n  if (!/^[a-f0-9]{48}$/.test(token || '') || !Number.isInteger(timeoutMs) || timeoutMs \u003c 1 || timeoutMs > 10000) throw new Error('Invalid test-session token or timeout.');\n  const ops = manifest.operations.filter(op => op.kind === 'api' && op.source === source);\n  if (!ops.length) throw new Error('No enabled API recipes for this source.');\n  let disposed = false; const pending = new Set();\n  async function call(op, input, { signal } = {}) {\n    if (disposed) throw new Error('Test HTTP port is disposed.');\n    if (op.input.none ? input !== undefined : !engine.matches(input, op.input.schema)) throw new Error('Input violates the test contract.');\n    const consumed = new Set(), path = op.resource.replace(/\\{([a-zA-Z][a-zA-Z0-9_]*)\\}/g, (_, key) => {\n      if (!input || !['string', 'number', 'boolean'].includes(typeof input[key])) throw new Error('A path parameter needs an explicit scalar input field.');\n      consumed.add(key); return encodeURIComponent(String(input[key]));\n    });\n    const target = new URL('/sources/' + op.source + path, base);\n    if (['GET', 'HEAD'].includes(op.method) && input !== undefined) for (const [key, value] of Object.entries(input)) if (!consumed.has(key)) target.searchParams.set(key, typeof value === 'string' ? value : JSON.stringify(value));\n    const controller = new AbortController(), abort = () => controller.abort(signal.reason); pending.add(controller);\n    if (signal?.aborted) abort(); else signal?.addEventListener('abort', abort, { once: true });\n    const timer = setTimeout(() => controller.abort(new Error('Test HTTP timeout.')), timeoutMs);\n    try {\n      const response = await transport(target.href, { method: op.method, redirect: 'error', credentials: 'omit', cache: 'no-store', signal: controller.signal, headers: { Authorization: 'Bearer ' + token, ...(!['GET', 'HEAD'].includes(op.method) && input !== undefined ? { 'Content-Type': 'application/json' } : {}) }, ...(!['GET', 'HEAD'].includes(op.method) && input !== undefined ? { body: JSON.stringify(input) } : {}) });\n      if (!response.ok) { const error = new Error('Test HTTP response ' + response.status); error.status = response.status; throw error; }\n      const text = await response.text(); if (text.length > 5000000) throw new Error('Test response exceeds 5 MB.');\n      const output = text ? JSON.parse(text) : undefined;\n      if (op.output.none ? output !== undefined : !engine.matches(output, op.output.schema)) throw new Error('Test HTTP output violates the declared contract.');\n      return output;\n    } finally { clearTimeout(timer); pending.delete(controller); signal?.removeEventListener('abort', abort); }\n  }\n  return Object.freeze({ port: Object.freeze(Object.fromEntries(ops.map(op => [op.slug, (input, options) => call(op, input, options)]))), dispose() { disposed = true; for (const controller of pending) controller.abort(new Error('Test HTTP port disposed.')); pending.clear(); } });\n}\n"}</script>
 <!--
 # Third-party notices — offline concept
 
@@ -1919,7 +2009,7 @@ THE SOFTWARE.
 </head>
 <body>
 <a class="skip" href="#content">Skip to workbench</a>
-<div class="concept-bar"><span class="concept-dot"></span><strong>INTERACTIVE CONCEPT</strong><span class="concept-copy">Local simulation only · no commands, downloads or vault access</span><button data-action="lab" id="lab-trigger">Review scenarios <span aria-hidden="true">↗</span></button></div>
+<div class="concept-bar"><span class="concept-dot"></span><strong>INTERACTIVE CONCEPT</strong><span class="concept-copy">Offline designer · exports only · no live services or vault access</span><button data-action="lab" id="lab-trigger">Review scenarios <span aria-hidden="true">↗</span></button></div>
 <div class="host-title"><span class="host-logo">◇</span><span>Plugin Workspace</span><span class="muted"> / Obsidian</span><span class="title-end">Developer vault <span class="small-dot"></span></span></div>
 <div class="app-frame">
 <aside class="ribbon" aria-label="Obsidian concept ribbon"><button class="ribbon-active" data-action="nav" data-value="projects" aria-label="Shell Workbench" title="Shell Workbench">◇</button><button data-action="palette" aria-label="Command palette" title="Command palette">⌘</button><button data-action="note" aria-label="Project handoff note" title="Project handoff note">▤</button><div class="ribbon-bottom"><button data-action="theme" aria-label="Toggle light or dark theme" title="Toggle theme">◐</button><button data-action="settings" aria-label="Workbench preferences" title="Preferences">⚙</button></div></aside>
@@ -12280,14 +12370,14 @@ let legacySnapshot=null;
 function freshVaultFiles(){return {'.obsidian/plugins/shell-workbench/manifest.json':'Companion installation fixture — preserve', '.obsidian/workspace.json':'Host workspace fixture — preserve'};}
 function vaultProjectPrepared(){return project()?.phase==='prepared';}
 function vaultRoot(){return CONCEPT_VAULT.root;}
-function vaultTestRoot(){return vaultRoot()+'/.dev-vault';}
+function vaultTestRoot(){return vaultRoot()+'/.test-vault';}
 function validVaultFiles(files){
  return files&&typeof files==='object'&&!Array.isArray(files)&&Object.keys(files).length<=300&&Object.entries(files).every(([path,text])=>validVaultRelativePath(path)&&typeof text==='string'&&text.length<=500000);
 }
 function validVaultRelativePath(path){return typeof path==='string'&&path.length>0&&path.length<=240&&!path.startsWith('/')&&!/[\\\x00-\x1f:]/.test(path)&&path.split('/').every(part=>part&&part!=='.'&&part!=='..'&&!['__proto__','constructor','prototype'].includes(part));}
 function validVaultScope(s,validateProject){
  return s.schema===2&&s.vaultKey===CONCEPT_VAULT.key&&!['projects','activeId','designDraft'].some(k=>Object.hasOwn(s,k))&&validVaultFiles(s.vaultFiles)&&typeof s.legacyHandled==='boolean'&&
-  (s.project===null||(validateProject(s.project)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&s.project.vault===vaultTestRoot()&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
+  (s.project===null||(validateProject(s.project)&&s.project.key==='vault-project'&&s.project.root===vaultRoot()&&[vaultTestRoot(),vaultRoot()+'/.dev-vault'].includes(s.project.vault)&&['planning','prepared'].includes(s.project.phase)&&typeof s.project.projectNote==='string'&&(!s.project.design||validSavedDesign(s.project.design))));
 }
 function projectNoteText(p){return '---\ntype: obsidian-plugin-project\nschema: 1\nproject_id: '+JSON.stringify(p.key)+'\nplugin_id: '+JSON.stringify(p.id)+'\nname: '+JSON.stringify(p.name)+'\nsource_root: "."\ndesign_folder: "project"\n---\n\n# '+p.name+'\n\n'+p.description+'\n\nOne project in this vault. Design artifacts belong under `project/`.\n';}
 function projectIdentity(p){return JSON.stringify([p?.key,p?.id,p?.name,p?.author,p?.description,p?.version,p?.root,p?.vault,p?.config]);}
@@ -12315,6 +12405,116 @@ function legacyChoices(){
  }catch{return [];}
 }
 function legacyAvailable(){return Boolean(legacySnapshot)&&!state.legacyHandled;}
+
+// Project-owned design declarations, never a replacement for the host's theme.
+const SG_GROUPS=Object.freeze({fonts:'Fonts',typography:'Typography',spacing:'Spacing',sizes:'Sizes',radii:'Corner radii',colors:'Colors',guidelines:'Usage guidelines'});
+const SG_FONT_SOURCES=Object.freeze({interface:'Obsidian interface font',text:'Obsidian text font',mono:'Obsidian monospace font',custom:'Named local font stack'});
+function sgBlank(name='Project design system'){return {schema:1,name,description:'',principles:'',fonts:[],typography:[],spacing:[],sizes:[],radii:[],colors:[],guidelines:[]};}
+function sgStarter(){
+ const s=sgBlank((project()?.name||'Plugin')+' design system');s.name=s.name.slice(0,100);
+ s.description='A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.';
+ s.principles='Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.';
+ s.fonts=[{id:'interface',name:'Interface',source:'interface',families:'',fallback:'system-ui',usage:'Navigation, controls and labels.',license:'Host font preference. No font files are embedded.'},{id:'body',name:'Reading',source:'text',families:'',fallback:'sans-serif',usage:'Descriptions and long-form content.',license:'Host font preference. No font files are embedded.'},{id:'code',name:'Code',source:'mono',families:'',fallback:'monospace',usage:'Identifiers, paths and code samples.',license:'Host font preference. No font files are embedded.'}];
+ s.typography=[{id:'page-title',name:'Page title',font:'interface',size:24,unit:'px',weight:600,lineHeight:1.25,letterSpacing:0,usage:'One primary heading per view.'},{id:'section-title',name:'Section title',font:'interface',size:18,unit:'px',weight:600,lineHeight:1.4,letterSpacing:0,usage:'Group related controls or content.'},{id:'body',name:'Body',font:'body',size:16,unit:'px',weight:400,lineHeight:1.5,letterSpacing:0,usage:'Main descriptive copy.'},{id:'label',name:'Label',font:'interface',size:14,unit:'px',weight:500,lineHeight:1.4,letterSpacing:0,usage:'Form labels; do not rely on placeholders.'}];
+ s.spacing=[['xs',4,'Related inline items'],['sm',8,'Within a control group'],['md',16,'Between related blocks'],['lg',24,'Between sections'],['xl',32,'Major content separation']].map(([id,value,usage])=>({id,name:id.toUpperCase(),value,unit:'px',usage}));
+ s.sizes=[{id:'control',name:'Control height',value:36,unit:'px',usage:'Proposed default, not an accessibility guarantee.'},{id:'icon',name:'Icon',value:18,unit:'px',usage:'Glyph size, not the clickable target.'},{id:'inspector',name:'Inspector width',value:320,unit:'px',usage:'Preferred width; adapt for narrower panes.'}];
+ s.radii=[{id:'control',name:'Control radius',value:6,unit:'px',usage:'Inputs and compact actions.'},{id:'surface',name:'Surface radius',value:12,unit:'px',usage:'Standalone panels.'}];
+ s.colors=[['background','Background','#FFFFFF','#1E1E24','--background-primary'],['text','Primary text','#202027','#ECECF2','--text-normal'],['muted','Secondary text','#595964','#B6B6C4','--text-muted'],['accent','Accent','#6550B9','#B7A3FF','--interactive-accent'],['accent-text','Text on accent','#FFFFFF','#17131F','--text-on-accent']].map(([id,name,light,dark,host])=>({id,name,light,dark,host,usage:'Illustrative fallback palette; resolve the named variable from the active host theme.'}));
+ s.guidelines=[{id:'interaction',name:'Interaction states',usage:'Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator.'},{id:'components',name:'Component usage',usage:'Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations.'}];return s;
+}
+function sgKeys(v,allowed){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).every(k=>allowed.includes(k));}
+function sgText(v,max=1000){return typeof v==='string'&&v.length<=max&&!/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(v);}
+function sgId(v){return typeof v==='string'&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(v)&&v.length<=60&&!['constructor','prototype'].includes(v);}
+function sgNumber(v,min,max){return typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;}
+function sgFontNames(v){return sgText(v,200)&&v.split(',').every(n=>/^[\p{L}\p{N} _-]{1,70}$/u.test(n.trim()));}
+function sgIssues(s){
+ if(s===undefined)return [];
+ if(!sgKeys(s,['schema','name','description','principles',...Object.keys(SG_GROUPS)])||s.schema!==1||!sgText(s.name,100)||!s.name.trim()||!sgText(s.description,2000)||!sgText(s.principles,4000))return ['Give the design system a name and keep descriptions within their limits.'];
+ const errors=[];
+ for(const group of Object.keys(SG_GROUPS)){
+  const rows=s[group];if(!Array.isArray(rows)||rows.length>(group==='fonts'?12:64)){errors.push(SG_GROUPS[group]+': too many or malformed entries.');continue;}
+  const ids=new Set();for(const r of rows){
+   if(!r||!sgId(r.id)||ids.has(r.id)||!sgText(r.name,100)||!r.name.trim()||!sgText(r.usage,2000)){errors.push(SG_GROUPS[group]+': use a unique code name, a visible name and a bounded description.');continue;}ids.add(r.id);
+   const base=['id','name','usage'];
+   if(group==='fonts'){
+    if(!sgKeys(r,[...base,'source','families','fallback','license'])||!Object.hasOwn(SG_FONT_SOURCES,r.source)||!['system-ui','sans-serif','serif','monospace'].includes(r.fallback)||!sgText(r.families,200)||!sgText(r.license,1000)||r.source==='custom'&&!sgFontNames(r.families))errors.push(r.name+': specify local family names separated by commas, a fallback and font provenance. URLs, CSS and font files are not accepted.');
+   }else if(group==='typography'){
+    if(!sgKeys(r,[...base,'font','size','unit','weight','lineHeight','letterSpacing'])||!Array.isArray(s.fonts)||!s.fonts.some(f=>f.id===r.font)||!['px','rem'].includes(r.unit)||!sgNumber(r.size,.1,r.unit==='rem'?12:192)||!Number.isInteger(r.weight)||r.weight<100||r.weight>900||!sgNumber(r.lineHeight,1,3)||!sgNumber(r.letterSpacing,-2,10))errors.push(r.name+': choose an existing font, valid size, weight 100–900, line height 1–3 and letter spacing −2–10 px.');
+   }else if(['spacing','sizes','radii'].includes(group)){
+    if(!sgKeys(r,[...base,'value','unit'])||!['px','rem'].includes(r.unit)||!sgNumber(r.value,0,r.unit==='rem'?100:1600))errors.push(r.name+': use a non-negative size with px or rem units (up to 1,600 px / 100 rem).');
+   }else if(group==='colors'){
+    if(!sgKeys(r,[...base,'light','dark','host'])||!/^#[0-9a-f]{6}$/i.test(r.light)||!/^#[0-9a-f]{6}$/i.test(r.dark)||!sgText(r.host,80)||r.host!==''&&!/^--[a-z][a-z0-9-]*$/.test(r.host))errors.push(r.name+': provide six-digit hex colors and an optional CSS variable name, not a CSS expression.');
+   }else if(!sgKeys(r,base))errors.push(r.name+': unsupported guideline fields.');
+  }
+ }
+ return errors;
+}
+function validStyleGuide(s){try{return sgIssues(s).length===0;}catch{return false;}}
+function styleGuide(d=design()){return d.designSystem;}
+function sgFontCSS(font,host=true){
+ if(!font)return 'system-ui';
+ if(font.source!=='custom')return host?'var('+({interface:'--font-interface',text:'--font-text',mono:'--font-monospace'})[font.source]+', '+font.fallback+')':font.fallback;
+ return font.families.split(',').map(s=>JSON.stringify(s.trim())).concat(font.fallback).join(', ');
+}
+function sgTypeCSS(t,s,host=true){return `font-family:${sgFontCSS(s.fonts.find(f=>f.id===t.font),host)};font-size:${t.size}${t.unit};font-weight:${t.weight};line-height:${t.lineHeight};letter-spacing:${t.letterSpacing}px`;}
+function sgContrast(a,b){
+ const luminance=v=>{const channels=[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;};const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+}
+function sgContrastPairs(s){return [['text','background'],['muted','background'],['accent-text','accent']].flatMap(([fg,bg])=>{const a=s.colors.find(c=>c.id===fg),b=s.colors.find(c=>c.id===bg);return !a||!b?[]:['light','dark'].map(mode=>({label:a.name+' / '+b.name,mode,ratio:sgContrast(a[mode],b[mode])}));});}
+function sgUnique(group,s){let id='new-'+group.replace(/s$/,''),i=2;const keys=new Set(s[group].map(r=>r.id));while(keys.has(id))id='new-'+group.replace(/s$/,'')+'-'+i++;return id;}
+function sgNew(group,s){const common={id:sgUnique(group,s),name:'',usage:''};if(group==='fonts')return {...common,source:'custom',families:'',fallback:'sans-serif',license:''};if(group==='typography')return {...common,font:s.fonts[0]?.id||'',size:16,unit:'px',weight:400,lineHeight:1.5,letterSpacing:0};if(group==='colors')return {...common,light:'#000000',dark:'#FFFFFF',host:''};if(group==='guidelines')return common;return {...common,value:8,unit:'px'};}
+
+// Persistent, data-only recipes are independent from canvas placement and live credentials.
+const TD_PROVIDERS=Object.freeze({auto:'From shape / entity default',sequence:'Sequence / prefix',name:'Synthetic person name',email:'Reserved-domain email',integer:'Integer',boolean:'Checkbox / boolean',date:'Date',uuid:'Stable UUID',literal:'Literal JSON value'});
+function tdDefaults(){return {schema:1,seed:42,referenceDate:'2026-01-01T00:00:00.000Z',locale:'en',count:12,recipes:[]};}
+function tdSettings(d=design()){return d.dataSources?.testing||tdDefaults();}
+function tdValidSettings(v,m){
+ if(v===undefined)return true;
+ if(!dsKeys(v,['schema','seed','referenceDate','locale','count','recipes'])||v.schema!==1||!Number.isSafeInteger(v.seed)||v.seed<0||v.seed>2147483647||!Number.isInteger(v.count)||v.count<1||v.count>100||!['en','de'].includes(v.locale)||!/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(v.referenceDate)||!Number.isFinite(Date.parse(v.referenceDate))||new Date(v.referenceDate).toISOString()!==v.referenceDate||!Array.isArray(v.recipes)||v.recipes.length>288)return false;
+ const ids=new Set();
+ for(const r of v.recipes){
+  const source=m.sources.find(s=>s.id===r.source),op=source?.operations.find(o=>o.id===r.operation);
+  if(!op||ids.has(r.operation)||!dsKeys(r,['source','operation','enabled','behavior','dataset','keyField','scenario','latencyMs','errorStatus','rules'])||typeof r.enabled!=='boolean'||!['fixture','list','upsert','delete'].includes(r.behavior)||!dsSlug(r.dataset)||!dsKey(r.keyField)||!['populated','empty','error','slow'].includes(r.scenario)||!Number.isInteger(r.latencyMs)||r.latencyMs<0||r.latencyMs>5000||!Number.isInteger(r.errorStatus)||r.errorStatus<400||r.errorStatus>599||!Array.isArray(r.rules)||r.rules.length>80)return false;
+  const keys=new Set();for(const rule of r.rules){if(!dsKeys(rule,['side','path','provider','argument'])||!['input','output'].includes(rule.side)||!dsText(rule.path,200)||!Object.hasOwn(TD_PROVIDERS,rule.provider)||!dsText(rule.argument,1000)||keys.has(rule.side+rule.path))return false;keys.add(rule.side+rule.path);}
+  ids.add(r.operation);
+ }
+ return true;
+}
+function tdRecipe(source,op){const saved=tdSettings().recipes.find(r=>r.operation===op.id);return saved||{source:source.id,operation:op.id,enabled:false,behavior:'fixture',dataset:op.output.mode==='entity'?design().semantic.entities.find(e=>e.id===op.output.entity).slug:op.slug,keyField:'id',scenario:'populated',latencyMs:0,errorStatus:503,rules:[]};}
+function tdNormalizeSchema(s){
+ if(!s||s.declared===false||s.missingEntity)throw Error('Declare the input and output shapes first. Use “No payload” for an intentionally empty input.');
+ const v=designCopy(s);delete v.declared;
+ if(v.type==='object'){v.properties=Object.fromEntries(Object.entries(v.properties||{}).map(([k,p])=>[k,tdNormalizeSchema(p)]));v.required=v.required||[];}
+ if(v.type==='array')v.items=tdNormalizeSchema(v.items);return v;
+}
+function tdEntity(e,m){
+ const fields=erFields(e,m),properties={id:{type:'string',format:'uuid'},type:{type:'string',const:e.slug}};
+ for(const p of fields){
+  const type=({text:'string',number:'number',checkbox:'boolean',date:'string',datetime:'string',tags:'array',list:'array'})[p.type];
+  const s={type};if(type==='array')s.items={type:'string'};if(p.type==='date')s.format='date';if(p.type==='datetime')s.format='date-time';
+  if(p.type==='list'&&!p.relationship)s.items={type:['string','number']};
+  if(Object.hasOwn(p,'defaultValue'))s.default=designCopy(p.defaultValue);properties[p.key]=s;
+ }
+ return {id:e.id,slug:e.slug,folder:e.folder,schema:{type:'object',properties,required:['id','type',...fields.filter(p=>p.required).map(p=>p.key)],additionalProperties:false},relationships:m.relationships.filter(r=>r.source===e.id).map(r=>({key:r.key,target:r.target,many:erMany(r.targetCard)}))};
+}
+function tdManifest(d=design()){
+ const settings=tdSettings(d),sources=d.dataSources||emptyDataSources();
+ if(!tdValidSettings(settings,sources))throw Error('Test recipes are malformed or reference a missing source operation.');
+ const entities=(d.semantic?.entities||[]).map(e=>tdEntity(e,d.semantic));
+ const shape=s=>s.mode==='none'?{none:true}:s.mode==='entity'?{entity:s.entity,many:s.many,schema:s.many?{type:'array',items:designCopy(entities.find(e=>e.id===s.entity)?.schema)}:designCopy(entities.find(e=>e.id===s.entity)?.schema)}:{schema:tdNormalizeSchema(dsResolveShape(s,d))};
+ const operations=settings.recipes.filter(r=>r.enabled).map(r=>{
+  const source=sources.sources.find(s=>s.id===r.source),op=source.operations.find(o=>o.id===r.operation);
+  if(source.status==='deprecated')throw Error('Disable test recipes for deprecated source '+source.name+'.');
+  return {id:op.id,source:source.slug,slug:op.slug,kind:source.kind,direction:op.direction,method:op.method,resource:op.resource|| (source.kind==='api'?'/':''),input:shape(op.input),output:shape(op.output),behavior:r.behavior,dataset:r.dataset,keyField:r.keyField,scenario:r.scenario,latencyMs:r.latencyMs,errorStatus:r.errorStatus,rules:designCopy(r.rules)};
+ });
+ return {schema:1,engine:'shell-fixtures/1',target:'.test-vault',seed:settings.seed,count:settings.count,locale:settings.locale,referenceDate:settings.referenceDate,entities,operations};
+}
+function tdFingerprint(){return JSON.stringify({owner:designOwner(),settings:tdSettings(),semantic:semanticGeneration(design()),sources:dsGeneration(design())});}
+function tdRows(shape,side){
+ if(shape.mode==='none'||shape.mode==='unspecified')return [];
+ const s=tdNormalizeSchema(dsResolveShape(shape)),rows=[];
+ const visit=(schema,path)=>{if(schema.type==='object'){for(const [k,v] of Object.entries(schema.properties))visit(v,path+'/'+k);}else if(schema.type==='array')visit(schema.items,path+'/*');else rows.push({side,path,type:dsTypeScript(schema),entity:shape.mode==='entity'});};visit(s,'');return rows;
+}
 
 // Data-only source catalog. Rendering and source previews never open a connection.
 const DS_KINDS = Object.freeze({vault:'Obsidian vault',api:'External service / API',database:'Database'});
@@ -12373,7 +12573,7 @@ function dsResourceValid(source,resource){
 }
 function dataSourcesShape(m){
  if(m===undefined)return true;
- if(!dsKeys(m,['schema','nextId','sources','flows','positions'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
+ if(!dsKeys(m,['schema','nextId','sources','flows','positions','testing'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
  const ids=[];
  for(const s of m.sources){
   if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
@@ -12394,6 +12594,7 @@ function dataSourcesShape(m){
  }
  if(new Set(ids).size!==ids.length||ids.some(id=>Number(id.split('-').at(-1))>=m.nextId)||new Set(m.sources.map(s=>s.slug)).size!==m.sources.length)return false;
  if(new Set(m.flows.map(f=>JSON.stringify([f.source,f.operation,f.card,f.direction]))).size!==m.flows.length)return false;
+ if(!tdValidSettings(m.testing,m))return false;
  return Object.keys(m.positions).length<=DS_LIMITS.sources&&Object.entries(m.positions).every(([id,p])=>m.sources.some(s=>s.id===id)&&dsKeys(p,['x','y'])&&[p.x,p.y].every(n=>Number.isFinite(n)&&Math.abs(n)<=50000));
 }
 function dsReferences(d){
@@ -12421,7 +12622,7 @@ function dataSourceIssues(d,qualify=true){
 }
 function dsGeneration(d){
  const m=d.dataSources;if(!m?.sources.length)return null;
- return {schema:1,sources:designCopy(m.sources),flows:designCopy(m.flows),resolvedShapes:m.sources.flatMap(s=>s.operations.map(o=>({source:s.id,operation:o.id,input:dsResolveShape(o.input,d),output:dsResolveShape(o.output,d)})))};
+ return {schema:1,...(m.testing?{testing:designCopy(m.testing)}:{}),sources:designCopy(m.sources),flows:designCopy(m.flows),resolvedShapes:m.sources.flatMap(s=>s.operations.map(o=>({source:s.id,operation:o.id,input:dsResolveShape(o.input,d),output:dsResolveShape(o.output,d)})))};
 }
 function dsResolveShape(s,d=design()){
  if(s.mode==='unspecified')return {declared:false};
@@ -12612,7 +12813,7 @@ const ICONS = {
  menu:'M4 6h16M4 12h16M4 18h16', link:'m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 1 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0',
  alert:'m12 3 10 18H2L12 3Zm0 6v5m0 3h.01', dot:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z'
 };
-const NAV = [['overview','box','Project overview'],['prds','file','Product requirements'],['sitemap','layers','Sitemap & views'],['entities','layers','Entity relationships'],['sources','layers','Data Sources'],['components','box','Component library'],['blueprints','grid','Blueprints'],['patterns','spark','Action patterns'],['prepare','terminal','Prepare project'],['generate','wand','Generate'],['develop','terminal','Develop'],['quality','shield','Quality'],['capabilities','layers','Capabilities'],['release','flag','Release preparation'],['runs','clock','Runs & recovery']];
+const NAV = [['overview','box','Project overview'],['prds','file','Product requirements'],['sitemap','layers','Sitemap & views'],['entities','layers','Entity relationships'],['sources','layers','Data Sources'],['testdata','play','Test data'],['designsystem','settings','Design System'],['components','box','Component library'],['blueprints','grid','Blueprints'],['patterns','spark','Action patterns'],['prepare','terminal','Prepare project'],['generate','wand','Generate'],['develop','terminal','Develop'],['quality','shield','Quality'],['capabilities','layers','Capabilities'],['release','flag','Release preparation'],['runs','clock','Runs & recovery']];
 const SCENARIOS = [
  ['happy','Happy path','All fixtures are available.'],['missing-node','Missing prerequisite','Block setup until the toolchain fixture is restored.'],
  ['offline','Offline download','Use a cached source fixture instead.'],['collision','Target collision','Block deployment to the occupied fixture target.'],
@@ -12705,12 +12906,12 @@ function redrawModal(){const d=document.getElementById('modal');if(!d.open)retur
 
 // Concept section: workspace
 // Render functions intentionally use escaped strings; user data is never evaluated.
-function render(){const uiFocus=captureUiFocus();erDestroy();destroyFlow();if(project())normalizeSitemapSelection();
- document.documentElement.dataset.theme=state.settings.theme;document.body.classList.toggle('design-workspace',['prds','sitemap','entities','sources','components','blueprints','patterns'].includes(state.view));const p=project();
+function render(){if(state.view!=='testdata'||tdUi.sessionKey&&tdUi.sessionKey!==tdFingerprint())tdDropSession();const uiFocus=captureUiFocus();erDestroy();destroyFlow();if(project())normalizeSitemapSelection();
+ document.documentElement.dataset.theme=state.settings.theme;document.body.classList.toggle('design-workspace',['prds','sitemap','entities','sources','testdata','designsystem','components','blueprints','patterns'].includes(state.view));const p=project();
  document.getElementById('sidebar').innerHTML=`<div class="brand">${icon('box')}<div>Shell Workbench<small>A place to build plugins</small></div></div><div class="project-picker vault-identity" data-tour="project"><span class="project-initial">${p?esc(initials(p.name)):icon('plus')}</span><span class="grow"><span class="project-name">${p?esc(p.name):esc(CONCEPT_VAULT.name)}</span><span class="small subtle" style="display:block">${p?'This vault’s project':'Current vault · start here'}</span></span></div><div class="nav-label">WORKSPACE</div>${NAV.map(([id,ic,label])=>`${id==='prds'?'<div class="nav-label">DESIGN</div>':id==='generate'?'<div class="nav-label">BUILD & VERIFY</div>':''}<button class="nav-item ${state.view===id?'active':''}" data-action="nav" data-value="${id}" data-tour="${id}" ${state.view===id?'aria-current="page"':''}>${icon(ic)}${label}${id==='runs'&&state.runs.length?`<span class="nav-count">${state.runs.length}</span>`:''}</button>`).join('')}<div class="sidebar-bottom"><button class="nav-item" data-action="tour">${icon('help')}Take a guided tour</button><button class="nav-item" data-action="settings">${icon('settings')}Preferences</button><div class="sidebar-note"><strong>UI and CLI. One workflow.</strong><br>Your project stays yours.</div></div>`;
  const name=NAV.find(n=>n[0]===state.view)?.[2]||'Project overview';
  document.getElementById('header').innerHTML=`<button class="icon-button mobile-nav" data-action="menu" aria-label="Toggle navigation">${icon('menu')}</button><div class="breadcrumb"><span class="muted">Workbench</span><span class="subtle">/</span><strong>${esc(name)}</strong></div><div class="header-actions">${state.activeRun?button('Run in progress','active-run','','small','clock'):''}<button class="btn ghost small" data-action="palette" aria-label="Open command palette">${icon('search')}<span class="header-command-label">Find an action</span><kbd>⌘ K</kbd></button><button class="icon-button" data-action="theme" aria-label="Toggle theme">${icon('sun')}</button></div>`;
- const views={prds:prdWorkspaceView,entities:semanticView,sources:dataSourcesView,components:componentLibraryView,sitemap:sitemapView,blueprints:blueprintView,patterns:patternLibrary,overview:workflowOverview,prepare:vaultPreparationView,generate:generateView,develop:developView,quality:qualityView,capabilities:capabilitiesView,release:releaseView,runs:runsView};
+ const views={prds:prdWorkspaceView,entities:semanticView,sources:dataSourcesView,testdata:testDataView,designsystem:styleGuideView,components:componentLibraryView,sitemap:sitemapView,blueprints:blueprintView,patterns:patternLibrary,overview:workflowOverview,prepare:vaultPreparationView,generate:generateView,develop:developView,quality:qualityView,capabilities:capabilitiesView,release:releaseView,runs:runsView};
  document.getElementById('content').innerHTML=(!p&&!['capabilities','runs'].includes(state.view))?vaultWelcomeView():p&&!vaultProjectPrepared()&&['generate','develop','quality','release'].includes(state.view)?vaultPreparationView():views[state.view]();
  document.getElementById('context').innerHTML=vaultContextView();
  document.getElementById('status-left').textContent=`${CONCEPT_VAULT.name} · one project per vault${p?' · '+p.name:''}`;
@@ -12756,7 +12957,7 @@ function makerCode(index){const g=state.generator;const group=g.kind==='feature'
 function makerReview(){const g=state.generator;const files=makerFiles();return dialogBody('Review generated changes',`<div class="row between"><p class="mb0">${esc(g.entity)} · ${esc(g.preset)} preset</p>${badge('5 illustrative files','purple')}</div><div class="grid2 mt16"><div class="file-list">${files.map((f,i)=>`<button class="file-row ${state.selectedFile===i?'active':''}" data-action="file-preview" data-value="${i}"><span class="plus">${i===2?'~':'+'}</span><code>${esc(f)}</code></button>`).join('')}</div><div class="code-panel"><div class="code-title">Illustrative source · not executable output</div><pre class="code-body">${esc(makerCode(state.selectedFile))}</pre></div></div><div class="mt16">${command(getMakerCommand(false))}</div><p class="scope-label">The real maker is authoritative for paths, validation and generated bytes. These snippets are UX fixtures only.</p><div class="mt16">${callout('Apply runs typecheck, the generated test and entity validation. Full verify is separate. Edited files must never be force-overwritten.')}</div><div id="maker-error" class="error" role="alert">${esc(g.error||'')}</div>`,`${button('Back to form','close','','ghost')}${button('Apply simulated changes','maker-apply','','primary','wand')}`);}
 
 // Concept section: dialogs
-function drawModal(){const factories={'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
+function drawModal(){const factories={'style-guide-form':styleGuideForm,'test-data-form':testDataForm,'test-data-target':testDataTargetForm,'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('test-data-modal',modalType==='test-data-form');document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return vaultContextDialog();}
 function attachDialog(){return vaultContextDialog();}
@@ -12810,7 +13011,7 @@ function downloadText(data=modalData){const {text,filename}=data;const blob=new 
 // Concept section: interactions
 function dispatch(action,value){
  if(action==='editor-keep-editing'){restoreInlineRemoval();return;}if(handleVaultAction(action,value))return;
- if(handleDataSourceAction(action,value)||handleSemanticAction(action,value)||handleVariantAction(action,value)||handleEdgeEditingAction(action,value)||handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
+ if(handleStyleGuideAction(action,value)||handleTestDataAction(action,value)||handleDataSourceAction(action,value)||handleSemanticAction(action,value)||handleVariantAction(action,value)||handleEdgeEditingAction(action,value)||handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
  case 'nav':setView(value);break;
@@ -12879,7 +13080,7 @@ function dispatch(action,value){
  default:notify('This action is outside the current concept.');
  }
 }
-function updateField(el,commit=false){if(editVaultField(el))return;if(editDataSourceField(el)||editSemanticField(el)||editVariantField(el)||editUnifiedField(el)||editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
+function updateField(el,commit=false){if(editVaultField(el))return;if(editStyleGuideField(el)||editTestDataField(el)||editDataSourceField(el)||editSemanticField(el)||editVariantField(el)||editUnifiedField(el)||editReferenceField(el)||editLibraryField(el,commit)||editBrickField(el,commit)||editConnectionField(el,commit)||editFlowField(el,commit)||editWorkflowField(el)||editCanvasField(el)||editPolishField(el)||editProductField(el,commit)||editDesignField(el,commit))return;const key=el.dataset.field;const value=el.type==='checkbox'?el.checked:el.value;
  if(key?.startsWith('w-')){const w=state.wizard;const fieldName=key.slice(2);if(!['name','id','author','description','version','source','bound','trusted','approved'].includes(fieldName))return;w[fieldName]=value;w.error='';if(!['trusted','approved'].includes(fieldName)){w.rev++;w.plan=null;w.approved=false;if(fieldName==='source'||fieldName==='root')w.acquired=false;}if(fieldName==='trusted'&&!value){w.plan=null;w.approved=false;}save();if(commit&&(el.type==='checkbox'||el.tagName==='SELECT'))redrawModal();}
  if(key?.startsWith('g-')){state.generator[key.slice(2)]=value;state.generator.plan=null;state.generator.error='';save();}
  if(key==='tool-search'){state.search=value;document.getElementById('tool-results').innerHTML=toolResults();}
@@ -12894,6 +13095,612 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+/** Shared deterministic fixture engine. Pure data in/out; never executes expressions or I/O. */
+function createFixtureEngine() {
+  const version = 'shell-fixtures/1';
+  const copy = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+  const plain = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const key = value => typeof value === 'string' && /^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/.test(value) && !['constructor', 'prototype', '__proto__'].includes(value);
+  const slug = value => typeof value === 'string' && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) && value.length <= 60;
+  const fail = message => { throw new Error(message); };
+  function folder(value) {
+    return typeof value === 'string' && value.length > 0 && value.length <= 180 && value.split('/').every(part => /^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(part) && !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(part));
+  }
+  function hash(text) {
+    let value = 2166136261;
+    for (let i = 0; i < text.length; i++) { value ^= text.charCodeAt(i); value = Math.imul(value, 16777619); }
+    return value >>> 0;
+  }
+  function schemaValid(s, depth = 0, budget = { count: 0 }) {
+    if (!plain(s) || depth > 6 || ++budget.count > 160) return false;
+    const allowed = ['type', 'properties', 'required', 'additionalProperties', 'items', 'description', 'format', 'enum', '$schema', 'const', 'default'];
+    if (Object.keys(s).some(k => !allowed.includes(k))) return false;
+    const types = Array.isArray(s.type) ? s.type : [s.type];
+    if (!types.length || types.some(t => !['string', 'number', 'integer', 'boolean', 'null', 'object', 'array'].includes(t))) return false;
+    if (types.length > 1 && types.some(t => ['object', 'array'].includes(t))) return false;
+    if (s.format && (s.type !== 'string' || !['date', 'date-time', 'uuid', 'email', 'uri'].includes(s.format))) return false;
+    if (s.type === 'object') {
+      if (!plain(s.properties) || Object.keys(s.properties).length > 80 || !Object.entries(s.properties).every(([k, v]) => key(k) && schemaValid(v, depth + 1, budget))) return false;
+      if (!Array.isArray(s.required) || !s.required.every(k => Object.hasOwn(s.properties, k))) return false;
+    }
+    if (s.type === 'array' && !schemaValid(s.items, depth + 1, budget)) return false;
+    if (s.enum && (!Array.isArray(s.enum) || !s.enum.length || s.enum.length > 30)) return false;
+    return true;
+  }
+  function matches(value, s, depth = 0) {
+    if (!s || depth > 7) return false;
+    if (Object.hasOwn(s, 'const') && JSON.stringify(value) !== JSON.stringify(s.const)) return false;
+    if (s.enum && !s.enum.some(v => JSON.stringify(v) === JSON.stringify(value))) return false;
+    if (Array.isArray(s.type)) return s.type.some(type => matches(value, { ...s, type }, depth + 1));
+    if (s.type === 'null') return value === null;
+    if (s.type === 'boolean') return typeof value === 'boolean';
+    if (s.type === 'number') return typeof value === 'number' && Number.isFinite(value);
+    if (s.type === 'integer') return Number.isSafeInteger(value);
+    if (s.type === 'array') return Array.isArray(value) && value.length <= 500 && value.every(v => matches(v, s.items, depth + 1));
+    if (s.type === 'object') return plain(value) && Object.keys(value).length <= 100 && (s.required || []).every(k => Object.hasOwn(value, k)) && Object.entries(value).every(([k, v]) => key(k) && (s.properties[k] ? matches(v, s.properties[k], depth + 1) : s.additionalProperties !== false));
+    if (typeof value !== 'string' || value.length > 10000) return false;
+    if (s.format === 'date') return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+    if (s.format === 'date-time') return /^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(Date.parse(value));
+    if (s.format === 'uuid') return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    if (s.format === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    if (s.format === 'uri') { try { return new URL(value).protocol === 'https:'; } catch { return false; } }
+    return true;
+  }
+  function validate(manifest) {
+    if (!plain(manifest) || manifest.schema !== 1 || manifest.engine !== version || manifest.target !== '.test-vault') fail('Unsupported test-data manifest or target.');
+    if (!Number.isSafeInteger(manifest.seed) || manifest.seed < 0 || manifest.seed > 2147483647 || !Number.isInteger(manifest.count) || manifest.count < 1 || manifest.count > 100) fail('Use a seed from 0 to 2147483647 and 1–100 records.');
+    if (!['en', 'de'].includes(manifest.locale) || !/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(manifest.referenceDate) || Number.isNaN(Date.parse(manifest.referenceDate)) || new Date(manifest.referenceDate).toISOString() !== manifest.referenceDate) fail('Choose a supported locale and a fixed UTC reference date.');
+    if (!Array.isArray(manifest.entities) || manifest.entities.length > 60 || !Array.isArray(manifest.operations) || manifest.operations.length > 288) fail('Fixture inventory exceeds its bounded limit.');
+    const entities = new Map();
+    for (const e of manifest.entities) {
+      if (!slug(e.id) || entities.has(e.id) || !slug(e.slug) || !folder(e.folder) || !schemaValid(e.schema) || e.schema.type !== 'object') fail('Invalid entity fixture contract.');
+      if (!Array.isArray(e.relationships) || e.relationships.length > 160 || !e.relationships.every(r => key(r.key) && slug(r.target) && typeof r.many === 'boolean')) fail('Invalid fixture relationship.');
+      entities.set(e.id, e);
+    }
+    for (const e of entities.values()) for (const r of e.relationships) if (!entities.has(r.target)) fail('A fixture relationship target is missing.');
+    const ids = new Set(), names = new Set();
+    for (const op of manifest.operations) {
+      if (!slug(op.source) || !slug(op.slug) || !slug(op.id) || ids.has(op.id) || !['api', 'database', 'vault'].includes(op.kind) || !['read', 'write', 'both'].includes(op.direction)) fail('Invalid source operation.');
+      if (!['fixture', 'list', 'upsert', 'delete'].includes(op.behavior) || !slug(op.dataset) || !key(op.keyField) || !['populated', 'empty', 'error', 'slow'].includes(op.scenario)) fail('Invalid fixture recipe.');
+      if (!Number.isInteger(op.latencyMs) || op.latencyMs < 0 || op.latencyMs > 5000 || !Number.isInteger(op.errorStatus) || op.errorStatus < 400 || op.errorStatus > 599) fail('Invalid simulated failure or delay.');
+      if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'adapter'].includes(op.method)) fail('Invalid test method.');
+      if (typeof op.resource !== 'string' || op.resource.length > 240 || /[\\\x00-\x1f?#]/.test(op.resource) || op.resource.split('/').some(p => ['..', '.'].includes(p))) fail('Invalid test resource.');
+      if (op.kind === 'api' && (!/^\/[a-zA-Z0-9_\-/{},.]*$/.test(op.resource) || op.method === 'adapter')) fail('API simulation needs an HTTP method and absolute resource path.');
+      if (op.kind !== 'api' && op.method !== 'adapter') fail('Non-API operations use an application adapter.');
+      for (const side of ['input', 'output']) {
+        const s = op[side];
+        if (!plain(s) || (s.none !== true && !schemaValid(s.schema)) || s.entity && !entities.has(s.entity)) fail('Declare complete input and output shapes before generating.');
+      }
+      if (op.scenario === 'empty' && op.kind !== 'vault' && !op.output.none && op.output.schema.type !== 'array') fail('Empty responses require a collection output; use the error scenario for a missing single record.');
+      if (op.method === 'HEAD' && !op.output.none) fail('HEAD operations must declare no output payload.');
+      if (op.kind === 'api') {
+        const segments = op.resource.split('/').slice(1), params = segments.filter(v => /^\{[a-zA-Z][a-zA-Z0-9_]*\}$/.test(v)).map(v => v.slice(1, -1));
+        if (segments.some(v => !/^[a-zA-Z0-9_,.-]*$/.test(v) && !/^\{[a-zA-Z][a-zA-Z0-9_]*\}$/.test(v)) || new Set(params).size !== params.length) fail('Mock path parameters must occupy a complete unique path segment.');
+        if (params.length && (op.input.none || op.input.schema.type !== 'object' || params.some(k => !op.input.schema.properties[k] || !['string', 'number', 'integer', 'boolean'].includes(op.input.schema.properties[k].type)))) fail('Every mock path parameter needs a declared scalar input property.');
+        if (['GET', 'HEAD'].includes(op.method) && !op.input.none && op.input.schema.type !== 'object') fail('HTTP query inputs must be an object of named fields.');
+        if (['GET', 'HEAD'].includes(op.method) && ['upsert', 'delete'].includes(op.behavior)) fail('Safe HTTP methods cannot mutate a test dataset.');
+      }
+      if (op.behavior === 'list' && (op.output.none || op.output.schema.type !== 'array' || !op.input.none)) fail('List behavior needs a collection output and no input; custom filtering is not inferred.');
+      if (['upsert', 'delete'].includes(op.behavior) && (op.input.none || op.input.schema.type !== 'object' || !op.input.schema.properties[op.keyField])) fail('Write behavior needs an object input containing the declared key.');
+      if (op.behavior !== 'fixture' && op.direction === 'read' && op.behavior !== 'list') fail('Read-only recipes cannot mutate a test dataset.');
+      if (op.kind === 'vault' && !folder(op.resource)) fail('Vault fixtures need an explicit safe note folder.');
+      if (!Array.isArray(op.rules) || op.rules.length > 80) fail('Invalid generator rules.');
+      const paths = new Set();
+      for (const r of op.rules) {
+        if (!['input', 'output'].includes(r.side) || typeof r.path !== 'string' || r.path.length > 200 || !/^(\/(?:[a-zA-Z][a-zA-Z0-9_-]*|\*))*$/.test(r.path) || paths.has(r.side + r.path)) fail('Invalid or duplicate field rule.');
+        if (!['auto', 'sequence', 'name', 'email', 'integer', 'boolean', 'date', 'uuid', 'literal'].includes(r.provider) || typeof r.argument !== 'string' || r.argument.length > 1000) fail('Unsupported generator provider.');
+        if (op[r.side].entity && r.provider !== 'auto') fail('Entity values are shared across sources: define their defaults in Entities. Operation overrides apply to custom DTO shapes.');
+        let node = op[r.side].schema;
+        for (const segment of r.path.split('/').slice(1)) node = segment === '*' ? node?.items : node?.properties?.[segment];
+        if (!node) fail('A generator rule references a removed field. Reopen its recipe.');
+        paths.add(r.side + r.path);
+      }
+      if (names.has(op.source + '/' + op.slug)) fail('Duplicate operation method name.');
+      names.add(op.source + '/' + op.slug); ids.add(op.id);
+    }
+    return manifest;
+  }
+  function scalar(s, context, rule, provider) {
+    const n = hash(context.token), name = context.path.split('/').at(-1) || 'value';
+    if (rule?.provider === 'literal') { try { return JSON.parse(rule.argument); } catch { fail('Literal generators need a valid JSON value.'); } }
+    if (Object.hasOwn(s, 'const')) return copy(s.const);
+    if (Object.hasOwn(s, 'default') && (!rule || rule.provider === 'auto')) return copy(s.default);
+    if (s.enum) return copy(s.enum[n % s.enum.length]);
+    const type = Array.isArray(s.type) ? s.type.find(t => t !== 'null') || 'null' : s.type;
+    const selected = rule?.provider && rule.provider !== 'auto' ? rule.provider : s.format || (type === 'string' && /email/i.test(name) ? 'email' : type === 'string' && /name/i.test(name) ? 'name' : type);
+    if (provider && ['name', 'email'].includes(selected)) return provider({ ...context, seed: n, kind: selected });
+    if (selected === 'sequence') return (rule.argument || name + '-') + String(context.index + 1).padStart(4, '0');
+    if (selected === 'uuid' || name === 'id' && type === 'string') {
+      const h = Array.from({ length: 4 }, (_, i) => hash(context.token + ':' + i).toString(16).padStart(8, '0')).join('');
+      return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20)}`;
+    }
+    if (selected === 'email') return `fixture-${n.toString(36)}@example.invalid`;
+    if (selected === 'name') return (context.locale === 'de' ? ['Alex', 'Mika', 'Kim', 'Lena'] : ['Alex', 'Jordan', 'Casey', 'Sam'])[n % 4] + ' Example ' + (context.index + 1);
+    if (selected === 'date' || selected === 'date-time') { const date = new Date(Date.parse(context.referenceDate) + (n % 365) * 86400000).toISOString(); return selected === 'date' ? date.slice(0, 10) : date; }
+    if (selected === 'uri') return `https://example.invalid/fixture/${n}`;
+    if (selected === 'boolean') return n % 2 === 0;
+    if (selected === 'number' || selected === 'integer') return selected === 'integer' ? n % 10000 : (n % 100000) / 100;
+    if (selected === 'null') return null;
+    return `${name}-${(context.index + 1).toString().padStart(4, '0')}-${n.toString(36)}`;
+  }
+  function value(s, context, rules, provider, budget) {
+    if (++budget.values > 200000) fail('Fixture expansion exceeds 200,000 values. Reduce count or simplify nested arrays.');
+    const rule = rules.find(r => r.path === context.path && r.side === context.side);
+    if (rule?.provider === 'literal' || Object.hasOwn(s, 'const') || Object.hasOwn(s, 'default') && (!rule || rule.provider === 'auto') || s.enum) return scalar(s, context, rule, provider);
+    if (s.type === 'object') return Object.fromEntries(Object.entries(s.properties).map(([k, field]) => [k, value(field, { ...context, path: context.path + '/' + k, token: context.token + '/' + k }, rules, provider, budget)]));
+    if (s.type === 'array') return Array.from({ length: 2 }, (_, i) => value(s.items, { ...context, index: i, path: context.path + '/*', token: context.token + '/' + i }, rules, provider, budget));
+    return scalar(s, context, rule, provider);
+  }
+  function generate(input, options = {}) {
+    const m = validate(copy(input)), budget = { values: 0, bytes: 0 }, files = new Map(), pools = new Map(), entityMap = new Map(m.entities.map(e => [e.id, e]));
+    const context = (token, index, side = 'output') => ({ token: `${m.seed}|${token}|${index}`, index, path: '', side, locale: m.locale, referenceDate: m.referenceDate });
+    const notePath = (e, i) => `${e.folder}/fixture-${e.slug}-${String(i + 1).padStart(4, '0')}.md`;
+    function put(path, content, owner) {
+      if ([...files.keys()].some(p => p !== path && p.toLowerCase() === path.toLowerCase())) fail('Case-insensitive fixture collision.');
+      if (files.has(path) && files.get(path).content !== content) fail('Fixture file collision: ' + path);
+      if (!files.has(path)) budget.bytes += new TextEncoder().encode(content).length;
+      if (files.size >= 3000 && !files.has(path) || budget.bytes > 5000000) fail('Fixture preview exceeds 3,000 files or 5 MB. Reduce record count or enabled recipes.');
+      files.set(path, { path, content, owner });
+    }
+    for (const e of m.entities) pools.set(e.id, Array.from({ length: m.count }, (_, i) => value(e.schema, context(e.id, i), [], options.provider, budget)));
+    // Allocate every identity first; cyclic/self relationships do not recurse.
+    for (const e of m.entities) pools.get(e.id).forEach((record, i) => {
+      for (const r of e.relationships) {
+        const target = entityMap.get(r.target), link = '[[' + notePath(target, i).slice(0, -3) + ']]';
+        record[r.key] = r.many ? [link] : link;
+      }
+      if (!matches(record, e.schema)) fail('Generated entity violates its declared property types: ' + e.slug);
+    });
+    const needed = new Set();
+    function requireEntity(id) { if (needed.has(id)) return; needed.add(id); for (const r of entityMap.get(id).relationships) requireEntity(r.target); }
+    function payload(op, side) {
+      const shape = op[side]; if (shape.none) return undefined;
+      if (shape.entity) return copy(shape.many ? pools.get(shape.entity) : pools.get(shape.entity)[0]);
+      const c = context(op.source + ':' + op.id + ':' + side, 0, side);
+      return shape.schema.type === 'array' ? Array.from({ length: m.count }, (_, i) => value(shape.schema.items, { ...c, index: i, path: '/*', token: c.token + '/' + i }, op.rules, options.provider, budget)) : value(shape.schema, c, op.rules, options.provider, budget);
+    }
+    const operations = m.operations.map(op => {
+      const inputValue = payload(op, 'input'); let outputValue = payload(op, 'output');
+      if (op.scenario === 'empty' && !op.output.none && op.output.schema.type === 'array') outputValue = [];
+      for (const [side, generated] of [['input', inputValue], ['output', outputValue]]) if (!op[side].none && !matches(generated, op[side].schema)) fail('Generated ' + side + ' does not match ' + op.source + '/' + op.slug + '. Check its field rules.');
+      const base = `.fixtures/${op.source}/${op.slug}`;
+      for (const [side, generated] of [['input', inputValue], ['output', outputValue]]) if (generated !== undefined) put(base + '-' + side + '.json', JSON.stringify(generated, null, 2) + '\n', op.id);
+      if (op.kind === 'vault' && !['empty', 'error'].includes(op.scenario)) {
+        const side = op.direction === 'write' ? 'input' : 'output', shape = op[side];
+        if (shape.none) fail('Vault recipe has no record payload.');
+        if (shape.entity) {
+          if (entityMap.get(shape.entity).folder !== op.resource) fail('Vault operation folder and entity folder differ. Declare one explicit folder before seeding.');
+          requireEntity(shape.entity);
+        } else {
+          const records = Array.isArray(side === 'input' ? inputValue : outputValue) ? (side === 'input' ? inputValue : outputValue) : [side === 'input' ? inputValue : outputValue];
+          records.forEach((r, i) => put(`${op.resource}/fixture-${op.source}-${op.slug}-${String(i + 1).padStart(4, '0')}.md`, markdown(r), op.id));
+        }
+      }
+      return { ...op, inputValue, outputValue };
+    });
+    for (const id of needed) pools.get(id).forEach((record, i) => put(notePath(entityMap.get(id), i), markdown(record), id));
+    const items = [...files.values()].sort((a, b) => a.path.localeCompare(b.path, 'en'));
+    const lower = new Set(); let bytes = 0;
+    for (const file of items) { if (lower.has(file.path.toLowerCase())) fail('Case-insensitive output collision.'); lower.add(file.path.toLowerCase()); bytes += new TextEncoder().encode(file.content).length; }
+    if (items.length > 3000 || bytes > 5000000) fail('Fixture preview exceeds 3,000 files or 5 MB. Reduce record count or enabled recipes.');
+    return { engine: version, seed: m.seed, count: m.count, locale: m.locale, referenceDate: m.referenceDate, files: items, operations, bytes, provider: options.providerName || 'builtin-v1' };
+  }
+  function markdown(record) {
+    const scalarValue = v => v === null || typeof v === 'string' || typeof v === 'boolean' || typeof v === 'number' && Number.isFinite(v);
+    if (!plain(record) || !Object.entries(record).every(([k, v]) => key(k) && (scalarValue(v) || Array.isArray(v) && v.every(scalarValue)))) fail('Vault notes need a flat object of Obsidian-compatible scalar/list properties. Nested DTOs need an explicit mapping.');
+    return '---\n' + Object.entries(record).map(([k, v]) => JSON.stringify(k) + ': ' + JSON.stringify(v)).join('\n') + '\n---\n\nSynthetic test fixture. Do not use as production data.\n';
+  }
+  return Object.freeze({ version, validate, generate, matches, markdown });
+}
+
+/** Development-only application-port simulator. Never falls back to a live source. */
+function createFixtureAdapter(manifest, options = {}) {
+  const engine = createFixtureEngine(), generated = engine.generate(manifest, options);
+  const clone = v => v === undefined ? undefined : structuredClone(v);
+  const operations = new Map(generated.operations.map(op => [op.id, op]));
+  const stores = new Map(), captures = [];
+  let disposed = false;
+  function error(message, status = 422) { const e = new Error(message); e.status = status; throw e; }
+  function dataset(op) { return op.source + '/' + op.dataset; }
+  function initialize() {
+    stores.clear(); captures.length = 0;
+    for (const op of operations.values()) {
+      if (op.behavior !== 'list') continue;
+      const id = dataset(op), schema = op.output.schema.items;
+      const keySchema = schema.type === 'object' && schema.properties[op.keyField];
+      if (!keySchema || !['string', 'integer', 'number'].includes(keySchema.type)) error('Stateful datasets require a scalar identity field on an object collection.');
+      const previous = stores.get(id);
+      if (previous && (JSON.stringify(previous.schema) !== JSON.stringify(schema) || previous.keyField !== op.keyField)) error('Incompatible list contracts share a test dataset.');
+      const records = clone(op.outputValue);
+      if (previous && JSON.stringify(previous.records) !== JSON.stringify(records)) error('Different list fixtures cannot initialize the same dataset. Use one list recipe per dataset.');
+      if (new Set(records.map(r => r[op.keyField])).size !== records.length || records.some(r => r[op.keyField] === undefined)) error('Dataset identifiers must be present and unique.');
+      stores.set(id, { schema, keyField: op.keyField, records });
+    }
+    for (const op of operations.values()) if (['upsert', 'delete'].includes(op.behavior)) {
+      const store = stores.get(dataset(op));
+      if (!store || store.keyField !== op.keyField) error('Stateful writes need a list recipe with the same source, dataset and identity key.');
+      if (op.behavior === 'upsert' && !engine.matches(op.inputValue, store.schema)) error('Upsert input cannot satisfy its dataset schema. Declare an explicit mapping instead.');
+    }
+  }
+  initialize();
+  function check() { if (disposed) error('Test adapter has been disposed.', 410); }
+  async function delay(ms, signal) {
+    if (signal?.aborted) throw signal.reason || new Error('Aborted');
+    if (!ms) return;
+    await new Promise((resolve, reject) => {
+      const cleanup = () => signal?.removeEventListener('abort', cancel);
+      const timer = setTimeout(() => { cleanup(); resolve(); }, ms);
+      const cancel = () => { clearTimeout(timer); cleanup(); reject(signal.reason || new Error('Aborted')); };
+      signal?.addEventListener('abort', cancel, { once: true });
+    });
+  }
+  async function execute(id, input, { signal } = {}) {
+    check(); const op = operations.get(id);
+    if (!op) error('Unknown or disabled test operation. Live fallback is forbidden.', 404);
+    if (op.kind === 'vault') error('Vault recipes seed real notes. Use the generated plugin’s vault repository, not this memory adapter.', 400);
+    if (op.input.none ? input !== undefined : !engine.matches(input, op.input.schema)) error('Input does not match the declared test operation contract.');
+    await delay(op.scenario === 'slow' ? Math.max(1000, op.latencyMs) : op.latencyMs, signal);
+    check(); if (signal?.aborted) throw signal.reason || new Error('Aborted');
+    if (op.scenario === 'error') error('Deliberate synthetic failure.', op.errorStatus);
+    const store = stores.get(dataset(op)); let output = clone(op.outputValue);
+    if (op.behavior === 'list') output = clone(store.records);
+    if (['upsert', 'delete'].includes(op.behavior)) {
+      const k = input[op.keyField];
+      if (!['string', 'number'].includes(typeof k)) error('A write needs the dataset identity key.');
+      const index = store.records.findIndex(r => r[op.keyField] === k);
+      if (op.behavior === 'delete') { if (index < 0) error('Synthetic record not found.', 404); store.records.splice(index, 1); }
+      else {
+        if (!engine.matches(input, store.schema)) error('Input needs an explicit mapping to the stored record shape.');
+        if (index >= 0) store.records[index] = clone(input);
+        else { if (store.records.length >= 1000) error('Test dataset capacity reached.', 409); store.records.push(clone(input)); }
+      }
+    }
+    if (!op.output.none && !engine.matches(output, op.output.schema)) error('Simulator output violated its declared shape.', 500);
+    captures.push({ operation: id, direction: op.direction, input: clone(input) }); if (captures.length > 100) captures.shift();
+    return output;
+  }
+  function port(source) {
+    const selected = [...operations.values()].filter(op => op.source === source && op.kind !== 'vault');
+    if (!selected.length) error('No enabled simulator operations for this source.', 404);
+    return Object.freeze(Object.fromEntries(selected.map(op => [op.slug, (input, options) => execute(op.id, input, options)])));
+  }
+  return Object.freeze({ execute, port, reset() { check(); initialize(); }, captured() { check(); return clone(captures); }, dispose() { disposed = true; stores.clear(); captures.length = 0; } });
+}
+
+const sgUi={section:'overview',form:null,error:''};
+function sgIdentity(){return JSON.stringify({owner:designOwner(),system:styleGuide()||null});}
+function sgFail(message){sgUi.error=message;if(document.getElementById('modal').open&&modalType==='style-guide-form'){redrawModal();sgPaintDraft();document.getElementById('sg-error')?.focus();}else{render();document.getElementById('sg-page-error')?.focus();}return false;}
+function sgCommit(candidate){
+ if(state.activeRun)return sgFail('Finish the active project simulation before changing design declarations.');
+ const errors=sgIssues(candidate);if(errors.length)return sgFail(errors[0]);
+ if(JSON.stringify(styleGuide())===JSON.stringify(candidate))return true;
+ recordDesign();design().designSystem=designCopy(candidate);designChanged();return true;
+}
+function sgOpen(group,id=null){
+ const s=styleGuide();if(!s||group!=='overview'&&!Object.hasOwn(SG_GROUPS,group))return sgFail('Create a design system first.');
+ if(state.activeRun)return sgFail('Finish the active project simulation first.');
+ if(group==='typography'&&!s.fonts.length)return sgFail('Declare a font before a typography style.');
+ const saved=id?s[group].find(r=>r.id===id):null;if(id&&!saved)return sgFail('That declaration no longer exists. Reopen its current version.');
+ sgUi.form={group,id,record:designCopy(group==='overview'?{name:s.name,description:s.description,principles:s.principles}:saved||sgNew(group,s)),snapshot:sgIdentity(),owner:designOwner(),removal:false};sgUi.error='';showModal('style-guide-form');sgPaintDraft();
+}
+function sgCurrent(){return sgUi.form&&sgUi.form.snapshot===sgIdentity()&&sgUi.form.owner===designOwner();}
+function sgSave(){
+ const f=sgUi.form;if(!sgCurrent())return sgFail('The saved design system changed while this draft was open. Your draft is retained; reopen a current declaration before applying.');
+ const s=designCopy(styleGuide());if(f.group==='overview')Object.assign(s,f.record);else{const i=s[f.group].findIndex(r=>r.id===f.id);if(i<0)s[f.group].push(designCopy(f.record));else s[f.group][i]=designCopy(f.record);}
+ if(!sgCommit(s))return false;modalOriginal=null;closeModal();sgUi.error='';render();notify('Design declaration saved. The host theme is unchanged.');return true;
+}
+function sgRemove(){
+ const f=sgUi.form;if(!f?.id||!sgCurrent())return sgFail('This removal review is stale. Saved declarations were not changed.');
+ const s=designCopy(styleGuide());if(f.group==='fonts'&&s.typography.some(t=>t.font===f.id))return sgFail('This font is used by typography styles. Change those styles before removing the font.');
+ s[f.group]=s[f.group].filter(r=>r.id!==f.id);if(!sgCommit(s))return false;modalOriginal=null;closeModal();sgUi.error='';render();notify('Design declaration removed. Undo restores the saved version; exports were not deleted.');return true;
+}
+function handleStyleGuideAction(action,value=''){
+ if(!action.startsWith('sg-'))return false;
+ if(!project()){openVaultIdentity('designsystem');return true;}
+ switch(action){
+  case 'sg-section':if(value==='overview'||Object.hasOwn(SG_GROUPS,value)){sgUi.section=value;sgUi.error='';render();}break;
+  case 'sg-starter':case 'sg-empty':if(styleGuide()){sgFail('A design system already exists. Edit its declarations instead of replacing it.');break;}if(sgCommit(action==='sg-starter'?sgStarter():sgBlank())){sgUi.error='';sgUi.section='overview';render();}break;
+  case 'sg-add':sgOpen(value);break;
+  case 'sg-edit':{const [group,id]=value.split(':');sgOpen(group,id||null);break;}
+  case 'sg-save':sgSave();break;
+  case 'sg-remove':if(sgUi.form?.id){sgUi.form.removal=true;redrawModal();document.querySelector('[data-action="sg-keep"]')?.focus();}break;
+  case 'sg-keep':if(sgUi.form){sgUi.form.removal=false;redrawModal();sgPaintDraft();}break;
+  case 'sg-confirm-remove':sgRemove();break;
+  case 'sg-export':if(['md','html'].includes(value))sgDownload(value);break;
+ }
+ return true;
+}
+function editStyleGuideField(el){
+ const key=el.dataset.field;if(!key?.startsWith('sg-'))return false;const f=sgUi.form,name=key.slice(3);if(!f||!Object.hasOwn(f.record,name)||name==='id'&&f.id)return true;
+ f.record[name]=['size','weight','lineHeight','letterSpacing','value'].includes(name)?(el.value===''?null:Number(el.value)):el.value;sgPaintDraft();return true;
+}
+
+function sgField(label,key,value,type='text',hint='',extra=''){return `<label class="field" for="sg-${key}">${label}<input id="sg-${key}" data-field="sg-${key}" type="${type}" value="${esc(value??'')}" ${extra}>${hint?`<small>${esc(hint)}</small>`:''}</label>`;}
+function sgArea(label,key,value,max=2000){return `<label class="field" for="sg-${key}">${label}<textarea id="sg-${key}" data-field="sg-${key}" rows="4" maxlength="${max}">${esc(value)}</textarea></label>`;}
+function sgSelect(label,key,value,options){return `<label class="field" for="sg-${key}">${label}<select id="sg-${key}" data-field="sg-${key}">${options.map(([id,name])=>`<option value="${id}" ${value===id?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;}
+function styleGuideView(){
+ const s=styleGuide();
+ const actions=button('Export Markdown','sg-export','md','small','download',!s?'disabled':'')+button('Export HTML','sg-export','html','small','download',!s?'disabled':'');
+ return `<section class="sg-workspace"><header class="page-heading"><div><h1>Design System</h1><p>Describe how your plugin should look, read and behave.</p></div><div class="row wrap">${actions}</div></header><p id="sg-page-error" class="error" role="alert" tabindex="-1">${esc(sgUi.error)}</p>${!s?`<div class="sg-empty"><h2>Define the design before writing the styles</h2><p>Keep fonts, typography, spacing and usage rules together. Start with host-friendly values or an empty system, then export an implementation-ready reference.</p><div class="row wrap">${button('Use host-friendly starter','sg-starter','','primary','plus')}${button('Start empty','sg-empty','','','plus')}</div><p class="small muted">Starter values are editable proposals. They do not override Obsidian, load fonts, or automatically style your components.</p></div>`:`<div class="sg-layout"><nav class="sg-navigation" aria-label="Design-system sections">${[['overview','Overview'],...Object.entries(SG_GROUPS)].map(([id,label])=>`<button data-action="sg-section" data-value="${id}" class="${sgUi.section===id?'selected':''}" aria-pressed="${sgUi.section===id}"><span>${label}</span>${id==='overview'?'':`<small>${s[id].length}</small>`}</button>`).join('')}<div class="sg-history">${button('Undo','design-undo','','small','',!design().history.length?'disabled':'')}${button('Redo','design-redo','','small','',!design().future.length?'disabled':'')}</div></nav><section class="sg-content" aria-label="Design declarations">${sgContent(s)}</section></div>`}</section>`;
+}
+function sgContent(s){
+ const group=sgUi.section;
+ if(group==='overview')return `<div class="row between wrap"><h2>${esc(s.name)}</h2>${button('Edit overview','sg-edit','overview','small','settings')}</div><p class="sg-prose">${esc(s.description||'Add a description of the visual language and audience.')}</p><h3>Principles</h3><p class="sg-prose">${esc(s.principles||'Record the decisions your implementation should follow.')}</p><h3>Implementation boundary</h3><p>These are your target plugin’s declarations, not settings for this workbench. Exports include every saved token and guideline. Font files, remote styles, and automatic component styling are not included.</p><div class="sg-overview-preview"><span>Sample of your saved typography</span>${s.typography.slice(0,3).map(t=>`<div style="${esc(sgTypeCSS(t,s))}">${esc(t.name)} — Design for understanding.</div>`).join('')||'<p>Add a font, then a typography style to preview it here.</p>'}</div><p class="small muted">Preview fonts use installed families and host preferences. Exports use local fallbacks when host fonts are unavailable.</p>`;
+ const help=({fonts:'Use Obsidian font preferences or list local family names. Declare the license separately; no font files are downloaded.',typography:'Name each text role and give it a font, size, weight, line height and usage.',spacing:'Use one spacing vocabulary across your views and component variants.',sizes:'Describe control, icon and layout dimensions. Preferred sizes must still adapt to the available pane.',radii:'Define consistent corner radii for controls and surfaces.',colors:'Declare light and dark fallback colors, with optional references to host CSS variables.',guidelines:'Explain component usage, accessibility, interaction states and exceptions in plain language.'})[group];
+ return `<div class="row between wrap"><h2>${SG_GROUPS[group]}</h2>${button('Add '+(({fonts:'font',typography:'text style',guidelines:'guideline'})[group]||'token'),'sg-add',group,'primary small','plus',s[group].length>=(group==='fonts'?12:64)||group==='typography'&&!s.fonts.length?'disabled':'')}</div><p>${help}</p>${group==='typography'&&!s.fonts.length?`<p class="sg-hint">Add a font before declaring a typography style. ${button('Go to fonts','sg-section','fonts','small')}</p>`:''}<div class="sg-entries">${s[group].map(r=>sgRow(group,r,s)).join('')||'<p class="sg-empty-list">No declarations yet. Add the values your plugin needs; blank groups still export explicitly.</p>'}</div>${group==='colors'?sgContrastView(s):''}`;
+}
+function sgRow(group,r,s){
+ let sample='',meta=r.id;
+ if(group==='fonts'){meta+=' · '+SG_FONT_SOURCES[r.source];sample=`<div class="sg-font-sample" style="font-family:${esc(sgFontCSS(r))}">The quick brown fox · 0123456789</div><small>${esc(r.families||r.fallback)} · ${esc(r.license||'License / provenance not yet described')}</small>`;}
+ else if(group==='typography'){meta+=` · ${r.size}${r.unit} / ${r.lineHeight} · ${r.weight} · ${r.letterSpacing}px tracking`;sample=`<div class="sg-type-sample" style="${esc(sgTypeCSS(r,s))}">Design for understanding.</div>`;}
+ else if(group==='colors'){meta+=r.host?' · '+r.host:'';sample=`<div class="sg-swatches">${['light','dark'].map(m=>`<div><span style="background:${r[m]}"></span><small>${m}<br><code>${r[m]}</code></small></div>`).join('')}</div>`;}
+ else if(group!=='guidelines'){meta+=' · '+r.value+r.unit;sample=group==='radii'?`<div class="sg-radius" style="border-radius:${r.value}${r.unit}"></div>`:`<div class="sg-measure" style="width:${Math.min(240,r.value*(r.unit==='rem'?16:1))}px"></div><small>Visual measure capped at 240 px; token value is exact.</small>`;}
+ return `<article class="sg-entry"><div class="sg-entry-heading"><div><h3>${esc(r.name)}</h3><code>${esc(meta)}</code></div>${button('Edit','sg-edit',group+':'+r.id,'small','settings')}</div>${sample?`<div class="sg-sample">${sample}</div>`:''}<p class="sg-prose">${esc(r.usage||'No usage notes yet.')}</p></article>`;
+}
+function sgContrastView(s){const pairs=sgContrastPairs(s);return `<section class="sg-contrast"><h3>Declared palette contrast</h3><p class="small muted">Checks the saved text/background, muted/background and accent-text/accent pairs only. This does not certify host themes, every interaction state or complete accessibility.</p>${pairs.length?`<div>${pairs.map(p=>`<p><span>${esc(p.label)} · ${p.mode}</span><strong>${p.ratio.toFixed(2)}:1</strong><span class="${p.ratio>=4.5?'':'error'}">${p.ratio>=4.5?'Meets 4.5:1':'Below 4.5:1'}</span></p>`).join('')}</div>`:'<p>Add colors using the keys above to calculate these pairs.</p>'}</section>`;}
+function styleGuideForm(){
+ const f=sgUi.form;if(!f)return dialogBody('Design declaration unavailable','Reopen the saved declaration.');
+ if(f.removal)return dialogBody('Remove '+esc(f.record.name)+'?',`<p>Only the saved design declaration will be removed. Previously exported documents and source files are kept. Unsaved edits are not applied.</p><p class="error" role="alert" id="sg-error" tabindex="-1">${esc(sgUi.error)}</p>`,button('Keep editing','sg-keep','','ghost')+button('Remove declaration','sg-confirm-remove','','danger','trash'));
+ const r=f.record,g=f.group;let body='';
+ if(g==='overview')body=sgField('Design-system name','name',r.name,'text','','maxlength="100"')+sgArea('Description','description',r.description)+sgArea('Principles','principles',r.principles,4000);
+ else {
+  body=`<div class="sg-form-grid">${sgField('Name','name',r.name,'text','','maxlength="100"')}${sgField('Stable code name','id',r.id,'text','Lowercase words separated by hyphens.','maxlength="60" '+(f.id?'readonly':''))}</div>`;
+  if(g==='fonts')body+=`<div class="sg-form-grid">${sgSelect('Font source','source',r.source,Object.entries(SG_FONT_SOURCES))}${sgSelect('Fallback','fallback',r.fallback,['system-ui','sans-serif','serif','monospace'].map(x=>[x,x]))}</div>`+sgField('Local family names','families',r.families,'text','For custom stacks only. Comma-separated names, for example: Inter, Arial. No URLs or CSS.','maxlength="200"')+sgArea('License / provenance','license',r.license,1000);
+  else if(g==='typography')body+=`<div class="sg-form-grid">${sgSelect('Font','font',r.font,styleGuide().fonts.map(x=>[x.id,x.name]))}${sgField('Font size','size',r.size,'number','','min="0.1" max="192" step="0.1"')}${sgSelect('Size unit','unit',r.unit,[['px','px'],['rem','rem']])}${sgField('Weight','weight',r.weight,'number','100–900; installed fonts determine available weights.','min="100" max="900" step="100"')}${sgField('Line height multiplier','lineHeight',r.lineHeight,'number','','min="1" max="3" step="0.05"')}${sgField('Letter spacing (px)','letterSpacing',r.letterSpacing,'number','','min="-2" max="10" step="0.1"')}</div>`;
+  else if(g==='colors')body+=`<div class="sg-form-grid">${sgField('Light fallback','light',r.light,'text','#RRGGBB','maxlength="7"')}${sgField('Dark fallback','dark',r.dark,'text','#RRGGBB','maxlength="7"')}</div>`+sgField('Obsidian CSS variable (optional)','host',r.host,'text','Reference only, for example --text-normal. Does not override the host.','maxlength="80"');
+  else if(g!=='guidelines')body+=`<div class="sg-form-grid">${sgField('Value','value',r.value,'number','','min="0" max="1600" step="0.1"')}${sgSelect('Unit','unit',r.unit,[['px','px'],['rem','rem']])}</div>`;
+  body+=sgArea('Usage / description','usage',r.usage);
+ }
+ body+='<div id="sg-draft-preview" class="sg-draft-preview" aria-label="Unsaved declaration preview"></div>'+`<p class="error" role="alert" id="sg-error" tabindex="-1">${esc(sgUi.error)}</p><p class="small muted">Save commits this declaration. Export always uses the saved design system.</p>`;
+ return dialogBody(g==='overview'?'Design-system overview':(f.id?'Edit ':'Add ')+SG_GROUPS[g].toLowerCase(),body,(f.id?button('Remove','sg-remove','','danger small','trash'):'')+button('Cancel','close','','ghost')+button('Save declaration','sg-save','','primary'));
+}
+function sgPaintDraft(){
+ const p=document.getElementById('sg-draft-preview'),f=sgUi.form;if(!p||!f||f.group==='overview'||f.removal)return;
+ const s=designCopy(styleGuide()),r=designCopy(f.record),i=s[f.group].findIndex(t=>t.id===f.id);if(i<0)s[f.group].push(r);else s[f.group][i]=r;
+ p.innerHTML=validStyleGuide(s)?'<small>Unsaved preview</small>'+sgRow(f.group,r,s).replace(/<button[\s\S]*?<\/button>/,''):'<small>Complete valid values to preview this declaration.</small>';
+}
+
+// Exports are inert documents. Authored text never becomes markup, CSS or a URL.
+function sgMarkdownCell(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\/g,'\\\\').replace(/[|`*_\[\]#]/g,c=>'\\'+c).replace(/\r?\n/g,'<br>');}
+function sgTable(headers,rows){return '| '+headers.map(sgMarkdownCell).join(' | ')+' |\n| '+headers.map(()=> '---').join(' | ')+' |\n'+rows.map(row=>'| '+row.map(sgMarkdownCell).join(' | ')+' |').join('\n')+'\n';}
+function sgExportSnapshot(s){if(!s||!validStyleGuide(s))throw Error('Save a valid design system before exporting.');return designCopy(s);}
+function sgMarkdown(source){
+ const s=sgExportSnapshot(source);let out='---\ntype: design-system\nschema: 1\ntitle: '+JSON.stringify(s.name)+'\n---\n\n# '+sgMarkdownCell(s.name)+'\n\n'+sgMarkdownCell(s.description)+'\n\n## Principles\n\n'+sgMarkdownCell(s.principles)+'\n\n';
+ out+='## Fonts\n\n'+sgTable(['Key','Name','Source','Family / fallback','Usage','License / provenance'],s.fonts.map(f=>[f.id,f.name,SG_FONT_SOURCES[f.source],(f.source==='custom'?f.families+', ':'')+f.fallback,f.usage,f.license]))+'\n';
+ out+='## Typography\n\n'+sgTable(['Key','Name','Font','Size','Weight','Line height','Letter spacing','Usage'],s.typography.map(t=>[t.id,t.name,t.font,t.size+t.unit,t.weight,t.lineHeight,t.letterSpacing+'px',t.usage]))+'\n';
+ for(const group of ['spacing','sizes','radii'])out+='## '+SG_GROUPS[group]+'\n\n'+sgTable(['Key','Name','Value','Usage'],s[group].map(t=>[t.id,t.name,t.value+t.unit,t.usage]))+'\n';
+ out+='## Colors\n\n'+sgTable(['Key','Name','Light','Dark','Host variable','Usage'],s.colors.map(c=>[c.id,c.name,c.light,c.dark,c.host,c.usage]))+'\n';
+ out+='## Usage guidelines\n\n'+s.guidelines.map(g=>'### '+sgMarkdownCell(g.name)+'\n\n'+sgMarkdownCell(g.usage)).join('\n\n')+'\n\n';
+ const pairs=sgContrastPairs(s);out+='## Declared palette contrast\n\n'+(pairs.length?sgTable(['Pair','Mode','Ratio','Normal text 4.5:1'],pairs.map(p=>[p.label,p.mode,p.ratio.toFixed(2)+':1',p.ratio>=4.5?'Meets numeric threshold':'Below threshold'])):'Add text/background or accent-text/accent tokens to compute the default pairs.\n');
+ return out+'\n## Handoff boundaries\n\nValues describe the target plugin; they do not override the companion or Obsidian theme. Named fonts are references only and require separate licensing and availability review. No font binaries or remote assets are included. The HTML guide uses a 16 px root for rem previews and local fallbacks for host fonts. Palette ratios test only the declared solid colors, not the actual host, every state, or complete accessibility conformance. Component implementation and automatic token application are separate work. Exports include saved declarations only.\n';
+}
+function sgHtml(source){
+ const s=sgExportSnapshot(source),e=esc;
+ const row=(title,meta,body,usage)=>`<article><div class="meta"><h3>${e(title)}</h3><code>${e(meta)}</code></div><div class="sample">${body}</div><p>${e(usage)}</p></article>`;
+ let body=`<header><p>Plugin design system</p><h1>${e(s.name)}</h1><p>${e(s.description)}</p><nav aria-label="Guide sections">${Object.entries(SG_GROUPS).map(([id,title])=>`<a href="#${id}">${title}</a>`).join('')}</nav></header><main><section><h2>Principles</h2><p class="prose">${e(s.principles)}</p></section>`;
+ body+=`<section id="fonts"><h2>Fonts</h2>${s.fonts.map(f=>row(f.name,f.id+' · '+SG_FONT_SOURCES[f.source],`<div style="font-family:${e(sgFontCSS(f,false))}">The quick brown fox · 0123456789</div><p>${e(f.families||f.fallback)}<br>${e(f.license)}</p>`,f.usage)).join('')||'<p>No fonts declared.</p>'}</section>`;
+ body+=`<section id="typography"><h2>Typography</h2>${s.typography.map(t=>row(t.name,`${t.id} · ${t.font} · ${t.size}${t.unit} / ${t.lineHeight} · ${t.weight} · ${t.letterSpacing}px tracking`,`<div style="${e(sgTypeCSS(t,s,false))}">Design for understanding.</div>`,t.usage)).join('')||'<p>No type styles declared.</p>'}</section>`;
+ for(const group of ['spacing','sizes','radii'])body+=`<section id="${group}"><h2>${SG_GROUPS[group]}</h2>${s[group].map(t=>row(t.name,t.id+' · '+t.value+t.unit,group==='radii'?`<div class="radius" style="border-radius:${t.value}${t.unit}"></div>`:`<div class="measure" style="width:${Math.min(320,t.value*(t.unit==='rem'?16:1))}px"></div>`,t.usage)).join('')||'<p>No values declared.</p>'}<p class="muted">${group==='radii'?'Corners shown on a fixed sample.':'Long measures are visually capped at 320 px; the printed token value is exact.'}</p></section>`;
+ body+=`<section id="colors"><h2>Colors</h2>${s.colors.map(c=>row(c.name,c.id+(c.host?' · '+c.host:''),`<div class="swatches">${['light','dark'].map(mode=>`<div><span class="swatch" style="background:${c[mode]}"></span><span>${mode}: <code>${c[mode]}</code></span></div>`).join('')}</div>`,c.usage)).join('')||'<p>No colors declared.</p>'}<h3>Declared palette contrast</h3><ul>${sgContrastPairs(s).map(p=>`<li>${e(p.label)} · ${p.mode}: <strong>${p.ratio.toFixed(2)}:1</strong> — ${p.ratio>=4.5?'meets':'below'} the 4.5:1 normal-text threshold</li>`).join('')||'<li>No default pairs declared.</li>'}</ul></section>`;
+ body+=`<section id="guidelines"><h2>Usage guidelines</h2>${s.guidelines.map(g=>`<article><h3>${e(g.name)}</h3><p class="prose">${e(g.usage)}</p></article>`).join('')||'<p>No guidelines declared.</p>'}</section><section><h2>Implementation notes</h2><p>This is a saved design contract, not an applied Obsidian theme. Custom fonts use installed family names and fallbacks; no fonts, scripts or remote assets are embedded. This guide uses 1rem = 16px. Host font variables resolve to documented fallbacks here. Declared color ratios do not establish complete accessibility conformance or host-theme contrast.</p><p>Exports contain saved declarations only. Component styling and production token integration require implementation and review.</p></section></main><footer>Project design-system handoff · schema 1 · generated locally</footer>`;
+ const css=`:root{font-size:16px;color-scheme:light dark;--bg:#fff;--fg:#24242b;--muted:#5b5b68;--border:#d8d8e0;--accent:#6651b4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}header,main,footer{max-width:1120px;margin:auto;padding:32px}header{padding-top:56px}h1{font-size:2.5rem;line-height:1.2}h2{margin-top:0}h3{font-size:1rem;margin:0 0 6px}p{max-width:75ch;overflow-wrap:anywhere}nav{display:flex;gap:16px;flex-wrap:wrap}a{color:var(--accent);text-underline-offset:3px}a:focus-visible{outline:2px solid;outline-offset:4px}section{margin:0 0 48px;scroll-margin-top:16px}article{border-top:1px solid var(--border);padding:20px 0;display:grid;grid-template-columns:minmax(140px,1fr) minmax(0,2fr);gap:12px 28px;break-inside:avoid}article>p{grid-column:2;margin:0;color:var(--muted);white-space:pre-wrap}.sample{min-width:0;overflow:auto;padding:4px}.prose{white-space:pre-wrap}code{font:13px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.meta code{color:var(--muted)}.swatches{display:flex;gap:24px;flex-wrap:wrap}.swatches>div{display:flex;align-items:center;gap:10px}.swatch{width:44px;height:44px;display:inline-block;border:1px solid var(--border);border-radius:8px}.measure{background:var(--accent);height:16px;min-width:1px;max-width:100%}.radius{width:96px;height:60px;border:2px solid var(--accent)}.muted,footer{color:var(--muted)}footer{border-top:1px solid var(--border)}@media(prefers-color-scheme:dark){:root{--bg:#1e1e24;--fg:#ededf3;--muted:#b9b9c7;--border:#41414d;--accent:#c0aaff}}@media(max-width:640px){header,main,footer{padding:20px}h1{font-size:2rem}article{grid-template-columns:1fr}article>p{grid-column:1}}@media print{:root{color-scheme:light;--bg:#fff;--fg:#000;--muted:#444;--border:#ccc;--accent:#333}nav{display:none}header{padding-top:0}main,header,footer{padding:12px}.sample{overflow:visible}a{color:inherit}}`;
+ return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src \'none\'; font-src \'none\'; base-uri \'none\'; form-action \'none\'"><meta name="color-scheme" content="light dark"><title>'+e(s.name)+'</title><style>'+css+'<\/style></head><body>'+body+'</body></html>\n';
+}
+function sgFiles(d){const s=styleGuide(d);return s?[{path:'docs/design/DESIGN-SYSTEM.md',content:sgMarkdown(s),owner:'design-system',role:'Saved design-system Markdown handoff'},{path:'docs/design/design-system.html',content:sgHtml(s),owner:'design-system',role:'Self-contained inert HTML style guide'}]:[];}
+function sgDownload(format){try{const s=styleGuide(),html=format==='html',content=html?sgHtml(s):sgMarkdown(s),blob=new Blob([content],{type:html?'text/html;charset=utf-8':'text/markdown;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='design-system.'+(html?'html':'md');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Saved design system exported. No host styles or vault files were changed.');}catch(error){sgFail(error.message);}}
+
+const tdUi={source:null,form:null,error:'',preview:null,file:0,session:null,sessionKey:null,operation:null,input:'',output:'',busy:false,abort:null,target:null};
+function tdFail(message){tdUi.error=message;if(document.getElementById('modal').open&&modalType==='test-data-form'){redrawModal();document.getElementById('td-error')?.focus();}else {render();document.getElementById('td-page-error')?.focus();}return false;}
+function tdDropSession(){tdUi.abort?.abort();tdUi.abort=null;tdUi.session?.dispose();tdUi.session=null;tdUi.sessionKey=null;tdUi.busy=false;tdUi.output='';}
+function tdCommit(candidate){
+ if(state.activeRun)return tdFail('Finish the active project simulation first.');
+ if(!tdValidSettings(candidate,dataSources()))return tdFail('Check the seed, date, record count and generator settings.');
+ if(JSON.stringify(candidate)===JSON.stringify(tdSettings()))return true;
+ recordDesign();dataSources().testing=designCopy(candidate);designChanged();tdUi.preview=null;tdDropSession();return true;
+}
+function tdOpen(operation=null){
+ if(!project()){openVaultIdentity('testdata');return;}
+ if(state.activeRun){notify('Finish the active simulation first.');return;}
+ let record=designCopy(tdSettings()),source=null,op=null;
+ if(operation){source=dataSources().sources.find(s=>s.operations.some(o=>o.id===operation));op=source?.operations.find(o=>o.id===operation);if(!op)return tdFail('That operation no longer exists.');record=designCopy(tdRecipe(source,op));}
+ tdUi.form={kind:operation?'recipe':'settings',record,snapshot:tdFingerprint(),owner:designOwner(),source:source?.id,operation:op?.id};tdUi.error='';showModal('test-data-form');
+}
+function tdSave(){
+ const f=tdUi.form;
+ if(!f||f.owner!==designOwner()||f.snapshot!==tdFingerprint())return tdFail('The source contracts changed during editing. Keep your draft, then reopen a fresh recipe.');
+ let settings=f.kind==='settings'?designCopy(f.record):designCopy(tdSettings());
+ if(f.kind==='recipe'){const i=settings.recipes.findIndex(r=>r.operation===f.operation);if(i<0)settings.recipes.push(designCopy(f.record));else settings.recipes[i]=designCopy(f.record);}
+ if(!tdCommit(settings))return false;
+ modalOriginal=null;closeModal();tdUi.error='';render();notify('Test recipe saved. No data or files were generated.');return true;
+}
+function tdBuildPreview(){
+ try{
+  const manifest=tdManifest();if(!manifest.operations.length)throw Error('Enable at least one source operation recipe.');
+  const generated=createFixtureEngine().generate(manifest),session=createFixtureAdapter(manifest);session.dispose();
+  const fingerprint=tdFingerprint();tdUi.preview={manifest,generated,fingerprint};tdUi.file=0;tdUi.error='';return tdUi.preview;
+ }catch(error){tdUi.preview=null;tdFail(error.message);return null;}
+}
+async function tdSimulate(){
+ if(tdUi.busy)return;
+ let controller=null,key=null,session=null;
+ try{
+  key=tdFingerprint();if(!tdUi.session||tdUi.sessionKey!==key){tdDropSession();tdUi.session=createFixtureAdapter(tdManifest());tdUi.sessionKey=key;}
+  session=tdUi.session;const op=tdManifest().operations.find(o=>o.id===tdUi.operation);if(!op)throw Error('Select an enabled API or database operation.');
+  let input;try{input=op.input.none?undefined:JSON.parse(tdUi.input);}catch{throw Error('Enter valid JSON request data.');}
+  tdUi.busy=true;controller=new AbortController();tdUi.abort=controller;tdUi.output='Running in the in-memory test session…';tdPaintSimulation();
+  const result=await session.execute(op.id,input,{signal:controller.signal});
+  if(tdUi.session!==session||tdUi.abort!==controller||tdFingerprint()!==key)return;
+  tdUi.output=result===undefined?'No payload':JSON.stringify(result,null,2);
+ }catch(error){if(!controller||tdUi.abort===controller)tdUi.output=(error.status?'Simulated status '+error.status+': ':'')+error.message;}
+ finally{if(!controller||tdUi.abort===controller){tdUi.busy=false;tdUi.abort=null;tdPaintSimulation();}}
+}
+function tdChooseOperation(id){
+ tdUi.abort?.abort();tdUi.abort=null;tdUi.busy=false;tdUi.operation=id;tdUi.output='';
+ try{const op=createFixtureEngine().generate(tdManifest()).operations.find(o=>o.id===id);tdUi.input=op?.inputValue===undefined?'':JSON.stringify(op.inputValue,null,2);}catch{tdUi.input='';}
+}
+function handleTestDataAction(action,value=''){
+ if(!action.startsWith('td-'))return false;
+ if(!project()){openVaultIdentity('testdata');return true;}
+ switch(action){
+  case 'td-open':tdUi.source=value||null;setView('testdata');break;
+  case 'td-source':tdDropSession();tdUi.source=value;tdUi.error='';render();break;
+  case 'td-settings':tdOpen();break;
+  case 'td-recipe':tdOpen(value);break;
+  case 'td-save':tdSave();break;
+  case 'td-enable':{const s=dataSources().sources.find(s=>s.id===value);if(!s)break;const settings=designCopy(tdSettings());for(const op of s.operations){const r=designCopy(tdRecipe(s,op));r.enabled=true;const i=settings.recipes.findIndex(x=>x.operation===op.id);if(i<0)settings.recipes.push(r);else settings.recipes[i]=r;}if(tdCommit(settings)){tdUi.error='';render();}break;}
+  case 'td-preview':if(tdBuildPreview())render();break;
+  case 'td-file':tdUi.file=Number(value)||0;render();break;
+  case 'td-export':{const p=tdUi.preview;if(!p||p.fingerprint!==tdFingerprint()){tdFail('Preview the current recipes before exporting. The previous preview is stale.');break;}tdDownloadKit(p.manifest);break;}
+  case 'td-simulate':void tdSimulate();break;
+  case 'td-cancel':tdUi.abort?.abort(new Error('Test request cancelled. No live fallback.'));break;
+  case 'td-reset-session':tdDropSession();tdUi.output='In-memory session reset. Files on disk were not changed.';tdPaintSimulation();break;
+  case 'td-target':if(state.activeRun){tdFail('Finish the active project simulation first.');break;}tdUi.target={owner:designOwner(),revision:project().rev,vault:project().vault};showModal('test-data-target');break;
+  case 'td-target-confirm':{const p=project(),t=tdUi.target;if(state.activeRun||!t||t.owner!==designOwner()||t.revision!==p.rev||t.vault!==p.vault){notify('Development target review is stale or a run is active. Reopen the target review.');break;}tdUi.target=null;p.vault=vaultTestRoot();invalidateProject(p);state.wizard=null;modalOriginal=null;closeModal();render();notify('Development target set to .test-vault. Existing .dev-vault files were not moved or deleted.');break;}
+ }
+ return true;
+}
+function editTestDataField(el){
+ const key=el.dataset.field;if(!key?.startsWith('td-'))return false;
+ if(key==='td-operation'){tdChooseOperation(el.value);tdPaintSimulation();return true;}
+ if(key==='td-input'){tdUi.input=el.value;return true;}
+ const f=tdUi.form;if(!f)return true;
+ if(key.startsWith('td-rule-')){
+  const op=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),rows=[...tdRows(op.input,'input'),...tdRows(op.output,'output')],row=rows[Number(el.dataset.index)];if(!row)return true;
+  let r=f.record.rules.find(r=>r.side===row.side&&r.path===row.path);if(!r){r={side:row.side,path:row.path,provider:'auto',argument:''};f.record.rules.push(r);}
+  r[key==='td-rule-provider'?'provider':'argument']=el.value;
+  if(r.provider==='auto'&&!r.argument)f.record.rules=f.record.rules.filter(x=>x!==r);return true;
+ }
+ const name=key.slice(3);
+ if(['seed','count','latencyMs','errorStatus'].includes(name))f.record[name]=el.value===''?null:Number(el.value);
+ else if(name==='referenceDate')f.record[name]=el.value+'T00:00:00.000Z';
+ else if(name==='enabled')f.record.enabled=el.checked;
+ else if(Object.hasOwn(f.record,name))f.record[name]=el.value;
+ return true;
+}
+
+function tdField(label,name,value,type='text',hint='',extra=''){
+ return `<label class="field" for="td-${name}">${label}<input id="td-${name}" data-field="td-${name}" type="${type}" value="${esc(value??'')}" ${extra}>${hint?`<small>${hint}</small>`:''}</label>`;
+}
+function tdSelect(label,name,values,current){return `<label class="field" for="td-${name}">${label}<select id="td-${name}" data-field="td-${name}">${values.map(([id,text])=>`<option value="${id}" ${current===id?'selected':''}>${esc(text)}</option>`).join('')}</select></label>`;}
+function testDataView(){
+ const settings=tdSettings(),sources=dataSources().sources,selected=sources.find(s=>s.id===tdUi.source)||sources[0];if(selected)tdUi.source=selected.id;
+ const preview=tdUi.preview,current=preview?.fingerprint===tdFingerprint(),enabled=settings.recipes.filter(r=>r.enabled).length;
+ return `<section class="td-workspace"><header class="page-heading"><div><h1>Test data</h1><p>Give your plugin realistic inputs before connecting a live service.</p></div><div class="row wrap">${button('Data Sources','nav','sources','small')}${button('Preview test kit','td-preview','','primary small','play',!enabled?'disabled':'')}</div></header>
+ <div class="td-safety"><strong>Only <code>.test-vault/</code></strong><span>Vault notes are seeded by the exported runner. API and database behavior is simulated. Live sources are never contacted.</span></div>
+ ${project().vault!==vaultTestRoot()?`<div class="callout warn"><div><strong>Earlier development target retained</strong><p>This project still points at <code>.dev-vault</code>. Test data always uses <code>.test-vault</code>. Switch the development target before installing this plugin for testing.</p>${button('Use .test-vault','td-target','','small')}</div></div>`:''}
+ <div class="td-settings"><div><strong>${settings.count} records</strong><span>Shared entity identities and valid links</span></div><div><strong>Seed ${settings.seed} · ${settings.locale}</strong><span>Reference date ${esc(settings.referenceDate.slice(0,10))}</span></div><div><strong>${enabled} enabled recipes</strong><span>Explicit opt-in; no live fallback</span></div>${button('Generation settings','td-settings','','small','settings')}</div>
+ <p class="error" role="alert" id="td-page-error" tabindex="-1">${esc(tdUi.error)}</p>
+ ${!sources.length?`<div class="td-empty"><h2>Start with a data-source contract</h2><p>Add a source and declare what each operation accepts and returns. Its shapes become your test-data recipe.</p>${button('Define data sources','nav','sources','primary')}</div>`:
+ `<div class="td-layout"><aside class="td-sources" aria-label="Test-data sources">${sources.map(s=>`<button class="td-source ${s.id===selected.id?'selected':''}" data-action="td-source" data-value="${s.id}" aria-pressed="${s.id===selected.id}">${dsGlyph(s.kind)}<span><strong>${esc(s.name)}</strong><small>${s.kind==='vault'?'Markdown fixture files':s.kind==='api'?'Loopback HTTP + in-memory preview':'In-memory database port'}</small><small>${settings.recipes.filter(r=>r.source===s.id&&r.enabled).length} of ${s.operations.length} recipes enabled</small></span></button>`).join('')}</aside><section class="td-detail"><div class="row between wrap"><div><h2>${esc(selected.name)}</h2><p>${selected.kind==='vault'?'Create valid notes in their declared folders. Related entity notes are included automatically.':selected.kind==='api'?'Export a localhost API simulator. It uses declared methods, paths, inputs and outputs; production URLs and credentials are excluded.':'Use an isolated application-port simulator, not a SQL database. Engine-specific migrations and database seeding are separate adapters.'}</p></div>${button('Enable source recipes','td-enable',selected.id,'small','plus',selected.status==='deprecated'||!selected.operations.length?'disabled':'')}</div>
+ ${selected.operations.length?selected.operations.map(o=>{const r=tdRecipe(selected,o);return `<article class="td-recipe"><div><h3>${esc(o.name)}</h3><p>${esc(DS_DIRECTIONS[o.direction])}</p><div class="row wrap">${badge(r.enabled?'Enabled for testing':'Not enabled',r.enabled?'good':'')}${badge(r.scenario)}${badge(selected.kind==='vault'?'Vault files':r.behavior==='fixture'?'Fixed response + capture':r.behavior)}</div><small>Input: ${esc(dsShapeLabel(o.input))} · Output: ${esc(dsShapeLabel(o.output))}</small></div>${button('Configure recipe','td-recipe',o.id,'small','settings')}</article>`;}).join(''):`<p>Add an operation before creating a generator.</p>${button('Add operation','ds-operation',selected.id,'small','plus')}`}</section></div>`}
+ <section class="td-preview"><div class="row between wrap"><div><h2>Preview and export</h2><p>Review generated data and boilerplate before creating any files.</p></div>${button('Export runnable test kit','td-export','','small','download',!current?'disabled':'')}</div>
+ ${preview?`<p class="${current?'':'error'}">${current?'Current preview':'Stale preview — rebuild before exporting'} · ${preview.generated.files.length} fixture files · ${(preview.generated.bytes/1024).toFixed(1)} KiB · built-in deterministic provider</p><div class="td-files"><div class="td-file-list" aria-label="Preview files">${preview.generated.files.slice(0,150).map((f,i)=>`<button data-action="td-file" data-value="${i}" class="${tdUi.file===i?'selected':''}" aria-pressed="${tdUi.file===i}">${esc(f.path)}</button>`).join('')}${preview.generated.files.length>150?'<p class="small muted">First 150 listed. All files are present in the exported runner plan.</p>':''}</div><pre tabindex="0" aria-label="Fixture content">${esc(preview.generated.files[tdUi.file]?.content||'No files for these shapes.')}</pre></div>`:'<p class="td-empty">Enable the needed recipes and select Preview test kit. Incomplete shapes block generation without discarding your design.</p>'}
+ <p class="small muted">The ZIP contains editable Node generators and the exact manifest, not an installed plugin. The runner defaults to a dry plan; apply and cleanup both require an approval hash. Existing notes, plugin settings and edited fixtures are preserved.</p></section>
+ <section class="td-simulation"><h2>Try an operation</h2><p>In-memory preview only. Use the exported localhost server to exercise the actual HTTP transport.</p><div id="td-simulation-panel">${tdSimulation()}</div></section></section>`;
+}
+function tdSimulation(){
+ let operations=[];try{operations=tdManifest().operations.filter(o=>o.kind!=='vault');}catch{/* Readiness errors appear in preview, not as destructive input replacement. */}
+ if(!operations.length)return '<p class="muted">Enable an API or database recipe to try its behavior. Vault recipes are exercised through actual seeded files and your plugin’s vault repository.</p>';
+ if(!operations.some(o=>o.id===tdUi.operation))tdChooseOperation(operations[0].id);
+ const op=operations.find(o=>o.id===tdUi.operation);
+ return `<div class="td-simulation-grid"><div>${tdSelect('Operation','operation',operations.map(o=>[o.id,o.source+' / '+o.slug]),tdUi.operation)}<label class="field" for="td-input">Input JSON<textarea id="td-input" data-field="td-input" rows="6" ${op.input.none?'disabled':''} placeholder="${op.input.none?'This operation has no input.':'JSON matching the input contract'}">${esc(tdUi.input)}</textarea></label><div class="row wrap">${button(tdUi.busy?'Running…':'Run in-memory test','td-simulate','','primary small','play',tdUi.busy?'disabled':'')}${button('Cancel','td-cancel','','small','',tdUi.busy?'':'disabled')}${button('Reset test session','td-reset-session','','ghost small','',tdUi.busy?'disabled':'')}</div></div><div><h3>Result</h3><pre class="td-result" tabindex="0" role="status" aria-live="polite">${esc(tdUi.output||'Run an operation to inspect its result. Fixed-response recipes capture writes; choose list/upsert/delete and a shared dataset for read-after-write behavior.')}</pre></div></div>`;
+}
+function tdPaintSimulation(){const p=document.getElementById('td-simulation-panel');if(p)p.innerHTML=tdSimulation();}
+function testDataForm(){
+ const f=tdUi.form;if(!f)return dialogBody('Test recipe unavailable','Reopen the current source.');const r=f.record;
+ let body;
+ if(f.kind==='settings')body=`<p>A fixed seed, date and provider version make fixture runs reproducible. Every entity gets the same count so required and one-to-one relationships remain satisfiable.</p><div class="td-form-grid">${tdField('Record count','count',r.count,'number','1–100 per entity or root collection.','min="1" max="100"')}${tdField('Seed','seed',r.seed,'number','A repeatable non-negative seed.','min="0" max="2147483647"')}${tdField('Reference date','referenceDate',r.referenceDate.slice(0,10),'date')}${tdSelect('Locale','locale',[['en','English'],['de','German']],r.locale)}</div>`;
+ else {
+  const source=dataSources().sources.find(s=>s.id===f.source),op=source?.operations.find(o=>o.id===f.operation);if(!op)return dialogBody('Operation removed','Copy your draft before closing.');
+  const rows=[...tdRows(op.input,'input'),...tdRows(op.output,'output')];
+  body=`<p><strong>${esc(source.name)} / ${esc(op.name)}</strong><br>Input enters the source; output leaves it. This recipe never uses the source’s production location.</p><label class="check-label"><input type="checkbox" data-field="td-enabled" ${r.enabled?'checked':''}> Enable this operation for test data</label><div class="td-form-grid">${tdSelect('Scenario','scenario',[['populated','Populated / successful'],['empty','Empty collection / no seeded notes'],['error','Deliberate error response'],['slow','Slow successful response']],r.scenario)}${tdField('Delay in milliseconds','latencyMs',r.latencyMs,'number','0–5,000; slow has a 1,000 ms minimum.','min="0" max="5000"')}${tdField('Error HTTP status','errorStatus',r.errorStatus,'number','Used only for the error scenario.','min="400" max="599"')}${source.kind==='vault'?'<p>Vault mode seeds Markdown and dependencies. Empty/error scenarios do not create notes; they do not delete previous fixtures.</p>':tdSelect('Simulator behavior','behavior',[['fixture','Fixed response; capture requests'],['list','List records from shared dataset'],['upsert','Save / replace record in shared dataset'],['delete','Delete record from shared dataset']],r.behavior)}${tdField('Shared dataset','dataset',r.dataset,'text','Same source + dataset connects list and write operations.','maxlength="60"')}${tdField('Record identity field','keyField',r.keyField,'text','Required for stateful writes; never guessed from a display name.','maxlength="60"')}</div>
+ <p class="small muted">List needs a collection output and no input. Stateful writes need a matching object shape and identity. Custom queries, DTO transformations and synchronization are not inferred.</p><h3>Field generators</h3><p class="small muted">Auto uses declared types, formats, enums and entity defaults. Entity values are shared across sources; edit their defaults in Entities. Optional Faker integration is available in the exported kit.</p><div class="td-rules">${rows.map((row,i)=>{const rule=r.rules.find(x=>x.side===row.side&&x.path===row.path)||{provider:'auto',argument:''};return `<div class="td-rule"><label for="td-provider-${i}"><strong>${row.side} ${esc(row.path||'/')}</strong><small>${esc(row.type)}${row.entity?' · shared entity':''}</small></label><select id="td-provider-${i}" data-field="td-rule-provider" data-index="${i}" ${row.entity?'disabled':''}>${Object.entries(TD_PROVIDERS).map(([id,label])=>`<option value="${id}" ${rule.provider===id?'selected':''}>${label}</option>`).join('')}</select><input data-field="td-rule-argument" data-index="${i}" aria-label="Literal JSON or sequence prefix for ${esc(row.path)}" placeholder="Literal JSON or sequence prefix" value="${esc(rule.argument)}" maxlength="1000" ${row.entity?'disabled':''}></div>`;}).join('')||'<p>Declare payload fields first. No-payload operations need no field generators.</p>'}</div>`;
+ }
+ return dialogBody(f.kind==='settings'?'Test-data settings':'Test-data recipe',body+`<p class="error" role="alert" id="td-error" tabindex="-1">${esc(tdUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save recipe','td-save','','primary'));
+}
+function testDataTargetForm(){return dialogBody('Use .test-vault for development?', '<p>This changes the declared build/install target, not its files. Existing <code>.dev-vault</code> notes and plugin installations remain untouched. An unfinished preparation review will be cleared and must be reviewed again.</p><p>Install explicitly with <code>npm run build:local -- --vault .test-vault</code>, then open that directory as a separate vault.</p>',button('Cancel','close','','ghost')+button('Use .test-vault','td-target-confirm','','primary'));}
+
+// Export inert, readable Node sources. No eval, dynamic loading or API requests in this UI.
+function tdToolSources(){return JSON.parse(document.getElementById('test-data-tool-sources').textContent);}
+function tdBoilerplateFiles(d=design()){
+ if(!tdSettings(d).recipes.some(r=>r.enabled))return [];
+ const manifest=tdManifest(d),engine=createFixtureEngine();engine.generate(manifest);createFixtureAdapter(manifest).dispose();
+ const files=Object.entries(tdToolSources()).map(([name,content])=>({path:'scripts/test-data/'+name,content,owner:'test-data-kit',role:'Executable development-only fixture tooling'}));
+ files.push({path:'scripts/test-data/manifest.json',content:JSON.stringify(manifest,null,2)+'\n',owner:'test-data-kit',role:'Resolved test contracts and deterministic generator recipes'});
+ files.push({path:'scripts/test-data/package.json',content:JSON.stringify({name:'plugin-test-data-kit',version:'1.0.0',private:true,type:'module',engines:{node:'>=22.13.0'},scripts:{plan:'node cli.mjs plan',apply:'node cli.mjs apply',serve:'node cli.mjs serve'}},null,2)+'\n',owner:'test-data-kit',role:'Isolated development tools; no added production dependencies'});
+ const faker="import { readFile } from 'node:fs/promises';\nimport { resolve, dirname } from 'node:path';\nimport { fileURLToPath } from 'node:url';\nimport { Faker, en, de } from '@faker-js/faker';\nimport { createFakerProvider } from './faker-provider.mjs';\nimport { planFixtures, applyFixtures } from './storage.mjs';\nimport { startFixtureServer } from './server.mjs';\nconst manifest = JSON.parse(await readFile(new URL('./manifest.json', import.meta.url), 'utf8'));\nconst faker = new Faker({ locale: manifest.locale === 'de' ? [de, en] : [en] });\nconst options = { provider: createFakerProvider(faker, '10.5.0'), providerName: '@faker-js/faker@10.5.0/' + manifest.locale };\nconst root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');\nconst [command = 'plan', flag, approval] = process.argv.slice(2);\nif (command === 'serve' && !flag) {\n  const session = await startFixtureServer(manifest, options);\n  console.log(JSON.stringify({ url: session.url, token: session.token }));\n  const stop = () => session.close();\n  process.once('SIGINT', stop); process.once('SIGTERM', stop);\n} else if (command === 'apply' && flag === '--approve' && /^[a-f0-9]{64}$/.test(approval || '')) console.log(await applyFixtures(root, manifest, approval, options));\nelse if (command === 'plan' && !flag) {\n  const { desired, retained, ...plan } = await planFixtures(root, manifest, options);\n  console.log(JSON.stringify(plan, null, 2));\n} else throw new Error('Use plan, apply --approve HASH, or serve.');\n";
+ files.push({path:'scripts/test-data/faker-example.mjs',content:faker,owner:'test-data-kit',role:'Optional Faker seam; install and qualify pinned dev dependency separately'});
+ files.push({path:'scripts/test-data/README.md',content:tdReadme(),owner:'test-data-kit',role:'Test-vault, simulator, reset and bootstrap instructions'});
+ return files;
+}
+function tdReadme(){return `# Generated test-data kit
+
+Development-only. No production endpoint or credential is retained in manifest.json. This is working fixture tooling, not the complete generated plugin.
+
+## Workflow
+
+1. Build and install the plugin with the existing template installer: \`npm run build:local -- --vault .test-vault\`.
+2. Open \`.test-vault/\` as a separate Obsidian vault and enable the installed plugin manually. Do not disable Restricted Mode programmatically. Opening the authoring vault is not sufficient.
+3. Run \`node scripts/test-data/cli.mjs plan\` from the project. This performs no writes. Review the exact files and approval hash.
+4. Run \`node scripts/test-data/cli.mjs apply --approve HASH\`. The plan and on-disk files are checked again. A changed source/recipe/file/receipt requires a new plan.
+5. API testing: \`node scripts/test-data/cli.mjs serve\`. An ephemeral 127.0.0.1 listener prints its URL and a random test-session token. Configure your development-only HTTP adapter to use \`URL/sources/SOURCE_SLUG\` and the token as a Bearer header. Use declared methods/resources and JSON payloads. The listener does not proxy anything.
+
+The root template retains its historical .dev-vault default for compatibility; always pass the explicit .test-vault argument here. The companion uses .test-vault for new projects. Older projects require the explicit target-switch action; their old files are not moved.
+
+## Application-port wiring
+
+Import \`createFixtureAdapter\` from \`adapters.mjs\` only in development/test bootstrap. Construct it from this manifest, then inject \`adapter.port('source-slug')\` for the matching application data port. Method names are the operation slugs. Vault sources must still use the actual vault repository against the seeded notes. Dispose the adapter/server when the test ends. Do not automatically fall back to live services for an unknown operation or missing configuration.
+
+This adapter models a database at the application-port boundary. It is NOT PostgreSQL/SQLite/etc. Engine-specific constraints, SQL, migrations and driver behavior need a separate disposable database adapter and integration tests. HTTP localhost mode is provided because process-level interception cannot be assumed to cover every native Obsidian transport. Adapt your requestUrl/fetch wrapper explicitly; redirects to external hosts are forbidden in test mode.
+
+### HTTP client bootstrap
+
+The exported \`client.mjs\` supplies a loopback-only HTTP application port. Import \`createTestHttpPort\`, pass the enabled manifest, source slug, URL and session token printed by the runner, and inject the returned \`port\` into your development bootstrap. The client validates payloads, serializes path/query/body fields, rejects redirects, times out and aborts on disposal. Browser CORS is allowed only for the exact native Obsidian app origin; harnesses can use the memory port or a reviewed transport wrapper. Do not persist the ephemeral session token in the design or production configuration.
+
+## Behavior and fidelity
+
+- Fixed-response fixtures validate input and capture the last 100 requests. Writes do not silently mutate later reads.
+- List + upsert/delete recipes with the same source/dataset/key explicitly model read-after-write. Upserts replace complete objects, not partial patches. Record schemas must agree; mappings and query/filter behavior are not invented.
+- List requires no input; custom filters require a custom adapter. Dataset capacity is 1,000 records. Unknown operations fail closed.
+- Empty is a valid empty collection; use an error scenario for missing single records. Slow is at least 1,000 ms. Error uses the configured 400–599 status. Error/empty vault recipes do not seed notes and do not delete prior notes.
+- Input examples and output fixtures are stored under .test-vault/.fixtures. These hidden files are not vault notes. Open the test vault to see its visible declared note folders.
+- All semantic identities are allocated before relationships. Linked notes include their dependencies, including cycles/self-links. Every relationship uses a valid one-to-one pairing within the equal-sized entity pools; random distributions and uniqueness policies beyond this pairing are not claimed.
+- Custom vault DTOs must be flat Obsidian-compatible objects. Nested API shapes require explicit mapping to notes. Required defaults and enums are validated before any write.
+
+## Safe cleanup and reproducibility
+
+\`node scripts/test-data/cli.mjs reset-plan\`, then \`node scripts/test-data/cli.mjs reset --approve HASH\` removes only unchanged receipt-owned fixture files. Existing notes, .obsidian, plugin data.json and unrelated data are never cleanup targets. Obsolete generated files are retained on ordinary regeneration; review reset to remove them. Manual fixture edits create conflicts, even if the new output would match an unowned file.
+
+The writer uses a scoped lock, preconditions and rollback with retained recovery backups after uncertain failure. This is not OS-enforced atomicity against another process swapping directories between checks. Stop competing writers before seed/reset. A held recovery lock is not automatically deleted. Review its backups manually.
+
+Seed, count, fixed UTC reference date and engine version determine the built-in output. Field-local streams avoid random-call-order drift. Keep this manifest and generator version with the project. No Math.random/Date.now drives fixture values. Preview listings are capped; the exported plan lists all generated files.
+
+## Optional Faker
+
+The default kit needs no npm installation. The browser uses the built-in provider, not Faker. To opt in, install \`@faker-js/faker@10.5.0\` as an exact DEV dependency inside scripts/test-data and retain its generated lockfile. Run \`node scripts/test-data/faker-example.mjs plan\`, then \`apply --approve HASH\` or \`serve\`. Do not mix built-in and Faker approval hashes. The supplied provider supports names and reserved-domain synthetic emails, seeds every field and fixes the reference date. Qualify the actual installed Faker version before use; it is not vendored or loaded by the concept. Production source never imports Faker. Other data values still use the declared schemas and deterministic built-in generators.
+
+## Limits
+
+100 records per entity/collection, 3,000 fixture files, 5 MB output, 64 KiB HTTP request bodies, 5-second configured delays. No live source seeding, arbitrary expressions, remote schema refs, database drivers, automatic credentials, automatic native plugin installation or claims that your plugin consumes these ports before explicit bootstrap wiring.
+`;
+}
+function tdZip(files){
+ const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+ const crc=bytes=>{let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;};
+ const header=(length,signature)=>{const b=new Uint8Array(length);new DataView(b.buffer).setUint32(0,signature,true);return b;};
+ for(const f of files){
+  const name=enc.encode(f.path),data=enc.encode(f.content),sum=crc(data),local=header(30,0x04034b50),v=new DataView(local.buffer);
+  v.setUint16(4,20,true);v.setUint16(6,0x800,true);v.setUint16(12,33,true);v.setUint32(14,sum,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,name.length,true);
+  parts.push(local,name,data);
+  const c=header(46,0x02014b50),d=new DataView(c.buffer);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint16(8,0x800,true);d.setUint16(14,33,true);d.setUint32(16,sum,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);d.setUint16(28,name.length,true);d.setUint32(42,offset,true);central.push(c,name);offset+=local.length+name.length+data.length;
+ }
+ const end=header(22,0x06054b50),view=new DataView(end.buffer),size=central.reduce((n,b)=>n+b.length,0);view.setUint16(8,files.length,true);view.setUint16(10,files.length,true);view.setUint32(12,size,true);view.setUint32(16,offset,true);
+ return new Blob([...parts,...central,end],{type:'application/zip'});
+}
+function tdDownloadKit(){
+ const files=tdBoilerplateFiles(),blob=tdZip(files),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='plugin-test-data-kit.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Test kit exported. Review its plan before applying; nothing was written into a vault.');
+}
+
 // One canvas selection, with a separate catalog cursor. These are view-local,
 // non-persistent projections; selecting a source never selects a surface too.
 function sitemapSelection(d=design()){
@@ -12970,6 +13777,7 @@ function requestInlineRemoval(kind,id){
  document.querySelector('#modal [data-action="editor-keep-editing"]')?.focus();return true;
 }
 function restoreInlineRemoval(){
+ if(modalType==='style-guide-form'&&sgUi.form?.removal){sgUi.form.removal=false;redrawModal();sgPaintDraft();return true;}
  const f=inlineRemovalForm();if(!f?.removeRequested)return false;
  delete f.removeRequested;redrawModal();return true;
 }
@@ -13079,10 +13887,10 @@ function dsSave(){
    dsPosition(source.id,m,d);if(old)m.flows[m.flows.indexOf(old)]=flow;else m.flows.push(flow);selected=source.id;savedFlow=flow.id;
   }else if(f.formKind==='remove-source'){
    if(m.flows.some(x=>x.source===f.id))throw Error('Remove this source’s data flows explicitly first. The source and all usages were preserved.');
-   m.sources=m.sources.filter(s=>s.id!==f.id);delete m.positions[f.id];selected=null;
+   m.sources=m.sources.filter(s=>s.id!==f.id);if(m.testing)m.testing.recipes=m.testing.recipes.filter(r=>r.source!==f.id);delete m.positions[f.id];selected=null;
   }else if(f.formKind==='remove-operation'){
    if(m.flows.some(x=>x.operation===f.id))throw Error('Remove or reassign the flows using this operation first.');
-   const s=m.sources.find(s=>s.id===f.sourceId);if(s)s.operations=s.operations.filter(o=>o.id!==f.id);
+   const s=m.sources.find(s=>s.id===f.sourceId);if(s)s.operations=s.operations.filter(o=>o.id!==f.id);if(m.testing)m.testing.recipes=m.testing.recipes.filter(r=>r.operation!==f.id);
   }else if(f.formKind==='remove-flow')m.flows=m.flows.filter(x=>x.id!==f.id);
   else if(f.formKind==='position'){
    const x=Number(f.x),y=Number(f.y);if(!String(f.x).trim()||!String(f.y).trim()||![x,y].every(n=>Number.isFinite(n)&&Math.abs(n)<=50000))throw Error('Enter coordinates between −50,000 and 50,000.');
@@ -13184,7 +13992,7 @@ function dsDetail(source){
  return `<header class="ds-detail-heading"><span class="ds-glyph">${dsGlyph(source.kind)}</span><div><h2>${esc(source.name)}</h2><code>${esc(source.slug)}</code></div>${badge(source.status,source.status==='deprecated'?'warn':'')}</header><p>${esc(source.description||'Describe why the plugin uses this source.')}</p>
  <dl class="ds-facts"><dt>Source type</dt><dd>${esc(DS_KINDS[source.kind])}</dd><dt>${source.kind==='database'?'Connection reference':'Location'}</dt><dd><code>${esc(source.locator||'Configure at runtime')}</code></dd><dt>Authentication</dt><dd>${esc(source.auth)}${source.credentialRef?' · reference '+esc(source.credentialRef):''}</dd></dl>
  ${source.kind==='vault'?'<p class="ds-note">“Active vault” means the vault where the generated plugin runs, not permission to read this authoring vault. Its folder paths remain vault-relative.</p>':''}
- <div class="row wrap">${button('Edit source','ds-edit',source.id,'small','settings')}${button(placed?'Show on sitemap':'Place on sitemap','ds-place',source.id,'small','layers')}${button('Remove source','ds-remove-source',source.id,'ghost small','trash')}</div>
+ <div class="row wrap">${button('Edit source','ds-edit',source.id,'small','settings')}${button('Test data','td-open',source.id,'small','play')}${button(placed?'Show on sitemap':'Place on sitemap','ds-place',source.id,'small','layers')}${button('Remove source','ds-remove-source',source.id,'ghost small','trash')}</div>
  <div class="ds-section-heading"><h3>Operations & data shapes</h3>${button('Add operation','ds-operation',source.id,'small','plus',source.operations.length>=DS_LIMITS.operations?'disabled':'')}</div><p class="small muted">Input goes <strong>into the source</strong>. Output comes <strong>out of the source</strong>. Editing a contract affects every listed usage and requires a new generator review.</p>
  ${source.operations.length?source.operations.map(o=>`<article class="ds-operation"><div class="row between"><div><h4>${esc(o.name)}</h4><code>${esc(o.slug)}</code></div>${button('Edit operation','ds-operation',source.id+':'+o.id,'small')}</div><p class="small">${esc(DS_DIRECTIONS[o.direction])} · <code>${esc(o.method==='adapter'?o.resource||'Runtime adapter':o.method+' '+(o.resource||'/'))}</code></p><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${esc(dsShapeLabel(o.input))}</strong></div><div><span>Output · from source</span><strong>${esc(dsShapeLabel(o.output))}</strong></div></div><div class="row between"><small>${flows.filter(f=>f.operation===o.id).length} sitemap usages</small>${button('Remove operation','ds-remove-operation',source.id+':'+o.id,'ghost small')}</div></article>`).join(''):'<div class="ds-help-empty">Add the first operation. A source alone does not define what data can be read or written.</div>'}
  <div class="ds-section-heading"><h3>Sitemap data flows</h3>${button('Connect to card','ds-connect',source.id,'primary small','link',!source.operations.length||source.status==='deprecated'?'disabled':'')}</div>${dsFlowList(flows)}<div class="row wrap mt16">${button('Validate declarations','ds-validate','','small','check')}${button('Preview contracts','ds-preview','','ghost small','code')}</div>`;
@@ -13904,10 +14712,10 @@ function vaultTemplateFiles(w){return {
  'package.json':JSON.stringify({name:w.id,version:w.version,private:true,notice:'Illustrative template file — not an installable project'},null,2),
  'src/main.ts':'// Reviewed template entry fixture. Real source comes from a qualified template artifact.\n',
  'scripts/setup.mjs':'// Canonical setup entry fixture. No code is executed by this concept.\n',
- '.gitignore':'.obsidian/\n.dev-vault/\nnode_modules/\ndist/\nreports/\n',
+ '.gitignore':'.obsidian/\n.dev-vault/\n.test-vault/\nnode_modules/\ndist/\nreports/\n',
  'Project.md':projectNoteText({...project(),...w,key:project().key})
 };}
-function protectedVaultPath(path){return path===CONCEPT_VAULT.config||path.startsWith(CONCEPT_VAULT.config+'/')||path==='.git'||path.startsWith('.git/')||path==='project'||path.startsWith('project/')||path==='.dev-vault'||path.startsWith('.dev-vault/');}
+function protectedVaultPath(path){return path===CONCEPT_VAULT.config||path.startsWith(CONCEPT_VAULT.config+'/')||path==='.git'||path.startsWith('.git/')||path==='project'||path.startsWith('project/')||path==='.dev-vault'||path.startsWith('.dev-vault/')||path==='.test-vault'||path.startsWith('.test-vault/');}
 function vaultFilePlan(w){
  const files=state.vaultFiles;
  return Object.entries(vaultTemplateFiles(w)).map(([path,after])=>{
@@ -14038,7 +14846,7 @@ function handleVaultAction(action,value){
  if(action==='vault-legacy-export'){downloadText({text:modalData.snapshot,filename:'previous-workbench-recovery.json'});return true;}
  if(['nav','palette-nav','outline-start'].includes(action)&&!project()){
   const target=action==='outline-start'?'prds':value;
-  if(['prds','sitemap','entities','components','patterns','blueprints','prepare'].includes(target)){openVaultIdentity(target==='prepare'?'overview':target);return true;}
+  if(['prds','sitemap','entities','sources','testdata','designsystem','components','patterns','blueprints','prepare'].includes(target)){openVaultIdentity(target==='prepare'?'overview':target);return true;}
  }
  return false;
 }
@@ -16325,8 +17133,10 @@ window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});
 
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='style-guide-form')return JSON.stringify(sgUi.form?.record||null);
+ if(modalType==='test-data-form')return JSON.stringify(tdUi.form?.record||null);
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  if(modalType==='semantic-form'||modalType==='data-source-form')return editorDraftCheckpoint(inlineRemovalForm());
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
@@ -16568,10 +17378,10 @@ function replacementDesign(id){const d=design(),fresh=createDesign(id),mapping=n
 let designUi={selected:null,mode:'map',filter:'',category:'all',plan:null,file:0,error:'',undoMessage:'',form:null};
 function design(){const p=project();if(!p)throw Error('Define this vault’s project before editing.');if(!p.design){p.design=createDesign('blank');p.design.goal='';}return ensureProductModel(p.design);}
 function designOwner(){return project()?.key||'uninitialized-vault';}
-function designSnapshot(d){return designCopy({blueprint:d.blueprint,goal:d.goal,platform:d.platform,nodes:d.nodes,links:d.links,nextId:d.nextId,library:d.library,prds:d.prds,...(d.librarySchema?{librarySchema:d.librarySchema}:{}),...(d.canvas?{canvas:d.canvas}:{}),...(d.semantic?{semantic:d.semantic}:{}),...(d.dataSources?{dataSources:d.dataSources}:{})});}
+function designSnapshot(d){return designCopy({blueprint:d.blueprint,goal:d.goal,platform:d.platform,nodes:d.nodes,links:d.links,nextId:d.nextId,library:d.library,prds:d.prds,...(d.librarySchema?{librarySchema:d.librarySchema}:{}),...(d.canvas?{canvas:d.canvas}:{}),...(d.semantic?{semantic:d.semantic}:{}),...(d.dataSources?{dataSources:d.dataSources}:{}),...(d.designSystem?{designSystem:d.designSystem}:{})});}
 function recordDesign(){const d=design();d.history.push(designSnapshot(d));d.history=d.history.slice(-DESIGN_LIMITS.history);d.future=[];}
 function designChanged(){const d=design();d.revision++;designUi.plan=null;designUi.error='';save();}
-function designHistory(direction){const d=design(),before=designFingerprint(d);const stack=direction==='undo'?d.history:d.future;if(!stack.length)return;const other=direction==='undo'?d.future:d.history;other.push(designSnapshot(d));if(other.length>20)other.shift();const sourceCounter=d.dataSources?.nextId||1;const semanticCounter=d.semantic?.nextId||1;const nextId=d.nextId,snapshot=stack.pop();Object.assign(d,snapshot);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(nextId,d.nextId);if(before!==designFingerprint(d))designChanged();else save();render();notify((before!==designFingerprint(d)?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');}
+function designHistory(direction){const d=design(),before=designFingerprint(d);const stack=direction==='undo'?d.history:d.future;if(!stack.length)return;const other=direction==='undo'?d.future:d.history;other.push(designSnapshot(d));if(other.length>20)other.shift();const sourceCounter=d.dataSources?.nextId||1;const semanticCounter=d.semantic?.nextId||1;const nextId=d.nextId,snapshot=stack.pop();Object.assign(d,snapshot);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.designSystem)delete d.designSystem;if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(nextId,d.nextId);if(before!==designFingerprint(d))designChanged();else save();render();notify((before!==designFingerprint(d)?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');}
 function selectedNode(){if(!project())return null;const d=design();return d.nodes.find(n=>n.id===designUi.selected)||null;}
 function nodeOwner(d,node){let n=node;const seen=new Set();while(n&&!seen.has(n.id)){seen.add(n.id);if(n.kind==='view')return n;n=d.nodes.find(x=>x.id===n.parent);}return null;}
 function nodePlacement(d,n){return nodeOwner(d,n)?.placement||n.placement;}
@@ -16582,7 +17392,7 @@ function structuralDesign(value){
  const text=(x,max=120)=>typeof x==='string'&&x.length<=max;
  if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&Object.hasOwn(NODE_KINDS,n.kind)&&LAYOUTS.some(l=>l.id===n.layout)&&Object.hasOwn(PLACEMENTS,n.placement)&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
  if(!value.links.every(e=>e&&text(e.id)&&e.id.length>0&&!e.id.startsWith('contains-')&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
- return dataSourcesShape(value.dataSources)&&erShape(value.semantic)&&productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total&&dataSourceIssues(value,false).length===0;
+ return validStyleGuide(value.designSystem)&&dataSourcesShape(value.dataSources)&&erShape(value.semantic)&&productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total&&dataSourceIssues(value,false).length===0;
 }
 function designIssues(d){
  const issues=[...productIssues(d),...brickIssues(d),...semanticIssues(d),...dataSourceIssues(d)];const add=(level,code,message,node=null)=>issues.push({level,code,message,node});
@@ -16636,7 +17446,7 @@ function importDesign(text){
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error'&&i.code!=='data-source-shape');if(issues.length)throw Error(issues[0].message);
- const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
+ const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources','designSystem']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},designSystem:clean.designSystem,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
 }
 function validSavedDesign(d){
  const plain=o=>o&&typeof o==='object'&&!Array.isArray(o);
@@ -16679,7 +17489,7 @@ function designFiles(d){
  const hooks=d.nodes.filter(n=>n.kind!=='group').map(n=>`| ${n.label.replace(/\|/g,'/')} | ${n.kind} | ${n.goal.replace(/[\r\n|]/g,' ')||'Describe the outcome and acceptance rule.'} |`).join('\n');
  put('docs/BUSINESS-LOGIC-HANDOFF.md',`# Business-logic handoff\n\nConcept only. No application build or test was executed.\n\n## Product goal\n${d.goal}\n\n| Surface | Type | Business decision still required |\n| --- | --- | --- |\n${hooks}\n\n## Never inferred\nUndeclared entities, authorization, formulas, business rules, persistence adapters, remote credentials, real test results. Declared entities and relationships feed schema previews, not a native data migration.\n\n## Requested patterns\n${d.nodes.flatMap(n=>n.patterns.map(id=>'- '+n.label+': '+PATTERNS.find(p=>p.id===id).name)).join('\n')}\n`,'blueprint','Developer work remaining');
  if(d.nodes.some(n=>bricksOf(n).length))put('docs/SCREEN-CONTENT-OUTLINE.md',contentOutlineMarkdown(d),'blueprint','Ordered content intent and explicit component mappings');
- return [...files,...productPlanFiles(d),...semanticFiles(d),...dataSourceFiles(d)];
+ return [...files,...productPlanFiles(d),...semanticFiles(d),...dataSourceFiles(d),...tdBoilerplateFiles(d),...sgFiles(d)];
 }
 function buildDesignPlan(d){
  const issues=designIssues(d);let files=[];try{files=designFiles(d);}catch{issues.push({level:'error',code:'preview-contract',message:'The outline contains a contract that cannot be previewed. Repair the design; no source has been changed.'});}if(files.some(f=>f.content.length>=100000)||new Set([...Object.keys(d.emitted),...files.map(f=>f.path)]).size>600)issues.push({level:'error',code:'preview-capacity',message:'This scaffold exceeds the concept’s saved-preview capacity (600 files; each below 100,000 characters). Export the blueprint and reduce the preview scope. Nothing was emitted.'});const changes=files.map(f=>{const before=d.emitted[f.path];return {...f,status:!before?'create':before.owner!==f.owner?'conflict':before.content===f.content?'unchanged':before.protected?'conflict':'update'};});

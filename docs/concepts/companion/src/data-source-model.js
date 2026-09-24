@@ -55,7 +55,7 @@ function dsResourceValid(source,resource){
 }
 function dataSourcesShape(m){
  if(m===undefined)return true;
- if(!dsKeys(m,['schema','nextId','sources','flows','positions'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
+ if(!dsKeys(m,['schema','nextId','sources','flows','positions','testing'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
  const ids=[];
  for(const s of m.sources){
   if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
@@ -76,6 +76,7 @@ function dataSourcesShape(m){
  }
  if(new Set(ids).size!==ids.length||ids.some(id=>Number(id.split('-').at(-1))>=m.nextId)||new Set(m.sources.map(s=>s.slug)).size!==m.sources.length)return false;
  if(new Set(m.flows.map(f=>JSON.stringify([f.source,f.operation,f.card,f.direction]))).size!==m.flows.length)return false;
+ if(!tdValidSettings(m.testing,m))return false;
  return Object.keys(m.positions).length<=DS_LIMITS.sources&&Object.entries(m.positions).every(([id,p])=>m.sources.some(s=>s.id===id)&&dsKeys(p,['x','y'])&&[p.x,p.y].every(n=>Number.isFinite(n)&&Math.abs(n)<=50000));
 }
 function dsReferences(d){
@@ -103,7 +104,7 @@ function dataSourceIssues(d,qualify=true){
 }
 function dsGeneration(d){
  const m=d.dataSources;if(!m?.sources.length)return null;
- return {schema:1,sources:designCopy(m.sources),flows:designCopy(m.flows),resolvedShapes:m.sources.flatMap(s=>s.operations.map(o=>({source:s.id,operation:o.id,input:dsResolveShape(o.input,d),output:dsResolveShape(o.output,d)})))};
+ return {schema:1,...(m.testing?{testing:designCopy(m.testing)}:{}),sources:designCopy(m.sources),flows:designCopy(m.flows),resolvedShapes:m.sources.flatMap(s=>s.operations.map(o=>({source:s.id,operation:o.id,input:dsResolveShape(o.input,d),output:dsResolveShape(o.output,d)})))};
 }
 function dsResolveShape(s,d=design()){
  if(s.mode==='unspecified')return {declared:false};

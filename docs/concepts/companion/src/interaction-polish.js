@@ -1,7 +1,9 @@
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='style-guide-form')return JSON.stringify(sgUi.form?.record||null);
+ if(modalType==='test-data-form')return JSON.stringify(tdUi.form?.record||null);
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  if(modalType==='semantic-form'||modalType==='data-source-form')return editorDraftCheckpoint(inlineRemovalForm());
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
