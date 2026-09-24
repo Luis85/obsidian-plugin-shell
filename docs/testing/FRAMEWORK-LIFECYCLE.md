@@ -431,8 +431,9 @@ Light with a dark main view; a later failure showed Dark; Linux illegal-access
 errors were received during pop-out closure; Windows UI-03-04 coverage timeout and
 archive EBUSY remain separate unresolved facts. Driver receipt time is not renderer
 throw time, observation ends at CDP disconnect, and EBUSY proves neither a prior
-timeout nor an orphan. Current Windows source/served checks are not fixed-byte native
-qualification, and later Linux passes do not explain historical causes.
+timeout nor an orphan. Current Windows source checks and Linux served-browser checks
+are not fixed-byte Windows native qualification, and later Linux passes do not
+explain historical causes.
 
 ## Final consumer and next increment
 

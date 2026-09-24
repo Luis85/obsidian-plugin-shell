@@ -57,17 +57,18 @@ hashes. Parent serializes the launch. No retained candidate is instrumented or
 rewritten. Preserve the first result, screenshot, independent ledger, receipts,
 primary errors and cleanup errors. Stop on a reproduced failure for analysis.
 
-1. Subscribe to the installed runtime, then create a separate persistent native
-   `Notice` using its public constructor. The driver owns its handle.
+1. Subscribe to the installed runtime, then invoke the separately installed
+   qualification fixture's command to create a persistent native `Notice` through
+   the public API. That plugin owns the Notice; the driver retains its DOM element.
 2. Open two actual showcase leaves. In one renderer turn, dispatch the real
    optional recovery-example button and close its owning leaf. Require the real
    300 ms progress timer to acquire/release without a progress sink appearing.
    Open a fresh initiating leaf beside the retained sibling for the next phase.
 3. Both leaves create ordinary native notices. Start the initiating view's
-   modal-backed recovery example. Retain the actual native action function using
-   public CDP `DOMDebugger.getEventListeners`, then call that function twice with
-   `Runtime.callFunctionOn`. The real modal remains unresolved: require one pending
-   availability check, one registry and the actual disabled native action. Wait
+   modal-backed recovery example. Retain the actual native action function in a
+   named public-CDP object group using `DOMDebugger.getEventListeners`, then invoke
+   it twice with `Runtime.callFunctionOn`. The real modal remains unresolved:
+   require one pending availability check, one registry and the disabled action. Wait
    for the genuine 300 ms delayed progress notice to appear.
 4. Close only the initiating leaf. Require its notices/modal/timers/registry to
    release and pending availability to settle without success. Invoke the retained
@@ -77,8 +78,9 @@ primary errors and cleanup errors. Stop on a reproduced failure for analysis.
    and the unrelated persistent native Notice remains usable.
 5. Disable the plugin. Require all observed plugin resources to release, both
    retained plugin notice elements to remain detached and the independent fault
-   ledger to remain exactly empty. Update the foreign Notice successfully using
-   its public handle, then clean up that driver-owned Notice only.
+   ledger to remain exactly empty. Update the foreign Notice successfully through
+   its fixture command, then disable the fixture plugin and verify its owned
+   Notice element is detached. The driver does not obtain the Notice instance.
 6. Restore the enabled plugin and view for the remaining native protocol. Retain
    observation and cleanup failures separately from the primary failure.
 
