@@ -21,3 +21,6 @@ node-qualified
 .template-state/
 .template-setup.lock/
 .codex-authoring.lock/
+
+# Isolated generated-plugin test data and local mock sessions
+/.test-vault/

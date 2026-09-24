@@ -1,0 +1,78 @@
+{
+  "scope": "Reviewed local bundles, not a dependency-security audit",
+  "workflow_commit": "ea408790d73a400ae1cd8e63d8fb10b83991c995",
+  "workflow_run": 35857006004,
+  "artifact_id": 10748230981,
+  "artifact_sha256": "9b6f75c5a4053e0d7c7928ce6b4dff463910f9ffb091879637e8e13eab0c34e0",
+  "versions": {
+    "vue": "3.5.43",
+    "pinia": "4.0.3",
+    "@vue-flow/core": "1.48.2"
+  },
+  "adaptations": [
+    "One hash-guarded unquoted environment token in the Vue Flow IIFE is quoted on assembly; raw vendor remains unchanged.",
+    "The fixed upstream stylesheet is scoped to #vf-root and dashdraw is namespaced in a separate derived stylesheet."
+  ],
+  "files": [
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "sha256": "8d1d116d98a3ad8bc97c631de6c898fd89a45a0e97045ab71dda2f6f8bcff31a",
+      "bytes": 5505
+    },
+    {
+      "path": "d3-NOTICE.txt",
+      "sha256": "3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4",
+      "bytes": 731
+    },
+    {
+      "path": "packages.json",
+      "sha256": "efb8ca73b77c3b8093891a454c8d91a4a9ce55947a90f1ed5c94da33a9d45904",
+      "bytes": 18963
+    },
+    {
+      "path": "pinia-LICENSE.txt",
+      "sha256": "91a2845c4db44e7497b514b98634a674c737986ad0db81599307cf733bf850b2",
+      "bytes": 1100
+    },
+    {
+      "path": "pinia.iife.prod.js",
+      "sha256": "8101551218f6b4665baa35aef1d97096c69833afbf68cc13a43032759662343d",
+      "bytes": 5413
+    },
+    {
+      "path": "vue-LICENSE.txt",
+      "sha256": "1bb85cc9b13b81ef41c81c51866172fc345e0503c86726a6755b796590b70175",
+      "bytes": 1091
+    },
+    {
+      "path": "vue-flow-core-LICENSE.txt",
+      "sha256": "102b29fe1db781aaad7c28e4ac4f20de288781ac5cd06936099be15a473c1794",
+      "bytes": 1101
+    },
+    {
+      "path": "vue-flow-core.iife.js",
+      "sha256": "92cd354fac92f7a998565c40d6e3b59d9031dfc56db4d393a524cdb57cf27edc",
+      "bytes": 368324
+    },
+    {
+      "path": "vue-flow.css",
+      "sha256": "fdf470cad60025356057e92fb8e478d340d9d5dc2e641479d5fcdad7b38fd8d8",
+      "bytes": 3930
+    },
+    {
+      "path": "vue-flow.scoped.css",
+      "sha256": "911368b9ce32dcf1cba5756dc2e57d231c288a7c3eebf9445727f25c13ea1a5a",
+      "bytes": 4473
+    },
+    {
+      "path": "vue.runtime.global.prod.js",
+      "sha256": "f2f1547993b942e5e24f2d6e63577b21739a37a920e09c656b0e87eb0ad55175",
+      "bytes": 109374
+    },
+    {
+      "path": "vueuse-NOTICE.txt",
+      "sha256": "465a9a8da0bf1963e3cbe0adc5690f633e2a3376c3e183b1e6e5b4797c8c8452",
+      "bytes": 1101
+    }
+  ]
+}

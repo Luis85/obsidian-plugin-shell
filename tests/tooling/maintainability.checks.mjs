@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sha256 } from '../../scripts/testing/source-inputs.mjs';
@@ -132,5 +132,67 @@ test('maintainability inventories exact immutable vendor data and refuses change
     assert.equal(report.inventory.files.find(file => file.path === vendorArchive).view, 'unsupported');
     await writeFile(join(root, vendorArchive), 'not the approved immutable archive');
     assert.equal(run(root).status, 1);
+  });
+});
+
+
+test('maintainability inventories every concept Python source without diluting production metrics', async () => {
+  await fixture(async root => {
+    const before = run(root); assert.equal(before.status, 0, before.stderr);
+    const baseline = JSON.parse(await readFile(join(packet(before).output, 'report.json'), 'utf8'));
+    const sources = [];
+    for (const directory of ['scripts/concepts', 'tests/concepts']) {
+      await mkdir(join(root, directory), { recursive: true });
+      for (const name of (await readdir(resolve(directory))).filter(name => name.endsWith('.py')).sort()) {
+        const path = `${directory}/${name}`;
+        const bytes = await readFile(resolve(path));
+        await writeFile(join(root, path), bytes);
+        sources.push({ path, bytes });
+      }
+    }
+    assert.ok(sources.some(file => file.path === 'scripts/concepts/build-companion.py'));
+    assert.ok(sources.some(file => file.path === 'tests/concepts/companion-storage.browser.py'));
+    const result = run(root); assert.equal(result.status, 0, result.stderr);
+    const output = packet(result).output;
+    const reportPath = join(output, 'report.json');
+    const report = JSON.parse(await readFile(reportPath, 'utf8'));
+    const inventoried = report.inventory.files.filter(file => file.extension === 'py');
+    assert.equal(inventoried.length, sources.length);
+    for (const source of sources) {
+      const entry = inventoried.find(file => file.path === source.path);
+      assert.ok(entry, source.path);
+      assert.equal(entry.sha256, sha256(source.bytes));
+      assert.equal(entry.bytes, source.bytes.length);
+      assert.equal(entry.view, 'unsupported');
+      assert.equal(entry.measurement, 'not-measured');
+      assert.match(entry.reason, /Python concept tooling/);
+      for (const view of Object.values(report.views)) assert.ok(!view.inputs.some(input => input.path === source.path));
+    }
+    assert.deepEqual(report.views.production.inputs, baseline.views.production.inputs);
+    assert.deepEqual(report.views.production.health, baseline.views.production.health);
+    assert.deepEqual(report.views.production.duplication, baseline.views.production.duplication);
+    assert.equal(run(root, ['--check', output]).status, 0);
+    // Unsupported by Fallow does not mean absent from stale/tampered evidence checks.
+    const original = await readFile(reportPath, 'utf8');
+    report.inventory.files = report.inventory.files.filter(file => file.path !== sources[0].path);
+    await writeFile(reportPath, JSON.stringify(report));
+    assert.match(run(root, ['--check', output]).stderr, /METRIC_STALE_INVENTORY/);
+    await writeFile(reportPath, original);
+    await writeFile(join(root, sources[0].path), Buffer.concat([sources[0].bytes, Buffer.from('\n# changed Python source\n')]));
+    assert.match(run(root, ['--check', output]).stderr, /METRIC_STALE_INVENTORY/);
+  });
+});
+
+test('maintainability rejects unknown languages, production Python and unclassified concept inputs', async () => {
+  await fixture(async root => {
+    for (const path of ['src/probe.py', 'scripts/probe.py', 'tests/probe.py', 'harness/probe.py',
+      'scripts/concepts/probe.svelte', 'scripts/concepts/probe.pyc', 'scripts/concepts/nested/probe.py']) {
+      await mkdir(join(root, path, '..'), { recursive: true });
+      await writeFile(join(root, path), 'not an approved metric input');
+      const result = run(root);
+      assert.equal(result.status, 1, path);
+      assert.ok(result.stderr.includes(`METRIC_UNCLASSIFIED_INPUT: ${path}`), result.stderr);
+      await rm(join(root, path));
+    }
   });
 });

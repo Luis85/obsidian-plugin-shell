@@ -172,3 +172,36 @@ runtime/tooling gaps in the readiness ledger, the Actions publication interface,
 real public-release qualification and expanded host/device/accessibility evidence.
 Native evidence is limited to named checks and cannot certify all hosts, themes
 or devices.
+
+## Proposed companion product
+
+The [companion developer-workbench PRD](COMPANION-PLUGIN-PRD.md) specifies a
+same-repository Obsidian companion built on the shell: **one vault, one project**.
+A developer opens an initially empty folder as a vault, installs the companion,
+and defines/designs the project before needing Node/npm or a template. Preparation
+adds reviewed source files to that same vault while preserving its notes and host
+configuration. Generated-plugin testing uses the contained `.dev-vault`, not the
+companion's authoring profile. Other projects are other Obsidian vaults.
+
+The [single-vault contract](../concepts/companion/SINGLE-VAULT.md) identifies the
+implemented browser concept, native persistence/hydration backlog and acceptance
+boundary. The [earlier research](../research/2026-09-23-companion-plugin.md) is dated
+background; its external-source and multi-project proposals are superseded.
+This remains proposed native product scope, not an installable companion,
+marketplace listing, native file-write qualification or change to root-template
+verification results. The shared CLI stays canonical.
+
+### Companion semantic design and variants
+
+The companion's single-project Design workspace also declares runtime entities,
+Obsidian-compatible properties, cardinalities and source-owned note relationships.
+Visual ER sections organize the model without becoming persistence boundaries.
+Sitemap surfaces reference declared entity IDs; the reviewed generator consumes
+those declarations alongside views and reusable components. Named component
+variants share one contract, pin defaults/version at placement and retain local
+content until reviewed upgrades. See the [semantic-layer contract](../concepts/companion/SEMANTIC-LAYER.md).
+
+The browser concept implements these authoring interactions and input-driven
+source previews. Shared CLI lowering, native Markdown schema records,
+relationship resolution and safe data migrations remain separately qualified
+implementation packages; no existing root runtime behavior is replaced here.
