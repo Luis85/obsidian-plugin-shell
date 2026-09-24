@@ -1,0 +1,112 @@
+name: Temporary companion product-audit delivery
+on:
+  push:
+    branches: [docs/companion-plugin-prd]
+    paths:
+      - '.github/companion-product-audit-delivery/**'
+      - '.github/workflows/companion-product-audit-delivery.yml'
+permissions:
+  contents: write
+concurrency:
+  group: companion-product-audit-delivery
+  cancel-in-progress: false
+jobs:
+  deliver:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Apply only the reviewed, checksum-locked concept files
+        shell: bash
+        env:
+          EXPECTED_EVENT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PYTHON'
+          import base64, hashlib, json, lzma, os, subprocess
+          from pathlib import Path
+          base = 'a27dc75102ea2832e723fe66abdca6bf4e67eff5'
+          digest = 'f663810a48ea072d117558f279859f17dcc9748394c69f37a2e8b43a2e00dad4'
+          helpers = {f'.github/companion-product-audit-delivery/part-{i}.b64' for i in range(3)}
+          helpers.add('.github/workflows/companion-product-audit-delivery.yml')
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          if git('rev-parse', 'HEAD') != os.environ['EXPECTED_EVENT'] or git('rev-parse', 'HEAD^') != base:
+              raise SystemExit('Delivery head or parent moved; refusing to apply')
+          if set(git('diff', '--name-only', base, 'HEAD').splitlines()) != helpers:
+              raise SystemExit('Unexpected changes in delivery envelope')
+          encoded = ''.join(Path(f'.github/companion-product-audit-delivery/part-{i}.b64').read_text() for i in range(3))
+          raw = lzma.decompress(base64.b64decode(encoded, validate=True), memlimit=128 * 1024 * 1024)
+          if hashlib.sha256(raw).hexdigest() != digest:
+              raise SystemExit('Payload checksum mismatch')
+          payload = json.loads(raw)
+          if payload['base'] != base or len(payload['files']) != 21:
+              raise SystemExit('Payload base or file count mismatch')
+          scripts = {'scripts/concepts/build-companion.py', 'scripts/concepts/run-browser-checks.py'}
+          tests = {'tests/concepts/companion-product-audit.browser.py', 'tests/concepts/companion-safety.browser.py', 'tests/concepts/companion-storage.browser.py'}
+          pending = {}
+          for name, entry in payload['files'].items():
+              path = Path(name)
+              permitted = name.startswith('docs/concepts/companion/src/') or name in {
+                  'docs/concepts/companion/README.md', 'docs/concepts/companion/PRODUCT-AUDIT.md',
+                  'docs/concepts/companion/PRODUCT-AUDIT-VERIFICATION.md'
+              } or name in scripts or name in tests
+              if not permitted or path.is_absolute() or '..' in path.parts or any(part.is_symlink() for part in [path, *path.parents]):
+                  raise SystemExit('Refusing unsafe or out-of-scope path: ' + name)
+              if entry['before'] is None:
+                  if path.exists():
+                      raise SystemExit('New file already exists: ' + name)
+                  original = b''
+              else:
+                  if not path.is_file():
+                      raise SystemExit('Missing regular file: ' + name)
+                  original = path.read_bytes()
+                  if hashlib.sha256(original).hexdigest() != entry['before']:
+                      raise SystemExit('Original checksum mismatch: ' + name)
+              text = original.decode('utf-8')
+              end_limit = len(text)
+              for start, end, replacement in reversed(entry['edits']):
+                  if not isinstance(start, int) or not isinstance(end, int) or not isinstance(replacement, str) or not 0 <= start <= end <= end_limit:
+                      raise SystemExit('Invalid or overlapping edit: ' + name)
+                  text = text[:start] + replacement + text[end:]
+                  end_limit = start
+              result = text.encode('utf-8')
+              if hashlib.sha256(result).hexdigest() != entry['after']:
+                  raise SystemExit('Result checksum mismatch: ' + name)
+              pending[path] = result
+          for path, result in pending.items():
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(result)
+          subprocess.run(['python3', '-B', 'scripts/concepts/build-companion.py'], check=True)
+          html = Path('docs/concepts/companion/index.html')
+          if hashlib.sha256(html.read_bytes()).hexdigest() != payload['html_sha256']:
+              raise SystemExit('Assembled HTML differs from tested candidate')
+          subprocess.run(['git', 'add', '--', *payload['files'], str(html)], check=True)
+          if set(git('diff', '--cached', '--name-only').splitlines()) != set(payload['files']) | {str(html)}:
+              raise SystemExit('Unexpected staged paths')
+          print('Verified 21 source/document/test files and byte-identical assembled HTML')
+          PYTHON
+      - name: Verify assembly, syntax and executable generator regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B scripts/concepts/build-companion.py --check
+          python3 -B tests/concepts/companion-assembly.test.py
+          for file in docs/concepts/companion/src/*.js; do node --check "$file"; done
+          node --test tests/tooling/test-data-*.checks.mjs
+          git diff --cached --check
+      - name: Commit tested sources without overwriting newer work
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(concept): audit product flows, recovery and accessibility'
+          git push origin HEAD:refs/heads/docs/companion-plugin-prd
