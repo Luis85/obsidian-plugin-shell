@@ -1,12 +1,12 @@
 # Delivery tasks
 
-**Order:** shell first → real companion on shell → publication last. **Concept status:** still evolving; not feature-complete or natively implemented. See [strategy](../product/DELIVERY-STRATEGY.md), [plan](../product/COMPANION-IMPROVEMENT-PLAN.md) and [traceability](TRACEABILITY.md).
+**Order:** qualify and ship shell + project generator + TypeScript CLI → real companion on shipped shell → companion publication. **Concept status:** still evolving; not feature-complete or natively implemented. See [strategy](../product/DELIVERY-STRATEGY.md), [plan](../product/COMPANION-IMPROVEMENT-PLAN.md) and [traceability](TRACEABILITY.md).
 
-There are **44 individual task files**. Every task starts as `planned`; these files do not report completed implementation. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
+There are **56 individual task files**: 34 shell/framework, seven concept, ten native companion and five companion-publication tasks. New tasks are `planned`; SH-022 is explicitly `blocked` by the reviewed source/CI and missing framework scope. This revision closes no implementation task. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
 
 ## Working rules
 
-Priorities express delivery order: P0 shell; P1 concept refinement that must not displace shell work; P2 native companion; P3 publication. They do not downgrade security or quality requirements. SH-022 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of the publication lane.
+Priorities express delivery order: P0 framework including its separately approved shipment; P1 secondary concept refinement; P2 native companion; P3 companion publication. They do not downgrade safety or quality. SH-022, SH-034 and CX-007 are hard prerequisites of CP-001. CP-010 is a hard prerequisite of PUB tasks, not of the first framework release. Read the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and [PR #5 readiness review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md).
 
 Inspect current source and actual evidence before implementing. A task may extend or qualify existing behavior; do not recreate working makers/services because older prose calls them pending. Record covered criteria and implement only the remaining gap. Preserve parent requirements, exact dependency pins, existing thresholds, protected data and unrelated edits.
 
@@ -39,7 +39,19 @@ Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted conc
 | [SH-019](shell/SH-019.md) | Independent generated reference plugin | SH-010, SH-013, SH-014, SH-018 |
 | [SH-020](shell/SH-020.md) | Host, accessibility and performance qualification | SH-003, SH-005, SH-006, SH-007 |
 | [SH-021](shell/SH-021.md) | Supported dependency and security baseline | SH-001, SH-013 |
-| [SH-022](shell/SH-022.md) | Shell consumer-readiness gate | SH-019, SH-020, SH-021 |
+| [SH-022](shell/SH-022.md) | Framework technical-readiness gate | SH-019, SH-020, SH-021, SH-032, SH-033 |
+| [SH-023](shell/SH-023.md) | Reconcile the implementation baseline and Windows CI | SH-001 |
+| [SH-024](shell/SH-024.md) | Extract the shared TypeScript tooling core | SH-002, SH-011, SH-015, SH-023 |
+| [SH-025](shell/SH-025.md) | Deliver the central human and agent CLI | SH-024 |
+| [SH-026](shell/SH-026.md) | Assemble the runnable framework developer kit | SH-013, SH-025 |
+| [SH-027](shell/SH-027.md) | Implement guided setup and project JSON intake | SH-026, SH-005, SH-015 |
+| [SH-028](shell/SH-028.md) | Integrate full project generation with shared makers | SH-017, SH-018, SH-024, SH-027 |
+| [SH-029](shell/SH-029.md) | Unify development, test-vault and lifecycle commands | SH-025, SH-010, SH-028 |
+| [SH-030](shell/SH-030.md) | Provide ownership-aware maintenance and upgrades | SH-012, SH-018, SH-025, SH-028 |
+| [SH-031](shell/SH-031.md) | Expose generated-plugin release preparation and rehearsal | SH-021, SH-025, SH-028, SH-029 |
+| [SH-032](shell/SH-032.md) | Qualify the clean release-archive user journey | SH-019, SH-026, SH-027, SH-028, SH-029, SH-030, SH-031 |
+| [SH-033](shell/SH-033.md) | Qualify the framework-side companion operation adapter | SH-024, SH-025, SH-028, SH-029, SH-007, SH-012 |
+| [SH-034](shell/SH-034.md) | Ship the qualified framework before companion conversion | SH-022 |
 
 Start at SH-001. SH-022 includes the transitive prerequisites above and all newly accepted shell requirements; it cannot close with required consumer behavior only present in the concept.
 
@@ -59,11 +71,11 @@ Concept work may continue secondarily while shell implementation proceeds. No wh
 
 ## Native companion P2
 
-Every CP task inherits SH-022 and CX-007 through CP-001. Concept-only screens, virtual storage and simulated receipts do not satisfy native acceptance.
+Every CP task inherits SH-022, SH-034 and CX-007 through CP-001. Concept-only screens, virtual storage and simulated receipts do not satisfy native acceptance.
 
 | Task | Deliverable | Depends on |
 | --- | --- | --- |
-| [CP-001](companion/CP-001.md) | Convert concept into a real shell-based native product | SH-022, CX-007 |
+| [CP-001](companion/CP-001.md) | Convert concept into a real shell-based native product | SH-022, SH-034, CX-007 |
 | [CP-002](companion/CP-002.md) | Persist and resume canonical design records | CP-001 |
 | [CP-003](companion/CP-003.md) | Integrate native design editors | CP-002 |
 | [CP-004](companion/CP-004.md) | Optional template setup through shared operations | CP-002 |
@@ -74,14 +86,14 @@ Every CP task inherits SH-022 and CX-007 through CP-001. Concept-only screens, v
 | [CP-009](companion/CP-009.md) | End-to-end native and standalone regression qualification | CP-006, CP-007, CP-008 |
 | [CP-010](companion/CP-010.md) | Native companion readiness gate | CP-009 |
 
-## Publication P3
+## Companion publication P3
 
-Distribution risk may be investigated earlier, but actual public packaging decisions and publication follow qualified native delivery. Publication tasks require the separate approvals described in each file.
+These tasks publish the companion after native qualification, referencing the previously shipped compatible framework. SH-031 owns generated-plugin release tooling; SH-034 owns the first framework shipment. Every public mutation still requires its own explicit candidate-specific approval.
 
 | Task | Deliverable | Depends on |
 | --- | --- | --- |
 | [PUB-001](publication/PUB-001.md) | Resolve current policy and distribution topology | CP-010 |
-| [PUB-002](publication/PUB-002.md) | Rehearse exact companion/template release artifacts | PUB-001 |
+| [PUB-002](publication/PUB-002.md) | Rehearse companion artifacts with shipped framework | PUB-001 |
 | [PUB-003](publication/PUB-003.md) | Final onboarding, support and release documentation | PUB-002 |
 | [PUB-004](publication/PUB-004.md) | Explicitly authorized publication of exact candidate | PUB-003 |
 | [PUB-005](publication/PUB-005.md) | Post-publication installation and recovery verification | PUB-004 |

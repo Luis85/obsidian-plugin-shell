@@ -95,3 +95,9 @@ The browser suite downloads an actual project export and passes those bytes to t
 ## Next implementation boundary
 
 The next writer increment must define a reviewed deterministic plan from this envelope, resolve target-relative codebase/tests paths, compile schema/domain/component contracts, preserve foreign and edited files, invalidate stale approvals and prove generated source through the shell's normal qualification. The complete native companion remains downstream of shell readiness. The current entrypoint must not be relabeled as full generation until those writes and their safety/evidence contracts actually exist.
+
+## Planned framework-first successor — 2026-09-24
+
+The [CLI/generator implementation plan](FRAMEWORK-CLI-GENERATOR-PLAN.md) introduces a separate project-root setup/import/compiler workflow from a downloaded framework archive. SH-015/SH-024 extract shared TypeScript semantic validation; SH-027 reconciles imported identity/folder settings; SH-028 generates through the same makers as the CLI; SH-033 proves the companion adapter contract.
+
+This does **not** change v1 above: the existing script remains dependency-free, read-only and exact-byte on stdout, with the documented vault-relative target. A future full writer must not silently inherit execution approval or relabel these tests as generation evidence. Source/test paths remain portable design fields; the new development project root is selected locally, not imported as an absolute vault path.

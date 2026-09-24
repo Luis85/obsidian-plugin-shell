@@ -1,10 +1,10 @@
 # Shell-first companion improvement plan
 
-**Revision:** 1.1 · **Date:** 2026-09-24 · **Status:** Planned work, not implementation evidence.
+**Revision:** 1.2 · **Date:** 2026-09-24 · **Status:** Planned work, not implementation evidence.
 
-**Controlling decision:** Complete a proper standalone shell and its reusable features first. Continue developing the companion concept. Convert an agreed concept scope into a real plugin built on the qualified shell. Publish only afterward.
+**Controlling decision:** Qualify and ship the standalone framework developer kit containing shell, shared TypeScript CLI and JSON project generator first. Continue concept design secondarily; convert its agreed scope on the shipped framework; publish the companion only after native qualification. See the [detailed implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
 
-This revises the supplied `COMPANION-IMPROVEMENT-PLAN.md` (SHA-256 `7c8236b401ca4d3c9c8530dcd8ffecd37b52007546b40e21f16bcfde5c6cdad8`). Its product outcomes are retained, but its companion-first investment order and immediate root-identity recommendation are superseded by the owner's subsequent shell-first instruction. Baseline inspected: PR #5 at `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. This is a documentation plan, not a new runtime audit.
+This revises the supplied `COMPANION-IMPROVEMENT-PLAN.md` (SHA-256 `7c8236b401ca4d3c9c8530dcd8ffecd37b52007546b40e21f16bcfde5c6cdad8`). Its product outcomes are retained, but its companion-first investment order and immediate root-identity recommendation are superseded by the owner's subsequent shell-first instruction. Baseline inspected: PR #5 at `e413ec628b4227c4b8dc8b6ec3d12b8487533557`. That is the historical planning baseline. The [current bounded review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md) inspects PR #5 at `e71c655fe376e51a520fb8f194800e9294eb8e4e`, including Windows CI failures and missing PR #17 discovery integration; this revision is documentation, not their implementation.
 
 Read the [delivery strategy](DELIVERY-STRATEGY.md), [task index](../tasks/README.md), [traceability crosswalk](../tasks/TRACEABILITY.md) and [companion architecture contract](../architecture/COMPANION-ON-SHELL.md).
 
@@ -16,7 +16,7 @@ The companion is a future shell-based product and a demanding reference consumer
 
 The generated plugin is developer-owned source and independently built runtime assets. It must not depend on an installed companion, the maintainer repository or a remote service to continue ordinary development.
 
-The eventual install-companion-first experience remains valid. It does not mean the companion must be implemented before its foundation.
+The primary entry is a downloaded framework release archive, not an installed plugin. An install-companion-first experience remains an optional later route; it does not delay standalone framework shipment.
 
 ## 2. Baseline and limits
 
@@ -30,12 +30,12 @@ Each task starts by reconciling its scope with current source and exact evidence
 
 | Lane | Priority | Completion boundary |
 | --- | --- | --- |
-| Shell capabilities | P0, highest | SH-022: independently useful and qualified for the accepted consumer scope. |
+| Framework capabilities and shipment | P0, highest | SH-022 technical readiness; SH-034 separately authorized shipment of shell, CLI and generator. |
 | Continuing concept development | P1, secondary/parallel | CX-007: bounded conversion scope reviewed, not whole-product feature completion. |
 | Native companion | P2 | CP-010: agreed features implemented on shell and natively qualified. |
-| Publication | P3, last | Explicitly authorized matching artifacts and verified distribution. |
+| Companion publication | P3, last | Explicitly authorized native companion artifacts compatible with the shipped framework. |
 
-Native conversion cannot start before SH-022 and CX-007. Publication cannot start before CP-010. Early risk identification is allowed; public promotion and manifest identity changes are not pulled forward. A new concept requirement can reopen an affected shell task before native adoption.
+Native conversion requires SH-022, SH-034 and CX-007. Companion publication requires CP-010; first framework shipment does not. Generated-plugin release tooling belongs in SH-031 before framework shipment. Technical readiness never replaces explicit approval for public actions. A new concept requirement can reopen an affected shell task before native adoption.
 
 ## 4. Shell capability target
 
@@ -45,7 +45,7 @@ These are capabilities, not mandatory new packages. Preserve the current archite
 
 ## 5. Developer journeys
 
-**Standalone shell:** obtain a qualified template artifact → guided setup → add a feature through public APIs/makers → run browser and native development loops → inspect exact evidence. The companion is never required.
+**Primary standalone journey:** download framework release asset → extract into new project folder → dependency-free compiled CLI bootstrap → configure → import project JSON → resolve differences → review/generate boilerplate → develop/build/test → explicitly publish the generated plugin → maintain. Direct Node and npm entry points share handlers. The companion is never required.
 
 **Future companion:** install native companion → define one project → design without external developer tools → optionally add shell source to the same vault → generate a reviewed implementation → test in an isolated vault → continue with an editor/CLI.
 
@@ -71,7 +71,7 @@ The native UI projects Markdown design records with durable IDs, record kinds, s
 
 Generic serialization, revision checks and recovery belong in shell services. Companion settings select safe project-relative authoring paths; they do not create a second design database or allow imported notes to authorize execution. Multiple leaves share committed state, not drafts.
 
-The current authoring vault remains the source root. Preserve the existing contained `.dev-vault` contract. The earlier requested `.test-vault` name is a test-context requirement to reconcile, not an automatic folder migration. Any new path option requires reviewed installer and fixture tests.
+The standalone development project root is independent of any Obsidian vault. The companion may retain its same-vault authoring route; imported data cannot choose an arbitrary host root. Preserve existing `.dev-vault` projects; the new-kit `.test-vault` default is introduced only with qualified configuration/migration behavior. `codebaseFolder` and `testsFolder` default to `src` and `tests`; propagate custom paths through all generated build/test tooling.
 
 ## 9. Shared design-to-code compiler
 
@@ -117,7 +117,7 @@ The concept then designs the authoring UI; the native companion later implements
 
 ## 13. Safe preparation, operations and recovery
 
-Additive preparation starts from a vault already containing notes, host configuration and the companion. Inspect a pinned template artifact in bounded staging, derive exact create/update/unchanged/conflict entries, protect the actual host profile, Git metadata, existing design and unrelated files, and recheck preimages before writes.
+The primary setup prepares an extracted standalone project. Optional companion-driven additive preparation starts from a vault already containing notes, host configuration and the companion. Inspect a pinned template artifact in bounded staging, derive exact create/update/unchanged/conflict entries, protect the actual host profile, Git metadata, existing design and unrelated files, and recheck preimages before writes.
 
 Share plan/apply, locks, cancellation, journals and receipts across CLI and UI. Review downloading, source writes, dependency execution, builds, deployment and activation separately. Receipt freshness depends on relevant input and tool identities. Imported approval is never local execution permission.
 
@@ -147,21 +147,21 @@ Run three native acceptance journeys: design without external tooling; design to
 
 ## 17. Task breakdown and change control
 
-The [44 individual tasks](../tasks/README.md) contain purpose, baseline entry points, scope, acceptance, evidence and dependencies: 22 shell, 7 concept, 10 native companion and 5 publication tasks. Initial status is planned; writing the backlog completes none of them.
+The [56 individual tasks](../tasks/README.md) contain purpose, baseline, scope, acceptance, verification, evidence and dependencies: 34 shell/framework, seven concept, ten native companion and five companion-publication tasks. SH-023–SH-034 capture the CLI/archive/generator refinement. Task frontmatter is authoritative; SH-022 is blocked and no implementation is completed by this revision.
 
 The [crosswalk](../tasks/TRACEABILITY.md) accounts for the supplied plan's 18 sections and E01–E12 packages. Phase priority overrides their original P0/P1 labels. Scope additions are allowed; append stable IDs, update dependency links and reopen impacted gates instead of renumbering existing work.
 
 Each implementation PR should close one coherent task or a justified tightly coupled slice. Reconcile current implementation before editing; record evidence for existing capabilities instead of treating the entire task as greenfield work. Retain owner approval separately from technical readiness.
 
-## 18. Publication last
+## 18. Companion publication last
 
-After native readiness, decide and rehearse companion distribution versus standalone template export, root metadata, version compatibility, licenses/notices, checksums/provenance, documentation, privacy/network disclosures, support and update/recovery guidance.
+After native readiness, decide and rehearse companion distribution against the already shipped framework kit, including root metadata, version compatibility, licenses/notices, checksums/provenance, documentation, privacy/network disclosures, support and update/recovery guidance.
 
-Do not switch the root manifest merely to match the future product narrative. Select a distribution topology only after the actual shell/companion compositions exist and their independence is proven. A nested manifest alone is not an assumed solution; publication tasks recheck current primary-source requirements.
+Do not switch the root manifest merely to match the future product narrative. Select and qualify the standalone framework distribution through SH-026/SH-032/SH-034 before companion conversion. Select the later companion topology against that compatible shipped foundation after native qualification. A nested manifest alone is not an assumed solution; publication tasks recheck current primary-source requirements.
 
 PUB-004 requires new, explicit owner approval for the exact release candidate and destinations. No automatic tags, releases, listing submissions, permission changes or activation are authorized. PUB-005 validates installation and recovery after an authorized release.
 
-**Priority conclusion:** shell and reusable features first; continuing concept work remains open; real companion conversion on shell follows; publication is the final phase.
+**Priority conclusion:** ship the qualified shell, project generator and TypeScript CLI first; concept work remains open; native conversion uses that shipped framework; companion publication is last. No publication is authorized by the roadmap.
 
 ## Source and document provenance
 
