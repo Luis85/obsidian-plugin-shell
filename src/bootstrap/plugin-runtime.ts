@@ -10,8 +10,11 @@ import { createCommands } from './commands';
 import { authoringPanels } from './authoring';
 import { authoringViewDefinitions } from './authoring-views';
 import { failure } from '../domain/outcome';
+import { createRuntimeObservation } from '../infrastructure/runtime-observation';
 export async function initializePlugin(plugin: Plugin) {
-  const services = await createServices(nativeAdapters(plugin));
+  const observations = createRuntimeObservation();
+  const services = await createServices({ ...nativeAdapters(plugin),
+    observeError: observations.error, observeLifecycle: observations.lifecycle });
   let disposed = false;
   const views = new Set<ShowcaseView>();
   let stopHostEvents = () => {};
@@ -26,7 +29,7 @@ export async function initializePlugin(plugin: Plugin) {
     for (const view of Array.from(views)) {
       try { view.disposeView(); } catch { services.diagnostics.report('view.dispose', 'view.close'); }
     }
-    stopHostEvents(); services.dispose();
+    stopHostEvents(); services.dispose(); observations.dispose();
   };
   const toggleHeader = async () => {
     if (disposed) return failure('disposed', 'error.disposed');
@@ -67,5 +70,5 @@ export async function initializePlugin(plugin: Plugin) {
     stopSettings = () => settings.dispose(); plugin.addSettingTab(settings);
     stopHostEvents = bindHostEvents(plugin, services.hostEvents, services.diagnostics, services.scheduler);
   } catch (error) { dispose(); new Notice(`${plugin.manifest.name} could not start. Check the installed version.`); throw error; }
-  return { dispose, diagnosticSnapshot: () => services.diagnostics.current };
+  return { dispose, diagnosticSnapshot: () => services.diagnostics.current, observation: observations.observation };
 }

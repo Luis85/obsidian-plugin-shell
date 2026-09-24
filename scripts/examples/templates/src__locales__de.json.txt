@@ -26,7 +26,11 @@
     "blocked": "Plugin-Daten konnten nicht sicher gelesen oder ein Speichervorgang nicht bestätigt werden. Speichern bleibt zum Schutz der Daten gesperrt. Behebe das Problem und starte das Plugin vor weiteren Änderungen neu.",
     "hideHeader": "Obsidian-Ansichtskopf ausblenden",
     "hideHeaderHelp": "Gilt sofort für alle Plugin-Shell-Ansichten. Hier, in den nativen Einstellungen oder über die Befehlspalette wiederherstellen.",
-    "headerSaving": "Ansichtseinstellung wird gespeichert…"
+    "headerSaving": "Ansichtseinstellung wird gespeichert…",
+    "recoveryCorrupt": "Gespeicherte Plugin-Daten sind ungültig. Sie bleiben erhalten und Speichern ist gesperrt. Stelle eine geprüfte Sicherung wieder her oder repariere die Daten bei deaktiviertem Plugin. Starte es danach neu.",
+    "recoveryFuture": "Gespeicherte Plugin-Daten verwenden ein neueres Schema. Sie bleiben erhalten und Speichern ist gesperrt. Verwende eine kompatible Plugin-Version; ersetze die Daten nicht durch Standardwerte.",
+    "recoveryInaccessible": "Plugin-Daten konnten nicht gelesen werden. Speichern ist gesperrt. Prüfe Zugriff und Speicherverfügbarkeit und starte das Plugin nach Behebung des Lesefehlers neu.",
+    "recoveryUncertain": "Der letzte Speichervorgang konnte nicht bestätigt werden. Weitere Änderungen sind gesperrt. Prüfe die gespeicherten Daten vor einem Neustart und entscheide dann bewusst über weitere Änderungen. Wiederhole den Vorgang nicht blind."
   },
   "feedback": {
     "dismiss": "Hinweis schließen",

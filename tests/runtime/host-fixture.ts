@@ -34,7 +34,7 @@ class Workspace extends HostEvents {
 }
 class HostApp {
   workspace = new Workspace();
-  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', getAbstractFileByPath: vi.fn(() => null), getRoot: () => new HostFolder(), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
+  vault = Object.assign(new HostEvents('vault.'), { configDir: '.obsidian', adapter: { exists: vi.fn(async () => false), read: vi.fn(async () => '') }, getAbstractFileByPath: vi.fn(() => null), getRoot: () => new HostFolder(), getMarkdownFiles: () => [], getFiles: () => [], create: vi.fn(), createFolder: vi.fn() });
   metadataCache = new HostEvents('metadata.');
   loadLocalStorage = vi.fn(() => null); saveLocalStorage = vi.fn();
 }

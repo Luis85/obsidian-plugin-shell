@@ -26,6 +26,16 @@ measurements determine this gate. A tool crash, unknown schema or invalid JSON
 never counts as a measurement. The independent zero-finding `check:analyzer`,
 architecture, source-line and coverage checks retain their own rules.
 
+The separate dead-code analyzer declares `src/features/api.ts` as one explicit
+public library entry. Fallow 3.28.0 treats entry exports as externally consumed;
+the installed `schema.json` documents this through `entry` and
+`includeEntryExports`. This preserves the reviewed authoring contracts after
+example removal without dummy consumers or ignored directories. It does not
+change this metric inventory or coverage floors. The
+`public-api-analysis.checks.mjs` negative control runs the actual analyzer and
+still rejects an unrelated feature file and unused private implementation
+exports/types. Expanding the public API remains an explicit design review.
+
 Fallow parses Vue scripts and also emits `<template>` aggregate render metrics.
 These markup aggregates are listed separately as `templateFindings`; they are
 not JavaScript functions and are not qualified against a per-function ceiling.

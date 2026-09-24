@@ -55,7 +55,8 @@ it('registers an exact native view and command with isolated drafts and owned li
 });
 it('keeps localized selected mounts owned and fails unknown selections before attachment', async () => {
   const plugin = new FixturePlugin(new App(), manifest);
-  vi.mocked(plugin.loadData).mockResolvedValueOnce({ schemaVersion: 1, preferences: { ...defaults, locale: 'de' } });
+  vi.mocked(plugin.app.vault.adapter.exists).mockResolvedValueOnce(true);
+  vi.mocked(plugin.app.vault.adapter.read).mockResolvedValueOnce(JSON.stringify({ schemaVersion: 1, preferences: { ...defaults, locale: 'de' } }));
   const services = await createServices(nativeAdapters(plugin)); const root = document.createElement('div'); document.body.append(root);
   try {
     const close = mountShowcase(root, services, undefined, undefined, 'fixture-panel'); await settle();

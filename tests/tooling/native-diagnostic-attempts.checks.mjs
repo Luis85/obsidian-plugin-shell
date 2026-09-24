@@ -27,10 +27,13 @@ test('foundation native driver retains separate failed attempts and their origin
       assert.match(report.reason, /\.native-runner.*obsidian-launcher.*package\.json/);
       assert.deepEqual(report.checks, []); assert.deepEqual(report.assets, []); assert.deepEqual(report.errors, []);
       assert.equal(report.launcherVersion, undefined); assert.equal(report.cleanupFailure, undefined);
-      assert.equal(report.scratchPreserved, undefined);
+      assert.equal(report.scratchPreserved, true);
+      assert.deepEqual(report.launchResources, []);
       return report;
     };
     const first = execute();
+    const firstScratch = await readdir(join(root, '.nq'));
+    assert.equal(firstScratch.length, 1); assert.match(firstScratch[0], /^[a-zA-Z0-9]{6}$/);
     const firstDirectory = first.attemptDirectory ?? join(root, 'reports/native');
     const originalReport = await readFile(join(firstDirectory, 'report.json'));
     const originalLog = await readFile(join(firstDirectory, 'host.log'));
@@ -50,7 +53,13 @@ test('foundation native driver retains separate failed attempts and their origin
     assert.deepEqual(JSON.parse(lastReport), second);
     assert.deepEqual(await readFile(join(root, 'reports/native/report.json')), lastReport);
     assert.deepEqual(await readFile(join(second.attemptDirectory, 'host.log')), Buffer.alloc(0));
-    assert.deepEqual(await readdir(join(root, '.native-cache/qualification')), []);
+    const retainedScratch = await readdir(join(root, '.nq'));
+    assert.equal(retainedScratch.length, 2);
+    assert.ok(retainedScratch.includes(firstScratch[0]));
+    for (const directory of retainedScratch) {
+      assert.match(directory, /^[a-zA-Z0-9]{6}$/);
+      assert.deepEqual(await readdir(join(root, '.nq', directory)), []);
+    }
     assert.equal((await readdir(root)).includes('.native-runner'), false);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

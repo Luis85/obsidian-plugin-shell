@@ -1,6 +1,13 @@
 # Obsidian Plugin Shell
 
-**Persistence/lifecycle acceptance milestone, version 0.4.0.**
+**Framework lifecycle and recovery increment, version 0.4.0.**
+
+The [framework guide](docs/development/FRAMEWORK-GUIDE.md) maps the reusable
+developer API and the path from feature generation to production qualification.
+The [active plan](docs/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action
+permits, precise protected-data recovery, UTF-8 document bounds and independent
+lifecycle observation. The [current execution record](docs/testing/FRAMEWORK-LIFECYCLE.md)
+keeps its results separate from the prior qualified persistence milestone below.
 
 The [current plan](docs/development/PERSISTENCE-LIFECYCLE-PLAN.md) focuses on
 exact durable outcomes, protected data and disposed view capabilities. Its
@@ -118,7 +125,7 @@ Open the printed loopback address at `/harness/app/`. This runs the same Vue/Nux
 | --- | --- |
 | Overview | Nuxt UI capability cards, environment information, and entry to document creation/native modal. |
 | Documents | Preview/create a Task note; load existing notes, edit title/status/due/tags with revision checks, and explicitly move a note to reversible trash. |
-| Events & feedback | Inspect safe event/diagnostic summaries, show owned feedback/native notices, and try info, confirmation and validated text-prompt dialogs without changing notes. |
+| Events & feedback | Inspect safe event/diagnostic summaries, show owned feedback/native notices, and try dialogs plus a real modal-backed recovery action with delayed progress and owner cleanup, without changing notes. |
 | Preferences | English/German, Task folder, routine-success notices and **Hide Obsidian view header** through one validated writer. The header toggle applies immediately. Native settings use the same service. |
 
 Markdown is canonical for note-backed entities. Explicit plugin-data entities share

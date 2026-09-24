@@ -3,6 +3,7 @@ import type { Frontmatter } from '../application/document-service';
 import type { DocumentCodec } from '../application/document-codec';
 import { plainRecord } from '../domain/entity';
 import { failure, success } from '../domain/outcome';
+import { fitsUtf8Bytes } from '../domain/utf8';
 /** Quote ambiguous scalars with a real YAML serializer; one complete create call. */
 export function renderMarkdown(properties: Frontmatter, body: string): string {
   return `---\n${stringify(properties, { lineWidth: 0, defaultStringType: 'QUOTE_DOUBLE', defaultKeyType: 'PLAIN' })}---\n\n${body}`;
@@ -18,7 +19,7 @@ function safeDocument(document: ReturnType<typeof parseDocument>): boolean {
 }
 
 function parseMarkdown(markdown: string) {
-  if (markdown.length > 1_000_000) return failure('validation', 'error.entity');
+  if (!fitsUtf8Bytes(markdown, 1_000_000)) return failure('validation', 'error.entity');
   if (!/^---\r?\n/.test(markdown)) return success(undefined);
   const block = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
   if (!block) return failure('validation', 'error.entity');
@@ -46,6 +47,7 @@ export const markdownCodec: DocumentCodec = {
       if (Object.hasOwn(properties, key)) document.set(key, properties[key]);
       else document.delete(key);
     }
-    return success(`---\n${document.toString({ lineWidth: 0 })}---\n${body}`);
+    const candidate = `---\n${document.toString({ lineWidth: 0 })}---\n${body}`;
+    return fitsUtf8Bytes(candidate, 1_000_000) ? success(candidate) : failure('validation', 'error.entity');
   },
 };

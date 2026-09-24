@@ -9,7 +9,7 @@ const { uid, services, preferences, form, pending, headerPending, error, save, t
 </script>
 <template>
   <div class="shell-page-heading"><div class="shell-eyebrow">{{ t('nav.settings') }} · Vue I18n</div><h1>{{ t('settings.title') }}</h1><p>{{ t('settings.subtitle') }}</p></div>
-  <p v-if="services.preferences.readonly" role="alert" class="shell-error">{{ t('settings.blocked') }}</p>
+  <p v-if="services.preferences.readonly" role="alert" class="shell-error">{{ t(services.preferences.recoveryKey ?? 'settings.blocked') }}</p>
   <UCard class="shell-settings-card"><form class="shell-form" @submit.prevent="save">
     <div class="shell-setting-row"><div><label :for="`${uid}-shell-header`">{{ t('settings.hideHeader') }}</label><p :id="`${uid}-shell-header-help`">{{ t('settings.hideHeaderHelp') }}</p></div><input :id="`${uid}-shell-header`" type="checkbox" :checked="preferences.hideObsidianViewHeader" :aria-describedby="`${uid}-shell-header-help`" :disabled="headerPending || services.preferences.readonly" @change="toggleHeader"></div>
     <p v-if="headerPending" role="status">{{ t('settings.headerSaving') }}</p>

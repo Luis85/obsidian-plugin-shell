@@ -5,14 +5,16 @@ export class Diagnostics implements ErrorReporter {
   private disposed = false;
   private entries: Diagnostic[] = [];
   private readonly listeners = new Set<() => void | Promise<void>>();
-  constructor(private readonly observer?: (entry: Diagnostic) => void) {}
+  constructor(private readonly observer?: (entry: Diagnostic) => unknown) {}
   get current(): readonly Diagnostic[] { return this.entries.slice(); }
   private append(code: string, operation: string): void {
     if (this.disposed) return;
     const safe = (v: string) => /^[a-z.]+$/.test(v) ? v.slice(0, 80) : 'redacted';
     const entry = Object.freeze({ sequence: ++this.sequence, code: safe(code), operation: safe(operation) });
     this.entries = [...this.entries.slice(-199), entry];
-    try { this.observer?.(entry); } catch { /* Independent observer failure cannot recurse. */ }
+    try {
+      void Promise.resolve(this.observer?.(entry)).catch(() => undefined);
+    } catch { /* Independent observer failure cannot recurse. */ }
   }
   report(code: string, operation: string): void {
     if (this.disposed) return;

@@ -12,6 +12,7 @@ test.afterEach(async ({ page }) => { expect(observed.get(page)).toEqual([]); awa
 
 for (const [name, raw] of [
   ['corrupt JSON', '{"schemaVersion":1,"private":"do not replace"'],
+  ['present JSON null', 'null'],
   ['future envelope', '{ "schemaVersion": 999, "private": ["preserve", 17] }'],
 ] as const) test(`[PL-B07] ${name} retains exact raw bytes and disables durable mutations across reload`, async ({ page }) => {
   const faults = [{ code: 'settings.read', operation: 'settings.load' }]; expectedFaults.set(page, faults);
@@ -21,7 +22,8 @@ for (const [name, raw] of [
     await primary.getByRole('button', { name: 'Preferences', exact: true }).click();
     await expect(primary.getByRole('button', { name: 'Save preferences', exact: true })).toBeDisabled();
     await expect(primary.getByLabel('Task note folder', { exact: true })).toBeDisabled();
-    await expect(primary.getByRole('alert')).toContainText('Saving is disabled');
+    await expect(primary.getByRole('alert')).toContainText('saving is disabled');
+    await expect(primary.getByRole('alert')).toContainText(name === 'future envelope' ? 'newer schema' : 'Stored plugin data is invalid');
     await primary.getByRole('button', { name: 'Documents', exact: true }).click();
     const items = primary.getByTestId('items-repository');
     await expect(items.getByRole('button', { name: 'Create item', exact: true })).toBeDisabled();
@@ -71,7 +73,7 @@ for (const phase of ['before', 'after'] as const) test(`[PL-B05] rejected shared
   await expect(first.getByRole('textbox', { name: 'New item label', exact: true })).toHaveValue('Preserved private draft');
   await expect(first.getByRole('status')).toHaveCount(0); await expect(sibling.getByRole('button', { name: 'Edit item: Preserved private draft', exact: true })).toHaveCount(0);
   await sibling.getByRole('button', { name: 'Create item', exact: true }).click();
-  await expect(sibling.getByRole('alert')).toContainText('Stored plugin data is protected');
+  await expect(sibling.getByRole('alert')).toContainText('save outcome is uncertain');
   await expect(sibling.getByRole('textbox', { name: 'New item label', exact: true })).toHaveValue('Sibling draft');
   const next = itemEnvelope(id, 'Preserved private draft'); next.pluginEntities.collections.item.revision = 2;
   const added = next.pluginEntities.collections.item.records[0]; if (!added) throw new Error('Missing expected new record'); added.revision = 2;

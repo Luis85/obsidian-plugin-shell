@@ -63,13 +63,13 @@ export function browserAdapters() {
   };
   const documents = browserDocumentStorage(files, current => write('files', current), () => failWrite);
   const adapters: ServiceAdapters = {
-    settings: { async load() { return read('settings'); }, async save(value) { if (pauseSettings) await new Promise<void>(resolve => { finishSettings = resolve; }); if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
+    settings: { async load() { return read('settings'); }, async read() { return localStorage.getItem(prefix + 'settings'); }, async save(value) { if (pauseSettings) await new Promise<void>(resolve => { finishSettings = resolve; }); if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
     local: { get: read, set: write }, host,
     modals: resources.modals, scheduler: resources.scheduler,
     documents: { ...documents, async create(path, markdown) { if (pauseWrite) await new Promise<void>(resolve => { finishWrite = resolve; }); return documents.create(path, markdown); } },
     newId: () => { const sequence = Number(read('sequence') ?? 0) + 1; write('sequence', sequence); return `demo-${String(sequence).padStart(4, '0')}`; },
     now: () => '2026-09-22T12:00:00.000Z',
-    observeError: entry => errors.push({ code: entry.code, operation: entry.operation }),
+    observeError: entry => { errors.push({ code: entry.code, operation: entry.operation }); },
   };
   return { adapters, files, errors, resources: () => ({ ...resources.snapshot(), openDialogs: dialogs.size, openCalls }),
     fault(kind: HarnessFault) {

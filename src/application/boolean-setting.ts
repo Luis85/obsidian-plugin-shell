@@ -20,7 +20,7 @@ export class BooleanSetting {
   private readonly listeners = new Set<() => void | Promise<void>>();
   private readonly stops: Unsubscribe[];
   constructor(definition: BooleanSettingDefinition, private readonly repository: Repository,
-    private readonly services: { events: EventObserver<ShellEvents>; diagnostics: ErrorReporter; readonly: () => boolean }) {
+    private readonly services: { events: EventObserver<ShellEvents>; diagnostics: ErrorReporter; readonly: () => boolean; readErrorKey?: () => string | undefined }) {
     if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(definition.id) || definition.id.length > 64 || !definition.entity
       || !/^[a-z][\w.-]{0,99}$/.test(definition.titleKey) || !/^[a-z][\w.-]{0,99}$/.test(definition.descriptionKey)
       || typeof definition.defaultValue !== 'boolean') throw new Error('INVALID_BOOLEAN_SETTING');
@@ -34,7 +34,7 @@ export class BooleanSetting {
   }
   get value(): boolean | undefined { return this.current; }
   get readonly(): boolean { return this.disposed || this.pending > 0 || this.current === undefined || !!this.problem || this.services.readonly(); }
-  get errorKey(): string | undefined { return this.problem?.key ?? (this.services.readonly() ? 'error.settingsRead' : undefined); }
+  get errorKey(): string | undefined { return this.problem?.key ?? (this.services.readonly() ? this.services.readErrorKey?.() ?? 'error.settingsRead' : undefined); }
   initialize(): Promise<Result<void>> { this.initialization ??= this.refresh(); return this.initialization; }
   subscribe(listener: () => void | Promise<void>): Unsubscribe {
     if (this.disposed) return () => undefined;

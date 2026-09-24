@@ -142,6 +142,12 @@ Definitions are versioned. Changing a definition does not automatically migrate 
 
 **DOC-18 — Privacy and limits.** Default diagnostics include operation/error codes and safe correlation IDs, not note titles, paths, property values, full plans, or body text. The user-visible result/preview may necessarily display its destination/content, but debug/export tooling must redact it. Put bounded limits on input sizes, body bytes, recursion-free template operations, request tracking, and collision attempts. No telemetry, external AI calls, network template fetches, or database setup are required.
 
+The current implementation bounds both projected body and complete serialized or
+patched Markdown at 1,000,000 UTF-8 bytes, rejecting unpaired surrogates rather
+than silently replacing them. Counting stops at the budget without allocating an
+encoded copy. This document bound is separate from the plugin-data envelope's
+existing character limit and does not establish every broader DOC-18 clause.
+
 ## 8. Makers and developer extension
 
 **DOC-19 — `make entity`.** Extend the existing maker runner with an `entity` recipe. `npm run make -- entity task --feature tasks --document` adds a typed entity definition, explicit document mapping/body template, defaults/validation, registry entry, creation action integration, and relevant type/serialization/service tests plus a Markdown fixture. A Task preset demonstrates `type`, `due`, and the other example fields. Without `--document`, an entity can remain domain-only.
