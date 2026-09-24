@@ -82,3 +82,6 @@
 
 /* Press feedback is scoped to this editor and its protected form. */
 .er-workspace .btn:active:not(:disabled),.er-toolbar .btn:active:not(:disabled),#modal.semantic-modal .btn:active:not(:disabled){box-shadow:inset 0 0 0 1px var(--accent);filter:brightness(.92)}
+
+/* Connected ports remain visible: idle relationships must not terminate in empty space. */
+#er-flow .er-secondary-port.er-connected-port{opacity:1}

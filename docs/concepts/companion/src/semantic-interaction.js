@@ -4,7 +4,7 @@ function erCurrentPositions(){const m=semanticModel(),out=Object.fromEntries(m.e
 function erRefreshGeometry(){
  const api=erUi.api;if(!api)return;const m=semanticModel(),positions=erCurrentPositions();
  for(const frame of erSectionNodes(m,positions))api.updateNode(frame.id,{position:frame.position,style:frame.style,data:frame.data});
- api.setEdges(erEdgeProjection(positions));
+ api.setEdges(erEdgeProjection(positions));Vue.nextTick(erPortFeedback);
 }
 function erPaintGuides(guides=[]){
  erUi.guides=guides;const root=document.getElementById('er-guides');if(!root)return;
@@ -17,7 +17,12 @@ function erHighlightRelationship(id=erUi.edge){
  document.querySelectorAll('#er-flow .er-card').forEach(el=>el.classList.toggle('er-related',!!r&&(el.dataset.entity===r.source||el.dataset.entity===r.target)));
  document.querySelectorAll('#er-flow [data-relationship]').forEach(el=>el.classList.toggle('er-owned-field',el.dataset.relationship===id));
 }
+function erPortFeedback(){
+ const used=new Set();for(const e of erUi.api?.getEdges.value||[])for(const kind of ['source','target'])used.add(e[kind]+':'+e[kind+'Handle']);
+ document.querySelectorAll('#er-flow .vue-flow__handle').forEach(el=>el.classList.toggle('er-connected-port',used.has(el.closest('.vue-flow__node')?.dataset.id+':'+el.dataset.handleid)));
+}
 function erSelectionFeedback(){
+ erPortFeedback();
  document.querySelectorAll('.er-catalog-item').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.value===erUi.selected)));
  document.querySelectorAll('.er-relationship-item').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.value===erUi.edge)));
  erHighlightRelationship();
