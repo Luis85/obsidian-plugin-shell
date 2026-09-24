@@ -90,7 +90,10 @@
     "events:catalog": "node scripts/events/catalog.mjs",
     "events:check": "node scripts/events/catalog.mjs --check",
     "release:operate": "node scripts/release/cli.mjs",
-    "companion:generate": "node scripts/companion/generate.mjs"
+    "companion:generate": "node scripts/companion/generate.mjs",
+    "companion:scaffold": "node shell.mjs generate",
+    "test:generator": "node --experimental-strip-types --test tests/tooling/project-generator.checks.mjs",
+    "typecheck:generator": "tsc --noEmit --project tsconfig.generator.json"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

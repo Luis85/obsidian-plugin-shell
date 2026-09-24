@@ -5,6 +5,18 @@ import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
 
 const protectedRoots = new Set(['.git', 'node_modules', '.worktrees', '.qualification', '.dev-vault', '.native-runner', '.codex-authoring.lock']);
 const hash = value => createHash('sha256').update(value).digest('hex');
+function contentBytes(entry) {
+  if (entry.encoding !== undefined && entry.encoding !== 'base64') throw new Error('PLAN_INVALID_ENCODING');
+  if (entry.content === null) {
+    if (entry.encoding) throw new Error('PLAN_INVALID_ENCODING');
+    return null;
+  }
+  if (typeof entry.content !== 'string') throw new Error('PLAN_INVALID_CONTENT');
+  if (!entry.encoding) return entry.content;
+  const decoded = Buffer.from(entry.content, 'base64');
+  if (decoded.toString('base64') !== entry.content) throw new Error('PLAN_INVALID_BASE64');
+  return decoded;
+}
 function relativePath(path) {
   if (typeof path !== 'string' || !path || isAbsolute(path) || path.includes('\\')) throw new Error('PLAN_UNSAFE_PATH');
   const parts = path.split('/');
@@ -61,16 +73,17 @@ export async function createFilePlan(inputRoot, entries) {
   if (!Array.isArray(entries)) throw new Error('PLAN_INVALID_ENTRIES');
   const seen = new Set(); const changes = [];
   for (const entry of entries) {
-    if (!entry || (typeof entry.content !== 'string' && entry.content !== null)) throw new Error('PLAN_INVALID_CONTENT');
+    if (!entry) throw new Error('PLAN_INVALID_CONTENT');
+    const bytes = contentBytes(entry);
     relativePath(entry.path);
     const identity = entry.path.toLowerCase();
     if (seen.has(identity)) throw new Error(`PLAN_DUPLICATE_PATH: ${entry.path}`);
     seen.add(identity);
     const original = await inspect(root, entry.path);
     const beforeHash = original.bytes === null ? null : hash(original.bytes);
-    const afterHash = entry.content === null ? null : hash(entry.content);
+    const afterHash = bytes === null ? null : hash(bytes);
     const status = beforeHash === afterHash ? 'unchanged' : beforeHash === null ? 'create' : afterHash === null ? 'delete' : 'update';
-    changes.push(Object.freeze({ path: entry.path, beforeHash, afterHash, content: entry.content, status }));
+    changes.push(Object.freeze({ path: entry.path, beforeHash, afterHash, content: entry.content, ...(entry.encoding ? { encoding: entry.encoding } : {}), status }));
   }
   return Object.freeze({ version: 1, root, changes: Object.freeze(changes) });
 }
@@ -86,9 +99,9 @@ function validatePlan(plan) {
     relativePath(change.path);
     if (seen.has(change.path.toLowerCase())) throw new Error('PLAN_DUPLICATE_PATH');
     seen.add(change.path.toLowerCase());
-    if (typeof change.content !== 'string' && change.content !== null) throw new Error('PLAN_INVALID_CONTENT');
+    const bytes = contentBytes(change);
     if (change.beforeHash !== null && !/^[a-f0-9]{64}$/.test(change.beforeHash)) throw new Error('PLAN_INVALID_HASH');
-    if (change.afterHash !== (change.content === null ? null : hash(change.content))) throw new Error('PLAN_INVALID_HASH');
+    if (change.afterHash !== (bytes === null ? null : hash(bytes))) throw new Error('PLAN_INVALID_HASH');
     const status = change.beforeHash === change.afterHash ? 'unchanged' : change.beforeHash === null ? 'create' : change.afterHash === null ? 'delete' : 'update';
     if (change.status !== status) throw new Error('PLAN_INVALID_STATUS');
   }
@@ -97,7 +110,7 @@ function validatePlan(plan) {
  * not a claim of a filesystem-wide transaction or compare-and-swap primitive. */
 export async function applyFilePlan(plan, { beforeWrite } = {}) {
   plan = Object.freeze({ version: plan?.version, root: plan?.root, changes: Array.isArray(plan?.changes)
-    ? Object.freeze(plan.changes.map(change => Object.freeze({ path: change.path, beforeHash: change.beforeHash, afterHash: change.afterHash, content: change.content, status: change.status }))) : undefined });
+    ? Object.freeze(plan.changes.map(change => Object.freeze({ path: change.path, beforeHash: change.beforeHash, afterHash: change.afterHash, content: change.content, ...(change.encoding ? { encoding: change.encoding } : {}), status: change.status }))) : undefined });
   validatePlan(plan);
   const root = await checkedRoot(plan.root); const lock = join(root, '.codex-authoring.lock');
   await mkdir(lock).catch(error => { if (error.code === 'EEXIST') throw new Error('PLAN_LOCKED: another authoring operation or unresolved recovery owns .codex-authoring.lock'); throw error; });
@@ -108,7 +121,7 @@ export async function applyFilePlan(plan, { beforeWrite } = {}) {
     for (const [index, change] of plan.changes.entries()) {
       const original = await precondition(root, change); originals.set(change.path, original.bytes);
       if (original.bytes !== null) await writeFile(join(lock, `before-${index}`), original.bytes, { flag: 'wx' });
-      if (change.content !== null) await writeFile(join(lock, `after-${index}`), change.content, { flag: 'wx' });
+      if (change.content !== null) await writeFile(join(lock, `after-${index}`), contentBytes(change), { flag: 'wx' });
     }
     for (const [index, change] of plan.changes.entries()) {
       if (change.status === 'unchanged') { report.unchanged.push(change.path); continue; }
