@@ -3,7 +3,7 @@ function handleReferenceAction(action,value){
  switch(action){
   case 'ref-content':openReferenceContent(value);break;
   case 'ref-content-save':saveReferenceContent();break;
-  case 'ref-inspect':designUi.selected=value;referenceUi.panel='inspector';render();break;
+  case 'ref-inspect':selectSitemapItem('surface',value);referenceUi.panel='inspector';render();break;
   case 'ref-panel-close':referenceUi.panel='none';canvasUi.outline=false;render();break;
   case 'ref-reveal':showMapNode(value,true);fitMap(true);break;
   case 'ref-section':openSectionEditor(value||null);break;

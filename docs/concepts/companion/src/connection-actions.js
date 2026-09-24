@@ -30,7 +30,7 @@ function editConnectionField(el,commit){
   const summary=document.getElementById('connection-summary');const origin=design().nodes.find(n=>n.id===f.origin);
   if(summary&&origin)summary.innerHTML='<span>'+esc(f.direction==='incoming'?v:origin.label)+'</span>'+icon('arrow')+'<span>'+esc(f.direction==='incoming'?origin.label:v)+'</span>';
  }
- if(commit&&k==='linkKind')redrawModal();return true;
+ if(commit&&['linkKind','parent','nav'].includes(k))redrawModal();return true;
 }
 let destructiveReview=null;
 function prepareDestructiveReview(type,id){

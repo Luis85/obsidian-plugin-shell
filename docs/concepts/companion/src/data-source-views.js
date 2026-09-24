@@ -7,14 +7,14 @@ function dsSelect(label,key,values,current,extra=''){
 function dsGlyph(kind){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${kind==='vault'?'<path d="m12 2 8 6-3 12-10 2-4-13Z"/><path d="m12 2-2 10 7 8M3 9l7 3-3 10"/>':kind==='database'?'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 8-4 4 4 4m6-8 4 4-4 4m-2-10-2 12"/>'}</svg>`;}
 function dsCatalogItems(){
  const list=dataSources().sources.filter(s=>(dsUi.kind==='all'||s.kind===dsUi.kind)&&(s.name+' '+s.slug+' '+s.description).toLowerCase().includes(dsUi.query.trim().toLowerCase()));
- return list.map(s=>`<button class="ds-catalog-row ${dsUi.selected===s.id?'selected':''}" data-action="ds-select" data-value="${s.id}" aria-pressed="${dsUi.selected===s.id}"><span class="ds-glyph">${dsGlyph(s.kind)}</span><span><strong>${esc(s.name)}</strong><small>${esc(DS_KINDS[s.kind])} · ${s.operations.length} operations</small><small>${esc(s.status)} · ${dataSources().flows.filter(f=>f.source===s.id).length} usages</small></span></button>`).join('')||'<p class="muted ds-empty-result">No matching sources. Clear the filter or add a source.</p>';
+ return list.map(s=>`<button class="ds-catalog-row ${dsUi.catalogSelected===s.id?'selected':''}" data-action="ds-select" data-value="${s.id}" aria-pressed="${dsUi.catalogSelected===s.id}"><span class="ds-glyph">${dsGlyph(s.kind)}</span><span><strong>${esc(s.name)}</strong><small>${esc(DS_KINDS[s.kind])} · ${s.operations.length} operations</small><small>${esc(s.status)} · ${dataSources().flows.filter(f=>f.source===s.id).length} usages</small></span></button>`).join('')||'<p class="muted ds-empty-result">No matching sources. Clear the filter or add a source.</p>';
 }
 function dataSourcesView(){
- const m=dataSources(),selected=m.sources.find(s=>s.id===dsUi.selected)||m.sources[0];if(selected)dsUi.selected=selected.id;
+ const m=dataSources(),selected=m.sources.find(s=>s.id===dsUi.catalogSelected)||m.sources[0];if(selected)dsUi.catalogSelected=selected.id;
  return `<section class="ds-workspace"><header class="page-heading"><div><h1>Data Sources</h1><p>Define where your plugin reads and writes data. One catalog, reused across the sitemap.</p></div><div class="row wrap">${button('Open sitemap','nav','sitemap','small','layers')}${button('Review generator','design-plan','','small','wand')}${button('Add source','ds-add','api','primary small','plus')}</div></header>
  <div class="ds-boundary">Design declarations only. No connection is tested, no request is sent, and no vault or database is changed.</div>
  ${!m.sources.length?`<div class="ds-empty"><h2>Start with the data your plugin needs.</h2><p>A source contains operations such as “Fetch tasks” or “Save note”. Give each operation an input and output shape, then connect it to a sitemap card.</p><div class="ds-starters">${Object.entries(DS_KINDS).map(([id,label])=>`<button data-action="ds-add" data-value="${id}">${dsGlyph(id)}<strong>${label}</strong><span>${{api:'Declare a service and its request / response contracts.',database:'Describe a runtime adapter, tables and record shapes.',vault:'Read or save notes in the generated plugin’s active vault.'}[id]}</span></button>`).join('')}</div><div class="mt24">${button('Use example sources','ds-example','','ghost small','layers')}<p class="small muted">Adds illustrative API, vault and database contracts. No live connections.</p></div></div>`:
- `<div class="ds-catalog-layout"><aside class="ds-catalog" aria-label="Data-source catalog"><label class="field" for="ds-query">Find a source<input id="ds-query" type="search" data-field="ds-query" value="${esc(dsUi.query)}" placeholder="Name, code or purpose…"></label>${dsSelect('Source type','filter',[['all','All types'],...Object.entries(DS_KINDS)],dsUi.kind)}<div id="ds-results" aria-live="polite">${dsCatalogItems()}</div></aside><section class="ds-detail" aria-label="Selected data source">${selected?dsDetail(selected):''}</section></div>`}</section>`;
+ `<div class="ds-catalog-layout"><aside class="ds-catalog" aria-label="Data-source catalog"><label class="field" for="ds-query">Find a source<input id="ds-query" type="search" data-field="ds-query" value="${esc(dsUi.query)}" placeholder="Name, code or purpose…"></label>${dsSelect('Source type','filter',[['all','All types'],...Object.entries(DS_KINDS)],dsUi.kind)}<div id="ds-results" aria-live="polite">${dsCatalogItems()}</div></aside><section class="ds-detail" aria-label="Selected data source"><p id="ds-filter-context" class="ds-filter-context" role="status">${dsFilterContext()}</p>${selected?dsDetail(selected):''}</section></div>`}</section>`;
 }
 function dsDetail(source){
  const flows=dataSources().flows.filter(f=>f.source===source.id),placed=Object.hasOwn(dataSources().positions,source.id);
@@ -43,6 +43,7 @@ function dsShapeEditor(side,s,f){
 }
 function dataSourceFormDialog(){
  const f=dsUi.form;if(!f)return dialogBody('Data source unavailable','Reopen the source catalog.');
+ if(f.removeRequested)return inlineRemovalDialog(f);
  const m=dataSources();let title='',body='',danger='';
  if(f.formKind==='source'){
   title=f.id?'Edit data source':'Add data source';
@@ -55,7 +56,7 @@ function dataSourceFormDialog(){
   const sources=m.sources.filter(s=>s.id===f.source||s.status!=='deprecated'&&s.operations.length),source=sources.find(s=>s.id===f.source),op=source?.operations.find(o=>o.id===f.operation);
   title=f.id?'Edit data flow':'Connect data source';
   body=`<p>Data-flow arrows show where business data moves. They are separate from navigation and never make a card reachable.</p><div class="grid2">${dsSelect('Data source','source',sources.map(s=>[s.id,s.name]),f.source)}${dsSelect('Sitemap card','card',design().nodes.filter(n=>n.kind!=='group').map(n=>[n.id,n.label]),f.card)}</div>${dsSelect('Source operation','operation',(source?.operations||[]).map(o=>[o.id,o.name]),f.operation)}${dsSelect('Data movement','direction',Object.entries(DS_DIRECTIONS).filter(([k])=>op?.direction==='both'||op?.direction===k),f.direction)}<div class="ds-direction-summary" role="status"><strong>${esc(dsFlowSentence(f))}</strong><p>${f.direction==='both'?'Two explicit data directions. This does not implement synchronization, conflict resolution or automatic round trips.':f.direction==='read'?'The card receives business data from this source. Query or filter inputs may still be required.':'The card sends business data to this source. A returned acknowledgement may still be part of the operation.'}</p></div><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${op?esc(dsShapeLabel(op.input)):''}</strong></div><div><span>Output · from source</span><strong>${op?esc(dsShapeLabel(op.output)):''}</strong></div></div>${dsInput('Connection label','label',f.label)}${dsSelect('Trigger / intent','trigger',[['on-open','When the card opens'],['on-submit','When a form is submitted'],['manual','Explicit user action'],['background','Background task'],['event','Application event']],f.trigger)}${dsInput('Mapping / behavior notes','notes',f.notes,'Describe transformations, failure handling and ownership. Text is not executed.',true)}<p class="small muted">Uses the current source operation and ER entity definitions. Changing these contracts requires reviewing generation again.</p>`;
-  if(f.id)danger=button('Remove data flow','ds-remove-flow',f.id,'danger');
+  if(f.id)danger=button('Remove data flow','ds-remove-flow',f.id,'danger')+button('Show on sitemap','ds-flow-reveal',f.id,'small');
  }else if(f.formKind==='position'){
   title='Position data source';body=`<p>Move this source without dragging. Position has no effect on its operations or generated contracts.</p><div class="grid2">${dsInput('X','x',f.x)}${dsInput('Y','y',f.y)}</div>`;
  }else{
@@ -66,4 +67,10 @@ function dataSourceFormDialog(){
  }
  body+=`<p id="ds-error" class="error" role="alert" tabindex="-1">${esc(dsUi.error)}</p>`;
  return dialogBody(title,body,danger+button('Cancel','close','','ghost')+button(f.formKind.startsWith('remove-')?'Remove declaration':'Save declaration','ds-save','',f.formKind.startsWith('remove-')?'danger':'primary','check'));
+}
+
+function dsFilterContext(){
+ const source=dataSources().sources.find(s=>s.id===dsUi.catalogSelected);
+ const visible=source&&(dsUi.kind==='all'||source.kind===dsUi.kind)&&(source.name+' '+source.slug+' '+source.description).toLowerCase().includes(dsUi.query.trim().toLowerCase());
+ return source&&!visible?'Showing '+esc(source.name)+'; this selected source is outside the current filter.':'';
 }

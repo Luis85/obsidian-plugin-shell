@@ -18,6 +18,7 @@ function setFlowConnecting(active){
  if(!active)flowUi.api?.endConnection();paintReferenceChrome();
 }
 function resetFlowConnection(announce=false){
+ dsUi.connection=null;
  const was=flowUi.connecting||!!flowUi.api?.connectionStartHandle?.value;
  flowUi.cancelled=true;edgeEditing.reconnect=null;document.getElementById("vf-root")?.removeAttribute("data-reconnecting");connectionUi.pointer=null;flowUi.api?.endConnection(undefined,true);setFlowConnecting(false);closeConnectionMenu(false);
  if(announce&&was)canvasAnnounce('Connection cancelled. Nothing changed.');

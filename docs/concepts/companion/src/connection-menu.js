@@ -20,7 +20,7 @@ function closeConnectionMenu(restore=true){
 function openConnectionMenu(node,side,anchor=null){
  if(state.activeRun){notify('Finish the active simulation before extending this outline.');return;}
  const d=design(),n=d.nodes.find(n=>n.id===node);if(!n||n.kind==='group'||!PORTS[side])return;
- closeConnectionMenu(false);designUi.selected=n.id;canvasUi.edge=null;paintMapSelection();
+ closeConnectionMenu(false);selectSitemapItem('surface',n.id);paintMapSelection();
  const incoming=PORTS[side].type==='target';
  anchor=anchor||document.querySelector(`.map-node[data-node="${CSS.escape(node)}"] [data-handleid="${PORTS[side].id}"]`);
  const rect=anchor?.getBoundingClientRect()||{left:innerWidth/2,right:innerWidth/2,top:innerHeight/2,bottom:innerHeight/2};

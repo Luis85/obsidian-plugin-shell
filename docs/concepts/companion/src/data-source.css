@@ -100,3 +100,21 @@
 #vf-root .vue-flow__node.ds-related .ds-port { opacity: 1 !important; pointer-events: auto; }
 #vf-root .ds-port::after { border-color: var(--ds-accent) !important; }
 #vf-root .ds-port.source::after { background: var(--ds-accent) !important; }
+
+/* Contextual selection and safe focus states for the three-editor handoff. */
+.ds-filter-context:empty { display: none; }
+.ds-filter-context { color: var(--muted); font-size: 12px; padding: 10px 0; }
+.node-inspector .ds-facts { grid-template-columns: 90px minmax(0,1fr); }
+.node-inspector .ds-shape-pair { grid-template-columns: 1fr; gap: 6px; }
+.node-inspector .ds-operation h3 { overflow-wrap: anywhere; }
+#vf-root .ds-port { touch-action: none; }
+#vf-root .ds-port:active { outline: 3px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root .ds-port.valid { outline: 3px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root .ds-port[aria-disabled="true"] { cursor: not-allowed; }
+.inspector-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.ds-outline-row:hover { background: var(--ds-tint); }
+.ds-outline-row:active { background: var(--raised); }
+.ds-workspace button:disabled:hover,.ds-source-card button:disabled:hover { background: var(--surface); border-color: var(--line); }
+
+#vf-root[data-data-visible="false"] .map-node .ds-port { opacity: 0 !important; pointer-events: none !important; }
+#vf-root .ds-port[aria-disabled="true"]::after { opacity: .45; }

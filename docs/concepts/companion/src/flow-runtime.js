@@ -42,7 +42,7 @@ function mountFlow(){
    if(!current()||state.activeRun)return;
    if(dsBeginDrag({node,event}))return;dsUi.selected=null;
    flowUi.drag={owner,revision:design().revision,id:node.id,startX:event.clientX,startY:event.clientY,before:designCopy(canvasState())};flowUi.dragging=true;flowUi.cancelled=false;
-   beginSpatialDrag(node.id);designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
+   beginSpatialDrag(node.id);selectSitemapItem('surface',node.id);paintMapSelection();
   });
   api.onNodeDrag(({event})=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;updateSpatialDrag(event);queueSpatialPaint();}});
   api.onNodeDragStop(({node,event})=>{
@@ -54,10 +54,10 @@ function mountFlow(){
    if(JSON.stringify(pos)!==JSON.stringify(drag.before.positions[node.id])){recordDesign();canvasState().positions[node.id]=pos;canvasState().custom=true;if(spatialUi.drop)assignCardToSection(design(),node.id,spatialUi.drop.id);save();}
    clearSpatialGesture();render();canvasAnnounce('Card moved. One undo restores its position; structure is unchanged.');focusMapNode(node.id);
   });
-  api.onConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
+  api.onConnectStart(params=>{if(current()){flowUi.cancelled=false;dsBeginConnection(params);setFlowConnecting(true);}});
   api.onClickConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
-  api.onConnect(connection=>{if(current()&&!flowUi.cancelled&&!edgeEditing.reconnect){setFlowConnecting(false);connectionUi.committed=true;reviewFlowConnection(connection);}});
-  api.onConnectEnd(()=>{if(current())setFlowConnecting(false);});
+  api.onConnect(connection=>{if(current()&&!flowUi.cancelled&&!edgeEditing.reconnect){setFlowConnecting(false);connectionUi.committed=true;dsUi.connection=null;reviewFlowConnection(connection);}});
+  api.onConnectEnd(event=>{if(current()){dsFinishConnection(event);setFlowConnecting(false);}});
   api.onClickConnectEnd(()=>{if(current())setFlowConnecting(false);});
   api.onEdgeClick(({edge,event})=>{if(!current())return;event.stopPropagation();dispatch('canvas-edge',edge.id);});
   api.onEdgeUpdateStart(({edge})=>{if(current())beginEdgeReconnect(edge);});
@@ -70,7 +70,7 @@ function mountFlow(){
  flowUi.app=createApp(Component);flowUi.app.use(pinia);flowUi.app.mount(root);paintFlowChrome();
 }
 function destroyFlow(){
- dsCancelDrag(false);
+ dsUi.connection=null;dsUi.hover=null;dsCancelDrag(false);
  closeConnectionMenu(false);resetFlowConnection(false);clearSpatialGesture();edgeEditing.reconnect=null;
  clearTimeout(flowUi.saveTimer);if(!flowUi.app)return;flowUi.serial++;
  if(flowUi.drag&&flowUi.owner===designOwner())design().canvas=flowUi.drag.before;
@@ -80,17 +80,17 @@ function destroyFlow(){
 function paintFlowChrome(){
  const c=canvasState(),root=document.getElementById('vf-root'),vp=document.getElementById('map-viewport');if(!vp)return;
  const z=document.getElementById('map-zoom-label');if(z)z.textContent=Math.round(c.zoom*100)+'%';
- if(root)root.style.setProperty('--map-inverse',1/c.zoom);
+ if(root){root.style.setProperty('--map-inverse',1/c.zoom);root.dataset.dataVisible=String(dsUi.show);}
  vp.style.backgroundSize=(24*c.zoom)+'px '+(24*c.zoom)+'px';vp.style.backgroundPosition=c.pan.x+'px '+c.pan.y+'px';vp.style.backgroundImage=c.interaction.grid?'':'none';
  vp.dataset.wheel=c.interaction.wheel;vp.dataset.grid=String(c.interaction.grid);paintReferenceChrome();
 }
 function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>{if(api===flowUi.api)flowUi.syncing=false;});}
 function syncFlowSelection(){
- if(!flowUi.store)return;const selected=designUi.selected;
+ if(!flowUi.store)return;normalizeSitemapSelection();const selected=designUi.selected;
  for(const n of flowUi.store.nodes){n.selected=n.data.source?n.id===dsUi.selected:n.id===selected;n.data.dim=n.data.source?!dsMapMatch(n.data.source):!mapMatch(n.data.surface);}
- flowUi.store.edges=flowEdgeProjection(design());
+ flowUi.store.edges=flowEdgeProjection(design());dsPaintFlowFeedback();
  const changes=(flowUi.api?.getNodes.value||[]).map(n=>({id:n.id,type:'select',selected:n.id===(n.data?.source?dsUi.selected:selected)}));flowUi.api?.applyNodeChanges(changes);
- const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=!selected&&!dsUi.selected;
+ const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=!selected&&!dsUi.selected&&sitemapSelection().kind!=='data-flow';
 }
 function refreshFlowConfig(){const toggle=document.querySelector('[data-field="canvas-snap"]');if(toggle)toggle.checked=canvasState().snap;if(!flowUi.store)return;flowUi.store.preferences={...canvasPreferences()};flowUi.store.snap=canvasState().snap;flowUi.store.edges=flowEdgeProjection(design());paintFlowChrome();}
 function cancelFlowGesture(){
@@ -100,7 +100,7 @@ function cancelFlowGesture(){
 }
 
 function validFlowConnection(c){
- if(!c)return false;
+ if(!c||state.activeRun)return false;
  if(edgeEditing.reconnect?.structure)return validStructureReconnect(c);
  if(/^structure-out-(left|right|top|bottom)$/.test(c.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(c.targetHandle))return design().nodes.some(n=>n.id===c.target&&n.parent===c.source);
  return !connectionError(c.source,c.target,c.sourceHandle,c.targetHandle);

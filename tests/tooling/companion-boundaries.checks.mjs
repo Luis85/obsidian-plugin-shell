@@ -69,7 +69,7 @@ test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still 
   const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
   const entry = config.entry.filter(path => path.startsWith('docs/concepts/companion/'));
   const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
-  assert.equal(entry.length, 84, 'Exact declared JS/CSS and verified vendor inputs');
+  assert.equal(entry.length, 86, 'Exact declared JS/CSS and verified vendor inputs');
   const valid = await probe(sources, value => value, { full: true, entry });
   assert.equal(valid.status, 0, valid.diagnostic);
   assert.equal(valid.summary.total_issues, 0, valid.diagnostic);

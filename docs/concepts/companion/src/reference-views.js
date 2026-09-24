@@ -9,15 +9,15 @@ function referenceSelectionToolbar(n){
  <span class="ref-tool-separator"></span>${referenceTool('More actions','canvas-card-menu',n.id,'more')}</div>`;
 }
 function referenceSitemapView(){
- const d=design(),n=selectedNode(),errors=designIssues(d).filter(x=>x.level==='error');
+ const d=design();normalizeSitemapSelection(d);const n=selectedNode(),errors=designIssues(d).filter(x=>x.level==='error');
  return `<section class="sitemap-studio ref-studio" data-panel="${referenceUi.panel}">
  <header class="ref-page-header"><div><h1>Sitemap & views</h1><p>${esc(project()?.name||'Plugin outline')} <span>·</span> ${d.nodes.length} surfaces <span>·</span> ${d.links.length} interactions <span>·</span> ${errors.length?errors.length+' checks need attention':'Structure consistent'}</p></div>
  <div class="row">${designUi.mode!=='map'?button('Back to map','ref-mode','map','small','arrow'):''}${button('Data Sources','ds-catalog','','small','layers')}${button('Import / export','design-transfer','','ghost small','code')}${button('Review boilerplate','design-plan','','primary small','wand')}${referenceTool(canvasUi.expanded?'Leave focus mode':'Focus mode','canvas-expand','','focus')}</div></header>
  <div class="map-workspace ref-workspace"><section class="map-main" aria-label="Sitemap editor">${designUi.mode==='map'?referenceMap(d):designUi.mode==='preview'?designLivePreview(d,n):designCheckView(designIssues(d))}</section>
  <aside class="outline-tree ref-panel" aria-label="Structure panel">${referenceStructure(d)}</aside>
- <aside class="node-inspector polish-inspector ref-panel" aria-label="Selected sitemap card">
+ <aside class="node-inspector polish-inspector ref-panel" aria-label="Sitemap inspector" data-selection-kind="${sitemapSelection(d).kind}">
  <div class="ref-panel-heading"><strong>Inspector</strong>${referenceTool('Close inspector','ref-panel-close','','close')}</div>
- <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Components'],['intent','Intent'],['links','Links'],['data','Data'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
+ <div class="inspector-tabs" role="group" aria-label="Inspector section">${sitemapInspectorTabs(d)}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
  </div><footer class="ref-map-footer"><span id="map-status-message" role="status">Drag cards to arrange · Click a block to write · Use handles to connect</span><div>${button('Change blueprint','nav','blueprints','ghost small')}${referenceTool('Map help','canvas-help','','help')}</div></footer><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
 }
 function referenceMap(d){
@@ -41,7 +41,7 @@ function referenceMap(d){
  ${referenceTool('Undo','design-undo','','undo',!d.history.length?'disabled':'')}${referenceTool('Redo','design-redo','','redo',!d.future.length?'disabled':'')}
  <span class="ref-tool-separator"></span>${referenceTool('Layout preview','ref-mode','preview','eye')}${referenceTool('Structure checks','ref-mode','issues','check')}${referenceTool('Canvas settings','flow-settings','','settings')}
  </div>
- <div class="map-controls ref-zoom-dock nodrag nopan" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','','aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" aria-label="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small')}${referenceTool('Focus selected card','canvas-focus','','focus',!selectedNode()&&!dsUi.selected?'disabled':'')}
+ <div class="map-controls ref-zoom-dock nodrag nopan" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','','aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" aria-label="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small')}${referenceTool('Focus selected card','canvas-focus','','focus',sitemapSelection(d).kind==='empty'?'disabled':'')}
  <details class="map-pan-controls"><summary title="Pan without dragging">Pan</summary><div class="map-pan-menu">${button('←','canvas-pan','96,0','small','','aria-label="Pan left"')}${button('↑','canvas-pan','0,96','small','','aria-label="Pan up"')}${button('↓','canvas-pan','0,-96','small','','aria-label="Pan down"')}${button('→','canvas-pan','-96,0','small','','aria-label="Pan right"')}</div></details></div>
  <div id="map-instructions" class="sr-only">Click cards to select; drag their headers to move. Click blocks to write. Click or drag handles to connect. Empty canvas clears selection.</div><span id="map-count" class="sr-only">${nodes.length}/${d.nodes.length} visible</span><div id="map-search-feedback" class="sr-only" hidden></div></div>`;
 }

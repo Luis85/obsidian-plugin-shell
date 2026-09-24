@@ -113,7 +113,7 @@ function saveReferenceContent(){
  const oldIssues=new Set(brickIssues(d).map(i=>i.code+':'+i.message));
  const introduced=brickIssues(candidate).find(i=>!oldIssues.has(i.code+':'+i.message));
  if(introduced)return fail(introduced.message);
- recordDesign();n.bricks=bricks;d.nextId=next;designChanged();designUi.selected=n.id;
+ recordDesign();n.bricks=bricks;d.nextId=next;designChanged();selectSitemapItem('surface',n.id);
  modalOriginal=null;closeModal();render();canvasAnnounce('Page content saved. One undo restores the previous outline.');
 }
 

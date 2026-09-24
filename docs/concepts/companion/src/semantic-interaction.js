@@ -79,7 +79,7 @@ function erExtraAction(action,value){
 }
 function erKeyDown(event){
  if(state.view!=='entities')return;
- if(document.getElementById('modal').open){if(modalType==='semantic-form'&&erUi.form?.formKind==='entity'&&(event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();dispatch('er-property-add');}return;}
+ if(document.getElementById('modal').open){if(modalType==='semantic-form'&&erUi.form?.formKind==='entity'&&!erUi.form.removeRequested&&(event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();dispatch('er-property-add');}return;}
  if(!event.target.closest('.er-workspace,.er-toolbar')||event.target.closest('input,textarea,select,[contenteditable=true]'))return;
  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!erCancelGesture())erPick(null);return;}
  if(state.activeRun)return;

@@ -3,7 +3,7 @@ function erOpen(kind,record={}){
  const m=semanticModel();erUi.error='';erUi.form={...designCopy(record),formKind:kind,owner:designOwner(),revision:design().revision,snapshot:JSON.stringify(m)};showModal('semantic-form');
 }
 function erBeginEntity(id=null){
- const m=semanticModel(),e=m.entities.find(e=>e.id===id);let name='New entity',n=2;while(m.entities.some(e=>e.slug===semanticName(name)))name='New entity '+n++;
+ const m=semanticModel(),e=m.entities.find(e=>e.id===id);if(id&&!e)return erFail('This entity no longer exists. Select a current entity.');let name='New entity',n=2;while(m.entities.some(e=>e.slug===semanticName(name)))name='New entity '+n++;
  erOpen('entity',e?{...e,editing:true,properties:e.properties.map(p=>({...p,hasDefault:Object.hasOwn(p,'defaultValue'),defaultText:Object.hasOwn(p,'defaultValue')?(typeof p.defaultValue==='string'?p.defaultValue:JSON.stringify(p.defaultValue)):''}))}:{id:null,name,slug:semanticName(name),folder:'Records/'+semanticPascal(semanticName(name)),description:'',section:null,properties:[],editing:false});
 }
 function erFail(message){erUi.error=message;if(modalType==='semantic-form'){redrawModal();document.getElementById('er-form-error')?.focus();}else{erAnnounce(message);notify(message);}return false;}
@@ -17,7 +17,7 @@ function erCommit(change,visual=false){
  }catch(error){return erFail(error.message);}
 }
 function erSave(){
- const f=erUi.form,m=semanticModel();if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==JSON.stringify(m))return erFail('This review is stale. Copy your edits and reopen it; nothing has been overwritten.');
+ const draft=erUi.form,f=draft?.removeRequested?{...draft,formKind:draft.removeRequested}:draft,m=semanticModel();if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==JSON.stringify(m))return erFail('This review is stale. Copy your edits and reopen it; nothing has been overwritten.');
  const visual=['section','remove-section','position'].includes(f.formKind);let selected=erUi.selected,edge=erUi.edge;
  const ok=erCommit(next=>{
   if(f.formKind==='entity'){
@@ -47,7 +47,7 @@ function erSave(){
  if(ok){erUi.selected=selected;erUi.edge=edge;modalOriginal=null;closeModal();render();notify(visual?'Arrangement saved. Entity contracts are unchanged.':'Semantic design saved. Review generation before applying any schema.');}return ok;
 }
 function erBeginRelationship(source=null,target=null,id=null){
- const m=semanticModel(),existing=m.relationships.find(r=>r.id===id);if(m.entities.length<1)return notify('Add an entity before defining a relationship.');
+ const m=semanticModel(),existing=m.relationships.find(r=>r.id===id);if(id&&!existing)return erFail('This relationship no longer exists. Select a current connection.');if(m.entities.length<1)return notify('Add an entity before defining a relationship.');
  erOpen('relationship',existing||{id:null,name:'References',source:source||m.entities[0].id,target:target||m.entities.at(-1).id,key:'related',sourceCard:'0..*',targetCard:'0..1',onDelete:'restrict'});
 }
 function erPick(id,edge=false){erUi.selected=edge?null:id;erUi.edge=edge?id:null;const inspector=document.getElementById('er-inspector');if(inspector)inspector.innerHTML=erInspector();if(erUi.api){erUi.api.applyNodeChanges(erUi.api.getNodes.value.map(n=>({id:n.id,type:'select',selected:n.id===erUi.selected})));erUi.api.applyEdgeChanges(erUi.api.getEdges.value.map(e=>({id:e.id,type:'select',selected:e.id===erUi.edge})));}erSelectionFeedback();}
@@ -62,10 +62,10 @@ function handleSemanticAction(action,value){
   case 'er-edge':erPick(value,true);break;
   case 'er-connect':erBeginRelationship(erUi.selected);break;
   case 'er-edit-edge':erBeginRelationship(null,null,value||erUi.edge);break;
-  case 'er-section':erOpen('section',m.sections.find(s=>s.id===value)||{id:null,name:'New section'});break;
-  case 'er-delete-section':erOpen('remove-section',m.sections.find(s=>s.id===value));break;
-  case 'er-delete':erOpen('remove-entity',m.entities.find(e=>e.id===(value||erUi.selected)));break;
-  case 'er-delete-edge':erOpen('remove-relationship',m.relationships.find(r=>r.id===(value||erUi.edge)));break;
+  case 'er-section':{const section=m.sections.find(s=>s.id===value);if(value&&!section)erFail('This section no longer exists.');else erOpen('section',section||{id:null,name:'New section'});break;}
+  case 'er-delete-section':{const section=m.sections.find(s=>s.id===value);if(section)erOpen('remove-section',section);else erFail('This section no longer exists.');break;}
+  case 'er-delete':{const entity=m.entities.find(e=>e.id===(value||erUi.selected));if(entity)erOpen('remove-entity',entity);else erFail('This entity no longer exists.');break;}
+  case 'er-delete-edge':{const id=value||erUi.edge;if(requestInlineRemoval('remove-relationship',id))break;const r=m.relationships.find(r=>r.id===id);if(r)erOpen('remove-relationship',r);else erFail('This relationship no longer exists.');break;}
   case 'er-save':erSave();break;
   case 'er-property-add':if(erUi.form.properties.length<40){erUi.form.properties.push({id:null,key:'',type:'text',required:false,hasDefault:false,defaultText:''});redrawModal();document.querySelector('#er-property-rows .er-property-row:last-child input')?.focus();}else erFail('Use at most 40 properties per entity.');break;
   case 'er-property-remove':if(Number.isInteger(Number(value))) {erUi.form.properties.splice(Number(value),1);redrawModal();}break;

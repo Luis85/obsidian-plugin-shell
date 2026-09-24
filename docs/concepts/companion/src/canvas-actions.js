@@ -5,9 +5,9 @@ function handleCanvasAction(action,value){
   case 'canvas-select':
    if(flowUi.dragging||flowUi.suppressClick)return true;
    if(canvasUi.connecting){const target=d.nodes.find(x=>x.id===value);if(!target||target.kind==='group'){notify('Connect to a surface or action, not an organizing group.');break;}designUi.form={from:canvasUi.connecting,to:value,label:'Open '+target.label,owner:designOwner(),baseRevision:d.revision};canvasUi.connecting=null;designUi.error='';showModal('design-connect');}
-   else {designUi.selected=value;canvasUi.edge=null;paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
-  case 'canvas-child':designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
-  case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
+   else {selectSitemapItem('surface',value);paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
+  case 'canvas-child':selectSitemapItem('surface',value);paintMapSelection();startNodeForm('page');break;
+  case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;selectSitemapItem('surface',value);canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
   case 'canvas-outline':referencePaneMode('structure');break;
   case 'canvas-expand':canvasUi.expanded=!canvasUi.expanded;render();fitMap();break;
@@ -19,7 +19,7 @@ function handleCanvasAction(action,value){
   case 'canvas-zoom-out':zoomMap(1/1.2);break;
   case 'canvas-reset-zoom':zoomMap(1/c.zoom);break;
   case 'canvas-fit':fitMap();break;
-  case 'canvas-focus':if(n||dsUi.selected)fitMap(true);break;
+  case 'canvas-focus':if(n||dsUi.selected||sitemapSelection().kind==='data-flow')fitMap(true);break;
   case 'canvas-pan':{const [dx,dy]=value.split(',').map(Number);c.pan.x=Math.max(-50000,Math.min(50000,c.pan.x+dx));c.pan.y=Math.max(-50000,Math.min(50000,c.pan.y+dy));paintMap();save();canvasAnnounce('Canvas panned. Surface positions are unchanged.');break;}
   case 'canvas-nudge':if(n){const [dx,dy]=value.split(',').map(Number);moveMapNode(n.id,dx,dy);}break;
   case 'canvas-position':{
@@ -30,13 +30,13 @@ function handleCanvasAction(action,value){
    const before=c.positions[value];if(before)moveMapNode(value,x-before.x,y-before.y);break;
   }
   case 'canvas-place':canvasUi.placing=value;canvasUi.connecting=null;render();{const box=document.getElementById('map-mode-message');box.hidden=false;box.firstChild.textContent='Click empty canvas to place the selected card. ';}break;
-  case 'canvas-edge':{if(value.startsWith('contains-')){openStructureRelationship(value.slice(9));break;}const edge=d.links.find(e=>e.id===value);if(!edge)break;designUi.selected=edge.from;canvasUi.edge=value;canvasUi.inspector='links';paintMapSelection();openTypedConnection(edge);break;}
+  case 'canvas-edge':{if(value.startsWith('contains-')){openStructureRelationship(value.slice(9));break;}const edge=d.links.find(e=>e.id===value);if(!edge)break;selectSitemapItem('surface',edge.from);canvasUi.edge=value;canvasUi.inspector='links';paintMapSelection();openTypedConnection(edge);break;}
   case 'canvas-edit-edge':{const edge=d.links.find(e=>e.id===value);if(edge)openTypedConnection(edge);break;}
   case 'canvas-remove-edge':showModal('canvas-edge-remove',value);break;
   case 'canvas-remove-edge-confirm':if(!validDestructiveReview('canvas-edge-remove',value))break;closeModal();dispatch('design-unlink',value);canvasUi.edge=null;break;
-  case 'canvas-card-menu':designUi.selected=value;showModal('canvas-card-menu',value);break;
+  case 'canvas-card-menu':selectSitemapItem('surface',value);showModal('canvas-card-menu',value);break;
   case 'canvas-menu-edit':closeModal();startNodeForm('view',value);break;
-  case 'canvas-menu-child':closeModal();designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
+  case 'canvas-menu-child':closeModal();selectSitemapItem('surface',value);paintMapSelection();startNodeForm('page');break;
   case 'canvas-menu-remove':showModal('design-remove',value);break;
   case 'canvas-menu-duplicate':closeModal();dispatch('design-duplicate',value);break;
   case 'canvas-menu-entry':closeModal();dispatch('design-entry',value);break;

@@ -96,5 +96,5 @@ function paintReferenceChrome(){
    if(place){toolbar.style.left=place.x+'px';toolbar.style.top=place.y+'px';}else toolbar.hidden=true;
   }
  }
- dsPaintConnectedPorts();paintSpatialLayers();
+ dsPaintConnectedPorts();dsPaintFlowFeedback();paintSpatialLayers();
 }

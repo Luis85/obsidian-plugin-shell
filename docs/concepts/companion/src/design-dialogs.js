@@ -17,14 +17,16 @@ function designRemoveDialog(){const n=design().nodes.find(n=>n.id===modalData);i
 function designTransferDialog(){return dialogBody('Portable plugin blueprint',`<p>Export the sitemap, layouts, patterns and product intent as data. Declared note folders and public source locations may be included. No execution trust, credential values or test results are included. Do not place secrets in descriptive text. Import validates schema and structure before replacing the outline.</p><label for="blueprint-json">Blueprint JSON</label><textarea id="blueprint-json" data-field="design-transfer-json" aria-describedby="design-error" aria-invalid="${!!designUi.error}" class="mono transfer-area" spellcheck="false">${esc(designUi.transfer?.text??JSON.stringify(portableDesign(),null,2))}</textarea><p id="design-error" class="error" role="alert">${esc(designUi.error)}</p>`,button('Close','close','','ghost')+button('Import reviewed JSON','design-import','','','upload')+button('Download saved blueprint','design-export','','primary','download'));}
 function startNodeForm(kind='view',editId=null){
  const d=design(),n=d.nodes.find(n=>n.id===editId),selected=selectedNode();
+ if(editId&&!n){notify('This surface no longer exists. Select a current card.');return;}
  const parent=kind==='page'?(selected&&['view','page','group'].includes(selected.kind)?selected.id:d.nodes.find(n=>n.kind==='view')?.id||null):null;
  designUi.form=n?{...designCopy(n),intent:n.intent||'',goals:n.goals||[],editing:true,owner:designOwner()}:{components:[],id:'node-'+d.nextId,label:kind==='view'?'New view':kind==='page'?'New screen':'New surface',slug:kind==='view'?'new-view':kind==='page'?'new-screen':'new-surface',kind,layout:kind==='settings'?'form':'single',placement:'tab',parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:!d.nodes.some(n=>n.entry)&&kind==='view',instance:'reuse',patterns:[],goal:'',intent:'',goals:[],entity:'',editing:false,owner:designOwner()};
  if(!n){Object.assign(designUi.form,uniqueSurfaceName(d,kind));designUi.form.autoSlug=true;}
- designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
+ designUi.form.surfaceSnapshot=n?JSON.stringify(surfaceEditIdentity(n)):null;designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
 }
 function saveDesignNode(){
  const d=design(),f=designUi.form;designUi.error='';if(state.activeRun){designUi.error='Finish the active simulation before saving.';redrawModal();return;}
  if(f.owner!==designOwner()||f.baseRevision!==d.revision){designUi.error='The selected project changed. Reopen the surface editor.';redrawModal();return;}
+ if(f.editing&&(!d.nodes.some(n=>n.id===f.id)||f.surfaceSnapshot!==JSON.stringify(surfaceEditIdentity(d.nodes.find(n=>n.id===f.id))))){designUi.error='This surface changed. Copy your draft and reopen it.';redrawModal();return;}
  if(!f.editing&&f.autoSlug)f.slug=allocateSurfaceCode(d,f.label);
  const keys=['components','id','slug','label','kind','layout','placement','parent','nav','command','ribbon','entry','instance','patterns','goal','entity','intent','goals'];
  const n=Object.fromEntries(keys.map(k=>[k,designCopy(f[k])]));if(f.bricks!==undefined)n.bricks=designCopy(f.bricks);
@@ -35,7 +37,7 @@ function saveDesignNode(){
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
  if(f.editing&&JSON.stringify(d.nodes.map(surfaceEditIdentity))===JSON.stringify(candidate.nodes.map(surfaceEditIdentity))){closeModal();return;}
- recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
+ recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();selectSitemapItem('surface',n.id);closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
 function editDesignField(el,commit){
  const key=el.dataset.field,value=el.type==='checkbox'?el.checked:el.value;

@@ -2,16 +2,17 @@ function connectedCardDialog(){
  const f=connectionUi.form,d=design(),origin=d.nodes.find(n=>n.id===f?.origin);if(!f||!origin)return dialogBody('Source no longer available','Cancel and choose a current card.');
  const target=f.direction==='incoming'?origin:{kind:f.kind},kinds=allowedLinkKinds(target),layouts=LAYOUTS.filter(l=>f.kind!=='modal'||['single','form','wizard'].includes(l.id));
  const parents=d.nodes.filter(n=>['view','page','group'].includes(n.kind)&&nodeOwner(d,n));
+ const containment=connectedCardUsesContainment(f,d);
  const from=f.direction==='incoming'?f.label:origin.label,to=f.direction==='incoming'?origin.label:f.label;
  return dialogBody('Create a connected '+(f.kind==='page'?'screen':f.kind==='view'?'view':f.kind==='modal'?'dialog':'action'),`
   <div class="connection-review-strip"><span>${icon('link')} ${f.direction==='incoming'?'Leads into':'Continues from'} <strong>${esc(origin.label)}</strong></span><span>${esc(SIDE_NAMES[f.side])} handle</span></div>
-  <p>One save creates the card and its editable user-flow connection. Cancel changes nothing.</p>
+  <p>${containment?'Adds one screen to this view container with one Contains relationship. Parent navigation makes it reachable; no duplicate navigation line is added.':'One save creates the card and its editable user-flow connection.'} Cancel changes nothing.</p>
   <div class="grid2">${connectionInput('Card name','label',f.label)}${connectionInput('Code name','slug',f.slug)}</div>
   <div class="grid2">${connectionSelect('Layout template','layout',layouts.map(l=>[l.id,l.name]),f.layout)}${f.kind==='page'?connectionSelect('Lives inside','parent',parents.map(n=>[n.id,n.label]),f.parent):f.kind==='view'?connectionSelect('Initial placement','placement',Object.entries(PLACEMENTS),f.placement):'<div class="connection-kind-note">'+esc(NODE_KINDS[f.kind])+'<small>Separate surface; existing cards are not reparented.</small></div>'}</div>
   ${f.kind==='page'?`<label class="toggle-line"><input type="checkbox" data-field="connection-nav" ${f.nav?'checked':''}> Also list this screen in its parent navigation</label>`:''}
-  <section class="connection-form-section"><h3>User-flow connection</h3><div class="connection-direction" id="connection-summary"><span>${esc(from)}</span>${icon('arrow')}<span>${esc(to)}</span></div>
+  ${containment?'':`<section class="connection-form-section"><h3>User-flow connection</h3><div class="connection-direction" id="connection-summary"><span>${esc(from)}</span>${icon('arrow')}<span>${esc(to)}</span></div>
   <div class="grid2">${connectionSelect('Connection type','linkKind',kinds.map(k=>[k,LINK_TYPES[k].label]),f.linkKind)}${connectionInput('Action label','actionLabel',f.actionLabel)}</div>
-  ${f.linkKind==='conditional'?connectionInput('Condition','condition',f.condition,true):''}<p class="small muted">${esc(LINK_TYPES[f.linkKind]?.description||'')}</p></section>
+  ${f.linkKind==='conditional'?connectionInput('Condition','condition',f.condition,true):''}<p class="small muted">${esc(LINK_TYPES[f.linkKind]?.description||'')}</p></section>`}
   <details class="connection-intent-details"><summary>Describe user intent and goals</summary>${connectionInput('User intent','intent',f.intent,true)}${connectionInput('User goals — one per line','goals',f.goals,true)}</details>
   <p class="connection-save-note">${icon('shield')} Existing cards stay in place. No source code is written.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Create card & connection','connection-save','','primary','plus'));
 }

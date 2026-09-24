@@ -100,7 +100,9 @@
     "docs/concepts/companion/src/data-source-views.js",
     "docs/concepts/companion/src/data-source-flow.js",
     "docs/concepts/companion/src/data-source-generation.js",
-    "docs/concepts/companion/src/data-source.css"
+    "docs/concepts/companion/src/data-source.css",
+    "docs/concepts/companion/src/editor-selection.js",
+    "docs/concepts/companion/src/editor-removal.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

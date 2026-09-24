@@ -1,14 +1,14 @@
-# Data Sources iteration
-
-The **Data Sources** design catalog now declares external API, database and active-vault operations with separate input/output shapes. Place a source on the sitemap and connect it to surfaces with read, write or bidirectional data flows. These are design declarations and typed generator previews, not live connections.
-
-Try **Use example outline → Data Sources → Use example sources → Show on sitemap**. The example is explicit and illustrative. See [DATA-SOURCES.md](DATA-SOURCES.md) and [DATA-SOURCES-VERIFICATION.md](DATA-SOURCES-VERIFICATION.md). Current assembly inventory: **84 exact JS/CSS inputs** (64 authored JS, 15 authored CSS, five unchanged vendors). Earlier verification documents retain their original artifact scope.
-
 # Shell Workbench companion concept
 
-> **One vault, one project · entity-editor review and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · three-editor correctness and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
+
+## Three-editor review
+
+The Sitemap, Entities and Data Sources pass corrects source/view connection targeting, duplicate child connections, relationship deletion in the edit modal and unrelated inspector content. Source/catalog selection is separate, source and flow inspector tabs are contextual, saved flows reveal hidden endpoints, and deletion/cancellation preserves the edit draft. Data-handle body drops and keyboard activation use the same reviewed contract as Connect to card.
+
+Read [EDITORS-REVIEW.md](EDITORS-REVIEW.md) for reproduced defects, prioritized findings and code decisions, and [EDITORS-VERIFICATION.md](EDITORS-VERIFICATION.md) for exact-artifact evidence and its limits. Earlier reports retain their original commit scope. See [DATA-SOURCES.md](DATA-SOURCES.md) for source/operation/shape semantics.
 
 ## Current experience
 
@@ -59,7 +59,7 @@ CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-ch
 
 The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suite uses HTML injection and explicit controlled-storage fixtures because this environment blocks direct loopback navigation. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-The builder and Fallow inventory agree on **78 exact inputs: 59 maintained JS, 14 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
+The builder and Fallow inventory agree on **86 exact inputs: 66 maintained JS, 15 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 

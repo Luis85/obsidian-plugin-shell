@@ -179,7 +179,7 @@ with sync_playwright() as pw:
         page.locator('[data-field="ds-query"]').fill('');page.locator('[data-field="ds-filter"]').select_option('vault')
         ok('Source type filter selects the active-vault declaration',page.locator('.ds-catalog-row').count()==1 and 'Obsidian vault' in page.locator('.ds-catalog-row').inner_text())
         page.locator('[data-field="ds-filter"]').select_option('all');page.screenshot(path=str(OUT/'catalog-dark.png'),full_page=True)
-        source=js('dataSources().sources[0].id');act('ds-place',source);ready_map()
+        source=js('dataSources().sources[0].id');act('ds-place',source);ready_map();js('fitMap()');page.wait_for_timeout(150)  # Show focuses one source; geometry qualification explicitly frames the full graph.
         ok('Source cards are projected without contaminating the view hierarchy',js('flowUi.api.getNodes.value.filter(n=>n.type==="dataSource").length===3&&!design().nodes.some(n=>n.id.startsWith("ds-"))'))
         ok('Read, write and both directions render correct endpoints and arrow markers',js('flowUi.api.getEdges.value.filter(e=>e.data?.dataSource).every(e=>{const f=dataSources().flows.find(f=>f.id===e.id);return e.source===(f.direction==="write"?f.card:f.source)&&e.target===(f.direction==="write"?f.source:f.card)&&!!e.markerEnd&&!!e.markerStart===(f.direction==="both")})'))
         ok('Data-flow paths meet their measured handles',all(js(ENDPOINTS)),'SVG endpoint-to-handle geometry')

@@ -61,6 +61,7 @@ function startConnectedCard(kind,context){
   autoAction:true,condition:'',intent:'',goals:''};
  connectionUi.error='';showModal('connection-create');
 }
+function connectedCardUsesContainment(f,d=design()){return f?.kind==='page'&&f.direction==='outgoing'&&f.parent===f.origin&&d.nodes.some(n=>n.id===f.origin&&n.kind==='view')&&f.nav;}
 function connectedCardCandidate(d,f){
  const origin=d.nodes.find(n=>n.id===f.origin),nodeId='node-'+d.nextId,edgeId='edge-'+(d.nextId+1);
  const n={id:nodeId,kind:f.kind,label:f.label.trim(),slug:f.slug.trim(),parent:f.kind==='page'?f.parent:null,
@@ -70,30 +71,30 @@ function connectedCardCandidate(d,f){
  const fromSide=incoming?OPPOSITE_SIDE[f.side]:f.side,toSide=incoming?f.side:OPPOSITE_SIDE[f.side];
  const e={id:edgeId,from:from.id,to:to.id,sourceHandle:'out-'+fromSide,targetHandle:'in-'+toSide,
   label:f.actionLabel.trim(),kind:f.linkKind,condition:f.linkKind==='conditional'?f.condition.trim():'',description:''};
- const candidate=designCopy(d);candidate.nodes.push(n);candidate.links.push(e);candidate.nextId=d.nextId+2;
- return {candidate,n,e};
+ const candidate=designCopy(d),containment=connectedCardUsesContainment(f,d);candidate.nodes.push(n);if(!containment)candidate.links.push(e);candidate.nextId=d.nextId+(containment?1:2);
+ return {candidate,n,e:containment?null:e};
 }
 function commitConnectedCard(){
  const d=design(),f=connectionUi.form,fail=m=>{connectionUi.error=m;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before saving.');
  if(!f||f.owner!==designOwner()||f.revision!==d.revision||!d.nodes.some(n=>n.id===f.origin))return fail('This draft is stale. Cancel and reopen the handle menu.');
- if(d.nodes.length>=DESIGN_LIMITS.nodes||d.links.length>=DESIGN_LIMITS.links)return fail('The outline limit is reached. No card or connection was added.');
- if(!f.actionLabel.trim()||f.actionLabel.length>120)return fail('Use an action label of 1–120 characters.');
- if(f.linkKind==='conditional'&&!f.condition.trim())return fail('Describe the condition before saving this connection.');
+ if(d.nodes.length>=DESIGN_LIMITS.nodes||!connectedCardUsesContainment(f,d)&&d.links.length>=DESIGN_LIMITS.links)return fail('The outline limit is reached. No card or connection was added.');
+ if(!connectedCardUsesContainment(f,d)&&(!f.actionLabel.trim()||f.actionLabel.length>120))return fail('Use an action label of 1–120 characters.');
+ if(!connectedCardUsesContainment(f,d)&&f.linkKind==='conditional'&&!f.condition.trim())return fail('Describe the condition before saving this connection.');
  const {candidate,n,e}=connectedCardCandidate(d,f);
- if(!validIntentFields(n)||!validLinkFields(e))return fail('Intent, goals or connection details exceed their limits.');
+ if(!validIntentFields(n)||e&&!validLinkFields(e))return fail('Intent, goals or connection details exceed their limits.');
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  const position=proposedCardPosition(d,f.origin,f.side,n);if(!position)return fail('No free position near that handle. Move the source card and try again.');
  recordDesign();d.nodes=candidate.nodes;d.links=candidate.links;d.nextId=candidate.nextId;
  const c=canvasState(d);c.positions[n.id]=position;c.custom=true;assignCardToSection(d,n.id,sectionForCard(d,f.origin));
  c.collapsed=c.collapsed.filter(id=>!nodeDescendants(d,id).has(n.id));
- designChanged();designUi.selected=n.id;canvasUi.edge=e.id;canvasUi.inspector='links';closeModal();render();
- revealDesignSelection();focusMapNode(n.id);canvasAnnounce('Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.');
+ designChanged();selectSitemapItem('surface',n.id);canvasUi.edge=e?.id||'contains-'+n.id;canvasUi.inspector='links';closeModal();render();
+ revealDesignSelection();focusMapNode(n.id);canvasAnnounce(e?'Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.':'Created '+n.label+' inside its view container. One containment connection; Undo removes the new screen.');
 }
 function openStructureRelationship(childId){
  const d=design(),child=d.nodes.find(n=>n.id===childId);if(!child?.parent)return;
  connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(canvasState(d).anchors['contains-'+child.id]),label:canvasState(d).anchors['contains-'+child.id].label||'Contains',...structureRoute(d,child)};connectionUi.error='';
- designUi.selected=child.id;canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
+ selectSitemapItem('surface',child.id);canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
 }
 function saveStructureRelationship(){
  const d=design(),f=connectionUi.structure,child=d.nodes.find(n=>n.id===f?.child),fail=m=>{connectionUi.error=m;redrawModal();};

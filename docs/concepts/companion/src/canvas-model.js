@@ -26,7 +26,7 @@ function visibleMapNodes(d=design()){
 }
 function canvasCommit(fn,message){
  if(state.activeRun){notify('Finish or cancel the active simulation before arranging the map.');return false;}
- const d=design();canvasState(d);recordDesign();fn(d.canvas);save();render();if(message)canvasAnnounce(message);return true;
+ const d=design();canvasState(d);const next=designCopy(d.canvas);fn(next);if(JSON.stringify(next)===JSON.stringify(d.canvas))return true;if(!validCanvas(next)){notify('Invalid canvas arrangement. Nothing was changed.');return false;}recordDesign();d.canvas=next;save();render();if(message)canvasAnnounce(message);return true;
 }
 function arrangeMap(layout){
  if(!Object.hasOwn(MAP_LAYOUTS,layout))return;
@@ -48,7 +48,7 @@ function showMapNode(id,focus=false){
  dsUi.selected=null;
  const d=design();if(!d.nodes.some(n=>n.id===id))return;
  const c=canvasState(d);c.collapsed=c.collapsed.filter(parent=>!nodeDescendants(d,parent).has(id));
- designUi.selected=id;canvasUi.edge=null;render();revealDesignSelection();if(focus)focusMapNode(id);
+ selectSitemapItem('surface',id);render();revealDesignSelection();if(focus)focusMapNode(id);
 }
 function focusMapNode(id){if(!id)return;const focus=()=>{if(designUi.selected===id&&!document.getElementById('modal').open)document.querySelector(`.map-node[data-node="${CSS.escape(id)}"]`)?.focus({preventScroll:true});};focus();if(flowUi.app)Vue.nextTick(focus);}
 function mapMatch(n){const q=canvasUi.search.trim().toLowerCase();return !q||(n.label+' '+n.slug+' '+NODE_KINDS[n.kind]).toLowerCase().includes(q);}

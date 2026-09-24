@@ -1772,6 +1772,24 @@ body{display:flex;flex-direction:column;height:100dvh}
 #vf-root .ds-port::after { border-color: var(--ds-accent) !important; }
 #vf-root .ds-port.source::after { background: var(--ds-accent) !important; }
 
+/* Contextual selection and safe focus states for the three-editor handoff. */
+.ds-filter-context:empty { display: none; }
+.ds-filter-context { color: var(--muted); font-size: 12px; padding: 10px 0; }
+.node-inspector .ds-facts { grid-template-columns: 90px minmax(0,1fr); }
+.node-inspector .ds-shape-pair { grid-template-columns: 1fr; gap: 6px; }
+.node-inspector .ds-operation h3 { overflow-wrap: anywhere; }
+#vf-root .ds-port { touch-action: none; }
+#vf-root .ds-port:active { outline: 3px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root .ds-port.valid { outline: 3px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root .ds-port[aria-disabled="true"] { cursor: not-allowed; }
+.inspector-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.ds-outline-row:hover { background: var(--ds-tint); }
+.ds-outline-row:active { background: var(--raised); }
+.ds-workspace button:disabled:hover,.ds-source-card button:disabled:hover { background: var(--surface); border-color: var(--line); }
+
+#vf-root[data-data-visible="false"] .map-node .ds-port { opacity: 0 !important; pointer-events: none !important; }
+#vf-root .ds-port[aria-disabled="true"]::after { opacity: .45; }
+
 </style>
 <!--
 # Third-party notices — offline concept
@@ -12573,6 +12591,7 @@ let dialogReturnFocus=null;
 const STORAGE_KEY = 'shell-workbench-single-vault-v2';
 const BASELINE = 'd755745 · iteration 03';
 const ICONS = {
+ trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
  box:'M12 3 3 7.5v9L12 21l9-4.5v-9L12 3ZM3 7.5l9 4.5 9-4.5M12 12v9M7.5 5.25l9 4.5',
  grid:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
  plus:'M12 5v14M5 12h14', arrow:'M5 12h14M13 6l6 6-6 6', check:'m5 12 4 4L19 6',
@@ -12686,7 +12705,7 @@ function redrawModal(){const d=document.getElementById('modal');if(!d.open)retur
 
 // Concept section: workspace
 // Render functions intentionally use escaped strings; user data is never evaluated.
-function render(){const uiFocus=captureUiFocus();erDestroy();destroyFlow();
+function render(){const uiFocus=captureUiFocus();erDestroy();destroyFlow();if(project())normalizeSitemapSelection();
  document.documentElement.dataset.theme=state.settings.theme;document.body.classList.toggle('design-workspace',['prds','sitemap','entities','sources','components','blueprints','patterns'].includes(state.view));const p=project();
  document.getElementById('sidebar').innerHTML=`<div class="brand">${icon('box')}<div>Shell Workbench<small>A place to build plugins</small></div></div><div class="project-picker vault-identity" data-tour="project"><span class="project-initial">${p?esc(initials(p.name)):icon('plus')}</span><span class="grow"><span class="project-name">${p?esc(p.name):esc(CONCEPT_VAULT.name)}</span><span class="small subtle" style="display:block">${p?'This vault’s project':'Current vault · start here'}</span></span></div><div class="nav-label">WORKSPACE</div>${NAV.map(([id,ic,label])=>`${id==='prds'?'<div class="nav-label">DESIGN</div>':id==='generate'?'<div class="nav-label">BUILD & VERIFY</div>':''}<button class="nav-item ${state.view===id?'active':''}" data-action="nav" data-value="${id}" data-tour="${id}" ${state.view===id?'aria-current="page"':''}>${icon(ic)}${label}${id==='runs'&&state.runs.length?`<span class="nav-count">${state.runs.length}</span>`:''}</button>`).join('')}<div class="sidebar-bottom"><button class="nav-item" data-action="tour">${icon('help')}Take a guided tour</button><button class="nav-item" data-action="settings">${icon('settings')}Preferences</button><div class="sidebar-note"><strong>UI and CLI. One workflow.</strong><br>Your project stays yours.</div></div>`;
  const name=NAV.find(n=>n[0]===state.view)?.[2]||'Project overview';
@@ -12790,7 +12809,7 @@ function downloadText(data=modalData){const {text,filename}=data;const blob=new 
 
 // Concept section: interactions
 function dispatch(action,value){
- if(handleVaultAction(action,value))return;
+ if(action==='editor-keep-editing'){restoreInlineRemoval();return;}if(handleVaultAction(action,value))return;
  if(handleDataSourceAction(action,value)||handleSemanticAction(action,value)||handleVariantAction(action,value)||handleEdgeEditingAction(action,value)||handleUnifiedAction(action,value)||handleReferenceAction(action,value)||handleLibraryAction(action,value)||handleBrickAction(action,value)||handleConnectionAction(action,value)||handleFlowAction(action,value)||handleWorkflowAction(action,value)||handleCanvasAction(action,value)||handleProductAction(action,value)||handleDesignAction(action,value))return;
  const p=project();
  switch(action){
@@ -12875,13 +12894,113 @@ document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&e
 document.getElementById('modal').addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 document.getElementById('tour').addEventListener('cancel',event=>{event.preventDefault();pauseTour();});
 window.addEventListener('beforeunload',save);
+// One canvas selection, with a separate catalog cursor. These are view-local,
+// non-persistent projections; selecting a source never selects a surface too.
+function sitemapSelection(d=design()){
+ const flow=d.dataSources?.flows.find(f=>f.id===canvasUi.edge);
+ if(flow)return {kind:'data-flow',id:flow.id,record:flow};
+ const source=d.dataSources?.sources.find(s=>s.id===dsUi.selected);
+ if(source&&dsUi.show&&Object.hasOwn(d.dataSources.positions,source.id))return {kind:'source',id:source.id,record:source};
+ const surface=d.nodes.find(n=>n.id===designUi.selected);
+ return surface?{kind:'surface',id:surface.id,record:surface}:{kind:'empty',id:null,record:null};
+}
+function selectSitemapItem(kind,id=null){
+ const d=design();
+ if(kind==='source'&&!d.dataSources?.sources.some(s=>s.id===id))return false;
+ if(kind==='surface'&&!d.nodes.some(n=>n.id===id))return false;
+ if(kind==='data-flow'&&!d.dataSources?.flows.some(f=>f.id===id))return false;
+ const changed=designUi.selected!==id||kind!=='surface';
+ designUi.selected=kind==='surface'?id:null;
+ dsUi.selected=kind==='source'?id:null;
+ canvasUi.edge=kind==='data-flow'?id:null;
+ if(changed){brickUi.selected=null;brickUi.node=null;}
+ normalizeSitemapSelection(d);return true;
+}
+function normalizeSitemapSelection(d=design()){
+ if(!d.nodes.some(n=>n.id===designUi.selected))designUi.selected=null;
+ if(!dsUi.show||!d.dataSources?.sources.some(s=>s.id===dsUi.selected&&Object.hasOwn(d.dataSources.positions,s.id)))dsUi.selected=null;
+ if(canvasUi.edge&&!d.links.some(e=>e.id===canvasUi.edge)&&!d.nodes.some(n=>n.parent&&'contains-'+n.id===canvasUi.edge)&&!d.dataSources?.flows.some(f=>f.id===canvasUi.edge))canvasUi.edge=null;
+ if(!dsUi.show&&d.dataSources?.flows.some(f=>f.id===canvasUi.edge))canvasUi.edge=null;
+ if(dsUi.selected||d.dataSources?.flows.some(f=>f.id===canvasUi.edge))designUi.selected=null;
+ if(!d.dataSources?.sources.some(s=>s.id===dsUi.catalogSelected))dsUi.catalogSelected=null;
+ if(d.semantic){if(!d.semantic.entities.some(e=>e.id===erUi.selected))erUi.selected=null;if(!d.semantic.relationships.some(r=>r.id===erUi.edge))erUi.edge=null;}
+ const tabs=sitemapInspectorSections(d);
+ if(tabs.length&&!tabs.some(([id])=>id===canvasUi.inspector))canvasUi.inspector=tabs[0][0];
+}
+function sitemapInspectorSections(d=design()){
+ const kind=sitemapSelection(d).kind;
+ if(kind==='source')return [['source-details','Source'],['source-operations','Operations'],['source-flows','Data flows']];
+ if(kind==='data-flow')return [['data','Data flow']];
+ if(kind==='empty')return [];
+ return [['details','Surface'],['bricks','Components'],['intent','Intent'],['links','Links'],['data','Data'],['checks','Checks']];
+}
+function sitemapInspectorTabs(d=design()){
+ return sitemapInspectorSections(d).map(([id,label])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${label}</button>`).join('');
+}
+function paintSitemapInspector(){
+ const d=design();normalizeSitemapSelection(d);
+ const root=document.querySelector('.node-inspector');if(!root)return;
+ const tabs=root.querySelector('.inspector-tabs'),body=root.querySelector('.inspector-body');
+ if(tabs){tabs.innerHTML=sitemapInspectorTabs(d);tabs.hidden=!sitemapInspectorSections(d).length;}
+ if(body)body.innerHTML=flowInspector(d,selectedNode());
+ root.dataset.selectionKind=sitemapSelection(d).kind;
+}
+function dsFlowInspector(f,d=design()){
+ const source=d.dataSources.sources.find(s=>s.id===f.source),op=source.operations.find(o=>o.id===f.operation),card=d.nodes.find(n=>n.id===f.card);
+ return `<h2>${esc(f.label)}</h2><p class="ds-direction-summary">${esc(dsFlowSentence(f,d))}</p><dl class="ds-facts"><dt>Operation</dt><dd>${esc(op.name)}</dd><dt>Direction</dt><dd>${esc(DS_DIRECTIONS[f.direction])}</dd><dt>Trigger</dt><dd>${esc(f.trigger)}</dd></dl><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${esc(dsShapeLabel(op.input,d))}</strong></div><div><span>Output · from source</span><strong>${esc(dsShapeLabel(op.output,d))}</strong></div></div><p>${esc(f.notes||'No mapping or behavior notes declared.')}</p><div class="row wrap">${button('Edit data flow','ds-flow',f.id,'primary small')}${button('Locate '+card.label,'ds-flow-reveal',f.id,'small')}${button('Manage '+source.name,'ds-catalog',source.id,'small')}${button('Remove data flow','ds-remove-flow',f.id,'danger small')}</div><p class="small muted">This is a design contract. No data transfer, authentication or synchronization is executed.</p>`;
+}
+// Canvas hit-testing and keyboard focus must not resurrect the previous card.
+function sitemapFocusStillCurrent(token){
+ const id=token?.node||(token?.action==='canvas-select'?token.value:null);
+ if(!id||!project()||state.view!=='sitemap')return true;
+ const current=sitemapSelection();return current.id===id;
+}
+
+// In-modal removal is a second review of the original identity, not an implicit
+// save of edited fields. Keep editing/Escape restores the exact pending draft.
+function inlineRemovalForm(){
+ return modalType==='semantic-form'?erUi.form:modalType==='data-source-form'?dsUi.form:null;
+}
+function requestInlineRemoval(kind,id){
+ const f=inlineRemovalForm();
+ if(!document.getElementById('modal').open||!f||f.id!==id||!id)return false;
+ const allowed=modalType==='semantic-form'?{relationship:'remove-relationship'}:{flow:'remove-flow',operation:'remove-operation',source:'remove-source'};
+ if(allowed[f.formKind]!==kind)return false;
+ f.removeRequested=kind;redrawModal();
+ document.querySelector('#modal [data-action="editor-keep-editing"]')?.focus();return true;
+}
+function restoreInlineRemoval(){
+ const f=inlineRemovalForm();if(!f?.removeRequested)return false;
+ delete f.removeRequested;redrawModal();return true;
+}
+function inlineRemovalDialog(f){
+ const entity=modalType==='semantic-form';
+ const name=entity?semanticModel().relationships.find(r=>r.id===f.id)?.name:f.formKind==='flow'?dataSources().flows.find(x=>x.id===f.id)?.label:f.name;
+ const detail=entity?'The relationship and its generated field declaration are removed from the design. Both entities, existing notes and previously generated files are kept.':'Only this declaration is removed. Existing notes, remote data and previously generated files are kept. Used sources and operations remain protected.';
+ const error=entity?erUi.error:dsUi.error;
+ return dialogBody('Remove '+(name||'declaration')+'?',`<p>${esc(detail)}</p><p>Unsaved field edits are not applied by deletion. Keep editing returns to the exact draft. Undo restores the saved declaration.</p><div class="error" role="alert" id="${entity?'er-form-error':'ds-error'}" tabindex="-1">${esc(error)}</div>`,button('Keep editing','editor-keep-editing','','ghost')+button('Remove declaration',entity?'er-save':'ds-save','','danger','trash'));
+}
+
+// Ignore untouched mode caches, but retain edited fields in hidden shape modes.
+// A mode round-trip alone is not an edit; cached user input still needs protection.
+function editorDraftCheckpoint(form){
+ if(!form)return 'null';
+ const value=Object.fromEntries(Object.entries(form).filter(([key])=>!['snapshot','owner','revision','token','removeRequested','shapeBaselines','shapeDrafts'].includes(key)));
+ const hidden={};
+ for(const side of ['input','output'])for(const [mode,shape] of Object.entries(form.shapeDrafts?.[side]||{})){
+  if(mode!==form[side]?.mode&&JSON.stringify(shape)!==JSON.stringify(form.shapeBaselines?.[side]?.[mode]))hidden[side+':'+mode]=shape;
+ }
+ if(Object.keys(hidden).length)value.hiddenShapeEdits=hidden;
+ return JSON.stringify(value);
+}
+
 // Reviewed catalog transactions share the outline's persistence, Undo and generator review.
-const dsUi={selected:null,query:'',kind:'all',show:true,form:null,error:'',drag:null};
+const dsUi={selected:null,catalogSelected:null,connection:null,hover:null,query:'',kind:'all',show:true,form:null,error:'',drag:null};
 function dsFail(message){dsUi.error=message;if(modalType==='data-source-form'){redrawModal();document.getElementById('ds-error')?.focus();}else notify(message);return false;}
 function dsToken(){return JSON.stringify(dsGeneration(design()));}
 function dsOpen(kind,record={}){
- if(state.activeRun)return notify('Finish or cancel the active simulation before changing data sources.');
- dsUi.form={...designCopy(record),formKind:kind,owner:designOwner(),revision:design().revision,snapshot:dsToken()};dsUi.error='';showModal('data-source-form');
+ if(state.activeRun){notify('Finish or cancel the active simulation before changing data sources.');return false;}
+ dsUi.form={...designCopy(record),formKind:kind,owner:designOwner(),revision:design().revision,snapshot:dsToken()};if(kind==='operation')dsUi.form.shapeBaselines=Object.fromEntries(['input','output'].map(side=>[side,{[record[side].mode]:designCopy(record[side])}]));dsUi.error='';showModal('data-source-form');return true;
 }
 function dsCommit(change){
  if(state.activeRun)return dsFail('Finish the active simulation first.');
@@ -12899,17 +13018,27 @@ function dsFreshSource(kind='api'){
  while(dataSources().sources.some(s=>s.slug===slug))slug=base+'-'+n++;
  return {id:null,name:n===2?names[kind]:names[kind]+' '+(n-1),slug,kind,status:'draft',description:'',locator:kind==='vault'?'vault://active':'',auth:'none',credentialRef:'',operations:[]};
 }
-function dsEditSource(id){dsOpen('source',dataSources().sources.find(s=>s.id===id)||dsFreshSource());}
+function dsEditSource(id){const source=dataSources().sources.find(s=>s.id===id);if(id&&!source)return dsFail('This source no longer exists. Select a current source.');dsOpen('source',source||dsFreshSource());}
 function dsEditOperation(value){
  const [sourceId,id]=value.split(':'),source=dataSources().sources.find(s=>s.id===sourceId);if(!source)return notify('Select an existing data source first.');
+ if(id&&!source.operations.some(o=>o.id===id))return dsFail('This operation no longer exists. Select a current operation.');
  const op=source.operations.find(o=>o.id===id)||{id:null,name:'Read records',slug:'read-records',direction:'read',method:source.kind==='api'?'GET':'adapter',resource:'',description:'',input:dsNewShape('none'),output:dsNewShape()};
  dsOpen('operation',{...op,sourceId,inputSchemaText:op.input.schema?JSON.stringify(op.input.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}',outputSchemaText:op.output.schema?JSON.stringify(op.output.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}'});
 }
 function dsEditFlow(id=null,sourceId=null,cardId=null,direction=null){
- const m=dataSources(),sources=m.sources.filter(s=>s.status!=='deprecated'&&s.operations.length),cards=design().nodes.filter(n=>n.kind!=='group');
- const old=m.flows.find(f=>f.id===id);if(!old&&(!sources.length||!cards.length))return notify('Add a source operation and a sitemap surface before connecting data.');
- const source=sources.find(s=>s.id===sourceId)||sources[0],op=source?.operations[0];
- dsOpen('flow',old||{id:null,source:source.id,operation:op.id,card:cardId||selectedNode()?.id||cards[0].id,direction:direction&&(op.direction===direction||op.direction==='both')?direction:op.direction,label:op.name,trigger:'manual',notes:''});
+ const m=dataSources(),old=m.flows.find(f=>f.id===id);
+ if(id&&!old)return dsFail('This data flow no longer exists. Select a current connection.');
+ if(old)return dsOpen('flow',old);
+ const sources=m.sources.filter(s=>s.status!=='deprecated'&&s.operations.some(o=>!direction||o.direction===direction||o.direction==='both')),cards=design().nodes.filter(n=>n.kind!=='group');
+ const source=sourceId?m.sources.find(s=>s.id===sourceId):sources[0];
+ if(!source)return dsFail('Add a data source with an operation before connecting data.');
+ if(source.status==='deprecated')return dsFail('This source is deprecated. Choose an active or draft source.');
+ if(!source.operations.length)return dsFail('Add an operation to '+source.name+' first. No other source was substituted.');
+ const card=cardId?cards.find(n=>n.id===cardId):cards.find(n=>n.id===selectedNode()?.id)||cards[0];
+ if(!card)return dsFail('Choose an existing view or screen, not a navigation group.');
+ const op=source.operations.find(o=>!direction||o.direction===direction||o.direction==='both');
+ if(!op)return dsFail('Add a '+direction+' operation to '+source.name+' first.');
+ return dsOpen('flow',{id:null,source:source.id,operation:op.id,card:card.id,direction:direction||op.direction,label:op.name,trigger:'manual',notes:''});
 }
 function dsPosition(id,m=dataSources(),d=design()){
  if(!m.positions[id]){
@@ -12919,8 +13048,8 @@ function dsPosition(id,m=dataSources(),d=design()){
  return m.positions[id];
 }
 function dsSave(){
- const f=dsUi.form;if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==dsToken())return dsFail('This review is stale. Copy your edits and reopen it; nothing was overwritten.');
- let selected=dsUi.selected;
+ const draft=dsUi.form,f=draft?.removeRequested?{...draft,formKind:draft.removeRequested}:draft;if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==dsToken())return dsFail('This review is stale. Copy your edits and reopen it; nothing was overwritten.');
+ let selected=dsUi.catalogSelected,savedFlow=null;
  const ok=dsCommit((m,d)=>{
   if(f.formKind==='source'){
    const old=m.sources.find(s=>s.id===f.id);if(f.id&&!old)throw Error('The source no longer exists.');
@@ -12947,7 +13076,7 @@ function dsSave(){
    if(source.status==='deprecated'&&(!old||old.source!==source.id||old.operation!==f.operation||old.card!==f.card))throw Error('Deprecated sources cannot acquire new usages.');
    const flow={id:f.id||dsNext(m,'flow'),source:f.source,operation:f.operation,card:f.card,direction:f.direction,label:f.label.trim(),trigger:f.trigger,notes:f.notes.trim()};
    if(m.flows.some(x=>x.id!==flow.id&&x.source===flow.source&&x.operation===flow.operation&&x.card===flow.card&&x.direction===flow.direction))throw Error('That source operation is already connected in this direction. Edit the existing flow.');
-   dsPosition(source.id,m,d);if(old)m.flows[m.flows.indexOf(old)]=flow;else m.flows.push(flow);selected=source.id;
+   dsPosition(source.id,m,d);if(old)m.flows[m.flows.indexOf(old)]=flow;else m.flows.push(flow);selected=source.id;savedFlow=flow.id;
   }else if(f.formKind==='remove-source'){
    if(m.flows.some(x=>x.source===f.id))throw Error('Remove this source’s data flows explicitly first. The source and all usages were preserved.');
    m.sources=m.sources.filter(s=>s.id!==f.id);delete m.positions[f.id];selected=null;
@@ -12960,32 +13089,33 @@ function dsSave(){
    if(!m.sources.some(s=>s.id===f.id))throw Error('The source was removed.');m.positions[f.id]={x,y};
   }
  });
- if(ok){dsUi.selected=selected;modalOriginal=null;closeModal();render();notify(f.formKind==='position'?'Source positioned. Generator contracts unchanged.':'Data-source design saved. No external service, database or vault was accessed.');}return ok;
+ if(ok){dsUi.catalogSelected=selected;modalOriginal=null;closeModal();if(savedFlow&&state.view==='sitemap')dsRevealFlow(savedFlow);else render();notify(f.formKind==='position'?'Source positioned. Generator contracts unchanged.':'Data-source design saved. No external service, database or vault was accessed.');}return ok;
 }
 function handleDataSourceAction(action,value=''){
  // Source nodes are a separate projection, never native view/containment nodes.
- if(action==='canvas-edge'&&dataSources().flows.some(f=>f.id===value)){canvasUi.edge=value;designUi.selected=dataSources().flows.find(f=>f.id===value).card;paintMapSelection();dsEditFlow(value);return true;}
+ if(action==='canvas-edge'&&dataSources().flows.some(f=>f.id===value)){selectSitemapItem('data-flow',value);referenceUi.panel='inspector';paintMapSelection();dsEditFlow(value);return true;}
  if(action==='canvas-select'&&dsIsNode(value)){if(!flowUi.dragging&&!flowUi.suppressClick)dsPick(value);return true;}
  if(action==='canvas-select')dsUi.selected=null;
  if(!action.startsWith('ds-'))return false;
  switch(action){
-  case 'ds-example':if(dsCommit(seedDataSourceExample)){dsUi.selected=dataSources().sources[0]?.id;render();}break;
+  case 'ds-example':if(dsCommit(seedDataSourceExample)){dsUi.catalogSelected=dataSources().sources[0]?.id;render();}break;
   case 'ds-add':dsOpen('source',dsFreshSource(Object.hasOwn(DS_KINDS,value)?value:'api'));break;
-  case 'ds-edit':dsEditSource(value||dsUi.selected);break;
-  case 'ds-select':dsUi.selected=value;render();break;
+  case 'ds-edit':dsEditSource(value||dsUi.catalogSelected);break;
+  case 'ds-select':if(dataSources().sources.some(s=>s.id===value)){dsUi.catalogSelected=value;render();}break;
   case 'ds-save':dsSave();break;
   case 'ds-operation':dsEditOperation(value);break;
-  case 'ds-connect':dsEditFlow(null,value||dsUi.selected);break;
+  case 'ds-connect':dsEditFlow(null,value||(state.view==='sources'?dsUi.catalogSelected:dsUi.selected));break;
   case 'ds-card-connect':dsEditFlow(null,null,value);break;
-  case 'ds-flow':dsEditFlow(value);break;
-  case 'ds-remove-source':{const s=dataSources().sources.find(s=>s.id===value);if(s)dsOpen('remove-source',s);break;}
-  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');dsOpen('remove-operation',{id,sourceId});break;}
-  case 'ds-remove-flow':dsOpen('remove-flow',{id:value});break;
-  case 'ds-place':if(dsCommit((m,d)=>dsPosition(value,m,d))){dsUi.show=true;dsUi.selected=value;designUi.selected=null;setView('sitemap');dsPick(value);fitMap();}break;
+  case 'ds-flow':if(state.view==='sitemap'){selectSitemapItem('data-flow',value);paintMapSelection();}dsEditFlow(value);break;
+  case 'ds-flow-reveal':if(!document.getElementById('modal').open||!askDiscardForm()){closeModal();dsRevealFlow(value);}break;
+  case 'ds-remove-source':{if(requestInlineRemoval('remove-source',value))break;const s=dataSources().sources.find(s=>s.id===value);if(s)dsOpen('remove-source',s);break;}
+  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');if(requestInlineRemoval('remove-operation',id))break;const op=dataSources().sources.find(s=>s.id===sourceId)?.operations.find(o=>o.id===id);if(op)dsOpen('remove-operation',{id,sourceId});else dsFail('This operation no longer exists.');break;}
+  case 'ds-remove-flow':if(!requestInlineRemoval('remove-flow',value)){const f=dataSources().flows.find(f=>f.id===value);if(f)dsOpen('remove-flow',f);else dsFail('This data flow no longer exists.');}break;
+  case 'ds-place':if(dsIsNode(value)&&dsCommit((m,d)=>dsPosition(value,m,d))){dsUi.show=true;selectSitemapItem('source',value);referenceUi.panel='inspector';designUi.mode='map';setView('sitemap');Vue.nextTick(()=>fitMap(true));}break;
   case 'ds-position':{const p=dataSources().positions[value];if(p)dsOpen('position',{id:value,x:String(p.x),y:String(p.y)});break;}
   case 'ds-unplace':if(dataSources().flows.some(f=>f.source===value)){notify('This card has data flows. Remove them first, or hide the data layer without removing the card.');break;}if(dsCommit(m=>delete m.positions[value]))render();break;
   case 'ds-layer':dsUi.show=!dsUi.show;render();break;
-  case 'ds-catalog':dsUi.selected=value||dsUi.selected;setView('sources');break;
+  case 'ds-catalog':dsUi.catalogSelected=value||dsUi.catalogSelected;setView('sources');break;
   case 'ds-validate':showModal('copy',{title:'Local declaration validation · not a connection test',text:JSON.stringify(dataSourceIssues(design()),null,2),filename:'data-source-checks.json'});break;
   case 'ds-preview':showModal('copy',{title:'Data-source contract · preview only',text:JSON.stringify(dsGeneration(design()),null,2),filename:'data-sources.json'});break;
   case 'ds-field-add':{const f=dsUi.form,s=f?.[value];if(s?.mode==='fields'&&s.fields.length<40){let n=s.fields.length+1;while(s.fields.some(p=>p.name==='field'+n))n++;s.fields.push({name:'field'+n,type:'string',required:false});redrawModal();document.getElementById('ds-'+value+'-name-'+(s.fields.length-1))?.focus();}break;}
@@ -12995,22 +13125,23 @@ function handleDataSourceAction(action,value=''){
 }
 function editDataSourceField(el){
  const key=el.dataset.field;if(!key?.startsWith('ds-'))return false;
- if(key==='ds-query'||key==='ds-filter'){dsUi[key==='ds-query'?'query':'kind']=el.value;const results=document.getElementById('ds-results');if(results)results.innerHTML=dsCatalogItems();return true;}
+ if(key==='ds-query'||key==='ds-filter'){dsUi[key==='ds-query'?'query':'kind']=el.value;const results=document.getElementById('ds-results');if(results)results.innerHTML=dsCatalogItems();const context=document.getElementById('ds-filter-context');if(context)context.innerHTML=dsFilterContext();return true;}
  const f=dsUi.form;if(!f)return true;dsUi.error='';const error=document.getElementById('ds-error');if(error)error.textContent='';
  if(key.startsWith('ds-shape-')){
   const [side,name]=key.slice(9).split('-'),s=f[side];if(!s)return true;
-  if(name==='mode'){if(!f.shapeDrafts)f.shapeDrafts={input:{},output:{}};f.shapeDrafts[side][s.mode]=designCopy(s);f[side]=designCopy(f.shapeDrafts[side][el.value]||dsNewShape(el.value));if(el.value==='entity'&&!f[side].entity)f[side].entity=design().semantic?.entities[0]?.id||null;redrawModal();}
+  if(name==='mode'){if(!f.shapeDrafts)f.shapeDrafts={input:{},output:{}};f.shapeDrafts[side][s.mode]=designCopy(s);f[side]=designCopy(f.shapeDrafts[side][el.value]||dsNewShape(el.value));if(el.value==='entity'&&!f[side].entity)f[side].entity=design().semantic?.entities[0]?.id||null;if(!f.shapeBaselines[side][el.value])f.shapeBaselines[side][el.value]=designCopy(f[side]);redrawModal();}
   else if(name==='entity')s.entity=el.value;
   else if(name==='many')s.many=el.checked;
   else if(name==='schemaText')f[side+'SchemaText']=el.value;
   else if(name==='name'||name==='type'||name==='required'){const field=s.fields[Number(el.dataset.index)];if(field)field[name]=name==='required'?el.checked:el.value;}
   return true;
  }
- const name=key.slice(3),previous=f.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
+ const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
  if(name==='name'&&!f.id&&f.slug===semanticName(previous)){f.slug=semanticName(f.name);const control=document.getElementById('ds-slug');if(control)control.value=f.slug;}
  if(name==='kind'){f.locator=f.kind==='vault'?'vault://active':'';f.auth='none';f.credentialRef='';redrawModal();}
- if(name==='source'){const o=dataSources().sources.find(s=>s.id===f.source)?.operations[0];f.operation=o?.id||'';f.direction=o?.direction||'read';f.label=o?.name||'';redrawModal();}
- if(name==='operation'){const o=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation);f.direction=o?.direction||'read';redrawModal();}
+ if(name==='source'){const o=dataSources().sources.find(s=>s.id===f.source)?.operations[0];f.operation=o?.id||'';f.direction=o?.direction||'read';if(autoLabel)f.label=o?.name||'';redrawModal();}
+ if(name==='operation'){const source=dataSources().sources.find(s=>s.id===f.source),o=source?.operations.find(o=>o.id===f.operation);if(o){if(autoLabel)f.label=o.name;f.direction=o.direction==='both'?f.direction:o.direction;}redrawModal();}
+ if(name==='card')redrawModal();
  if(name==='method'&&['GET','HEAD'].includes(f.method))f.direction='read';
  if(['direction','method','auth'].includes(name))redrawModal();return true;
 }
@@ -13039,14 +13170,14 @@ function dsSelect(label,key,values,current,extra=''){
 function dsGlyph(kind){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${kind==='vault'?'<path d="m12 2 8 6-3 12-10 2-4-13Z"/><path d="m12 2-2 10 7 8M3 9l7 3-3 10"/>':kind==='database'?'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 8-4 4 4 4m6-8 4 4-4 4m-2-10-2 12"/>'}</svg>`;}
 function dsCatalogItems(){
  const list=dataSources().sources.filter(s=>(dsUi.kind==='all'||s.kind===dsUi.kind)&&(s.name+' '+s.slug+' '+s.description).toLowerCase().includes(dsUi.query.trim().toLowerCase()));
- return list.map(s=>`<button class="ds-catalog-row ${dsUi.selected===s.id?'selected':''}" data-action="ds-select" data-value="${s.id}" aria-pressed="${dsUi.selected===s.id}"><span class="ds-glyph">${dsGlyph(s.kind)}</span><span><strong>${esc(s.name)}</strong><small>${esc(DS_KINDS[s.kind])} · ${s.operations.length} operations</small><small>${esc(s.status)} · ${dataSources().flows.filter(f=>f.source===s.id).length} usages</small></span></button>`).join('')||'<p class="muted ds-empty-result">No matching sources. Clear the filter or add a source.</p>';
+ return list.map(s=>`<button class="ds-catalog-row ${dsUi.catalogSelected===s.id?'selected':''}" data-action="ds-select" data-value="${s.id}" aria-pressed="${dsUi.catalogSelected===s.id}"><span class="ds-glyph">${dsGlyph(s.kind)}</span><span><strong>${esc(s.name)}</strong><small>${esc(DS_KINDS[s.kind])} · ${s.operations.length} operations</small><small>${esc(s.status)} · ${dataSources().flows.filter(f=>f.source===s.id).length} usages</small></span></button>`).join('')||'<p class="muted ds-empty-result">No matching sources. Clear the filter or add a source.</p>';
 }
 function dataSourcesView(){
- const m=dataSources(),selected=m.sources.find(s=>s.id===dsUi.selected)||m.sources[0];if(selected)dsUi.selected=selected.id;
+ const m=dataSources(),selected=m.sources.find(s=>s.id===dsUi.catalogSelected)||m.sources[0];if(selected)dsUi.catalogSelected=selected.id;
  return `<section class="ds-workspace"><header class="page-heading"><div><h1>Data Sources</h1><p>Define where your plugin reads and writes data. One catalog, reused across the sitemap.</p></div><div class="row wrap">${button('Open sitemap','nav','sitemap','small','layers')}${button('Review generator','design-plan','','small','wand')}${button('Add source','ds-add','api','primary small','plus')}</div></header>
  <div class="ds-boundary">Design declarations only. No connection is tested, no request is sent, and no vault or database is changed.</div>
  ${!m.sources.length?`<div class="ds-empty"><h2>Start with the data your plugin needs.</h2><p>A source contains operations such as “Fetch tasks” or “Save note”. Give each operation an input and output shape, then connect it to a sitemap card.</p><div class="ds-starters">${Object.entries(DS_KINDS).map(([id,label])=>`<button data-action="ds-add" data-value="${id}">${dsGlyph(id)}<strong>${label}</strong><span>${{api:'Declare a service and its request / response contracts.',database:'Describe a runtime adapter, tables and record shapes.',vault:'Read or save notes in the generated plugin’s active vault.'}[id]}</span></button>`).join('')}</div><div class="mt24">${button('Use example sources','ds-example','','ghost small','layers')}<p class="small muted">Adds illustrative API, vault and database contracts. No live connections.</p></div></div>`:
- `<div class="ds-catalog-layout"><aside class="ds-catalog" aria-label="Data-source catalog"><label class="field" for="ds-query">Find a source<input id="ds-query" type="search" data-field="ds-query" value="${esc(dsUi.query)}" placeholder="Name, code or purpose…"></label>${dsSelect('Source type','filter',[['all','All types'],...Object.entries(DS_KINDS)],dsUi.kind)}<div id="ds-results" aria-live="polite">${dsCatalogItems()}</div></aside><section class="ds-detail" aria-label="Selected data source">${selected?dsDetail(selected):''}</section></div>`}</section>`;
+ `<div class="ds-catalog-layout"><aside class="ds-catalog" aria-label="Data-source catalog"><label class="field" for="ds-query">Find a source<input id="ds-query" type="search" data-field="ds-query" value="${esc(dsUi.query)}" placeholder="Name, code or purpose…"></label>${dsSelect('Source type','filter',[['all','All types'],...Object.entries(DS_KINDS)],dsUi.kind)}<div id="ds-results" aria-live="polite">${dsCatalogItems()}</div></aside><section class="ds-detail" aria-label="Selected data source"><p id="ds-filter-context" class="ds-filter-context" role="status">${dsFilterContext()}</p>${selected?dsDetail(selected):''}</section></div>`}</section>`;
 }
 function dsDetail(source){
  const flows=dataSources().flows.filter(f=>f.source===source.id),placed=Object.hasOwn(dataSources().positions,source.id);
@@ -13075,6 +13206,7 @@ function dsShapeEditor(side,s,f){
 }
 function dataSourceFormDialog(){
  const f=dsUi.form;if(!f)return dialogBody('Data source unavailable','Reopen the source catalog.');
+ if(f.removeRequested)return inlineRemovalDialog(f);
  const m=dataSources();let title='',body='',danger='';
  if(f.formKind==='source'){
   title=f.id?'Edit data source':'Add data source';
@@ -13087,7 +13219,7 @@ function dataSourceFormDialog(){
   const sources=m.sources.filter(s=>s.id===f.source||s.status!=='deprecated'&&s.operations.length),source=sources.find(s=>s.id===f.source),op=source?.operations.find(o=>o.id===f.operation);
   title=f.id?'Edit data flow':'Connect data source';
   body=`<p>Data-flow arrows show where business data moves. They are separate from navigation and never make a card reachable.</p><div class="grid2">${dsSelect('Data source','source',sources.map(s=>[s.id,s.name]),f.source)}${dsSelect('Sitemap card','card',design().nodes.filter(n=>n.kind!=='group').map(n=>[n.id,n.label]),f.card)}</div>${dsSelect('Source operation','operation',(source?.operations||[]).map(o=>[o.id,o.name]),f.operation)}${dsSelect('Data movement','direction',Object.entries(DS_DIRECTIONS).filter(([k])=>op?.direction==='both'||op?.direction===k),f.direction)}<div class="ds-direction-summary" role="status"><strong>${esc(dsFlowSentence(f))}</strong><p>${f.direction==='both'?'Two explicit data directions. This does not implement synchronization, conflict resolution or automatic round trips.':f.direction==='read'?'The card receives business data from this source. Query or filter inputs may still be required.':'The card sends business data to this source. A returned acknowledgement may still be part of the operation.'}</p></div><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${op?esc(dsShapeLabel(op.input)):''}</strong></div><div><span>Output · from source</span><strong>${op?esc(dsShapeLabel(op.output)):''}</strong></div></div>${dsInput('Connection label','label',f.label)}${dsSelect('Trigger / intent','trigger',[['on-open','When the card opens'],['on-submit','When a form is submitted'],['manual','Explicit user action'],['background','Background task'],['event','Application event']],f.trigger)}${dsInput('Mapping / behavior notes','notes',f.notes,'Describe transformations, failure handling and ownership. Text is not executed.',true)}<p class="small muted">Uses the current source operation and ER entity definitions. Changing these contracts requires reviewing generation again.</p>`;
-  if(f.id)danger=button('Remove data flow','ds-remove-flow',f.id,'danger');
+  if(f.id)danger=button('Remove data flow','ds-remove-flow',f.id,'danger')+button('Show on sitemap','ds-flow-reveal',f.id,'small');
  }else if(f.formKind==='position'){
   title='Position data source';body=`<p>Move this source without dragging. Position has no effect on its operations or generated contracts.</p><div class="grid2">${dsInput('X','x',f.x)}${dsInput('Y','y',f.y)}</div>`;
  }else{
@@ -13100,6 +13232,12 @@ function dataSourceFormDialog(){
  return dialogBody(title,body,danger+button('Cancel','close','','ghost')+button(f.formKind.startsWith('remove-')?'Remove declaration':'Save declaration','ds-save','',f.formKind.startsWith('remove-')?'danger':'primary','check'));
 }
 
+function dsFilterContext(){
+ const source=dataSources().sources.find(s=>s.id===dsUi.catalogSelected);
+ const visible=source&&(dsUi.kind==='all'||source.kind===dsUi.kind)&&(source.name+' '+source.slug+' '+source.description).toLowerCase().includes(dsUi.query.trim().toLowerCase());
+ return source&&!visible?'Showing '+esc(source.name)+'; this selected source is outside the current filter.':'';
+}
+
 // Projection into the existing Vue Flow island. No source becomes a navigation node.
 const DS_CARD_SIZE=Object.freeze({width:290,height:224});
 function dsIsNode(id,d=design()){return !!d.dataSources?.sources.some(s=>s.id===id);}
@@ -13108,18 +13246,18 @@ function dsPorts(id,isSource){
  const {h}=Vue,{Handle,Position}=VueFlowCore;
  return ['left','right','top','bottom'].flatMap(side=>['source','target'].map(type=>h(Handle,{
   id:'ds-'+(type==='source'?'out-':'in-')+side,type,position:Position[side[0].toUpperCase()+side.slice(1)],
-  class:'ds-port flow-port '+(isSource?'ds-source-port':''),connectable:()=>!state.activeRun,
+  class:'ds-port flow-port '+(isSource?'ds-source-port':''),connectable:()=>dsPortAvailable(id,isSource,type),'aria-disabled':String(!dsPortAvailable(id,isSource,type)),
   title:(type==='source'?'Data leaves':'Data enters')+' this '+(isSource?'source':'card')+'. Drag to connect data.',
-  'aria-label':(type==='source'?'Outgoing':'Incoming')+' data connector '+side,tabindex:0,role:'button',
-  onClick:event=>{event.stopPropagation();if(!flowUi.suppressClick)dispatch(isSource?'ds-connect':'ds-card-connect',id);},
-  onKeydown:event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();dispatch(isSource?'ds-connect':'ds-card-connect',id);}}
+  'aria-label':(type==='source'?'Outgoing':'Incoming')+' data connector '+side,tabindex:dsUi.show?0:-1,'aria-hidden':String(!dsUi.show),role:'button',
+  onClick:event=>{event.stopPropagation();if(!flowUi.suppressClick)dsOpenFromPort(id,isSource,type);},
+  onKeydown:event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();dsOpenFromPort(id,isSource,type);}}
  })));
 }
 function createDataSourceNode(){
  const {h,defineComponent,onMounted}=Vue;
  return defineComponent({name:'CompanionDataSource',props:['id','data','selected'],setup(p){onMounted(()=>scheduleHandleMeasure(p.id,flowUi.serial));return()=>{
   const s=p.data.source,flows=dataSources().flows.filter(f=>f.source===s.id);
-  return h('article',{class:['ds-source-card',{'selected':dsUi.selected===s.id,'search-dim':!dsMapMatch(s)}],style:{width:DS_CARD_SIZE.width+'px',height:DS_CARD_SIZE.height+'px'},'data-source-node':s.id,'data-action':'canvas-select','data-value':s.id,tabindex:0,role:'group','aria-label':s.name+' · data source · '+DS_KINDS[s.kind],onFocus:event=>{if(event.target===event.currentTarget&&!flowUi.dragging){designUi.selected=null;dsUi.selected=s.id;paintMapSelection();}}},[
+  return h('article',{class:['ds-source-card',{'selected':p.selected,'search-dim':!dsMapMatch(s)}],style:{width:DS_CARD_SIZE.width+'px',height:DS_CARD_SIZE.height+'px'},'data-source-node':s.id,'data-action':'canvas-select','data-value':s.id,tabindex:0,role:'group','aria-label':s.name+' · data source · '+DS_KINDS[s.kind],onFocus:event=>{if(event.target===event.currentTarget&&!flowUi.dragging){selectSitemapItem('source',s.id);paintMapSelection();}}},[
    h('div',{class:'ds-source-card-body',innerHTML:`<div class="ds-source-type">${dsGlyph(s.kind)}<span>${esc(DS_KINDS[s.kind])}</span>${badge(s.status,s.status==='deprecated'?'warn':'')}</div><h3>${esc(s.name)}</h3><code>${esc(s.slug)}</code><p>${s.operations.length} operations · ${flows.length} data flows</p><div class="ds-card-actions nodrag nopan">${button('Manage','ds-catalog',s.id,'small')}${button('Connect data','ds-connect',s.id,'small','link',s.status==='deprecated'||!s.operations.length?'disabled':'')}</div><small>Design only · no live connection</small>`}),...dsPorts(s.id,true)
   ]);
  };}});
@@ -13148,6 +13286,7 @@ function dataFlowProjection(d,visibleIds){
  });
 }
 function dsConnectionError(c){
+ if(state.activeRun)return 'Finish the active simulation before connecting data.';
  const d=design(),sourceId=dsIsNode(c.source)?c.source:dsIsNode(c.target)?c.target:null;
  if(!sourceId||dsIsNode(c.source)&&dsIsNode(c.target))return 'A data flow connects one data source to one sitemap card.';
  const card=d.nodes.find(n=>n.id===(c.source===sourceId?c.target:c.source)),source=dataSources().sources.find(s=>s.id===sourceId),direction=c.source===sourceId?'read':'write';
@@ -13159,17 +13298,32 @@ function dsConnectionError(c){
 }
 function dsReviewConnection(c){
  const error=dsConnectionError(c);if(error){notify(error);return false;}
- const read=dsIsNode(c.source),sourceId=read?c.source:c.target,source=dataSources().sources.find(s=>s.id===sourceId),direction=read?'read':'write',op=source.operations.find(o=>o.direction===direction||o.direction==='both');
- dsEditFlow(null,sourceId,read?c.target:c.source,direction);dsUi.form.operation=op.id;dsUi.form.label=op.name;redrawModal();return true;
+ const read=dsIsNode(c.source);
+ return !!dsEditFlow(null,read?c.source:c.target,read?c.target:c.source,read?'read':'write');
 }
 function dsPick(id){
- if(!dsIsNode(id))return;dsUi.selected=id;designUi.selected=null;canvasUi.edge=null;referenceUi.panel='inspector';render();
- document.querySelector('[data-source-node="'+CSS.escape(id)+'"]')?.focus({preventScroll:true});canvasAnnounce('Selected data source. Manage its operations or connect it to a sitemap card.');
+ if(!selectSitemapItem('source',id))return;
+ referenceUi.panel='inspector';paintMapSelection();
+ canvasAnnounce('Selected data source. Manage its operations or connect it to a sitemap card.');
+}
+function dsRevealFlow(id){
+ const d=design(),f=d.dataSources?.flows.find(x=>x.id===id);
+ if(!f)return dsFail('This data flow no longer exists. Select a current connection.');
+ if(!d.dataSources.positions[f.source]&&!dsCommit((m,next)=>dsPosition(f.source,m,next)))return false;
+ dsUi.show=true;designUi.mode='map';referenceUi.panel='inspector';
+ const c=canvasState(d);c.collapsed=c.collapsed.filter(parent=>!nodeDescendants(d,parent).has(f.card));
+ selectSitemapItem('data-flow',id);setView('sitemap');
+ Vue.nextTick(()=>{if(canvasUi.edge===id&&state.view==='sitemap')fitMap(true);});
+ canvasAnnounce(dsFlowSentence(f,d)+'. Connection revealed; contracts unchanged.');return true;
 }
 function dsSitemapInspector(d,n){
- if(n)return `<h2>${esc(n.label)} · data flows</h2><p class="small muted">Data origins and destinations, not navigation or containment.</p>${button('Connect data source','ds-card-connect',n.id,'primary small','link')}${dsFlowList(dataSources().flows.filter(f=>f.card===n.id))}${button('Manage Data Sources','ds-catalog','','ghost small')}`;
+ if(n)return `<h2>${esc(n.label)} · data flows</h2><p class="small muted">Data origins and destinations, not navigation or containment.</p>${button('Connect data source','ds-card-connect',n.id,'primary small','link',n.kind==='group'?'disabled':'')}${dsFlowList(dataSources().flows.filter(f=>f.card===n.id))}${button('Manage Data Sources','ds-catalog','','ghost small')}`;
  const source=d.dataSources?.sources.find(s=>s.id===dsUi.selected);if(!source)return '';
- return `<span class="ds-glyph">${dsGlyph(source.kind)}</span><h2>${esc(source.name)}</h2><p>${esc(DS_KINDS[source.kind])} · ${esc(source.status)}</p><p class="small muted">A reusable source declaration. It is not a view, navigation destination or ER entity.</p><div class="row wrap">${button('Manage source','ds-catalog',source.id,'primary small')}${button('Connect to card','ds-connect',source.id,'small','link')}${button('Position','ds-position',source.id,'small')}</div>${dsFlowList(dataSources().flows.filter(f=>f.source===source.id))}${button('Remove from canvas','ds-unplace',source.id,'ghost small')}<p class="small muted">Remove data flows first to remove this card. The catalog definition stays intact.</p>`;
+ const flows=d.dataSources.flows.filter(f=>f.source===source.id),disabled=source.status==='deprecated'||!source.operations.length;
+ const heading=`<span class="ds-glyph">${dsGlyph(source.kind)}</span><h2>${esc(source.name)}</h2><p>${esc(DS_KINDS[source.kind])} · ${esc(source.status)}</p>`;
+ if(canvasUi.inspector==='source-operations')return heading+`<p>Input enters this source; output leaves it. Contracts are shared by all usages.</p>${button('Add operation','ds-operation',source.id,'small','plus',source.operations.length>=DS_LIMITS.operations?'disabled':'')}`+(source.operations.map(o=>`<section class="ds-operation"><h3>${esc(o.name)}</h3><p>${esc(DS_DIRECTIONS[o.direction])}</p><div class="ds-shape-pair"><div><span>Input</span><strong>${esc(dsShapeLabel(o.input,d))}</strong></div><div><span>Output</span><strong>${esc(dsShapeLabel(o.output,d))}</strong></div></div>${button('Edit operation','ds-operation',source.id+':'+o.id,'small')}</section>`).join('')||'<p class="ds-help-empty">Add an operation before connecting this source. No unrelated source is substituted.</p>');
+ if(canvasUi.inspector==='source-flows')return heading+button('Connect to card','ds-connect',source.id,'primary small','link',disabled?'disabled':'')+dsFlowList(flows);
+ return heading+`<p>${esc(source.description||'Describe the purpose of this reusable source.')}</p><dl class="ds-facts"><dt>Location</dt><dd>${esc(source.locator||'Configure at runtime')}</dd><dt>Operations</dt><dd>${source.operations.length}</dd><dt>Data flows</dt><dd>${flows.length}</dd></dl><div class="row wrap">${button('Manage source','ds-catalog',source.id,'primary small')}${button('Connect to card','ds-connect',source.id,'small','link',disabled?'disabled':'')}${button('Position','ds-position',source.id,'small')}${button('Remove from canvas','ds-unplace',source.id,'ghost small','',flows.length?'disabled':'')}</div><p class="small muted">${flows.length?'This source has data flows. Remove them explicitly or hide the data layer.':'Removing this placement keeps the catalog definition.'} No live service, database or vault is accessed.</p>`;
 }
 function dsOutline(){
  if(!dataSources().sources.length)return '';
@@ -13177,7 +13331,9 @@ function dsOutline(){
 }
 function dsExtendBounds(bounds,selected=false){
  if(!dsUi.show||!design().dataSources)return bounds;
- const positions=dataSources().positions,ids=selected?(dsUi.selected&&positions[dsUi.selected]?[dsUi.selected]:[]):Object.keys(positions);
+ const positions=dataSources().positions,flow=selected?dataSources().flows.find(f=>f.id===canvasUi.edge):null;
+ if(flow){const a=positions[flow.source],card=design().nodes.find(n=>n.id===flow.card),b=canvasState().positions[flow.card],size=brickSurfaceSize(card),x=Math.min(a.x,b.x),y=Math.min(a.y,b.y);return {x,y,w:Math.max(a.x+DS_CARD_SIZE.width,b.x+size.width)-x,h:Math.max(a.y+DS_CARD_SIZE.height,b.y+size.height)-y};}
+ const ids=selected?(dsUi.selected&&positions[dsUi.selected]?[dsUi.selected]:[]):Object.keys(positions);
  if(!ids.length)return bounds;
  const boxes=ids.map(id=>({x:positions[id].x,y:positions[id].y,w:DS_CARD_SIZE.width,h:DS_CARD_SIZE.height}));
  if(!selected||selectedNode())boxes.push(bounds);
@@ -13185,7 +13341,7 @@ function dsExtendBounds(bounds,selected=false){
 }
 function dsBeginDrag({node,event}){
  if(!dsIsNode(node.id))return false;
- dsUi.drag={id:node.id,owner:designOwner(),revision:design().revision,before:{...dataSources().positions[node.id]},x:event.clientX,y:event.clientY,cancelled:false};flowUi.dragging=true;flowUi.cancelled=false;dsUi.selected=node.id;designUi.selected=null;canvasUi.edge=null;return true;
+ dsUi.drag={id:node.id,owner:designOwner(),revision:design().revision,before:{...dataSources().positions[node.id]},x:event.clientX,y:event.clientY,cancelled:false};flowUi.dragging=true;flowUi.cancelled=false;selectSitemapItem('source',node.id);paintMapSelection();return true;
 }
 function dsAlignChanges(changes){
  const drag=dsUi.drag;if(!drag||drag.cancelled)return changes;
@@ -13209,9 +13365,15 @@ function dsCancelDrag(repaint=false){
  if(repaint)queueMicrotask(()=>{if(state.view==='sitemap')render();});return true;
 }
 function dsHoverFlow(id,active){
- const f=design().dataSources?.flows.find(f=>f.id===id);if(!f)return;
- for(const key of [f.card,f.source])document.querySelector('#vf-root .vue-flow__node[data-id="'+CSS.escape(key)+'"]')?.classList.toggle('ds-related',active);
+ if(active)dsUi.hover=id;else if(dsUi.hover===id)dsUi.hover=null;
+ dsPaintFlowFeedback();
 }
+function dsPaintFlowFeedback(){
+ const ids=new Set();
+ if(dsUi.show)for(const f of design().dataSources?.flows||[])if(f.id===dsUi.hover||f.id===canvasUi.edge){ids.add(f.card);ids.add(f.source);}
+ document.querySelectorAll('#vf-root .vue-flow__node').forEach(node=>node.classList.toggle('ds-related',ids.has(node.dataset.id)));
+}
+
 document.addEventListener('keydown',event=>{
  if(state.view!=='sitemap'||document.getElementById('modal').open)return;
  if(event.key==='Escape'&&dsUi.drag){event.preventDefault();event.stopImmediatePropagation();dsCancelDrag(true);return;}
@@ -13227,6 +13389,36 @@ function dsPaintConnectedPorts(){
  for(const edge of flowUi.api?.getEdges.value||[]){if(!edge.data?.dataSource)continue;
   for(const kind of ['source','target'])root.querySelector('.vue-flow__node[data-id="'+CSS.escape(edge[kind])+'"] [data-handleid="'+CSS.escape(edge[kind+'Handle'])+'"]')?.classList.add('ds-connected');
  }
+}
+
+function dsBeginConnection(params){
+ dsUi.connection=params?.handleId?.startsWith('ds-')?{...params,owner:designOwner(),revision:design().revision}:null;
+}
+function dsFinishConnection(event){
+ const pending=dsUi.connection;dsUi.connection=null;
+ if(!pending||flowUi.cancelled||state.activeRun||document.getElementById('modal').open||pending.owner!==designOwner()||pending.revision!==design().revision)return;
+ const point=event?.changedTouches?.[0]||event;
+ if(!Number.isFinite(point?.clientX)||!Number.isFinite(point?.clientY))return;
+ const target=document.elementFromPoint(point.clientX,point.clientY),node=target?.closest('#vf-root .vue-flow__node');
+ if(!node||target.closest('.vue-flow__handle,button,input,textarea,select'))return;
+ const id=node.dataset.id;if(!id||id===pending.nodeId)return;
+ const outgoing=pending.handleType==='source';
+ const c={source:outgoing?pending.nodeId:id,target:outgoing?id:pending.nodeId,sourceHandle:outgoing?pending.handleId:'ds-out-right',targetHandle:outgoing?'ds-in-left':pending.handleId};
+ if(!dsIsNode(c.source)&&!dsIsNode(c.target))return;
+ flowUi.suppressClick=true;setTimeout(()=>{if(!flowUi.dragging)flowUi.suppressClick=false;},180);
+ dsReviewConnection(c);
+}
+
+function dsPortDirection(isSource,type){return (isSource?type==='source':type==='target')?'read':'write';}
+function dsPortAvailable(id,isSource,type){
+ if(state.activeRun)return false;
+ if(!isSource)return dsUi.show;
+ const source=dataSources().sources.find(s=>s.id===id),direction=dsPortDirection(isSource,type);
+ return !!source&&source.status!=='deprecated'&&source.operations.some(o=>o.direction===direction||o.direction==='both');
+}
+function dsOpenFromPort(id,isSource,type){
+ if(!dsPortAvailable(id,isSource,type)){notify('This data connector is unavailable. Add a compatible operation, enable the data layer or finish the active simulation.');return false;}
+ return dsEditFlow(null,isSource?id:null,isSource?null:id,dsPortDirection(isSource,type));
 }
 
 // Deterministic, inert previews. Adapter implementations are deliberately not fabricated.
@@ -13414,7 +13606,7 @@ function erExtraAction(action,value){
 }
 function erKeyDown(event){
  if(state.view!=='entities')return;
- if(document.getElementById('modal').open){if(modalType==='semantic-form'&&erUi.form?.formKind==='entity'&&(event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();dispatch('er-property-add');}return;}
+ if(document.getElementById('modal').open){if(modalType==='semantic-form'&&erUi.form?.formKind==='entity'&&!erUi.form.removeRequested&&(event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();dispatch('er-property-add');}return;}
  if(!event.target.closest('.er-workspace,.er-toolbar')||event.target.closest('input,textarea,select,[contenteditable=true]'))return;
  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!erCancelGesture())erPick(null);return;}
  if(state.activeRun)return;
@@ -13436,7 +13628,7 @@ function erOpen(kind,record={}){
  const m=semanticModel();erUi.error='';erUi.form={...designCopy(record),formKind:kind,owner:designOwner(),revision:design().revision,snapshot:JSON.stringify(m)};showModal('semantic-form');
 }
 function erBeginEntity(id=null){
- const m=semanticModel(),e=m.entities.find(e=>e.id===id);let name='New entity',n=2;while(m.entities.some(e=>e.slug===semanticName(name)))name='New entity '+n++;
+ const m=semanticModel(),e=m.entities.find(e=>e.id===id);if(id&&!e)return erFail('This entity no longer exists. Select a current entity.');let name='New entity',n=2;while(m.entities.some(e=>e.slug===semanticName(name)))name='New entity '+n++;
  erOpen('entity',e?{...e,editing:true,properties:e.properties.map(p=>({...p,hasDefault:Object.hasOwn(p,'defaultValue'),defaultText:Object.hasOwn(p,'defaultValue')?(typeof p.defaultValue==='string'?p.defaultValue:JSON.stringify(p.defaultValue)):''}))}:{id:null,name,slug:semanticName(name),folder:'Records/'+semanticPascal(semanticName(name)),description:'',section:null,properties:[],editing:false});
 }
 function erFail(message){erUi.error=message;if(modalType==='semantic-form'){redrawModal();document.getElementById('er-form-error')?.focus();}else{erAnnounce(message);notify(message);}return false;}
@@ -13450,7 +13642,7 @@ function erCommit(change,visual=false){
  }catch(error){return erFail(error.message);}
 }
 function erSave(){
- const f=erUi.form,m=semanticModel();if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==JSON.stringify(m))return erFail('This review is stale. Copy your edits and reopen it; nothing has been overwritten.');
+ const draft=erUi.form,f=draft?.removeRequested?{...draft,formKind:draft.removeRequested}:draft,m=semanticModel();if(!f||f.owner!==designOwner()||f.revision!==design().revision||f.snapshot!==JSON.stringify(m))return erFail('This review is stale. Copy your edits and reopen it; nothing has been overwritten.');
  const visual=['section','remove-section','position'].includes(f.formKind);let selected=erUi.selected,edge=erUi.edge;
  const ok=erCommit(next=>{
   if(f.formKind==='entity'){
@@ -13480,7 +13672,7 @@ function erSave(){
  if(ok){erUi.selected=selected;erUi.edge=edge;modalOriginal=null;closeModal();render();notify(visual?'Arrangement saved. Entity contracts are unchanged.':'Semantic design saved. Review generation before applying any schema.');}return ok;
 }
 function erBeginRelationship(source=null,target=null,id=null){
- const m=semanticModel(),existing=m.relationships.find(r=>r.id===id);if(m.entities.length<1)return notify('Add an entity before defining a relationship.');
+ const m=semanticModel(),existing=m.relationships.find(r=>r.id===id);if(id&&!existing)return erFail('This relationship no longer exists. Select a current connection.');if(m.entities.length<1)return notify('Add an entity before defining a relationship.');
  erOpen('relationship',existing||{id:null,name:'References',source:source||m.entities[0].id,target:target||m.entities.at(-1).id,key:'related',sourceCard:'0..*',targetCard:'0..1',onDelete:'restrict'});
 }
 function erPick(id,edge=false){erUi.selected=edge?null:id;erUi.edge=edge?id:null;const inspector=document.getElementById('er-inspector');if(inspector)inspector.innerHTML=erInspector();if(erUi.api){erUi.api.applyNodeChanges(erUi.api.getNodes.value.map(n=>({id:n.id,type:'select',selected:n.id===erUi.selected})));erUi.api.applyEdgeChanges(erUi.api.getEdges.value.map(e=>({id:e.id,type:'select',selected:e.id===erUi.edge})));}erSelectionFeedback();}
@@ -13495,10 +13687,10 @@ function handleSemanticAction(action,value){
   case 'er-edge':erPick(value,true);break;
   case 'er-connect':erBeginRelationship(erUi.selected);break;
   case 'er-edit-edge':erBeginRelationship(null,null,value||erUi.edge);break;
-  case 'er-section':erOpen('section',m.sections.find(s=>s.id===value)||{id:null,name:'New section'});break;
-  case 'er-delete-section':erOpen('remove-section',m.sections.find(s=>s.id===value));break;
-  case 'er-delete':erOpen('remove-entity',m.entities.find(e=>e.id===(value||erUi.selected)));break;
-  case 'er-delete-edge':erOpen('remove-relationship',m.relationships.find(r=>r.id===(value||erUi.edge)));break;
+  case 'er-section':{const section=m.sections.find(s=>s.id===value);if(value&&!section)erFail('This section no longer exists.');else erOpen('section',section||{id:null,name:'New section'});break;}
+  case 'er-delete-section':{const section=m.sections.find(s=>s.id===value);if(section)erOpen('remove-section',section);else erFail('This section no longer exists.');break;}
+  case 'er-delete':{const entity=m.entities.find(e=>e.id===(value||erUi.selected));if(entity)erOpen('remove-entity',entity);else erFail('This entity no longer exists.');break;}
+  case 'er-delete-edge':{const id=value||erUi.edge;if(requestInlineRemoval('remove-relationship',id))break;const r=m.relationships.find(r=>r.id===id);if(r)erOpen('remove-relationship',r);else erFail('This relationship no longer exists.');break;}
   case 'er-save':erSave();break;
   case 'er-property-add':if(erUi.form.properties.length<40){erUi.form.properties.push({id:null,key:'',type:'text',required:false,hasDefault:false,defaultText:''});redrawModal();document.querySelector('#er-property-rows .er-property-row:last-child input')?.focus();}else erFail('Use at most 40 properties per entity.');break;
   case 'er-property-remove':if(Number.isInteger(Number(value))) {erUi.form.properties.splice(Number(value),1);redrawModal();}break;
@@ -13571,7 +13763,7 @@ function erRelationshipForm(f,m){
  return `<div class="grid2">${erInput('Relationship name','name',f.name,'A verb phrase, for example “Assigned to”.')}${erInput('Stored property key','key',f.key,'Unique on the owning entity. For example: assignee.')}${erSelect('Owning entity — stores the link','source',options,f.source)}${erSelect('Referenced entity','target',options,f.target)}${erSelect('For each '+(a?.name||'owner')+', how many '+(b?.name||'targets')+'?','targetCard',cards,f.targetCard)}${erSelect('For each '+(b?.name||'target')+', how many '+(a?.name||'owners')+'?','sourceCard',cards,f.sourceCard)}</div><div class="callout"><div><strong>Read the relationship</strong><p class="er-meaning">${esc(erRelationshipWords(f,m))}</p><p>${erMany(f.targetCard)?'List of quoted links':'Text with a quoted link'} stored once on ${esc(a?.name||'the owner')}. The reverse is queried.</p><pre class="er-reference-example">${esc(f.key+': '+JSON.stringify(erMany(f.targetCard)?[example]:example))}</pre>${f.source===f.target?'<p>This entity references another record of the same entity type.</p>':''}</div></div><p class="small muted">Cardinality and required values are application rules, not native Obsidian constraints. Referenced records are protected from deletion; no cascading deletes or automatic inverse writes.</p>`;
 }
 function semanticFormDialog(){
- const f=erUi.form;if(!f)return dialogBody('Selection unavailable','Reopen this editor.');const m=semanticModel();let body='',title='';
+ const f=erUi.form;if(!f)return dialogBody('Selection unavailable','Reopen this editor.');if(f.removeRequested)return inlineRemovalDialog(f);const m=semanticModel();let body='',title='';
  if(f.formKind==='entity'){
   title=f.editing?'Edit '+f.name:'New entity';const known=[...new Map(m.entities.flatMap(e=>erFields(e,m)).map(p=>[p.key,p])).values()];
   body=`<div class="grid2">${erInput('Entity name','name',f.name)}${erInput('Stable code name','slug',f.slug,'Used in generator paths. Immutable after creation.',false,f.editing)}${erInput('Runtime note folder','folder',f.folder,'Relative to the generated plugin’s vault, not this design folder.')}${erSelect('Diagram section','section',[['','Ungrouped'],...m.sections.map(s=>[s.id,s.name])],f.section||'')}</div>${erInput('Meaning / responsibility','description',f.description,'',true)}<div class="row between"><h3>Obsidian properties</h3>${button('Add property','er-property-add','','small','plus',f.properties.length>=40?'disabled':'')}</div><p class="small muted">id and type are managed Text. Keys use lowercase snake_case and have one type across the vault. Required values are validated by your application.</p><div class="er-quick-properties" role="group" aria-label="Add a common property"><span>Quick add:</span>${['title','status','due','completed','tags'].map(k=>button(k,'er-quick-property',k,'small','',f.properties.some(p=>p.key===k)||f.properties.length>=40?'disabled':'')).join('')}</div><datalist id="er-known-properties">${known.map(p=>`<option value="${esc(p.key)}">${esc(ER_TYPES[p.type])} · existing property</option>`).join('')}</datalist><div id="er-property-rows">${erPropertyRows()||'<p>No additional properties yet. Add a property or use Quick add.</p>'}</div><p class="small muted">Ctrl/Cmd+Enter adds another property. Defaults are opt-in. Tags is reserved for tags; aliases and cssclasses use List. Relationship fields are declared on connectors, not duplicated here. No existing notes are migrated.</p>`;
@@ -13580,7 +13772,7 @@ function semanticFormDialog(){
  if(f.formKind==='position'){title='Position '+f.name;body=erPositionDialog();}
  if(f.formKind==='section'){title=f.id?'Edit section':'New section';body=erInput('Section name','name',f.name,'Visual grouping only; no renaming files or changing entity ownership.')+(f.id?erEditButton('Remove section, keep entities','er-delete-section',f.id,'danger small'):'');}
  if(f.formKind.startsWith('remove-')){title='Remove '+f.name+'?';body=`<p>${f.formKind==='remove-section'?'Members become ungrouped; all entities and relationships are kept.':f.formKind==='remove-entity'?'Entities with relationships or sitemap bindings cannot be deleted. Remove those declarations explicitly first.':'Only this relationship declaration is removed. Existing note properties and generated source remain for an explicit migration.'}</p><p>This changes the design, not native notes or generated files. Undo remains available.</p>`;}
- return dialogBody(title,body+`<div class="error" role="alert" id="er-form-error" tabindex="-1">${esc(erUi.error)}</div>`,button('Cancel','close','','ghost')+(f.formKind==='entity'?button('Save & add another','er-save-next','','','plus'):'')+button(f.formKind.startsWith('remove-')?'Remove declaration':f.formKind==='position'?'Save position':'Save declaration','er-save','',f.formKind.startsWith('remove-')?'danger':'primary','check'));
+ return dialogBody(title,body+`<div class="error" role="alert" id="er-form-error" tabindex="-1">${esc(erUi.error)}</div>`,(f.formKind==='relationship'&&f.id?button('Remove relationship','er-delete-edge',f.id,'danger','trash'):'')+button('Cancel','close','','ghost')+(f.formKind==='entity'?button('Save & add another','er-save-next','','','plus'):'')+button(f.formKind.startsWith('remove-')?'Remove declaration':f.formKind==='position'?'Save position':'Save declaration','er-save','',f.formKind.startsWith('remove-')?'danger':'primary','check'));
 }
 function semanticGeneratorEntry(){const m=semanticModel();return `<section class="card"><div class="section-head"><div><h2>Generate from declared entities</h2><p>${m.entities.length} entities and ${m.relationships.length} relationships in this vault’s design. Includes every declared property, not a substituted preset.</p></div>${button('Review design generation','design-plan','','primary small','terminal')}${button('Edit semantic layer','nav','entities','small')}</div><p class="small muted">Schema recipes are a concept compiler preview. The legacy CLI preset maker below remains a separate, explicitly limited path.</p></section>`;}
 
@@ -14207,6 +14399,7 @@ function setFlowConnecting(active){
  if(!active)flowUi.api?.endConnection();paintReferenceChrome();
 }
 function resetFlowConnection(announce=false){
+ dsUi.connection=null;
  const was=flowUi.connecting||!!flowUi.api?.connectionStartHandle?.value;
  flowUi.cancelled=true;edgeEditing.reconnect=null;document.getElementById("vf-root")?.removeAttribute("data-reconnecting");connectionUi.pointer=null;flowUi.api?.endConnection(undefined,true);setFlowConnecting(false);closeConnectionMenu(false);
  if(announce&&was)canvasAnnounce('Connection cancelled. Nothing changed.');
@@ -14326,7 +14519,7 @@ function paintReferenceChrome(){
    if(place){toolbar.style.left=place.x+'px';toolbar.style.top=place.y+'px';}else toolbar.hidden=true;
   }
  }
- dsPaintConnectedPorts();paintSpatialLayers();
+ dsPaintConnectedPorts();dsPaintFlowFeedback();paintSpatialLayers();
 }
 
 // Canvas-first shell, restrained overview cards and synchronized full-page editing.
@@ -14340,15 +14533,15 @@ function referenceSelectionToolbar(n){
  <span class="ref-tool-separator"></span>${referenceTool('More actions','canvas-card-menu',n.id,'more')}</div>`;
 }
 function referenceSitemapView(){
- const d=design(),n=selectedNode(),errors=designIssues(d).filter(x=>x.level==='error');
+ const d=design();normalizeSitemapSelection(d);const n=selectedNode(),errors=designIssues(d).filter(x=>x.level==='error');
  return `<section class="sitemap-studio ref-studio" data-panel="${referenceUi.panel}">
  <header class="ref-page-header"><div><h1>Sitemap & views</h1><p>${esc(project()?.name||'Plugin outline')} <span>·</span> ${d.nodes.length} surfaces <span>·</span> ${d.links.length} interactions <span>·</span> ${errors.length?errors.length+' checks need attention':'Structure consistent'}</p></div>
  <div class="row">${designUi.mode!=='map'?button('Back to map','ref-mode','map','small','arrow'):''}${button('Data Sources','ds-catalog','','small','layers')}${button('Import / export','design-transfer','','ghost small','code')}${button('Review boilerplate','design-plan','','primary small','wand')}${referenceTool(canvasUi.expanded?'Leave focus mode':'Focus mode','canvas-expand','','focus')}</div></header>
  <div class="map-workspace ref-workspace"><section class="map-main" aria-label="Sitemap editor">${designUi.mode==='map'?referenceMap(d):designUi.mode==='preview'?designLivePreview(d,n):designCheckView(designIssues(d))}</section>
  <aside class="outline-tree ref-panel" aria-label="Structure panel">${referenceStructure(d)}</aside>
- <aside class="node-inspector polish-inspector ref-panel" aria-label="Selected sitemap card">
+ <aside class="node-inspector polish-inspector ref-panel" aria-label="Sitemap inspector" data-selection-kind="${sitemapSelection(d).kind}">
  <div class="ref-panel-heading"><strong>Inspector</strong>${referenceTool('Close inspector','ref-panel-close','','close')}</div>
- <div class="inspector-tabs" role="group" aria-label="Inspector section">${[['details','Surface'],['bricks','Components'],['intent','Intent'],['links','Links'],['data','Data'],['checks','Checks']].map(([id,title])=>`<button data-action="canvas-inspector" data-value="${id}" class="${canvasUi.inspector===id?'active':''}" aria-pressed="${canvasUi.inspector===id}">${title}</button>`).join('')}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
+ <div class="inspector-tabs" role="group" aria-label="Inspector section">${sitemapInspectorTabs(d)}</div><div class="inspector-body">${flowInspector(d,n)}</div></aside>
  </div><footer class="ref-map-footer"><span id="map-status-message" role="status">Drag cards to arrange · Click a block to write · Use handles to connect</span><div>${button('Change blueprint','nav','blueprints','ghost small')}${referenceTool('Map help','canvas-help','','help')}</div></footer><span id="canvas-live" class="sr-only" aria-live="polite"></span></section>`;
 }
 function referenceMap(d){
@@ -14372,7 +14565,7 @@ function referenceMap(d){
  ${referenceTool('Undo','design-undo','','undo',!d.history.length?'disabled':'')}${referenceTool('Redo','design-redo','','redo',!d.future.length?'disabled':'')}
  <span class="ref-tool-separator"></span>${referenceTool('Layout preview','ref-mode','preview','eye')}${referenceTool('Structure checks','ref-mode','issues','check')}${referenceTool('Canvas settings','flow-settings','','settings')}
  </div>
- <div class="map-controls ref-zoom-dock nodrag nopan" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','','aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" aria-label="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small')}${referenceTool('Focus selected card','canvas-focus','','focus',!selectedNode()&&!dsUi.selected?'disabled':'')}
+ <div class="map-controls ref-zoom-dock nodrag nopan" role="group" aria-label="Canvas navigation">${button('−','canvas-zoom-out','','small','','aria-label="Zoom out"')}<button id="map-zoom-label" class="btn small" data-action="canvas-reset-zoom" aria-label="Reset zoom to 100%">100%</button>${button('+','canvas-zoom-in','','small','','aria-label="Zoom in"')}${button('Fit','canvas-fit','','small')}${referenceTool('Focus selected card','canvas-focus','','focus',sitemapSelection(d).kind==='empty'?'disabled':'')}
  <details class="map-pan-controls"><summary title="Pan without dragging">Pan</summary><div class="map-pan-menu">${button('←','canvas-pan','96,0','small','','aria-label="Pan left"')}${button('↑','canvas-pan','0,96','small','','aria-label="Pan up"')}${button('↓','canvas-pan','0,-96','small','','aria-label="Pan down"')}${button('→','canvas-pan','-96,0','small','','aria-label="Pan right"')}</div></details></div>
  <div id="map-instructions" class="sr-only">Click cards to select; drag their headers to move. Click blocks to write. Click or drag handles to connect. Empty canvas clears selection.</div><span id="map-count" class="sr-only">${nodes.length}/${d.nodes.length} visible</span><div id="map-search-feedback" class="sr-only" hidden></div></div>`;
 }
@@ -14542,7 +14735,7 @@ function saveReferenceContent(){
  const oldIssues=new Set(brickIssues(d).map(i=>i.code+':'+i.message));
  const introduced=brickIssues(candidate).find(i=>!oldIssues.has(i.code+':'+i.message));
  if(introduced)return fail(introduced.message);
- recordDesign();n.bricks=bricks;d.nextId=next;designChanged();designUi.selected=n.id;
+ recordDesign();n.bricks=bricks;d.nextId=next;designChanged();selectSitemapItem('surface',n.id);
  modalOriginal=null;closeModal();render();canvasAnnounce('Page content saved. One undo restores the previous outline.');
 }
 
@@ -14576,7 +14769,7 @@ function handleReferenceAction(action,value){
  switch(action){
   case 'ref-content':openReferenceContent(value);break;
   case 'ref-content-save':saveReferenceContent();break;
-  case 'ref-inspect':designUi.selected=value;referenceUi.panel='inspector';render();break;
+  case 'ref-inspect':selectSitemapItem('surface',value);referenceUi.panel='inspector';render();break;
   case 'ref-panel-close':referenceUi.panel='none';canvasUi.outline=false;render();break;
   case 'ref-reveal':showMapNode(value,true);fitMap(true);break;
   case 'ref-section':openSectionEditor(value||null);break;
@@ -15120,6 +15313,7 @@ function startConnectedCard(kind,context){
   autoAction:true,condition:'',intent:'',goals:''};
  connectionUi.error='';showModal('connection-create');
 }
+function connectedCardUsesContainment(f,d=design()){return f?.kind==='page'&&f.direction==='outgoing'&&f.parent===f.origin&&d.nodes.some(n=>n.id===f.origin&&n.kind==='view')&&f.nav;}
 function connectedCardCandidate(d,f){
  const origin=d.nodes.find(n=>n.id===f.origin),nodeId='node-'+d.nextId,edgeId='edge-'+(d.nextId+1);
  const n={id:nodeId,kind:f.kind,label:f.label.trim(),slug:f.slug.trim(),parent:f.kind==='page'?f.parent:null,
@@ -15129,30 +15323,30 @@ function connectedCardCandidate(d,f){
  const fromSide=incoming?OPPOSITE_SIDE[f.side]:f.side,toSide=incoming?f.side:OPPOSITE_SIDE[f.side];
  const e={id:edgeId,from:from.id,to:to.id,sourceHandle:'out-'+fromSide,targetHandle:'in-'+toSide,
   label:f.actionLabel.trim(),kind:f.linkKind,condition:f.linkKind==='conditional'?f.condition.trim():'',description:''};
- const candidate=designCopy(d);candidate.nodes.push(n);candidate.links.push(e);candidate.nextId=d.nextId+2;
- return {candidate,n,e};
+ const candidate=designCopy(d),containment=connectedCardUsesContainment(f,d);candidate.nodes.push(n);if(!containment)candidate.links.push(e);candidate.nextId=d.nextId+(containment?1:2);
+ return {candidate,n,e:containment?null:e};
 }
 function commitConnectedCard(){
  const d=design(),f=connectionUi.form,fail=m=>{connectionUi.error=m;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before saving.');
  if(!f||f.owner!==designOwner()||f.revision!==d.revision||!d.nodes.some(n=>n.id===f.origin))return fail('This draft is stale. Cancel and reopen the handle menu.');
- if(d.nodes.length>=DESIGN_LIMITS.nodes||d.links.length>=DESIGN_LIMITS.links)return fail('The outline limit is reached. No card or connection was added.');
- if(!f.actionLabel.trim()||f.actionLabel.length>120)return fail('Use an action label of 1–120 characters.');
- if(f.linkKind==='conditional'&&!f.condition.trim())return fail('Describe the condition before saving this connection.');
+ if(d.nodes.length>=DESIGN_LIMITS.nodes||!connectedCardUsesContainment(f,d)&&d.links.length>=DESIGN_LIMITS.links)return fail('The outline limit is reached. No card or connection was added.');
+ if(!connectedCardUsesContainment(f,d)&&(!f.actionLabel.trim()||f.actionLabel.length>120))return fail('Use an action label of 1–120 characters.');
+ if(!connectedCardUsesContainment(f,d)&&f.linkKind==='conditional'&&!f.condition.trim())return fail('Describe the condition before saving this connection.');
  const {candidate,n,e}=connectedCardCandidate(d,f);
- if(!validIntentFields(n)||!validLinkFields(e))return fail('Intent, goals or connection details exceed their limits.');
+ if(!validIntentFields(n)||e&&!validLinkFields(e))return fail('Intent, goals or connection details exceed their limits.');
  const errors=newDesignErrors(d,candidate);if(errors.length)return fail(errors[0].message);
  const position=proposedCardPosition(d,f.origin,f.side,n);if(!position)return fail('No free position near that handle. Move the source card and try again.');
  recordDesign();d.nodes=candidate.nodes;d.links=candidate.links;d.nextId=candidate.nextId;
  const c=canvasState(d);c.positions[n.id]=position;c.custom=true;assignCardToSection(d,n.id,sectionForCard(d,f.origin));
  c.collapsed=c.collapsed.filter(id=>!nodeDescendants(d,id).has(n.id));
- designChanged();designUi.selected=n.id;canvasUi.edge=e.id;canvasUi.inspector='links';closeModal();render();
- revealDesignSelection();focusMapNode(n.id);canvasAnnounce('Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.');
+ designChanged();selectSitemapItem('surface',n.id);canvasUi.edge=e?.id||'contains-'+n.id;canvasUi.inspector='links';closeModal();render();
+ revealDesignSelection();focusMapNode(n.id);canvasAnnounce(e?'Created '+n.label+' and its '+LINK_TYPES[e.kind].label+' connection. Undo removes both.':'Created '+n.label+' inside its view container. One containment connection; Undo removes the new screen.');
 }
 function openStructureRelationship(childId){
  const d=design(),child=d.nodes.find(n=>n.id===childId);if(!child?.parent)return;
  connectionUi.structure={owner:designOwner(),revision:d.revision,child:child.id,parent:child.parent,anchorSnapshot:JSON.stringify(canvasState(d).anchors['contains-'+child.id]),label:canvasState(d).anchors['contains-'+child.id].label||'Contains',...structureRoute(d,child)};connectionUi.error='';
- designUi.selected=child.id;canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
+ selectSitemapItem('surface',child.id);canvasUi.edge='contains-'+child.id;canvasUi.inspector='links';paintMapSelection();showModal('connection-structure');
 }
 function saveStructureRelationship(){
  const d=design(),f=connectionUi.structure,child=d.nodes.find(n=>n.id===f?.child),fail=m=>{connectionUi.error=m;redrawModal();};
@@ -15174,16 +15368,17 @@ function connectedCardDialog(){
  const f=connectionUi.form,d=design(),origin=d.nodes.find(n=>n.id===f?.origin);if(!f||!origin)return dialogBody('Source no longer available','Cancel and choose a current card.');
  const target=f.direction==='incoming'?origin:{kind:f.kind},kinds=allowedLinkKinds(target),layouts=LAYOUTS.filter(l=>f.kind!=='modal'||['single','form','wizard'].includes(l.id));
  const parents=d.nodes.filter(n=>['view','page','group'].includes(n.kind)&&nodeOwner(d,n));
+ const containment=connectedCardUsesContainment(f,d);
  const from=f.direction==='incoming'?f.label:origin.label,to=f.direction==='incoming'?origin.label:f.label;
  return dialogBody('Create a connected '+(f.kind==='page'?'screen':f.kind==='view'?'view':f.kind==='modal'?'dialog':'action'),`
   <div class="connection-review-strip"><span>${icon('link')} ${f.direction==='incoming'?'Leads into':'Continues from'} <strong>${esc(origin.label)}</strong></span><span>${esc(SIDE_NAMES[f.side])} handle</span></div>
-  <p>One save creates the card and its editable user-flow connection. Cancel changes nothing.</p>
+  <p>${containment?'Adds one screen to this view container with one Contains relationship. Parent navigation makes it reachable; no duplicate navigation line is added.':'One save creates the card and its editable user-flow connection.'} Cancel changes nothing.</p>
   <div class="grid2">${connectionInput('Card name','label',f.label)}${connectionInput('Code name','slug',f.slug)}</div>
   <div class="grid2">${connectionSelect('Layout template','layout',layouts.map(l=>[l.id,l.name]),f.layout)}${f.kind==='page'?connectionSelect('Lives inside','parent',parents.map(n=>[n.id,n.label]),f.parent):f.kind==='view'?connectionSelect('Initial placement','placement',Object.entries(PLACEMENTS),f.placement):'<div class="connection-kind-note">'+esc(NODE_KINDS[f.kind])+'<small>Separate surface; existing cards are not reparented.</small></div>'}</div>
   ${f.kind==='page'?`<label class="toggle-line"><input type="checkbox" data-field="connection-nav" ${f.nav?'checked':''}> Also list this screen in its parent navigation</label>`:''}
-  <section class="connection-form-section"><h3>User-flow connection</h3><div class="connection-direction" id="connection-summary"><span>${esc(from)}</span>${icon('arrow')}<span>${esc(to)}</span></div>
+  ${containment?'':`<section class="connection-form-section"><h3>User-flow connection</h3><div class="connection-direction" id="connection-summary"><span>${esc(from)}</span>${icon('arrow')}<span>${esc(to)}</span></div>
   <div class="grid2">${connectionSelect('Connection type','linkKind',kinds.map(k=>[k,LINK_TYPES[k].label]),f.linkKind)}${connectionInput('Action label','actionLabel',f.actionLabel)}</div>
-  ${f.linkKind==='conditional'?connectionInput('Condition','condition',f.condition,true):''}<p class="small muted">${esc(LINK_TYPES[f.linkKind]?.description||'')}</p></section>
+  ${f.linkKind==='conditional'?connectionInput('Condition','condition',f.condition,true):''}<p class="small muted">${esc(LINK_TYPES[f.linkKind]?.description||'')}</p></section>`}
   <details class="connection-intent-details"><summary>Describe user intent and goals</summary>${connectionInput('User intent','intent',f.intent,true)}${connectionInput('User goals — one per line','goals',f.goals,true)}</details>
   <p class="connection-save-note">${icon('shield')} Existing cards stay in place. No source code is written.</p><p class="error" id="connection-error" role="alert">${esc(connectionUi.error)}</p>`,button('Cancel','close','','ghost')+button('Create card & connection','connection-save','','primary','plus'));
 }
@@ -15229,7 +15424,7 @@ function closeConnectionMenu(restore=true){
 function openConnectionMenu(node,side,anchor=null){
  if(state.activeRun){notify('Finish the active simulation before extending this outline.');return;}
  const d=design(),n=d.nodes.find(n=>n.id===node);if(!n||n.kind==='group'||!PORTS[side])return;
- closeConnectionMenu(false);designUi.selected=n.id;canvasUi.edge=null;paintMapSelection();
+ closeConnectionMenu(false);selectSitemapItem('surface',n.id);paintMapSelection();
  const incoming=PORTS[side].type==='target';
  anchor=anchor||document.querySelector(`.map-node[data-node="${CSS.escape(node)}"] [data-handleid="${PORTS[side].id}"]`);
  const rect=anchor?.getBoundingClientRect()||{left:innerWidth/2,right:innerWidth/2,top:innerHeight/2,bottom:innerHeight/2};
@@ -15308,7 +15503,7 @@ function editConnectionField(el,commit){
   const summary=document.getElementById('connection-summary');const origin=design().nodes.find(n=>n.id===f.origin);
   if(summary&&origin)summary.innerHTML='<span>'+esc(f.direction==='incoming'?v:origin.label)+'</span>'+icon('arrow')+'<span>'+esc(f.direction==='incoming'?origin.label:v)+'</span>';
  }
- if(commit&&k==='linkKind')redrawModal();return true;
+ if(commit&&['linkKind','parent','nav'].includes(k))redrawModal();return true;
 }
 let destructiveReview=null;
 function prepareDestructiveReview(type,id){
@@ -15343,7 +15538,7 @@ function connectionError(from,to,sourceHandle='out-right',targetHandle='in-left'
 }
 function openTypedConnection(edge,overrides={}){
  if(state.activeRun){notify('Finish the active simulation before editing a connection.');return;}
- designUi.form={...designCopy(edge),sourceHandle:edge.sourceHandle||'out-right',targetHandle:edge.targetHandle||'in-left',condition:edge.condition||'',description:edge.description||'',...overrides,editing:true,owner:designOwner(),baseRevision:design().revision};
+ designUi.form={...designCopy(edge),sourceHandle:edge.sourceHandle||'out-right',targetHandle:edge.targetHandle||'in-left',condition:edge.condition||'',description:edge.description||'',...overrides,editing:true,edgeSnapshot:JSON.stringify(connectionEditIdentity(edge)),owner:designOwner(),baseRevision:design().revision};
  designUi.error='';showModal('design-connect');
 }
 function reviewFlowConnection(connection,edgeId=null){
@@ -15354,13 +15549,14 @@ function reviewFlowConnection(connection,edgeId=null){
  const old=edgeId?design().links.find(e=>e.id===edgeId):null;
  if(edgeId&&!old){notify('That connection no longer exists.');return false;}
  const n=design().nodes.find(n=>n.id===target),kind=old&&allowedLinkKinds(n).includes(old.kind)?old.kind:linkKind(n);
- designUi.form={...(old?designCopy(old):{}),from:source,to:target,sourceHandle,targetHandle,kind,label:old?.label||'Open '+n.label,condition:old?.condition||'',description:old?.description||'',editing:!!old,owner:designOwner(),baseRevision:design().revision};
+ designUi.form={...(old?designCopy(old):{}),from:source,to:target,sourceHandle,targetHandle,kind,label:old?.label||'Open '+n.label,condition:old?.condition||'',description:old?.description||'',editing:!!old,edgeSnapshot:old?JSON.stringify(connectionEditIdentity(old)):null,owner:designOwner(),baseRevision:design().revision};
  designUi.error='';canvasUi.connecting=null;showModal('design-connect');return true;
 }
 function saveTypedConnection(){
  const f=designUi.form,d=design();const fail=message=>{designUi.error=message;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before saving.');
  if(!f||f.owner!==designOwner()||f.baseRevision!==d.revision)return fail('This connection draft is stale. Reopen it against the current project.');
+ if(f.editing&&(!d.links.some(e=>e.id===f.id)||f.edgeSnapshot!==JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))))return fail('This connection changed. Copy your draft and reopen it.');
  const sh=f.sourceHandle||'out-right',th=f.targetHandle||'in-left',error=connectionError(f.from,f.to,sh,th);if(error)return fail(error);
  const kind=f.kind||linkKind(d.nodes.find(n=>n.id===f.to));
  if(!allowedLinkKinds(d.nodes.find(n=>n.id===f.to)).includes(kind))return fail('Select a connection type compatible with the destination.');
@@ -15372,11 +15568,11 @@ function saveTypedConnection(){
  const edge={id:f.editing?f.id:'edge-'+d.nextId,from:f.from,to:f.to,label:f.label.trim(),kind,sourceHandle:sh,targetHandle:th,condition:kind==='conditional'?f.condition.trim():'',description:(f.description||'').trim()};
  if(!validLinkFields(edge))return fail('Connection details exceed their limits.');
  if(f.editing&&JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))===JSON.stringify(connectionEditIdentity(edge))){closeModal();return;}
- recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();designUi.selected=edge.from;canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
+ recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();selectSitemapItem('surface',edge.from);canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
 }
 function deselectFlow(){
  brickUi.selected=null;brickUi.node=null;
- if(flowUi.dragging)return;designUi.selected=null;dsUi.selected=null;canvasUi.edge=null;canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
+ if(flowUi.dragging)return;selectSitemapItem('empty');canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
  document.querySelectorAll('.outline-node').forEach(n=>{n.classList.remove('selected');n.setAttribute('aria-pressed','false');});
  const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=true;
  document.getElementById('map-viewport')?.focus({preventScroll:true});canvasAnnounce('Selection cleared. Click a surface or drag an outgoing handle.');
@@ -15391,7 +15587,7 @@ function saveSurfaceIntent(){
  const next={...n,intent:f.intent.trim(),goals:f.goals.split('\n').map(s=>s.trim()).filter(Boolean)};
  if(!validIntentFields(next))return fail('Use at most 1,000 characters for intent and 12 goals of up to 300 characters each.');
  if(JSON.stringify([n.intent||'',n.goals||[]])===JSON.stringify([next.intent,next.goals])){closeModal();return;}
- recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();designUi.selected=n.id;canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
+ recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();selectSitemapItem('surface',n.id);canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
 }
 function beginBindingReview(nodeId,componentId){beginLibraryBrick(nodeId,componentId);}
 
@@ -15408,7 +15604,9 @@ function saveBindingRegion(){
 function connectionEditIdentity(e){return [e.id,e.from,e.to,e.label,e.kind,e.sourceHandle||'out-right',e.targetHandle||'in-left',e.condition||'',e.description||''];}
 
 function flowInspector(d,n){
- if(!n&&dsUi.selected)return dsSitemapInspector(d,null);
+ const selection=sitemapSelection(d);
+ if(selection.kind==='data-flow')return dsFlowInspector(selection.record,d);
+ if(selection.kind==='source')return dsSitemapInspector(d,null);
  if(n&&canvasUi.inspector==='data')return dsSitemapInspector(d,n);
  if(canvasUi.inspector==='bricks')return brickInspector(d,n);
  if(!n)return `<div class="selection-empty">${icon('layers')}<h2>No surface selected</h2><p>Select a card to edit its intent, place components, or inspect its connections.</p><div class="empty-tip"><strong>Connect screens directly</strong><p>Click a handle to add a connected card or choose an existing one. Drag to draw directly. Click any line to inspect its relationship.</p></div>${button('Add a view','design-add','view','primary small','plus')}${button('Canvas settings','flow-settings','','small','settings')}</div>`;
@@ -15440,7 +15638,7 @@ function handleFlowAction(action,value){
  switch(action){
  case 'flow-settings':interactionUi.settingsOwner=designOwner();showModal('flow-settings');break;
  case 'flow-settings-reset':design().canvas.interaction=defaultCanvasPreferences();canvasState().snap=true;save();refreshFlowConfig();redrawModal();break;
- case 'flow-components':designUi.selected=value;canvasUi.edge=null;canvasUi.inspector='bricks';interactionUi.componentQuery='';render();break;
+ case 'flow-components':selectSitemapItem('surface',value);canvasUi.inspector='bricks';interactionUi.componentQuery='';render();break;
  case 'flow-place-component':{const [node,id]=value.split(':');beginBindingReview(node,id);break;}
  case 'flow-binding':reviewExistingBinding(value);break;
  case 'flow-binding-save':saveBindingRegion();break;
@@ -15511,7 +15709,7 @@ function mountFlow(){
    if(!current()||state.activeRun)return;
    if(dsBeginDrag({node,event}))return;dsUi.selected=null;
    flowUi.drag={owner,revision:design().revision,id:node.id,startX:event.clientX,startY:event.clientY,before:designCopy(canvasState())};flowUi.dragging=true;flowUi.cancelled=false;
-   beginSpatialDrag(node.id);designUi.selected=node.id;canvasUi.edge=null;paintMapSelection();
+   beginSpatialDrag(node.id);selectSitemapItem('surface',node.id);paintMapSelection();
   });
   api.onNodeDrag(({event})=>{if(current()){canvasUi.metrics.moves++;canvasUi.metrics.frames++;updateSpatialDrag(event);queueSpatialPaint();}});
   api.onNodeDragStop(({node,event})=>{
@@ -15523,10 +15721,10 @@ function mountFlow(){
    if(JSON.stringify(pos)!==JSON.stringify(drag.before.positions[node.id])){recordDesign();canvasState().positions[node.id]=pos;canvasState().custom=true;if(spatialUi.drop)assignCardToSection(design(),node.id,spatialUi.drop.id);save();}
    clearSpatialGesture();render();canvasAnnounce('Card moved. One undo restores its position; structure is unchanged.');focusMapNode(node.id);
   });
-  api.onConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
+  api.onConnectStart(params=>{if(current()){flowUi.cancelled=false;dsBeginConnection(params);setFlowConnecting(true);}});
   api.onClickConnectStart(()=>{if(current()){flowUi.cancelled=false;setFlowConnecting(true);}});
-  api.onConnect(connection=>{if(current()&&!flowUi.cancelled&&!edgeEditing.reconnect){setFlowConnecting(false);connectionUi.committed=true;reviewFlowConnection(connection);}});
-  api.onConnectEnd(()=>{if(current())setFlowConnecting(false);});
+  api.onConnect(connection=>{if(current()&&!flowUi.cancelled&&!edgeEditing.reconnect){setFlowConnecting(false);connectionUi.committed=true;dsUi.connection=null;reviewFlowConnection(connection);}});
+  api.onConnectEnd(event=>{if(current()){dsFinishConnection(event);setFlowConnecting(false);}});
   api.onClickConnectEnd(()=>{if(current())setFlowConnecting(false);});
   api.onEdgeClick(({edge,event})=>{if(!current())return;event.stopPropagation();dispatch('canvas-edge',edge.id);});
   api.onEdgeUpdateStart(({edge})=>{if(current())beginEdgeReconnect(edge);});
@@ -15539,7 +15737,7 @@ function mountFlow(){
  flowUi.app=createApp(Component);flowUi.app.use(pinia);flowUi.app.mount(root);paintFlowChrome();
 }
 function destroyFlow(){
- dsCancelDrag(false);
+ dsUi.connection=null;dsUi.hover=null;dsCancelDrag(false);
  closeConnectionMenu(false);resetFlowConnection(false);clearSpatialGesture();edgeEditing.reconnect=null;
  clearTimeout(flowUi.saveTimer);if(!flowUi.app)return;flowUi.serial++;
  if(flowUi.drag&&flowUi.owner===designOwner())design().canvas=flowUi.drag.before;
@@ -15549,17 +15747,17 @@ function destroyFlow(){
 function paintFlowChrome(){
  const c=canvasState(),root=document.getElementById('vf-root'),vp=document.getElementById('map-viewport');if(!vp)return;
  const z=document.getElementById('map-zoom-label');if(z)z.textContent=Math.round(c.zoom*100)+'%';
- if(root)root.style.setProperty('--map-inverse',1/c.zoom);
+ if(root){root.style.setProperty('--map-inverse',1/c.zoom);root.dataset.dataVisible=String(dsUi.show);}
  vp.style.backgroundSize=(24*c.zoom)+'px '+(24*c.zoom)+'px';vp.style.backgroundPosition=c.pan.x+'px '+c.pan.y+'px';vp.style.backgroundImage=c.interaction.grid?'':'none';
  vp.dataset.wheel=c.interaction.wheel;vp.dataset.grid=String(c.interaction.grid);paintReferenceChrome();
 }
 function paintFlowViewport(){const c=canvasState();paintFlowChrome();const api=flowUi.api;if(!api)return;flowUi.syncing=true;Promise.resolve(api.setViewport({x:c.pan.x,y:c.pan.y,zoom:c.zoom},{duration:0})).finally(()=>{if(api===flowUi.api)flowUi.syncing=false;});}
 function syncFlowSelection(){
- if(!flowUi.store)return;const selected=designUi.selected;
+ if(!flowUi.store)return;normalizeSitemapSelection();const selected=designUi.selected;
  for(const n of flowUi.store.nodes){n.selected=n.data.source?n.id===dsUi.selected:n.id===selected;n.data.dim=n.data.source?!dsMapMatch(n.data.source):!mapMatch(n.data.surface);}
- flowUi.store.edges=flowEdgeProjection(design());
+ flowUi.store.edges=flowEdgeProjection(design());dsPaintFlowFeedback();
  const changes=(flowUi.api?.getNodes.value||[]).map(n=>({id:n.id,type:'select',selected:n.id===(n.data?.source?dsUi.selected:selected)}));flowUi.api?.applyNodeChanges(changes);
- const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=!selected&&!dsUi.selected;
+ const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=!selected&&!dsUi.selected&&sitemapSelection().kind!=='data-flow';
 }
 function refreshFlowConfig(){const toggle=document.querySelector('[data-field="canvas-snap"]');if(toggle)toggle.checked=canvasState().snap;if(!flowUi.store)return;flowUi.store.preferences={...canvasPreferences()};flowUi.store.snap=canvasState().snap;flowUi.store.edges=flowEdgeProjection(design());paintFlowChrome();}
 function cancelFlowGesture(){
@@ -15569,7 +15767,7 @@ function cancelFlowGesture(){
 }
 
 function validFlowConnection(c){
- if(!c)return false;
+ if(!c||state.activeRun)return false;
  if(edgeEditing.reconnect?.structure)return validStructureReconnect(c);
  if(/^structure-out-(left|right|top|bottom)$/.test(c.sourceHandle)&&/^structure-in-(left|right|top|bottom)$/.test(c.targetHandle))return design().nodes.some(n=>n.id===c.target&&n.parent===c.source);
  return !connectionError(c.source,c.target,c.sourceHandle,c.targetHandle);
@@ -15815,7 +16013,7 @@ function visibleMapNodes(d=design()){
 }
 function canvasCommit(fn,message){
  if(state.activeRun){notify('Finish or cancel the active simulation before arranging the map.');return false;}
- const d=design();canvasState(d);recordDesign();fn(d.canvas);save();render();if(message)canvasAnnounce(message);return true;
+ const d=design();canvasState(d);const next=designCopy(d.canvas);fn(next);if(JSON.stringify(next)===JSON.stringify(d.canvas))return true;if(!validCanvas(next)){notify('Invalid canvas arrangement. Nothing was changed.');return false;}recordDesign();d.canvas=next;save();render();if(message)canvasAnnounce(message);return true;
 }
 function arrangeMap(layout){
  if(!Object.hasOwn(MAP_LAYOUTS,layout))return;
@@ -15837,7 +16035,7 @@ function showMapNode(id,focus=false){
  dsUi.selected=null;
  const d=design();if(!d.nodes.some(n=>n.id===id))return;
  const c=canvasState(d);c.collapsed=c.collapsed.filter(parent=>!nodeDescendants(d,parent).has(id));
- designUi.selected=id;canvasUi.edge=null;render();revealDesignSelection();if(focus)focusMapNode(id);
+ selectSitemapItem('surface',id);render();revealDesignSelection();if(focus)focusMapNode(id);
 }
 function focusMapNode(id){if(!id)return;const focus=()=>{if(designUi.selected===id&&!document.getElementById('modal').open)document.querySelector(`.map-node[data-node="${CSS.escape(id)}"]`)?.focus({preventScroll:true});};focus();if(flowUi.app)Vue.nextTick(focus);}
 function mapMatch(n){const q=canvasUi.search.trim().toLowerCase();return !q||(n.label+' '+n.slug+' '+NODE_KINDS[n.kind]).toLowerCase().includes(q);}
@@ -15972,9 +16170,9 @@ function handleCanvasAction(action,value){
   case 'canvas-select':
    if(flowUi.dragging||flowUi.suppressClick)return true;
    if(canvasUi.connecting){const target=d.nodes.find(x=>x.id===value);if(!target||target.kind==='group'){notify('Connect to a surface or action, not an organizing group.');break;}designUi.form={from:canvasUi.connecting,to:value,label:'Open '+target.label,owner:designOwner(),baseRevision:d.revision};canvasUi.connecting=null;designUi.error='';showModal('design-connect');}
-   else {designUi.selected=value;canvasUi.edge=null;paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
-  case 'canvas-child':designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
-  case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;designUi.selected=value;canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
+   else {selectSitemapItem('surface',value);paintMapSelection();focusMapNode(value);canvasAnnounce('Selected '+selectedNode()?.label+'. Use Edit to change the surface.');}break;
+  case 'canvas-child':selectSitemapItem('surface',value);paintMapSelection();startNodeForm('page');break;
+  case 'canvas-connect-from':canvasUi.connecting=value;canvasUi.placing=null;selectSitemapItem('surface',value);canvasUi.inspector='links';render();canvasAnnounce('Choose a destination card or press Escape to cancel.');break;
   case 'canvas-cancel-mode':cancelFlowGesture();canvasUi.connecting=null;canvasUi.placing=null;render();break;
   case 'canvas-outline':referencePaneMode('structure');break;
   case 'canvas-expand':canvasUi.expanded=!canvasUi.expanded;render();fitMap();break;
@@ -15986,7 +16184,7 @@ function handleCanvasAction(action,value){
   case 'canvas-zoom-out':zoomMap(1/1.2);break;
   case 'canvas-reset-zoom':zoomMap(1/c.zoom);break;
   case 'canvas-fit':fitMap();break;
-  case 'canvas-focus':if(n||dsUi.selected)fitMap(true);break;
+  case 'canvas-focus':if(n||dsUi.selected||sitemapSelection().kind==='data-flow')fitMap(true);break;
   case 'canvas-pan':{const [dx,dy]=value.split(',').map(Number);c.pan.x=Math.max(-50000,Math.min(50000,c.pan.x+dx));c.pan.y=Math.max(-50000,Math.min(50000,c.pan.y+dy));paintMap();save();canvasAnnounce('Canvas panned. Surface positions are unchanged.');break;}
   case 'canvas-nudge':if(n){const [dx,dy]=value.split(',').map(Number);moveMapNode(n.id,dx,dy);}break;
   case 'canvas-position':{
@@ -15997,13 +16195,13 @@ function handleCanvasAction(action,value){
    const before=c.positions[value];if(before)moveMapNode(value,x-before.x,y-before.y);break;
   }
   case 'canvas-place':canvasUi.placing=value;canvasUi.connecting=null;render();{const box=document.getElementById('map-mode-message');box.hidden=false;box.firstChild.textContent='Click empty canvas to place the selected card. ';}break;
-  case 'canvas-edge':{if(value.startsWith('contains-')){openStructureRelationship(value.slice(9));break;}const edge=d.links.find(e=>e.id===value);if(!edge)break;designUi.selected=edge.from;canvasUi.edge=value;canvasUi.inspector='links';paintMapSelection();openTypedConnection(edge);break;}
+  case 'canvas-edge':{if(value.startsWith('contains-')){openStructureRelationship(value.slice(9));break;}const edge=d.links.find(e=>e.id===value);if(!edge)break;selectSitemapItem('surface',edge.from);canvasUi.edge=value;canvasUi.inspector='links';paintMapSelection();openTypedConnection(edge);break;}
   case 'canvas-edit-edge':{const edge=d.links.find(e=>e.id===value);if(edge)openTypedConnection(edge);break;}
   case 'canvas-remove-edge':showModal('canvas-edge-remove',value);break;
   case 'canvas-remove-edge-confirm':if(!validDestructiveReview('canvas-edge-remove',value))break;closeModal();dispatch('design-unlink',value);canvasUi.edge=null;break;
-  case 'canvas-card-menu':designUi.selected=value;showModal('canvas-card-menu',value);break;
+  case 'canvas-card-menu':selectSitemapItem('surface',value);showModal('canvas-card-menu',value);break;
   case 'canvas-menu-edit':closeModal();startNodeForm('view',value);break;
-  case 'canvas-menu-child':closeModal();designUi.selected=value;canvasUi.edge=null;paintMapSelection();startNodeForm('page');break;
+  case 'canvas-menu-child':closeModal();selectSitemapItem('surface',value);paintMapSelection();startNodeForm('page');break;
   case 'canvas-menu-remove':showModal('design-remove',value);break;
   case 'canvas-menu-duplicate':closeModal();dispatch('design-duplicate',value);break;
   case 'canvas-menu-entry':closeModal();dispatch('design-entry',value);break;
@@ -16035,14 +16233,13 @@ function mapPointerDown(event){
  if(canvasUi.connecting||canvasUi.placing)return;
  const card=event.target.closest('.map-node'),c=canvasState();
  if(card&&state.activeRun){notify('Finish or cancel the active simulation before moving a card.');return;}
- if(card){designUi.selected=card.dataset.node;paintMapSelection();card.focus({preventScroll:true});}
+ if(card){selectSitemapItem('surface',card.dataset.node);paintMapSelection();card.focus({preventScroll:true});}
  canvasUi.drag={pointer:event.pointerId,owner:designOwner(),revision:design().revision,startX:event.clientX,startY:event.clientY,kind:card?'node':'pan',node:card?.dataset.node,before:designCopy(c),moved:false,frame:0,dx:0,dy:0};
  canvasUi.drag.capture=card||vp;(card||vp).setPointerCapture(event.pointerId);event.preventDefault();
 }
 function paintMapSelection(){
  document.querySelectorAll('.map-node').forEach(el=>el.classList.toggle('selected',el.dataset.node===designUi.selected));
- const inspector=document.querySelector('.inspector-body'),n=selectedNode();
- if(inspector)inspector.innerHTML=flowInspector(design(),n);if(flowUi.api)syncFlowSelection();paintReferenceChrome();
+ paintSitemapInspector();if(flowUi.api)syncFlowSelection();paintReferenceChrome();
  const wires=document.getElementById('map-wires');if(wires)wires.innerHTML=canvasWires(design(),visibleMapNodes());
 }
 function mapPointerMove(event){
@@ -16123,7 +16320,7 @@ document.addEventListener('keydown',mapKeyDown);
 document.addEventListener('wheel',mapWheel,{passive:false});
 document.addEventListener('contextmenu',event=>{const n=event.target.closest('.map-node');if(n){event.preventDefault();dispatch('canvas-card-menu',n.dataset.node);}});
 document.addEventListener('dblclick',event=>{const n=event.target.closest('.map-node');if(n&&!event.target.closest('button,.flow-port')){event.preventDefault();startNodeForm('view',n.dataset.node);}});
-document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){designUi.selected=n.dataset.node;paintMapSelection();if(n.matches(':focus-visible')&&!flowUi.dragging)revealDesignSelection();}});
+document.addEventListener('focusin',event=>{const n=event.target.closest('.map-node');if(n&&event.target===n){selectSitemapItem('surface',n.dataset.node);paintMapSelection();if(n.matches(':focus-visible')&&!flowUi.dragging)revealDesignSelection();}});
 window.addEventListener('resize',()=>{if(state.view==='sitemap')paintMap();});
 
 // Shared form and focus safeguards. No production persistence or runtime adapters.
@@ -16131,10 +16328,12 @@ let modalOriginal=null;
 const TRACKED_FORMS=new Set(['data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
+ if(modalType==='semantic-form'||modalType==='data-source-form')return editorDraftCheckpoint(inlineRemovalForm());
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
 }
 function rememberModalForm(){modalOriginal=TRACKED_FORMS.has(modalType)?formCheckpoint():null;}
 function askDiscardForm(){
+ if(restoreInlineRemoval())return true;
  if(!modalOriginal||!TRACKED_FORMS.has(modalType)||formCheckpoint()===modalOriginal)return false;
  let dialog=document.getElementById('discard-dialog');
  if(!dialog){dialog=document.createElement('dialog');dialog.id='discard-dialog';dialog.setAttribute('aria-labelledby','discard-title');document.body.appendChild(dialog);dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close();});}
@@ -16149,7 +16348,7 @@ function captureUiFocus(){
  return {id:e.id,action:e.dataset.action,value:e.dataset.value,field:e.dataset.field,node:e.dataset.node,selectionStart:typeof e.selectionStart==='number'?e.selectionStart:null,selectionEnd:typeof e.selectionEnd==='number'?e.selectionEnd:null};
 }
 function restoreUiFocus(t){
- if(!t||document.getElementById('modal').open)return;
+ if(!t||document.getElementById('modal').open||!sitemapFocusStillCurrent(t))return;
  let e=t.id?document.getElementById(t.id):null;
  if(!e&&t.node)e=document.querySelector(`.map-node[data-node="${CSS.escape(t.node)}"]`);
  if(!e&&t.field)e=[...document.querySelectorAll('[data-field]')].find(x=>x.dataset.field===t.field);
@@ -16570,14 +16769,16 @@ function designRemoveDialog(){const n=design().nodes.find(n=>n.id===modalData);i
 function designTransferDialog(){return dialogBody('Portable plugin blueprint',`<p>Export the sitemap, layouts, patterns and product intent as data. Declared note folders and public source locations may be included. No execution trust, credential values or test results are included. Do not place secrets in descriptive text. Import validates schema and structure before replacing the outline.</p><label for="blueprint-json">Blueprint JSON</label><textarea id="blueprint-json" data-field="design-transfer-json" aria-describedby="design-error" aria-invalid="${!!designUi.error}" class="mono transfer-area" spellcheck="false">${esc(designUi.transfer?.text??JSON.stringify(portableDesign(),null,2))}</textarea><p id="design-error" class="error" role="alert">${esc(designUi.error)}</p>`,button('Close','close','','ghost')+button('Import reviewed JSON','design-import','','','upload')+button('Download saved blueprint','design-export','','primary','download'));}
 function startNodeForm(kind='view',editId=null){
  const d=design(),n=d.nodes.find(n=>n.id===editId),selected=selectedNode();
+ if(editId&&!n){notify('This surface no longer exists. Select a current card.');return;}
  const parent=kind==='page'?(selected&&['view','page','group'].includes(selected.kind)?selected.id:d.nodes.find(n=>n.kind==='view')?.id||null):null;
  designUi.form=n?{...designCopy(n),intent:n.intent||'',goals:n.goals||[],editing:true,owner:designOwner()}:{components:[],id:'node-'+d.nextId,label:kind==='view'?'New view':kind==='page'?'New screen':'New surface',slug:kind==='view'?'new-view':kind==='page'?'new-screen':'new-surface',kind,layout:kind==='settings'?'form':'single',placement:'tab',parent,nav:kind==='page',command:kind==='view',ribbon:false,entry:!d.nodes.some(n=>n.entry)&&kind==='view',instance:'reuse',patterns:[],goal:'',intent:'',goals:[],entity:'',editing:false,owner:designOwner()};
  if(!n){Object.assign(designUi.form,uniqueSurfaceName(d,kind));designUi.form.autoSlug=true;}
- designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
+ designUi.form.surfaceSnapshot=n?JSON.stringify(surfaceEditIdentity(n)):null;designUi.form.baseRevision=d.revision;designUi.error='';showModal('design-node');
 }
 function saveDesignNode(){
  const d=design(),f=designUi.form;designUi.error='';if(state.activeRun){designUi.error='Finish the active simulation before saving.';redrawModal();return;}
  if(f.owner!==designOwner()||f.baseRevision!==d.revision){designUi.error='The selected project changed. Reopen the surface editor.';redrawModal();return;}
+ if(f.editing&&(!d.nodes.some(n=>n.id===f.id)||f.surfaceSnapshot!==JSON.stringify(surfaceEditIdentity(d.nodes.find(n=>n.id===f.id))))){designUi.error='This surface changed. Copy your draft and reopen it.';redrawModal();return;}
  if(!f.editing&&f.autoSlug)f.slug=allocateSurfaceCode(d,f.label);
  const keys=['components','id','slug','label','kind','layout','placement','parent','nav','command','ribbon','entry','instance','patterns','goal','entity','intent','goals'];
  const n=Object.fromEntries(keys.map(k=>[k,designCopy(f[k])]));if(f.bricks!==undefined)n.bricks=designCopy(f.bricks);
@@ -16588,7 +16789,7 @@ function saveDesignNode(){
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
  if(f.editing&&JSON.stringify(d.nodes.map(surfaceEditIdentity))===JSON.stringify(candidate.nodes.map(surfaceEditIdentity))){closeModal();return;}
- recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();designUi.selected=n.id;closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
+ recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();selectSitemapItem('surface',n.id);closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
 function editDesignField(el,commit){
  const key=el.dataset.field,value=el.type==='checkbox'?el.checked:el.value;

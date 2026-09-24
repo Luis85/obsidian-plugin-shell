@@ -16,7 +16,7 @@ function connectionError(from,to,sourceHandle='out-right',targetHandle='in-left'
 }
 function openTypedConnection(edge,overrides={}){
  if(state.activeRun){notify('Finish the active simulation before editing a connection.');return;}
- designUi.form={...designCopy(edge),sourceHandle:edge.sourceHandle||'out-right',targetHandle:edge.targetHandle||'in-left',condition:edge.condition||'',description:edge.description||'',...overrides,editing:true,owner:designOwner(),baseRevision:design().revision};
+ designUi.form={...designCopy(edge),sourceHandle:edge.sourceHandle||'out-right',targetHandle:edge.targetHandle||'in-left',condition:edge.condition||'',description:edge.description||'',...overrides,editing:true,edgeSnapshot:JSON.stringify(connectionEditIdentity(edge)),owner:designOwner(),baseRevision:design().revision};
  designUi.error='';showModal('design-connect');
 }
 function reviewFlowConnection(connection,edgeId=null){
@@ -27,13 +27,14 @@ function reviewFlowConnection(connection,edgeId=null){
  const old=edgeId?design().links.find(e=>e.id===edgeId):null;
  if(edgeId&&!old){notify('That connection no longer exists.');return false;}
  const n=design().nodes.find(n=>n.id===target),kind=old&&allowedLinkKinds(n).includes(old.kind)?old.kind:linkKind(n);
- designUi.form={...(old?designCopy(old):{}),from:source,to:target,sourceHandle,targetHandle,kind,label:old?.label||'Open '+n.label,condition:old?.condition||'',description:old?.description||'',editing:!!old,owner:designOwner(),baseRevision:design().revision};
+ designUi.form={...(old?designCopy(old):{}),from:source,to:target,sourceHandle,targetHandle,kind,label:old?.label||'Open '+n.label,condition:old?.condition||'',description:old?.description||'',editing:!!old,edgeSnapshot:old?JSON.stringify(connectionEditIdentity(old)):null,owner:designOwner(),baseRevision:design().revision};
  designUi.error='';canvasUi.connecting=null;showModal('design-connect');return true;
 }
 function saveTypedConnection(){
  const f=designUi.form,d=design();const fail=message=>{designUi.error=message;redrawModal();};
  if(state.activeRun)return fail('Finish the active simulation before saving.');
  if(!f||f.owner!==designOwner()||f.baseRevision!==d.revision)return fail('This connection draft is stale. Reopen it against the current project.');
+ if(f.editing&&(!d.links.some(e=>e.id===f.id)||f.edgeSnapshot!==JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))))return fail('This connection changed. Copy your draft and reopen it.');
  const sh=f.sourceHandle||'out-right',th=f.targetHandle||'in-left',error=connectionError(f.from,f.to,sh,th);if(error)return fail(error);
  const kind=f.kind||linkKind(d.nodes.find(n=>n.id===f.to));
  if(!allowedLinkKinds(d.nodes.find(n=>n.id===f.to)).includes(kind))return fail('Select a connection type compatible with the destination.');
@@ -45,11 +46,11 @@ function saveTypedConnection(){
  const edge={id:f.editing?f.id:'edge-'+d.nextId,from:f.from,to:f.to,label:f.label.trim(),kind,sourceHandle:sh,targetHandle:th,condition:kind==='conditional'?f.condition.trim():'',description:(f.description||'').trim()};
  if(!validLinkFields(edge))return fail('Connection details exceed their limits.');
  if(f.editing&&JSON.stringify(connectionEditIdentity(d.links.find(e=>e.id===f.id)))===JSON.stringify(connectionEditIdentity(edge))){closeModal();return;}
- recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();designUi.selected=edge.from;canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
+ recordDesign();if(f.editing)d.links=d.links.map(e=>e.id===edge.id?edge:e);else{d.nextId++;d.links.push(edge);}designChanged();selectSitemapItem('surface',edge.from);canvasUi.edge=edge.id;canvasUi.inspector='links';closeModal();render();canvasAnnounce('Connection saved. '+LINK_TYPES[kind].label+'. Containment is unchanged.');
 }
 function deselectFlow(){
  brickUi.selected=null;brickUi.node=null;
- if(flowUi.dragging)return;designUi.selected=null;dsUi.selected=null;canvasUi.edge=null;canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
+ if(flowUi.dragging)return;selectSitemapItem('empty');canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
  document.querySelectorAll('.outline-node').forEach(n=>{n.classList.remove('selected');n.setAttribute('aria-pressed','false');});
  const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=true;
  document.getElementById('map-viewport')?.focus({preventScroll:true});canvasAnnounce('Selection cleared. Click a surface or drag an outgoing handle.');
@@ -64,7 +65,7 @@ function saveSurfaceIntent(){
  const next={...n,intent:f.intent.trim(),goals:f.goals.split('\n').map(s=>s.trim()).filter(Boolean)};
  if(!validIntentFields(next))return fail('Use at most 1,000 characters for intent and 12 goals of up to 300 characters each.');
  if(JSON.stringify([n.intent||'',n.goals||[]])===JSON.stringify([next.intent,next.goals])){closeModal();return;}
- recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();designUi.selected=n.id;canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
+ recordDesign();n.intent=next.intent;n.goals=next.goals;designChanged();selectSitemapItem('surface',n.id);canvasUi.inspector='intent';closeModal();render();canvasAnnounce('User intent and goals saved. This is design context, not verified behavior.');
 }
 function beginBindingReview(nodeId,componentId){beginLibraryBrick(nodeId,componentId);}
 

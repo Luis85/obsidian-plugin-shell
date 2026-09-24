@@ -3,10 +3,12 @@ let modalOriginal=null;
 const TRACKED_FORMS=new Set(['data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
+ if(modalType==='semantic-form'||modalType==='data-source-form')return editorDraftCheckpoint(inlineRemovalForm());
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));
 }
 function rememberModalForm(){modalOriginal=TRACKED_FORMS.has(modalType)?formCheckpoint():null;}
 function askDiscardForm(){
+ if(restoreInlineRemoval())return true;
  if(!modalOriginal||!TRACKED_FORMS.has(modalType)||formCheckpoint()===modalOriginal)return false;
  let dialog=document.getElementById('discard-dialog');
  if(!dialog){dialog=document.createElement('dialog');dialog.id='discard-dialog';dialog.setAttribute('aria-labelledby','discard-title');document.body.appendChild(dialog);dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close();});}
@@ -21,7 +23,7 @@ function captureUiFocus(){
  return {id:e.id,action:e.dataset.action,value:e.dataset.value,field:e.dataset.field,node:e.dataset.node,selectionStart:typeof e.selectionStart==='number'?e.selectionStart:null,selectionEnd:typeof e.selectionEnd==='number'?e.selectionEnd:null};
 }
 function restoreUiFocus(t){
- if(!t||document.getElementById('modal').open)return;
+ if(!t||document.getElementById('modal').open||!sitemapFocusStillCurrent(t))return;
  let e=t.id?document.getElementById(t.id):null;
  if(!e&&t.node)e=document.querySelector(`.map-node[data-node="${CSS.escape(t.node)}"]`);
  if(!e&&t.field)e=[...document.querySelectorAll('[data-field]')].find(x=>x.dataset.field===t.field);
