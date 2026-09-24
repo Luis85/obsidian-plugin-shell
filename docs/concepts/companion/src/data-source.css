@@ -1,0 +1,102 @@
+:root { --ds-accent: #62c6ce; --ds-tint: rgba(98,198,206,.1); }
+:root[data-theme="light"] { --ds-accent: #086a75; --ds-tint: rgba(8,106,117,.08); }
+.ds-workspace { max-width: 1450px; margin: 0 auto; }
+.ds-boundary { color: var(--muted); border-bottom: 1px solid var(--line); padding: 0 0 18px; margin-bottom: 24px; font-size: 12px; }
+.ds-empty { padding: 32px 0; max-width: 960px; }
+.ds-empty > p { max-width: 70ch; }
+.ds-starters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-top: 28px; }
+.ds-starters button { display: flex; flex-direction: column; gap: 12px; text-align: left; padding: 24px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; color: var(--text); cursor: pointer; }
+.ds-starters button svg { color: var(--ds-accent); }
+.ds-starters button span { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.ds-catalog-layout { display: grid; grid-template-columns: 286px minmax(0,1fr); gap: 28px; align-items: start; }
+.ds-catalog { min-width: 0; padding-right: 16px; border-right: 1px solid var(--line); }
+.ds-catalog-row { display: flex; width: 100%; gap: 12px; padding: 16px 10px; border: 1px solid transparent; text-align: left; color: var(--text); background: transparent; border-radius: 9px; cursor: pointer; align-items: start; }
+.ds-catalog-row > span:last-child { min-width: 0; }
+.ds-catalog-row strong,.ds-catalog-row small { display: block; overflow-wrap: anywhere; }
+.ds-catalog-row small { margin-top: 5px; color: var(--muted); font-size: 11px; }
+.ds-catalog-row.selected { background: var(--ds-tint); border-color: var(--ds-accent); }
+.ds-glyph { color: var(--ds-accent); flex: 0 0 26px; display: inline-flex; width: 26px; height: 28px; align-items: center; overflow: hidden; }
+.ds-detail { min-width: 0; max-width: 850px; }
+.ds-detail-heading { display: flex; align-items: center; gap: 12px; }
+.ds-detail-heading > div { flex: 1; min-width: 0; }
+.ds-detail h2 { margin: 0; overflow-wrap: anywhere; }
+.ds-detail code { overflow-wrap: anywhere; }
+.ds-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 8px; }
+.ds-section-heading h3 { margin: 0; }
+.ds-operation { border-top: 1px solid var(--line); padding: 18px 0; }
+.ds-operation h4 { margin: 0 0 4px; }
+.ds-operation small,.ds-operation code { color: var(--muted); }
+.ds-shape-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px 0; }
+.ds-shape-pair > div { min-width: 0; padding: 12px; background: var(--ds-tint); border-radius: 8px; }
+.ds-shape-pair span,.ds-shape-pair strong { display: block; overflow-wrap: anywhere; }
+.ds-shape-pair span { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+.ds-facts { display: grid; grid-template-columns: 150px minmax(0,1fr); font-size: 12px; gap: 8px; }
+.ds-facts dt { color: var(--muted); }
+.ds-facts dd { margin: 0; overflow-wrap: anywhere; }
+.ds-note,.ds-direction-summary { padding: 14px 16px; background: var(--ds-tint); border-radius: 8px; font-size: 12px; line-height: 1.65; }
+.ds-direction-summary strong { font-size: 15px; overflow-wrap: anywhere; }
+.ds-direction-summary p { margin-bottom: 0; }
+.ds-help-empty { padding: 18px 0; color: var(--muted); }
+.ds-flow-row { display: flex; flex-direction: column; gap: 5px; background: transparent; border: 1px solid var(--line); color: var(--text); width: 100%; text-align: left; border-radius: 8px; padding: 13px; margin-top: 10px; cursor: pointer; overflow-wrap: anywhere; }
+.ds-flow-row span { color: var(--ds-accent); }
+.ds-flow-row small { color: var(--muted); }
+#modal.data-source-modal { width: min(840px,calc(100vw - 24px)); }
+.data-source-modal .field small { line-height: 1.6; }
+.ds-shape-editor { min-width: 0; border: 1px solid var(--line); border-radius: 10px; margin: 24px 0; padding: 18px; }
+.ds-shape-editor legend { color: var(--ds-accent); padding: 0 8px; font-weight: 650; }
+.ds-field-row { display: grid; grid-template-columns: minmax(90px,1fr) minmax(100px,1fr) auto auto; gap: 8px; align-items: end; margin-bottom: 10px; }
+.ds-field-row label { font-size: 11px; color: var(--muted); }
+.ds-field-row label:not(.ds-required) input,.ds-field-row select { display: block; width: 100%; min-width: 0; margin-top: 5px; }
+.ds-field-row .ds-required { display: flex; align-items: center; gap: 6px; min-height: 34px; white-space: nowrap; }
+.ds-hint { display: block; margin-top: 12px; color: var(--muted); }
+.ds-schema-text { font: 12px/1.6 var(--mono); white-space: pre; tab-size: 2; }
+#ds-error:empty { display: none; }
+#ds-error:focus { outline: 2px solid var(--accent); outline-offset: 4px; }
+.ds-source-card { box-sizing: border-box; border: 1px solid var(--ds-accent); border-radius: 12px; background: var(--surface); color: var(--text); position: relative; cursor: grab; }
+.ds-source-card:active { cursor: grabbing; }
+.ds-source-card-body { overflow: hidden; padding: 17px; height: 100%; border-radius: inherit; box-sizing: border-box; }
+.ds-source-card h3 { font-size: 17px; line-height: 1.4; margin: 14px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-source-card p { font-size: 12px; margin: 12px 0; }
+.ds-source-card code,.ds-source-card small { color: var(--muted); font-size: 11px; }
+.ds-source-card code { display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.ds-source-card small { display: block; margin-top: 8px; }
+.ds-source-type { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--ds-accent); }
+.ds-source-type svg { flex-shrink: 0; width: 18px; height: 18px; }
+.ds-source-type span:not(.badge) { flex: 1; }
+.ds-card-actions { display: flex; gap: 8px; }
+#vf-root .ds-source-card.selected { outline: 2px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root .ds-source-card:hover { background: var(--raised); }
+#vf-root .ds-port { width: 13px; height: 13px; border: 2px solid var(--surface); background: var(--ds-accent); border-radius: 50%; z-index: 6; opacity: 0; pointer-events: none; }
+#vf-root .ds-port.ds-connected,#vf-root .ds-source-card .ds-port,#vf-root[data-connecting="true"] .ds-port,#vf-root .vue-flow__node.ds-related .ds-port,#vf-root .vue-flow__node.selected .ds-port,#vf-root .vue-flow__node:hover .ds-port { opacity: 1; pointer-events: auto; }
+#vf-root .ds-port.source { margin-top: -22px; }
+#vf-root .ds-port.target { margin-top: 22px; }
+#vf-root .ds-port.vue-flow__handle-top,#vf-root .ds-port.vue-flow__handle-bottom { margin-top: 0; }
+#vf-root .ds-port.vue-flow__handle-top.source,#vf-root .ds-port.vue-flow__handle-bottom.source { margin-left: -22px; }
+#vf-root .ds-port.vue-flow__handle-top.target,#vf-root .ds-port.vue-flow__handle-bottom.target { margin-left: 22px; }
+#vf-root .ds-port:hover,#vf-root .ds-port:focus-visible,#vf-root .ds-port.connecting { outline: 2px solid var(--ds-accent); outline-offset: 3px; opacity: 1; pointer-events: auto; }
+#vf-root .ds-data-edge:hover .vue-flow__edge-path,#vf-root .ds-data-edge.selected .vue-flow__edge-path { stroke-width: 3.5; }
+#vf-root .ds-related .map-node,#vf-root .ds-related .ds-source-card { outline: 2px solid var(--ds-accent); outline-offset: 3px; }
+#vf-root svg.vue-flow__edges { overflow: visible; }
+.ds-outline { padding: 12px 16px; border-top: 1px solid var(--line); }
+.ds-outline-row { display: flex; width: 100%; gap: 8px; align-items: center; text-align: left; padding: 9px 0; color: var(--text); background: none; border: 0; cursor: pointer; }
+.ds-outline-row svg { width: 18px; flex-shrink: 0; color: var(--ds-accent); }
+.ds-outline-row span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ds-outline-row small { color: var(--muted); }
+.ds-starters button:hover,.ds-catalog-row:hover,.ds-flow-row:hover { background: var(--ds-tint); border-color: var(--ds-accent); }
+.ds-starters button:active,.ds-catalog-row:active,.ds-flow-row:active { background: var(--raised); }
+.ds-workspace button:focus-visible,.ds-outline button:focus-visible,.ds-source-card:focus-visible { outline: 2px solid var(--ds-accent); outline-offset: 3px; }
+.ds-workspace button:disabled,.ds-source-card button:disabled { opacity: .5; cursor: not-allowed; }
+@media(max-width:1100px){.ds-catalog-layout{grid-template-columns:230px minmax(0,1fr);gap:18px}.ds-starters{grid-template-columns:1fr}.ref-canvas-top{flex-wrap:wrap}}
+@media(max-width:760px){.ds-catalog-layout{grid-template-columns:1fr}.ds-catalog{border-right:0;border-bottom:1px solid var(--line);padding:0 0 18px}.ds-catalog #ds-results{max-height:230px;overflow:auto}.ds-field-row{grid-template-columns:minmax(80px,1fr) minmax(100px,1fr)}.ds-shape-editor{padding:12px}.ds-shape-pair{grid-template-columns:1fr}.ds-facts{grid-template-columns:100px minmax(0,1fr)}.ds-section-heading{flex-wrap:wrap}}
+
+#vf-root .ds-flow-label { border-color: var(--ds-accent); }
+#vf-root .ds-flow-label strong { color: var(--ds-accent); }
+/* Override the incumbent surface-only handle visibility, not navigation ports. */
+#vf-root .map-node .ds-port { opacity: 0 !important; pointer-events: none; }
+#vf-root .map-node .ds-port.ds-connected,
+#vf-root .map-node .ds-port:focus-visible,
+#vf-root .map-node:is(:hover,:focus-within,.selected) .ds-port,
+#vf-root[data-connecting="true"] .map-node .ds-port,
+#vf-root .vue-flow__node.ds-related .ds-port { opacity: 1 !important; pointer-events: auto; }
+#vf-root .ds-port::after { border-color: var(--ds-accent) !important; }
+#vf-root .ds-port.source::after { background: var(--ds-accent) !important; }

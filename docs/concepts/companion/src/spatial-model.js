@@ -67,7 +67,7 @@ function alignFlowChanges(changes){
  return changes.map(change=>{
   if(change.type!=='position'||change.id!==drag.id||!change.position)return change;
   const surface=d.nodes.find(n=>n.id===drag.id);if(!surface)return change;
-  const others=nodes.filter(n=>n.id!==drag.id).map(n=>({id:n.id,...n.position,...brickSurfaceSize(d.nodes.find(s=>s.id===n.id),d)}));
+  const others=nodes.filter(n=>n.id!==drag.id).map(n=>({id:n.id,...n.position,...dsNodeSize(n.id,d)}));
   const aligned=prefs.guides!==false&&!spatialUi.alt?alignPosition(change.position,brickSurfaceSize(surface,d),others,canvasState().zoom,prefs.guideSnap!==false):{position:change.position,guides:[]};
   spatialUi.guides=aligned.guides;spatialUi.last=aligned.position;queueSpatialPaint();return {...change,position:aligned.position};
  });

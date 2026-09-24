@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
+    ('data-sources', 'data-sources/checks.json'),
     ('single-vault', 'single-vault/checks.json'),
     ('semantic', 'semantic/checks.json'),
     ('er-polish', 'er-polish/checks.json'),

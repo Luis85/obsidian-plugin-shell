@@ -38,6 +38,7 @@ function erSave(){
    const item={id:f.id||semanticId(next,'section'),name:f.name.trim()};const index=next.sections.findIndex(s=>s.id===f.id);if(index<0)next.sections.push(item);else next.sections[index]=item;
   }else if(f.formKind==='remove-section'){next.sections=next.sections.filter(s=>s.id!==f.id);next.entities.forEach(e=>{if(e.section===f.id)e.section=null;});
   }else if(f.formKind==='remove-entity'){
+   if(dsReferences(design()).some(r=>r.entity===f.id))throw Error('Update the data-source input/output shapes that reference this entity first.');
    if(next.relationships.some(r=>r.source===f.id||r.target===f.id))throw Error('Remove this entity’s relationships explicitly before deleting the entity.');
    const e=next.entities.find(e=>e.id===f.id);if(design().nodes.some(n=>n.entity===f.id||n.entity===e?.slug))throw Error('Unbind this entity from its sitemap surfaces first.');
    next.entities=next.entities.filter(e=>e.id!==f.id);delete next.canvas.positions[f.id];selected=null;

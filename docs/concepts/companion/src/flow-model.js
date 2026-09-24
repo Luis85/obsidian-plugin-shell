@@ -7,6 +7,7 @@ function canvasPreferences(){return canvasState().interaction;}
 function allowedLinkKinds(n){if(!n||n.kind==='group')return [];return n.kind==='modal'?['open','data']:n.kind==='settings'?['configure','data']:n.kind==='action'?['execute','data']:['navigate','return','conditional','data'];}
 function nForFocus(){return selectedNode();}
 function connectionError(from,to,sourceHandle='out-right',targetHandle='in-left'){
+ if(dsIsNode(from)||dsIsNode(to))return dsConnectionError({source:from,target:to,sourceHandle,targetHandle});
  const d=design(),a=d.nodes.find(n=>n.id===from),b=d.nodes.find(n=>n.id===to);
  if(!a||!b||a.kind==='group'||b.kind==='group')return 'Choose two existing screens, dialogs or actions.';
  if(from===to)return 'Connect to another surface. Self-connections are not supported.';
@@ -20,6 +21,7 @@ function openTypedConnection(edge,overrides={}){
 }
 function reviewFlowConnection(connection,edgeId=null){
  const {source,target,sourceHandle,targetHandle}=connection;
+ if(dsIsNode(source)||dsIsNode(target))return dsReviewConnection(connection);
  const error=connectionError(source,target,sourceHandle,targetHandle);if(error){notify(error);return false;}
  if(state.activeRun){notify('Finish the active simulation before connecting surfaces.');return false;}
  const old=edgeId?design().links.find(e=>e.id===edgeId):null;
@@ -47,7 +49,7 @@ function saveTypedConnection(){
 }
 function deselectFlow(){
  brickUi.selected=null;brickUi.node=null;
- if(flowUi.dragging)return;designUi.selected=null;canvasUi.edge=null;canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
+ if(flowUi.dragging)return;designUi.selected=null;dsUi.selected=null;canvasUi.edge=null;canvasUi.connecting=null;canvasUi.placing=null;paintMapSelection();
  document.querySelectorAll('.outline-node').forEach(n=>{n.classList.remove('selected');n.setAttribute('aria-pressed','false');});
  const focus=document.querySelector('[data-action="canvas-focus"]');if(focus)focus.disabled=true;
  document.getElementById('map-viewport')?.focus({preventScroll:true});canvasAnnounce('Selection cleared. Click a surface or drag an outgoing handle.');

@@ -19,7 +19,7 @@ function handleCanvasAction(action,value){
   case 'canvas-zoom-out':zoomMap(1/1.2);break;
   case 'canvas-reset-zoom':zoomMap(1/c.zoom);break;
   case 'canvas-fit':fitMap();break;
-  case 'canvas-focus':if(n)fitMap(true);break;
+  case 'canvas-focus':if(n||dsUi.selected)fitMap(true);break;
   case 'canvas-pan':{const [dx,dy]=value.split(',').map(Number);c.pan.x=Math.max(-50000,Math.min(50000,c.pan.x+dx));c.pan.y=Math.max(-50000,Math.min(50000,c.pan.y+dy));paintMap();save();canvasAnnounce('Canvas panned. Surface positions are unchanged.');break;}
   case 'canvas-nudge':if(n){const [dx,dy]=value.split(',').map(Number);moveMapNode(n.id,dx,dy);}break;
   case 'canvas-position':{

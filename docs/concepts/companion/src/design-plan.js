@@ -6,7 +6,7 @@ function designFiles(d){
  const name=n=>n.slug.split('-').map(s=>s[0].toUpperCase()+s.slice(1)).join('');
  for(const n of d.nodes){
   if(n.kind==='group')continue;
-  const spec={nodeId:n.id,kind:n.kind,label:n.label,entity:n.entity||null,layout:n.layout,placement:nodePlacement(d,n),parent:n.parent,instance:n.instance,patterns:n.patterns,intent:n.intent||'',userGoals:n.goals||[],contentBricks:bricksOf(n)};
+  const spec={nodeId:n.id,kind:n.kind,label:n.label,entity:n.entity||null,layout:n.layout,placement:nodePlacement(d,n),parent:n.parent,instance:n.instance,patterns:n.patterns,intent:n.intent||'',userGoals:n.goals||[],dataFlows:d.dataSources?.flows.filter(f=>f.card===n.id)||[],contentBricks:bricksOf(n)};
   put(`src/features/${n.slug}/surface-spec.ts`,header+`export const surfaceSpec = ${JSON.stringify(spec,null,2)} as const;\n`,n.id,'Owned declarative surface contract');
   if(['view','page'].includes(n.kind)){
    put(`src/presentation/components/${name(n)}Screen.vue`,header.replace('//','<!--').trim()+' -->\n'+`<template>\n  <section class="screen-${n.slug}" aria-label=${quote(n.label)}>\n    <h2>${esc(n.label)}</h2>\n    <p>Connect the ${esc(n.layout)} layout to typed application actions.</p>\n    <!-- Required states: empty, loading, error, populated. -->\n  </section>\n</template>\n`,n.id,'Presentation markup only');
@@ -25,7 +25,7 @@ function designFiles(d){
  const hooks=d.nodes.filter(n=>n.kind!=='group').map(n=>`| ${n.label.replace(/\|/g,'/')} | ${n.kind} | ${n.goal.replace(/[\r\n|]/g,' ')||'Describe the outcome and acceptance rule.'} |`).join('\n');
  put('docs/BUSINESS-LOGIC-HANDOFF.md',`# Business-logic handoff\n\nConcept only. No application build or test was executed.\n\n## Product goal\n${d.goal}\n\n| Surface | Type | Business decision still required |\n| --- | --- | --- |\n${hooks}\n\n## Never inferred\nUndeclared entities, authorization, formulas, business rules, persistence adapters, remote credentials, real test results. Declared entities and relationships feed schema previews, not a native data migration.\n\n## Requested patterns\n${d.nodes.flatMap(n=>n.patterns.map(id=>'- '+n.label+': '+PATTERNS.find(p=>p.id===id).name)).join('\n')}\n`,'blueprint','Developer work remaining');
  if(d.nodes.some(n=>bricksOf(n).length))put('docs/SCREEN-CONTENT-OUTLINE.md',contentOutlineMarkdown(d),'blueprint','Ordered content intent and explicit component mappings');
- return [...files,...productPlanFiles(d),...semanticFiles(d)];
+ return [...files,...productPlanFiles(d),...semanticFiles(d),...dataSourceFiles(d)];
 }
 function buildDesignPlan(d){
  const issues=designIssues(d);let files=[];try{files=designFiles(d);}catch{issues.push({level:'error',code:'preview-contract',message:'The outline contains a contract that cannot be previewed. Repair the design; no source has been changed.'});}if(files.some(f=>f.content.length>=100000)||new Set([...Object.keys(d.emitted),...files.map(f=>f.path)]).size>600)issues.push({level:'error',code:'preview-capacity',message:'This scaffold exceeds the concept’s saved-preview capacity (600 files; each below 100,000 characters). Export the blueprint and reduce the preview scope. Nothing was emitted.'});const changes=files.map(f=>{const before=d.emitted[f.path];return {...f,status:!before?'create':before.owner!==f.owner?'conflict':before.content===f.content?'unchanged':before.protected?'conflict':'update'};});

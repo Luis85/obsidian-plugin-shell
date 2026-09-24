@@ -600,3 +600,14 @@ Still to resolve through implementation evidence: policy acceptance, final publi
 External facts use the R01–R17 register in the [dated research report](../research/2026-09-23-companion-plugin.md). Repository capability claims come from the pinned baseline, current [setup](../development/SETUP-IDENTITY.md), [makers](../development/AUTHORING-TOOLS.md), [package scripts](../../package.json), [actual setup entry](../../scripts/setup.mjs), [parent PRD](PRD.md) and [verification record](../testing/ITERATION-THREE.md).
 
 This document adds a proposed product. It does not implement the companion, approve new filesystem privileges, change dependency policy, publish artifacts, reserve a listing or upgrade existing evidence. Any implementation-status update must identify its code revision, actual commands and scope-labeled results.
+
+
+## Data Sources: semantic contracts on the sitemap
+
+The single project owns a reusable catalog of external services/APIs, databases and the generated plugin's active Obsidian vault. Each source declares named operations, supported business-data directions, resource metadata, authentication reference names and independent input/output shapes. Shapes may reference a declared ER entity or define an external payload without polluting the entity model.
+
+Sitemap surfaces use these operations through labeled read (source → surface), write (surface → source) or bidirectional flows. These are separate from navigation and containment and never make a screen reachable. A response acknowledgement does not imply bidirectional synchronization. Sources expose their current usages and support explicit editing, deprecation and guarded removal. Declared data flows feed the same reviewed generation plan as surface and entity contracts.
+
+Source-kind capabilities, bounded schemas, dangling references, incompatible directions and unsafe locations are validated before canonical changes. Source/operation deletion, surface deletion and entity removal cannot silently break usages. Undo/Redo, draft recovery and review invalidation apply; geometry-only edits do not change contracts. Credential values, database connection strings, SQL execution, external requests, native vault writes and inferred synchronization are outside the interactive concept.
+
+See the implemented [Data Sources contract](../concepts/companion/DATA-SOURCES.md) and [qualification record](../concepts/companion/DATA-SOURCES-VERIFICATION.md). Native runtime adapters and compiler integration remain separately accepted implementation work.

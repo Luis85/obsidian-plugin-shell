@@ -1,3 +1,9 @@
+# Data Sources iteration
+
+The **Data Sources** design catalog now declares external API, database and active-vault operations with separate input/output shapes. Place a source on the sitemap and connect it to surfaces with read, write or bidirectional data flows. These are design declarations and typed generator previews, not live connections.
+
+Try **Use example outline → Data Sources → Use example sources → Show on sitemap**. The example is explicit and illustrative. See [DATA-SOURCES.md](DATA-SOURCES.md) and [DATA-SOURCES-VERIFICATION.md](DATA-SOURCES-VERIFICATION.md). Current assembly inventory: **84 exact JS/CSS inputs** (64 authored JS, 15 authored CSS, five unchanged vendors). Earlier verification documents retain their original artifact scope.
+
 # Shell Workbench companion concept
 
 > **One vault, one project · entity-editor review and polish — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.

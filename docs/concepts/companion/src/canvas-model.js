@@ -45,6 +45,7 @@ function toggleMapBranch(id){
  const d=design();canvasCommit(c=>{c.collapsed=c.collapsed.includes(id)?c.collapsed.filter(x=>x!==id):[...c.collapsed,id];if(nodeDescendants(d,id).has(designUi.selected)&&designUi.selected!==id)designUi.selected=id;},'Branch visibility changed. No surfaces were removed.');
 }
 function showMapNode(id,focus=false){
+ dsUi.selected=null;
  const d=design();if(!d.nodes.some(n=>n.id===id))return;
  const c=canvasState(d);c.collapsed=c.collapsed.filter(parent=>!nodeDescendants(d,parent).has(id));
  designUi.selected=id;canvasUi.edge=null;render();revealDesignSelection();if(focus)focusMapNode(id);
@@ -59,6 +60,7 @@ function canvasBounds(nodes=visibleMapNodes()){
 function fitMap(selected=false){
  const pane=document.getElementById('map-viewport');if(!pane)return;
  const c=canvasState(),nodes=selected&&selectedNode()?[selectedNode()]:visibleMapNodes();let b=canvasBounds(nodes);if(!selected&&(c.sections?.length||c.layout==='sections')){const zones=sectionZones(design());const left=Math.min(b.x,...zones.map(z=>z.x)),topY=Math.min(b.y,...zones.map(z=>z.y));b={x:left,y:topY,w:Math.max(b.x+b.w,...zones.map(z=>z.x+z.width))-left,h:Math.max(b.y+b.h,...zones.map(z=>z.y+z.height))-topY};}
+ b=dsExtendBounds(b,selected);
  const inset=referenceUi.panel==='none'?0:Math.min(294,pane.clientWidth-160);
  const width=Math.max(150,pane.clientWidth-inset),height=pane.clientHeight,top=selected?132:78,bottom=96;
  c.zoom=Math.max(.12,Math.min(selected?1.15:1,(width-64)/b.w,(height-top-bottom)/b.h));
@@ -89,6 +91,6 @@ function revealDesignSelection(){
  const dy=top<90?90-top:top+h>pane.clientHeight-96?(h>pane.clientHeight-186?90-top:pane.clientHeight-96-top-h):0;
  if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
-function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
+function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;const sources=dsGeneration(d);if(sources)value.dataSources=sources;else delete value.dataSources;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
 
 function boundedCameraPan(p){return {x:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.x)),y:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.y))};}

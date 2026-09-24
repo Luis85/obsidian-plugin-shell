@@ -94,7 +94,13 @@
     "docs/concepts/companion/vendor/vue-flow.scoped.css",
     "docs/concepts/companion/vendor/vue.runtime.global.prod.js",
     "docs/concepts/companion/src/semantic-geometry.js",
-    "docs/concepts/companion/src/semantic-interaction.js"
+    "docs/concepts/companion/src/semantic-interaction.js",
+    "docs/concepts/companion/src/data-source-model.js",
+    "docs/concepts/companion/src/data-source-actions.js",
+    "docs/concepts/companion/src/data-source-views.js",
+    "docs/concepts/companion/src/data-source-flow.js",
+    "docs/concepts/companion/src/data-source-generation.js",
+    "docs/concepts/companion/src/data-source.css"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

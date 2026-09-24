@@ -1,4 +1,6 @@
 function flowInspector(d,n){
+ if(!n&&dsUi.selected)return dsSitemapInspector(d,null);
+ if(n&&canvasUi.inspector==='data')return dsSitemapInspector(d,n);
  if(canvasUi.inspector==='bricks')return brickInspector(d,n);
  if(!n)return `<div class="selection-empty">${icon('layers')}<h2>No surface selected</h2><p>Select a card to edit its intent, place components, or inspect its connections.</p><div class="empty-tip"><strong>Connect screens directly</strong><p>Click a handle to add a connected card or choose an existing one. Drag to draw directly. Click any line to inspect its relationship.</p></div>${button('Add a view','design-add','view','primary small','plus')}${button('Canvas settings','flow-settings','','small','settings')}</div>`;
  if(canvasUi.inspector==='components')return surfaceComponentsPanel(d,n);

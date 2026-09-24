@@ -26,6 +26,7 @@ function scheduleHandleMeasure(id,serial){
  requestAnimationFrame(()=>{if(serial===flowUi.serial&&flowUi.api)flowUi.api.updateNodeInternals([id]);});
 }
 function abortSpatialInput(){
+ dsCancelDrag(true);
  resetFlowConnection(false);
  if(flowUi.drag){const drag=flowUi.drag;flowUi.cancelled=true;flowUi.drag=null;flowUi.dragging=false;if(drag.owner===designOwner())design().canvas=drag.before;const owner=flowUi.owner,serial=flowUi.serial;queueMicrotask(()=>{if(state.view==='sitemap'&&owner===designOwner()&&serial===flowUi.serial)render();});}
  clearSpatialGesture();
