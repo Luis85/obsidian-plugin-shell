@@ -5,10 +5,10 @@ function vaultTemplateFiles(w){return {
  'package.json':JSON.stringify({name:w.id,version:w.version,private:true,notice:'Illustrative template file — not an installable project'},null,2),
  'src/main.ts':'// Reviewed template entry fixture. Real source comes from a qualified template artifact.\n',
  'scripts/setup.mjs':'// Canonical setup entry fixture. No code is executed by this concept.\n',
- '.gitignore':'.obsidian/\n.dev-vault/\nnode_modules/\ndist/\nreports/\n',
+ '.gitignore':'.obsidian/\n.dev-vault/\n.test-vault/\nnode_modules/\ndist/\nreports/\n',
  'Project.md':projectNoteText({...project(),...w,key:project().key})
 };}
-function protectedVaultPath(path){return path===CONCEPT_VAULT.config||path.startsWith(CONCEPT_VAULT.config+'/')||path==='.git'||path.startsWith('.git/')||path==='project'||path.startsWith('project/')||path==='.dev-vault'||path.startsWith('.dev-vault/');}
+function protectedVaultPath(path){return path===CONCEPT_VAULT.config||path.startsWith(CONCEPT_VAULT.config+'/')||path==='.git'||path.startsWith('.git/')||path==='project'||path.startsWith('project/')||path==='.dev-vault'||path.startsWith('.dev-vault/')||path==='.test-vault'||path.startsWith('.test-vault/');}
 function vaultFilePlan(w){
  const files=state.vaultFiles;
  return Object.entries(vaultTemplateFiles(w)).map(([path,after])=>{

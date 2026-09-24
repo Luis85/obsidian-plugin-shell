@@ -102,7 +102,26 @@
     "docs/concepts/companion/src/data-source-generation.js",
     "docs/concepts/companion/src/data-source.css",
     "docs/concepts/companion/src/editor-selection.js",
-    "docs/concepts/companion/src/editor-removal.js"
+    "docs/concepts/companion/src/editor-removal.js",
+    "docs/concepts/companion/src/test-data-model.js",
+    "docs/concepts/companion/src/test-data-actions.js",
+    "docs/concepts/companion/src/test-data-views.js",
+    "docs/concepts/companion/src/test-data-export.js",
+    "docs/concepts/companion/src/test-data.css",
+    "docs/concepts/companion/test-kit/engine.mjs",
+    "docs/concepts/companion/test-kit/adapters.mjs",
+    "docs/concepts/companion/test-kit/storage.mjs",
+    "docs/concepts/companion/test-kit/server.mjs",
+    "docs/concepts/companion/test-kit/cli.mjs",
+    "docs/concepts/companion/test-kit/faker-provider.mjs",
+    "docs/concepts/companion/src/style-guide-model.js",
+    "docs/concepts/companion/src/style-guide-actions.js",
+    "docs/concepts/companion/src/style-guide-views.js",
+    "docs/concepts/companion/src/style-guide-export.js",
+    "docs/concepts/companion/src/style-guide.css",
+    "docs/concepts/companion/test-kit/client.mjs",
+    "docs/concepts/companion/src/workbench.css",
+    "docs/concepts/companion/src/ui-fields.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -187,6 +206,12 @@
           "docs/concepts/companion/src/**",
           "docs/concepts/companion/vendor/**"
         ]
+      },
+      {
+        "name": "companion-test-kit",
+        "patterns": [
+          "docs/concepts/companion/test-kit/**"
+        ]
       }
     ],
     "rules": [
@@ -253,7 +278,8 @@
           "test",
           "harness",
           "tooling",
-          "styles"
+          "styles",
+          "companion-test-kit"
         ]
       },
       {
@@ -295,6 +321,12 @@
       {
         "from": "companion-concept",
         "allow": []
+      },
+      {
+        "from": "companion-test-kit",
+        "allow": [
+          "companion-test-kit"
+        ]
       }
     ]
   },

@@ -83,10 +83,10 @@ function dsSave(){
    dsPosition(source.id,m,d);if(old)m.flows[m.flows.indexOf(old)]=flow;else m.flows.push(flow);selected=source.id;savedFlow=flow.id;
   }else if(f.formKind==='remove-source'){
    if(m.flows.some(x=>x.source===f.id))throw Error('Remove this source’s data flows explicitly first. The source and all usages were preserved.');
-   m.sources=m.sources.filter(s=>s.id!==f.id);delete m.positions[f.id];selected=null;
+   m.sources=m.sources.filter(s=>s.id!==f.id);if(m.testing)m.testing.recipes=m.testing.recipes.filter(r=>r.source!==f.id);delete m.positions[f.id];selected=null;
   }else if(f.formKind==='remove-operation'){
    if(m.flows.some(x=>x.operation===f.id))throw Error('Remove or reassign the flows using this operation first.');
-   const s=m.sources.find(s=>s.id===f.sourceId);if(s)s.operations=s.operations.filter(o=>o.id!==f.id);
+   const s=m.sources.find(s=>s.id===f.sourceId);if(s)s.operations=s.operations.filter(o=>o.id!==f.id);if(m.testing)m.testing.recipes=m.testing.recipes.filter(r=>r.operation!==f.id);
   }else if(f.formKind==='remove-flow')m.flows=m.flows.filter(x=>x.id!==f.id);
   else if(f.formKind==='position'){
    const x=Number(f.x),y=Number(f.y);if(!String(f.x).trim()||!String(f.y).trim()||![x,y].every(n=>Number.isFinite(n)&&Math.abs(n)<=50000))throw Error('Enter coordinates between −50,000 and 50,000.');

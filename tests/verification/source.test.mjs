@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -55,18 +55,18 @@ if (n) /[/]/.test('/'); // after control
 test('[SRC-02] dependency-free actual source gate enforces exact 100, 400 and 450 code-line limits', async (t) => {
   const project = fileURLToPath(new URL('../../', import.meta.url));
   const dir = await mkdtemp(join(tmpdir(), 'shell-code-limit-')); t.after(() => rm(dir, { recursive: true, force: true }));
-  const directories = new Set(['src', 'harness', 'scripts', 'tests', '.github/workflows']);
   const inventory = await sourceInputs(project);
   for (const path of inventory.roots) {
-    if (directories.has(path)) await mkdir(join(dir, path), { recursive: true });
+    if ((await lstat(join(project, path))).isDirectory()) await mkdir(join(dir, path), { recursive: true });
     else { await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), '{}'); }
   }
   for (const path of ['scripts/quality/check-source.mjs', 'scripts/testing/source-inputs.mjs', 'scripts/testing/code-lines.mjs', 'scripts/styles/vendor-policy.mjs', 'scripts/shared/hash.mjs']) {
     await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), await readFile(join(project, path)));
   }
   await mkdir(join(dir, 'src/locales')); for (const locale of ['en', 'de']) await writeFile(join(dir, `src/locales/${locale}.json`), '{}');
+  await mkdir(join(dir, 'docs/concepts/companion/test-kit'), { recursive: true });
   const run = () => spawnSync(process.execPath, ['scripts/quality/check-source.mjs'], { cwd: dir, encoding: 'utf8', timeout: 10000 });
-  for (const [path, limit] of [['src/main.ts', 100], ['src/example.ts', 400], ['tests/example.mjs', 450]]) {
+  for (const [path, limit] of [['src/main.ts', 100], ['src/example.ts', 400], ['tests/example.mjs', 450], ['docs/concepts/companion/test-kit/example.mjs', 400]]) {
     const code = 'void 0; /* inline */\n'.repeat(limit); const comments = '// comment only\n\n/* block\ncomment */\n'.repeat(100);
     await writeFile(join(dir, path), code); assert.equal(run().status, 0, path);
     await writeFile(join(dir, path), comments + code); assert.equal(run().status, 0, `${path} with comments`);

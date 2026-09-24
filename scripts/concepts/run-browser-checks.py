@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
+    ('consistency', 'consistency/checks.json'),
+    ('style-guide', 'style-guide/checks.json'),
+    ('test-data', 'test-data/checks.json'),
     ('editors', 'editors/checks.json'),
     ('data-sources', 'data-sources/checks.json'),
     ('single-vault', 'single-vault/checks.json'),
@@ -62,7 +65,7 @@ report = {
     'chromium_executable': os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
     'real_storage_requested': args.real_storage,
     'passed': sum(r.get('passed', 0) for r in results), 'suites': results,
-    'scope': 'Concept UI only. Assertion totals include model, geometry and controlled-state fixtures; not native host, actual CLI or release qualification.',
+    'scope': 'Companion UI plus the explicitly scoped exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, production CLI generation or release qualification.',
 }
 (OUT / 'browser-summary.json').write_text(json.dumps(report, indent=2) + '\n')
 raise SystemExit(0 if report['status'] == 'passed' else 1)

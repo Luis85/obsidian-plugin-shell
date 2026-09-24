@@ -18,6 +18,7 @@ class AssemblyContract(unittest.TestCase):
         self.concept = self.root / 'docs/concepts/companion'
         shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
+        shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
         shutil.copy(ROOT / '.fallowrc.json', self.root / '.fallowrc.json')
         spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'scripts/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
