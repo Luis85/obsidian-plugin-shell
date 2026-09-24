@@ -59,7 +59,7 @@
 .er-toolbar button,.er-canvas-caption label,.er-quick-properties .btn{min-height:32px}
 .er-toolbar .segmented [aria-pressed=true]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .er-toolbar button:hover:not(:disabled),.er-quick-properties button:hover:not(:disabled){border-color:var(--accent)}
-.er-toolbar button:active:not(:disabled),.er-catalog-item:active,.er-relationship-item:active{background:var(--accent-soft)}
+.er-toolbar button:active:not(:disabled),.er-catalog-item:active,.er-relationship-item:active{box-shadow:inset 0 0 0 1px var(--accent);filter:brightness(.90)}
 .er-toolbar button:focus-visible,.er-catalog-item:focus-visible,.er-relationship-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .er-catalog-item[aria-pressed=true],.er-relationship-item[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
 .er-catalog-item strong,.er-catalog-item small{overflow-wrap:anywhere}
@@ -85,3 +85,5 @@
 
 /* Connected ports remain visible: idle relationships must not terminate in empty space. */
 #er-flow .er-secondary-port.er-connected-port{opacity:1}
+
+.er-relationship-item[aria-pressed=true]:hover{background:var(--accent-soft)}

@@ -1,0 +1,150 @@
+{
+  "schema": "companion-concept-browser/v1",
+  "status": "failed",
+  "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e",
+  "html_bytes": 1490957,
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "playwright": "1.57.0",
+  "chromium_executable": "/usr/bin/chromium",
+  "real_storage_requested": true,
+  "passed": 766,
+  "suites": [
+    {
+      "suite": "consistency",
+      "status": "passed",
+      "passed": 89,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/consistency/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "style-guide",
+      "status": "passed",
+      "passed": 37,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/style-guide/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "test-data",
+      "status": "passed",
+      "passed": 39,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/test-data/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "editors",
+      "status": "passed",
+      "passed": 64,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/editors/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "data-sources",
+      "status": "passed",
+      "passed": 77,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/data-sources/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "single-vault",
+      "status": "passed",
+      "passed": 47,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/single-vault/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "semantic",
+      "status": "passed",
+      "passed": 76,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/semantic/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "er-polish",
+      "status": "passed",
+      "passed": 67,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/er-polish/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "containers",
+      "status": "passed",
+      "passed": 64,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/containers/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "reference",
+      "status": "passed",
+      "passed": 50,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reference/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "reference-graph",
+      "status": "passed",
+      "passed": 8,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reference/graph-checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "reconciliation",
+      "status": "passed",
+      "passed": 34,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reconciliation/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "unified",
+      "status": "passed",
+      "passed": 67,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/unified/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "safety",
+      "status": "passed",
+      "passed": 47,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/safety/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    },
+    {
+      "suite": "storage",
+      "status": "failed",
+      "passed": 0,
+      "failed": 0,
+      "exit": 1,
+      "evidence": "reports/concepts/storage/checks.json",
+      "html_sha256": "c77e4e45e640b58e0008722f49ff1afe58a3e2cc5f6c371c150130a543f44f0e"
+    }
+  ],
+  "scope": "Companion UI plus the explicitly scoped exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, production CLI generation or release qualification.",
+  "limitation": "Real HTTP-origin storage stopped before its first assertion: net::ERR_BLOCKED_BY_ADMINISTRATOR. No browser policy bypass or test relaxation."
+}

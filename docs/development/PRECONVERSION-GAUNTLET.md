@@ -5,14 +5,14 @@
 **PRE-CONVERSION BLOCKED.** SH-001–022 and CX-001–007 are in scope. Stop before CP-001;
 no native companion conversion, publication, tags, PR merges or personal vault changes.
 
-Implementation branch: `build/preconversion-shell`. Draft PR #17 base:
+Initial integration: `build/preconversion-shell`, PR #17 base:
 `docs/shell-first-companion-delivery-plan` (open PR #16, `2cadc495d5989760b09f257289b33e9d7c356e70`).
-Source integration also preserves current main `9a56505ee3af90583d5e057774705078d6e99aff`
+That integration also preserves the main snapshot `9a56505ee3af90583d5e057774705078d6e99aff`
 and open PR #5 `6a39dd03947e4f8da40c03dc42f4a8b5e34065b4` through the verified merge
 snapshot `8be4fd03b6cadc3185f0010042d2ee5f323c12ab`. Integration commit: `7ce25382d90dd87e942249533acd69b6e8f14017`.
 First implementation: `afbc4119f34639db8d1b6e62c7632a7ed1f1a3ce`.
 Prerequisite branches are unchanged.
-PR #15 is parallel, unmerged runtime work, not a claimed part of this candidate.
+PR #15 was parallel runtime work at that integration, not a claimed part of this candidate.
 
 The commit containing this checkpoint is the source identity for its contents;
 consult the PR head/commit history for the current revision, not the local recovery
@@ -52,3 +52,14 @@ the intentional README change had not updated its reviewed ownership hash. The
 containing repair commit updates that preimage without relaxing edited-file guards;
 see [exact results and repair](../testing/preconversion-gauntlet/INTEGRATION-80a426f.md).
 Recheck the repaired head's complete consumer workflow before advancing SH-011.
+
+## Updated planning base and conflict repair
+
+PR #17 is now reconciled with PR #16 at
+`a6dd8e46cd208880550f8f49409b8a681665a17d`, including concept PR #5 at
+`a27dc75102ea2832e723fe66abdca6bf4e67eff5`. The prior implementation head
+`040f63ad29c94771380a24df0ef12504e8cef8c1` is retained as the first parent.
+See the [stack reconciliation and verification record](../testing/preconversion-gauntlet/STACK-RECONCILIATION.md).
+No task states, runtime, dependency pins or release gates change. The separate
+unpushed SH-015 patch is not included. Recheck CI for the actual current head
+before advancing qualification; the earlier consumer result belongs to `040f63a`.

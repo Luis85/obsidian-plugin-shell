@@ -42,7 +42,8 @@ function workflowMapSearchFeedback(){
 function workflowModalPolish(){
  const modal=document.getElementById('modal');
  modal.dataset.kind=modalType;
- const title=modal.querySelector('h2');if(title&&!title.id){title.id='active-dialog-title';modal.setAttribute('aria-labelledby',title.id);}
+ if(modalType==='style-guide-form')sgPaintDraft();
+ const title=modal.querySelector('h2');if(title){if(!title.id)title.id='active-dialog-title';modal.setAttribute('aria-labelledby',title.id);}else modal.removeAttribute('aria-labelledby');
  if(modalType==='wizard'){
   const w=state.wizard,body=modal.querySelector('.wizard-body');
   if(w?.design&&body&&!body.querySelector('.wizard-outline-summary'))body.insertAdjacentHTML('afterbegin',`<div class="wizard-outline-summary">${icon('layers')}<span>Your outline is included: <strong>${w.design.nodes.length} surfaces</strong> · ${w.design.prds?.length||0} PRD(s)</span></div>`);

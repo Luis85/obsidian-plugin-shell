@@ -1,8 +1,9 @@
-function dsInput(label,key,value,hint='',area=false,extra=''){
- const id='ds-'+key;return `<label class="field" for="${id}">${label}${area?`<textarea id="${id}" data-field="${id}" rows="3" maxlength="1000" ${extra}>${esc(value||'')}</textarea>`:`<input id="${id}" data-field="${id}" value="${esc(value??'')}" maxlength="${key==='name'||key==='label'?80:key==='locator'||key==='resource'?240:60}" ${extra}>`}${hint?`<small>${hint}</small>`:''}</label>`;
+function dsInput(label, key, value, hint = '', area = false, extra = '') {
+  const max = area ? 1000 : ['name', 'label'].includes(key) ? 80 : ['locator', 'resource'].includes(key) ? 240 : 60;
+  return uiInput(label, 'ds-' + key, value, { hint, multiline: area, extra: `maxlength="${max}" ${extra}` });
 }
-function dsSelect(label,key,values,current,extra=''){
- return `<label class="field" for="ds-${key}">${label}<select id="ds-${key}" data-field="ds-${key}" ${extra}>${values.map(([id,name])=>`<option value="${esc(id)}" ${id===current?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;
+function dsSelect(label, key, values, current, extra = '') {
+  return uiSelect(label, 'ds-' + key, values, current, extra);
 }
 function dsGlyph(kind){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${kind==='vault'?'<path d="m12 2 8 6-3 12-10 2-4-13Z"/><path d="m12 2-2 10 7 8M3 9l7 3-3 10"/>':kind==='database'?'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 8-4 4 4 4m6-8 4 4-4 4m-2-10-2 12"/>'}</svg>`;}
 function dsCatalogItems(){

@@ -61,6 +61,17 @@ The [0.4 detailed requirements](COMPANION-REQUIREMENTS-0.4.md) preserve the comp
 PR #5 `6a39dd0` requirements, including test-data tooling and design-system export,
 without replacing the [0.3 baseline](COMPANION-REQUIREMENTS-0.3.md). These are additive
 requirements, not shell or native implementation evidence. The shell-first
-[delivery strategy](DELIVERY-STRATEGY.md) supersedes earlier sequencing and the
-concept test kit's `.test-vault` default: shell work retains `.dev-vault`; no installer
-or fixture target is renamed by this reconciliation.
+[delivery strategy](DELIVERY-STRATEGY.md) supersedes earlier sequencing. Shell
+installer work retains `.dev-vault`; the concept can explicitly select `.test-vault`
+without changing that default. No installer or fixture target is renamed or moved
+by this reconciliation.
+
+## Test data and design-system extension (2026-09-24)
+
+The single-project authoring workflow includes **Design → Test data** and **Design → Design System**. Test recipes derive from maintained source operations and entity/DTO shapes; each source declares fixture behavior rather than guessing mappings or connecting to production. New project development targets use `.test-vault/`; changing an older target is explicit and never moves/deletes its contents. The separate test-vault workflow uses the existing build/install command with an explicit target.
+
+The runnable test kit must default to a read-only plan; apply/reset require exact reviewed hashes, file ownership and preserved foreign/edited data. Vault fixtures are Markdown; API simulation can use a token-protected loopback server; database simulation is an isolated application port, not an engine-specific database. Native plugin bootstrap wiring remains explicit. Full rules and fidelity limits: [TEST-DATA.md](../concepts/companion/TEST-DATA.md).
+
+A project design system maintains named fonts, typography, spacing, sizes, corner radii, light/dark color values and descriptive usage rules. It is editable, undoable, portable with the blueprint and exportable as Markdown or standalone HTML. Authoring values must not override the host's own theme. Exports use saved declarations, escape user text and never bundle font files or fetch remote assets. Full contract: [DESIGN-SYSTEM.md](../concepts/companion/DESIGN-SYSTEM.md).
+
+This retained extension describes the evolving concept and its explicit target selection. It does not rename the shell installer’s existing `.dev-vault` default or override the shell-first delivery gates above.

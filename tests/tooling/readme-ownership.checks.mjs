@@ -40,3 +40,13 @@ test('[OWN-README-02] a modified README conflicts before any source is changed',
   assert.equal(await readFile(join(root, 'README.md'), 'utf8'), custom);
   assert.equal(await readFile(join(root, 'consumer.txt'), 'utf8'), 'business source\n');
 }));
+test('[OWN-README-03] edits after preview block apply without changing other source', () => fixture(async root => {
+  const registry = await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8');
+  const planned = await planExampleRemoval(root);
+  const custom = reviewed + '\nEdited after preview.\n';
+  await writeFile(join(root, 'README.md'), custom);
+  await assert.rejects(applyFilePlan(planned.plan), /PLAN_STALE/);
+  assert.equal(await readFile(join(root, 'README.md'), 'utf8'), custom);
+  assert.equal(await readFile(join(root, 'consumer.txt'), 'utf8'), 'business source\n');
+  assert.equal(await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8'), registry);
+}));

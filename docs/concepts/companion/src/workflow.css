@@ -1,10 +1,6 @@
 /* Workflow refinement: the established Obsidian-like world, fewer competing levels. */
-:root{--subtle:#a0a2b4;--accent-strong:#7656c8;--workflow-space:20px;--map-card-width:248px;--map-card-height:190px}
-:root[data-theme=light]{--subtle:#646478;--accent-strong:#7252bd}
-::selection{background:var(--accent-soft);color:var(--text)}
-input,textarea{caret-color:var(--accent)}
-*{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-.btn{min-height:34px}.btn.small{min-height:30px}.badge{font-variant-numeric:tabular-nums}
+:root{--workflow-space:20px;--map-card-width:248px;--map-card-height:190px}
+.badge{font-variant-numeric:tabular-nums}
 .concept-bar{height:26px}.host-title{height:29px}.app-frame{height:calc(100dvh - 81px)}
 .host-tabs{height:34px}.host-tab{height:29px}.workbench-header{min-height:47px;padding:8px 22px}
 .sidebar{width:205px;padding:16px 11px 11px}.brand{margin-bottom:18px}.project-picker{margin-bottom:15px;padding:10px}

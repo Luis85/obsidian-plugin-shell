@@ -12,7 +12,7 @@ function requestInlineRemoval(kind,id){
  document.querySelector('#modal [data-action="editor-keep-editing"]')?.focus();return true;
 }
 function restoreInlineRemoval(){
- if(modalType==='style-guide-form'&&sgUi.form?.removal){sgUi.form.removal=false;redrawModal();sgPaintDraft();return true;}
+ if(modalType==='style-guide-form'&&sgUi.form?.removal){sgUi.form.removal=false;redrawModal();return true;}
  const f=inlineRemovalForm();if(!f?.removeRequested)return false;
  delete f.removeRequested;redrawModal();return true;
 }

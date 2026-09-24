@@ -119,7 +119,9 @@
     "docs/concepts/companion/src/style-guide-views.js",
     "docs/concepts/companion/src/style-guide-export.js",
     "docs/concepts/companion/src/style-guide.css",
-    "docs/concepts/companion/test-kit/client.mjs"
+    "docs/concepts/companion/test-kit/client.mjs",
+    "docs/concepts/companion/src/workbench.css",
+    "docs/concepts/companion/src/ui-fields.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

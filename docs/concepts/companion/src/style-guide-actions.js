@@ -1,6 +1,6 @@
 const sgUi={section:'overview',form:null,error:''};
 function sgIdentity(){return JSON.stringify({owner:designOwner(),system:styleGuide()||null});}
-function sgFail(message){sgUi.error=message;if(document.getElementById('modal').open&&modalType==='style-guide-form'){redrawModal();sgPaintDraft();document.getElementById('sg-error')?.focus();}else{render();document.getElementById('sg-page-error')?.focus();}return false;}
+function sgFail(message){sgUi.error=message;if(document.getElementById('modal').open&&modalType==='style-guide-form'){redrawModal();document.getElementById('sg-error')?.focus();}else{render();document.getElementById('sg-page-error')?.focus();}return false;}
 function sgCommit(candidate){
  if(state.activeRun)return sgFail('Finish the active project simulation before changing design declarations.');
  const errors=sgIssues(candidate);if(errors.length)return sgFail(errors[0]);
@@ -12,7 +12,7 @@ function sgOpen(group,id=null){
  if(state.activeRun)return sgFail('Finish the active project simulation first.');
  if(group==='typography'&&!s.fonts.length)return sgFail('Declare a font before a typography style.');
  const saved=id?s[group].find(r=>r.id===id):null;if(id&&!saved)return sgFail('That declaration no longer exists. Reopen its current version.');
- sgUi.form={group,id,record:designCopy(group==='overview'?{name:s.name,description:s.description,principles:s.principles}:saved||sgNew(group,s)),snapshot:sgIdentity(),owner:designOwner(),removal:false};sgUi.error='';showModal('style-guide-form');sgPaintDraft();
+ sgUi.form={group,id,record:designCopy(group==='overview'?{name:s.name,description:s.description,principles:s.principles}:saved||sgNew(group,s)),snapshot:sgIdentity(),owner:designOwner(),removal:false};sgUi.error='';showModal('style-guide-form');
 }
 function sgCurrent(){return sgUi.form&&sgUi.form.snapshot===sgIdentity()&&sgUi.form.owner===designOwner();}
 function sgSave(){
@@ -35,7 +35,7 @@ function handleStyleGuideAction(action,value=''){
   case 'sg-edit':{const [group,id]=value.split(':');sgOpen(group,id||null);break;}
   case 'sg-save':sgSave();break;
   case 'sg-remove':if(sgUi.form?.id){sgUi.form.removal=true;redrawModal();document.querySelector('[data-action="sg-keep"]')?.focus();}break;
-  case 'sg-keep':if(sgUi.form){sgUi.form.removal=false;redrawModal();sgPaintDraft();}break;
+  case 'sg-keep':if(sgUi.form){sgUi.form.removal=false;redrawModal();}break;
   case 'sg-confirm-remove':sgRemove();break;
   case 'sg-export':if(['md','html'].includes(value))sgDownload(value);break;
  }
