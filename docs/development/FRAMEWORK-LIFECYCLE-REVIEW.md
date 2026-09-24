@@ -58,3 +58,9 @@ in three fresh sessions and the separate performance session. Four scoped native
 AC-71 links were added only after that audit, retaining partial extent and requiring
 fresh qualification of the changed policy. There is no whole-row promotion or
 historical Windows/renderer cause closure.
+
+Final 17d0f5b reconciliation observed all 151 links with the unchanged
+2 verified / 55 partial / 39 not-run counts. Candidate source, all producer attempts,
+native/witness hashes, complete host logs and all five consumer stages were audited
+independently. These final records are evidence-only additions; they do not change
+the qualified implementation or policy and do not grant release authorization.

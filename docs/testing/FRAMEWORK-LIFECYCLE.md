@@ -8,10 +8,15 @@ findings, reproduced controls and correction scope.
 The [framework guide](../development/FRAMEWORK-GUIDE.md) documents the available
 developer contracts and their boundaries. Prior qualification remains bound to
 `7f14292871efb07ddace131fb9b5603de4122394`: 2 verified / 55 partial / 39 not-run.
-The first complete source qualification is
-`1c20f7ba00f997953d2c4dcfd252c4e6edba04ff`: **2 verified / 55 partial / 39 not-run**,
-with all 147 then-current links observed. Four subsequently audited native partial
-links extend the crosswalk to 151; that policy change requires a fresh final session.
+Final qualified code/policy is
+`17d0f5bbea700612762b2a8c1eb467b9d66c8d95`: **2 verified / 55 partial / 39 not-run**,
+with **151/151 links observed** and no whole-row promotion. The
+[candidate audit](evidence/framework-lifecycle-candidate.json) and
+[retained-attempt index](evidence/framework-lifecycle-attempts.json) preserve exact
+provenance and scope. The earlier 1c20f7b qualification below remains a distinct
+147-link checkpoint; documentation updates after 17d0f5b are evidence-only.
+The separately identified [consumer audit](evidence/framework-lifecycle-consumer.json)
+qualifies all five generated-consumer/archive stages on that same final code head.
 
 ## Implemented scope
 
@@ -367,3 +372,106 @@ Only this qualification trigger and its regression change executable inputs beyo
 1c20f7b; implementation source remains identical. Static checks preserve all 96
 mode sets, every exact historical link and the blocked release, with 34 new partial
 links and no execution evidence supplied to that static validation.
+
+## Final code/policy qualification
+
+[Run 36023921226](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36023921226)
+completed successfully on `17d0f5bbea700612762b2a8c1eb467b9d66c8d95`. A fresh exact-lock
+strict installation and all 23 verify stages passed. Independent review matched
+all 604 archived source files to Git and revalidated every one of the 10 registered
+packets and 32 raw receipts. The final counts are tooling 211 passed plus four
+designated platform skips, runtime 398×3, separate coverage 398, browser 47, and
+native 37×3. The 52-case historical baseline passed three times. No retry or failed
+packet was discarded from the final session; earlier failed sessions remain separate.
+
+All 103 production and 47 core inputs met the unchanged coverage floors, including
+the independent business scopes. Twelve metric reports and 425 per-input receipts
+validated 863 production functions and 0.6962% duplication. Live security passed
+with zero vulnerabilities across all categories. The nested ESLint support exception
+remains unresolved; audit success is not dependency support.
+
+The final native audit retained three distinct original sessions and a separate
+performance run, with all 37 checks in each. Every source/installed witness hash,
+all eight prelaunch snapshots and both independent experiment ledgers per run were
+validated. The exact controlled Items write fault remains separate from native disk
+I/O. Resource ledgers have zero faults, losses, gaps and observer failures; late
+handler calls leave the closed state unchanged. No renderer or cleanup failures
+were captured. Full host logs still retain their GPU-fatal and host-ignored ENOENT
+messages. Advisory shared-runner p95 is 9.90 ms initialization and 121.70 ms item
+readiness, from all 66 retained samples; no reference/device budget is qualified.
+
+Final artifact 10818418842 has SHA-256
+`7c5c84546d43a856a3cf229dee9a62b8f571c626b878b4b83ce48b1dcd6a98a3`.
+Candidate record SHA-256 is
+`4b6f9b6ddb072db3af4f18c67e7429e1835b260a4a5ecb2081771ee5a51df41d`.
+The three actual asset hashes in the preceding table remain identical and were
+rechecked against retained, installed and packaged bytes. Source-input digest is
+`f7cf32445072e59622021c778b42024f2bec7b5a6344ff67f6168d2e4144b642`;
+execution-policy digest is
+`7354f171144d51542161a3e2505d650ccfca25386a35f58199fd0532c8b451b9`.
+
+Exact acceptance recomputation matches the retained CI report: previous and current
+**2 verified / 55 partial / 39 not-run**, AC-03 and AC-06 verified, all 151 links
+observed. The 34 added partial links strengthen AC-05/07/11/46/62/66/71. None is
+promoted merely because its suite passes. All 96 required-mode sets, every exact
+historical link, the separate Nuxt matrix and the blocked release remain.
+
+Remaining groups overlap: E (existing assertions/current evidence) 89 rows;
+A (missing complete assertions/mode binding) 91; I (implementation) 5;
+Q (native/manual/environment qualification) 32; X (external/owner prerequisites) 10.
+Implementation gaps include ordered migrations, complete locale behavior, retained
+event-envelope requirements and release/listing surfaces. Environment work includes
+reference timing, secondary-window/partial-startup coverage, screen readers and
+physical devices. External work includes supported dependencies and separately
+authorized publication/listing. These counts describe remaining acceptance clauses,
+not missing source files or a release authorization.
+
+Historical observations stay distinct: the earliest Windows Appearance control was
+Light with a dark main view; a later failure showed Dark; Linux illegal-access
+errors were received during pop-out closure; Windows UI-03-04 coverage timeout and
+archive EBUSY remain separate unresolved facts. Driver receipt time is not renderer
+throw time, observation ends at CDP disconnect, and EBUSY proves neither a prior
+timeout nor an orphan. Current Windows source/served checks are not fixed-byte native
+qualification, and later Linux passes do not explain historical causes.
+
+## Final consumer and next increment
+
+[Consumer run 36023921215](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36023921215)
+passed all five stages on the final code head. Setup/edited/archive/foundation/Reading
+runtime counts were 398/411/398/331/339, each in both coverage runs; served stages
+passed 47/2/2 cases. The final consumer has 108 production inputs and 339 tests in
+74 files; the literal archive has 103 inputs and 398 tests in 69 files, with its
+Git-free identity retained. The new qualification-trigger assertion ran in every
+verification stage. Six packets, 19 raw receipts, 60 metric and 2134 per-input
+receipts plus 44 uploaded source files were independently checked.
+
+The exact edited Bookmarks hash
+`ba9b3f20d82192311eb7b409a36ef65037ac07a45fdaa87900f6d8dbff51fced`
+survived reviewed removal and the Reading extension. All ten added demonstration
+files were removed; nine generic framework tests remained byte-identical and
+executed. The 95-entry removal inventory preserves consumer files. Artifact
+10820165690 has SHA-256
+`2ea06776f75025f696035f21a395fdbbc179ef6cf1fef4801a95bef7990de3bd`.
+Different Git/execution identities and equal production-source/asset bytes are
+reported separately; all checkpoints executed independently. No consumer native
+host, archive browser or physical-device qualification is inferred.
+
+Recommended order for the next owner-selected increment:
+
+1. Audit complete clauses for the strengthened lifecycle/recovery rows, particularly
+   partial startup and secondary-window ownership, before promoting whole extents.
+2. Select a bounded implementation gap: ordered migrations, complete locale
+   behavior or retained event-envelope metadata; avoid a broad platform rewrite.
+3. Provision candidate-bound Windows/reference and manual accessibility/device
+   experiments with preserved first failures and explicit observation boundaries.
+4. Review upstream dependency support and remaining release/listing requirements;
+   publication, permissions and promotion still require separate owner authorization.
+
+All twelve code-head checks passed: candidate, both consumer runs, both baseline
+platforms, both showcase platforms, four installer-compatibility combinations and
+the security check. Main remains clean on `9a56505ee3af90583d5e057774705078d6e99aff`;
+PR #15 remains open on `codex/framework-lifecycle`. Exact executable and policy byte
+parity was checked before the evidence-only documentation update, and repository
+link/workflow/style validation passed. The separate evidence commit is identified
+in the PR and delivery; no earlier execution is relabelled as that commit.
+No merge, tag, release upload, publication, listing or permissions change was made.

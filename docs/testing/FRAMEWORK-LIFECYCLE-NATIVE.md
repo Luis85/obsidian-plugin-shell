@@ -5,6 +5,14 @@ without changing its historical findings. The experiment below is implemented;
 its execution belongs to the current frozen-candidate record. Implementing a
 driver or passing its synthetic controls is not native qualification.
 
+Final frozen `17d0f5bbea700612762b2a8c1eb467b9d66c8d95` passed all 37 checks in
+three fresh native sessions plus the separate 66-sample performance run. The
+[candidate audit](evidence/framework-lifecycle-candidate.json) preserves all
+ledger checkpoints, source/installed hashes and complete host logs. Zero captured
+renderer/cleanup failures is distinct from the retained host GPU-fatal and ignored
+config messages. Shared-runner timing and Linux execution do not qualify an idle
+reference, fixed-byte Windows native run or historical cause closure.
+
 ## Reviewed observation boundary
 
 `LifecycleObservations` emits immutable metadata after an actual notice, modal,
