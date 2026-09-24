@@ -14,6 +14,13 @@ timeout remains unresolved. The [execution record](../testing/ACCEPTANCE-CLOSURE
 and [candidate audit](../testing/evidence/acceptance-closure-candidate.json)
 retain exact source identities, all transitions and the qualification boundary.
 
+The subsequent frozen code `7f14292871efb07ddace131fb9b5603de4122394` reports
+**2 verified / 55 partial / 39 not-run**, with all 117 links observed. AC-71
+advances from not-run to partial through PL-C71 and PL-B11-71; its native clauses
+remain open. The other six selected rows gain stronger partial assertions without
+whole-case promotion. See the [current execution record](../testing/PERSISTENCE-LIFECYCLE.md)
+and [candidate audit](../testing/evidence/persistence-lifecycle-candidate.json).
+
 Normative scope: [baseline AC-01–62](../product/BASELINE-0.4.md),
 [AC-63–96 and companions](../product/SPECIFICATION-0.7.md), and current
 [PRD amendments](../product/PRD.md). In particular, code-line counting supersedes
@@ -137,7 +144,7 @@ Paths are repository-relative; `runtime/`, `e2e/`, `tooling/`, `verification/` a
 
 ## Persistence/lifecycle assertion extension
 
-The [current plan](PERSISTENCE-LIFECYCLE-PLAN.md) and [separate review](PERSISTENCE-LIFECYCLE-REVIEW.md) extend the seven selected rows above. The previous frozen counts remain historical until the new complete session is audited. New unit, component and served assertions have deliberately partial extents; every remaining required mode and normative clause stays visible.
+The [current plan](PERSISTENCE-LIFECYCLE-PLAN.md) and [separate review](PERSISTENCE-LIFECYCLE-REVIEW.md) extend the seven selected rows above. The previous frozen counts remain historical; the complete current session is audited above. New unit, component and served assertions have deliberately partial extents; every remaining required mode and normative clause stays visible.
 
 ## Ordered finish list
 

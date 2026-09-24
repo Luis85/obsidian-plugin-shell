@@ -6,8 +6,9 @@ assertions; B reviews C's retained native diagnostics and causal claims; C revie
 A's persistence/failure assertions. Parent reviews shared integration, source
 identity, crosswalk extents and consumer/removal preservation.
 
-The separate wave reviewed actual source and adversarial behavior. Qualification
-is still in progress; exact frozen results belong to the execution record.
+The separate wave reviewed actual source and adversarial behavior. The
+[frozen execution record](../testing/PERSISTENCE-LIFECYCLE.md) retains the exact
+results and source/asset identities.
 
 ## Findings and corrections
 
@@ -46,6 +47,28 @@ entry currently checks busy rather than owner liveness. This is follow-up work,
 not a claim that every action surface is now disposal-qualified. This milestone's
 runtime corrections and direct capability tests cover document creation/opening
 and view navigation plus protected Items reads.
+
+## Frozen-evidence review
+
+Parent independently rehashed/reparsed all 32 raw producer receipts and reproduced
+the current 96-row acceptance report; every one of 117 links is observed. The
+current result is 2 verified / 55 partial / 39 not-run, with only AC-71 changing
+state (not-run to partial). Current asset/provenance and complete maintainability
+receipt checks passed without rebuilding or rerunning metrics.
+
+C independently audited three distinct native sessions and the separate
+performance session, matching source/installed hashes, all 31 checks, exact
+canonical errors, cleanup fields and diagnostic timelines. All 66 samples remain
+retained. GPU and temporary-configuration host messages were inspected and kept;
+zero captured renderer errors does not mean empty host stderr. Historical causes
+and the missing independent native fault observer remain explicit.
+
+A independently audited the consumer's five full verification stages, six producer
+packets, 19 raw receipts, 60 metric receipts, 1,964 per-input receipts and all 44
+uploaded source files. The edited Bookmarks hash survives removal and Reading
+extension; all five new example files are removed. The literal archive reports
+archive identity with null revision. Parent inspected these outputs and kept
+consumer/archive assets and acceptance separate from the base candidate.
 
 ## Review requirements
 

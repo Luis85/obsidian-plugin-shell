@@ -192,6 +192,15 @@ No production test globals or private Notice manager patch is proposed.
 
 ## Recomputed raw integrity
 
+The subsequent [Windows prescribed-run audit](evidence/persistence-lifecycle-windows.json)
+retains the current Showcase job's two archive body/cleanup successes, all command
+receipts and four full runtime coverage summaries. This is ordinary planned
+verification, not a causal rerun. Its Git tree matches the frozen code, while
+rebuilt asset bytes differ and remain separately identified. It does not explain
+the original EBUSY/timeout or qualify Windows native behavior. The
+[current execution record](PERSISTENCE-LIFECYCLE.md) records the new Linux native
+sessions and their equally limited nonrecurrence evidence.
+
 All hashes below were recomputed from the preserved raw files on 2026-09-24.
 Roots: A = earliest archive native directory above; W = later Windows attempt;
 L = failed Linux attempt; R = `.worktrees/acceptance-closure/reports/acceptance-closure`.
