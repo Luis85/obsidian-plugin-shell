@@ -3,7 +3,7 @@ function handleDesignAction(action,value){
  const d=design(),n=selectedNode();
  if(state.activeRun&&!['design-select','design-mode','design-file'].includes(action)){notify('Finish or cancel the active simulation before changing its design.');return true;}
  switch(action){
-  case 'outline-start':state.activeId=null;designUi.selected=null;designUi.plan=null;closeModal();setView('sitemap');break;
+  case 'outline-start':designUi.selected=null;designUi.plan=null;closeModal();setView('sitemap');break;
   case 'blueprint-choose':showModal('design-replace',value);break;
   case 'blueprint-apply':{recordDesign();const fresh=replacementDesign(value);Object.assign(d,fresh);designChanged();designUi.selected=d.nodes[0]?.id;closeModal();setView('sitemap');break;}
   case 'design-select':showMapNode(value);break;
@@ -40,19 +40,14 @@ function handleDesignAction(action,value){
   case 'design-import':importReviewedBlueprint();break;
   case 'design-export':if(modalType==='design-transfer'){downloadText({text:JSON.stringify(portableDesign(),null,2),filename:'plugin-blueprint.json'});break;}showModal('copy',{title:'Data-only plugin blueprint. No paths, approval or executable code.',text:JSON.stringify(portableDesign(),null,2),filename:'plugin-blueprint.json'});break;
   case 'design-bundle':showModal('copy',{title:'Concept preview bundle. NOT an installable plugin; business hooks and test obligations remain incomplete.',text:JSON.stringify({kind:'concept-scaffold-preview',schema:1,executable:false,blueprint:portableDesign(),files:designUi.plan?.changes||[],realCommandsExecuted:0},null,2),filename:'companion-scaffold-preview.json'});break;
-  case 'design-create':{
-   if(project()){notify('The outline already belongs to a project. Use Review boilerplate to extend it.');break;}
-   const errors=designIssues(d).filter(i=>i.level==='error');if(errors.length){designUi.mode='issues';render();notify('Resolve outline blockers before creating the project.');break;}
-   if(state.wizard){showModal('design-wizard-confirm');break;}createWizardFromDesign();break;
-  }
-  case 'design-create-confirm':createWizardFromDesign();break;
-  case 'design-open-from-wizard':state.designDraft=designCopy(state.wizard.design||createDesign(state.wizard.blueprint||'workspace'));state.activeId=null;designUi.selected=null;closeModal();setView('sitemap');break;
+  case 'design-create':case 'design-create-confirm':startVaultPreparation();break;
+  case 'design-open-from-wizard':designUi.selected=null;state.wizard.plan=null;state.wizard.approved=false;closeModal();setView('sitemap');break;
   default:return false;
  }
  save();return true;
 }
-function createWizardFromDesign(){const w=state.wizard||newWizard();w.rev++;w.plan=null;w.approved=false;w.status='draft';w.step=Math.min(w.step,2);w.blueprint=design().blueprint;w.design={...createDesign('blank'),...designSnapshot(design())};state.wizard=w;designUi.plan=null;showModal('wizard');}
-function wizardBlueprintSection(){const w=state.wizard,b=BLUEPRINTS.find(b=>b.id===(w.blueprint||'workspace'));return `<div class="card mt16"><div class="section-head"><h3>Plugin shell blueprint</h3>${badge('Design only','purple')}</div><p>${esc(b.name)} · ${w.design?.nodes.length??createDesign(b.id).nodes.length} outlined surfaces</p>${button('Design sitemap & layouts','design-open-from-wizard','','small','layers')}<p class="tiny muted mt16 mb0">Source version and shell blueprint are separate choices. Setup uses the existing CLI; sitemap generation requires a new shared maker.</p></div>`;}
+function createWizardFromDesign(){startVaultPreparation();}
+function wizardBlueprintSection(){const w=state.wizard,b=BLUEPRINTS.find(b=>b.id===(w.blueprint||'workspace'));return `<div class="card mt16"><div class="section-head"><h3>Plugin shell blueprint</h3>${badge('Design only','purple')}</div><p>${esc(b.name)} · ${w.design?.nodes.length??createDesign(b.id).nodes.length} outlined surfaces</p>${button('Return to this design','design-open-from-wizard','','small','layers')}<p class="tiny muted mt16 mb0">Source version and shell blueprint are separate choices. Setup uses the existing CLI; sitemap generation requires a new shared maker.</p></div>`;}
 function outlineOverviewCard(){const d=design();return `<section class="card outline-overview"><div><span class="eyebrow">PLUGIN BLUEPRINT</span><h2>${esc(BLUEPRINTS.find(b=>b.id===d.blueprint)?.name||'Custom outline')}</h2><p class="mb0">${d.nodes.filter(n=>n.kind==='view').length} native views · ${d.nodes.filter(n=>n.kind==='page').length} internal screens · ${d.nodes.reduce((n,x)=>n+x.patterns.length,0)} pattern selections</p></div><div class="row wrap">${button('Edit sitemap','nav','sitemap','primary small','layers')}${button('Add a view','design-add','view','small','plus')}</div></section>`;}
 
 

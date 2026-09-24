@@ -5,9 +5,9 @@ const WORKFLOW_STAGES = [
  {id:'structure',label:'Structure',detail:'Sitemap & layouts',view:'sitemap',icon:'layers'},
  {id:'components',label:'Compose',detail:'Components & actions',view:'components',icon:'box'},
  {id:'review',label:'Review',detail:'Boilerplate & ownership',view:'sitemap',icon:'code'},
- {id:'build',label:'Build & verify',detail:'Setup & evidence',view:'develop',icon:'terminal'}
+ {id:'build',label:'Prepare & build',detail:'This vault & evidence',view:'develop',icon:'terminal'}
 ];
-function workflowHasDesign(){return Boolean(project()?.design||state.designDraft);}
+function workflowHasDesign(){return Boolean(project()?.design);}
 function workflowFacts(){
  const d=design(),p=project(),active=d.prds.filter(x=>x.status!=='archived');
  const requirements=active.flatMap(x=>x.requirements).filter(r=>r.status!=='deferred');
@@ -20,7 +20,7 @@ function workflowFacts(){
 function workflowStage(){
  if(modalType==='design-plan')return 'review';
  if(['prds'].includes(state.view))return 'brief';
- if(['sitemap','blueprints'].includes(state.view))return 'structure';
+ if(['sitemap','entities','blueprints'].includes(state.view))return 'structure';
  if(['components','patterns'].includes(state.view))return 'components';
  return ['generate','develop','quality','release','runs'].includes(state.view)?'build':null;
 }
@@ -29,16 +29,17 @@ function workflowStatus(id,f=workflowFacts()){
  if(id==='structure')return f.blockers.length?f.blockers.length+' to resolve':f.d.nodes.length+' surfaces outlined';
  if(id==='components')return f.used?f.used+' component bindings':'Reuse where useful';
  if(id==='review')return f.generated?'Preview recorded':f.blockers.length?'Resolve blockers first':'Review the source plan';
+ if(!vaultProjectPrepared())return 'Not prepared · design only';
  return f.p?(f.p.quality.verify?.rev===f.p.rev&&f.p.quality.verify?.status==='passed'?'Verification fixture current':'Review verification scopes'):'Create your project';
 }
 function workflowNext(){
  const f=workflowFacts();
- if(f.p&&!f.p.enabled)return {title:'Enable the installed candidate deliberately',description:'Installation and activation are different steps. Review the target vault before enabling the fixture.',label:'Review activation',action:'activate'};
+ if(vaultProjectPrepared()&&!f.p.enabled)return {title:'Enable the installed candidate deliberately',description:'Installation and activation are different steps. Review the target vault before enabling the fixture.',label:'Review activation',action:'activate'};
  if(!f.hasBrief)return {title:'Clarify the problem you are solving',description:'A lean brief keeps screens and generated hooks connected to a real user outcome.',label:'Define the plugin',stage:'brief'};
  if(!f.d.nodes.length)return {title:'Choose a starting structure',description:'Use a shell blueprint, or add your first view. You can revise either later.',label:'Choose a blueprint',action:'nav',value:'blueprints'};
  if(f.blockers.length)return {title:'Resolve '+f.blockers.length+' outline issue'+(f.blockers.length===1?'':'s'),description:'Review broken links, incompatible surfaces or component version changes before scaffolding.',label:'Review outline issues',action:'workflow-checks'};
  if(!f.generated)return {title:'Review what the template will prepare',description:'Inspect file changes and protected business hooks. A preview is not an implementation.',label:'Review boilerplate',stage:'review'};
- if(!f.p)return {title:'Take your outline into project setup',description:'The wizard carries this exact brief, sitemap and library forward. Execution stays a separate approval.',label:'Set up the project',stage:'build'};
+ if(!vaultProjectPrepared())return {title:'Prepare this vault for development',description:'Add reviewed template files to this root without replacing the design or Obsidian configuration.',label:'Prepare this vault',action:'vault-prepare'};
  return {title:'Continue the first development loop',description:'Implement an application action, then verify the relevant scopes. The concept only simulates execution.',label:'Open development',action:'nav',value:'develop'};
 }
 function workflowActionButton(next,cls='primary'){

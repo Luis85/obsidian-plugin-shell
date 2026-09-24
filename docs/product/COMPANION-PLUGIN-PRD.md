@@ -1,14 +1,16 @@
 # PRD: Plugin Shell companion developer workbench
 
-> **Version:** 0.1.0 · **Date:** 2026-09-23 · **Owner:** Luis85
+> **Version:** 0.3.0 · **Date:** 2026-09-24 · **Owner:** Luis85
 > **Status:** Proposed product requirements; not an implementation or release-readiness claim.
 > **Working public name:** Shell Workbench · **Proposed ID:** `shell-workbench` — both subject to availability and review.
 > **Inspected baseline:** `Luis85/obsidian-plugin-shell` at `d755745668974820ff4dbcdd0b9f8bfeec307ec3`, iteration 03 / plugin 0.3.0.
 > **Related:** [Parent PRD](PRD.md) · [Research and primary sources](../research/2026-09-23-companion-plugin.md) · [Test strategy](../testing/TEST-STRATEGY.md) · [Test concept](../testing/TEST-CONCEPT.md).
 
+> **Current product direction:** One vault, one project. This revision supersedes the earlier multi-project launcher, external-source default and authoring-vault deployment proposal. The historical baseline below remains evidence of earlier CLI capabilities, not the current interaction model. See [single-vault contract and implementation scope](../concepts/companion/SINGLE-VAULT.md).
+
 ## 1. Product decision
 
-Build an Obsidian companion that turns the template's developer workflow into an approachable, native, guided workbench. A developer installs it in a fresh development vault, chooses **Create plugin**, obtains a qualified template, reviews and runs setup, installs the built plugin into the explicitly designated development vault, and learns how to generate, develop and verify features.
+Build a single-project Obsidian companion that turns an opened vault into a developer’s project workspace. The developer opens an initially empty folder as a vault, installs the companion, defines the project, and designs its requirements, entities/relationships, sitemap, screens and shared component variants. **The currently opened vault is the project/source root.** Only when ready does the developer review additive template preparation in that same folder, install dependencies and run the shared toolchain. Generated-plugin testing uses a separate contained `.dev-vault`; installing the companion is not installing or enabling the plugin being designed.
 
 The companion is maintained in the **same repository**, is itself built using the **same shell foundation**, and is intended for the **Obsidian Community directory**. It is an additional interface to the existing toolchain, not its replacement. The terminal remains a fully supported first-class interface.
 
@@ -19,7 +21,9 @@ The companion is maintained in the **same repository**, is itself built using th
 3. **Real dogfooding.** Shared runtime services and public feature APIs power actual companion features. Copying the template once into an unrelated app is insufficient.
 4. **Intentional side effects.** Downloading, executing project code, modifying source, installing dependencies, deploying artifacts and activating code are distinguishable decisions.
 5. **Evidence, not optimistic badges.** A successful build is not a passed native test or a public release. Failed, stale, skipped and unexecuted checks remain visible.
-6. **Honest distribution boundary.** Community acceptance of the project-install workflow must be established before promising marketplace availability.
+6. **One vault, one project.** No project registry, project picker, attach-another-project action or alternative source-root field. Other projects are other Obsidian vaults. Multiple workbench leaves share the same project and operation ownership.
+7. **Design before the toolchain.** Project definition and all design work remain usable without external Node/npm/Git. Preparation enriches the existing project; it never replaces its identity or authored design.
+8. **Honest distribution boundary.** Community acceptance of the project-install workflow must be established before promising marketplace availability.
 
 The first version is desktop-only. It supplies a development workbench, not a full IDE, generic terminal, package manager, cloud service or no-code application builder.
 
@@ -33,18 +37,18 @@ The proposed companion brings these activities into one context without making a
 
 | User | Situation | Job to be done | Desired outcome |
 | --- | --- | --- | --- |
-| First-time plugin author | Knows basic TypeScript but not Obsidian development conventions | Start a real plugin without guessing the setup sequence | A named, verified project and a deliberately enabled plugin in the test vault. |
+| First-time plugin author | Knows basic TypeScript but not Obsidian development conventions | Start a real plugin without guessing the setup sequence | A retained project design first, followed by a verified workspace and deliberately enabled plugin in the separate test vault. |
 | Experienced author | Uses the terminal/editor daily | Discover and apply template features faster | Accurate generator forms, inspectable plans and copyable CLI equivalents. |
 | Template maintainer | Evolves common runtime and scripts | Detect downstream breakage immediately | Companion and independently exported consumer pass the same relevant contracts. |
 | Developer returning to a project | Tool versions, paths or source have changed | Understand readiness and resume safely | Actionable diagnostics rather than destructive reinitialization. |
 
-Primary job: **When I have a plugin idea and a fresh vault, help me create and validate a maintainable project so I can concentrate on the feature rather than assembling the toolchain.**
+Primary job: **When I open a folder as an Obsidian vault and install the companion, help me turn my idea into a designed and prepared project in that vault, without making me create or attach a second project.**
 
 Secondary jobs: add a note-backed feature; understand entity/document mappings; run the appropriate quality gates; inspect and recover a failed run; move between UI and terminal; prepare a verifiable release handoff.
 
 ## 3. Outcomes and success measures
 
-The north-star outcome is a **verified first development loop**: create project → build → deliberately enable in the bound vault → make a change or generate a feature → verify/rebuild → observe the intended result.
+The north-star outcome is a **continuous design-to-development loop in one vault**: define project → capture requirements → design views/components → review preparation → add qualified template files → build → deliberately enable the generated plugin in the contained test vault → implement and verify. The same stable project identity and design survive every stage.
 
 The following are proposed acceptance targets, not existing measurements:
 
@@ -64,13 +68,13 @@ Use facilitated studies, reproducible test records and manually inspected local 
 
 ### Public v1 scope
 
-A native workbench; prerequisite detection; qualified template acquisition; a resumable creation wizard; explicit execution trust; setup and current maker UI; a shared bound-vault deployment extension; development sessions; entity inspection; evidence-aware quality execution; full navigation to currently delivered template capabilities; contextual learning; safe diagnostics; compatibility handling; and release-preparation guidance.
+A native single-project workbench; vault-local Markdown authoring; design-first onboarding; prerequisite detection only when development operations need it; qualified template staging; reviewed additive preparation in the current vault; explicit execution trust; setup/maker UI over shared CLI contracts; contained test-vault deployment; development sessions; entity inspection; scoped quality evidence; contextual learning; diagnostics; safe single-project recovery; compatibility handling; and release-preparation guidance.
 
-Public v1 must include the requested fresh-vault journey. A private prototype that only opens a different `.dev-vault` is useful evidence but does not satisfy this product promise.
+Public v1 must include the requested initially empty-folder journey. “Empty” describes the folder before Obsidian and the companion add their configuration. Existing host configuration and subsequently authored notes are expected, not reasons to erase or replace the root. The source stays in the current authoring vault; `.dev-vault` is an isolated runtime test target, not a second project.
 
 ### Explicit exclusions
 
-No mobile process execution; automatic Node/npm/Git/Obsidian installation; arbitrary remote-code extensions; companion self-updates; arbitrary shell-command forms; credential vault; Git hosting requirement; browser-based cloud IDE; AI code generation; automatic migration of arbitrary plugins; whole-vault indexing; unattended publishing; editing global package-manager policy; automatic security-setting changes; or silent regeneration of user-edited files.
+No multi-project dashboard or registry; source-root selection outside the current vault; new nested project folder; automatic generated-plugin activation in the authoring vault; mobile process execution; automatic Node/npm/Git/Obsidian installation; arbitrary remote-code extensions; companion self-updates; arbitrary shell-command forms; credential vault; Git hosting requirement; browser-based cloud IDE; AI code generation; automatic migration of arbitrary plugins; whole-vault indexing; unattended publishing; editing global package-manager policy; automatic security-setting changes; or silent regeneration of user-edited files.
 
 The full parent-template roadmap remains valid. A companion button must not claim that an unimplemented view/store/modal/style/custom generator already exists. Such capability gaps become shared-tooling backlog, not UI placeholders presented as working features.
 
@@ -79,8 +83,8 @@ The full parent-template roadmap remains valid. A companion button must not clai
 | Milestone | Outcome | Public promise |
 | --- | --- | --- |
 | M0 — feasibility and contracts | Policy interpretation, single-repository distribution rehearsal, standalone export, process and paired-vault spikes | No marketplace-ready claim. |
-| M1 — internal vertical slice | Fresh vault → create → setup → bound deployment → manual enable → feature generation → recovery | Private/beta evidence only. |
-| M2 — public v1 candidate | Complete delivered-tool catalog, usability/accessibility, multi-project support, diagnostics and desktop qualification | Submission candidate; listing still depends on external review. |
+| M1 — internal vertical slice | Open vault → define/design one project → additive preparation → contained deployment → manual enable → feature generation → recovery | Private/beta evidence only. |
+| M2 — public v1 candidate | Complete delivered-tool catalog, usability/accessibility, single-project resume/migration, diagnostics and desktop qualification | Submission candidate; listing still depends on external review. |
 | M3 — subsequent improvements | Additional shared makers, opt-in supported reload bridge, reviewed template upgrades and richer release automation | Only advertise individually implemented and qualified capabilities. |
 
 No calendar commitments are implied by these milestones.
@@ -108,7 +112,7 @@ The inspected repository has a working Vue/Pinia/Nuxt UI foundation, entity/docu
 | --- | --- | --- |
 | Setup | Dependency-free entry, identity plans, answers, final JSON, resume and browser/native profiles | Form adapter, trust boundary, operation history and versioned compatibility. |
 | Makers | `feature` and `entity --document`; plans, real tests and catalog checks | Accurate recipe forms and change/result visualization. |
-| Native deployment | Only contained `.dev-vault`; no arbitrary vault option | Explicit shared project/vault binding and guarded deployment profile. |
+| Native deployment | Only contained `.dev-vault`; no arbitrary vault option | Retain that test-target boundary. Add safe template hydration into the already populated authoring root as a separate shared contract. |
 | Machine output | Final JSON on stdout; progress on stderr | Strict parsing now; additive structured progress later. |
 | Capabilities | Package scripts and maker listings | Data-only versioned catalog, implementation status and risk metadata. |
 | Template distribution | No public release documented at baseline | Qualified standalone source artifact and provenance/compatibility record. |
@@ -125,35 +129,38 @@ Use a normal Obsidian workspace view, a command-palette entry, an optional ribbo
 
 | Area | Main content | Primary action |
 | --- | --- | --- |
-| Projects | Recent projects, compatibility, source/target identity, last verified result | Create plugin / Attach project. |
-| Project overview | Next meaningful step, prerequisites, active session and scoped health | Continue setup / Start development. |
-| Create and generate | Wizard and delivered maker catalog | Review changes, then apply. |
+| Project overview | This vault, project identity, retained design, next step and scoped health | Start designing / Continue design / Resume preparation. |
+| Product design | Requirements, entity relationships, sitemap/views, content, versioned component variants, blueprints and action patterns for this project | Create or edit a design artifact. |
+| Prepare project | Fixed current-vault root, environment, staged template and additive file plan | Review, approve and prepare this vault. |
+| Generate | Delivered maker catalog for the already prepared project | Review source changes, then apply. |
 | Develop | Watch/build status, browser/native paths, artifact identity | Start/stop a selected session. |
 | Quality | Named checks, scope, freshness, failures and output | Run selected checks / Verify project. |
 | Capabilities | Runtime services, entity mappings, styling, testing and documentation | Open relevant guide or supported operation. |
 | Release preparation | Artifact checks, identity, disclosures and unexecuted gates | Prepare a handoff; no automatic publish. |
 | Runs and recovery | Stage history, logs, partial changes and recovery choices | Inspect / Resume eligible operation. |
 
-Keep the selected project, source location, target vault and active-run indicator visible. Use progressive disclosure: one next-step action first, detailed commands and logs on demand. Do not build an unreadable dashboard of every npm script.
+Keep the current vault, stable project identity, source root, separate test target and active-run indicator visible. Remove the companion project picker; another project is opened through Obsidian’s vault switcher. Use progressive disclosure: one next-step action first, detailed commands and logs on demand. Do not build an unreadable dashboard of every npm script.
 
-### Creation wizard
+### Design-first entry and preparation wizard
+
+On first use, explain **This vault. One project.** Ask only for a project name, portable generated-plugin ID and optional descriptive information. Author details and execution prerequisites can be completed later. Initialize one `Project.md` record after explicit confirmation, then open requirements/design. Returning to the workbench resumes that same project. No template download or script execution is part of this design initialization.
 
 | Stage | User input or review | Completion condition |
 | --- | --- | --- |
-| 1. Welcome | Explain developer privileges; choose create or attach | User chooses a route; no network or project execution. |
+| 1. Current project | Confirm the existing project and current authoring vault; explain preparation privileges | Same project remains selected implicitly; no network or execution. |
 | 2. Environment | Detected Node/npm; optional Git/editor/host CLI | Required tools resolved or a saved blocked state with instructions. |
-| 3. Source and location | Qualified template version, source folder, acquisition method | User approves acquisition; destination ownership and compatibility checked. |
-| 4. Project identity | ID, name, description, author, version; optional repository | Shared identity validation succeeds; public-readiness issues are explained. |
-| 5. Development target | Explicitly designate the current fresh vault; show actual config directory | Validated paired target, separate from source, without implicit activation. |
-| 6. Trust and plan | Source/provenance, execution permissions, files, commands, network and lifecycle hooks | Current plan reviewed and explicit operation approval captured. |
-| 7. Execute | Stage progress and safe output; cancel/recovery | Actual setup and deployment receipts agree with current inputs. |
+| 3. Template staging | Qualified template version and acquisition method; source root is read-only | Acquire into owned staging outside the authoring root; inspect archive safely before any root writes. |
+| 4. Project identity | Review existing ID/name/description, complete author/version; optional repository | Shared validation succeeds; stable project ID and existing design are retained. |
+| 5. Isolated test target | Review contained `.dev-vault` and its actual config directory, distinct from the authoring vault | Installer safety checks pass; the companion and authoring profile are not deployment targets. |
+| 6. Trust and plan | Template provenance, root-relative create/update/unchanged/conflict entries, preserved design/host files, commands and hooks | Approval binds project, full design, source, tools, target and exact file preimages; no unresolved conflicts. |
+| 7. Execute | Hydrate approved template files, run canonical setup, then build/verify/deploy as selected; cancellation/recovery | Actual receipts agree with current inputs; the original project/design and unrelated files survive. |
 | 8. First working loop | Manual enable instructions, open generated plugin, contextual feature tour | Verified stages plus explicitly labeled observed/user-confirmed host outcome. |
 
 Acquisition is a separate side effect from setup dry-run. Download approval may occur before stage 6; the UI must not claim the whole wizard has been read-only. A setup plan generated after trust retains the existing script's no-write/no-network dry-run contract.
 
 ### Contextual tour
 
-Start with project/source/vault distinctions, then guide a real build, a generated note feature, its entity catalog and its tests. Highlight stable semantic targets, not hard-coded screen coordinates. Users can dismiss, skip, revisit and resume the tour from Help. Forms and commands must work without it.
+Start with this vault’s project and the separate test-vault distinction, then guide a real build, a generated note feature, its entity catalog and its tests. Highlight stable semantic targets, not hard-coded screen coordinates. Users can dismiss, skip, revisit and resume the tour from Help. Forms and commands must work without it.
 
 Do not create sample notes, run scripts, enable a plugin or mark an action successful merely because the user advanced a tooltip. On return, reconcile checkpoints with project identity, input fingerprints and actual run records. Explain a disappeared or unavailable target instead of trapping the user behind an overlay.
 
@@ -163,15 +170,15 @@ Do not create sample notes, run scripts, enable a plugin or mark an action succe
 
 ### 8.1 Entry, prerequisites and acquisition
 
-**FR-01 — Native entry and empty state — P0.** Open/focus one workbench view through the command palette and ribbon. Empty state offers Create plugin, Attach project and Learn. Opening the workbench does not require external Node, execute project code or contact a service. Multiple leaves share runtime-owned operations but retain separate view state.
+**FR-01 — Native entry and empty state — P0.** Open/focus the workbench through the command palette and ribbon. Empty state offers Start designing and Learn, not Create another project or Attach. With a valid project record, resume it. Missing, duplicate, corrupt or future records receive explicit inspect/recovery states, never an automatic second project. Opening and authoring do not require external Node, execute project code or contact a service. Multiple leaves share runtime-owned project and operation services while retaining local presentation state.
 
 **FR-02 — Environment inspection — P0.** Display detected executable paths, versions, tested compatibility and missing prerequisites. Permit explicit external Node/npm CLI selection with validation. Detect GUI PATH differences without evaluating shell startup files. Never treat Electron's `process.execPath` as the project's Node executable. A blocked prerequisite keeps the wizard data and offers a recheck rather than a reset.
 
-**FR-03 — Template selection and acquisition — P0.** Offer the qualified official standalone template artifact, a previously verified cached artifact or an explicitly selected local archive. Show source, version, resolved revision, digest and compatibility. Reject unsupported layouts, unsafe archive entries and occupied destinations. No Git installation or GitHub login is required for the public-template path. Moving-branch development sources are advanced, explicitly unqualified choices, not the default.
+**FR-03 — Template selection and additive acquisition — P0.** Offer a qualified official standalone artifact, verified cached artifact or selected local archive. Show version, resolved revision, digest and compatibility. Download/extract into bounded owned staging, not directly into the authoring root. Reject unsafe archive entries. Plan each destination against the current vault: missing file → create; exact same bytes → unchanged; known owned metadata → separately reviewed update; differing existing or aliased path → conflict. Preserve the real host config directory, companion installation, Git metadata, Project.md body and existing design/notes. No blanket empty-folder rejection, clone-over-root, force overwrite or nested second project. No GitHub login or Git installation is required for the public-artifact route.
 
 **FR-04 — Inspect before execution — P0.** Read static metadata as data. Require project trust before executing setup, maker help, dry-run, entity catalog, package scripts or project-defined configuration. A maliciously modified script is not made safe by the name of its operation. Trust is revocable and separate from approval to perform a particular mutation.
 
-**FR-05 — Identity and configuration — P0.** Use the shared setup validation and plan rather than a separate UI writer. Preserve lockfile resolutions, license, attribution, Git remotes and unrelated edits. Present local-valid and Community-ready checks separately. Changing installed identity is a distinct migration workflow; never quietly rename folders or overwrite another plugin.
+**FR-05 — Stable identity and configuration — P0.** Create one versioned project record with a stable ID independent of the public plugin ID, folder name and display name. Capture project identity during design without requiring the toolchain; require complete author/publishing fields only at their relevant stage. Use shared setup validation/planning when preparing package/manifests, not a separate UI package writer. Preserve lock resolutions, attribution, Git remotes, design references and handwritten note content. Public-valid checks remain separate. Installed identity changes require a distinct migration, never an implicit folder rename or another project.
 
 ### 8.2 Plans, setup and recovery
 
@@ -185,13 +192,13 @@ Do not create sample notes, run scripts, enable a plugin or mark an action succe
 
 ### 8.3 Source workspace and development vault
 
-**FR-10 — Explicit project/vault binding — P0.** Propose a bounded shared-tooling extension that binds one canonical project root to one explicitly selected development vault and its real configuration directory. Default to the currently open vault only after deliberate designation and path review. The same binding and validations must be usable from the CLI. No arbitrary filesystem path from a Markdown note, URL or untrusted capability file grants deployment permission.
+**FR-10 — Current-vault source and contained test target — P0.** Resolve the project root from the actual opened Obsidian vault. Notes, imports, query strings and saved absolute paths cannot redirect it. Default the generated-plugin runtime target to the existing contained `.dev-vault` contract, with validated actual target config/identity. The authoring vault’s companion installation is protected and never used as the generated-plugin destination. Show both contexts; moving a vault re-resolves the root and invalidates approvals rather than trusting synced machine paths. Keep this shared validation available to CLI operations; do not add arbitrary external-vault deployment in this change.
 
 **FR-11 — Safe artifact deployment — P0.** Use the shared installer to stage and promote the complete accepted artifact set into the target plugin-ID directory. Verify manifest identity, source/target separation, previous installation state and candidate hashes. Preserve `data.json`, notes, unrelated plugins and last-good assets. Never deploy over the companion itself. A failed build never installs a mixed candidate.
 
 **FR-12 — Activation and host feedback — P0.** The first release guides deliberate manual enablement in the correct vault. It never modifies Restricted Mode or enables generated code as a hidden setup step. Report installed, enabled, opened and verified as separate states; user attestation is not automated native evidence. Where host state cannot be reliably observed through supported APIs, say so and show the manual check.
 
-**FR-13 — Attach and switch projects — P1.** Attach a compatible existing consumer by selecting its root, inspect it without executing code, and show supported, limited or unsupported capabilities. Rebind moved projects explicitly. Do not convert arbitrary plugins automatically. Serialize conflicting runs, make cross-project targeting visible and prevent a project switch from redirecting an already approved operation.
+**FR-13 — Resume and recover this project — P1.** Discover only the current vault’s single project record and inspect compatible source there without executing it. No project registry, external attachment or in-plugin switcher is maintained. Other projects use Obsidian’s vault switcher. A supported existing project can be adopted only through an explicit same-root metadata review; ambiguous/incompatible roots remain read-only. Legacy multi-project concept data requires explicit selection of one design, with original data and unselected entries retained/exportable; drop old absolute paths, trust, approvals and execution results. Serialize shared mutations across leaves and reject stale reviewed state.
 
 ### 8.4 Authoring and capability access
 
@@ -215,13 +222,27 @@ Do not create sample notes, run scripts, enable a plugin or mark an action succe
 
 **FR-22 — Release preparation — P1.** Reuse available build/artifact checks and present missing publication prerequisites, metadata issues, disclosures and separately scoped evidence. Produce a local handoff through a shared operation when implemented. Do not claim an unimplemented release script exists. Tagging, publishing, uploading and directory submission remain deliberate maintainer actions outside public v1 automation.
 
-**FR-23 — Preferences and persistence — P1.** Provide native settings for executable paths, default workspace, known project bindings, downloads/cache limits, log retention, notice preferences, editor integration and tutorial state. English/German text follows the template's shared locale service. Validate and serialize writes; preserve corrupt/future state for inspection. Project trust and execution approvals are machine-local and never inherited merely by syncing a vault.
+**FR-23 — Settings and persistence — P1.** Provide settings for project-owned relative authoring paths, validated executable preferences, bounded cache/log retention, notices, editor integration and tutorial state. The source root remains the opened vault and is not a configurable workspace path. No known-project registry exists. English/German text uses the shared locale service. Validate and serialize writes, preserve corrupt/future data, and separate portable Markdown project/design records from machine-local trust, path resolution and execution receipts. Synced state must never grant execution authority.
 
-**FR-24 — Compatibility and updates — P1.** Keep companion, template, shared-foundation, operation-protocol and host/toolchain versions separate. Handle unknown catalog/schema versions without executing them. Offer explicit acquisition of another template version for a new project. Updating an existing consumer is a future reviewed change plan, not a source overwrite. The companion never uses template acquisition to update its own runtime.
+**FR-24 — Compatibility and updates — P1.** Keep companion, template, shared-foundation, operation-protocol and host/toolchain versions separate. Handle unknown catalog/schema versions without executing them. Offer an explicitly selected template version when preparing this vault’s project. Other projects belong to other vaults. Updating an existing consumer is a future reviewed change plan, not a source overwrite. The companion never uses template acquisition to update its own runtime.
 
 **FR-25 — Optional host/tool integrations — P2.** Support a feature-detected official Obsidian CLI reload bridge or an explicitly selected external reload tool after qualification. Require one reload owner, correct vault/ID targeting and approval. No arbitrary `eval`, private API dependency or automatic registration of global commands. A normal editor remains optional and is launched through a validated adapter.
 
 **FR-26 — Companion removal — P1.** Disabling/removing the companion stops its owned work and releases resources, but does not delete consumer source, development notes, installed consumer assets, caches belonging to other tools or user configuration. Document explicit cleanup choices. Existing CLI workflows continue independently.
+
+### Semantic design and reusable variants
+
+**FR-27 — Entity relationship workspace — P0.** Add Entity relationships to Design in the same single-vault project. Provide entity CRUD, readable property cards, source/target handles, reviewed relationship forms, search/catalog, diagram and non-drag list, inspector, pan/zoom, snap, Undo/Redo and independent semantic visual sections. Stable IDs and saved code names survive renaming/grouping. Section removal ungroups, never deletes its entities. Screen creation does not infer business entities.
+
+**FR-28 — Native-compatible property declarations — P0.** Declare Text, List, Number, Checkbox, Date, Date & time and Tags with required intent and optional typed defaults. Check flat-value shapes, finite numbers, calendar dates, false/zero preservation, reserved managed keys, unique field ownership and vault-wide property-name type consistency. Tags is exclusive to tags; aliases/cssclasses use List. The native adapter must additionally inspect destination property conventions. Document the generator's conservative portable subset rather than claiming all host property names are forbidden.
+
+**FR-29 — Owned relationships and generator parity — P0.** Declare both endpoint cardinalities (0..1, 1, 0..*, 1..*), one source-owned stored property and restrict-deletion intent. Use quoted note links as Text/List, derived inverse queries and explicit validation/migration obligations. Reject missing endpoints, duplicate ownership and incompatible fields. Bind sitemap surfaces by declared entity ID. The same portable schema must feed both native UI and shared CLI generation. Entity/default/relationship changes invalidate approval; layout-only changes do not change source. Preserve handwritten source and retained obsolete files for migration. Browser source previews are not evidence that the shared compiler is implemented.
+
+**FR-30 — Versioned component variants — P0.** Define named variants within one shared component, with a mandatory default, typed prop defaults and optional content defaults. Expose management, preview and placement selection. Changed variants require newer definition versions; instances pin version/defaults and retain local overrides until reviewed upgrade. Disclose prop and content changes. Prevent removal while referenced. Generate variant contracts and explicit selected defaults without copying definitions or accepting executable templates/styles from data.
+
+**FR-31 — Bounded and recoverable design editing — P0.** Keep imports/drafts on failure and explicit Close/Escape discard protection. Check current owner/review snapshots before mutation; include semantic/variant state in reload/export/import/history. Fix library miniature overflow while retaining readable labels and accessible controls. Declare limits and reject oversized source previews before corrupting saved state. Test native Markdown write failures separately from controlled browser storage.
+
+The [semantic-layer specification](../concepts/companion/SEMANTIC-LAYER.md) supplies detailed interaction, model, serializer/compiler contracts and current implementation boundaries. The [official property reference](https://obsidian.md/help/properties) anchors host compatibility; semantic constraints remain application responsibilities.
 
 ## 9. CLI-to-UI capability coverage
 
@@ -229,12 +250,12 @@ This inventory reflects the reviewed `package.json` and current authoring docume
 
 | UI group/action | Existing script(s) | Scope and qualification rule |
 | --- | --- | --- |
-| Create/configure/resume | `setup` | Uses actual identity/profile/dry-run/JSON/answers/resume contracts. |
+| Configure/prepare/resume | `setup` | Existing setup remains canonical after separately reviewed additive template hydration; design initialization requires neither setup nor npm. |
 | Generate feature/entity | `make` | Only implemented recipes; show real file plan and generated-test results. |
 | Inspect entity mappings | `entities:catalog`, `entities:check` | Derived from trusted source, not static data-only inspection. |
 | Command help | `help` | Prefer trusted bundled/catalog descriptions before executing project help. |
 | Build candidate | `build` | Build result does not imply test success. |
-| Install contained candidate | `build:local` | Current contained target only; bound-target extension is FR-10. |
+| Install contained candidate | `build:local` | Contained `.dev-vault` test target; current-vault source safety is FR-10. |
 | Compatibility alias | `test-build` | Alias to local install; do not label it a test suite or duplicate the main action. |
 | Watch without install | `dev` | Persistent process; no implied native activation. |
 | Watch and contained install | `dev:local` | Deployment safety, current target restrictions and last-good guarantees remain. |
@@ -357,11 +378,11 @@ Exact folders are an architecture decision. Preserve the existing feature-author
 
 ### Source and vault placement
 
-Recommend source outside the active vault, in a developer-chosen workspace. “Create from within this vault” describes where the workflow starts, not where all source and dependencies must be stored. Source must never be generated inside the companion's own installed directory or an occupied consumer installation.
+**The authoring vault is the project/source root.** A developer opens an empty folder as an Obsidian vault before installing the companion. Obsidian configuration and the companion therefore already exist before project preparation. The native implementation adds reviewed template files alongside project notes; it must not clone over the vault, create a second project directory, or generate into an installed plugin folder. Development dependencies/build output are excluded from authored-note discovery and version control as appropriate; project notes are retained in version control.
 
-The bound deployment profile is a **proposed future exception** to the current contained-vault-only tooling contract. It requires an explicitly approved shared implementation and updated safety documentation. Until then, existing tools and agents remain bound by [AGENTS.md](../../AGENTS.md); this PRD does not authorize deployment into a personal vault.
+Use the existing contained `.dev-vault` default for generated-plugin testing. This is a separate runtime host context, not another managed project. No arbitrary external-vault installer privilege is added. The new shared-tooling work is **safe hydration of a qualified template into a nonempty authoring root**, followed by canonical setup/maker contracts. Until that adapter is implemented and qualified, the browser plan remains a simulation. Existing tooling/agents remain subject to [AGENTS.md](../../AGENTS.md); this PRD never authorizes modifying a personal vault during tests.
 
-At runtime, binding validation must account for the actual host configuration directory, not assume `.obsidian`. Use documented host capabilities where available; otherwise require explicit validated configuration rather than private API guesses. Reject root/parent escapes, unexpected links/reparse points, case aliases and companion-ID collisions. Tests exercise paired source/vault directories inside a disposable codebase-contained fixture.
+At runtime, derive the authoring root and actual configuration folder through supported host APIs. Do not assume every profile is named `.obsidian`; protect the resolved profile, the companion installation and any retained configuration profiles. Reject escapes, links/reparse-point redirection, file/directory overlaps, case aliases and companion-ID collisions. Fixtures must include harmless existing notes, populated host configuration and an isolated contained test vault. Obsidian’s official [vault documentation](https://docs.obsidian.md/Plugins/Vault) distinguishes visible-note APIs from hidden-folder adapter access; its [configuration-folder guide](https://help.obsidian.md/Files+and+folders/Configuration+folder) documents profile overrides. These APIs require separate native qualification.
 
 ### Mandatory safety requirements
 
@@ -375,7 +396,7 @@ At runtime, binding validation must account for the actual host configuration di
 | SAFE-06 | Roll back only bytes still owned by the operation. Preserve concurrent edits and incomplete-recovery backups. Never erase the last good candidate or force-overwrite a conflict. |
 | SAFE-07 | Preserve package-manager registry/proxy/certificate/auth/lifecycle policy. Do not weaken peer checks, install globally, edit PATH, request elevation or silently upgrade the locked dependency graph. |
 | SAFE-08 | Never modify Restricted Mode, install over the companion, auto-enable generated code or directly rewrite host security preferences. Detect external reload tooling before promising a target is inactive. |
-| SAFE-09 | Preserve note contents, unrelated plugins, `data.json` and Git remotes. Deleting a project reference removes the reference, not source or vault data. |
+| SAFE-09 | Preserve note contents, unrelated plugins, `data.json` and Git remotes. Companion removal, preferences reset or recovery never deletes the project record, design notes, source or vault configuration; there is no remove-project launcher action. |
 | SAFE-10 | Never log secrets or environment dumps. Treat paths and source snippets as sensitive; safe exports require preview. Render process output and downloaded descriptions as inert content. |
 | SAFE-11 | The companion's runtime is fully bundled and updated through supported distribution. Acquired template/project code is never dynamically loaded as companion code. |
 | SAFE-12 | Implement bounded process-tree lifecycle control on each platform. Track ownership beyond a bare reused PID. Do not kill unrelated processes or call cancellation complete while children remain active. |
@@ -387,11 +408,11 @@ No security control makes an intentionally trusted malicious npm script harmless
 
 ## 13. Data ownership and recovery semantics
 
-Project source, manifests and lockfiles remain canonical in the source project. The shared setup/maker journals remain canonical for their operations. The companion stores only validated preferences, bounded presentation history and references it owns; it does not build another editable project database.
+Project source, manifests and lockfiles live at the current vault root. One `Project.md` record and Markdown design entities under configured project-owned folders are canonical authoring data. Requirements, views, component definitions and connections retain stable IDs and explicit frontmatter relations. The shared setup/maker journals remain canonical for execution. UI stores are projections of these records, not an independently editable second project database. The interactive concept’s localStorage and virtual file map demonstrate transitions only; they are not a native persistence implementation.
 
-Machine-specific executable paths, root mappings, vault bindings and trust receipts must be kept separately from portable project notes. Choose and test a machine-local storage mechanism before public release; Obsidian plugin `data.json` alone must not be assumed to be unsynced. Unknown/future storage versions are preserved rather than overwritten.
+Machine-specific executable paths, resolved vault/test locations and trust receipts remain separate from portable notes. The native plugin derives its source root again from the host on each session. Choose and test a machine-local storage mechanism before public release; plugin `data.json` must not be assumed unsynced. Unknown/future schemas, missing records with existing source and multiple project records stop initialization and offer inspection/export without automatic overwrite.
 
-An optional ProjectBrief/DevelopmentHandoff note uses the existing entity/document APIs and an explicitly configured vault folder. Its frontmatter can contain a stable project ID, public plugin identity, template revision and lifecycle label; machine paths and authorization are excluded. Editing preserves handwritten body content and unrelated properties.
+The required `Project.md` frontmatter contains schema, stable project ID, public plugin identity and relative authoring paths; it contains no execution authorization or authoritative absolute root. Design records use the existing entity/document service patterns. Use safe host note-update APIs that preserve handwritten bodies, comments/unrelated frontmatter and external edits. Obsidian’s [Vault.process guidance](https://docs.obsidian.md/Plugins/Vault) requires checking the current content when applying a previously computed asynchronous change. Multi-file authoring still needs shared ownership, journaling and stale-reference recovery; do not claim a global atomic transaction.
 
 A crash after source mutation but before result delivery creates an uncertain outcome. Recovery inspects journals and actual bytes, then reports what is known. A failed later test retains the generated source for correction. No automatic retry creates another project or another note to compensate for an unclear result.
 
@@ -401,13 +422,13 @@ These are proposed budgets and quality gates; they are not benchmark results.
 
 | ID | Requirement and evidence |
 | --- | --- |
-| NFR-01 Responsiveness | On a documented reference machine with 10 attached projects, cached workbench opening targets p95 under 1 second; normal interactions target feedback within 100 ms. Tool work runs asynchronously. |
+| NFR-01 Responsiveness | On a documented reference machine with one project at the declared design-size limit, cached workbench opening targets p95 under 1 second; normal interactions target feedback within 100 ms. Tool work runs asynchronously. |
 | NFR-02 Bounded output | Default live output uses a bounded buffer, initially 10,000 lines or 5 MiB, with visible truncation and bounded retained logs. Burst-output tests prove the UI remains responsive. |
 | NFR-03 Accessible workflow | All core tasks work with keyboard alone, visible focus, meaningful labels/errors, non-color status and reduced motion. Test 200% zoom, narrow splits and a representative screen reader; automated checks alone do not establish conformance. |
 | NFR-04 Native fit | Reuse host tokens, dark/light themes and scoped Nuxt UI. No Tailwind Preflight, global theme takeover, remote fonts or unscoped portal leakage. |
 | NFR-05 Localization | English and German for wizard, operation states and recovery; source IDs and machine protocol fields remain stable across locales. |
 | NFR-06 Platform qualification | Test Windows, macOS and Linux process/path/cancellation behavior separately, including spaces, non-ASCII names, denied permissions and relevant case/link semantics. Existing Linux native evidence does not certify all three. |
-| NFR-07 Offline behavior | Opening/help, attached-project inspection and already provisioned local work remain useful offline. Acquisition requires a local/cache artifact; missing dependencies or live audits are blocked, not falsely completed. |
+| NFR-07 Offline behavior | Opening/help, current-project inspection, note-based design and already provisioned work remain useful offline without external Node. No broad vault indexing is needed. Acquisition requires a local/cache artifact; missing dependencies or live audits are blocked, not falsely completed. |
 | NFR-08 Maintainability | Preserve framework boundaries and current code-line budgets: runtime/CSS/scripts 400, tests/helpers 450, lifecycle `main.ts` 100. No weakening of inherited lint, architecture or coverage gates. |
 | NFR-09 Lifecycle hygiene | Repeated open/close, split/pop-out, enable/disable and cold restart leave no duplicate subscriptions, abandoned watchers or unauthorized running children. |
 | NFR-10 Provenance | Every distributed companion and template artifact identifies producing source, relevant toolchain and accepted hashes. Reproducibility claims require an executed comparison, not merely a lockfile. |
@@ -455,8 +476,8 @@ Production and stricter business-code coverage floors remain inherited from the 
 
 | ID | Scenario | Acceptance evidence | Requirements |
 | --- | --- | --- | --- |
-| AC-01 | Open in a fresh vault with no external Node | Workbench/help usable, zero child launches/network, saved blocked wizard | FR-01–04, SAFE-01 |
-| AC-02 | Successful first project | Correct consumer identity, unchanged lock resolutions, actual setup result and complete deployment into designated fixture vault | FR-03–12 |
+| AC-01 | Open in a fresh vault with no external Node | Define one project, edit/reload requirements and views, zero children/network; preparation alone blocks for missing tools | FR-01–04, SAFE-01 |
+| AC-02 | Design then prepare the same project | Stable project/design IDs preserved; additive source-root writes protect notes/host config; actual setup and contained test deployment receipts | FR-03–12 |
 | AC-03 | Switch UI to CLI and back | Same project remains usable; no hidden UI state required to build/generate | FR-07, FR-14, ARCH-04/06 |
 | AC-04 | Dry-run on trusted source | Real plan; no project writes, lock/report creation, child stages or network caused by the setup dry-run | FR-06/07 |
 | AC-05 | Untrusted or changed project | No execution before trust; changed script/lock/target invalidates relevant approval | FR-04/06, SAFE-13 |
@@ -475,6 +496,15 @@ Production and stricter business-code coverage floors remain inherited from the 
 | AC-18 | Unknown future catalog/state | Inspectable limited mode, no guessed execution or destructive migration | FR-23/24 |
 | AC-19 | Offline and missing caches | Accurate blocked states; existing provisioned work remains available | FR-03/18, NFR-07 |
 | AC-20 | Public artifact rehearsal | Root/release identity, tags/assets and standalone template layout agree | REL-01–08 |
+| AC-21 | One project, multiple workbench leaves | No launcher/switcher; shared ownership prevents second initialization and duplicate operations | FR-01/05/13 |
+| AC-22 | Existing notes and occupied source files | Harmless files survive; conflicting, aliased or concurrently changed destinations block before overwrite | FR-03/06/09, SAFE-04–06 |
+| AC-23 | Legacy multi-project or future records | Explicit one-design recovery with original data retained; trust/results/root are not inherited; unsupported records preserved | FR-13/23 |
+| AC-24 | Author a semantic model before preparation | Entity/property/default/relationship editing, section membership, alternate list and same-project reload | FR-27/28/31 |
+| AC-25 | Conflicting properties or endpoints | Actual validator rejects malformed types/defaults, shared-key conflicts and missing endpoints without canonical writes | FR-28/29 |
+| AC-26 | Semantic design feeds generation | Full properties, folders, relationships and surface IDs included; stale apply blocked; grouping keeps source unchanged; native compiler tested independently | FR-27–29 |
+| AC-27 | Reuse and upgrade a named variant | Correct placement/defaults, pinned prior version/props, local content preserved, in-use removal blocked | FR-30/31 |
+| AC-28 | Narrow library and ER editing | Measured contained miniatures, readable property cards/edge labels and accessible non-drag controls | FR-27/31 |
+| AC-29 | Schema changes after source/note creation | Owned changes only, retained obsolete source, explicit native data migration and failed-write recovery | FR-29/31 |
 
 Representative executable acceptance wording:
 
@@ -513,14 +543,16 @@ Use Epic → Feature → PBI → Tasks. PBIs describe delivered use cases, inclu
 | E02 Shared foundation and export | Compose companion from public services; export a standalone consumer; preserve root/consumer identity separation | E01 distribution decision; ARCH-01–06. |
 | E03 Shared operation contracts | Data-only capability catalog; normalize setup/maker results; bind plan approval; CLI/UI differential tests | Existing contracts retained; no UI-only mutations. |
 | E04 Native workbench and trust | Open/focus view; empty state; prerequisite inspection; machine-local project trust and settings | E02/E03; AC-01/05/18. |
-| E05 Guided project creation | Acquire reviewed template; configure identity; review/apply/resume setup; honest error recovery | E03/E04; AC-02/04/06. |
-| E06 Development-vault binding | Shared safe binding; complete-asset deployment; deliberate enablement; custom config handling | Explicit safety-contract approval; AC-10/11/13. |
+| E05 Design-first project preparation | Define single project; persist requirements/views; stage template; review additive hydration; apply/resume canonical setup | E03/E04; AC-01/02/04/06/21–23. |
+| E06 Isolated generated-plugin runtime | Retain contained test target; complete-asset deployment; deliberate enablement; custom config handling | Explicit safety-contract approval; AC-10/11/13. |
 | E07 Authoring and capability UI | Maker forms, entity catalog, complete delivered-tool catalog, real-service learning | E03/E05; AC-03/07. |
+| E11 Semantic design and generation | Declare schemas/properties/relationships; organize ER sections; bind views; lower the reviewed blueprint into shared document makers; qualify native records/migrations | E03/E05; FR-27–29/31; AC-24–26/29. |
+| E12 Reusable component variants | Manage typed variants; preview/place; preserve pinned instances; review upgrades and generator mappings; verify bounded miniatures | E07; FR-30/31; AC-27/28. |
 | E08 Development and quality | Session ownership, watch/harness, all baseline checks, scoped evidence and failure navigation | E06/E07; AC-12/14/15/19. |
-| E09 Onboarding and polish | Resumable contextual tour, keyboard/screen-reader, native themes, English/German, multi-project clarity | M1 working slice; AC-16 plus usability study. |
+| E09 Onboarding and polish | Resumable contextual tour, keyboard/screen-reader, native themes, English/German, single-project recovery and context clarity | M1 working slice; AC-16 plus usability study. |
 | E10 Public release qualification | Diagnostics/privacy, uninstall continuity, all desktop matrices, review disclosures and exact-asset rehearsal | All public-v1 P0/P1 and policy gate closed; AC-17/20. |
 
-First vertical-slice PBIs: **Inspect development prerequisites**, **Acquire a qualified template**, **Configure and review a new plugin**, **Execute and resume setup**, **Bind a development vault**, **Install a complete candidate**, **Generate a note feature**, **Inspect verification results**. Each must exercise real shared behavior, not a success-only UI simulation.
+First vertical-slice PBIs: **Define this vault’s project**, **Persist and resume the project design**, **Inspect development prerequisites**, **Stage a qualified template**, **Review additive preparation in the authoring vault**, **Execute and resume setup**, **Install a complete candidate in the contained test vault**, **Generate a note feature**, **Inspect verification results**. Each native PBI must exercise shared behavior and real file/host boundaries, not a success-only UI simulation.
 
 Definition of Ready: capability and implementation status identified; shared contract agreed; path/security effects specified; UX failure states designed; requirement/test traceability present; no unresolved prerequisite hidden inside the PBI.
 
@@ -532,7 +564,7 @@ Definition of Done: real implementation through approved boundaries; determinist
 | --- | --- | --- |
 | Project dependency install conflicts with Community policy | Seek early interpretation using actual process/cwd/dependency boundaries; do not conceal behavior | Maintainer; written review outcome before public candidate. |
 | Root template identity conflicts with root distribution manifest | Separate companion facade and standalone template export, then rehearse | Architecture/release; independent export and install evidence. |
-| Fresh current vault falls outside existing contained installer | Add an explicit shared paired-target profile only after safety review; retain contained default | Tooling/security; real negative fixtures and updated contract. |
+| Authoring root is already populated before template acquisition | Add shared staged/additive hydration, protect actual host profiles and design notes; keep generated-plugin deployment contained | Tooling/security; occupied-root, custom-profile and stale-write fixtures. |
 | GUI PATH, npm wrappers and process cancellation differ by OS | External executable selection and platform-specific owned adapters | Engineering; three-platform evidence. |
 | Companion becomes a second implementation | Shared operation contract and differential tests are required | Architecture; source review and parity tests. |
 | Trust is misrepresented as isolation | Explain OS permissions; no sandbox claim or automatic code execution | Security/UX; comprehension test and negative controls. |
@@ -543,15 +575,16 @@ Definition of Done: real implementation through approved boundaries; determinist
 | Name/ID conflicts or public rules change | Validate the working name and current rules before submission | Maintainer; directory validation. |
 | Machine-local trust storage accidentally syncs | Select and test storage design before M2; synced metadata grants nothing | Architecture/security; cross-machine negative fixture. |
 
-Product choices settled by this proposal: desktop-first; current fresh vault as an explicitly designated target; external source workspace recommended; no required account for local development; CLI canonical; no generic terminal; no telemetry; manual activation in v1; same repository with separately qualified outputs.
+Product choices settled by this proposal: **one project per vault; the opened vault is the source root; design before preparation; additive template hydration; contained `.dev-vault` for generated-plugin testing; no companion project picker or external source workspace**. Desktop-first, local development without an account, canonical CLI, no generic terminal, no telemetry, manual activation and separately qualified outputs from the same repository remain unchanged.
 
-Still to resolve through implementation evidence: policy acceptance, final public name, exact shared-package layout, capability schema/version policy, machine-local storage mechanism, platform process-tree implementation and current-host binding APIs. These do not justify inventing unverified capabilities.
+Still to resolve through implementation evidence: policy acceptance, final public name, exact shared-package layout, capability schema/version policy, machine-local storage mechanism, platform process-tree implementation and supported current-root/config discovery, safe Markdown-entity serialization, lossless native recovery and additive hydration APIs. These do not justify inventing unverified capabilities.
 
 ## 19. Public-v1 acceptance checklist
 
 - [ ] Community policy interpretation and one-repository distribution rehearsal are documented.
 - [ ] The companion is a real shell consumer, not a maintained copy or special-case runtime fork.
-- [ ] A fresh vault can complete the requested creation and first-loop journey without manual JSON edits or a required GitHub account.
+- [ ] An initially empty-folder vault can define and retain one project without Node/npm, then prepare that same root without replacing design/notes/configuration or requiring GitHub login.
+- [ ] Existing-source adoption, legacy data recovery, moved vaults and multiple leaves preserve the singleton and cannot inherit machine trust.
 - [ ] Missing prerequisites, offline conditions, conflicts, failed tests and interruption have recoverable, truthful UI states.
 - [ ] Every implemented stable template tool is available through an appropriate UI path, with unsupported future tools clearly distinguished.
 - [ ] Shared CLI/UI contracts, approvals, locks, safe deployment and generated-source preservation are exercised by negative tests.

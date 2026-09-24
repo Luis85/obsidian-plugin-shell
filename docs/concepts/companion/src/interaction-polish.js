@@ -1,6 +1,6 @@
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
  if(modalType==='ref-content')return JSON.stringify(referenceUi.content?.bricks||[]);
  return JSON.stringify([...document.querySelectorAll('#modal input,#modal textarea,#modal select')].map((e,i)=>[e.dataset.field||e.id||String(i),e.type==='checkbox'?e.checked:e.value]));

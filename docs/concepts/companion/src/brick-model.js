@@ -2,7 +2,7 @@
 function validBricks(n){
  if(n.bricks===undefined)return true;
  const text=(v,max)=>typeof v==='string'&&v.length<=max;
- return Array.isArray(n.bricks)&&n.bricks.length<=BRICK_LIMITS.perSurface&&n.bricks.every(b=>b&&b.schema===1&&/^brick-[1-9][0-9]*$/.test(b.id)&&Object.hasOwn(BRICK_KINDS,b.kind)&&text(b.title,BRICK_LIMITS.title)&&b.title.trim().length>0&&text(b.purpose,BRICK_LIMITS.purpose)&&text(b.content,BRICK_LIMITS.content)&&text(b.region,40)&&(b.component===null||text(b.component,100))&&(b.definition===undefined||text(b.definition,100)&&typeof b.version==='string'&&/^\d+\.\d+\.\d+$/.test(b.version)&&validContentSpec(b.defaults))&&Object.keys(b).every(k=>['schema','id','kind','title','purpose','content','region','component','definition','version','defaults'].includes(k)));
+ return Array.isArray(n.bricks)&&n.bricks.length<=BRICK_LIMITS.perSurface&&n.bricks.every(b=>b&&b.schema===1&&/^brick-[1-9][0-9]*$/.test(b.id)&&Object.hasOwn(BRICK_KINDS,b.kind)&&text(b.title,BRICK_LIMITS.title)&&b.title.trim().length>0&&text(b.purpose,BRICK_LIMITS.purpose)&&text(b.content,BRICK_LIMITS.content)&&text(b.region,40)&&(b.component===null||text(b.component,100))&&(b.variantProps===undefined||validVariantProps(b.variantProps))&&(b.variant===undefined||text(b.variant,40)&&/^[a-z][a-z0-9-]*$/.test(b.variant))&&(b.definition===undefined||text(b.definition,100)&&typeof b.version==='string'&&/^\d+\.\d+\.\d+$/.test(b.version)&&validContentSpec(b.defaults))&&Object.keys(b).every(k=>['schema','id','kind','title','purpose','content','region','component','definition','version','defaults','variant','variantProps'].includes(k)));
 }
 function brickIssues(d){
  const issues=libraryBrickIssues(d),ids=new Set();let total=0;
@@ -38,7 +38,7 @@ function saveBrick(){
  if(!n||!brickContext(f))return failBrick('This draft is stale. Reopen the brick against the current outline.');
  const candidate=designCopy(d),target=candidate.nodes.find(x=>x.id===n.id);target.bricks=target.bricks||[];
  if(!f.id&&target.bricks.length>=BRICK_LIMITS.perSurface)return failBrick('Use at most 24 bricks per surface.');
- const b={schema:1,id:f.id||freshBrickId(candidate),kind:f.kind,title:f.title.trim(),purpose:f.purpose.trim(),content:f.content,region:f.region,component:f.component||null,...(f.definition?{definition:f.definition,version:f.version,defaults:designCopy(f.defaults)}:{})};
+ const b={schema:1,id:f.id||freshBrickId(candidate),kind:f.kind,title:f.title.trim(),purpose:f.purpose.trim(),content:f.content,region:f.region,component:f.component||null,...(f.definition?{definition:f.definition,variant:f.variant||'default',variantProps:designCopy(f.variantProps||{}),version:f.version,defaults:designCopy(f.defaults)}:{})};
  const index=target.bricks.findIndex(x=>x.id===f.id);
  if(f.id&&index<0)return failBrick('The original brick no longer exists.');
  try{ensureBrickBinding(candidate,target,b);}catch(e){return failBrick(e.message);}

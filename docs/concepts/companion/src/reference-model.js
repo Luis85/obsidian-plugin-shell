@@ -70,6 +70,7 @@ function saveSectionEditor(remove=false){
 }
 function referencePaneMode(panel){referenceUi.panel=referenceUi.panel===panel?'none':panel;canvasUi.outline=referenceUi.panel==='structure';render();}
 function paintReferenceChrome(){
+ if(!project())return;
  const vp=document.getElementById('map-viewport'),toolbar=document.getElementById('ref-node-toolbar');
  if(!vp)return;
  document.querySelector('.sitemap-studio')?.setAttribute('data-panel',referenceUi.panel);

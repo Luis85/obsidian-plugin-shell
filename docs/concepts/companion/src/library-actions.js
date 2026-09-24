@@ -11,12 +11,12 @@ function handleLibraryAction(action,value){
    if(!c||!isBrickComponent(c))break;
    const node=canHaveBricks(n)?n:d.nodes.find(canHaveBricks);
    if(!node){notify('Add a visual surface before placing a component.');break;}
-   libraryUi.form={component:value,node:node.id,owner:designOwner(),revision:d.revision};
+   libraryUi.form={component:value,node:node.id,variant:variantFor(c,variantUi.preview)?variantUi.preview:'default',owner:designOwner(),revision:d.revision};
    showModal('library-place');break;
   }
   case 'library-place-confirm':{
    const f=libraryUi.form;if(!brickContext(f)){notify('The design changed. Reopen the placement.');break;}
-   closeModal();beginLibraryBrick(f.node,f.component);break;
+   closeModal();beginLibraryBrick(f.node,f.component,null,f.variant);break;
   }
   case 'library-pick':{const [node,id]=value.split(':');beginLibraryBrick(node,id);break;}
   case 'library-open':productUi.component=value;libraryUi.filter='all';productUi.filter='';closeModal();setView('components');break;

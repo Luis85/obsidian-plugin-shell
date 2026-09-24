@@ -22,7 +22,7 @@ function resetConceptState(){
  if(state.activeRun)return;
  try{localStorage.removeItem(STORAGE_KEY);if(localStorage.getItem(STORAGE_KEY)!==null)throw Error('Retained storage');}
  catch{storageWarning='Reset could not remove browser data. Your current session is retained. Export recovery before closing.';paintStorageState();notify(storageWarning);return;}
- clearTimeout(runTimer);persistenceSnapshot=null;storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');
+ clearTimeout(runTimer);destroyFlow();persistenceSnapshot=null;storageWarning='';state=freshState();closeModal();render();notify('Fresh demo restored. Only this concept’s browser state was reset.');
 }
 window.addEventListener('storage',event=>{
  if((event.key===STORAGE_KEY||event.key===null)&&!storageWarning){

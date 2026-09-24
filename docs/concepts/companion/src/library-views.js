@@ -22,7 +22,7 @@ function libraryDefaultsEditor(c){
 function libraryPlacementDialog(){
  const f=libraryUi.form,c=design().library.find(c=>c.id===f?.component);
  if(!c)return dialogBody('Component unavailable','Reopen the library.');
- return dialogBody('Place '+c.name,`<p>Create a versioned content instance. This does not copy the shared definition.</p><label class="field" for="library-place-node">Screen<select id="library-place-node" data-field="library-place-node">${design().nodes.filter(canHaveBricks).map(n=>`<option value="${n.id}" ${n.id===f.node?'selected':''}>${esc(n.label)}</option>`).join('')}</select></label>${brickDefinitionPreview(c)}`,button('Cancel','close','','ghost')+button('Configure instance','library-place-confirm','','primary','arrow'));
+ return dialogBody('Place '+c.name,`<p>Create a versioned content instance. This does not copy the shared definition.</p><label class="field" for="library-place-node">Screen<select id="library-place-node" data-field="library-place-node">${design().nodes.filter(canHaveBricks).map(n=>`<option value="${n.id}" ${n.id===f.node?'selected':''}>${esc(n.label)}</option>`).join('')}</select></label>${variantSelect(c,f.variant||'default','library-place-variant')}${brickDefinitionPreview(variantComponent(c,f.variant||'default'))}`,button('Cancel','close','','ghost')+button('Configure instance','library-place-confirm','','primary','arrow'));
 }
 function libraryUpgradeDialog(){
  const f=libraryUi.form,{n,b}=findBrick((f?.node||'')+':'+(f?.id||'')),c=design().library.find(c=>c.id===b?.definition);

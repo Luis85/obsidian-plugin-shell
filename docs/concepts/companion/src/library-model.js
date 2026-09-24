@@ -26,7 +26,7 @@ function brickDefinition(d,kind){
 }
 function attachBrickDefinition(b,c){
  if(!c)return b;
- b.definition=c.id;b.version=c.version;b.defaults=designCopy(c.contentSpec);return b;
+ b.definition=c.id;b.version=c.version;b.variantProps=designCopy(variantFor(c,b.variant||'default')?.props||{});b.defaults=designCopy(variantComponent(c,b.variant||'default').contentSpec);return b;
 }
 function ensureBrickLibrary(d){
  // Additive legacy migration: preserve authored instances, IDs, notes and implementation bindings.
@@ -54,19 +54,20 @@ function libraryBrickIssues(d){
   const c=(d.library||[]).find(c=>c.id===b.definition);
   const add=(level,code,text)=>result.push({level,code,message:n.label+' / '+b.title+': '+text,node:n.id});
   if(!isBrickComponent(c)){add('error','brick-definition-missing','the library component is missing. Relink explicitly.');continue;}
+  if(!variantFor(c,b.variant||'default'))add('error','component-variant-missing','the referenced variant is missing; reassign explicitly.');
   if(c.version!==b.version)add('error','brick-definition-drift','review library v'+c.version+' before generating.');
   if(c.status==='deprecated')add('warning','brick-definition-deprecated','the definition is deprecated; existing content is retained.');
   if(c.status==='draft')add('warning','brick-definition-draft','the component definition is still a draft.');
  }
  return result;
 }
-function beginLibraryBrick(node,id,instance=null){
+function beginLibraryBrick(node,id,instance=null,variant='default'){
  const d=design(),n=d.nodes.find(n=>n.id===node),c=d.library.find(c=>c.id===id);
  if(!canHaveBricks(n)||!isBrickComponent(c)||state.activeRun)return;
  if(c.status==='deprecated'&&!instance){notify('This component is deprecated. Choose an active definition.');return;}
- const b=instance||{schema:1,id:null,...Object.fromEntries(['kind','title','purpose','content','region'].map(k=>[k,c.contentSpec[k]])),component:null};
+ const spec=variantComponent(c,variant).contentSpec;const b=instance||{schema:1,id:null,variant,...Object.fromEntries(['kind','title','purpose','content','region'].map(k=>[k,spec[k]])),component:null};
  beginBrick(node,b.kind,instance?.id||null);
- if(!instance){Object.assign(brickUi.form,b,{region:componentSlots(n).includes(b.region)?b.region:componentSlots(n)[0],definition:c.id,version:c.version,defaults:designCopy(c.contentSpec)});modalOriginal=null;redrawModal();}
+ if(!instance){Object.assign(brickUi.form,b,{region:componentSlots(n).includes(b.region)?b.region:componentSlots(n)[0],definition:c.id,version:c.version,variantProps:designCopy(variantFor(c,variant)?.props||{}),defaults:designCopy(spec)});modalOriginal=null;redrawModal();}
 }
 function newBrickDefinition(){
  const c=nextCustomComponent();c.category='Content';c.preview='brick';
@@ -81,9 +82,10 @@ function upgradedBrick(b,c){
  const next=designCopy(b),changes=[];
  for(const field of ['kind','title','purpose','content','region']){
   const local=b.defaults?b[field]!==b.defaults[field]:true;
-  const value=local?b[field]:c.contentSpec[field];
+  const value=local?b[field]:variantComponent(c,b.variant||'default').contentSpec[field];
   changes.push({field,local,before:b[field],after:value});next[field]=value;
  }
+ const props=variantFor(c,b.variant||'default')?.props||{};changes.push({field:'Variant prop defaults',local:false,before:JSON.stringify(b.variantProps||{}),after:JSON.stringify(props)});
  attachBrickDefinition(next,c);return {next,changes};
 }
 function applyBrickUpgrade(){

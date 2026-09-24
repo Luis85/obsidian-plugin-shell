@@ -1,11 +1,11 @@
 // Navigation between established capabilities. This module never generates files.
 function handleWorkflowAction(action,value){
- if(action==='outline-start'){const hadDraft=Boolean(state.designDraft);state.activeId=null;designUi.plan=null;designUi.selected=null;closeModal();setView(hadDraft?'sitemap':'prds');return true;}
+ if(action==='outline-start'){const hadDraft=Boolean(project()?.design?.nodes.length);designUi.plan=null;designUi.selected=null;closeModal();setView(hadDraft?'sitemap':'prds');return true;}
  if(!action.startsWith('workflow-'))return false;
  switch(action){
   case 'workflow-stage':{
    if(value==='review'){if(state.activeRun){notify('Finish or cancel the active simulation before reviewing a new plan.');break;}closeModal();workflowUi.fileQuery='';workflowUi.fileStatus='all';reviewDesignPlan();break;}
-   if(value==='build'){closeModal();if(project())setView('develop');else handleDesignAction('design-create','');break;}
+   if(value==='build'){closeModal();if(vaultProjectPrepared())setView('develop');else startVaultPreparation();break;}
    const step=WORKFLOW_STAGES.find(s=>s.id===value);if(step){closeModal();setView(step.view);}break;
   }
   case 'workflow-component-tab':workflowUi.componentTab=value;render();break;

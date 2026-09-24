@@ -1,57 +1,60 @@
 # Shell Workbench companion concept
 
-> Review & recovery — product review and regression hardening, 2026-09-23. Interactive browser concept, not an installable Obsidian plugin.
+> **One vault, one project · semantic design and variants — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
-Open [index.html](index.html) locally in a desktop browser. All runtime scripts, styles and SVG icons are embedded, including the reviewed Vue, Pinia and Vue Flow bundles. No server, npm install or runtime CDN is needed. GitHub displays HTML source rather than executing it.
+Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
-## Current iteration
+## Current experience
 
-The cross-product review adds recoverable import editing, observed cross-window storage conflict protection, immediate storage-failure feedback with recovery export, safe duplication limits, correct Settings defaults and no-op saves. Large-coordinate focus no longer resets the canvas. Reconnection/removal reviews also reject intervening anchor/caption changes.
+Open an initially empty folder as an Obsidian vault, install the companion, then **design and prepare the one project belonging to that vault**. This concept starts after the first two native steps using a clearly labeled simulated host context.
 
-Read the [product review](PRODUCT-REVIEW.md) and [current verification record](PRODUCT-VERIFICATION.md). Prior iteration reports remain historical evidence, not additional current passing tests.
+The fresh overview offers **Start designing**. Define the project, capture requirements, choose a blueprint and edit the existing sitemap/components without Node/npm. The vault identity stays visible, but there is no project picker, external attachment or second-project creation. Other projects are other Obsidian vaults.
 
-Native views are depicted as **view containers** with a host layout, placement and child-screen outlet. Navigation groups are compact organizational nodes in every display. Screen cards show the selected layout name; complete Structure previews and shared dimensions prevent cropping and incorrect section padding. All automatic arrangements keep visual sections separate.
+**Prepare project** stages a template and reviews additive source-root changes, not a clone over the vault. Existing host configuration, project notes and the full authored design survive. Conflicts and stale approvals block writes. Interruption/resume keeps the same project. Generated-plugin testing uses the separate contained `.dev-vault`; installing the companion is not enabling the output plugin.
 
-New surface code names receive an incremental suffix only on collision. Connection captions are editable, modal deletion preserves surfaces, and selected lines expose draggable endpoints that open a review before saving. Existing anchor choices stay fixed during card movement. See the preceding [container product/code review](CONTAINERS-REVIEW.md) and [verification](CONTAINERS-VERIFICATION.md).
+Read the [single-vault decision and native implementation contract](SINGLE-VAULT.md), [updated companion PRD](../../product/COMPANION-PLUGIN-PRD.md) and [current verification](SINGLE-VAULT-VERIFICATION.md). Historical reviews retain their dated evidence; their old counts and launcher assumptions are not current acceptance results.
 
-The established 44-entry component library, ordered content editor, tags, guidelines, visual section drop zones and PRD-to-setup workflow remain available. Previously authored components on native views are retained explicitly rather than silently removed.
+## Try the flow
 
-## Review the current experience
+**Start designing → define identity → Product requirements → Blueprints → Sitemap & views → Entity relationships → Component library / Variants → Prepare project.** Project details and an illustrative Project.md record are available without preparation. Author information can be completed when preparing the template. **Use example outline** starts a planning-only example only when the vault has no project; it does not fabricate successful build/install results.
 
-Start with **Explore example → Sitemap & views → Collection → Content editor**. The reference-led canvas uses compact, content-first cards, floating selection actions, an optional Structure panel and a synchronized full-page content draft. The existing handles, typed connections, library-backed content, PRDs and design-to-setup journey remain.
+The eight-step preparation review makes the current source root read-only, distinguishes the test context, lists create/unchanged/conflict states and requires trust plus explicit approval. Use Review scenarios to exercise missing Node, acquisition failure, stale plans, conflicts and interrupted installation. Keep the existing design while returning between the wizard and editor.
 
-The content editor supports ordered components, Markdown-source writing, per-instance purpose and region, library selection, preview navigation and one deliberate Save. Screen content is distinct from shared library definitions. Visual sections and card arrangement remain outside semantic generation inputs.
+The retained editor supports view containers, internal screens, navigation groups, section-safe arrangement, stable code names, editable captions and draggable connection endpoints. The component library, per-instance content editor, PRDs, tags, guidelines, shared-definition versioning, source previews, draft protection and Undo/Redo remain available. The [previous product review](PRODUCT-REVIEW.md) and [container review](CONTAINERS-REVIEW.md) describe retained behavior.
 
-This reconciliation adds safe shortcut handling when discard confirmation is open, focused field errors, reversible removal, an explicit draft export, before/after reorder feedback, useful empty states and clearer popover dismissal. See [review](RECONCILIATION-REVIEW.md) and [historical reconciliation verification](RECONCILIATION-VERIFICATION.md).
+## Entity relationships and component variants
 
-## Source and evidence
+**Design → Entity relationships** opens the semantic editor: entities, typed properties/defaults, runtime note folders, explicit relationships/cardinalities and visual sections. Drag handles to review a connection, or use Connect entities. Arrange sections, Fit, Undo/Redo, the inspector and Entity list provide alternate editing paths. **Review generator** includes declared entity interfaces, document-recipe inputs, frontmatter examples and relationship mappings in the same source plan as the sitemap.
 
-Edit the readable modules under [src](src), not the generated HTML. Build with:
+**Component library → Variants** adds reusable named variants with validated typed prop defaults and content overrides. Choose a variant for preview or placement. Existing placements retain their pinned version/defaults and local content until reviewed upgrades. Miniatures stay within their bounded boxes at wide and narrow pane widths.
+
+The [semantic-layer specification](SEMANTIC-LAYER.md) covers native property compatibility, single ownership of relationship fields, generation, limits and native implementation packages. These are concept source previews, not a working native blueprint CLI compiler.
+
+## Data and recovery
+
+Browser state is now a schema-2 singleton under `shell-workbench-single-vault-v2`; it has no project collection, active-project pointer or detached design. Existing legacy data stays under its original key. A recovery banner offers an explicit copy of **one** selected outline and a raw export of the entire old workspace. Old locations, execution approvals, trust and generated/test results are not carried over. Invalid/future records are preserved, not reset automatically.
+
+Native implementation will use one Project.md descriptor and Markdown entities in project-owned folders. The browser's virtual file map and project-note export demonstrate that contract but **do not write native vault files or form an installable template**. Recovery exports can contain private paths and notes; do not enter secrets. Export covers committed state, not unsubmitted modal drafts. Observed storage conflicts are blocked without claiming atomic cross-window locking.
+
+## Source and verification
+
+Edit [src](src), not generated HTML. From repository root:
 
 ```sh
-python3 scripts/concepts/build-companion.py
-python3 scripts/concepts/build-companion.py --check
+python3 -B scripts/concepts/build-companion.py
+python3 -B scripts/concepts/build-companion.py --check
+python3 -B tests/concepts/companion-assembly.test.py
+CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py
+# Require actual browser Storage, loopback HTTP and two pages as well:
+CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
 ```
 
-Run the current exact-artifact browser suite from the repository root with Python Playwright 1.57.0 and a provisioned Chromium executable:
+The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suite uses HTML injection and explicit controlled-storage fixtures because this environment blocks direct loopback navigation. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-```sh
-python3 tests/concepts/companion-assembly.test.py
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 scripts/concepts/run-browser-checks.py
-# Additionally require actual browser Storage, a loopback HTTP origin and two pages:
-CHROMIUM_EXECUTABLE=/path/to/chromium python3 scripts/concepts/run-browser-checks.py --real-storage
-```
-
-The read-only companion workflow provisions its own test-tool environment without changing the root dependency lockfile. It runs assembly rejection tests and all current browser suites, including real-origin storage, and retains raw logs/screenshots and the exact HTML. The local controlled-storage run passed **270 named checks** on one artifact; the **five assembly tests** and **48 authored JavaScript syntax checks** are separate. See the verification record for actual CI status; a requested or merely scheduled run is not passing evidence. Some older suites assert pre-reference layouts and are not part of this current suite.
-
-The Fallow inventory explicitly lists each assembled concept module in an isolated zone. The builder rejects missing or extra module entries. Production import rules and thresholds are unchanged; negative analyzer fixtures guard imports in both directions.
-
-The template has advanced beyond the iteration-03 capabilities used by many concept fixtures. The concept's script inventory and source previews are illustrative, not live detection of current repository capabilities. Production authoring and readiness are documented in the [parent PRD](../../product/PRD.md); the [companion PRD](../../product/COMPANION-PLUGIN-PRD.md) remains a proposed product contract with its dated baseline.
+The builder and Fallow inventory agree on **76 exact inputs: 57 maintained JS, 14 maintained CSS and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 
-No real vault, filesystem adapter, template download, command execution, deployment, activation or publication is performed. Explicit exports download local Markdown/JSON supplied by the user; they do not transmit data. Do not enter secrets. The prototype is not a second production generator or proof that the native template consumes its design schema.
+No real vault access, template acquisition, process execution, dependency installation, deployment, activation or publication occurs in the concept. Native Markdown adapters, additive archive hydration and cross-leaf operations remain implementation work. Browser assertions include model, controlled-state, synthetic and geometry checks; they are not all physical-pointer tasks, comprehensive accessibility certification or performance benchmarks.
 
-Browser state may be retained through the existing demo preference. An observed newer snapshot blocks overwriting and exposes a recovery export; this is best-effort conflict detection, not atomic multi-window locking. Recovery exports contain committed in-memory concept state, not unsaved form drafts, and can include private entered information. Invalid/future data is preserved for inspection; a dirty-form unload guard is a browser warning, not durable draft storage. File-origin persistence, native Obsidian behavior, complete accessibility and physical touch/pen/trackpad remain unqualified.
-
-Third-party runtime provenance and license notices remain under [vendor](vendor). No font binaries or extracted host stylesheet are added. The surrounding panels retain concept rendering; the sitemap is the real Vue Flow island, not a claim that the entire companion is already a production Vue/Nuxt UI application.
+Vendor provenance and notices remain under [vendor](vendor). No font binaries or extracted Obsidian stylesheet are added. The sitemap is a real embedded Vue Flow island; the surrounding concept panels are not a claim that a production Vue/Nuxt UI companion is already complete. Existing root-template CLI and native capabilities retain their own [parent PRD](../../product/PRD.md) and qualification records.
