@@ -5,7 +5,7 @@ The subsequent [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
 audit and results. The requirement inventory and earlier candidate figures below
 remain historical context; unlinked evidence is not absent implementation.
 
-Current frozen code `e14c1c303df75a80a8a287ee8d8a66d4efb9b738` has a complete
+Current frozen code `e2758ae47723cc7496fabd0074b76b03db5c4ee2` has a complete
 Linux evidence session with **2 verified / 54 partial / 40 not-run**: AC-06 joins
 AC-03 as verified, while audited links advance 41 previously unlinked cases to partial.
 The [96-row finish ledger](ACCEPTANCE-CLOSURE-LEDGER.md) retains missing clauses

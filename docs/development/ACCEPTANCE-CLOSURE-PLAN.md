@@ -80,3 +80,12 @@ add no retries, blanket cleanup suppression or speculative process-tree changes.
 Do not export environment/Git configuration secrets. Independent review and real
 positive/negative controls precede a new frozen candidate. Earlier candidates and
 failed checks remain distinct; their results cannot be relabeled as the new source.
+
+## Final evidence delivery after external merge
+
+PR #11 was merged externally at 2026-09-23 21:41:14 UTC as
+`fc3400473d4183d3668d8525c6d5ed18a9b4667d`, before the completed evidence-only
+commit was pushed. Its tree equals qualified code `e2758ae`. Parent confirmed the
+merge, fetched/pruned and fast-forwarded clean main. Documentation-only PR #12
+delivers the final records; the active worktree remains for that unmerged follow-up
+and the explicitly preserved evidence. No PR merge was performed by this task.

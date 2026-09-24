@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "kind": "read-only-retained-candidate-audit",
   "status": "audited",
-  "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+  "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
   "scope": "Read-only retained Linux CI artifact consistency audit. No test/host/producers rerun; no local environment freshness, honest-execution attestation or release authorization claim.",
   "run": {
-    "id": 35913168402,
-    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913168402",
+    "id": 35920589427,
+    "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589427",
     "conclusion": "success",
-    "artifactId": 10774635895,
-    "archiveSha256": "72420d56630aea47ca4c14da93b0c7e1ff40648f7f96ca40c4996e7fbbb55c84"
+    "artifactId": 10777636160,
+    "archiveSha256": "5507416317b61a7524587f2a91e47fbe0593e05f058f850b420f0b583b3232a7"
   },
   "candidate": {
-    "recordSha256": "33b82299f9948fc3f7ae12f616434b6e26e0609f5dd629d43bbaba712944db39",
+    "recordSha256": "809aaf261c9851612ffc51eb611df387c23d16b5af0be85baa7cbdab7d619474",
     "lockSha256": "a3441564d8f267be967fd1cec1156f701bd324353cd26f76ed159b510b03b723",
     "tools": {
       "node": "v24.21.0",
@@ -51,30 +51,30 @@
     "serializerRenderedLength": 171883
   },
   "execution": {
-    "inputDigest": "5b029e21c04080bd7b64f8672421afb1e932ed47b7f6036c1bae086b3a24e3ec",
-    "sourceInputsDigest": "faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1",
+    "inputDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+    "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
     "rawReceiptFilesVerified": 32,
     "totalRuns": 10,
     "packets": [
       {
-        "id": "dd497b49-4a00-417f-84a9-f1ec5726df43",
+        "id": "1a5170a1-ae83-4eb4-b0b4-a688d2114975",
         "producer": "tooling",
-        "sha256": "8b2dc479238a5143b337489eb3a8553f5b7df83f7ffb0760bac00d06047038b3",
+        "sha256": "b78a1cc960f5fa8c6a22b43122a8aae26112054db77e579468d63266e192bf0b",
         "counts": {
-          "total": 173,
-          "passed": 169,
+          "total": 178,
+          "passed": 174,
           "expectedPlatformSkips": 4
         },
-        "suites": 37,
+        "suites": 38,
         "modes": [
           "node-baseline",
           "tooling-generated"
         ]
       },
       {
-        "id": "39e9828d-fda1-486d-a857-0e839d22f063",
+        "id": "a9f07fb8-06db-4f5d-ac66-94bfce3f144c",
         "producer": "runtime",
-        "sha256": "40545642e6f5468a3317d319dc8b6aeea56c47d7522f6d68d5a968f5bceb74e2",
+        "sha256": "798ff0b52feae54e5a5f4693ed3677bce5c79d721633fc0d8d1334483716f66b",
         "counts": {
           "total": 312,
           "passed": 312,
@@ -87,9 +87,9 @@
         ]
       },
       {
-        "id": "8b3423a6-aefb-4387-b25d-3768e6c1a90c",
+        "id": "3a6e75cd-7cdb-4c5a-951c-4f3d34621530",
         "producer": "runtime",
-        "sha256": "8e37aeed3cdfc831be35326a882668b7e0095d4d13067782901be2b34ba60697",
+        "sha256": "a56819f30ec4d1d5734cf678b0c8caac928637539223320c7aae465c8d3867e0",
         "counts": {
           "total": 312,
           "passed": 312,
@@ -102,9 +102,9 @@
         ]
       },
       {
-        "id": "a5be85c2-cbd1-4e1c-8804-9ae460a77d79",
+        "id": "be356918-0afe-40e7-8f33-8e06cc93836e",
         "producer": "runtime",
-        "sha256": "2f863ad51cb4d7421108d0ce1e68b49002f28396a878ff92c1ec7cca02be0dab",
+        "sha256": "6221c66847de5205aef413b5246f41f87209c405e191e113ef958452dc722d47",
         "counts": {
           "total": 312,
           "passed": 312,
@@ -117,9 +117,9 @@
         ]
       },
       {
-        "id": "a6b38fbf-9023-4de9-ad5e-da91ae62c988",
+        "id": "8668b6a1-9d40-4122-adec-505a829fbf87",
         "producer": "coverage",
-        "sha256": "eb7adf4dc830170bd1866e233ba3ab05df464ac2eb9f71275df2d776999b795d",
+        "sha256": "fb925bac1d5774ff1460d59ed8905322bdf1eeffe1a933d9f3ff624820b4fc92",
         "counts": {
           "total": 312,
           "passed": 312,
@@ -132,9 +132,9 @@
         ]
       },
       {
-        "id": "783b2051-3c94-46f5-abb3-2c9252989bb9",
+        "id": "a6c2ddb7-0f92-4005-91cb-65d17ad3283a",
         "producer": "artifact",
-        "sha256": "c4370f6a6da102ba43a2fc25f7b462801396f615b6c38a990ff4c559bbf88ea0",
+        "sha256": "6ba8de847a079b511140df7989b043b13af4985240381ffb65ce6cc008d94d84",
         "counts": {
           "total": 1,
           "passed": 1,
@@ -146,9 +146,9 @@
         ]
       },
       {
-        "id": "224c6e64-d1a6-4a69-80ce-e41fde11887d",
+        "id": "36781b32-21e6-4172-a26b-2e9f9f6c3660",
         "producer": "browser",
-        "sha256": "98c406caeec58f7b231dfa29ddf0f102264c5f7fb32747b7cee24abd8052e827",
+        "sha256": "dda0a1f8cb094ee5a8f194de04dda518608bbe12e37f2f1c0a3d6c2f5a1d3aca",
         "counts": {
           "total": 35,
           "passed": 35,
@@ -160,9 +160,9 @@
         ]
       },
       {
-        "id": "197ab9d6-99a9-49e7-9fc8-e06f1848abc4",
+        "id": "7a2f643b-322a-46b4-bcea-c7aae7d2eced",
         "producer": "native",
-        "sha256": "8c4a211ffd63324f502c0460a7b0dde50bd7e045d806c45a98cdd1d09a6ddfe9",
+        "sha256": "b5a35ca661cd536cf3a691687f0da84818e71ae482c50b0c4167e26752ec830d",
         "counts": {
           "total": 31,
           "passed": 31,
@@ -174,9 +174,9 @@
         ]
       },
       {
-        "id": "ab5b86a9-f3d6-4e0c-bb24-4ecff7515af6",
+        "id": "89ea2fea-bd46-4660-be2d-fb580ad99f97",
         "producer": "native",
-        "sha256": "a6b35ecc6a67f193f1e14da8df3858683f3774c704449195f845e830d8e9820b",
+        "sha256": "86a3ef7b4de0cbab14e8a635cee9558762ff95316a16028be8dbb52ba5ee48f4",
         "counts": {
           "total": 31,
           "passed": 31,
@@ -188,9 +188,9 @@
         ]
       },
       {
-        "id": "5ad76bad-fb30-4624-9888-dba936808598",
+        "id": "d6350ac1-ccb1-49e2-97b5-f852890da9ed",
         "producer": "native",
-        "sha256": "c64ee57ca0c61e1f246cc9bbe03f71cfd0002d103c224491da1dd8dafb5abc24",
+        "sha256": "7374c19f42e226a6b8c364ea15248f0223c0e6696c4312e475ccb16442ea3499",
         "counts": {
           "total": 31,
           "passed": 31,
@@ -1697,8 +1697,8 @@
     }
   },
   "maintainability": {
-    "report": "reports/maintainability/2026-09-23T20-03-26-153Z/report.json",
-    "sha256": "41ee0d46d0af2addfd4fdb9c7b80d8b09ebc98632c008e126df7ae18bf750fb2",
+    "report": "reports/maintainability/2026-09-23T21-11-54-340Z/report.json",
+    "sha256": "6027a1f5ed40a51ef2ba13e8e88fd44aa62cb0e96ae2c0f6ba5ba80722d1574a",
     "status": "passed",
     "policy": {
       "version": 1,
@@ -1760,18 +1760,19 @@
   "native": {
     "scope": [
       "Not a new native execution or trusted producer packet. No host launched; retained evidence read-only.",
-      "Page errors observed only while CDP connected; page-close receipts are driver events and do not establish postdisconnect renderer behavior.",
-      "No cleanup failure recorded is the original driver result, not an independent process inventory.",
-      "Passing later qualification does not explain or erase historical Windows theme or Linux illegal-access failures.",
-      "The separate performance session is shared-runner advisory, not a controlled reference."
+      "Page errors observable only while CDP connected; close receipts do not establish postdisconnect renderer behavior.",
+      "No cleanup failure recorded is original driver output, not independent process inventory.",
+      "Later qualification does not explain or erase earlier Windows theme or Linux illegal-access failures.",
+      "Separate performance session is shared-runner advisory, not controlled reference.",
+      "Earlier e14 audit remains separately retained; none of its executions are relabeled as e2758ae."
     ],
     "reports": [
       {
         "file": "reports/native-run-1/report.json",
-        "bytes": 11802,
-        "sha256": "c6ef985edbd8f752deff3733f1dd133636348b6c99fa21d378b681f6f4afb0a6",
-        "attempt": "2026-09-23T20-07-33.120Z-22312",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+        "bytes": 12197,
+        "sha256": "0a0a7e803ff392f51f4a5f17ce7c972b8344d24f0abcd0f70a4dd7f5c2c47994",
+        "attempt": "2026-09-23T21-18-12.492Z-22665",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
         "status": "passed",
         "checkCount": 31,
         "rendererErrorCount": 0,
@@ -1815,7 +1816,7 @@
         "timeline": {
           "schemaVersion": 1,
           "clock": "driver Date/performance.now receipt time; not renderer throw time",
-          "eventCount": 25,
+          "eventCount": 27,
           "kindCounts": [
             {
               "kind": "observer-disposed",
@@ -1823,11 +1824,11 @@
             },
             {
               "kind": "page-close",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "page-observed",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "phase",
@@ -1838,13 +1839,15 @@
             1,
             2,
             3,
-            4
+            4,
+            5
           ],
           "closedPageIds": [
             3,
             1,
             2,
-            4
+            4,
+            5
           ],
           "phaseSequence": [
             "initial-smoke",
@@ -1869,17 +1872,17 @@
           "monotonicAndUtcOrderVerified": true
         },
         "hostLog": {
-          "file": "reports/native-run-1/attempts/2026-09-23T20-07-33.120Z-22312/host.log",
+          "file": "reports/native-run-1/attempts/2026-09-23T21-18-12.492Z-22665/host.log",
           "bytes": 910,
-          "sha256": "dcf284b097efcf34abc2630b852a716ec4a11838fb3ed199da89b005920acc00"
+          "sha256": "e94e14bbbbe9300d978fc31c5ce514e8cf9c085d626047d7414549d5e846dbb8"
         }
       },
       {
         "file": "reports/native-run-2/report.json",
-        "bytes": 11772,
-        "sha256": "0bc23dd75d209b685f86f3d84a4419bead79c2c1822727a6eef159d966ea5c29",
-        "attempt": "2026-09-23T20-08-04.074Z-22588",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+        "bytes": 12194,
+        "sha256": "9f88ec23dbdd5715b068c4b561865126d8449f485999079616f583e55cb74759",
+        "attempt": "2026-09-23T21-18-39.343Z-22944",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
         "status": "passed",
         "checkCount": 31,
         "rendererErrorCount": 0,
@@ -1923,7 +1926,7 @@
         "timeline": {
           "schemaVersion": 1,
           "clock": "driver Date/performance.now receipt time; not renderer throw time",
-          "eventCount": 25,
+          "eventCount": 27,
           "kindCounts": [
             {
               "kind": "observer-disposed",
@@ -1931,11 +1934,11 @@
             },
             {
               "kind": "page-close",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "page-observed",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "phase",
@@ -1946,13 +1949,15 @@
             1,
             2,
             3,
-            4
+            4,
+            5
           ],
           "closedPageIds": [
             3,
             1,
             2,
-            4
+            4,
+            5
           ],
           "phaseSequence": [
             "initial-smoke",
@@ -1977,17 +1982,17 @@
           "monotonicAndUtcOrderVerified": true
         },
         "hostLog": {
-          "file": "reports/native-run-2/attempts/2026-09-23T20-08-04.074Z-22588/host.log",
+          "file": "reports/native-run-2/attempts/2026-09-23T21-18-39.343Z-22944/host.log",
           "bytes": 910,
-          "sha256": "2f330af69ab0701ad79da65c9a9242a4c5354ca41d48ff89702e2c292a38633e"
+          "sha256": "3bc0147254a4a7aa68dfa65d5fd7b1e02482d7823664742c996005d94089a225"
         }
       },
       {
         "file": "reports/native-run-3/report.json",
-        "bytes": 11771,
-        "sha256": "6e0c6bd8d60ab7b2fdd1b900f371179e2f5d318bb93d8afc717c31846c3eaddc",
-        "attempt": "2026-09-23T20-08-24.125Z-22848",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+        "bytes": 12192,
+        "sha256": "21bcc9ecd253a3aa96caab345d3f7002416241c8c966a8d646a461af20a8e4fd",
+        "attempt": "2026-09-23T21-19-02.161Z-23215",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
         "status": "passed",
         "checkCount": 31,
         "rendererErrorCount": 0,
@@ -2031,7 +2036,7 @@
         "timeline": {
           "schemaVersion": 1,
           "clock": "driver Date/performance.now receipt time; not renderer throw time",
-          "eventCount": 25,
+          "eventCount": 27,
           "kindCounts": [
             {
               "kind": "observer-disposed",
@@ -2039,11 +2044,11 @@
             },
             {
               "kind": "page-close",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "page-observed",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "phase",
@@ -2054,13 +2059,15 @@
             1,
             2,
             3,
-            4
+            4,
+            5
           ],
           "closedPageIds": [
             3,
             1,
             2,
-            4
+            4,
+            5
           ],
           "phaseSequence": [
             "initial-smoke",
@@ -2085,17 +2092,17 @@
           "monotonicAndUtcOrderVerified": true
         },
         "hostLog": {
-          "file": "reports/native-run-3/attempts/2026-09-23T20-08-24.125Z-22848/host.log",
+          "file": "reports/native-run-3/attempts/2026-09-23T21-19-02.161Z-23215/host.log",
           "bytes": 910,
-          "sha256": "ccb46bb80514574c4671f29d8bfb77f97f078e5310193fa56bf1a305dfb1fb30"
+          "sha256": "7ca20146397c9c66d034f21af8319134d02e96445e46d61a1c960a44e261fb71"
         }
       },
       {
         "file": "reports/native/report.json",
-        "bytes": 46686,
-        "sha256": "1621f532cfe8f54922909112b1346611762d3b412377c39d0cfe7e08e70548c8",
-        "attempt": "2026-09-23T20-08-43.976Z-23107",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+        "bytes": 47014,
+        "sha256": "0e88a7d812279ebc0ac340807f5acb8dc3ad16b51d447c4609e7a83fb4af242d",
+        "attempt": "2026-09-23T21-19-24.266Z-23469",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
         "status": "passed",
         "checkCount": 31,
         "rendererErrorCount": 0,
@@ -2139,7 +2146,7 @@
         "timeline": {
           "schemaVersion": 1,
           "clock": "driver Date/performance.now receipt time; not renderer throw time",
-          "eventCount": 25,
+          "eventCount": 27,
           "kindCounts": [
             {
               "kind": "observer-disposed",
@@ -2147,11 +2154,11 @@
             },
             {
               "kind": "page-close",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "page-observed",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "phase",
@@ -2162,13 +2169,15 @@
             1,
             2,
             3,
-            4
+            4,
+            5
           ],
           "closedPageIds": [
             3,
             1,
             2,
-            4
+            4,
+            5
           ],
           "phaseSequence": [
             "initial-smoke",
@@ -2193,67 +2202,66 @@
           "monotonicAndUtcOrderVerified": true
         },
         "hostLog": {
-          "file": "reports/native/attempts/2026-09-23T20-08-43.976Z-23107/host.log",
+          "file": "reports/native/attempts/2026-09-23T21-19-24.266Z-23469/host.log",
           "bytes": 910,
-          "sha256": "ea5d9e670b56a01d006c387bef702d9d34d988fa7b591fab26905ad13eba2f4d"
+          "sha256": "e5576a53745e0e1dc663f93a85cc89aa6adeb6a6a7a65df7a9519473a7c8d952"
         }
       }
     ],
     "packets": [
       {
-        "id": "197ab9d6-99a9-49e7-9fc8-e06f1848abc4",
+        "id": "7a2f643b-322a-46b4-bcea-c7aae7d2eced",
         "status": "passed",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
-        "sourceDigest": "5b029e21c04080bd7b64f8672421afb1e932ed47b7f6036c1bae086b3a24e3ec",
-        "sourceInputsDigest": "faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
         "unchangedBeforeAfter": true,
         "exitCode": 0,
         "retry": 0,
         "rawNative": {
           "file": "raw-native.txt",
-          "bytes": 11802,
-          "sha256": "c6ef985edbd8f752deff3733f1dd133636348b6c99fa21d378b681f6f4afb0a6"
+          "bytes": 12197,
+          "sha256": "0a0a7e803ff392f51f4a5f17ce7c972b8344d24f0abcd0f70a4dd7f5c2c47994"
         }
       },
       {
-        "id": "5ad76bad-fb30-4624-9888-dba936808598",
+        "id": "89ea2fea-bd46-4660-be2d-fb580ad99f97",
         "status": "passed",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
-        "sourceDigest": "5b029e21c04080bd7b64f8672421afb1e932ed47b7f6036c1bae086b3a24e3ec",
-        "sourceInputsDigest": "faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
         "unchangedBeforeAfter": true,
         "exitCode": 0,
         "retry": 0,
         "rawNative": {
           "file": "raw-native.txt",
-          "bytes": 11771,
-          "sha256": "6e0c6bd8d60ab7b2fdd1b900f371179e2f5d318bb93d8afc717c31846c3eaddc"
+          "bytes": 12194,
+          "sha256": "9f88ec23dbdd5715b068c4b561865126d8449f485999079616f583e55cb74759"
         }
       },
       {
-        "id": "ab5b86a9-f3d6-4e0c-bb24-4ecff7515af6",
+        "id": "d6350ac1-ccb1-49e2-97b5-f852890da9ed",
         "status": "passed",
-        "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
-        "sourceDigest": "5b029e21c04080bd7b64f8672421afb1e932ed47b7f6036c1bae086b3a24e3ec",
-        "sourceInputsDigest": "faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1",
+        "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+        "sourceDigest": "66512113fb34a8912b9073df1ca7a4dd4fc7d21f3a3ec5b045d06c15b1fcc811",
+        "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
         "unchangedBeforeAfter": true,
         "exitCode": 0,
         "retry": 0,
         "rawNative": {
           "file": "raw-native.txt",
-          "bytes": 11772,
-          "sha256": "0bc23dd75d209b685f86f3d84a4419bead79c2c1822727a6eef159d966ea5c29"
+          "bytes": 12192,
+          "sha256": "21bcc9ecd253a3aa96caab345d3f7002416241c8c966a8d646a461af20a8e4fd"
         }
       }
     ],
     "uniqueAttempts": 4,
-    "duplicateAttemptNote": "native-run-3 attempt is also retained under reports/native before the fourth performance attempt.",
     "performance": {
-      "file": "reports/native/attempts/2026-09-23T20-08-43.976Z-23107/performance.json",
-      "bytes": 32531,
-      "sha256": "371932f0e63c3362bb542afc15ccc26e60efe207408391367bb8e3ece14b7300",
-      "sourceCommit": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
-      "sourceInputsDigest": "faf4a176492234d512a352f5399f2c98c98f2aa11432b61566ac90b8249e3cd1",
+      "file": "reports/native/attempts/2026-09-23T21-19-24.266Z-23469/performance.json",
+      "bytes": 32442,
+      "sha256": "cbeb2be17a6bce2967d0adda810fd88ca1bc81dc3991d948777c9bbdce8f96be",
+      "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+      "sourceInputsDigest": "b1f178ad8d8cf49418eb5720918b2a204561bee498e3ae2cbc11b536292736c3",
       "status": "passed",
       "classification": "shared-runner",
       "protocolSha256": "207d39c37adfbb27ea9ac73f98629a8550ab4c6ee0611d2940920cd860e12dbe",
@@ -2278,10 +2286,10 @@
         "release": "6.17.0-1022-azure",
         "arch": "x64",
         "cpus": [
-          "AMD EPYC 9V45 96-Core Processor",
-          "AMD EPYC 9V45 96-Core Processor",
-          "AMD EPYC 9V45 96-Core Processor",
-          "AMD EPYC 9V45 96-Core Processor"
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor",
+          "AMD EPYC 7763 64-Core Processor"
         ],
         "totalMemory": 16766414848,
         "node": "v24.21.0",
@@ -2344,13 +2352,13 @@
             31,
             32
           ],
-          "p95Ms": 9.099999999976717,
-          "minMeasuredMs": 3.3999999999650754,
-          "maxMeasuredMs": 9.800000000046566,
+          "p95Ms": 16.099999999976717,
+          "minMeasuredMs": 5.699999999953434,
+          "maxMeasuredMs": 16.79999999993015,
           "reported": {
             "kind": "warm-initialization",
             "samples": 30,
-            "p95Ms": 9.099999999976717,
+            "p95Ms": 16.099999999976717,
             "budgetMs": 200,
             "withinProposedBudget": true
           }
@@ -2396,13 +2404,13 @@
             31,
             32
           ],
-          "p95Ms": 85.70000000001164,
-          "minMeasuredMs": 44.70000000001164,
-          "maxMeasuredMs": 100.70000000001164,
+          "p95Ms": 102.30000000004657,
+          "minMeasuredMs": 79.80000000004657,
+          "maxMeasuredMs": 140.40000000002328,
           "reported": {
             "kind": "items-readiness",
             "samples": 30,
-            "p95Ms": 85.70000000001164,
+            "p95Ms": 102.30000000004657,
             "budgetMs": 500,
             "withinProposedBudget": true
           }
@@ -2437,24 +2445,24 @@
     "node": "v24.21.0",
     "jsonExit": 0,
     "ordinaryExit": 0,
-    "capturedAt": "2026-09-23T20:09:10.187Z"
+    "capturedAt": "2026-09-23T21:19:58.018Z"
   },
   "archiveInventory": [
     {
-      "file": "reports/acceptance-closure/qualified-e14c1c3.zip",
-      "sha256": "72420d56630aea47ca4c14da93b0c7e1ff40648f7f96ca40c4996e7fbbb55c84",
-      "entries": 1340,
+      "file": "reports/acceptance-closure/qualified-e2758ae.zip",
+      "sha256": "5507416317b61a7524587f2a91e47fbe0593e05f058f850b420f0b583b3232a7",
+      "entries": 1365,
       "fontEntries": []
     },
     {
-      "file": "reports/acceptance-closure/qualified-e14c1c3-clean/reports/candidate-qualification/candidate-source.zip",
-      "sha256": "5d2edd0b345e2df581ebf7b4d81a23848d1e964329034f963bfcb44a2e17ede5",
-      "entries": 601,
+      "file": "reports/acceptance-closure/qualified-e2758ae/reports/candidate-qualification/candidate-source.zip",
+      "sha256": "1bdd700c987e293878eccee2fbc8fa032a19d0c43efde5388c99a772583b8f93",
+      "entries": 610,
       "fontEntries": []
     },
     {
-      "file": "reports/acceptance-closure/qualified-e14c1c3-clean/candidate-plugin.zip",
-      "sha256": "3bc82f9830363aa1a1ee0bc2f2bee16f96fc62aafc8c6f234da6779f063bdb54",
+      "file": "reports/acceptance-closure/qualified-e2758ae/candidate-plugin.zip",
+      "sha256": "39f44412a4e2cc3f2ba9bbbe8428806cee58d57f663ae51c48251267b6c6f7b9",
       "entries": 4,
       "fontEntries": []
     }
@@ -2463,77 +2471,262 @@
     "Separate Windows setup-matrix UI-03-04 timeout remains unresolved after one non-reproducing bounded diagnostic; the Linux session does not erase it.",
     "Prior native failures remain unresolved; no runtime fix or current Windows native execution is claimed.",
     "Production Vue template aggregates remain separate from source-function limits.",
-    "Unsupported nested ESLint graph, manual/device breadth and owner-authorized release operations remain open."
+    "Unsupported nested ESLint graph, manual/device breadth and owner-authorized release operations remain open.",
+    "Prior Windows archive-fixture EBUSY remains unexplained; corrected command/error receipts establish diagnostic preservation, not a root-cause fix."
   ],
+  "archiveCommandAudit": {
+    "schemaVersion": 1,
+    "status": "audited",
+    "sourceCommit": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
+    "scope": "Read-only retained Linux archive-analyzer command receipts; no rerun and no explanation of historical Windows EBUSY.",
+    "attempts": [
+      {
+        "id": "c6138f4d-79fe-42da-87fd-758c8b152dd6",
+        "reportSha256": "367115633e835c8cea6c58f6d70431635e4ec942f3ab8a1afe52cb963ceea25c",
+        "workStatus": "passed",
+        "bodyCompleted": true,
+        "cleanupStatus": "passed",
+        "receipts": [
+          {
+            "index": 1,
+            "file": "git",
+            "args": [
+              "init",
+              "--quiet"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 6.051351999999952,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "352e31cf86648b0ec5205ff11848342102ba6110bf25610b75b9032665695e09",
+            "resultSha256": "f0b77adfe78730d0cfa0c97e44c0ba167bd62fa5292ee57df6f86e49f909b7d7"
+          },
+          {
+            "index": 2,
+            "file": "git",
+            "args": [
+              "-c",
+              "core.autocrlf=false",
+              "add",
+              "--all"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 105.368832,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "7da059a1d0a5468aad89320e6ecef7ce1a6aefc7ffef603917d11dc42e6e1725",
+            "resultSha256": "ee91bc3d38381beb769ecddeb6aefbe0d4ab94ce99fe78429c2333f3cfdd8d21"
+          },
+          {
+            "index": 3,
+            "file": "git",
+            "args": [
+              "write-tree"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 15.851162000000045,
+            "stdoutBytes": 41,
+            "stderrBytes": 0,
+            "startedSha256": "d7daa13326c454d4e15823335dcc9ed6291d0b2bb0908a644a96f71dc1da7d8a",
+            "resultSha256": "7f4e8f10d12d556ab53c49aed897b8905eacb30218e3485f6b8f4330a50db3f5"
+          },
+          {
+            "index": 4,
+            "file": "git",
+            "args": [
+              "archive",
+              "--format=tar",
+              "--output=/tmp/analyzer-archive-5mXVpo/source.tar",
+              "e086d95f23043b162db05cd293038bb06c305c60"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 32.77882499999998,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "5856a8e0555a9d3fd1234fe565ceb43698f8cb0ba384e67f7c4ec41cd8656557",
+            "resultSha256": "36b742f04ae92fa5f57dc5d4e5e5a0600a61935ec49596f3c2fca26f31334711"
+          },
+          {
+            "index": 5,
+            "file": "tar",
+            "args": [
+              "-xf",
+              "/tmp/analyzer-archive-5mXVpo/source.tar",
+              "-C",
+              "/tmp/analyzer-archive-5mXVpo/extracted"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 17.89435100000003,
+            "stdoutBytes": 0,
+            "stderrBytes": 0,
+            "startedSha256": "45db359a259a965f65dab69d7e25819fad6f85d992b1e6ac18fb149aa46b1c26",
+            "resultSha256": "cbb4e3cf6f461cded2340e1234b89959cf779cbe1cd0318fa022f9d988b72b9b"
+          },
+          {
+            "index": 6,
+            "file": "git",
+            "args": [
+              "rev-parse",
+              "--show-toplevel"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 128,
+            "durationMs": 3.0558619999999337,
+            "stdoutBytes": 0,
+            "stderrBytes": 69,
+            "startedSha256": "cde6dcaaca3130cfcf7e3b306c2f9f61f5f52c3f27f9f3678821ebb877b32bb3",
+            "resultSha256": "62daa75b58153b9c1d6c7ea0fff4b17504d923e7e6374d583926ac1edb8ef89b"
+          },
+          {
+            "index": 7,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 325.8995319999999,
+            "stdoutBytes": 100,
+            "stderrBytes": 0,
+            "startedSha256": "2e73363777d5d413340d0a7c52235c830559cf2a899b75a8a5ea9b53302d33fa",
+            "resultSha256": "c10cf09ba601d4768548ff7ba189b4a4df33eba652c1299b5cb70f617e6ab87d"
+          },
+          {
+            "index": 8,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 1,
+            "durationMs": 264.552553,
+            "stdoutBytes": 0,
+            "stderrBytes": 3147,
+            "startedSha256": "67d3065d17dc24f0fde9f9064834635cdd658115878e88486c090c6c797b965b",
+            "resultSha256": "9f1131871f7cc163ceb53551a2cf8d6a9ecfeb8c769c17037cea3961fc478920"
+          },
+          {
+            "index": 9,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 1,
+            "durationMs": 274.25939900000003,
+            "stdoutBytes": 0,
+            "stderrBytes": 3251,
+            "startedSha256": "594323b6cf9be93f3efd01926e26f69303151b9e43716bda19da4e004be436a7",
+            "resultSha256": "603a5c621babd0b177da002bad48260b86c7fa0f06665963fa9a3030a1392b65"
+          },
+          {
+            "index": 10,
+            "file": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+            "args": [
+              "scripts/quality/check-analyzer.mjs"
+            ],
+            "timeoutMs": 60000,
+            "maxBufferBytes": 12582912,
+            "status": 0,
+            "durationMs": 243.33399000000009,
+            "stdoutBytes": 100,
+            "stderrBytes": 0,
+            "startedSha256": "da4d3ac0b0fb9e85ce8207bfbda5328fbd3005a5439a756bba971adb6f3e7806",
+            "resultSha256": "f7ff470c88e7f7da87320c2b7097632f240d3285cb4c7a3931f23cbdc81bc026"
+          }
+        ]
+      }
+    ]
+  },
+  "previousMilestoneCheckpoints": {
+    "qualifiedCode": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+    "evidenceOnly": "7a292e40dde61dc6ea4134caa9b5b88093fc3cb7",
+    "candidateAudit": "acceptance-closure-e14c1c3-candidate.json",
+    "consumerAudit": "acceptance-closure-e14c1c3-consumer.json"
+  },
   "codeHeadChecks": {
-    "headRefOid": "e14c1c303df75a80a8a287ee8d8a66d4efb9b738",
+    "headRefOid": "e2758ae47723cc7496fabd0074b76b03db5c4ee2",
     "baseRefName": "main",
     "checks": [
       {
         "name": "candidate",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913168402/job/107357875841"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589427/job/107383236064"
       },
       {
         "name": "Baseline / ubuntu-latest",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221383/job/107358066282"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593871/job/107383248020"
       },
       {
         "name": "ubuntu-latest / Node 24.15.0 / npm 12.0.2",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221327/job/107358066034"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248576"
       },
       {
         "name": "Showcase / ubuntu-latest",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221470/job/107358066406"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593968/job/107383248554"
       },
       {
         "name": "renamed-feature",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221382/job/107358065643"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593882/job/107383248029"
       },
       {
         "name": "renamed-feature",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913168383/job/107357875818"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920589679/job/107383233118"
       },
       {
         "name": "Baseline / windows-latest",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221383/job/107358066068"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593871/job/107383247901"
       },
       {
         "name": "windows-latest / Node 24.15.0 / npm 12.0.2",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221327/job/107358066127"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248840"
       },
       {
         "name": "Showcase / windows-latest",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221470/job/107358065965"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593968/job/107383248059"
       },
       {
         "name": "ubuntu-latest / Node 24.21.0 / npm 11.19.1",
         "status": "COMPLETED",
         "conclusion": "SUCCESS",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221327/job/107358066064"
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248481"
       },
       {
         "name": "windows-latest / Node 24.21.0 / npm 11.19.1",
         "status": "COMPLETED",
-        "conclusion": "FAILURE",
-        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35913221327/job/107358065660"
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/35920593891/job/107383248722"
       },
       {
         "name": "GitGuardian Security Checks",
