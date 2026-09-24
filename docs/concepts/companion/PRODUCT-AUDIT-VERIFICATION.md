@@ -37,6 +37,18 @@ The product-audit script was rerun after improving its contrast screenshot captu
 
 The CI workflow `companion-concept-verification.yml` already runs source checks with qualified Node, all maintained browser suites and actual-origin storage, then preserves raw reports and the exact HTML in `companion-browser-evidence` plus a separate source archive. Inspect the runs attached to the final PR head and their artifacts; a previous green head is not evidence for this candidate. Final-head run URLs/results belong in the PR handover after those runs actually complete.
 
+## Verified delivery CI
+
+The [guarded delivery run](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36034211986) completed successfully. It reconstructed the reviewed source changes, checked their before/after hashes, rebuilt the exact HTML above, ran the source and browser checks, then pushed source commit **`e4598ffe3ffff83d4ab28deb094d2a182a59a14a`** onto PR #5 without a force push.
+
+**845 named browser assertions passed across 16 suites**, including **11 actual HTTP-origin/two-window Storage checks**. This resolves the local-origin execution gap for this artifact; it does not claim native Obsidian or file-origin persistence. The 67 product-audit checks and all prior maintained suites passed. The source steps also passed 27 executable test-data tests, 10 assembly/inventory tests and syntax checks of all 75 authored JavaScript modules using Node 24.21.0. Local Python parsing remains the separately recorded local check.
+
+The [CI evidence artifact](https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36034211986/artifacts/10824620321) was downloaded and independently reopened. Its ZIP SHA-256 is `3e24b97ec90f3826b1a7929665f0bd54b4945339baeac2cb4263764370e54ddf`. The HTML is byte-identical to the reviewed candidate. Each of the 16 raw reports has the expected artifact hash, only passing named assertions, and no observed page errors or unexpected requests. The browser count is not added to the 834 local assertions or previous iterations.
+
+**Evidence boundary:** the run started from staging commit `dd2680995baf8037c025e5b3bd7ac47202b08040`, applied the checksum-locked candidate and tested that working tree before creating the source commit. It is exact-candidate/branch evidence, not a final PR merge-snapshot or full root-template qualification. Cleanup removes only the temporary delivery files and adds this verification record; it does not change the tested concept or test implementation.
+
+The concurrent PR #16 roadmap merge `c3a9f2cf5d306101181b01f7dea913dc375adec1` was preserved. During delivery, `main` advanced to framework-lifecycle merge `9a48b65660d6bbd66bac9aff2cb73627e1f38211` and GitHub reported PR merge conflicts. This audit does not merge or overwrite that work. Reconcile the branch with current `main` and run the full root/PR checks before claiming merge readiness. The earlier green baseline workflows are not evidence that this integration has passed.
+
 ## Reproduction
 
 ```sh
