@@ -1,8 +1,7 @@
 name: Temporary companion product-audit delivery
 on:
-  pull_request:
-    branches: [main]
-    types: [synchronize]
+  push:
+    branches: [docs/companion-plugin-prd]
     paths:
       - '.github/companion-product-audit-delivery/**'
       - '.github/workflows/companion-product-audit-delivery.yml'
@@ -13,14 +12,13 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deliver:
-    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.event.pull_request.number == 5 && github.event.pull_request.head.ref == 'docs/companion-plugin-prd' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/docs/companion-plugin-prd'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
@@ -28,7 +26,7 @@ jobs:
       - name: Apply only the reviewed, checksum-locked concept files
         shell: bash
         env:
-          EXPECTED_EVENT: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_EVENT: ${{ github.sha }}
         run: |
           set -euo pipefail
           python3 -B - <<'PYTHON'
@@ -105,6 +103,31 @@ jobs:
           for file in docs/concepts/companion/src/*.js; do node --check "$file"; done
           node --test tests/tooling/test-data-*.checks.mjs
           git diff --cached --check
+      - name: Verify browser behavior and actual two-window storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/companion-browsers"
+          python3 -m venv "$RUNNER_TEMP/companion-browser-env"
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m pip install playwright==1.57.0
+          "$RUNNER_TEMP/companion-browser-env/bin/python" -m playwright install chromium
+          export CHROMIUM_EXECUTABLE=$("$RUNNER_TEMP/companion-browser-env/bin/python" - <<'PYTHON'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              print(pw.chromium.executable_path)
+          PYTHON
+          )
+          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --real-storage
+      - name: Retain exact candidate evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-product-audit-evidence
+          path: |
+            reports/concepts/
+            docs/concepts/companion/index.html
+          retention-days: 7
+          if-no-files-found: error
       - name: Commit tested sources without overwriting newer work
         shell: bash
         run: |
