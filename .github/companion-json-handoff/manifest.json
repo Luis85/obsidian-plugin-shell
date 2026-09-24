@@ -1,0 +1,153 @@
+{
+  "base": "63e2589eaae79d715e6561e5704a46bda0053bb6",
+  "direct": [
+    ".github/workflows/companion-concept-verification.yml",
+    "docs/concepts/companion/PROJECT-JSON-VERIFICATION.md",
+    "docs/concepts/companion/PROJECT-JSON.md",
+    "docs/concepts/companion/src/companion-project.js",
+    "docs/concepts/companion/src/project-transfer.js",
+    "docs/development/COMPANION-PROJECT-JSON.md",
+    "scripts/companion/generate.mjs",
+    "scripts/companion/project-contract.mjs",
+    "scripts/companion/read-project.mjs",
+    "tests/concepts/companion-project-transfer.browser.py",
+    "tests/tooling/companion-project.checks.mjs"
+  ],
+  "files": {
+    ".fallowrc.json": {
+      "before_sha256": "50806b2ca5be3ec3114a5b236cf57750983b6a3d0af33ca39ba56188c01e800c",
+      "after_sha256": "a4630dcd9a294a7c6d662f9ddaf71cabb55f09637e8409d56d367f053b984d0f",
+      "bytes": 10637
+    },
+    ".github/workflows/companion-concept-verification.yml": {
+      "before_sha256": "3d80862433213a2947c0830745d7d55c9930a36408110e8e0094040c18348a1b",
+      "after_sha256": "4b142faafecf2e4bb4c2390e4e8a10017296e33835be3b4765ddb84b4de6a24c",
+      "bytes": 6036
+    },
+    "docs/concepts/companion/PROJECT-JSON-VERIFICATION.md": {
+      "before_sha256": null,
+      "after_sha256": "dc496db010d3a483b3e964c95eb1c0648e57bb90175fcf256d1e858c5cf3e11f",
+      "bytes": 6287
+    },
+    "docs/concepts/companion/PROJECT-JSON.md": {
+      "before_sha256": null,
+      "after_sha256": "d1ccf022b7614452b67c96668137601ae3c5b00aadf36a27a7add29318f03aa8",
+      "bytes": 5086
+    },
+    "docs/concepts/companion/README.md": {
+      "before_sha256": "fc78333ce93a1ca148a4c58d07b361d4408cf44477ed003525e24b8f703cf817",
+      "after_sha256": "cf8d8d3245d7c32bcd2f421bd4844cdf85aaa9ebdaee5c572d8c28f7d345814d",
+      "bytes": 13091
+    },
+    "docs/concepts/companion/companion-project.json": {
+      "before_sha256": null,
+      "after_sha256": "c33f1892d47734e516429c7425b6a3afd1d06799c664dc22b4081463b00ac4d6",
+      "bytes": 147928
+    },
+    "docs/concepts/companion/index.html": {
+      "before_sha256": "c5f7692d2d63e5aa776ff9c7b1a487d055f9da4abe38a062c02fc2ec01657cc0",
+      "after_sha256": "30032f20093f6eeb120ec701ee37bd379714f06f3f76293ad3bf2417d2000f0d",
+      "bytes": 1540936
+    },
+    "docs/concepts/companion/src/base.html": {
+      "before_sha256": "44c8e5a95cb4a3fef6f88b3d8702ce125a4c2673e96c544e7e2173595882b0ba",
+      "after_sha256": "2c73ce18b19918a1e564f9c632ca64489872b85310613f621ddd2f60cb6507cb",
+      "bytes": 91433
+    },
+    "docs/concepts/companion/src/companion-project.js": {
+      "before_sha256": null,
+      "after_sha256": "94406a789e7f763768f8ab3845f2a38f6fd1e84c850de464b0c1a83036a5cf40",
+      "bytes": 19303
+    },
+    "docs/concepts/companion/src/interaction-polish.js": {
+      "before_sha256": "91d4886d5debaf1e2403aac6aefaab5e87debfb318987597d12de1376074f682",
+      "after_sha256": "6592946242ade4c7d034cc17b07ec0fd05d107681e3d62799080801ef0928d45",
+      "bytes": 11287
+    },
+    "docs/concepts/companion/src/project-transfer.js": {
+      "before_sha256": null,
+      "after_sha256": "288d9e0109af6610b5d743a0ff00520e543fe703de0bcc09382e2a77f7884883",
+      "bytes": 15210
+    },
+    "docs/concepts/companion/src/vault-project.js": {
+      "before_sha256": "3d66196eb56bb539ad7660abf5a0ab7a6f1b4c2890b9b4a7cdbb1b962f8b7004",
+      "after_sha256": "f1acf6bdad655f56d0cebc8375045372ba95850bc256950aded2d7f9893dc773",
+      "bytes": 4312
+    },
+    "docs/concepts/companion/src/vault-workspace.js": {
+      "before_sha256": "3eb255b6d4d58f7f55b0db793f9d4c5e5c53664c46b69fa008c8026d19666284",
+      "after_sha256": "62c697d64fb55a3ed7fc1bc4c4e25cbb7e9971ef9366651016525ba26b07dc3d",
+      "bytes": 13726
+    },
+    "docs/concepts/companion/src/workflow-views.js": {
+      "before_sha256": "76d788e211b8c4960b0f027f2b36d7ccf2e5e66a0cab4c6b0836f1ee2b16fe99",
+      "after_sha256": "6e476839aa50604e56f7ace4f95797bacc1d28f53f7af0a2674f096f3d269665",
+      "bytes": 8820
+    },
+    "docs/development/COMPANION-PROJECT-JSON.md": {
+      "before_sha256": null,
+      "after_sha256": "06e34548943c6bf630fd088c6697e2efe65e3e38d8716f8aa425863c4a459dac",
+      "bytes": 9386
+    },
+    "package.json": {
+      "before_sha256": "9f1d7137f1534af39e28c854b40c4d1b13e613acd8ecb09eda33f278259de0ef",
+      "after_sha256": "48bd03ae8d1aa5d73e177640a19be5b6ab49ffda1d20237f61b3458b17b78901",
+      "bytes": 4336
+    },
+    "scripts/companion/generate.mjs": {
+      "before_sha256": null,
+      "after_sha256": "d610ede2dd1af5f380bb9e0a2d9369537d5222fc0d7234ca42099e4142ebf2a7",
+      "bytes": 2089
+    },
+    "scripts/companion/project-contract.mjs": {
+      "before_sha256": null,
+      "after_sha256": "3d985cb87d4ba6fe8fa3e5b40333173852ac0900029c1d214ef889aed7848555",
+      "bytes": 6192
+    },
+    "scripts/companion/read-project.mjs": {
+      "before_sha256": null,
+      "after_sha256": "7fcfe6f8369caf7acba826cb4c37aecdc1c8531fc2ec8c10fb99e977923faf7d",
+      "bytes": 2869
+    },
+    "scripts/concepts/build-companion.py": {
+      "before_sha256": "4f22e7f3f11f38e2ade6b95964738a0c840f47d8e8b7d6fe12056490a64fe91f",
+      "after_sha256": "97503f93d021d0d1223457c0924d86dacd8de27881345cdf09b3ac790d0342a2",
+      "bytes": 16326
+    },
+    "scripts/concepts/run-browser-checks.py": {
+      "before_sha256": "272921f85bfc18d721ae5a076521af6fbd15c81b4f194c3de3e64a59e0ffdcd0",
+      "after_sha256": "dbee793422906320118b77049a15edbedf69c9aaadf74b2c56a4203297a6d639",
+      "bytes": 4154
+    },
+    "scripts/help.mjs": {
+      "before_sha256": "c82946ec0ec0055d30e7c797fd1409bb9645606e67a0902909ef36fe97942115",
+      "after_sha256": "1207d4580f9b1607d3ab8c998ee717303464af5cbb5bda7caa4f3ae7d88b2347",
+      "bytes": 3409
+    },
+    "tests/concepts/companion-assembly.test.py": {
+      "before_sha256": "31569ef3491c1f65ebddaef694cb57e32e657e199376190e9891186f0584c1d9",
+      "after_sha256": "8afb33b4273e74c285a2b672c69825d0459f28b982e544f9142ac4c7c7242567",
+      "bytes": 6179
+    },
+    "tests/concepts/companion-project-transfer.browser.py": {
+      "before_sha256": null,
+      "after_sha256": "5825fffe3cbcaef2f788dceadf8da26d60a3e968c783d6b66047e7a6cbf53520",
+      "bytes": 16722
+    },
+    "tests/concepts/companion-storage.browser.py": {
+      "before_sha256": "b1d606367fbd6e2bbd735248aaf5dcb31f2f63b6871717242a3163bf12244303",
+      "after_sha256": "37fd8456c20969497946c16c48f79f88d56e70dc6d34f0787cb214e8982f6933",
+      "bytes": 8285
+    },
+    "tests/tooling/companion-project.checks.mjs": {
+      "before_sha256": null,
+      "after_sha256": "6fa7c3d5a534bb77c6c45d428582a086eb7420f806aaccdfdc618d729a2ac3a6",
+      "bytes": 9177
+    }
+  },
+  "patches": {
+    "tooling.patch": "0b872bd3956d746b86806998102e0c6e2ecc2abbf2f38e2f2130f9346897f015",
+    "ui.patch": "968956850233b32cdde1242e71af5f5a7f6cbdfc8afabd8d38eb8245cad49c81",
+    "assembly.patch": "ed512453d3660abb757c38e2b8d708ae6d4401bffbe64ac6d46a43e04d634b80"
+  }
+}

@@ -1,0 +1,106 @@
+diff --git a/.fallowrc.json b/.fallowrc.json
+index 18b2625..bb82dbc 100644
+--- a/.fallowrc.json
++++ b/.fallowrc.json
+@@ -124,3 +124,6 @@
+     "docs/concepts/companion/src/workbench.css",
+-    "docs/concepts/companion/src/ui-fields.js"
++    "docs/concepts/companion/src/ui-fields.js",
++    "docs/concepts/companion/src/project-transfer.js",
++    "docs/concepts/companion/src/companion-project.js",
++    "scripts/companion/project-contract.mjs"
+   ],
+diff --git a/package.json b/package.json
+index c60bfa4..8d3416e 100644
+--- a/package.json
++++ b/package.json
+@@ -91,3 +91,4 @@
+     "events:check": "node scripts/events/catalog.mjs --check",
+-    "release:operate": "node scripts/release/cli.mjs"
++    "release:operate": "node scripts/release/cli.mjs",
++    "companion:generate": "node scripts/companion/generate.mjs"
+   },
+diff --git a/scripts/concepts/run-browser-checks.py b/scripts/concepts/run-browser-checks.py
+index 86c45e1..e2203dc 100644
+--- a/scripts/concepts/run-browser-checks.py
++++ b/scripts/concepts/run-browser-checks.py
+@@ -14,2 +14,3 @@ OUT = ROOT / 'reports/concepts'
+ SUITES = [
++    ('project-transfer', 'project-transfer/checks.json'),
+     ('product-audit', 'product-audit/checks.json'),
+@@ -68,3 +69,3 @@ report = {
+     'passed': sum(r.get('passed', 0) for r in results), 'suites': results,
+-    'scope': 'Companion UI plus the explicitly scoped exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, production CLI generation or release qualification.',
++    'scope': 'Companion UI, full-project read-only CLI and the explicitly scoped exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, production CLI generation or release qualification.',
+ }
+diff --git a/scripts/help.mjs b/scripts/help.mjs
+index 340a0e1..e6c3a32 100644
+--- a/scripts/help.mjs
++++ b/scripts/help.mjs
+@@ -5,2 +5,3 @@ npm run setup             Review identity/profile, install exact dependencies an
+ npm run setup -- --help   Identity flags, explicit native migration, dry-run and resume
++npm run companion:generate -- --help  Read a companion JSON export; v1 prints data and writes nothing
+ npm run make -- --list    Discover integrated source recipes and their prerequisites
+diff --git a/tests/concepts/companion-assembly.test.py b/tests/concepts/companion-assembly.test.py
+index 061f36f..af03e9c 100644
+--- a/tests/concepts/companion-assembly.test.py
++++ b/tests/concepts/companion-assembly.test.py
+@@ -21,2 +21,3 @@ class AssemblyContract(unittest.TestCase):
+         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
++        shutil.copytree(ROOT / 'scripts/companion', self.root / 'scripts/companion')
+         shutil.copy(ROOT / '.fallowrc.json', self.root / '.fallowrc.json')
+@@ -107,2 +108,19 @@ class AssemblyContract(unittest.TestCase):
+ 
++    def test_shared_project_contract_changes_the_generated_artifact(self):
++        self.build()
++        before = self.output.read_bytes()
++        shared = self.root / 'scripts/companion/project-contract.mjs'
++        shared.write_text(shared.read_text() + '\n// exact shared contract change\n')
++        self.build()
++        self.assertNotEqual(before, self.output.read_bytes())
++        self.assertIn(b'exact shared contract change', self.output.read_bytes())
++
++    def test_shared_project_contract_requires_analyzer_entry(self):
++        config = self.root / '.fallowrc.json'
++        value = json.loads(config.read_text())
++        value['entry'].remove('scripts/companion/project-contract.mjs')
++        config.write_text(json.dumps(value))
++        with self.assertRaisesRegex(ValueError, 'Shared project contract'):
++            self.build()
++
+     def test_stale_generated_output_is_rejected(self):
+diff --git a/tests/concepts/companion-storage.browser.py b/tests/concepts/companion-storage.browser.py
+index c970c57..bdc9c04 100644
+--- a/tests/concepts/companion-storage.browser.py
++++ b/tests/concepts/companion-storage.browser.py
+@@ -81,2 +81,30 @@ try:
+         check('Reload adopts the latest retained snapshot and clears the conflict', p.evaluate('design().goal==="Newer second-window edit"&&!storageWarning'))
++        p.locator('[data-action="settings"]').first.click()
++        p.locator('#modal [data-action="project-example"]').click()
++        p.locator('#project-import-confirm').check()
++        p.locator('#modal [data-action="project-import-apply"]').click()
++        portable = p.evaluate('companionJson()')
++        p.reload()
++        check('Full companion import survives real-origin reload without restoring execution trust',
++              p.evaluate('companionJson()') == portable and p.evaluate('!project().trusted && project().phase==="planning"'))
++        p.locator('[data-action="settings"]').first.click()
++        p.locator('#modal [data-action="project-folders"]').click()
++        p.locator('#f-project-codebase-folder').fill('plugin/src')
++        p.locator('#f-project-tests-folder').fill('plugin/tests')
++        p.locator('#modal [data-action="project-folders-save"]').click()
++        p.reload()
++        check('Custom codebase and tests folders survive actual browser reload',
++              p.evaluate('companionFolders().codebaseFolder==="plugin/src" && companionFolders().testsFolder==="plugin/tests"'))
++        q = context.new_page(); q.on('pageerror', lambda e: errors.append(str(e))); q.goto(url); p.reload()
++        p.locator('[data-action="settings"]').first.click()
++        p.locator('#modal [data-action="project-example"]').click()
++        q.evaluate('design().goal="Newer imported project edit";designChanged()')
++        p.wait_for_function('() => storageWarning.includes("another window")')
++        p.locator('#project-import-confirm').check()
++        p.locator('#modal [data-action="project-import-apply"]').click()
++        check('Actual two-window conflict prevents full-project replacement',
++              p.evaluate('JSON.parse(localStorage.getItem(STORAGE_KEY)).project.design.goal==="Newer imported project edit"'))
++        check('Blocked import retains the stale session for separate recovery',
++              p.evaluate('design().goal!=="Newer imported project edit" && companionFolders().codebaseFolder==="plugin/src"'))
++        q.close(); p.evaluate('modalOriginal=null;closeModal()'); p.reload()
+         p.evaluate('localStorage.setItem("unrelated-review-key","keep");state.settings.remember=false;save()')
