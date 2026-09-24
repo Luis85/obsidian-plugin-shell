@@ -1,6 +1,6 @@
-import type { ErrorReporter, HostActions, TimerScheduler, Unsubscribe } from './ports';
+import type { ErrorReporter, HostActions, LifecycleObservation, TimerScheduler, Unsubscribe } from './ports';
 import { NotificationPolicy, type NotificationRequest, type NotificationKind, type NotificationObservation, type RecoveryAction } from './notification-policy';
-export interface Feedback { readonly id: number; readonly owner: string; readonly kind: NotificationKind; readonly key: string; readonly native: boolean; readonly visible?: boolean; readonly scope?: 'runtime' | 'view'; readonly actions?: readonly { readonly id: string; readonly labelKey: string; readonly busy: boolean }[] }
+export interface Feedback { readonly id: number; readonly owner: string; readonly operation?: string; readonly kind: NotificationKind; readonly key: string; readonly native: boolean; readonly visible?: boolean; readonly scope?: 'runtime' | 'view'; readonly actions?: readonly { readonly id: string; readonly labelKey: string; readonly busy: boolean }[] }
 export class NotificationService {
   private next = 0;
   private disposed = false;
@@ -9,8 +9,8 @@ export class NotificationService {
   private readonly listeners = new Set<() => void | Promise<void>>();
   private readonly policy?: NotificationPolicy;
   constructor(private readonly host: HostActions, private readonly text: (key: string) => string, private readonly errors: ErrorReporter,
-    options?: { scheduler: TimerScheduler; validKey?: (key: string) => boolean; observe?: (value: NotificationObservation) => void }) {
-    if (options) this.policy = new NotificationPolicy(host, text, errors, options.scheduler, () => this.changed(), options.validKey, options.observe);
+    options?: { scheduler: TimerScheduler; validKey?: (key: string) => boolean; observe?: (value: NotificationObservation) => unknown; observeLifecycle?: (value: LifecycleObservation) => unknown }) {
+    if (options) this.policy = new NotificationPolicy(host, text, errors, options.scheduler, () => this.changed(), options.validKey, options.observe, options.observeLifecycle);
   }
   get current(): readonly Feedback[] { return this.policy?.current ?? this.items.slice(); }
   notify(request: NotificationRequest) { if (!this.policy) throw new Error('NOTIFICATION_SCHEDULER_REQUIRED'); return this.policy.notify(request); }

@@ -10,8 +10,8 @@ import { BooleanSetting } from './boolean-setting';
 export interface AuthoringServices {
   readonly events: EventObserver<ShellEvents>;
   readonly modals: Pick<ModalService, 'info' | 'confirm' | 'prompt' | 'closeOwner'>;
-  readonly notices: Pick<NoticeService, 'info' | 'dismissOwner'>;
-  readonly preferences: Pick<PreferenceService, 'current' | 'readonly' | 'update' | 'toggleViewHeader' | 'subscribe'>;
+  readonly notices: Pick<NoticeService, 'info' | 'success' | 'warning' | 'error' | 'progress' | 'registerActions' | 'invoke' | 'dismissOwner'>;
+  readonly preferences: Pick<PreferenceService, 'current' | 'readonly' | 'persistenceStatus' | 'readErrorKey' | 'recoveryKey' | 'update' | 'toggleViewHeader' | 'subscribe'>;
   readonly diagnostics: ErrorReporter;
 }
 export interface AuthoringExtension extends CommandGroup { readonly settings?: readonly BooleanSetting[]; dispose(): void }

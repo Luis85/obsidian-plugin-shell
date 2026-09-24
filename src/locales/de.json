@@ -1,4 +1,13 @@
 {
+  "recovery": {
+    "start": "Aktion mit eigener Lebensdauer testen",
+    "title": "Beispiel für eine Wiederherstellungsaktion",
+    "help": "Dieses Beispiel ändert keine Dateien. Bestätige den Dialog, um die Folgeaktion freizugeben, oder brich ab, um sie zu verwerfen.",
+    "waiting": "Warte auf eine Antwort im Beispieldialog…",
+    "notice": "Bestätige den Beispieldialog und prüfe anschließend das Ergebnis.",
+    "review": "Beispielergebnis prüfen",
+    "completed": "Beispiel geprüft. Keine Dateien wurden geändert."
+  },
   "notification": {
     "overflow": "Weitere Meldungen warten. Details finden Sie in den zugehörigen Ansichten."
   },
@@ -124,6 +133,10 @@
     "theme": "Theme folgt Obsidian",
     "themeHelp": "Kein eigener Farbmodus wird installiert. Komponenten verwenden die CSS-Variablen des Hosts.",
     "blocked": "Plugin-Daten konnten nicht sicher gelesen oder ein Speichervorgang nicht bestätigt werden. Speichern bleibt zum Schutz der Daten gesperrt. Behebe das Problem und starte das Plugin vor weiteren Änderungen neu.",
+    "recoveryCorrupt": "Gespeicherte Plugin-Daten sind ungültig. Sie bleiben erhalten und Speichern ist gesperrt. Stelle eine geprüfte Sicherung wieder her oder repariere die Daten bei deaktiviertem Plugin. Starte es danach neu.",
+    "recoveryFuture": "Gespeicherte Plugin-Daten verwenden ein neueres Schema. Sie bleiben erhalten und Speichern ist gesperrt. Verwende eine kompatible Plugin-Version; ersetze die Daten nicht durch Standardwerte.",
+    "recoveryInaccessible": "Plugin-Daten konnten nicht gelesen werden. Speichern ist gesperrt. Prüfe Zugriff und Speicherverfügbarkeit und starte das Plugin nach Behebung des Lesefehlers neu.",
+    "recoveryUncertain": "Der letzte Speichervorgang konnte nicht bestätigt werden. Weitere Änderungen sind gesperrt. Prüfe die gespeicherten Daten vor einem Neustart und entscheide dann bewusst über weitere Änderungen. Wiederhole den Vorgang nicht blind.",
     "hideHeader": "Obsidian-Ansichtskopf ausblenden",
     "hideHeaderHelp": "Gilt sofort für alle Plugin-Shell-Ansichten. Hier, in den nativen Einstellungen oder über die Befehlspalette wiederherstellen.",
     "headerSaving": "Ansichtseinstellung wird gespeichert…"

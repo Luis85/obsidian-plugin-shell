@@ -13,7 +13,7 @@ export function booleanSettingFixture(initial: unknown = null) {
   const data = new PluginDataStore(storage, diagnostics); const preferences = new PreferenceService(data, events, diagnostics);
   const entity = defineEntity('fixture-setting', 1, { enabled: fields.defaulted(fields.boolean(), false) });
   const repository = new PluginDataRepository(entity, data, events, () => `setting-${++sequence}`, () => '2026-09-23', diagnostics);
-  const capabilities = { events, diagnostics, readonly: () => preferences.readonly };
+  const capabilities = { events, diagnostics, readonly: () => preferences.readonly, readErrorKey: () => preferences.readErrorKey };
   const definition = { id: 'fixture-setting', entity: entity.key, titleKey: 'fixture.title', descriptionKey: 'fixture.description', defaultValue: false };
   const setting = new BooleanSetting(definition, repository, capabilities);
   return { setting, definition, repository, capabilities, events, diagnostics, storage, preferences, raw: () => raw,

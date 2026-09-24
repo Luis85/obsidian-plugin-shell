@@ -1,8 +1,10 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { nativeCommand } from './native-command.mjs';
 import { pendingNativeData } from './native-data.mjs';
+import { attachRuntimeObservation, assertIndependentObservation } from './native-runtime-observation.mjs';
 
 /** Serialized into the native renderer; the same driver helper is regression-tested without claiming host execution. */
 export function installItemBoundary(id) {
@@ -21,12 +23,13 @@ export function installItemBoundary(id) {
 }
 /** Actual native views with explicitly controlled persistence boundaries; injected failures are not native disk evidence. */
 export async function qualifyItemOwnership(page, report, output, vault, identity) {
-  report.phase = 'native-items-controlled-adapter-ownership';
+  noteNativePhase(report, 'native-items-controlled-adapter-ownership');
   report.itemOwnership = { mode: 'controlled-adapter-in-native-host', nativeDiskFailure: false, status: 'running' };
   let failed = false;
   const path = join(vault, identity.pluginDirectory, 'data.json'); const originalBytes = await readFile(path);
-  await page.evaluate(installItemBoundary, identity.id);
+  const observation = await page.evaluateHandle(attachRuntimeObservation, identity.id);
   try {
+    await page.evaluate(installItemBoundary, identity.id);
     const first = page.locator(identity.viewSelector).first();
     await first.getByRole('button', { name: 'Documents', exact: true }).click();
     await first.getByRole('button', { name: 'View actions', exact: true }).click();
@@ -61,17 +64,27 @@ export async function qualifyItemOwnership(page, report, output, vault, identity
     await expect(panel.getByRole('button', { name: 'Create item', exact: true })).toBeDisabled();
     await expect(panel.getByRole('status')).toHaveCount(0);
     expect(await readFile(path)).toEqual(beforeFailure);
-    const diagnostics = await page.evaluate(id => window.app.plugins.plugins[id].runtime.diagnosticSnapshot(), identity.id);
-    expect(diagnostics.map(entry => ({ code: entry.code, operation: entry.operation }))).toEqual([{ code: 'settings.write', operation: 'settings.save' }]);
+    const independentObservation = await observation.evaluate(handle => handle.read());
+    assertIndependentObservation(independentObservation, [{ code: 'settings.write', operation: 'settings.save' }]);
     report.itemOwnership = { ...report.itemOwnership, status: 'passed',
-      counts: await page.evaluate(() => { const { calls, completed, failed } = window.__qualificationItemBoundary.state; return { calls, completed, failed }; }), diagnostics };
+      counts: await page.evaluate(() => { const { calls, completed, failed } = window.__qualificationItemBoundary.state; return { calls, completed, failed }; }), independentObservation,
+      diagnosticSource: 'independent-runtime-observer', diagnostics: independentObservation.events.filter(event => event.kind === 'error').map(event => event.entry) };
     expect(report.itemOwnership.counts).toEqual({ calls: 2, completed: 1, failed: 1 });
     report.checks.push('native-items-controlled-adapter-rejection-retains-draft-no-success');
+    report.checks.push('native-items-independent-fault-ledger-exact-count-zero-loss-before-reconstruction');
   } catch (error) {
     failed = true; report.itemOwnership.status = 'failed'; report.itemOwnership.reason = String(error.message);
-    await page.screenshot({ path: join(output, 'native-items-boundary-failure.png') }).catch(() => undefined);
+    await page.screenshot({ path: join(output, 'native-items-boundary-failure.png') })
+      .catch(failure => { report.itemOwnership.screenshotFailure = String(failure.message); });
     throw error;
   } finally {
+    let observationFailure;
+    try {
+      report.itemOwnership.finalObservation = await observation.evaluate(handle => handle.read());
+      if (!failed) assertIndependentObservation(report.itemOwnership.finalObservation, [{ code: 'settings.write', operation: 'settings.save' }]);
+    } catch (error) { observationFailure = error; report.itemOwnership.observationCleanupFailure = String(error.message); }
+    try { await observation.evaluate(handle => handle.stop()); await observation.dispose(); }
+    catch (error) { observationFailure ??= error; report.itemOwnership.observationStopFailure = String(error.message); }
     try {
       await page.evaluate(() => { window.__qualificationItemBoundary.restore(); });
       // Releasing a held native call is not completion: drain owned writes before restoring bytes.
@@ -85,6 +98,10 @@ export async function qualifyItemOwnership(page, report, output, vault, identity
     } catch (error) {
       report.itemOwnership.status = 'failed'; report.itemOwnership.cleanupFailure = String(error.message);
       if (!failed) throw error;
+    }
+    if (observationFailure) {
+      report.itemOwnership.status = 'failed';
+      if (!failed) throw observationFailure;
     }
   }
   expect(await readFile(path)).toEqual(originalBytes);

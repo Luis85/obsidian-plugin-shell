@@ -64,10 +64,17 @@ silently repaired or automatically migrated.
 Updates and deletes require an authentic snapshot returned by that repository
 runtime. The saved record revision must still match. Competing views get a stale
 failure and must reload/review. The counter survives deletion, preventing stale
-snapshots from overwriting a recreated ID. The storage port is Obsidian's
-`loadData`/`saveData`; it supplies no cross-process compare-and-swap. This queue
+snapshots from overwriting a recreated ID. Native storage reads exact JSON through
+the public vault adapter and saves through `saveData`; it supplies no cross-process
+compare-and-swap. This queue
 coordinates this plugin runtime, not other processes, devices or external edits
 to `data.json`. Run one writer for that plugin installation.
+
+`SettingsStorage.read()` distinguishes an absent file from present JSON `null`,
+malformed JSON, future data and inaccessible reads. The store exposes read-only
+status and recovery guidance through preferences. Legacy decoded-only `load()`
+adapters cannot distinguish present null from their absence sentinel; implement
+the optional raw reader for that guarantee. Neither reader writes during loading.
 
 A rejected `saveData` may already have committed. It returns an `uncertain`
 failure and blocks **all** subsequent preference/entity writes for that runtime.

@@ -5,6 +5,7 @@ import type { DocumentRecipe } from './document-definition';
 import type { DocumentCodec } from './document-codec';
 import type { DocumentStorage, ErrorReporter } from './ports';
 import type { EventPublisher, ShellEvents } from './events';
+import type { OperationPermit } from './action-scope';
 
 export interface NoteSnapshot<V> {
   readonly entity: string;
@@ -110,7 +111,8 @@ export class NoteRepository<I, V> {
     const match = rows.value.find(row => row.path === path);
     return match ? success(match) : failure('storage', 'error.read');
   }
-  async update(snapshot: NoteSnapshot<V>, values: I): Promise<Result<NoteSnapshot<V>>> {
+  async update(snapshot: NoteSnapshot<V>, values: I, permit?: OperationPermit): Promise<Result<NoteSnapshot<V>>> {
+    if (this.inactive(permit)) return failure('disposed', 'error.disposed');
     const parsed = this.recipe.entity.parse(values);
     if (!parsed.ok) return parsed;
     const properties = this.recipe.properties(parsed.value);
@@ -125,29 +127,30 @@ export class NoteRepository<I, V> {
       if (!written.ok) return written;
       this.publish('documents.updated', changed.value);
       return success(changed.value);
-    });
+    }, permit);
     if (!result.ok) return result;
     return result.value ? success(result.value) : failure('stale', 'error.stale');
   }
-  async delete(snapshot: NoteSnapshot<V>): Promise<Result<void>> {
+  async delete(snapshot: NoteSnapshot<V>, permit?: OperationPermit): Promise<Result<void>> {
     const result = await this.mutate(snapshot, 'delete', async state => {
       const deleted = await this.storage.trash(snapshot.path, state.markdown);
       if (!deleted.ok) return deleted;
       this.publish('documents.deleted', snapshot);
       return success(undefined);
-    });
+    }, permit);
     return result.ok ? success(undefined) : result;
   }
-  private mutate(snapshot: NoteSnapshot<V>, fingerprint: string, action: (state: SnapshotState) => Promise<Result<NoteSnapshot<V> | undefined>>): Promise<Result<NoteSnapshot<V> | undefined>> {
-    if (this.disposed) return Promise.resolve(failure('disposed', 'error.disposed'));
+  private mutate(snapshot: NoteSnapshot<V>, fingerprint: string, action: (state: SnapshotState) => Promise<Result<NoteSnapshot<V> | undefined>>, permit?: OperationPermit): Promise<Result<NoteSnapshot<V> | undefined>> {
+    if (this.inactive(permit)) return Promise.resolve(failure('disposed', 'error.disposed'));
     const prior = this.mutations.get(snapshot);
     if (prior) return prior.fingerprint === fingerprint ? prior.work : Promise.resolve(failure('stale', 'error.stale'));
     const state = this.snapshots.get(snapshot);
     if (!state || state.folder !== this.folder()) return Promise.resolve(failure('stale', 'error.stale'));
     const work = this.enqueue(async () => {
+      if (this.inactive(permit)) return failure('disposed', 'error.disposed');
       const current = await this.get(snapshot.path);
       if (!current.ok) return current;
-      if (this.disposed) return failure('disposed', 'error.disposed');
+      if (this.inactive(permit)) return failure('disposed', 'error.disposed');
       if (state.folder !== this.folder() || this.snapshots.get(current.value)?.markdown !== state.markdown) return failure('stale', 'error.stale');
       try { return await action(state); }
       catch { this.errors.report('repository.write', 'repository.mutate'); return failure('uncertain', 'error.uncertain'); }
@@ -181,4 +184,5 @@ export class NoteRepository<I, V> {
     return work;
   }
   dispose(): void { this.disposed = true; this.creation.dispose(); }
+  private inactive(permit?: OperationPermit): boolean { return this.disposed || permit?.active() === false; }
 }

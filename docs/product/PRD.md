@@ -9,6 +9,13 @@
 
 A developer obtains the template, runs a guided setup, generates a feature, develops using a real-component harness and native Obsidian, verifies the work, and publishes the exact accepted assets. Target current public Obsidian with a qualified, actively maintained dependency graph.
 
+The template is also a developer-facing framework foundation: reusable, typed
+abstractions should support rapid plugin ideation and iteration without changing
+generic persistence or lifecycle internals. The [framework guide](../development/FRAMEWORK-GUIDE.md)
+maps that extension path. Production readiness is the result of qualifying the
+actual consumer and its applicable requirements, not an automatic property of
+starting from the template.
+
 The owner requested the first runnable iteration up to an openable showcase view. That slice now implements the native view, selected Nuxt UI components, Task Markdown workflow, shared preferences, typed events, feedback, scoped CSS, setup/local installation and executable tests. Do not interpret a working showcase as completion of every v1 capability.
 
 ## Requirements remain in force
@@ -174,6 +181,10 @@ Native evidence is limited to named checks and cannot certify all hosts, themes
 or devices.
 
 ## Proposed companion product
+
+The [shell-first delivery overview](../../SHELL-FIRST-OVERVIEW.md) and
+[delivery strategy](DELIVERY-STRATEGY.md) define repository execution order:
+qualify the shared shell first, build the native companion second, publish last.
 
 The [companion developer-workbench PRD](COMPANION-PLUGIN-PRD.md) specifies a
 same-repository Obsidian companion built on the shell: **one vault, one project**.

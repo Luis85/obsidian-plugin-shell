@@ -1,4 +1,13 @@
 {
+  "recovery": {
+    "start": "Try owned recovery",
+    "title": "Owned recovery example",
+    "help": "This example changes no files. Confirm to make the review action available, or cancel to dismiss it.",
+    "waiting": "Waiting for the example dialog…",
+    "notice": "Confirm the example dialog, then review its result.",
+    "review": "Review example result",
+    "completed": "Example reviewed. No files changed."
+  },
   "notification": {
     "overflow": "More notifications are waiting. Review the related views for details."
   },
@@ -124,6 +133,10 @@
     "theme": "Theme follows Obsidian",
     "themeHelp": "No independent color mode is installed. Components consume the host’s CSS variables.",
     "blocked": "Stored plugin data could not be safely read, or a save could not be confirmed. Saving is disabled to preserve the data. Resolve the issue and restart the plugin before making further changes.",
+    "recoveryCorrupt": "Stored plugin data is invalid. It has been preserved and saving is disabled. Restore a reviewed backup or repair the data while the plugin is disabled, then restart.",
+    "recoveryFuture": "Stored plugin data uses a newer schema. It has been preserved and saving is disabled. Use a plugin version that supports this data; do not replace it with defaults.",
+    "recoveryInaccessible": "Plugin data could not be read. Saving is disabled. Check access and storage availability, then restart after resolving the read failure.",
+    "recoveryUncertain": "The last save outcome is uncertain. Further writes are blocked. Inspect the saved data before restarting and deliberately continuing; do not retry blindly.",
     "hideHeader": "Hide Obsidian view header",
     "hideHeaderHelp": "Applies immediately to all Plugin Shell views. Restore it here, in native settings, or with the command palette.",
     "headerSaving": "Saving header preference…"

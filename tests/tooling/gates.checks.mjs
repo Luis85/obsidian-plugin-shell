@@ -5,21 +5,26 @@ import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
+import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unapproved archived source', async () => {
-  const scratch = await mkdtemp(join(tmpdir(), 'analyzer-archive-'));
-  const staging = join(scratch, 'staging'); const extracted = join(scratch, 'extracted');
-  const env = { ...process.env, GIT_CEILING_DIRECTORIES: scratch, FALLOW_TELEMETRY_DISABLED: '1' };
-  const command = (file, args, cwd) => {
-    const run = spawnSync(file, args, { cwd, env, encoding: 'utf8', timeout: 60000, maxBuffer: 12 * 1024 * 1024 });
-    assert.ifError(run.error); return run;
-  };
-  try {
+  await archiveCommandFixture(async ({ scratch, command: execute }) => {
+    const staging = join(scratch, 'staging'); const extracted = join(scratch, 'extracted');
+    const env = { ...process.env, GIT_CEILING_DIRECTORIES: scratch, FALLOW_TELEMETRY_DISABLED: '1' };
+    const command = (file, args, cwd) => execute(file, args, cwd, env);
     await mkdir(staging); await mkdir(extracted);
     const source = await sourceInputs(process.cwd());
     for (const input of source.files) {
       const target = join(staging, input.path); await mkdir(dirname(target), { recursive: true });
       await cp(resolve(input.path), target);
+    }
+    // These execution policies are fingerprinted separately from sourceInputs;
+    // the transport fixture still needs their real bytes for explicit consumers.
+    const policies = await Promise.all(['docs/testing/native-evidence-checks.json', 'docs/testing/acceptance-crosswalk.json']
+      .map(async path => ({ path, bytes: await readFile(resolve(path)) })));
+    for (const policy of policies) {
+      const target = join(staging, policy.path); await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, policy.bytes);
     }
     // A local index/tree forms a real transport archive even when this test's
     // parent is already a Git-free archive. No commit, author or remote is needed.
@@ -33,6 +38,7 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     const unpacked = command('tar', ['-xf', archive, '-C', extracted], scratch); assert.equal(unpacked.status, 0, unpacked.stderr);
     assert.equal(command('git', ['rev-parse', '--show-toplevel'], extracted).status, 128);
     assert.deepEqual((await sourceInputs(extracted)).files, source.files);
+    for (const policy of policies) assert.deepEqual(await readFile(join(extracted, policy.path)), policy.bytes);
     await cp(resolve('dist'), join(extracted, 'dist'), { recursive: true });
     await symlink(resolve('node_modules'), join(extracted, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], extracted);
@@ -50,10 +56,7 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     assert.ok((await diagnostic()).workspace_diagnostics.some(row => row.kind === 'excluded-by-default-ignore' && row.path === 'dist'));
     await rm(hidden);
     const restored = check(); assert.equal(restored.status, 0, restored.stdout + restored.stderr);
-  } finally {
-    assert.equal(dirname(scratch), resolve(tmpdir()));
-    await rm(scratch, { recursive: true, force: true });
-  }
+  });
 });
 test('[GATE-02-01] full analyzer fails for real unused files and exports', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shell-analysis-'));

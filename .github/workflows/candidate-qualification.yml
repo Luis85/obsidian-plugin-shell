@@ -1,8 +1,18 @@
 name: Candidate qualification
 on:
   push:
-    branches: [build/template-foundation, build/release-operations, build/runtime-authoring, codex/executable-qualification]
-    paths-ignore: ['docs/**', 'README.md', 'AGENTS.md']
+    branches: [build/template-foundation, build/release-operations, build/runtime-authoring, codex/executable-qualification, codex/acceptance-closure, codex/persistence-lifecycle, codex/framework-lifecycle]
+    paths:
+      - '**'
+      - '.*'
+      - '.*/**'
+      - '!docs/**'
+      - '!README.md'
+      - '!AGENTS.md'
+      - 'docs/testing/acceptance-crosswalk.json'
+      - 'docs/testing/native-evidence-checks.json'
+      - 'docs/testing/test-plan.json'
+      - 'docs/design/obsidian-tokens.json'
   workflow_dispatch:
 permissions:
   contents: read

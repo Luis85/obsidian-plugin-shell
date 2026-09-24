@@ -15,6 +15,7 @@ node-qualified
 .fallow/
 .native-runner/
 .native-cache/
+.nq/
 
 .shell-build-lock/
 .shell-build-*/

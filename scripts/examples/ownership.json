@@ -59,7 +59,7 @@
     },
     {
       "path": "src/presentation/components/panels/EventsPanel.vue",
-      "sha256": "41d0d1986d79a28ee89d73a09de38816c32cf0845182d68de4c27a4a406613ca"
+      "sha256": "8859a09c28c87603ceb1a78e7ae83b02dccf525af1c0e32a63b3cd0288919096"
     },
     {
       "path": "src/presentation/components/panels/TaskRepositoryPanel.vue",
@@ -67,7 +67,7 @@
     },
     {
       "path": "src/presentation/stores/showcase.ts",
-      "sha256": "4e2b369910b1d3743e99a1415634f5bba8f94f9f2501689d983ec5e4f4ebd535"
+      "sha256": "a39922c6b5816763d215b205318fde58f532a04ca16c63ce67a38164eb4db764"
     },
     {
       "path": "src/presentation/composables/use-document-form.ts",
@@ -75,7 +75,7 @@
     },
     {
       "path": "src/presentation/composables/use-showcase-actions.ts",
-      "sha256": "e7104508561c0c7a806c293283db07555e69f8254316395f92bfdaa79f847685"
+      "sha256": "d5397486e0f1d53891a5b69fd719ebdfd363f315b4ae4b09b0a3fb6b3d21992a"
     },
     {
       "path": "src/presentation/composables/use-showcase-shell.ts",
@@ -83,7 +83,7 @@
     },
     {
       "path": "src/presentation/composables/use-task-repository.ts",
-      "sha256": "a1e617137aa41ee1b804d7ef44b600e6e807de91ed73235a52649cd8827fb061"
+      "sha256": "d2ea3754345d4e1ca767ebb16be3f9536c742e218e087fb48643ff63f38b42ab"
     },
     {
       "path": "tests/runtime/view-state.test.ts",
@@ -127,7 +127,7 @@
     },
     {
       "path": "src/bootstrap/services.ts",
-      "sha256": "cbd5a6134e0fbf05b6de45367fb976cf5a0e9ec1ae26f8fb88b828220a9c9671",
+      "sha256": "df1f31609156026a5decbc949856a28849a1921e4d47f2b0b2b7fce8148241a7",
       "template": "src__bootstrap__services.ts.txt"
     },
     {
@@ -232,7 +232,7 @@
     },
     {
       "path": "tests/runtime/settings-components.test.ts",
-      "sha256": "e9f238400bec3c7d5a5cfd6f966b2603acb535cfe1ef12e44a2aad346da6ece2",
+      "sha256": "b6426757008b81897161756abf7c95275428d6330b8f646036a427a165b71235",
       "template": "tests__runtime__settings-components.test.ts.txt"
     },
     {
@@ -257,17 +257,17 @@
     },
     {
       "path": "src/locales/en.json",
-      "sha256": "b402d2dddbba95cabd98312124796167b7f973dee3ec4688c93996a4ad6a6441",
+      "sha256": "04db82c0fc96b839fae977f617615d2d1d4b7cd151f6f7385d126028330db5b3",
       "template": "src__locales__en.json.txt"
     },
     {
       "path": "src/locales/de.json",
-      "sha256": "4e56c995df53a2629146e272c8df31bd940bb92f2782b368c8836a1a8b9d229f",
+      "sha256": "2d930ee4d89a0e0b164c7eaacd69a328b12da5e79d81e0de991792910032e109",
       "template": "src__locales__de.json.txt"
     },
     {
       "path": "README.md",
-      "sha256": "952bc04dedfe753933c795d2bf648eeacce94b0111158b47f97870dcb5537d53",
+      "sha256": "8c6714287a0bc72d14900987155cdc69ff141d79fcf369da31bcd432e19014eb",
       "template": "README.md.txt"
     },
     {
@@ -292,7 +292,7 @@
     },
     {
       "path": "scripts/testing/check-native.mjs",
-      "sha256": "e241dfeebee48eeee5cb7b2743412483e696c2052c5b0eba3c8880391a087975",
+      "sha256": "b1517d5831c4daa832f644f9b9f4cd5d58098852b6d04912f9dfaeeb4414dc2a",
       "template": "scripts__testing__check-native.mjs.txt"
     },
     {
@@ -313,7 +313,7 @@
     },
     {
       "path": "src/presentation/composables/use-items-controller.ts",
-      "sha256": "56024f968653a59028fafec99497d2c2caa0277dd6966e8910f9e0e4a7ba08c3"
+      "sha256": "14c51c8b447f99e496bb57e43aa2f580a2942edbfadf6c42681a418d0e09cdd7"
     },
     {
       "path": "src/presentation/components/panels/ItemsPanel.vue",
@@ -351,7 +351,7 @@
     },
     {
       "path": "scripts/testing/native-items.mjs",
-      "sha256": "fe6c1ce0372ff2ffae83ab8d8a07c8e71ff11248f95f57fc36ab568815b5e773"
+      "sha256": "18c7c4cb5f5ca05bc13b4d1ba2fbdb64746cf2e7a473a01501cacc5c590f6325"
     },
     {
       "path": "scripts/testing/native-performance.mjs",
@@ -363,11 +363,79 @@
     },
     {
       "path": "scripts/testing/native-item-ownership.mjs",
-      "sha256": "bd0adc3128a2c1f7ef5ae9a1942fc7bbd0ea6ecf86fe3aa5fbbdc67c807be9e7"
+      "sha256": "5f8e227f5e127d79ba4f05ff4a5fef3c81032fd57512a9cba7c6a35ae037324e"
     },
     {
       "path": "tests/tooling/native-item-boundary.checks.mjs",
       "sha256": "c5d59f6aa9e00dd0b44c1a9d39405cfdce56e25f1f55b4662d8911480c8683b5"
+    },
+    {
+      "path": "tests/runtime/acceptance-closure.test.ts",
+      "sha256": "2fb78d74dad53a505b6b1690413d1e883c75e8c68d4e36d593df62006552b482"
+    },
+    {
+      "path": "tests/e2e/acceptance-closure.spec.ts",
+      "sha256": "5e3b1297865c53700409014bf9fb81737da0d8ffb0284be34c71fd748268a371"
+    },
+    {
+      "path": "tests/runtime/persistence-outcomes.test.ts",
+      "sha256": "64c8256f1941c211e9796bd0d178865a3878c737ac1332ae6ec55eb71718701a"
+    },
+    {
+      "path": "tests/runtime/document-lifecycle.test.ts",
+      "sha256": "4d5d5d4b9fc8ec0dc85ed30f962dd452cc6a89fcba59ab4c7dedfb49fb31923a"
+    },
+    {
+      "path": "tests/runtime/lifecycle-recovery-components.test.ts",
+      "sha256": "59f17baafc9412e49d31c0399f696a35defb147e6839398216a03dfcfc92d87e"
+    },
+    {
+      "path": "tests/e2e/persistence-lifecycle.spec.ts",
+      "sha256": "6b3eeb227c06b842feb9c005bf10a397c136d9bd23a2abf73db90cb4e2b6673d"
+    },
+    {
+      "path": "tests/e2e/persistence-lifecycle-fixture.ts",
+      "sha256": "e45870998b091cb87557eeba7fa4ce8bb937aeb1955ab2e5faed8d1c63d337dc"
+    },
+    {
+      "path": "tests/runtime/retained-task-actions-components.test.ts",
+      "sha256": "79d8101bdd309026ff8dfbba71c2d412442648fba07b423a0e8a0a6f4aea03fd"
+    },
+    {
+      "path": "scripts/testing/native-resource-ownership.mjs",
+      "sha256": "8ad86d28cc0d0ee6e9c0fb267119897856c296a240489a5f36257b09239e8155"
+    },
+    {
+      "path": "src/presentation/composables/use-recovery-example.ts",
+      "sha256": "9e1b0f2438b634431b29ce0cf32e48b528c601e2576a10c2627239a58e376999"
+    },
+    {
+      "path": "tests/runtime/recovery-example-components.test.ts",
+      "sha256": "fd23ee6ed3db37d19ba8ec0279de2c8024f66f064e33633d552fe2754778112d"
+    },
+    {
+      "path": "tests/e2e/recovery-example.spec.ts",
+      "sha256": "06c3a4896f884af5940951dad4b066b36d06e1e1bb79624f9cbe226a6451669e"
+    },
+    {
+      "path": "scripts/testing/native-recovery-handles.mjs",
+      "sha256": "f6006b6886088f05193e1d842df494f94dc58dcc4412be8e2f18cfb28e714450"
+    },
+    {
+      "path": "tests/tooling/native-recovery-handles.checks.mjs",
+      "sha256": "b3cb3270e2fcc82f0630b10555bbc9dc7f7f940ca90bad9cc2c2e709bb7a89be"
+    },
+    {
+      "path": "scripts/testing/native-foreign-notice.mjs",
+      "sha256": "596f23330b675751a263534ba62448819998b28187521e047de1d6c96c15b52f"
+    },
+    {
+      "path": "tests/tooling/native-foreign-notice.checks.mjs",
+      "sha256": "db353e2ed82b24134388f3c00687a560b7b8055695061ff8d4024d75f144cf4a"
+    },
+    {
+      "path": "scripts/testing/native-recovery-handles.d.mts",
+      "sha256": "265e3f8efaa4baface8bc325afe2a3e54c5f7663f70240e3fd20d8ece9b21c82"
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { noteNativePhase } from './native-diagnostic-observer.mjs';
 import { expect } from '@playwright/test';
 import { join } from 'node:path';
 import { nativeCommand } from './native-command.mjs';
@@ -5,7 +6,7 @@ import { assertDiagnostics } from './native-header-checks.mjs';
 
 /** Qualifies real registered commands and the canonical modal/notice services. */
 export async function qualifyDebugging(page, report, output, identity, notePath) {
-  report.phase = 'native-debugging';
+  noteNativePhase(report, 'native-debugging');
   await nativeCommand(page, 'Toggle debug logging');
   await expect(page.getByText('Debug logging enabled for this session.', { exact: true })).toBeVisible();
   await nativeCommand(page, 'Inspect debug report');

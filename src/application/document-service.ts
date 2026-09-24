@@ -1,5 +1,6 @@
 import { validateDocumentTitle, validateFolder } from '../domain/paths';
 import { failure, success, type Result } from '../domain/outcome';
+import { fitsUtf8Bytes } from '../domain/utf8';
 import type { DocumentWriter, ErrorReporter } from './ports';
 import type { EventPublisher, ShellEvents } from './events';
 export type Frontmatter = Readonly<Record<string, string | number | boolean | readonly string[]>>;
@@ -9,7 +10,7 @@ export interface DocumentDefinition<I> {
 }
 function validProjection(title: unknown, body: unknown, schemaVersion: number): boolean {
   return Number.isSafeInteger(schemaVersion) && schemaVersion >= 1 && typeof title === 'string'
-    && typeof body === 'string' && body.length <= 1_000_000;
+    && typeof body === 'string';
 }
 export interface DocumentReceipt { readonly id: string; readonly entity: string; readonly path: string; readonly schemaVersion: number }
 export interface PreparedDocument extends DocumentReceipt { readonly markdown: string; readonly requestId: string; readonly folder: string }
@@ -58,9 +59,10 @@ export class DocumentCreationService<Inputs> {
     if (!validProjection(title, body, schemaVersion)) return failure('validation', 'error.entity');
     const filename = validateDocumentTitle(title);
     if (!filename.ok) return filename;
+    if (!fitsUtf8Bytes(body, 1_000_000)) return failure('validation', 'error.entity');
     if (Object.keys(properties).some(k => ['type', 'id', 'schema_version', 'created_at'].includes(k))) return failure('validation', 'error.entity');
     const markdown = this.serialize({ type: entity, id, schema_version: schemaVersion, created_at: this.now(), ...properties }, body);
-    if (markdown.length > 1_000_000) return failure('validation', 'error.entity');
+    if (!fitsUtf8Bytes(markdown, 1_000_000)) return failure('validation', 'error.entity');
     const plan = Object.freeze({ entity, id, schemaVersion, requestId, folder, path: `${folder}/${filename.value}.md`, markdown });
     return success(plan);
   }

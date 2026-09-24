@@ -3,7 +3,8 @@ import type { ServiceAdapters } from '../../src/application/ports';
 import { pluginIdentity } from '../../src/infrastructure/plugin-identity';
 import { browserDocumentStorage } from './document-storage';
 import { browserNotification } from './notification-sink';
-import { browserModalSink } from './modal-sink';
+import { lifecycleResources } from './lifecycle-resources';
+import type { HarnessFault } from './test-api';
 const prefix = `${pluginIdentity.id}:harness:v1:`;
 export function browserAdapters() {
   let failWrite = false;
@@ -12,6 +13,9 @@ export function browserAdapters() {
   let failNotice = false;
   let pauseSettings = false;
   let finishSettings: (() => void) | undefined;
+  let pauseWrite = false; let finishWrite: (() => void) | undefined;
+  let pauseOpen = false; let finishOpen: (() => void) | undefined;
+  let openCalls = 0; let disposed = false; const resources = lifecycleResources();
 
   const dialogs = new Set<HTMLDialogElement>();
   const disposers = new Set<() => void>();
@@ -41,11 +45,11 @@ export function browserAdapters() {
   }
   const host: ServiceAdapters['host'] = {
     kind: 'browser',
-    async openDocument(path) { if (failOpen) return failure('storage', 'error.open'); const value = files()[path]; if (value === undefined) return failure('storage', 'error.open'); dialog(path, value, true); return success(undefined); },
+    async openDocument(path) { openCalls++; if (pauseOpen) await new Promise<void>(resolve => { finishOpen = resolve; }); if (disposed) return failure('disposed', 'error.disposed'); if (failOpen) return failure('storage', 'error.open'); const value = files()[path]; if (value === undefined) return failure('storage', 'error.open'); dialog(path, value, true); return success(undefined); },
     showModal: dialog,
     notification(text, actions) {
       if (failNotice) throw new Error('FIXTURE_NOTICE_FAILURE');
-      return browserNotification(text, actions, close => { disposers.add(close); return () => { disposers.delete(close); }; });
+      return resources.notification((message, choices) => browserNotification(message, choices, close => { disposers.add(close); return () => { disposers.delete(close); }; }), text, actions);
     },
     notice(text, duration = 4000) {
       if (failNotice) throw new Error('FIXTURE_NOTICE_FAILURE');
@@ -57,17 +61,24 @@ export function browserAdapters() {
       const timer = duration > 0 ? setTimeout(hide, duration) : undefined; disposers.add(hide); return hide;
     },
   };
+  const documents = browserDocumentStorage(files, current => write('files', current), () => failWrite);
   const adapters: ServiceAdapters = {
-    settings: { async load() { return read('settings'); }, async save(value) { if (pauseSettings) await new Promise<void>(resolve => { finishSettings = resolve; }); if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
+    settings: { async load() { return read('settings'); }, async read() { return localStorage.getItem(prefix + 'settings'); }, async save(value) { if (pauseSettings) await new Promise<void>(resolve => { finishSettings = resolve; }); if (failSettings) throw new Error('FIXTURE_SETTINGS_FAILURE'); write('settings', value); } },
     local: { get: read, set: write }, host,
-    modals: browserModalSink(),
-    documents: browserDocumentStorage(files, current => write('files', current), () => failWrite),
+    modals: resources.modals, scheduler: resources.scheduler,
+    documents: { ...documents, async create(path, markdown) { if (pauseWrite) await new Promise<void>(resolve => { finishWrite = resolve; }); return documents.create(path, markdown); } },
     newId: () => { const sequence = Number(read('sequence') ?? 0) + 1; write('sequence', sequence); return `demo-${String(sequence).padStart(4, '0')}`; },
     now: () => '2026-09-22T12:00:00.000Z',
-    observeError: entry => errors.push({ code: entry.code, operation: entry.operation }),
+    observeError: entry => { errors.push({ code: entry.code, operation: entry.operation }); },
   };
-  return { adapters, files, errors,
-    fault(kind: 'write' | 'open' | 'settings' | 'settings-pause' | 'notice' | 'none') { failWrite = kind === 'write'; failOpen = kind === 'open'; failSettings = kind === 'settings'; failNotice = kind === 'notice'; pauseSettings = kind === 'settings-pause'; if (!pauseSettings) { finishSettings?.(); finishSettings = undefined; } },
-    dispose() { pauseSettings = false; finishSettings?.(); finishSettings = undefined; for (const hide of [...disposers]) hide(); for (const el of dialogs) el.close(); },
+  return { adapters, files, errors, resources: () => ({ ...resources.snapshot(), openDialogs: dialogs.size, openCalls }),
+    fault(kind: HarnessFault) {
+      failWrite = kind === 'write'; failOpen = kind === 'open'; failSettings = kind === 'settings'; failNotice = kind === 'notice';
+      pauseSettings = kind === 'settings-pause'; pauseWrite = kind === 'write-pause'; pauseOpen = kind === 'open-pause';
+      if (!pauseSettings) { finishSettings?.(); finishSettings = undefined; }
+      if (!pauseWrite) { finishWrite?.(); finishWrite = undefined; }
+      if (!pauseOpen) { finishOpen?.(); finishOpen = undefined; }
+    },
+    dispose() { disposed = true; pauseSettings = false; finishSettings?.(); finishSettings = undefined; finishWrite?.(); finishWrite = undefined; finishOpen?.(); finishOpen = undefined; for (const hide of [...disposers]) hide(); for (const el of dialogs) el.close(); },
   };
 }

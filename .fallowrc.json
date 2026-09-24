@@ -1,6 +1,7 @@
 {
   "entry": [
     "src/main.ts",
+    "src/features/api.ts",
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",

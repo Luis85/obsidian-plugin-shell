@@ -1,5 +1,46 @@
 # Template readiness ledger
 
+The active [framework lifecycle increment](FRAMEWORK-LIFECYCLE-PLAN.md) exposes
+reusable owner permits, precise recovery/presence reads and read-only resource
+observation through the [developer guide](FRAMEWORK-GUIDE.md). Its
+[execution record](../testing/FRAMEWORK-LIFECYCLE.md) owns current qualification;
+the final frozen code/policy is `17d0f5b`, with **2 verified / 55 partial /
+39 not-run** and all **151 links observed**. Native pending recovery,
+delayed progress and foreign-owner cleanup now have actual scoped evidence.
+Thirty-four added links remain partial; no whole row was promoted. See the
+[candidate audit](../testing/evidence/framework-lifecycle-candidate.json).
+Migration breadth, complete assertion coverage, reference/device
+qualification and external release/dependency prerequisites remain open.
+
+The public authoring entry now survives example removal with its intentionally
+unused developer contracts intact; unrelated implementation dead code remains
+checked. The final 17d0f5b [consumer audit](../testing/evidence/framework-lifecycle-consumer.json)
+passed all five stages, preserving the edited feature and generating a new working
+feature after removal. Earlier d8826fd/a5c4aac/1c20f7b passes remain separately bound.
+The earlier failures remain in the execution record. Complete fixed-byte Windows
+native qualification and all historical host/timeout/cleanup causes remain open;
+later Linux passes do not resolve them. No final-template readiness is claimed.
+
+The [persistence/lifecycle execution record](../testing/PERSISTENCE-LIFECYCLE.md)
+and [cross-owner review](PERSISTENCE-LIFECYCLE-REVIEW.md) retain the preceding focused
+milestone. Frozen `7f14292871efb07ddace131fb9b5603de4122394` had **2 verified /
+55 partial / 39 not-run** after a complete audited session: AC-71 now has partial
+component/browser evidence, while its native ownership clauses remain open.
+The earlier candidate figures below remain historical; partial assertion
+improvements are not full-template readiness.
+
+The earlier [acceptance closure plan](ACCEPTANCE-CLOSURE-PLAN.md) and
+[execution record](../testing/ACCEPTANCE-CLOSURE.md) retain that assertion
+audit and results. The requirement inventory and earlier candidate figures below
+remain historical context; unlinked evidence is not absent implementation.
+
+Previous frozen code `e2758ae47723cc7496fabd0074b76b03db5c4ee2` has a complete
+Linux evidence session with **2 verified / 54 partial / 40 not-run**: AC-06 joins
+AC-03 as verified, while audited links advance 41 previously unlinked cases to partial.
+The [96-row finish ledger](ACCEPTANCE-CLOSURE-LEDGER.md) retains missing clauses
+and modes. Both historical native failure classes and a separate Windows
+production-coverage timeout remain unresolved. Full-template release stays blocked.
+
 Reviewed 2026-09-23 against merged iteration-four source and its retained
 [execution record](../testing/ITERATION-FOUR.md). This is a requirement inventory,
 not a replacement acceptance report or permission to release. The

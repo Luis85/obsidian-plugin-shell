@@ -76,6 +76,14 @@ example links remain visibly unobserved with their gaps. Native performance, whe
 present, is checked against the independent controlled-reference protocol and raw
 sample validator; timing budget qualification remains separate from test counts.
 
+Enhanced native ownership claims additionally require an independent live ledger,
+closed nested schemas, exact fault counts, consecutive event sequences, zero lost
+entries/subscriber failures and matching resource acquisition/release metadata
+across immutable checkpoint prefixes. The real recovery example supplies delayed
+progress and pending availability; public CDP retains its actual Notice listener
+for invocation after closure. Protocol/parser fixtures alone cannot establish
+native execution. See [the native ownership protocol](FRAMEWORK-LIFECYCLE-NATIVE.md).
+
 ## Packet and session integrity
 
 Schema 1 packets record the producer, run UUID, UTC interval, actual exit/signal,
@@ -116,8 +124,10 @@ against the untouched legacy plan on every report.
 
 AC-06's unit link has whole extent: the assertion overlaps an item create with a
 preference update, checks their exact combined stored envelope, preserves the
-sibling draft and queries current state from a late view. AC-06 remains partial
-because its browser link does not overlap preference and item persistence.
+sibling draft and queries current state from a late view. The later AC-CLOSE-06
+served assertion overlaps preference and item persistence and checks exact saved
+envelopes plus restored UI. Both whole links established AC-06 in the prior
+qualified session; any changed source requires a fresh complete session.
 AC-03's two links now have whole extent after an assertion audit: the unit test
 constructs independent services from saved data after create, rename and delete,
 checks the expected stable IDs/labels or absence, and asserts zero initialization

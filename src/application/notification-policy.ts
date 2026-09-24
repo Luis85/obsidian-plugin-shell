@@ -1,4 +1,5 @@
-import type { ErrorReporter, HostActions, NoticeHandle, TimerScheduler, Unsubscribe } from './ports';
+import type { ErrorReporter, HostActions, LifecycleObservation, NoticeHandle, TimerScheduler, Unsubscribe } from './ports';
+import { LifecycleObservations } from './lifecycle-observation';
 export type NotificationKind = 'info' | 'success' | 'warning' | 'error' | 'progress';
 export interface NotificationRequest {
   readonly owner: string; readonly operation: string; readonly kind: NotificationKind; readonly key: string;
@@ -28,19 +29,30 @@ export class NotificationPolicy {
   private readonly entries = new Map<number, Entry>();
   private readonly queue: number[] = [];
   private readonly owners = new Map<string, Readonly<Record<string, RecoveryAction>>>();
+  private readonly releaseActions = new Map<string, Unsubscribe>();
+  private readonly resources: LifecycleObservations;
   constructor(private readonly host: HostActions, private readonly text: (key: string) => string, private readonly errors: ErrorReporter,
     private readonly timers: TimerScheduler, private readonly changed: () => void,
     private readonly validKey: (key: string) => boolean = token,
-    private readonly observe?: (value: NotificationObservation) => void) {}
+    private readonly observe?: (value: NotificationObservation) => unknown,
+    observeLifecycle?: (value: LifecycleObservation) => unknown) { this.resources = new LifecycleObservations(errors, observeLifecycle); }
   get current(): readonly NotificationFeedback[] { return [...this.entries.values()].map(entry => entry.feedback); }
   private observation(entry: Entry, phase: NotificationObservation['phase']) {
-    try { this.observe?.({ id: entry.feedback.id, kind: entry.spec.kind, phase }); }
+    try { void Promise.resolve(this.observe?.({ id: entry.feedback.id, kind: entry.spec.kind, phase })).catch(() => this.errors.report('notice.observer', 'notice.observe')); }
     catch { this.errors.report('notice.observer', 'notice.observe'); }
   }
   registerActions(owner: string, actions: Readonly<Record<string, RecoveryAction>>): Unsubscribe {
     if (this.disposed || !token(owner) || this.owners.has(owner) || Object.entries(actions).some(([id, action]) => !token(id) || !this.validKey(action.labelKey))) throw new Error('INVALID_NOTIFICATION_OWNER');
     const registry = Object.freeze({ ...actions }); this.owners.set(owner, registry);
-    return () => { if (this.owners.get(owner) !== registry) return; this.owners.delete(owner); this.dismissOwner(owner); };
+    const release = this.resources.acquire('action', owner, 'recovery', Object.keys(registry).length);
+    if (this.owners.get(owner) === registry) this.releaseActions.set(owner, release); else release();
+    return () => {
+      if (this.owners.get(owner) !== registry) return;
+      const owned = [...this.entries.values()].filter(entry => entry.spec.owner === owner);
+      this.owners.delete(owner); const released = this.releaseActions.get(owner); this.releaseActions.delete(owner);
+      for (const entry of owned) this.dismiss(entry.feedback.id);
+      released?.();
+    };
   }
   private valid(spec: NotificationRequest): boolean {
     return token(spec.owner) && token(spec.operation) && token(spec.key) && this.validKey(spec.key)
@@ -90,20 +102,46 @@ export class NotificationPolicy {
   private sink(entry: Entry): NoticeHandle {
     const actions = () => entry.feedback.actions.map(action => ({ label: this.translated(action.labelKey), disabled: action.busy, invoke: () => { void this.invoke(entry.feedback.id, action.id); } }));
     const text = this.translated(entry.spec.key);
-    if (this.host.notification) return this.host.notification(text, actions());
-    let hide = this.host.notice(text, 0);
-    return { update: next => { hide(); hide = this.host.notice(next, 0); }, dismiss: () => hide() };
+    if (this.host.notification) {
+      const handle = this.host.notification(text, actions());
+      const release = this.resources.acquire('notice', entry.spec.owner, entry.spec.operation);
+      return { update: (message, choices) => handle.update(message, choices), dismiss() { handle.dismiss(); release(); } };
+    }
+    return this.legacySink(entry, text);
+  }
+  private legacySink(entry: Entry, text: string): NoticeHandle {
+    const open = (message: string) => {
+      const hide = this.host.notice(message, 0);
+      const release = this.resources.acquire('notice', entry.spec.owner, entry.spec.operation);
+      let active = true;
+      return () => { if (active) { hide(); active = false; release(); } };
+    };
+    let hide = open(text); let closed = false; let generation = 0;
+    return {
+      update: next => {
+        if (closed) return;
+        const current = ++generation; hide();
+        if (closed || generation !== current) return;
+        const successor = open(next);
+        if (closed || generation !== current) successor(); else hide = successor;
+      },
+      dismiss() { if (closed) return; closed = true; hide(); },
+    };
   }
   private schedule(entry: Entry, milliseconds: number, callback: () => void): boolean {
-    let active = true; let completed = false; let cancel: Unsubscribe | undefined;
-    const stop = () => { active = false; cancel?.(); };
+    if (!this.currentEntry(entry)) return false;
+    let active = true; let completed = false; let cancelled = false; let cancel: Unsubscribe | undefined; let release: Unsubscribe | undefined;
+    const stop = () => { active = false; cancel?.(); cancelled = true; release?.(); };
     entry.timer = stop;
     try {
       cancel = this.timers.after(milliseconds, () => {
-        if (!active) return; active = false; completed = true;
+        completed = true; release?.();
+        if (!active) return; active = false;
         if (entry.timer === stop) entry.timer = undefined;
         callback();
       });
+      release = this.resources.acquire('timer', entry.spec.owner, entry.spec.operation);
+      if (completed || cancelled) release();
       return true;
     } catch {
       active = false; if (entry.timer === stop) entry.timer = undefined;
@@ -117,10 +155,18 @@ export class NotificationPolicy {
   private showOverflow(capacity = false) {
     this.capacityOverflow ||= capacity;
     if (this.overflow) return;
-    try { this.overflow = this.host.notice(this.translated('notification.overflow'), 0); }
+    try {
+      const hide = this.host.notice(this.translated('notification.overflow'), 0);
+      const release = this.resources.acquire('notice', 'runtime:overflow', 'overflow');
+      const close = () => { hide(); release(); };
+      if (this.overflow || this.disposed || !this.overflowNeeded()) {
+        try { close(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); }
+      } else this.overflow = close;
+    }
     catch { this.errors.report('notice.sink', 'notice.show'); }
   }
   private display(entry: Entry) {
+    if (!this.currentEntry(entry)) return;
     const id = entry.feedback.id;
     if (entry.spec.native && this.active() >= 3 && !this.essential(entry)) {
       if (this.queue.length >= 10) {
@@ -131,21 +177,30 @@ export class NotificationPolicy {
     }
     const native = this.nativeAvailable(entry);
     entry.feedback = this.feedback(id, entry.spec, native, true, entry.running);
-    if (native) {
-      try { entry.sink = this.sink(entry); }
-      catch { this.errors.report('notice.sink', 'notice.show'); entry.feedback = this.feedback(id, entry.spec, false, true, entry.running); }
-    }
+    if (native && !this.attachSink(entry)) return;
     if (!this.persistent(entry)) this.schedule(entry, entry.spec.duration ?? 6000, () => this.dismiss(id));
     this.observation(entry, 'show'); this.changed();
+  }
+  private attachSink(entry: Entry): boolean {
+    try {
+      const request = entry.spec; const sink = this.sink(entry);
+      // A subscriber may close the owner or replace its request during acquisition.
+      if (!this.currentRequest(entry, request)) {
+        try { sink.dismiss(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); }
+        return false;
+      }
+      entry.sink = sink;
+    } catch { this.errors.report('notice.sink', 'notice.show'); entry.feedback = this.feedback(entry.feedback.id, entry.spec, false, true, entry.running); }
+    return true;
   }
   private nativeAvailable(entry: Entry): boolean {
     return !!entry.spec.native && (this.essential(entry) || this.active() < 3) && (!entry.spec.actions?.length || !!this.host.notification);
   }
   private stop(entry: Entry) {
-    this.cancelTimer(entry);
-    try { entry.sink?.dismiss(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); }
-    entry.sink = undefined;
+    const sink = entry.sink; entry.sink = undefined;
     const queued = this.queue.indexOf(entry.feedback.id); if (queued !== -1) this.queue.splice(queued, 1);
+    this.cancelTimer(entry);
+    try { sink?.dismiss(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); }
   }
   private drain() {
     while (!this.disposed && this.active() < 3 && this.queue.length) {
@@ -154,25 +209,38 @@ export class NotificationPolicy {
     this.clearOverflow();
   }
   private clearOverflow(): void {
-    if (!this.queue.length && this.overflow && (!this.capacityOverflow || this.entries.size < 128)) {
-      try { this.overflow(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); } this.overflow = undefined; this.capacityOverflow = false;
-    }
+    if (!this.overflow || this.overflowNeeded()) return;
+    const hide = this.overflow; this.overflow = undefined; this.capacityOverflow = false;
+    try { hide(); } catch { this.errors.report('notice.sink', 'notice.dismiss'); }
   }
+  private overflowNeeded(): boolean { return this.queue.length > 0 || this.capacityOverflow && this.entries.size >= 128; }
   private update(id: number, patch: Omit<NotificationRequest, 'owner' | 'operation'>): boolean {
     const entry = this.entries.get(id); if (!entry || this.disposed) return false;
+    const previous = entry.spec;
     const spec = this.patch(entry, patch);
     if (!this.valid(spec)) { this.errors.report('notice.specification', 'notice.request'); return false; }
     const hadSink = entry.sink; const wasVisible = entry.feedback.visible;
     this.cancelTimer(entry);
+    if (!this.currentRequest(entry, previous)) return false;
     const queued = this.queue.indexOf(id); if (queued !== -1) this.queue.splice(queued, 1);
     entry.spec = Object.freeze({ ...spec, actions: Object.freeze([...(spec.actions ?? [])]) });
     entry.feedback = this.feedback(id, entry.spec, !!hadSink, wasVisible, entry.running);
-    if (hadSink && this.retainSink(entry)) {
-      this.refresh(entry);
-      if (!this.persistent(entry)) this.schedule(entry, spec.duration ?? 6000, () => this.dismiss(id));
-      this.changed();
-    } else { this.stop(entry); this.display(entry); }
+    if (!this.updateSink(entry, !!hadSink)) return false;
     this.observation(entry, 'update'); this.drain(); return true;
+  }
+  private updateSink(entry: Entry, hadSink: boolean): boolean {
+    return hadSink && this.retainSink(entry) ? this.refreshRetained(entry) : this.replaceSink(entry);
+  }
+  private refreshRetained(entry: Entry): boolean {
+    const current = entry.spec; this.refresh(entry);
+    if (!this.currentRequest(entry, current)) return false;
+    if (!this.persistent(entry)) this.schedule(entry, entry.spec.duration ?? 6000, () => this.dismiss(entry.feedback.id));
+    this.changed(); return true;
+  }
+  private replaceSink(entry: Entry): boolean {
+    const current = entry.spec; this.stop(entry);
+    if (!this.currentRequest(entry, current)) return false;
+    this.display(entry); return true;
   }
   private patch(entry: Entry, patch: Omit<NotificationRequest, 'owner' | 'operation'>): NotificationRequest {
     return { ...patch, owner: entry.spec.owner, operation: entry.spec.operation, scope: patch.scope ?? entry.spec.scope, native: patch.native ?? entry.spec.native };
@@ -188,18 +256,26 @@ export class NotificationPolicy {
     if (!entry || !action || !this.canInvoke(entry, actionId)) return false;
     const request = entry.spec;
     entry.running = true; entry.feedback = this.feedback(id, entry.spec, entry.feedback.native, entry.feedback.visible, true); this.refresh(entry); this.changed();
+    const settled = this.resources.acquire('availability', entry.spec.owner, actionId);
     try {
-      if (!await action.available() || !this.currentAction(entry, request, registry)) return false;
+      if (!this.currentAction(entry, request, registry)) return false;
+      let available: boolean;
+      try { available = await action.available(); } finally { settled(); }
+      if (!available || !this.currentAction(entry, request, registry)) return false;
       await action.run(); this.observation(entry, 'action'); return true;
     } catch { this.errors.report('notice.action', 'notice.action'); return false; }
-    finally {
-      entry.running = false;
-      if (this.entries.get(id) === entry) { entry.feedback = this.feedback(id, entry.spec, entry.feedback.native, entry.feedback.visible); this.refresh(entry); this.changed(); }
-    }
+    finally { this.finishAction(id, entry, settled); }
+  }
+  private finishAction(id: number, entry: Entry, settled: Unsubscribe): void {
+    settled();
+    entry.running = false;
+    if (this.entries.get(id) === entry) { entry.feedback = this.feedback(id, entry.spec, entry.feedback.native, entry.feedback.visible); this.refresh(entry); this.changed(); }
   }
   private currentAction(entry: Entry, request: NotificationRequest, registry: Readonly<Record<string, RecoveryAction>> | undefined): boolean {
-    return this.entries.get(entry.feedback.id) === entry && entry.spec === request && this.owners.get(entry.spec.owner) === registry;
+    return this.currentRequest(entry, request) && this.owners.get(entry.spec.owner) === registry;
   }
+  private currentEntry(entry: Entry): boolean { return !this.disposed && this.entries.get(entry.feedback.id) === entry; }
+  private currentRequest(entry: Entry, request: NotificationRequest): boolean { return this.currentEntry(entry) && entry.spec === request; }
   private canInvoke(entry: Entry, actionId: string): boolean { return !!entry.spec.actions?.includes(actionId) && !entry.running && !this.disposed; }
   dismiss(id: number): void {
     const entry = this.entries.get(id); if (!entry) return;
@@ -210,5 +286,5 @@ export class NotificationPolicy {
     // oxlint-disable-next-line unicorn/no-useless-spread
     for (const entry of [...this.entries.values()]) if (entry.spec.owner === owner) this.dismiss(entry.feedback.id);
   }
-  dispose(): void { if (this.disposed) return; this.disposed = true; for (const id of this.entries.keys()) this.dismiss(id); this.drain(); this.owners.clear(); }
+  dispose(): void { if (this.disposed) return; this.disposed = true; for (const id of this.entries.keys()) this.dismiss(id); this.drain(); this.owners.clear(); for (const release of this.releaseActions.values()) release(); this.releaseActions.clear(); }
 }

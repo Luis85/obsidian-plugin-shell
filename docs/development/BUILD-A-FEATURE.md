@@ -8,6 +8,11 @@ typed definitions, validation helpers, document rendering, safe repository CRUD,
 events, preferences, diagnostics and view lifecycle. Write your business rules
 against those services. Task and Project are worked examples you can replace.
 
+The [framework guide](FRAMEWORK-GUIDE.md) maps the complete authoring surface and
+explains owner permits, asynchronous cleanup, protected-storage guidance and
+production qualification. Use a captured permit for view-owned note update/delete
+operations so closing a view during preflight cannot start a later mutation.
+
 ## Define the business data
 
 Create `src/features/bookmarks/entity.ts`:
