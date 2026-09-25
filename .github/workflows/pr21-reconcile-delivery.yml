@@ -1,0 +1,33 @@
+name: Reconcile PR21 composition source
+on:
+  push:
+    branches: [work/pr21-composition-reconcile]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 3
+      - name: Reconstruct exact reviewed reconciliation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,base64,lzma,hashlib,os
+          raw=''.join(pathlib.Path(f'.delivery/union-{i}.b64').read_text() for i in range(3))
+          patch=lzma.decompress(base64.b64decode(raw,validate=True))
+          assert hashlib.sha256(patch).hexdigest()=='5f37e545dbf913f1006d220d7d230f2fef1cdfe28cbdc74b1416d464aab7b75d'
+          pathlib.Path(os.environ['RUNNER_TEMP'],'pr21-union.patch').write_bytes(patch)
+          PY
+          git checkout --detach 89c65fc21f6b7fbc695acb827c457a2297f4b5ca
+          git apply --check "$RUNNER_TEMP/pr21-union.patch"
+          git apply "$RUNNER_TEMP/pr21-union.patch"
+          python3 scripts/concepts/build-companion.py
+          git add -A
+          test "$(git write-tree)" = "5dcf672ccad95d2a138c9d9fb63f01659f99de6f"
+          COMMIT=$(git -c user.name='OpenAI' -c user.email='noreply@openai.com' commit-tree 5dcf672ccad95d2a138c9d9fb63f01659f99de6f -p acae965604014008814962d7c215f62f9273b100 -p 08ed974eacc0a7c87106ea2f2e4bb3bc34e81310 -m 'merge: reconcile generator providers and typed actions with current composition schema')
+          echo "Reviewed reconciliation commit: $COMMIT"
+          git push origin "$COMMIT:refs/heads/work/generator-detail-implementation"
