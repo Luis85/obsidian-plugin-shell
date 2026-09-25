@@ -12,9 +12,9 @@ Choose **Load companion project** to review and load the companion's own authore
 
 ## Storymaps
 
-**Design → Storymaps** opens the overview and a structured Vue Flow editor with activities, steps, stories, release slices and Unplanned. PRD details can create or link existing maps. Items reference existing sitemap surfaces and requirements; sitemap inspectors link back to those maps. Non-drag Move controls and Outline mode share the same records. Draft protection, Undo/Redo, missing-target recovery and full project JSON round trips are included.
+**Design → Storymaps** opens the overview and a structured Vue Flow editor with activities, steps, stories, release slices and Unplanned. PRD details can create or link existing maps. Items reference existing sitemap surfaces and requirements; sitemap inspectors link back to those maps. Non-drag Move controls, Outline and the advisory Review representation share the same records. In-map text/release/finding filters, searchable requirement links, contextual return navigation and Save & add another support capture and consumption without remounting the canvas on each keystroke. Draft protection, Undo/Redo, missing-target recovery and full project JSON round trips are included.
 
-Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 3/design schema 3; legacy format-1 and format-2 projects remain readable. The CLI remains read-only. See [STORYMAPS.md](STORYMAPS.md) and [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
+Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 3/design schema 3; legacy format-1 and format-2 projects remain readable. The inspection CLI remains read-only; the separate reviewed scaffolding generator retains the full design without implementing native storymap behavior. See [STORYMAPS.md](STORYMAPS.md), the current [STORYMAPS-POLISH.md](STORYMAPS-POLISH.md), and historical [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
 
 ## Page and component editors
 

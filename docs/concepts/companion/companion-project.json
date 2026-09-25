@@ -3914,7 +3914,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo.",
+            "acceptance": "Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo. Repeated story entry retains the destination; search preserves the complete map.",
             "nodes": [
               "node-9"
             ],
@@ -3929,7 +3929,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Items link existing sitemap identities and requirements. Missing targets remain explicit; linked artifacts are never deleted.",
+            "acceptance": "Items link existing sitemap identities and requirements. Searchable pickers retain selected references; direct links and Back preserve context. Missing targets remain explicit; linked artifacts are never deleted.",
             "nodes": [
               "node-9"
             ],
@@ -3944,7 +3944,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Move stories between releases or Unplanned. Removing a release preserves its stories.",
+            "acceptance": "Move stories between releases or Unplanned. Removing a release preserves its stories. Review surfaces missing outcomes, acceptance notes and targets without claiming implementation; archived maps require restore before editing.",
             "nodes": [
               "node-9"
             ],

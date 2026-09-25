@@ -89,9 +89,13 @@ function smSurfaceUses(ids, d = design()) {
 }
 const SM_GEOMETRY = Object.freeze({ left: 174, column: 232, cardWidth: 216, cardHeight: 96, pitch: 108, top: 182 });
 function smLayout(map) {
-  const g = SM_GEOMETRY, nodes = [], columns = [], activities = []; let x = g.left;
+  const g = SM_GEOMETRY, nodes = [], columns = [], activities = [], cells = new Map(), stepsByActivity = new Map();
+  for (const step of map.steps) { if (!stepsByActivity.has(step.activityId)) stepsByActivity.set(step.activityId, []); stepsByActivity.get(step.activityId).push(step); }
+  for (const story of map.stories) { const key = JSON.stringify([story.stepId, story.releaseId]); if (!cells.has(key)) cells.set(key, []); cells.get(key).push(story); }
+  const storiesIn = (stepId, releaseId) => cells.get(JSON.stringify([stepId, releaseId])) || [];
+  let x = g.left;
   for (const activity of map.activities) {
-    const steps = map.steps.filter(step => step.activityId === activity.id), start = x;
+    const steps = stepsByActivity.get(activity.id) || [], start = x;
     for (const step of steps) {
       columns.push({ id: step.id, activityId: activity.id, x, width: g.cardWidth });
       nodes.push({ id: step.id, kind: 'step', record: step, x, y: 90, width: g.cardWidth, height: 68 }); x += g.column;
@@ -102,12 +106,12 @@ function smLayout(map) {
   }
   const width = Math.max(g.left + g.column, x), lanes = []; let y = g.top;
   for (const release of [...map.releases, { id: null, title: 'Unplanned', outcome: 'Not assigned to a release.' }]) {
-    const counts = columns.map(column => map.stories.filter(story => story.stepId === column.id && story.releaseId === release.id).length);
+    const counts = columns.map(column => storiesIn(column.id, release.id).length);
     const height = Math.max(148, Math.max(0, ...counts) * g.pitch + 60);
     lanes.push({ id: release.id, title: release.title, outcome: release.outcome, y, height, width });
     nodes.push({ id: release.id || 'sm-unplanned', kind: 'lane', record: release, x: 0, y, width, height });
     for (const column of columns.filter(c => c.id)) {
-      const stories = map.stories.filter(story => story.stepId === column.id && story.releaseId === release.id);
+      const stories = storiesIn(column.id, release.id);
       stories.forEach((story, index) => nodes.push({ id: story.id, kind: 'story', record: story, x: column.x, y: y + 16 + index * g.pitch, width: g.cardWidth, height: g.cardHeight }));
       nodes.push({ id: 'sm-add-' + column.id + '-' + (release.id || 'unplanned'), kind: 'add', record: { stepId: column.id, releaseId: release.id },
         x: column.x, y: y + 16 + stories.length * g.pitch, width: g.cardWidth, height: 32 });
@@ -116,9 +120,10 @@ function smLayout(map) {
   }
   return { nodes, columns, activities, lanes, width, height: y };
 }
-function smDropTarget(map, id, position) {
-  const layout = smLayout(map), item = smItem(map, id); if (!item) return null;
-  const cx = position.x + SM_GEOMETRY.cardWidth / 2;
+function smDropTarget(map, id, position, layout = smLayout(map)) {
+  const item = smItem(map, id); if (!item) return null;
+  if (!Number.isFinite(position.x) || !Number.isFinite(position.y)) return null;
+  const cx = position.x + (layout.nodes.find(n => n.id === id)?.width || SM_GEOMETRY.cardWidth) / 2;
   if (item.kind === 'story') {
     const column = layout.columns.find(c => c.id && cx >= c.x && cx < c.x + SM_GEOMETRY.column);
     const cy = position.y + SM_GEOMETRY.cardHeight / 2, lane = layout.lanes.find(l => cy >= l.y && cy <= l.y + l.height);

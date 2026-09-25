@@ -129,6 +129,7 @@
     "shell.mjs",
     "scripts/companion/runtime/operation.ts",
     "docs/concepts/companion/src/storymap-model.js",
+    "docs/concepts/companion/src/storymap-review.js",
     "docs/concepts/companion/src/storymap-actions.js",
     "docs/concepts/companion/src/storymap-forms.js",
     "docs/concepts/companion/src/storymap-views.js",
