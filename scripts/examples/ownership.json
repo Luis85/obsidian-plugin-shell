@@ -418,6 +418,10 @@
       "sha256": "06c3a4896f884af5940951dad4b066b36d06e1e1bb79624f9cbe226a6451669e"
     },
     {
+      "path": "tests/e2e/design-system.spec.ts",
+      "sha256": "14a76c95646367b673b562c759c08bb59e3706165aff5c5216d267e7cee14dc5"
+    },
+    {
       "path": "scripts/testing/native-recovery-handles.mjs",
       "sha256": "f6006b6886088f05193e1d842df494f94dc58dcc4412be8e2f18cfb28e714450"
     },

@@ -13,7 +13,8 @@ jobs:
   verify:
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    # Guided setup runs the complete verify gates once before the served showcase.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -33,12 +34,9 @@ jobs:
           npm install --prefix "$tool" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
-      - name: Guided setup from a clean checkout without node_modules
+      - name: Guided setup and complete verification from a clean checkout without node_modules
         shell: pwsh
         run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
-      - name: Verify production coverage, contracts and retained baseline
-        shell: pwsh
-        run: node "$env:QUALIFIED_NPM_CLI" run verify
       - name: Provision pinned Chromium
         if: matrix.os == 'ubuntu-latest'
         run: |
