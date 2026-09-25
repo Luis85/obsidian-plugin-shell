@@ -1,18 +1,23 @@
 #!/usr/bin/env node
-// Dependency-free dispatch; the project compiler is shared TypeScript, not a shell script.
+// Source launcher only. Release kits include TypeScript-compiled modules before installation.
+import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-const [command, ...args] = process.argv.slice(2);
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+const root = dirname(fileURLToPath(import.meta.url));
+const compiled = join(root, '.framework/compiled/scripts/framework/cli.js');
 try {
-  if (command === 'generate') {
-    if (!process.features.typescript && !process.execArgv.includes('--experimental-strip-types')) {
-      const child = spawnSync(process.execPath, ['--experimental-strip-types', fileURLToPath(import.meta.url), ...process.argv.slice(2)], {stdio:'inherit'});
-      if (child.error) throw child.error;
-      process.exitCode = child.status ?? 1;
-    } else await (await import('./scripts/companion/compiler/cli.ts')).generatorCli(args);
+  if (existsSync(compiled)) process.exitCode = await (await import(pathToFileURL(compiled).href)).main(process.argv.slice(2), root);
+  else if (process.features.typescript || process.execArgv.includes('--experimental-strip-types')) {
+    process.exitCode = await (await import('./scripts/framework/cli.ts')).main(process.argv.slice(2), root);
+  } else {
+    const child = spawnSync(process.execPath, ['--experimental-strip-types', fileURLToPath(import.meta.url), ...process.argv.slice(2)], { stdio: 'inherit' });
+    if (child.error) throw child.error;
+    process.exitCode = child.status ?? 1;
   }
-  else if (command === 'make') { process.argv = [process.argv[0], 'scripts/makers/cli.mjs', ...args]; await import('./scripts/makers/cli.mjs'); }
-  else if (command === 'setup') { process.argv = [process.argv[0], 'scripts/setup.mjs', ...args]; await import('./scripts/setup.mjs'); }
-  else if (command === '--help' || command === undefined) process.stdout.write('Shell framework\n  node shell.mjs setup [options]\n  node shell.mjs make <recipe> [options]\n  node shell.mjs generate --help\nUse npm run help for the existing build, test, maintenance and release commands.\n');
-  else throw new Error('SHELL_USAGE: unknown command; use --help.');
-} catch (error) { process.stderr.write((error instanceof Error ? error.message : 'SHELL_FAILED')+'\n'); process.exitCode = 1; }
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Unable to start the framework CLI.';
+  if (process.argv.includes('--json')) process.stdout.write(JSON.stringify({ protocolVersion: 1, command: 'bootstrap', status: 'failed', data: null, diagnostics: [{ code: 'BOOTSTRAP_FAILED', message }] }) + '\n');
+  else process.stderr.write(message + '\n');
+  process.exitCode = 1;
+}

@@ -6,13 +6,13 @@
 
 ## Current product decision
 
-The repository delivers a proper reusable **Plugin Shell first**. The companion is a demanding consumer of that foundation, not a shortcut around unfinished shell capabilities. After the shell meets its internal readiness gate and the conversion scope is reviewed, integrate the concept into a real Obsidian plugin using the same maintained shell runtime, feature APIs, styles and tooling. Qualify that plugin before publication.
+The repository delivers a proper reusable **Plugin Shell first**. The companion is a demanding consumer of that foundation, not a shortcut around unfinished shell capabilities. After SH-022 technical readiness, SH-034 separately authorized framework shipment and reviewed CX-007 conversion scope, integrate the concept into a real Obsidian plugin using the same maintained shell runtime, feature APIs, styles and tooling. Qualify that plugin before publication.
 
 The [delivery strategy](DELIVERY-STRATEGY.md) and [improvement plan](COMPANION-IMPROVEMENT-PLAN.md) supersede the earlier milestone ordering. They do not withdraw the retained requirements, safety rules or scope distinctions. The full previous PRD is preserved byte-for-byte as [requirements baseline 0.3](COMPANION-REQUIREMENTS-0.3.md); its FR identifiers and detailed contracts remain references. Where its historical milestone order or priority labels conflict with the current strategy, the current strategy governs scheduling. A former P0 companion requirement does not outrank shell prerequisites.
 
 ## Two sequences, deliberately different
 
-**Repository delivery:** shell capabilities and standalone qualification → continuing concept refinement and a reviewed conversion baseline → native companion built on shell → qualification → authorized publication.
+**Repository delivery:** qualify and ship the standalone shell + TypeScript CLI + JSON generator developer kit → native companion on that shipped framework with a reviewed conversion scope → native qualification → authorized companion publication. Concept refinement remains secondary/parallel. See the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
 
 **Eventual developer journey:** install companion → define/design one project → optionally add Plugin Shell → review generated source → build/test in an isolated vault → keep developing with or without the companion.
 
@@ -42,7 +42,8 @@ A separate standalone consumer must still build and run after the companion is r
 
 | Gate | Evidence required | Does not authorize |
 | --- | --- | --- |
-| Shell ready — SH-022 | Applicable shell capability matrix and independent consumer qualification | Companion readiness or publication |
+| Framework ready — SH-022 | Shell/CLI/generator/archive matrix and independent consumer qualification | Companion readiness or publication approval |
+| Framework shipped — SH-034 | Separately approved exact kit published and redownload-verified | Companion shipment or approval for other public actions |
 | Conversion baseline — CX-007 | Reviewed, bounded concept scope and shell dependency mapping | A complete or implemented companion |
 | Native companion ready — CP-010 | Actual native feature coverage, three product journeys and supported-platform evidence | Tags, release promotion or a listing |
 | Publication — PUB tasks | Distribution/policy decision, matching artifacts, support docs and explicit owner approval | Unattended future releases |

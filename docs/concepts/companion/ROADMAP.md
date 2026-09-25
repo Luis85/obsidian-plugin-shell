@@ -38,6 +38,10 @@ Scope changes that affect source schemas, fixtures, token export or makers must 
 
 ## Conversion handoff
 
-[CP-001](../../tasks/companion/CP-001.md) converts the concept to a native product on the shell only after [SH-022](../../tasks/shell/SH-022.md) and CX-007. It is followed by dedicated persistence/editor/generation/test-data/design-system/run tasks, not treated as a one-step HTML packaging exercise.
+[CP-001](../../tasks/companion/CP-001.md) converts the concept to a native product on the shell only after [SH-022](../../tasks/shell/SH-022.md), [SH-034](../../tasks/shell/SH-034.md) framework shipment and CX-007. It is followed by dedicated persistence/editor/generation/test-data/design-system/run tasks, not treated as a one-step HTML packaging exercise.
 
 Handoff includes a feature inventory, selected/deferred scope, interaction contracts, canonical records, test fixtures, shell capability mapping and explicit unsupported behavior. New feature work remains possible after handoff through reviewed changes. Publication is a separate final lane.
+
+## Framework-first entry refinement — 2026-09-24
+
+The first delivered user journey starts with the standalone framework archive and CLI, not this plugin. The concept remains an optional authoring interface; its exported project JSON must drive the same shared makers/compiler used by the CLI. Keep one-project-per-vault and design-only use without Node. SH-033 qualifies the framework-side operation adapter headlessly before native conversion; native process integration and policy acceptance remain explicit later work. See the [implementation plan](../../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).

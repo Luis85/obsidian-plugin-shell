@@ -6,7 +6,7 @@ import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
 import { digest, json, projectModel, row, rows, text, requireValue } from './model.ts';
 import { projectFiles } from './project-files.ts';
 import { detailDocuments } from './detail-model.ts';
-export interface GenerateOptions { input: string; target: string; vault?: string; templateRoot?: string }
+export interface GenerateOptions { input: string; target: string; vault?: string; templateRoot?: string; bootstrap?: ReadonlyArray<{path: string; hash: string}>; output?: Awaited<ReturnType<typeof projectFiles>> }
 const generationVersion = 1;
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
 export async function planProject(options: GenerateOptions) {
@@ -17,7 +17,8 @@ export async function planProject(options: GenerateOptions) {
   const prefix = options.target === '.' ? '' : options.target+'/';
   const receiptPath = prefix+'.companion/generation.json';
   const inspected = await createFilePlan(input.vault,[{path:receiptPath,content:null}]); const receiptBefore = inspected.changes[0]!.beforeHash;
-  let previous = new Map<string,{hash:string;ownership:string}>();
+  for (const file of options.bootstrap ?? []) requireValue(['shell.mjs','package.json','README.md','LICENSE','design/project.json'].includes(file.path) && /^[a-f0-9]{64}$/.test(file.hash), 'Invalid bootstrap ownership.');
+  let previous = new Map<string,{hash:string;ownership:string}>((options.bootstrap ?? []).map(file => [file.path,{hash:file.hash,ownership:'framework'}]));
   if (receiptBefore) {
     const raw = await readFile(resolve(input.vault,receiptPath),'utf8'); requireValue(digest(raw) === receiptBefore,'Receipt changed while reading.');
     const receipt = row(JSON.parse(raw)); requireValue(receipt.version === generationVersion && receipt.projectId === model.project.id,'Receipt belongs to another project/version.');
@@ -27,7 +28,7 @@ export async function planProject(options: GenerateOptions) {
     previous = new Map(records.map(f => [text(f.path),{hash:text(f.hash),ownership:text(f.ownership)}]));
   }
   const details = detailDocuments(model);
-  const output = await projectFiles(templateRoot,model);
+  const output = options.output ?? await projectFiles(templateRoot,model);
   requireValue(output.length <= 5000, 'Generated project exceeds the supported ownership inventory.');
   const candidates = await createFilePlan(input.vault,output.map(e => ({path:prefix+e.path,content:e.content,...(e.encoding ? {encoding:e.encoding} : {})})));
   const preserved: string[] = []; const conflicts: string[] = []; const entries: Array<{path:string;content:string;encoding?:'base64'}> = [];

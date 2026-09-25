@@ -93,7 +93,13 @@
     "companion:generate": "node scripts/companion/generate.mjs",
     "companion:scaffold": "node shell.mjs generate",
     "test:generator": "node --experimental-strip-types --test tests/tooling/project-generator*.checks.mjs",
-    "typecheck:generator": "tsc --noEmit --project tsconfig.generator.json"
+    "typecheck:generator": "tsc --noEmit --project tsconfig.generator.json",
+    "shell": "node shell.mjs",
+    "capabilities": "node scripts/operations/cli.mjs",
+    "framework:setup": "node shell.mjs setup",
+    "framework:pack": "node shell.mjs framework pack",
+    "typecheck:framework": "tsc --noEmit --project tsconfig.framework.json",
+    "test:framework-cli": "node --experimental-strip-types --test tests/tooling/framework-*.checks.mjs"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

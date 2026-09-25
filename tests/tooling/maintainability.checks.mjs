@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sha256 } from '../../scripts/testing/source-inputs.mjs';
@@ -136,22 +136,16 @@ test('maintainability inventories exact immutable vendor data and refuses change
 });
 
 
-test('maintainability inventories every concept Python source without diluting production metrics', async () => {
+test('maintainability inventories unsupported Python fixtures without diluting production metrics', async () => {
   await fixture(async root => {
     const before = run(root); assert.equal(before.status, 0, before.stderr);
     const baseline = JSON.parse(await readFile(join(packet(before).output, 'report.json'), 'utf8'));
     const sources = [];
-    for (const directory of ['scripts/concepts', 'tests/concepts']) {
-      await mkdir(join(root, directory), { recursive: true });
-      for (const name of (await readdir(resolve(directory))).filter(name => name.endsWith('.py')).sort()) {
-        const path = `${directory}/${name}`;
-        const bytes = await readFile(resolve(path));
-        await writeFile(join(root, path), bytes);
-        sources.push({ path, bytes });
-      }
+    for (const path of ['scripts/concepts/assembly-fixture.py', 'tests/concepts/browser-fixture.py']) {
+      const bytes = Buffer.from('# Unsupported-language inventory fixture\nprint("fixture")\n');
+      await mkdir(join(root, path, '..'), { recursive: true });
+      await writeFile(join(root, path), bytes); sources.push({path, bytes});
     }
-    assert.ok(sources.some(file => file.path === 'scripts/concepts/build-companion.py'));
-    assert.ok(sources.some(file => file.path === 'tests/concepts/companion-storage.browser.py'));
     const result = run(root); assert.equal(result.status, 0, result.stderr);
     const output = packet(result).output;
     const reportPath = join(output, 'report.json');

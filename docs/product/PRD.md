@@ -184,7 +184,7 @@ or devices.
 
 The [shell-first delivery overview](../../SHELL-FIRST-OVERVIEW.md) and
 [delivery strategy](DELIVERY-STRATEGY.md) define repository execution order:
-qualify the shared shell first, build the native companion second, publish last.
+qualify and ship the shared shell, TypeScript CLI and project generator first; build the native companion on that shipped framework second; publish the companion last.
 
 The [companion developer-workbench PRD](COMPANION-PLUGIN-PRD.md) specifies a
 same-repository Obsidian companion built on the shell: **one vault, one project**.
@@ -216,3 +216,9 @@ The browser concept implements these authoring interactions and input-driven
 source previews. Shared CLI lowering, native Markdown schema records,
 relationship resolution and safe data migrations remain separately qualified
 implementation packages; no existing root runtime behavior is replaced here.
+
+### Framework developer-kit entry refinement — 2026-09-24
+
+The primary developer starts with the assembled GitHub framework release archive, not an installed plugin: extract → console setup/configure → import project JSON → reviewed generation → develop/build/test → explicitly publish the generated plugin → maintain. The compiled TypeScript-authored CLI runs before dependency installation, both directly and through npm aliases, and shares operations/makers/contracts with the template and future companion. An independent project root and custom source/test paths are first-class.
+
+The [implementation plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) and SH-023–SH-034 extend the existing requirements. SH-022 remains technically blocked; SH-034 requires new exact-candidate authorization. Existing read-only handoff semantics and all earlier quality/safety requirements remain unchanged. This amendment is not runtime implementation or a release claim.
