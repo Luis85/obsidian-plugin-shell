@@ -2,7 +2,9 @@
 
 ## Source and integration
 
-Implementation base: PR #5 `5ddc7a278ba639fdc78b9294a55dfdc99c5279d2`.
+Recovered implementation base: PR #5 `5ddc7a278ba639fdc78b9294a55dfdc99c5279d2`.
+Publication integrates PR #5 `3cd1f7b04025df02a9fc1407fc598112a072a965` and retains its
+Nuxt UI Design System stylesheet compiler, frontend roles, tests and host-owned styles.
 The Storymaps polishing on that base is preserved. The detail compiler from PR #21
 `7e600df16ad5b35230d117ba06282b0bbe3202fb` is incorporated and extended. Its older
 three-design qualification is historical, not evidence for the expanded project.
@@ -35,11 +37,33 @@ runner protocol. Business TODOs are never counted as passing acceptance.
 
 ## Executed local evidence and limits
 
-The current focused composition browser suite passed **111 named assertions**.
-The contract/CLI/test-data and compiler regression command passed **220 tests**; a separate three-case complete-project compiler suite passed, including execution of the generated model tests for all 134 lowered documents (**179 passing UI/navigation assertions and three business TODOs**). The assembly/inventory suite passed **12 tests**. Complete current-tree regression
-results and generated-workspace build/type/Vitest qualification are reported in the
-PR's current-head checks and retained artifacts; no earlier-head result substitutes
-for them. Counts from separate or repeated runs must not be added together.
+The integrated local contract/CLI/test-data/compiler command passed **263 tests**,
+zero failures or skips. This includes the complete-project compiler/effect suite and
+37 Design System tests. The focused composition browser suite passed **111 named
+assertions**, including all 80 working designs; assembly/inventory passed **13 tests**.
+The full registered browser suite and hosted generated-workspace qualification are
+separate gates. Their current-head results belong to the PR checks and retained
+artifacts, not historical results of the recovery checkpoint.
+
+Integration corrections preserve local/custom font provenance and valid rem sizes
+in detail previews and immutable token captures. Large file/example imports retain
+the complete payload outside the textarea; large export previews are explicitly
+bounded, while downloads retain every byte. Paste editing stays unwrapped and exact.
+The full-project test repeats review/cancel/open, file import, paste round trips,
+replacement conflicts and actual download equality rather than increasing timeouts.
+Numeric layout fields use bounded native number inputs; long palette labels avoid
+broken words. Both concurrent stylesheet and composition browser suites are registered.
+Source transport includes the canonical fixture, repairing the missing fixture seen
+in the baseline archive-analyzer job (Showcase run 36128435671).
+
+| Integrated artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `index.html` | 1,870,767 | `a2eb3c06921565a7794fbdd7616beb8bdb58c7bb5ce5de78ed3341769624ddca` |
+| `companion-project.json` | 2,265,670 | `c63076f2824c8d941b3fd7e6e37e95708672db4b36d12e16b997c2515eed96e2` |
+
+The checked-in JSON is regenerated from the embedded seed by
+`export-companion-project.py`; byte equality passed locally. No staged payload or
+delivery workflow belongs in the feature commit.
 
 Local Node is 22.16.0; Chromium uses the explicitly scoped in-memory Storage adapter.
 Local root npm dependencies are unavailable, so no local full Vue compilation,

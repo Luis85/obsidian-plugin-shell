@@ -8,6 +8,7 @@ import { DESIGN_SYSTEM_ROLES } from '../../scripts/companion/design-system-roles
 import { resolveDesignSystemFrontend, validateDesignSystem } from '../../scripts/companion/design-system-contract.mjs';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { compositionDefaultUI, compositionStyle, validateCompositionDesignSystem } from '../../scripts/companion/composition-contract.mjs';
 import { styleCode } from '../../scripts/companion/compiler/style-code.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
 const fixture = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
@@ -144,4 +145,30 @@ test('a manually changed managed stylesheet is a regeneration conflict, never an
     assert.ok(result.conflicts.some(c=>c.includes('design-system/colors.css')));await assert.rejects(applyProject(result,result.hash),/conflicts/);
     assert.equal(await readFile(path,'utf8'),'/* manual edit */\n');
   } finally {await rm(vault,{recursive:true,force:true});}
+});
+
+test('composition snapshots and previews share declared rem and local font semantics',()=>{
+  const s=system();s.fonts[0].source='custom';s.fonts[0].families='Example Sans, Second Family';
+  s.typography[0].font=s.fonts[0].id;s.typography[0].unit='rem';s.typography[0].size=1.75;
+  s.spacing[0].unit='rem';s.spacing[0].value=100;s.radii[0].unit='px';s.radii[0].value=1600;
+  validateDesignSystem(s);validateCompositionDesignSystem(s);
+  const node={kind:'text',layout:'stack',ui:compositionDefaultUI()};
+  Object.assign(node.ui.tokens,{typography:s.typography[0].id,gap:s.spacing[0].id,radius:s.radii[0].id});
+  const style=compositionStyle(node,s);
+  assert.equal(style.fontSize,'1.75rem');assert.equal(style.fontFamily,'"Example Sans", "Second Family", system-ui');
+  assert.equal(style.gap,'100rem');assert.equal(style.borderRadius,'1600px');
+  const doc=structuredClone(fixture);doc.design.detailDesigns.revisions[0].designSystem=s;
+  assert.doesNotThrow(()=>validateCompanionDocument(doc));
+});
+test('composition native font preferences remain scoped references and injection stays inert',()=>{
+  const s=system(),node={kind:'text',layout:'stack',ui:compositionDefaultUI()};node.ui.tokens.typography=s.typography[0].id;
+  s.typography[0].font=s.fonts[0].id;s.fonts[0].source='interface';
+  assert.equal(compositionStyle(node,s).fontFamily,'var(--font-interface, system-ui)');
+  s.fonts[0].source='custom';s.fonts[0].families='Example; background:url(https://invalid.test)';
+  assert.equal(compositionStyle(node,s).fontFamily,undefined);
+  for(const [unit,size] of [['rem',12.1],['px',192.1],['url(x)',16]]){
+    s.typography[0].unit=unit;s.typography[0].size=size;
+    assert.throws(()=>validateCompositionDesignSystem(s),/typography/);
+    assert.equal(compositionStyle(node,s).fontSize,undefined);
+  }
 });

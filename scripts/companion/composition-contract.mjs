@@ -101,9 +101,21 @@ export function compositionTransition(doc, session, edgeId) {
   }
   return next;
 }
+function cpMetric(t, type) {
+  const max = type === 'type' ? {px:192,rem:12,em:12} : {px:1600,rem:100,em:100,'%':100};
+  return !!t && Object.hasOwn(max,t.unit) && cpNumber(type === 'type' ? t.size : t.value,type === 'type' ? .1 : 0,max[t.unit]);
+}
+function cpFontStack(font) {
+  if (!font) return '';
+  const hosts={interface:'--font-interface',text:'--font-text',mono:'--font-monospace'};
+  const fallback=['system-ui','sans-serif','serif','monospace'].includes(font.fallback)?font.fallback:'system-ui';
+  if (Object.hasOwn(hosts,font.source)) return `var(${hosts[font.source]}, ${fallback})`;
+  if (font.source==='custom' && cpText(font.families,200) && font.families.split(',').every(s=>/^[\p{L}\p{N} _-]{1,70}$/u.test(s.trim()))) return font.families.split(',').map(s=>JSON.stringify(s.trim())).join(', ')+', '+fallback;
+  return '';
+}
 export function compositionStyle(node, system, narrow = false) {
   const ui = node.ui || compositionDefaultUI(), tokens = ui.tokens;
-  const space = (id, fallback) => { const t = system?.spacing?.find(t => t.id === id); return t && cpNumber(t.value,0,1000) && ['px','rem','em'].includes(t.unit) ? t.value + t.unit : fallback + 'px'; };
+  const space = (id, fallback) => { const t = system?.spacing?.find(t => t.id === id); return cpMetric(t,'space') ? t.value + t.unit : fallback + 'px'; };
   const layout = narrow ? ui.narrow.layout : node.layout;
   const style = { overflow:ui.overflow, boxSizing: 'border-box', minWidth: `min(100%, ${ui.minWidth}px)`, maxWidth: `min(100%, ${ui.maxWidth}px)`, width: ui.widthMode === 'fill' ? '100%' : ui.widthMode === 'fixed' ? `min(100%, ${ui.width}px)` : 'fit-content', gap: space(tokens.gap, ui.gap), padding: space(tokens.padding, ui.padding) };
   if (['region', 'slot', 'component'].includes(node.kind)) Object.assign(style, { display: layout === 'grid' ? 'grid' : 'flex', flexDirection: layout === 'row' ? 'row' : 'column', flexWrap: ui.wrap ? 'wrap' : 'nowrap', alignItems: ui.align, justifyContent: ui.justify, gridTemplateColumns: `repeat(${narrow ? ui.narrow.columns : ui.columns}, minmax(0, 1fr))` });
@@ -111,10 +123,10 @@ export function compositionStyle(node, system, narrow = false) {
     const t = system?.colors?.find(t => t.id === token);
     if (t && /^#[0-9a-f]{6}$/i.test(t.light) && /^#[0-9a-f]{6}$/i.test(t.dark)) style[property] = `var(--composition-color-${t.id}, ${t.light})`;
   }
-  const radius = system?.radii?.find(t => t.id === tokens.radius); if (radius && cpNumber(radius.value,0,1000) && ['px','rem','em'].includes(radius.unit)) style.borderRadius = radius.value + radius.unit;
+  const radius = system?.radii?.find(t => t.id === tokens.radius); if (cpMetric(radius,'space')) style.borderRadius = radius.value + radius.unit;
   const typo = system?.typography?.find(t => t.id === tokens.typography);
-  if (typo && cpNumber(typo.size,6,160) && ['px','rem','em'].includes(typo.unit) && cpNumber(typo.weight,100,900) && cpNumber(typo.lineHeight,.5,5) && cpNumber(typo.letterSpacing,-10,20)) Object.assign(style, { fontSize: typo.size + typo.unit, fontWeight: typo.weight, lineHeight: typo.lineHeight, letterSpacing: typo.letterSpacing + 'px' });
-  const font = typo && system?.fonts?.find(f=>f.id===typo.font); if(font && cpText(font.stack,300) && /^[A-Za-z0-9 ,\"'._-]+$/.test(font.stack))style.fontFamily=font.stack;
+  if (cpMetric(typo,'type') && cpNumber(typo.weight,100,900) && cpNumber(typo.lineHeight,.5,5) && cpNumber(typo.letterSpacing,-10,20)) Object.assign(style, { fontSize: typo.size + typo.unit, fontWeight: typo.weight, lineHeight: typo.lineHeight, letterSpacing: typo.letterSpacing + 'px' });
+  const stack = cpFontStack(typo && system?.fonts?.find(f=>f.id===typo.font)); if(stack)style.fontFamily=stack;
   return style;
 }
 export function compositionTestSource(doc) {
@@ -134,7 +146,7 @@ export function compositionTheme(system, dark = false) {
 export function validateCompositionDesignSystem(system) {
   if (system == null) return;
   compositionLiteral(system);
-  for (const group of ['spacing', 'radii']) for (const t of system[group] || []) cpAssert(cpRef(t.id) && cpNumber(t.value, 0, 1000) && ['px', 'rem', 'em', '%'].includes(t.unit), 'Invalid spacing/radius token.');
+  for (const group of ['spacing', 'radii']) for (const t of system[group] || []) cpAssert(cpRef(t.id) && cpMetric(t,'space'), 'Invalid spacing/radius token.');
   for (const t of system.colors || []) cpAssert(cpRef(t.id) && /^#[0-9a-f]{6}$/i.test(t.light) && /^#[0-9a-f]{6}$/i.test(t.dark), 'Invalid theme color token.');
-  for (const t of system.typography || []) cpAssert(cpRef(t.id) && cpNumber(t.size, 6, 160) && ['px', 'rem', 'em'].includes(t.unit) && cpNumber(t.weight, 100, 900) && cpNumber(t.lineHeight, .5, 5) && cpNumber(t.letterSpacing, -10, 20), 'Invalid typography token.');
+  for (const t of system.typography || []) cpAssert(cpRef(t.id) && cpMetric(t,'type') && cpNumber(t.weight, 100, 900) && cpNumber(t.lineHeight, .5, 5) && cpNumber(t.letterSpacing, -10, 20), 'Invalid typography token.');
 }

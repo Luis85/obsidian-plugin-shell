@@ -11,11 +11,15 @@ function cpControlFields(r, doc) {
     ${doc.kind === 'component' ? cpField('Content from public property', 'node-contentProp', r.contentProp || '', [['', 'Use literal content'], ...parseMembers(dtOwner(doc)?.props || '', 'props').map(m => [m.name, m.name + ' · ' + m.type])]) : ''}`;
 }
 function cpLayoutFields(record) {
-  const number = (label, key) => cpField(label, key, record[key]);
+  const number = (label, key) => {
+    const bounds={gap:[0,160],padding:[0,160],columns:[1,12],width:[24,1600],minWidth:[0,1600],maxWidth:[24,4000],'narrow-columns':[1,12]};
+    const [min,max]=bounds[key];
+    return uiInput(label,'cp-'+key,key==='narrow-columns'?record.narrow.columns:record[key],{type:'number',extra:`min="${min}" max="${max}" step="${key.includes('columns')?1:'any'}" inputmode="decimal"`});
+  };
   const tokens = { gap: 'spacing', padding: 'spacing', color: 'colors', background: 'colors', radius: 'radii', typography: 'typography' };
   return `<fieldset><legend>Spacing and layout</legend><div class="cols2">${number('Gap (px)', 'gap')}${number('Padding (px)', 'padding')}${number('Grid columns', 'columns')}${cpField('Align items', 'align', record.align, ['start', 'center', 'end', 'stretch'].map(s => [s, s]))}${cpField('Distribute content', 'justify', record.justify, ['start', 'center', 'end', 'space-between'].map(s => [s, s]))}${cpField('Wrap row content', 'wrap', String(record.wrap), [['true', 'Wrap'], ['false', 'Keep one row']])}</div></fieldset>
     <fieldset><legend>Width</legend><div class="cols2">${cpField('Sizing', 'widthMode', record.widthMode, [['fill', 'Fill available space'], ['hug', 'Fit content'], ['fixed', 'Fixed, bounded by parent']])}${number('Preferred width (px)', 'width')}${number('Minimum width (px)', 'minWidth')}${number('Maximum width (px)', 'maxWidth')}${cpField('Overflow','overflow',record.overflow,[['visible','Visible'],['auto','Scroll when needed'],['hidden','Clip overflow']])}</div></fieldset>
-    <fieldset><legend>Narrow container (640 px or less)</legend><div class="cols2">${cpField('Reading layout', 'narrow-layout', record.narrow.layout, [['stack', 'Stack'], ['row', 'Row'], ['grid', 'Grid']])}${cpField('Grid columns', 'narrow-columns', record.narrow.columns)}${cpField('Visibility', 'narrow-hidden', String(record.narrow.hidden), [['false', 'Show'], ['true', 'Hide on narrow']])}</div><p class="small muted">These overrides apply to the preview or generated container, not the whole Obsidian window.</p></fieldset>
+    <fieldset><legend>Narrow container (640 px or less)</legend><div class="cols2">${cpField('Reading layout', 'narrow-layout', record.narrow.layout, [['stack', 'Stack'], ['row', 'Row'], ['grid', 'Grid']])}${number('Grid columns', 'narrow-columns')}${cpField('Visibility', 'narrow-hidden', String(record.narrow.hidden), [['false', 'Show'], ['true', 'Hide on narrow']])}</div><p class="small muted">These overrides apply to the preview or generated container, not the whole Obsidian window.</p></fieldset>
     <fieldset><legend>Design System references</legend><div class="cols2">${Object.entries(tokens).map(([key, group]) => cpField(key[0].toUpperCase() + key.slice(1), 'token-' + key, record.tokens[key], dtRefChoices([['', 'Literal / inherited fallback'], ...(design().designSystem?.[group] || []).map(t => [t.id, t.name])], record.tokens[key]))).join('')}</div><p class="small muted">Tokens override matching literals. Missing tokens stay visible as review questions; they are not silently replaced.</p></fieldset>`;
 }
 function cpBegin(type, value = '') {

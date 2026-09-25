@@ -5,7 +5,7 @@
 .cp-review-section { margin-top:24px; padding-top:20px; border-top:1px solid var(--line); }
 .cp-review-section h2, .cp-review-section h3 { margin:16px 0 8px; }
 .cp-compare { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
-.cp-compare > section { min-width:0; }
+.cp-compare > section { min-width:0; padding:12px; border:1px solid var(--line); }
 .cp-id-list { max-height:160px; overflow:auto; padding:8px 12px; background:var(--bg); border:1px solid var(--line); }
 .cp-id-list p { margin:4px 0; }
 .cp-confirm { display:flex; align-items:center; gap:10px; margin:20px 0; }
@@ -27,7 +27,7 @@
 .cp-slot { border:1px dashed var(--line); min-height:36px; }
 .cp-tabs { display:flex; flex-wrap:wrap; gap:4px; }
 .cp-tabs [aria-selected=true] { border-color:var(--accent); text-decoration:underline; text-underline-offset:5px; }
-.cp-image-placeholder { display:flex; align-items:center; justify-content:center; min-height:80px; border:1px dashed var(--line); }
+.cp-image-placeholder { display:flex; align-items:center; justify-content:center; flex-direction:column; min-height:90px; border:1px dashed var(--line); background:var(--panel); gap:8px; }
 .cp-play-status { padding:8px 0; min-height:24px; }
 .dt-palette { align-content:start; }
 .dt-palette h3 { grid-column:1/-1; margin:16px 0 4px; font-size:13px; }
@@ -38,4 +38,5 @@
 @media(max-width:760px) { .cp-compare { grid-template-columns:1fr; } .cp-preview-toolbar { align-items:stretch; } .cp-preview-toolbar .field { flex:1 1 160px; } }
 @media(prefers-reduced-motion:reduce) { .dt-wireframe * { transition:none; } }
 
-.cp-image-placeholder{display:flex;min-height:90px;align-items:center;justify-content:center;flex-direction:column;border:1px dashed var(--line);background:var(--panel);gap:8px}.cp-preview-toolbar fieldset{margin:0}.cp-compare>section{min-width:0;padding:12px;border:1px solid var(--line)}
+.cp-preview-toolbar fieldset { margin:0; }
+.dt-palette-buttons .btn[data-value="component"], .dt-palette-buttons .btn[data-value="image"] { grid-column:1/-1; overflow-wrap:normal; }

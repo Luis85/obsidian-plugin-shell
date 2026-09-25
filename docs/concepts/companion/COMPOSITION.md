@@ -32,7 +32,9 @@ existing spacing, colors, radii and typography rather than accepting arbitrary C
 Missing tokens remain visible as review questions with numeric/default fallbacks.
 Preview and generated Vue use the same data-only style resolver. Light/dark colors
 are scoped to the generated detail root; captured components retain captured token
-values. This is detail styling, not a replacement for a complete Nuxt UI skin.
+values. The concurrent Nuxt UI stylesheet generator remains active for the surrounding
+frontend; detail styling does not replace it. Rem values and safe local font-family
+names use the same declared units/provenance. No font files are fetched.
 
 Canvas coordinates remain presentation-only. Arrange canvas computes bounded,
 nonoverlapping regions without changing semantic sibling order. Outline provides
@@ -127,3 +129,11 @@ physical touch/pen and screen-reader trials and formal WCAG conformance still ne
 native acceptance. Representative measured browser render timings are diagnostics,
 not a maximum-scale/native latency guarantee. Native Markdown adapters, completed
 business handlers and release qualification are not part of this concept increment.
+
+## Large self-project transfer
+
+File and bundled imports retain the complete reviewed JSON outside the visible paste
+control when large; typing in that control explicitly replaces the input and invalidates
+review. Large export previews identify their 30,000-character display limit; the
+download always contains the full validated payload. These presentation limits do
+not truncate exported authoring data or relax the 4 MB input contract.
