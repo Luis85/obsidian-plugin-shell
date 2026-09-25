@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseArguments, validateRequest } from '../../scripts/framework/catalog.ts';
+import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
@@ -19,7 +19,7 @@ async function fixture(t) {
   await writeFile(join(dir, 'project.json'), JSON.stringify(seed));
   return { root: dir, frameworkRoot: root };
 }
-const run = (ctx, args) => executeOperation(parseArguments(args), ctx);
+const run = (ctx, args) => executeOperation(parseCliArguments(args), ctx);
 async function configured(t) {
   const ctx = await fixture(t);
   const response = await run(ctx, ['setup', '--id', identity.id, '--name', identity.name, '--author', identity.author, '--yes']);
@@ -30,8 +30,8 @@ function cli(args, cwd = root) {
   return spawnSync(process.execPath, [join(root, 'shell.mjs'), ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 5_000_000 });
 }
 test('command parser rejects unknown, duplicated and mismatched options', () => {
-  for (const args of [['unknown'], ['status', '--input', 'x'], ['status', '--json', '--json'], ['setup', '--id'], ['status', 'extra']]) assert.throws(() => parseArguments(args));
-  assert.equal(parseArguments(['config', 'explain', '--json']).command, 'config explain');
+  for (const args of [['unknown'], ['status', '--input', 'x'], ['status', '--json', '--json'], ['setup', '--id'], ['status', 'extra']]) assert.throws(() => parseCliArguments(args));
+  assert.equal(parseCliArguments(['config', 'explain', '--json']).command, 'config explain');
 });
 test('programmatic request validation does not execute accessors, cycles or toJSON', () => {
   let invoked = 0;
@@ -102,7 +102,7 @@ test('saved plans bind request and preimages; yes cannot override stale approval
   assert.equal((await run(ctx, ['plan', 'apply', 'setup.plan.json', '--yes'])).diagnostics[0].code, 'PLAN_AUTHORITY');
 });
 test('in-memory API plans are revalidated after configuration changes', async t => {
-  const ctx = await configured(t), request = parseArguments(['vault', 'prepare']);
+  const ctx = await configured(t), request = parseCliArguments(['vault', 'prepare']);
   const plan = await planOperation(request, ctx);
   const config = JSON.parse(await readFile(join(ctx.root, 'shell.config.json'), 'utf8')); config.paths.testVaultFolder = '.other-vault';
   await writeFile(join(ctx.root, 'shell.config.json'), JSON.stringify(config));

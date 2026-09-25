@@ -7,7 +7,6 @@ import { parseJsonData } from '../contracts/json-data.mjs';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array) => createHash('sha256').update(bytes).digest('hex');
-export const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 export async function exists(path: string): Promise<boolean> {
   try { await lstat(path); return true; } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
 }

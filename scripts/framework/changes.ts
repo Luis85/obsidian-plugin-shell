@@ -1,10 +1,11 @@
+import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { parseCompanionDocument } from '../companion/project-contract.mjs';
 import { readCompanionProject } from '../companion/read-project.mjs';
 import { projectModel } from '../companion/compiler/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
-import { exists, json, hash, readBounded, readConfiguration, readJson } from './files.ts';
+import { exists, hash, readBounded, readConfiguration, readJson } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
 type Entry = { path: string; content: string };
 export async function inspectDesign(context: Context, input: string) {

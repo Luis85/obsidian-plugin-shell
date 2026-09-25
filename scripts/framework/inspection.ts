@@ -1,5 +1,5 @@
 import { join, dirname, resolve } from 'node:path';
-import { exists, readJson, readConfiguration } from './files.ts';
+import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';
 import { requireThat, result, type Context, type Diagnostic } from './contracts.ts';
 export async function status(context: Context, command = 'status') {
@@ -13,6 +13,16 @@ export async function status(context: Context, command = 'status') {
   if (config && generated && (manifest?.id !== config.project.id || manifest?.version !== config.project.version)) diagnostics.push({ code: 'IDENTITY_DRIFT', message: 'Manifest and configured plugin identity/version differ.' });
   if (!dependencies) diagnostics.push({ code: 'DEPENDENCIES_MISSING', message: 'Project dependencies are not installed.', next: 'install --yes' });
   if (Number(process.versions.node.split('.')[0]) < 22) diagnostics.push({ code: 'NODE_UNSUPPORTED', message: 'Node 22 or newer is required.' });
+  let designStale: boolean | null = null;
+  if (generated && imported) {
+    const receipt = object(await readJson(join(context.root, '.companion/generation.json')));
+    designStale = receipt.inputHash !== hash(await readBounded(join(context.root, 'design/project.json'), 4_000_000));
+    if (designStale) diagnostics.push({ code: 'DESIGN_GENERATION_STALE', message: 'The accepted design changed after generation.', next: 'generate --dry-run' });
+  }
+  if (command === 'doctor' && await exists(join(context.frameworkRoot, '.nvmrc'))) {
+    const qualified = (await readBounded(join(context.frameworkRoot, '.nvmrc'))).toString('utf8').trim();
+    if (qualified !== process.versions.node) diagnostics.push({ code: 'NODE_UNQUALIFIED', message: `Current Node ${process.versions.node}; the recorded qualification baseline is ${qualified}.`, next: 'Use the project-qualified toolchain before release verification.' });
+  }
   let obligations: number | null = null;
   if (await exists(join(context.root, 'design/traceability.json'))) {
     const trace = object(await readJson(join(context.root, 'design/traceability.json')));
@@ -20,7 +30,7 @@ export async function status(context: Context, command = 'status') {
     if (obligations) diagnostics.push({ code: 'ACCEPTANCE_PENDING', message: `${obligations} generated requirements are not accepted. Scaffold tests do not prove their behavior.` });
   }
   return { ...result(command, { root: context.root, configuration: config, manifest, generated, imported, dependencies,
-    acceptanceObligations: obligations, runtime: 'not-connected', next: !config ? 'setup' : !imported ? 'project import' : !generated ? 'generate' : !dependencies ? 'install --yes' : 'verify',
+    designStale, acceptanceObligations: obligations, runtime: 'not-connected', next: !config ? 'setup' : !imported ? 'project import' : !generated || designStale ? 'generate' : !dependencies ? 'install --yes' : 'verify',
     identityAuthority: generated ? 'manifest.json' : 'shell.config.json', native: 'not-run', publication: 'not-authorized' }), diagnostics };
 }
 export async function releaseCheck(context: Context, input?: string) {

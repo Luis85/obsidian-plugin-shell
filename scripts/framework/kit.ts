@@ -1,13 +1,14 @@
+import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
-import { readBounded, hash, json, readJson, exists } from './files.ts';
+import { readBounded, hash, readJson, exists } from './files.ts';
 import { listFiles, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateReadmeOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
-export const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github'];
-export const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs'];
+const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github'];
+const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');

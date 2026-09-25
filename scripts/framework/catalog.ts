@@ -7,6 +7,9 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'version', summary: 'Report the pinned framework and current Node versions.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'styles inspect', summary: 'Validate saved design tokens and inspect scoped Nuxt UI bindings.', options: values('input'), maxArgs: 0, effect: 'read' },
+  { id: 'styles export', summary: 'Plan deterministic CSS, JSON, Markdown or HTML exports.', options: values('input', 'format', 'out'), maxArgs: 0, effect: 'plan' },
   { id: 'help', summary: 'Discover commands without reading project code.', options: {}, maxArgs: 2, effect: 'read' },
   { id: 'capabilities', summary: 'Versioned command and maker contracts; no custom-code discovery.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'schema', summary: 'Machine-readable operation request/result contracts.', options: {}, maxArgs: 0, effect: 'read' },
@@ -42,11 +45,18 @@ export const commands: readonly Command[] = [
   { id: 'release rehearse', summary: 'Run existing fixed-candidate rehearsal; no public promotion.', options: values('commit', 'version'), maxArgs: 0, effect: 'process' },
   { id: 'release operate', summary: 'Use the existing guarded release executor and separate authorization.', options: { ...values('input', 'authorize'), execute: 'flag' }, maxArgs: 0, effect: 'release' },
 ];
+for (const entry of commands) { Object.freeze(entry.options); Object.freeze(entry); }
+Object.freeze(commands);
+export function parameterKinds(entry: Command): Record<string, 'value' | 'flag'> {
+  return { ...common, ...entry.options };
+}
 export function descriptor(id: string): Command {
   const command = commands.find(item => item.id === id);
   requireThat(command, 'UNKNOWN_COMMAND', `Unknown command: ${id}. Use help.`); return command;
 }
-export function parseArguments(argv: string[]): Request {
+export function parseCliArguments(argv: string[]): Request {
+  argv = argv.map(arg => arg === '-h' ? '--help' : arg === '-V' ? '--version' : arg);
+  if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
   requireThat(argv.length <= 100 && argv.every(arg => arg.length <= 4096 && !arg.includes('\0')), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
   const positional: string[] = [], options: Values = {};
   const available: Record<string, 'value' | 'flag'> = { ...common };
@@ -62,10 +72,18 @@ export function parseArguments(argv: string[]): Request {
   const name = commands.map(item => item.id).sort((a, b) => b.length - a.length)
     .find(id => id.split(' ').every((word, i) => positional[i] === word)) ?? (positional.length ? positional[0]! : 'help');
   const entry = descriptor(name), args = positional.slice(name === 'help' && positional.length === 0 ? 0 : name.split(' ').length);
-  requireThat(args.length <= entry.maxArgs, 'INVALID_ARGUMENT', `Too many arguments for ${name}.`);
+  return validateFields(entry, args, options);
+}
+function validateFields(entry: Command, args: string[], options: Values): Request {
+  requireThat(args.length <= entry.maxArgs && args.every(arg => arg.length <= 4096 && !arg.includes('\0') && !arg.startsWith('--')), 'INVALID_ARGUMENT', `Invalid arguments for ${entry.id}.`);
+  const allowed = parameterKinds(entry);
+  for (const [key, value] of Object.entries(options)) {
+    requireThat(Object.hasOwn(allowed, key), 'INVALID_OPTION', `--${key} is not supported by ${entry.id}.`);
+    requireThat(allowed[key] === 'flag' ? value === true : typeof value === 'string' && value.length <= 4096 && !value.includes('\0'), 'INVALID_OPTION', `Invalid value for --${key}.`);
+  }
   if (options.apply !== undefined) requireThat(typeof options.apply === 'string' && /^[a-f0-9]{64}$/.test(options.apply), 'INVALID_PLAN_HASH', 'Supply a SHA-256 plan hash.');
-  for (const key of Object.keys(options)) requireThat(Object.hasOwn(common, key) || Object.hasOwn(entry.options, key), 'INVALID_OPTION', `--${key} is not supported by ${name}.`);
-  return { command: name, args, options };
+  if (options.timeout !== undefined) requireThat(typeof options.timeout === 'string' && /^\d+$/.test(options.timeout) && Number(options.timeout) > 0 && Number(options.timeout) <= 3_600_000, 'INVALID_TIMEOUT', 'Timeout must be 1..3600000 milliseconds.');
+  return { command: entry.id, args: [...args], options: { ...options } };
 }
 export function validateRequest(value: unknown): Request {
   assertJsonData(value);
@@ -74,12 +92,9 @@ export function validateRequest(value: unknown): Request {
   requireThat(Object.keys(input).every(key => ['command', 'args', 'options'].includes(key)) && typeof input.command === 'string' && Array.isArray(input.args), 'INVALID_REQUEST', 'Malformed operation request.');
   requireThat(input.args.every(arg => typeof arg === 'string'), 'INVALID_REQUEST', 'Arguments must be strings.');
   requireThat(input.options !== null && typeof input.options === 'object' && !Array.isArray(input.options), 'INVALID_REQUEST', 'Options must be an object.');
-  const argv: string[] = [...input.command.split(' '), ...input.args];
-  for (const [key, val] of Object.entries(input.options)) {
-    requireThat(typeof val === 'string' || val === true, 'INVALID_REQUEST', 'Invalid option value.');
-    argv.push('--' + key); if (typeof val === 'string') argv.push(val);
-  }
-  return parseArguments(argv);
+  // A structured request is not a shell argument string. Never reinterpret data
+  // fields as another command or flags, especially --yes or --trust-custom.
+  return validateFields(descriptor(input.command), input.args, input.options as Values);
 }
 export function canonicalRequest(request: Request): Request {
   const omitted = new Set(['root', 'json', 'no-interaction', 'yes', 'dry-run', 'apply', 'plan-out', 'help']);

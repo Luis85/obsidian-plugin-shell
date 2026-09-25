@@ -9,7 +9,7 @@ export interface Screen { id: string; slug: string; label: string; kind: string;
 export interface Requirement { id: string; key: string; title: string; acceptance: string; prd: string; nodes: string[]; components: string[] }
 export interface Model { document: Row; project: Row; sourceRoot: string; testRoot: string; entities: Entity[]; sources: Source[]; screens: Screen[]; links: Row[]; components: Row[]; requirements: Requirement[]; flows: Row[]; warnings: string[] }
 export const digest = (text: string | Uint8Array) => createHash('sha256').update(text).digest('hex');
-export const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
+export { serializeJson as json } from '../../contracts/serialization.ts';
 export const literal = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('\u2028', '\\u2028').replaceAll('\u2029', '\\u2029');
 export const symbol = (slug: string) => 'G' + slug.split('-').map(word => word[0]!.toUpperCase() + word.slice(1)).join('');
 export function requireValue(value: unknown, message: string): asserts value { if (!value) throw new Error('GENERATOR_INVALID: ' + message); }

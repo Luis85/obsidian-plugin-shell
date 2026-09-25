@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runNode, npmEntry } from '../../scripts/framework/process.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
-import { parseArguments } from '../../scripts/framework/catalog.ts';
+import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { failure } from '../../scripts/framework/contracts.ts';
 import { fixtureManifest } from './test-data-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -15,7 +15,7 @@ async function fixture(t, code = '') {
   const directory = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-'))); t.after(() => rm(directory, {recursive: true, force: true}));
   await writeFile(join(directory, 'child.mjs'), code); return {root: directory, frameworkRoot: root};
 }
-const run = (ctx, args) => executeOperation(parseArguments(args), ctx);
+const run = (ctx, args) => executeOperation(parseCliArguments(args), ctx);
 test('argument arrays and split UTF-8 survive process execution without a shell', async t => {
   const ctx = await fixture(t, `const bytes = Buffer.from('Grüße'); process.stdout.write(bytes.subarray(0, 3)); setTimeout(() => { process.stdout.write(bytes.subarray(3)); process.stdout.write(JSON.stringify(process.argv.slice(2))); }, 5);`);
   const output = await runNode(ctx, 'child.mjs', ['$(touch should-not-exist)', 'semi;colon', 'two words'], 10000);

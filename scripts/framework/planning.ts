@@ -1,12 +1,14 @@
+import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.mjs';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
+import { styleExportPlan } from './styles.ts';
 import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
-import { readConfiguration, readJson, readBounded, hash, json, exists } from './files.ts';
+import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
 type FilePlan = Awaited<ReturnType<typeof createFilePlan>>;
 interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string }
@@ -51,6 +53,7 @@ export async function planOperation(request: Request, context: Context) {
   switch (request.command) {
     case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
     case 'generate': planned = await generationPlan(request, context); break;
+    case 'styles export': planned = await styleExportPlan(request, context); break;
     case 'make': planned = await makerPlan(request, context); break;
     case 'vault prepare': planned = await vaultPlan(context); break;
     case 'plugin install': planned = await pluginPlan(context); break;
@@ -83,6 +86,9 @@ export async function savePlan(context: Context, planned: Awaited<ReturnType<typ
   const path = resolve(context.root, output);
   const local = relative(context.root, path);
   requireThat(local && !isAbsolute(local) && !local.split(sep).some(part => ['..', '.framework', '.companion', '.test-vault', '.obsidian'].includes(part.toLowerCase())), 'PLAN_OUTPUT_PROTECTED', 'Store plans inside the project, outside framework and ownership directories.');
+  requireThat(!planned.plan.changes.some(change => change.path.toLowerCase() === local.split(sep).join('/').toLowerCase()), 'PLAN_OUTPUT_COLLISION', 'A saved plan cannot occupy one of its output paths.');
+  const config = await readConfiguration(context.root);
+  requireThat(!config || !local.split(sep).some(part => part.toLowerCase() === config.paths.testVaultFolder.toLowerCase()), 'PLAN_OUTPUT_PROTECTED', 'Saved plans must remain outside the configured test vault.');
   const content = json({ protocolVersion: 1, root: context.root, request: planned.request, planHash: planned.planHash });
   const write = await createFilePlan(context.root, [{ path: local.split(sep).join('/'), content }]);
   requireThat(!write.changes.some(change => change.status === 'update'), 'PLAN_FILE_EXISTS', 'Refusing to replace an existing plan file.');

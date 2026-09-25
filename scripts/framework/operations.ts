@@ -1,7 +1,8 @@
 import { resolve, join } from 'node:path';
+import { inspectStyles } from './styles.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
-import { commands, descriptor, validateRequest } from './catalog.ts';
+import { commands, descriptor, validateRequest, parameterKinds } from './catalog.ts';
 import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
@@ -57,6 +58,13 @@ async function processOperation(request: Request, context: Context): Promise<Res
   return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
 }
 async function readOperation(request: Request, context: Context): Promise<Result> {
+  if (request.command === 'version') {
+    const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
+    const { readJson } = await import('./files.ts');
+    const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
+    return result(request.command, { frameworkVersion: metadata.version, nodeVersion: process.version, protocolVersion: 1, distribution: kit ? 'compiled-kit' : 'source' });
+  }
+  if (request.command === 'styles inspect') return result(request.command, await inspectStyles(request, context));
   if (request.command.startsWith('config ')) return result(request.command, { configuration: await readConfiguration(context.root), source: 'shell.config.json', identityAuthority: 'manifest.json after generation', overrides: 'none' });
   if (request.command === 'project inspect') {
     const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
@@ -76,10 +84,19 @@ export async function executeOperation(input: Request, context: Context): Promis
     const request = validateRequest(input); command = request.command;
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
     if (command === 'schema') return result(command, operationSchemas());
-    if (request.options.help || command === 'help' || command === 'capabilities') return result(command, { protocolVersion: 1, commands, makers: capabilityCatalog().makers,
-      examples: ['node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'], transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
+    if (request.options.help || command === 'help' || command === 'capabilities') {
+      const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
+      const entries = selected ? [descriptor(selected)] : commands;
+      return result(command, { protocolVersion: 1, commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect })),
+        makers: capabilityCatalog().makers, examples: ['node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
+        transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
+    }
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
-    if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) return result(command, { makers: capabilityCatalog().makers.filter((item: { id: string }) => request.args[0] !== 'describe' || item.id === request.args[1]) });
+    if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
+      const makers = capabilityCatalog().makers.filter((item: { id: string }) => request.args[0] !== 'describe' || item.id === request.args[1]);
+      requireThat(makers.length > 0, 'MAKER_UNKNOWN', 'Supply an existing recipe ID; use make list.');
+      return result(command, { makers });
+    }
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {

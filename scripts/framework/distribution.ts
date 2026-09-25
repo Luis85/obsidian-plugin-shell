@@ -1,6 +1,7 @@
+import { serializeJson as json } from '../contracts/serialization.ts';
 import { posix } from 'node:path';
 import { object } from './configuration.ts';
-import { hash, json } from './files.ts';
+import { hash } from './files.ts';
 import { requireThat } from './contracts.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
 const excludedRoots = ['docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'scripts/concepts/', 'tests/concepts/'];
