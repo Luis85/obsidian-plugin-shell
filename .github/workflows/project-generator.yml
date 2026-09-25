@@ -50,18 +50,12 @@ jobs:
           mkdir -p reports/project-generator
           git archive --format=tar.gz HEAD -o reports/project-generator/framework-source.tar.gz
           git rev-parse HEAD > reports/project-generator/commit.txt
-          if test -f reports/project-generator/target.txt; then
-            TARGET="$(cat reports/project-generator/target.txt)"
-            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/generated-companion.tar.gz -C "$TARGET" .
-          fi
-          if test -f reports/project-generator/boundaries/target.txt; then
-            TARGET="$(cat reports/project-generator/boundaries/target.txt)"
-            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/boundaries/generated-boundaries.tar.gz -C "$TARGET" .
-          fi
-          if test -f reports/project-generator/providers/target.txt; then
-            TARGET="$(cat reports/project-generator/providers/target.txt)"
-            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/providers/generated-providers.tar.gz -C "$TARGET" .
-          fi
+          for pair in .:generated-companion boundaries:generated-boundaries providers:generated-providers; do
+            DIR="reports/project-generator/${pair%%:*}"
+            if test -f "$DIR/target.txt"; then
+              tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$DIR/${pair#*:}.tar.gz" -C "$(cat "$DIR/target.txt")" .
+            fi
+          done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
