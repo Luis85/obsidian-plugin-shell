@@ -11,8 +11,8 @@ const project = JSON.parse(await readFile(new URL('../../docs/concepts/companion
 const documents = detailDocuments(projectModel(project));
 test('complete companion lowers all live designs and immutable published designs with independent identities', () => {
   const store = project.design.detailDesigns;
-  assert.equal(store.documents.length, 80); assert.equal(store.revisions.length, 54);
-  assert.equal(documents.length, 134); assert.equal(new Set(documents.map(d => d.id)).size, documents.length);
+  assert.equal(store.documents.length, 81); assert.equal(store.revisions.length, 54);
+  assert.equal(documents.length, 135); assert.equal(new Set(documents.map(d => d.id)).size, documents.length);
   for (const doc of documents) for (const node of doc.nodes) assert.equal(Object.hasOwn(node, 'position'), false);
   for (const revision of store.revisions) {
     const doc = documents.find(d => d.id === revision.id);

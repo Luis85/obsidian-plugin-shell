@@ -14,6 +14,7 @@ OUT = ROOT / 'reports/concepts'
 SUITES = [
     ('generator-fixtures', 'generator-fixtures/checks.json'),
     ('generator-boundaries', 'generator-boundaries/checks.json'),
+    ('project-starters', 'project-starters/checks.json'),
     ('design-styles', 'design-styles/checks.json'),
     ('composition', 'composition/checks.json'),
     ('storymap-polish', 'storymap-polish/checks.json'),

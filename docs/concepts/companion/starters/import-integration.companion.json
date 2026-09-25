@@ -1,0 +1,3362 @@
+{
+  "kind": "obsidian-companion-project",
+  "schemaVersion": 4,
+  "executable": false,
+  "project": {
+    "id": "import-integration-plugin",
+    "name": "Import & Integration",
+    "author": "",
+    "version": "0.1.0",
+    "description": "Design a fixture-first import workflow before connecting a live service."
+  },
+  "settings": {
+    "codebaseFolder": "src",
+    "testsFolder": "tests"
+  },
+  "design": {
+    "schema": 4,
+    "blueprint": "blank",
+    "goal": "Use for CSV/JSON intake or a future external-service adapter.",
+    "platform": "desktop",
+    "nodes": [
+      {
+        "id": "node-1",
+        "slug": "workspace",
+        "label": "Import & Integration workspace",
+        "kind": "view",
+        "layout": "sidebar-left",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": true,
+        "entry": true,
+        "instance": "reuse",
+        "patterns": [
+          "open-view"
+        ],
+        "goal": "Import & Integration workspace for Use for CSV/JSON intake or a future external-service adapter.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-2",
+        "slug": "preview",
+        "label": "Import preview",
+        "kind": "page",
+        "layout": "table",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Import preview for Use for CSV/JSON intake or a future external-service adapter.",
+        "entity": "er-entity-1",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-3",
+        "slug": "mapping",
+        "label": "Mapping review",
+        "kind": "page",
+        "layout": "form",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Mapping review for Use for CSV/JSON intake or a future external-service adapter.",
+        "entity": "er-entity-1",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-4",
+        "slug": "result",
+        "label": "Import result",
+        "kind": "page",
+        "layout": "single",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Import result for Use for CSV/JSON intake or a future external-service adapter.",
+        "entity": "er-entity-1",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-5",
+        "slug": "preferences",
+        "label": "Preferences",
+        "kind": "settings",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [
+          "settings"
+        ],
+        "goal": "Configure this plugin without changing unrelated host settings.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      }
+    ],
+    "links": [
+      {
+        "id": "edge-6",
+        "from": "node-1",
+        "to": "node-2",
+        "kind": "navigate",
+        "label": "Open import preview"
+      },
+      {
+        "id": "edge-7",
+        "from": "node-2",
+        "to": "node-3",
+        "kind": "navigate",
+        "label": "Open mapping review"
+      },
+      {
+        "id": "edge-8",
+        "from": "node-2",
+        "to": "node-4",
+        "kind": "navigate",
+        "label": "Open import result"
+      }
+    ],
+    "nextId": 9,
+    "library": [],
+    "prds": [
+      {
+        "id": "starter-requirements",
+        "title": "Import & Integration requirements",
+        "version": "0.1.0",
+        "revision": 1,
+        "status": "draft",
+        "problem": "Design a fixture-first import workflow before connecting a live service.",
+        "audience": "Obsidian users who need use for csv/json intake or a future external-service adapter.",
+        "goals": "Use for CSV/JSON intake or a future external-service adapter.",
+        "nonGoals": "Implement parsing, mapping, idempotency and rollback\nAdd user-authorized networking, cancellation and secure credential handling\nNo OAuth, live API calls or file parsing are implied",
+        "notes": "All requirements are designed, not implemented or verified.",
+        "nextReq": 6,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "starter-1",
+            "title": "Import preview",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Given the import preview surface, when the primary user action succeeds, then show the updated result; on failure preserve the draft and show a recoverable error. Implement the domain-specific assertions before marking this requirement complete.",
+            "nodes": [
+              "node-2"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-2",
+            "title": "Mapping review",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Given the mapping review surface, when the primary user action succeeds, then show the updated result; on failure preserve the draft and show a recoverable error. Implement the domain-specific assertions before marking this requirement complete.",
+            "nodes": [
+              "node-3"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-3",
+            "title": "Import result",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Given the import result surface, when the primary user action succeeds, then show the updated result; on failure preserve the draft and show a recoverable error. Implement the domain-specific assertions before marking this requirement complete.",
+            "nodes": [
+              "node-4"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-4",
+            "title": "Native lifecycle and data safety",
+            "priority": "must",
+            "status": "designed",
+            "kind": "quality",
+            "acceptance": "Given the plugin is enabled then disabled, all subscriptions, timers and UI resources are released; no unrelated notes or settings are changed.",
+            "nodes": [
+              "node-1"
+            ],
+            "components": [],
+            "patterns": []
+          },
+          {
+            "id": "starter-5",
+            "title": "Isolated acceptance",
+            "priority": "must",
+            "status": "designed",
+            "kind": "quality",
+            "acceptance": "Given an isolated development vault and synthetic data, verify the intended outcome with a failing test before implementing it. Scaffold tests and synthetic examples do not satisfy this acceptance.",
+            "nodes": [
+              "node-2"
+            ],
+            "components": [],
+            "patterns": []
+          }
+        ]
+      }
+    ],
+    "librarySchema": 3,
+    "canvas": {
+      "schema": 1,
+      "layout": "vertical",
+      "positions": {},
+      "pan": {
+        "x": 32,
+        "y": 28
+      },
+      "zoom": 1,
+      "snap": true,
+      "collapsed": [],
+      "edges": "selected",
+      "custom": false,
+      "arrangedFor": "",
+      "fitted": false
+    },
+    "semantic": {
+      "schema": 1,
+      "nextId": 5,
+      "entities": [
+        {
+          "id": "er-entity-1",
+          "slug": "import-record",
+          "name": "Import Record",
+          "folder": "Starter/ImportRecord",
+          "description": "Proposed note contract; native persistence is an implementation point.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-2",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-3",
+              "key": "external_id",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-4",
+              "key": "status",
+              "type": "text",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "relationships": [],
+      "sections": [],
+      "canvas": {
+        "positions": {
+          "er-entity-1": {
+            "x": 60,
+            "y": 60
+          }
+        },
+        "viewport": {
+          "x": 40,
+          "y": 40,
+          "zoom": 1
+        },
+        "snap": true
+      }
+    },
+    "dataSources": {
+      "schema": 1,
+      "nextId": 4,
+      "sources": [
+        {
+          "id": "ds-source-1",
+          "slug": "starter-records",
+          "name": "External records (fixture only)",
+          "kind": "api",
+          "status": "active",
+          "description": "Declarative port only. No live source is contacted. Native adapter must be implemented.",
+          "locator": "https://example.invalid",
+          "auth": "none",
+          "credentialRef": "",
+          "operations": [
+            {
+              "id": "ds-operation-2",
+              "slug": "list-records",
+              "name": "List records",
+              "direction": "read",
+              "method": "GET",
+              "resource": "/records",
+              "description": "Retrieve declared records through an explicit read-only application port.",
+              "input": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "output": {
+                "mode": "entity",
+                "entity": "er-entity-1",
+                "many": true,
+                "fields": [],
+                "schema": null
+              }
+            }
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "id": "ds-flow-3",
+          "source": "ds-source-1",
+          "operation": "ds-operation-2",
+          "card": "node-2",
+          "direction": "read",
+          "label": "Read declared records",
+          "trigger": "manual",
+          "notes": "The generated adapter fails explicitly until implemented. Captured scenarios contain synthetic examples."
+        }
+      ],
+      "positions": {
+        "ds-source-1": {
+          "x": 900,
+          "y": 80
+        }
+      },
+      "testing": {
+        "schema": 1,
+        "seed": 42,
+        "referenceDate": "2026-01-01T00:00:00.000Z",
+        "locale": "en",
+        "count": 3,
+        "recipes": [
+          {
+            "source": "ds-source-1",
+            "operation": "ds-operation-2",
+            "enabled": true,
+            "behavior": "list",
+            "dataset": "import-record",
+            "keyField": "id",
+            "scenario": "populated",
+            "latencyMs": 0,
+            "errorStatus": 503,
+            "rules": []
+          }
+        ]
+      }
+    },
+    "designSystem": {
+      "schema": 1,
+      "name": "Import & Integration tokens",
+      "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+      "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+      "fonts": [
+        {
+          "id": "interface",
+          "name": "Interface",
+          "source": "interface",
+          "families": "",
+          "fallback": "system-ui",
+          "usage": "Navigation, controls and labels.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "body",
+          "name": "Reading",
+          "source": "text",
+          "families": "",
+          "fallback": "sans-serif",
+          "usage": "Descriptions and long-form content.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "code",
+          "name": "Code",
+          "source": "mono",
+          "families": "",
+          "fallback": "monospace",
+          "usage": "Identifiers, paths and code samples.",
+          "license": "Host font preference. No font files are embedded."
+        }
+      ],
+      "typography": [
+        {
+          "id": "page-title",
+          "name": "Page title",
+          "font": "interface",
+          "size": 24,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.25,
+          "letterSpacing": 0,
+          "usage": "One primary heading per view."
+        },
+        {
+          "id": "section-title",
+          "name": "Section title",
+          "font": "interface",
+          "size": 18,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Group related controls or content."
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "font": "body",
+          "size": 16,
+          "unit": "px",
+          "weight": 400,
+          "lineHeight": 1.5,
+          "letterSpacing": 0,
+          "usage": "Main descriptive copy."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "font": "interface",
+          "size": 14,
+          "unit": "px",
+          "weight": 500,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Form labels; do not rely on placeholders."
+        }
+      ],
+      "spacing": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": 4,
+          "unit": "px",
+          "usage": "Related inline items"
+        },
+        {
+          "id": "sm",
+          "name": "SM",
+          "value": 8,
+          "unit": "px",
+          "usage": "Within a control group"
+        },
+        {
+          "id": "md",
+          "name": "MD",
+          "value": 16,
+          "unit": "px",
+          "usage": "Between related blocks"
+        },
+        {
+          "id": "lg",
+          "name": "LG",
+          "value": 24,
+          "unit": "px",
+          "usage": "Between sections"
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": 32,
+          "unit": "px",
+          "usage": "Major content separation"
+        }
+      ],
+      "sizes": [
+        {
+          "id": "control",
+          "name": "Control height",
+          "value": 36,
+          "unit": "px",
+          "usage": "Proposed default, not an accessibility guarantee."
+        },
+        {
+          "id": "icon",
+          "name": "Icon",
+          "value": 18,
+          "unit": "px",
+          "usage": "Glyph size, not the clickable target."
+        },
+        {
+          "id": "inspector",
+          "name": "Inspector width",
+          "value": 320,
+          "unit": "px",
+          "usage": "Preferred width; adapt for narrower panes."
+        }
+      ],
+      "radii": [
+        {
+          "id": "control",
+          "name": "Control radius",
+          "value": 6,
+          "unit": "px",
+          "usage": "Inputs and compact actions."
+        },
+        {
+          "id": "surface",
+          "name": "Surface radius",
+          "value": 12,
+          "unit": "px",
+          "usage": "Standalone panels."
+        }
+      ],
+      "colors": [
+        {
+          "id": "background",
+          "name": "Background",
+          "light": "#FFFFFF",
+          "dark": "#1E1E24",
+          "host": "--background-primary",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "text",
+          "name": "Primary text",
+          "light": "#202027",
+          "dark": "#ECECF2",
+          "host": "--text-normal",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "muted",
+          "name": "Secondary text",
+          "light": "#595964",
+          "dark": "#B6B6C4",
+          "host": "--text-muted",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "light": "#6550B9",
+          "dark": "#B7A3FF",
+          "host": "--interactive-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent-text",
+          "name": "Text on accent",
+          "light": "#FFFFFF",
+          "dark": "#17131F",
+          "host": "--text-on-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "interaction",
+          "name": "Interaction states",
+          "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+        },
+        {
+          "id": "components",
+          "name": "Component usage",
+          "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+        }
+      ],
+      "frontend": {
+        "schema": 1,
+        "target": "nuxt-ui",
+        "colorPolicy": "host",
+        "bindings": {}
+      }
+    },
+    "storymaps": {
+      "schema": 1,
+      "nextId": 1,
+      "maps": []
+    },
+    "detailDesigns": {
+      "schema": 2,
+      "nextId": 73,
+      "documents": [
+        {
+          "id": "detail-document-1",
+          "kind": "page",
+          "ownerId": "node-2",
+          "ownerLabel": "Import preview",
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
+          "nodes": [
+            {
+              "id": "detail-node-2",
+              "kind": "region",
+              "label": "Import preview layout",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "size": {
+                "width": 676,
+                "height": 776
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 16,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-3",
+              "kind": "heading",
+              "label": "Import preview",
+              "text": "Import preview",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": "section-title"
+                }
+              }
+            },
+            {
+              "id": "detail-node-4",
+              "kind": "text",
+              "label": "Implementation scope",
+              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-5",
+              "kind": "input",
+              "label": "Search or filter draft",
+              "text": "",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-6",
+              "kind": "table",
+              "label": "Example records",
+              "text": "No fixture records.",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 180
+              },
+              "component": null,
+              "props": {},
+              "binding": {
+                "sourceId": "ds-source-1",
+                "operationId": "ds-operation-2",
+                "field": ""
+              },
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              },
+              "options": [
+                "title",
+                "external_id",
+                "status"
+              ]
+            },
+            {
+              "id": "detail-node-7",
+              "kind": "button",
+              "label": "Clear local draft",
+              "text": "Clear draft",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-9",
+              "kind": "button",
+              "label": "Implement import preview",
+              "text": "Run action (implementation hook)",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-11",
+              "kind": "button",
+              "label": "Open Mapping review",
+              "text": "Open Mapping review",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-13",
+              "kind": "alert",
+              "label": "Recoverable failure",
+              "text": "The operation did not complete. The draft remains unchanged.",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "error"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-14",
+              "kind": "text",
+              "label": "Empty state",
+              "text": "No records yet. Define the capture or import action for your domain.",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 630
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "empty"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-8",
+              "source": "detail-node-7",
+              "target": "detail-node-5",
+              "event": "click",
+              "label": "Clear only this local input",
+              "notes": "No note or business record is deleted.",
+              "acceptance": "Local input becomes empty.",
+              "targetSurfaceId": null,
+              "effect": {
+                "type": "value",
+                "value": ""
+              }
+            },
+            {
+              "id": "detail-edge-10",
+              "source": "detail-node-9",
+              "target": "detail-node-5",
+              "event": "click",
+              "label": "Implement import preview",
+              "notes": "Explicit business hook; not a success simulation.",
+              "acceptance": "Replace the generated TODO with a failing business assertion.",
+              "targetSurfaceId": null
+            },
+            {
+              "id": "detail-edge-12",
+              "source": "detail-node-11",
+              "target": "detail-node-5",
+              "event": "click",
+              "label": "Open Mapping review",
+              "notes": "Declared navigation only.",
+              "acceptance": "Open the existing surface.",
+              "targetSurfaceId": "node-3"
+            }
+          ],
+          "scenarios": [
+            {
+              "id": "scenario-15",
+              "name": "Default synthetic example",
+              "state": "default",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-16",
+              "name": "Narrow synthetic example",
+              "state": "default",
+              "width": "narrow",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-17",
+              "name": "Empty collection",
+              "state": "empty",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": []
+                }
+              ]
+            },
+            {
+              "id": "scenario-18",
+              "name": "Recoverable error",
+              "state": "error",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "detail-document-19",
+          "kind": "page",
+          "ownerId": "node-3",
+          "ownerLabel": "Mapping review",
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
+          "nodes": [
+            {
+              "id": "detail-node-20",
+              "kind": "region",
+              "label": "Mapping review layout",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "size": {
+                "width": 676,
+                "height": 776
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 16,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-21",
+              "kind": "heading",
+              "label": "Mapping review",
+              "text": "Mapping review",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": "section-title"
+                }
+              }
+            },
+            {
+              "id": "detail-node-22",
+              "kind": "text",
+              "label": "Implementation scope",
+              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-23",
+              "kind": "textarea",
+              "label": "Draft content",
+              "text": "",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-24",
+              "kind": "table",
+              "label": "Example records",
+              "text": "No fixture records.",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 180
+              },
+              "component": null,
+              "props": {},
+              "binding": {
+                "sourceId": "ds-source-1",
+                "operationId": "ds-operation-2",
+                "field": ""
+              },
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              },
+              "options": [
+                "title",
+                "external_id",
+                "status"
+              ]
+            },
+            {
+              "id": "detail-node-25",
+              "kind": "button",
+              "label": "Clear local draft",
+              "text": "Clear draft",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-27",
+              "kind": "button",
+              "label": "Implement mapping review",
+              "text": "Run action (implementation hook)",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-29",
+              "kind": "button",
+              "label": "Open Import preview",
+              "text": "Open Import preview",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-31",
+              "kind": "alert",
+              "label": "Recoverable failure",
+              "text": "The operation did not complete. The draft remains unchanged.",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "error"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-32",
+              "kind": "text",
+              "label": "Empty state",
+              "text": "No records yet. Define the capture or import action for your domain.",
+              "parentId": "detail-node-20",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 630
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "empty"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-26",
+              "source": "detail-node-25",
+              "target": "detail-node-23",
+              "event": "click",
+              "label": "Clear only this local input",
+              "notes": "No note or business record is deleted.",
+              "acceptance": "Local input becomes empty.",
+              "targetSurfaceId": null,
+              "effect": {
+                "type": "value",
+                "value": ""
+              }
+            },
+            {
+              "id": "detail-edge-28",
+              "source": "detail-node-27",
+              "target": "detail-node-23",
+              "event": "click",
+              "label": "Implement mapping review",
+              "notes": "Explicit business hook; not a success simulation.",
+              "acceptance": "Replace the generated TODO with a failing business assertion.",
+              "targetSurfaceId": null
+            },
+            {
+              "id": "detail-edge-30",
+              "source": "detail-node-29",
+              "target": "detail-node-23",
+              "event": "click",
+              "label": "Open Import preview",
+              "notes": "Declared navigation only.",
+              "acceptance": "Open the existing surface.",
+              "targetSurfaceId": "node-2"
+            }
+          ],
+          "scenarios": [
+            {
+              "id": "scenario-33",
+              "name": "Default synthetic example",
+              "state": "default",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-34",
+              "name": "Narrow synthetic example",
+              "state": "default",
+              "width": "narrow",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-35",
+              "name": "Empty collection",
+              "state": "empty",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": []
+                }
+              ]
+            },
+            {
+              "id": "scenario-36",
+              "name": "Recoverable error",
+              "state": "error",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "detail-document-37",
+          "kind": "page",
+          "ownerId": "node-4",
+          "ownerLabel": "Import result",
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
+          "nodes": [
+            {
+              "id": "detail-node-38",
+              "kind": "region",
+              "label": "Import result layout",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "size": {
+                "width": 676,
+                "height": 776
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 16,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-39",
+              "kind": "heading",
+              "label": "Import result",
+              "text": "Import result",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": "section-title"
+                }
+              }
+            },
+            {
+              "id": "detail-node-40",
+              "kind": "text",
+              "label": "Implementation scope",
+              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-41",
+              "kind": "input",
+              "label": "Search or filter draft",
+              "text": "",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-42",
+              "kind": "table",
+              "label": "Example records",
+              "text": "No fixture records.",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 180
+              },
+              "component": null,
+              "props": {},
+              "binding": {
+                "sourceId": "ds-source-1",
+                "operationId": "ds-operation-2",
+                "field": ""
+              },
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              },
+              "options": [
+                "title",
+                "external_id",
+                "status"
+              ]
+            },
+            {
+              "id": "detail-node-43",
+              "kind": "button",
+              "label": "Clear local draft",
+              "text": "Clear draft",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-45",
+              "kind": "button",
+              "label": "Implement import result",
+              "text": "Run action (implementation hook)",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 394
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-47",
+              "kind": "button",
+              "label": "Open Import preview",
+              "text": "Open Import preview",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-49",
+              "kind": "alert",
+              "label": "Recoverable failure",
+              "text": "The operation did not complete. The draft remains unchanged.",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 512
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "error"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-50",
+              "kind": "text",
+              "label": "Empty state",
+              "text": "No records yet. Define the capture or import action for your domain.",
+              "parentId": "detail-node-38",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 630
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "empty"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-44",
+              "source": "detail-node-43",
+              "target": "detail-node-41",
+              "event": "click",
+              "label": "Clear only this local input",
+              "notes": "No note or business record is deleted.",
+              "acceptance": "Local input becomes empty.",
+              "targetSurfaceId": null,
+              "effect": {
+                "type": "value",
+                "value": ""
+              }
+            },
+            {
+              "id": "detail-edge-46",
+              "source": "detail-node-45",
+              "target": "detail-node-41",
+              "event": "click",
+              "label": "Implement import result",
+              "notes": "Explicit business hook; not a success simulation.",
+              "acceptance": "Replace the generated TODO with a failing business assertion.",
+              "targetSurfaceId": null
+            },
+            {
+              "id": "detail-edge-48",
+              "source": "detail-node-47",
+              "target": "detail-node-41",
+              "event": "click",
+              "label": "Open Import preview",
+              "notes": "Declared navigation only.",
+              "acceptance": "Open the existing surface.",
+              "targetSurfaceId": "node-2"
+            }
+          ],
+          "scenarios": [
+            {
+              "id": "scenario-51",
+              "name": "Default synthetic example",
+              "state": "default",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-52",
+              "name": "Narrow synthetic example",
+              "state": "default",
+              "width": "narrow",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "scenario-53",
+              "name": "Empty collection",
+              "state": "empty",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": []
+                }
+              ]
+            },
+            {
+              "id": "scenario-54",
+              "name": "Recoverable error",
+              "state": "error",
+              "width": "wide",
+              "values": {},
+              "bindings": [
+                {
+                  "sourceId": "ds-source-1",
+                  "operationId": "ds-operation-2",
+                  "value": [
+                    {
+                      "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
+                      "type": "import-record",
+                      "title": "title-0001-1dzlwnx",
+                      "external_id": "external_id-0001-1mhwmv2",
+                      "status": "status-0001-1l96ntf"
+                    },
+                    {
+                      "id": "93788877-9278-46e4-8578-8b9d94788a0a",
+                      "type": "import-record",
+                      "title": "title-0002-fiisry",
+                      "external_id": "external_id-0002-1m1i465",
+                      "status": "status-0002-1ksuzm2"
+                    },
+                    {
+                      "id": "b3842098-b484-422b-8584-23beb6842551",
+                      "type": "import-record",
+                      "title": "title-0003-47tsuv",
+                      "external_id": "external_id-0003-1upcx9w",
+                      "status": "status-0003-a239c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "detail-document-55",
+          "kind": "page",
+          "ownerId": "node-5",
+          "ownerLabel": "Preferences",
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
+          "nodes": [
+            {
+              "id": "detail-node-56",
+              "kind": "region",
+              "label": "Preferences layout",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 24
+              },
+              "size": {
+                "width": 676,
+                "height": 686
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 16,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-57",
+              "kind": "heading",
+              "label": "Preferences",
+              "text": "Preferences",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": "section-title"
+                }
+              }
+            },
+            {
+              "id": "detail-node-58",
+              "kind": "text",
+              "label": "Implementation scope",
+              "text": "Configure your own plugin settings here. This surface does not change Obsidian settings.",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 68
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-59",
+              "kind": "textarea",
+              "label": "Draft content",
+              "text": "",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-60",
+              "kind": "text",
+              "label": "Result area",
+              "text": "Your result appears here after implementing the use case.",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 186
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-61",
+              "kind": "button",
+              "label": "Clear local draft",
+              "text": "Clear draft",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 304
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-63",
+              "kind": "button",
+              "label": "Implement preferences",
+              "text": "Run action (implementation hook)",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 304
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-65",
+              "kind": "button",
+              "label": "Open Import preview",
+              "text": "Open Import preview",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 422
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-67",
+              "kind": "alert",
+              "label": "Recoverable failure",
+              "text": "The operation did not complete. The draft remains unchanged.",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 352,
+                "y": 422
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "error"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            },
+            {
+              "id": "detail-node-68",
+              "kind": "text",
+              "label": "Empty state",
+              "text": "No records yet. Define the capture or import action for your domain.",
+              "parentId": "detail-node-56",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 540
+              },
+              "size": {
+                "width": 300,
+                "height": 90
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "empty"
+              ],
+              "sourceBrickId": null,
+              "ui": {
+                "gap": 12,
+                "padding": 0,
+                "columns": 2,
+                "align": "stretch",
+                "justify": "start",
+                "wrap": true,
+                "overflow": "visible",
+                "widthMode": "fill",
+                "width": 320,
+                "minWidth": 0,
+                "maxWidth": 1600,
+                "narrow": {
+                  "layout": "stack",
+                  "columns": 1,
+                  "hidden": false
+                },
+                "tokens": {
+                  "gap": "",
+                  "padding": "",
+                  "color": "",
+                  "background": "",
+                  "radius": "",
+                  "typography": ""
+                }
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-62",
+              "source": "detail-node-61",
+              "target": "detail-node-59",
+              "event": "click",
+              "label": "Clear only this local input",
+              "notes": "No note or business record is deleted.",
+              "acceptance": "Local input becomes empty.",
+              "targetSurfaceId": null,
+              "effect": {
+                "type": "value",
+                "value": ""
+              }
+            },
+            {
+              "id": "detail-edge-64",
+              "source": "detail-node-63",
+              "target": "detail-node-59",
+              "event": "click",
+              "label": "Implement preferences",
+              "notes": "Explicit business hook; not a success simulation.",
+              "acceptance": "Replace the generated TODO with a failing business assertion.",
+              "targetSurfaceId": null
+            },
+            {
+              "id": "detail-edge-66",
+              "source": "detail-node-65",
+              "target": "detail-node-59",
+              "event": "click",
+              "label": "Open Import preview",
+              "notes": "Declared navigation only.",
+              "acceptance": "Open the existing surface.",
+              "targetSurfaceId": "node-2"
+            }
+          ],
+          "scenarios": [
+            {
+              "id": "scenario-69",
+              "name": "Default synthetic example",
+              "state": "default",
+              "width": "wide",
+              "values": {},
+              "bindings": []
+            },
+            {
+              "id": "scenario-70",
+              "name": "Narrow synthetic example",
+              "state": "default",
+              "width": "narrow",
+              "values": {},
+              "bindings": []
+            },
+            {
+              "id": "scenario-71",
+              "name": "Empty collection",
+              "state": "empty",
+              "width": "wide",
+              "values": {},
+              "bindings": []
+            },
+            {
+              "id": "scenario-72",
+              "name": "Recoverable error",
+              "state": "error",
+              "width": "wide",
+              "values": {},
+              "bindings": []
+            }
+          ]
+        }
+      ],
+      "revisions": []
+    }
+  },
+  "notes": [
+    "# Starter scope\n\nPreview, mapping review and import result surfaces\nImport-record model and explicit read-source contract\nSynthetic API fixture; example.invalid locator and no credentials\n\n## Implementation work\n\nImplement parsing, mapping, idempotency and rollback\nAdd user-authorized networking, cancellation and secure credential handling\nNo OAuth, live API calls or file parsing are implied\n\nNo business acceptance has passed. Use a separate development vault. Never insert credentials in this portable JSON.\n"
+  ]
+}

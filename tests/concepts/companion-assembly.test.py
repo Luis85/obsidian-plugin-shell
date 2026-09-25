@@ -17,6 +17,7 @@ class AssemblyContract(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.concept = self.root / 'docs/concepts/companion'
         shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
+        shutil.copytree(ROOT / 'docs/concepts/companion/starters', self.concept / 'starters')
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
         shutil.copytree(ROOT / 'scripts/companion', self.root / 'scripts/companion')
@@ -38,6 +39,28 @@ class AssemblyContract(unittest.TestCase):
         self.build()
         self.assertEqual(self.output.read_bytes(), (ROOT / 'docs/concepts/companion/index.html').read_bytes())
         self.build(check=True)
+
+    def test_starter_bytes_and_inventory_are_verified(self):
+        source = self.concept / 'starters/blank.companion.json'
+        original = source.read_bytes()
+        source.write_bytes(original + b' ')
+        with self.assertRaisesRegex(ValueError, 'Starter source integrity'):
+            self.build()
+        source.write_bytes(original)
+        orphan = self.concept / 'starters/orphan.json'
+        orphan.write_text('{}')
+        with self.assertRaisesRegex(ValueError, 'Starter source inventory'):
+            self.build()
+        orphan.unlink()
+        self.build()
+
+    def test_starter_contract_requires_explicit_inventory(self):
+        config = self.root / '.fallowrc.json'
+        value = json.loads(config.read_text())
+        value['entry'].remove('scripts/companion/starter-contract.mjs')
+        config.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError, 'Starter contract missing'):
+            self.build()
 
     def test_design_system_shared_modules_require_explicit_inventory(self):
         config = self.root / '.fallowrc.json'

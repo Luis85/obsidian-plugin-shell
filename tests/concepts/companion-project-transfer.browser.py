@@ -52,7 +52,7 @@ with sync_playwright() as pw:
         act('project-example')
         check('Bundled project opens a reviewed import, not an automatic replacement', js('project()===null && !!projectTransferUi.candidate'))
         check('Large bundled payload stays complete without mounting its text into the form', js('projectTransferUi.text.length>100000') and page.locator('#project-import-text').input_value() == '')
-        check('Example contains 27 surfaces and 30 mapped requirements', js('projectTransferUi.candidate.design.nodes.length===27 && allRequirements(projectTransferUi.candidate.design).length===30'))
+        check('Example contains 28 surfaces and 31 mapped requirements', js('projectTransferUi.candidate.design.nodes.length===28 && allRequirements(projectTransferUi.candidate.design).length===31'))
         check('Example includes ten project-owned components', js('projectTransferUi.candidate.design.library.filter(c=>c.origin==="project").length===10'))
         check('Example includes entities, source operations, recipes and design tokens', js('projectTransferUi.candidate.design.semantic.entities.length===11 && projectTransferUi.candidate.design.dataSources.sources[0].operations.length===3 && projectTransferUi.candidate.design.designSystem.colors.length===5'))
         check('Bundled companion design has no structural blockers', js('designIssues(projectTransferUi.candidate.design).filter(i=>i.level==="error").length===0'))

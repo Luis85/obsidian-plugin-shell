@@ -22,7 +22,7 @@ function cli(options,extra = [], entry = join(root,'shell.mjs')) {
 }
 test('self-project preserves all declared artifacts and exposes honest readiness',()=>{
   const m = projectModel(fixture);
-  assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[27,54,11,1,30]);
+  assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[28,54,11,1,31]);
   assert.equal(m.sources[0].operations.length,3); assert.equal(m.flows.length,3);
   assert.equal(m.document,fixture); assert.ok(m.warnings.some(w=>w.includes('require implementation')));
 });
@@ -78,7 +78,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.match(await readFile(join(target,'src/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/repositories.GRequirement.list/);
   assert.match(await readFile(join(target,'src/bootstrap/features.ts'),'utf8'),/GRequirement: register\(GRequirement\)/);
   assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
-  const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,30);
+  const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   assert.deepEqual(trace.detailDesigns,fixture.design.detailDesigns);
   assert.ok(trace.warnings.some(w=>w.includes('detail designs compile')));

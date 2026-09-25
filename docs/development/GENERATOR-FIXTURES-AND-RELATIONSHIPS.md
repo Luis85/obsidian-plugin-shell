@@ -44,3 +44,7 @@ Local checks use Node 22.16.0 and the installed browser. Hosted qualification us
 The analyzer integration repair classifies the exact fixture compiler before the general tooling zone and removes an unused internal HTTP export. No quality threshold or rule is suppressed. The concept HTML is rebuilt from the current source assembly, not copied from the older review archive.
 
 See [providers and relationships](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md), [generator use](COMPANION-GENERATOR.md), and [declarative actions](GENERATOR-DECLARATIVE-ACTIONS.md).
+
+## Project Starters integration
+
+The concurrent PR #5 Project Starters catalog and all nine qualification jobs are retained. Built-in native list sources now use generated canonical read adapters, so starter tests execute those adapters and assert cancellation instead of requiring an obsolete placeholder. The HTTPS starter is still blocked until runtime origin approval. The Tasks starter uses `starter-task` and `starter-project` canonical keys to coexist with retained framework examples; its user-facing names and route slugs are unchanged. Catalog integrity metadata and embedded prototype bytes are regenerated together. This updates the built-in design only; no existing consumer workspace or vault is migrated.
