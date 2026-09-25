@@ -104,8 +104,8 @@ export function projectModel(input: unknown): Model {
   unique(requirements,r => r.key);
   requireValue(requirements.every(r => r.nodes.every(id => screens.some(n => n.id === id)) && r.components.every(id => components.some(c => c.id === id))), 'Dangling requirement reference.');
   return {document,project,sourceRoot,testRoot,entities:entityModels,sources,screens,links,components,requirements,flows,warnings:[
-    'Source adapters and PRD business behavior require implementation; generated passing tests verify scaffolding only.',
-    'Complex component layouts, editor engines, relationship enforcement and source-flow payload mapping remain explicit extension points.',
+    'Native note operations and declared HTTPS providers are generated; custom providers and PRD business outcomes still require implementation and acceptance.',
+    'Explicit controls, mappings and restrict relationships are executable; visual editor engines, undeclared business logic and transactional cascade rules require product implementation.',
     ...(design.detailDesigns ? ['Page/component detail designs compile to Vue layouts, state visibility, typed instances and safe source projections. Business acceptance and payload mapping still require implementation.'] : []),
     'Framework internals remain in src/tests; configured folders locate generated product code and product tests.',
   ]};

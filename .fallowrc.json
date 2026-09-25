@@ -247,6 +247,12 @@
         "patterns": [
           "docs/concepts/companion/test-kit/**"
         ]
+      },
+      {
+        "name": "fixture-compiler",
+        "patterns": [
+          "scripts/companion/compiler/fixture-code.ts"
+        ]
       }
     ],
     "rules": [
@@ -314,7 +320,8 @@
           "harness",
           "tooling",
           "styles",
-          "companion-test-kit"
+          "companion-test-kit",
+          "fixture-compiler"
         ]
       },
       {
@@ -344,7 +351,8 @@
           "test",
           "harness",
           "tooling",
-          "styles"
+          "styles",
+          "fixture-compiler"
         ]
       },
       {
@@ -360,6 +368,13 @@
       {
         "from": "companion-test-kit",
         "allow": [
+          "companion-test-kit"
+        ]
+      },
+      {
+        "from": "fixture-compiler",
+        "allow": [
+          "tooling",
           "companion-test-kit"
         ]
       }

@@ -10,9 +10,12 @@ import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obs
 import { bindHostEvents } from ${ref('src/infrastructure/obsidian/event-bridge.ts')};
 import { screens } from '../domain/screens.ts';
 import { createSources } from './sources.ts';
+import { configureSourceProviders } from './source-providers.ts';
 import { mountProject } from './mount.ts';
 export async function initializeProject(plugin: Plugin) {
-  const shell = await createServices(nativeAdapters(plugin)); const sources = createSources(shell);
+  const shell = await createServices(nativeAdapters(plugin));
+  let sources: ReturnType<typeof createSources>;
+  let providers: ReturnType<typeof configureSourceProviders> | undefined;
   const views = new Set<ShowcaseView>(); const modals = new Set<Modal>(); const settings = new Set<() => void>();
   let disposed = false; let stopEvents = () => {};
   const dispose = () => {
@@ -20,6 +23,7 @@ export async function initializeProject(plugin: Plugin) {
     for (const modal of modals) { try { modal.close(); } catch { shell.diagnostics.report('generated.cleanup','modal.close'); } }
     for (const release of settings) { try { release(); } catch { shell.diagnostics.report('generated.cleanup','settings.close'); } }
     for (const view of views) { try { view.disposeView(); } catch { shell.diagnostics.report('generated.cleanup','view.close'); } }
+    try { providers?.dispose(); } catch { shell.diagnostics.report('generated.cleanup','sources.dispose'); }
     try { stopEvents(); } finally { shell.dispose(); }
   };
   function openModal(id: string) {
@@ -42,6 +46,7 @@ export async function initializeProject(plugin: Plugin) {
     await leaf.setViewState({type,active:true}); await plugin.app.workspace.revealLeaf(leaf);
   }
   try {
+    providers = configureSourceProviders(shell); sources = createSources(shell,providers.ports);
     const definitions = [{id:undefined as string | undefined,type:viewType,label:plugin.manifest.name}, ...screens.filter(s => !['modal','group','action'].includes(s.kind)).map(s => ({id:s.id,type:viewType+'-'+s.slug,label:s.label}))];
     for (const definition of definitions) {
       const View = nativeViewClass({type:definition.type,title:()=>definition.label});
@@ -68,6 +73,15 @@ export async function initializeProject(plugin: Plugin) {
     stopEvents = bindHostEvents(plugin,shell.hostEvents,shell.diagnostics,shell.scheduler);
     return {dispose};
   } catch (error) { dispose(); throw error; }
+}
+`);
+  const providerFile = `${root}/bootstrap/source-providers.ts`;
+  add(providerFile,`import type { Services } from ${literal(relativeImport(providerFile,'src/bootstrap/services.ts'))};
+import type { SourcePorts } from '../application/sources.ts';
+/** Developer-owned runtime configuration. Portable JSON never authorizes network access.
+ * Return complete source ports. Dispose each configured provider on plugin unload. */
+export function configureSourceProviders(_shell: Services): {ports: Partial<SourcePorts>; dispose(): void} {
+  return {ports: {}, dispose() {}};
 }
 `);
   const mount = `${root}/bootstrap/mount.ts`;

@@ -2,11 +2,20 @@
 export interface Schema { type: string | string[]; properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean; items?: Schema; enum?: unknown[]; format?: string }
 function safe(value: unknown, depth = 0, budget = {count:0}): boolean {
   if (depth > 40 || ++budget.count > 120000) return false;
-  if (value === null || value === undefined || ['string','boolean'].includes(typeof value)) return true;
+  if (value === undefined) return depth === 0;
+  if (value === null || ['string','boolean'].includes(typeof value)) return true;
   if (typeof value === 'number') return Number.isFinite(value);
   if (typeof value !== 'object') return false;
-  if (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) return false;
-  return Object.entries(value).every(([key,item]) => !['__proto__','prototype','constructor'].includes(key) && safe(item,depth+1,budget));
+  const array=Array.isArray(value);
+  if (!array && ![Object.prototype,null].includes(Object.getPrototypeOf(value))) return false;
+  const keys=Reflect.ownKeys(value);
+  if(array && (value.length>120000 || keys.length!==value.length+1))return false;
+  return keys.every(key=>{
+    if(array && key==='length')return true;
+    if(typeof key!=='string' || ['__proto__','prototype','constructor'].includes(key) || array && !/^(0|[1-9][0-9]*)$/.test(key))return false;
+    const descriptor=Object.getOwnPropertyDescriptor(value,key)!;
+    return 'value' in descriptor && safe(descriptor.value,depth+1,budget);
+  });
 }
 function formatMatches(value: string, format?: string): boolean {
   if (!format) return true;

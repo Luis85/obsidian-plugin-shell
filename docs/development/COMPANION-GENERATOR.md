@@ -35,7 +35,10 @@ The original `npm run companion:generate` and `scripts/companion/generate.mjs` *
 | Modal/settings/view | Native shell lifecycle wiring and isolated Vue/Pinia mount | Generated build; native acceptance remains separate |
 | PRD requirement | Stable use-case module plus original requirement/acceptance text | Explicit `it.todo`, to replace with a failing behavioral test |
 | Design system | Scoped Nuxt UI / shell CSS, token fragments and effective binding manifest | Shared browser/CLI compiler, generated build and real Nuxt UI harness |
-| Source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
+| Test-data recipes | Standalone reviewed test-vault kit, deterministic fixtures, simulator ports | Native note reads and retained engine contract tests |
+| Writable native relationships | Shared preflight service, graph/cardinality/target checks, restrict deletion | Real canonical repository mutation tests and constraint regressions |
+| HTTPS JSON sources | Typed provider factory, approved origin, runtime credential injection, bounded requests | Generated factory/service execution and transport failure tests |
+| Rich components without authored internals | Typed component specification and extension modules | Contract/traceability only, not a visual editor port |
 
 Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Unspecified custom/provider adapters and use cases throw explicit `NotImplementedError` until implemented. Declared native note operations use the shell repository, not an empty implementation. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
 
@@ -61,7 +64,7 @@ Imported JSON is data. It cannot provide code templates, commands, dependency ve
 
 ## Remaining native conversion work
 
-The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Visual editors such as Vue Flow, semantic relationship rules, custom providers, translations and seeded source recipes still need product implementation and behavioral tests. Native note operations, typed controls, slot-content assignments and explicit action mappings are generated under the contracts below. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
+The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Visual editors such as Vue Flow, domain-specific business rules, database drivers and translations still need product implementation and behavioral tests. Explicit restrict relationships, HTTPS JSON providers and seeded source recipes are generated; see [provider and relationship contracts](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md). Native note operations, typed controls, slot-content assignments and explicit action mappings are generated under the contracts below. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
 
 ## Technical references
 
@@ -69,7 +72,7 @@ The output is a development shell. Components without detail designs remain impl
 - Vitest test API: https://vitest.dev/api/test — TODOs identify unimplemented acceptance, not passing assertions.
 - Node TypeScript execution: https://nodejs.org/api/typescript.html — type stripping executes erasable TypeScript; it does not replace the compiler type-check.
 
-## Executable detailed-design generation
+## Executable detailed-design generation (schema 1; schema 2 extensions below)
 
 Saved v3 page/component designs now compile to editable Vue SFCs. Page details replace the
 placeholder page composition; component details implement the matching reusable library SFC.
@@ -124,3 +127,7 @@ Detail schema 2 adds typed controls, reusable-instance slot assignments and sour
 See [declarative action and native note contracts](GENERATOR-DECLARATIVE-ACTIONS.md). These contracts supersede the text-only/payload/slot limitations of the earlier increment above. The generated JSON and Markdown editors are accessible plain-text controls, not Monaco, a visual Markdown renderer, or a port of the Vue Flow workbench.
 
 Both the actual companion export and an explicitly synthetic boundary project are independently generated, installed, built and tested by the qualification workflow. The second fixture declares all new control types, a slot assignment, a typed payload action and a native note CRUD source; it is not substituted for the companion design or counted as its completed PRD behavior. Native repository tests exercise the actual NoteRepository and Markdown codec against an in-memory storage port, not the Obsidian desktop host.
+
+## Provider, relationship and recipe implementation
+
+The generator now emits executable recipe tooling, typed HTTPS JSON providers, a complete-source override registry with lifecycle cleanup, and native relationship preflight. See [the integration guide](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md). These additions do not convert requirement prose into passing acceptance evidence or replace native Obsidian qualification.

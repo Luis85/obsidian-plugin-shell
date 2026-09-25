@@ -2,7 +2,7 @@ interface NoteLease { readonly id: string; readonly revision: number; readonly v
 type NoteResult<T> = {readonly ok:true;readonly value:T} | {readonly ok:false;readonly error:{readonly code:string}};
 interface CanonicalNotes<I,S extends NoteLease> {
   list(): Promise<NoteResult<readonly S[]>>;
-  create(values:I,requestId:string): Promise<NoteResult<S>>;
+  create(values:I,requestId:string,permit?:{active():boolean}): Promise<NoteResult<S>>;
   update(snapshot:S,values:I,permit:{active():boolean}): Promise<NoteResult<S>>;
   delete(snapshot:S,permit:{active():boolean}): Promise<NoteResult<void>>;
 }
@@ -31,7 +31,7 @@ export function noteOperations<I, S extends NoteLease>(repository: CanonicalNote
       const record = input(value); const values = parse(record.values);
       if(typeof record.requestId !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,119}$/.test(record.requestId)) throw new Error('NOTE_REQUEST_ID_REQUIRED');
       if(signal?.aborted) throw new Error('OPERATION_ABORTED');
-      const result=await repository.create(values,record.requestId); if(!result.ok) throw new Error('NOTE_CREATE_FAILED: '+result.error.code); return present(result.value);
+      const result=await repository.create(values,record.requestId,{active:()=>!signal?.aborted}); if(!result.ok) throw new Error('NOTE_CREATE_FAILED: '+result.error.code); return present(result.value);
     },
     async update(value: unknown, signal?: AbortSignal) {
       const record=input(value); const snapshot=lease(record); const values=parse(record.values);
