@@ -15,7 +15,7 @@ async function scratch(t) {
 }
 async function minimal(t) {
   const root = await scratch(t), inventory = await sourceInputs(process.cwd());
-  for (const path of inventory.roots.filter(path => path !== sidecar)) {
+  for (const path of inventory.roots.filter(path => path !== sidecar && path !== 'docs/concepts/companion/companion-project.json')) {
     const target = join(root, path);
     if ((await lstat(resolve(path))).isDirectory()) await mkdir(target, { recursive: true });
     else { await mkdir(dirname(target), { recursive: true }); await writeFile(target, ''); }

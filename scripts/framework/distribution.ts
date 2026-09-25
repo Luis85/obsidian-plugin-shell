@@ -23,6 +23,8 @@ function documentation(path: string, source: string): string {
   }).join('\n');
 }
 export function standaloneSource(path: string, bytes: Buffer): Buffer {
+  // Normalize only distributed UTF-8 text; never rewrite checkout files or binary fixtures.
+  if (!path.endsWith('.gz')) bytes = Buffer.from(new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/\r\n/g, '\n'));
   if (path.endsWith('.md') || path.endsWith('.md.txt')) {
     const intro = path === 'README.md' ? '# Framework developer kit\n\nStart in this extracted folder with `node shell.mjs setup` or `npm run setup`. The compiled CLI runs before dependency installation. Choose a project JSON or an explicit blank design, review generation, then approve dependency installation separately.\n\nFor automation use `node shell.mjs help --json` and `node shell.mjs schema --json`. Run `node shell.mjs build`, `test`, and `verify --profile project` after generation and installation. Actual native qualification and public-release approval remain separate.\n\nSee [CLI workflow](docs/development/FRAMEWORK-CLI.md) for invocation, safe plan/apply, fixtures, maintenance and release boundaries.\n\n## Retained framework reference\n\n' : '';
     return Buffer.from(intro + documentation(path, bytes.toString('utf8')));
@@ -39,7 +41,8 @@ export function updateReadmeOwnership(original: Buffer, adapted: Buffer, metadat
   const value = object(JSON.parse(metadata.toString('utf8')));
   requireThat(Array.isArray(value.files), 'KIT_OWNERSHIP', 'Invalid example-removal metadata.');
   const record = value.files.map(object).find(file => file.path === 'README.md');
-  requireThat(record && record.sha256 === hash(original), 'KIT_OWNERSHIP', 'The framework README is not the reviewed preimage; refuse silent ownership adoption.');
+  const reviewedText = new TextDecoder('utf-8', { fatal: true }).decode(original).replace(/\r\n/g, '\n');
+  requireThat(record && (record.sha256 === hash(original) || record.sha256 === hash(reviewedText)), 'KIT_OWNERSHIP', 'The framework README is not the reviewed preimage; refuse silent ownership adoption.');
   record.sha256 = hash(adapted);
   return Buffer.from(json(value));
 }

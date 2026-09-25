@@ -20,29 +20,32 @@ export function lineLimit(path) {
 // This optional executable sidecar is present with the companion concept. It
 // must participate in archive transport and evidence freshness when installed.
 // Missing concept content is valid in a foundation-only checkout; links are not.
-async function defaultRoots(root) {
-  const roots = [...inputRoots];
-  // Foundation-only fixtures can omit the compiler, but installed launcher and
-  // compiler configuration bytes must participate in transport and freshness.
-  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json']) {
-    let stat;
-    try { stat = await lstat(join(root, extra)); }
-    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
-    if (stat.isSymbolicLink()) throw new Error('SOURCE_SYMLINK');
-    if (!stat.isFile()) throw new Error('SOURCE_NOT_REGULAR');
-    roots.push(extra);
-  }
-  const sidecar = 'docs/concepts/companion/test-kit';
+async function optionalInput(root, name, directory = false) {
+  const parts = name.split('/');
   let path = root;
-  for (const part of sidecar.split('/')) {
-    path = join(path, part);
+  for (let i = 0; i < parts.length; i++) {
+    path = join(path, parts[i]);
     let stat;
     try { stat = await lstat(path); }
-    catch (error) { if (error.code === 'ENOENT') return roots; throw error; }
+    catch (error) { if (error.code === 'ENOENT') return false; throw error; }
     if (stat.isSymbolicLink()) throw new Error('SOURCE_SYMLINK');
-    if (!stat.isDirectory()) throw new Error('SOURCE_NOT_DIRECTORY');
+    const expectsDirectory = directory || i < parts.length - 1;
+    if (expectsDirectory ? !stat.isDirectory() : !stat.isFile()) {
+      throw new Error(expectsDirectory ? 'SOURCE_NOT_DIRECTORY' : 'SOURCE_NOT_REGULAR');
+    }
   }
-  roots.push(sidecar);
+  return true;
+}
+async function defaultRoots(root) {
+  const roots = [...inputRoots];
+  // Optional installed capabilities and their actual reference input must travel
+  // with source-only archives and invalidate receipts when their bytes change.
+  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json',
+    'docs/concepts/companion/companion-project.json']) {
+    if (await optionalInput(root, extra)) roots.push(extra);
+  }
+  const sidecar = 'docs/concepts/companion/test-kit';
+  if (await optionalInput(root, sidecar, true)) roots.push(sidecar);
   return roots;
 }
 export async function sourceInputs(root, roots) {
