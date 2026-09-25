@@ -13,6 +13,7 @@ HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
     ('design-styles', 'design-styles/checks.json'),
+    ('composition', 'composition/checks.json'),
     ('storymap-polish', 'storymap-polish/checks.json'),
     ('detail-polish', 'detail-polish/checks.json'),
     ('details', 'details/checks.json'),
@@ -47,7 +48,7 @@ for name, relative_report in SUITES:
     report_path = OUT / relative_report
     report_path.unlink(missing_ok=True)
     try:
-        run = subprocess.run([sys.executable, f'tests/concepts/companion-{name}.browser.py'], cwd=ROOT, text=True, capture_output=True, timeout=150)
+        run = subprocess.run([sys.executable, f'tests/concepts/companion-{name}.browser.py'], cwd=ROOT, text=True, capture_output=True, timeout=300 if name == 'composition' else 150)
         (OUT / f'{name}.log').write_text(run.stdout + run.stderr)
         evidence = json.loads(report_path.read_text()) if report_path.exists() else {}
         # Older individual scripts intentionally report different summary shapes;

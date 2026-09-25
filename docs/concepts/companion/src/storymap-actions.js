@@ -17,6 +17,7 @@ function smCanWrite(token = smToken()) {
   if (storageWarning || localStorage.getItem(STORAGE_KEY) !== persistenceSnapshot) throw Error('Resolve the storage conflict first. Export this session and the retained copy; no storymap was changed.');
 }
 function smPersistDesign(candidate, previous) {
+  cpRetainRevisions(candidate.detailDesigns, previous.detailDesigns);if(candidate.detailDesigns?.schema===2)candidate.schema=4;cpBoundHistory(candidate);
   if (!validSavedDesign(candidate)) throw Error('The change would create an invalid project. Nothing was saved.');
   project().design = candidate;
   if (!saveConceptState()) { project().design = previous; throw Error('The change could not be saved. Previous data and history are retained; export recovery before closing.'); }

@@ -9,7 +9,7 @@ function dtLiteralProps(text) {
   return value;
 }
 function dtPropRows(node, d = design()) {
-  const c = d.library.find(c => c.id === node.component?.id);
+  const c = node.component?.revisionId ? d.detailDesigns?.revisions?.find(r => r.id === node.component.revisionId)?.library : d.library.find(c => c.id === node.component?.id);
   const variant = c && c.version === node.component.version ? variantFor(c, node.component.variantId) : null;
   const defaults = variant?.props || {}, members = c ? parseMembers(c.props, 'props') : [];
   const keys = [...new Set([...members.map(m => m.name), ...Object.keys(defaults), ...Object.keys(node.props)])];

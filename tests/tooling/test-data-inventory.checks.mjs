@@ -8,6 +8,7 @@ import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
 import { fixtureManifest } from './test-data-fixture.mjs';
 
 const sidecar = 'docs/concepts/companion/test-kit';
+const projectFixture = 'docs/concepts/companion/companion-project.json';
 async function scratch(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'test-kit-inventory-')));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -15,7 +16,7 @@ async function scratch(t) {
 }
 async function minimal(t) {
   const root = await scratch(t), inventory = await sourceInputs(process.cwd());
-  for (const path of inventory.roots.filter(path => path !== sidecar)) {
+  for (const path of inventory.roots.filter(path => path !== sidecar && path !== projectFixture)) {
     const target = join(root, path);
     if ((await lstat(resolve(path))).isDirectory()) await mkdir(target, { recursive: true });
     else { await mkdir(dirname(target), { recursive: true }); await writeFile(target, ''); }
@@ -63,4 +64,17 @@ test('[TD-CLI-DEFAULT] exported command locates generated manifest independently
   const report = JSON.parse(completed.stdout); assert.equal(report.target, join(root, '.test-vault')); assert.equal(report.blockers.length, 0);
   assert.equal(report.mode, 'seed'); assert.deepEqual(await readdir(elsewhere), []);
   await assert.rejects(readFile(join(root, '.test-vault/.shell-fixtures.json')), { code: 'ENOENT' });
+});
+
+
+test('[PROJECT-FIXTURE-INVENTORY] canonical design bytes are transported, fingerprinted and never followed through links', async t => {
+  const root = await minimal(t); const target = join(root, projectFixture);
+  const before = await sourceInputs(root); assert.ok(!before.roots.includes(projectFixture));
+  await mkdir(dirname(target), { recursive: true }); await writeFile(target, '{"design":"original"}');
+  const first = await sourceInputs(root); assert.equal(first.files.filter(f => f.path === projectFixture).length, 1);
+  await writeFile(target, '{"design":"changed"}'); assert.notEqual((await sourceInputs(root)).digest, first.digest);
+  await rm(target); await mkdir(target); await assert.rejects(sourceInputs(root), /SOURCE_NOT_REGULAR/);
+  await rm(target, { recursive: true });
+  const outside = await scratch(t); await symlink(outside, target, process.platform === 'win32' ? 'junction' : 'dir');
+  await assert.rejects(sourceInputs(root), /SOURCE_SYMLINK/); assert.deepEqual(await readdir(outside), []);
 });

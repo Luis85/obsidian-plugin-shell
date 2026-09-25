@@ -14,14 +14,14 @@
 .dt-empty h2{font-size:22px}
 .dt-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}
 .dt-separator{height:20px;border-left:1px solid var(--line);margin:0 4px}
-.dt-editor{display:grid;grid-template-columns:190px minmax(240px,1fr) 270px;border:1px solid var(--line);border-radius:10px;overflow:hidden;height:clamp(440px,calc(100dvh - 340px),820px);margin-top:12px;background:var(--bg)}
+.dt-editor{display:grid;grid-template-columns:220px minmax(240px,1fr) 270px;border:1px solid var(--line);border-radius:10px;overflow:hidden;height:clamp(440px,calc(100dvh - 340px),820px);margin-top:12px;background:var(--bg)}
 .dt-editor h2{font-size:13px;margin:0 0 12px}
 .dt-editor h3{font-size:12px;margin:20px 0 8px}
 .dt-palette,.dt-inspector{padding:16px;overflow:auto;background:var(--panel);min-width:0}
 .dt-palette{border-right:1px solid var(--line)}
 .dt-inspector{border-left:1px solid var(--line)}
-.dt-palette-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.dt-palette-buttons .btn{justify-content:flex-start;font-size:11px;padding:7px 6px;white-space:normal;text-align:left}
+.dt-palette-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.dt-palette-buttons .btn{min-width:0;overflow-wrap:anywhere;justify-content:flex-start;font-size:11px;padding:7px 6px;white-space:normal;text-align:left}
 .dt-inspector h2{font-size:16px;overflow-wrap:anywhere}
 .dt-inspector p,.dt-inspector dd{font-size:12px;line-height:1.65}
 .dt-inspector dl{margin:16px 0}
@@ -71,7 +71,7 @@
 .dt-wireframe.is-narrow .layout-grid{grid-template-columns:1fr}
 .dt-wire-text{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
 .dt-wire-input{display:flex;flex-direction:column;gap:6px;font-size:12px;min-width:120px;flex:1}
-.dt-wire-input input{width:100%;box-sizing:border-box;pointer-events:none;min-width:0}
+.dt-wire-input input{width:100%;box-sizing:border-box;min-width:0}
 .dt-wire-button{display:inline-flex;align-self:flex-start;padding:9px 14px;border:1px solid var(--accent);border-radius:6px;color:var(--text);font-size:12px;background:var(--hover)}
 .dt-wire-button.is-disabled{opacity:.5}
 .dt-wire-slot{border:1px dashed var(--accent);padding:12px;font-size:12px;border-radius:5px}
