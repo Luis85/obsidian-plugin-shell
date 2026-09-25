@@ -24,9 +24,10 @@ const commands = [
   ['scripts/quality/check-maintainability.mjs'],
   ['scripts/makers/entities.mjs', '--check'],
   ['scripts/events/catalog.mjs', '--check'],
-  ['node_modules/vitest/vitest.mjs', 'run', '--coverage'],
+  // One run gates both scopes: production coverage and, from the same per-file
+  // counts, the selected-core thresholds and include list in vitest.config.mjs.
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.production.config.mjs'],
-  ['scripts/quality/coverage-inventory.mjs'],
+  ['scripts/quality/coverage-inventory.mjs', '--selected-core'],
   ['scripts/styles/check-tokens.mjs'],
   ['scripts/quality/check-artifacts.mjs'],
   ['scripts/testing/verify-baseline.mjs', '--repeat', '3'],
