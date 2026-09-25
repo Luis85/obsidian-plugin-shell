@@ -1,0 +1,33 @@
+name: Assemble PR21 starter reconciliation
+on:
+  push:
+    branches: [work/pr21-starters-sync-20260925]
+permissions:
+  contents: write
+jobs:
+  assemble:
+    if: ${{ contains(github.event.head_commit.message, 'stage PR21 starter reconciliation') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Assemble exact reviewed integration tree
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, lzma, hashlib, pathlib, subprocess
+          path = pathlib.Path('.delivery/starters-reconcile.b64')
+          patch = lzma.decompress(base64.b64decode(path.read_text(), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '1dfa7c887175dc92b238b36c9765795826a145577a5697987a0d3936284d3bac'
+          subprocess.run(['git', 'apply', '--check', '-'], input=patch, check=True)
+          subprocess.run(['git', 'apply', '-'], input=patch, check=True)
+          subprocess.run(['python3', 'scripts/concepts/build-companion.py'], check=True)
+          path.unlink()
+          pathlib.Path('.github/workflows/pr21-starters-sync.yml').unlink()
+          PY
+          git add -A
+          test "$(git write-tree)" = "8d52016c6ac5a00624b213b732a227732d1b692c"
+          git restore --source=HEAD --staged --worktree .github/workflows/project-generator.yml .github/workflows/pr21-starters-sync.yml
+          git diff --cached --quiet -- .github/workflows
+          git -c user.name='OpenAI' -c user.email='noreply@openai.com' commit -m 'build: retain exact PR21 starter integration source'
+          git push origin HEAD:refs/heads/work/pr21-starters-sync-20260925

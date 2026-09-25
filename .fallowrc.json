@@ -151,7 +151,6 @@
     "docs/concepts/companion/src/detail-navigation.js",
     "docs/concepts/companion/src/detail-review.js",
     "docs/concepts/companion/src/detail-handoff.js",
-    "scripts/companion/runtime/use-detail.ts",
     "docs/concepts/companion/src/style-guide-frontend.js",
     "scripts/companion/design-system-roles.mjs",
     "scripts/companion/design-system-contract.mjs",
@@ -165,7 +164,12 @@
     "docs/concepts/companion/src/composition-seed.js",
     "docs/concepts/companion/src/composition.css",
     "docs/concepts/companion/src/composition-tools.js",
-    "scripts/companion/test-data-manifest.mjs"
+    "scripts/companion/starter-contract.mjs",
+    "docs/concepts/companion/src/project-starters.js",
+    "docs/concepts/companion/src/project-starter-views.js",
+    "docs/concepts/companion/src/project-starters.css",
+    "scripts/companion/starter-files.mjs",
+    "scripts/companion/qualify-starter.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -182,12 +186,6 @@
       "requireAllFiles": true
     },
     "zones": [
-      {
-        "name": "fixture-compiler",
-        "patterns": [
-          "scripts/companion/compiler/fixture-code.ts"
-        ]
-      },
       {
         "name": "domain",
         "patterns": [
@@ -330,8 +328,7 @@
           "harness",
           "tooling",
           "styles",
-          "companion-test-kit",
-          "fixture-compiler"
+          "companion-test-kit"
         ]
       },
       {
@@ -361,8 +358,7 @@
           "test",
           "harness",
           "tooling",
-          "styles",
-          "fixture-compiler"
+          "styles"
         ]
       },
       {
@@ -378,13 +374,6 @@
       {
         "from": "companion-test-kit",
         "allow": [
-          "companion-test-kit"
-        ]
-      },
-      {
-        "from": "fixture-compiler",
-        "allow": [
-          "tooling",
           "companion-test-kit"
         ]
       }
