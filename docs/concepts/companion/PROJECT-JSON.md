@@ -1,7 +1,7 @@
 # Full-project JSON, self-project and folder settings
 
-> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
-**2026-09-24 · Concept extension with a real read-only shell entrypoint.**
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). This guide describes the current v4 transfer; older verification receipts retain their original scope.
+**Current format: v4 · Offline authoring plus separate read-only inspection and reviewed generation.**
 
 The HTML prototype contains a loadable **Plugin Companion** project. It uses the same editors, persistence, import review and JSON contract as a user-authored project; it is not a separate hardcoded presentation or a second active project. The existing simpler example and blank-project entry remain available.
 
@@ -12,9 +12,10 @@ Open `index.html` and choose **Load companion project**. Review the proposed pro
 | Authored area | Included example |
 | --- | --- |
 | Identity and purpose | Plugin Companion, `plugin-companion`, version 0.1.0, design-to-shell outcome |
-| Surfaces | 24: workbench, 19 internal screens including Storymaps overview/detail, Preferences, and three transfer/handoff dialogs |
+| Surfaces | 27: one workbench view and 26 eligible page/modal/settings surfaces, including Storymaps and both detail editors |
 | Requirements | 5 PRDs and 30 mapped requirements covering discovery, structure, composition, test-data/handoff and operational safeguards |
 | Components | 54 retained definitions: 44 starter contracts and 10 project-owned companion components, with content and default/compact variants |
+| Detail designs | All 26 eligible surfaces and all 54 reusable components: 80 working designs and 54 immutable published revisions |
 | Domain | 11 entities and 7 relationships |
 | Source and test data | One proposed native-vault port, three declared read operations/usages, and three deterministic test recipes |
 | Storymaps | One editable map with two activities, three steps, five stories, two releases and PRD/sitemap/requirement links |
@@ -35,7 +36,9 @@ Import/export is a semantic round trip: object formatting may be normalized on b
 
 ## Format compatibility
 
-New exports use full-project `schemaVersion: 3` with `design.schema: 3`, including optional `design.storymaps` and `design.detailDesigns` collections (each subsystem schema 1). V2 projects remain importable without detail documents. Detail data concealed in a v1/v2 envelope is rejected. See [Detail editors](DETAIL-EDITORS.md) for owner references, instance contracts, limits and generator boundaries. V1 projects without storymaps remain importable and start with an empty collection. Storymaps hidden in a v1 envelope and unsupported versions fail before mutation. Saved maps and unresolved external references survive the reviewed JSON round trip; viewports, selection and drafts do not travel. See [Storymaps](STORYMAPS.md) for the model and editing rules.
+New exports use `schemaVersion: 4` and `design.schema: 4`. Storymaps retain subsystem schema 1; detailed composition uses subsystem schema 2 with working documents and immutable revisions. Layout/token references, slot content, scenarios and reviewed revision pins survive export/import. Selection, viewport, drafts, session clipboard and live preview values do not.
+
+V1/v2/v3 documents remain importable without inventing previously unauthored details. V1 cannot contain Storymaps; v1/v2 cannot contain details; v3 cannot conceal the richer composition subsystem. Unsupported versions and invalid internal references fail before replacement. See [Composition](COMPOSITION.md) and the [canonical contract](../../development/COMPANION-PROJECT-JSON.md).
 
 ## Settings and shell handoff
 
@@ -47,7 +50,7 @@ Open **Preferences → Configure project folders**. Defaults are `src` for code 
 npm run --silent companion:generate -- --input "plugin-companion.companion.json" --vault "/path/to/vault" --target "plugins/companion"
 ```
 
-The script validates the envelope and vault-contained target, then prints the original JSON. It does not generate boilerplate yet. Changing these folders does not relocate the existing shell, alter its build configuration, or change the older illustrative scaffold previews. Those remain separate from this new versioned handoff.
+The script validates the envelope and vault-contained target, then prints the original JSON. It remains read-only. The separate `companion:scaffold` command generates a workspace through explicit plan/hash/apply review, including supported detail layouts and local UI effects. Changing these folders does not relocate the existing shell, alter its build configuration, or change the older illustrative scaffold previews. Those remain separate from this new versioned handoff.
 
 Read the [canonical contract, CLI reference and safety boundary](../../development/COMPANION-PROJECT-JSON.md) for all field definitions, default/path rules, excluded state and reproduction commands.
 
@@ -55,4 +58,6 @@ Read the [canonical contract, CLI reference and safety boundary](../../developme
 
 The importer has a review-before-replace flow, explicit acknowledgement, current-project export, stale-review/storage checks and rollback after save failure. It refuses replacement during active operations and does not silently discard an edited Project.md. Late completion of a closed or superseded file selection is ignored. Confirmation controls do not masquerade as unsaved content; editing the JSON invalidates the candidate without rebuilding a large textarea on each keystroke. Folder drafts retain the existing keep/discard protection.
 
-A first version is not a migration/import-merge engine, native companion conversion, publication package or full boilerplate compiler. Keep shell qualification first and native conversion/publication behind their existing gates.
+Project replacement is not an import-merge engine, native companion conversion or release authorization. Generated UI scaffolding does not complete the companion's business handlers. Keep shell qualification first and native conversion/publication behind their existing gates.
+
+Large file/example imports retain their complete reviewed payload outside the replacement paste field. Large export previews identify their 30,000-character display limit; downloads contain the full validated project, never that shortened preview.

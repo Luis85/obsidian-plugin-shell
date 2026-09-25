@@ -99,9 +99,9 @@ fingerprint; content, containment, reading order and interactions do. The separa
 shell compiler still hashes the complete input when reviewing an apply plan;
 changing exported bytes requires a new reviewed compiler plan.
 
-## Transfer contract v3
+## Original detail contract (legacy v3)
 
-Exports use `schemaVersion: 3` and `design.schema: 3`. V1 and v2 imports remain
+The original increment used `schemaVersion: 3` and `design.schema: 3`. Current exports use v4; see [Composition](COMPOSITION.md). V1 and v2 imports remain
 supported without inventing detail documents. V1 cannot contain Storymaps or
 details; v2 cannot contain details. Unknown fields/versions, internal dangling
 references, unsafe literals, invalid coordinates and composition cycles fail
