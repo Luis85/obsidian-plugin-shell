@@ -22,7 +22,7 @@ test('v3 self-project includes page and component designs with bounded stable id
   assert.deepEqual(validateDetailDesigns(emptyDetailDesigns()).documents, []);
 });
 for (const [name, change] of [
-  ['future schema', s => s.schema = 2], ['reused counter', s => s.nextId = 1], ['unsafe counter', s => s.nextId = Number.MAX_SAFE_INTEGER],
+  ['future schema', s => s.schema = 99], ['reused counter', s => s.nextId = 1], ['unsafe counter', s => s.nextId = Number.MAX_SAFE_INTEGER],
   ['unknown store field', s => s.executed = true], ['duplicate owner', s => { const d = copy(s.documents[0]); d.id = 'detail-document-' + s.nextId++; s.documents.push(d); }],
   ['duplicate node ID', s => s.documents[0].nodes[1].id = s.documents[0].nodes[0].id],
   ['unknown kind', s => s.documents[0].nodes[1].kind = 'javascript'], ['empty label', s => s.documents[0].nodes[1].label = '  '],

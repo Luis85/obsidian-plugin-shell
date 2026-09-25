@@ -34,9 +34,10 @@ The original `npm run companion:generate` and `scripts/companion/generate.mjs` *
 | Navigation/interaction | Typed sitemap registry, store navigation, modal effect routing | Declared edge tests; non-navigational behavior stays TODO |
 | Modal/settings/view | Native shell lifecycle wiring and isolated Vue/Pinia mount | Generated build; native acceptance remains separate |
 | PRD requirement | Stable use-case module plus original requirement/acceptance text | Explicit `it.todo`, to replace with a failing behavioral test |
-| Design system, source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
+| Design system | Scoped Nuxt UI / shell CSS, token fragments and effective binding manifest | Shared browser/CLI compiler, generated build and real Nuxt UI harness |
+| Source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
 
-Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Adapters and use cases throw explicit `NotImplementedError` until implemented. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
+Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Unspecified custom/provider adapters and use cases throw explicit `NotImplementedError` until implemented. Declared native note operations use the shell repository, not an empty implementation. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
 
 `codebaseFolder` selects `<folder>/generated`; `testsFolder` selects `<folder>/project`. The reusable framework remains under `src` and its original tests under `tests/runtime`. This increment relocates generated product code, not the foundation's internal modules. Paths are target-relative, validated and portable. Every generated project keeps its framework scripts, harness, docs, lockfile and release tooling; no repository, credentials or installed dependencies are copied.
 
@@ -60,7 +61,7 @@ Imported JSON is data. It cannot provide code templates, commands, dependency ve
 
 ## Remaining native conversion work
 
-The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations, design-token application and seeded source recipes still need implementation and behavioral tests. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
+The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Visual editors such as Vue Flow, semantic relationship rules, custom providers, translations and seeded source recipes still need product implementation and behavioral tests. Native note operations, typed controls, slot-content assignments and explicit action mappings are generated under the contracts below. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
 
 ## Technical references
 
@@ -112,3 +113,14 @@ Technical basis: [Vue props](https://vuejs.org/guide/components/props.html),
 [Vue events](https://vuejs.org/guide/components/events.html),
 [Pinia testing](https://pinia.vuejs.org/cookbook/testing.html) and
 [Vitest test semantics](https://vitest.dev/api/test). Dependency pins are unchanged.
+## Design-system styles
+
+The JSON compiler now applies saved design tokens through its normal stylesheet import path. See [Design system → Nuxt UI styles](DESIGN-SYSTEM-STYLES.md) for the frontend contract, host/declared policy, safe regeneration and customization. This does not implement arbitrary component layout or turn usage prose into executable CSS.
+
+## Declarative action and persistence increment — 2026-09-25
+
+Detail schema 2 adds typed controls, reusable-instance slot assignments and source/emit actions with explicit data mappings. Schema 1 remains supported without interpreting prose as behavior. The prototype exposes these declarations in Page/Component forms and an advanced native-operation field in the source editor. The full project envelope remains version 3; only the detail subsystem upgrades when its new semantics are saved.
+
+See [declarative action and native note contracts](GENERATOR-DECLARATIVE-ACTIONS.md). These contracts supersede the text-only/payload/slot limitations of the earlier increment above. The generated JSON and Markdown editors are accessible plain-text controls, not Monaco, a visual Markdown renderer, or a port of the Vue Flow workbench.
+
+Both the actual companion export and an explicitly synthetic boundary project are independently generated, installed, built and tested by the qualification workflow. The second fixture declares all new control types, a slot assignment, a typed payload action and a native note CRUD source; it is not substituted for the companion design or counted as its completed PRD behavior. Native repository tests exercise the actual NoteRepository and Markdown codec against an in-memory storage port, not the Obsidian desktop host.

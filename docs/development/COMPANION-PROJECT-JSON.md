@@ -110,3 +110,7 @@ The read-only handoff command above remains separate from workspace generation. 
 ## Page and component detail designs (v3)
 
 `design.detailDesigns` is validated by the shared `detail-contract.mjs` before browser import or CLI handoff. Stable owner references connect page documents to sitemap surfaces and component documents to library definitions. Ordered nodes retain containment, content, local instance props, bindings, visible states and canvas geometry; edges retain interaction and acceptance declarations. The model never evaluates those declarations. V1/v2 envelopes containing this subsystem fail before mutation. See [Detail editors](../concepts/companion/DETAIL-EDITORS.md) for the exact limits and native conversion boundary. The separate compiler preserves details in project and traceability JSON and emits an explicit unimplemented-runtime warning.
+
+## Design-system frontend extension
+
+Optional `design.designSystem.frontend` schema 1 declares `target: "nuxt-ui"`, `colorPolicy: "host" | "declared"` and finite role-to-token `bindings`. Both import paths validate the complete typed design system. The reviewed scaffold compiler lowers it into styles; the read-only handoff still returns the original bytes. See [the complete contract](DESIGN-SYSTEM-STYLES.md).

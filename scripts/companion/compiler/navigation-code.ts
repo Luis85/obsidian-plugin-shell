@@ -1,5 +1,5 @@
 import { literal, type Model } from './model.ts';
-import { relativeImport, type Add } from './data-code.ts';
+import { relativeImport, type Add } from './file-code.ts';
 export function navigationCode(m: Model, add: Add): void {
   const root = m.sourceRoot; const test = `${m.testRoot}/navigation.test.ts`;
   add(`${root}/domain/screens.ts`,`export interface Screen { id: string; slug: string; label: string; kind: string; parent: string | null; nav: boolean; entry: boolean; command: boolean; ribbon: boolean; goal: string; components: string[] }\nexport interface Interaction { id: string; from: string; to: string; label: string; kind: string }\nexport const screens: Screen[] = ${literal(m.screens)};\nexport const interactions: Interaction[] = ${literal(m.links)};\n`,'managed');

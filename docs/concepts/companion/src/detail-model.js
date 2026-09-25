@@ -26,16 +26,23 @@ function dtDescendants(doc, id) {
 }
 function dtRemoveNode(doc, id) {
   if (!doc.nodes.some(n => n.id === id)) throw Error('The element no longer exists.');
-  const ids = dtDescendants(doc, id); doc.nodes = doc.nodes.filter(n => !ids.has(n.id));
+  const ids = dtDescendants(doc, id);
+  const references = mapping => mapping && (mapping.kind==='draft' && ids.has(mapping.nodeId) || mapping.kind==='object' && Object.values(mapping.fields).some(references));
+  if(doc.edges.some(e=>!ids.has(e.source)&&!ids.has(e.target)&&references(e.action?.input || e.action?.payload)))throw Error('Reassign the interaction payload mapping before removing this input.');
+  for(const n of doc.nodes)for(const [name,assigned] of Object.entries(n.slots || {})){n.slots[name]=assigned.filter(value=>!ids.has(value));if(!n.slots[name].length)delete n.slots[name];}
+  doc.nodes = doc.nodes.filter(n => !ids.has(n.id));
   doc.edges = doc.edges.filter(e => !ids.has(e.source) && !ids.has(e.target));
 }
 function dtDuplicateNode(store, doc, id) {
   const source = doc.nodes.find(n => n.id === id); if (!source) throw Error('The element no longer exists.');
-  const ids = dtDescendants(doc, id), replacements = new Map(), nodes = doc.nodes.filter(n => ids.has(n.id)).map(dtCopy);
+  const ids = dtDescendants(doc, id); let size=0; while(size!==ids.size){size=ids.size;for(const n of doc.nodes.filter(n=>ids.has(n.id)))for(const assigned of Object.values(n.slots || {}).flat())for(const child of dtDescendants(doc,assigned))ids.add(child);}
+  const replacements = new Map(), nodes = doc.nodes.filter(n => ids.has(n.id)).map(dtCopy);
   for (const n of nodes) { const old = n.id; n.id = dtNext(store, 'node'); replacements.set(old, n.id); }
-  for (const n of nodes) { n.parentId = replacements.get(n.parentId) || n.parentId; n.sourceBrickId = null; }
+  for (const n of nodes) { n.parentId = replacements.get(n.parentId) || n.parentId; n.sourceBrickId = null; if(n.slots)for(const name of Object.keys(n.slots))n.slots[name]=n.slots[name].map(value=>replacements.get(value)||value); }
   const root = nodes.find(n => n.id === replacements.get(id)); root.label = (root.label + ' copy').slice(0, 120); root.position.x += 32; root.position.y += 32;
   const edges = doc.edges.filter(e => ids.has(e.source) && ids.has(e.target)).map(e => ({ ...dtCopy(e), id: dtNext(store, 'edge'), source: replacements.get(e.source), target: replacements.get(e.target) }));
+  const remap = mapping => {if(!mapping)return;if(mapping.kind==='draft')mapping.nodeId=replacements.get(mapping.nodeId)||mapping.nodeId;if(mapping.kind==='object')Object.values(mapping.fields).forEach(remap);};
+  for(const edge of edges)remap(edge.action?.input || edge.action?.payload);
   doc.nodes.push(...nodes); doc.edges.push(...edges); return root.id;
 }
 function dtMoveInOrder(doc, id, direction) {

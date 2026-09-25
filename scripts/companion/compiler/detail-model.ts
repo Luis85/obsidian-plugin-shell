@@ -1,3 +1,4 @@
+import { validateMappings } from './detail-mappings.ts';
 import { visibleDetails, type DetailDocument, type DetailElement, type DetailLiteral } from '../runtime/detail-runtime.ts';
 import type { Schema } from '../runtime/contract.ts';
 import { row, rows, text, requireValue, type Model, type Row } from './model.ts';
@@ -49,9 +50,27 @@ export function detailDocuments(m: Model): DetailDocument[] {
   const store = row(m.document.design).detailDesigns;
   if (!store) return [];
   const documents = structuredClone(rows(row(store).documents, 200)) as unknown as DetailDocument[];
+  const resolved=new Set<string>();
+  function resolveSlots(doc: DetailDocument,depth=0): void {
+    requireValue(depth<=12,'Slot composition exceeds twelve levels.'); if(resolved.has(doc.id))return;
+    for(const node of doc.nodes){
+      if(!node.component || !node.slots)continue;
+      const target=documents.find(d=>d.kind==='component'&&d.ownerId===node.component!.id);if(!target)continue;
+      resolveSlots(target,depth+1);
+      for(const [name,ids] of Object.entries(node.slots)){
+        const slots=target.nodes.filter(n=>n.kind==='slot'&&n.label===name);
+        requireValue(slots.length===1,'Assigned slot needs exactly one authored placeholder: '+name);
+        const states=slots[0]!.visibleIn.filter(state=>visibleDetails(target,state).some(n=>n.id===slots[0]!.id));
+        for(const id of ids){const root=doc.nodes.find(n=>n.id===id)!;root.visibleIn=root.visibleIn.filter(state=>states.includes(state));}
+      }
+    }
+    resolved.add(doc.id);
+  }
+  for(const doc of documents)resolveSlots(doc);
   for (const doc of documents) {
     const owner = doc.kind === 'page' ? m.screens.find(s => s.id === doc.ownerId) : m.components.find(c => c.id === doc.ownerId);
     requireValue(owner && (doc.kind !== 'page' || !['group', 'action'].includes(String(owner.kind))), 'Missing detail owner: ' + doc.ownerId);
+    validateMappings(m, doc, doc.kind === 'component' ? componentMembers(row(owner)) : { props: {}, events: {}, slots: [] });
     const keys = new Set<string>();
     for (const edge of doc.edges) {
       const key = edge.source + ':' + edge.event;
@@ -64,7 +83,11 @@ export function detailDocuments(m: Model): DetailDocument[] {
       if (edge.targetSurfaceId) requireValue(m.screens.some(s => s.id === edge.targetSurfaceId && !['group', 'action'].includes(s.kind)), 'Missing detail navigation target: ' + edge.id);
     }
     for (const node of doc.nodes) {
-      if (node.component) node.props = instanceProps(node, m.components);
+      if (node.component) {
+        node.props = instanceProps(node, m.components);
+        const slots = componentMembers(m.components.find(c => c.id === node.component!.id)!).slots;
+        requireValue(Object.keys(node.slots ?? {}).every(name => slots.includes(name)), 'Undeclared instance slot: ' + node.id);
+      }
       if (node.kind === 'slot' && doc.kind === 'component') requireValue(componentMembers(row(owner)).slots.includes(node.label), 'Undeclared component slot: ' + node.id);
       if (!node.binding) continue;
       requireValue(['text', 'input'].includes(node.kind), 'Binding requires an explicit text/input projection: ' + node.id);
@@ -89,5 +112,6 @@ export function detailDocuments(m: Model): DetailDocument[] {
     id: node.id, kind: node.kind, label: node.label, text: node.text, parentId: node.parentId, layout: node.layout,
     component: node.component ? { id: node.component.id, version: node.component.version, variantId: node.component.variantId } : null,
     props: node.props, binding: node.binding, a11y: node.a11y, visibleIn: node.visibleIn,
+    ...(node.control ? {control:node.control} : {}), ...(node.slots ? {slots:node.slots} : {}),
   })) }));
 }

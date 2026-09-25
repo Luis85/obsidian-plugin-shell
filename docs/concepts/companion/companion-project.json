@@ -829,11 +829,11 @@
         "entry": false,
         "instance": "reuse",
         "patterns": [],
-        "goal": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+        "goal": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown, HTML or scoped Nuxt UI CSS.",
         "entity": "er-entity-51",
-        "intent": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+        "intent": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown, HTML or scoped Nuxt UI CSS.",
         "goals": [
-          "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML."
+          "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown, HTML or scoped Nuxt UI CSS."
         ],
         "components": [
           {
@@ -853,8 +853,8 @@
             "id": "brick-26",
             "kind": "heading",
             "title": "Design System",
-            "purpose": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
-            "content": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
+            "purpose": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown, HTML or scoped Nuxt UI CSS.",
+            "content": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown, HTML or scoped Nuxt UI CSS.",
             "region": "content",
             "component": null,
             "definition": "content-heading",
@@ -3749,7 +3749,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Persist font declarations, typography, sizes, spacing, radii, paired colors and usage guidance.",
+            "acceptance": "Persist font declarations, typography, sizes, spacing, radii, paired colors, usage guidance and explicit Nuxt UI token bindings.",
             "nodes": [
               "node-25"
             ],
@@ -3764,7 +3764,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs.",
+            "acceptance": "Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs. A scoped stylesheet export and the JSON-driven shell generator compile the same saved Nuxt UI token bindings.",
             "nodes": [
               "node-25"
             ],
@@ -3868,7 +3868,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.",
+            "acceptance": "The independent companion:scaffold / shell generate compiler reviews an ownership-safe apply plan, including compiled design-system styles. The read-only version-one handoff remains write-free.",
             "nodes": [
               "node-33"
             ],
@@ -3914,7 +3914,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo.",
+            "acceptance": "Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo. Repeated story entry retains the destination; search preserves the complete map.",
             "nodes": [
               "node-9"
             ],
@@ -3929,7 +3929,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Items link existing sitemap identities and requirements. Missing targets remain explicit; linked artifacts are never deleted.",
+            "acceptance": "Items link existing sitemap identities and requirements. Searchable pickers retain selected references; direct links and Back preserve context. Missing targets remain explicit; linked artifacts are never deleted.",
             "nodes": [
               "node-9"
             ],
@@ -3944,7 +3944,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Move stories between releases or Unplanned. Removing a release preserves its stories.",
+            "acceptance": "Move stories between releases or Unplanned. Removing a release preserves its stories. Review surfaces missing outcomes, acceptance notes and targets without claiming implementation; archived maps require restore before editing.",
             "nodes": [
               "node-9"
             ],
@@ -4773,7 +4773,7 @@
     "designSystem": {
       "schema": 1,
       "name": "Companion workbench design system",
-      "description": "Host-friendly design declarations for the companion. Tokens are authored intent, not automatic component styling.",
+      "description": "Host-friendly design declarations compiled into scoped Nuxt UI styles by the shell generator; custom component layout remains an implementation task.",
       "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
       "fonts": [
         {
@@ -4979,7 +4979,13 @@
           "name": "Component usage",
           "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
         }
-      ]
+      ],
+      "frontend": {
+        "schema": 1,
+        "target": "nuxt-ui",
+        "colorPolicy": "host",
+        "bindings": {}
+      }
     },
     "storymaps": {
       "schema": 1,

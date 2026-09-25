@@ -36,7 +36,13 @@ jobs:
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
       - name: Generate, independently install, build and test the companion project
-        run: node scripts/companion/qualify-project.mjs
+        run: |
+          node scripts/companion/qualify-project.mjs
+          node scripts/companion/qualify-project.mjs --boundary-fixture
+      - name: Exercise generated stylesheet against real Nuxt UI components
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/companion/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -46,6 +52,10 @@ jobs:
           if test -f reports/project-generator/target.txt; then
             TARGET="$(cat reports/project-generator/target.txt)"
             tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/generated-companion.tar.gz -C "$TARGET" .
+          fi
+          if test -f reports/project-generator/boundaries/target.txt; then
+            TARGET="$(cat reports/project-generator/boundaries/target.txt)"
+            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/boundaries/generated-boundaries.tar.gz -C "$TARGET" .
           fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()

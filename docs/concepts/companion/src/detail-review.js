@@ -1,7 +1,10 @@
 // Review is advisory design evidence, never a test verdict or a readiness score.
 function dtVisibleIds(doc, stateName) {
-  const visible = new Set();
-  for (const node of dtSortedNodes(doc)) if (node.visibleIn.includes(stateName) && (!node.parentId || visible.has(node.parentId))) visible.add(node.id);
+  const visible = new Set(), owners=new Map(doc.nodes.flatMap(n=>Object.values(n.slots || {}).flat().map(id=>[id,n.id])));
+  for(const node of doc.nodes){let cursor=node;const seen=new Set();let ok=true;
+    while(cursor){if(seen.has(cursor.id)||!cursor.visibleIn.includes(stateName)){ok=false;break;}seen.add(cursor.id);const parent=cursor.parentId || owners.get(cursor.id);if(!parent)break;cursor=doc.nodes.find(n=>n.id===parent);if(!cursor)ok=false;}
+    if(ok)visible.add(node.id);
+  }
   return visible;
 }
 function dtReviewItems(doc, d = design()) {

@@ -1,4 +1,5 @@
 // Shared by the standalone concept and read-only shell entrypoint. No host I/O.
+import { validateDesignSystem } from './design-system-contract.mjs';
 import { validateStorymaps } from './storymap-contract.mjs';
 import { validateDetailDesigns } from './detail-contract.mjs';
 export const COMPANION_FORMAT = 'obsidian-companion-project';
@@ -55,7 +56,8 @@ function validateCompanionIdentity(value) {
   companionRequire(companionText(value.author, 80) && companionText(value.description, 400), 'Project description or author exceeds its limit.');
   companionRequire(companionText(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), 'Expected an x.y.z project version.');
 }
-function validateCompanionDesign(value) {
+function validateCompanionDesign(value, pluginId) {
+  validateDesignSystem(value?.designSystem, pluginId);
   if (value?.detailDesigns !== undefined) validateDetailDesigns(value.detailDesigns);
   if (value?.storymaps !== undefined) validateStorymaps(value.storymaps);
   companionRequire(companionObject(value, companionDesignKeys, ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId', 'library', 'prds']), 'Unsupported design envelope.');
@@ -75,7 +77,7 @@ export function validateCompanionDocument(value) {
     'Unsupported companion format/version or executable flag.');
   validateCompanionIdentity(value.project);
   validateCompanionFolders(value.settings);
-  validateCompanionDesign(value.design);
+  validateCompanionDesign(value.design, value.project.id);
   companionRequire(value.design.schema === value.schemaVersion, 'Transfer and design schema versions must match.');
   companionRequire(value.schemaVersion >= 2 || !Object.hasOwn(value.design, 'storymaps'), 'Storymaps require transfer version 2 or later.');
   companionRequire(value.schemaVersion >= 3 || !Object.hasOwn(value.design, 'detailDesigns'), 'Detail designs require transfer version 3.');

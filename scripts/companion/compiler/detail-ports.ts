@@ -1,5 +1,5 @@
 import { literal, symbol, type Model } from './model.ts';
-import type { Add } from './data-code.ts';
+import type { Add } from './file-code.ts';
 export function detailPorts(m: Model, add: Add): void {
   const imports: string[] = []; const stores: string[] = []; const entries: string[] = [];
   for (const source of m.sources) {

@@ -1,5 +1,5 @@
 import { literal, symbol, type Model } from './model.ts';
-import { relativeImport, type Add } from './data-code.ts';
+import { relativeImport, type Add } from './file-code.ts';
 export function uiCode(m: Model, add: Add): void {
   const root = m.sourceRoot; const registry: string[] = []; const panels: string[] = [];
   for (const component of m.components) {

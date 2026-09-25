@@ -1,10 +1,8 @@
+import { noteEntity } from './persistence-code.ts';
 import type { Schema } from '../runtime/contract.ts';
-import { posix } from 'node:path';
 import { literal, json, symbol, type Model } from './model.ts';
 import { typeCode, sampleCode } from './schema-code.ts';
-export interface Entry { path: string; content: string; encoding?: 'base64'; ownership: 'managed' | 'extension' | 'framework' }
-export type Add = (path: string, content: string, ownership?: Entry['ownership']) => void;
-export function relativeImport(from: string, to: string): string { const path = posix.relative(posix.dirname(from),to); return path.startsWith('.') ? path : './'+path; }
+import { relativeImport, type Add } from './file-code.ts';
 function contract(name: string, schema: Schema | null): string {
   return `export type ${name} = ${typeCode(schema)};\nexport const ${name}Schema: Schema | null = ${literal(schema)};\nexport function is${name}(value: unknown): value is ${name} { return matches(value,${name}Schema); }\n`;
 }
@@ -36,7 +34,28 @@ export function dataCode(m: Model, add: Add): void {
     const imports = names.map(n => n.startsWith('is') ? n : 'type '+n).join(', ');
     add(`${dir}/service.ts`,`import { ${imports}${imports ? ', ' : ''}type ${name}Port } from './contracts.ts';\n/** Canonical behavior belongs in this service/adapter, not the per-view Pinia store. */\nexport function create${name}Service(port: ${name}Port) {\n  return {\n${methods}  };\n}\nexport type ${name}Service = ReturnType<typeof create${name}Service>;\n`);
     const adapter = `${root}/infrastructure/sources/${source.slug}.ts`;
-    add(adapter,`import type { ${name}Port } from '../../application/${source.slug}/contracts.ts';\nimport type { Services } from ${literal(relativeImport(adapter,'src/bootstrap/services.ts'))};\nimport { NotImplementedError } from '../../domain/contract.ts';\n/** ${source.kind} adapter seam. Use shell services; never introduce a second saveData owner.\n * The export describes contracts, not permission to access a vault/network/database. */\nexport function create${name}Adapter(_shell: Services): ${name}Port {\n  return {\n${source.operations.map(o => `    async ${literal(o.slug)}(_input, _signal) { throw new NotImplementedError(${literal(source.id)},${literal(o.id)}); },`).join('\n')}\n  };\n}\n`);
+    const native = new Map(source.operations.flatMap(op => { const e = noteEntity(m,source.id,op.id); return e && op.contract.implementation ? [[e.id,e] as const] : []; }));
+    const nativeImports = [...native.values()].map(e => `import { entity as ${symbol(e.slug)}Entity } from '../../application/documents/${e.slug}.ts';`).join('\n');
+    const nativeInit = [...native.values()].map(e => `  const ${symbol(e.slug)}Notes = noteOperations(_shell.repositories.${symbol(e.slug)},${literal(e.slug)},input => { const result=${symbol(e.slug)}Entity.decode(input); if(!result.ok) throw new Error('NOTE_VALUES_INVALID'); return result.value; });`).join('\n');
+    const adapterMethods = source.operations.map(op => {
+      const entity = noteEntity(m,source.id,op.id);
+      if (!entity) return `    async ${literal(op.slug)}(_input, _signal) { throw new NotImplementedError(${literal(source.id)},${literal(op.id)}); },`;
+      if (op.contract.implementation) return `    ${literal(op.slug)}: ${symbol(entity.slug)}Notes.${(op.contract.implementation as {operation:string}).operation},`;
+      return `    async ${literal(op.slug)}(_input, signal) { if(signal?.aborted) throw new Error('OPERATION_ABORTED'); const result=await _shell.repositories.${symbol(entity.slug)}.list(); if(!result.ok) throw new Error('NOTE_READ_FAILED'); return result.value.map(snapshot=>({...snapshot.values,id:snapshot.id,type:${literal(entity.slug)}})); },`;
+    }).join('\n');
+    add(adapter,`import type { ${name}Port } from '../../application/${source.slug}/contracts.ts';
+import type { Services } from ${literal(relativeImport(adapter,'src/bootstrap/services.ts'))};
+${adapterMethods.includes('NotImplementedError') ? "import { NotImplementedError } from '../../domain/contract.ts';" : ''}
+${native.size ? "import { noteOperations } from '../../application/note-operations.ts';" : ''}
+${nativeImports}
+/** Native mappings use the shell's canonical repositories; other adapters remain explicit. */
+export function create${name}Adapter(_shell: Services): ${name}Port {
+${nativeInit}
+  return {
+${adapterMethods}
+  };
+}
+`);
     add(`${root}/presentation/stores/${source.slug}.ts`,`import { defineStore } from 'pinia';\nimport { operation } from '../composables/operation.ts';\nimport type { ${name}Service } from '../../application/${source.slug}/service.ts';\nexport function define${name}Store(service: ${name}Service) {\n  return defineStore(${literal(String(m.project.id)+':source:'+source.slug)}, () => ({\n${actions}  }));\n}\n`);
     add(`${tests}/sources/${source.slug}.test.ts`,`import { it, expect } from 'vitest';\nimport { createPinia, disposePinia } from 'pinia';\nimport { create${name}Service } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,`${dir}/service.ts`))};\nimport { define${name}Store } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,`${root}/presentation/stores/${source.slug}.ts`))};\nimport type { ${name}Port } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,path))};\nconst fixture = (): ${name}Port => ({${fixtures.join(',\n')}});\n${cases.join('\n')}`);
     serviceImports.push(`import { create${name}Service } from '../application/${source.slug}/service.ts';\nimport { create${name}Adapter } from '../infrastructure/sources/${source.slug}.ts';`);
