@@ -47,3 +47,33 @@ test('uncertain canonical commits keep their original request and are never disc
  const port=protectNoteRelationships(repo,createRelationshipSession([rule],async()=>[parent]));
  await assert.rejects(port.create(child.values,'request'),/uncertain/);await assert.rejects(port.create(child.values,'request'),/uncertain/);assert.equal(commits,1);assert.equal(discards,0);
 });
+
+test('audit is read-only and the reconciled policy never accepts required inverse deficits',async()=>{
+ const strict={...rule,sourceCard:'1..*'};const records=[parent];const before=JSON.stringify(records);
+ const session=createRelationshipSession([strict],async()=>records);
+ assert.ok((await session.audit()).some(f=>f.code==='inverse-cardinality'));assert.equal(JSON.stringify(records),before);
+ await assert.rejects(session.run({mode:'create',record:{...parent,id:'p2',path:'Parents/two.md'}},async()=>{throw Error('NO_WRITE');},()=>true),/VIOLATION/);
+ session.dispose();await assert.rejects(session.audit(),/DISPOSED/);
+});
+test('queued relationship proposals and actual repository writes use captured values',async()=>{
+ let release;const pending=new Promise(resolve=>{release=resolve;});let observed;
+ const values={title:'Initial',parent_ref:'p'};
+ const session=createRelationshipSession([rule],async()=>{await pending;return [parent,child];});
+ const repository={list:async()=>({ok:true,value:[]}),prepare:()=>{throw Error('UNUSED');},discard:()=>true,commit:async()=>{throw Error('UNUSED');},
+ update:async(_snapshot,proposal)=>{observed=proposal;return {ok:true,value:{...child,values:proposal}};},delete:async()=>{throw Error('UNUSED');}};
+ const port=protectNoteRelationships(repository,session);
+ const operation=port.update(child,values,{active:()=>true});values.title='Changed after review';values.parent_ref='missing';release();
+ assert.equal((await operation).ok,true);assert.deepEqual(observed,{title:'Initial',parent_ref:'p'});assert.ok(Object.isFrozen(observed));
+});
+test('disposal cancels queued mutations and unsafe arrays never execute getters',async()=>{
+ let release,calls=0;const pending=new Promise(resolve=>{release=resolve;});
+ const session=createRelationshipSession([rule],async()=>{await pending;return [parent];});
+ const operation=session.run({mode:'create',record:child},async()=>{calls++;},()=>true);
+ await Promise.resolve();session.dispose();release();await assert.rejects(operation,/DISPOSED/);assert.equal(calls,0);
+ let access=0;const refs=['p'];Object.defineProperty(refs,'0',{get(){access++;return 'p';}});
+ assert.throws(()=>inspectRelationships([{...rule,targetCard:'0..*'}],[parent,{...child,values:{parent_ref:refs}}]),/ACCESSOR/);assert.equal(access,0);
+ const next=createRelationshipSession([rule],async()=>[parent]);
+ for(const values of [{parent_ref:new Array(1)},{parent_ref:['p'],[Symbol('hidden')]:true},{get parent_ref(){access++;return 'p';}}])
+   assert.throws(()=>next.run({mode:'create',record:{...child,values}},async()=>{},()=>true),/RELATIONSHIP/);
+ assert.equal(access,0);
+});

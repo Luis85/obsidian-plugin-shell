@@ -188,3 +188,7 @@ contains 80 working and 54 captured documents; code generation includes both. Li
 local font references use safe declared family names or native font variables; no fonts are downloaded.
 The Nuxt UI stylesheet path and customization ownership introduced by the Design System increment
 remain active alongside detailed component styles.
+
+## Local-review reconciliation
+
+The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.

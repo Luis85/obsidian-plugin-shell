@@ -81,7 +81,7 @@ def build(output: Path, check: bool = False):
  if 'scripts/companion/storymap-contract.mjs' not in config['entry']:raise ValueError('Shared storymap contract missing from analyzer inventory')
  detail_contract=ROOT.parents[2]/'scripts/companion/detail-contract.mjs'
  if 'scripts/companion/detail-contract.mjs' not in config['entry']:raise ValueError('Shared detail contract missing from analyzer inventory')
- ds_modules=['design-system-roles.mjs','design-system-contract.mjs','design-system-css.mjs']
+ ds_modules=['test-data-manifest.mjs','design-system-roles.mjs','design-system-contract.mjs','design-system-css.mjs']
  ds_shared=''
  for name in ds_modules:
   path='scripts/companion/'+name

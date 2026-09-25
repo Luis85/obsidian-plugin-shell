@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
+    ('generator-fixtures', 'generator-fixtures/checks.json'),
     ('generator-boundaries', 'generator-boundaries/checks.json'),
     ('design-styles', 'design-styles/checks.json'),
     ('composition', 'composition/checks.json'),

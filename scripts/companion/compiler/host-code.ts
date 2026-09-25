@@ -1,3 +1,4 @@
+import { relationshipScope } from './relationship-model.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
 export function hostCode(m: Model, add: Add): void {
@@ -10,6 +11,7 @@ import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obs
 import { bindHostEvents } from ${ref('src/infrastructure/obsidian/event-bridge.ts')};
 import { screens } from '../domain/screens.ts';
 import { createSources } from './sources.ts';
+${relationshipScope(m,true).rules.length ? "import { disposeRelationshipIntegrity } from './relationships.ts';" : ''}
 import { configureSourceProviders } from './source-providers.ts';
 import { mountProject } from './mount.ts';
 export async function initializeProject(plugin: Plugin) {
@@ -23,6 +25,7 @@ export async function initializeProject(plugin: Plugin) {
     for (const modal of modals) { try { modal.close(); } catch { shell.diagnostics.report('generated.cleanup','modal.close'); } }
     for (const release of settings) { try { release(); } catch { shell.diagnostics.report('generated.cleanup','settings.close'); } }
     for (const view of views) { try { view.disposeView(); } catch { shell.diagnostics.report('generated.cleanup','view.close'); } }
+    ${relationshipScope(m,true).rules.length ? 'disposeRelationshipIntegrity(shell);' : ''}
     try { providers?.dispose(); } catch { shell.diagnostics.report('generated.cleanup','sources.dispose'); }
     try { stopEvents(); } finally { shell.dispose(); }
   };

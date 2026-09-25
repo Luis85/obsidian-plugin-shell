@@ -39,6 +39,7 @@ jobs:
         run: |
           node scripts/companion/qualify-project.mjs
           node scripts/companion/qualify-project.mjs --boundary-fixture
+          node scripts/companion/qualify-project.mjs --provider-fixture
       - name: Exercise generated stylesheet against real Nuxt UI components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
@@ -56,6 +57,10 @@ jobs:
           if test -f reports/project-generator/boundaries/target.txt; then
             TARGET="$(cat reports/project-generator/boundaries/target.txt)"
             tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/boundaries/generated-boundaries.tar.gz -C "$TARGET" .
+          fi
+          if test -f reports/project-generator/providers/target.txt; then
+            TARGET="$(cat reports/project-generator/providers/target.txt)"
+            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/providers/generated-providers.tar.gz -C "$TARGET" .
           fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()

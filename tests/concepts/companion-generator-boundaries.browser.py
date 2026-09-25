@@ -34,14 +34,15 @@ with sync_playwright() as pw:
     try:
         page.set_content(STORAGE+HTML.read_text())
         act('project-example');page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
-        check('Loading the existing companion keeps legacy detail semantics',js('dtStore().schema')==1)
+        initial_schema = json.loads((ROOT / 'docs/concepts/companion/companion-project.json').read_text())['design']['detailDesigns']['schema']
+        check('Loading the existing companion preserves its declared detail schema',js('dtStore().schema')==initial_schema)
         act('nav','pages','#sidebar');owner=js('design().nodes.find(n=>n.slug==="import-project").id');act('dt-page',owner);act('dt-mode','outline')
         input_id=js('dtDocument().nodes.find(n=>n.kind==="input").id');act('dt-edit',input_id)
         check('All ten explicit control kinds are available',field('controlKind').locator('option').count()==10)
         before=js('JSON.stringify(dtStore())');field('controlKind').select_option('number');field('controlRequired').check()
         check('Changing control semantics is draft-only until Save',before==js('JSON.stringify(dtStore())'))
-        save();check('Saving a typed required control upgrades only the detail schema',js('dtStore().schema===2 && dtDocument().nodes.find(n=>n.id===dtUi.selected).control.kind==="number" && dtDocument().nodes.find(n=>n.id===dtUi.selected).control.required===true'))
-        act('dt-undo');check('Undo restores the legacy detail schema',js('dtStore().schema')==1);act('dt-redo')
+        save();check('Saving a typed required control retains a supported detail schema',js('(schema)=>dtStore().schema===Math.max(2,schema) && dtDocument().nodes.find(n=>n.id===dtUi.selected).control.kind==="number" && dtDocument().nodes.find(n=>n.id===dtUi.selected).control.required===true',initial_schema))
+        act('dt-undo');check('Undo restores the exact original detail document and schema',js('JSON.stringify(dtStore())')==before);act('dt-redo')
         act('dt-edit',input_id);field('controlKind').select_option('select');field('controlOptions').fill('{bad')
         before=js('JSON.stringify(dtStore())');act('dt-save',scope='#modal')
         check('Malformed options retain the form and saved data',page.locator('#modal').is_visible() and page.locator('#dt-form-error').inner_text()!='' and before==js('JSON.stringify(dtStore())'))

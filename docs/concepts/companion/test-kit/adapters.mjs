@@ -11,7 +11,7 @@ export function createFixtureAdapter(manifest, options = {}) {
   function initialize() {
     stores.clear(); captures.length = 0;
     for (const op of operations.values()) {
-      if (op.behavior !== 'list') continue;
+      if (op.kind === 'vault' || op.behavior !== 'list') continue;
       const id = dataset(op), schema = op.output.schema.items;
       const keySchema = schema.type === 'object' && schema.properties[op.keyField];
       if (!keySchema || !['string', 'integer', 'number'].includes(keySchema.type)) error('Stateful datasets require a scalar identity field on an object collection.');
@@ -22,7 +22,7 @@ export function createFixtureAdapter(manifest, options = {}) {
       if (new Set(records.map(r => r[op.keyField])).size !== records.length || records.some(r => r[op.keyField] === undefined)) error('Dataset identifiers must be present and unique.');
       stores.set(id, { schema, keyField: op.keyField, records });
     }
-    for (const op of operations.values()) if (['upsert', 'delete'].includes(op.behavior)) {
+    for (const op of operations.values()) if (op.kind !== 'vault' && ['upsert', 'delete'].includes(op.behavior)) {
       const store = stores.get(dataset(op));
       if (!store || store.keyField !== op.keyField) error('Stateful writes need a list recipe with the same source, dataset and identity key.');
       if (op.behavior === 'upsert' && !engine.matches(op.inputValue, store.schema)) error('Upsert input cannot satisfy its dataset schema. Declare an explicit mapping instead.');

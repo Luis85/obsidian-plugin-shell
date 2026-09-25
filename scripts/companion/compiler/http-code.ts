@@ -4,7 +4,7 @@ import { validateHttpSource, type JsonHttpSource } from '../runtime/json-http.ts
 import { literal, text, symbol, type Model, type Source } from './model.ts';
 import { sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';
-export function httpDefinition(source:Source):JsonHttpSource {
+function httpDefinition(source:Source):JsonHttpSource {
   const definition={id:source.id,locator:text(source.contract.locator,240),auth:text(source.contract.auth,40),credentialRef:text(source.contract.credentialRef,60),operations:source.operations.map(op=>({slug:op.slug,method:text(op.contract.method,10),resource:text(op.contract.resource,500),input:op.input,output:op.output}))};
   validateHttpSource(definition);return definition;
 }

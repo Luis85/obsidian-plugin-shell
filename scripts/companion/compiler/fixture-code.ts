@@ -1,87 +1,115 @@
+import { fixtureNoteTests } from './fixture-notes-code.ts';
+import { sampleCode } from './schema-code.ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { buildCompanionFixtureManifest } from '../test-data-manifest.mjs';
 import { createFixtureEngine } from '../../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../../docs/concepts/companion/test-kit/adapters.mjs';
-import { json, literal, row, rows, text, requireValue, symbol, type Model, type Row } from './model.ts';
-import { matches, type Schema } from '../runtime/contract.ts';
 import { noteEntity } from './persistence-code.ts';
+import { json, literal, row, symbol, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
-const kit = ['engine.mjs','adapters.mjs','storage.mjs','server.mjs','client.mjs','cli.mjs','faker-provider.mjs'];
-/** Resolve portable recipe data; live endpoints and credential references never enter the kit. */
-export function fixtureManifest(m: Model): Row | null {
-  const design = row(m.document.design); const sourceDesign = row(design.dataSources ?? {});
-  if (!sourceDesign.testing) return null;
-  const settings = row(sourceDesign.testing); const recipes = rows(settings.recipes,288);
-  requireValue(settings.schema === 1 && recipes.every(r=>typeof r.enabled==='boolean'), 'Invalid recipe settings.');
-  const seen = new Set<string>();
-  for (const recipe of recipes) {
-    const id = text(recipe.operation); requireValue(!seen.has(id), 'Duplicate recipe operation.'); seen.add(id);
-    requireValue(m.sources.some(s=>s.id===recipe.source && s.operations.some(o=>o.id===id)), 'Dangling test recipe.');
-  }
-  if (!recipes.some(r=>r.enabled)) return null;
-  const relationships = rows(row(design.semantic ?? {}).relationships ?? [],120);
-  const native = new Set(m.sources.flatMap(s=>s.operations.flatMap(o=>{const e=noteEntity(m,s.id,o.id);return e?[e.id]:[];})));
-  // Related fixture notes must also be readable by canonical repositories.
-  for (let changed=true; changed;) { changed=false; for(const r of relationships) if(native.has(String(r.source)) && !native.has(String(r.target))){native.add(String(r.target));changed=true;} }
-  const entities = m.entities.map(entity=>{
-    const schema:Schema & {properties?:Record<string,Schema & {default?:unknown}>} = structuredClone(entity.schema); schema.additionalProperties=false;
-    schema.properties = {...schema.properties,id:{type:'string',format:'uuid'}};
-    const authored=rows(row(design.semantic).entities,60).find(e=>e.id===entity.id)!;
-    for(const property of rows(authored.properties ?? [],40))if(Object.hasOwn(property,'defaultValue')){
-      const field=schema.properties[text(property.key)];requireValue(field && matches(property.defaultValue,field),'Invalid entity fixture default.');field.default=structuredClone(property.defaultValue);
-    }
-    if(native.has(entity.id)) {
-      requireValue(!Object.hasOwn(schema.properties,'schema_version') && !Object.hasOwn(schema.properties,'created_at'), 'Reserved native fixture metadata.');
-      Object.assign(schema.properties,{schema_version:{type:'integer',enum:[1]},created_at:{type:'string',enum:[String(settings.referenceDate)]}});
-      schema.required=[...schema.required ?? [],'schema_version','created_at'];
-    }
-    return {id:entity.id,slug:entity.slug,folder:entity.folder,schema,relationships:relationships.filter(r=>r.source===entity.id).map(r=>({key:r.key,target:r.target,many:String(r.targetCard).endsWith('*')}))};
-  });
-  const operations = recipes.filter(r=>r.enabled).map(recipe=>{
-    const source=m.sources.find(s=>s.id===recipe.source)!; const op=source.operations.find(o=>o.id===recipe.operation)!;
-    requireValue(source.contract.status!=='deprecated','Disable recipes for deprecated sources.');
-    const shape=(side:'input'|'output')=>{
-      const original=row(op.contract[side]); const schema=op[side];
-      if(schema===null)return {none:true};
-      if(original.mode==='entity') {
-        const entity=entities.find(e=>e.id===original.entity)!;
-        return {entity:entity.id,many:original.many,schema:original.many?{type:'array',items:entity.schema}:entity.schema};
-      }
-      return {schema};
-    };
-    return {id:op.id,source:source.slug,slug:op.slug,kind:source.kind,direction:op.direction,method:op.contract.method,resource:op.contract.resource || (source.kind==='api'?'/':''),input:shape('input'),output:shape('output'),
-      behavior:recipe.behavior,dataset:recipe.dataset,keyField:recipe.keyField,scenario:recipe.scenario,latencyMs:recipe.latencyMs,errorStatus:recipe.errorStatus,rules:recipe.rules};
-  });
-  const manifest={schema:1,engine:'shell-fixtures/1',target:'.test-vault',seed:settings.seed,count:settings.count,locale:settings.locale,referenceDate:settings.referenceDate,entities,operations};
-  // Execute only our pinned, pure engine. No imported code, filesystem or live source access.
-  createFixtureEngine().generate(manifest); createFixtureAdapter(manifest).dispose();
+const kitFiles = ['engine.mjs', 'adapters.mjs', 'storage.mjs', 'server.mjs', 'client.mjs', 'cli.mjs', 'faker-provider.mjs'];
+export function fixtureManifest(m: Model) {
+  const manifest = buildCompanionFixtureManifest(row(m.document.design));
+  if (!manifest.operations.length) return null;
+  createFixtureEngine().generate(manifest);
+  createFixtureAdapter(manifest).dispose();
   return manifest;
 }
-export async function fixtureCode(template: string, m: Model, add: Add): Promise<boolean> {
-  const manifest=fixtureManifest(m); if(!manifest)return false;
-  for(const name of kit) add('scripts/test-data/'+name,await readFile(join(template,'docs/concepts/companion/test-kit',name),'utf8'),'managed');
-  add('scripts/test-data/manifest.json',json(manifest),'managed');
-  add('scripts/test-data/README.md',`# Project test-data tooling\n\nResolved from design/project.json. Development-only; no live endpoint or credential is copied.\n\nRun npm run testdata:plan, inspect its full file list, then npm run testdata:apply -- --approve HASH. This seeds only .test-vault, never the authoring vault. Reset requires testdata:reset-plan followed by testdata:reset -- --approve HASH; only unchanged receipt-owned files can be removed. Plugin installation and activation remain separate.\n\nNative entity fixtures contain schema_version and created_at required by the canonical Markdown codec. Generated recipe tests read those notes through real NoteRepository instances, not a fake Pinia action.\n\nAPI/database fixtures use the application-port simulator, not a real database driver. Testdata:serve provides the existing loopback-only HTTP server. Never fall back to live data when a recipe is absent. Seed, count, UTC reference date and the retained engine determine output. Empty/error/slow and stateful list/upsert/delete recipes retain their declared semantics.\n\nUse the generated scripts/test-data/source-ports.mjs to adapt simulator cancellation to the generated port signature. Pass complete per-source overrides into createSources(shell, overrides); partial source overrides are rejected rather than mixing simulated and live operations. Dispose the fixture adapter when its scope ends. No fixture code is imported by the production bootstrap.\n`,'managed');
+/** The same reviewed fixture engine used by the browser validates recipes before any writes. */
+export async function fixtureCode(templateRoot: string, m: Model, add: Add): Promise<boolean> {
+  const manifest = fixtureManifest(m);
+  if (!manifest) return false;
+  createFixtureEngine().generate(manifest);
+  fixtureNoteTests(m,add);
+  createFixtureAdapter(manifest).dispose();
+  for (const name of kitFiles) add('scripts/test-data/' + name, await readFile(join(templateRoot, 'docs/concepts/companion/test-kit', name), 'utf8'), 'managed');
+  add('scripts/test-data/manifest.json', json(manifest), 'managed');
+  add('scripts/test-data/adapters.d.mts', `export interface FixtureAdapter {
+execute(id: string, input?: unknown, options?: { signal?: AbortSignal }): Promise<unknown>;
+port(source: string): Readonly<Record<string, (input?: unknown, options?: { signal?: AbortSignal }) => Promise<unknown>>>;
+reset(): void; captured(): Array<{operation: string; direction: string; input: unknown}>; dispose(): void;
+}
+export function createFixtureAdapter(manifest: unknown): FixtureAdapter;
+`, 'managed');
+  add('scripts/test-data/engine.d.mts', `export interface GeneratedFixtures {
+files: Array<{path: string; content: string; owner: string}>;
+operations: Array<{id: string; source: string; slug: string; kind: string; input: {none?: boolean; schema?: unknown}; output: {none?: boolean; schema?: unknown}; inputValue: unknown; outputValue: unknown}>;
+bytes: number;
+}
+export function createFixtureEngine(): {generate(manifest: unknown): GeneratedFixtures; matches(value: unknown, schema: unknown): boolean};
+`, 'managed');
+  add('scripts/test-data/verify.mjs', `import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import { createFixtureEngine } from './engine.mjs';
+import { createFixtureAdapter } from './adapters.mjs';
+const manifest = JSON.parse(await readFile(new URL('./manifest.json', import.meta.url), 'utf8'));
+const engine = createFixtureEngine(), first = engine.generate(manifest);
+assert.deepEqual(engine.generate(manifest), first, 'Seeded fixtures must be deterministic');
+const adapter = createFixtureAdapter(manifest); adapter.dispose();
+console.log(JSON.stringify({status:'fixture-contracts-verified',operations:first.operations.length,files:first.files.length,bytes:first.bytes,nativeAcceptance:'not-run'}));
+`, 'managed');
+  add('scripts/test-data/README.md', `# Generated test data
+
+The exported DataSource recipes are compiled into manifest.json by the same data-only translator as the companion prototype. Generation validates the actual fixture engine and simulator but never seeds notes, starts a server, installs a package, or contacts a provider.
+
+Run npm run testdata:check to check reproducibility. Run npm run testdata:plan, review the approval and file list, then npm run testdata:apply -- --approve HASH. The writer is contained in this project's .test-vault and refuses foreign/edited files. Regeneration of code does not re-seed or reset data. Use npm run testdata:reset-plan followed by npm run testdata:reset -- --approve HASH for explicit receipt-owned cleanup.
+
+API recipes support npm run testdata:serve: an explicit loopback server with an ephemeral session token, no live fallback. Database recipes simulate application ports, not a database engine. Vault recipes seed actual Markdown with schema_version and created_at for the canonical repositories rather than substituting a memory port. Native operation JSON examples are payload examples, not live snapshot leases: list records through the running repository before updating or deleting them.
+
+Typed fixture port factories live under ${m.testRoot}/fixtures for API/database sources. They translate the generated AbortSignal argument to the simulator's options object. Inject them into the actual generated service or pass them as explicit source overrides. Unknown/disabled operations reject, even when a production adapter exists. Dispose every test adapter after the test. Fixture code is never imported by the production bootstrap.
+
+The built-in provider is dependency-free. faker-provider.mjs remains an optional explicit seam; no Faker dependency, network font, credential, executable expression or production endpoint is imported from the design.
+`, 'managed');
+  const test = `${m.testRoot}/fixtures/recipes.test.ts`;
+  add(test, `import { it, expect } from 'vitest';
+import { createFixtureEngine } from ${literal(relativeImport(test, 'scripts/test-data/engine.mjs'))};
+import { createFixtureAdapter } from ${literal(relativeImport(test, 'scripts/test-data/adapters.mjs'))};
+import manifest from ${literal(relativeImport(test, 'scripts/test-data/manifest.json'))};
+it('compiles the authored recipes into deterministic bounded fixture data', () => {
+  const engine = createFixtureEngine(); const first = engine.generate(manifest);
+  expect(engine.generate(manifest)).toEqual(first); expect(first.operations).toHaveLength(manifest.operations.length);
+  expect(first.bytes).toBeLessThanOrEqual(5000000);
+  const adapter = createFixtureAdapter(manifest); adapter.dispose();
+  expect(() => adapter.reset()).toThrow('disposed');
+});
+`, 'managed');
+  for (const source of m.sources.filter(s => s.kind !== 'vault' && manifest.operations.some((op: {source: string}) => op.source === s.slug))) {
+    const name = symbol(source.slug), file = `${m.testRoot}/fixtures/${source.slug}.ts`;
+    add(file, `import { createFixtureAdapter, type FixtureAdapter } from ${literal(relativeImport(file, 'scripts/test-data/adapters.mjs'))};
+import manifest from ${literal(relativeImport(file, 'scripts/test-data/manifest.json'))} with { type: 'json' };
+import type { ${name}Port } from ${literal(relativeImport(file, `${m.sourceRoot}/application/${source.slug}/contracts.ts`))};
+/** A full typed port: disabled/missing recipes reject instead of reaching a live provider. */
+export function create${name}FixturePort(adapter: FixtureAdapter = createFixtureAdapter(manifest)): {port: ${name}Port; dispose(): void} {
+  return { port: {
+${source.operations.map(op => `    ${literal(op.slug)}: (input, signal) => adapter.execute(${literal(op.id)}, input, {signal}),`).join('\n')}
+  }, dispose: () => adapter.dispose() };
+}
+`, 'extension');
+    const testPath = `${m.testRoot}/fixtures/${source.slug}.test.ts`;
+    add(testPath, `import { it, expect } from 'vitest';
+import { create${name}FixturePort } from './${source.slug}.ts';
+import { createPinia, disposePinia } from 'pinia';
+import { create${name}Service } from ${literal(relativeImport(testPath,`${m.sourceRoot}/application/${source.slug}/service.ts`))};
+import { define${name}Store } from ${literal(relativeImport(testPath,`${m.sourceRoot}/presentation/stores/${source.slug}.ts`))};
+${source.operations.filter(op=>op.input===null && manifest.operations.some((r:{id:string;behavior:string})=>r.id===op.id && r.behavior==='list')).map(op=>`it('executes ${op.slug} against its actual seeded port through Pinia', async () => {
+  const fixture=create${name}FixturePort(), pinia=createPinia();
+  try { const store=define${name}Store(create${name}Service(fixture.port))(pinia);
+    const result=await store[${literal(op.slug)}].execute(undefined);
+    expect(result.ok).toBe(${manifest.operations.find((r:{id:string})=>r.id===op.id).scenario!=='error'}); expect(store[${literal(op.slug)}].pending).toBe(false);
+  } finally { disposePinia(pinia); fixture.dispose(); }
+});`).join('\n')}
+it('the ${source.slug} fixture never falls back to live operations after disposal', async () => {
+  const fixture = create${name}FixturePort(); fixture.dispose();
+${source.operations.map(op => `  await expect(fixture.port[${literal(op.slug)}](${sampleCode(op.input)})).rejects.toThrow('disposed');`).join('\n')}
+});
+`, 'managed');
+  }
   const adapter='scripts/test-data/source-ports.mjs';
   add(adapter,`import { createFixtureAdapter } from './adapters.mjs';\nexport function createProjectTestPorts(manifest) {\n  const adapter=createFixtureAdapter(manifest);\n  const sources=[...new Set(manifest.operations.filter(op=>op.kind!=='vault').map(op=>op.source))];\n  const ports=Object.fromEntries(sources.map(source=>{const port=adapter.port(source);return [source,Object.fromEntries(Object.entries(port).map(([slug,run])=>[slug,(input,signal)=>run(input,{signal})]))];}));\n  return {ports,dispose:()=>adapter.dispose()};\n}\n`,'managed');
-  const test=`${m.testRoot}/recipes.test.mjs`;
-  add(test,`import { it, expect } from 'vitest';
-import { readFile } from 'node:fs/promises';
-import { createFixtureEngine } from ${literal(relativeImport(test,'scripts/test-data/engine.mjs'))};
-import { createProjectTestPorts } from ${literal(relativeImport(test,adapter))};
-const manifest=JSON.parse(await readFile(new URL(${literal(relativeImport(test,'scripts/test-data/manifest.json'))},import.meta.url),'utf8'));
-it('exported recipes create deterministic contract-valid data without live I/O',()=>{
- const engine=createFixtureEngine();const before=JSON.stringify(manifest);const first=engine.generate(manifest);const second=engine.generate(manifest);
- expect(second).toEqual(first);expect(JSON.stringify(manifest)).toBe(before);expect(first.files.length).toBeGreaterThan(0);
- for(const op of first.operations)for(const side of ['input','output'])if(!op[side].none)expect(engine.matches(op[side+'Value'],op[side].schema)).toBe(true);
-});
-it('fixture source ports never expose vault adapters or a live fallback',()=>{
- const fixture=createProjectTestPorts(manifest);try{for(const op of manifest.operations)if(op.kind==='vault')expect(fixture.ports[op.source]).toBeUndefined();}finally{fixture.dispose();}
-});
-`,'managed');
   for(const source of m.sources) for(const op of source.operations) {
     const entity=noteEntity(m,source.id,op.id);
-    const recipe=rows(manifest.operations,288).find(r=>r.id===op.id);
+    const recipe=manifest.operations.find((r: {id:string;scenario:string})=>r.id===op.id);
     if(!entity || !recipe || op.contract.implementation || ['error','empty'].includes(String(recipe.scenario)))continue;
     const path=`${m.testRoot}/recipes/${source.slug}-${op.slug}.test.mjs`;
     add(path,`import { it, expect } from 'vitest';

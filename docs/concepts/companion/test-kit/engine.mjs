@@ -54,9 +54,11 @@ export function createFixtureEngine() {
     if (!Number.isSafeInteger(manifest.seed) || manifest.seed < 0 || manifest.seed > 2147483647 || !Number.isInteger(manifest.count) || manifest.count < 1 || manifest.count > 100) fail('Use a seed from 0 to 2147483647 and 1–100 records.');
     if (!['en', 'de'].includes(manifest.locale) || !/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(manifest.referenceDate) || Number.isNaN(Date.parse(manifest.referenceDate)) || new Date(manifest.referenceDate).toISOString() !== manifest.referenceDate) fail('Choose a supported locale and a fixed UTC reference date.');
     if (!Array.isArray(manifest.entities) || manifest.entities.length > 60 || !Array.isArray(manifest.operations) || manifest.operations.length > 288) fail('Fixture inventory exceeds its bounded limit.');
+    if (manifest.noteMetadata !== undefined && (!plain(manifest.noteMetadata) || Object.keys(manifest.noteMetadata).sort().join(',') !== 'created_at,schema_version' || manifest.noteMetadata.schema_version !== 1 || manifest.noteMetadata.created_at !== manifest.referenceDate)) fail('Invalid canonical note metadata.');
     const entities = new Map();
     for (const e of manifest.entities) {
       if (!slug(e.id) || entities.has(e.id) || !slug(e.slug) || !folder(e.folder) || !schemaValid(e.schema) || e.schema.type !== 'object') fail('Invalid entity fixture contract.');
+      if (manifest.noteMetadata && ['schema_version','created_at'].some(key => Object.hasOwn(e.schema.properties,key))) fail('Canonical note metadata collides with an authored field.');
       if (!Array.isArray(e.relationships) || e.relationships.length > 160 || !e.relationships.every(r => key(r.key) && slug(r.target) && typeof r.many === 'boolean')) fail('Invalid fixture relationship.');
       entities.set(e.id, e);
     }
@@ -86,6 +88,7 @@ export function createFixtureEngine() {
       if (op.behavior === 'list' && (op.output.none || op.output.schema.type !== 'array' || !op.input.none)) fail('List behavior needs a collection output and no input; custom filtering is not inferred.');
       if (['upsert', 'delete'].includes(op.behavior) && (op.input.none || op.input.schema.type !== 'object' || !op.input.schema.properties[op.keyField])) fail('Write behavior needs an object input containing the declared key.');
       if (op.behavior !== 'fixture' && op.direction === 'read' && op.behavior !== 'list') fail('Read-only recipes cannot mutate a test dataset.');
+      if (op.noteEntity !== undefined && (op.kind !== 'vault' || !entities.has(op.noteEntity) || entities.get(op.noteEntity).folder !== op.resource || !manifest.noteMetadata)) fail('Invalid canonical note fixture mapping.');
       if (op.kind === 'vault' && !folder(op.resource)) fail('Vault fixtures need an explicit safe note folder.');
       if (!Array.isArray(op.rules) || op.rules.length > 80) fail('Invalid generator rules.');
       const paths = new Set();
@@ -171,7 +174,7 @@ export function createFixtureEngine() {
       if (op.kind === 'vault' && !['empty', 'error'].includes(op.scenario)) {
         const side = op.direction === 'write' ? 'input' : 'output', shape = op[side];
         if (shape.none) fail('Vault recipe has no record payload.');
-        if (shape.entity) {
+        if (op.noteEntity) { requireEntity(op.noteEntity); } else if (shape.entity) {
           if (entityMap.get(shape.entity).folder !== op.resource) fail('Vault operation folder and entity folder differ. Declare one explicit folder before seeding.');
           requireEntity(shape.entity);
         } else {
@@ -181,7 +184,7 @@ export function createFixtureEngine() {
       }
       return { ...op, inputValue, outputValue };
     });
-    for (const id of needed) pools.get(id).forEach((record, i) => put(notePath(entityMap.get(id), i), markdown(record), id));
+    for (const id of needed) pools.get(id).forEach((record, i) => put(notePath(entityMap.get(id), i), markdown(m.noteMetadata ? { ...record, ...m.noteMetadata } : record), id));
     const items = [...files.values()].sort((a, b) => a.path.localeCompare(b.path, 'en'));
     const lower = new Set(); let bytes = 0;
     for (const file of items) { if (lower.has(file.path.toLowerCase())) fail('Case-insensitive output collision.'); lower.add(file.path.toLowerCase()); bytes += new TextEncoder().encode(file.content).length; }
