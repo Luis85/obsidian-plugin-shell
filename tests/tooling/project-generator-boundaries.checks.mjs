@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdtemp, realpath, cp, rm } from 'node:fs/promises';
+import { join, relative, sep } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 import { parseDetailControl, copyDetailData } from '../../scripts/companion/runtime/detail-controls.ts';
@@ -77,4 +79,20 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
  assert.ok(!files.has('product/code/generated/application/interactions/detail-edge-5014.ts'));
  assert.ok(files.has('product/specs/project/persistence/boundary-record.test.ts'));
  assert.deepEqual(legacyProject.design.detailDesigns.schema,1);
+});
+test('native repositories register into the example-removed feature registry and still refuse other customizations',async()=>{
+ const {planExampleRemoval}=await import('../../scripts/examples/plan.mjs');
+ const removed=(await planExampleRemoval(root)).plan.changes.find(change=>change.path==='src/bootstrap/features.ts').content;
+ const template=await realpath(await mkdtemp(join(tmpdir(),'generator-removed-')));
+ const skipped=new Set(['.git','node_modules','dist','dist-harness','reports','.fallow','.qualification']);
+ try{
+  await cp(root,template,{recursive:true,filter:path=>{const parts=relative(root,path).split(sep);return !skipped.has(parts[0])&&!parts.includes('__pycache__');}});
+  await writeFile(join(template,'src/bootstrap/features.ts'),removed);
+  const registry=new Map((await projectFiles(template,projectModel(fixture()))).map(e=>[e.path,e.content])).get('src/bootstrap/features.ts');
+  assert.match(registry,/createNoteFeatures\(services, register => \(\{\n( {4}G\w+: register\(G\w+\),\n)+ {2}\}\)\);/);
+  assert.ok(registry.includes('    GBoundaryRecord: register(GBoundaryRecord),\n'));
+  assert.ok(!registry.includes('taskFeature'));
+  await writeFile(join(template,'src/bootstrap/features.ts'),removed.replace('() => ({','register => ({\n    custom: register(customFeature),'));
+  await assert.rejects(projectFiles(template,projectModel(fixture())),/customized feature registry/);
+ }finally{await rm(template,{recursive:true,force:true});}
 });

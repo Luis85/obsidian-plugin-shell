@@ -25,6 +25,15 @@ export function noteEntity(m: Model, sourceId: string, operationId: string): Ent
   if (source.kind === 'vault' && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
   return undefined;
 }
+const showcaseAnchor = '    items: register(itemFeature),';
+// Exact output of examples:remove: the callback keeps no parameter and only blank lines.
+const removedRegistry = /createNoteFeatures\(services, \(\) => \(\{[ \n]*\n {2}\}\)\);/;
+/** Extend only the two reviewed registry shapes; any other customization is refused. */
+function registerFeatures(original: string, registrations: string[]): string {
+  if (original.includes(showcaseAnchor)) return original.replace(showcaseAnchor, showcaseAnchor+'\n'+registrations.join('\n'));
+  requireValue(removedRegistry.test(original), 'Review customized feature registry before generating native repositories.');
+  return original.replace(removedRegistry, () => `createNoteFeatures(services, register => ({\n${registrations.join('\n')}\n  }));`);
+}
 export async function persistenceCode(templateRoot: string, m: Model, add: Add): Promise<void> {
   const selected = new Map<string, Entity>();
   for (const source of m.sources) for (const op of source.operations) { const entity = noteEntity(m, source.id, op.id); if (entity) selected.set(entity.id, entity); }
@@ -85,8 +94,7 @@ it('persists every ${entity.slug} field, rejects stale edits and preserves unrel
 `);
   }
   const original = await readFile(join(templateRoot, 'src/bootstrap/features.ts'), 'utf8');
-  requireValue(original.includes('    items: register(itemFeature),'), 'Review customized feature registry before generating native repositories.');
-  add('src/bootstrap/features.ts', imports.join('\n')+'\n'+original.replace('    items: register(itemFeature),','    items: register(itemFeature),\n'+registrations.join('\n')));
+  add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
   const registryTest = `${m.testRoot}/persistence/registry.test.ts`;
   add(registryTest, `import { it, expect } from 'vitest';
 import { createFeatures } from ${literal(relativeImport(registryTest,'src/bootstrap/features.ts'))};
