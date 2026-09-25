@@ -101,6 +101,7 @@ export async function executeOperation(input: Request, context: Context): Promis
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {
       const path = stringOption(request.options, 'input'); requireThat(path, 'INPUT_REQUIRED', 'Supply --input <release-operation.json>.');
+      if (request.options['dry-run']) return result(command, { execution: 'not-run', input: path, requestedMode: request.options.execute ? 'candidate-write' : 'remote-discovery', candidateEligibility: 'not-checked', publication: 'not-authorized' }, 'planned');
       const args = ['--input', resolve(context.root, path)];
       if (request.options.execute) { const authorization = stringOption(request.options, 'authorize'); requireThat(authorization, 'RELEASE_AUTHORIZATION', 'Public execution requires a separate --authorize digest. --yes is not authorization.'); args.push('--execute', '--authorize', authorization); }
       else requireThat(request.options.authorize === undefined, 'RELEASE_AUTHORIZATION', '--authorize requires --execute.');

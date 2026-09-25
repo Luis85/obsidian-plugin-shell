@@ -17,7 +17,7 @@ function dtProjection(doc) {
     ...(n.parentId ? { parentNode: n.parentId } : {}),
     data: { record: dtCopy(n), childCount: doc.nodes.filter(c => c.parentId === n.id).length },
     style: { width: n.size.width + 'px', height: n.size.height + 'px' }, dimensions: dtCopy(n.size),
-    selected: n.id === dtUi.selected, draggable: !state.activeRun && !tdUi.busy, selectable: true, connectable: !state.activeRun && !tdUi.busy, focusable: false,
+    selected: n.id === dtUi.selected || (cpUi.selection||[]).includes(n.id), draggable: !state.activeRun && !tdUi.busy, selectable: true, connectable: !state.activeRun && !tdUi.busy, focusable: false,
     dragHandle: '.dt-flow-title' }));
 }
 function dtEdgeProjection(doc) {
@@ -47,7 +47,7 @@ function dtMount() {
     const api = useVueFlow('companion-detail-' + serial); dtUi.api = api;
     api.onNodesChange(changes => { if (current()) api.applyNodeChanges(changes.filter(c => ['dimensions', 'select'].includes(c.type) || c.type === 'position' && !!dtUi.drag && !dtUi.cancelled)); });
     api.onEdgesChange(changes => { if (current()) api.applyEdgeChanges(changes.filter(c => c.type === 'select')); });
-    api.onNodeClick(({ node }) => { if (current()) dtSelect(node.id); });
+    api.onNodeClick(({ node, event }) => { if (current()) { if(event.ctrlKey||event.metaKey)cpToggleSelection(node.id);else dtSelect(node.id); } });
     api.onEdgeClick(({ edge }) => { if (current()) dtSelect(null, edge.id); });
     api.onPaneClick(() => { if (current() && !dtUi.drag) dtSelect(null); });
     api.onNodeDoubleClick(({ node }) => { if (current()) { try { dtBegin('node', node.id); } catch (error) { dtFail(error); } } });

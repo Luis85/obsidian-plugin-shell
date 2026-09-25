@@ -17,7 +17,7 @@ const plain = value => JSON.parse(JSON.stringify(value));
 test('[STORYMAP-SCHEMA] empty and self-project collections have bounded stable identities', () => {
   assert.equal(validateStorymaps(emptyStorymaps()).maps.length, 0);
   assert.equal(validateStorymaps(fixture()).maps[0].stories.length, 5);
-  assert.equal(seed.schemaVersion, 3); assert.equal(seed.design.schema, 3);
+  assert.equal(seed.schemaVersion, 4); assert.equal(seed.design.schema, 4);
   assert.deepEqual(parseCompanionDocument(JSON.stringify(seed)), seed);
 });
 for (const [name, mutate] of [
@@ -110,7 +110,7 @@ test('[STORYMAP-VERSION] legacy projects remain readable; old-version envelopes 
   const legacy = copy(seed); legacy.schemaVersion = 1; legacy.design.schema = 1; delete legacy.design.storymaps; delete legacy.design.detailDesigns;
   assert.deepEqual(validateCompanionDocument(legacy), legacy);
   legacy.design.storymaps = fixture(); assert.throws(() => validateCompanionDocument(legacy), /version 2/);
-  const future = copy(seed); future.schemaVersion = 4; assert.throws(() => validateCompanionDocument(future), /Unsupported companion/);
+  const future = copy(seed); future.schemaVersion = 999; assert.throws(() => validateCompanionDocument(future), /Unsupported companion/);
 });
 test('[STORYMAP-LARGE] 500-story layout remains deterministic without coordinate persistence', () => {
   const s = fixture(), m = s.maps[0], example = copy(m.stories[0]); m.stories = [];

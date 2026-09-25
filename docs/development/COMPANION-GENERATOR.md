@@ -1,6 +1,6 @@
 # Companion project compiler
 
-Related: issue #19, [SH-035](../tasks/shell/SH-035.md) (the compiler task originally also named SH-023 in PR #20), and PR #5's full project JSON contract. This is shell tooling, not a completed native companion implementation.
+Related: issue #19, PR #5's full project JSON contract. This is shell tooling, not a completed native companion implementation.
 
 ## User journey
 
@@ -30,11 +30,12 @@ The original `npm run companion:generate` and `scripts/companion/generate.mjs` *
 | Entity | TypeScript type, runtime guard, folder metadata and source schema | Valid fixture and invalid-value tests |
 | DataSource operation | Application port, input/output guards, service and adapter extension | Real service/Pinia execution and failure tests |
 | DataSource | One per-view Pinia store and bootstrap source registry | Pending/error, latest-read and disposal tests |
-| Screen | Vue component, component composition imports and panel registry | Mounted navigation smoke test |
+| Screen | Vue component, component composition imports and panel registry; authored detail layout when available | Mounted navigation and five-state detail tests |
 | Navigation/interaction | Typed sitemap registry, store navigation, modal effect routing | Declared edge tests; non-navigational behavior stays TODO |
 | Modal/settings/view | Native shell lifecycle wiring and isolated Vue/Pinia mount | Generated build; native acceptance remains separate |
 | PRD requirement | Stable use-case module plus original requirement/acceptance text | Explicit `it.todo`, to replace with a failing behavioral test |
-| Design system, source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
+| Design system | Scoped Nuxt UI / shell CSS, token fragments and effective binding manifest | Shared browser/CLI compiler, generated build and real Nuxt UI harness |
+| Source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
 
 Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Adapters and use cases throw explicit `NotImplementedError` until implemented. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
 
@@ -60,10 +61,69 @@ Imported JSON is data. It cannot provide code templates, commands, dependency ve
 
 ## Remaining native conversion work
 
-The output is a development shell. Component files are implementation placeholders, not a faithful conversion of the browser prototype's rendered layouts or free-form props/events. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations, design-token application and seeded source recipes still need implementation and behavioral tests. Preserve the reconciled delivery order: framework qualification (SH-022), separately authorized shipment of shell + CLI + generator (SH-034), native companion implementation after CX-007, native acceptance, then companion publication. See the [delivery strategy](../product/DELIVERY-STRATEGY.md). This implemented generator is the baseline to extend, not evidence that the full release-archive workflow is complete.
+The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations and seeded source recipes still need implementation and behavioral tests. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
 
 ## Technical references
 
 - Pinia testing: https://pinia.vuejs.org/cookbook/testing.html — generated tests instantiate actual Pinia rather than replacing actions with automatic mocks.
 - Vitest test API: https://vitest.dev/api/test — TODOs identify unimplemented acceptance, not passing assertions.
 - Node TypeScript execution: https://nodejs.org/api/typescript.html — type stripping executes erasable TypeScript; it does not replace the compiler type-check.
+
+## Design-system styles
+
+The JSON compiler now applies saved design tokens through its normal stylesheet import path. See [Design system → Nuxt UI styles](DESIGN-SYSTEM-STYLES.md) for the frontend contract, host/declared policy, safe regeneration and customization. This does not implement arbitrary component layout or turn usage prose into executable CSS.
+
+## Executable detailed-design generation
+
+Saved v3 page/component designs now compile to editable Vue SFCs. Page details replace the
+placeholder page composition; component details implement the matching reusable library SFC.
+Each document also has managed data specifications, traceability and generated verification.
+
+- Regions compile as stack, wrapping row or responsive grid containers, in semantic array/parent order.
+  Canvas coordinates and editing-frame sizes are deliberately not CSS layout instructions.
+- Text is escaped data. Typed inputs, selectors, tabs, lists, tables and buttons use their
+  declared semantics. Named slots carry caller-owned content or fallback content; immutable
+  revision dependencies have separate generated identities. Declarative local UI effects
+  execute; arbitrary conditions and business-output mappings are never inferred.
+- Reusable instances import one definition, receive typed primitive props and merge reviewed
+  variant defaults with local overrides. False, zero and empty text remain valid overrides.
+  Stale versions, missing variants, unknown props and wrong types stop generation.
+- `designState` controls default/loading/empty/error/disabled; hidden ancestors suppress children.
+  Without an explicit state, referenced source projections and local interaction status drive
+  loading/error/empty. Disabled/loading controls cannot dispatch a business interaction.
+- Source bindings traverse declared own-property paths such as `0.title`, never expressions.
+  They expose the actual per-view Pinia projection. Typing changes a local draft only.
+  Only separately declared on-open read flows start automatically. Payload and write mapping
+  stays in the typed application hooks; no implicit save follows an input change.
+- A declared navigation target routes through the navigation store or native modal callback.
+  Other interactions dispatch stable-ID requests to `application/interactions/<edge-id>.ts`.
+  For interactions without a declared UI effect, those hooks fail explicitly until implemented. Pending duplicates are ignored, errors retain
+  drafts, and disposed views do not accept late completion updates.
+
+`domain/components/contracts` contains typed prop/event/slot contracts. Member declarations
+use `name:string`, `name:number`, `name:boolean`, or event-only `name:void`. Unsupported
+syntax is rejected rather than copied as code or widened to `any`. Component custom-event
+payloads remain implementation contracts; prose such as “emit select” is not a machine mapping.
+
+`design/detail-traceability.json` links documents, Vue files, interaction hooks and acceptance
+tests. Generated tests exercise five-state rendering, real event dispatch, declared navigation,
+source/service/Pinia projections and runtime failure/disposal behavior. PRD and interaction
+acceptance prose remains explicit TODOs. UI wiring passing is not acceptance of that prose.
+
+Use the existing reviewed plan/apply workflow for regeneration. Expanded component trees are
+bounded; unresolved references, ambiguous event branching and projects larger than the
+ownership inventory fail before writes. Consumer-edit conflict protection remains unchanged.
+
+Technical basis: [Vue props](https://vuejs.org/guide/components/props.html),
+[Vue events](https://vuejs.org/guide/components/events.html),
+[Pinia testing](https://pinia.vuejs.org/cookbook/testing.html) and
+[Vitest test semantics](https://vitest.dev/api/test). Dependency pins are unchanged.
+
+## Complete v4 composition
+
+See [composition guide](../concepts/companion/COMPOSITION.md) for responsive layout, token references,
+instance slots, revision snapshots, fixtures and supported effects. The current self-project
+contains 80 working and 54 captured documents; code generation includes both. Live and captured
+local font references use safe declared family names or native font variables; no fonts are downloaded.
+The Nuxt UI stylesheet path and customization ownership introduced by the Design System increment
+remain active alongside detailed component styles.

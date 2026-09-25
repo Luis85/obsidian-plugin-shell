@@ -69,7 +69,7 @@ test('configured/imported differences require a deliberate resolution policy', a
   const imported = await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes']);
   assert.equal(imported.status, 'applied', JSON.stringify(imported));
   const saved = JSON.parse(await readFile(join(ctx.root, 'design/project.json'), 'utf8'));
-  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 3);
+  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 4);
   assert.deepEqual(saved.design.detailDesigns, seed.design.detailDesigns);
   assert.equal((await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes'])).status, 'unchanged');
 });
@@ -78,7 +78,7 @@ test('import preserves foreign and manually edited design snapshots', async t =>
   const result = await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes']);
   assert.equal(result.diagnostics[0].code, 'IMPORT_OWNERSHIP'); assert.equal(await readFile(join(ctx.root, 'design/project.json'), 'utf8'), 'foreign');
 });
-test('file and stdin inspection accept full v3 while rejecting executable/future envelopes', async t => {
+test('file and stdin inspection accept full v4 while rejecting executable/future envelopes', async t => {
   const ctx = await fixture(t);
   const inspected = await run(ctx, ['project', 'inspect', '--input', 'project.json']); assert.equal(inspected.status, 'ok'); assert.equal(inspected.data.screens, 27);
   const stdin = await run({ ...ctx, inputText: JSON.stringify(seed) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);

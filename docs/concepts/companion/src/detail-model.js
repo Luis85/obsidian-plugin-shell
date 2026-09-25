@@ -28,6 +28,7 @@ function dtRemoveNode(doc, id) {
   if (!doc.nodes.some(n => n.id === id)) throw Error('The element no longer exists.');
   const ids = dtDescendants(doc, id); doc.nodes = doc.nodes.filter(n => !ids.has(n.id));
   doc.edges = doc.edges.filter(e => !ids.has(e.source) && !ids.has(e.target));
+  for (const scenario of doc.scenarios || []) for (const id of ids) delete scenario.values[id];
 }
 function dtDuplicateNode(store, doc, id) {
   const source = doc.nodes.find(n => n.id === id); if (!source) throw Error('The element no longer exists.');
@@ -47,7 +48,7 @@ function dtSortedNodes(doc) {
   const out = []; const walk = parent => { for (const node of doc.nodes.filter(n => n.parentId === parent)) { out.push(node); walk(node.id); } }; walk(null); return out;
 }
 function dtSemantic(store) {
-  return { schema: store.schema, documents: store.documents.map(doc => ({ ...doc, nodes: doc.nodes.map(({ position, size, ...node }) => node) })) };
+  return { schema: store.schema, ...(store.revisions ? { revisions: store.revisions } : {}), documents: store.documents.map(doc => ({ ...doc, nodes: doc.nodes.map(({ position, size, ...node }) => node) })) };
 }
 function dtIssues(d) {
   const store = dtStore(d), issues = []; let detailNodeId = null, detailEdgeId = null; const warn = (doc, message) => issues.push({ documentId: doc.id, detailNodeId, detailEdgeId, level: 'warning', code: 'detail-reference', message: dtOwnerLabel(doc, d) + ': ' + message, node: doc.kind === 'page' ? doc.ownerId : null });
@@ -58,7 +59,7 @@ function dtIssues(d) {
     else if (doc.kind === 'page' && !dtPageEligible(owner)) warn(doc, 'owner is no longer a page, modal or settings surface.');
     for (const node of doc.nodes) {
       detailNodeId = node.id;
-      const ref = node.component, c = ref && d.library.find(c => c.id === ref.id);
+      const ref = node.component, c = ref && (ref.revisionId ? store.revisions?.find(r => r.id === ref.revisionId)?.library : d.library.find(c => c.id === ref.id));
       if (ref && !c) warn(doc, node.label + ': component target missing.');
       if (c && c.version !== ref.version) warn(doc, node.label + ': pinned version ' + ref.version + ' differs from library ' + c.version + '; review before updating.');
       if (c && !componentVariants(c).some(v => v.id === ref.variantId)) warn(doc, node.label + ': variant target missing.');
@@ -80,7 +81,7 @@ function dtComponentUses(id, d = design()) {
 }
 function dtValidateInstance(node, d = design()) {
   if (!node.component) return;
-  const c = d.library.find(c => c.id === node.component.id); if (!c) throw Error('Choose an existing component or retain this missing reference unchanged.');
+  const c = node.component.revisionId ? d.detailDesigns?.revisions?.find(r => r.id === node.component.revisionId)?.library : d.library.find(c => c.id === node.component.id); if (!c) throw Error('Choose an existing component or retain this missing reference unchanged.');
   if (c.version !== node.component.version) throw Error('This instance uses an older contract. Review its library version before applying instance changes.');
   if (!componentVariants(c).some(v => v.id === node.component.variantId)) throw Error('Choose an existing component variant.');
   const members = parseMembers(c.props, 'props');

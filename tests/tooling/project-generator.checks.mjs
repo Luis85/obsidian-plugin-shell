@@ -80,7 +80,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,30);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   assert.deepEqual(trace.detailDesigns,fixture.design.detailDesigns);
-  assert.ok(trace.warnings.some(w=>w.includes('detail designs are preserved')));
+  assert.ok(trace.warnings.some(w=>w.includes('detail designs compile')));
   for (const r of trace.requirements) assert.match(await readFile(join(target,r.test),'utf8'),/it.todo/);
   const pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8')); assert.equal(pkg.name,'plugin-companion'); assert.equal(pkg.scripts.verify,JSON.parse(await readFile(join(root,'package.json'),'utf8')).scripts.verify);
   assert.equal(JSON.parse(await readFile(join(target,'package-lock.json'),'utf8')).packages[''].name,pkg.name);

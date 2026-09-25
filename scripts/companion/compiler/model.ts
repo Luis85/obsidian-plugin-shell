@@ -106,7 +106,7 @@ export function projectModel(input: unknown): Model {
   return {document,project,sourceRoot,testRoot,entities:entityModels,sources,screens,links,components,requirements,flows,warnings:[
     'Source adapters and PRD business behavior require implementation; generated passing tests verify scaffolding only.',
     'Complex component layouts, editor engines, relationship enforcement and source-flow payload mapping remain explicit extension points.',
-    ...(design.detailDesigns ? ['Page/component detail designs are preserved in design/project.json and detail traceability; their layouts, bindings and interaction acceptance remain implementation work, not generated runtime behavior.'] : []),
+    ...(design.detailDesigns ? ['Page/component detail designs compile to Vue layouts, state visibility, typed instances and safe source projections. Business acceptance and payload mapping still require implementation.'] : []),
     'Framework internals remain in src/tests; configured folders locate generated product code and product tests.',
   ]};
 }

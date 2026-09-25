@@ -1,12 +1,13 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · Page/component detail editors, Storymaps and full-project JSON v3 — 2026-09-25.** Interactive browser concept, not an installable native Obsidian companion.
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
+> **One vault, one project · Page/component detail editors, Storymaps and full-project JSON v4 — 2026-09-25.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
 ## Project JSON and companion self-project
 
-Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files.
+Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files. The separate reviewed workspace compiler generates supported Vue layouts, slots and UI effects; [Composition](COMPOSITION.md) describes the current scope and complete 80-design self-project.
 
 [PROJECT-JSON.md](PROJECT-JSON.md) explains the UI, seed content and limits; [companion-project.json](companion-project.json) is the importable self-project. The [shell contract](../../development/COMPANION-PROJECT-JSON.md) documents the command and safety boundary. This extends the existing single-project model, not a multi-project launcher.
 

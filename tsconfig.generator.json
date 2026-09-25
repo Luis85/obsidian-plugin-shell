@@ -1,9 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
-    "strict": true, "noUncheckedIndexedAccess": true, "noEmit": true,
-    "allowImportingTsExtensions": true, "allowJs": true, "checkJs": false,
-    "skipLibCheck": true, "types": ["node"]
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
   },
-  "include": ["scripts/companion/compiler/**/*.ts", "scripts/companion/runtime/contract.ts"]
+  "include": [
+    "scripts/companion/compiler/**/*.ts",
+    "scripts/companion/runtime/contract.ts",
+    "scripts/companion/runtime/detail-runtime.ts",
+    "scripts/companion/runtime/use-detail.ts"
+  ]
 }

@@ -92,7 +92,7 @@
     "release:operate": "node scripts/release/cli.mjs",
     "companion:generate": "node scripts/companion/generate.mjs",
     "companion:scaffold": "node shell.mjs generate",
-    "test:generator": "node --experimental-strip-types --test tests/tooling/project-generator.checks.mjs",
+    "test:generator": "node --experimental-strip-types --test tests/tooling/project-generator*.checks.mjs",
     "typecheck:generator": "tsc --noEmit --project tsconfig.generator.json",
     "shell": "node shell.mjs",
     "capabilities": "node scripts/operations/cli.mjs",

@@ -1,7 +1,7 @@
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
-import { parseCompanionDocument } from '../companion/project-contract.mjs';
+import { parseCompanionDocument, COMPANION_VERSION } from '../companion/project-contract.mjs';
 import { readCompanionProject } from '../companion/read-project.mjs';
 import { projectModel } from '../companion/compiler/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
@@ -49,9 +49,9 @@ export async function configurationPlan(request: Request, context: Context) {
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
   if ((input || options.blank) && request.command !== 'config set') {
     requireThat(input || selected, 'IDENTITY_REQUIRED', 'Configure identity before creating a blank design.');
-    const blank = selected ? json({kind: 'obsidian-companion-project', schemaVersion: 3, executable: false, project: selected.project,
+    const blank = selected ? json({kind: 'obsidian-companion-project', schemaVersion: COMPANION_VERSION, executable: false, project: selected.project,
       settings: {codebaseFolder: selected.paths.codebaseFolder, testsFolder: selected.paths.testsFolder}, notes: [], design: {
-        schema: 3, blueprint: selected.project.name, goal: selected.project.description, platform: 'desktop', nextId: 2, library: [], prds: [], links: [],
+        schema: COMPANION_VERSION, blueprint: selected.project.name, goal: selected.project.description, platform: 'desktop', nextId: 2, library: [], prds: [], links: [],
         nodes: [{id: 'node-1', slug: 'main', label: selected.project.name, kind: 'view', parent: null, nav: true, entry: true, command: true, ribbon: false, components: [], goal: ''}],
       }}) : '';
     const { source } = await inspectDesign(input ? context : {...context, inputText: blank}, input ?? '-');

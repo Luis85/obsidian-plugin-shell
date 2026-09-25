@@ -74,7 +74,17 @@ try:
         p.locator('#modal [data-action="reset-confirm"]').click()
         check('Actual stale-window reset cannot delete the second window saved edit', p.evaluate('JSON.parse(localStorage.getItem(STORAGE_KEY)).project.design.goal==="Newer second-window edit"&&storageWarning.startsWith("Reset blocked")'))
         p.evaluate('closeModal();exportRetainedBrowserData()')
-        check('Retained export recovers the actual second-window bytes separately', json.loads(p.locator('#copy-text').input_value())['project']['design']['goal'] == 'Newer second-window edit')
+        # The textarea is a bounded preview, not the downloadable recovery payload.
+        retained = p.evaluate('localStorage.getItem(STORAGE_KEY)')
+        with p.expect_download() as event:
+            p.locator('#modal [data-action="download-text"]').click()
+        event.value.save_as(str(OUT / 'retained-browser-data.json'))
+        recovered = (OUT / 'retained-browser-data.json').read_text()
+        check('Retained export recovers the actual second-window bytes separately',
+              recovered == retained and json.loads(recovered)['project']['design']['goal'] == 'Newer second-window edit')
+        check('Large recovery export bounds only its preview and retains every saved byte',
+              len(recovered) > 100000 and len(p.locator('#copy-text').input_value()) == 30000
+              and 'full text' in p.locator('label[for=copy-text]').inner_text())
         p.evaluate('closeModal()')
         q.close()
         p.reload()

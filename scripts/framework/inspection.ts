@@ -1,3 +1,4 @@
+import { parseDesignData } from '../contracts/json-data.mjs';
 import { join, dirname, resolve } from 'node:path';
 import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';
@@ -25,7 +26,8 @@ export async function status(context: Context, command = 'status') {
   }
   let obligations: number | null = null;
   if (await exists(join(context.root, 'design/traceability.json'))) {
-    const trace = object(await readJson(join(context.root, 'design/traceability.json')));
+    const bytes = await readBounded(join(context.root, 'design/traceability.json'), 4_000_000);
+    const trace = object(parseDesignData(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
     if (Array.isArray(trace.requirements)) obligations = trace.requirements.filter(item => object(item).verification !== 'verified').length;
     if (obligations) diagnostics.push({ code: 'ACCEPTANCE_PENDING', message: `${obligations} generated requirements are not accepted. Scaffold tests do not prove their behavior.` });
   }

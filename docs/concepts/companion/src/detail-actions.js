@@ -16,12 +16,12 @@ function dtCanWrite(token = smToken()) {
 function dtCommit(change, token = smToken()) {
   dtCanWrite(token);
   const previous = design(), candidate = dtCopy(previous), store = dtCopy(dtStore(previous)), before = JSON.stringify(store);
-  change(store); validateDetailDesigns(store);
+  cpUpgradeStore(store); change(store); cpRetainRevisions(store, dtStore(previous)); validateDetailDesigns(store); cpValidateLinks(store,previous);
   if (before === JSON.stringify(store)) return true;
   const semantic = JSON.stringify(dtSemantic(dtStore(previous))) !== JSON.stringify(dtSemantic(store));
-  candidate.schema = 3; candidate.detailDesigns = store;
+  candidate.schema = store.schema === 2 ? 4 : 3; candidate.detailDesigns = store;
   candidate.revision = previous.revision + (semantic ? 1 : 0);
-  candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = [];
+  candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = []; cpBoundHistory(candidate);
   if (!validSavedDesign(candidate)) throw Error('This change would create an invalid project. Nothing was saved.');
   project().design = candidate;
   if (!saveConceptState()) { project().design = previous; throw Error('The change could not be saved. Previous data and history are retained; export recovery before closing.'); }
@@ -39,7 +39,7 @@ function dtTravel(direction) {
   candidate.semantic = snapshot.semantic || emptySemantic(); candidate.dataSources = snapshot.dataSources || emptyDataSources();
   candidate.storymaps = dtCopy(snapshot.storymaps || emptyStorymaps());
   for (const key of ['semantic', 'dataSources', 'storymaps', 'detailDesigns']) if (candidate[key]) candidate[key].nextId = Math.max(candidate[key].nextId, previous[key]?.nextId || 1);
-  candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.schema = 3;
+  candidate.nextId = Math.max(previous.nextId, candidate.nextId); cpRetainRevisions(candidate.detailDesigns, previous.detailDesigns); candidate.schema = candidate.detailDesigns?.schema === 2 ? 4 : 3;
   const semantic = JSON.stringify(generationSnapshot(candidate)) !== JSON.stringify(generationSnapshot(previous));
   candidate.revision = previous.revision + (semantic ? 1 : 0);
   if (!validSavedDesign(candidate)) throw Error('That history entry cannot be restored safely.');
@@ -52,15 +52,16 @@ function dtOpen(kind, ownerId) {
   const retained = dtFind(dtStore(), kind, ownerId);
   if (!retained && (!owner || kind === 'page' && !dtPageEligible(owner))) return dtFail('Choose a page, modal, settings surface or reusable component.');
   if (state.view === kind + '-editor' && dtUi.ownerId === ownerId) return;
-  dtUi.back.push({ view: state.view, kind: dtUi.kind, ownerId: dtUi.ownerId, selected: dtUi.selected, edge: dtUi.edge, mode: dtUi.mode, query: dtUi.query, previewState: dtUi.previewState, width: dtUi.width, scroll: document.getElementById('content').scrollTop });
+  dtUi.back.push({ view: state.view, kind: dtUi.kind, ownerId: dtUi.ownerId, selected: dtUi.selected, edge: dtUi.edge, mode: dtUi.mode, query: dtUi.query, previewState: dtUi.previewState, width: dtUi.width, composition: { scenario: cpUi.scenario, compare: cpUi.compare, comparison:cpUi.comparison, variantA:cpUi.variantA,variantB:cpUi.variantB }, scroll: document.getElementById('content').scrollTop });
   if (dtUi.back.length > 12) dtUi.back.shift();
+  cpUi.selection=[]; cpUi.session = null; cpUi.scenario = ''; cpUi.play = false;
   Object.assign(dtUi, { kind, ownerId, selected: null, edge: null, error: '', query: '', mode: innerWidth < 700 ? 'outline' : 'canvas' });
   setView(kind + '-editor');
 }
 function dtReturn() {
   const back = dtUi.back.pop(); if (!back) return setView(dtUi.kind === 'page' ? 'pages' : 'components');
   Object.assign(dtUi, { kind: back.kind, ownerId: back.ownerId, selected: back.selected, edge: back.edge, mode: back.mode, query: back.query, previewState: back.previewState, width: back.width, error: '' });
-  setView(back.view); document.getElementById('content').scrollTop = back.scroll;
+  Object.assign(cpUi, back.composition || {}, { session:null, play:false, selection:[] }); setView(back.view); document.getElementById('content').scrollTop = back.scroll;
 }
 function dtStart() {
   const owner = dtUi.kind === 'component' ? design().library.find(c => c.id === dtUi.ownerId) : design().nodes.find(n => n.id === dtUi.ownerId);
@@ -70,12 +71,13 @@ function dtStart() {
 }
 function dtUpdate(change) { const id = dtDocument()?.id; if (!id) throw Error('Start a detail design first.'); dtCommit(store => { const doc = store.documents.find(d => d.id === id); if (!doc) throw Error('The design no longer exists.'); change(store, doc); }); render(); }
 function handleDetailAction(action, value) {
+  if (handleCompositionAction(action, value)) return true;
   if (!action.startsWith('dt-')) return false;
   try {
     const actions = {
       'dt-page': () => dtOpen('page', value), 'dt-component': () => dtOpen('component', value), 'dt-back': dtReturn, 'dt-start': dtStart,
-      'dt-mode': () => { dtUi.mode = value; render(); }, 'dt-width': () => { dtUi.width = value; render(); },
-      'dt-state': () => { dtUi.previewState = value; render(); }, 'dt-select': () => dtSelect(value),
+      'dt-mode': () => { dtUi.mode = value; cpUi.session = null; render(); }, 'dt-width': () => { dtUi.width = value; cpUi.session = null; render(); },
+      'dt-state': () => { dtUi.previewState = value; cpUi.session = null; render(); }, 'dt-select': () => dtSelect(value),
       'dt-edit': () => dtBegin('node', value || dtUi.selected), 'dt-add': () => dtBegin('node', null, value),
       'dt-edge': () => dtBegin('edge', value || null), 'dt-connect': () => dtBegin('edge'), 'dt-notes': () => dtBegin('notes'),
       'dt-save': dtSave, 'dt-remove': () => { dtUi.form.removal = true; redrawModal(); }, 'dt-remove-confirm': dtRemove,
@@ -86,7 +88,7 @@ function handleDetailAction(action, value) {
       'dt-locate': () => { if (dtUi.selected) dtUi.api?.fitView({ nodes: [dtUi.selected], padding: .4, minZoom: .6, maxZoom: 1, duration: 0 }); },
       'dt-upgrade': dtReviewVersion, 'dt-prop-override': () => dtPropertyAction('override', value), 'dt-prop-reset': () => dtPropertyAction('reset', value),
       'dt-finding': () => dtJumpFinding(value), 'dt-use': () => dtOpenUse(value), 'dt-export-brief': dtExportBrief,
-      'dt-review-state': () => { dtUi.mode = 'preview'; dtUi.previewState = value; render(); }, 'dt-zoom': () => dtZoom(value)
+      'dt-review-state': () => { dtUi.mode = 'preview'; dtUi.previewState = value; cpUi.session = null; render(); }, 'dt-zoom': () => dtZoom(value)
     };
     if (Object.hasOwn(actions, action)) actions[action](); else return false;
   } catch (error) { dtFail(error); }

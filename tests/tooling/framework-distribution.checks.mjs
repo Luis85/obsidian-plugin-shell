@@ -55,3 +55,16 @@ test('optional project fixture contributes exact bytes and refuses parent redire
   await symlink(outside, join(folder, 'docs/concepts'), 'junction');
   await assert.rejects(sourceInputs(folder), /SOURCE_SYMLINK/);
 });
+test('reviewed example removal preserves shared design tokens after source integration', async () => {
+  const { planExampleRemoval } = await import('../../scripts/examples/plan.mjs');
+  const report = await planExampleRemoval(root);
+  const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');
+  const panels = report.plan.changes.find(change => change.path === 'src/styles/panels.css');
+  assert.match(shell.content, /var\(--plugin-shell-surface\)/);
+  assert.match(panels.content, /var\(--plugin-shell-control-radius\)/);
+  assert.ok(!shell.content.includes('.shell-sidebar'));
+  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  for (const path of ['README.md', 'src/styles/shell.css', 'src/styles/panels.css', 'src/styles/layout.css']) {
+    assert.equal(ownership.files.find(file => file.path === path).sha256, hash(await readFile(join(root, path))));
+  }
+});

@@ -1,3 +1,4 @@
+import { parseJsonData, parseDesignData } from '../../scripts/contracts/json-data.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';
@@ -108,4 +109,23 @@ test('status derives regeneration freshness from actual design bytes', async t =
   const response = await run(ctx, ['status']);
   assert.equal(response.data.designStale, true); assert.equal(response.data.next, 'generate');
   assert.ok(response.diagnostics.some(item => item.code === 'DESIGN_GENERATION_STALE'));
+});
+
+test('large v4 design traceability remains inspectable without broadening operation input limits', async t => {
+  const ctx = await fixture(t);
+  await run(ctx, ['setup', '--input', 'input.json', '--yes']);
+  const trace = JSON.stringify({requirements: [{verification: 'todo'}], detailDesigns: seed.design.detailDesigns}, null, 2);
+  assert.ok(Buffer.byteLength(trace) > 1_048_576, 'exercise the real large-project metadata boundary');
+  await writeFile(join(ctx.root, 'design/traceability.json'), trace);
+  const response = await run(ctx, ['status']);
+  assert.equal(response.status, 'ok', JSON.stringify(response));
+  assert.equal(response.data.acceptanceObligations, 1);
+});
+
+test('larger design-data profile does not relax small operation input or hostile-key checks', () => {
+  const large = JSON.stringify({description: 'x'.repeat(1_100_000)});
+  assert.throws(() => parseJsonData(large), /JSON_DATA_INVALID/);
+  assert.equal(parseDesignData(large).description.length, 1_100_000);
+  assert.throws(() => parseDesignData(JSON.stringify({description: 'x'.repeat(4_000_000)})), /JSON_DATA_INVALID/);
+  assert.throws(() => parseDesignData('{"constructor":{}}'), /JSON_DATA_INVALID/);
 });

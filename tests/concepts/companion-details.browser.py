@@ -42,8 +42,8 @@ with sync_playwright() as pw:
     page.on('request', lambda r: requests.append(r.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        act('project-example'); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
-        check('Self-project imports page and component detail documents', js('dtStore().documents.length===3 && validState(state)'))
+        act('project-import');page.locator('#project-import-file').set_input_files(str(ROOT / 'tests/fixtures/companion/detail-v3.json'));page.locator('#project-import-confirm').wait_for(); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
+        check('Legacy v3 self-project retains its original three detail documents', js('dtStore().documents.length===3 && validState(state)'))
         check('Golden JSON matches the complete current authoring model', json.loads(js('companionJson(companionExampleProject())')) == json.loads((HTML.parent / 'companion-project.json').read_text()))
         navigate('pages'); check('Pages overview excludes view and group containers', page.locator('.dt-page-card').count() == js('design().nodes.filter(dtPageEligible).length'))
         before = js('JSON.stringify(design())'); owner = js('design().nodes.find(n=>n.slug==="overview").id')

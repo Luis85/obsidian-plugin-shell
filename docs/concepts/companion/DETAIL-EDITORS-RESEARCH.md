@@ -1,5 +1,6 @@
 # Page and component editors: competitive research, needs and requirements
 
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
 Research date: **25 September 2026**. Product baseline: PR #5, commit
 `552a9449e0814322dc67fbe8d452214fb3b0e6a2`.
 
