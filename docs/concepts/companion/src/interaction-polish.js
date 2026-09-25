@@ -1,7 +1,8 @@
 // Shared form and focus safeguards. No production persistence or runtime adapters.
 let modalOriginal=null;
-const TRACKED_FORMS=new Set(['detail-form','storymap-form','project-import','project-folders','style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
+const TRACKED_FORMS=new Set(['starter-configure','detail-form','storymap-form','project-import','project-folders','style-guide-form','test-data-form','data-source-form','semantic-form','component-variant','vault-identity','design-transfer','edge-detach','ref-content','ref-section','library-place','library-upgrade','brick-edit','brick-transfer','connection-create','connection-structure','flow-intent','flow-binding','design-node','design-connect','design-goal','product-prd','product-requirement','product-component','product-bind']);
 function formCheckpoint(){
+ if(modalType==='starter-configure')return JSON.stringify(starterUi.draft);
  if(modalType==='detail-form')return JSON.stringify([dtUi.form?.record,dtUi.form?.propsText]);
  if(modalType==='storymap-form')return JSON.stringify(smUi.form?.record||null);
  if(modalType==='project-import')return JSON.stringify(projectTransferUi.text);

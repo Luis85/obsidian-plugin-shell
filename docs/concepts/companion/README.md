@@ -116,3 +116,7 @@ contracts. The [polishing receipt](DETAIL-EDITORS-POLISH.md) distinguishes deliv
 browser behavior from native and generated-code acceptance. The [editor guide](DETAIL-EDITORS.md)
 includes typed property controls, safe override repair, search, direct usage,
 Review and saved-design Markdown export.
+
+## Project Starters
+
+The companion now offers a curated, data-only full-project starter catalog. See [usage and contract](PROJECT-STARTERS.md) and [research and selection](PROJECT-STARTERS-RESEARCH.md). Start Blank is a minimal runnable shell; focused starters add editable contracts and fixtures, not finished native business features.

@@ -32,6 +32,17 @@ test('source-only archive includes and fingerprints the actual imported project 
   const file = inventory.files.find(item => item.path === projectFixture);
   assert.ok(file, 'fixture required by generator tests must be transported, not suppressed');
   assert.equal(file.sha256, hash(await readFile(join(root, projectFixture))));
+  const catalogPath = 'docs/concepts/companion/starters/catalog.json';
+  const catalogBytes = await readFile(join(root, catalogPath));
+  assert.equal(inventory.files.find(item => item.path === catalogPath)?.sha256, hash(catalogBytes));
+  const catalog = JSON.parse(catalogBytes.toString('utf8'));
+  assert.equal(catalog.starters.length, 9, 'retain all nine reviewed starters');
+  for (const starter of catalog.starters) {
+    const path = `docs/concepts/companion/starters/${starter.file}`;
+    const actualHash = hash(await readFile(join(root, path)));
+    assert.equal(actualHash, starter.sha256, path + ': catalog integrity');
+    assert.equal(inventory.files.find(item => item.path === path)?.sha256, actualHash, path);
+  }
 });
 test('optional project fixture contributes exact bytes and refuses parent redirects', async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixture-inventory-')));

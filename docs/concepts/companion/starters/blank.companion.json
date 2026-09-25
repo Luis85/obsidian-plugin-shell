@@ -1,0 +1,345 @@
+{
+  "kind": "obsidian-companion-project",
+  "schemaVersion": 4,
+  "executable": false,
+  "project": {
+    "id": "my-plugin",
+    "name": "My Plugin",
+    "author": "",
+    "version": "0.1.0",
+    "description": "A minimal runnable plugin shell with no example domain or product requirements."
+  },
+  "settings": {
+    "codebaseFolder": "src",
+    "testsFolder": "tests"
+  },
+  "design": {
+    "schema": 4,
+    "blueprint": "blank",
+    "goal": "",
+    "platform": "desktop",
+    "nodes": [
+      {
+        "id": "node-1",
+        "slug": "workspace",
+        "label": "Workspace",
+        "kind": "view",
+        "layout": "sidebar-left",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": true,
+        "ribbon": true,
+        "entry": true,
+        "instance": "reuse",
+        "patterns": [
+          "open-view"
+        ],
+        "goal": "Add your first feature.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      },
+      {
+        "id": "node-2",
+        "slug": "preferences",
+        "label": "Preferences",
+        "kind": "settings",
+        "layout": "form",
+        "placement": "tab",
+        "parent": null,
+        "nav": false,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [
+          "settings"
+        ],
+        "goal": "Configure this plugin without changing unrelated host settings.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      }
+    ],
+    "links": [],
+    "nextId": 3,
+    "library": [],
+    "prds": [],
+    "librarySchema": 3,
+    "canvas": {
+      "schema": 1,
+      "layout": "vertical",
+      "positions": {},
+      "pan": {
+        "x": 32,
+        "y": 28
+      },
+      "zoom": 1,
+      "snap": true,
+      "collapsed": [],
+      "edges": "selected",
+      "custom": false,
+      "arrangedFor": "",
+      "fitted": false
+    },
+    "semantic": {
+      "schema": 1,
+      "nextId": 1,
+      "entities": [],
+      "relationships": [],
+      "sections": [],
+      "canvas": {
+        "positions": {},
+        "viewport": {
+          "x": 40,
+          "y": 40,
+          "zoom": 1
+        },
+        "snap": true
+      }
+    },
+    "dataSources": {
+      "schema": 1,
+      "nextId": 1,
+      "sources": [],
+      "flows": [],
+      "positions": {}
+    },
+    "designSystem": {
+      "schema": 1,
+      "name": "My Plugin tokens",
+      "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+      "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+      "fonts": [
+        {
+          "id": "interface",
+          "name": "Interface",
+          "source": "interface",
+          "families": "",
+          "fallback": "system-ui",
+          "usage": "Navigation, controls and labels.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "body",
+          "name": "Reading",
+          "source": "text",
+          "families": "",
+          "fallback": "sans-serif",
+          "usage": "Descriptions and long-form content.",
+          "license": "Host font preference. No font files are embedded."
+        },
+        {
+          "id": "code",
+          "name": "Code",
+          "source": "mono",
+          "families": "",
+          "fallback": "monospace",
+          "usage": "Identifiers, paths and code samples.",
+          "license": "Host font preference. No font files are embedded."
+        }
+      ],
+      "typography": [
+        {
+          "id": "page-title",
+          "name": "Page title",
+          "font": "interface",
+          "size": 24,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.25,
+          "letterSpacing": 0,
+          "usage": "One primary heading per view."
+        },
+        {
+          "id": "section-title",
+          "name": "Section title",
+          "font": "interface",
+          "size": 18,
+          "unit": "px",
+          "weight": 600,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Group related controls or content."
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "font": "body",
+          "size": 16,
+          "unit": "px",
+          "weight": 400,
+          "lineHeight": 1.5,
+          "letterSpacing": 0,
+          "usage": "Main descriptive copy."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "font": "interface",
+          "size": 14,
+          "unit": "px",
+          "weight": 500,
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "usage": "Form labels; do not rely on placeholders."
+        }
+      ],
+      "spacing": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": 4,
+          "unit": "px",
+          "usage": "Related inline items"
+        },
+        {
+          "id": "sm",
+          "name": "SM",
+          "value": 8,
+          "unit": "px",
+          "usage": "Within a control group"
+        },
+        {
+          "id": "md",
+          "name": "MD",
+          "value": 16,
+          "unit": "px",
+          "usage": "Between related blocks"
+        },
+        {
+          "id": "lg",
+          "name": "LG",
+          "value": 24,
+          "unit": "px",
+          "usage": "Between sections"
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": 32,
+          "unit": "px",
+          "usage": "Major content separation"
+        }
+      ],
+      "sizes": [
+        {
+          "id": "control",
+          "name": "Control height",
+          "value": 36,
+          "unit": "px",
+          "usage": "Proposed default, not an accessibility guarantee."
+        },
+        {
+          "id": "icon",
+          "name": "Icon",
+          "value": 18,
+          "unit": "px",
+          "usage": "Glyph size, not the clickable target."
+        },
+        {
+          "id": "inspector",
+          "name": "Inspector width",
+          "value": 320,
+          "unit": "px",
+          "usage": "Preferred width; adapt for narrower panes."
+        }
+      ],
+      "radii": [
+        {
+          "id": "control",
+          "name": "Control radius",
+          "value": 6,
+          "unit": "px",
+          "usage": "Inputs and compact actions."
+        },
+        {
+          "id": "surface",
+          "name": "Surface radius",
+          "value": 12,
+          "unit": "px",
+          "usage": "Standalone panels."
+        }
+      ],
+      "colors": [
+        {
+          "id": "background",
+          "name": "Background",
+          "light": "#FFFFFF",
+          "dark": "#1E1E24",
+          "host": "--background-primary",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "text",
+          "name": "Primary text",
+          "light": "#202027",
+          "dark": "#ECECF2",
+          "host": "--text-normal",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "muted",
+          "name": "Secondary text",
+          "light": "#595964",
+          "dark": "#B6B6C4",
+          "host": "--text-muted",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "light": "#6550B9",
+          "dark": "#B7A3FF",
+          "host": "--interactive-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        },
+        {
+          "id": "accent-text",
+          "name": "Text on accent",
+          "light": "#FFFFFF",
+          "dark": "#17131F",
+          "host": "--text-on-accent",
+          "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "interaction",
+          "name": "Interaction states",
+          "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+        },
+        {
+          "id": "components",
+          "name": "Component usage",
+          "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+        }
+      ],
+      "frontend": {
+        "schema": 1,
+        "target": "nuxt-ui",
+        "colorPolicy": "host",
+        "bindings": {}
+      }
+    },
+    "storymaps": {
+      "schema": 1,
+      "nextId": 1,
+      "maps": []
+    },
+    "detailDesigns": {
+      "schema": 2,
+      "nextId": 1,
+      "documents": [],
+      "revisions": []
+    }
+  },
+  "notes": [
+    "# Starter scope\n\nCommand and ribbon entry to an empty workspace\nNative settings surface and host-friendly design tokens\nNo example entities, source recipes or PRDs\n\n## Implementation work\n\nYour domain model, pages and business behavior\nNative acceptance and release qualification\n\nNo business acceptance has passed. Use a separate development vault. Never insert credentials in this portable JSON.\n"
+  ]
+}

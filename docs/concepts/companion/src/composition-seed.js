@@ -1,6 +1,7 @@
 // Companion self-description: editable authoring data, never native completion evidence.
 const CP_PAGE_CONTENT = {
   overview: ['Project overview', 'Choose the next authoring or delivery step.', 'list', ['Project identity', 'Design questions', 'Recent authoring changes'], 'Open product requirements', 'requirements'],
+  starters: ['Project Starters', 'Choose and configure a full JSON project without silently replacing the current design.', 'list', ['Start Blank', 'Command Utility', 'Quick Capture', 'Tasks & Projects', 'Knowledge Collection', 'Daily Journal', 'Vault Dashboard', 'Note Inspector', 'Import & Integration'], 'Review configured starter', 'import-project'],
   requirements: ['Product requirements', 'Connect product intent to verifiable acceptance and designed surfaces.', 'table', ['Requirement', 'Priority', 'Acceptance'], 'Open storymaps', 'storymaps'],
   storymaps: ['Storymaps', 'Find a journey and inspect its activities, stories and releases.', 'table', ['Storymap', 'Outcome', 'Status'], 'Open storymap', 'storymap-detail'],
   'storymap-detail': ['Storymap editor', 'Arrange activities and steps; slice stories by release without losing requirement links.', 'tabs', ['Map', 'Outline', 'Review'], 'Design linked page', 'page-editor'],

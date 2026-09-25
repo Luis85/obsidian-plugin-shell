@@ -2,7 +2,7 @@
 
 **Order:** qualify and ship shell + project generator + TypeScript CLI → real companion on shipped shell → companion publication. **Concept status:** still evolving; not feature-complete or natively implemented. See [strategy](../product/DELIVERY-STRATEGY.md), [plan](../product/COMPANION-IMPROVEMENT-PLAN.md) and [traceability](TRACEABILITY.md).
 
-There are **57 individual task files**: 35 shell/framework, seven concept, ten native companion and five companion-publication tasks. Roadmap tasks remain `planned`; the incoming compiler task SH-035 retains `in-review` (implementation under verification), and SH-022 is explicitly `blocked` by the reviewed source/CI and missing framework scope. This revision closes no implementation task. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
+There are **58 individual task files**: 35 shell/framework, eight concept, ten native companion and five companion-publication tasks. Roadmap tasks remain `planned`; the incoming compiler task SH-035 and starter task CX-008 retain `in-review` (implementation under verification), and SH-022 is explicitly `blocked` by the reviewed source/CI and missing framework scope. This revision closes no implementation task. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
 
 ## Working rules
 
@@ -71,6 +71,7 @@ Concept work may continue secondarily while shell implementation proceeds. No wh
 | [CX-005](concept/CX-005.md) | Design-system editor and export concept | CX-001 |
 | [CX-006](concept/CX-006.md) | Generation, ownership and recovery review concept | CX-002, CX-004 |
 | [CX-007](concept/CX-007.md) | Reviewed bounded conversion baseline | CX-003, CX-005, CX-006, SH-015 |
+| [CX-008](concept/CX-008.md) | JSON-backed Project Starters and Start Blank | CX-001, SH-015, SH-035 |
 
 ## Native companion P2
 

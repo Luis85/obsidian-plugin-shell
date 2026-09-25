@@ -51,7 +51,7 @@ function openCompanionImport(example = false) {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation first.');
   Object.assign(projectTransferUi, { text: example ? companionJson(companionExampleProject()) : '',
     filename: example ? 'Bundled companion project' : '', candidate: null, snapshot: companionProjectToken(),
-    error: '', loading: false, serial: projectTransferUi.serial + 1 });
+    error: '', loading: false, starter: null, serial: projectTransferUi.serial + 1 });
   showModal('project-import');
   if (example) reviewCompanionImport();
 }
@@ -91,7 +91,7 @@ function applyCompanionImport() {
 }
 async function readCompanionImportFile(file) {
   const u = projectTransferUi, serial = ++u.serial;
-  u.candidate = null; u.error = ''; u.loading = true; u.text = ''; u.filename = file?.name || '';
+  u.starter = null; u.candidate = null; u.error = ''; u.loading = true; u.text = ''; u.filename = file?.name || '';
   redrawModal();
   try {
     if (!file || file.size > COMPANION_MAX_BYTES) throw Error('Choose a JSON file no larger than 4 MB.');
@@ -108,21 +108,21 @@ function companionSettingsCard() {
   const p = project(), folders = companionFolders();
   return `<section class="card mt16"><h3>Project files &amp; JSON handoff</h3><p>${p ? 'Saved folder settings travel with the full project export.' : 'Load the companion example, import a full project, or start a blank project.'}</p>
     ${p ? `<dl class="receipt"><dt>Codebase folder</dt><dd><code>${esc(folders.codebaseFolder)}/</code></dd><dt>Tests folder</dt><dd><code>${esc(folders.testsFolder)}/</code></dd></dl>` : ''}
-    <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Load companion project', 'project-example', '', 'small', 'box')}</div>
-    <p class="small muted">Import replaces the one project only after review. Recovery snapshots below are a different format. The shell handoff currently prints JSON only.</p></section>`;
+    <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Load companion project', 'project-example', '', 'small', 'box')}${button('Project Starters', 'palette-nav', 'starters', 'small', 'grid')}${p ? button('Generate plugin shell','starter-generate','','small','terminal') : ''}</div>
+    <p class="small muted">Import replaces the one project only after review. Recovery snapshots below are a different format. The read-only inspector prints JSON; the separate reviewed generator creates the shell.</p></section>`;
 }
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
   const retainedFile = !!u.filename && u.text.length > 100000;
   const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
-  return dialogBody('Import a full project', `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
+  return dialogBody(projectTransferUi.starter ? 'Review starter project' : 'Import a full project', starterReviewBanner() + `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
     <p class="small" role="status">${u.loading ? 'Reading selected file…' : esc(u.filename)}${retainedFile ? ' · Complete payload retained (' + new TextEncoder().encode(u.text).length.toLocaleString() + ' bytes). Review below or paste replacement JSON.' : ''}</p>
     <div class="field"><label for="project-import-text">Or paste the full project JSON</label><textarea id="project-import-text" rows="7" data-field="project-import-text" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" ${u.loading ? 'disabled' : ''}>${retainedFile ? '' : esc(u.text)}</textarea></div>
     <p class="small muted">Includes saved identity, requirements, screens, component content/variants, entities, source operations, test recipes, design tokens, arrangement, notes and folders. Excludes unsubmitted drafts, execution trust, machine paths, generated files and test receipts.</p>
     <div class="error" id="project-transfer-error" role="alert" tabindex="-1">${esc(u.error)}</div>${summary}`,
-    button('Cancel', 'close', '', 'ghost') + (current ? button('Export current project', 'project-backup', '', '', 'download') : '') +
+    button('Cancel', 'close', '', 'ghost') + (u.starter && u.candidate ? button('Back to configuration','starter-back','','ghost') : '') + (current ? button('Export current project', 'project-backup', '', '', 'download') : '') +
     button('Review JSON', 'project-import-review', '', '', 'search', u.loading ? 'disabled' : '') +
     button(current ? 'Replace project' : 'Import project', 'project-import-apply', '', 'primary', 'file', !p || u.loading ? 'disabled' : ''));
 }
@@ -162,7 +162,9 @@ function handleCompanionTransfer(action) {
 function editCompanionTransfer(el) {
   if (el.dataset.field === 'project-import-text') {
     projectTransferUi.serial++; projectTransferUi.filename = ''; projectTransferUi.text = el.value; projectTransferUi.candidate = null;
-    projectTransferUi.error = '';
+    projectTransferUi.error = ''; projectTransferUi.starter = null;
+    document.getElementById('starter-review-context')?.remove();
+    document.querySelector('#modal [data-action="starter-back"]')?.remove();
     // Keep a large pasted document in its existing textarea, preserving caret and
     // avoiding a full modal replacement on every keystroke.
     document.getElementById('project-import-summary')?.remove();
@@ -182,8 +184,8 @@ function companionHandoffDialog() {
   const folders = companionFolders(), filename = (project()?.id || 'my-plugin') + '.companion.json';
   return dialogBody('Project JSON → shell script', `<p>Export the full project, save it locally, then run this command from the shell checkout. Use your actual vault directory.</p>
     ${command('npm run --silent companion:generate -- --input "' + filename + '" --vault "/path/to/vault" --target "."')}
-    <p><strong>Version 1 returns the supplied JSON only.</strong> It validates the envelope and contained target, prints the original bytes to stdout, and writes nothing. Full boilerplate generation is the next implementation stage.</p>
+    <p><strong>Version 1 returns the supplied JSON only.</strong> It validates the envelope and contained target, prints the original bytes to stdout, and writes nothing. For runnable boilerplate use the separate reviewed generator, not this inspection command.</p>
     <dl class="receipt"><dt>Future codebase</dt><dd>&lt;target&gt;/${esc(folders.codebaseFolder)}/</dd><dt>Future tests</dt><dd>&lt;target&gt;/${esc(folders.testsFolder)}/</dd></dl>
     <p class="small muted">Use a nested relative target such as plugins/companion when needed. Target and folder checks do not authorize installation or execution. The browser never launches the shell.</p>`,
-    button('Close', 'close', '', 'ghost') + (project() ? button('Export project JSON', 'project-export', '', 'primary', 'download') : ''));
+    button('Close', 'close', '', 'ghost') + (project() ? button('Reviewed code generator','starter-generate','','primary','terminal') + button('Export project JSON', 'project-export', '', '', 'download') : ''));
 }

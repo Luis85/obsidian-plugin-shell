@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "starters": [
+    {
+      "id": "blank",
+      "name": "Start Blank",
+      "category": "Foundations",
+      "level": "Foundation",
+      "summary": "A minimal runnable plugin shell with no example domain or product requirements.",
+      "outcome": "Best when your idea does not fit an existing pattern.",
+      "tags": [
+        "blank",
+        "empty",
+        "minimal",
+        "custom"
+      ],
+      "includes": [
+        "Command and ribbon entry to an empty workspace",
+        "Native settings surface and host-friendly design tokens",
+        "No example entities, source recipes or PRDs"
+      ],
+      "implementation": [
+        "Your domain model, pages and business behavior",
+        "Native acceptance and release qualification"
+      ],
+      "version": "1.0.0",
+      "file": "blank.companion.json",
+      "sha256": "ad92df85da5d6a11659f409e2cacc1239ef09ef05c3d9de509997891919fd38f"
+    },
+    {
+      "id": "command-utility",
+      "name": "Command Utility",
+      "category": "Foundations",
+      "level": "Foundation",
+      "summary": "A small command-led tool for transforming or inspecting text.",
+      "outcome": "Start here for a focused utility rather than a large workspace.",
+      "tags": [
+        "command",
+        "editor",
+        "text",
+        "selection",
+        "utility"
+      ],
+      "includes": [
+        "Utility workbench with text input and preview",
+        "Native command, ribbon and settings entry points",
+        "Local clear-input effect and scoped PRD acceptance TODOs"
+      ],
+      "implementation": [
+        "Bind the active editor or selection through host APIs",
+        "Implement the transformation and preserve undo history"
+      ],
+      "version": "1.0.0",
+      "file": "command-utility.companion.json",
+      "sha256": "3d50516633e00e1a54fa22e01f1083ff808e3facb8ede78f81a7e8456a5c57ed"
+    },
+    {
+      "id": "quick-capture",
+      "name": "Quick Capture",
+      "category": "Capture",
+      "level": "Everyday",
+      "summary": "Collect ideas through a focused capture dialog and a reviewable inbox.",
+      "outcome": "Adapt for notes, bookmarks, meeting intake or a personal inbox.",
+      "tags": [
+        "capture",
+        "inbox",
+        "form",
+        "bookmark",
+        "template"
+      ],
+      "includes": [
+        "Inbox, capture modal and item details",
+        "Capture-item entity and explicit list-source contract",
+        "Synthetic fixture states and draft/reset interactions"
+      ],
+      "implementation": [
+        "Validate and persist notes atomically",
+        "Choose append/create behavior and protect filenames"
+      ],
+      "version": "1.0.0",
+      "file": "quick-capture.companion.json",
+      "sha256": "80135ba860da2cc8001fbd1acbe5ce9c80294d040baa7e495645bd0895db64df"
+    },
+    {
+      "id": "tasks-projects",
+      "name": "Tasks & Projects",
+      "category": "Organize",
+      "level": "Everyday",
+      "summary": "Build a note-backed task workspace linked to project records.",
+      "outcome": "Use for a personal planner, delivery backlog or project tracker.",
+      "tags": [
+        "tasks",
+        "project",
+        "kanban",
+        "backlog",
+        "status",
+        "planner"
+      ],
+      "includes": [
+        "Task list, task detail and project overview",
+        "Task and project entities with a declared relationship",
+        "Typed status/date fields, fixture list and acceptance TODOs"
+      ],
+      "implementation": [
+        "Implement task updates and relationship persistence",
+        "Add recurrence, drag-and-drop or reminders only as needed"
+      ],
+      "version": "1.0.0",
+      "file": "tasks-projects.companion.json",
+      "sha256": "fd53cb655ebc936caca77d73bcf34c864d90d8cdd46db626c660b17d03c0fd23"
+    },
+    {
+      "id": "knowledge-collection",
+      "name": "Knowledge Collection",
+      "category": "Organize",
+      "level": "Everyday",
+      "summary": "Organize structured notes as a browsable collection with editable details.",
+      "outcome": "Adapt into a reading list, research library, asset register or simple CRM.",
+      "tags": [
+        "collection",
+        "research",
+        "reading",
+        "crm",
+        "records",
+        "catalog",
+        "metadata"
+      ],
+      "includes": [
+        "Collection list, record detail and capture form",
+        "Record/category models and a relationship",
+        "Typed fields, source port and fixture scenarios"
+      ],
+      "implementation": [
+        "Implement note creation and metadata changes",
+        "Define domain validation and attachment policy"
+      ],
+      "version": "1.0.0",
+      "file": "knowledge-collection.companion.json",
+      "sha256": "ab74b636379bb6654897bf4b4a75713632c429d612e9cec4b8fe1260d9d03723"
+    },
+    {
+      "id": "daily-journal",
+      "name": "Daily Journal",
+      "category": "Capture",
+      "level": "Everyday",
+      "summary": "Create a dated-entry workspace with a writing surface and review history.",
+      "outcome": "Use for reflection, habit logs, stand-ups or daily work notes.",
+      "tags": [
+        "daily",
+        "journal",
+        "habit",
+        "date",
+        "calendar",
+        "reflection"
+      ],
+      "includes": [
+        "Today, journal history and entry detail",
+        "Journal-entry model with a date field",
+        "Date-focused fixtures and review navigation"
+      ],
+      "implementation": [
+        "Define timezone/date-key and duplicate-day rules",
+        "Implement native note persistence; calendar engine not included"
+      ],
+      "version": "1.0.0",
+      "file": "daily-journal.companion.json",
+      "sha256": "dbb9077b9c786ac489875020ef88dd3e0f1b4491b1116edbce19014c1009b183"
+    },
+    {
+      "id": "vault-dashboard",
+      "name": "Vault Dashboard",
+      "category": "Explore",
+      "level": "Everyday",
+      "summary": "Present note-backed results in a calm overview and drill-down list.",
+      "outcome": "Adapt for a home view, reading dashboard or project health overview.",
+      "tags": [
+        "dashboard",
+        "homepage",
+        "query",
+        "dataview",
+        "overview",
+        "reporting"
+      ],
+      "includes": [
+        "Overview, results list and result detail",
+        "Read-only result entity and source operation",
+        "Default, narrow, empty and error fixture scenarios"
+      ],
+      "implementation": [
+        "Implement scoped indexing and result calculation",
+        "Choose caching/invalidation; no Dataview dependency is assumed"
+      ],
+      "version": "1.0.0",
+      "file": "vault-dashboard.companion.json",
+      "sha256": "2fa3beed328789d41545c4f290232a85093980aeed24be9943a8967261912300"
+    },
+    {
+      "id": "note-inspector",
+      "name": "Note Inspector",
+      "category": "Explore",
+      "level": "Everyday",
+      "summary": "Inspect a note’s declared metadata and review a possible edit.",
+      "outcome": "Use for contextual helpers, property editors or note-quality tools.",
+      "tags": [
+        "inspector",
+        "active note",
+        "metadata",
+        "properties",
+        "context",
+        "sidebar"
+      ],
+      "includes": [
+        "Metadata inspection and review surfaces",
+        "Note-record schema and a read contract",
+        "Visible edit draft with local reset behavior"
+      ],
+      "implementation": [
+        "Bind active-note changes and lifecycle cleanup",
+        "Implement safe frontmatter updates and stale-note checks",
+        "Respect user pane placement; native right-sidebar placement is not generated"
+      ],
+      "version": "1.0.0",
+      "file": "note-inspector.companion.json",
+      "sha256": "1352fa68552fcda196e79d6b370d6bccd0410242fcd0ae653c795a68a3417944"
+    },
+    {
+      "id": "import-integration",
+      "name": "Import & Integration",
+      "category": "Integrate",
+      "level": "Advanced",
+      "summary": "Design a fixture-first import workflow before connecting a live service.",
+      "outcome": "Use for CSV/JSON intake or a future external-service adapter.",
+      "tags": [
+        "import",
+        "integration",
+        "api",
+        "csv",
+        "json",
+        "mapping",
+        "external"
+      ],
+      "includes": [
+        "Preview, mapping review and import result surfaces",
+        "Import-record model and explicit read-source contract",
+        "Synthetic API fixture; example.invalid locator and no credentials"
+      ],
+      "implementation": [
+        "Implement parsing, mapping, idempotency and rollback",
+        "Add user-authorized networking, cancellation and secure credential handling",
+        "No OAuth, live API calls or file parsing are implied"
+      ],
+      "version": "1.0.0",
+      "file": "import-integration.companion.json",
+      "sha256": "6c57c39949df3e321c33cbe37f7f4bc20c6104759bdd170df75c7e39b0459606"
+    }
+  ]
+}

@@ -44,8 +44,9 @@ async function defaultRoots(root) {
     'docs/concepts/companion/companion-project.json']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
-  const sidecar = 'docs/concepts/companion/test-kit';
-  if (await optionalInput(root, sidecar, true)) roots.push(sidecar);
+  for (const directory of ['docs/concepts/companion/test-kit', 'docs/concepts/companion/starters']) {
+    if (await optionalInput(root, directory, true)) roots.push(directory);
+  }
   return roots;
 }
 export async function sourceInputs(root, roots) {
