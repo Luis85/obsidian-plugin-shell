@@ -13708,7 +13708,7 @@ function designSystemIssues(s){
 function validateDesignSystem(value, pluginId) {
   let errors;
   try { errors = designSystemIssues(value); } catch { errors = ['Malformed design-system declaration.']; }
-  if (pluginId && value?.colors?.some(token => token.host.startsWith('--'+pluginId+'-'))) errors.push('Host colors cannot reference the generated plugin namespace.');
+  if (pluginId && !errors.length && Array.isArray(value?.colors) && value.colors.some(token => token.host.startsWith('--'+pluginId+'-'))) errors.push('Host colors cannot reference the generated plugin namespace.');
   if (errors.length) throw new Error('DESIGN_SYSTEM_INVALID: ' + errors.join(' '));
   return value;
 }

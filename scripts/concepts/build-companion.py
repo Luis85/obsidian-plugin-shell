@@ -4,7 +4,7 @@ ROOT=Path(__file__).resolve().parents[2] / "docs/concepts/companion"
 
 def load_starters(root):
  folder=root/'starters'
- manifest=json.loads((folder/'catalog.json').read_text())
+ manifest=json.loads((folder/'catalog.json').read_text(encoding='utf-8'))
  if manifest.get('schemaVersion')!=1 or not isinstance(manifest.get('starters'),list):raise ValueError('Invalid starter catalog')
  files={'catalog.json'};ids=set()
  for entry in manifest['starters']:
@@ -19,7 +19,7 @@ def load_starters(root):
  return manifest
 
 def build(output: Path, check: bool = False):
- s=(ROOT/'src/base.html').read_text()
+ s=(ROOT/'src/base.html').read_text(encoding='utf-8')
  def change(old,new):
   nonlocal s
   if s.count(old)!=1:raise ValueError(f'Expected one baseline seam, got {s.count(old)}: {old[:90]}')
@@ -72,7 +72,7 @@ def build(output: Path, check: bool = False):
  source_inputs=modules+['style-guide-model.js','test-data-model.js','data-source-model.js','semantic-model.js','component-variants.js','vault-project.js','brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js']+styles
  tools=['engine.mjs','adapters.mjs','storage.mjs','server.mjs','cli.mjs','faker-provider.mjs','client.mjs']
  inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}|{'test-kit/'+name for name in tools}
- config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text())
+ config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text(encoding='utf-8'))
  prefix='docs/concepts/companion/'
  registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix)]
  actual={file.relative_to(ROOT).as_posix() for folder in ['src','vendor','test-kit'] for file in (ROOT/folder).rglob('*') if file.suffix in {'.js','.css','.mjs'}}
@@ -86,10 +86,10 @@ def build(output: Path, check: bool = False):
   raw=(ROOT/'vendor'/entry['path']).read_bytes()
   if len(raw)!=entry['bytes'] or hashlib.sha256(raw).hexdigest()!=entry['sha256']:
    raise ValueError('Unreviewed vendor input: '+entry['path'])
- tool_sources={name:(ROOT/'test-kit'/name).read_text() for name in tools}
+ tool_sources={name:(ROOT/'test-kit'/name).read_text(encoding='utf-8') for name in tools}
  engine=tool_sources['engine.mjs'].replace('export function createFixtureEngine()', 'function createFixtureEngine()',1)
  adapters=tool_sources['adapters.mjs'].replace("import { createFixtureEngine } from './engine.mjs';\n",'',1).replace('export function createFixtureAdapter(', 'function createFixtureAdapter(',1)
- extension=engine+'\n'+adapters+'\n'+'\n'.join((ROOT/'src'/m).read_text() for m in modules)
+ extension=engine+'\n'+adapters+'\n'+'\n'.join((ROOT/'src'/m).read_text(encoding='utf-8') for m in modules)
  s=s.replace('</head>', '<script type="application/json" id="project-starters-data">'+json.dumps(load_starters(ROOT),ensure_ascii=False).replace('<','\\u003c')+'</script>\n</head>',1)
  s=s.replace('</head>', '<script type="application/json" id="test-data-tool-sources">'+json.dumps(tool_sources).replace('<','\\u003c')+'</script>\n</head>',1)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
@@ -104,19 +104,19 @@ def build(output: Path, check: bool = False):
  for name in ds_modules:
   path='scripts/companion/'+name
   if path not in config['entry']:raise ValueError('Shared design-system module missing from inventory: '+path)
-  ds_shared+='\n'+'\n'.join(line for line in (ROOT.parents[2]/path).read_text().splitlines() if not line.startswith('import '))
+  ds_shared+='\n'+'\n'.join(line for line in (ROOT.parents[2]/path).read_text(encoding='utf-8').splitlines() if not line.startswith('import '))
  composition_contract=ROOT.parents[2]/'scripts/companion/composition-contract.mjs'
  if 'scripts/companion/composition-contract.mjs' not in config['entry']:raise ValueError('Shared composition contract missing from analyzer inventory')
  import re
- shared=(ds_shared+'\n'+composition_contract.read_text()+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(), flags=re.M)+'\n'+storymap_contract.read_text()+'\n'+contract.read_text().replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
+ shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+contract.read_text(encoding='utf-8').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
  starter_contract=ROOT.parents[2]/'scripts/companion/starter-contract.mjs'
  if 'scripts/companion/starter-contract.mjs' not in config['entry']:raise ValueError('Starter contract missing from inventory')
- shared+='\n'+re.sub(r'^import .*\n','',starter_contract.read_text(),flags=re.M).replace('export const ','const ').replace('export function ','function ')
- change('<script>','<script>\n'+shared+'\n'+(ROOT/'src/brick-catalog.js').read_text()+'\n'+(ROOT/'src/catalog.js').read_text()+'\n'+(ROOT/'src/canvas-catalog.js').read_text()+'\n'+(ROOT/'src/flow-catalog.js').read_text()+'\n'+(ROOT/'src/vault-project.js').read_text()+'\n'+(ROOT/'src/style-guide-model.js').read_text()+'\n'+(ROOT/'src/test-data-model.js').read_text()+'\n'+(ROOT/'src/data-source-model.js').read_text()+'\n'+(ROOT/'src/semantic-model.js').read_text()+'\n'+(ROOT/'src/component-variants.js').read_text()+'\nlet dialogReturnFocus=null;\n')
- change('</style>',''.join((ROOT/'src'/name).read_text() for name in styles)+'\n</style>')
+ shared+='\n'+re.sub(r'^import .*\n','',starter_contract.read_text(encoding='utf-8'),flags=re.M).replace('export const ','const ').replace('export function ','function ')
+ change('<script>','<script>\n'+shared+'\n'+(ROOT/'src/brick-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/canvas-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/flow-catalog.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/vault-project.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/style-guide-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/test-data-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/data-source-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/semantic-model.js').read_text(encoding='utf-8')+'\n'+(ROOT/'src/component-variants.js').read_text(encoding='utf-8')+'\nlet dialogReturnFocus=null;\n')
+ change('</style>',''.join((ROOT/'src'/name).read_text(encoding='utf-8') for name in styles)+'\n</style>')
  # Local pinned vendors only. Preserve upstream licenses and no runtime requests.
  vendor=ROOT/'vendor'
- css=(vendor/'vue-flow.scoped.css').read_text()
+ css=(vendor/'vue-flow.scoped.css').read_text(encoding='utf-8')
  # Reuse the hash-verified upstream scope for the independent semantic island.
  css += '\n'+css.replace('#vf-root', '#er-flow')+'\n'+css.replace('#vf-root', '#sm-flow')+'\n'+css.replace('#vf-root', '#dt-flow')
  s=s.replace('<style>', '<style>\n'+css+'\n',1)
@@ -133,7 +133,7 @@ def build(output: Path, check: bool = False):
   return text.replace('</script','<\\/script')
  bundles='\n'.join('<script data-vendor="'+name+'">'+vendor_text(name)+'</script>' for name in vendor_scripts)
  s=s.replace('<script>',bundles+'\n<script>',1)
- notices=(vendor/'THIRD_PARTY_NOTICES.txt').read_text().replace('--','—')
+ notices=(vendor/'THIRD_PARTY_NOTICES.txt').read_text(encoding='utf-8').replace('--','—')
  s=s.replace('</head>', '<!--\n'+notices+'\n-->\n</head>',1)
  encoded=s.encode('utf-8')
  if check:

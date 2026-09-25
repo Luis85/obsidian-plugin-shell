@@ -1,6 +1,10 @@
+import recipes from './recipes.json' with { type: 'json' };
 const flags = new Set(['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document']);
 const values = new Set(['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference']);
-export const builtinRecipes = ['feature', 'entity', 'view', 'component', 'store', 'usecase', 'command', 'modal', 'setting', 'event', 'listener', 'style', 'locale', 'maker'];
+export const builtinRecipes = Object.freeze(recipes.map(recipe => recipe.id));
+export function recipeOptions(maker) {
+  return recipes.find(recipe => recipe.id === maker)?.options ?? ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature'];
+}
 export function parseArguments(args) {
   const options = {}; const positional = [];
   for (let index = 0; index < args.length; index++) {

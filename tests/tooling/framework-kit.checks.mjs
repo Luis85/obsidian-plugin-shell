@@ -1,0 +1,68 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, writeFile, readFile, rm, readdir, realpath } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { extractArchive } from './framework-archive-fixture.mjs';
+import { zip } from '../../scripts/framework/zip.ts';
+import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
+const root = fileURLToPath(new URL('../../', import.meta.url));
+function cli(dir, args) {
+  return spawnSync(process.execPath, [join(dir, 'shell.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
+}
+test('compiled kit bootstraps, imports and generates without dependencies or Git', { timeout: 300000 }, async t => {
+  const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
+  const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler()), archive = zip(files);
+  assert.deepEqual(archive, zip([...files].reverse()), 'ZIP ordering must be deterministic');
+  const extracted = await extractArchive(archive, dir);
+  assert.equal(extracted.length, files.length);
+  for (const file of files) assert.deepEqual(await readFile(join(dir, file.path)), file.bytes);
+  assert.ok(!extracted.some(path => /docs\/concepts\/companion\/(?:src|vendor)\//.test(path)));
+  assert.ok(!extracted.some(path => path.endsWith('docs/concepts/companion/index.html')));
+  assert.ok(!(await readdir(dir)).includes('node_modules')); assert.ok(!(await readdir(dir)).includes('.git'));
+  assert.ok((await verifyKit(dir)).files.length > 100);
+  let output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
+  assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
+  assert.ok(files.some(file => file.path === '.framework/compiled/scripts/framework/cli.js'));
+  const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+  design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
+  design.settings = { codebaseFolder: 'app/source', testsFolder: 'spec' };
+  await writeFile(join(dir, 'input.json'), JSON.stringify(design));
+  output = cli(dir, ['setup', '--input', 'input.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  output = cli(dir, ['generate', '--json', '--plan-out', 'generation.plan.json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  const plan = JSON.parse(output.stdout); assert.equal(plan.status, 'planned'); assert.deepEqual(plan.data.conflicts, []);
+  assert.ok(!(await readdir(dir)).includes('src'), 'preview cannot write source');
+  output = cli(dir, ['plan', 'apply', 'generation.plan.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  assert.equal(JSON.parse(output.stdout).status, 'applied');
+  assert.match(await readFile(join(dir, 'app/source/generated/presentation/stores/authoring-vault.ts'), 'utf8'), /defineStore/);
+  assert.match(await readFile(join(dir, 'vitest.project.config.mjs'), 'utf8'), /spec\/project/);
+  assert.equal(JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8')).id, 'field-notes');
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'unchanged');
+  await writeFile(join(dir, 'draft.json'), JSON.stringify({ ...design, design: { ...design.design, goal: 'Unreviewed draft' } }));
+  output = cli(dir, ['generate', '--input', 'draft.json', '--yes', '--json']); assert.notEqual(output.status, 0); assert.match(output.stdout + output.stderr, /INPUT_REQUIRES_IMPORT/);
+  assert.notEqual(JSON.parse(await readFile(join(dir, 'design/project.json'), 'utf8')).design.goal, 'Unreviewed draft');
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'unchanged');
+  design.design.goal = 'Revised intent with unchanged implementation contracts';
+  await writeFile(join(dir, 'input.json'), JSON.stringify(design));
+  output = cli(dir, ['project', 'import', '--input', 'input.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  assert.equal(JSON.parse(await readFile(join(dir, 'design/project.json'), 'utf8')).design.goal, design.design.goal);
+  const source = join(dir, 'app/source/generated/infrastructure/sources/authoring-vault.ts'); await writeFile(source, (await readFile(source, 'utf8')) + '\n// developer edit\n');
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.match(await readFile(source, 'utf8'), /developer edit/);
+  output = cli(dir, ['status', '--json']); assert.equal(output.status, 0, output.stderr); assert.ok(JSON.parse(output.stdout).diagnostics.some(item => item.code === 'ACCEPTANCE_PENDING'));
+  const compiled = join(dir, '.framework/compiled/scripts/framework/catalog.js'); await writeFile(compiled, (await readFile(compiled, 'utf8')) + '\n// drift\n');
+  await assert.rejects(verifyKit(dir), /fingerprint mismatch/);
+});
+test('kit manifest rejects traversal and duplicate case aliases', () => {
+  const base = { schemaVersion: 1, version: '0.4.0', compilerVersion: '6.0.3', sourceHash: 'a'.repeat(64), files: [{ path: '.framework/template/LICENSE', hash: 'a'.repeat(64), bytes: 1 }], bootstrap: ['shell.mjs', 'package.json', 'README.md', 'LICENSE'].map(path => ({path, hash: 'b'.repeat(64)})) };
+  assert.equal(kitManifest(base).version, '0.4.0');
+  assert.throws(() => kitManifest({ ...base, files: [{ ...base.files[0], path: '.framework/template/../../outside' }] }));
+  assert.throws(() => kitManifest({ ...base, files: [...base.files, { ...base.files[0], path: '.framework/template/license' }] }));
+});
+test('archive rejects traversal and duplicate entries', () => {
+  assert.throws(() => zip([{ path: '../outside', bytes: Buffer.from('x') }]));
+  assert.throws(() => zip([{ path: 'x', bytes: Buffer.from('x') }, { path: 'x', bytes: Buffer.from('x') }]));
+});

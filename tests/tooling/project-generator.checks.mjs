@@ -40,6 +40,8 @@ for (const [label,change,expected] of [
   ['missing operation',d=>d.design.dataSources.flows[0].operation='missing',/flow/],
   ['missing requirement screen',d=>d.design.prds[0].requirements[0].nodes.push('missing'),/requirement/],
   ['unsafe source root',d=>d.settings.codebaseFolder='scripts',/tooling/],
+  ['case-aliased source root',d=>d.settings.codebaseFolder='Scripts/app',/tooling/],
+  ['case-aliased tests root',d=>d.settings.testsFolder='DOCS',/tooling/],
   ['relationship collision',d=>d.design.semantic.relationships[0].key='id',/collision/],
 ]) test('rejects '+label,()=>{ const d=clone(); change(d); assert.throws(()=>projectModel(d),expected); });
 test('schema subset creates type-safe fixtures without weakening constraints',()=>{
@@ -71,7 +73,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.deepEqual(await readdir(options.vault),['project.json']);
   assert.equal(first.hash,(await planProject(options)).hash);
   await assert.rejects(applyProject(first,'wrong-hash'),/stale/);
-  const applied=await applyProject(first,first.hash); assert.ok(applied.written.length>1000);
+  const applied=await applyProject(first,first.hash); assert.equal(applied.written.length,first.plan.changes.filter(change=>change.status!=='unchanged').length); assert.ok(applied.written.length>100);
   const target=join(options.vault,options.target);
   assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.match(await readFile(join(target,'src/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);
@@ -95,6 +97,12 @@ test('regeneration preserves consumer business logic and refuses conflicting rew
   await writeFile(absolute,(await readFile(absolute,'utf8'))+'\n// consumer implementation\n');
   const preserve=await planProject(options); assert.deepEqual(preserve.conflicts,[]); assert.ok(preserve.preserved.includes(path));
   await applyProject(preserve,preserve.hash); assert.match(await readFile(absolute,'utf8'),/consumer implementation/);
+  const kept=await readFile(absolute); await writeFile(absolute,Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),kept]));
+  const bom=await planProject(options); assert.deepEqual(bom.conflicts,[]); assert.ok(bom.preserved.includes(path)); assert.equal(bom.plan.changes.find(c=>c.path.endsWith(path)).status,'unchanged');
+  await writeFile(absolute,Buffer.concat([kept,Buffer.from([0xff,0xfe,0x0a])]));
+  const binary=await planProject(options); assert.ok(binary.conflicts.includes(path+': customized file is not UTF-8 text and cannot be preserved byte-for-byte')); assert.ok(!binary.preserved.includes(path));
+  await assert.rejects(applyProject(binary,binary.hash),/conflicts/); assert.deepEqual(await readFile(absolute),Buffer.concat([kept,Buffer.from([0xff,0xfe,0x0a])]));
+  await writeFile(absolute,kept);
   const next=clone(); const source=next.design.dataSources.sources[0]; source.operations.push({...structuredClone(source.operations[0]),id:'new-operation',slug:'new-operation',name:'New operation'});
   await writeFile(options.input,JSON.stringify(next)); const conflict=await planProject(options); assert.ok(conflict.conflicts.some(c=>c.startsWith(path+':')));
   await assert.rejects(applyProject(conflict,conflict.hash),/conflicts/); assert.match(await readFile(absolute,'utf8'),/consumer implementation/);

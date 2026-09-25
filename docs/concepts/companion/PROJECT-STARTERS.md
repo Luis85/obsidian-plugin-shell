@@ -61,7 +61,7 @@ Create the full definition through the existing companion authoring model and ex
 
 Place the file under `starters/`, update its exact SHA-256 in `catalog.json`, and maintain a unique portable ID. Bump the starter's version when changing its template contract. Preserve meaningful internal references; never silently migrate an already created project.
 
-The folder has an exact inventory. Unlisted files, missing files, duplicate sources, traversal and symlinks are rejected. No remote URLs can stand in for a source filename. Adding a runtime source or style also requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
+The folder has an exact inventory. Unlisted files, missing files, duplicate sources, traversal, symlinks and altered bytes, including a CRLF checkout, are rejected. The repository `.gitattributes` pins LF on every platform so a Windows `autocrlf` checkout cannot turn a reviewed SHA-256 into a false integrity failure. No remote URLs can stand in for a source filename. Adding a runtime source or style also requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
 
 Run:
 

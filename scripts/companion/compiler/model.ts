@@ -9,7 +9,7 @@ export interface Screen { id: string; slug: string; label: string; kind: string;
 export interface Requirement { id: string; key: string; title: string; acceptance: string; prd: string; nodes: string[]; components: string[] }
 export interface Model { document: Row; project: Row; sourceRoot: string; testRoot: string; entities: Entity[]; sources: Source[]; screens: Screen[]; links: Row[]; components: Row[]; requirements: Requirement[]; flows: Row[]; warnings: string[] }
 export const digest = (text: string | Uint8Array) => createHash('sha256').update(text).digest('hex');
-export const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
+export { serializeJson as json } from '../../contracts/serialization.ts';
 export const literal = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('\u2028', '\\u2028').replaceAll('\u2029', '\\u2029');
 export const symbol = (slug: string) => 'G' + slug.split('-').map(word => word[0]!.toUpperCase() + word.slice(1)).join('');
 export function requireValue(value: unknown, message: string): asserts value { if (!value) throw new Error('GENERATOR_INVALID: ' + message); }
@@ -80,7 +80,7 @@ function shape(value: unknown, entities: Entity[]): Schema | null {
 export function projectModel(input: unknown): Model {
   const document = row(validateCompanionDocument(input)); const design = row(document.design); const project = row(document.project); const settings = row(document.settings);
   const sourceRoot = text(settings.codebaseFolder) + '/generated'; const testRoot = text(settings.testsFolder) + '/project';
-  requireValue(!['scripts','docs','harness','node_modules','dist'].some(p => [String(settings.codebaseFolder),String(settings.testsFolder)].some(f => f === p || f.startsWith(p+'/'))), 'Generated roots overlap framework tooling.');
+  requireValue(!['scripts','docs','harness','node_modules','dist'].some(p => [String(settings.codebaseFolder),String(settings.testsFolder)].map(f => f.toLowerCase()).some(f => f === p || f.startsWith(p+'/'))), 'Generated roots overlap framework tooling.');
   const entityModels = entities(design); const components = rows(design.library); unique(components, c => slug(c.id)); for (const c of components) { text(c.name,120); text(c.description ?? '',10000); }
   const screens = rows(design.nodes,60).map(n => ({ id:text(n.id,120), slug:slug(n.slug), label:text(n.label,120), kind:text(n.kind,40), parent:n.parent === null ? null : text(n.parent,120), nav:n.nav === true, entry:n.entry === true, command:n.command === true, ribbon:n.ribbon === true, goal:text(n.goal ?? ''), components:rows(n.components ?? [],60).map(c => text(c.id,120)) }));
   unique(screens, n => n.slug); unique(screens,n=>symbol(n.slug)); requireValue(screens.some(n=>!['group','action','modal'].includes(n.kind)), 'Declare at least one navigable screen.');

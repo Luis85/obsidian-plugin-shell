@@ -72,6 +72,12 @@ test('case-sensitive identity changes do not replace domain words or authored co
 });
 for(const [label,change] of [
  ['altered bytes',async f=>{const p=join(f,'blank.companion.json');await writeFile(p,(await readFile(p,'utf8'))+' ');}],
+ ['CRLF checkout',async f=>{const p=join(f,'blank.companion.json');await writeFile(p,(await readFile(p,'utf8')).replaceAll('\n','\r\n'));}],
  ['orphan source',async f=>writeFile(join(f,'unlisted.json'),'{}')],
  ['symlink source',async (f,t)=>{const p=join(f,'blank.companion.json');await rm(p);return fileSymlink(t,join(root,'package.json'),p);}],
 ])test('file loader rejects '+label,t=>temporary(async folder=>{const f=join(folder,'docs/concepts/companion/starters');await mkdir(f,{recursive:true});await cp(join(root,'docs/concepts/companion/starters'),f,{recursive:true});if(await change(f,t)===false)return;await assert.rejects(loadStarterCatalog(folder),/STARTER_INVALID/);}));
+test('starter sources are LF-only bytes and the repository pins LF checkout for every platform',async()=>{
+ const folder=join(root,'docs/concepts/companion/starters');
+ for(const name of await readdir(folder))assert.ok(!(await readFile(join(folder,name))).includes(13),name+' contains a carriage return');
+ assert.match(await readFile(join(root,'.gitattributes'),'utf8'),/^\* text=auto eol=lf$/m);
+});

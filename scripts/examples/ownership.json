@@ -242,17 +242,17 @@
     },
     {
       "path": "src/styles/shell.css",
-      "sha256": "0cd251d43dbab61883ef668963a781336b4cace825454ed92c32db1c9187a59a",
+      "sha256": "f0113c434ed7fc810922d51681145422811f1c9cd436eef02bff8e1f6c181588",
       "template": "src__styles__shell.css.txt"
     },
     {
       "path": "src/styles/panels.css",
-      "sha256": "959bf8bbd1a5d291a4daeaba4f6c0f6ec54afed17478cdaa8461c0535c5e19b9",
+      "sha256": "89e9e2e5f6870e020c8a113356b1afa7e72859529d5cabb66599b96ee9a09146",
       "template": "src__styles__panels.css.txt"
     },
     {
       "path": "src/styles/layout.css",
-      "sha256": "c05dafdd6fdd51a7b741f25b50d5e9d82c2b419819f8bb4729de2b7bfd352e4f",
+      "sha256": "54a955fe47aec9628ebb484e4795523de340d706da5f8204750266bb4fb2dacf",
       "template": "src__styles__layout.css.txt"
     },
     {
@@ -267,7 +267,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "8c6714287a0bc72d14900987155cdc69ff141d79fcf369da31bcd432e19014eb",
+      "sha256": "65c72290c6985989208449d46b1139e48f721aaf47e509de30b12993fd0feeb5",
       "template": "README.md.txt"
     },
     {

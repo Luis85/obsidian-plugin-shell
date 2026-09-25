@@ -5,6 +5,15 @@ import { sampleCode } from './schema-code.ts';
 import { mapDetailPayload } from '../runtime/detail-actions.ts';
 import { parseDetailControl } from '../runtime/detail-controls.ts';
 import { visibleDetails, type DetailDocument } from '../runtime/detail-runtime.ts';
+const control = (kind: string) => ['input','checkbox','number'].includes(kind) ? ' input' : kind==='textarea' ? ' textarea' : kind==='select' ? ' select' : '';
+/** A value effect is asserted on the target control's real state; serialized HTML never shows a checked box as "true". */
+function valueAssertion(target: string, kind: string, value: unknown): string {
+  const selector = literal('[data-design-node="'+target+'"]'+control(kind));
+  if (kind === 'checkbox') return `expect(wrapper.get<HTMLInputElement>(${selector}).element.checked).toBe(${value === true ? 'true' : 'false'});`;
+  if (control(kind)) return `expect(wrapper.get<HTMLInputElement>(${selector}).element.value).toBe(${literal(String(value))});`;
+  if (kind === 'tabs') return `expect(wrapper.get(${literal('[data-design-node="'+target+'"] [aria-selected="true"]')}).text()).toBe(${literal(String(value))});`;
+  return `expect(wrapper.get(${selector}).text()).toContain(${literal(String(value))});`;
+}
 export function detailTests(m: Model, doc: DetailDocument, component: string, add: Add): void {
   const path = `${m.testRoot}/details/${doc.id}.test.ts`; const root = m.sourceRoot;
   const properties = doc.kind === 'component' ? Object.fromEntries(Object.entries(componentMembers(detailDefinitions(m).find(c=>c.id===doc.ownerId)!).props).map(([key,type])=>[key,type === 'boolean' ? false : type === 'number' ? 0 : 'fixture'])) : {};
@@ -27,7 +36,7 @@ export function detailTests(m: Model, doc: DetailDocument, component: string, ad
       const target='[data-design-node="'+edge.target+'"]';
       if(effect.type==='state')assertion=`expect(wrapper.attributes('data-design-state')).toBe(${literal(effect.value)});`;
       if(effect.type==='toggle')assertion=`expect(wrapper.find(${literal(target)}).exists()).toBe(false);`;
-      if(effect.type==='value')assertion=`expect(wrapper.html()).toContain(${literal(String(effect.value))});`;
+      if(effect.type==='value')assertion=valueAssertion(edge.target, doc.nodes.find(n=>n.id===edge.target)!.kind, effect.value);
       if(effect.type==='emit')assertion=`expect(wrapper.emitted(${literal(String(effect.value))})).toHaveLength(1);`;
       if(effect.type==='focus')assertion=`expect(wrapper.get(${literal(target)}).element.contains(document.activeElement) || wrapper.get(${literal(target)}).element===document.activeElement).toBe(true);`;
       assertion+=' expect(handle).not.toHaveBeenCalled(); expect(navigate).not.toHaveBeenCalled();';

@@ -171,7 +171,9 @@
     "docs/concepts/companion/src/project-starter-views.js",
     "docs/concepts/companion/src/project-starters.css",
     "scripts/companion/starter-files.mjs",
-    "scripts/companion/qualify-starter.mjs"
+    "scripts/companion/qualify-starter.mjs",
+    "scripts/framework/operations.ts",
+    "scripts/framework/cli.ts"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -368,7 +370,8 @@
           "harness",
           "tooling",
           "styles",
-          "fixture-compiler"
+          "fixture-compiler",
+          "companion-test-kit"
         ]
       },
       {

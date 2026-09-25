@@ -99,7 +99,7 @@ export function detailDocuments(m: Model): DetailDocument[] {
       requireValue(!keys.has(key), 'Ambiguous detail event; explicit branching is not declared: ' + edge.id); keys.add(key);
       const source = doc.nodes.find(n => n.id === edge.source)!;
       const allowed = source.component ? Object.keys(componentMembers(definitions.find(c => c.id === source.component!.id) ?? {}).events) :
-        ['click', 'dblclick', 'focus', 'blur', 'keydown', 'keyup', ...(['input','textarea','number','checkbox','select','tabs'].includes(source.kind) ? ['input', 'change'] : [])];
+        ['click', 'dblclick', 'focus', 'blur', 'keydown', 'keyup', ...(['input','textarea','number','checkbox','select'].includes(source.kind) ? ['input', 'change'] : source.kind === 'tabs' ? ['change'] : [])];
       requireValue(!forbidden.has(edge.event) && allowed.includes(edge.event), 'Unsupported detail event: ' + edge.id);
       requireValue(['default', 'empty', 'error'].some(state => visibleDetails(doc, state as 'default' | 'empty' | 'error').some(n => n.id === edge.source)), 'Interaction source has no enabled visible state: ' + edge.id);
       if (edge.effect?.type==='emit') { const declared=doc.kind==='component' && componentMembers(row(owner)).events[String(edge.effect.value)]; requireValue(declared && typeof edge.effect.payload===declared, 'Undeclared event or incompatible emitted payload: '+edge.id); }

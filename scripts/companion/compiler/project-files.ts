@@ -13,7 +13,7 @@ import { hostCode } from './host-code.ts';
 import { detailCode } from './detail-code.ts';
 import { styleCode } from './style-code.ts';
 const roots = ['src','scripts','tests','harness','docs','.github'];
-const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','tsconfig.generator.json'];
+const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','tsconfig.generator.json','tsconfig.framework.json'];
 export async function projectFiles(templateRoot: string, m: Model): Promise<Entry[]> {
   const entries = new Map<string,Entry>();
   const add: Add = (path,content,ownership = 'extension') => { entries.set(path,{path,content,ownership}); };
@@ -36,7 +36,7 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   add('manifest.json',json(manifest));
   const pkg = readJson('package.json'); const lock = readJson('package-lock.json');
   Object.assign(pkg,{name:m.project.id,version:m.project.version,description:m.project.description,author:m.project.author});
-  Object.assign(lock,{name:pkg.name,version:pkg.version}); Object.assign(lock.packages[''],{name:pkg.name,version:pkg.version});
+  Object.assign(lock,{name:pkg.name,version:pkg.version}); Object.assign(lock.packages[''],{name:pkg.name,version:pkg.version,...(pkg.bin ? {bin:pkg.bin} : {})});
   pkg.scripts['test:framework'] = pkg.scripts.test;
   pkg.scripts['test'] = 'vitest run --config vitest.project.config.mjs';
   pkg.scripts['test:watch'] = 'vitest --config vitest.project.config.mjs';
