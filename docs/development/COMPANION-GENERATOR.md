@@ -34,7 +34,8 @@ The original `npm run companion:generate` and `scripts/companion/generate.mjs` *
 | Navigation/interaction | Typed sitemap registry, store navigation, modal effect routing | Declared edge tests; non-navigational behavior stays TODO |
 | Modal/settings/view | Native shell lifecycle wiring and isolated Vue/Pinia mount | Generated build; native acceptance remains separate |
 | PRD requirement | Stable use-case module plus original requirement/acceptance text | Explicit `it.todo`, to replace with a failing behavioral test |
-| Design system, source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
+| Design system | Scoped Nuxt UI / shell CSS, token fragments and effective binding manifest | Shared browser/CLI compiler, generated build and real Nuxt UI harness |
+| Source recipes and rich component contracts | Portable design files, source metadata and component specification modules | Preservation/traceability, not visual or business acceptance |
 
 Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Adapters and use cases throw explicit `NotImplementedError` until implemented. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
 
@@ -60,10 +61,14 @@ Imported JSON is data. It cannot provide code templates, commands, dependency ve
 
 ## Remaining native conversion work
 
-The output is a development shell. Component files are implementation placeholders, not a faithful conversion of the browser prototype's rendered layouts or free-form props/events. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations, design-token application and seeded source recipes still need implementation and behavioral tests. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
+The output is a development shell. Component files are implementation placeholders, not a faithful conversion of the browser prototype's rendered layouts or free-form props/events. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations and seeded source recipes still need implementation and behavioral tests. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
 
 ## Technical references
 
 - Pinia testing: https://pinia.vuejs.org/cookbook/testing.html — generated tests instantiate actual Pinia rather than replacing actions with automatic mocks.
 - Vitest test API: https://vitest.dev/api/test — TODOs identify unimplemented acceptance, not passing assertions.
 - Node TypeScript execution: https://nodejs.org/api/typescript.html — type stripping executes erasable TypeScript; it does not replace the compiler type-check.
+
+## Design-system styles
+
+The JSON compiler now applies saved design tokens through its normal stylesheet import path. See [Design system → Nuxt UI styles](DESIGN-SYSTEM-STYLES.md) for the frontend contract, host/declared policy, safe regeneration and customization. This does not implement arbitrary component layout or turn usage prose into executable CSS.

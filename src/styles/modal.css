@@ -1,2 +1,2 @@
 .plugin-shell.shell-modal-form .shell-modal-copy { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 50vh; overflow: auto; }
-.plugin-shell.shell-modal-form .shell-modal-actions { display: flex; flex-wrap: wrap; gap: var(--size-4-2); justify-content: flex-end; }
+.plugin-shell.shell-modal-form .shell-modal-actions { display: flex; flex-wrap: wrap; gap: var(--plugin-shell-space-sm); justify-content: flex-end; }

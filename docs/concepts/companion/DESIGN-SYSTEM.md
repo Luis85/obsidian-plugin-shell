@@ -1,10 +1,10 @@
 # Design System: project-owned declarations and portable handoff
 
-Status: implemented in the single-project companion concept. Native authoring-vault persistence and automatic application of these tokens to production components remain separate work. The workbench theme is never replaced by the design being described.
+Status: implemented in the single-project companion concept. Scoped Nuxt UI stylesheet export and JSON-driven compiler application are implemented. Native authoring-vault persistence and arbitrary component-layout conversion remain separate work. The workbench theme is never replaced by the design being described.
 
 ## Product contract
 
-A developer can describe the target plugin's visual language under **Design → Design System** and export the saved declaration as **Markdown** or a **self-contained HTML style guide**. This is a description/editor/export feature, not a font downloader, theme installer or CSS execution console.
+A developer can describe the target plugin's visual language under **Design → Design System** and export the saved declaration as **Markdown**, a **self-contained HTML style guide**, or a **scoped Nuxt UI stylesheet**. This is a description/editor/export feature, not a font downloader, theme installer or CSS execution console.
 
 The empty state offers **Start from Obsidian-friendly defaults** or **Start empty**. Merely opening the feature does not create project data. The starter is illustrative, not a claim about the active host theme's actual values. It contains host font roles, a compact type scale, spacing and size tokens, corner radii, light/dark fallback colors, and usage notes. Existing declarations are never replaced by a starter without user action.
 
@@ -38,9 +38,10 @@ The existing source-plan preview includes:
 ```text
 docs/design/DESIGN-SYSTEM.md
 docs/design/design-system.html
+docs/design/design-system.css
 ```
 
-Changing a saved declaration invalidates a reviewed source plan because its handoff documents changed. Selecting another section or exporting does not mutate the design. Existing component definitions and variants are not silently restyled or rewritten. Automatic token binding to component code is a future, explicitly reviewed generator integration.
+Changing a saved declaration invalidates a reviewed source plan because its handoff documents changed. Selecting another section or exporting does not mutate the design. Existing component definitions and variants are not silently restyled or rewritten. The shared compiler now binds saved tokens to scoped Nuxt UI and shell variables. See [stylesheet generation](../../development/DESIGN-SYSTEM-STYLES.md) for mappings, palette policy, generated paths and the remaining component-layout boundary.
 
 ## Export guarantees
 
@@ -50,7 +51,7 @@ Changing a saved declaration invalidates a reviewed source plan because its hand
 
 The HTML's rem preview uses an explicit 16 px root. Host font roles use documented local fallbacks outside Obsidian, so a font installed only on another computer may appear differently. Font references are not a font license, an availability guarantee or permission to redistribute binaries.
 
-Exports contain **saved declarations only**. They do not mutate the vault, install a theme, or claim that production components already consume the tokens. Exported notes and descriptions are user-authored project data and may be private.
+Exports contain **saved declarations only**. They do not mutate the vault, install a theme, or claim native acceptance; the separate shell generator imports the styles into the generated production build. Exported notes and descriptions are user-authored project data and may be private.
 
 ## Contrast scope
 
@@ -76,3 +77,7 @@ Reviewed 2026-09-24. The [Design Tokens Community Group format](https://www.desi
 ## Acceptance evidence
 
 `tests/concepts/companion-style-guide.browser.py` exercises real controls, draft protection, stale-save refusal, guarded deletion, Undo/Redo, blueprint round-trip, injection rejection, current-source generation and both actual download formats. It opens the exported HTML, checks no scripts/network requests, and verifies narrow-page reflow. Current totals and artifact identity belong to `TEST-DATA-DESIGN-VERIFICATION.md` and the final PR checks, not to the existence of this specification.
+
+## Nuxt UI stylesheet authoring
+
+The **Nuxt UI styling** section edits the saved palette policy and explicit token bindings using the same guarded drafts, Undo/Redo and stale-save checks. **Export stylesheet** produces the same deterministic CSS as the project compiler. Markdown and HTML now include effective bindings. The self-described companion JSON contains the frontend declaration and updated acceptance criteria. Native CP-007 remains unimplemented.
