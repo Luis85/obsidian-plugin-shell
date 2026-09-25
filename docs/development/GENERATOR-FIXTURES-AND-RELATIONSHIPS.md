@@ -29,7 +29,7 @@ npm run testdata:apply -- --approve REVIEWED_PLAN_HASH
 
 Generation and `testdata:check` do not seed notes or start a server. Apply writes only within the project's `.test-vault`, under the retained receipt/approval rules. Reset uses `testdata:reset-plan` followed by `testdata:reset -- --approve REVIEWED_RESET_HASH`; unrelated or edited files are not silently removed. Never treat fixture revision examples as live snapshot leases.
 
-Browser optional undefined object fields are omitted as portable JSON would omit them. Accessors, executable values, symbols, sparse arrays, nonconstant dates and invalid recipes are rejected. Canonical Markdown metadata is emitted into notes without adding undeclared fields to API/application payloads.
+The translator shallowly validates every top-level design member but copies only `dataSources` and `semantic`, the subtrees it reads, so large unrelated authoring state (for example the 80-design self-project in live browser state) cannot exhaust the bounded recipe input budget. Oversized recipe/entity input still fails. Browser optional undefined object fields are omitted as portable JSON would omit them. Accessors, executable values, symbols, sparse arrays, nonconstant dates and invalid recipes are rejected. Canonical Markdown metadata is emitted into notes without adding undeclared fields to API/application payloads.
 
 ## Integrity lifecycle
 
@@ -48,3 +48,7 @@ See [providers and relationships](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md), [ge
 ## Project Starters integration
 
 The concurrent PR #5 Project Starters catalog and all nine qualification jobs are retained. Built-in native list sources now use generated canonical read adapters, so starter tests execute those adapters and assert cancellation instead of requiring an obsolete placeholder. The HTTPS starter is still blocked until runtime origin approval. The Tasks starter uses `starter-task` and `starter-project` canonical keys to coexist with retained framework examples; its user-facing names and route slugs are unchanged. Catalog integrity metadata and embedded prototype bytes are regenerated together. This updates the built-in design only; no existing consumer workspace or vault is migrated.
+
+## Baseline patch integration
+
+The residual baseline-patch port, the relationship-policy decision and the verification record are in [the integration record](GENERATOR-BASELINE-PATCH-INTEGRATION.md).
