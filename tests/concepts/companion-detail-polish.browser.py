@@ -35,7 +35,7 @@ with sync_playwright() as pw:
     page.on('request',lambda r:requests.append(r.url))
     try:
         page.set_content(STORAGE+HTML.read_text())
-        act('project-example');page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+        act('project-import');page.locator('#project-import-file').set_input_files(str(ROOT / 'tests/fixtures/companion/detail-v3.json'));page.locator('#project-import-confirm').wait_for();page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
         act('nav','pages','#sidebar');before=js('JSON.stringify(design())')
         field('page-search').fill('import-project')
         check('Search finds a surface by slug without changing project',page.locator('.dt-page-card').count()==1 and before==js('JSON.stringify(design())'))

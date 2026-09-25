@@ -105,7 +105,7 @@ test('[COMPANION-OVERLAP] case-insensitive ancestor folders are refused, sibling
 test('[COMPANION-INVALID] malformed/future/wrong-kind/authority documents produce no stdout or writes', async t => {
   const f = await fixture(t);
   const cases = ['{', 'null', '[]', '{"schema":2,"project":{}}'];
-  for (const patch of [{ kind: 'plugin-shell-blueprint' }, { schemaVersion: 4 }, { executable: true }, { trusted: true },
+  for (const patch of [{ kind: 'plugin-shell-blueprint' }, { schemaVersion: 999 }, { executable: true }, { trusted: true },
     { settings: { codebaseFolder: '../src', testsFolder: 'tests' } }, { project: { ...document.project, id: '../bad' } },
     { design: { ...document.design, nodes: [{ id: 'duplicate' }, { id: 'duplicate' }] } }]) cases.push(JSON.stringify({ ...document, ...patch }));
   for (const text of cases) {

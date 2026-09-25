@@ -10,7 +10,7 @@ function companionProjectDocument(p = project()) {
   if (!p) throw Error('Define a project before exporting.');
   const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
   return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
-    project: identity, settings: companionFolders(p), design: { schema: 3, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
+    project: identity, settings: companionFolders(p), design: { schema: COMPANION_VERSION, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
 }
 function companionJson(p = project()) {
   const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
@@ -113,12 +113,13 @@ function companionSettingsCard() {
 }
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
+  const retainedFile = !!u.filename && u.text.length > 100000;
   const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
   return dialogBody('Import a full project', `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
-    <p class="small" role="status">${u.loading ? 'Reading selected file…' : esc(u.filename)}</p>
-    <div class="field"><label for="project-import-text">Or paste the full project JSON</label><textarea id="project-import-text" rows="7" data-field="project-import-text" spellcheck="false" ${u.loading ? 'disabled' : ''}>${esc(u.text)}</textarea></div>
+    <p class="small" role="status">${u.loading ? 'Reading selected file…' : esc(u.filename)}${retainedFile ? ' · Complete payload retained (' + new TextEncoder().encode(u.text).length.toLocaleString() + ' bytes). Review below or paste replacement JSON.' : ''}</p>
+    <div class="field"><label for="project-import-text">Or paste the full project JSON</label><textarea id="project-import-text" rows="7" data-field="project-import-text" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" ${u.loading ? 'disabled' : ''}>${retainedFile ? '' : esc(u.text)}</textarea></div>
     <p class="small muted">Includes saved identity, requirements, screens, component content/variants, entities, source operations, test recipes, design tokens, arrangement, notes and folders. Excludes unsubmitted drafts, execution trust, machine paths, generated files and test receipts.</p>
     <div class="error" id="project-transfer-error" role="alert" tabindex="-1">${esc(u.error)}</div>${summary}`,
     button('Cancel', 'close', '', 'ghost') + (current ? button('Export current project', 'project-backup', '', '', 'download') : '') +
@@ -160,7 +161,7 @@ function handleCompanionTransfer(action) {
 }
 function editCompanionTransfer(el) {
   if (el.dataset.field === 'project-import-text') {
-    projectTransferUi.serial++; projectTransferUi.text = el.value; projectTransferUi.candidate = null;
+    projectTransferUi.serial++; projectTransferUi.filename = ''; projectTransferUi.text = el.value; projectTransferUi.candidate = null;
     projectTransferUi.error = '';
     // Keep a large pasted document in its existing textarea, preserving caret and
     // avoiding a full modal replacement on every keystroke.

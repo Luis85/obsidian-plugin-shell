@@ -26,23 +26,17 @@ function dtDescendants(doc, id) {
 }
 function dtRemoveNode(doc, id) {
   if (!doc.nodes.some(n => n.id === id)) throw Error('The element no longer exists.');
-  const ids = dtDescendants(doc, id);
-  const references = mapping => mapping && (mapping.kind==='draft' && ids.has(mapping.nodeId) || mapping.kind==='object' && Object.values(mapping.fields).some(references));
-  if(doc.edges.some(e=>!ids.has(e.source)&&!ids.has(e.target)&&references(e.action?.input || e.action?.payload)))throw Error('Reassign the interaction payload mapping before removing this input.');
-  for(const n of doc.nodes)for(const [name,assigned] of Object.entries(n.slots || {})){n.slots[name]=assigned.filter(value=>!ids.has(value));if(!n.slots[name].length)delete n.slots[name];}
-  doc.nodes = doc.nodes.filter(n => !ids.has(n.id));
+  const ids = dtDescendants(doc, id); doc.nodes = doc.nodes.filter(n => !ids.has(n.id));
   doc.edges = doc.edges.filter(e => !ids.has(e.source) && !ids.has(e.target));
+  for (const scenario of doc.scenarios || []) for (const id of ids) delete scenario.values[id];
 }
 function dtDuplicateNode(store, doc, id) {
   const source = doc.nodes.find(n => n.id === id); if (!source) throw Error('The element no longer exists.');
-  const ids = dtDescendants(doc, id); let size=0; while(size!==ids.size){size=ids.size;for(const n of doc.nodes.filter(n=>ids.has(n.id)))for(const assigned of Object.values(n.slots || {}).flat())for(const child of dtDescendants(doc,assigned))ids.add(child);}
-  const replacements = new Map(), nodes = doc.nodes.filter(n => ids.has(n.id)).map(dtCopy);
+  const ids = dtDescendants(doc, id), replacements = new Map(), nodes = doc.nodes.filter(n => ids.has(n.id)).map(dtCopy);
   for (const n of nodes) { const old = n.id; n.id = dtNext(store, 'node'); replacements.set(old, n.id); }
-  for (const n of nodes) { n.parentId = replacements.get(n.parentId) || n.parentId; n.sourceBrickId = null; if(n.slots)for(const name of Object.keys(n.slots))n.slots[name]=n.slots[name].map(value=>replacements.get(value)||value); }
+  for (const n of nodes) { n.parentId = replacements.get(n.parentId) || n.parentId; n.sourceBrickId = null; }
   const root = nodes.find(n => n.id === replacements.get(id)); root.label = (root.label + ' copy').slice(0, 120); root.position.x += 32; root.position.y += 32;
   const edges = doc.edges.filter(e => ids.has(e.source) && ids.has(e.target)).map(e => ({ ...dtCopy(e), id: dtNext(store, 'edge'), source: replacements.get(e.source), target: replacements.get(e.target) }));
-  const remap = mapping => {if(!mapping)return;if(mapping.kind==='draft')mapping.nodeId=replacements.get(mapping.nodeId)||mapping.nodeId;if(mapping.kind==='object')Object.values(mapping.fields).forEach(remap);};
-  for(const edge of edges)remap(edge.action?.input || edge.action?.payload);
   doc.nodes.push(...nodes); doc.edges.push(...edges); return root.id;
 }
 function dtMoveInOrder(doc, id, direction) {
@@ -54,7 +48,7 @@ function dtSortedNodes(doc) {
   const out = []; const walk = parent => { for (const node of doc.nodes.filter(n => n.parentId === parent)) { out.push(node); walk(node.id); } }; walk(null); return out;
 }
 function dtSemantic(store) {
-  return { schema: store.schema, documents: store.documents.map(doc => ({ ...doc, nodes: doc.nodes.map(({ position, size, ...node }) => node) })) };
+  return { schema: store.schema, ...(store.revisions ? { revisions: store.revisions } : {}), documents: store.documents.map(doc => ({ ...doc, nodes: doc.nodes.map(({ position, size, ...node }) => node) })) };
 }
 function dtIssues(d) {
   const store = dtStore(d), issues = []; let detailNodeId = null, detailEdgeId = null; const warn = (doc, message) => issues.push({ documentId: doc.id, detailNodeId, detailEdgeId, level: 'warning', code: 'detail-reference', message: dtOwnerLabel(doc, d) + ': ' + message, node: doc.kind === 'page' ? doc.ownerId : null });
@@ -65,7 +59,7 @@ function dtIssues(d) {
     else if (doc.kind === 'page' && !dtPageEligible(owner)) warn(doc, 'owner is no longer a page, modal or settings surface.');
     for (const node of doc.nodes) {
       detailNodeId = node.id;
-      const ref = node.component, c = ref && d.library.find(c => c.id === ref.id);
+      const ref = node.component, c = ref && (ref.revisionId ? store.revisions?.find(r => r.id === ref.revisionId)?.library : d.library.find(c => c.id === ref.id));
       if (ref && !c) warn(doc, node.label + ': component target missing.');
       if (c && c.version !== ref.version) warn(doc, node.label + ': pinned version ' + ref.version + ' differs from library ' + c.version + '; review before updating.');
       if (c && !componentVariants(c).some(v => v.id === ref.variantId)) warn(doc, node.label + ': variant target missing.');
@@ -87,7 +81,7 @@ function dtComponentUses(id, d = design()) {
 }
 function dtValidateInstance(node, d = design()) {
   if (!node.component) return;
-  const c = d.library.find(c => c.id === node.component.id); if (!c) throw Error('Choose an existing component or retain this missing reference unchanged.');
+  const c = node.component.revisionId ? d.detailDesigns?.revisions?.find(r => r.id === node.component.revisionId)?.library : d.library.find(c => c.id === node.component.id); if (!c) throw Error('Choose an existing component or retain this missing reference unchanged.');
   if (c.version !== node.component.version) throw Error('This instance uses an older contract. Review its library version before applying instance changes.');
   if (!componentVariants(c).some(v => v.id === node.component.variantId)) throw Error('Choose an existing component variant.');
   const members = parseMembers(c.props, 'props');

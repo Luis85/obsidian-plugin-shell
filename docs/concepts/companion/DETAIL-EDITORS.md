@@ -1,5 +1,6 @@
 # Page and component detail editors
 
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
 This increment extends PR #5’s offline companion, including its existing Storymaps,
 sitemap, component library and project JSON. Both detail canvases use the same
 pinned, embedded Vue Flow runtime as those editors. It is not a second application
@@ -98,9 +99,9 @@ fingerprint; content, containment, reading order and interactions do. The separa
 shell compiler still hashes the complete input when reviewing an apply plan;
 changing exported bytes requires a new reviewed compiler plan.
 
-## Transfer contract v3
+## Original detail contract (legacy v3)
 
-Exports use `schemaVersion: 3` and `design.schema: 3`. V1 and v2 imports remain
+The original increment used `schemaVersion: 3` and `design.schema: 3`. Current exports use v4; see [Composition](COMPOSITION.md). V1 and v2 imports remain
 supported without inventing detail documents. V1 cannot contain Storymaps or
 details; v2 cannot contain details. Unknown fields/versions, internal dangling
 references, unsafe literals, invalid coordinates and composition cycles fail

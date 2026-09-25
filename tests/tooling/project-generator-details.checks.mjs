@@ -7,7 +7,7 @@ import { detailDocuments, componentMembers } from '../../scripts/companion/compi
 import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
 import { detailValue, detailTextValue, visibleDetails } from '../../scripts/companion/runtime/detail-runtime.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const fixture = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json', import.meta.url), 'utf8'));
+const fixture = JSON.parse(await readFile(new URL('../../tests/fixtures/companion/detail-v3.json', import.meta.url), 'utf8'));
 const clone = () => structuredClone(fixture);
 const docs = d => detailDocuments(projectModel(d));
 const review = d => d.design.library.find(c => c.id === 'project-json-review');
@@ -45,7 +45,7 @@ for (const [name, change, expected] of [
   ['inherited bound property', d => d.design.detailDesigns.documents[2].nodes[1].binding.field = 'constructor.name', /binding field/],
   ['missing operation', d => d.design.detailDesigns.documents[2].nodes[1].binding.operationId = 'missing', /readable detail binding/],
   ['lifecycle event', d => d.design.detailDesigns.documents[1].edges[0].event = 'vue:mounted', /Unsupported detail event/],
-  ['binding with no destination', d => d.design.detailDesigns.documents[2].nodes[0].binding = { ...d.design.detailDesigns.documents[2].nodes[1].binding }, /explicit text\/input projection/],
+  ['binding with no destination', d => d.design.detailDesigns.documents[2].nodes[0].binding = { ...d.design.detailDesigns.documents[2].nodes[1].binding }, /readable value element/],
   ['disabled-only interaction', d => d.design.detailDesigns.documents[1].nodes[1].visibleIn = ['disabled'], /no enabled visible state/],
   ['undeclared slot', d => d.design.detailDesigns.documents[0].nodes[2].label = 'missing', /Undeclared component slot/],
 ]) test('detail compiler refuses ' + name, () => { const d = clone(); change(d); assert.throws(() => docs(d), expected); });

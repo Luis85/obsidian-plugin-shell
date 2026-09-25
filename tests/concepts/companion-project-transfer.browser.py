@@ -51,6 +51,7 @@ with sync_playwright() as pw:
         check('Welcome offers full project import before initialization', page.locator('[data-action="project-import"]').count() == 1)
         act('project-example')
         check('Bundled project opens a reviewed import, not an automatic replacement', js('project()===null && !!projectTransferUi.candidate'))
+        check('Large bundled payload stays complete without mounting its text into the form', js('projectTransferUi.text.length>100000') and page.locator('#project-import-text').input_value() == '')
         check('Example contains 27 surfaces and 30 mapped requirements', js('projectTransferUi.candidate.design.nodes.length===27 && allRequirements(projectTransferUi.candidate.design).length===30'))
         check('Example includes ten project-owned components', js('projectTransferUi.candidate.design.library.filter(c=>c.origin==="project").length===10'))
         check('Example includes entities, source operations, recipes and design tokens', js('projectTransferUi.candidate.design.semantic.entities.length===11 && projectTransferUi.candidate.design.dataSources.sources[0].operations.length===3 && projectTransferUi.candidate.design.designSystem.colors.length===5'))
@@ -72,6 +73,7 @@ with sync_playwright() as pw:
         shot('02-companion-project-overview.png')
         act('project-export', '#content')
         check('Full project export is distinct from a recovery snapshot', js('JSON.parse(modalData.text).kind==="obsidian-companion-project" && !JSON.parse(modalData.text).vaultKey'))
+        check('Large export bounds only the displayed preview, never the download', len(page.locator('#copy-text').input_value()) == 30000 and len(js('modalData.text')) > 100000 and 'full text' in page.locator('label[for=copy-text]').inner_text())
         with page.expect_download() as event:
             act('download-text', '#modal')
         download = event.value; download.save_as(str(OUT / 'project.companion.json'))
@@ -106,6 +108,7 @@ with sync_playwright() as pw:
         check('Portable export omits trust, paths, generated files and execution receipts', js('!Object.hasOwn(companionProjectDocument().project,"trusted") && !Object.hasOwn(companionProjectDocument().project,"root") && !Object.hasOwn(companionProjectDocument().design,"emitted")'))
         act('project-import', '#content')
         page.locator('#project-import-text').fill(custom); act('project-import-review')
+        check('Large paste remains editable and unwrapped', page.locator('#project-import-text').input_value() == custom and page.locator('#project-import-text').get_attribute('wrap') == 'off')
         check('Pasted JSON is reviewed without replacing current authority', js('project().trusted && !!projectTransferUi.candidate'))
         before = js('companionProjectToken()'); act('project-import-apply')
         check('Existing project requires the replacement checkbox', js('companionProjectToken()') == before)

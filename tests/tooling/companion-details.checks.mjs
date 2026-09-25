@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import vm from 'node:vm';
 import { emptyDetailDesigns, validateDetailDesigns, DETAIL_NODE_KINDS, DETAIL_STATES } from '../../scripts/companion/detail-contract.mjs';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-const seed = JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'));
+const seed = JSON.parse(await readFile('tests/fixtures/companion/detail-v3.json', 'utf8'));
 const copy = value => JSON.parse(JSON.stringify(value));
 const context = vm.createContext({ emptyDetailDesigns, validateDetailDesigns, DETAIL_NODE_KINDS, DETAIL_STATES });
 vm.runInContext(await readFile('docs/concepts/companion/src/detail-model.js', 'utf8'), context);
@@ -22,7 +22,7 @@ test('v3 self-project includes page and component designs with bounded stable id
   assert.deepEqual(validateDetailDesigns(emptyDetailDesigns()).documents, []);
 });
 for (const [name, change] of [
-  ['future schema', s => s.schema = 99], ['reused counter', s => s.nextId = 1], ['unsafe counter', s => s.nextId = Number.MAX_SAFE_INTEGER],
+  ['future schema', s => s.schema = 999], ['reused counter', s => s.nextId = 1], ['unsafe counter', s => s.nextId = Number.MAX_SAFE_INTEGER],
   ['unknown store field', s => s.executed = true], ['duplicate owner', s => { const d = copy(s.documents[0]); d.id = 'detail-document-' + s.nextId++; s.documents.push(d); }],
   ['duplicate node ID', s => s.documents[0].nodes[1].id = s.documents[0].nodes[0].id],
   ['unknown kind', s => s.documents[0].nodes[1].kind = 'javascript'], ['empty label', s => s.documents[0].nodes[1].label = '  '],

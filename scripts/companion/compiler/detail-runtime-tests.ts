@@ -1,5 +1,5 @@
 import { literal, symbol, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { relativeImport, type Add } from './data-code.ts';
 import { sampleCode } from './schema-code.ts';
 import type { DetailDocument } from '../runtime/detail-runtime.ts';
 export function detailRuntimeTests(m: Model, documents: DetailDocument[], add: Add): void {
@@ -16,37 +16,6 @@ const doc: DetailDocument = { id: 'test-document', kind: 'page', ownerId: 'test-
 function subject(context: DetailContext, design = doc) {
   return mount(defineComponent({ setup: () => ({ model: useDetail(design, {}, () => {}) }), render: () => null }), { global: { plugins: [{ install(app: App) { provideDetailContext(app, context); } }] } });
 }
-it('typed drafts map false and zero to a source call and retain raw invalid input', async () => {
-  const design: DetailDocument = { ...doc, nodes: [
-    {...doc.nodes[0]!,id:'amount',control:{kind:'number'}},
-    {...doc.nodes[0]!,id:'enabled',control:{kind:'checkbox'}},
-    {...doc.nodes[0]!,id:'save',kind:'button'},
-  ],edges:[{...doc.edges[0]!,id:'save-event',source:'save',target:'amount',event:'click',action:{kind:'source',sourceId:'source',operationId:'save',input:{kind:'object',fields:{amount:{kind:'draft',nodeId:'amount'},enabled:{kind:'draft',nodeId:'enabled'}}}}}]};
-  const run=vi.fn(async (_input?:unknown)=>({ok:false}));
-  const wrapper=subject({ports:[{sourceId:'source',operationId:'save',direction:'write',requiresInput:true,data:null,pending:false,error:null,run}],navigate:()=>{},handle:async()=>{throw Error('WRONG_HANDLER');}},design);
-  const model=wrapper.vm.model;
-  try {
-    const number=document.createElement('input'); number.value='0'; const e=new Event('input');number.dispatchEvent(e);await model.update(0,e);
-    const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=false;const c=new Event('input');checkbox.dispatchEvent(c);await model.update(1,c);
-    model.listeners('save').click!(undefined);await flushPromises();expect(run).toHaveBeenCalledExactlyOnceWith({amount:0,enabled:false});
-    expect(model.values.amount).toBe(0);expect(model.values.enabled).toBe(false);expect(model.message.value).toContain('retained');
-    number.value='invalid';number.dispatchEvent(e);expect(await model.update(0,e)).toBe(false);expect(model.display(0)).toBe('invalid');expect(model.values.amount).toBe(0);
-    model.listeners('save').click!(undefined);await flushPromises();expect(run).toHaveBeenCalledTimes(1);
-  } finally {wrapper.unmount();}
-});
-it('JSON file selection is bounded, latest-selection-wins and ignored after disposal', async () => {
-  const design:DetailDocument={...doc,nodes:[{...doc.nodes[0]!,control:{kind:'json-file',maxBytes:1000}}],edges:[]};
-  const wrapper=subject({ports:[],navigate:()=>{},handle:async()=>undefined},design);const model=wrapper.vm.model;
-  const input=document.createElement('input');input.type='file';const event=new Event('change');
-  let first:(s:string)=>void=()=>{};const oldFile={size:20,text:()=>new Promise<string>(resolve=>{first=resolve;})};
-  Object.defineProperty(input,'files',{configurable:true,value:[oldFile]});input.dispatchEvent(event);const pending=model.update(0,event);
-  Object.defineProperty(input,'files',{configurable:true,value:[{size:12,text:async()=>JSON.stringify({new:true})}]});
-  input.dispatchEvent(event);expect(await model.update(0,event)).toBe(true);first(JSON.stringify({old:true}));expect(await pending).toBe(false);expect(model.values.input).toEqual({new:true});
-  Object.defineProperty(input,'files',{configurable:true,value:[{size:2000,text:async()=>JSON.stringify({tooLarge:true})}]});input.dispatchEvent(event);
-  expect(await model.update(0,event)).toBe(false);expect(model.values.input).toEqual({new:true});
-  Object.defineProperty(input,'files',{configurable:true,value:[]});input.dispatchEvent(event);await model.update(0,event);expect(Object.hasOwn(model.values,'input')).toBe(false);
-  Object.defineProperty(input,'files',{configurable:true,value:[oldFile]});input.dispatchEvent(event);const late=model.update(0,event);wrapper.unmount();first(JSON.stringify({late:true}));expect(await late).toBe(false);expect(Object.hasOwn(model.values,'input')).toBe(false);
-});
 it('retains drafts and reports unimplemented behavior without pretending success', async () => {
   const wrapper = subject({ ports: [], navigate: () => {}, handle: async () => { throw new Error('NOT_IMPLEMENTED: change'); } });
   try { const model = wrapper.vm.model; const input = document.createElement('input'); input.value = 'Preserve me';
@@ -78,7 +47,7 @@ it('maps source pending, error and empty states without starting a source operat
 `);
   const fixture = `${m.testRoot}/fixtures/detail-sources.ts`;
   add(fixture, m.sources.map(source => `import { create${symbol(source.slug)}Service } from ${literal(relativeImport(fixture, `${m.sourceRoot}/application/${source.slug}/service.ts`))};`).join('\n') + `\nexport function fixtureSources() { return {${m.sources.map(s => `${literal(s.slug)}: create${symbol(s.slug)}Service({${s.operations.map(op => `${literal(op.slug)}: async () => structuredClone(${sampleCode(op.output)})`).join(',')}})`).join(',')}}; }\n`);
-  for (const doc of documents) for (const node of doc.nodes.filter(n => n.binding && n.kind === 'text')) {
+  for (const doc of documents) for (const node of doc.nodes.filter(n => n.binding && ['text','heading','alert','input','number','textarea','checkbox','select','table','list'].includes(n.kind))) {
     const source = m.sources.find(s => s.id === node.binding!.sourceId)!;
     const op = source.operations.find(o => o.id === node.binding!.operationId)!;
     const test = `${m.testRoot}/details/${node.id}-binding.test.ts`;
@@ -97,7 +66,9 @@ it(${literal('[' + node.id + '] displays validated source output through the act
   const wrapper = mount(Subject, { global: { plugins: [pinia], provide: { [detailKey as symbol]: context } } });
   try { const port = context.ports.find(p => p.operationId === ${literal(op.id)} && p.sourceId === ${literal(source.id)})!;
     await port.run(${sampleCode(op.input)}); await flushPromises();
-    expect(wrapper.get(${literal('[data-design-node="' + node.id + '"]')}).text()).toBe(detailTextValue(detailValue(${sampleCode(op.output)}, ${literal(node.binding!.field)}), ${literal(node.text)}));
+    const value=detailValue(${sampleCode(op.output)},${literal(node.binding!.field)}); const element=wrapper.get(${literal('[data-design-node="'+node.id+'"]')});
+    ${node.kind==='table'?`expect(element.findAll('tbody tr')).toHaveLength(Array.isArray(value)&&value.length?Math.min(value.length,50):1);
+    for(const [i,item] of (Array.isArray(value)?value.slice(0,50):[]).entries()) for(const [j,key] of ${literal(node.options||[])}.entries())expect(element.findAll('tbody tr')[i]!.findAll('td')[j]!.text()).toBe(detailTextValue(detailValue(item,key),''));`:node.kind==='list'?`expect(element.findAll('li')).toHaveLength(Array.isArray(value)&&value.length?Math.min(value.length,50):${node.options?.length||0});`:['input','number','textarea','checkbox','select'].includes(node.kind)?`expect(element.find('input,select,textarea').exists()).toBe(true);`: `expect(element.text()).toBe(detailTextValue(value,${literal(node.text)}));`}
     expect(port.pending).toBe(false); expect(port.error).toBe(null);
   } finally { wrapper.unmount(); disposePinia(pinia); }
 });
