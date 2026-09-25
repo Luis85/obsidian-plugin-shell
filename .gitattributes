@@ -1,0 +1,2 @@
+# Starter sources are verified by exact SHA-256; keep their bytes identical on autocrlf checkouts.
+docs/concepts/companion/starters/** text eol=lf
