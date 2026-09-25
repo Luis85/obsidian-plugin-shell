@@ -1,7 +1,7 @@
 // All writes are guarded, validated and persisted once. Vue Flow owns only a projection.
-const dtUi = { kind: 'page', ownerId: null, selected: null, edge: null, mode: 'canvas', previewState: 'default', width: 'wide', back: [], form: null, error: '', app: null, api: null, root: null, serial: 0, drag: null, viewports: {} };
+const dtUi = { kind: 'page', ownerId: null, selected: null, edge: null, mode: 'canvas', previewState: 'default', width: 'wide', back: [], form: null, error: '', app: null, api: null, root: null, serial: 0, drag: null, viewports: {}, query: '', pageQuery: '' };
 function dtDocument() { return project() ? dtFind(dtStore(), dtUi.kind, dtUi.ownerId) : null; }
-function dtReset() { dtUi.ownerId = null; dtUi.selected = null; dtUi.edge = null; dtUi.back = []; dtUi.form = null; dtUi.viewports = {}; }
+function dtReset() { dtUi.ownerId = null; dtUi.selected = null; dtUi.edge = null; dtUi.back = []; dtUi.form = null; dtUi.viewports = {}; dtUi.query = ''; dtUi.pageQuery = ''; }
 function dtFail(error) {
   dtUi.error = error instanceof Error ? error.message : error;
   if (modalType === 'detail-form' && document.getElementById('modal').open) { redrawModal(); document.getElementById('dt-form-error')?.focus(); }
@@ -52,14 +52,14 @@ function dtOpen(kind, ownerId) {
   const retained = dtFind(dtStore(), kind, ownerId);
   if (!retained && (!owner || kind === 'page' && !dtPageEligible(owner))) return dtFail('Choose a page, modal, settings surface or reusable component.');
   if (state.view === kind + '-editor' && dtUi.ownerId === ownerId) return;
-  dtUi.back.push({ view: state.view, kind: dtUi.kind, ownerId: dtUi.ownerId, selected: dtUi.selected, edge: dtUi.edge, scroll: document.getElementById('content').scrollTop });
+  dtUi.back.push({ view: state.view, kind: dtUi.kind, ownerId: dtUi.ownerId, selected: dtUi.selected, edge: dtUi.edge, mode: dtUi.mode, query: dtUi.query, previewState: dtUi.previewState, width: dtUi.width, scroll: document.getElementById('content').scrollTop });
   if (dtUi.back.length > 12) dtUi.back.shift();
-  Object.assign(dtUi, { kind, ownerId, selected: null, edge: null, error: '', mode: innerWidth < 700 ? 'outline' : 'canvas' });
+  Object.assign(dtUi, { kind, ownerId, selected: null, edge: null, error: '', query: '', mode: innerWidth < 700 ? 'outline' : 'canvas' });
   setView(kind + '-editor');
 }
 function dtReturn() {
   const back = dtUi.back.pop(); if (!back) return setView(dtUi.kind === 'page' ? 'pages' : 'components');
-  Object.assign(dtUi, { kind: back.kind, ownerId: back.ownerId, selected: back.selected, edge: back.edge, error: '' });
+  Object.assign(dtUi, { kind: back.kind, ownerId: back.ownerId, selected: back.selected, edge: back.edge, mode: back.mode, query: back.query, previewState: back.previewState, width: back.width, error: '' });
   setView(back.view); document.getElementById('content').scrollTop = back.scroll;
 }
 function dtStart() {
@@ -84,7 +84,9 @@ function handleDetailAction(action, value) {
       'dt-undo': () => dtTravel('undo'), 'dt-redo': () => dtTravel('redo'),
       'dt-fit': () => dtUi.api?.fitView({ padding: .12, minZoom: .2, maxZoom: 1, duration: 0 }),
       'dt-locate': () => { if (dtUi.selected) dtUi.api?.fitView({ nodes: [dtUi.selected], padding: .4, minZoom: .6, maxZoom: 1, duration: 0 }); },
-      'dt-upgrade': dtReviewVersion
+      'dt-upgrade': dtReviewVersion, 'dt-prop-override': () => dtPropertyAction('override', value), 'dt-prop-reset': () => dtPropertyAction('reset', value),
+      'dt-finding': () => dtJumpFinding(value), 'dt-use': () => dtOpenUse(value), 'dt-export-brief': dtExportBrief,
+      'dt-review-state': () => { dtUi.mode = 'preview'; dtUi.previewState = value; render(); }, 'dt-zoom': () => dtZoom(value)
     };
     if (Object.hasOwn(actions, action)) actions[action](); else return false;
   } catch (error) { dtFail(error); }

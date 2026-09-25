@@ -70,7 +70,7 @@ rejected across the full detail collection.
 
 ## Preview and accessibility scope
 
-Canvas, Outline and Preview expose the same saved document. Outline provides
+Canvas, Outline, Preview and Review expose the same saved document. Outline provides
 non-drag selection, editing, containment, order and interaction authoring. Small
 screens default to Outline when opening a design. Keyboard focus styling, named
 controls, form labels and status/error announcements use the companion shell.
@@ -147,3 +147,49 @@ the pinned runtime already present in PR #5. Native conversion remains
 [CP-003](../../tasks/companion/CP-003.md), after shell readiness.
 
 Reloading while a detail editor is open restores all saved design data and opens its Pages or Component library overview. Selection, viewport and drill-down history remain session-only; import does not acquire execution authority. Missing component owners have a retained-design section in the library.
+
+
+## Research-led authoring and review polish
+
+The [research and requirements](DETAIL-EDITORS-RESEARCH.md) distinguish documented
+competitive patterns, historical user reports and a direct audit of this concept.
+The [polishing receipt](DETAIL-EDITORS-POLISH.md) records the delivered scope and
+verification boundaries.
+
+**Find the right object.** Pages searches titles, kinds and slugs. Search structure
+filters element labels, kinds, content and component names while retaining their
+ancestors. Search and breadcrumbs do not change the saved design. Outline shows
+one tree rather than a repeated palette tree.
+
+**Edit local properties.** Component instances expose typed text, boolean and
+number fields. Each row identifies a local override, matching variant default or
+unset value. Use Override to create a local value and Use default / Remove override
+to reset only that property. False, zero and empty text remain real values. Blank
+or non-finite numeric input blocks Save. Advanced JSON remains available for
+repair, but nested objects and expressions are not accepted.
+
+Changing a definition retains all draft overrides. Incompatible values remain
+visible for explicit repair; they are not silently discarded. Defaults are not
+borrowed from a different contract version or a missing variant. Contract pins do
+not archive historical internals: editing reusable internals still edits the
+shared definition. The Component editor's Used by panel reports direct instances,
+not transitive impact, and opens each exact instance. Back restores the previous
+representation, search and preview context.
+
+**Review before handoff.** Review consolidates reference/accessibility findings and
+missing design-intent or interaction descriptions. Its actions open the exact
+editable object. The state table counts local elements with ancestor visibility;
+reusable internals are explicitly excluded from those counts. Preview actions
+open the corresponding state. Equal states are not automatically an error, and
+zero questions does not mean an accessibility audit or an implementation passed.
+
+Export design brief produces deterministic, escaped Markdown from saved design
+content: owner and element IDs, reading order, configuration origins, bindings,
+interactions, acceptance intent and review questions. It does not write design
+state, execute providers, generate Vue layouts or run tests. Use full-project JSON
+for editable transfer; the Markdown brief is not an import format.
+
+Canvas also exposes Zoom out, 100%, Zoom in and Fit canvas. Connection labels use
+short event names with readable text/background styles; the inspector retains
+the full interaction label and description. Selected representations and preview
+states remain visibly marked in both themes.
