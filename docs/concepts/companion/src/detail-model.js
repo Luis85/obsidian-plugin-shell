@@ -50,12 +50,14 @@ function dtSemantic(store) {
   return { schema: store.schema, documents: store.documents.map(doc => ({ ...doc, nodes: doc.nodes.map(({ position, size, ...node }) => node) })) };
 }
 function dtIssues(d) {
-  const store = dtStore(d), issues = []; const warn = (doc, message) => issues.push({ level: 'warning', code: 'detail-reference', message: dtOwnerLabel(doc, d) + ': ' + message, node: doc.kind === 'page' ? doc.ownerId : null });
+  const store = dtStore(d), issues = []; let detailNodeId = null, detailEdgeId = null; const warn = (doc, message) => issues.push({ documentId: doc.id, detailNodeId, detailEdgeId, level: 'warning', code: 'detail-reference', message: dtOwnerLabel(doc, d) + ': ' + message, node: doc.kind === 'page' ? doc.ownerId : null });
   if (!dtShape(store)) return [{ level: 'error', code: 'detail-schema', message: 'Page or component detail data is malformed.', node: null }];
   for (const doc of store.documents) {
+    detailNodeId = null; detailEdgeId = null;
     const owner = dtOwner(doc, d); if (!owner) warn(doc, 'owner is missing; design retained for recovery.');
     else if (doc.kind === 'page' && !dtPageEligible(owner)) warn(doc, 'owner is no longer a page, modal or settings surface.');
     for (const node of doc.nodes) {
+      detailNodeId = node.id;
       const ref = node.component, c = ref && d.library.find(c => c.id === ref.id);
       if (ref && !c) warn(doc, node.label + ': component target missing.');
       if (c && c.version !== ref.version) warn(doc, node.label + ': pinned version ' + ref.version + ' differs from library ' + c.version + '; review before updating.');
@@ -68,7 +70,8 @@ function dtIssues(d) {
       if (node.kind === 'slot' && owner && doc.kind === 'component' && !(owner.slots || '').split(',').map(s => s.trim()).includes(node.label)) warn(doc, node.label + ': slot is not declared in the component contract.');
       if (node.kind === 'input' && !node.a11y.trim()) warn(doc, node.label + ': document accessible naming and error feedback.');
     }
-    for (const edge of doc.edges) if (edge.targetSurfaceId && !d.nodes.some(n => n.id === edge.targetSurfaceId)) warn(doc, edge.label + ': navigation target missing.');
+    detailNodeId = null;
+    for (const edge of doc.edges) { detailEdgeId = edge.id; if (edge.targetSurfaceId && !d.nodes.some(n => n.id === edge.targetSurfaceId)) warn(doc, edge.label + ': navigation target missing.'); }
   }
   return issues;
 }

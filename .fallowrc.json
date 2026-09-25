@@ -145,7 +145,11 @@
     "docs/concepts/companion/src/detail-preview.js",
     "docs/concepts/companion/src/detail-seed.js",
     "docs/concepts/companion/src/detail.css",
-    "scripts/companion/detail-contract.mjs"
+    "scripts/companion/detail-contract.mjs",
+    "docs/concepts/companion/src/detail-properties.js",
+    "docs/concepts/companion/src/detail-navigation.js",
+    "docs/concepts/companion/src/detail-review.js",
+    "docs/concepts/companion/src/detail-handoff.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

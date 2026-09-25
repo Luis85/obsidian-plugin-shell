@@ -21,7 +21,10 @@ def js(code, arg=None): return page.evaluate(code, arg)
 def act(action, value=None, scope='#content'):
     suffix = '' if value is None else '[data-value=' + json.dumps(value) + ']'
     page.locator(f'{scope} [data-action="{action}"]{suffix}').first.click()
-def field(key): return page.locator('[data-field="dt-' + key + '"]').first
+def field(key):
+    if key == 'props' and not page.locator('[data-field="dt-props"]').is_visible():
+        page.locator('.dt-advanced-props > summary').click()
+    return page.locator('[data-field="dt-' + key + '"]').first
 def save():
     act('dt-save', scope='#modal')
     page.locator("#modal").wait_for(state="hidden")

@@ -94,3 +94,60 @@ test('real CLI returns exact v3 bytes; malformed detail data produces no output 
     assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /DETAIL_INVALID/); assert.deepEqual(await readdir(vault), ['project.json']);
   } finally { await rm(vault, { recursive: true, force: true }); }
 });
+
+// Exercise production authoring helpers directly; only environment globals are supplied.
+for (const module of ['product-model', 'component-variants', 'detail-properties', 'detail-navigation', 'detail-review', 'detail-handoff']) {
+  vm.runInContext(await readFile('docs/concepts/companion/src/' + module + '.js', 'utf8'), context);
+}
+vm.runInContext(await readFile('docs/concepts/companion/src/semantic-model.js', 'utf8'), context);
+test('property provenance retains false, zero and empty text as explicit local overrides', () => {
+  const d = copy(seed.design), c = d.library[0]; c.props = 'title:string\nbusy:boolean\ncount:number';
+  c.variantSpecs = [{ id: 'default', name: 'Default', props: { title: 'Default title', busy: true, count: 10 } }];
+  const n = { component: { id: c.id, version: c.version, variantId: 'default' }, props: { title: '', busy: false, count: 0 } };
+  const before = JSON.stringify(d), rows = copy(context.dtPropRows(n, d));
+  assert.deepEqual(rows.map(r => r.value), ['', false, 0]); assert.ok(rows.every(r => r.source === 'Local override'));
+  assert.equal(JSON.stringify(d), before);
+});
+test('mismatched pins and missing variants never borrow current defaults', () => {
+  const d = copy(seed.design), c = d.library[0]; c.props = 'title:string'; c.variantSpecs = [{ id: 'default', props: { title: 'Current default' } }];
+  const n = { component: { id: c.id, version: '0.0.0', variantId: 'default' }, props: {} };
+  assert.equal(context.dtPropRows(n, d)[0].value, undefined);
+  n.component.version = c.version; n.component.variantId = 'missing'; assert.equal(context.dtPropRows(n, d)[0].source, 'Not set');
+  n.component.variantId = 'default'; assert.equal(context.dtPropRows(n, d)[0].source, 'Variant default');
+});
+test('undeclared local props remain identifiable and repairable instead of being dropped', () => {
+  const d = copy(seed.design), c = d.library[0], n = { component: { id: c.id, version: c.version, variantId: 'default' }, props: { obsolete: 'Retain me' } };
+  c.variantSpecs = [{ id: 'default', props: {} }];
+  const row = context.dtPropRows(n, d).find(p => p.name === 'obsolete'); assert.equal(row.value, 'Retain me'); assert.equal(row.compatible, false);
+});
+for (const invalid of ['null', '[]', '{"x":{}}', '{"x":null}', '{"x":1e999}', '{"__proto__":true}', '{"constructor":true}', '(()=>1)()']) {
+  test('typed draft parser refuses unsafe or nonliteral input ' + invalid, () => assert.throws(() => context.dtLiteralProps(invalid)));
+}
+test('outline search retains ancestor context, excludes siblings and mutates no source', () => {
+  const doc = fixture().documents[1], leaf = doc.nodes.find(n => n.kind !== 'region'), before = JSON.stringify(doc);
+  leaf.label = 'Unique target'; const input = JSON.stringify(doc), matched = context.dtOutlineMatches(doc, ' unique TARGET ');
+  assert.ok(matched.has(leaf.id)); if (leaf.parentId) assert.ok(matched.has(leaf.parentId));
+  assert.equal(context.dtOutlineMatches(doc, 'no-match-983').size, 0); assert.equal(context.dtOutlineMatches(doc, '').size, doc.nodes.length);
+  assert.equal(JSON.stringify(doc), input); assert.notEqual(before, input);
+});
+test('state review respects hidden ancestors even when a child declares that state', () => {
+  const doc = fixture().documents[1], root = doc.nodes.find(n => n.parentId === null); root.visibleIn = ['default'];
+  assert.equal(context.dtVisibleIds(doc, 'error').size, 0); assert.ok(context.dtVisibleIds(doc, 'default').size > 0);
+});
+test('review findings identify exact node and edge even with duplicate document labels', () => {
+  const d = copy(seed.design), doc = d.detailDesigns.documents[1], node = doc.nodes.find(n => n.component);
+  node.component.id = 'missing'; doc.edges[0].targetSurfaceId = 'missing-page';
+  const issues = context.dtReviewItems(doc, d);
+  assert.ok(issues.some(i => i.documentId === doc.id && i.target === 'node/' + node.id));
+  assert.ok(issues.some(i => i.target === 'edge/' + doc.edges[0].id && i.message.includes('navigation target missing')));
+});
+test('Markdown handoff is deterministic, read-only, escaped and excludes diagram coordinates', () => {
+  const d = copy(seed.design); for (const c of d.library) c.variantSpecs ||= [{ id: 'default', props: {} }];
+  const doc = d.detailDesigns.documents[1]; doc.notes = '<script>alert(1)</script> ![x](https://example.test/a)\n# forged heading';
+  const before = JSON.stringify(d), brief = context.dtBrief(doc, d);
+  assert.equal(brief, context.dtBrief(doc, d)); assert.equal(JSON.stringify(d), before);
+  assert.ok(brief.includes('not implementation or executed-test evidence')); assert.ok(brief.includes(doc.nodes[0].id));
+  assert.ok(!brief.includes('<script>')); assert.ok(!brief.includes('![x]')); assert.ok(!brief.includes('\n# forged'));
+  for (const node of doc.nodes) { node.position = { x: 42222, y: 32222 }; node.size.width = 1400; }
+  assert.equal(brief, context.dtBrief(doc, d));
+});

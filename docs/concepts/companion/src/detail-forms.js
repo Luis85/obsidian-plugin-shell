@@ -29,7 +29,7 @@ function dtComponentFields(r) {
     <p class="small muted">${esc(c?.description || 'Missing definitions are retained, not silently replaced.')}</p>
     ${dtSelectField('Variant', 'variantId', r.component.variantId, dtRefChoices(c ? componentVariants(c).map(v => [v.id, v.name]) : [], r.component.variantId))}
     <p class="small">Declared props: <code>${esc(c?.props || 'none')}</code>. Local overrides do not edit the reusable definition.</p>
-    ${dtInput('Instance prop overrides (JSON literals only)', 'props', dtUi.form.propsText, 10000, true)}
+    ${dtPropertyFields(r)}
     ${c ? `<details><summary>Component contract</summary><p>Events: ${esc(c.events || 'none')} · Slots: ${esc(c.slots || 'none')}</p><p>${esc(c.a11y || 'No accessibility notes yet.')}</p></details>` : ''}</fieldset>`;
 }
 function dtBindingFields(r) {
@@ -63,16 +63,18 @@ function detailForm() {
     button('Cancel', 'close', '', 'ghost') + (f.id && !f.removal ? button('Remove…', 'dt-remove', '', 'danger') : '') + button(f.removal ? 'Remove from design' : 'Save design', f.removal ? 'dt-remove-confirm' : 'dt-save', '', 'primary'));
 }
 function editDetailField(el) {
+  if (dtSearchInput(el)) return true;
   if (!el.dataset.field?.startsWith('dt-') || !dtUi.form) return false;
   const key = el.dataset.field.slice(3), f = dtUi.form, r = f.record, value = el.value;
-  if (key === 'props') f.propsText = value;
+  if (key.startsWith('prop-')) { try { dtPropertyInput(el); } catch (error) { dtFail(error); } }
+  else if (key === 'props') { f.propsText = value; f.propErrors = {}; const panel = document.getElementById('dt-properties'); if (panel) panel.innerHTML = dtPropertyRows(r); }
   else if (key === 'parentId' || key === 'targetSurfaceId') r[key] = value || null;
   else if (['x', 'y'].includes(key)) r.position[key] = Number(value);
   else if (['width', 'height'].includes(key)) r.size[key] = Number(value);
   else if (key === 'visible') r.visibleIn = el.checked ? [...new Set([...r.visibleIn, el.dataset.key])] : r.visibleIn.filter(s => s !== el.dataset.key);
   else if (key === 'componentId') {
-    const c = design().library.find(c => c.id === value); if (c) { r.component = { id: c.id, label: c.name, version: c.version, variantId: 'default' }; r.props = {}; f.propsText = '{}'; redrawModal(); }
-  } else if (key === 'variantId') r.component.variantId = value;
+    const c = design().library.find(c => c.id === value); if (c) { r.component = { id: c.id, label: c.name, version: c.version, variantId: 'default' }; dtUi.error = 'Definition changed in this draft. All local overrides are retained; repair incompatible values or explicitly reset them before saving.'; redrawModal(); }
+  } else if (key === 'variantId') { r.component.variantId = value; redrawModal(); }
   else if (key === 'sourceId') { const s = design().dataSources?.sources.find(s => s.id === value); r.binding = s ? { sourceId: s.id, operationId: s.operations[0]?.id || '', field: '' } : null; redrawModal(); }
   else if (key === 'operationId') r.binding.operationId = value;
   else if (key === 'bindingField') r.binding.field = value;
@@ -86,9 +88,10 @@ function dtReviewVersion() {
 }
 function dtSave() {
   const f = dtUi.form; if (!f || f.removal) return;
+  if (Object.keys(f.propErrors || {}).length) throw Error('Repair the invalid number or reset its override before saving.');
   const record = dtCopy(f.record);
   if (f.type === 'node') {
-    record.label = record.label.trim(); record.props = JSON.parse(f.propsText);
+    record.label = record.label.trim(); record.props = dtLiteralProps(f.propsText);
     if (JSON.stringify({ component: record.component, props: record.props }) !== JSON.stringify({ component: f.original.component, props: f.original.props }) || !f.id) dtValidateInstance(record);
   }
   dtCommit(store => {

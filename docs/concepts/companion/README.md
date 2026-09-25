@@ -105,3 +105,13 @@ The builder and Fallow inventory agree on **105 exact inputs: 75 maintained JS, 
 No real vault access, template acquisition, process execution, dependency installation, deployment, activation or publication occurs in the concept. Native Markdown adapters, additive archive hydration and cross-leaf operations remain implementation work. Browser assertions include model, controlled-state, synthetic and geometry checks; they are not all physical-pointer tasks, comprehensive accessibility certification or performance benchmarks.
 
 Vendor provenance and notices remain under [vendor](vendor). No font binaries or extracted Obsidian stylesheet are added. The sitemap is a real embedded Vue Flow island; the surrounding concept panels are not a claim that a production Vue/Nuxt UI companion is already complete. Existing root-template CLI and native capabilities retain their own [parent PRD](../../product/PRD.md) and qualification records.
+
+
+### Page/component editor research and polish
+
+The [competitive research and requirements](DETAIL-EDITORS-RESEARCH.md) cover ten
+reference products/tools, observed authoring issues and the next layout/slot/test
+contracts. The [polishing receipt](DETAIL-EDITORS-POLISH.md) distinguishes delivered
+browser behavior from native and generated-code acceptance. The [editor guide](DETAIL-EDITORS.md)
+includes typed property controls, safe override repair, search, direct usage,
+Review and saved-design Markdown export.

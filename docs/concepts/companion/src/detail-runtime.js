@@ -21,7 +21,7 @@ function dtProjection(doc) {
     dragHandle: '.dt-flow-title' }));
 }
 function dtEdgeProjection(doc) {
-  return doc.edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: 'out', targetHandle: 'in', label: e.event.length > 12 ? e.event.slice(0, 11) + '…' : e.event, type: 'smoothstep', selectable: true, updatable: false, focusable: false }));
+  return doc.edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: 'out', targetHandle: 'in', label: e.event.length > 16 ? e.event.slice(0, 15) + '…' : e.event, zIndex: 1001, labelStyle: { fill: 'var(--text)', stroke: 'none', fontSize: '12px', fontWeight: 500 }, labelBgStyle: { fill: 'var(--panel)', stroke: 'var(--line)' }, labelBgPadding: [8, 5], labelBgBorderRadius: 4, interactionWidth: 24, type: 'smoothstep', selectable: true, updatable: false, focusable: false }));
 }
 function dtSelect(id, edge = null) {
   const doc = dtDocument(); if (!doc) return;
