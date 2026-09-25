@@ -1,5 +1,5 @@
 /** Scoped .test-vault writer. Preview and approval are separate; foreign/edited files fail closed. */
-import { lstat, realpath, readFile, mkdir, writeFile, rename, unlink, rmdir, readdir } from 'node:fs/promises';
+import { lstat, readFile, mkdir, writeFile, rename, unlink, rmdir, readdir } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 import { createFixtureEngine } from './engine.mjs';
@@ -15,7 +15,12 @@ function safePath(path) {
 }
 async function targetRoot(root) {
   root = resolve(root);
-  if ((await stat(root))?.isSymbolicLink() || await realpath(root) !== root) throw new Error('Project root must be a real, non-symlink directory.');
+  // Inspect every component: a realpath string comparison mistakes Windows 8.3 and drive-letter aliases for links.
+  for (let path = root; ; path = dirname(path)) {
+    if ((await stat(path))?.isSymbolicLink()) throw new Error('Project root must be a real, non-symlink directory.');
+    if (dirname(path) === path) break;
+  }
+  if (!(await stat(root))?.isDirectory()) throw new Error('Project root must be a real, non-symlink directory.');
   return join(root, '.test-vault');
 }
 async function checked(root, relative) {

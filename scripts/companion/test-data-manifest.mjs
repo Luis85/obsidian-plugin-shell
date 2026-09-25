@@ -22,6 +22,20 @@ function fixtureCopy(value, depth = 0, budget = { count: 0 }) {
   fixtureRequire(!Array.isArray(value) || result.length === value.length, 'Sparse arrays are not supported.');
   return result;
 }
+// Validate every top-level member shallowly, but copy only the subtrees this translator reads:
+// unrelated authoring state (detail designs, history) must not consume the recipe input budget.
+function fixtureDesign(design) {
+  fixtureRequire(design && typeof design === 'object' && !Array.isArray(design) && [Object.prototype, null].includes(Object.getPrototypeOf(design)), 'Only JSON data is supported.');
+  const result = {};
+  for (const key of Reflect.ownKeys(design)) {
+    const field = typeof key === 'string' ? Object.getOwnPropertyDescriptor(design, key) : undefined;
+    fixtureRequire(field && !['__proto__', 'constructor', 'prototype'].includes(key) && field.enumerable && 'value' in field, 'Unsafe data property.');
+    const value = field.value;
+    fixtureRequire(value === undefined || value === null || ['string', 'boolean'].includes(typeof value) || typeof value === 'number' && Number.isFinite(value) || typeof value === 'object' && (Array.isArray(value) || [Object.prototype, null].includes(Object.getPrototypeOf(value))), 'Only JSON data is supported.');
+    if (value !== undefined && ['dataSources', 'semantic'].includes(key)) result[key] = fixtureCopy(value);
+  }
+  return result;
+}
 function fixtureKeys(value, keys) { return value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key)); }
 function fixtureSettings(testing, sources) {
   fixtureRequire(fixtureKeys(testing, ['schema', 'seed', 'referenceDate', 'locale', 'count', 'recipes']) && testing.schema === 1, 'Unsupported recipe collection.');
@@ -81,7 +95,7 @@ function fixtureShape(shape, entities) {
   return { schema: normalize(schema) };
 }
 export function buildCompanionFixtureManifest(design) {
-  design = fixtureCopy(design);
+  design = fixtureDesign(design);
   const sources = design.dataSources?.sources ?? [], settings = design.dataSources?.testing ?? fixtureDefaults;
   fixtureSettings(settings, sources);
   const semantic = design.semantic ?? { entities: [], relationships: [] }, entities = semantic.entities.map(e => fixtureEntity(e, semantic));

@@ -71,6 +71,14 @@ test('fixture translator rejects getters, symbols, sparse arrays and executable 
   const hidden=structuredClone(original.design);hidden[Symbol('data')]=true;assert.throws(()=>buildCompanionFixtureManifest(hidden));
   const sparse=structuredClone(original.design);sparse.dataSources.testing.recipes=new Array(1);assert.throws(()=>buildCompanionFixtureManifest(sparse));
 });
+test('large unrelated authoring state does not consume the recipe budget, while oversized recipe inputs still fail',()=>{
+  const large=structuredClone(original.design);let calls=0;
+  large.detailDesigns={...large.detailDesigns,history:Array.from({length:130000},(_,i)=>({i}))};
+  Object.defineProperty(large.detailDesigns,'unread',{enumerable:true,get(){calls++;return 'never read';}});
+  assert.deepEqual(buildCompanionFixtureManifest(large),buildCompanionFixtureManifest(original.design));assert.equal(calls,0);
+  const oversized=structuredClone(original.design);oversized.semantic.entities[0].padding=[0,1,2].map(()=>Array.from({length:50000},(_,i)=>i));
+  assert.throws(()=>buildCompanionFixtureManifest(oversized),/Input limit exceeded/);
+});
 test('generator emits a typed provider seam, canonical-read tests and dependency-free recipe tools with custom roots',async()=>{
   const p=providerProject(original);p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
   const files=new Map((await projectFiles(root,projectModel(p))).map(f=>[f.path,f.content]));

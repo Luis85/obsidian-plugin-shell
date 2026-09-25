@@ -20,9 +20,7 @@ export function fixtureManifest(m: Model) {
 export async function fixtureCode(templateRoot: string, m: Model, add: Add): Promise<boolean> {
   const manifest = fixtureManifest(m);
   if (!manifest) return false;
-  createFixtureEngine().generate(manifest);
   fixtureNoteTests(m,add);
-  createFixtureAdapter(manifest).dispose();
   for (const name of kitFiles) add('scripts/test-data/' + name, await readFile(join(templateRoot, 'docs/concepts/companion/test-kit', name), 'utf8'), 'managed');
   add('scripts/test-data/manifest.json', json(manifest), 'managed');
   add('scripts/test-data/adapters.d.mts', `export interface FixtureAdapter {

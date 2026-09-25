@@ -74,3 +74,13 @@ test('[TD-CLI] actual command entrypoint defaults to a read-only plan and uses a
   await assert.rejects(runTestData(['plan', '--target', '../live'], { root, manifestPath }), /Invalid arguments/);
   const reset = await runTestData(['reset-plan'], { root, manifestPath }); await runTestData(['reset', '--approve', reset.approval], { root, manifestPath });
 });
+test('[TD-CONTAINMENT] a project root reached through a linked ancestor is rejected without writes', async t => {
+  const outside = await sandbox(t), holder = await sandbox(t); await mkdir(join(outside, 'project'));
+  await symlink(outside, join(holder, 'alias'), process.platform === 'win32' ? 'junction' : 'dir');
+  await assert.rejects(planFixtures(join(holder, 'alias', 'project'), fixtureManifest()), /non-symlink/);
+  assert.deepEqual(await readdir(join(outside, 'project')), []);
+});
+test('[TD-CONTAINMENT] Windows drive-letter aliases of a real root are not mistaken for links', { skip: process.platform !== 'win32' && 'Windows path aliases only' }, async t => {
+  const root = await sandbox(t), alias = root[0].toLowerCase() + root.slice(1); assert.notEqual(alias, root);
+  const plan = await planFixtures(alias, fixtureManifest()); assert.ok(plan.changes.length > 0); assert.deepEqual(await readdir(root), []);
+});
