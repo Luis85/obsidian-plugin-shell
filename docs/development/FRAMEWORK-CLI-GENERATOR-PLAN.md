@@ -1,5 +1,6 @@
 # Framework release, CLI and project generator implementation plan
 
+**Implementation checkpoint, 2026-09-25:** The central CLI and compiled-kit workflow are now implemented on PR #18. See [current workflow](FRAMEWORK-CLI.md). Remaining task criteria and native/publication gates are not marked complete.
 **Decision:** 2026-09-24. **Status:** accepted delivery direction; implementation is pending. Command names and proposed paths below are design contracts, not available commands. The executable name `obs-shell` is provisional.
 
 Read the [delivery strategy](../product/DELIVERY-STRATEGY.md), [task index](../tasks/README.md), [PR #5 framework review](PR5-FRAMEWORK-READINESS-REVIEW.md) and [current read-only JSON contract](COMPANION-PROJECT-JSON.md). This plan adds scope to existing SH tasks; it does not replace their safety or qualification criteria.

@@ -71,7 +71,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.deepEqual(await readdir(options.vault),['project.json']);
   assert.equal(first.hash,(await planProject(options)).hash);
   await assert.rejects(applyProject(first,'wrong-hash'),/stale/);
-  const applied=await applyProject(first,first.hash); assert.ok(applied.written.length>1000);
+  const applied=await applyProject(first,first.hash); assert.equal(applied.written.length,first.plan.changes.filter(change=>change.status!=='unchanged').length); assert.ok(applied.written.length>100);
   const target=join(options.vault,options.target);
   assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.match(await readFile(join(target,'src/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);

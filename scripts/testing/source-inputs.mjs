@@ -24,7 +24,7 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Foundation-only fixtures can omit the compiler, but installed launcher and
   // compiler configuration bytes must participate in transport and freshness.
-  for (const extra of ['shell.mjs', 'tsconfig.generator.json']) {
+  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json']) {
     let stat;
     try { stat = await lstat(join(root, extra)); }
     catch (error) { if (error.code === 'ENOENT') continue; throw error; }

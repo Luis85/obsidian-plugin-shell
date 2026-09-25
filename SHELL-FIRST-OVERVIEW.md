@@ -1,5 +1,6 @@
 # Shell-first delivery overview
 
+**Implementation checkpoint, 2026-09-25:** The central CLI and compiled-kit workflow are now implemented on PR #18. See [current workflow](docs/development/FRAMEWORK-CLI.md). Remaining task criteria and native/publication gates are not marked complete.
 A reusable TypeScript/Vue/Pinia/Nuxt UI foundation for building Obsidian plugins, with guided setup, shared runtime services, generators and verification tooling.
 
 ## Delivery order: shell first
