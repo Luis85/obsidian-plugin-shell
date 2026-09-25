@@ -9,33 +9,41 @@ permissions:
 concurrency:
   group: template-authoring-${{ github.ref }}
   cancel-in-progress: true
+# Three independent journeys run in parallel. Each one still runs every gate on
+# its own fresh checkout; only the wall-clock serialization between them is gone.
 jobs:
   renamed-feature:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - &setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Select exact npm in runner scratch
+      - &select-npm
+        name: Select exact npm in runner scratch
         run: |
           npm install --prefix "$RUNNER_TEMP/template-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           echo "QUALIFIED_NPM=$RUNNER_TEMP/template-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-      - name: Adopt a distinct identity from a fresh checkout and run every setup gate
+      - &adopt-identity
+        name: Adopt a distinct identity from a fresh checkout and run every setup gate
         run: |
           mkdir -p reports/template-authoring
           set -o pipefail
           node "$QUALIFIED_NPM" run setup -- --id atlas-notes --name "Atlas Notes" --author "Template Qualification" --repo example/atlas-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
-      - name: Generate a new business feature through the public maker
+      - &make-feature
+        name: Generate a new business feature through the public maker
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
           node "$QUALIFIED_NPM" run entities:check
-      - name: Extend consumer source and exercise local event and plugin-data authoring
+      - &extend-consumer
+        name: Extend consumer source and exercise local event and plugin-data authoring
         run: |
           node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
           node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
@@ -53,8 +61,43 @@ jobs:
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
           node "$QUALIFIED_NPM" run test:e2e
+      - name: Retain authoring evidence and the generated source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: renamed-template-authoring
+          path: |
+            reports/
+            !reports/e2e/html/**
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+            src/features/bookmarks/
+            src/bootstrap/events.ts
+            src/bootstrap/event-catalog.ts
+            src/bootstrap/authoring.ts
+            scripts/makers/custom/
+            tests/runtime/generated/
+            tests/fixtures/entities/bookmarks-bookmark.md
+            src/bootstrap/features.ts
+            PROJECT-IDENTITY.md
+            .template-state/setup.json
+            dist/
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: error
+
+  source-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
       - name: Exercise literal source archive without ancestor Git discovery
         run: |
+          mkdir -p reports/template-authoring
           ARCHIVE_ROOT="$RUNNER_TEMP/executable-qualification-archive"
           mkdir -p "$ARCHIVE_ROOT"
           git archive --format=tar HEAD | tar -x -C "$ARCHIVE_ROOT"
@@ -67,6 +110,33 @@ jobs:
           node scripts/testing/evidence-cli.mjs run runtime
           node scripts/testing/evidence-cli.mjs run artifact
           cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
+      - name: Retain source-archive evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: template-authoring-source-archive
+          path: |
+            reports/
+            !reports/**/*.ttf
+            !reports/**/*.otf
+            !reports/**/*.woff
+            !reports/**/*.woff2
+          retention-days: 7
+          if-no-files-found: error
+
+  example-removal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - *checkout
+      - *setup-node
+      - *select-npm
+      # Reproduces the renamed-feature consumer state; that job verifies it before removal.
+      - *adopt-identity
+      - *make-feature
+      - *extend-consumer
+      - name: Provision pinned Chromium
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
           set -o pipefail
@@ -88,11 +158,11 @@ jobs:
           for session in reports/evidence/*; do
             node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
           done
-      - name: Retain authoring evidence and the generated source
+      - name: Retain removal evidence and the generated source
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: renamed-template-authoring
+          name: template-authoring-example-removal
           path: |
             reports/
             !reports/e2e/html/**
@@ -107,7 +177,6 @@ jobs:
             src/bootstrap/authoring.ts
             scripts/makers/custom/
             tests/runtime/generated/
-            tests/runtime/generated/bookmarks-bookmark.test.ts
             tests/fixtures/entities/bookmarks-bookmark.md
             src/bootstrap/features.ts
             PROJECT-IDENTITY.md

@@ -12,18 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - &setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Select qualified npm and install the framework
+      - &select-npm
+        name: Select qualified npm
         run: |
-          npm install --prefix "$RUNNER_TEMP/generator-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/generator-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-          node "$RUNNER_TEMP/generator-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install the framework
+        run: node "$QUALIFIED_NPM" ci --no-fund
       - name: Verify generator integration with unchanged repository gates
         run: |
           node scripts/bundling/build.mjs
@@ -69,17 +73,9 @@ jobs:
       matrix:
         id: [blank, command-utility, quick-capture, tasks-projects, knowledge-collection, daily-journal, vault-dashboard, note-inspector, import-integration]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - name: Select qualified npm
-        run: |
-          npm install --prefix "$RUNNER_TEMP/starter-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/starter-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - *checkout
+      - *setup-node
+      - *select-npm
       - name: Generate and independently install, build, typecheck and test
         run: node scripts/companion/qualify-starter.mjs "${{ matrix.id }}"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
