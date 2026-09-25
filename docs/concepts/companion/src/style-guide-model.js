@@ -14,33 +14,7 @@ function sgStarter(){
  s.colors=[['background','Background','#FFFFFF','#1E1E24','--background-primary'],['text','Primary text','#202027','#ECECF2','--text-normal'],['muted','Secondary text','#595964','#B6B6C4','--text-muted'],['accent','Accent','#6550B9','#B7A3FF','--interactive-accent'],['accent-text','Text on accent','#FFFFFF','#17131F','--text-on-accent']].map(([id,name,light,dark,host])=>({id,name,light,dark,host,usage:'Illustrative fallback palette; resolve the named variable from the active host theme.'}));
  s.guidelines=[{id:'interaction',name:'Interaction states',usage:'Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator.'},{id:'components',name:'Component usage',usage:'Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations.'}];return s;
 }
-function sgKeys(v,allowed){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).every(k=>allowed.includes(k));}
-function sgText(v,max=1000){return typeof v==='string'&&v.length<=max&&!/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(v);}
-function sgId(v){return typeof v==='string'&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(v)&&v.length<=60&&!['constructor','prototype'].includes(v);}
-function sgNumber(v,min,max){return typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;}
-function sgFontNames(v){return sgText(v,200)&&v.split(',').every(n=>/^[\p{L}\p{N} _-]{1,70}$/u.test(n.trim()));}
-function sgIssues(s){
- if(s===undefined)return [];
- if(!sgKeys(s,['schema','name','description','principles',...Object.keys(SG_GROUPS)])||s.schema!==1||!sgText(s.name,100)||!s.name.trim()||!sgText(s.description,2000)||!sgText(s.principles,4000))return ['Give the design system a name and keep descriptions within their limits.'];
- const errors=[];
- for(const group of Object.keys(SG_GROUPS)){
-  const rows=s[group];if(!Array.isArray(rows)||rows.length>(group==='fonts'?12:64)){errors.push(SG_GROUPS[group]+': too many or malformed entries.');continue;}
-  const ids=new Set();for(const r of rows){
-   if(!r||!sgId(r.id)||ids.has(r.id)||!sgText(r.name,100)||!r.name.trim()||!sgText(r.usage,2000)){errors.push(SG_GROUPS[group]+': use a unique code name, a visible name and a bounded description.');continue;}ids.add(r.id);
-   const base=['id','name','usage'];
-   if(group==='fonts'){
-    if(!sgKeys(r,[...base,'source','families','fallback','license'])||!Object.hasOwn(SG_FONT_SOURCES,r.source)||!['system-ui','sans-serif','serif','monospace'].includes(r.fallback)||!sgText(r.families,200)||!sgText(r.license,1000)||r.source==='custom'&&!sgFontNames(r.families))errors.push(r.name+': specify local family names separated by commas, a fallback and font provenance. URLs, CSS and font files are not accepted.');
-   }else if(group==='typography'){
-    if(!sgKeys(r,[...base,'font','size','unit','weight','lineHeight','letterSpacing'])||!Array.isArray(s.fonts)||!s.fonts.some(f=>f.id===r.font)||!['px','rem'].includes(r.unit)||!sgNumber(r.size,.1,r.unit==='rem'?12:192)||!Number.isInteger(r.weight)||r.weight<100||r.weight>900||!sgNumber(r.lineHeight,1,3)||!sgNumber(r.letterSpacing,-2,10))errors.push(r.name+': choose an existing font, valid size, weight 100–900, line height 1–3 and letter spacing −2–10 px.');
-   }else if(['spacing','sizes','radii'].includes(group)){
-    if(!sgKeys(r,[...base,'value','unit'])||!['px','rem'].includes(r.unit)||!sgNumber(r.value,0,r.unit==='rem'?100:1600))errors.push(r.name+': use a non-negative size with px or rem units (up to 1,600 px / 100 rem).');
-   }else if(group==='colors'){
-    if(!sgKeys(r,[...base,'light','dark','host'])||!/^#[0-9a-f]{6}$/i.test(r.light)||!/^#[0-9a-f]{6}$/i.test(r.dark)||!sgText(r.host,80)||r.host!==''&&!/^--[a-z][a-z0-9-]*$/.test(r.host))errors.push(r.name+': provide six-digit hex colors and an optional CSS variable name, not a CSS expression.');
-   }else if(!sgKeys(r,base))errors.push(r.name+': unsupported guideline fields.');
-  }
- }
- return errors;
-}
+function sgIssues(s){return designSystemIssues(s);}
 function validStyleGuide(s){try{return sgIssues(s).length===0;}catch{return false;}}
 function styleGuide(d=design()){return d.designSystem;}
 function sgFontCSS(font,host=true){

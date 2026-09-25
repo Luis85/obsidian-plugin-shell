@@ -149,7 +149,11 @@
     "docs/concepts/companion/src/detail-properties.js",
     "docs/concepts/companion/src/detail-navigation.js",
     "docs/concepts/companion/src/detail-review.js",
-    "docs/concepts/companion/src/detail-handoff.js"
+    "docs/concepts/companion/src/detail-handoff.js",
+    "docs/concepts/companion/src/style-guide-frontend.js",
+    "scripts/companion/design-system-roles.mjs",
+    "scripts/companion/design-system-contract.mjs",
+    "scripts/companion/design-system-css.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
