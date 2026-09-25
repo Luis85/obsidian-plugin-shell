@@ -1,5 +1,5 @@
 /** Actual isolated install/build/typecheck/test evidence for one built-in starter. */
-import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,8 @@ const root=fileURLToPath(new URL('../../',import.meta.url)),id=process.argv[2];
 const catalog=await loadStarterCatalog(root),entry=catalog.starters.find(s=>s.id===id);
 if(!entry)throw Error('Supply a built-in starter ID.');
 const out=join(root,'reports/project-starters',id);await mkdir(out,{recursive:true});
-const vault=await mkdtemp(join(tmpdir(),'qualified-starter-')),input=join(vault,'project.json');
+// Canonical path: Windows 8.3 temp aliases break test-module resolution in the generated workspace.
+const vault=await realpath(await mkdtemp(join(tmpdir(),'qualified-starter-'))),input=join(vault,'project.json');
 const document=customizeStarter(catalog,id,{}),report={id,sourceSha256:entry.sha256,scope:'Independent generated dependency installation, build, typecheck and scaffold tests; not native Obsidian or completed business acceptance.',steps:[],status:'failed'};
 function run(label,args,cwd){
  const npm=process.env.QUALIFIED_NPM;

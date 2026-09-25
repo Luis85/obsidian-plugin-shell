@@ -1,5 +1,5 @@
 /** Qualification, not part of generation: explicitly installs and executes the reviewed fixture. */
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +14,8 @@ if (process.argv.slice(2).length>1 || process.argv.slice(2).some(arg=>!['--bound
 const boundary = process.argv.includes('--boundary-fixture');
 const provider = process.argv.includes('--provider-fixture');
 const output = join(root, 'reports/project-generator', ...(boundary ? ['boundaries'] : provider ? ['providers'] : [])); await mkdir(output, { recursive: true });
-const vault = await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), 'companion-qualification-'));
+// Canonical path: Windows 8.3 temp aliases break test-module resolution in the generated workspace.
+const vault = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), 'companion-qualification-')));
 let input = join(root,'docs/concepts/companion/companion-project.json');
 if(boundary || provider){const document=(boundary?boundaryProject:providerProject)(JSON.parse(await readFile(input,'utf8')));input=join(vault,'boundary-project.json');await writeFile(input,JSON.stringify(document,null,2));}
 const options = { input, vault, target: boundary ? 'boundary-companion' : provider ? 'provider-companion' : 'companion' };

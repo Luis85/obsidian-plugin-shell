@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, realpath, rm } from 'node:fs/promises';
+import { fileSymlink } from './file-symlink.mjs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -167,10 +168,14 @@ test('[COMPANION-LINKS] target links, child-folder redirects and input links are
     const result = run(['--input', f.input, '--vault', f.vault, '--target', target]);
     assert.notEqual(result.status, 0); assert.equal(result.stdout, ''); assert.match(result.stderr, /link/);
   }
-  await symlink(f.input, join(f.dir, 'input-link.json'));
+  assert.deepEqual(await readdir(join(f.dir, 'outside')), []);
+});
+test('[COMPANION-LINKS] input file links are refused', async t => {
+  const f = await fixture(t);
+  if (!await fileSymlink(t, f.input, join(f.dir, 'input-link.json'))) return;
   const result = run(['--input', join(f.dir, 'input-link.json'), '--vault', f.vault, '--target', 'new']);
   assert.notEqual(result.status, 0); assert.equal(result.stdout, '');
-  assert.deepEqual(await readdir(join(f.dir, 'outside')), []);
+  assert.equal((await readdir(f.vault)).includes('new'), false);
 });
 test('[COMPANION-NONFILE] directories, absent inputs and targets through files are refused', async t => {
   const f = await fixture(t);

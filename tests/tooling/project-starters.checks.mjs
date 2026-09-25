@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, cp, symlink } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, cp } from 'node:fs/promises';
+import { fileSymlink } from './file-symlink.mjs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -72,5 +73,5 @@ test('case-sensitive identity changes do not replace domain words or authored co
 for(const [label,change] of [
  ['altered bytes',async f=>{const p=join(f,'blank.companion.json');await writeFile(p,(await readFile(p,'utf8'))+' ');}],
  ['orphan source',async f=>writeFile(join(f,'unlisted.json'),'{}')],
- ['symlink source',async f=>{const p=join(f,'blank.companion.json');await rm(p);await symlink(join(root,'package.json'),p);}],
-])test('file loader rejects '+label,()=>temporary(async folder=>{const f=join(folder,'docs/concepts/companion/starters');await mkdir(f,{recursive:true});await cp(join(root,'docs/concepts/companion/starters'),f,{recursive:true});await change(f);await assert.rejects(loadStarterCatalog(folder),/STARTER_INVALID/);}));
+ ['symlink source',async (f,t)=>{const p=join(f,'blank.companion.json');await rm(p);return fileSymlink(t,join(root,'package.json'),p);}],
+])test('file loader rejects '+label,t=>temporary(async folder=>{const f=join(folder,'docs/concepts/companion/starters');await mkdir(f,{recursive:true});await cp(join(root,'docs/concepts/companion/starters'),f,{recursive:true});if(await change(f,t)===false)return;await assert.rejects(loadStarterCatalog(folder),/STARTER_INVALID/);}));
