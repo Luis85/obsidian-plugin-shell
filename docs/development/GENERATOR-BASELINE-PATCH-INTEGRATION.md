@@ -1,6 +1,6 @@
 # Generator-boundary baseline patch: integration record
 
-Part of PR #21 / [SH-023](../tasks/shell/SH-023.md). This records how the local `pr21-generator-boundaries-baseline.patch` was integrated into the current PR branch. It does not describe completed business or native acceptance.
+Part of PR #21 / [SH-035](../tasks/shell/SH-035.md) (formerly the colliding SH-023). This records how the local `pr21-generator-boundaries-baseline.patch` was integrated into the current PR branch. It does not describe completed business or native acceptance.
 
 ## Inputs
 

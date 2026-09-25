@@ -1,6 +1,6 @@
 # Generated providers, relationship integrity and test data
 
-This is part of PR #21 / SH-023. It extends the existing explicit action, canonical note and scoped Design System compilers. It does not infer business rules from PRD prose or turn the browser concept into a finished native plugin.
+This is part of PR #21 / [SH-035](../tasks/shell/SH-035.md) (formerly the colliding SH-023). It extends the existing explicit action, canonical note and scoped Design System compilers. It does not infer business rules from PRD prose or turn the browser concept into a finished native plugin.
 
 ## Supported declaration-to-code mapping
 
