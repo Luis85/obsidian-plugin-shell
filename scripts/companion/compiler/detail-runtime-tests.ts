@@ -6,15 +6,15 @@ export function detailRuntimeTests(m: Model, documents: DetailDocument[], add: A
   const path = `${m.testRoot}/detail-runtime.test.ts`;
   add(path, `// @vitest-environment happy-dom
 import { it, expect, vi } from 'vitest';
-import { defineComponent, nextTick, reactive } from 'vue';
+import { defineComponent, nextTick, reactive, type App } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
-import { useDetail, detailKey, type DetailContext } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-detail.ts`))};
+import { useDetail, provideDetailContext, type DetailContext } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-detail.ts`))};
 import type { DetailDocument, DetailRequest } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/detail-runtime.ts`))};
 const doc: DetailDocument = { id: 'test-document', kind: 'page', ownerId: 'test-page', ownerLabel: 'Test', notes: '',
  nodes: [{ id: 'input', kind: 'input', label: 'Draft', text: '', parentId: null, layout: 'stack', component: null, props: {}, binding: null, a11y: '', visibleIn: ['default', 'loading', 'error', 'disabled'] }],
  edges: [{ id: 'change', source: 'input', target: 'output', event: 'change', label: 'Save', notes: '', acceptance: '', targetSurfaceId: null }] };
 function subject(context: DetailContext, design = doc) {
-  return mount(defineComponent({ setup: () => ({ model: useDetail(design, {}, () => {}) }), render: () => null }), { global: { provide: { [detailKey as symbol]: context } } });
+  return mount(defineComponent({ setup: () => ({ model: useDetail(design, {}, () => {}) }), render: () => null }), { global: { plugins: [{ install(app: App) { provideDetailContext(app, context); } }] } });
 }
 it('retains drafts and reports unimplemented behavior without pretending success', async () => {
   const wrapper = subject({ ports: [], navigate: () => {}, handle: async () => { throw new Error('NOT_IMPLEMENTED: change'); } });

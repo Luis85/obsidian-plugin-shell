@@ -80,7 +80,7 @@ import { projectKey } from '../presentation/context/project.ts';
 import type { Sources } from '../application/sources.ts';
 import { panels } from './panels.ts';
 import { bindFlows } from './flows.ts';
-import { detailKey } from '../presentation/composables/use-detail.ts';
+import { provideDetailContext } from '../presentation/composables/use-detail.ts';
 import { createDetailContext } from './detail-context.ts';
 import '../presentation/detail-layout.css';
 export function mountProject(root: HTMLElement,shell: Services,sources: Sources,openModal: (id: string) => void,initial?: string,isolated = false) {
@@ -88,7 +88,7 @@ export function mountProject(root: HTMLElement,shell: Services,sources: Sources,
   const close = () => { if (closed) return; closed = true; try { if (mounted) app.unmount(); } finally { disposePinia(pinia); theme(); } };
   try {
     root.classList.add(shell.identity.rootClass,shell.identity.scopeClass); root.dataset.pluginUi = shell.identity.id;
-    theme = bindHostTheme(root); app.use(pinia); app.provide(detailKey, createDetailContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
+    theme = bindHostTheme(root); app.use(pinia); provideDetailContext(app, createDetailContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
     app.config.errorHandler = () => shell.diagnostics.report('generated.render','view.render');
     mounted = true; app.mount(root); return close;
   } catch (error) { close(); throw error; }

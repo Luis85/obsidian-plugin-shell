@@ -21,7 +21,7 @@ test('unimplemented adapter errors preserve explicit source and operation identi
 
 test('root CLI and compiler policy are fingerprinted and covered as tooling', async () => {
   const inventory = await sourceInputs(process.cwd());
-  for (const path of ['shell.mjs', 'tsconfig.generator.json']) {
+  for (const path of ['shell.mjs', 'tsconfig.generator.json', 'docs/concepts/companion/companion-project.json']) {
     const entries = inventory.files.filter(file => file.path === path);
     assert.equal(entries.length, 1);
     assert.equal(entries[0].sha256, sha256(await readFile(path)));

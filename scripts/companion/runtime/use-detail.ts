@@ -1,4 +1,4 @@
-import { computed, inject, onScopeDispose, reactive, ref, useId, type InjectionKey } from 'vue';
+import { computed, inject, onScopeDispose, reactive, ref, useId, type App, type InjectionKey } from 'vue';
 import { detailValue, detailTextValue, visibleDetails, type DetailDocument, type DetailRequest, type DetailState } from './detail-runtime.ts';
 export interface DetailPort {
   sourceId: string; operationId: string; direction: string; requiresInput: boolean;
@@ -11,6 +11,7 @@ export interface DetailContext {
   handle(request: DetailRequest): Promise<unknown>;
 }
 export const detailKey: InjectionKey<DetailContext> = Symbol('generated-details');
+export function provideDetailContext(app: App, context: DetailContext): void { app.provide(detailKey, context); }
 /** State and draft values belong to this mount. Bindings never imply persistence. */
 export function useDetail(document: DetailDocument, props: { designState?: DetailState }, emit: (request: DetailRequest) => void) {
   const context = inject(detailKey, undefined); const prefix = useId();

@@ -78,7 +78,7 @@ test('compiler emits layouts, slots, typed props, source adapters and traceable 
   assert.match(entries.get(path + 'presentation/components/library/project-json-review.vue'), /<slot :name=/);
   assert.match(entries.get(path + 'domain/components/contracts/project-json-review.ts'), /"busy"\?: boolean/);
   assert.match(entries.get(path + 'bootstrap/detail-context.ts'), /defineGAuthoringVaultStore/);
-  assert.match(entries.get(path + 'bootstrap/mount.ts'), /app.provide\(detailKey/);
+  assert.match(entries.get(path + 'bootstrap/mount.ts'), /provideDetailContext\(app/);
   assert.match(entries.get(path + 'application/interactions/detail-edge-13.ts'), /NotImplementedError/);
   assert.match(entries.get('tests/project/details/detail-document-14.test.ts'), /toHaveBeenCalledWith\("node-17"\)/);
   assert.match(entries.get('tests/project/acceptance/detail-edge-13.test.ts'), /it.todo/);
