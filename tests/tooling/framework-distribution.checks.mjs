@@ -7,12 +7,19 @@ import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
 import { standaloneSource, updateOwnership } from '../../scripts/framework/distribution.ts';
 import { hash } from '../../scripts/framework/files.ts';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const projectFixture = 'docs/concepts/companion/companion-project.json';
+// A synthetic reviewed README keeps these ownership checks independent of whether
+// this checkout still carries the showcase README or already removed examples.
+const reviewedReadme = Buffer.from('# Reviewed framework README\n\nSee the [CLI workflow](docs/development/FRAMEWORK-CLI.md) and [prototype](docs/concepts/companion/index.html).\n');
+async function pinnedOwnership() {
+  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  return { ...ownership, files: ownership.files.map(file => file.path === 'README.md' ? { ...file, sha256: hash(reviewedReadme) } : file) };
+}
 test('release adaptation recognizes only the reviewed README across checkout line endings', async () => {
-  const source = await readFile(join(root, 'README.md'));
-  const metadata = await readFile(join(root, 'scripts/examples/ownership.json'));
-  const canonical = Buffer.from(source.toString('utf8').replace(/\r\n/g, '\n'));
+  const metadata = Buffer.from(JSON.stringify(await pinnedOwnership()));
+  const canonical = reviewedReadme;
   const crlf = Buffer.from(canonical.toString('utf8').replace(/\n/g, '\r\n'));
   const expected = standaloneSource('README.md', canonical);
   for (const original of [canonical, crlf]) {
@@ -28,12 +35,12 @@ test('release adaptation recognizes only the reviewed README across checkout lin
   assert.deepEqual(standaloneSource('harness/vendor.css.gz', compressed), compressed);
 });
 test('kit ownership refreshes every normalized example-owned file and refuses unknown preimages', async () => {
-  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  const ownership = await pinnedOwnership();
   const record = ownership.files.find(file => typeof file.sha256 === 'string' && file.path !== 'README.md' && file.path.endsWith('.ts'));
   const mixed = Buffer.from('export const a = 1;\r\nexport const b = 2;\n// mixed checkout bytes\r\n');
   const shipped = standaloneSource(record.path, mixed); assert.ok(!shipped.equals(mixed)); assert.ok(!shipped.includes('\r'));
   const pinned = Buffer.from(JSON.stringify({ ...ownership, files: ownership.files.map(file => file === record ? { ...file, sha256: hash(mixed) } : file) }));
-  const readme = await readFile(join(root, 'README.md'));
+  const readme = reviewedReadme;
   const updated = JSON.parse(updateOwnership(new Map([[record.path, mixed], ['README.md', readme]]), new Map([[record.path, shipped], ['README.md', standaloneSource('README.md', readme)]]), pinned));
   assert.equal(updated.files.find(file => file.path === record.path).sha256, hash(shipped));
   assert.equal(updated.files.find(file => file.path === 'README.md').sha256, hash(standaloneSource('README.md', readme)));
@@ -82,6 +89,7 @@ test('optional project fixture contributes exact bytes and refuses parent redire
   await assert.rejects(sourceInputs(folder), /SOURCE_SYMLINK/);
 });
 test('reviewed style removal preserves tokens across checkout line endings', async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; the reviewed stylesheet preimages no longer exist'); return; }
   const { planExampleRemoval } = await import('../../scripts/examples/plan.mjs');
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-removal-')));
   t.after(() => rm(folder, { recursive: true, force: true }));
