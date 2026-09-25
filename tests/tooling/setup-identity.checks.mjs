@@ -224,3 +224,18 @@ test('[SETUP-05] intent is journaled before metadata application and externally 
   const corrupt = run(f.root, f.launcher, ['--dry-run', '--json']); assert.equal(corrupt.status, 1); assert.match(corrupt.stdout, /Invalid setup journal/);
   assert.equal(await readFile(join(f.root, '.template-state/setup.json'), 'utf8'), '{"external":true}');
 });
+
+test('[SETUP-06] deferred verification skips only the verify stage, reports it as deferred and refuses native installs', async t => {
+  const f = await fixture(); t.after(() => rm(f.root, { recursive: true, force: true }));
+  const result = run(f.root, f.launcher, [...flags, '--id', 'deferred-plugin', '--defer-verify']); assert.equal(result.status, 0, result.stdout + result.stderr);
+  const output = JSON.parse(result.stdout); assert.equal(output.identity.id, 'deferred-plugin');
+  assert.equal(output.scope.staticServiceArtifactChecks, 'deferred: run npm run verify');
+  assert.deepEqual(output.stages.map(stage => [stage.id, stage.status]), [['install', 'verified'], ['browser-provision', 'skipped'], ['verify', 'skipped'], ['native-install', 'skipped']]);
+  await assert.rejects(readFile(join(f.root, 'verify-count')), { code: 'ENOENT' }); assert.doesNotMatch(result.stderr, /Synthetic verify boundary/);
+  assert.equal((await parsed(f.root, '.template-state/setup.json')).options['defer-verify'], true);
+  const resumed = run(f.root, f.launcher, [...flags, '--resume']); assert.equal(resumed.status, 0, resumed.stdout + resumed.stderr);
+  assert.equal(JSON.parse(resumed.stdout).stages.find(stage => stage.id === 'verify').status, 'skipped');
+  const verified = run(f.root, f.launcher, flags); assert.equal(verified.status, 0, verified.stdout + verified.stderr);
+  assert.equal(JSON.parse(verified.stdout).scope.staticServiceArtifactChecks, 'verified'); assert.equal(await readFile(join(f.root, 'verify-count'), 'utf8'), '1');
+  await assert.rejects(setupOptions(['--defer-verify', '--profile', 'native']), /--defer-verify conflicts with --profile native/);
+});
