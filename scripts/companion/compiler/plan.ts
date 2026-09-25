@@ -1,10 +1,11 @@
 import { readFile } from 'node:fs/promises';
-import { resolve, relative, isAbsolute } from 'node:path';
+import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readCompanionProject } from '../read-project.mjs';
 import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
 import { digest, json, projectModel, row, rows, text, requireValue } from './model.ts';
 import { projectFiles } from './project-files.ts';
+import { detailDocuments } from './detail-model.ts';
 export interface GenerateOptions { input: string; target: string; vault?: string; templateRoot?: string }
 const generationVersion = 1;
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
@@ -12,7 +13,7 @@ export async function planProject(options: GenerateOptions) {
   const input = await readCompanionProject(options); const model = projectModel(input.document);
   const templateRoot = resolve(options.templateRoot ?? fileURLToPath(new URL('../../../',import.meta.url)));
   const within = relative(templateRoot,input.target);
-  requireValue(within.startsWith('..') || isAbsolute(within), 'Use a target outside this framework checkout; do not recursively copy or overwrite the template.');
+  requireValue(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'Use a target outside this framework checkout; do not recursively copy or overwrite the template.');
   const prefix = options.target === '.' ? '' : options.target+'/';
   const receiptPath = prefix+'.companion/generation.json';
   const inspected = await createFilePlan(input.vault,[{path:receiptPath,content:null}]); const receiptBefore = inspected.changes[0]!.beforeHash;
@@ -25,7 +26,9 @@ export async function planProject(options: GenerateOptions) {
     requireValue(new Set(records.map(f=>text(f.path).toLowerCase())).size === records.length,'Duplicate receipt paths.');
     previous = new Map(records.map(f => [text(f.path),{hash:text(f.hash),ownership:text(f.ownership)}]));
   }
+  const details = detailDocuments(model);
   const output = await projectFiles(templateRoot,model);
+  requireValue(output.length <= 5000, 'Generated project exceeds the supported ownership inventory.');
   const candidates = await createFilePlan(input.vault,output.map(e => ({path:prefix+e.path,content:e.content,...(e.encoding ? {encoding:e.encoding} : {})})));
   const preserved: string[] = []; const conflicts: string[] = []; const entries: Array<{path:string;content:string;encoding?:'base64'}> = [];
   const ownership: Array<{path:string;hash:string;ownership:string}> = [];
@@ -48,7 +51,7 @@ export async function planProject(options: GenerateOptions) {
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
   for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
   const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
-  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length,warnings:model.warnings}};
+  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + details.flatMap(d=>d.edges).filter(e=>e.acceptance || !e.targetSurfaceId).length,detailDocuments:details.length,detailInteractions:details.reduce((n,d)=>n+d.edges.length,0),warnings:model.warnings}};
 }
 export async function applyProject(result: Awaited<ReturnType<typeof planProject>>, expectedHash: string) {
   requireValue(result.hash === expectedHash,'Reviewed plan hash is stale; inspect a fresh plan.');

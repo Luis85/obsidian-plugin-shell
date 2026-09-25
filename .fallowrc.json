@@ -149,7 +149,8 @@
     "docs/concepts/companion/src/detail-properties.js",
     "docs/concepts/companion/src/detail-navigation.js",
     "docs/concepts/companion/src/detail-review.js",
-    "docs/concepts/companion/src/detail-handoff.js"
+    "docs/concepts/companion/src/detail-handoff.js",
+    "scripts/companion/runtime/use-detail.ts"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

@@ -235,3 +235,15 @@ release promotion require separate evidence and authorization.
 | [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Full update/candidate/promotion contract. |
 
 [Agent instructions](AGENTS.md) · [License](LICENSE)
+
+## Generate a plugin from a companion design
+
+Export Project JSON from the companion HTML concept. From this framework checkout, run
+`node shell.mjs generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
+to inspect the file plan, then repeat with `--apply <planHash>`. The npm equivalent is
+`npm run companion:scaffold -- ...`. In the generated project run `npm ci`,
+`npm run verify:project`, then `npm run test:tdd`. Generation performs no installation, activation or publishing.
+
+The compiler creates the shell, entity contracts, DataSource services/Pinia stores, native hosts,
+Vue detail layouts and traceable tests. Business behavior stays in explicit implementation hooks.
+See [the generator guide](docs/development/COMPANION-GENERATOR.md) for supported contracts and boundaries.
