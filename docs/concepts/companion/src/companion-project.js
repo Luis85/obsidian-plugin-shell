@@ -25,6 +25,7 @@ function companionExampleProject() {
   surface('workbench', 'Companion workbench', 'sidebar-left', 'Open the one-vault workspace and retain the selected design context.', 'view');
   const screens = [
     ['overview', 'Project overview', 'dashboard', 'Understand the next useful action, review blockers and advisory findings.'],
+    ['starters', 'Project Starters', 'dashboard', 'Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.'],
     ['requirements', 'Product requirements', 'list-detail', 'Describe outcomes and verifiable acceptance criteria, then map them to screens and components.'],
     ['storymaps', 'Storymaps overview', 'list-detail', 'Find, create, link and archive the project’s storymaps.'],
     ['storymap-detail', 'Storymap editor', 'canvas', 'Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.'],
@@ -59,6 +60,7 @@ function companionExampleProject() {
   for (const [from, to, label] of [
     ['requirements', 'storymaps', 'Browse linked storymaps'], ['storymaps', 'storymap-detail', 'Open a storymap'], ['requirements', 'storymap-detail', 'Open linked map'], ['storymap-detail', 'sitemap', 'Locate a linked surface'],
     ['sitemap', 'page-editor', 'Design surface details'], ['storymap-detail', 'page-editor', 'Design linked page'], ['pages', 'page-editor', 'Open page design'], ['components', 'component-editor', 'Design reusable internals'], ['page-editor', 'component-editor', 'Edit instance definition'],
+    ['overview', 'starters', 'Choose a project starter'], ['starters', 'import-project', 'Review configured starter'], ['starters', 'shell-handoff', 'Generate the confirmed project'],
     ['overview', 'requirements', 'Define the outcome'], ['requirements', 'sitemap', 'Shape the experience'],
     ['sitemap', 'entities', 'Describe meaning'], ['entities', 'sources', 'Bind a source contract'],
     ['sources', 'test-data', 'Try a source operation'], ['components', 'sitemap', 'Place a component'],
@@ -83,6 +85,7 @@ function companionExampleProject() {
 function companionExampleRequirements(d, surfaces) {
   const groups = [
     ['Product & workspace', 'A plugin idea, its requirements and its implementation context are otherwise scattered across tools.', [
+      ['Start from a curated full project', 'starters', 'Browse and filter nine offline JSON starters including a minimal runnable Start Blank. Inspect scope, configure identity and folders, review the exact project, explicitly confirm replacement, and preserve the old project on invalid input, stale state or failed persistence. Templates remain immutable and exported projects stay generator-compatible.'],
       ['One vault owns one project', 'overview', 'Opening this workspace exposes one project; loading another definition requires review and never adds a second active project.'],
       ['Capture requirements and acceptance', 'requirements', 'Create, revise, map and export PRDs with testable requirements, priorities and retained review baselines.'],
       ['Author screens and transitions', 'sitemap', 'Edit screens, containers and transitions with keyboard and pointer controls. Page and Component editors provide semantic elements, responsive layout/token controls, instance slots, fixtures and explicit UI effects. Undo and Redo preserve published snapshots within the disclosed storage budget.'],

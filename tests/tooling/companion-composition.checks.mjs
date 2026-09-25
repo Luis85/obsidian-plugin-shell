@@ -16,7 +16,7 @@ vm.runInContext(await readFile('docs/concepts/companion/src/composition-model.js
 const page=s=>s.documents.find(d=>d.kind==='page' && d.nodes.some(n=>n.component && d.nodes.some(c=>c.parentId===n.id)));
 test('v4 self-project covers every eligible page and library definition with valid frozen dependencies',()=>{
  assert.equal(validateCompanionDocument(seed),seed);const s=validateDetailDesigns(store());
- assert.equal(s.documents.length,80);assert.equal(s.revisions.length,54);
+ assert.equal(s.documents.length,81);assert.equal(s.revisions.length,54);
  assert.deepEqual(s.documents.filter(d=>d.kind==='page').map(d=>d.ownerId).sort(),seed.design.nodes.filter(n=>['page','modal','settings'].includes(n.kind)).map(n=>n.id).sort());
  assert.deepEqual(s.documents.filter(d=>d.kind==='component').map(d=>d.ownerId).sort(),seed.design.library.map(c=>c.id).sort());
  assert.ok(s.documents.every(d=>d.scenarios?.length>=2));assert.ok(s.documents.flatMap(d=>d.nodes).filter(n=>n.component).every(n=>n.component.revisionId));
