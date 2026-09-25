@@ -4,6 +4,12 @@
 
 Read the [delivery strategy](../product/DELIVERY-STRATEGY.md), [task index](../tasks/README.md), [PR #5 framework review](PR5-FRAMEWORK-READINESS-REVIEW.md) and [current read-only JSON contract](COMPANION-PROJECT-JSON.md). This plan adds scope to existing SH tasks; it does not replace their safety or qualification criteria.
 
+## Current implementation baseline — 2026-09-25
+
+PR #20 has been merged into the base at `1dfa991df77ea5fa742d8bd5e300c877d0d45151`. Preserve its TypeScript compiler, runtime contracts, `shell.mjs` dispatch, binary-safe file-plan extension and generator workflow/tests. The [generator guide](COMPANION-GENERATOR.md) documents current `node shell.mjs generate` and `companion:scaffold` behavior; setup/make currently forward to existing handlers. The implementation is tracked under [SH-035](../tasks/shell/SH-035.md), resolving its concurrent SH-023 collision without dropping scope.
+
+This does not complete the central TypeScript CLI or compiled developer kit: the present compiler launches TypeScript at runtime, expects a separate vault-relative target, retains framework `src`/`tests` roots, and preserves PRD acceptance as explicit TODOs. SH-028 now depends on SH-035 to extend the existing compiler. Other command examples and packaging contracts below remain targets, not availability claims. The dated PR #5 review retains its original scope and has an integration addendum.
+
 ## 1. Primary product journey
 
 Download the versioned **framework developer-kit release asset** from GitHub Releases; extract it into a new project folder; run setup from the terminal; configure project/plugin identity; import a project JSON; review and generate boilerplate; implement remaining behavior; build; test; prepare and explicitly publish the resulting plugin; continue maintenance with the same CLI.

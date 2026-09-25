@@ -36,7 +36,7 @@ The supplied plan is revised in [COMPANION-IMPROVEMENT-PLAN.md](../product/COMPA
 | 11 Preparation/execution safety | SH-012, SH-014, CP-004, CP-008. |
 | 12 Architecture | SH-002–SH-008; architecture contract; CP-001. |
 | 13 Quality/accessibility/performance | SH-019–SH-022, CP-009, CP-010. |
-| 14 Work packages | This crosswalk and 56 individual tasks; original priorities superseded. |
+| 14 Work packages | This crosswalk and 57 individual tasks; original priorities superseded. |
 | 15 Incremental delivery | Strategy gates and explicit task dependencies. |
 | 16 Next concept iteration | CX-001–CX-007; concept roadmap. |
 | 17 Validation/sustainability | CX-002, CX-007, CP-009, PUB-003, PUB-005; no telemetry dependency. |
@@ -74,3 +74,7 @@ The [parent PRD](../product/PRD.md), its baseline/specification companions, the 
 | Framework-side discover/plan/apply/results/recovery integration | SH-033 before shipment; CP-004/CP-008 provide later native UI. |
 
 All original E01–E12 and 18-section scope remains accounted for. New IDs extend rather than renumber the backlog. The [detailed plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md) defines the journey and the [bounded PR review](../development/PR5-FRAMEWORK-READINESS-REVIEW.md) distinguishes available evidence from remaining gaps.
+
+## PR #20 generator integration — 2026-09-25
+
+The separately implemented compiler task previously also used SH-023. Preserve it as [SH-035](shell/SH-035.md), with its issue #19 provenance, original acceptance and `in-review` status. SH-023 remains the baseline/CI reconciliation task. SH-028 now depends on SH-035; SH-022 covers it transitively through SH-032/SH-033. Existing compiler/CLI/file-plan implementation and the generator workflow are retained unchanged. The backlog now has 57 tasks, including 35 in the shell lane.

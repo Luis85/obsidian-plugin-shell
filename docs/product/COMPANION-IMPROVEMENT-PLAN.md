@@ -8,6 +8,10 @@ This revises the supplied `COMPANION-IMPROVEMENT-PLAN.md` (SHA-256 `7c8236b401ca
 
 Read the [delivery strategy](DELIVERY-STRATEGY.md), [task index](../tasks/README.md), [traceability crosswalk](../tasks/TRACEABILITY.md) and [companion architecture contract](../architecture/COMPANION-ON-SHELL.md).
 
+## Integration update — 2026-09-25
+
+PR #20's TypeScript project compiler and `shell.mjs` entry now exist in the base and are preserved by the PR #18 reconciliation. [SH-035](../tasks/shell/SH-035.md) retains that compiler task, formerly a colliding SH-023, under verification; SH-028 extends its existing behavior. The [generator guide](../development/COMPANION-GENERATOR.md) describes commands available now. Earlier pending descriptions below specify the complete framework target, not a request to discard or recreate the implemented compiler. A compiled developer-kit release and native companion readiness remain unqualified.
+
 ## 1. Product relationship
 
 Plugin Shell is the reusable foundation: services, safe persistence, host integration, styles, generators, tooling and tests. It must be usable directly by a developer without installing the companion.
@@ -147,7 +151,7 @@ Run three native acceptance journeys: design without external tooling; design to
 
 ## 17. Task breakdown and change control
 
-The [56 individual tasks](../tasks/README.md) contain purpose, baseline, scope, acceptance, verification, evidence and dependencies: 34 shell/framework, seven concept, ten native companion and five companion-publication tasks. SH-023–SH-034 capture the CLI/archive/generator refinement. Task frontmatter is authoritative; SH-022 is blocked and no implementation is completed by this revision.
+The [57 individual tasks](../tasks/README.md) contain purpose, baseline, scope, acceptance, verification, evidence and dependencies: 35 shell/framework, seven concept, ten native companion and five companion-publication tasks. SH-023–SH-034 capture the CLI/archive/generator refinement. Task frontmatter is authoritative; SH-022 is blocked and no implementation is completed by this revision.
 
 The [crosswalk](../tasks/TRACEABILITY.md) accounts for the supplied plan's 18 sections and E01–E12 packages. Phase priority overrides their original P0/P1 labels. Scope additions are allowed; append stable IDs, update dependency links and reopen impacted gates instead of renumbering existing work.
 

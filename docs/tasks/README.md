@@ -2,7 +2,7 @@
 
 **Order:** qualify and ship shell + project generator + TypeScript CLI → real companion on shipped shell → companion publication. **Concept status:** still evolving; not feature-complete or natively implemented. See [strategy](../product/DELIVERY-STRATEGY.md), [plan](../product/COMPANION-IMPROVEMENT-PLAN.md) and [traceability](TRACEABILITY.md).
 
-There are **56 individual task files**: 34 shell/framework, seven concept, ten native companion and five companion-publication tasks. New tasks are `planned`; SH-022 is explicitly `blocked` by the reviewed source/CI and missing framework scope. This revision closes no implementation task. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
+There are **57 individual task files**: 35 shell/framework, seven concept, ten native companion and five companion-publication tasks. Roadmap tasks remain `planned`; the incoming compiler task SH-035 retains `in-review` (implementation under verification), and SH-022 is explicitly `blocked` by the reviewed source/CI and missing framework scope. This revision closes no implementation task. Task frontmatter is the single authority for status/dependencies. Tables below are navigation and dependency summaries, not a second progress database.
 
 ## Working rules
 
@@ -45,13 +45,16 @@ Use the [task template](TASK-TEMPLATE.md). Add new stable IDs when accepted conc
 | [SH-025](shell/SH-025.md) | Deliver the central human and agent CLI | SH-024 |
 | [SH-026](shell/SH-026.md) | Assemble the runnable framework developer kit | SH-013, SH-025 |
 | [SH-027](shell/SH-027.md) | Implement guided setup and project JSON intake | SH-026, SH-005, SH-015 |
-| [SH-028](shell/SH-028.md) | Integrate full project generation with shared makers | SH-017, SH-018, SH-024, SH-027 |
+| [SH-028](shell/SH-028.md) | Integrate full project generation with shared makers | SH-017, SH-018, SH-024, SH-027, SH-035 |
 | [SH-029](shell/SH-029.md) | Unify development, test-vault and lifecycle commands | SH-025, SH-010, SH-028 |
 | [SH-030](shell/SH-030.md) | Provide ownership-aware maintenance and upgrades | SH-012, SH-018, SH-025, SH-028 |
 | [SH-031](shell/SH-031.md) | Expose generated-plugin release preparation and rehearsal | SH-021, SH-025, SH-028, SH-029 |
 | [SH-032](shell/SH-032.md) | Qualify the clean release-archive user journey | SH-019, SH-026, SH-027, SH-028, SH-029, SH-030, SH-031 |
 | [SH-033](shell/SH-033.md) | Qualify the framework-side companion operation adapter | SH-024, SH-025, SH-028, SH-029, SH-007, SH-012 |
 | [SH-034](shell/SH-034.md) | Ship the qualified framework before companion conversion | SH-022 |
+| [SH-035](shell/SH-035.md) | Preserve and qualify the implemented companion project compiler | SH-015, SH-018 |
+
+PR #20 also introduced an unrelated SH-023. Its generator task is now [SH-035](shell/SH-035.md); the original [SH-023](shell/SH-023.md) baseline task keeps its existing references. SH-028 depends on SH-035, so framework readiness still covers the generator without an ID collision or a dependency cycle. No acceptance criterion is closed by the reconciliation.
 
 Start at SH-001. SH-022 includes the transitive prerequisites above and all newly accepted shell requirements; it cannot close with required consumer behavior only present in the concept.
 

@@ -1,0 +1,55 @@
+name: Companion project generator
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: project-generator-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  generated-companion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Select qualified npm and install the framework
+        run: |
+          npm install --prefix "$RUNNER_TEMP/generator-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/generator-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/generator-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Verify generator integration with unchanged repository gates
+        run: |
+          node scripts/bundling/build.mjs
+          node scripts/quality/check-analyzer.mjs
+          node scripts/quality/check-repository.mjs
+          node scripts/quality/check-source.mjs
+      - name: Type-check the compiler and test ownership, contracts and legacy handoff
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:generator
+          node --test tests/tooling/project-generator*.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
+      - name: Generate, independently install, build and test the companion project
+        run: node scripts/companion/qualify-project.mjs
+      - name: Retain exact source and generated project without dependencies or machine state
+        if: always()
+        run: |
+          mkdir -p reports/project-generator
+          git archive --format=tar.gz HEAD -o reports/project-generator/framework-source.tar.gz
+          git rev-parse HEAD > reports/project-generator/commit.txt
+          if test -f reports/project-generator/target.txt; then
+            TARGET="$(cat reports/project-generator/target.txt)"
+            tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf reports/project-generator/generated-companion.tar.gz -C "$TARGET" .
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: project-generator-evidence
+          path: reports/project-generator/
+          retention-days: 7
+          if-no-files-found: error

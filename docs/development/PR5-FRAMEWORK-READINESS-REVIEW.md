@@ -80,3 +80,11 @@ At the repaired-head check observed during this review, [companion source](https
 ## Review disposition
 
 Continue P0 implementation; **framework readiness remains blocked** by missing PR #17 integration and the specified kit/CLI/compiler/adapter qualification. Preserve the concurrent Windows correction and check its exact-head results. Preserve PR #5's read-only handoff and evolving concept. Ship the independently qualified framework before native companion conversion. Reassess exact-head CI after future code changes; do not treat this dated review as live status.
+
+## PR #20 integration addendum — 2026-09-25
+
+The prior findings apply to the exact heads cited above. The base has since advanced to `1dfa991df77ea5fa742d8bd5e300c877d0d45151`, merging PR #20. It now includes `shell.mjs`, a shared TypeScript project compiler and runtime contracts, binary-safe file plans, source-fingerprint updates, generator tests and a generated-consumer workflow. Statements above that no generator/entry exists are historical, not the current implementation inventory.
+
+The conflict repair retains all these executable changes byte-for-byte. Its add/add task collision is resolved by retaining the roadmap SH-023 and mapping PR #20's compiler task to [SH-035](../tasks/shell/SH-035.md); SH-028 depends on it. The handoff documentation retains both the unchanged read-only v1 reader and the separate plan/apply generator. See the [current generator guide](COMPANION-GENERATOR.md) and [merge verification](../testing/PR18-MERGE-RECONCILIATION.md).
+
+Remaining distinctions: runtime TypeScript launch is not the planned compiled-kit bootstrap; separate vault-relative generation is not in-place extracted-project setup; configurable generated-product folders do not relocate framework roots; generated TODOs are not accepted native behavior. The PR #17 discovery paths remain absent. Framework readiness and the requested framework-before-companion shipment order are unchanged. No implementation task is marked done by conflict resolution.

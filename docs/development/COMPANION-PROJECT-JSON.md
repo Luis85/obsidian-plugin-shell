@@ -101,3 +101,9 @@ The next writer increment must define a reviewed deterministic plan from this en
 The [CLI/generator implementation plan](FRAMEWORK-CLI-GENERATOR-PLAN.md) introduces a separate project-root setup/import/compiler workflow from a downloaded framework archive. SH-015/SH-024 extract shared TypeScript semantic validation; SH-027 reconciles imported identity/folder settings; SH-028 generates through the same makers as the CLI; SH-033 proves the companion adapter contract.
 
 This does **not** change v1 above: the existing script remains dependency-free, read-only and exact-byte on stdout, with the documented vault-relative target. A future full writer must not silently inherit execution approval or relabel these tests as generation evidence. Source/test paths remain portable design fields; the new development project root is selected locally, not imported as an absolute vault path.
+
+## Implementation workspace generation
+
+The v1 reader documented above remains unchanged. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
+
+The generator from PR #20 is the existing implementation baseline for [SH-035](../tasks/shell/SH-035.md) and SH-028, not a replacement for the read-only v1 handoff. Its current vault-relative, separate-target workflow and runtime TypeScript launch are documented in the generator guide. The broader extracted-project, bundled-CLI workflow above remains planned. Preserve and extend the current compiler rather than implement a competing one.
