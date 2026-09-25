@@ -196,3 +196,35 @@ test('maintainability rejects unknown languages, production Python and unclassif
     }
   });
 });
+
+
+test('shared composition declarations retain exact measured bytes without ambient parse degradation', async () => {
+  await fixture(async root => {
+    const path = 'scripts/companion/composition-contract.d.mts';
+    const source = await readFile(resolve(path), 'utf8');
+    await mkdir(join(root, 'scripts/companion'), { recursive: true });
+    await writeFile(join(root, path), source);
+    const valid = run(root); assert.equal(valid.status, 0, valid.stderr);
+    const output = packet(valid).output;
+    const report = JSON.parse(await readFile(join(output, 'report.json'), 'utf8'));
+    const input = report.views.tooling.inputs.find(file => file.path === path);
+    assert.ok(input, 'The declaration must remain a measured tooling input');
+    assert.equal(input.sha256, sha256(source));
+    assert.equal(input.bytes, Buffer.byteLength(source));
+    assert.equal(report.views.tooling.health.inputs, 1);
+    assert.equal(report.views.tooling.health.findings.length, 0);
+    const health = JSON.parse(await readFile(join(output, 'tooling-health.json'), 'utf8'));
+    assert.equal(health.workspace_diagnostics?.length ?? 0, 0);
+    assert.equal(health.parse_errors?.length ?? 0, 0);
+    assert.equal(health.skipped_files?.length ?? 0, 0);
+    assert.equal(run(root, ['--check', output]).status, 0);
+    // Reproduce the original lost ambient context under the exact staging policy.
+    const degraded = source.replace('export declare const COMPOSITION_CONTROLS', 'export const COMPOSITION_CONTROLS');
+    assert.notEqual(degraded, source);
+    await writeFile(join(root, path), degraded);
+    const invalid = run(root); assert.equal(invalid.status, 1, invalid.stdout);
+    assert.match(invalid.stderr, /METRIC_REPORT_INCOMPLETE/);
+    await writeFile(join(root, path), source);
+    assert.equal(run(root, ['--check', output]).status, 0);
+  });
+});
