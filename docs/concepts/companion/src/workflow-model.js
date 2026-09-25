@@ -21,7 +21,7 @@ function workflowStage(){
  if(modalType==='design-plan')return 'review';
  if(['prds'].includes(state.view))return 'brief';
  if(['sitemap','entities','sources','blueprints'].includes(state.view))return 'structure';
- if(['components','designsystem','patterns'].includes(state.view))return 'components';
+ if(['pages','page-editor','component-editor','components','designsystem','patterns'].includes(state.view))return 'components';
  if(state.view==='testdata')return 'review';
  return ['prepare','generate','develop','quality','capabilities','release','runs'].includes(state.view)?'build':null;
 }

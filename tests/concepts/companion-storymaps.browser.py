@@ -187,7 +187,7 @@ with sync_playwright() as pw:
         nav('overview'); act('project-import'); page.locator('#project-import-file').set_input_files(str(OUT/'project.companion.json')); page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
         check('Reviewed import preserves the full semantic document', json.loads(js('companionJson()')) == json.loads(document))
         check('Current stored project validates after import', js('validState(JSON.parse(__saved[STORAGE_KEY]))'))
-        legacy=json.loads(document);legacy['schemaVersion']=1;legacy['design']['schema']=1;del legacy['design']['storymaps']
+        legacy=json.loads(document);legacy['schemaVersion']=1;legacy['design']['schema']=1;del legacy['design']['storymaps']; legacy['design'].pop('detailDesigns', None)
         check('Legacy version-one import starts with an empty storymap collection', js('text=>smStore(companionCandidate(text).design).maps.length===0',json.dumps(legacy)), 'Legacy migration contract fixture')
         nav('storymaps');act('sm-open',original_id);act('sm-mode','map')
         for width,theme,mode in [(1440,'dark','map'),(1440,'light','map'),(960,'dark','map'),(390,'dark','outline')]:

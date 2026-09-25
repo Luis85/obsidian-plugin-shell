@@ -29,6 +29,9 @@ function companionExampleProject() {
     ['storymaps', 'Storymaps overview', 'list-detail', 'Find, create, link and archive the project’s storymaps.'],
     ['storymap-detail', 'Storymap editor', 'canvas', 'Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.'],
     ['sitemap', 'Sitemap & views', 'canvas', 'Arrange native containers and internal screens; keep containment, navigation and data flows distinct.'],
+    ['pages', 'Pages overview', 'list-detail', 'Browse content-bearing surfaces and open their detailed composition without copying the sitemap.'],
+    ['page-editor', 'Page editor', 'canvas', 'Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow.'],
+    ['component-editor', 'Component editor', 'canvas', 'Design reusable internals while keeping page-instance overrides separate from the definition.'],
     ['entities', 'Entity relationships', 'canvas', 'Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.'],
     ['sources', 'Data Sources', 'list-detail', 'Describe vault, API and database ports, operations and payloads without contacting live services.'],
     ['test-data', 'Test Data', 'list-detail', 'Configure seeded recipes, try isolated operations and export reviewed test tooling.'],
@@ -55,6 +58,7 @@ function companionExampleProject() {
   }
   for (const [from, to, label] of [
     ['requirements', 'storymaps', 'Browse linked storymaps'], ['storymaps', 'storymap-detail', 'Open a storymap'], ['requirements', 'storymap-detail', 'Open linked map'], ['storymap-detail', 'sitemap', 'Locate a linked surface'],
+    ['sitemap', 'page-editor', 'Design surface details'], ['storymap-detail', 'page-editor', 'Design linked page'], ['pages', 'page-editor', 'Open page design'], ['components', 'component-editor', 'Design reusable internals'], ['page-editor', 'component-editor', 'Edit instance definition'],
     ['overview', 'requirements', 'Define the outcome'], ['requirements', 'sitemap', 'Shape the experience'],
     ['sitemap', 'entities', 'Describe meaning'], ['entities', 'sources', 'Bind a source contract'],
     ['sources', 'test-data', 'Try a source operation'], ['components', 'sitemap', 'Place a component'],
@@ -67,6 +71,7 @@ function companionExampleProject() {
   companionExampleRequirements(d, surfaces);
   companionExampleEntities(d, surfaces);
   companionExampleStorymaps(d, surfaces);
+  companionExampleDetails(d, surfaces);
   d.designSystem = sgStarter(); d.designSystem.name = 'Companion workbench design system';
   d.designSystem.description = 'Host-friendly design declarations for the companion. Tokens are authored intent, not automatic component styling.';
   d.canvas = emptyCanvas();

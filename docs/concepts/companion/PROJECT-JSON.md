@@ -34,7 +34,7 @@ Import/export is a semantic round trip: object formatting may be normalized on b
 
 ## Format compatibility
 
-New exports use full-project `schemaVersion: 2` with `design.schema: 2`, including the optional `design.storymaps` collection (subsystem schema 1). V1 projects without storymaps remain importable and start with an empty collection. Storymaps hidden in a v1 envelope and unsupported versions fail before mutation. Saved maps and unresolved external references survive the reviewed JSON round trip; viewports, selection and drafts do not travel. See [Storymaps](STORYMAPS.md) for the model and editing rules.
+New exports use full-project `schemaVersion: 3` with `design.schema: 3`, including optional `design.storymaps` and `design.detailDesigns` collections (each subsystem schema 1). V2 projects remain importable without detail documents. Detail data concealed in a v1/v2 envelope is rejected. See [Detail editors](DETAIL-EDITORS.md) for owner references, instance contracts, limits and generator boundaries. V1 projects without storymaps remain importable and start with an empty collection. Storymaps hidden in a v1 envelope and unsupported versions fail before mutation. Saved maps and unresolved external references survive the reviewed JSON round trip; viewports, selection and drafts do not travel. See [Storymaps](STORYMAPS.md) for the model and editing rules.
 
 ## Settings and shell handoff
 

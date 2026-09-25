@@ -1,0 +1,149 @@
+# Page and component detail editors
+
+This increment extends PR #5’s offline companion, including its existing Storymaps,
+sitemap, component library and project JSON. Both detail canvases use the same
+pinned, embedded Vue Flow runtime as those editors. It is not a second application
+or an installable native companion.
+
+## Design layers
+
+| Layer | What it owns | What it references |
+| --- | --- | --- |
+| Sitemap | Native view containers, pages, modals, settings and navigation | Page detail owners |
+| Storymap | Activities, steps, stories and release slices | Existing sitemap surfaces and requirements |
+| Page editor | Regions, reading order, content, instances, bindings, states and interactions | One sitemap page/modal/settings owner; reusable definitions |
+| Component editor | Reusable internal regions, primitives, slots and nested instances | One library definition and its declared props/events/slots/variants |
+
+A view or group is an ownership/navigation container, not automatically a page.
+Detail documents supplement the existing shell/bricks; they do not overwrite or
+synchronize those older sketches implicitly. A component instance is a reference
+with local overrides, not a copied library definition.
+
+## Try the supplied example
+
+Open `index.html`, choose **Load companion project**, review, confirm, then:
+
+1. **Pages → Import project JSON → Open page editor** opens a composed modal with
+   an input, a reusable review instance, error/loading content and an interaction.
+2. Select **Project review → Edit reusable internals** to open the component
+   editor. **Back** restores the originating page and selected instance.
+3. **Preview → Error** exposes the authored error content. **Narrow** reviews
+   reading layout at a bounded width. Controls in this symbolic wireframe are inert.
+4. **Component library → ProjectJsonReview → Open component editor** opens the
+   same reusable detail document, not another copy.
+
+Sitemap inspectors expose **Open page editor** on eligible surfaces. Linked
+storymap items expose **Design page** beside their sitemap reference. Returning
+from that editor restores the selected story and map. Opening an unstarted
+surface does not author data: **Start detail design** creates one initial region.
+
+## Shared authoring behavior
+
+The palette adds regions, text, inputs, buttons and component instances. Component
+documents additionally offer slots. Adding inside a selected region sets an
+explicit parent ID. **Edit element → Parent region** performs the same containment
+change without dragging; cyclic parents and nesting beyond eight levels fail.
+
+**Reading order → Move earlier/later** changes semantic order among siblings.
+Canvas dragging and numeric X/Y/width/height change presentation geometry only.
+A parent move carries its rendered children; their saved positions remain relative
+to that parent. Use the region’s stack/row/grid layout for reading-layout intent.
+
+Drag an element’s right handle to another element’s left handle, or choose
+**Add interaction**. A separate draft describes event, label, behavior, optional
+navigation target and Given/When/Then acceptance notes. Arrows are interactions,
+not containment. A connection is not saved until confirmed. Duplicate event links
+and self-links are rejected.
+
+Select **Edit element** for content, accessible naming/validation notes, source
+operation and result-field declarations, and visibility in default/loading/empty/
+error/disabled states. No source provider runs in these editors. The field path is
+data, not an expression interpreter.
+
+Reusable instances pin a library contract version and variant, with bounded JSON
+literal props checked against the existing prop declaration. Changing an instance
+does not mutate the reusable contract. A version mismatch stays visible; **Review
+current version** changes only the draft, and incompatible props must be repaired
+before Save. Missing external definitions/operations/owners remain recoverable
+references, not silently dropped records. Recursive component composition is
+rejected across the full detail collection.
+
+## Preview and accessibility scope
+
+Canvas, Outline and Preview expose the same saved document. Outline provides
+non-drag selection, editing, containment, order and interaction authoring. Small
+screens default to Outline when opening a design. Keyboard focus styling, named
+controls, form labels and status/error announcements use the companion shell.
+
+Preview follows reading order and parent layout rather than canvas positions. It
+can expand reusable internals at the current pinned contract version. Props are
+shown as instance values, not evaluated as template substitutions. Narrow preview
+stacks rows and grids; it is a review aid, not a responsive CSS generator. A
+500-rendered-element budget prevents exponentially repeated instances from
+locking the preview. Native Obsidian, touch/assistive-technology qualification and
+maximum-scale profiling remain separate acceptance work.
+
+## Persistence and safety
+
+All detail edits use one guarded copy/validate/persist transaction and the shared
+bounded project history. Save failures roll back the canonical design and both
+history stacks while keeping the draft. Stale drafts, competing browser storage
+and active operations block writes. Undo/Redo restore the whole design and retain
+monotonic identity counters. Removing a region removes only its descendants and
+attached arrows, never library definitions, sitemap surfaces or storymap items.
+
+Selection, viewport, open modal drafts, preview width/state and navigation history
+are transient. Canvas moves do not change the browser’s semantic generation
+fingerprint; content, containment, reading order and interactions do. The separate
+shell compiler still hashes the complete input when reviewing an apply plan;
+changing exported bytes requires a new reviewed compiler plan.
+
+## Transfer contract v3
+
+Exports use `schemaVersion: 3` and `design.schema: 3`. V1 and v2 imports remain
+supported without inventing detail documents. V1 cannot contain Storymaps or
+details; v2 cannot contain details. Unknown fields/versions, internal dangling
+references, unsafe literals, invalid coordinates and composition cycles fail
+before replacement.
+
+`design.detailDesigns` has subsystem schema 1, a monotonic `nextId`, and
+`documents`. Each document has a stable generated ID, kind (`page`/`component`),
+`ownerId`, fallback `ownerLabel`, notes, ordered nodes and interaction edges.
+Nodes have stable IDs, parent ID, kind, content, layout, geometry, optional
+component reference/props/binding, accessibility notes and visible states.
+
+Limits: 200 documents/project; 120 elements and 240 interactions/document;
+4,000 total detail elements plus interactions; eight containment levels; bounded
+literal props, strings and coordinates. Full-project input/output remains 4 MB;
+browser retained state, including history, remains 5 MB. Imported text is escaped,
+never evaluated or fetched.
+
+The read-only `companion:generate` accepts v3 and prints the exact original bytes
+without writes. The separate `companion:scaffold` preserves detail data in
+`design/project.json` and `design/traceability.json` and explicitly warns that
+layout execution, data binding behavior and detail acceptance remain implementation
+work. This increment does not claim those details have become generated working
+Vue components or passing business tests.
+
+## Source and verification
+
+`src/detail-model.js` is renderer-independent authoring logic;
+`scripts/companion/detail-contract.mjs` is the shared browser/CLI validator.
+`detail-actions.js`, `detail-forms.js`, `detail-views.js`, `detail-runtime.js`,
+`detail-preview.js`, `detail-seed.js` and `detail.css` keep state, UI, renderer and
+preview concerns separate. The assembly inventory and CI include every new input.
+
+Run `python3 scripts/concepts/build-companion.py --check`,
+`node --test tests/tooling/companion-details.checks.mjs`, and
+`python3 tests/concepts/companion-details.browser.py`. The complete browser runner
+includes the new suite alongside all existing suites. See
+[DETAIL-EDITORS-VERIFICATION.md](DETAIL-EDITORS-VERIFICATION.md) for executed evidence.
+
+The controlled projection and parent-node design follow the official Vue Flow
+[node guide](https://vueflow.dev/guide/node.html),
+[state guide](https://vueflow.dev/guide/vue-flow/state.html), and
+[nesting example](https://vueflow.dev/examples/nodes/nesting.html), checked against
+the pinned runtime already present in PR #5. Native conversion remains
+[CP-003](../../tasks/companion/CP-003.md), after shell readiness.
+
+Reloading while a detail editor is open restores all saved design data and opens its Pages or Component library overview. Selection, viewport and drill-down history remain session-only; import does not acquire execution authority. Missing component owners have a retained-design section in the library.

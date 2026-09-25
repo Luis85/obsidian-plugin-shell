@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
+    ('details', 'details/checks.json'),
     ('storymaps', 'storymaps/checks.json'),
     ('project-transfer', 'project-transfer/checks.json'),
     ('product-audit', 'product-audit/checks.json'),
