@@ -41,9 +41,19 @@ The integrated local contract/CLI/test-data/compiler command passed **263 tests*
 zero failures or skips. This includes the complete-project compiler/effect suite and
 37 Design System tests. The focused composition browser suite passed **111 named
 assertions**, including all 80 working designs; assembly/inventory passed **13 tests**.
-The full registered browser suite and hosted generated-workspace qualification are
-separate gates. Their current-head results belong to the PR checks and retained
-artifacts, not historical results of the recovery checkpoint.
+The complete registered non-storage browser run passed **1,233 named assertions
+across 22 suites** on the same HTML hash below. This includes the 111 composition
+assertions, not an additional total. All raw reports show passing checks, no
+observed browser errors and no unexpected requests. Light/dark canvas/preview and
+narrow layout forms were inspected after the fixes. These are named checks, not
+1,233 independent user journeys.
+
+Hosted source assembly run `36136961763` reproduced this exact HTML and JSON,
+matched clean tree `f9a34d95d9506e31313cc864ca5bcb7d842f33fd`, and repeated
+**263 focused Node tests and 13 assembly tests** successfully on Node 24.21.0.
+Its downloaded source manifest matched every locally computed blob identity.
+This repeats the local scopes; counts must not be added. Real-origin Storage and
+full generated-workspace/repository qualification remain separate PR checks.
 
 Integration corrections preserve local/custom font provenance and valid rem sizes
 in detail previews and immutable token captures. Large file/example imports retain
