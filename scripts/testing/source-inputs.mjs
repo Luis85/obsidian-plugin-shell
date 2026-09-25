@@ -20,17 +20,24 @@ export function lineLimit(path) {
 // This optional executable sidecar is present with the companion concept. It
 // must participate in archive transport and evidence freshness when installed.
 // Missing concept content is valid in a foundation-only checkout; links are not.
+async function optionalFile(root, name) {
+  const parts = name.split('/'); let path = root;
+  for (let index = 0; index < parts.length; index++) {
+    path = join(path, parts[index]); let stat;
+    try { stat = await lstat(path); }
+    catch (error) { if (error.code === 'ENOENT') return false; throw error; }
+    if (stat.isSymbolicLink()) throw new Error('SOURCE_SYMLINK');
+    if (index < parts.length - 1 && !stat.isDirectory()) throw new Error('SOURCE_NOT_DIRECTORY');
+    if (index === parts.length - 1 && !stat.isFile()) throw new Error('SOURCE_NOT_REGULAR');
+  }
+  return true;
+}
 async function defaultRoots(root) {
   const roots = [...inputRoots];
-  // Foundation-only fixtures can omit the compiler, but installed launcher and
-  // compiler configuration bytes must participate in transport and freshness.
-  for (const extra of ['shell.mjs', 'tsconfig.generator.json']) {
-    let stat;
-    try { stat = await lstat(join(root, extra)); }
-    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
-    if (stat.isSymbolicLink()) throw new Error('SOURCE_SYMLINK');
-    if (!stat.isFile()) throw new Error('SOURCE_NOT_REGULAR');
-    roots.push(extra);
+  // Optional compiler and canonical design fixture are actual executable test
+  // inputs when present. Archive transport must preserve their exact bytes.
+  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'docs/concepts/companion/companion-project.json']) {
+    if (await optionalFile(root, extra)) roots.push(extra);
   }
   const sidecar = 'docs/concepts/companion/test-kit';
   let path = root;

@@ -2,7 +2,7 @@
 import { validateStorymaps } from './storymap-contract.mjs';
 import { validateDetailDesigns } from './detail-contract.mjs';
 export const COMPANION_FORMAT = 'obsidian-companion-project';
-export const COMPANION_VERSION = 3;
+export const COMPANION_VERSION = 4;
 export const COMPANION_MAX_BYTES = 4_000_000;
 export const COMPANION_DEFAULT_FOLDERS = Object.freeze({ codebaseFolder: 'src', testsFolder: 'tests' });
 const companionDesignKeys = ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId',
@@ -59,7 +59,7 @@ function validateCompanionDesign(value) {
   if (value?.detailDesigns !== undefined) validateDetailDesigns(value.detailDesigns);
   if (value?.storymaps !== undefined) validateStorymaps(value.storymaps);
   companionRequire(companionObject(value, companionDesignKeys, ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId', 'library', 'prds']), 'Unsupported design envelope.');
-  companionRequire([1, 2, 3].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
+  companionRequire([1, 2, 3, 4].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
     ['desktop', 'mobile-ready'].includes(value.platform), 'Unsupported design schema or platform.');
   companionRequire(Number.isSafeInteger(value.nextId) && value.nextId > 0 && value.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid design counter.');
   for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', 12]]) {
@@ -71,13 +71,14 @@ function validateCompanionDesign(value) {
 export function validateCompanionDocument(value) {
   companionSafeTree(value);
   companionRequire(companionObject(value, ['kind', 'schemaVersion', 'executable', 'project', 'settings', 'design', 'notes']), 'Expected a full companion project, not a blueprint or recovery snapshot.');
-  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, COMPANION_VERSION].includes(value.schemaVersion) && value.executable === false,
+  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, 3, COMPANION_VERSION].includes(value.schemaVersion) && value.executable === false,
     'Unsupported companion format/version or executable flag.');
   validateCompanionIdentity(value.project);
   validateCompanionFolders(value.settings);
   validateCompanionDesign(value.design);
   companionRequire(value.design.schema === value.schemaVersion, 'Transfer and design schema versions must match.');
   companionRequire(value.schemaVersion >= 2 || !Object.hasOwn(value.design, 'storymaps'), 'Storymaps require transfer version 2 or later.');
+  companionRequire(value.schemaVersion >= 4 || !value.design.detailDesigns || value.design.detailDesigns.schema === 1, 'Composition requires transfer version 4.');
   companionRequire(value.schemaVersion >= 3 || !Object.hasOwn(value.design, 'detailDesigns'), 'Detail designs require transfer version 3.');
   companionRequire(Array.isArray(value.notes) && value.notes.length <= 100 && value.notes.every(note => companionText(note, 100000)), 'Invalid project notes.');
   companionRequire(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');

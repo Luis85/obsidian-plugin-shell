@@ -1,5 +1,6 @@
 # Full-project JSON, self-project and folder settings
 
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
 **2026-09-24 · Concept extension with a real read-only shell entrypoint.**
 
 The HTML prototype contains a loadable **Plugin Companion** project. It uses the same editors, persistence, import review and JSON contract as a user-authored project; it is not a separate hardcoded presentation or a second active project. The existing simpler example and blank-project entry remain available.

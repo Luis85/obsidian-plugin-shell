@@ -150,7 +150,16 @@
     "docs/concepts/companion/src/detail-properties.js",
     "docs/concepts/companion/src/detail-navigation.js",
     "docs/concepts/companion/src/detail-review.js",
-    "docs/concepts/companion/src/detail-handoff.js"
+    "docs/concepts/companion/src/detail-handoff.js",
+    "scripts/companion/runtime/use-detail.ts",
+    "scripts/companion/composition-contract.mjs",
+    "docs/concepts/companion/src/composition-model.js",
+    "docs/concepts/companion/src/composition-fields.js",
+    "docs/concepts/companion/src/composition-preview.js",
+    "docs/concepts/companion/src/composition-actions.js",
+    "docs/concepts/companion/src/composition-seed.js",
+    "docs/concepts/companion/src/composition.css",
+    "docs/concepts/companion/src/composition-tools.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

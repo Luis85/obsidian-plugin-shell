@@ -1,5 +1,6 @@
 # Page and component detail editors
 
+> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
 This increment extends PR #5’s offline companion, including its existing Storymaps,
 sitemap, component library and project JSON. Both detail canvases use the same
 pinned, embedded Vue Flow runtime as those editors. It is not a second application
