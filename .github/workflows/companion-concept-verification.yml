@@ -1,7 +1,7 @@
 name: Companion concept source verification
 on:
   pull_request:
-    paths:
+    paths: &concept-inputs
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
@@ -18,21 +18,7 @@ on:
       - '.github/workflows/companion-concept-verification.yml'
   push:
     branches: [main]
-    paths:
-      - 'docs/concepts/companion/**'
-      - 'scripts/concepts/**'
-      - 'scripts/companion/**'
-      - 'tests/tooling/companion-project.checks.mjs'
-      - 'tests/tooling/companion-details.checks.mjs'
-      - 'tests/tooling/companion-composition.checks.mjs'
-      - 'tests/fixtures/companion/**'
-      - 'package.json'
-      - 'tests/concepts/**'
-      - 'tests/tooling/test-data-*'
-      - '.fallowrc.json'
-      - 'scripts/quality/maintainability-inventory.mjs'
-      - 'tests/tooling/maintainability.checks.mjs'
-      - '.github/workflows/companion-concept-verification.yml'
+    paths: *concept-inputs
   workflow_dispatch:
 permissions:
   contents: read

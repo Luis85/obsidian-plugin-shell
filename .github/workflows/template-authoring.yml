@@ -16,28 +16,34 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - &setup-node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Select exact npm in runner scratch
+      - &select-npm
+        name: Select exact npm in runner scratch
         run: |
           npm install --prefix "$RUNNER_TEMP/template-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           echo "QUALIFIED_NPM=$RUNNER_TEMP/template-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
-      - name: Adopt a distinct identity from a fresh checkout and run every setup gate
+      - &adopt-identity
+        name: Adopt a distinct identity from a fresh checkout and run every setup gate
         run: |
           mkdir -p reports/template-authoring
           set -o pipefail
           node "$QUALIFIED_NPM" run setup -- --id atlas-notes --name "Atlas Notes" --author "Template Qualification" --repo example/atlas-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
-      - name: Generate a new business feature through the public maker
+      - &make-feature
+        name: Generate a new business feature through the public maker
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
           node "$QUALIFIED_NPM" run entities:check
-      - name: Extend consumer source and exercise local event and plugin-data authoring
+      - &extend-consumer
+        name: Extend consumer source and exercise local event and plugin-data authoring
         run: |
           node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
           node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
@@ -86,17 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - name: Select exact npm in runner scratch
-        run: |
-          npm install --prefix "$RUNNER_TEMP/template-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/template-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - *checkout
+      - *setup-node
+      - *select-npm
       - name: Exercise literal source archive without ancestor Git discovery
         run: |
           mkdir -p reports/template-authoring
@@ -130,32 +128,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: 24.21.0
-          package-manager-cache: false
-      - name: Select exact npm in runner scratch
-        run: |
-          npm install --prefix "$RUNNER_TEMP/template-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
-          echo "QUALIFIED_NPM=$RUNNER_TEMP/template-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - *checkout
+      - *setup-node
+      - *select-npm
       # Reproduces the renamed-feature consumer state; that job verifies it before removal.
-      - name: Adopt the same distinct identity and consumer extensions
-        run: |
-          mkdir -p reports/template-authoring
-          set -o pipefail
-          node "$QUALIFIED_NPM" run setup -- --id atlas-notes --name "Atlas Notes" --author "Template Qualification" --repo example/atlas-notes --version 1.0.0 --profile browser --yes --no-interaction 2>&1 | tee reports/template-authoring/setup.txt
-          node "$QUALIFIED_NPM" run make -- feature bookmarks --entity bookmark --yes --no-interaction 2>&1 | tee reports/template-authoring/make.txt
-          node "$QUALIFIED_NPM" run entities:check
-          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
-          node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
-          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --yes --no-interaction
-          node "$QUALIFIED_NPM" run make -- entity rating --feature bookmarks --backend plugin-data --yes --no-interaction
-          node "$QUALIFIED_NPM" run make -- event refreshed --feature bookmarks --yes --no-interaction
-          node "$QUALIFIED_NPM" run make -- listener observe --feature bookmarks --event refreshed --yes --no-interaction
-          node "$QUALIFIED_NPM" run events:check
+      - *adopt-identity
+      - *make-feature
+      - *extend-consumer
       - name: Provision pinned Chromium
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Remove reviewed examples while preserving the consumer feature

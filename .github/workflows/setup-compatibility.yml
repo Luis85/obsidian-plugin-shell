@@ -2,7 +2,7 @@ name: Setup npm policy compatibility
 on:
   push:
     branches: [main, fix/setup-npm-policy, build/iteration-three]
-    paths:
+    paths: &setup-inputs
       - 'package.json'
       - 'package-lock.json'
       - 'scripts/setup.mjs'
@@ -19,19 +19,7 @@ on:
   # verification (both OSes, qualified toolchain). This matrix proves the npm
   # install policy and toolchain rows, so it runs when those inputs change.
   pull_request:
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - 'scripts/setup.mjs'
-      - 'scripts/setup/**'
-      - 'scripts/shared/**'
-      - 'scripts/testing/check-npm-install-policy.mjs'
-      - 'scripts/testing/local-npm-registry.mjs'
-      - 'tests/tooling/npm-install.checks.mjs'
-      - 'tests/tooling/setup-identity*.mjs'
-      - '.gitattributes'
-      - '.nvmrc'
-      - '.github/workflows/setup-compatibility.yml'
+    paths: *setup-inputs
   workflow_dispatch:
 permissions:
   contents: read
