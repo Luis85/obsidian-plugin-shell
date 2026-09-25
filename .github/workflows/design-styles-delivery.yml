@@ -44,7 +44,10 @@ jobs:
           test "$TREE" = e7f139b5511ffb5625100a78abe20edd1ab54f08
           test ! -e .delivery
           test ! -e .github/workflows/design-styles-delivery.yml
-          COMMIT="$(git -c user.name=OpenAI -c user.email=noreply@openai.com commit-tree "$TREE" -p 851c7ff0e44b7a5da36fbe0e956d4bf5282cf35d -m 'feat(companion): compile design-system JSON into scoped Nuxt UI styles')"
+          # The workflow change was separately committed by the authorized connector.
+          # This runner pushes code only; no workflow changes are made by its token.
+          PARENT=507364f5c9205d302912327bf3cce5a45c1edad0
+          COMMIT="$(git -c user.name=OpenAI -c user.email=noreply@openai.com commit-tree "$TREE" -p "$PARENT" -m 'feat(companion): compile design-system JSON into scoped Nuxt UI styles')"
           git checkout --detach "$COMMIT"
           echo "SOURCE_DIR=$SOURCE_DIR" >> "$GITHUB_ENV"
           echo "SOURCE_COMMIT=$COMMIT" >> "$GITHUB_ENV"
