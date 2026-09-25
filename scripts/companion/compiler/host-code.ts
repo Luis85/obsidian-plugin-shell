@@ -80,30 +80,27 @@ import { projectKey } from '../presentation/context/project.ts';
 import type { Sources } from '../application/sources.ts';
 import { panels } from './panels.ts';
 import { bindFlows } from './flows.ts';
-import { provideDetailContext } from '../presentation/composables/use-detail.ts';
-import { createDetailContext } from './detail-context.ts';
-import '../presentation/detail-layout.css';
 export function mountProject(root: HTMLElement,shell: Services,sources: Sources,openModal: (id: string) => void,initial?: string,isolated = false) {
   const pinia = createPinia(); const app = createApp(Workbench); let mounted = false; let closed = false; let theme = () => {};
   const close = () => { if (closed) return; closed = true; try { if (mounted) app.unmount(); } finally { disposePinia(pinia); theme(); } };
   try {
     root.classList.add(shell.identity.rootClass,shell.identity.scopeClass); root.dataset.pluginUi = shell.identity.id;
-    theme = bindHostTheme(root); app.use(pinia); provideDetailContext(app, createDetailContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
+    theme = bindHostTheme(root); app.use(pinia); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
     app.config.errorHandler = () => shell.diagnostics.report('generated.render','view.render');
     mounted = true; app.mount(root); return close;
   } catch (error) { close(); throw error; }
 }
 `);
   add('src/main.ts',`import { Plugin } from 'obsidian';\nimport { initializeProject } from ${literal(relativeImport('src/main.ts',init))};\nimport './styles/app.css';\nimport ${literal(relativeImport('src/main.ts',`${root}/styles/project.css`))};\nexport default class GeneratedPlugin extends Plugin {\n  private runtime?: Awaited<ReturnType<typeof initializeProject>>;\n  async onload(): Promise<void> { this.runtime = await initializeProject(this); }\n  onunload(): void { this.runtime?.dispose(); }\n}\n`);
-  add(`${root}/styles/project.css`,`.generated-workbench { display: flex; min-width: 0; gap: var(--size-4-4); padding: var(--size-4-4); color: var(--text-normal); background: var(--background-primary); }
-.generated-workbench nav { display: flex; flex-direction: column; flex: 0 0 12rem; gap: var(--size-4-1); }
+  add(`${root}/styles/layout.css`,`.generated-workbench { display: flex; min-width: 0; gap: var(--plugin-shell-space-lg); padding: var(--plugin-shell-space-lg); color: var(--plugin-shell-text); background: var(--plugin-shell-surface); }
+.generated-workbench nav { display: flex; flex-direction: column; flex: 0 0 12rem; gap: var(--plugin-shell-space-xs); }
 .generated-workbench nav button { white-space: normal; text-align: start; }
-.generated-workbench [aria-current="page"] { font-weight: 700; outline: 2px solid var(--interactive-accent); }
+.generated-workbench [aria-current="page"] { font-weight: 700; outline: 2px solid var(--plugin-shell-accent); }
 .generated-workbench main { flex: 1; min-width: 0; }
-.generated-screen { display: grid; gap: var(--size-4-3); }
-.generated-component { border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); padding: var(--size-4-3); }
-.generated-hint { color: var(--text-muted); }
-.generated-workbench button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.generated-screen { display: grid; gap: var(--plugin-shell-space-md); }
+.generated-component { border: 1px solid var(--plugin-shell-border); border-radius: var(--plugin-shell-radius-md); padding: var(--plugin-shell-space-md); }
+.generated-hint { color: var(--plugin-shell-text-muted); }
+.generated-workbench button:focus-visible { outline: 2px solid var(--plugin-shell-accent); outline-offset: 2px; }
 @media (max-width: 600px) { .generated-workbench { flex-direction: column; } .generated-workbench nav { flex-basis: auto; } }
 `);
 }

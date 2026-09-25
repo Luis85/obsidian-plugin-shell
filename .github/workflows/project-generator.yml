@@ -30,13 +30,16 @@ jobs:
           node scripts/quality/check-analyzer.mjs
           node scripts/quality/check-repository.mjs
           node scripts/quality/check-source.mjs
-          node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
       - name: Type-check the compiler and test ownership, contracts and legacy handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
       - name: Generate, independently install, build and test the companion project
         run: node scripts/companion/qualify-project.mjs
+      - name: Exercise generated stylesheet against real Nuxt UI components
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/companion/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |

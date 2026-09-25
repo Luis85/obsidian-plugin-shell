@@ -14,7 +14,7 @@
 }
 @container plugin-shell-leaf (max-width: 600px) {
   .shell-app { --plugin-shell-gutter: var(--plugin-shell-space-lg); flex-direction: column; }
-  .shell-sidebar { width: 100%; flex: 0 0 auto; max-height: 40%; padding: var(--plugin-shell-space-sm) var(--plugin-shell-gutter); border-right: 0; border-bottom: 1px solid var(--background-modifier-border); }
+  .shell-sidebar { width: 100%; flex: 0 0 auto; max-height: 40%; padding: var(--plugin-shell-space-sm) var(--plugin-shell-gutter); border-right: 0; border-bottom: 1px solid var(--plugin-shell-border); }
   .shell-brand, .shell-sidebar-bottom, .shell-nav-label { display: none; }
   .shell-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--plugin-shell-space-xs); }
   .shell-nav button { white-space: normal; min-height: 36px; padding: var(--plugin-shell-space-sm); font-size: 12px; }

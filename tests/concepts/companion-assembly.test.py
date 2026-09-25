@@ -39,6 +39,18 @@ class AssemblyContract(unittest.TestCase):
         self.assertEqual(self.output.read_bytes(), (ROOT / 'docs/concepts/companion/index.html').read_bytes())
         self.build(check=True)
 
+    def test_design_system_shared_modules_require_explicit_inventory(self):
+        config = self.root / '.fallowrc.json'
+        original = config.read_text()
+        for name in ['design-system-roles.mjs', 'design-system-contract.mjs', 'design-system-css.mjs']:
+            with self.subTest(name=name):
+                value = json.loads(original)
+                value['entry'].remove('scripts/companion/' + name)
+                config.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, 'design-system module missing'):
+                    self.build()
+        config.write_text(original)
+
     def test_unassembled_source_is_not_hidden(self):
         (self.concept / 'src/unregistered.js').write_text('console.log("unused fixture");\n')
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
