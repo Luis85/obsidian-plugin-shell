@@ -11,11 +11,12 @@ Open `index.html` and choose **Load companion project**. Review the proposed pro
 | Authored area | Included example |
 | --- | --- |
 | Identity and purpose | Plugin Companion, `plugin-companion`, version 0.1.0, design-to-shell outcome |
-| Surfaces | 22: workbench, 17 internal screens, Preferences, and three transfer/handoff dialogs |
-| Requirements | 4 PRDs and 25 mapped requirements covering discovery, structure, composition, test-data/handoff and operational safeguards |
+| Surfaces | 24: workbench, 19 internal screens including Storymaps overview/detail, Preferences, and three transfer/handoff dialogs |
+| Requirements | 5 PRDs and 30 mapped requirements covering discovery, structure, composition, test-data/handoff and operational safeguards |
 | Components | 54 retained definitions: 44 starter contracts and 10 project-owned companion components, with content and default/compact variants |
-| Domain | 9 entities and 7 relationships |
+| Domain | 11 entities and 7 relationships |
 | Source and test data | One proposed native-vault port, three declared read operations/usages, and three deterministic test recipes |
+| Storymaps | One editable map with two activities, three steps, five stories, two releases and PRD/sitemap/requirement links |
 | Design System | Host-friendly font roles, typography, spacing, sizes, radii, paired colors and guidelines |
 | Notes | Shell-first implementation boundary and explicit read-only v1 scope |
 
@@ -30,6 +31,10 @@ The standalone [companion-project.json](companion-project.json) is generated fro
 **Import project JSON** accepts a local JSON file or pasted JSON. File selection is the preferred route for large pretty-printed exports. Review shows identity, counts, configured folders and outstanding design findings before explicit replacement. Malformed models and unsupported formats fail before mutation. Incomplete but structurally valid designs remain drafts rather than being forced into a false ready state.
 
 Import/export is a semantic round trip: object formatting may be normalized on browser export, but saved authored fields retain their values. In contrast, the shell's v1 stdout is an exact byte return of its input file, including whitespace. Nothing executes inside the JSON.
+
+## Format compatibility
+
+New exports use full-project `schemaVersion: 3` with `design.schema: 3`, including optional `design.storymaps` and `design.detailDesigns` collections (each subsystem schema 1). V2 projects remain importable without detail documents. Detail data concealed in a v1/v2 envelope is rejected. See [Detail editors](DETAIL-EDITORS.md) for owner references, instance contracts, limits and generator boundaries. V1 projects without storymaps remain importable and start with an empty collection. Storymaps hidden in a v1 envelope and unsupported versions fail before mutation. Saved maps and unresolved external references survive the reviewed JSON round trip; viewports, selection and drafts do not travel. See [Storymaps](STORYMAPS.md) for the model and editing rules.
 
 ## Settings and shell handoff
 

@@ -1,6 +1,6 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · full-project JSON, companion self-project and read-only shell handoff — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · Page/component detail editors, Storymaps and full-project JSON v3 — 2026-09-25.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
@@ -9,6 +9,18 @@ Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and t
 Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files.
 
 [PROJECT-JSON.md](PROJECT-JSON.md) explains the UI, seed content and limits; [companion-project.json](companion-project.json) is the importable self-project. The [shell contract](../../development/COMPANION-PROJECT-JSON.md) documents the command and safety boundary. This extends the existing single-project model, not a multi-project launcher.
+
+## Storymaps
+
+**Design → Storymaps** opens the overview and a structured Vue Flow editor with activities, steps, stories, release slices and Unplanned. PRD details can create or link existing maps. Items reference existing sitemap surfaces and requirements; sitemap inspectors link back to those maps. Non-drag Move controls and Outline mode share the same records. Draft protection, Undo/Redo, missing-target recovery and full project JSON round trips are included.
+
+Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 3/design schema 3; legacy format-1 and format-2 projects remain readable. The CLI remains read-only. See [STORYMAPS.md](STORYMAPS.md) and [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
+
+## Page and component editors
+
+**Pages** opens content-bearing sitemap surfaces. **Open page editor** is also available from sitemap inspectors and linked storymap items. **Component library → Open component editor**, or a page instance’s **Edit reusable internals**, opens reusable definitions. Both are controlled Vue Flow canvases with nested regions, primitives, component instances, source bindings, interaction drafts, non-drag Outline and symbolic state/width Preview. **Start detail design** is explicit; existing shell sketches are retained.
+
+Try **Pages → Import project JSON → Project review → Edit reusable internals** in the self-project. [DETAIL-EDITORS.md](DETAIL-EDITORS.md) documents authoring, versioning, safety, transfer limits and the native/generator boundaries. [DETAIL-EDITORS-VERIFICATION.md](DETAIL-EDITORS-VERIFICATION.md) records executed checks.
 
 ## Previous product audit
 
@@ -40,7 +52,7 @@ Read the [single-vault decision and native implementation contract](SINGLE-VAULT
 
 ## Try the flow
 
-**Start designing → define identity → Product requirements → Blueprints → Sitemap & views → Entity relationships → Component library / Variants → Prepare project.** Project details and an illustrative Project.md record are available without preparation. Author information can be completed when preparing the template. **Use example outline** starts a planning-only example only when the vault has no project; it does not fabricate successful build/install results.
+**Start designing → define identity → Product requirements → Storymaps → Blueprints → Sitemap & views → Entity relationships → Component library / Variants → Prepare project.** Project details and an illustrative Project.md record are available without preparation. Author information can be completed when preparing the template. **Use example outline** starts a planning-only example only when the vault has no project; it does not fabricate successful build/install results.
 
 The eight-step preparation review makes the current source root read-only, distinguishes the test context, lists create/unchanged/conflict states and requires trust plus explicit approval. Use Review scenarios to exercise missing Node, acquisition failure, stale plans, conflicts and interrupted installation. Keep the existing design while returning between the wizard and editor.
 
@@ -93,3 +105,13 @@ The builder and Fallow inventory agree on **105 exact inputs: 75 maintained JS, 
 No real vault access, template acquisition, process execution, dependency installation, deployment, activation or publication occurs in the concept. Native Markdown adapters, additive archive hydration and cross-leaf operations remain implementation work. Browser assertions include model, controlled-state, synthetic and geometry checks; they are not all physical-pointer tasks, comprehensive accessibility certification or performance benchmarks.
 
 Vendor provenance and notices remain under [vendor](vendor). No font binaries or extracted Obsidian stylesheet are added. The sitemap is a real embedded Vue Flow island; the surrounding concept panels are not a claim that a production Vue/Nuxt UI companion is already complete. Existing root-template CLI and native capabilities retain their own [parent PRD](../../product/PRD.md) and qualification records.
+
+
+### Page/component editor research and polish
+
+The [competitive research and requirements](DETAIL-EDITORS-RESEARCH.md) cover ten
+reference products/tools, observed authoring issues and the next layout/slot/test
+contracts. The [polishing receipt](DETAIL-EDITORS-POLISH.md) distinguishes delivered
+browser behavior from native and generated-code acceptance. The [editor guide](DETAIL-EDITORS.md)
+includes typed property controls, safe override repair, search, direct usage,
+Review and saved-design Markdown export.

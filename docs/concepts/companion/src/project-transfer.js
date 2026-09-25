@@ -10,7 +10,7 @@ function companionProjectDocument(p = project()) {
   if (!p) throw Error('Define a project before exporting.');
   const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
   return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
-    project: identity, settings: companionFolders(p), design: { schema: 1, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
+    project: identity, settings: companionFolders(p), design: { schema: 3, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
 }
 function companionJson(p = project()) {
   const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
@@ -82,7 +82,7 @@ function applyCompanionImport() {
     state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
       wizard: null, generator: { ...state.generator, plan: null }, runs: [], view: 'overview' };
     if (!saveConceptState()) { state = before; throw Error('The project could not be saved. The current project is unchanged; export recovery before closing.'); }
-    tdDropSession(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
+    tdDropSession(); dtReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
     designUi.error = ''; productUi.prd = null; productUi.component = null;
     dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
     u.serial++; u.candidate = null; modalOriginal = null; closeModal(); setView('overview');
