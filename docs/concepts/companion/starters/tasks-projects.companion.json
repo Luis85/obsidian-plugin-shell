@@ -260,7 +260,7 @@
       "entities": [
         {
           "id": "er-entity-1",
-          "slug": "task",
+          "slug": "starter-task",
           "name": "Task",
           "folder": "Starter/Task",
           "description": "Proposed note contract; native persistence is an implementation point.",
@@ -288,7 +288,7 @@
         },
         {
           "id": "er-entity-5",
-          "slug": "project",
+          "slug": "starter-project",
           "name": "Project",
           "folder": "Starter/Project",
           "description": "Proposed note contract; native persistence is an implementation point.",
@@ -1247,27 +1247,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -1286,27 +1286,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -1339,27 +1339,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -1966,27 +1966,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -2005,27 +2005,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -2058,27 +2058,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -2685,27 +2685,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -2724,27 +2724,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -2777,27 +2777,27 @@
                   "value": [
                     {
                       "id": "2e6fbe5e-2f6f-4ff1-8c6f-bb382d6fbccb",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0001-1dzlwnx",
                       "status": "status-0001-1l96ntf",
                       "due_date": "2026-10-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0001]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0001]]"
                     },
                     {
                       "id": "93788877-9278-46e4-8578-8b9d94788a0a",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0002-fiisry",
                       "status": "status-0002-1ksuzm2",
                       "due_date": "2026-01-14",
-                      "project_ref": "[[Starter/Project/fixture-project-0002]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0002]]"
                     },
                     {
                       "id": "b3842098-b484-422b-8584-23beb6842551",
-                      "type": "task",
+                      "type": "starter-task",
                       "title": "title-0003-47tsuv",
                       "status": "status-0003-a239c9",
                       "due_date": "2026-04-19",
-                      "project_ref": "[[Starter/Project/fixture-project-0003]]"
+                      "project_ref": "[[Starter/Project/fixture-starter-project-0003]]"
                     }
                   ]
                 }
@@ -3421,6 +3421,7 @@
     }
   },
   "notes": [
-    "# Starter scope\n\nTask list, task detail and project overview\nTask and project entities with a declared relationship\nTyped status/date fields, fixture list and acceptance TODOs\n\n## Implementation work\n\nImplement task updates and relationship persistence\nAdd recurrence, drag-and-drop or reminders only as needed\n\nNo business acceptance has passed. Use a separate development vault. Never insert credentials in this portable JSON.\n"
+    "# Starter scope\n\nTask list, task detail and project overview\nTask and project entities with a declared relationship\nTyped status/date fields, fixture list and acceptance TODOs\n\n## Implementation work\n\nImplement task updates and relationship persistence\nAdd recurrence, drag-and-drop or reminders only as needed\n\nNo business acceptance has passed. Use a separate development vault. Never insert credentials in this portable JSON.\n",
+    "Canonical native entity keys starter-task and starter-project avoid collision with the retained framework example repositories. User-facing Task/Project names and navigation remain unchanged."
   ]
 }

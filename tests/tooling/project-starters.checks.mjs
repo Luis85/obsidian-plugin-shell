@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, cp, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
-import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
@@ -37,7 +37,20 @@ for(const entry of catalog.starters){
   assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
-  if(entry.document.design.dataSources.sources.length){assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);assert.match(await readFile(join(target,'src/generated/infrastructure/sources/starter-records.ts'),'utf8'),/NotImplementedError/);}
+  if(entry.document.design.dataSources.sources.length){
+   assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
+   const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/generated/infrastructure/sources/starter-records.ts')).href);
+   const create=module.createGStarterRecordsAdapter;
+   if(source.kind==='vault'){
+    const entity=document.design.semantic.entities.find(e=>e.id===source.operations[0].output.entity);let reads=0;
+    const port=create({repositories:{[symbol(entity.slug)]:{list:async()=>{reads++;return {ok:true,value:[{id:'fixture',values:{title:'Fixture'}}]};}}}});
+    assert.deepEqual(await port['list-records'](undefined),[{id:'fixture',type:entity.slug,title:'Fixture'}]);assert.equal(reads,1);
+    await assert.rejects(port['list-records'](undefined,AbortSignal.abort()),/OPERATION_ABORTED/);assert.equal(reads,1);
+   }else{
+    const port=create({repositories:{}});
+    await assert.rejects(port['list-records'](undefined),/HTTP_ORIGIN_NOT_APPROVED/);
+   }
+  }
   const replay=await planProject(options);assert.equal(replay.conflicts.length,0);assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'));assert.equal(await readFile(join(vault,'keep.md'),'utf8'),'keep');
  }));
 }
