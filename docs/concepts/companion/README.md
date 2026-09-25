@@ -1,6 +1,6 @@
 # Shell Workbench companion concept
 
-> **One vault, one project · full-project JSON, companion self-project and read-only shell handoff — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
+> **One vault, one project · Storymaps, full-project JSON, companion self-project and read-only shell handoff — 2026-09-24.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
@@ -9,6 +9,12 @@ Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and t
 Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files.
 
 [PROJECT-JSON.md](PROJECT-JSON.md) explains the UI, seed content and limits; [companion-project.json](companion-project.json) is the importable self-project. The [shell contract](../../development/COMPANION-PROJECT-JSON.md) documents the command and safety boundary. This extends the existing single-project model, not a multi-project launcher.
+
+## Storymaps
+
+**Design → Storymaps** opens the overview and a structured Vue Flow editor with activities, steps, stories, release slices and Unplanned. PRD details can create or link existing maps. Items reference existing sitemap surfaces and requirements; sitemap inspectors link back to those maps. Non-drag Move controls and Outline mode share the same records. Draft protection, Undo/Redo, missing-target recovery and full project JSON round trips are included.
+
+Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 2/design schema 2; legacy format-1 projects without storymaps remain readable. The CLI remains read-only. See [STORYMAPS.md](STORYMAPS.md) and [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
 
 ## Previous product audit
 
@@ -40,7 +46,7 @@ Read the [single-vault decision and native implementation contract](SINGLE-VAULT
 
 ## Try the flow
 
-**Start designing → define identity → Product requirements → Blueprints → Sitemap & views → Entity relationships → Component library / Variants → Prepare project.** Project details and an illustrative Project.md record are available without preparation. Author information can be completed when preparing the template. **Use example outline** starts a planning-only example only when the vault has no project; it does not fabricate successful build/install results.
+**Start designing → define identity → Product requirements → Storymaps → Blueprints → Sitemap & views → Entity relationships → Component library / Variants → Prepare project.** Project details and an illustrative Project.md record are available without preparation. Author information can be completed when preparing the template. **Use example outline** starts a planning-only example only when the vault has no project; it does not fabricate successful build/install results.
 
 The eight-step preparation review makes the current source root read-only, distinguishes the test context, lists create/unchanged/conflict states and requires trust plus explicit approval. Use Review scenarios to exercise missing Node, acquisition failure, stale plans, conflicts and interrupted installation. Keep the existing design while returning between the wizard and editor.
 

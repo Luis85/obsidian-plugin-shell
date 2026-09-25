@@ -1,6 +1,6 @@
 {
   "kind": "obsidian-companion-project",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "executable": false,
   "project": {
     "id": "plugin-companion",
@@ -14,7 +14,7 @@
     "testsFolder": "tests"
   },
   "design": {
-    "schema": 1,
+    "schema": 2,
     "blueprint": "workspace",
     "goal": "Help developers turn a plugin idea into a consistent, reviewable design and portable handoff without requiring build tools during discovery.",
     "platform": "desktop",
@@ -82,7 +82,7 @@
             "purpose": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
             "content": "",
             "region": "content",
-            "id": "brick-58",
+            "id": "brick-66",
             "component": "workflow-rail",
             "definition": "workflow-rail",
             "version": "0.1.0",
@@ -159,7 +159,7 @@
             "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
             "content": "",
             "region": "content",
-            "id": "brick-59",
+            "id": "brick-67",
             "component": "review-findings",
             "definition": "review-findings",
             "version": "0.1.0",
@@ -236,7 +236,7 @@
             "purpose": "Capture requirements, acceptance, priority and screen/component traceability.",
             "content": "",
             "region": "content",
-            "id": "brick-61",
+            "id": "brick-69",
             "component": "requirements-panel",
             "definition": "requirements-panel",
             "version": "0.1.0",
@@ -254,6 +254,108 @@
       },
       {
         "id": "node-7",
+        "slug": "storymaps",
+        "label": "Storymaps overview",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Find, create, link and archive the project’s storymaps.",
+        "entity": "er-entity-41",
+        "intent": "Find, create, link and archive the project’s storymaps.",
+        "goals": [
+          "Find, create, link and archive the project’s storymaps."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-8",
+            "kind": "heading",
+            "title": "Storymaps overview",
+            "purpose": "Find, create, link and archive the project’s storymaps.",
+            "content": "Find, create, link and archive the project’s storymaps.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-9",
+        "slug": "storymap-detail",
+        "label": "Storymap editor",
+        "kind": "page",
+        "layout": "canvas",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.",
+        "entity": "er-entity-46",
+        "intent": "Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.",
+        "goals": [
+          "Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-10",
+            "kind": "heading",
+            "title": "Storymap editor",
+            "purpose": "Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.",
+            "content": "Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-11",
         "slug": "sitemap",
         "label": "Sitemap & views",
         "kind": "page",
@@ -287,7 +389,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-8",
+            "id": "brick-12",
             "kind": "heading",
             "title": "Sitemap & views",
             "purpose": "Arrange native containers and internal screens; keep containment, navigation and data flows distinct.",
@@ -313,7 +415,7 @@
             "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
             "content": "",
             "region": "content",
-            "id": "brick-62",
+            "id": "brick-70",
             "component": "diagram-inspector",
             "definition": "diagram-inspector",
             "version": "0.1.0",
@@ -330,7 +432,7 @@
         ]
       },
       {
-        "id": "node-9",
+        "id": "node-13",
         "slug": "entities",
         "label": "Entity relationships",
         "kind": "page",
@@ -364,7 +466,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-10",
+            "id": "brick-14",
             "kind": "heading",
             "title": "Entity relationships",
             "purpose": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
@@ -390,7 +492,7 @@
             "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
             "content": "",
             "region": "content",
-            "id": "brick-63",
+            "id": "brick-71",
             "component": "diagram-inspector",
             "definition": "diagram-inspector",
             "version": "0.1.0",
@@ -407,7 +509,7 @@
         ]
       },
       {
-        "id": "node-11",
+        "id": "node-15",
         "slug": "sources",
         "label": "Data Sources",
         "kind": "page",
@@ -441,7 +543,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-12",
+            "id": "brick-16",
             "kind": "heading",
             "title": "Data Sources",
             "purpose": "Describe vault, API and database ports, operations and payloads without contacting live services.",
@@ -467,7 +569,7 @@
             "purpose": "Describe operations and payloads; never collect live credentials.",
             "content": "",
             "region": "content",
-            "id": "brick-64",
+            "id": "brick-72",
             "component": "source-operation-editor",
             "definition": "source-operation-editor",
             "version": "0.1.0",
@@ -484,7 +586,7 @@
         ]
       },
       {
-        "id": "node-13",
+        "id": "node-17",
         "slug": "test-data",
         "label": "Test Data",
         "kind": "page",
@@ -518,7 +620,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-14",
+            "id": "brick-18",
             "kind": "heading",
             "title": "Test Data",
             "purpose": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
@@ -544,7 +646,7 @@
             "purpose": "Select an operation, run or cancel it, and separate live status from JSON results.",
             "content": "",
             "region": "content",
-            "id": "brick-65",
+            "id": "brick-73",
             "component": "test-operation-panel",
             "definition": "test-operation-panel",
             "version": "0.1.0",
@@ -561,7 +663,7 @@
         ]
       },
       {
-        "id": "node-15",
+        "id": "node-19",
         "slug": "design-system",
         "label": "Design System",
         "kind": "page",
@@ -575,7 +677,7 @@
         "instance": "reuse",
         "patterns": [],
         "goal": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
-        "entity": "er-entity-41",
+        "entity": "er-entity-51",
         "intent": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
         "goals": [
           "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML."
@@ -595,7 +697,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-16",
+            "id": "brick-20",
             "kind": "heading",
             "title": "Design System",
             "purpose": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
@@ -621,7 +723,7 @@
             "purpose": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
             "content": "",
             "region": "content",
-            "id": "brick-66",
+            "id": "brick-74",
             "component": "design-token-editor",
             "definition": "design-token-editor",
             "version": "0.1.0",
@@ -638,7 +740,7 @@
         ]
       },
       {
-        "id": "node-17",
+        "id": "node-21",
         "slug": "components",
         "label": "Component library",
         "kind": "page",
@@ -672,7 +774,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-18",
+            "id": "brick-22",
             "kind": "heading",
             "title": "Component library",
             "purpose": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
@@ -698,7 +800,7 @@
             "purpose": "Edit props, events, slots, variants and reusable content; review version changes.",
             "content": "",
             "region": "content",
-            "id": "brick-67",
+            "id": "brick-75",
             "component": "component-contract-panel",
             "definition": "component-contract-panel",
             "version": "0.1.0",
@@ -715,7 +817,7 @@
         ]
       },
       {
-        "id": "node-19",
+        "id": "node-23",
         "slug": "blueprints",
         "label": "Blueprints",
         "kind": "page",
@@ -744,7 +846,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-20",
+            "id": "brick-24",
             "kind": "heading",
             "title": "Blueprints",
             "purpose": "Choose a layout starting point while retaining ownership of the current design.",
@@ -766,7 +868,7 @@
         ]
       },
       {
-        "id": "node-21",
+        "id": "node-25",
         "slug": "patterns",
         "label": "Action patterns",
         "kind": "page",
@@ -795,7 +897,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-22",
+            "id": "brick-26",
             "kind": "heading",
             "title": "Action patterns",
             "purpose": "Attach established actions to shared application behavior with accessible entry points.",
@@ -817,7 +919,7 @@
         ]
       },
       {
-        "id": "node-23",
+        "id": "node-27",
         "slug": "prepare",
         "label": "Prepare project",
         "kind": "page",
@@ -851,7 +953,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-24",
+            "id": "brick-28",
             "kind": "heading",
             "title": "Prepare project",
             "purpose": "Review additive template preparation, trust and an isolated test vault before any native execution.",
@@ -877,7 +979,7 @@
             "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
             "content": "",
             "region": "content",
-            "id": "brick-71",
+            "id": "brick-79",
             "component": "shell-handoff-panel",
             "definition": "shell-handoff-panel",
             "version": "0.1.0",
@@ -894,7 +996,7 @@
         ]
       },
       {
-        "id": "node-25",
+        "id": "node-29",
         "slug": "generate",
         "label": "Generate a feature",
         "kind": "page",
@@ -923,7 +1025,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-26",
+            "id": "brick-30",
             "kind": "heading",
             "title": "Generate a feature",
             "purpose": "Preview independent shell makers without equating scaffolding with implementation.",
@@ -945,7 +1047,7 @@
         ]
       },
       {
-        "id": "node-27",
+        "id": "node-31",
         "slug": "develop",
         "label": "Development",
         "kind": "page",
@@ -974,7 +1076,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-28",
+            "id": "brick-32",
             "kind": "heading",
             "title": "Development",
             "purpose": "Keep source, built and installed revisions distinct through the first development loop.",
@@ -996,7 +1098,7 @@
         ]
       },
       {
-        "id": "node-29",
+        "id": "node-33",
         "slug": "quality",
         "label": "Quality & verification",
         "kind": "page",
@@ -1030,7 +1132,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-30",
+            "id": "brick-34",
             "kind": "heading",
             "title": "Quality & verification",
             "purpose": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
@@ -1056,7 +1158,7 @@
             "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
             "content": "",
             "region": "content",
-            "id": "brick-60",
+            "id": "brick-68",
             "component": "review-findings",
             "definition": "review-findings",
             "version": "0.1.0",
@@ -1073,7 +1175,7 @@
         ]
       },
       {
-        "id": "node-31",
+        "id": "node-35",
         "slug": "capabilities",
         "label": "Shell capabilities",
         "kind": "page",
@@ -1102,7 +1204,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-32",
+            "id": "brick-36",
             "kind": "heading",
             "title": "Shell capabilities",
             "purpose": "Discover CLI commands and shared shell services without requiring the companion.",
@@ -1124,7 +1226,7 @@
         ]
       },
       {
-        "id": "node-33",
+        "id": "node-37",
         "slug": "release",
         "label": "Release readiness",
         "kind": "page",
@@ -1153,7 +1255,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-34",
+            "id": "brick-38",
             "kind": "heading",
             "title": "Release readiness",
             "purpose": "Inspect publication prerequisites only after shell and native qualification.",
@@ -1175,7 +1277,7 @@
         ]
       },
       {
-        "id": "node-35",
+        "id": "node-39",
         "slug": "runs",
         "label": "Runs & recovery",
         "kind": "page",
@@ -1204,7 +1306,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-36",
+            "id": "brick-40",
             "kind": "heading",
             "title": "Runs & recovery",
             "purpose": "Inspect bounded execution history and preserve private recovery copies before reset.",
@@ -1226,7 +1328,7 @@
         ]
       },
       {
-        "id": "node-37",
+        "id": "node-41",
         "slug": "preferences",
         "label": "Workbench preferences",
         "kind": "settings",
@@ -1251,7 +1353,7 @@
         "bricks": []
       },
       {
-        "id": "node-38",
+        "id": "node-42",
         "slug": "import-project",
         "label": "Import project JSON",
         "kind": "modal",
@@ -1285,7 +1387,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-39",
+            "id": "brick-43",
             "kind": "heading",
             "title": "Import project JSON",
             "purpose": "Validate and review a full project, then explicitly replace the current authoring project.",
@@ -1311,7 +1413,7 @@
             "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
             "content": "",
             "region": "content",
-            "id": "brick-68",
+            "id": "brick-76",
             "component": "project-json-review",
             "definition": "project-json-review",
             "version": "0.1.0",
@@ -1328,7 +1430,7 @@
         ]
       },
       {
-        "id": "node-40",
+        "id": "node-44",
         "slug": "export-project",
         "label": "Export project JSON",
         "kind": "modal",
@@ -1362,7 +1464,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-41",
+            "id": "brick-45",
             "kind": "heading",
             "title": "Export project JSON",
             "purpose": "Export all saved design data and folder settings without machine trust or execution receipts.",
@@ -1388,7 +1490,7 @@
             "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
             "content": "",
             "region": "content",
-            "id": "brick-69",
+            "id": "brick-77",
             "component": "project-json-review",
             "definition": "project-json-review",
             "version": "0.1.0",
@@ -1405,7 +1507,7 @@
         ]
       },
       {
-        "id": "node-42",
+        "id": "node-46",
         "slug": "shell-handoff",
         "label": "Shell JSON handoff",
         "kind": "modal",
@@ -1439,7 +1541,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-43",
+            "id": "brick-47",
             "kind": "heading",
             "title": "Shell JSON handoff",
             "purpose": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
@@ -1465,7 +1567,7 @@
             "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
             "content": "",
             "region": "content",
-            "id": "brick-70",
+            "id": "brick-78",
             "component": "shell-handoff-panel",
             "definition": "shell-handoff-panel",
             "version": "0.1.0",
@@ -1484,105 +1586,133 @@
     ],
     "links": [
       {
-        "id": "edge-44",
+        "id": "edge-48",
+        "from": "node-5",
+        "to": "node-7",
+        "label": "Browse linked storymaps",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-49",
+        "from": "node-7",
+        "to": "node-9",
+        "label": "Open a storymap",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-50",
+        "from": "node-5",
+        "to": "node-9",
+        "label": "Open linked map",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-51",
+        "from": "node-9",
+        "to": "node-11",
+        "label": "Locate a linked surface",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-52",
         "from": "node-3",
         "to": "node-5",
         "label": "Define the outcome",
         "kind": "navigate"
       },
       {
-        "id": "edge-45",
+        "id": "edge-53",
         "from": "node-5",
-        "to": "node-7",
+        "to": "node-11",
         "label": "Shape the experience",
         "kind": "navigate"
       },
       {
-        "id": "edge-46",
-        "from": "node-7",
-        "to": "node-9",
+        "id": "edge-54",
+        "from": "node-11",
+        "to": "node-13",
         "label": "Describe meaning",
         "kind": "navigate"
       },
       {
-        "id": "edge-47",
-        "from": "node-9",
-        "to": "node-11",
+        "id": "edge-55",
+        "from": "node-13",
+        "to": "node-15",
         "label": "Bind a source contract",
         "kind": "navigate"
       },
       {
-        "id": "edge-48",
-        "from": "node-11",
-        "to": "node-13",
+        "id": "edge-56",
+        "from": "node-15",
+        "to": "node-17",
         "label": "Try a source operation",
         "kind": "navigate"
       },
       {
-        "id": "edge-49",
-        "from": "node-17",
-        "to": "node-7",
+        "id": "edge-57",
+        "from": "node-21",
+        "to": "node-11",
         "label": "Place a component",
         "kind": "navigate"
       },
       {
-        "id": "edge-50",
-        "from": "node-15",
-        "to": "node-17",
+        "id": "edge-58",
+        "from": "node-19",
+        "to": "node-21",
         "label": "Review component guidance",
         "kind": "navigate"
       },
       {
-        "id": "edge-51",
+        "id": "edge-59",
         "from": "node-3",
-        "to": "node-38",
+        "to": "node-42",
         "label": "Import a project",
         "kind": "open"
       },
       {
-        "id": "edge-52",
+        "id": "edge-60",
         "from": "node-3",
-        "to": "node-40",
+        "to": "node-44",
         "label": "Export the full project",
         "kind": "open"
       },
       {
-        "id": "edge-53",
-        "from": "node-23",
-        "to": "node-42",
+        "id": "edge-61",
+        "from": "node-27",
+        "to": "node-46",
         "label": "Review CLI handoff",
         "kind": "open"
       },
       {
-        "id": "edge-54",
-        "from": "node-42",
-        "to": "node-40",
+        "id": "edge-62",
+        "from": "node-46",
+        "to": "node-44",
         "label": "Save project JSON",
         "kind": "open"
       },
       {
-        "id": "edge-55",
-        "from": "node-23",
-        "to": "node-27",
+        "id": "edge-63",
+        "from": "node-27",
+        "to": "node-31",
         "label": "Continue after preparation",
         "kind": "navigate"
       },
       {
-        "id": "edge-56",
-        "from": "node-27",
-        "to": "node-29",
+        "id": "edge-64",
+        "from": "node-31",
+        "to": "node-33",
         "label": "Inspect current evidence",
         "kind": "navigate"
       },
       {
-        "id": "edge-57",
-        "from": "node-29",
-        "to": "node-33",
+        "id": "edge-65",
+        "from": "node-33",
+        "to": "node-37",
         "label": "Review publication gates",
         "kind": "navigate"
       }
     ],
-    "nextId": 72,
+    "nextId": 80,
     "library": [
       {
         "id": "record-card",
@@ -3282,7 +3412,7 @@
             "kind": "functional",
             "acceptance": "Edit screens, containers, content sections and transitions with keyboard and pointer controls, Undo and Redo.",
             "nodes": [
-              "node-7"
+              "node-11"
             ],
             "components": [
               "status-notice"
@@ -3297,7 +3427,7 @@
             "kind": "functional",
             "acceptance": "Define properties and explicit cardinalities while keeping diagram arrangement separate from persistence semantics.",
             "nodes": [
-              "node-9"
+              "node-13"
             ],
             "components": [
               "status-notice"
@@ -3312,7 +3442,7 @@
             "kind": "functional",
             "acceptance": "Place pinned component versions and variants with local content; preview and deliberately apply upgrades.",
             "nodes": [
-              "node-17"
+              "node-21"
             ],
             "components": [
               "status-notice"
@@ -3327,7 +3457,7 @@
             "kind": "functional",
             "acceptance": "Use a reviewed starter and shared action patterns without overwriting an existing design silently.",
             "nodes": [
-              "node-19"
+              "node-23"
             ],
             "components": [
               "status-notice"
@@ -3358,7 +3488,7 @@
             "kind": "functional",
             "acceptance": "Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.",
             "nodes": [
-              "node-11"
+              "node-15"
             ],
             "components": [
               "status-notice"
@@ -3373,7 +3503,7 @@
             "kind": "functional",
             "acceptance": "A screen references a declared source operation through a named directional data flow, not a duplicate source definition.",
             "nodes": [
-              "node-7"
+              "node-11"
             ],
             "components": [
               "status-notice"
@@ -3388,7 +3518,7 @@
             "kind": "functional",
             "acceptance": "Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.",
             "nodes": [
-              "node-13"
+              "node-17"
             ],
             "components": [
               "status-notice"
@@ -3403,7 +3533,7 @@
             "kind": "functional",
             "acceptance": "Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.",
             "nodes": [
-              "node-13"
+              "node-17"
             ],
             "components": [
               "status-notice"
@@ -3418,7 +3548,7 @@
             "kind": "functional",
             "acceptance": "Export fixtures and adapters with a read-only plan and explicit ownership checks before applying or cleaning files.",
             "nodes": [
-              "node-13"
+              "node-17"
             ],
             "components": [
               "status-notice"
@@ -3433,7 +3563,7 @@
             "kind": "functional",
             "acceptance": "Persist font declarations, typography, sizes, spacing, radii, paired colors and usage guidance.",
             "nodes": [
-              "node-15"
+              "node-19"
             ],
             "components": [
               "status-notice"
@@ -3448,7 +3578,7 @@
             "kind": "functional",
             "acceptance": "Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs.",
             "nodes": [
-              "node-15"
+              "node-19"
             ],
             "components": [
               "status-notice"
@@ -3494,7 +3624,7 @@
             "kind": "functional",
             "acceptance": "The versioned JSON preserves identity, folder settings, PRDs, screen content, variants, arrangements, entities, source operations, test recipes, tokens and notes.",
             "nodes": [
-              "node-40"
+              "node-44"
             ],
             "components": [
               "status-notice"
@@ -3509,7 +3639,7 @@
             "kind": "functional",
             "acceptance": "File and pasted JSON are bounded and validated before review; invalid input, cancelled review or stale state leaves the project unchanged.",
             "nodes": [
-              "node-38"
+              "node-42"
             ],
             "components": [
               "status-notice"
@@ -3524,7 +3654,7 @@
             "kind": "functional",
             "acceptance": "Codebase defaults to src and tests to tests. Valid custom folders persist and survive a JSON round trip; invalid or overlapping paths are rejected.",
             "nodes": [
-              "node-37"
+              "node-41"
             ],
             "components": [],
             "patterns": []
@@ -3537,7 +3667,7 @@
             "kind": "functional",
             "acceptance": "The v1 script accepts the export and a target inside an explicitly selected vault, prints original JSON bytes, and performs zero filesystem writes.",
             "nodes": [
-              "node-42"
+              "node-46"
             ],
             "components": [
               "status-notice"
@@ -3552,7 +3682,7 @@
             "kind": "functional",
             "acceptance": "Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.",
             "nodes": [
-              "node-23"
+              "node-27"
             ],
             "components": [
               "status-notice"
@@ -3563,6 +3693,97 @@
       },
       {
         "id": "prd-4",
+        "title": "Storymaps & scope planning",
+        "version": "0.1.0",
+        "status": "draft",
+        "problem": "A flat set of requirements loses the user experience and the intended scope of a useful release.",
+        "audience": "Obsidian plugin developers, product owners and designers.",
+        "goals": "Create and open storymaps from either entry point\nPlan structured user experiences\nConnect without copying artifacts\nPlan outcome-oriented release slices\nTransfer storymaps without data loss",
+        "nonGoals": "No native conversion, live service access or release authorization from the browser concept.",
+        "notes": "Design specification, not implementation evidence.",
+        "revision": 1,
+        "nextReq": 6,
+        "baselines": [],
+        "requirements": [
+          {
+            "id": "companion-4-1",
+            "title": "Create and open storymaps from either entry point",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Navigation and linked PRD details open the same map; returning retains the originating context.",
+            "nodes": [
+              "node-7"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-2",
+            "title": "Plan structured user experiences",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo.",
+            "nodes": [
+              "node-9"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-3",
+            "title": "Connect without copying artifacts",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Items link existing sitemap identities and requirements. Missing targets remain explicit; linked artifacts are never deleted.",
+            "nodes": [
+              "node-9"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-4",
+            "title": "Plan outcome-oriented release slices",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Move stories between releases or Unplanned. Removing a release preserves its stories.",
+            "nodes": [
+              "node-9"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          },
+          {
+            "id": "companion-4-5",
+            "title": "Transfer storymaps without data loss",
+            "priority": "must",
+            "status": "designed",
+            "kind": "functional",
+            "acceptance": "Versioned project JSON preserves IDs, order, content, releases and references. Legacy projects are accepted without inventing stories.",
+            "nodes": [
+              "node-7"
+            ],
+            "components": [
+              "status-notice"
+            ],
+            "patterns": []
+          }
+        ]
+      },
+      {
+        "id": "prd-5",
         "title": "Safety & qualification",
         "version": "0.1.0",
         "status": "draft",
@@ -3576,27 +3797,27 @@
         "baselines": [],
         "requirements": [
           {
-            "id": "companion-4-1",
+            "id": "companion-5-1",
             "title": "Preserve drafts and keyboard context",
             "priority": "must",
             "status": "designed",
             "kind": "functional",
             "acceptance": "Closing dirty forms asks for confirmation; modal feedback is visible and focus returns to a meaningful control.",
             "nodes": [
-              "node-37"
+              "node-41"
             ],
             "components": [],
             "patterns": []
           },
           {
-            "id": "companion-4-2",
+            "id": "companion-5-2",
             "title": "Protect recovery copies",
             "priority": "must",
             "status": "designed",
             "kind": "functional",
             "acceptance": "A stale window cannot reset newer retained state; current and retained data can be exported separately before reload.",
             "nodes": [
-              "node-35"
+              "node-39"
             ],
             "components": [
               "status-notice"
@@ -3604,14 +3825,14 @@
             "patterns": []
           },
           {
-            "id": "companion-4-3",
+            "id": "companion-5-3",
             "title": "Keep test-vault boundaries",
             "priority": "must",
             "status": "designed",
             "kind": "functional",
             "acceptance": "Authoring files, host configuration and test-target data are preserved; no silent path migration or plugin activation.",
             "nodes": [
-              "node-23"
+              "node-27"
             ],
             "components": [
               "status-notice"
@@ -3619,14 +3840,14 @@
             "patterns": []
           },
           {
-            "id": "companion-4-4",
+            "id": "companion-5-4",
             "title": "Keep verification scopes separate",
             "priority": "must",
             "status": "designed",
             "kind": "functional",
             "acceptance": "Build, browser, native and security evidence have explicit scope and revision. Import never grants trust or carries simulated passes forward.",
             "nodes": [
-              "node-29"
+              "node-33"
             ],
             "components": [
               "status-notice"
@@ -3634,7 +3855,7 @@
             "patterns": []
           },
           {
-            "id": "companion-4-5",
+            "id": "companion-5-5",
             "title": "Teach the complete workflow",
             "priority": "must",
             "status": "designed",
@@ -3649,14 +3870,14 @@
             "patterns": []
           },
           {
-            "id": "companion-4-6",
+            "id": "companion-5-6",
             "title": "Publish only after native acceptance",
             "priority": "must",
             "status": "designed",
             "kind": "functional",
             "acceptance": "Shell qualification comes first, then native companion conversion and acceptance, then publication. No design action publishes.",
             "nodes": [
-              "node-33"
+              "node-37"
             ],
             "components": [
               "status-notice"
@@ -3685,7 +3906,7 @@
     },
     "semantic": {
       "schema": 1,
-      "nextId": 53,
+      "nextId": 63,
       "entities": [
         {
           "id": "er-entity-1",
@@ -3961,10 +4182,10 @@
         },
         {
           "id": "er-entity-41",
-          "slug": "design-token",
-          "name": "Design Token",
-          "folder": "Companion/DesignToken",
-          "description": "Authoring contract for design token; not an existing native repository.",
+          "slug": "storymap",
+          "name": "Storymap",
+          "folder": "Companion/Storymap",
+          "description": "Authoring contract for storymap; not an existing native repository.",
           "section": null,
           "properties": [
             {
@@ -3975,18 +4196,86 @@
             },
             {
               "id": "er-property-43",
-              "key": "token_group",
+              "key": "purpose",
               "type": "text",
               "required": false
             },
             {
               "id": "er-property-44",
-              "key": "value",
+              "key": "audience",
               "type": "text",
               "required": false
             },
             {
               "id": "er-property-45",
+              "key": "status",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-46",
+          "slug": "storymap-item",
+          "name": "Storymap Item",
+          "folder": "Companion/StorymapItem",
+          "description": "Authoring contract for storymap item; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-47",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-48",
+              "key": "item_kind",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-49",
+              "key": "description",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-50",
+              "key": "acceptance",
+              "type": "text",
+              "required": false
+            }
+          ]
+        },
+        {
+          "id": "er-entity-51",
+          "slug": "design-token",
+          "name": "Design Token",
+          "folder": "Companion/DesignToken",
+          "description": "Authoring contract for design token; not an existing native repository.",
+          "section": null,
+          "properties": [
+            {
+              "id": "er-property-52",
+              "key": "title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "er-property-53",
+              "key": "token_group",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-54",
+              "key": "value",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "er-property-55",
               "key": "usage",
               "type": "text",
               "required": false
@@ -3996,7 +4285,7 @@
       ],
       "relationships": [
         {
-          "id": "er-relationship-46",
+          "id": "er-relationship-56",
           "name": "requirement → plugin-project",
           "source": "er-entity-7",
           "target": "er-entity-1",
@@ -4006,7 +4295,7 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-47",
+          "id": "er-relationship-57",
           "name": "screen → plugin-project",
           "source": "er-entity-12",
           "target": "er-entity-1",
@@ -4016,7 +4305,7 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-48",
+          "id": "er-relationship-58",
           "name": "requirement → screen",
           "source": "er-entity-7",
           "target": "er-entity-12",
@@ -4026,7 +4315,7 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-49",
+          "id": "er-relationship-59",
           "name": "screen → component",
           "source": "er-entity-12",
           "target": "er-entity-17",
@@ -4036,7 +4325,7 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-50",
+          "id": "er-relationship-60",
           "name": "source-operation → data-source",
           "source": "er-entity-32",
           "target": "er-entity-27",
@@ -4046,7 +4335,7 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-51",
+          "id": "er-relationship-61",
           "name": "test-recipe → source-operation",
           "source": "er-entity-37",
           "target": "er-entity-32",
@@ -4056,9 +4345,9 @@
           "onDelete": "restrict"
         },
         {
-          "id": "er-relationship-52",
+          "id": "er-relationship-62",
           "name": "design-token → plugin-project",
-          "source": "er-entity-41",
+          "source": "er-entity-51",
           "target": "er-entity-1",
           "key": "project_ref",
           "sourceCard": "0..*",
@@ -4104,6 +4393,14 @@
           "er-entity-41": {
             "x": 920,
             "y": 898
+          },
+          "er-entity-46": {
+            "x": 60,
+            "y": 1317
+          },
+          "er-entity-51": {
+            "x": 490,
+            "y": 1317
           }
         },
         "viewport": {
@@ -4216,7 +4513,7 @@
           "id": "ds-flow-5",
           "source": "ds-source-1",
           "operation": "ds-operation-4",
-          "card": "node-7",
+          "card": "node-11",
           "direction": "read",
           "label": "Load sitemap",
           "trigger": "on-open",
@@ -4226,7 +4523,7 @@
           "id": "ds-flow-7",
           "source": "ds-source-1",
           "operation": "ds-operation-6",
-          "card": "node-17",
+          "card": "node-21",
           "direction": "read",
           "label": "Load components",
           "trigger": "on-open",
@@ -4493,6 +4790,166 @@
           "id": "components",
           "name": "Component usage",
           "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+        }
+      ]
+    },
+    "storymaps": {
+      "schema": 1,
+      "nextId": 14,
+      "maps": [
+        {
+          "id": "map-1",
+          "title": "From plugin intent to a portable design",
+          "purpose": "A developer can explain an initial user experience and hand its saved design to the independent shell.",
+          "audience": "Obsidian plugin developers and product owners. This example is design intent, not implementation evidence.",
+          "status": "draft",
+          "revision": 1,
+          "updatedAt": "2026-09-24T00:00:00.000Z",
+          "prds": [
+            {
+              "id": "prd-1",
+              "label": "Product & workspace"
+            },
+            {
+              "id": "prd-4",
+              "label": "Storymaps & scope planning"
+            }
+          ],
+          "activities": [
+            {
+              "id": "activity-2",
+              "title": "Shape the plugin experience",
+              "surfaces": []
+            },
+            {
+              "id": "activity-3",
+              "title": "Prepare the development handoff",
+              "surfaces": []
+            }
+          ],
+          "steps": [
+            {
+              "id": "step-4",
+              "title": "Describe the user outcome",
+              "activityId": "activity-2",
+              "surfaces": []
+            },
+            {
+              "id": "step-5",
+              "title": "Connect stories and screens",
+              "activityId": "activity-2",
+              "surfaces": []
+            },
+            {
+              "id": "step-6",
+              "title": "Transfer the saved project",
+              "activityId": "activity-3",
+              "surfaces": []
+            }
+          ],
+          "stories": [
+            {
+              "id": "story-9",
+              "title": "Describe the problem and intended outcome",
+              "stepId": "step-4",
+              "releaseId": "release-7",
+              "description": "Keep the PRD as the source of product intent; the map adds experience context.",
+              "acceptance": "",
+              "ui": "surface",
+              "surfaces": [
+                {
+                  "id": "node-5",
+                  "label": "Product requirements"
+                }
+              ],
+              "requirements": []
+            },
+            {
+              "id": "story-10",
+              "title": "Connect a story to existing screens",
+              "stepId": "step-5",
+              "releaseId": "release-7",
+              "description": "Select existing sitemap items. Their stable identities remain shared; no screen is copied.",
+              "acceptance": "",
+              "ui": "surface",
+              "surfaces": [
+                {
+                  "id": "node-9",
+                  "label": "Storymap editor"
+                },
+                {
+                  "id": "node-11",
+                  "label": "Sitemap & views"
+                }
+              ],
+              "requirements": [
+                {
+                  "prdId": "prd-4",
+                  "id": "companion-4-3",
+                  "label": "Connect without copying artifacts"
+                }
+              ]
+            },
+            {
+              "id": "story-11",
+              "title": "Export and reimport the complete project",
+              "stepId": "step-6",
+              "releaseId": "release-7",
+              "description": "The transfer includes the saved storymaps and all linked project artifacts.",
+              "acceptance": "",
+              "ui": "surface",
+              "surfaces": [
+                {
+                  "id": "node-44",
+                  "label": "Export project JSON"
+                },
+                {
+                  "id": "node-42",
+                  "label": "Import project JSON"
+                }
+              ],
+              "requirements": []
+            },
+            {
+              "id": "story-12",
+              "title": "Review acceptance notes in context",
+              "stepId": "step-5",
+              "releaseId": "release-8",
+              "description": "Use the inspector or outline to read stories alongside their release outcome.",
+              "acceptance": "",
+              "ui": "surface",
+              "surfaces": [
+                {
+                  "id": "node-9",
+                  "label": "Storymap editor"
+                }
+              ],
+              "requirements": []
+            },
+            {
+              "id": "story-13",
+              "title": "Consider delivery-tool integration",
+              "stepId": "step-6",
+              "releaseId": null,
+              "description": "Unplanned exploration. No external synchronization is implemented or implied.",
+              "acceptance": "",
+              "ui": "unspecified",
+              "surfaces": [],
+              "requirements": []
+            }
+          ],
+          "releases": [
+            {
+              "id": "release-7",
+              "title": "First usable experience",
+              "outcome": "Create, connect and safely transfer one coherent plugin design."
+            },
+            {
+              "id": "release-8",
+              "title": "Refine and review",
+              "outcome": "Review detailed acceptance notes and alternative scope without losing context."
+            }
+          ]
         }
       ]
     }

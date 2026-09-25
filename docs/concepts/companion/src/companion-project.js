@@ -26,6 +26,8 @@ function companionExampleProject() {
   const screens = [
     ['overview', 'Project overview', 'dashboard', 'Understand the next useful action, review blockers and advisory findings.'],
     ['requirements', 'Product requirements', 'list-detail', 'Describe outcomes and verifiable acceptance criteria, then map them to screens and components.'],
+    ['storymaps', 'Storymaps overview', 'list-detail', 'Find, create, link and archive the project’s storymaps.'],
+    ['storymap-detail', 'Storymap editor', 'canvas', 'Plan activities, steps, stories and outcome-oriented releases; connect existing sitemap items.'],
     ['sitemap', 'Sitemap & views', 'canvas', 'Arrange native containers and internal screens; keep containment, navigation and data flows distinct.'],
     ['entities', 'Entity relationships', 'canvas', 'Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.'],
     ['sources', 'Data Sources', 'list-detail', 'Describe vault, API and database ports, operations and payloads without contacting live services.'],
@@ -52,6 +54,7 @@ function companionExampleProject() {
       kind: surfaces[to].kind === 'modal' ? 'open' : 'navigate' });
   }
   for (const [from, to, label] of [
+    ['requirements', 'storymaps', 'Browse linked storymaps'], ['storymaps', 'storymap-detail', 'Open a storymap'], ['requirements', 'storymap-detail', 'Open linked map'], ['storymap-detail', 'sitemap', 'Locate a linked surface'],
     ['overview', 'requirements', 'Define the outcome'], ['requirements', 'sitemap', 'Shape the experience'],
     ['sitemap', 'entities', 'Describe meaning'], ['entities', 'sources', 'Bind a source contract'],
     ['sources', 'test-data', 'Try a source operation'], ['components', 'sitemap', 'Place a component'],
@@ -63,6 +66,7 @@ function companionExampleProject() {
   companionExampleComponents(d, surfaces);
   companionExampleRequirements(d, surfaces);
   companionExampleEntities(d, surfaces);
+  companionExampleStorymaps(d, surfaces);
   d.designSystem = sgStarter(); d.designSystem.name = 'Companion workbench design system';
   d.designSystem.description = 'Host-friendly design declarations for the companion. Tokens are authored intent, not automatic component styling.';
   d.canvas = emptyCanvas();
@@ -96,6 +100,13 @@ function companionExampleRequirements(d, surfaces) {
       ['Accept JSON at the shell boundary', 'shell-handoff', 'The v1 script accepts the export and a target inside an explicitly selected vault, prints original JSON bytes, and performs zero filesystem writes.'],
       ['Keep generation a separate stage', 'prepare', 'Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.'],
     ]],
+    ['Storymaps & scope planning', 'A flat set of requirements loses the user experience and the intended scope of a useful release.', [
+      ['Create and open storymaps from either entry point', 'storymaps', 'Navigation and linked PRD details open the same map; returning retains the originating context.'],
+      ['Plan structured user experiences', 'storymap-detail', 'Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo.'],
+      ['Connect without copying artifacts', 'storymap-detail', 'Items link existing sitemap identities and requirements. Missing targets remain explicit; linked artifacts are never deleted.'],
+      ['Plan outcome-oriented release slices', 'storymap-detail', 'Move stories between releases or Unplanned. Removing a release preserves its stories.'],
+      ['Transfer storymaps without data loss', 'storymaps', 'Versioned project JSON preserves IDs, order, content, releases and references. Legacy projects are accepted without inventing stories.'],
+    ]],
     ['Safety & qualification', 'A convincing prototype must not imply that simulated execution or stored data is native evidence.', [
       ['Preserve drafts and keyboard context', 'preferences', 'Closing dirty forms asks for confirmation; modal feedback is visible and focus returns to a meaningful control.'],
       ['Protect recovery copies', 'runs', 'A stale window cannot reset newer retained state; current and retained data can be exported separately before reload.'],
@@ -123,6 +134,8 @@ function companionExampleEntities(d, surfaces) {
     ['data-source', 'Data Source', ['title', 'source_kind', 'locator', 'credential_ref']],
     ['source-operation', 'Source Operation', ['title', 'direction', 'input_shape', 'output_shape']],
     ['test-recipe', 'Test Recipe', ['title', 'scenario', 'dataset']],
+    ['storymap', 'Storymap', ['title', 'purpose', 'audience', 'status']],
+    ['storymap-item', 'Storymap Item', ['title', 'item_kind', 'description', 'acceptance']],
     ['design-token', 'Design Token', ['title', 'token_group', 'value', 'usage']],
   ];
   for (const [slug, name, keys] of definitions) {
@@ -140,7 +153,7 @@ function companionExampleEntities(d, surfaces) {
   }
   semanticArrange(m); d.semantic = m;
   for (const [key, entity] of [['overview', 'plugin-project'], ['requirements', 'requirement'], ['sitemap', 'screen'],
-    ['components', 'component'], ['entities', 'entity-definition'], ['sources', 'data-source'], ['test-data', 'test-recipe'], ['design-system', 'design-token']]) surfaces[key].entity = entities[entity].id;
+    ['components', 'component'], ['entities', 'entity-definition'], ['sources', 'data-source'], ['test-data', 'test-recipe'], ['design-system', 'design-token'], ['storymaps', 'storymap'], ['storymap-detail', 'storymap-item']]) surfaces[key].entity = entities[entity].id;
   const sources = emptyDataSources(); d.dataSources = sources;
   const source = { id: dsNext(sources, 'source'), slug: 'authoring-vault', name: 'Companion authoring vault', kind: 'vault', status: 'active',
     description: 'Proposed native adapter over project authoring notes. The HTML only declares this port.', locator: 'vault://active', auth: 'none', credentialRef: '', operations: [] };

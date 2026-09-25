@@ -39,10 +39,10 @@ async function snapshot(dir) {
 test('[COMPANION-SEED] full companion definition has authored coverage, not execution authority', () => {
   assert.equal(parseCompanionDocument(seed).kind, 'obsidian-companion-project');
   assert.equal(document.project.id, 'plugin-companion');
-  assert.equal(document.design.nodes.length, 22);
-  assert.equal(document.design.prds.flatMap(p => p.requirements).length, 25);
+  assert.equal(document.design.nodes.length, 24);
+  assert.equal(document.design.prds.flatMap(p => p.requirements).length, 30);
   assert.equal(document.design.library.length, 54);
-  assert.equal(document.design.semantic.entities.length, 9);
+  assert.equal(document.design.semantic.entities.length, 11);
   assert.equal(document.design.dataSources.testing.recipes.length, 3);
   assert.deepEqual(document.settings, { codebaseFolder: 'src', testsFolder: 'tests' });
   assert.equal(Object.hasOwn(document, 'trusted'), false);
@@ -105,7 +105,7 @@ test('[COMPANION-OVERLAP] case-insensitive ancestor folders are refused, sibling
 test('[COMPANION-INVALID] malformed/future/wrong-kind/authority documents produce no stdout or writes', async t => {
   const f = await fixture(t);
   const cases = ['{', 'null', '[]', '{"schema":2,"project":{}}'];
-  for (const patch of [{ kind: 'plugin-shell-blueprint' }, { schemaVersion: 2 }, { executable: true }, { trusted: true },
+  for (const patch of [{ kind: 'plugin-shell-blueprint' }, { schemaVersion: 3 }, { executable: true }, { trusted: true },
     { settings: { codebaseFolder: '../src', testsFolder: 'tests' } }, { project: { ...document.project, id: '../bad' } },
     { design: { ...document.design, nodes: [{ id: 'duplicate' }, { id: 'duplicate' }] } }]) cases.push(JSON.stringify({ ...document, ...patch }));
   for (const text of cases) {

@@ -127,7 +127,16 @@
     "docs/concepts/companion/src/companion-project.js",
     "scripts/companion/project-contract.mjs",
     "shell.mjs",
-    "scripts/companion/runtime/operation.ts"
+    "scripts/companion/runtime/operation.ts",
+    "docs/concepts/companion/src/storymap-model.js",
+    "docs/concepts/companion/src/storymap-actions.js",
+    "docs/concepts/companion/src/storymap-forms.js",
+    "docs/concepts/companion/src/storymap-views.js",
+    "docs/concepts/companion/src/storymap-runtime.js",
+    "docs/concepts/companion/src/storymap-export.js",
+    "docs/concepts/companion/src/storymap-seed.js",
+    "docs/concepts/companion/src/storymap.css",
+    "scripts/companion/storymap-contract.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

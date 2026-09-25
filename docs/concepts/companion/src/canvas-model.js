@@ -91,6 +91,7 @@ function revealDesignSelection(){
  const dy=top<90?90-top:top+h>pane.clientHeight-96?(h>pane.clientHeight-186?90-top:pane.clientHeight-96-top-h):0;
  if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
-function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;const sources=dsGeneration(d);if(sources)value.dataSources=sources;else delete value.dataSources;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
+// Storymaps are planning context in full-project exports, never compiler input.
+function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;delete value.storymaps;const sources=dsGeneration(d);if(sources)value.dataSources=sources;else delete value.dataSources;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
 
 function boundedCameraPan(p){return {x:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.x)),y:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.y))};}

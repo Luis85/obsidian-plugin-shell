@@ -10,7 +10,7 @@ function companionProjectDocument(p = project()) {
   if (!p) throw Error('Define a project before exporting.');
   const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
   return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
-    project: identity, settings: companionFolders(p), design: { schema: 1, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
+    project: identity, settings: companionFolders(p), design: { schema: 2, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
 }
 function companionJson(p = project()) {
   const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
