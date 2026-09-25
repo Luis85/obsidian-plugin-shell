@@ -41,6 +41,14 @@ jobs:
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
       - name: Generate, independently install, build and test the companion project
         run: node scripts/companion/qualify-project.mjs
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Restore the pinned Chromium download
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Exercise generated stylesheet against real Nuxt UI components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
@@ -63,25 +71,41 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  # Each starter still generates, installs, builds and tests in its own
+  # disposable workspace; three per job avoids nine runner slots of setup.
   starter:
-    name: Starter ${{ matrix.id }}
+    name: Starters ${{ matrix.ids }}
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 30
     strategy:
       fail-fast: false
-      max-parallel: 3
       matrix:
-        id: [blank, command-utility, quick-capture, tasks-projects, knowledge-collection, daily-journal, vault-dashboard, note-inspector, import-integration]
+        include:
+          - group: 1
+            ids: blank command-utility quick-capture
+          - group: 2
+            ids: tasks-projects knowledge-collection daily-journal
+          - group: 3
+            ids: vault-dashboard note-inspector import-integration
     steps:
       - *checkout
       - *setup-node
       - *select-npm
-      - name: Generate and independently install, build, typecheck and test
-        run: node scripts/companion/qualify-starter.mjs "${{ matrix.id }}"
+      - name: Generate and independently install, build, typecheck and test each starter
+        env:
+          STARTER_IDS: ${{ matrix.ids }}
+        run: |
+          failed=""
+          for id in $STARTER_IDS; do
+            echo "::group::Starter $id"
+            node scripts/companion/qualify-starter.mjs "$id" || failed="$failed $id"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
-          name: starter-${{ matrix.id }}-evidence
-          path: reports/project-starters/${{ matrix.id }}/
+          name: starters-${{ matrix.group }}-evidence
+          path: reports/project-starters/
           retention-days: 7
           if-no-files-found: error

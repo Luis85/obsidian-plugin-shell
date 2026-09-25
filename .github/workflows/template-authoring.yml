@@ -59,6 +59,16 @@ jobs:
           set -o pipefail
           node "$QUALIFIED_NPM" run verify 2>&1 | tee reports/template-authoring/verify.txt
           node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
+      - &playwright-version
+        name: Resolve the pinned Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - &playwright-cache
+        name: Restore the pinned Chromium download
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Provision pinned Chromium and exercise served components
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
@@ -137,6 +147,8 @@ jobs:
       - *adopt-identity
       - *make-feature
       - *extend-consumer
+      - *playwright-version
+      - *playwright-cache
       - name: Provision pinned Chromium
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Remove reviewed examples while preserving the consumer feature
