@@ -1,0 +1,73 @@
+name: Assemble reviewed generator boundaries
+on:
+  push:
+    branches: [work/assemble-generator-boundaries]
+permissions:
+  contents: write
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Reconstruct and store exact reviewed source tree without advancing a ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, subprocess, urllib.request
+          def git(*args):
+              return subprocess.check_output(['git', *args])
+          parts = [pathlib.Path(f'.delivery/boundaries-{i}.b64') for i in range(4)]
+          raw = ''.join(p.read_text() for p in parts)
+          assert hashlib.sha256(raw.encode()).hexdigest() == 'e8bfa8af9b8221ea4e1a5bb7fab41685a190e5128349aa04c92a0358b82f1471'
+          patch = lzma.decompress(base64.b64decode(raw, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '86cc087420849297c7894495593d4feedb13a87930cda1674ee31f0fc8ea759c'
+          subprocess.run(['git','apply','--check','-'], input=patch, check=True)
+          subprocess.run(['git','apply','-'], input=patch, check=True)
+          for p in parts: p.unlink()
+          pathlib.Path('.github/workflows/assemble-generator-boundaries.yml').unlink()
+          subprocess.run(['python3','scripts/concepts/build-companion.py'], check=True)
+          subprocess.run(['git','add','-A'], check=True)
+          expected = 'aee7178c61a741bd6dfed4d8bb52c8ae832bd381'
+          assert git('write-tree').decode().strip() == expected
+          indexed = {}
+          for record in git('ls-files','--stage','-z').split(b'\0'):
+              if not record: continue
+              meta, name = record.split(b'\t',1)
+              mode, sha, stage = meta.decode().split()
+              assert stage == '0'
+              indexed[name.decode()] = (mode,sha)
+          def post(endpoint, data):
+              request = urllib.request.Request('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/git/'+endpoint, data=json.dumps(data).encode(), method='POST', headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'})
+              with urllib.request.urlopen(request, timeout=60) as response: return json.load(response)
+          entries=[]
+          for raw_name in git('diff','--cached','--name-only','-z','HEAD').split(b'\0'):
+              if not raw_name: continue
+              name=raw_name.decode()
+              if name.startswith('.delivery/') or name=='.github/workflows/assemble-generator-boundaries.yml': continue
+              if name not in indexed:
+                  entries.append({'path':name,'mode':'100644','type':'blob','sha':None})
+                  continue
+              mode, sha=indexed[name]
+              content=git('show',':'+name)
+              stored=post('blobs',{'encoding':'base64','content':base64.b64encode(content).decode()})
+              assert stored['sha']==sha, name
+              entries.append({'path':name,'mode':mode,'type':'blob','sha':sha})
+          tree=post('trees',{'base_tree':'3e2eab38cc3b3ff1d66f62e922df5a6b687ded0d','tree':entries})
+          assert tree['sha']==expected
+          report=pathlib.Path(os.environ['RUNNER_TEMP'])/'generator-boundaries-assembly'
+          report.mkdir()
+          (report/'tree.json').write_text(json.dumps({'tree':expected,'changedFiles':len(entries),'patchSha256':hashlib.sha256(patch).hexdigest()},indent=2)+'\n')
+          subprocess.run(['git','archive','--format=tar.gz',expected,'-o',str(report/'framework-source.tar.gz')],check=True)
+          print(json.dumps({'storedTree':expected,'changedFiles':len(entries),'refAdvanced':False}))
+          PY
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: generator-boundaries-source
+          path: ${{ runner.temp }}/generator-boundaries-assembly/
+          retention-days: 7
+          if-no-files-found: error
