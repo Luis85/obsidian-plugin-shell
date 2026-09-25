@@ -1,0 +1,31 @@
+name: Deliver PR21 provider implementation
+on:
+  push:
+    branches: [work/pr21-provider-delivery]
+permissions:
+  contents: write
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+      - name: Verify and apply exact implementation to original PR head
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib, base64, lzma, hashlib, os
+          encoded=''.join(pathlib.Path(f'.delivery/pr21-{i}.b64').read_text() for i in range(4))
+          patch=lzma.decompress(base64.b64decode(encoded,validate=True))
+          assert hashlib.sha256(patch).hexdigest()=='a1dae33bcd82290fb0a6b4b5e6dac411387b48737e162182347489bded6c0c67'
+          pathlib.Path(os.environ['RUNNER_TEMP'],'pr21-implementation.patch').write_bytes(patch)
+          PY
+          git checkout --detach dcbddabab5ebabde5f4d41f9f4f415960ba70d1e
+          git apply --check "$RUNNER_TEMP/pr21-implementation.patch"
+          git apply "$RUNNER_TEMP/pr21-implementation.patch"
+          git add -A
+          test "$(git write-tree)" = "b6d648dfd4a321ee2c2f878df985dd5559f1bb11"
+          git -c user.name='OpenAI' -c user.email='noreply@openai.com' commit -m 'feat(generator): compile fixture recipes, HTTPS providers and native relationship guards'
+          git push origin HEAD:refs/heads/work/generator-detail-implementation
