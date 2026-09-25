@@ -41,6 +41,10 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.match(await readFile(join(dir, 'vitest.project.config.mjs'), 'utf8'), /spec\/project/);
   assert.equal(JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8')).id, 'field-notes');
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'unchanged');
+  await writeFile(join(dir, 'draft.json'), JSON.stringify({ ...design, design: { ...design.design, goal: 'Unreviewed draft' } }));
+  output = cli(dir, ['generate', '--input', 'draft.json', '--yes', '--json']); assert.notEqual(output.status, 0); assert.match(output.stdout + output.stderr, /INPUT_REQUIRES_IMPORT/);
+  assert.notEqual(JSON.parse(await readFile(join(dir, 'design/project.json'), 'utf8')).design.goal, 'Unreviewed draft');
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'unchanged');
   design.design.goal = 'Revised intent with unchanged implementation contracts';
   await writeFile(join(dir, 'input.json'), JSON.stringify(design));
   output = cli(dir, ['project', 'import', '--input', 'input.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);

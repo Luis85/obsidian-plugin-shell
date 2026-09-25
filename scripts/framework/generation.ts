@@ -12,6 +12,7 @@ export async function generationPlan(request: Request, context: Context) {
   if (target !== undefined) return planProject({ input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup and project import first.');
+  requireThat(input === resolve(context.root, designFile), 'INPUT_REQUIRES_IMPORT', 'In-place generation compiles the imported ' + designFile + '; run project import to adopt a different file.');
   requireThat(await exists(join(context.root, '.framework/kit.json')), 'KIT_REQUIRED', 'In-place generation requires an extracted, verified framework kit; legacy --vault/--target remains available.');
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);

@@ -1,6 +1,15 @@
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './data-code.ts';
 import { visibleDetails, type DetailDocument } from '../runtime/detail-runtime.ts';
+const control = (kind: string) => ['input','checkbox','number'].includes(kind) ? ' input' : kind==='textarea' ? ' textarea' : kind==='select' ? ' select' : '';
+/** A value effect is asserted on the target control's real state; serialized HTML never shows a checked box as "true". */
+function valueAssertion(target: string, kind: string, value: unknown): string {
+  const selector = literal('[data-design-node="'+target+'"]'+control(kind));
+  if (kind === 'checkbox') return `expect(wrapper.get<HTMLInputElement>(${selector}).element.checked).toBe(${value === true ? 'true' : 'false'});`;
+  if (control(kind)) return `expect(wrapper.get<HTMLInputElement>(${selector}).element.value).toBe(${literal(String(value))});`;
+  if (kind === 'tabs') return `expect(wrapper.get(${literal('[data-design-node="'+target+'"] [aria-selected="true"]')}).text()).toBe(${literal(String(value))});`;
+  return `expect(wrapper.get(${selector}).text()).toContain(${literal(String(value))});`;
+}
 export function detailTests(m: Model, doc: DetailDocument, component: string, add: Add): void {
   const path = `${m.testRoot}/details/${doc.id}.test.ts`; const root = m.sourceRoot;
   const cases = doc.edges.filter(e => doc.nodes.find(n => n.id === e.source)?.kind !== 'component').map(edge => {
@@ -13,7 +22,7 @@ export function detailTests(m: Model, doc: DetailDocument, component: string, ad
       const e=edge.effect, target=doc.nodes.find(n=>n.id===edge.target)!;
       if(e.type==='state') expected=`expect(wrapper.attributes('data-design-state')).toBe(${literal(e.value)});`;
       if(e.type==='toggle') expected=`expect(wrapper.find(${literal('[data-design-node="'+edge.target+'"]')}).exists()).toBe(false);`;
-      if(e.type==='value') expected=`expect(wrapper.html()).toContain(${literal(String(e.value))});`;
+      if(e.type==='value') expected=valueAssertion(edge.target, target.kind, e.value);
       if(e.type==='emit') expected=`expect(wrapper.emitted(${literal(String(e.value))})).toHaveLength(1);`;
       if(e.type==='focus') expected=`expect(wrapper.get(${literal('[data-design-node="'+edge.target+'"]'+(['input','checkbox','number'].includes(target.kind)?' input':target.kind==='textarea'?' textarea':target.kind==='select'?' select':''))}).element).toBe(document.activeElement);`;
       expected+=' expect(handle).not.toHaveBeenCalled(); expect(navigate).not.toHaveBeenCalled();';

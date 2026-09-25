@@ -38,12 +38,18 @@ export function standaloneSource(path: string, bytes: Buffer): Buffer {
   }
   return bytes;
 }
-export function updateReadmeOwnership(original: Buffer, adapted: Buffer, metadata: Buffer): Buffer {
+/** Every example-owned file the kit ships in adapted form gets its reviewed hash refreshed; unknown preimages are refused. */
+export function updateOwnership(originals: Map<string, Buffer>, shipped: Map<string, Buffer>, metadata: Buffer): Buffer {
   const value = object(JSON.parse(metadata.toString('utf8')));
   requireThat(Array.isArray(value.files), 'KIT_OWNERSHIP', 'Invalid example-removal metadata.');
-  const record = value.files.map(object).find(file => file.path === 'README.md');
-  const reviewedText = new TextDecoder('utf-8', { fatal: true }).decode(original).replace(/\r\n/g, '\n');
-  requireThat(record && (record.sha256 === hash(original) || record.sha256 === hash(reviewedText)), 'KIT_OWNERSHIP', 'The framework README is not the reviewed preimage; refuse silent ownership adoption.');
-  record.sha256 = hash(adapted);
+  const records = value.files.map(object);
+  requireThat(records.some(file => file.path === 'README.md'), 'KIT_OWNERSHIP', 'The framework README is not an example-owned file.');
+  for (const record of records) {
+    const path = String(record.path); const original = originals.get(path); const adapted = shipped.get(path);
+    if (typeof record.sha256 !== 'string' || !original || !adapted || adapted.equals(original)) continue;
+    const reviewedText = new TextDecoder('utf-8', { fatal: true }).decode(original).replace(/\r\n/g, '\n');
+    requireThat(record.sha256 === hash(original) || record.sha256 === hash(reviewedText), 'KIT_OWNERSHIP', path + ' is not the reviewed preimage; refuse silent ownership adoption.');
+    record.sha256 = hash(adapted);
+  }
   return Buffer.from(json(value));
 }

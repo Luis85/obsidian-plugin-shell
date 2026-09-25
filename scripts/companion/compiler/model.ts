@@ -80,7 +80,7 @@ function shape(value: unknown, entities: Entity[]): Schema | null {
 export function projectModel(input: unknown): Model {
   const document = row(validateCompanionDocument(input)); const design = row(document.design); const project = row(document.project); const settings = row(document.settings);
   const sourceRoot = text(settings.codebaseFolder) + '/generated'; const testRoot = text(settings.testsFolder) + '/project';
-  requireValue(!['scripts','docs','harness','node_modules','dist'].some(p => [String(settings.codebaseFolder),String(settings.testsFolder)].some(f => f === p || f.startsWith(p+'/'))), 'Generated roots overlap framework tooling.');
+  requireValue(!['scripts','docs','harness','node_modules','dist'].some(p => [String(settings.codebaseFolder),String(settings.testsFolder)].map(f => f.toLowerCase()).some(f => f === p || f.startsWith(p+'/'))), 'Generated roots overlap framework tooling.');
   const entityModels = entities(design); const components = rows(design.library); unique(components, c => slug(c.id)); for (const c of components) { text(c.name,120); text(c.description ?? '',10000); }
   const screens = rows(design.nodes,60).map(n => ({ id:text(n.id,120), slug:slug(n.slug), label:text(n.label,120), kind:text(n.kind,40), parent:n.parent === null ? null : text(n.parent,120), nav:n.nav === true, entry:n.entry === true, command:n.command === true, ribbon:n.ribbon === true, goal:text(n.goal ?? ''), components:rows(n.components ?? [],60).map(c => text(c.id,120)) }));
   unique(screens, n => n.slug); unique(screens,n=>symbol(n.slug)); requireValue(screens.some(n=>!['group','action','modal'].includes(n.kind)), 'Declare at least one navigable screen.');

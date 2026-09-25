@@ -1,1 +1,406 @@
-{"entry":["src/main.ts","src/features/api.ts","harness/app/main.ts","harness/style-fixture/fixture.js","scripts/testing/node-reporter.mjs","scripts/testing/evidence-vitest-reporter.mjs","scripts/styles/export-host-css.mjs","scripts/testing/check-browser-specimen.mjs","scripts/harness/serve-style-fixture.mjs","src/infrastructure/ui/static-plugin.ts","src/styles/index.css","harness/style-fixture/fixture.css","harness/styles/obsidian.css","harness/styles/simulated.css","harness/styles/host-adapter.css","scripts/makers/custom/registry.mjs","src/bootstrap/authoring-domains.ts","src/bootstrap/event-catalog.ts","docs/concepts/companion/src/brick-actions.js","docs/concepts/companion/src/brick-catalog.js","docs/concepts/companion/src/brick-model.js","docs/concepts/companion/src/brick-views.js","docs/concepts/companion/src/bricks.css","docs/concepts/companion/src/canvas-actions.js","docs/concepts/companion/src/canvas-catalog.js","docs/concepts/companion/src/canvas-layout.js","docs/concepts/companion/src/canvas-model.js","docs/concepts/companion/src/canvas-pointer.js","docs/concepts/companion/src/canvas-view.js","docs/concepts/companion/src/canvas.css","docs/concepts/companion/src/catalog.js","docs/concepts/companion/src/component-variants.css","docs/concepts/companion/src/component-variants.js","docs/concepts/companion/src/component-views.js","docs/concepts/companion/src/connection-actions.js","docs/concepts/companion/src/connection-menu.js","docs/concepts/companion/src/connection-model.js","docs/concepts/companion/src/connection-views.js","docs/concepts/companion/src/connection.css","docs/concepts/companion/src/design-actions.js","docs/concepts/companion/src/design-dialogs.js","docs/concepts/companion/src/design-model.js","docs/concepts/companion/src/design-plan.js","docs/concepts/companion/src/design-views.js","docs/concepts/companion/src/design.css","docs/concepts/companion/src/edge-editing.js","docs/concepts/companion/src/flow-actions.js","docs/concepts/companion/src/flow-catalog.js","docs/concepts/companion/src/flow-edge.js","docs/concepts/companion/src/flow-model.js","docs/concepts/companion/src/flow-runtime.js","docs/concepts/companion/src/flow-views.js","docs/concepts/companion/src/flow.css","docs/concepts/companion/src/interaction-polish.js","docs/concepts/companion/src/library-actions.js","docs/concepts/companion/src/library-model.js","docs/concepts/companion/src/library-views.js","docs/concepts/companion/src/library.css","docs/concepts/companion/src/prd-views.js","docs/concepts/companion/src/product-actions.js","docs/concepts/companion/src/product-model.js","docs/concepts/companion/src/product-plan.js","docs/concepts/companion/src/product.css","docs/concepts/companion/src/reference-actions.js","docs/concepts/companion/src/reference-content.js","docs/concepts/companion/src/reference-model.js","docs/concepts/companion/src/reference-views.js","docs/concepts/companion/src/reference.css","docs/concepts/companion/src/semantic-actions.js","docs/concepts/companion/src/semantic-generation.js","docs/concepts/companion/src/semantic-model.js","docs/concepts/companion/src/semantic-runtime.js","docs/concepts/companion/src/semantic-views.js","docs/concepts/companion/src/semantic.css","docs/concepts/companion/src/spatial-model.js","docs/concepts/companion/src/spatial-runtime.js","docs/concepts/companion/src/state-safety.js","docs/concepts/companion/src/surface-view.js","docs/concepts/companion/src/surface.css","docs/concepts/companion/src/unified-library.js","docs/concepts/companion/src/unified.css","docs/concepts/companion/src/vault-preparation.js","docs/concepts/companion/src/vault-project.js","docs/concepts/companion/src/vault-workspace.js","docs/concepts/companion/src/vault.css","docs/concepts/companion/src/workflow-actions.js","docs/concepts/companion/src/workflow-model.js","docs/concepts/companion/src/workflow-views.js","docs/concepts/companion/src/workflow.css","docs/concepts/companion/vendor/pinia.iife.prod.js","docs/concepts/companion/vendor/vue-flow-core.iife.js","docs/concepts/companion/vendor/vue-flow.css","docs/concepts/companion/vendor/vue-flow.scoped.css","docs/concepts/companion/vendor/vue.runtime.global.prod.js","docs/concepts/companion/src/semantic-geometry.js","docs/concepts/companion/src/semantic-interaction.js","docs/concepts/companion/src/data-source-model.js","docs/concepts/companion/src/data-source-actions.js","docs/concepts/companion/src/data-source-views.js","docs/concepts/companion/src/data-source-flow.js","docs/concepts/companion/src/data-source-generation.js","docs/concepts/companion/src/data-source.css","docs/concepts/companion/src/editor-selection.js","docs/concepts/companion/src/editor-removal.js","docs/concepts/companion/src/test-data-model.js","docs/concepts/companion/src/test-data-actions.js","docs/concepts/companion/src/test-data-views.js","docs/concepts/companion/src/test-data-export.js","docs/concepts/companion/src/test-data.css","docs/concepts/companion/test-kit/engine.mjs","docs/concepts/companion/test-kit/adapters.mjs","docs/concepts/companion/test-kit/storage.mjs","docs/concepts/companion/test-kit/server.mjs","docs/concepts/companion/test-kit/cli.mjs","docs/concepts/companion/test-kit/faker-provider.mjs","docs/concepts/companion/src/style-guide-model.js","docs/concepts/companion/src/style-guide-actions.js","docs/concepts/companion/src/style-guide-views.js","docs/concepts/companion/src/style-guide-export.js","docs/concepts/companion/src/style-guide.css","docs/concepts/companion/test-kit/client.mjs","docs/concepts/companion/src/workbench.css","docs/concepts/companion/src/ui-fields.js","docs/concepts/companion/src/project-transfer.js","docs/concepts/companion/src/companion-project.js","scripts/companion/project-contract.mjs","shell.mjs","scripts/companion/runtime/operation.ts","docs/concepts/companion/src/storymap-model.js","docs/concepts/companion/src/storymap-review.js","docs/concepts/companion/src/storymap-actions.js","docs/concepts/companion/src/storymap-forms.js","docs/concepts/companion/src/storymap-views.js","docs/concepts/companion/src/storymap-runtime.js","docs/concepts/companion/src/storymap-export.js","docs/concepts/companion/src/storymap-seed.js","docs/concepts/companion/src/storymap.css","scripts/companion/storymap-contract.mjs","docs/concepts/companion/src/detail-model.js","docs/concepts/companion/src/detail-actions.js","docs/concepts/companion/src/detail-forms.js","docs/concepts/companion/src/detail-views.js","docs/concepts/companion/src/detail-runtime.js","docs/concepts/companion/src/detail-preview.js","docs/concepts/companion/src/detail-seed.js","docs/concepts/companion/src/detail.css","scripts/companion/detail-contract.mjs","docs/concepts/companion/src/detail-properties.js","docs/concepts/companion/src/detail-navigation.js","docs/concepts/companion/src/detail-review.js","docs/concepts/companion/src/detail-handoff.js","docs/concepts/companion/src/style-guide-frontend.js","scripts/companion/design-system-roles.mjs","scripts/companion/design-system-contract.mjs","scripts/companion/design-system-css.mjs","scripts/framework/operations.ts","scripts/framework/cli.ts","scripts/companion/runtime/use-detail.ts","scripts/companion/composition-contract.mjs","docs/concepts/companion/src/composition-model.js","docs/concepts/companion/src/composition-fields.js","docs/concepts/companion/src/composition-preview.js","docs/concepts/companion/src/composition-actions.js","docs/concepts/companion/src/composition-seed.js","docs/concepts/companion/src/composition.css","docs/concepts/companion/src/composition-tools.js","scripts/companion/starter-contract.mjs","docs/concepts/companion/src/project-starters.js","docs/concepts/companion/src/project-starter-views.js","docs/concepts/companion/src/project-starters.css","scripts/companion/starter-files.mjs","scripts/companion/qualify-starter.mjs"],"plugins":["scripts/quality/fallow-node-tests.json"],"ignorePatterns":["dist/main.js","dist/styles.css","dist/manifest.json","dist-harness/**","reports/**"],"boundaries":{"coverage":{"requireAllFiles":true},"zones":[{"name":"domain","patterns":["src/domain/**"]},{"name":"application","patterns":["src/application/**"]},{"name":"features","patterns":["src/features/**"]},{"name":"infrastructure","patterns":["src/infrastructure/**"]},{"name":"presentation","patterns":["src/presentation/**"]},{"name":"bootstrap","patterns":["src/bootstrap/**","src/main.ts"]},{"name":"test","patterns":["tests/**"]},{"name":"harness","patterns":["harness/**"]},{"name":"tooling","patterns":["scripts/**","*.config.*","shell.mjs"]},{"name":"styles","patterns":["src/styles/**"]},{"name":"companion-concept","patterns":["docs/concepts/companion/src/**","docs/concepts/companion/vendor/**"]},{"name":"companion-test-kit","patterns":["docs/concepts/companion/test-kit/**"]}],"rules":[{"from":"domain","allow":["domain"]},{"from":"application","allow":["application","domain"]},{"from":"features","allow":["features","application","domain"]},{"from":"infrastructure","allow":["infrastructure","application","domain"]},{"from":"presentation","allow":["presentation","features","application","domain","styles"]},{"from":"bootstrap","allow":["features","domain","application","infrastructure","presentation","bootstrap","styles"]},{"from":"test","allow":["features","domain","application","infrastructure","presentation","bootstrap","test","harness","tooling","styles","companion-test-kit"]},{"from":"harness","allow":["features","domain","application","infrastructure","presentation","bootstrap","test","harness","tooling","styles"]},{"from":"tooling","allow":["features","domain","application","infrastructure","presentation","bootstrap","test","harness","tooling","styles","companion-test-kit"]},{"from":"styles","allow":["styles"]},{"from":"companion-concept","allow":[]},{"from":"companion-test-kit","allow":["companion-test-kit"]}]},"ignoreDependencies":["obsidian"],"ignoreUnresolvedImports":["/__host.css","./vendor/obsidian.css"],"usedClassMembers":[{"extends":"PluginSettingTab","members":["getSettingDefinitions","getControlValue","setControlValue","hide"]}],"rules":{"policy-violation":"off"}}
+{
+  "entry": [
+    "src/main.ts",
+    "src/features/api.ts",
+    "harness/app/main.ts",
+    "harness/style-fixture/fixture.js",
+    "scripts/testing/node-reporter.mjs",
+    "scripts/testing/evidence-vitest-reporter.mjs",
+    "scripts/styles/export-host-css.mjs",
+    "scripts/testing/check-browser-specimen.mjs",
+    "scripts/harness/serve-style-fixture.mjs",
+    "src/infrastructure/ui/static-plugin.ts",
+    "src/styles/index.css",
+    "harness/style-fixture/fixture.css",
+    "harness/styles/obsidian.css",
+    "harness/styles/simulated.css",
+    "harness/styles/host-adapter.css",
+    "scripts/makers/custom/registry.mjs",
+    "src/bootstrap/authoring-domains.ts",
+    "src/bootstrap/event-catalog.ts",
+    "docs/concepts/companion/src/brick-actions.js",
+    "docs/concepts/companion/src/brick-catalog.js",
+    "docs/concepts/companion/src/brick-model.js",
+    "docs/concepts/companion/src/brick-views.js",
+    "docs/concepts/companion/src/bricks.css",
+    "docs/concepts/companion/src/canvas-actions.js",
+    "docs/concepts/companion/src/canvas-catalog.js",
+    "docs/concepts/companion/src/canvas-layout.js",
+    "docs/concepts/companion/src/canvas-model.js",
+    "docs/concepts/companion/src/canvas-pointer.js",
+    "docs/concepts/companion/src/canvas-view.js",
+    "docs/concepts/companion/src/canvas.css",
+    "docs/concepts/companion/src/catalog.js",
+    "docs/concepts/companion/src/component-variants.css",
+    "docs/concepts/companion/src/component-variants.js",
+    "docs/concepts/companion/src/component-views.js",
+    "docs/concepts/companion/src/connection-actions.js",
+    "docs/concepts/companion/src/connection-menu.js",
+    "docs/concepts/companion/src/connection-model.js",
+    "docs/concepts/companion/src/connection-views.js",
+    "docs/concepts/companion/src/connection.css",
+    "docs/concepts/companion/src/design-actions.js",
+    "docs/concepts/companion/src/design-dialogs.js",
+    "docs/concepts/companion/src/design-model.js",
+    "docs/concepts/companion/src/design-plan.js",
+    "docs/concepts/companion/src/design-views.js",
+    "docs/concepts/companion/src/design.css",
+    "docs/concepts/companion/src/edge-editing.js",
+    "docs/concepts/companion/src/flow-actions.js",
+    "docs/concepts/companion/src/flow-catalog.js",
+    "docs/concepts/companion/src/flow-edge.js",
+    "docs/concepts/companion/src/flow-model.js",
+    "docs/concepts/companion/src/flow-runtime.js",
+    "docs/concepts/companion/src/flow-views.js",
+    "docs/concepts/companion/src/flow.css",
+    "docs/concepts/companion/src/interaction-polish.js",
+    "docs/concepts/companion/src/library-actions.js",
+    "docs/concepts/companion/src/library-model.js",
+    "docs/concepts/companion/src/library-views.js",
+    "docs/concepts/companion/src/library.css",
+    "docs/concepts/companion/src/prd-views.js",
+    "docs/concepts/companion/src/product-actions.js",
+    "docs/concepts/companion/src/product-model.js",
+    "docs/concepts/companion/src/product-plan.js",
+    "docs/concepts/companion/src/product.css",
+    "docs/concepts/companion/src/reference-actions.js",
+    "docs/concepts/companion/src/reference-content.js",
+    "docs/concepts/companion/src/reference-model.js",
+    "docs/concepts/companion/src/reference-views.js",
+    "docs/concepts/companion/src/reference.css",
+    "docs/concepts/companion/src/semantic-actions.js",
+    "docs/concepts/companion/src/semantic-generation.js",
+    "docs/concepts/companion/src/semantic-model.js",
+    "docs/concepts/companion/src/semantic-runtime.js",
+    "docs/concepts/companion/src/semantic-views.js",
+    "docs/concepts/companion/src/semantic.css",
+    "docs/concepts/companion/src/spatial-model.js",
+    "docs/concepts/companion/src/spatial-runtime.js",
+    "docs/concepts/companion/src/state-safety.js",
+    "docs/concepts/companion/src/surface-view.js",
+    "docs/concepts/companion/src/surface.css",
+    "docs/concepts/companion/src/unified-library.js",
+    "docs/concepts/companion/src/unified.css",
+    "docs/concepts/companion/src/vault-preparation.js",
+    "docs/concepts/companion/src/vault-project.js",
+    "docs/concepts/companion/src/vault-workspace.js",
+    "docs/concepts/companion/src/vault.css",
+    "docs/concepts/companion/src/workflow-actions.js",
+    "docs/concepts/companion/src/workflow-model.js",
+    "docs/concepts/companion/src/workflow-views.js",
+    "docs/concepts/companion/src/workflow.css",
+    "docs/concepts/companion/vendor/pinia.iife.prod.js",
+    "docs/concepts/companion/vendor/vue-flow-core.iife.js",
+    "docs/concepts/companion/vendor/vue-flow.css",
+    "docs/concepts/companion/vendor/vue-flow.scoped.css",
+    "docs/concepts/companion/vendor/vue.runtime.global.prod.js",
+    "docs/concepts/companion/src/semantic-geometry.js",
+    "docs/concepts/companion/src/semantic-interaction.js",
+    "docs/concepts/companion/src/data-source-model.js",
+    "docs/concepts/companion/src/data-source-actions.js",
+    "docs/concepts/companion/src/data-source-views.js",
+    "docs/concepts/companion/src/data-source-flow.js",
+    "docs/concepts/companion/src/data-source-generation.js",
+    "docs/concepts/companion/src/data-source.css",
+    "docs/concepts/companion/src/editor-selection.js",
+    "docs/concepts/companion/src/editor-removal.js",
+    "docs/concepts/companion/src/test-data-model.js",
+    "docs/concepts/companion/src/test-data-actions.js",
+    "docs/concepts/companion/src/test-data-views.js",
+    "docs/concepts/companion/src/test-data-export.js",
+    "docs/concepts/companion/src/test-data.css",
+    "docs/concepts/companion/test-kit/engine.mjs",
+    "docs/concepts/companion/test-kit/adapters.mjs",
+    "docs/concepts/companion/test-kit/storage.mjs",
+    "docs/concepts/companion/test-kit/server.mjs",
+    "docs/concepts/companion/test-kit/cli.mjs",
+    "docs/concepts/companion/test-kit/faker-provider.mjs",
+    "docs/concepts/companion/src/style-guide-model.js",
+    "docs/concepts/companion/src/style-guide-actions.js",
+    "docs/concepts/companion/src/style-guide-views.js",
+    "docs/concepts/companion/src/style-guide-export.js",
+    "docs/concepts/companion/src/style-guide.css",
+    "docs/concepts/companion/test-kit/client.mjs",
+    "docs/concepts/companion/src/workbench.css",
+    "docs/concepts/companion/src/ui-fields.js",
+    "docs/concepts/companion/src/project-transfer.js",
+    "docs/concepts/companion/src/companion-project.js",
+    "scripts/companion/project-contract.mjs",
+    "shell.mjs",
+    "scripts/companion/runtime/operation.ts",
+    "docs/concepts/companion/src/storymap-model.js",
+    "docs/concepts/companion/src/storymap-review.js",
+    "docs/concepts/companion/src/storymap-actions.js",
+    "docs/concepts/companion/src/storymap-forms.js",
+    "docs/concepts/companion/src/storymap-views.js",
+    "docs/concepts/companion/src/storymap-runtime.js",
+    "docs/concepts/companion/src/storymap-export.js",
+    "docs/concepts/companion/src/storymap-seed.js",
+    "docs/concepts/companion/src/storymap.css",
+    "scripts/companion/storymap-contract.mjs",
+    "docs/concepts/companion/src/detail-model.js",
+    "docs/concepts/companion/src/detail-actions.js",
+    "docs/concepts/companion/src/detail-forms.js",
+    "docs/concepts/companion/src/detail-views.js",
+    "docs/concepts/companion/src/detail-runtime.js",
+    "docs/concepts/companion/src/detail-preview.js",
+    "docs/concepts/companion/src/detail-seed.js",
+    "docs/concepts/companion/src/detail.css",
+    "scripts/companion/detail-contract.mjs",
+    "docs/concepts/companion/src/detail-properties.js",
+    "docs/concepts/companion/src/detail-navigation.js",
+    "docs/concepts/companion/src/detail-review.js",
+    "docs/concepts/companion/src/detail-handoff.js",
+    "docs/concepts/companion/src/style-guide-frontend.js",
+    "scripts/companion/design-system-roles.mjs",
+    "scripts/companion/design-system-contract.mjs",
+    "scripts/companion/design-system-css.mjs",
+    "scripts/framework/operations.ts",
+    "scripts/framework/cli.ts",
+    "scripts/companion/runtime/use-detail.ts",
+    "scripts/companion/composition-contract.mjs",
+    "docs/concepts/companion/src/composition-model.js",
+    "docs/concepts/companion/src/composition-fields.js",
+    "docs/concepts/companion/src/composition-preview.js",
+    "docs/concepts/companion/src/composition-actions.js",
+    "docs/concepts/companion/src/composition-seed.js",
+    "docs/concepts/companion/src/composition.css",
+    "docs/concepts/companion/src/composition-tools.js",
+    "scripts/companion/starter-contract.mjs",
+    "docs/concepts/companion/src/project-starters.js",
+    "docs/concepts/companion/src/project-starter-views.js",
+    "docs/concepts/companion/src/project-starters.css",
+    "scripts/companion/starter-files.mjs",
+    "scripts/companion/qualify-starter.mjs"
+  ],
+  "plugins": [
+    "scripts/quality/fallow-node-tests.json"
+  ],
+  "ignorePatterns": [
+    "dist/main.js",
+    "dist/styles.css",
+    "dist/manifest.json",
+    "dist-harness/**",
+    "reports/**"
+  ],
+  "boundaries": {
+    "coverage": {
+      "requireAllFiles": true
+    },
+    "zones": [
+      {
+        "name": "domain",
+        "patterns": [
+          "src/domain/**"
+        ]
+      },
+      {
+        "name": "application",
+        "patterns": [
+          "src/application/**"
+        ]
+      },
+      {
+        "name": "features",
+        "patterns": [
+          "src/features/**"
+        ]
+      },
+      {
+        "name": "infrastructure",
+        "patterns": [
+          "src/infrastructure/**"
+        ]
+      },
+      {
+        "name": "presentation",
+        "patterns": [
+          "src/presentation/**"
+        ]
+      },
+      {
+        "name": "bootstrap",
+        "patterns": [
+          "src/bootstrap/**",
+          "src/main.ts"
+        ]
+      },
+      {
+        "name": "test",
+        "patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "name": "harness",
+        "patterns": [
+          "harness/**"
+        ]
+      },
+      {
+        "name": "tooling",
+        "patterns": [
+          "scripts/**",
+          "*.config.*",
+          "shell.mjs"
+        ]
+      },
+      {
+        "name": "styles",
+        "patterns": [
+          "src/styles/**"
+        ]
+      },
+      {
+        "name": "companion-concept",
+        "patterns": [
+          "docs/concepts/companion/src/**",
+          "docs/concepts/companion/vendor/**"
+        ]
+      },
+      {
+        "name": "companion-test-kit",
+        "patterns": [
+          "docs/concepts/companion/test-kit/**"
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "from": "domain",
+        "allow": [
+          "domain"
+        ]
+      },
+      {
+        "from": "application",
+        "allow": [
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "features",
+        "allow": [
+          "features",
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "infrastructure",
+        "allow": [
+          "infrastructure",
+          "application",
+          "domain"
+        ]
+      },
+      {
+        "from": "presentation",
+        "allow": [
+          "presentation",
+          "features",
+          "application",
+          "domain",
+          "styles"
+        ]
+      },
+      {
+        "from": "bootstrap",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "styles"
+        ]
+      },
+      {
+        "from": "test",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles",
+          "companion-test-kit"
+        ]
+      },
+      {
+        "from": "harness",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles"
+        ]
+      },
+      {
+        "from": "tooling",
+        "allow": [
+          "features",
+          "domain",
+          "application",
+          "infrastructure",
+          "presentation",
+          "bootstrap",
+          "test",
+          "harness",
+          "tooling",
+          "styles",
+          "companion-test-kit"
+        ]
+      },
+      {
+        "from": "styles",
+        "allow": [
+          "styles"
+        ]
+      },
+      {
+        "from": "companion-concept",
+        "allow": []
+      },
+      {
+        "from": "companion-test-kit",
+        "allow": [
+          "companion-test-kit"
+        ]
+      }
+    ]
+  },
+  "ignoreDependencies": [
+    "obsidian"
+  ],
+  "ignoreUnresolvedImports": [
+    "/__host.css",
+    "./vendor/obsidian.css"
+  ],
+  "usedClassMembers": [
+    {
+      "extends": "PluginSettingTab",
+      "members": [
+        "getSettingDefinitions",
+        "getControlValue",
+        "setControlValue",
+        "hide"
+      ]
+    }
+  ],
+  "rules": {
+    "policy-violation": "off"
+  }
+}

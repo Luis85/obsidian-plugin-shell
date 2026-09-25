@@ -74,7 +74,7 @@ The generator is the existing PR #20 TypeScript compiler, not a new renderer. Da
 
 Custom `codebaseFolder` and `testsFolder` relocate generated product code/tests and their build/test configuration. Framework internals remain in their existing `src` and `tests` directories. General maker recipes still follow the framework's existing feature conventions. This remaining distinction must not be described as a complete arbitrary-directory framework migration.
 
-Legacy `companion:generate` remains dependency-free, exact-byte, read-only JSON output. `generate --vault ... --target ...` retains the existing separate-target workspace compiler and its raw JSON compatibility mode. New in-place generation requires an extracted verified kit; a source checkout is not automatically rewritten into a consumer.
+Legacy `companion:generate` remains dependency-free, exact-byte, read-only JSON output. `generate --vault ... --target ...` retains the existing separate-target workspace compiler and its raw JSON compatibility mode. New in-place generation requires an extracted verified kit; a source checkout is not automatically rewritten into a consumer. In-place `generate` compiles only the imported `design/project.json`; `--input` with another file is refused with `INPUT_REQUIRES_IMPORT` so the reviewed intake record and the managed design file cannot drift apart. Adopt a different design through `project import`.
 
 ## Test vault and fixtures
 

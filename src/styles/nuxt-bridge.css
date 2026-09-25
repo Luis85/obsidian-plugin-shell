@@ -13,8 +13,8 @@
   --ui-text-highlighted: var(--plugin-shell-text);
   --ui-text-inverted: var(--plugin-shell-text-on-accent);
   --ui-bg: var(--plugin-shell-surface);
-  --ui-bg-muted: var(--plugin-shell-surface-raised);
-  --ui-bg-elevated: var(--plugin-shell-surface-muted);
+  --ui-bg-muted: var(--plugin-shell-surface-muted);
+  --ui-bg-elevated: var(--plugin-shell-surface-raised);
   --ui-bg-accented: var(--plugin-shell-hover);
   --ui-bg-inverted: var(--plugin-shell-text);
   --ui-border: var(--plugin-shell-border);

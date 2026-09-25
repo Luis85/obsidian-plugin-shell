@@ -37,7 +37,7 @@ export function configuration(value: unknown): Configuration {
   requireThat(typeof source === 'string' && typeof tests === 'string' && typeof vault === 'string' && typeof directory === 'string', 'CONFIG_PATH', 'Paths must be strings.');
   requireThat(/^\.[a-zA-Z0-9_-]+$/.test(vault) && !['.git', '.framework', '.companion', '.qualification', '.native-runner'].includes(vault.toLowerCase()), 'CONFIG_PATH', 'Use a dedicated hidden test-vault folder.');
   requireThat(/^\.[a-zA-Z0-9_-]+$/.test(directory) && !['.git', '.framework'].includes(directory.toLowerCase()), 'CONFIG_PATH', 'Invalid Obsidian configuration directory.');
-  const reserved = ['.framework', '.companion', 'design', 'dist', 'scripts', 'harness', 'node_modules', '.git'];
+  const reserved = ['.framework', '.companion', 'design', 'dist', 'docs', 'scripts', 'harness', 'node_modules', '.git'];
   const values = [source, tests, vault].map(path => path.toLowerCase());
   const overlaps = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
   requireThat(!values.some((a, i) => values.some((b, j) => i !== j && overlaps(a, b))), 'CONFIG_OVERLAP', 'Source, tests and test vault must not overlap.');

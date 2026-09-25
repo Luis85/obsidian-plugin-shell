@@ -85,7 +85,7 @@ test('file and stdin inspection accept full v4 while rejecting executable/future
   const bad = { ...seed, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
 });
 test('unsafe and overlapping folders fail before writing', () => {
-  for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'node_modules/x', 'tests/nested']) {
+  for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'docs', 'Docs/site', 'node_modules/x', 'tests/nested']) {
     const config = defaults(identity); config.paths.codebaseFolder = source; assert.throws(() => configuration(config));
   }
   assert.equal(configuration({ ...defaults(identity), paths: { ...defaults(identity).paths, codebaseFolder: 'app/source', testsFolder: 'spec' } }).paths.testsFolder, 'spec');
@@ -155,4 +155,12 @@ test('explicit blank setup creates a valid inert design using the same intake pa
   assert.equal(response.status, 'applied', JSON.stringify(response));
   const inspect = await run(ctx, ['project', 'inspect', '--input', 'design/project.json']);
   assert.equal(inspect.status, 'ok'); assert.equal(inspect.data.screens, 1); assert.equal(inspect.data.sources, 0);
+});
+test('in-place generation refuses an unimported --input before any kit or plan work', async t => {
+  const ctx = await configured(t);
+  await writeFile(join(ctx.root, 'draft.json'), JSON.stringify(seed));
+  const refused = await run(ctx, ['generate', '--input', 'draft.json']);
+  assert.equal(refused.status, 'failed'); assert.ok(refused.diagnostics.some(item => item.code === 'INPUT_REQUIRES_IMPORT'), JSON.stringify(refused));
+  const kitless = await run(ctx, ['generate']);
+  assert.equal(kitless.status, 'failed'); assert.ok(kitless.diagnostics.some(item => item.code === 'KIT_REQUIRED'), JSON.stringify(kitless));
 });

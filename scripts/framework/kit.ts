@@ -5,7 +5,7 @@ import { readBounded, hash, readJson, exists } from './files.ts';
 import { listFiles, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
-import { included, standaloneSource, updateReadmeOwnership } from './distribution.ts';
+import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
 const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github'];
 const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs'];
@@ -38,7 +38,8 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     }
   }
   const ownership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json')!;
-  ownership.bytes = updateReadmeOwnership(originals.get('README.md')!, files.find(file => file.path === '.framework/template/README.md')!.bytes, ownership.bytes);
+  const shipped = new Map(files.filter(file => file.path.startsWith('.framework/template/')).map(file => [file.path.slice('.framework/template/'.length), file.bytes]));
+  ownership.bytes = updateOwnership(originals, shipped, ownership.bytes);
   for (const path of [ownership.path, '.framework/compiled/scripts/examples/ownership.json']) {
     const file = files.find(entry => entry.path === path)!; file.bytes = ownership.bytes;
     const record = records.find(entry => entry.path === path)!; record.hash = hash(file.bytes); record.bytes = file.bytes.length;

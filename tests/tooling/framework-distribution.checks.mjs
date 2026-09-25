@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
-import { standaloneSource, updateReadmeOwnership } from '../../scripts/framework/distribution.ts';
+import { standaloneSource, updateOwnership } from '../../scripts/framework/distribution.ts';
 import { hash } from '../../scripts/framework/files.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const projectFixture = 'docs/concepts/companion/companion-project.json';
@@ -18,14 +18,29 @@ test('release adaptation recognizes only the reviewed README across checkout lin
   for (const original of [canonical, crlf]) {
     const adapted = standaloneSource('README.md', original);
     assert.deepEqual(adapted, expected, 'distribution text must not vary by checkout EOL');
-    const updated = JSON.parse(updateReadmeOwnership(original, adapted, metadata));
+    const updated = JSON.parse(updateOwnership(new Map([['README.md', original]]), new Map([['README.md', adapted]]), metadata));
     assert.equal(updated.files.find(file => file.path === 'README.md').sha256, hash(adapted));
   }
   for (const original of [Buffer.concat([crlf, Buffer.from('edited')]), Buffer.concat([canonical, Buffer.from('\n')])]) {
-    assert.throws(() => updateReadmeOwnership(original, standaloneSource('README.md', original), metadata), /reviewed preimage/);
+    assert.throws(() => updateOwnership(new Map([['README.md', original]]), new Map([['README.md', standaloneSource('README.md', original)]]), metadata), /reviewed preimage/);
   }
   const compressed = Buffer.from([0, 13, 10, 255]);
   assert.deepEqual(standaloneSource('harness/vendor.css.gz', compressed), compressed);
+});
+test('kit ownership refreshes every normalized example-owned file and refuses unknown preimages', async () => {
+  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  const record = ownership.files.find(file => typeof file.sha256 === 'string' && file.path !== 'README.md' && file.path.endsWith('.ts'));
+  const mixed = Buffer.from('export const a = 1;\r\nexport const b = 2;\n// mixed checkout bytes\r\n');
+  const shipped = standaloneSource(record.path, mixed); assert.ok(!shipped.equals(mixed)); assert.ok(!shipped.includes('\r'));
+  const pinned = Buffer.from(JSON.stringify({ ...ownership, files: ownership.files.map(file => file === record ? { ...file, sha256: hash(mixed) } : file) }));
+  const readme = await readFile(join(root, 'README.md'));
+  const updated = JSON.parse(updateOwnership(new Map([[record.path, mixed], ['README.md', readme]]), new Map([[record.path, shipped], ['README.md', standaloneSource('README.md', readme)]]), pinned));
+  assert.equal(updated.files.find(file => file.path === record.path).sha256, hash(shipped));
+  assert.equal(updated.files.find(file => file.path === 'README.md').sha256, hash(standaloneSource('README.md', readme)));
+  const untouched = updated.files.filter(file => ![record.path, 'README.md'].includes(file.path));
+  assert.deepEqual(untouched, ownership.files.filter(file => ![record.path, 'README.md'].includes(file.path)));
+  assert.throws(() => updateOwnership(new Map([[record.path, Buffer.concat([mixed, Buffer.from('edited')])], ['README.md', readme]]), new Map([[record.path, shipped], ['README.md', standaloneSource('README.md', readme)]]), pinned), /reviewed preimage/);
+  assert.throws(() => updateOwnership(new Map([['README.md', readme]]), new Map([['README.md', standaloneSource('README.md', readme)]]), Buffer.from(JSON.stringify({ ...ownership, files: ownership.files.filter(file => file.path !== 'README.md') }))), /not an example-owned file/);
 });
 test('source-only archive includes and fingerprints the actual imported project fixture', async () => {
   const inventory = await sourceInputs(root);

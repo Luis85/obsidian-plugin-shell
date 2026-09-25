@@ -40,7 +40,12 @@ export async function planProject(options: GenerateOptions) {
     else if (change.beforeHash !== null && !old) conflicts.push(file.path+': existing unowned file');
     else if (old && change.beforeHash !== null && change.beforeHash !== old.hash) {
       if (file.ownership === 'managed' || change.afterHash !== old.hash) conflicts.push(file.path+': customized file conflicts with generated change');
-      else { const bytes = await readFile(resolve(input.vault,prefix+file.path)); content = bytes.toString(file.encoding ? 'base64' : 'utf8'); requireValue(digest(bytes) === change.beforeHash,'Extension changed while reading.'); preserved.push(file.path); ownedHash = old.hash; }
+      else {
+        const bytes = await readFile(resolve(input.vault,prefix+file.path)); requireValue(digest(bytes) === change.beforeHash,'Extension changed while reading.');
+        const kept = preservedText(bytes, file.encoding);
+        if (kept === null) conflicts.push(file.path+': customized file is not UTF-8 text and cannot be preserved byte-for-byte');
+        else { content = kept; preserved.push(file.path); ownedHash = old.hash; }
+      }
     }
     entries.push({path:prefix+file.path,content,...(file.encoding ? {encoding:file.encoding} : {})}); ownership.push({path:file.path,hash:ownedHash,ownership:file.ownership});
   }
@@ -53,6 +58,11 @@ export async function planProject(options: GenerateOptions) {
   for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
   const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
   return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + details.flatMap(d=>d.edges).filter(e=>!e.effect && (e.acceptance || !e.targetSurfaceId)).length,detailDocuments:rows(row(model.document.design).detailDesigns?row(row(model.document.design).detailDesigns).documents:[]).length,publishedRevisions:details.filter(d=>d.id.startsWith('detail-revision-')).length,generatedDetailSurfaces:details.length,detailInteractions:details.reduce((n,d)=>n+d.edges.length,0),warnings:model.warnings}};
+}
+/** Lossy decoding would silently rewrite a developer's bytes; only exact UTF-8 (BOM retained) or base64 survives. */
+function preservedText(bytes: Buffer, encoding?: 'base64'): string | null {
+  if (encoding) return bytes.toString('base64');
+  try { return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); } catch { return null; }
 }
 export async function applyProject(result: Awaited<ReturnType<typeof planProject>>, expectedHash: string) {
   requireValue(result.hash === expectedHash,'Reviewed plan hash is stale; inspect a fresh plan.');

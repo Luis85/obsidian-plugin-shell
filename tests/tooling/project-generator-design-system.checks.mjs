@@ -77,6 +77,8 @@ for(const [name,edit] of [
   ['CSS injection in color',s=>s.colors[0].light='#fff;display:none'],
   ['CSS injection in variable',s=>s.colors[0].host='--x); color:red'],
   ['generated UI color cycle',s=>s.colors[0].host='--ui-bg'],
+  ['color entry without a host field',s=>s.colors[0]={id:'x',name:'X',usage:'',light:'#000000',dark:'#000000'}],
+  ['null color entry',s=>s.colors[0]=null],
   ['generated token color cycle',s=>s.colors[0].host='--sample-plugin-ds-colors-background'],
   ['font URL',s=>{s.fonts[0].source='custom';s.fonts[0].families='url(https://evil.invalid/font)';}],
   ['negative spacing',s=>s.spacing[0].value=-1],
