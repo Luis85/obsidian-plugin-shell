@@ -55,16 +55,40 @@ test('optional project fixture contributes exact bytes and refuses parent redire
   await symlink(outside, join(folder, 'docs/concepts'), 'junction');
   await assert.rejects(sourceInputs(folder), /SOURCE_SYMLINK/);
 });
-test('reviewed example removal preserves shared design tokens after source integration', async () => {
+test('reviewed style removal preserves tokens across checkout line endings', async t => {
   const { planExampleRemoval } = await import('../../scripts/examples/plan.mjs');
-  const report = await planExampleRemoval(root);
+  const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-removal-')));
+  t.after(() => rm(folder, { recursive: true, force: true }));
+  const metadata = await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8');
+  const ownership = JSON.parse(metadata);
+  const copy = async path => {
+    const content = (await readFile(join(root, path), 'utf8')).replace(/\r\n/g, '\n');
+    await mkdir(dirname(join(folder, path)), { recursive: true });
+    await writeFile(join(folder, path), content); return content;
+  };
+  // Exercise the actual three stylesheet replacements in a bounded fixture.
+  // Canonical checkout EOL is not permission to adopt edited source hashes.
+  ownership.files = ownership.files.filter(file => ['src/styles/shell.css', 'src/styles/panels.css', 'src/styles/layout.css'].includes(file.path));
+  assert.equal(ownership.files.length, 3);
+  await mkdir(join(folder, 'scripts/examples'), { recursive: true });
+  await writeFile(join(folder, 'scripts/examples/ownership.json'), JSON.stringify(ownership));
+  await copy('src/bootstrap/features.ts');
+  for (const file of ownership.files) {
+    if (file.sha256 !== null) assert.equal(hash(await copy(file.path)), file.sha256, file.path);
+    if (file.template) await copy('scripts/examples/templates/' + file.template);
+  }
+  const report = await planExampleRemoval(folder);
   const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');
   const panels = report.plan.changes.find(change => change.path === 'src/styles/panels.css');
   assert.match(shell.content, /var\(--plugin-shell-surface\)/);
   assert.match(panels.content, /var\(--plugin-shell-control-radius\)/);
   assert.ok(!shell.content.includes('.shell-sidebar'));
-  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
-  for (const path of ['README.md', 'src/styles/shell.css', 'src/styles/panels.css', 'src/styles/layout.css']) {
-    assert.equal(ownership.files.find(file => file.path === path).sha256, hash(await readFile(join(root, path))));
-  }
+  const path = join(folder, 'src/styles/shell.css');
+  const canonical = await readFile(path, 'utf8');
+  await writeFile(path, canonical.replace(/\n/g, '\r\n'));
+  await assert.rejects(planExampleRemoval(folder), /EXAMPLES_EDITED_FILES/);
+  await writeFile(path, canonical + '\n/* unreviewed edit */\n');
+  await assert.rejects(planExampleRemoval(folder), /EXAMPLES_EDITED_FILES/);
+  await writeFile(path, canonical);
+  assert.deepEqual((await planExampleRemoval(folder)).plan, report.plan);
 });

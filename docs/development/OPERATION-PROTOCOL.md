@@ -118,4 +118,8 @@ Run `node --test tests/tooling/capability-discovery.checks.mjs` for actual CLI a
 independent-copy probes, handler/catalog parity, hostile consumer scripts, malformed
 JSON/versions, output tampering and existing maker help/list compatibility. Existing
 maker and consumer suites must additionally qualify actual source generation after
-the dispatch refactor. See [execution record](../testing/preconversion-gauntlet/SH-011.md).
+the dispatch refactor. See [execution record](https://github.com/Luis85/obsidian-plugin-shell/blob/7b02821269f4286f4c3f0031f0bd4af4b4b83fe9/docs/testing/preconversion-gauntlet/SH-011.md).
+
+## Historical protocol and current CLI
+
+The linked discovery-only checkpoint is pinned to the original PR #17 source. It is not current execution evidence. The central [framework CLI](FRAMEWORK-CLI.md) exposes a separate shared TypeScript operation interface; its [continuation record](../testing/PR18-CLI-CONTINUATION.md) identifies current source, tests and remaining qualification. Discovery through the v1 protocol above remains read-only.

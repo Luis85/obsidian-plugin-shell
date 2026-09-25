@@ -57,7 +57,7 @@ The task files, not this inventory, own execution status. Paths are repository-r
 
 ## Retained acceptance coverage, with no promoted statuses
 
-The [routing crosswalk](preconversion-acceptance-tasks.json) contains every AC-01–96
+The [routing crosswalk](https://github.com/Luis85/obsidian-plugin-shell/blob/7b02821269f4286f4c3f0031f0bd4af4b4b83fe9/docs/development/preconversion-acceptance-tasks.json) contains every AC-01–96
 and NUI-01–34 exactly once. It adds task routing only. Original text, required modes,
 assertion links and current historical outcomes remain in the [machine plan](../testing/test-plan.json),
 [assertion crosswalk](../testing/acceptance-crosswalk.json), [closure ledger](ACCEPTANCE-CLOSURE-LEDGER.md)
@@ -121,5 +121,5 @@ in this session. No separate worker or independent human reviewer was available.
 The review checked live heads, archive trees, source paths, graph coverage, unchanged
 acceptance files/lock/thresholds, publication separation and the concept/native boundary.
 This is an inventory review, not independent product approval or shell certification.
-See the [execution checkpoint](PRECONVERSION-GAUNTLET.md) and linked evidence for actual
+See the [execution checkpoint](https://github.com/Luis85/obsidian-plugin-shell/blob/7b02821269f4286f4c3f0031f0bd4af4b4b83fe9/docs/development/PRECONVERSION-GAUNTLET.md) and linked evidence for actual
 commands, negative controls, failed attempts and subsequent implementation qualification.
