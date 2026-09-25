@@ -24,9 +24,9 @@ jobs:
   setup:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     runs-on: ${{ matrix.os }}
-    # Fresh setup and standalone verification both run the complete gates. The
-    # measured Windows sequence exceeds 15 minutes with the new real-tool probes.
-    timeout-minutes: 20
+    # Fresh setup runs the complete verify gates once (scripts/setup/execute.mjs);
+    # a second identical standalone verify only doubled the Windows runtime.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -66,9 +66,6 @@ jobs:
       - name: Reproduce EALLOWSCRIPTS and prove scoped approval using actual npm
         shell: pwsh
         run: node scripts/testing/check-npm-install-policy.mjs --npm-cli "$env:QUALIFIED_NPM_CLI"
-      - name: Verify without weakening existing gates
-        shell: pwsh
-        run: node "$env:QUALIFIED_NPM_CLI" run verify
       - name: Retain non-secret compatibility evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

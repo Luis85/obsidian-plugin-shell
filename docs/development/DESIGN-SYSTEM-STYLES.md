@@ -109,7 +109,7 @@ Guidelines remain plain documentation. Component-internal layouts, arbitrary var
 
 - `tests/tooling/project-generator-design-system.checks.mjs`: deterministic generation, semantic mappings, zero/unit handling, hostile inputs, exact scope, bounded fragments, legacy systems, custom roots and real plan/apply/regeneration conflicts.
 - `tests/concepts/companion-design-styles.browser.py`: actual binding controls, guarded Save, Undo/Redo, JSON/CSS downloads, browser/CLI byte parity, computed token styling, modes and host/sibling-root isolation.
-- `tests/e2e/design-system.spec.ts`: real bundled Nuxt UI buttons and inputs, fonts, corners, focus, mode changes, independent leaves and forced colors.
+- `tests/e2e/design-system.spec.ts`: real bundled Nuxt UI buttons and inputs, fonts, corners, focus, mode changes, independent leaves and forced colors. It drives showcase controls, so it is example-owned and `examples:remove` deletes it with the showcase.
 - `scripts/companion/qualify-styles.mjs`: independently generated project build plus its real Nuxt UI harness. It alters only the disposable qualification fixture to load the generated product CSS. CI retains the logs separately from native acceptance.
 
 Run the repository's qualified Node/npm versions. Native Obsidian acceptance and release checks are still separate gates.
