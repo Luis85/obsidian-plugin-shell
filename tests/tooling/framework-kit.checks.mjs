@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../scripts/framework/zip.ts';
 import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -14,6 +15,7 @@ function cli(dir, args) {
   return spawnSync(process.execPath, [join(dir, 'shell.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
 }
 test('compiled kit bootstraps, imports and generates without dependencies or Git', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler()), archive = zip(files);
   assert.deepEqual(archive, zip([...files].reverse()), 'ZIP ordering must be deterministic');
