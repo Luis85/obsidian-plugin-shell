@@ -30,6 +30,10 @@ export function inspectRelationships(rules: readonly RelationshipRule[], records
   for(const record of records){const key=record.entity+':'+record.id;
     if(identities.has(key)||paths.has(record.path))throw new Error('RELATIONSHIP_DUPLICATE_RECORD');identities.add(key);paths.add(record.path);
   }
+  const ruleIds=new Set<string>();
+  for(const rule of rules){
+    if(!rule.id || ruleIds.has(rule.id) || !rule.key || ['__proto__','constructor','prototype'].includes(rule.key))throw new Error('RELATIONSHIP_DEFINITION');ruleIds.add(rule.id);
+  }
   const findings:RelationshipFinding[]=[];let inspectedLinks=0;
   for(const rule of rules){
     const outward=bounds[rule.targetCard],inward=bounds[rule.sourceCard];

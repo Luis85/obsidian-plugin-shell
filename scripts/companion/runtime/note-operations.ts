@@ -15,7 +15,8 @@ export function noteOperations<I, S extends NoteLease>(repository: CanonicalNote
     return {record: { ...snapshot.values, id:snapshot.id, type:entity }, revision:snapshot.revision};
   }
   function input(value: unknown): Record<string, unknown> {
-    if (!value || typeof value !== 'object' || ![Object.prototype,null].includes(Object.getPrototypeOf(value)) || Object.keys(value).some(key=>['__proto__','constructor','prototype'].includes(key) || !('value' in Object.getOwnPropertyDescriptor(value,key)!))) throw new Error('NOTE_INPUT_INVALID');
+    // Reflect.ownKeys also covers non-enumerable and symbol members, so no accessor executes.
+    if (!value || typeof value !== 'object' || ![Object.prototype,null].includes(Object.getPrototypeOf(value)) || Reflect.ownKeys(value).some(key=>typeof key !== 'string' || ['__proto__','constructor','prototype'].includes(key) || !('value' in Object.getOwnPropertyDescriptor(value,key)!))) throw new Error('NOTE_INPUT_INVALID');
     return value as Record<string, unknown>;
   }
   function lease(record: Record<string, unknown>): S {
@@ -28,13 +29,14 @@ export function noteOperations<I, S extends NoteLease>(repository: CanonicalNote
       if(!result.ok) throw new Error('NOTE_READ_FAILED: '+result.error.code); return result.value.map(present);
     },
     async create(value: unknown, signal?: AbortSignal) {
-      const record = input(value); const values = parse(record.values);
-      if(typeof record.requestId !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,119}$/.test(record.requestId)) throw new Error('NOTE_REQUEST_ID_REQUIRED');
+      const record = input(value); const values = parse(input(record.values));
+      // Same request-id contract as the canonical DocumentService.
+      if(typeof record.requestId !== 'string' || !/^[a-zA-Z0-9:-]{1,100}$/.test(record.requestId)) throw new Error('NOTE_REQUEST_ID_REQUIRED');
       if(signal?.aborted) throw new Error('OPERATION_ABORTED');
       const result=await repository.create(values,record.requestId,{active:()=>!signal?.aborted}); if(!result.ok) throw new Error('NOTE_CREATE_FAILED: '+result.error.code); return present(result.value);
     },
     async update(value: unknown, signal?: AbortSignal) {
-      const record=input(value); const snapshot=lease(record); const values=parse(record.values);
+      const record=input(value); const snapshot=lease(record); const values=parse(input(record.values));
       if(signal?.aborted) throw new Error('OPERATION_ABORTED');
       const result=await repository.update(snapshot,values,{active:()=>!signal?.aborted});
       if(!result.ok) throw new Error('NOTE_UPDATE_FAILED: '+result.error.code); snapshots.delete(snapshot.revision); return present(result.value);

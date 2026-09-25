@@ -35,18 +35,26 @@ export function createRelationshipSession(rules: readonly RelationshipRule[], re
     },
   };
 }
+// Plans claimed by any wrapper of a session; another view's retry must not re-run preflight on the committed note.
+const sessionClaims=new WeakMap<RelationshipSession,WeakMap<object,Promise<unknown>>>();
 /** Preserve canonical creation plans/idempotency instead of assigning a second note identity. */
 export function protectNoteRelationships<I extends object,S extends RelationshipRecord,P extends Plan>(repository:Notes<I,S,P>,session:RelationshipSession){
   const attempts=new WeakMap<P,Promise<Result<S>>>();
+  const claims=sessionClaims.get(session) ?? new WeakMap<object,Promise<unknown>>();sessionClaims.set(session,claims);
   return {
     list:()=>repository.list(),
     async create(values:I,requestId:string,permit={active:()=>true}):Promise<Result<S>>{
       const captured=snapshotNoteValues(values);
       const prepared=repository.prepare(captured,requestId);if(!prepared.ok)return prepared;
       const plan=prepared.value;const existing=attempts.get(plan);if(existing)return existing;
+      const claimed=claims.get(plan);
+      if(claimed){
+        // The canonical repository records every attempted plan, so commit returns that outcome without writing again.
+        const replay=claimed.then(()=>repository.commit(plan),()=>repository.commit(plan));attempts.set(plan,replay);return replay;
+      }
       let attempted=false;
       const work=session.run({mode:'create',record:{entity:plan.entity,id:plan.id,path:plan.path,values:captured}},()=>{attempted=true;return repository.commit(plan);},permit.active);
-      attempts.set(plan,work);
+      attempts.set(plan,work);claims.set(plan,work);
       // A rejected preflight has not attempted persistence; release only that unused canonical plan.
       void work.catch(()=>{if(!attempted)repository.discard(plan);});return work;
     },

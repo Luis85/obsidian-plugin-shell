@@ -1,11 +1,13 @@
 import { row, rows, text, requireValue, type Model } from './model.ts';
 import type { RelationshipRule } from '../runtime/relationships.ts';
 export function relationshipDefinitions(m:Model):RelationshipRule[]{
-  return rows(row(row(m.document.design).semantic ?? {}).relationships ?? [],120).map(value=>{
+  const rules=rows(row(row(m.document.design).semantic ?? {}).relationships ?? [],120).map(value=>{
     const source=m.entities.find(e=>e.id===value.source),target=m.entities.find(e=>e.id===value.target);
     requireValue(source&&target,'Dangling relationship entity.');
     return {id:text(value.id),source:source.slug,target:target.slug,key:text(value.key),sourceCard:text(value.sourceCard),targetCard:text(value.targetCard),onDelete:text(value.onDelete)};
   });
+  requireValue(new Set(rules.map(r=>r.id)).size===rules.length,'Duplicate relationship id.');
+  return rules;
 }
 /** Writable connected components need all related repositories, including read-only targets. */
 export function relationshipScope(m:Model, includeRead = false){

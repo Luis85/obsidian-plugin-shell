@@ -35,7 +35,7 @@ function check(value: unknown, schema: Schema): boolean {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
     const data = value as Record<string,unknown>;
     return (schema.required ?? []).every(key => Object.hasOwn(data,key)) && Object.entries(data).every(([key,item]) => {
-      const property = schema.properties?.[key]; return property ? check(item,property) : schema.additionalProperties !== false;
+      const property = schema.properties && Object.hasOwn(schema.properties,key) ? schema.properties[key] : undefined; return property ? check(item,property) : schema.additionalProperties !== false;
     });
   }
   if (schema.type === 'integer') return Number.isSafeInteger(value);

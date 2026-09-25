@@ -47,12 +47,15 @@ function nativeRelationshipTests(m:Model,add:Add):void {
     const schema={...entity.schema,properties:Object.fromEntries(Object.entries(entity.schema.properties ?? {}).filter(([key])=>!['id','type',rule.key].includes(key))),required:(entity.schema.required ?? []).filter(key=>!['id','type',rule.key].includes(key))};
     const values=sample(schema);const name=symbol(entity.slug);const sourceName=symbol(source.slug);
     const path=`${m.testRoot}/relationships/${entity.slug}.test.mjs`;
+    // The shared session reads the whole connected audit graph, so every in-scope repository must be registered.
+    const related=relationshipScope(m,true).entities.filter(e=>e.id!==entity.id);
     add(path,`import { test, expect } from 'vitest';
 import { NoteRepository } from ${literal(relativeImport(path,'src/application/note-repository.ts'))};
 import { markdownCodec } from ${literal(relativeImport(path,'src/infrastructure/markdown.ts'))};
 import { success, failure } from ${literal(relativeImport(path,'src/domain/outcome.ts'))};
 import { document } from ${literal(relativeImport(path,`${m.sourceRoot}/application/documents/${entity.slug}.ts`))};
-import { create${sourceName}Adapter } from ${literal(relativeImport(path,`${m.sourceRoot}/infrastructure/sources/${source.slug}.ts`))};
+${related.map(e=>`import { document as ${symbol(e.slug)}Document } from ${literal(relativeImport(path,`${m.sourceRoot}/application/documents/${e.slug}.ts`))};
+`).join('')}import { create${sourceName}Adapter } from ${literal(relativeImport(path,`${m.sourceRoot}/infrastructure/sources/${source.slug}.ts`))};
 import { createRelationshipIntegrity } from ${literal(relativeImport(path,`${m.sourceRoot}/bootstrap/relationships.ts`))};
 test('native source adapter prevents dangling writes and restrict deletion without changing Markdown',async()=>{
  const files=new Map();let writes=0,ids=0;
@@ -61,17 +64,20 @@ test('native source adapter prevents dangling writes and restrict deletion witho
  replace:async(p,before,after)=>{if(files.get(p)!==before)return failure('stale','error.stale');files.set(p,after);writes++;return success(undefined);},
  trash:async(p,before)=>{if(files.get(p)!==before)return failure('stale','error.stale');files.delete(p);writes++;return success(undefined);}};
  const repository=new NoteRepository(document,storage,markdownCodec,{publish:()=>{}},()=>${literal(entity.folder)},()=> 'record-'+(++ids),()=> '2026-01-01T00:00:00Z',{report:()=>{}});
- const shell={repositories:{${name}:repository}};const port=create${sourceName}Adapter(shell,createRelationshipIntegrity(shell));const base=${literal(values)};
+ const related={${related.map(e=>`${symbol(e.slug)}:new NoteRepository(${symbol(e.slug)}Document,storage,markdownCodec,{publish:()=>{}},()=>${literal(e.folder)},()=> 'unused',()=> '2026-01-01T00:00:00Z',{report:()=>{}})`).join(',')}};
+ const shell={repositories:{...related,${name}:repository}};const port=create${sourceName}Adapter(shell,createRelationshipIntegrity(shell));const base=${literal(values)};
  try{
   const parent=await port[${literal(operations.create)}]({values:{...base,title:'Parent'},requestId:'parent'});
   const child=await port[${literal(operations.create)}]({values:{...base,title:'Child',${literal(rule.key)}:parent.record.id},requestId:'child'});
   expect(writes).toBe(2);const before=[...files];
+  const retry=create${sourceName}Adapter(shell,createRelationshipIntegrity(shell));
+  expect(await retry[${literal(operations.create)}]({values:{...base,title:'Child',${literal(rule.key)}:parent.record.id},requestId:'child'})).toEqual(child);expect(writes).toBe(2);
   await expect(port[${literal(operations.update)}]({id:child.record.id,revision:child.revision,values:{...base,title:'Child',${literal(rule.key)}:'absent'}})).rejects.toThrow('RELATIONSHIP');
   await expect(port[${literal(operations.delete)}]({id:parent.record.id,revision:parent.revision})).rejects.toThrow('RELATIONSHIP');
   expect(writes).toBe(2);expect([...files]).toEqual(before);
   await port[${literal(operations.update)}]({id:child.record.id,revision:child.revision,values:{...base,title:'Child'}});
   await port[${literal(operations.delete)}]({id:parent.record.id,revision:parent.revision});expect(files.size).toBe(1);expect(writes).toBe(4);
- }finally{repository.dispose();}
+ }finally{repository.dispose();for(const other of Object.values(related))other.dispose();}
 });
 `,'managed');
   }

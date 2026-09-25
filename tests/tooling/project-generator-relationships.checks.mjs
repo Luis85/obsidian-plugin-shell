@@ -77,3 +77,38 @@ test('disposal cancels queued mutations and unsafe arrays never execute getters'
    assert.throws(()=>next.run({mode:'create',record:{...child,values}},async()=>{},()=>true),/RELATIONSHIP/);
  assert.equal(access,0);
 });
+test('canonical creation retries through another adapter wrapper return the committed result without a second write',async()=>{
+ const records=[parent],plans=new Map(),results=new Map();let commits=0,discards=0;
+ const repo={list:async()=>({ok:true,value:records}),
+  prepare:(_values,request)=>{if(!plans.has(request))plans.set(request,{entity:'child',id:'c-'+request,path:'Children/'+request+'.md'});return {ok:true,value:plans.get(request)};},
+  discard:()=>{discards++;return false;},
+  commit:async plan=>{if(results.has(plan))return results.get(plan);commits++;const record={...plan,values:{parent_ref:'p'}};records.push(record);const result={ok:true,value:record};results.set(plan,result);return result;},
+  update:async()=>{throw Error('UNUSED');},delete:async()=>{throw Error('UNUSED');}};
+ const session=createRelationshipSession([rule],async()=>records);
+ const first=protectNoteRelationships(repo,session),second=protectNoteRelationships(repo,session);
+ const created=await first.create({parent_ref:'p'},'once');assert.equal(created.ok,true);
+ assert.deepEqual(await second.create({parent_ref:'p'},'once'),created);assert.equal(commits,1);assert.equal(discards,0);
+ await assert.rejects(session.run({mode:'create',record:created.value},async()=>{throw Error('NO_WRITE');},()=>true),/STALE/);
+});
+test('duplicate or unsafe relationship definitions are refused before any graph evaluation',()=>{
+ assert.throws(()=>inspectRelationships([rule,rule],[parent]),/RELATIONSHIP_DEFINITION/);
+ for(const key of ['__proto__','constructor','prototype',''])assert.throws(()=>inspectRelationships([{...rule,key}],[parent]),/RELATIONSHIP_DEFINITION/);
+});
+test('mandatory two-way cycles stay explicitly unsupported without a batch transaction',async()=>{
+ const rules=[{id:'a-b',source:'a',target:'b',key:'b_ref',sourceCard:'1',targetCard:'1',onDelete:'restrict'},{id:'b-a',source:'b',target:'a',key:'a_ref',sourceCard:'1',targetCard:'1',onDelete:'restrict'}];
+ const records=[];let writes=0;const session=createRelationshipSession(rules,async()=>records);
+ for(const record of [{entity:'a',id:'a1',path:'A/a1.md',values:{b_ref:'b1'}},{entity:'b',id:'b1',path:'B/b1.md',values:{a_ref:'a1'}}])
+  await assert.rejects(session.run({mode:'create',record},async()=>{writes++;},()=>true),/VIOLATION/);
+ assert.equal(writes,0);assert.deepEqual(records,[]);
+});
+test('queued writes re-read the graph; failed reads and writes never poison later independent operations',async()=>{
+ const parents=[parent],children=[];let fail=true,writes=0;
+ const session=createRelationshipSession([{...rule,sourceCard:'0..1'}],async()=>{if(fail)throw Error('unavailable');return [...parents,...children];});
+ const record=id=>({entity:'child',id,path:'Children/'+id+'.md',values:{parent_ref:'p'}});
+ await assert.rejects(session.run({mode:'create',record:record('a')},async()=>{writes++;},()=>true),/unavailable/);fail=false;
+ await assert.rejects(session.run({mode:'create',record:record('a')},async()=>{throw Error('disk');},()=>true),/disk/);
+ const both=await Promise.allSettled(['a','b'].map(id=>session.run({mode:'create',record:record(id)},async()=>{await Promise.resolve();writes++;children.push(record(id));},()=>true)));
+ assert.deepEqual(both.map(r=>r.status),['fulfilled','rejected']);assert.match(both[1].reason.message,/VIOLATION/);assert.equal(writes,1);
+ parents.length=0;children.length=0;
+ await assert.rejects(session.run({mode:'create',record:record('c')},async()=>{writes++;},()=>true),/VIOLATION/);assert.equal(writes,1);
+});
