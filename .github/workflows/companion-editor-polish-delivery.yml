@@ -1,0 +1,83 @@
+name: Companion editor polish source assembly
+on:
+  push:
+    branches: [work/companion-editor-polish-delivery]
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify patch and reconstruct exact clean source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 552a9449e0814322dc67fbe8d452214fb3b0e6a2
+          cat .editor-polish.part-{1,2,3,4,5,6} > "$RUNNER_TEMP/editor.patch.xz"
+          echo "68073045f97d31c369988e2c383b234e67cde290ed58409996e1301f29f48016  $RUNNER_TEMP/editor.patch.xz" | sha256sum -c -
+          xz -dc "$RUNNER_TEMP/editor.patch.xz" > "$RUNNER_TEMP/editor.patch"
+          git apply --unidiff-zero --check "$RUNNER_TEMP/editor.patch"
+          git apply --unidiff-zero "$RUNNER_TEMP/editor.patch"
+          python3 scripts/concepts/build-companion.py
+          echo '9e128db2bafacab94331ebea7b47edbfa05b4a5c8d33c9422c0225b41f648be8  docs/concepts/companion/index.html' | sha256sum -c -
+          rm .editor-polish.part-{1,2,3,4,5,6} .github/workflows/companion-editor-polish-delivery.yml
+          git add -A
+          test "$(git write-tree)" = bbfe59c8e02aef8904cded9e1bf40c9314d63d99
+          git diff --cached --check
+          python3 scripts/concepts/build-companion.py --check
+          python3 -B tests/concepts/companion-assembly.test.py
+      - name: Store verified blobs and clean tree without updating any refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PYTHON'
+          import base64, hashlib, json, os, pathlib, subprocess, urllib.request
+          base = '552a9449e0814322dc67fbe8d452214fb3b0e6a2'
+          expected = 'bbfe59c8e02aef8904cded9e1bf40c9314d63d99'
+          api = 'https://api.github.com/repos/Luis85/obsidian-plugin-shell/git/'
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          def post(endpoint, payload):
+              req = urllib.request.Request(api + endpoint, data=json.dumps(payload).encode(), method='POST', headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          entries = []
+          paths = git('diff', '--cached', '--name-only', base).splitlines()
+          if len(paths) != 24:
+              raise SystemExit('Unexpected changed-path inventory')
+          for name in paths:
+              path = pathlib.Path(name)
+              if path.is_symlink() or not path.is_file() or name.startswith('.editor-polish.') or name.startswith('.github/workflows/'):
+                  raise SystemExit('Unexpected delivery input: ' + name)
+              raw = path.read_bytes()
+              sha = hashlib.sha1(('blob ' + str(len(raw)) + '\0').encode() + raw).hexdigest()
+              if sha != git('hash-object', name):
+                  raise SystemExit('Changed local bytes: ' + name)
+              actual = post('blobs', {'content': base64.b64encode(raw).decode(), 'encoding': 'base64'})['sha']
+              if actual != sha:
+                  raise SystemExit('Changed remote bytes: ' + name)
+              entries.append({'path': name, 'mode': '100644', 'type': 'blob', 'sha': sha})
+          tree = post('trees', {'base_tree': '376eee62da6c0ba08e45e82c0d2f3079918cb5f0', 'tree': entries})['sha']
+          if tree != expected:
+              raise SystemExit('Clean source tree mismatch')
+          manifest = {'scope': 'Exact source assembly and object storage only; no browser or repository qualification claim', 'base': base, 'tree': tree, 'files': entries}
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'editor-polish-source-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          print(json.dumps(manifest, indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+              out.write('Verified clean source tree: `' + tree + '`\n\nNo commit, branch ref, merge or release changed by this job.\n')
+          PYTHON
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-editor-polish-source-manifest
+          path: ${{ runner.temp }}/editor-polish-source-manifest.json
+          retention-days: 7
+          if-no-files-found: error
