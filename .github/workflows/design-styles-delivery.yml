@@ -1,4 +1,4 @@
-name: Design styles isolated source qualification
+name: Design styles combined source qualification
 on:
   push:
     branches: [work/design-styles-delivery]
@@ -20,41 +20,54 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Reconstruct and verify the clean feature tree
+      - name: Integrate the exact concurrent PR head without replacing its changes
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, hashlib, lzma, os
-          from pathlib import Path
-          encoded = ''.join(Path(f'.delivery/design-styles-{i}.b64').read_text() for i in [1,2,3])
-          patch = lzma.decompress(base64.b64decode(encoded, validate=True))
-          assert len(patch) == 170211
-          assert hashlib.sha256(patch).hexdigest() == '3b74b53d1bc3e590e99b2097faadb10ece649a64a6181ccfaeda3a67517cbd30'
-          Path(os.environ['RUNNER_TEMP'], 'design-styles.patch').write_bytes(patch)
-          PY
+          SOURCE_PARENT=681e93d7d74048155b2fec87cd5f3e155a1ebf73
+          STORY_PARENT=5ddc7a278ba639fdc78b9294a55dfdc99c5279d2
           SOURCE_DIR="$RUNNER_TEMP/design-styles-source"
-          git worktree add --detach "$SOURCE_DIR" 851c7ff0e44b7a5da36fbe0e956d4bf5282cf35d
+          git worktree add --detach "$SOURCE_DIR" "$SOURCE_PARENT"
           cd "$SOURCE_DIR"
-          git apply --check "$RUNNER_TEMP/design-styles.patch"
-          git apply "$RUNNER_TEMP/design-styles.patch"
+          if ! git -c user.name=OpenAI -c user.email=noreply@openai.com merge --no-commit --no-ff "$STORY_PARENT"; then
+            EXPECTED=$'scripts/concepts/build-companion.py\nscripts/concepts/run-browser-checks.py'
+            test "$(git diff --name-only --diff-filter=U)" = "$EXPECTED"
+            git checkout --ours scripts/concepts/build-companion.py scripts/concepts/run-browser-checks.py
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/concepts/build-companion.py')
+          s = p.read_text()
+          old = "'storymap-model.js','storymap-actions.js'"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, "'storymap-model.js','storymap-review.js','storymap-actions.js'"))
+          p = Path('scripts/concepts/run-browser-checks.py')
+          s = p.read_text()
+          old = "    ('design-styles', 'design-styles/checks.json'),\n"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, old + "    ('storymap-polish', 'storymap-polish/checks.json'),\n"))
+          p = Path('tests/tooling/companion-boundaries.checks.mjs')
+          s = p.read_text()
+          assert s.count('entry.length, 128,') == 1
+          p.write_text(s.replace('entry.length, 128,', 'entry.length, 129,'))
+          PY
           python3 scripts/concepts/build-companion.py
           git add .
           TREE="$(git write-tree)"
-          test "$TREE" = e7f139b5511ffb5625100a78abe20edd1ab54f08
+          test "$TREE" = 3e2eab38cc3b3ff1d66f62e922df5a6b687ded0d
           test ! -e .delivery
           test ! -e .github/workflows/design-styles-delivery.yml
-          # The workflow change was separately committed by the authorized connector.
-          # This runner pushes code only; no workflow changes are made by its token.
-          PARENT=507364f5c9205d302912327bf3cce5a45c1edad0
-          COMMIT="$(git -c user.name=OpenAI -c user.email=noreply@openai.com commit-tree "$TREE" -p "$PARENT" -m 'feat(companion): compile design-system JSON into scoped Nuxt UI styles')"
-          git checkout --detach "$COMMIT"
+          git diff --exit-code "$SOURCE_PARENT" -- .github
+          git -c user.name=OpenAI -c user.email=noreply@openai.com commit -m 'feat(companion): integrate generated design-system styles with concurrent Storymaps polish'
+          COMMIT="$(git rev-parse HEAD)"
+          git merge-base --is-ancestor "$SOURCE_PARENT" "$COMMIT"
+          git merge-base --is-ancestor "$STORY_PARENT" "$COMMIT"
           echo "SOURCE_DIR=$SOURCE_DIR" >> "$GITHUB_ENV"
           echo "SOURCE_COMMIT=$COMMIT" >> "$GITHUB_ENV"
           mkdir -p reports/design-styles
-          printf '{"commit":"%s","tree":"%s","base":"851c7ff0e44b7a5da36fbe0e956d4bf5282cf35d"}\n' "$COMMIT" "$TREE" > reports/design-styles/source.json
+          printf '{"commit":"%s","tree":"%s","pr_base":"%s"}\n' "$COMMIT" "$TREE" "$STORY_PARENT" > reports/design-styles/source.json
           cat reports/design-styles/source.json
-      - name: Retain the verified source on an isolated branch only
+      - name: Retain the combined source on the isolated feature branch only
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -91,13 +104,12 @@ jobs:
           node scripts/styles/check-tokens.mjs
           python3 scripts/concepts/build-companion.py --check
           python3 -B tests/concepts/companion-assembly.test.py
-      - name: Test generator contracts, ownership and legacy JSON handoff
+      - name: Test generator, ownership, legacy JSON, boundaries and editor contracts
         shell: bash
         run: |
           set -euo pipefail
           cd "$SOURCE_DIR"
-          node --test tests/tooling/project-generator*.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs | tee reports/design-styles/generator.log
-          node --test tests/tooling/companion-details.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/test-data-*.checks.mjs | tee reports/design-styles/contracts.log
+          node --test tests/tooling/project-generator*.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs tests/tooling/companion-boundaries.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/test-data-*.checks.mjs | tee reports/design-styles/contracts.log
       - name: Independently generate, install, typecheck, build and test the companion project
         run: cd "$SOURCE_DIR" && node scripts/companion/qualify-project.mjs
       - name: Verify generated styles against real Nuxt UI controls
@@ -120,7 +132,7 @@ jobs:
             if test -f reports/project-generator/target.txt; then
               TARGET="$(cat reports/project-generator/target.txt)"
               tar --exclude=node_modules --exclude=dist --exclude=dist-harness --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$RUNNER_TEMP/design-styles-evidence/generated-companion.tar.gz" -C "$TARGET" .
-              if test -d "$TARGET/test-results"; then cp -R "$TARGET/test-results" "$RUNNER_TEMP/design-styles-evidence/nuxt-test-results"; fi
+              if test -d "$TARGET/reports/e2e"; then cp -R "$TARGET/reports/e2e" "$RUNNER_TEMP/design-styles-evidence/nuxt-test-results"; fi
             fi
           fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
