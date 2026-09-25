@@ -136,7 +136,16 @@
     "docs/concepts/companion/src/storymap-export.js",
     "docs/concepts/companion/src/storymap-seed.js",
     "docs/concepts/companion/src/storymap.css",
-    "scripts/companion/storymap-contract.mjs"
+    "scripts/companion/storymap-contract.mjs",
+    "docs/concepts/companion/src/detail-model.js",
+    "docs/concepts/companion/src/detail-actions.js",
+    "docs/concepts/companion/src/detail-forms.js",
+    "docs/concepts/companion/src/detail-views.js",
+    "docs/concepts/companion/src/detail-runtime.js",
+    "docs/concepts/companion/src/detail-preview.js",
+    "docs/concepts/companion/src/detail-seed.js",
+    "docs/concepts/companion/src/detail.css",
+    "scripts/companion/detail-contract.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

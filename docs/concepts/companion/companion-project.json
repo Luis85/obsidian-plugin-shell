@@ -1,6 +1,6 @@
 {
   "kind": "obsidian-companion-project",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "executable": false,
   "project": {
     "id": "plugin-companion",
@@ -14,7 +14,7 @@
     "testsFolder": "tests"
   },
   "design": {
-    "schema": 2,
+    "schema": 3,
     "blueprint": "workspace",
     "goal": "Help developers turn a plugin idea into a consistent, reviewable design and portable handoff without requiring build tools during discovery.",
     "platform": "desktop",
@@ -82,7 +82,7 @@
             "purpose": "Move between Define, Structure, Compose, Review and Prepare without losing context.",
             "content": "",
             "region": "content",
-            "id": "brick-66",
+            "id": "brick-77",
             "component": "workflow-rail",
             "definition": "workflow-rail",
             "version": "0.1.0",
@@ -159,7 +159,7 @@
             "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
             "content": "",
             "region": "content",
-            "id": "brick-67",
+            "id": "brick-78",
             "component": "review-findings",
             "definition": "review-findings",
             "version": "0.1.0",
@@ -236,7 +236,7 @@
             "purpose": "Capture requirements, acceptance, priority and screen/component traceability.",
             "content": "",
             "region": "content",
-            "id": "brick-69",
+            "id": "brick-80",
             "component": "requirements-panel",
             "definition": "requirements-panel",
             "version": "0.1.0",
@@ -415,7 +415,7 @@
             "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
             "content": "",
             "region": "content",
-            "id": "brick-70",
+            "id": "brick-81",
             "component": "diagram-inspector",
             "definition": "diagram-inspector",
             "version": "0.1.0",
@@ -433,6 +433,159 @@
       },
       {
         "id": "node-13",
+        "slug": "pages",
+        "label": "Pages overview",
+        "kind": "page",
+        "layout": "list-detail",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Browse content-bearing surfaces and open their detailed composition without copying the sitemap.",
+        "entity": "",
+        "intent": "Browse content-bearing surfaces and open their detailed composition without copying the sitemap.",
+        "goals": [
+          "Browse content-bearing surfaces and open their detailed composition without copying the sitemap."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-14",
+            "kind": "heading",
+            "title": "Pages overview",
+            "purpose": "Browse content-bearing surfaces and open their detailed composition without copying the sitemap.",
+            "content": "Browse content-bearing surfaces and open their detailed composition without copying the sitemap.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-15",
+        "slug": "page-editor",
+        "label": "Page editor",
+        "kind": "page",
+        "layout": "canvas",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow.",
+        "entity": "",
+        "intent": "Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow.",
+        "goals": [
+          "Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-16",
+            "kind": "heading",
+            "title": "Page editor",
+            "purpose": "Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow.",
+            "content": "Compose regions, content, reusable instances, bindings, states and interaction contracts using Vue Flow.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-17",
+        "slug": "component-editor",
+        "label": "Component editor",
+        "kind": "page",
+        "layout": "canvas",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [],
+        "goal": "Design reusable internals while keeping page-instance overrides separate from the definition.",
+        "entity": "",
+        "intent": "Design reusable internals while keeping page-instance overrides separate from the definition.",
+        "goals": [
+          "Design reusable internals while keeping page-instance overrides separate from the definition."
+        ],
+        "components": [
+          {
+            "id": "status-notice",
+            "version": "1.0.0",
+            "slot": "content"
+          }
+        ],
+        "bricks": [
+          {
+            "schema": 1,
+            "id": "brick-18",
+            "kind": "heading",
+            "title": "Component editor",
+            "purpose": "Design reusable internals while keeping page-instance overrides separate from the definition.",
+            "content": "Design reusable internals while keeping page-instance overrides separate from the definition.",
+            "region": "content",
+            "component": null,
+            "definition": "content-heading",
+            "version": "1.0.0",
+            "variantProps": {},
+            "defaults": {
+              "schema": 1,
+              "kind": "heading",
+              "title": "Heading & context",
+              "purpose": "Orient the user: title, context and supporting copy.",
+              "content": "",
+              "region": "content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "node-19",
         "slug": "entities",
         "label": "Entity relationships",
         "kind": "page",
@@ -466,7 +619,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-14",
+            "id": "brick-20",
             "kind": "heading",
             "title": "Entity relationships",
             "purpose": "Declare note-backed entities, properties and cardinalities with non-drag editing alternatives.",
@@ -492,7 +645,7 @@
             "purpose": "Edit selected objects and relationships with precise controls and non-drag alternatives.",
             "content": "",
             "region": "content",
-            "id": "brick-71",
+            "id": "brick-82",
             "component": "diagram-inspector",
             "definition": "diagram-inspector",
             "version": "0.1.0",
@@ -509,7 +662,7 @@
         ]
       },
       {
-        "id": "node-15",
+        "id": "node-21",
         "slug": "sources",
         "label": "Data Sources",
         "kind": "page",
@@ -543,7 +696,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-16",
+            "id": "brick-22",
             "kind": "heading",
             "title": "Data Sources",
             "purpose": "Describe vault, API and database ports, operations and payloads without contacting live services.",
@@ -569,7 +722,7 @@
             "purpose": "Describe operations and payloads; never collect live credentials.",
             "content": "",
             "region": "content",
-            "id": "brick-72",
+            "id": "brick-83",
             "component": "source-operation-editor",
             "definition": "source-operation-editor",
             "version": "0.1.0",
@@ -586,7 +739,7 @@
         ]
       },
       {
-        "id": "node-17",
+        "id": "node-23",
         "slug": "test-data",
         "label": "Test Data",
         "kind": "page",
@@ -620,7 +773,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-18",
+            "id": "brick-24",
             "kind": "heading",
             "title": "Test Data",
             "purpose": "Configure seeded recipes, try isolated operations and export reviewed test tooling.",
@@ -646,7 +799,7 @@
             "purpose": "Select an operation, run or cancel it, and separate live status from JSON results.",
             "content": "",
             "region": "content",
-            "id": "brick-73",
+            "id": "brick-84",
             "component": "test-operation-panel",
             "definition": "test-operation-panel",
             "version": "0.1.0",
@@ -663,7 +816,7 @@
         ]
       },
       {
-        "id": "node-19",
+        "id": "node-25",
         "slug": "design-system",
         "label": "Design System",
         "kind": "page",
@@ -697,7 +850,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-20",
+            "id": "brick-26",
             "kind": "heading",
             "title": "Design System",
             "purpose": "Edit fonts, typography, spacing, sizes, radii, colors and guidance; export Markdown or HTML.",
@@ -723,7 +876,7 @@
             "purpose": "Edit grouped visual tokens with scoped previews and coverage disclosure.",
             "content": "",
             "region": "content",
-            "id": "brick-74",
+            "id": "brick-85",
             "component": "design-token-editor",
             "definition": "design-token-editor",
             "version": "0.1.0",
@@ -740,7 +893,7 @@
         ]
       },
       {
-        "id": "node-21",
+        "id": "node-27",
         "slug": "components",
         "label": "Component library",
         "kind": "page",
@@ -774,7 +927,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-22",
+            "id": "brick-28",
             "kind": "heading",
             "title": "Component library",
             "purpose": "Describe reusable component contracts, content and named variants; review pinned upgrades.",
@@ -800,7 +953,7 @@
             "purpose": "Edit props, events, slots, variants and reusable content; review version changes.",
             "content": "",
             "region": "content",
-            "id": "brick-75",
+            "id": "brick-86",
             "component": "component-contract-panel",
             "definition": "component-contract-panel",
             "version": "0.1.0",
@@ -817,7 +970,7 @@
         ]
       },
       {
-        "id": "node-23",
+        "id": "node-29",
         "slug": "blueprints",
         "label": "Blueprints",
         "kind": "page",
@@ -846,7 +999,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-24",
+            "id": "brick-30",
             "kind": "heading",
             "title": "Blueprints",
             "purpose": "Choose a layout starting point while retaining ownership of the current design.",
@@ -868,7 +1021,7 @@
         ]
       },
       {
-        "id": "node-25",
+        "id": "node-31",
         "slug": "patterns",
         "label": "Action patterns",
         "kind": "page",
@@ -897,7 +1050,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-26",
+            "id": "brick-32",
             "kind": "heading",
             "title": "Action patterns",
             "purpose": "Attach established actions to shared application behavior with accessible entry points.",
@@ -919,7 +1072,7 @@
         ]
       },
       {
-        "id": "node-27",
+        "id": "node-33",
         "slug": "prepare",
         "label": "Prepare project",
         "kind": "page",
@@ -953,7 +1106,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-28",
+            "id": "brick-34",
             "kind": "heading",
             "title": "Prepare project",
             "purpose": "Review additive template preparation, trust and an isolated test vault before any native execution.",
@@ -979,7 +1132,7 @@
             "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
             "content": "",
             "region": "content",
-            "id": "brick-79",
+            "id": "brick-90",
             "component": "shell-handoff-panel",
             "definition": "shell-handoff-panel",
             "version": "0.1.0",
@@ -996,7 +1149,7 @@
         ]
       },
       {
-        "id": "node-29",
+        "id": "node-35",
         "slug": "generate",
         "label": "Generate a feature",
         "kind": "page",
@@ -1025,7 +1178,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-30",
+            "id": "brick-36",
             "kind": "heading",
             "title": "Generate a feature",
             "purpose": "Preview independent shell makers without equating scaffolding with implementation.",
@@ -1047,7 +1200,7 @@
         ]
       },
       {
-        "id": "node-31",
+        "id": "node-37",
         "slug": "develop",
         "label": "Development",
         "kind": "page",
@@ -1076,7 +1229,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-32",
+            "id": "brick-38",
             "kind": "heading",
             "title": "Development",
             "purpose": "Keep source, built and installed revisions distinct through the first development loop.",
@@ -1098,7 +1251,7 @@
         ]
       },
       {
-        "id": "node-33",
+        "id": "node-39",
         "slug": "quality",
         "label": "Quality & verification",
         "kind": "page",
@@ -1132,7 +1285,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-34",
+            "id": "brick-40",
             "kind": "heading",
             "title": "Quality & verification",
             "purpose": "Inspect scoped and revision-bound evidence; simulation does not qualify the native plugin.",
@@ -1158,7 +1311,7 @@
             "purpose": "Show blocking and advisory totals with repair links to the owning editor.",
             "content": "",
             "region": "content",
-            "id": "brick-68",
+            "id": "brick-79",
             "component": "review-findings",
             "definition": "review-findings",
             "version": "0.1.0",
@@ -1175,7 +1328,7 @@
         ]
       },
       {
-        "id": "node-35",
+        "id": "node-41",
         "slug": "capabilities",
         "label": "Shell capabilities",
         "kind": "page",
@@ -1204,7 +1357,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-36",
+            "id": "brick-42",
             "kind": "heading",
             "title": "Shell capabilities",
             "purpose": "Discover CLI commands and shared shell services without requiring the companion.",
@@ -1226,7 +1379,7 @@
         ]
       },
       {
-        "id": "node-37",
+        "id": "node-43",
         "slug": "release",
         "label": "Release readiness",
         "kind": "page",
@@ -1255,7 +1408,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-38",
+            "id": "brick-44",
             "kind": "heading",
             "title": "Release readiness",
             "purpose": "Inspect publication prerequisites only after shell and native qualification.",
@@ -1277,7 +1430,7 @@
         ]
       },
       {
-        "id": "node-39",
+        "id": "node-45",
         "slug": "runs",
         "label": "Runs & recovery",
         "kind": "page",
@@ -1306,7 +1459,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-40",
+            "id": "brick-46",
             "kind": "heading",
             "title": "Runs & recovery",
             "purpose": "Inspect bounded execution history and preserve private recovery copies before reset.",
@@ -1328,7 +1481,7 @@
         ]
       },
       {
-        "id": "node-41",
+        "id": "node-47",
         "slug": "preferences",
         "label": "Workbench preferences",
         "kind": "settings",
@@ -1353,7 +1506,7 @@
         "bricks": []
       },
       {
-        "id": "node-42",
+        "id": "node-48",
         "slug": "import-project",
         "label": "Import project JSON",
         "kind": "modal",
@@ -1387,7 +1540,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-43",
+            "id": "brick-49",
             "kind": "heading",
             "title": "Import project JSON",
             "purpose": "Validate and review a full project, then explicitly replace the current authoring project.",
@@ -1413,7 +1566,7 @@
             "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
             "content": "",
             "region": "content",
-            "id": "brick-76",
+            "id": "brick-87",
             "component": "project-json-review",
             "definition": "project-json-review",
             "version": "0.1.0",
@@ -1430,7 +1583,7 @@
         ]
       },
       {
-        "id": "node-44",
+        "id": "node-50",
         "slug": "export-project",
         "label": "Export project JSON",
         "kind": "modal",
@@ -1464,7 +1617,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-45",
+            "id": "brick-51",
             "kind": "heading",
             "title": "Export project JSON",
             "purpose": "Export all saved design data and folder settings without machine trust or execution receipts.",
@@ -1490,7 +1643,7 @@
             "purpose": "Review portable project data and explicitly confirm replacement; preserve a backup first.",
             "content": "",
             "region": "content",
-            "id": "brick-77",
+            "id": "brick-88",
             "component": "project-json-review",
             "definition": "project-json-review",
             "version": "0.1.0",
@@ -1507,7 +1660,7 @@
         ]
       },
       {
-        "id": "node-46",
+        "id": "node-52",
         "slug": "shell-handoff",
         "label": "Shell JSON handoff",
         "kind": "modal",
@@ -1541,7 +1694,7 @@
         "bricks": [
           {
             "schema": 1,
-            "id": "brick-47",
+            "id": "brick-53",
             "kind": "heading",
             "title": "Shell JSON handoff",
             "purpose": "Pass the export and a vault-relative target to the shell; version one returns JSON and writes nothing.",
@@ -1567,7 +1720,7 @@
             "purpose": "Show the export path, target and source/test folder settings; disclose read-only v1 behavior.",
             "content": "",
             "region": "content",
-            "id": "brick-78",
+            "id": "brick-89",
             "component": "shell-handoff-panel",
             "definition": "shell-handoff-panel",
             "version": "0.1.0",
@@ -1586,133 +1739,168 @@
     ],
     "links": [
       {
-        "id": "edge-48",
+        "id": "edge-54",
         "from": "node-5",
         "to": "node-7",
         "label": "Browse linked storymaps",
         "kind": "navigate"
       },
       {
-        "id": "edge-49",
+        "id": "edge-55",
         "from": "node-7",
         "to": "node-9",
         "label": "Open a storymap",
         "kind": "navigate"
       },
       {
-        "id": "edge-50",
+        "id": "edge-56",
         "from": "node-5",
         "to": "node-9",
         "label": "Open linked map",
         "kind": "navigate"
       },
       {
-        "id": "edge-51",
+        "id": "edge-57",
         "from": "node-9",
         "to": "node-11",
         "label": "Locate a linked surface",
         "kind": "navigate"
       },
       {
-        "id": "edge-52",
+        "id": "edge-58",
+        "from": "node-11",
+        "to": "node-15",
+        "label": "Design surface details",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-59",
+        "from": "node-9",
+        "to": "node-15",
+        "label": "Design linked page",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-60",
+        "from": "node-13",
+        "to": "node-15",
+        "label": "Open page design",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-61",
+        "from": "node-27",
+        "to": "node-17",
+        "label": "Design reusable internals",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-62",
+        "from": "node-15",
+        "to": "node-17",
+        "label": "Edit instance definition",
+        "kind": "navigate"
+      },
+      {
+        "id": "edge-63",
         "from": "node-3",
         "to": "node-5",
         "label": "Define the outcome",
         "kind": "navigate"
       },
       {
-        "id": "edge-53",
+        "id": "edge-64",
         "from": "node-5",
         "to": "node-11",
         "label": "Shape the experience",
         "kind": "navigate"
       },
       {
-        "id": "edge-54",
+        "id": "edge-65",
         "from": "node-11",
-        "to": "node-13",
+        "to": "node-19",
         "label": "Describe meaning",
         "kind": "navigate"
       },
       {
-        "id": "edge-55",
-        "from": "node-13",
-        "to": "node-15",
+        "id": "edge-66",
+        "from": "node-19",
+        "to": "node-21",
         "label": "Bind a source contract",
         "kind": "navigate"
       },
       {
-        "id": "edge-56",
-        "from": "node-15",
-        "to": "node-17",
+        "id": "edge-67",
+        "from": "node-21",
+        "to": "node-23",
         "label": "Try a source operation",
         "kind": "navigate"
       },
       {
-        "id": "edge-57",
-        "from": "node-21",
+        "id": "edge-68",
+        "from": "node-27",
         "to": "node-11",
         "label": "Place a component",
         "kind": "navigate"
       },
       {
-        "id": "edge-58",
-        "from": "node-19",
-        "to": "node-21",
+        "id": "edge-69",
+        "from": "node-25",
+        "to": "node-27",
         "label": "Review component guidance",
         "kind": "navigate"
       },
       {
-        "id": "edge-59",
+        "id": "edge-70",
         "from": "node-3",
-        "to": "node-42",
+        "to": "node-48",
         "label": "Import a project",
         "kind": "open"
       },
       {
-        "id": "edge-60",
+        "id": "edge-71",
         "from": "node-3",
-        "to": "node-44",
+        "to": "node-50",
         "label": "Export the full project",
         "kind": "open"
       },
       {
-        "id": "edge-61",
-        "from": "node-27",
-        "to": "node-46",
+        "id": "edge-72",
+        "from": "node-33",
+        "to": "node-52",
         "label": "Review CLI handoff",
         "kind": "open"
       },
       {
-        "id": "edge-62",
-        "from": "node-46",
-        "to": "node-44",
+        "id": "edge-73",
+        "from": "node-52",
+        "to": "node-50",
         "label": "Save project JSON",
         "kind": "open"
       },
       {
-        "id": "edge-63",
-        "from": "node-27",
-        "to": "node-31",
+        "id": "edge-74",
+        "from": "node-33",
+        "to": "node-37",
         "label": "Continue after preparation",
         "kind": "navigate"
       },
       {
-        "id": "edge-64",
-        "from": "node-31",
-        "to": "node-33",
+        "id": "edge-75",
+        "from": "node-37",
+        "to": "node-39",
         "label": "Inspect current evidence",
         "kind": "navigate"
       },
       {
-        "id": "edge-65",
-        "from": "node-33",
-        "to": "node-37",
+        "id": "edge-76",
+        "from": "node-39",
+        "to": "node-43",
         "label": "Review publication gates",
         "kind": "navigate"
       }
     ],
-    "nextId": 80,
+    "nextId": 91,
     "library": [
       {
         "id": "record-card",
@@ -3427,7 +3615,7 @@
             "kind": "functional",
             "acceptance": "Define properties and explicit cardinalities while keeping diagram arrangement separate from persistence semantics.",
             "nodes": [
-              "node-13"
+              "node-19"
             ],
             "components": [
               "status-notice"
@@ -3442,7 +3630,7 @@
             "kind": "functional",
             "acceptance": "Place pinned component versions and variants with local content; preview and deliberately apply upgrades.",
             "nodes": [
-              "node-21"
+              "node-27"
             ],
             "components": [
               "status-notice"
@@ -3457,7 +3645,7 @@
             "kind": "functional",
             "acceptance": "Use a reviewed starter and shared action patterns without overwriting an existing design silently.",
             "nodes": [
-              "node-23"
+              "node-29"
             ],
             "components": [
               "status-notice"
@@ -3488,7 +3676,7 @@
             "kind": "functional",
             "acceptance": "Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.",
             "nodes": [
-              "node-15"
+              "node-21"
             ],
             "components": [
               "status-notice"
@@ -3518,7 +3706,7 @@
             "kind": "functional",
             "acceptance": "Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.",
             "nodes": [
-              "node-17"
+              "node-23"
             ],
             "components": [
               "status-notice"
@@ -3533,7 +3721,7 @@
             "kind": "functional",
             "acceptance": "Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.",
             "nodes": [
-              "node-17"
+              "node-23"
             ],
             "components": [
               "status-notice"
@@ -3548,7 +3736,7 @@
             "kind": "functional",
             "acceptance": "Export fixtures and adapters with a read-only plan and explicit ownership checks before applying or cleaning files.",
             "nodes": [
-              "node-17"
+              "node-23"
             ],
             "components": [
               "status-notice"
@@ -3563,7 +3751,7 @@
             "kind": "functional",
             "acceptance": "Persist font declarations, typography, sizes, spacing, radii, paired colors and usage guidance.",
             "nodes": [
-              "node-19"
+              "node-25"
             ],
             "components": [
               "status-notice"
@@ -3578,7 +3766,7 @@
             "kind": "functional",
             "acceptance": "Markdown and offline HTML contain all saved declarations and disclose unevaluated contrast pairs.",
             "nodes": [
-              "node-19"
+              "node-25"
             ],
             "components": [
               "status-notice"
@@ -3624,7 +3812,7 @@
             "kind": "functional",
             "acceptance": "The versioned JSON preserves identity, folder settings, PRDs, screen content, variants, arrangements, entities, source operations, test recipes, tokens and notes.",
             "nodes": [
-              "node-44"
+              "node-50"
             ],
             "components": [
               "status-notice"
@@ -3639,7 +3827,7 @@
             "kind": "functional",
             "acceptance": "File and pasted JSON are bounded and validated before review; invalid input, cancelled review or stale state leaves the project unchanged.",
             "nodes": [
-              "node-42"
+              "node-48"
             ],
             "components": [
               "status-notice"
@@ -3654,7 +3842,7 @@
             "kind": "functional",
             "acceptance": "Codebase defaults to src and tests to tests. Valid custom folders persist and survive a JSON round trip; invalid or overlapping paths are rejected.",
             "nodes": [
-              "node-41"
+              "node-47"
             ],
             "components": [],
             "patterns": []
@@ -3667,7 +3855,7 @@
             "kind": "functional",
             "acceptance": "The v1 script accepts the export and a target inside an explicitly selected vault, prints original JSON bytes, and performs zero filesystem writes.",
             "nodes": [
-              "node-46"
+              "node-52"
             ],
             "components": [
               "status-notice"
@@ -3682,7 +3870,7 @@
             "kind": "functional",
             "acceptance": "Full boilerplate generation requires a future reviewed compiler and apply plan; version one never claims to have generated source.",
             "nodes": [
-              "node-27"
+              "node-33"
             ],
             "components": [
               "status-notice"
@@ -3804,7 +3992,7 @@
             "kind": "functional",
             "acceptance": "Closing dirty forms asks for confirmation; modal feedback is visible and focus returns to a meaningful control.",
             "nodes": [
-              "node-41"
+              "node-47"
             ],
             "components": [],
             "patterns": []
@@ -3817,7 +4005,7 @@
             "kind": "functional",
             "acceptance": "A stale window cannot reset newer retained state; current and retained data can be exported separately before reload.",
             "nodes": [
-              "node-39"
+              "node-45"
             ],
             "components": [
               "status-notice"
@@ -3832,7 +4020,7 @@
             "kind": "functional",
             "acceptance": "Authoring files, host configuration and test-target data are preserved; no silent path migration or plugin activation.",
             "nodes": [
-              "node-27"
+              "node-33"
             ],
             "components": [
               "status-notice"
@@ -3847,7 +4035,7 @@
             "kind": "functional",
             "acceptance": "Build, browser, native and security evidence have explicit scope and revision. Import never grants trust or carries simulated passes forward.",
             "nodes": [
-              "node-33"
+              "node-39"
             ],
             "components": [
               "status-notice"
@@ -3877,7 +4065,7 @@
             "kind": "functional",
             "acceptance": "Shell qualification comes first, then native companion conversion and acceptance, then publication. No design action publishes.",
             "nodes": [
-              "node-37"
+              "node-43"
             ],
             "components": [
               "status-notice"
@@ -4523,7 +4711,7 @@
           "id": "ds-flow-7",
           "source": "ds-source-1",
           "operation": "ds-operation-6",
-          "card": "node-21",
+          "card": "node-27",
           "direction": "read",
           "label": "Load components",
           "trigger": "on-open",
@@ -4900,11 +5088,11 @@
               "ui": "surface",
               "surfaces": [
                 {
-                  "id": "node-44",
+                  "id": "node-50",
                   "label": "Export project JSON"
                 },
                 {
-                  "id": "node-42",
+                  "id": "node-48",
                   "label": "Import project JSON"
                 }
               ],
@@ -4948,6 +5136,415 @@
               "id": "release-8",
               "title": "Refine and review",
               "outcome": "Review detailed acceptance notes and alternative scope without losing context."
+            }
+          ]
+        }
+      ]
+    },
+    "detailDesigns": {
+      "schema": 1,
+      "nextId": 19,
+      "documents": [
+        {
+          "id": "detail-document-1",
+          "kind": "component",
+          "ownerId": "project-json-review",
+          "ownerLabel": "ProjectJsonReview",
+          "notes": "A reusable review panel. The title and busy props are consumer inputs; content is a named slot. This is an authored design, not a tested native component.",
+          "nodes": [
+            {
+              "id": "detail-node-2",
+              "kind": "region",
+              "label": "Review panel",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 32,
+                "y": 24
+              },
+              "size": {
+                "width": 660,
+                "height": 480
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-3",
+              "kind": "text",
+              "label": "Review summary",
+              "text": "Review the project before replacing this workspace.",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 82
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-4",
+              "kind": "slot",
+              "label": "content",
+              "text": "Project identity, counts and validation findings",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 310,
+                "y": 82
+              },
+              "size": {
+                "width": 270,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-5",
+              "kind": "button",
+              "label": "Confirm replacement",
+              "text": "Replace project",
+              "parentId": "detail-node-2",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 262
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "Require explicit confirmation; announce validation or persistence errors without discarding the draft.",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-6",
+              "source": "detail-node-5",
+              "target": "detail-node-4",
+              "event": "click",
+              "label": "Confirm reviewed project",
+              "notes": "Only request replacement after validation and explicit confirmation. Emit select to the owning page.",
+              "acceptance": "Given a reviewed project and confirmation\nWhen replacement is requested\nThen the page receives the selection event and retains recoverable errors.",
+              "targetSurfaceId": null
+            }
+          ]
+        },
+        {
+          "id": "detail-document-7",
+          "kind": "page",
+          "ownerId": "node-48",
+          "ownerLabel": "Import project JSON",
+          "notes": "Review a portable project, preserve current work, and confirm replacement. Loading and error states remain visible without executing an imported template.",
+          "nodes": [
+            {
+              "id": "detail-node-8",
+              "kind": "region",
+              "label": "Import workspace",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 32,
+                "y": 24
+              },
+              "size": {
+                "width": 780,
+                "height": 650
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-9",
+              "kind": "input",
+              "label": "Project JSON file",
+              "text": "Choose a local .json file",
+              "parentId": "detail-node-8",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 82
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "Visible label, JSON file hint and inline error description. Keyboard-accessible file selection.",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-10",
+              "kind": "component",
+              "label": "Project review",
+              "text": "",
+              "parentId": "detail-node-8",
+              "layout": "stack",
+              "position": {
+                "x": 322,
+                "y": 82
+              },
+              "size": {
+                "width": 350,
+                "height": 150
+              },
+              "component": {
+                "id": "project-json-review",
+                "label": "ProjectJsonReview",
+                "version": "0.1.0",
+                "variantId": "default"
+              },
+              "props": {
+                "title": "Review imported project",
+                "busy": false
+              },
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-11",
+              "kind": "text",
+              "label": "Import error",
+              "text": "The project could not be loaded. Your existing work is unchanged.",
+              "parentId": "detail-node-8",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 262
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "error"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-12",
+              "kind": "text",
+              "label": "Reading project",
+              "text": "Reading and validating the selected JSON…",
+              "parentId": "detail-node-8",
+              "layout": "stack",
+              "position": {
+                "x": 310,
+                "y": 262
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "loading"
+              ],
+              "sourceBrickId": null
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-13",
+              "source": "detail-node-9",
+              "target": "detail-node-10",
+              "event": "change",
+              "label": "Review selected file",
+              "notes": "Validate a bounded local JSON document before presenting replacement confirmation.",
+              "acceptance": "Given an existing project\nWhen valid JSON is selected\nThen show a review without replacing current data.",
+              "targetSurfaceId": null
+            }
+          ]
+        },
+        {
+          "id": "detail-document-14",
+          "kind": "page",
+          "ownerId": "node-27",
+          "ownerLabel": "Component library",
+          "notes": "Read component definitions through the declared source port. Open the reusable internals from an instance or library entry.",
+          "nodes": [
+            {
+              "id": "detail-node-15",
+              "kind": "region",
+              "label": "Library content",
+              "text": "",
+              "parentId": null,
+              "layout": "stack",
+              "position": {
+                "x": 32,
+                "y": 24
+              },
+              "size": {
+                "width": 760,
+                "height": 380
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-16",
+              "kind": "text",
+              "label": "Component results",
+              "text": "Component names, versions, variants and usage",
+              "parentId": "detail-node-15",
+              "layout": "stack",
+              "position": {
+                "x": 24,
+                "y": 82
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": {
+                "sourceId": "ds-source-1",
+                "operationId": "ds-operation-6",
+                "field": ""
+              },
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            },
+            {
+              "id": "detail-node-17",
+              "kind": "button",
+              "label": "Open component details",
+              "text": "Design internals",
+              "parentId": "detail-node-15",
+              "layout": "stack",
+              "position": {
+                "x": 310,
+                "y": 82
+              },
+              "size": {
+                "width": 240,
+                "height": 132
+              },
+              "component": null,
+              "props": {},
+              "binding": null,
+              "a11y": "",
+              "visibleIn": [
+                "default",
+                "loading",
+                "empty",
+                "error",
+                "disabled"
+              ],
+              "sourceBrickId": null
+            }
+          ],
+          "edges": [
+            {
+              "id": "detail-edge-18",
+              "source": "detail-node-17",
+              "target": "detail-node-16",
+              "event": "click",
+              "label": "Open selected component",
+              "notes": "Resolve the selected reusable definition by its stable ID. Do not duplicate it.",
+              "acceptance": "",
+              "targetSurfaceId": "node-17"
             }
           ]
         }

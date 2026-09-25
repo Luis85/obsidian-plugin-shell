@@ -30,7 +30,7 @@ function smCommit(change, token = smToken()) {
     const old = smFind(smStore(previous), map.id);
     if (old && JSON.stringify(map) !== JSON.stringify(old)) { map.revision = old.revision + 1; map.updatedAt = now; }
   }
-  validateStorymaps(store); candidate.schema = 2; candidate.storymaps = store; candidate.revision++;
+  validateStorymaps(store); candidate.schema = Math.max(previous.schema, 2); candidate.storymaps = store; candidate.revision++;
   candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = [];
   return smPersistDesign(candidate, previous);
 }
@@ -41,13 +41,15 @@ function smTravel(direction) {
   const other = direction === 'undo' ? candidate.future : candidate.history;
   other.push(designSnapshot(previous)); if (other.length > DESIGN_LIMITS.history) other.shift();
   const snapshot = source.pop(); Object.assign(candidate, snapshot);
-  for (const key of ['canvas', 'librarySchema', 'designSystem']) if (!Object.hasOwn(snapshot, key)) delete candidate[key];
+  for (const key of ['canvas', 'librarySchema', 'designSystem', 'detailDesigns']) if (!Object.hasOwn(snapshot, key)) delete candidate[key];
+  if(previous.detailDesigns&&!candidate.detailDesigns)candidate.detailDesigns=emptyDetailDesigns();
+  if(candidate.detailDesigns)candidate.detailDesigns.nextId=Math.max(candidate.detailDesigns.nextId, previous.detailDesigns?.nextId||1);
   candidate.storymaps = smCopy(snapshot.storymaps || emptyStorymaps());
   candidate.storymaps.nextId = Math.max(candidate.storymaps.nextId, smStore(previous).nextId);
   candidate.semantic = snapshot.semantic || emptySemantic(); candidate.dataSources = snapshot.dataSources || emptyDataSources();
   candidate.semantic.nextId = Math.max(previous.semantic?.nextId || 1, candidate.semantic.nextId);
   candidate.dataSources.nextId = Math.max(previous.dataSources?.nextId || 1, candidate.dataSources.nextId);
-  candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.schema = 2; candidate.revision = previous.revision + 1;
+  candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.schema = Math.max(previous.schema, 2); candidate.revision = previous.revision + 1;
   smPersistDesign(candidate, previous); render(); notify('Design ' + direction + ' complete. Source files and external artifacts were not deleted.');
 }
 function smNormalize() {

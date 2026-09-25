@@ -1,6 +1,6 @@
 # Companion project JSON → shell
 
-**Transfer format v2, with v1 import compatibility. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
+**Transfer format v3, with v1/v2 import compatibility. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
 
 The companion exports a complete **saved authoring definition**. The shell accepts that definition and a target inside an explicitly chosen vault. The first script version validates the transfer envelope and paths, then returns the original JSON bytes. It does not generate, install, activate, run tests, acquire a template or create a target directory.
 
@@ -35,7 +35,7 @@ Redirection is a shell operation, not a write by this script. Never redirect out
 | Field | Contract |
 | --- | --- |
 | `kind` | Exactly `obsidian-companion-project` |
-| `schemaVersion` | Exports use `2`; reader also accepts legacy `1` without storymaps; unsupported versions fail closed |
+| `schemaVersion` | Exports use `3`; reader also accepts legacy `1` without storymaps/details and `2` without details; unsupported versions fail closed |
 | `executable` | Exactly `false`; an export is data, never an execution approval |
 | `project` | `id`, `name`, `author`, `version`, `description` |
 | `settings` | `codebaseFolder` and `testsFolder`, both required in supported exports |
@@ -106,3 +106,7 @@ The next writer increment must define a reviewed deterministic plan from this en
 ## Implementation workspace generation
 
 The read-only handoff command above remains separate from workspace generation. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
+
+## Page and component detail designs (v3)
+
+`design.detailDesigns` is validated by the shared `detail-contract.mjs` before browser import or CLI handoff. Stable owner references connect page documents to sitemap surfaces and component documents to library definitions. Ordered nodes retain containment, content, local instance props, bindings, visible states and canvas geometry; edges retain interaction and acceptance declarations. The model never evaluates those declarations. V1/v2 envelopes containing this subsystem fail before mutation. See [Detail editors](../concepts/companion/DETAIL-EDITORS.md) for the exact limits and native conversion boundary. The separate compiler preserves details in project and traceability JSON and emits an explicit unimplemented-runtime warning.

@@ -37,7 +37,7 @@ function workflowDecorate(){
  const existing=content.querySelector('.handoff-bar');if(existing)existing.remove();
  if(['prds','entities','sources','components','blueprints','patterns'].includes(state.view))content.insertAdjacentHTML('beforeend',workflowHandoff());
  const breadcrumb=document.querySelector('.breadcrumb .muted');if(breadcrumb)breadcrumb.textContent=project()?.name||CONCEPT_VAULT.name;
- const main=content;if(main)main.setAttribute('aria-label',NAV.find(x=>x[0]===state.view)?.[2]||'Workspace');
+ const main=content;if(main)main.setAttribute('aria-label',(state.view==='page-editor'?'Page editor':state.view==='component-editor'?'Component editor':NAV.find(x=>x[0]===state.view)?.[2])||'Workspace');
  workflowMapSearchFeedback();
 }
 

@@ -92,6 +92,6 @@ function revealDesignSelection(){
  if(dx||dy){c.pan.x+=dx;c.pan.y+=dy;paintMap();save();}
 }
 // Storymaps are planning context in full-project exports, never compiler input.
-function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;delete value.storymaps;const sources=dsGeneration(d);if(sources)value.dataSources=sources;else delete value.dataSources;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
+function generationSnapshot(d){const value=designSnapshot(d);delete value.canvas;delete value.storymaps;if(value.detailDesigns?.documents.length)value.detailDesigns=dtSemantic(value.detailDesigns);else delete value.detailDesigns;const sources=dsGeneration(d);if(sources)value.dataSources=sources;else delete value.dataSources;const semantic=semanticGeneration(d);if(semantic)value.semantic=semantic;else delete value.semantic;return value;}
 
 function boundedCameraPan(p){return {x:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.x)),y:Math.max(-CANVAS_LIMITS.pan,Math.min(CANVAS_LIMITS.pan,p.y))};}
