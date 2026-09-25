@@ -25,14 +25,21 @@ export function noteEntity(m: Model, sourceId: string, operationId: string): Ent
   if (source.kind === 'vault' && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
   return undefined;
 }
-const showcaseAnchor = '    items: register(itemFeature),';
-// Exact output of examples:remove: the callback keeps no parameter and only blank lines.
-const removedRegistry = /createNoteFeatures\(services, \(\) => \(\{[ \n]*\n {2}\}\)\);/;
-/** Extend only the two reviewed registry shapes; any other customization is refused. */
-function registerFeatures(original: string, registrations: string[]): string {
-  if (original.includes(showcaseAnchor)) return original.replace(showcaseAnchor, showcaseAnchor+'\n'+registrations.join('\n'));
-  requireValue(removedRegistry.test(original), 'Review customized feature registry before generating native repositories.');
-  return original.replace(removedRegistry, () => `createNoteFeatures(services, register => ({\n${registrations.join('\n')}\n  }));`);
+// The maker's registry layout: one callback object of `    key: register(feature, ...),` lines.
+// examples:remove leaves a parameterless callback with blank lines; makers add consumer entries.
+const registryCall = /createNoteFeatures\(services, (\(\)|\(([A-Za-z_$][\w$]*)\)|([A-Za-z_$][\w$]*)) => \(\{\n([^]*?)\n {2}\}\)\);/g;
+const registryEntry = /^ {4}([A-Za-z_$][\w$]*): ([A-Za-z_$][\w$]*)\(.*\),$/;
+/** Append generated repositories without a TypeScript parser; any other registry layout is refused. */
+function registerFeatures(original: string, names: string[]): string {
+  const invalid = 'Review customized feature registry before generating native repositories.';
+  const calls = [...original.matchAll(registryCall)]; requireValue(calls.length === 1, invalid);
+  const [whole, parameter, wrapped, bare, body] = calls[0]!; const register = wrapped ?? bare ?? 'register';
+  const entries = body!.split('\n').filter(line => line.trim()).map(line => registryEntry.exec(line));
+  requireValue(entries.every(entry => entry && entry[2] === register) && (parameter !== '()' || !entries.length), invalid);
+  const keys = new Set(entries.map(entry => entry![1]!.toLowerCase()));
+  requireValue(names.every(name => !keys.has(name.toLowerCase())), 'Generated repository keys collide with an existing feature registration.');
+  const header = parameter === '()' ? register : parameter!;
+  return original.replace(whole!, () => `createNoteFeatures(services, ${header} => ({\n${body}\n${names.map(name => `    ${name}: ${register}(${name}),`).join('\n')}\n  }));`);
 }
 export async function persistenceCode(templateRoot: string, m: Model, add: Add): Promise<void> {
   const selected = new Map<string, Entity>();
@@ -60,7 +67,7 @@ export const document = defineDocument(entity,{mappings:${literal(props.map(([ke
 export const feature = defineNoteFeature({document,defaultFolder:${literal(entity.folder)}});
 `);
     imports.push(`import { feature as ${name} } from ${literal(relativeImport('src/bootstrap/features.ts', file))};`);
-    registrations.push(`    ${name}: register(${name}),`);
+    registrations.push(name);
     const test = `${m.testRoot}/persistence/${entity.slug}.test.ts`;
     const input: Schema = {...entity.schema, properties:Object.fromEntries(props), required:props.map(([key])=>key), additionalProperties:false};
     add(test, `import { it, expect } from 'vitest';

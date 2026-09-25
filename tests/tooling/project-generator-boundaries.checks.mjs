@@ -80,19 +80,23 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
  assert.ok(files.has('product/specs/project/persistence/boundary-record.test.ts'));
  assert.deepEqual(legacyProject.design.detailDesigns.schema,1);
 });
-test('native repositories register into the example-removed feature registry and still refuse other customizations',async()=>{
- const {planExampleRemoval}=await import('../../scripts/examples/plan.mjs');
- const removed=(await planExampleRemoval(root)).plan.changes.find(change=>change.path==='src/bootstrap/features.ts').content;
- const template=await realpath(await mkdtemp(join(tmpdir(),'generator-removed-')));
+// Exact src/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
+const removedRegistry="import { createNoteFeatures } from '../application/note-feature';\n\n\n\nimport type { PreferenceService } from '../application/preference-service';\n\n/** Add one explicit registration per feature. Ports are provided once by runtime bootstrap. */\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0], preferences: PreferenceService) {\n  void preferences;\n  return createNoteFeatures(services, () => ({\n    \n    \n    \n  }));\n}\n";
+test('native repositories extend example-removed and maker-extended registries and refuse other layouts',async()=>{
+ const {readRegistry,extendRegistry}=await import('../../scripts/makers/registry.mjs');
+ const consumer=extendRegistry(await readRegistry(root,removedRegistry),{key:'bookmark',local:'bookmarkFeature',from:'../features/bookmarks/bookmark.definition'});
+ const template=await realpath(await mkdtemp(join(tmpdir(),'generator-registry-')));
  const skipped=new Set(['.git','node_modules','dist','dist-harness','reports','.fallow','.qualification']);
+ const generate=async source=>{await writeFile(join(template,'src/bootstrap/features.ts'),source);return new Map((await projectFiles(template,projectModel(fixture()))).map(e=>[e.path,e.content])).get('src/bootstrap/features.ts');};
  try{
   await cp(root,template,{recursive:true,filter:path=>{const parts=relative(root,path).split(sep);return !skipped.has(parts[0])&&!parts.includes('__pycache__');}});
-  await writeFile(join(template,'src/bootstrap/features.ts'),removed);
-  const registry=new Map((await projectFiles(template,projectModel(fixture()))).map(e=>[e.path,e.content])).get('src/bootstrap/features.ts');
-  assert.match(registry,/createNoteFeatures\(services, register => \(\{\n( {4}G\w+: register\(G\w+\),\n)+ {2}\}\)\);/);
-  assert.ok(registry.includes('    GBoundaryRecord: register(GBoundaryRecord),\n'));
-  assert.ok(!registry.includes('taskFeature'));
-  await writeFile(join(template,'src/bootstrap/features.ts'),removed.replace('() => ({','register => ({\n    custom: register(customFeature),'));
-  await assert.rejects(projectFiles(template,projectModel(fixture())),/customized feature registry/);
+  for(const source of [removedRegistry,consumer]){
+   const registry=await generate(source);
+   assert.match(registry,/createNoteFeatures\(services, \(?register\)? => \(\{\n[^]*\n {4}GBoundaryRecord: register\(GBoundaryRecord\),\n[^]*\),\n {2}\}\)\);/);
+   assert.ok(!registry.includes('taskFeature'));
+  }
+  assert.ok((await generate(consumer)).includes('    bookmark: register(bookmarkFeature),\n'));
+  for(const source of [consumer.replace('register(bookmarkFeature)','build(bookmarkFeature)'),removedRegistry.replace('() => ({\n','() => ({\n    custom: register(customFeature),\n'),consumer.replace('bookmark:','GBoundaryRecord:')])
+   await assert.rejects(generate(source),/customized feature registry|collide/);
  }finally{await rm(template,{recursive:true,force:true});}
 });
