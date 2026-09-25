@@ -28,7 +28,9 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     }
     // A local index/tree forms a real transport archive even when this test's
     // parent is already a Git-free archive. No commit, author or remote is needed.
-    for (const args of [['init', '--quiet'], ['-c', 'core.autocrlf=false', 'add', '--all']]) {
+    // Repository-local autocrlf=false keeps both add and archive byte-exact even
+    // when a Windows host enables autocrlf globally for LF-pinned checkouts.
+    for (const args of [['init', '--quiet'], ['config', 'core.autocrlf', 'false'], ['add', '--all']]) {
       const run = command('git', args, staging); assert.equal(run.status, 0, run.stderr);
     }
     const tree = command('git', ['write-tree'], staging); assert.equal(tree.status, 0, tree.stderr);
