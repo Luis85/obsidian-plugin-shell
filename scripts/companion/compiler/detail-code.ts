@@ -14,7 +14,7 @@ function element(doc: DetailDocument, node: DetailElement, componentNames: Map<s
   const events = `v-on="model.listeners('${node.id}')"`;
   const disabled = `:disabled="['loading', 'disabled'].includes(model.state.value)"`;
   const children = doc.nodes.filter(n => n.parentId === node.id).map(n => element(doc, n, componentNames)).join('\n');
-  if (node.kind === 'region') return `<section ${attrs} class="generated-region" data-design-layout="${node.layout}" :aria-label="${ref}.label">\n${children}\n</section>`;
+  if (node.kind === 'region') return `<section ${attrs} class="generated-region" data-design-layout="${node.layout}" :aria-label="${ref}.label" ${events}>\n${children}\n</section>`;
   if (node.kind === 'text') return `<p ${attrs} class="generated-detail-text" ${events}>{{ model.display(${index}) }}</p>`;
   if (node.kind === 'input') return `<div ${attrs} class="generated-field">
 <label :for="model.prefix + '-${node.id}'">{{ ${ref}.label }}</label>
@@ -22,7 +22,7 @@ function element(doc: DetailDocument, node: DetailElement, componentNames: Map<s
 <small v-if="${ref}.a11y" :id="model.prefix + '-${node.id}-hint'">{{ ${ref}.a11y }}</small>
 </div>`;
   if (node.kind === 'button') return `<button ${attrs} type="button" ${disabled} ${events}>{{ ${ref}.text || ${ref}.label }}</button>`;
-  if (node.kind === 'slot') return `<div ${attrs}><slot :name="${ref}.label">{{ ${ref}.text }}</slot></div>`;
+  if (node.kind === 'slot') return `<div ${attrs} ${events}><slot :name="${ref}.label">{{ ${ref}.text }}</slot></div>`;
   return `<div ${attrs}><${componentNames.get(node.component!.id)} v-bind="${ref}.props" :design-state="model.state.value === 'default' ? undefined : model.state.value" ${events} /></div>`;
 }
 function documentCode(m: Model, doc: DetailDocument): string {

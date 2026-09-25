@@ -1,11 +1,11 @@
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './data-code.ts';
-import type { DetailDocument } from '../runtime/detail-runtime.ts';
+import { visibleDetails, type DetailDocument } from '../runtime/detail-runtime.ts';
 export function detailTests(m: Model, doc: DetailDocument, component: string, add: Add): void {
   const path = `${m.testRoot}/details/${doc.id}.test.ts`; const root = m.sourceRoot;
   const cases = doc.edges.filter(e => doc.nodes.find(n => n.id === e.source)?.kind !== 'component').map(edge => {
     const source = doc.nodes.find(n => n.id === edge.source)!;
-    const state = source.visibleIn.find(s => !['loading', 'disabled'].includes(s));
+    const state = source.visibleIn.find(s => !['loading', 'disabled'].includes(s) && visibleDetails(doc, s).some(n => n.id === source.id));
     if (!state) return '';
     const selector = `[data-design-node="${source.id}"]${source.kind === 'input' ? ' input' : ''}`;
     return `it(${literal('[' + edge.id + '] dispatches the designed ' + edge.event + ' interaction')}, async () => {

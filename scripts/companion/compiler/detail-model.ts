@@ -1,4 +1,4 @@
-import type { DetailDocument, DetailElement, DetailLiteral } from '../runtime/detail-runtime.ts';
+import { visibleDetails, type DetailDocument, type DetailElement, type DetailLiteral } from '../runtime/detail-runtime.ts';
 import type { Schema } from '../runtime/contract.ts';
 import { row, rows, text, requireValue, type Model, type Row } from './model.ts';
 export interface ComponentMembers { props: Record<string, string>; events: Record<string, string>; slots: string[] }
@@ -56,13 +56,18 @@ export function detailDocuments(m: Model): DetailDocument[] {
     for (const edge of doc.edges) {
       const key = edge.source + ':' + edge.event;
       requireValue(!keys.has(key), 'Ambiguous detail event; explicit branching is not declared: ' + edge.id); keys.add(key);
-      requireValue(!forbidden.has(edge.event), 'Unsafe detail event: ' + edge.id);
+      const source = doc.nodes.find(n => n.id === edge.source)!;
+      const allowed = source.component ? Object.keys(componentMembers(m.components.find(c => c.id === source.component!.id) ?? {}).events) :
+        ['click', 'dblclick', 'focus', 'blur', 'keydown', 'keyup', ...(source.kind === 'input' ? ['input', 'change'] : [])];
+      requireValue(!forbidden.has(edge.event) && allowed.includes(edge.event), 'Unsupported detail event: ' + edge.id);
+      requireValue(['default', 'empty', 'error'].some(state => visibleDetails(doc, state as 'default' | 'empty' | 'error').some(n => n.id === edge.source)), 'Interaction source has no enabled visible state: ' + edge.id);
       if (edge.targetSurfaceId) requireValue(m.screens.some(s => s.id === edge.targetSurfaceId && !['group', 'action'].includes(s.kind)), 'Missing detail navigation target: ' + edge.id);
     }
     for (const node of doc.nodes) {
       if (node.component) node.props = instanceProps(node, m.components);
       if (node.kind === 'slot' && doc.kind === 'component') requireValue(componentMembers(row(owner)).slots.includes(node.label), 'Undeclared component slot: ' + node.id);
       if (!node.binding) continue;
+      requireValue(['text', 'input'].includes(node.kind), 'Binding requires an explicit text/input projection: ' + node.id);
       const op = m.sources.find(s => s.id === node.binding!.sourceId)?.operations.find(o => o.id === node.binding!.operationId);
       requireValue(op && ['read', 'both'].includes(op.direction), 'Missing readable detail binding: ' + node.id);
       requireValue(bindingPath(op.output, node.binding.field), 'Unresolved binding field: ' + node.id + '/' + node.binding.field);
@@ -79,5 +84,10 @@ export function detailDocuments(m: Model): DetailDocument[] {
     return total;
   }
   for (const doc of documents) count(doc, 0);
-  return documents;
+  // Keep editor geometry in design/project.json, not the executable runtime IR.
+  return documents.map(doc => ({ ...doc, nodes: doc.nodes.map(node => ({
+    id: node.id, kind: node.kind, label: node.label, text: node.text, parentId: node.parentId, layout: node.layout,
+    component: node.component ? { id: node.component.id, version: node.component.version, variantId: node.component.variantId } : null,
+    props: node.props, binding: node.binding, a11y: node.a11y, visibleIn: node.visibleIn,
+  })) }));
 }

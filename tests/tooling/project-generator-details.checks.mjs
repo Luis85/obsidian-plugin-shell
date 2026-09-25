@@ -17,6 +17,8 @@ test('current export compiles page/component detail documents without mutating a
   const before = JSON.stringify(fixture); const result = docs(fixture);
   assert.equal(result.length, 3); assert.equal(result.filter(d => d.kind === 'page').length, 2);
   assert.equal(JSON.stringify(fixture), before);
+  assert.equal(Object.hasOwn(result[0].nodes[0], 'position'), false);
+  assert.equal(Object.hasOwn(result[1].nodes.find(n => n.component).component, 'label'), false);
   assert.deepEqual(result[1].nodes.find(n => n.component).props, { title: 'Review imported project', busy: false });
 });
 test('typed component contract parsing never treats authored declarations as code', () => {
@@ -42,6 +44,9 @@ for (const [name, change, expected] of [
   ['unknown bound field', d => d.design.detailDesigns.documents[2].nodes[1].binding.field = '0.missing', /binding field/],
   ['inherited bound property', d => d.design.detailDesigns.documents[2].nodes[1].binding.field = 'constructor.name', /binding field/],
   ['missing operation', d => d.design.detailDesigns.documents[2].nodes[1].binding.operationId = 'missing', /readable detail binding/],
+  ['lifecycle event', d => d.design.detailDesigns.documents[1].edges[0].event = 'vue:mounted', /Unsupported detail event/],
+  ['binding with no destination', d => d.design.detailDesigns.documents[2].nodes[0].binding = { ...d.design.detailDesigns.documents[2].nodes[1].binding }, /explicit text\/input projection/],
+  ['disabled-only interaction', d => d.design.detailDesigns.documents[1].nodes[1].visibleIn = ['disabled'], /no enabled visible state/],
   ['undeclared slot', d => d.design.detailDesigns.documents[0].nodes[2].label = 'missing', /Undeclared component slot/],
 ]) test('detail compiler refuses ' + name, () => { const d = clone(); change(d); assert.throws(() => docs(d), expected); });
 
@@ -87,4 +92,12 @@ test('custom folders keep all emitted detail imports relative and payload text i
   assert.ok(entries.has('product/code/generated/presentation/components/details/detail-document-7.vue'));
   const spec = entries.get('product/code/generated/domain/details/detail-document-7.ts'); assert.ok(!spec.includes('</script>')); assert.match(spec, /\\u003c/);
   assert.match(entries.get('product/specs/project/details/detail-document-7.test.ts'), /\.\.\/\.\.\/\.\.\/code\/generated/);
+});
+
+test('region and slot interactions retain native listener wiring', async () => {
+  const d = clone(); const doc = d.design.detailDesigns.documents[0]; doc.edges[0].source = doc.nodes[0].id;
+  const entries = new Map((await projectFiles(root, projectModel(d))).map(e => [e.path, e.content]));
+  const component = entries.get('src/generated/presentation/components/library/project-json-review.vue');
+  assert.match(component, /data-design-layout="stack"[^>]+v-on="model.listeners\('detail-node-2'\)"/);
+  assert.match(component, /<div[^>]+v-on="model.listeners\('detail-node-4'\)"/);
 });
