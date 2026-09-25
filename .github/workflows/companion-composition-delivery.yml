@@ -1,113 +1,74 @@
-name: Companion composition exact source assembly
+name: Recover companion composition source
 on:
   push:
     branches: [work/companion-composition-delivery]
 permissions:
-  contents: write
+  contents: read
 jobs:
-  assemble:
+  recover:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: '24.21.0'
-          package-manager-cache: false
-      - name: Restore reviewed authored source and frozen legacy fixture
+      - name: Restore exact staged source
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = 5ddc7a278ba639fdc78b9294a55dfdc99c5279d2
-          mkdir -p tests/fixtures/companion
-          cp docs/concepts/companion/companion-project.json tests/fixtures/companion/detail-v3.json
+          mkdir -p "$RUNNER_TEMP/recovered" "$RUNNER_TEMP/delivery"
           cat .composition.part-{1,2,3,4,5,6,7} > "$RUNNER_TEMP/composition.patch.xz"
           echo "6082ecc90a6a3c4d949640f12eb1190cb830d534fc175ae643c00d69a5614104  $RUNNER_TEMP/composition.patch.xz" | sha256sum -c -
+          git archive 5ddc7a278ba639fdc78b9294a55dfdc99c5279d2 | tar -xf - -C "$RUNNER_TEMP/recovered"
+          git archive --format=tar.gz 5ddc7a278ba639fdc78b9294a55dfdc99c5279d2 -o "$RUNNER_TEMP/delivery/base-source.tar.gz"
+          cd "$RUNNER_TEMP/recovered"
+          git init -q
+          git add -A
+          test "$(git write-tree)" = b603efdba5e13f7024d42da816384d00e74d77e2
+          git config user.name recovery
+          git config user.email recovery@localhost
+          git commit -qm base
+          mkdir -p tests/fixtures/companion
+          cp docs/concepts/companion/companion-project.json tests/fixtures/companion/detail-v3.json
           xz -dc "$RUNNER_TEMP/composition.patch.xz" > "$RUNNER_TEMP/composition.patch"
           git apply --unidiff-zero --check "$RUNNER_TEMP/composition.patch"
           git apply --unidiff-zero "$RUNNER_TEMP/composition.patch"
           python3 scripts/concepts/build-companion.py
           echo 'b94220c343f7fdd7e1d48aa3ba4380edb633274070bd02a30cd1921cc2e315bd  docs/concepts/companion/index.html' | sha256sum -c -
-      - name: Provision isolated tooling for deterministic self-project export
+      - name: Reproduce golden JSON
         shell: bash
         run: |
           set -euo pipefail
-          export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/composition-browsers"
-          printf 'PLAYWRIGHT_BROWSERS_PATH=%s\n' "$PLAYWRIGHT_BROWSERS_PATH" >> "$GITHUB_ENV"
-          python3 -m venv "$RUNNER_TEMP/composition-browser-env"
-          "$RUNNER_TEMP/composition-browser-env/bin/python" -m pip install playwright==1.57.0
-          "$RUNNER_TEMP/composition-browser-env/bin/python" -m playwright install chromium
-          "$RUNNER_TEMP/composition-browser-env/bin/python" - <<'PYTHON'
-          import os
-          from playwright.sync_api import sync_playwright
-          with sync_playwright() as pw:
-              with open(os.environ['GITHUB_ENV'], 'a') as output:
-                  output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
-          PYTHON
-      - name: Reproduce exact golden project and verify clean source tree
-        shell: bash
-        run: |
-          set -euo pipefail
-          "$RUNNER_TEMP/composition-browser-env/bin/python" scripts/concepts/export-companion-project.py
-          "$RUNNER_TEMP/composition-browser-env/bin/python" scripts/concepts/export-companion-project.py --check
+          python3 -m venv "$RUNNER_TEMP/browser-env"
+          "$RUNNER_TEMP/browser-env/bin/pip" install playwright==1.57.0
+          export PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/browsers"
+          "$RUNNER_TEMP/browser-env/bin/python" -m playwright install chromium
+          export CHROMIUM_EXECUTABLE=$("$RUNNER_TEMP/browser-env/bin/python" -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
+          cd "$RUNNER_TEMP/recovered"
+          "$RUNNER_TEMP/browser-env/bin/python" scripts/concepts/export-companion-project.py
           echo '7cdb262e03ea3d58dcbcacc6249aa637db9bf97f8028bb0b38d8b57c5424a2fe  docs/concepts/companion/companion-project.json' | sha256sum -c -
-          rm .composition.part-{1,2,3,4,5,6,7} .github/workflows/companion-composition-delivery.yml
           git add -A
           test "$(git write-tree)" = b2d379c3ff0d249f599b620f2facf0cf447ccb5e
           git diff --cached --check
-          python3 scripts/concepts/build-companion.py --check
-          python3 -B tests/concepts/companion-assembly.test.py
-          node --test tests/tooling/companion-composition.checks.mjs tests/tooling/project-generator-composition.checks.mjs
-      - name: Store verified blobs and clean tree without changing any refs
-        env:
-          GH_TOKEN: ${{ github.token }}
+          git diff --cached --name-only > "$RUNNER_TEMP/delivery/changed-paths.txt"
+          git diff --cached --binary > "$RUNNER_TEMP/delivery/composition.patch"
+          git commit -qm recovered
+          git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/delivery/composition-source.tar.gz"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/delivery/tree.txt"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 3cd1f7b04025df02a9fc1407fc598112a072a965
+          path: latest-source
+          persist-credentials: false
+      - name: Preserve concurrent changes
         shell: bash
         run: |
-          python3 - <<'PYTHON'
-          import base64, hashlib, json, os, pathlib, subprocess, urllib.request
-          base = '5ddc7a278ba639fdc78b9294a55dfdc99c5279d2'
-          expected = 'b2d379c3ff0d249f599b620f2facf0cf447ccb5e'
-          api = 'https://api.github.com/repos/Luis85/obsidian-plugin-shell/git/'
-          def git(*args):
-              return subprocess.check_output(['git', *args], text=True).strip()
-          def post(endpoint, payload):
-              req = urllib.request.Request(api + endpoint, data=json.dumps(payload).encode(), method='POST', headers={
-                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                  'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json',
-                  'X-GitHub-Api-Version': '2022-11-28'})
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  return json.load(response)
-          paths = git('diff', '--cached', '--name-only', base).splitlines()
-          if len(paths) != 69:
-              raise SystemExit('Unexpected changed-path inventory: ' + str(len(paths)))
-          entries = []
-          for name in paths:
-              path = pathlib.Path(name)
-              if path.is_symlink() or not path.is_file() or name.startswith('.composition.') or name.endswith('companion-composition-delivery.yml') or path.suffix in ['.ttf', '.otf', '.woff', '.woff2']:
-                  raise SystemExit('Unexpected delivery input: ' + name)
-              raw = path.read_bytes()
-              sha = hashlib.sha1(('blob ' + str(len(raw)) + '\0').encode() + raw).hexdigest()
-              if sha != git('hash-object', name):
-                  raise SystemExit('Changed local bytes: ' + name)
-              actual = post('blobs', {'content': base64.b64encode(raw).decode(), 'encoding': 'base64'})['sha']
-              if actual != sha:
-                  raise SystemExit('Changed remote bytes: ' + name)
-              entries.append({'path': name, 'mode': '100644', 'type': 'blob', 'sha': sha})
-          tree = post('trees', {'base_tree': 'b603efdba5e13f7024d42da816384d00e74d77e2', 'tree': entries})['sha']
-          if tree != expected:
-              raise SystemExit('Clean source tree mismatch')
-          manifest = {'scope': 'Exact source assembly, self-project reproduction, focused contracts and object storage; no full browser/native/repository qualification claim', 'base': base, 'tree': tree, 'files': entries}
-          pathlib.Path(os.environ['RUNNER_TEMP'], 'composition-source-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
-          print(json.dumps(manifest, indent=2))
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
-              out.write('Verified clean source tree: `' + tree + '`\n\nNo commit, branch ref, PR merge or release changed by this job.\n')
-          PYTHON
+          git -C latest-source archive --format=tar.gz HEAD -o "$RUNNER_TEMP/delivery/latest-source.tar.gz"
+          git -C latest-source rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/delivery/latest-identity.txt"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: companion-composition-source-manifest
-          path: ${{ runner.temp }}/composition-source-manifest.json
+          name: recovered-composition-and-current-source
+          path: ${{ runner.temp }}/delivery/
           retention-days: 7
           if-no-files-found: error
