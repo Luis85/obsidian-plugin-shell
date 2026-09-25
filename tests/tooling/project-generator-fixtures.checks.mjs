@@ -21,7 +21,7 @@ test('actual companion export resolves every enabled recipe with readable native
 });
 test('recipe generation is absent when recipes are not enabled',()=>{
  const data=structuredClone(seed);delete data.design.dataSources.testing;assert.equal(fixtureManifest(projectModel(data)),null);
- data.design.dataSources.testing={schema:1,recipes:[]};assert.equal(fixtureManifest(projectModel(data)),null);
+ data.design.dataSources.testing={...seed.design.dataSources.testing,recipes:[]};assert.equal(fixtureManifest(projectModel(data)),null);
 });
 test('malformed and dangling recipes fail generation rather than generating broken test tools',()=>{
  for(const change of [d=>d.design.dataSources.testing.seed=-1,d=>d.design.dataSources.testing.recipes[0].operation='missing',d=>d.design.dataSources.testing.recipes.push(d.design.dataSources.testing.recipes[0]),d=>d.design.dataSources.testing.recipes[0].rules=[{side:'output',path:'/id',provider:'literal',argument:'not-json'}]]){
@@ -53,5 +53,5 @@ test('fixture schemas preserve authored false, zero and empty-text defaults',()=
  entity.properties.push({id:'p-default-text',key:'default_text',type:'text',required:false,defaultValue:''},{id:'p-default-number',key:'default_number',type:'number',required:false,defaultValue:0},{id:'p-default-flag',key:'default_flag',type:'checkbox',required:false,defaultValue:false});
  const manifest=fixtureManifest(projectModel(data));const resolved=manifest.entities.find(e=>e.id===entity.id).schema;
  for(const [key,value]of Object.entries({default_text:'',default_number:0,default_flag:false}))assert.equal(resolved.properties[key].default,value);
- entity.properties.at(-1).defaultValue='not-a-boolean';assert.throws(()=>fixtureManifest(projectModel(data)),/fixture default/);
+ entity.properties.at(-1).defaultValue='not-a-boolean';assert.throws(()=>fixtureManifest(projectModel(data)),/Generated entity violates its declared property types/);
 });

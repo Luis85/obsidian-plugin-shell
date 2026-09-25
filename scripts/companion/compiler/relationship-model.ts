@@ -8,13 +8,17 @@ export function relationshipDefinitions(m:Model):RelationshipRule[]{
   });
 }
 /** Writable connected components need all related repositories, including read-only targets. */
-export function relationshipScope(m:Model){
+export function relationshipScope(m:Model, includeRead = false){
   const definitions=relationshipDefinitions(m);
   const selected=new Set(m.sources.flatMap(s=>s.operations.flatMap(op=>{
     const implementation=op.contract.implementation;
-    if(!implementation)return [];
+    if(!implementation){
+      const output=op.contract.output as {mode?:string;entity?:string;many?:boolean};
+      return includeRead && s.kind==='vault' && op.direction==='read' && op.input===null && output.mode==='entity' && output.many
+        ? m.entities.filter(e=>e.id===output.entity && e.folder!=='' && e.folder===op.contract.resource).map(e=>e.slug):[];
+    }
     const spec=row(implementation);
-    return spec.kind==='note' && spec.operation!=='list' ? m.entities.filter(e=>e.id===spec.entity).map(e=>e.slug):[];
+    return spec.kind==='note' && (includeRead || spec.operation!=='list') ? m.entities.filter(e=>e.id===spec.entity).map(e=>e.slug):[];
   })));
   for(let changed=true;changed;){changed=false;for(const rule of definitions)if(selected.has(rule.source)||selected.has(rule.target))for(const key of [rule.source,rule.target])if(!selected.has(key)){selected.add(key);changed=true;}}
   const rules=definitions.filter(r=>selected.has(r.source)||selected.has(r.target));

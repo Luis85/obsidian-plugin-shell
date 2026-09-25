@@ -64,3 +64,7 @@ Generated adapters receive the one existing shell repository registry. Real Note
 `npm run verify:project` checks the generated build, Vue/TypeScript and generated tests. Native note tests use the real repository/Markdown codec and an in-memory storage port to verify all-field round trips, stale edits, preserved unrelated Markdown, idempotency and disposal. A registry integration test composes generated repositories with retained framework features. These are not tests inside native Obsidian.
 
 The qualification command runs separately against the unmodified companion export and a synthetic design that declares the new semantics. PRD prose still produces explicit acceptance TODOs. Full visual editor conversion, custom API/database/auth integrations, domain-specific business rules, semantic relationship enforcement and native host acceptance remain separate work. Design System generation is integrated from PR #5 and remains plugin-scoped; no global host style override is introduced.
+
+## Local-review reconciliation
+
+The previously unpushed fixture/relationship patch is integrated with the current providers and composition code. See [the reconciliation and fixture workflow](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md). The existing `testdata:*` commands and strict whole-graph relationship policy remain canonical.

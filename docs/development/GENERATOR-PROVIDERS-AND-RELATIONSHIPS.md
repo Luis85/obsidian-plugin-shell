@@ -35,13 +35,13 @@ Reset removes only unchanged files covered by the fixture receipt. It is not a v
 
 The compiler resolves enabled recipes using the actual exported source/entity contracts. Seed, count, reference date, field rules, fixed/stateful behaviors and empty/error/slow scenarios retain the existing engine semantics. Entity defaults preserve false, zero and empty text. Dangling, duplicate or malformed enabled recipes stop generation. With no enabled recipes, the generator adds no recipe commands. The optional Faker seam stays separately version-bound; no registry download or provider execution is inferred from the export.
 
-Canonical Markdown fixture metadata is significant: data containing only `id` and `type` is not a valid native repository note. The generator includes `schema_version` and a deterministic `created_at`. Generated tests read the actual seeded Markdown through the real `NoteRepository`, Markdown codec and generated source service. A passing fixture read proves that boundary, not all product PRDs.
+Canonical Markdown fixture metadata is significant: data containing only `id` and `type` is not a valid native repository note. The shared browser/compiler translator includes `schema_version` and a deterministic `created_at` in emitted Markdown without adding metadata to operation DTOs. Generated tests read the actual seeded Markdown through the real `NoteRepository`, Markdown codec and generated source service. A passing fixture read proves that boundary, not all product PRDs.
 
 ## Simulated and custom providers
 
 Generated `application/sources.ts` contains `SourcePorts`. `createSources(shell, overrides)` accepts complete ports per source, applies the normal input/output validators, and keeps the existing per-view Pinia stores. It rejects unknown sources, accessors, extra/missing operations and non-functions. A partial simulation cannot accidentally combine mocked reads and live writes.
 
-`createProjectTestPorts(manifest)` in `scripts/test-data/source-ports.mjs` adapts non-vault fixture operations to the same `(input, signal)` signature. Use it only in tests or an explicitly controlled development bootstrap, pass its `ports` as overrides, and call `dispose()` at scope end. Native vault sources use actual seeded notes rather than a second in-memory persistence owner. A source with only some operations covered by enabled recipes must be completed in the test adapter before it can be injected. Production bootstrap never imports the test-data kit.
+`createProjectTestPorts(manifest)` in `scripts/test-data/source-ports.mjs` adapts non-vault fixture operations to the same `(input, signal)` signature. Use it only in tests or an explicitly controlled development bootstrap, pass its `ports` as overrides, and call `dispose()` at scope end. Native vault sources use actual seeded notes rather than a second in-memory persistence owner. The generated typed factories under the configured tests root cover every method; disabled or missing recipes reject. The generic simulator-port helper still needs a complete source before it can be injected. Production bootstrap never imports the test-data kit.
 
 For a database, implement the generated port in a developer-owned module and return it from `configureSourceProviders`. The export does not specify a trustworthy database driver, credential store, migration strategy or transaction protocol, so none is silently chosen.
 
@@ -97,3 +97,5 @@ Product work still includes visual Vue Flow editors, any components without auth
 - Obsidian Vault API usage: https://docs.obsidian.md/Plugins/Vault
 
 These references guide integration. Repository tests, not documentation links, establish the implemented behavior above.
+
+See [the local-review reconciliation](GENERATOR-FIXTURES-AND-RELATIONSHIPS.md) for shared translation, read-only checks, audits and queue disposal.

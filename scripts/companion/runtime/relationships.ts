@@ -14,6 +14,15 @@ function targetRecord(value: string, records: readonly RelationshipRecord[]): Re
   const matches=records.filter(record=>record.path.replace(/\.md$/,'')===path);
   return matches.length===1?matches[0]:undefined;
 }
+function referenceValues(raw:unknown):unknown[]{
+  if(raw===undefined)return [];
+  if(!Array.isArray(raw))return [raw];
+  if(raw.length>100000 || Reflect.ownKeys(raw).length!==raw.length+1)throw new Error('RELATIONSHIP_VALUES_LIMIT');
+  return Array.from({length:raw.length},(_,index)=>{
+    const field=Object.getOwnPropertyDescriptor(raw,String(index));
+    if(!field || !('value' in field))throw new Error('RELATIONSHIP_ACCESSOR');return field.value;
+  });
+}
 /** Validate a complete in-memory graph. No vault mutation or expression evaluation. */
 export function inspectRelationships(rules: readonly RelationshipRule[], records: readonly RelationshipRecord[]): RelationshipFinding[] {
   if(rules.length>120 || records.length>12000)throw new Error('RELATIONSHIP_LIMIT');
@@ -30,7 +39,7 @@ export function inspectRelationships(rules: readonly RelationshipRule[], records
       const descriptor=Object.getOwnPropertyDescriptor(record.values,rule.key);
       if(descriptor && !('value' in descriptor))throw new Error('RELATIONSHIP_ACCESSOR');
       const raw:unknown=descriptor?.value;
-      const links=raw===undefined?[]:Array.isArray(raw)?raw:[raw];
+      const links=referenceValues(raw);
       inspectedLinks+=links.length;if(inspectedLinks>100000)throw new Error('RELATIONSHIP_LIMIT');
       const add=(code:string)=>findings.push({relationship:rule.id,record:record.id,code});
       if(raw!==undefined && (rule.targetCard.endsWith('*') ? !Array.isArray(raw) : Array.isArray(raw)))add('shape');

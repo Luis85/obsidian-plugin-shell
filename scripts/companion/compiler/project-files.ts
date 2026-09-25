@@ -46,6 +46,7 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
   // Full framework coverage/native/release gates remain present and are NOT relabelled green.
   const fixtures = await fixtureCode(templateRoot,m,add);
+  if(fixtures) { pkg.scripts['testdata:check']='node scripts/test-data/verify.mjs'; pkg.scripts['verify:project'] += ' && npm run testdata:check'; }
   if(fixtures) for(const command of ['plan','apply','reset-plan','reset','serve']) pkg.scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));

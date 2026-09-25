@@ -21,28 +21,7 @@ function tdNormalizeSchema(s){
  if(v.type==='object'){v.properties=Object.fromEntries(Object.entries(v.properties||{}).map(([k,p])=>[k,tdNormalizeSchema(p)]));v.required=v.required||[];}
  if(v.type==='array')v.items=tdNormalizeSchema(v.items);return v;
 }
-function tdEntity(e,m){
- const fields=erFields(e,m),properties={id:{type:'string',format:'uuid'},type:{type:'string',const:e.slug}};
- for(const p of fields){
-  const type=({text:'string',number:'number',checkbox:'boolean',date:'string',datetime:'string',tags:'array',list:'array'})[p.type];
-  const s={type};if(type==='array')s.items={type:'string'};if(p.type==='date')s.format='date';if(p.type==='datetime')s.format='date-time';
-  if(p.type==='list'&&!p.relationship)s.items={type:['string','number']};
-  if(Object.hasOwn(p,'defaultValue'))s.default=designCopy(p.defaultValue);properties[p.key]=s;
- }
- return {id:e.id,slug:e.slug,folder:e.folder,schema:{type:'object',properties,required:['id','type',...fields.filter(p=>p.required).map(p=>p.key)],additionalProperties:false},relationships:m.relationships.filter(r=>r.source===e.id).map(r=>({key:r.key,target:r.target,many:erMany(r.targetCard)}))};
-}
-function tdManifest(d=design()){
- const settings=tdSettings(d),sources=d.dataSources||emptyDataSources();
- if(!tdValidSettings(settings,sources))throw Error('Test recipes are malformed or reference a missing source operation.');
- const entities=(d.semantic?.entities||[]).map(e=>tdEntity(e,d.semantic));
- const shape=s=>s.mode==='none'?{none:true}:s.mode==='entity'?{entity:s.entity,many:s.many,schema:s.many?{type:'array',items:designCopy(entities.find(e=>e.id===s.entity)?.schema)}:designCopy(entities.find(e=>e.id===s.entity)?.schema)}:{schema:tdNormalizeSchema(dsResolveShape(s,d))};
- const operations=settings.recipes.filter(r=>r.enabled).map(r=>{
-  const source=sources.sources.find(s=>s.id===r.source),op=source.operations.find(o=>o.id===r.operation);
-  if(source.status==='deprecated')throw Error('Disable test recipes for deprecated source '+source.name+'.');
-  return {id:op.id,source:source.slug,slug:op.slug,kind:source.kind,direction:op.direction,method:op.method,resource:op.resource|| (source.kind==='api'?'/':''),input:shape(op.input),output:shape(op.output),behavior:r.behavior,dataset:r.dataset,keyField:r.keyField,scenario:r.scenario,latencyMs:r.latencyMs,errorStatus:r.errorStatus,rules:designCopy(r.rules)};
- });
- return {schema:1,engine:'shell-fixtures/1',target:'.test-vault',seed:settings.seed,count:settings.count,locale:settings.locale,referenceDate:settings.referenceDate,entities,operations};
-}
+function tdManifest(d=design()){return buildCompanionFixtureManifest(d);}
 function tdFingerprint(){return JSON.stringify({owner:designOwner(),settings:tdSettings(),semantic:semanticGeneration(design()),sources:dsGeneration(design())});}
 function tdRows(shape,side){
  if(shape.mode==='none'||shape.mode==='unspecified')return [];

@@ -28,7 +28,7 @@ export function noteEntity(m: Model, sourceId: string, operationId: string): Ent
 export async function persistenceCode(templateRoot: string, m: Model, add: Add): Promise<void> {
   const selected = new Map<string, Entity>();
   for (const source of m.sources) for (const op of source.operations) { const entity = noteEntity(m, source.id, op.id); if (entity) selected.set(entity.id, entity); }
-  for(const entity of relationshipScope(m).entities) selected.set(entity.id,entity);
+  for(const entity of relationshipScope(m,true).entities) selected.set(entity.id,entity);
   if (!selected.size) return;
   const imports: string[] = []; const registrations: string[] = [];
   for (const entity of selected.values()) {
