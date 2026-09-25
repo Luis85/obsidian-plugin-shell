@@ -16,7 +16,8 @@ async function scratch(t) {
 }
 async function minimal(t) {
   const root = await scratch(t), inventory = await sourceInputs(process.cwd());
-  for (const path of inventory.roots.filter(path => path !== sidecar && path !== projectFixture)) {
+  // Every optional concept input (test kit, project fixture, starters) stays absent so redirect fixtures can occupy docs/concepts.
+  for (const path of inventory.roots.filter(path => !path.startsWith('docs/concepts/'))) {
     const target = join(root, path);
     if ((await lstat(resolve(path))).isDirectory()) await mkdir(target, { recursive: true });
     else { await mkdir(dirname(target), { recursive: true }); await writeFile(target, ''); }
