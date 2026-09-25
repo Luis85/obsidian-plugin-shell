@@ -18,7 +18,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # On pull requests Template authoring's renamed-feature job already runs
+        # setup, the complete verify and served e2e on Ubuntu with the same
+        # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-latest", "windows-latest"]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
