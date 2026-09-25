@@ -95,3 +95,7 @@ The browser suite downloads an actual project export and passes those bytes to t
 ## Next implementation boundary
 
 The next writer increment must define a reviewed deterministic plan from this envelope, resolve target-relative codebase/tests paths, compile schema/domain/component contracts, preserve foreign and edited files, invalidate stale approvals and prove generated source through the shell's normal qualification. The complete native companion remains downstream of shell readiness. The current entrypoint must not be relabeled as full generation until those writes and their safety/evidence contracts actually exist.
+
+## Implementation workspace generation
+
+The v1 reader documented above remains unchanged. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
