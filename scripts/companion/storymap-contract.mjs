@@ -36,7 +36,7 @@ export function validateStorymaps(value) {
     identity(map, 'map');
     smRequire(smText(map.purpose, 4000) && smText(map.audience, 1000) && ['draft', 'review', 'archived'].includes(map.status) &&
       smCounter(map.revision) && typeof map.updatedAt === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(map.updatedAt) &&
-      Number.isFinite(Date.parse(map.updatedAt)), 'Invalid map metadata.');
+      Number.isFinite(Date.parse(map.updatedAt)) && new Date(map.updatedAt).toISOString() === map.updatedAt, 'Invalid map metadata.');
     smReferences(map.prds);
     for (const key of ['activities', 'steps', 'stories', 'releases']) {
       smRequire(Array.isArray(map[key]) && map[key].length <= STORYMAP_LIMITS[key], 'Collection exceeds the ' + key + ' limit.');

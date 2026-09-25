@@ -89,7 +89,7 @@ with sync_playwright() as pw:
         ok('Portable blueprint contains the design system', js('portableDesign().designSystem.schema===1'))
         roundtrip=js('JSON.stringify(styleGuide())');js('importDesign(JSON.stringify(portableDesign()))')
         ok('Blueprint import roundtrips every saved declaration', js('JSON.stringify(styleGuide())')==roundtrip)
-        ok('Generator review includes both requested document formats', js('sgFiles(design()).length===2&&designFiles(design()).some(f=>f.path==="docs/design/design-system.html")'))
+        ok('Generator review includes both requested document formats', js('sgFiles(design()).length===3&&designFiles(design()).some(f=>f.path==="docs/design/design-system.html")'))
         act('sg-section','typography')
         page.screenshot(path=str(OUT/'typography-dark.png'),full_page=True)
         # Export controls exercise real browser downloads.
@@ -101,7 +101,7 @@ with sync_playwright() as pw:
         exported = browser.new_page(viewport={'width':960,'height':800})
         export_requests=[];exported.on('request', lambda r: export_requests.append(r.url))
         exported.set_content(source)
-        ok('Standalone HTML has every semantic section and no scripts', exported.locator('section[id]').count()==7 and exported.locator('script').count()==0)
+        ok('Standalone HTML has every semantic section and no scripts', exported.locator('section[id]').count()==8 and exported.locator('script').count()==0)
         ok('Standalone HTML has a restrictive resource policy', "default-src 'none'" in exported.locator('meta[http-equiv="Content-Security-Policy"]').get_attribute('content'))
         ok('HTML is self-contained without remote font or asset requests', not export_requests)
         exported.set_viewport_size({'width':420,'height':850});exported.screenshot(path=str(OUT/'export-narrow.png'),full_page=True)

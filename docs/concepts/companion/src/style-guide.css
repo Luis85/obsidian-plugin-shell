@@ -45,3 +45,9 @@
 .sg-draft-preview .sg-entry { border-top: 0; padding: 12px 0; }
 @media (max-width: 980px) { .sg-layout { grid-template-columns: 1fr; gap: 20px; } .sg-navigation { flex-direction: row; flex-wrap: wrap; gap: 6px; } .sg-navigation > button { gap: 10px; } .sg-history { border: 0; margin: 0; padding: 0; } .sg-content { border-left: 0; padding-left: 0; } }
 @media (max-width: 560px) { .sg-form-grid { grid-template-columns: 1fr; } .sg-workspace .page-heading .row { width: 100%; } .sg-workspace .page-heading .btn { flex: 1; } .sg-entry-heading { gap: 8px; } }
+.sg-style-bindings { margin-block: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.sg-style-bindings summary { cursor: pointer; font-weight: 600; padding: 4px; }
+.sg-style-bindings dl>div { display: grid; grid-template-columns: minmax(140px,1fr) minmax(0,1fr); gap: 12px; padding-block: 6px; }
+.sg-style-bindings dd { margin: 0; overflow-wrap: anywhere; }
+.sg-binding-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; margin-block-start: 12px; }
+.sg-css-preview { max-height: 320px; overflow: auto; white-space: pre; font-size: 12px; padding: 12px; }

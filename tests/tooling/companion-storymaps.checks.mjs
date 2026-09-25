@@ -127,3 +127,86 @@ test('[STORYMAP-MARKDOWN-IDS] unresolved reference identities cannot inject Mark
   const out = ctx.smMarkdown(m, d);
   assert.ok(!out.includes(attack)); assert.ok(!out.includes('[unsafe](javascript:bad)'));
 });
+
+vm.runInContext(await readFile('docs/concepts/companion/src/storymap-review.js', 'utf8'), ctx);
+test('[STORYMAP-REVIEW] findings are deterministic, actionable and read-only', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], before = JSON.stringify(d);
+  const findings = plain(ctx.smReviewFindings(m, d));
+  assert.ok(findings.some(f => f.code === 'acceptance'));
+  assert.ok(findings.every(f => f.id === m.id || ctx.smItem(m, f.id)));
+  assert.deepEqual(plain(ctx.smReviewFindings(m, d)), findings);
+  assert.equal(JSON.stringify(d), before);
+});
+test('[STORYMAP-REVIEW-MISSING] map, story and requirement references expose repair identities', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0];
+  m.prds.push({ id: 'missing-prd', label: 'Missing PRD' });
+  m.stories[0].surfaces.push({ id: 'missing-screen', label: '<unsafe> screen' });
+  m.stories[0].requirements.push({ id: 'missing-requirement', prdId: d.prds[0].id, label: 'Missing requirement' });
+  const findings = ctx.smReviewFindings(m, d);
+  for (const code of ['missing-prd', 'missing-surface', 'missing-requirement']) assert.ok(findings.some(f => f.code === code));
+  assert.ok(findings.filter(f => f.code === 'missing-surface').every(f => f.id === m.stories[0].id));
+});
+test('[STORYMAP-REVIEW-NOUI] explicitly headless stories do not require surface mapping', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], r = m.stories[0]; r.ui = 'none'; r.surfaces = []; r.acceptance = 'The command reports the exported bytes.';
+  assert.ok(!ctx.smReviewFindings(m, d).some(f => f.id === r.id));
+  assert.ok(!ctx.smMatchingStories(m, d, { findingFilter: 'interface' }).some(s => s.id === r.id));
+});
+test('[STORYMAP-REVIEW-STRUCTURE] empty parents and missing outcomes remain advisory', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], store = d.storymaps;
+  const a = ctx.smNewItem(store, 'activity'); a.title = 'Empty activity'; m.activities.push(a);
+  const step = ctx.smNewItem(store, 'step', m.activities[0].id); step.title = 'Empty step'; m.steps.push(step);
+  m.purpose = ''; m.audience = ''; m.releases[0].outcome = '';
+  validateStorymaps(store);
+  const codes = ctx.smReviewFindings(m, d).map(f => f.code);
+  for (const code of ['empty-activity', 'empty-step', 'purpose', 'audience', 'outcome']) assert.ok(codes.includes(code));
+});
+test('[STORYMAP-SEARCH] linked current names and parent context are searchable without copying data', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], r = m.stories[0], surface = d.nodes.find(n => n.id === r.surfaces[0].id);
+  surface.label = 'Distinct renamed surface';
+  assert.ok(ctx.smMatchingStories(m, d, { itemQuery: '  DISTINCT renamed  ' }).some(s => s.id === r.id));
+  const context = m.activities.find(a => a.id === m.steps.find(s => s.id === r.stepId).activityId).title;
+  assert.ok(ctx.smMatchingStories(m, d, { itemQuery: context }).some(s => s.id === r.id));
+  assert.ok(!r.surfaces[0].label.includes('Distinct'));
+});
+test('[STORYMAP-SEARCH-REQUIREMENTS] searches current requirement titles across PRDs', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], r = m.stories.find(s => s.requirements.length), ref = r.requirements[0];
+  d.prds.find(p => p.id === ref.prdId).requirements.find(q => q.id === ref.id).title = 'Distinct acceptance contract';
+  assert.deepEqual(plain(ctx.smMatchingStories(m, d, { itemQuery: 'distinct acceptance' })).map(s => s.id), [r.id]);
+});
+test('[STORYMAP-SEARCH-FILTERS] release, acceptance and missing-target filters compose without mutation', () => {
+  const d = copy(seed.design), m = d.storymaps.maps[0], before = JSON.stringify(m);
+  const result = ctx.smMatchingStories(m, d, { releaseFilter: m.releases[0].id, findingFilter: 'acceptance' });
+  assert.ok(result.length > 0); assert.ok(result.every(s => s.releaseId === m.releases[0].id && !s.acceptance.trim()));
+  assert.ok(ctx.smMatchingStories(m, d, { releaseFilter: 'unplanned' }).every(s => s.releaseId === null));
+  assert.equal(ctx.smMatchingStories(m, d, { itemQuery: 'NO SUCH STORY' }).length, 0);
+  assert.equal(ctx.smMatchingStories(m, d, { findingFilter: 'missing' }).length, 0);
+  assert.equal(JSON.stringify(m), before);
+});
+test('[STORYMAP-RELEASE-SCOPE] step coverage is not inherited from another release or an activity link', () => {
+  const m = fixture().maps[0]; const slice = plain(ctx.smReleaseSummary(m, m.releases[1].id));
+  assert.equal(slice.stories, 1); assert.equal(slice.steps, 1); assert.equal(slice.totalSteps, 3); assert.equal(slice.emptySteps.length, 2);
+  assert.equal(ctx.smReleaseSummary(m, null).stories, 1);
+});
+test('[STORYMAP-DRAG-CACHE] drag hit testing consumes the exact supplied geometry', () => {
+  const m = fixture().maps[0], layout = ctx.smLayout(m), original = ctx.smLayout;
+  ctx.smLayout = () => { throw Error('Unexpected layout recomputation'); };
+  try { assert.equal(ctx.smDropTarget(m, m.stories[0].id, { x: layout.columns[2].x, y: layout.lanes[1].y + 16 }, layout).stepId, m.steps[2].id); }
+  finally { ctx.smLayout = original; }
+});
+test('[STORYMAP-DRAG-INVALID] nonfinite positions cannot produce a semantic move', () => {
+  const m = fixture().maps[0];
+  for (const value of [Infinity, -Infinity, NaN]) assert.equal(ctx.smDropTarget(m, m.activities[0].id, { x: value, y: 10 }), null);
+});
+test('[STORYMAP-INDEX] layout never rescans the story collection per cell', () => {
+  const m = fixture().maps[0]; let scans = 0;
+  m.stories = new Proxy(m.stories, { get(target, key) { if (key === 'filter') scans++; return Reflect.get(target, key); } });
+  assert.equal(ctx.smLayout(m).nodes.filter(n => n.kind === 'story').length, 5); assert.equal(scans, 0);
+});
+for (const timestamp of ['2026-02-30T00:00:00.000Z', '2025-02-29T00:00:00.000Z', '2026-09-25T24:00:00.000Z']) {
+  test('[STORYMAP-DATE] refuses normalized rather than real timestamp ' + timestamp, () => {
+    const store = fixture(); store.maps[0].updatedAt = timestamp; assert.throws(() => validateStorymaps(store), /Invalid map metadata/);
+  });
+}
+test('[STORYMAP-DATE-LEAP] an actual leap-day timestamp remains accepted', () => {
+  const store = fixture(); store.maps[0].updatedAt = '2024-02-29T23:59:59.999Z'; assert.equal(validateStorymaps(store), store);
+});
