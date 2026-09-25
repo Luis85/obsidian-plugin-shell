@@ -108,9 +108,9 @@ function companionExampleRequirements(d, surfaces) {
     ]],
     ['Storymaps & scope planning', 'A flat set of requirements loses the user experience and the intended scope of a useful release.', [
       ['Create and open storymaps from either entry point', 'storymaps', 'Navigation and linked PRD details open the same map; returning retains the originating context.'],
-      ['Plan structured user experiences', 'storymap-detail', 'Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo.'],
-      ['Connect without copying artifacts', 'storymap-detail', 'Items link existing sitemap identities and requirements. Missing targets remain explicit; linked artifacts are never deleted.'],
-      ['Plan outcome-oriented release slices', 'storymap-detail', 'Move stories between releases or Unplanned. Removing a release preserves its stories.'],
+      ['Plan structured user experiences', 'storymap-detail', 'Activities, steps and stories keep semantic order across drag, form moves and shared Undo/Redo. Repeated story entry retains the destination; search preserves the complete map.'],
+      ['Connect without copying artifacts', 'storymap-detail', 'Items link existing sitemap identities and requirements. Searchable pickers retain selected references; direct links and Back preserve context. Missing targets remain explicit; linked artifacts are never deleted.'],
+      ['Plan outcome-oriented release slices', 'storymap-detail', 'Move stories between releases or Unplanned. Removing a release preserves its stories. Review surfaces missing outcomes, acceptance notes and targets without claiming implementation; archived maps require restore before editing.'],
       ['Transfer storymaps without data loss', 'storymaps', 'Versioned project JSON preserves IDs, order, content, releases and references. Legacy projects are accepted without inventing stories.'],
     ]],
     ['Safety & qualification', 'A convincing prototype must not imply that simulated execution or stored data is native evidence.', [

@@ -13,6 +13,7 @@ HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
     ('design-styles', 'design-styles/checks.json'),
+    ('storymap-polish', 'storymap-polish/checks.json'),
     ('detail-polish', 'detail-polish/checks.json'),
     ('details', 'details/checks.json'),
     ('storymaps', 'storymaps/checks.json'),

@@ -1,12 +1,14 @@
 // Concept adapter: one canonical project transaction, independent view state.
-const smUi = { details: innerWidth > 1100, lastWidth: innerWidth, owner: null, map: null, item: null, mode: 'map', query: '', status: 'active', prdFilter: '',
-  back: null, form: null, error: '', app: null, api: null, serial: 0, drag: null, viewports: {}, root: null };
+const smUi = { details: false, lastWidth: innerWidth, owner: null, map: null, item: null, mode: 'map', query: '', status: 'active', prdFilter: '',
+  itemQuery: '', releaseFilter: '', findingFilter: '', outbound: null, back: null, form: null, error: '', pageError: '', app: null, api: null, serial: 0, drag: null, viewports: {}, root: null };
+function smPaused() { return !!state.activeRun || !!tdUi.busy || !!storageWarning; }
+function smReadOnly(map = smCurrentMap()) { return map?.status === 'archived' || smPaused(); }
 function smCurrentMap() { return project() ? smFind(smStore(), smUi.map) : null; }
 function smToken() { return JSON.stringify({ owner: designOwner(), revision: design().revision, design: designSnapshot(design()) }); }
 function smFail(error) {
-  smUi.error = error instanceof Error ? error.message : error;
-  if (modalType === 'storymap-form' && document.getElementById('modal').open) { redrawModal(); document.getElementById('sm-form-error')?.focus(); }
-  else { const el = document.getElementById('sm-page-error'); if (el) el.textContent = smUi.error; notify(smUi.error); }
+  smUi.error = String(error instanceof Error ? error.message : error).replace(/^STORYMAP_INVALID: /, '');
+  if (modalType === 'storymap-form' && document.getElementById('modal').open) { redrawModal(); const title = document.getElementById('sm-title'); if (title && !smUi.form?.record.title?.trim()) { title.setAttribute('aria-invalid', 'true'); title.setAttribute('aria-describedby', 'sm-form-error'); title.focus(); } else document.getElementById('sm-form-error')?.focus(); }
+  else { smUi.pageError = smUi.error; const el = document.getElementById('sm-page-error'); if (el) el.textContent = smUi.error; notify(smUi.error); }
   return false;
 }
 function smCanWrite(token = smToken()) {
@@ -18,7 +20,7 @@ function smPersistDesign(candidate, previous) {
   if (!validSavedDesign(candidate)) throw Error('The change would create an invalid project. Nothing was saved.');
   project().design = candidate;
   if (!saveConceptState()) { project().design = previous; throw Error('The change could not be saved. Previous data and history are retained; export recovery before closing.'); }
-  designUi.plan = null; smUi.error = ''; return true;
+  designUi.plan = null; smUi.error = ''; smUi.pageError = ''; return true;
 }
 function smCommit(change, token = smToken()) {
   smCanWrite(token);
@@ -29,6 +31,11 @@ function smCommit(change, token = smToken()) {
   for (const map of store.maps) {
     const old = smFind(smStore(previous), map.id);
     if (old && JSON.stringify(map) !== JSON.stringify(old)) { map.revision = old.revision + 1; map.updatedAt = now; }
+  }
+  // Archived records may only be restored, not edited/deleted through alternate entry points.
+  for (const old of smStore(previous).maps.filter(m => m.status === 'archived')) {
+    const next = smFind(store, old.id);
+    if (!next || JSON.stringify({ ...next, status: old.status, revision: old.revision, updatedAt: old.updatedAt }) !== JSON.stringify(old)) throw Error('Restore this archived map before editing it.');
   }
   validateStorymaps(store); candidate.schema = Math.max(previous.schema, 2); candidate.storymaps = store; candidate.revision++;
   candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = [];
@@ -53,19 +60,23 @@ function smTravel(direction) {
   smPersistDesign(candidate, previous); render(); notify('Design ' + direction + ' complete. Source files and external artifacts were not deleted.');
 }
 function smNormalize() {
-  if (smUi.owner !== designOwner()) { smUi.owner = designOwner(); smUi.map = null; smUi.item = null; smUi.back = null; smUi.viewports = {}; }
+  if (smUi.owner !== designOwner()) { smUi.owner = designOwner(); smUi.map = null; smUi.item = null; smUi.back = null; smUi.viewports = {}; smUi.itemQuery = ''; smUi.releaseFilter = ''; smUi.findingFilter = ''; smUi.outbound = null; smUi.error = ''; smUi.pageError = ''; }
   const map = smCurrentMap(); if (!map) smUi.map = null;
   if (!smItem(map, smUi.item)) smUi.item = null;
+  if (smUi.releaseFilter && smUi.releaseFilter !== 'unplanned' && !map?.releases.some(r => r.id === smUi.releaseFilter)) smUi.releaseFilter = '';
+  const ids = new Set(smStore().maps.map(m => m.id)); for (const id of Object.keys(smUi.viewports)) if (!ids.has(id)) delete smUi.viewports[id];
 }
 function smOpen(id, origin = null, item = null) {
   smNormalize(); const map = smFind(smStore(), id); if (!map) return smFail('That storymap no longer exists.');
-  if (origin) smUi.back = { view: origin, id: origin === 'prds' ? selectedPrd()?.id : designUi.selected, tab: productUi.tab, scroll: document.getElementById('content').scrollTop };
-  smUi.map = id; smUi.item = item; smUi.mode = innerWidth < 700 ? 'outline' : smUi.mode; smUi.error = ''; setView('storymaps');
+  if (smUi.map !== id) { smUi.itemQuery = ''; smUi.releaseFilter = ''; smUi.findingFilter = ''; }
+  if (!origin) smUi.back = null;
+  if (origin) smUi.back = { view: origin, id: origin === 'prds' ? selectedPrd()?.id : designUi.selected, tab: productUi.tab, requirementSearch: productUi.requirementSearch || '', scroll: document.getElementById('content').scrollTop };
+  smUi.map = id; smUi.item = item; smUi.mode = innerWidth < 700 ? 'outline' : smUi.mode; smUi.error = ''; smUi.pageError = ''; setView('storymaps');
 }
 function smReturn() {
   const back = smUi.back; smUi.back = null;
   if (!back) { smUi.map = null; setView('storymaps'); return; }
-  if (back.view === 'prds') { productUi.prd = back.id; productUi.tab = back.tab; }
+  if (back.view === 'prds') { productUi.prd = back.id; productUi.tab = back.tab; productUi.requirementSearch = back.requirementSearch || ''; }
   if (back.view === 'sitemap') selectSitemapItem('surface', back.id);
   setView(back.view); document.getElementById('content').scrollTop = back.scroll;
 }
@@ -74,6 +85,8 @@ function smBegin(kind, id = null, parent = null, release = null, prdId = null) {
     smCanWrite(); const store = smCopy(smStore()), map = smCurrentMap(); let record;
     if (kind === 'map') {
       const existing = id ? smFind(store, id) : null; if (id && !existing) throw Error('That map no longer exists.');
+      if (existing?.status === 'archived') throw Error('Restore this archived map before editing it.');
+      if (!id && store.maps.length >= STORYMAP_LIMITS.maps) throw Error('The project already has ' + STORYMAP_LIMITS.maps + ' maps. Remove an unneeded map before creating another.');
       record = existing ? smCopy(existing) : smNewMap(store);
       const prd = prdId ? design().prds.find(p => p.id === prdId) : null;
       if (prdId && !prd) throw Error('That PRD no longer exists.');
@@ -83,15 +96,18 @@ function smBegin(kind, id = null, parent = null, release = null, prdId = null) {
       const existing = id ? smItem(map, id) : null; if (id && existing?.kind !== kind) throw Error('That item no longer exists.');
       if (!id && kind === 'step' && !map.activities.some(a => a.id === parent)) throw Error('Add an activity first, then add a step to it.');
       if (!id && kind === 'story' && !map.steps.some(s => s.id === parent)) throw Error('Add a step first, then add a story to it.');
+      const collection = { activity: 'activities', step: 'steps', story: 'stories', release: 'releases' }[kind];
+      if (!existing && map[collection].length >= STORYMAP_LIMITS[collection]) throw Error('This map has reached its ' + collection + ' limit. Remove an unneeded item first.');
       record = existing ? smCopy(existing.record) : smNewItem(store, kind, parent, release);
     }
-    smUi.form = { kind, id, mapId: map?.id || null, record, nextId: store.nextId, token: smToken(), removal: false, origin: prdId ? { view: 'prds', id: prdId, tab: productUi.tab, scroll: document.getElementById('content').scrollTop } : null };
+    smUi.form = { kind, id, mapId: map?.id || null, record, nextId: store.nextId, token: smToken(), removal: false, origin: prdId ? { view: 'prds', id: prdId, tab: productUi.tab, requirementSearch: productUi.requirementSearch || '', scroll: document.getElementById('content').scrollTop } : null };
     smUi.error = ''; showModal('storymap-form');
   } catch (error) { smFail(error); }
 }
-function smSave() {
-  const f = smUi.form; if (!f) return;
+function smSave(another = false) {
+  const f = smUi.form; if (!f || f.removal) return;
   try {
+    if (another && (f.id || f.kind !== 'story')) throw Error('Add another is available only when creating a story.');
     if (f.kind === 'move') {
       smCommit(store => { const map = smFind(store, f.mapId); if (!map || map.status === 'archived') throw Error('Open an active map first.'); smMove(map, f.id, f.record); }, f.token);
     } else if (f.kind === 'link-prd') {
@@ -120,7 +136,8 @@ function smSave() {
     modalOriginal = null; closeModal();
     if (f.kind === 'map') { if (!f.id) smUi.back = f.origin; smUi.map = f.record.id; smUi.owner = designOwner(); setView('storymaps'); }
     else { if (!['move', 'link-prd'].includes(f.kind)) smUi.item = f.record.id; render(); }
-    notify('Storymap saved. Planning and links are not implementation evidence.');
+    if (another && smCurrentMap().stories.length < STORYMAP_LIMITS.stories) { smBegin('story', null, f.record.stepId, f.record.releaseId); smAnnounce('Story saved. Add the next story in the same step and release.'); }
+    else { smFocusItem(); notify(f.kind === 'move' ? 'Item moved. Undo is available.' : 'Storymap saved.'); }
   } catch (error) { smFail(error); }
 }
 function smConfirmRemove() {
@@ -144,6 +161,24 @@ function smBeginPrdLinks(id) {
   smUi.form = { kind: 'link-prd', record: { id, maps: smStore().maps.filter(map => map.prds.some(ref => ref.id === id)).map(map => map.id) }, token: smToken(), removal: false };
   smUi.error = ''; showModal('storymap-form');
 }
+function smFocusItem() {
+  requestAnimationFrame(() => {
+    if (state.view !== 'storymaps' || document.querySelector('dialog[open]')) return;
+    const card = [...document.querySelectorAll('[data-sm-item]')].find(el => el.dataset.smItem === smUi.item);
+    const target = card?.querySelector('[data-action="sm-select"],[data-action="sm-find-item"]') || document.querySelector('.sm-heading h1');
+    target?.focus({ preventScroll: true });
+  });
+}
+function smRememberDeparture() {
+  smUi.outbound = { owner: designOwner(), map: smUi.map, item: smUi.item, mode: smUi.mode, back: smUi.back, itemQuery: smUi.itemQuery, releaseFilter: smUi.releaseFilter, findingFilter: smUi.findingFilter, scroll: document.getElementById('content').scrollTop };
+}
+function smReturnFromArtifact() {
+  const back = smUi.outbound; if (!back || back.owner !== designOwner() || !smFind(smStore(), back.map)) throw Error('The originating storymap is no longer available.');
+  Object.assign(smUi, back); smUi.outbound = null; setView('storymaps'); document.getElementById('content').scrollTop = back.scroll; smFocusItem();
+}
+function smReturnLink() {
+  return smUi.outbound?.owner === designOwner() && smFind(smStore(), smUi.outbound.map) ? button('Back to storymap', 'sm-return-map', '', 'small ghost') : '';
+}
 function handleStorymapAction(action, value = '') {
   if (['nav', 'palette-nav'].includes(action) && value === 'storymaps') { smUi.map = null; smUi.item = null; smUi.back = null; return false; }
   if (!action.startsWith('sm-')) return false;
@@ -154,15 +189,21 @@ function handleStorymapAction(action, value = '') {
       case 'sm-open': smOpen(value); break;
       case 'sm-open-prd': smOpen(value, 'prds'); break;
       case 'sm-backlink': { const [mapId, item] = value.split(':'); smOpen(mapId, 'sitemap', item); break; }
-      case 'sm-overview': smUi.map = null; smUi.item = null; smUi.back = null; setView('storymaps'); break;
+      case 'sm-overview': smUi.map = null; smUi.item = null; smUi.back = null; smUi.pageError = ''; setView('storymaps'); break;
       case 'sm-return': smReturn(); break;
+      case 'sm-return-map': smReturnFromArtifact(); break;
       case 'sm-new': smBegin('map', null, null, null, value || null); break;
       case 'sm-map-edit': smBegin('map', value || map?.id); break;
       case 'sm-add': { const [kind, parent, release] = value.split(':'); smBegin(kind, null, parent || null, release || null); break; }
       case 'sm-edit': { const item = smItem(map, value); if (!item) throw Error('That item no longer exists.'); smBegin(item.kind, value); break; }
       case 'sm-select': smSelect(value || null); break;
-      case 'sm-mode': if (['map', 'outline'].includes(value)) { smUi.mode = value; render(); } break;
+      case 'sm-mode': if (['map', 'outline', 'review'].includes(value)) { smUi.mode = value; render(); } break;
       case 'sm-save': smSave(); break;
+      case 'sm-save-another': smSave(true); break;
+      case 'sm-find-clear': smUi.itemQuery = ''; smUi.releaseFilter = ''; smUi.findingFilter = ''; render(); document.getElementById('sm-itemQuery')?.focus(); break;
+      case 'sm-find-item': smUi.item = value; if (smUi.mode !== 'outline') smUi.mode = 'map'; render(); requestAnimationFrame(() => { smSelect(value); smLocate(); const row = [...document.querySelectorAll('.sm-outline-story')].find(el => el.dataset.smItem === value); row?.scrollIntoView({ block: 'center' }); row?.querySelector('button')?.focus({ preventScroll: true }); smFocusItem(); }); break;
+      case 'sm-repair': if (value === map.id) smBegin('map', map.id); else { const item = smItem(map, value); if (item) smBegin(item.kind, value); } break;
+      case 'sm-requirement': { const [prdId, id] = JSON.parse(value), prd = design().prds.find(p => p.id === prdId); if (!prd?.requirements.some(r => r.id === id)) throw Error('Requirement target missing. Relink it in the story editor.'); smRememberDeparture(); productUi.prd = prdId; productUi.requirementSearch = ''; productUi.tab = 'requirements'; setView('prds'); const target = [...document.querySelectorAll('[data-action="product-requirement-edit"]')].find(el => el.dataset.value === id); target?.scrollIntoView({ block: 'center' }); target?.focus({ preventScroll: true }); break; }
       case 'sm-move': smBeginMove(value); break;
       case 'sm-delete': if (smUi.form?.id) { smUi.form.removal = true; redrawModal(); } break;
       case 'sm-keep': if (smUi.form) { smUi.form.removal = false; redrawModal(); } break;
@@ -176,7 +217,7 @@ function handleStorymapAction(action, value = '') {
       case 'sm-zoom': if (smUi.api) smUi.api.zoomTo(Math.max(.25, Math.min(1.5, smUi.api.viewport.value.zoom + (value === 'in' ? .1 : -.1)))); break;
       case 'sm-locate': smLocate(); break;
       case 'sm-surface': smGoSurface(value); break;
-      case 'sm-prd': { const prd = design().prds.find(p => p.id === value); if (!prd) throw Error('PRD target missing. Relink it in map settings.'); productUi.prd = value; productUi.tab = 'document'; setView('prds'); break; }
+      case 'sm-prd': { const prd = design().prds.find(p => p.id === value); if (!prd) throw Error('PRD target missing. Relink it in map settings.'); smRememberDeparture(); productUi.prd = value; productUi.tab = 'document'; setView('prds'); break; }
       case 'sm-export': smExport(); break;
       case 'sm-clear-filters': smUi.query = ''; smUi.prdFilter = ''; smUi.status = 'active'; render(); break;
     }
@@ -185,15 +226,21 @@ function handleStorymapAction(action, value = '') {
 }
 function smGoSurface(id) {
   if (!design().nodes.some(node => node.id === id)) throw Error('Sitemap target missing. Relink or remove it in the item editor.');
-  selectSitemapItem('surface', id); referenceUi.panel = 'inspector'; canvasUi.inspector = 'links';
+  smRememberDeparture(); selectSitemapItem('surface', id); referenceUi.panel = 'inspector'; canvasUi.inspector = 'links';
   canvasState().collapsed = canvasState().collapsed.filter(parent => !nodeDescendants(design(), parent).has(id));
   setView('sitemap'); fitMap(true);
 }
 // Text editing keeps native undo; map history shortcuts use the same guarded transaction.
 document.addEventListener('keydown', event => {
+  if (modalType === 'storymap-form' && document.getElementById('modal').open && !document.getElementById('discard-dialog')?.open && (event.ctrlKey || event.metaKey) && event.key === 'Enter' && !event.isComposing) { event.preventDefault(); if (!event.repeat && !smUi.form?.removal) smSave(false); return; }
   if (state.view !== 'storymaps' || !project() || document.querySelector('dialog[open]') || event.target.closest('input,textarea,select,[contenteditable=true]')) return;
   if ((event.ctrlKey || event.metaKey) && ['z', 'y'].includes(event.key.toLowerCase())) {
     event.preventDefault(); if (event.repeat) return;
     try { smTravel(event.shiftKey || event.key.toLowerCase() === 'y' ? 'redo' : 'undo'); } catch (error) { smFail(error); }
   }
 });
+
+// Transient menus dismiss without changing the map or moving focus on pointer use.
+document.addEventListener('pointerdown', event => {
+  for (const menu of document.querySelectorAll('.sm-export-menu[open],.sm-prd-menu[open]')) if (!menu.contains(event.target)) menu.open = false;
+}, true);
