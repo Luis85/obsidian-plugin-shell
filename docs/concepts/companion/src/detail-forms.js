@@ -8,6 +8,7 @@ function dtBegin(type, id = null, kind = null, connection = null) {
     const component = kind === 'component' ? design().library.find(c => c.id !== (doc.kind === 'component' ? doc.ownerId : null) && c.status !== 'deprecated') : null;
     if (!id && kind === 'component' && !component) throw Error('Create another reusable component in the library first.');
     record = existing ? dtCopy(existing) : dtNewNode(store, kind || 'text', parent, component);
+    if(!existing && kind==='slot')record.label=dtOwner(doc)?.slots.split(/[,\n]/).map(s=>s.trim()).find(Boolean)||'default';
     if (!id) { const siblings = doc.nodes.filter(n => n.parentId === parent); record.position = { x: 24 + siblings.length % 2 * 280, y: 72 + Math.floor(siblings.length / 2) * 170 }; }
   } else if (type === 'edge') {
     const existing = id && doc.edges.find(e => e.id === id); if (id && !existing) throw Error('That interaction no longer exists.');
@@ -39,11 +40,11 @@ function dtBindingFields(r) {
     <p class="small muted">No provider runs in this editor. Describe the field and operation the implementation should use.</p></details>`;
 }
 function dtNodeFields(f, doc) {
-  const r = f.record, blocked = f.id ? dtDescendants(doc, f.id) : new Set(), parents = [['', 'Canvas root'], ...doc.nodes.filter(n => n.kind === 'region' && !blocked.has(n.id)).map(n => [n.id, n.label])];
+  const r = f.record, blocked = f.id ? dtDescendants(doc, f.id) : new Set(), parents = [['', 'Canvas root'], ...doc.nodes.filter(n => ['region', 'slot', 'component'].includes(n.kind) && !blocked.has(n.id)).map(n => [n.id, n.label])];
   return `${dtInput('Element label / accessible name', 'label', r.label)}<div class="cols2">${dtSelectField('Parent region', 'parentId', r.parentId, parents)}${r.kind === 'region' ? dtSelectField('Reading layout', 'layout', r.layout, [['stack', 'Vertical stack'], ['row', 'Horizontal row'], ['grid', 'Two-column grid']]) : `<p class="small muted">${esc(r.kind)} element. Containment is separate from interaction arrows.</p>`}</div>
     ${r.kind === 'component' ? dtComponentFields(r) : dtInput(r.kind === 'slot' ? 'Fallback slot content' : 'Content / placeholder', 'text', r.text, 8000, true)}
     ${r.kind === 'slot' ? '<p class="small muted">Use a slot name declared in the owner’s library contract as the element label.</p>' : ''}
-    ${r.kind === 'input' ? dtControlFields(r) : ''}${r.kind === 'component' ? dtSlotFields(r,doc) : ''}${dtBindingFields(r)}${dtInput('Accessibility and validation notes', 'a11y', r.a11y, 2000, true)}
+    ${cpControlFields(r,doc)}${r.kind === 'input' ? dtControlFields(r) : ''}${r.kind === 'component' ? dtSlotFields(r,doc) : ''}${dtBindingFields(r)}${dtInput('Accessibility and validation notes', 'a11y', r.a11y, 2000, true)}
     <fieldset><legend>Visible in preview states</legend><div class="row wrap">${DETAIL_STATES.map(s => `<label class="dt-check"><input type="checkbox" data-field="dt-visible" data-key="${s}" ${r.visibleIn.includes(s) ? 'checked' : ''}>${s}</label>`).join('')}</div></fieldset>
     <details><summary>Canvas geometry (not implementation layout)</summary><div class="cols2">${dtInput('X position', 'x', r.position.x)}${dtInput('Y position', 'y', r.position.y)}${dtInput('Canvas width', 'width', r.size.width)}${dtInput('Canvas height', 'height', r.size.height)}</div><p class="small muted">Moving or resizing the canvas does not change reading order or generated layout.</p></details>`;
 }
@@ -51,8 +52,8 @@ function dtEdgeFields(r, doc) {
   const choices = doc.nodes.map(n => [n.id, n.label]);
   return `<div class="cols2">${dtSelectField('From element', 'source', r.source, choices)}${dtSelectField('To element', 'target', r.target, choices)}</div>
     ${dtInput('Interaction label', 'label', r.label)}${dtInput('Trigger event', 'event', r.event, 60)}
-    ${dtActionFields(r,doc)}
-    ${!r.action ? dtSelectField('Navigation target (optional)', 'targetSurfaceId', r.targetSurfaceId, dtRefChoices([['', 'Stay on this surface'], ...design().nodes.filter(dtPageEligible).map(n => [n.id, n.label])], r.targetSurfaceId)) : ''}
+    ${!r.effect ? dtActionFields(r,doc) : ''}${!r.action ? cpEffectFields(r) : ''}
+    ${!r.action && !r.effect ? dtSelectField('Navigation target (optional)', 'targetSurfaceId', r.targetSurfaceId, dtRefChoices([['', 'Stay on this surface'], ...design().nodes.filter(dtPageEligible).map(n => [n.id, n.label])], r.targetSurfaceId)) : ''}
     ${dtInput('Behavior and conditions', 'notes', r.notes, 4000, true)}${dtInput('Acceptance scenario (Given / When / Then)', 'acceptance', r.acceptance, 8000, true)}
     <p class="small muted">An interaction describes intent. It does not execute code or prove a test has passed.</p>`;
 }
@@ -64,13 +65,14 @@ function detailForm() {
     button('Cancel', 'close', '', 'ghost') + (f.id && !f.removal ? button('Remove…', 'dt-remove', '', 'danger') : '') + button(f.removal ? 'Remove from design' : 'Save design', f.removal ? 'dt-remove-confirm' : 'dt-save', '', 'primary'));
 }
 function editDetailField(el) {
+  if (cpEditField(el)) return true;
   if (dtSearchInput(el)) return true;
   if (!el.dataset.field?.startsWith('dt-') || !dtUi.form) return false;
   const key = el.dataset.field.slice(3), f = dtUi.form, r = f.record, value = el.value;
   if (dtExecutableField(key,el,f)) return true;
   if (key.startsWith('prop-')) { try { dtPropertyInput(el); } catch (error) { dtFail(error); } }
   else if (key === 'props') { f.propsText = value; f.propErrors = {}; const panel = document.getElementById('dt-properties'); if (panel) panel.innerHTML = dtPropertyRows(r); }
-  else if (key === 'parentId' || key === 'targetSurfaceId') r[key] = value || null;
+  else if (key === 'parentId' || key === 'targetSurfaceId') { r[key] = value || null; if (key === 'parentId') { const parent = dtDocument().nodes.find(n => n.id === value); if (parent?.component) r.slotName = cpDefinition(parent)?.slots.split(/[,\n]/)[0]?.trim() || ''; else delete r.slotName; redrawModal(); } }
   else if (['x', 'y'].includes(key)) r.position[key] = Number(value);
   else if (['width', 'height'].includes(key)) r.size[key] = Number(value);
   else if (key === 'visible') r.visibleIn = el.checked ? [...new Set([...r.visibleIn, el.dataset.key])] : r.visibleIn.filter(s => s !== el.dataset.key);
@@ -86,9 +88,10 @@ function editDetailField(el) {
 function dtReviewVersion() {
   const f = dtUi.form, c = design().library.find(c => c.id === f?.record.component?.id); if (!c) throw Error('The component definition is missing.');
   // This is still a draft: the contract, retained overrides and variant are reviewed before Save.
-  f.record.component.version = c.version; dtUi.error = 'Current contract selected in this draft. Review declared props and variant before saving; incompatible overrides are rejected.'; redrawModal();
+  f.record.component.version = c.version; delete f.record.component.revisionId; dtUi.error = 'Current contract selected in this draft. Review declared props and variant before saving; incompatible overrides are rejected.'; redrawModal();
 }
 function dtSave() {
+  if (dtUi.form?.payloadError) return dtFail(dtUi.form.payloadError);
   const f = dtUi.form; if (!f || f.removal) return;
   if (Object.keys(f.propErrors || {}).length) throw Error('Repair the invalid number or reset its override before saving.');
   const record = dtCopy(f.record);

@@ -1,22 +1,25 @@
 import type { DetailControl, DetailData } from './detail-controls.ts';
 import type { DetailAction } from './detail-actions.ts';
+import type { CompositionUI } from '../composition-contract.mjs';
 /** Data-only contracts shared by the compiler and generated presentation. */
 export type DetailState = 'default' | 'loading' | 'empty' | 'error' | 'disabled';
 export type DetailLiteral = string | number | boolean;
 export interface DetailBinding { sourceId: string; operationId: string; field: string }
 export interface DetailElement {
-  id: string; kind: 'region' | 'text' | 'input' | 'button' | 'component' | 'slot';
+  id: string; kind: 'region' | 'text' | 'input' | 'button' | 'component' | 'slot' | 'heading' | 'textarea' | 'select' | 'checkbox' | 'number' | 'table' | 'list' | 'alert' | 'divider' | 'tabs' | 'image';
   label: string; text: string; parentId: string | null; layout: 'stack' | 'row' | 'grid';
   component: { id: string; version: string; variantId: string } | null;
   props: Record<string, DetailLiteral>; binding: DetailBinding | null;
-  a11y: string; visibleIn: DetailState[]; control?: DetailControl; slots?: Record<string, string[]>;
+  ui?: CompositionUI; slotName?: string; contentProp?: string; options?: string[]; slotCapacity?: 'one'|'many'; slotKinds?:string[];
+  a11y: string; visibleIn: DetailState[]; control?: DetailControl; slots?: Record<string,string[]>;
 }
 export interface DetailInteraction {
   id: string; source: string; target: string; event: string; label: string;
-  notes: string; acceptance: string; targetSurfaceId: string | null; action?: DetailAction;
+  notes: string; acceptance: string; targetSurfaceId: string | null; action?: DetailAction; effect?: {type:'state'|'toggle'|'value'|'focus'|'emit';value: DetailLiteral;payload?:DetailLiteral};
 }
 export interface DetailDocument {
   id: string; kind: 'page' | 'component'; ownerId: string; ownerLabel: string;
+  designSystem?: unknown; scenarios?: {id:string;name:string;state:DetailState;width:'wide'|'narrow';values:Record<string,unknown>;bindings:{sourceId:string;operationId:string;value:unknown}[];recipe?:unknown}[];
   notes: string; nodes: DetailElement[]; edges: DetailInteraction[];
 }
 export interface DetailRequest {

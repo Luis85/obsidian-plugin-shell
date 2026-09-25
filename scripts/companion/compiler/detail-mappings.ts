@@ -6,7 +6,7 @@ import type { ComponentMembers } from './detail-model.ts';
 /** Validate references before the UI can route a request; runtime guards validate actual values. */
 export function validateMappings(m: Model, doc: DetailDocument, contract: ComponentMembers): void {
   function mapping(value: DetailMapping): void {
-    if (value.kind === 'draft') requireValue(doc.nodes.some(n => n.id === value.nodeId && n.kind === 'input'), 'Missing mapped input: ' + value.nodeId);
+    if (value.kind === 'draft') requireValue(doc.nodes.some(n => n.id === value.nodeId && ['input','number','checkbox','textarea','select','tabs'].includes(n.kind)), 'Missing mapped input: ' + value.nodeId);
     if (value.kind === 'prop') requireValue(doc.kind === 'component' && Object.hasOwn(contract.props, value.name), 'Missing mapped prop: ' + value.name);
     if (value.kind === 'source') {
       let schema = m.sources.find(s => s.id === value.sourceId)?.operations.find(o => o.id === value.operationId && o.direction !== 'write')?.output;

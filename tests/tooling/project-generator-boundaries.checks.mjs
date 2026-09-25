@@ -13,6 +13,7 @@ import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts
 import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const original=JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
+const legacyProject=JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json',import.meta.url),'utf8'));
 const fixture=()=>boundaryProject(original);
 for(const [kind,raw,value] of [['number','0',0],['number','-2.5',-2.5],['number','',null],['checkbox',false,false],['checkbox',true,true],['json-editor','{"active":false,"count":0}',{active:false,count:0}],['json-file','[1,2]',[1,2]],['date','2024-02-29','2024-02-29'],['markdown-editor','# Test\n<script>inert</script>','# Test\n<script>inert</script>']]) test('typed control '+kind+' preserves '+JSON.stringify(raw),()=>assert.deepEqual(parseDetailControl(raw,{kind}),value));
 for(const [kind,raw] of [['number','NaN'],['number','1e999'],['checkbox','false'],['date','2025-02-29'],['date','2026-01-01suffix'],['datetime-local','2026-01-01T25:00'],['json-editor','{bad}'],['json-file','{"__proto__":{}}']]) test('typed control rejects '+kind+' '+raw,()=>assert.throws(()=>parseDetailControl(raw,{kind})));
@@ -36,19 +37,19 @@ test('payload maps typed draft, source, prop and event values without coercion',
  assert.throws(()=>mapDetailPayload({kind:'event'},{...context,payload:new Date()}),/INVALID/);
 });
 test('legacy schema remains identical; executable metadata explicitly requires schema 2',()=>{
- const legacy=structuredClone(original.design.detailDesigns);assert.equal(validateDetailDesigns(legacy),legacy);
- legacy.documents[1].nodes[1].control={kind:'number'};assert.throws(()=>validateDetailDesigns(legacy),/schema 2/);
+ const legacy=structuredClone(legacyProject.design.detailDesigns);assert.equal(validateDetailDesigns(legacy),legacy);
+ legacy.documents[1].nodes[1].control={kind:'number'};assert.throws(()=>validateDetailDesigns(legacy),/Unsupported element fields|schema 2/);
  assert.equal(validateDetailDesigns(fixture().design.detailDesigns).schema,2);
 });
 test('slot assignments render once and follow host visibility, rejecting cycles/duplicate owners',()=>{
- const project=fixture(),doc=detailDocuments(projectModel(project)).at(-1);
- doc.nodes.find(n=>n.id==='detail-node-111').visibleIn=['default'];
- assert.ok(!visibleDetails(doc,'error').some(n=>n.id==='detail-node-113'));
+ const project=fixture(),doc=detailDocuments(projectModel(project)).find(d=>d.id==='detail-document-5000');
+ doc.nodes.find(n=>n.id==='detail-node-5011').visibleIn=['default'];
+ assert.ok(!visibleDetails(doc,'error').some(n=>n.id==='detail-node-5013'));
  for(const variant of ['cycle','duplicate','nonroot']) {
-  const p=fixture(),d=p.design.detailDesigns.documents.at(-1),n=d.nodes.find(n=>n.id==='detail-node-111');
-  if(variant==='cycle')n.slots.content=['detail-node-101'];
-  if(variant==='duplicate')n.slots.extra=['detail-node-112'];
-  if(variant==='nonroot')n.slots.content=['detail-node-113'];
+  const p=fixture(),d=p.design.detailDesigns.documents.at(-1),n=d.nodes.find(n=>n.id==='detail-node-5011');
+  if(variant==='cycle')n.slots.content=['detail-node-5001'];
+  if(variant==='duplicate')n.slots.extra=['detail-node-5012'];
+  if(variant==='nonroot')n.slots.content=['detail-node-5013'];
   assert.throws(()=>detailDocuments(projectModel(p)),/Slot|slot/);
  }
 });
@@ -67,13 +68,13 @@ test('mapped references, literal contracts and native output contracts fail befo
 test('native adapters, typed controls, slot content and mapped handlers are generated with custom roots',async()=>{
  const p=fixture();p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
  const files=new Map((await projectFiles(root,projectModel(p))).map(e=>[e.path,e.content]));
- const code=files.get('product/code/generated/presentation/components/details/detail-document-100.vue');
+ const code=files.get('product/code/generated/presentation/components/details/detail-document-5000.vue');
  for(const part of ['type="checkbox"','type="number"','type="file"','<textarea','<select','<template #content>'])assert.ok(code.includes(part),part);
- assert.equal((code.match(/data-design-node="detail-node-112"/g)||[]).length,1);
+ assert.equal((code.match(/data-design-node="detail-node-5012"/g)||[]).length,1);
  assert.match(files.get('src/bootstrap/features.ts'),/GBoundaryRecord: register\(GBoundaryRecord\)/);
  assert.match(files.get('product/code/generated/infrastructure/sources/boundary-records.ts'),/noteOperations/);
  assert.ok(!files.get('product/code/generated/infrastructure/sources/boundary-records.ts').includes('NotImplementedError'));
- assert.ok(!files.has('product/code/generated/application/interactions/detail-edge-114.ts'));
+ assert.ok(!files.has('product/code/generated/application/interactions/detail-edge-5014.ts'));
  assert.ok(files.has('product/specs/project/persistence/boundary-record.test.ts'));
- assert.deepEqual(original.design.detailDesigns.schema,1);
+ assert.deepEqual(legacyProject.design.detailDesigns.schema,1);
 });

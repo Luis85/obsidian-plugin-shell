@@ -66,6 +66,8 @@ Imported JSON is data. It cannot provide code templates, commands, dependency ve
 
 The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Visual editors such as Vue Flow, domain-specific business rules, database drivers and translations still need product implementation and behavioral tests. Explicit restrict relationships, HTTPS JSON providers and seeded source recipes are generated; see [provider and relationship contracts](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md). Native note operations, typed controls, slot-content assignments and explicit action mappings are generated under the contracts below. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
 
+The output is a development shell. Components without detail designs remain implementation placeholders. Authored details compile as described below; diagram coordinates do not imply pixel-perfect reproduction of the browser editor. Rich editors such as Vue Flow, field editing, semantic relationship rules, real source persistence, payload mappings, translations and seeded source recipes still need implementation and behavioral tests. Preserve the delivery order: shell qualification, native companion implementation on the generated shell, native acceptance, publication last.
+
 ## Technical references
 
 - Pinia testing: https://pinia.vuejs.org/cookbook/testing.html — generated tests instantiate actual Pinia rather than replacing actions with automatic mocks.
@@ -131,3 +133,58 @@ Both the actual companion export and an explicitly synthetic boundary project ar
 ## Provider, relationship and recipe implementation
 
 The generator now emits executable recipe tooling, typed HTTPS JSON providers, a complete-source override registry with lifecycle cleanup, and native relationship preflight. See [the integration guide](GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md). These additions do not convert requirement prose into passing acceptance evidence or replace native Obsidian qualification.
+
+## Executable detailed-design generation
+
+Saved v3 page/component designs now compile to editable Vue SFCs. Page details replace the
+placeholder page composition; component details implement the matching reusable library SFC.
+Each document also has managed data specifications, traceability and generated verification.
+
+- Regions compile as stack, wrapping row or responsive grid containers, in semantic array/parent order.
+  Canvas coordinates and editing-frame sizes are deliberately not CSS layout instructions.
+- Text is escaped data. Typed inputs, selectors, tabs, lists, tables and buttons use their
+  declared semantics. Named slots carry caller-owned content or fallback content; immutable
+  revision dependencies have separate generated identities. Declarative local UI effects
+  execute; arbitrary conditions and business-output mappings are never inferred.
+- Reusable instances import one definition, receive typed primitive props and merge reviewed
+  variant defaults with local overrides. False, zero and empty text remain valid overrides.
+  Stale versions, missing variants, unknown props and wrong types stop generation.
+- `designState` controls default/loading/empty/error/disabled; hidden ancestors suppress children.
+  Without an explicit state, referenced source projections and local interaction status drive
+  loading/error/empty. Disabled/loading controls cannot dispatch a business interaction.
+- Source bindings traverse declared own-property paths such as `0.title`, never expressions.
+  They expose the actual per-view Pinia projection. Typing changes a local draft only.
+  Only separately declared on-open read flows start automatically. Payload and write mapping
+  stays in the typed application hooks; no implicit save follows an input change.
+- A declared navigation target routes through the navigation store or native modal callback.
+  Other interactions dispatch stable-ID requests to `application/interactions/<edge-id>.ts`.
+  For interactions without a declared UI effect, those hooks fail explicitly until implemented. Pending duplicates are ignored, errors retain
+  drafts, and disposed views do not accept late completion updates.
+
+`domain/components/contracts` contains typed prop/event/slot contracts. Member declarations
+use `name:string`, `name:number`, `name:boolean`, or event-only `name:void`. Unsupported
+syntax is rejected rather than copied as code or widened to `any`. Component custom-event
+payloads remain implementation contracts; prose such as “emit select” is not a machine mapping.
+
+`design/detail-traceability.json` links documents, Vue files, interaction hooks and acceptance
+tests. Generated tests exercise five-state rendering, real event dispatch, declared navigation,
+source/service/Pinia projections and runtime failure/disposal behavior. PRD and interaction
+acceptance prose remains explicit TODOs. UI wiring passing is not acceptance of that prose.
+
+Use the existing reviewed plan/apply workflow for regeneration. Expanded component trees are
+bounded; unresolved references, ambiguous event branching and projects larger than the
+ownership inventory fail before writes. Consumer-edit conflict protection remains unchanged.
+
+Technical basis: [Vue props](https://vuejs.org/guide/components/props.html),
+[Vue events](https://vuejs.org/guide/components/events.html),
+[Pinia testing](https://pinia.vuejs.org/cookbook/testing.html) and
+[Vitest test semantics](https://vitest.dev/api/test). Dependency pins are unchanged.
+
+## Complete v4 composition
+
+See [composition guide](../concepts/companion/COMPOSITION.md) for responsive layout, token references,
+instance slots, revision snapshots, fixtures and supported effects. The current self-project
+contains 80 working and 54 captured documents; code generation includes both. Live and captured
+local font references use safe declared family names or native font variables; no fonts are downloaded.
+The Nuxt UI stylesheet path and customization ownership introduced by the Design System increment
+remain active alongside detailed component styles.
