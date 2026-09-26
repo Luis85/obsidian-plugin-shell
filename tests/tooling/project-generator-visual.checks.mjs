@@ -167,3 +167,35 @@ test('external adapter failures surface as a message instead of throwing into Vu
   assert.doesNotThrow(() => bind(dom.document.createElement('div'))); await settle();
   assert.equal(model.message.value, 'External component implementation required.');
 });
+test('every interaction declared for one event runs, in order, within one pending span', async () => {
+  const spec = page([
+    nuxt('vn-1', 'u-button', {}, { events: [act('vi-1', 'click', [{ kind: 'set-value', nodeId: 'vn-2', value: 'first' }]), act('vi-2', 'click', [{ kind: 'toggle', nodeId: 'vn-3' }, { kind: 'navigate', surfaceId: 'surface-b' }])] }),
+    text('vn-2', { kind: 'state', nodeId: 'vn-2' }), text('vn-3', lit('Toggled')),
+  ]);
+  const { model, requests, navigated } = mountVisual(spec);
+  model.on('vn-1').click(); await settle();
+  assert.equal(model.text('vn-2'), 'first'); assert.equal(model.visible('vn-3'), false); assert.deepEqual(navigated, ['surface-b']);
+  assert.deepEqual(requests.map(r => r.interactionId), ['vi-1', 'vi-2']); assert.equal(model.message.value, ''); assert.equal(model.state.value, 'default');
+});
+const editorTemplate = (props, extra = []) => ({ kind: 'component', id: 'vc-1', libraryId: 'lib', exportName: 'Editor', description: '', props: [], slots: [], emits: [], variants: [], scenarios: [], dependencies: [{ package: 'editor-lib', version: '1.0.0', purpose: 'Editing' }],
+  template: [{ id: 'vn-1', kind: 'external', package: 'editor-lib', adapter: 'editor', props, events: [] }, ...extra] });
+const recorder = log => () => ({ mount: (el, props) => { log.push(['mount', el.isConnected, props.value]); }, update: props => { log.push(['update', props.value]); }, destroy: () => { log.push(['destroy']); } });
+test('state-bound external props update the adapter after a local set-value', async () => {
+  const log = [];
+  const component = editorTemplate({ value: { kind: 'state', nodeId: 'vn-2' } }, [nuxt('vn-2', 'u-button', {}, { events: [act('vi-1', 'click', [{ kind: 'set-value', nodeId: 'vn-2', value: 'new' }])] })]);
+  const { model } = mountVisual(component);
+  model.external('vn-1', recorder(log))(dom.document.createElement('div')); await settle();
+  assert.deepEqual(log, [['mount', false, undefined]]);
+  model.on('vn-2').click(); await settle();
+  assert.deepEqual(log.at(-1), ['update', 'new']);
+});
+test('external adapters mount after render and never mount an element removed before the tick', async () => {
+  const log = []; let created = 0; const create = recorder(log);
+  const { model } = mountVisual(editorTemplate({ value: lit('v') }));
+  const bind = model.external('vn-1', () => { created++; return create(); });
+  const el = dom.document.createElement('div');
+  bind(el); assert.equal(created, 0); dom.document.body.appendChild(el); await settle();
+  assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v']]);
+  bind(null); const gone = dom.document.createElement('div'); bind(gone); bind(null); await settle();
+  assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
+});

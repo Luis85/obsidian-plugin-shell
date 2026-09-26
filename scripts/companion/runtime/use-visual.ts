@@ -19,8 +19,10 @@ export interface VisualContext {
 }
 export const visualKey: InjectionKey<VisualContext> = Symbol('generated-visuals');
 export function provideVisualContext(app: App, context: VisualContext): void { app.provide(visualKey, context); }
-interface ExternalMount { create: () => VisualExternalAdapter; bind: (el: unknown) => void; adapter: VisualExternalAdapter | null; el: HTMLElement | null; stop: WatchStopHandle | null; mounted: boolean; dirty: boolean }
+interface ExternalMount { create: () => VisualExternalAdapter; bind: (el: unknown) => void; adapter: VisualExternalAdapter | null; el: HTMLElement | null; stop: WatchStopHandle | null; mounted: boolean; dirty: boolean; generation: number }
 const isElement = (value: unknown): value is HTMLElement => typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
+/** Reads through the proxy first: Object.hasOwn alone is not tracked, so a key added later would never re-render. */
+const has = (record: Readonly<Record<string, unknown>>, key: string): boolean => { void record[key]; return Object.hasOwn(record, key); };
 const requiredImplementation = (error: unknown) => error instanceof Error && (error.name === 'NotImplementedError' || /^(NOT_IMPLEMENTED|IMPLEMENTATION_REQUIRED)\b/.test(error.message));
 /** Each mount owns its drafts and session. Typed conversions and mapping never imply a save. */
 export function useVisual(spec: VisualSpec, props: { designState?: VisualState; designScenario?: string } & Record<string, unknown>,
@@ -35,19 +37,21 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   const findPort = (source: string, operation: string) => context?.ports.find(p => p.sourceId === source && p.operationId === operation);
   const ports = () => context?.ports.filter(port => sources.has(port.sourceId + '\u0000' + port.operationId)) ?? [];
   const control = (node: UiNode | undefined) => node?.kind === 'component' && node.ref.kind === 'nuxt-ui' && VISUAL_RUNTIME_CONTROLS.includes(node.ref.entryId) ? node : null;
-  const state = computed<VisualState>(() => {
+  /** The rendered state; transitions inside this mount's own pending span ignore that span. */
+  function derive(ownPending: boolean): VisualState {
     if (localState.value) return localState.value;
     if (props.designState) return props.designState;
     if (props.designScenario) return session.state;
-    if (pending.value || ports().some(p => p.pending)) return 'loading';
+    if ((ownPending && pending.value) || ports().some(p => p.pending)) return 'loading';
     if (message.value || ports().some(p => p.error)) return 'error';
     if (ports().some(p => Array.isArray(p.data) && p.data.length === 0)) return 'empty';
     return 'default';
-  });
+  }
+  const state = computed<VisualState>(() => derive(true));
   const width = (): 'narrow' | 'wide' => (narrow.value ? 'narrow' : 'wide');
   const current = (): Session => ({ ...session, values: { ...values }, state: state.value, width: width() });
   /** Unproxied copy for visualTransition, which structured-clones its input. */
-  const frozen = (): Session => ({ ...toRaw(session), values: { ...toRaw(values) }, state: state.value, width: width() });
+  const frozen = (): Session => ({ ...toRaw(session), values: { ...toRaw(values) }, state: derive(false), width: width() });
   onScopeDispose(() => { disposed = true; for (const mount of externals.values()) teardown(mount); observer?.disconnect(); themeObserver?.disconnect(); host.value = null; });
   watch(() => props.designScenario, id => {
     const next = visualSession(spec.scenarios.find(s => s.id === id)); epoch++;
@@ -63,16 +67,16 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   function value(expr: ValueExpression | undefined): unknown {
     if (!expr) return undefined;
     if (expr.kind === 'literal') return expr.value;
-    if (expr.kind === 'prop') return Object.hasOwn(props, expr.name) ? props[expr.name] : undefined;
-    if (expr.kind === 'state') return Object.hasOwn(values, expr.nodeId) ? values[expr.nodeId] : undefined;
+    if (expr.kind === 'prop') return has(props, expr.name) ? props[expr.name] : undefined;
+    if (expr.kind === 'state') return has(values, expr.nodeId) ? values[expr.nodeId] : undefined;
     return visualRead(sourceData(expr.sourceId, expr.operationId), expr.field);
   }
   function visible(id: string): boolean { return visualVisible(spec, current(), id); }
   function enabled(id: string): boolean { return !disposed && !pending.value && !['loading', 'disabled'].includes(state.value) && visible(id); }
   function model(id: string): unknown {
     const node = control(index.get(id));
-    if (Object.hasOwn(drafts, id)) return drafts[id];
-    if (Object.hasOwn(values, id)) return values[id];
+    if (has(drafts, id)) return drafts[id];
+    if (has(values, id)) return values[id];
     return value(node?.props.modelValue);
   }
   function parse(node: NonNullable<ReturnType<typeof control>>, input: unknown): DetailData {
@@ -91,7 +95,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     for (const [id, node] of index) {
       const field = control(node); if (!field || !visible(id)) continue;
       if (errors[id]) throw new Error('VISUAL_INPUT_INVALID');
-      const entry = Object.hasOwn(values, id) ? values[id] : value(field.props.modelValue);
+      const entry = has(values, id) ? values[id] : value(field.props.modelValue);
       if (field.control || entry !== undefined) result[id] = parse(field, entry);
     }
     return result;
@@ -120,29 +124,33 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const outcome = await port.run(input);
     if (!outcome || typeof outcome !== 'object' || !('ok' in outcome) || outcome.ok !== true) throw new Error('VISUAL_SOURCE_FAILED');
   }
-  async function invoke(nodeId: string, interaction: Interaction, payload: unknown): Promise<void> {
-    if (!enabled(nodeId)) return;
-    const actions = interaction.actions, local = actions.length > 0 && actions.every(a => VISUAL_RUNTIME_LOCAL.includes(a.kind));
-    let captured: Record<string, DetailData>;
-    try { captured = snapshot(!local); } catch { message.value = 'Correct the input errors before continuing.'; return; }
-    const request: VisualRequest = { definitionId: spec.id, nodeId, interactionId: interaction.id, event: interaction.event, values: captured, payload };
-    const before = frozen(), requestEpoch = epoch;
+  const isLocal = (interaction: Interaction) => interaction.actions.length > 0 && interaction.actions.every(a => VISUAL_RUNTIME_LOCAL.includes(a.kind));
+  /** Runs every interaction declared for one event in order, inside one pending span and epoch; the first failure stops the rest. */
+  async function invoke(nodeId: string, interactions: Interaction[], payload: unknown): Promise<void> {
+    if (!interactions.length || !enabled(nodeId)) return;
+    let validated: Record<string, DetailData> = {};
+    try { if (!interactions.every(isLocal)) validated = snapshot(true); } catch { message.value = 'Correct the input errors before continuing.'; return; }
+    const requestEpoch = epoch, stale = () => disposed || requestEpoch !== epoch;
     pending.value = true; message.value = '';
     try {
-      emitInteraction(request);
-      if (disposed || requestEpoch !== epoch) return;
-      if (!actions.length) { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); return; }
-      const next = visualTransition(spec, before, nodeId, interaction.id);
-      applyLocal(next, actions);
-      for (const action of actions) { await perform(nodeId, action, captured, payload); if (disposed || requestEpoch !== epoch) return; }
-      if (actions.some(a => a.kind === 'focus') && next.focused) { await nextTick(); if (!disposed && requestEpoch === epoch) focus(next.focused); }
+      for (const interaction of interactions) {
+        const actions = interaction.actions, captured = { ...validated, ...snapshot(false) };
+        const request: VisualRequest = { definitionId: spec.id, nodeId, interactionId: interaction.id, event: interaction.event, values: captured, payload };
+        emitInteraction(request);
+        if (stale()) return;
+        if (!actions.length) { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); if (stale()) return; continue; }
+        const next = visualTransition(spec, frozen(), nodeId, interaction.id);
+        applyLocal(next, actions);
+        for (const action of actions) { await perform(nodeId, action, captured, payload); if (stale()) return; }
+        if (actions.some(a => a.kind === 'focus') && next.focused) { await nextTick(); if (stale()) return; focus(next.focused); }
+      }
     } catch (error) {
-      if (!disposed && requestEpoch === epoch) message.value = requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';
+      if (!stale()) message.value = requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';
     } finally { if (!disposed) pending.value = false; }
   }
   function trigger(nodeId: string, event: string, payload: unknown): void {
     const node = index.get(nodeId);
-    for (const interaction of node && 'events' in node ? node.events : []) if (interaction.event === event) void invoke(nodeId, interaction, payload);
+    void invoke(nodeId, node && 'events' in node ? node.events.filter(i => i.event === event) : [], payload);
   }
   function text(id: string): string { const node = index.get(id); return node?.kind === 'text' ? detailTextValue(value(node.value), '') : ''; }
   function resolved(id: string): Record<string, unknown> {
@@ -173,7 +181,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   }
   const theme = computed(() => compositionTheme(spec.designSystem, dark.value));
   function teardown(mount: ExternalMount): void {
-    const adapter = mount.adapter; mount.stop?.(); mount.stop = null; mount.adapter = null; mount.el = null; mount.mounted = false; mount.dirty = false;
+    const adapter = mount.adapter; mount.stop?.(); mount.stop = null; mount.adapter = null; mount.el = null; mount.mounted = false; mount.dirty = false; mount.generation++;
     if (!adapter) return;
     try { adapter.destroy(); } catch (error) { if (!disposed) message.value = failedExternal(error); }
   }
@@ -181,10 +189,13 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   function update(mount: ExternalMount, adapter: VisualExternalAdapter, next: Record<string, unknown>): void {
     try { adapter.update(next); } catch (error) { if (!disposed && mount.adapter === adapter) message.value = failedExternal(error); }
   }
-  async function mountExternal(id: string, mount: ExternalMount, el: HTMLElement): Promise<void> {
+  /** Mounts after render; an element removed or replaced before the tick is never mounted. */
+  async function mountExternal(id: string, mount: ExternalMount, el: HTMLElement, generation: number): Promise<void> {
+    await nextTick();
+    if (disposed || mount.generation !== generation) return;
     let adapter: VisualExternalAdapter;
     try { adapter = mount.create(); } catch (error) { message.value = failedExternal(error); return; }
-    mount.adapter = adapter; mount.el = el;
+    mount.adapter = adapter;
     mount.stop = watch(() => resolved(id), next => { if (mount.adapter !== adapter) return; if (mount.mounted) update(mount, adapter, next); else mount.dirty = true; }, { deep: true });
     try {
       await adapter.mount(el, resolved(id), (event, payload) => { if (!disposed && mount.adapter === adapter) trigger(id, event, payload); });
@@ -196,10 +207,10 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   /** Function-ref callback for an external node's mount element; stable per node so re-renders do not remount. */
   function external(id: string, createAdapter: () => VisualExternalAdapter): (el: unknown) => void {
     const existing = externals.get(id); if (existing) return existing.bind;
-    const mount: ExternalMount = { create: createAdapter, adapter: null, el: null, stop: null, mounted: false, dirty: false, bind: el => {
+    const mount: ExternalMount = { create: createAdapter, adapter: null, el: null, stop: null, mounted: false, dirty: false, generation: 0, bind: el => {
       if (disposed || el === mount.el) return;
       if (mount.el) teardown(mount);
-      if (isElement(el) && index.get(id)?.kind === 'external') void mountExternal(id, mount, el);
+      if (isElement(el) && index.get(id)?.kind === 'external') { mount.el = el; void mountExternal(id, mount, el, ++mount.generation); }
     } };
     externals.set(id, mount); return mount.bind;
   }
