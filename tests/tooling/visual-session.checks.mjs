@@ -77,3 +77,32 @@ test('error message format is VISUAL_INVALID with definition and element', () =>
     assert.match(err.message, /TestBtn/);
   }
 });
+/** Runs one generated model-test file and returns node --test's TAP output and exit status. */
+async function runGenerated(source) {
+  const dir = await mkdtemp(join(tmpdir(), 'visual-session-generated-')), file = join(dir, 'model.checks.mjs'); await writeFile(file, source);
+  return spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], { encoding: 'utf8', env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
+}
+const vsEffects = () => ({ id: 'vp-effects', name: 'Effects', notes: '', scenarios: [], root: [
+  { id: 'vn-1', kind: 'element', tag: 'button', name: 'Reset', attrs: {}, children: [], events: [{ id: 'vi-1', event: 'click', label: 'Reset to default', notes: '', acceptance: '', actions: [{ kind: 'set-state', state: 'default' }] }] },
+  { id: 'vn-2', kind: 'element', tag: 'button', name: 'Toggle', attrs: {}, children: [], events: [{ id: 'vi-2', event: 'click', label: 'Hide panel', notes: '', acceptance: '', actions: [{ kind: 'toggle', nodeId: 'vn-3' }, { kind: 'focus', nodeId: 'vn-1' }] }] },
+  { id: 'vn-3', kind: 'element', tag: 'div', name: 'Panel', attrs: {}, children: [], events: [] },
+  { id: 'vn-4', kind: 'element', tag: 'div', name: 'Other', attrs: {}, children: [], events: [] },
+] });
+test('generated model tests accept idempotent effects such as a reset to the current state', async () => {
+  const source = visualTestSource(vsEffects());
+  assert.match(source, /assert\.equal\(next\.state, "default"\);/); assert.match(source, /assert\.equal\(next\.hidden\["vn-3"\] === true, true\);/); assert.match(source, /assert\.equal\(next\.focused, "vn-1"\);/);
+  const run = await runGenerated(source);
+  assert.equal(run.status, 0, run.stdout + run.stderr); assert.match(run.stdout, /# pass 2/); assert.match(run.stdout, /# fail 0/);
+});
+test('generated model tests fail when the embedded transition or action target is wrong', async () => {
+  const source = visualTestSource(vsEffects());
+  for (const [label, from, to] of [
+    ['state transition ignores set-state', 'if (a.kind === \'set-state\') next.state = a.state;', 'if (a.kind === \'set-state\') next.state = \'error\';'],
+    ['toggle is a no-op', 'next.hidden[a.nodeId] = !next.hidden[a.nodeId];', 'void a;'],
+    ['toggle targets another element', '{"kind":"toggle","nodeId":"vn-3"}', '{"kind":"toggle","nodeId":"vn-4"}'],
+  ]) {
+    assert.ok(source.includes(from), label);
+    const run = await runGenerated(source.replace(from, to));
+    assert.notEqual(run.status, 0, label); assert.match(run.stdout, /# fail [1-9]/, label);
+  }
+});

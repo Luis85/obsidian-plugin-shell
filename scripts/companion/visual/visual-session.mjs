@@ -41,13 +41,25 @@ export function visualValue(session, expr, props = {}) {
   const fixture = session.bindings.find(b => b.sourceId === expr.sourceId && b.operationId === expr.operationId);
   return fixture ? visualRead(fixture.value, expr.field) : undefined;
 }
+// Each declared action's own effect is asserted, so idempotent effects (a reset to the current state) still pass.
+function vsesExpected(actions) {
+  const j = JSON.stringify, last = kind => actions.filter(a => a.kind === kind).at(-1), out = [];
+  const state = last('set-state'); if (state) out.push(`assert.equal(next.state, ${j(state.state)});`);
+  for (const id of new Set(actions.filter(a => a.kind === 'toggle').map(a => a.nodeId))) out.push(`assert.equal(next.hidden[${j(id)}] === true, ${actions.filter(a => a.kind === 'toggle' && a.nodeId === id).length % 2 === 1});`);
+  for (const [id, value] of new Map(actions.filter(a => a.kind === 'set-value').map(a => [a.nodeId, a.value]))) out.push(`assert.deepEqual(next.values[${j(id)}], ${j(value)});`);
+  const focus = last('focus'); if (focus) out.push(`assert.equal(next.focused, ${j(focus.nodeId)});`);
+  const nav = last('navigate'); if (nav) out.push(`assert.equal(next.navigation, ${j(nav.surfaceId)});`);
+  const emits = actions.filter(a => a.kind === 'emit').map(a => a.event); if (emits.length) out.push(`assert.deepEqual(next.emitted.map(e => e.name), ${j(emits)});`);
+  const reads = actions.filter(a => a.kind === 'source').map(a => a.sourceId + '/' + a.operationId); if (reads.length) out.push(`assert.deepEqual(next.requests.map(r => r.sourceId + '/' + r.operationId), ${j(reads)});`);
+  return out.join(' ');
+}
 export function visualTestSource(definition) {
   const safe = JSON.stringify(definition).replaceAll('<', '\\u003c'), cases = [], todos = [];
   visualWalk(visualRoot(definition), n => { for (const i of n.events ?? []) {
     const name = JSON.stringify('[' + i.id + '] ' + i.label);
     if (!i.actions.length) { todos.push(`test.todo(${JSON.stringify('[' + i.id + '] ' + i.label + ' — ' + (i.acceptance || i.notes || 'implementation required'))});`); continue; }
     const state = ['default', 'empty', 'error'].find(st => visualVisible(definition, { ...visualSession(), state: st }, n.id));
-    cases.push(state ? `test(${name}, () => { const session = { ...visualSession(), state: ${JSON.stringify(state)} }; const before = JSON.stringify(session); const next = visualTransition(definition, session, ${JSON.stringify(n.id)}, ${JSON.stringify(i.id)}); assert.equal(JSON.stringify(session), before); assert.notEqual(JSON.stringify(next), before); });` : `test(${name}, () => { assert.fail('No enabled visible source state: repair this interaction'); });`);
+    cases.push(state ? `test(${name}, () => { const session = { ...visualSession(), state: ${JSON.stringify(state)} }; const before = JSON.stringify(session); const next = visualTransition(definition, session, ${JSON.stringify(n.id)}, ${JSON.stringify(i.id)}); assert.equal(JSON.stringify(session), before); ${vsesExpected(i.actions)} });` : `test(${name}, () => { assert.fail('No enabled visible source state: repair this interaction'); });`);
   } });
   return `// Generated executable model tests. No claim of business outcomes or native UI acceptance.\nimport { test } from 'node:test';\nimport assert from 'node:assert/strict';\n${[visualAssert, visualIsPlain, visualChildLists, visualRoot, visualWalk, visualLocate, visualSession, vsesChain, visualVisible, visualTransition].map(f => f.toString()).join('\n')}\nconst definition = ${safe};\n${cases.join('\n')}\n${todos.join('\n')}\n`;
 }
