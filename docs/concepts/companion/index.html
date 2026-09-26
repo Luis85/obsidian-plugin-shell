@@ -3207,9 +3207,9 @@ body{display:flex;flex-direction:column;height:100dvh}
 
 /* Nodes, selection ring plus label chip (never colour alone), hidden-in-state dimming with its reason. */
 .ve-node{position:relative;min-width:0}
-.ve-stage:not(.ve-mode-preview) .ve-node[data-ve-node]{cursor:pointer}
-.ve-stage:not(.ve-mode-preview) .ve-node[data-ve-node]:hover{outline:1px dashed var(--ve-accent);outline-offset:2px}
-.ve-stage:not(.ve-mode-preview) .ve-node[aria-selected=true]{outline:2px solid var(--ve-accent);outline-offset:2px}
+.ve-node[data-action=ve-select]{cursor:pointer}
+.ve-node[data-action=ve-select]:hover{outline:1px dashed var(--ve-accent);outline-offset:2px}
+.ve-stage:not(.ve-mode-preview) .ve-node[aria-current=true]{outline:2px solid var(--ve-accent);outline-offset:2px}
 .ve-chip{position:absolute;top:-22px;left:-2px;z-index:3;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 7px;border-radius:4px;background:var(--ve-accent-strong);color:var(--ve-chip-text);font-size:11px;font-weight:600;line-height:16px;pointer-events:none}
 .ve-is-hidden{color:var(--ve-ui-muted);background-image:repeating-linear-gradient(135deg,transparent 0 8px,var(--ve-ui-border) 8px 9px)}
 .ve-is-hidden>:not(.ve-hidden-badge):not(.ve-chip){opacity:.45}
@@ -18941,7 +18941,15 @@ function veFieldPreview(node, entry, ctx) {
   const description = vePropText(node, entry, 'description', ctx), required = veProp(node, entry, 'required', ctx) === true;
   return `<div class="ve-u-field"><span class="ve-u-label">${vePropText(node, entry, 'label', ctx)}${required ? '<span class="ve-u-required" aria-hidden="true">*</span>' : ''}</span>${veSlotOrHint(node, 'default', ctx)}${description ? `<span class="ve-u-help">${description}</span>` : ''}</div>`;
 }
-function veCatalogPreview(node, entry, ctx) {
+// The node's layout style lands on the preview's root element, the Nuxt component root in the generated app.
+// Preview roots carry only escaped attributes, so the first '>' closes the root tag.
+function veRootStyle(html, style) {
+  if (!style) return html;
+  const end = html.indexOf('>'), head = html.slice(0, end);
+  return (head.includes(' style="') ? head.replace(' style="', ` style="${style};`) : head + ` style="${style}"`) + html.slice(end);
+}
+function veCatalogPreview(node, entry, ctx, style = '') { return veRootStyle(vePreviewFor(node, entry, ctx), style); }
+function vePreviewFor(node, entry, ctx) {
   switch (entry.preview) {
     case 'button': return veButtonPreview(node, entry, ctx);
     case 'input': return veInputPreview(node, entry, ctx);
@@ -18977,11 +18985,13 @@ const VE_TAG_LABELS = { div: 'Group', section: 'Section', header: 'Header', main
 function veStyleAttr(style) {
   return esc(Object.entries(style).map(([key, value]) => key.replace(/[A-Z]/g, c => '-' + c.toLowerCase()) + ':' + value).join(';'));
 }
-// Layout rules become inline style. Only containers get flex/grid; other nodes keep sizing, spacing and tokens.
-function veLayoutStyle(node, ctx) {
-  if (!node.layout) return '';
-  const kind = node.kind === 'element' || node.kind === 'slot' ? 'region' : 'leaf';
-  return veStyleAttr(compositionStyle({ kind, layout: node.layout.mode, ui: node.layout.ui }, ctx.system, ctx.narrow));
+// Layout rules become the same region style the generated runtime applies to the node's root (use-visual style()).
+function veLayoutRules(node, ctx) { return node.layout ? compositionStyle({ kind: 'region', layout: node.layout.mode, ui: node.layout.ui }, ctx.system, ctx.narrow) : {}; }
+function veLayoutStyle(node, ctx) { return veStyleAttr(veLayoutRules(node, ctx)); }
+// Catalog nodes: the Nuxt component root gets the full style; the selectable wrapper around it keeps only sizing.
+function veSizingStyle(node, ctx) {
+  const rules = veLayoutRules(node, ctx);
+  return veStyleAttr(Object.fromEntries(['boxSizing', 'width', 'minWidth', 'maxWidth'].filter(key => Object.hasOwn(rules, key)).map(key => [key, rules[key]])));
 }
 function veKindLabel(node) {
   if (node.kind === 'element') return VE_TAG_LABELS[node.tag] || node.tag;
@@ -18999,21 +19009,20 @@ function veHiddenReason(node, session) {
   if (session.width === 'narrow' && node.layout?.ui.narrow.hidden) return 'hidden on mobile';
   return '';
 }
-// Selectable wrapper. Nodes rendered from another definition (a component's internals) are not selectable here.
+// Node wrapper. The canvas is not an accessible widget: the Outline is the one tree. While designing, a node is a
+// click/focus target and the selected one carries aria-current plus a visible ring and label chip. Preview keeps only
+// the node id, so assistive technology reads the rendered app. A component's internals are never targets here.
 function veWrap(node, ctx, classes, inner, style = '') {
-  const chosen = ctx.selectable && ctx.selected === node.id, reason = ctx.design ? veHiddenReason(node, ctx.session) : '';
-  const attrs = ctx.selectable ? ` data-ve-node="${esc(node.id)}" data-action="ve-select" data-value="${esc(node.id)}" tabindex="-1" role="treeitem" aria-label="${esc(veNodeLabel(node) + (reason ? ' (' + reason + ')' : ''))}" aria-selected="${chosen}"` : '';
-  const chip = chosen && ctx.design ? `<span class="ve-chip" aria-hidden="true">${esc(veNodeLabel(node))}</span>` : '';
-  const badge = reason ? `<span class="ve-hidden-badge" aria-hidden="true">${esc(reason)}</span>` : '';
+  const target = ctx.selectable && ctx.design, chosen = target && ctx.selected === node.id, reason = ctx.design ? veHiddenReason(node, ctx.session) : '';
+  const attrs = !ctx.selectable ? '' : target ? ` data-ve-node="${esc(node.id)}" data-action="ve-select" data-value="${esc(node.id)}" tabindex="-1"${chosen ? ' aria-current="true"' : ''}` : ` data-ve-node="${esc(node.id)}"`;
+  const chip = chosen ? `<span class="ve-chip" aria-hidden="true">${esc(veNodeLabel(node))}</span>` : '';
+  const badge = reason ? `<span class="ve-hidden-badge">${esc(reason)}</span>` : '';
   return `<div class="ve-node ${classes}${reason ? ' ve-is-hidden' : ''}${chosen ? ' ve-is-selected' : ''}"${attrs}${style ? ` style="${style}"` : ''}>${chip}${badge}${inner}</div>`;
 }
 function veRenderList(nodes, ctx) { return (nodes || []).map(node => veRenderNode(node, ctx)).join(''); }
 function veRenderNode(node, ctx) {
   if (!ctx.design && !visualVisible(ctx.def, ctx.session, node.id)) return '';
-  if (++ctx.budget.count > VE_RENDER_LIMIT) {
-    if (ctx.budget.count === VE_RENDER_LIMIT + 1) return '<p class="ve-limit" role="status">Preview limit reached. Open a smaller part of this design.</p>';
-    return '';
-  }
+  if (++ctx.budget.count > VE_RENDER_LIMIT) return '';
   if (node.kind === 'element') return veElementHtml(node, ctx);
   if (node.kind === 'text') return veWrap(node, ctx, 've-text ve-t-' + node.role, veValueHtml(node.value, ctx), veLayoutStyle(node, ctx));
   if (node.kind === 'slot') return veSlotNodeHtml(node, ctx);
@@ -19021,7 +19030,7 @@ function veRenderNode(node, ctx) {
   if (node.ref?.kind === 'project') return veInstanceHtml(node, ctx);
   const entry = visualCatalogEntry(node.ref?.entryId);
   if (!entry) return veWrap(node, ctx, 've-missing', `<span>${esc('Unknown catalog entry ' + (node.ref?.entryId || ''))}</span>`);
-  return veWrap(node, ctx, 've-ui ve-ui-' + entry.preview, veCatalogPreview(node, entry, ctx), veLayoutStyle(node, ctx));
+  return veWrap(node, ctx, 've-ui ve-ui-' + entry.preview, veCatalogPreview(node, entry, ctx, veLayoutStyle(node, ctx)), veSizingStyle(node, ctx));
 }
 function veValueHtml(expr, ctx) {
   const text = veShow(visualValue(ctx.session, expr, ctx.props));
@@ -19089,10 +19098,12 @@ function veCanvasHtml(definition, session, { mode = 'design', selected = null, v
   const d = design(), current = { ...session, width: narrow ? 'narrow' : 'wide' };
   const ctx = { def: definition, session: current, props: veDefinitionProps(definition, props), design: kind !== 'preview', selected, narrow, system: d.designSystem, store: veStore(d), selectable: true, fills: null, stack: [], budget: { count: 0 }, dependencies: definition.dependencies || [] };
   const content = veRenderList(visualRoot(definition), ctx);
+  // Status messages follow the rendered nodes, never inside one of them.
   const empty = visualRoot(definition).length ? (content ? '' : '<p class="ve-canvas-empty">No elements are visible in this scenario.</p>')
     : `<p class="ve-canvas-empty">${ctx.design ? 'This design is empty. Insert a pattern, layout or component to start.' : 'Nothing to preview yet.'}</p>`;
+  const limit = ctx.budget.count > VE_RENDER_LIMIT ? '<p class="ve-limit" role="status">Preview limit reached. Open a smaller part of this design.</p>' : '';
   const theme = veStyleAttr(compositionTheme(d.designSystem, typeof state !== 'undefined' && state.settings?.theme === 'dark'));
-  return `<div class="ve-stage ve-mode-${kind}"><div class="ve-frame ve-vp-${view}" data-ve-canvas="${esc(definition.id)}" data-scenario-state="${esc(current.state)}" role="tree" aria-label="${esc(veDefinitionName(definition) + ' canvas · ' + kind + ' · ' + view)}"${theme ? ` style="${theme}"` : ''}>${content}${empty}</div></div>`;
+  return `<div class="ve-stage ve-mode-${kind}"><div class="ve-frame ve-vp-${view}" data-ve-canvas="${esc(definition.id)}" data-scenario-state="${esc(current.state)}" role="region" aria-label="${esc(veDefinitionName(definition) + ' canvas · ' + kind + ' · ' + view)}"${theme ? ` style="${theme}"` : ''}>${content}${empty}${limit}</div></div>`;
 }
 
 // Portable authoring documents are deliberately separate from recovery snapshots.

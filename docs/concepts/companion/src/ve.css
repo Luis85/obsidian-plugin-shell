@@ -43,9 +43,9 @@
 
 /* Nodes, selection ring plus label chip (never colour alone), hidden-in-state dimming with its reason. */
 .ve-node{position:relative;min-width:0}
-.ve-stage:not(.ve-mode-preview) .ve-node[data-ve-node]{cursor:pointer}
-.ve-stage:not(.ve-mode-preview) .ve-node[data-ve-node]:hover{outline:1px dashed var(--ve-accent);outline-offset:2px}
-.ve-stage:not(.ve-mode-preview) .ve-node[aria-selected=true]{outline:2px solid var(--ve-accent);outline-offset:2px}
+.ve-node[data-action=ve-select]{cursor:pointer}
+.ve-node[data-action=ve-select]:hover{outline:1px dashed var(--ve-accent);outline-offset:2px}
+.ve-stage:not(.ve-mode-preview) .ve-node[aria-current=true]{outline:2px solid var(--ve-accent);outline-offset:2px}
 .ve-chip{position:absolute;top:-22px;left:-2px;z-index:3;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 7px;border-radius:4px;background:var(--ve-accent-strong);color:var(--ve-chip-text);font-size:11px;font-weight:600;line-height:16px;pointer-events:none}
 .ve-is-hidden{color:var(--ve-ui-muted);background-image:repeating-linear-gradient(135deg,transparent 0 8px,var(--ve-ui-border) 8px 9px)}
 .ve-is-hidden>:not(.ve-hidden-badge):not(.ve-chip){opacity:.45}

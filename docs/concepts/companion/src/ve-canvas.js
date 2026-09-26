@@ -9,11 +9,13 @@ const VE_TAG_LABELS = { div: 'Group', section: 'Section', header: 'Header', main
 function veStyleAttr(style) {
   return esc(Object.entries(style).map(([key, value]) => key.replace(/[A-Z]/g, c => '-' + c.toLowerCase()) + ':' + value).join(';'));
 }
-// Layout rules become inline style. Only containers get flex/grid; other nodes keep sizing, spacing and tokens.
-function veLayoutStyle(node, ctx) {
-  if (!node.layout) return '';
-  const kind = node.kind === 'element' || node.kind === 'slot' ? 'region' : 'leaf';
-  return veStyleAttr(compositionStyle({ kind, layout: node.layout.mode, ui: node.layout.ui }, ctx.system, ctx.narrow));
+// Layout rules become the same region style the generated runtime applies to the node's root (use-visual style()).
+function veLayoutRules(node, ctx) { return node.layout ? compositionStyle({ kind: 'region', layout: node.layout.mode, ui: node.layout.ui }, ctx.system, ctx.narrow) : {}; }
+function veLayoutStyle(node, ctx) { return veStyleAttr(veLayoutRules(node, ctx)); }
+// Catalog nodes: the Nuxt component root gets the full style; the selectable wrapper around it keeps only sizing.
+function veSizingStyle(node, ctx) {
+  const rules = veLayoutRules(node, ctx);
+  return veStyleAttr(Object.fromEntries(['boxSizing', 'width', 'minWidth', 'maxWidth'].filter(key => Object.hasOwn(rules, key)).map(key => [key, rules[key]])));
 }
 function veKindLabel(node) {
   if (node.kind === 'element') return VE_TAG_LABELS[node.tag] || node.tag;
@@ -31,21 +33,20 @@ function veHiddenReason(node, session) {
   if (session.width === 'narrow' && node.layout?.ui.narrow.hidden) return 'hidden on mobile';
   return '';
 }
-// Selectable wrapper. Nodes rendered from another definition (a component's internals) are not selectable here.
+// Node wrapper. The canvas is not an accessible widget: the Outline is the one tree. While designing, a node is a
+// click/focus target and the selected one carries aria-current plus a visible ring and label chip. Preview keeps only
+// the node id, so assistive technology reads the rendered app. A component's internals are never targets here.
 function veWrap(node, ctx, classes, inner, style = '') {
-  const chosen = ctx.selectable && ctx.selected === node.id, reason = ctx.design ? veHiddenReason(node, ctx.session) : '';
-  const attrs = ctx.selectable ? ` data-ve-node="${esc(node.id)}" data-action="ve-select" data-value="${esc(node.id)}" tabindex="-1" role="treeitem" aria-label="${esc(veNodeLabel(node) + (reason ? ' (' + reason + ')' : ''))}" aria-selected="${chosen}"` : '';
-  const chip = chosen && ctx.design ? `<span class="ve-chip" aria-hidden="true">${esc(veNodeLabel(node))}</span>` : '';
-  const badge = reason ? `<span class="ve-hidden-badge" aria-hidden="true">${esc(reason)}</span>` : '';
+  const target = ctx.selectable && ctx.design, chosen = target && ctx.selected === node.id, reason = ctx.design ? veHiddenReason(node, ctx.session) : '';
+  const attrs = !ctx.selectable ? '' : target ? ` data-ve-node="${esc(node.id)}" data-action="ve-select" data-value="${esc(node.id)}" tabindex="-1"${chosen ? ' aria-current="true"' : ''}` : ` data-ve-node="${esc(node.id)}"`;
+  const chip = chosen ? `<span class="ve-chip" aria-hidden="true">${esc(veNodeLabel(node))}</span>` : '';
+  const badge = reason ? `<span class="ve-hidden-badge">${esc(reason)}</span>` : '';
   return `<div class="ve-node ${classes}${reason ? ' ve-is-hidden' : ''}${chosen ? ' ve-is-selected' : ''}"${attrs}${style ? ` style="${style}"` : ''}>${chip}${badge}${inner}</div>`;
 }
 function veRenderList(nodes, ctx) { return (nodes || []).map(node => veRenderNode(node, ctx)).join(''); }
 function veRenderNode(node, ctx) {
   if (!ctx.design && !visualVisible(ctx.def, ctx.session, node.id)) return '';
-  if (++ctx.budget.count > VE_RENDER_LIMIT) {
-    if (ctx.budget.count === VE_RENDER_LIMIT + 1) return '<p class="ve-limit" role="status">Preview limit reached. Open a smaller part of this design.</p>';
-    return '';
-  }
+  if (++ctx.budget.count > VE_RENDER_LIMIT) return '';
   if (node.kind === 'element') return veElementHtml(node, ctx);
   if (node.kind === 'text') return veWrap(node, ctx, 've-text ve-t-' + node.role, veValueHtml(node.value, ctx), veLayoutStyle(node, ctx));
   if (node.kind === 'slot') return veSlotNodeHtml(node, ctx);
@@ -53,7 +54,7 @@ function veRenderNode(node, ctx) {
   if (node.ref?.kind === 'project') return veInstanceHtml(node, ctx);
   const entry = visualCatalogEntry(node.ref?.entryId);
   if (!entry) return veWrap(node, ctx, 've-missing', `<span>${esc('Unknown catalog entry ' + (node.ref?.entryId || ''))}</span>`);
-  return veWrap(node, ctx, 've-ui ve-ui-' + entry.preview, veCatalogPreview(node, entry, ctx), veLayoutStyle(node, ctx));
+  return veWrap(node, ctx, 've-ui ve-ui-' + entry.preview, veCatalogPreview(node, entry, ctx, veLayoutStyle(node, ctx)), veSizingStyle(node, ctx));
 }
 function veValueHtml(expr, ctx) {
   const text = veShow(visualValue(ctx.session, expr, ctx.props));
@@ -121,8 +122,10 @@ function veCanvasHtml(definition, session, { mode = 'design', selected = null, v
   const d = design(), current = { ...session, width: narrow ? 'narrow' : 'wide' };
   const ctx = { def: definition, session: current, props: veDefinitionProps(definition, props), design: kind !== 'preview', selected, narrow, system: d.designSystem, store: veStore(d), selectable: true, fills: null, stack: [], budget: { count: 0 }, dependencies: definition.dependencies || [] };
   const content = veRenderList(visualRoot(definition), ctx);
+  // Status messages follow the rendered nodes, never inside one of them.
   const empty = visualRoot(definition).length ? (content ? '' : '<p class="ve-canvas-empty">No elements are visible in this scenario.</p>')
     : `<p class="ve-canvas-empty">${ctx.design ? 'This design is empty. Insert a pattern, layout or component to start.' : 'Nothing to preview yet.'}</p>`;
+  const limit = ctx.budget.count > VE_RENDER_LIMIT ? '<p class="ve-limit" role="status">Preview limit reached. Open a smaller part of this design.</p>' : '';
   const theme = veStyleAttr(compositionTheme(d.designSystem, typeof state !== 'undefined' && state.settings?.theme === 'dark'));
-  return `<div class="ve-stage ve-mode-${kind}"><div class="ve-frame ve-vp-${view}" data-ve-canvas="${esc(definition.id)}" data-scenario-state="${esc(current.state)}" role="tree" aria-label="${esc(veDefinitionName(definition) + ' canvas · ' + kind + ' · ' + view)}"${theme ? ` style="${theme}"` : ''}>${content}${empty}</div></div>`;
+  return `<div class="ve-stage ve-mode-${kind}"><div class="ve-frame ve-vp-${view}" data-ve-canvas="${esc(definition.id)}" data-scenario-state="${esc(current.state)}" role="region" aria-label="${esc(veDefinitionName(definition) + ' canvas · ' + kind + ' · ' + view)}"${theme ? ` style="${theme}"` : ''}>${content}${empty}${limit}</div></div>`;
 }

@@ -135,7 +135,15 @@ function veFieldPreview(node, entry, ctx) {
   const description = vePropText(node, entry, 'description', ctx), required = veProp(node, entry, 'required', ctx) === true;
   return `<div class="ve-u-field"><span class="ve-u-label">${vePropText(node, entry, 'label', ctx)}${required ? '<span class="ve-u-required" aria-hidden="true">*</span>' : ''}</span>${veSlotOrHint(node, 'default', ctx)}${description ? `<span class="ve-u-help">${description}</span>` : ''}</div>`;
 }
-function veCatalogPreview(node, entry, ctx) {
+// The node's layout style lands on the preview's root element, the Nuxt component root in the generated app.
+// Preview roots carry only escaped attributes, so the first '>' closes the root tag.
+function veRootStyle(html, style) {
+  if (!style) return html;
+  const end = html.indexOf('>'), head = html.slice(0, end);
+  return (head.includes(' style="') ? head.replace(' style="', ` style="${style};`) : head + ` style="${style}"`) + html.slice(end);
+}
+function veCatalogPreview(node, entry, ctx, style = '') { return veRootStyle(vePreviewFor(node, entry, ctx), style); }
+function vePreviewFor(node, entry, ctx) {
   switch (entry.preview) {
     case 'button': return veButtonPreview(node, entry, ctx);
     case 'input': return veInputPreview(node, entry, ctx);
