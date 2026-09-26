@@ -47,3 +47,7 @@ export function visualText(id, value, role = 'p', extra = {}) { return { id, kin
 export function visualSlot(id, name, extra = {}) { return { id, kind: 'slot', name, fallback: [], ...extra }; }
 export function visualNuxt(id, entryId, props = {}, extra = {}) { return { id, kind: 'component', ref: { kind: 'nuxt-ui', entryId }, props, slots: {}, events: [], ...extra }; }
 export function visualProject(id, componentId, extra = {}) { return { id, kind: 'component', ref: { kind: 'project', componentId }, props: {}, slots: {}, events: [], ...extra }; }
+export const VISUAL_DEPENDENCY_LIMIT = 8;
+export function visualIsPackage(value) { return typeof value === 'string' && value.length <= 214 && /^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(value); }
+export function visualIsExactVersion(value) { return typeof value === 'string' && value.length <= 64 && /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(value); }
+export function visualExternal(id, packageName, adapter, extra = {}) { return { id, kind: 'external', package: packageName, adapter, props: {}, events: [], ...extra }; }

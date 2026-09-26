@@ -68,7 +68,7 @@ export function visualReparent(store, ref, nodeId, target) {
 }
 export function visualDuplicateNode(store, ref, nodeId) { const { node, list, index } = vcmdHit(vcmdDef(store, ref), nodeId); const [copy] = visualClone(store, [node]); list.splice(index + 1, 0, copy); return copy; }
 export function visualWrapNode(store, ref, nodeId, tag = 'div') { const { node, list, index } = vcmdHit(vcmdDef(store, ref), nodeId); const wrap = visualElement(visualAllocate(store, 'vn'), tag, { name: 'Group', children: [node] }); list.splice(index, 1, wrap); return wrap; }
-const vcmdPatchKeys = ['name', 'visibleIn', 'a11y', 'layout', 'tag', 'role', 'value', 'attrs', 'props', 'variantId', 'control', 'slots'];
+const vcmdPatchKeys = ['name', 'visibleIn', 'a11y', 'layout', 'tag', 'role', 'value', 'attrs', 'props', 'variantId', 'control', 'slots', 'adapter'];
 export function visualUpdateNode(store, ref, nodeId, patch) {
   const { node } = vcmdHit(vcmdDef(store, ref), nodeId);
   for (const [key, value] of Object.entries(patch)) { visualAssert(vcmdPatchKeys.includes(key), 'Field ' + key + ' cannot be edited here.'); if (value === undefined) delete node[key]; else node[key] = structuredClone(value); }
@@ -92,6 +92,12 @@ export function visualAddInteraction(store, ref, nodeId, { event, label, actions
 export function visualUpdateInteraction(store, ref, nodeId, interactionId, patch) { const i = vcmdHit(vcmdDef(store, ref), nodeId).node.events?.find(x => x.id === interactionId); visualAssert(i, 'The interaction no longer exists.'); for (const [k, v] of Object.entries(patch)) { visualAssert(['event', 'label', 'actions', 'notes', 'acceptance'].includes(k), 'Field ' + k + ' cannot be edited.'); i[k] = structuredClone(v); } return i; }
 export function visualRemoveInteraction(store, ref, nodeId, interactionId) { const node = vcmdHit(vcmdDef(store, ref), nodeId).node; node.events = node.events.filter(i => i.id !== interactionId); }
 export function visualSetScenarios(store, ref, scenarios) { vcmdDef(store, ref).scenarios = structuredClone(scenarios); }
+export function visualSetDependencies(store, componentId, dependencies) {
+  const c = vcmdDef(store, { kind: 'component', id: componentId });
+  const used = visualNodes(c.template).filter(n => n.kind === 'external' && !dependencies.some(d => d.package === n.package));
+  visualAssert(!used.length, 'Still used by adapter ' + used.map(n => JSON.stringify(n.adapter)).join(', ') + '. Remove those external elements first.');
+  c.dependencies = structuredClone(dependencies);
+}
 const vcmdSemver = v => v.split('.').map(Number);
 const vcmdGreater = (a, b) => { const [x, y] = [vcmdSemver(a), vcmdSemver(b)]; for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
 export function visualPublish(store, componentId, version) {
@@ -100,6 +106,6 @@ export function visualPublish(store, componentId, version) {
   visualAssert(/^\d+\.\d+\.\d+$/.test(version) && (!latest || vcmdGreater(version, latest)), 'Version must be x.y.z and greater than ' + (latest ?? '0.0.0') + '.');
   const template = structuredClone(c.template);
   visualWalk(template, n => { if (n.kind === 'component' && n.ref.kind === 'project' && !n.ref.revisionId) { const dep = store.revisions.filter(r => r.componentId === n.ref.componentId).at(-1); visualAssert(dep, 'Publish ' + (store.components.find(x => x.id === n.ref.componentId)?.exportName ?? n.ref.componentId) + ' first.'); n.ref.revisionId = dep.id; } });
-  const revision = { id: visualAllocate(store, 'vr'), componentId, version, contract: structuredClone({ props: c.props, slots: c.slots, emits: c.emits, variants: c.variants }), template };
+  const revision = { id: visualAllocate(store, 'vr'), componentId, version, contract: structuredClone({ props: c.props, slots: c.slots, emits: c.emits, variants: c.variants }), template, ...(c.dependencies ? { dependencies: structuredClone(c.dependencies) } : {}) };
   store.revisions.push(revision); return revision;
 }

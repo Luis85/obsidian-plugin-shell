@@ -1,5 +1,5 @@
 // Complete, pure validation for visual designs. Gates save, export, import and generation.
-import { VISUAL_SCHEMA, VISUAL_CATALOG, VISUAL_TAGS, VISUAL_TEXT_ROLES, VISUAL_STATES, VISUAL_PROP_TYPES, VISUAL_PAYLOAD_TYPES, VISUAL_LAYOUT_MODES, VISUAL_DOM_EVENTS, VISUAL_LIMITS, visualAssert, visualIsRef, visualIsText, visualIsLine, visualIsKey, visualIsScalar, visualIsPlain, visualWalk } from './visual-ir.mjs';
+import { VISUAL_SCHEMA, VISUAL_CATALOG, VISUAL_TAGS, VISUAL_TEXT_ROLES, VISUAL_STATES, VISUAL_PROP_TYPES, VISUAL_PAYLOAD_TYPES, VISUAL_LAYOUT_MODES, VISUAL_DOM_EVENTS, VISUAL_LIMITS, VISUAL_DEPENDENCY_LIMIT, visualAssert, visualIsRef, visualIsText, visualIsLine, visualIsKey, visualIsScalar, visualIsPlain, visualIsPackage, visualIsExactVersion, visualWalk } from './visual-ir.mjs';
 import { visualCatalogEntry, VISUAL_CONTROL_ENTRIES } from './visual-catalog.mjs';
 import { visualCompositionGraph } from './visual-composition.mjs';
 import { validateVisualMapping, validateVisualControl, visualMappingRefs } from './visual-mapping.mjs';
@@ -14,6 +14,18 @@ function vvWithin(where, fn) {
   catch (err) { throw Error('VISUAL_INVALID: ' + where + ': ' + String(err?.message ?? err).replace(/^(VISUAL_INVALID|COMPOSITION_INVALID): /, '')); }
 }
 export function visualIsControl(node) { return node?.kind === 'component' && node.ref?.kind === 'nuxt-ui' && VISUAL_CONTROL_ENTRIES.includes(node.ref.entryId); }
+function vvDependencies(list, where) {
+  visualAssert(Array.isArray(list) && list.length <= VISUAL_DEPENDENCY_LIMIT, where + ': at most 8 dependencies.');
+  const seen = new Set();
+  for (const d of list) {
+    visualAssert(vvObject(d, ['package', 'version', 'purpose']), where + ': unsupported dependency fields.');
+    visualAssert(visualIsPackage(d.package), where + ': ' + JSON.stringify(d.package) + ' is not an npm package name (no URLs, git or file specifiers).');
+    visualAssert(visualIsExactVersion(d.version), where + ': ' + d.package + ' needs an exact version such as 1.2.3, not ' + JSON.stringify(d.version) + '.');
+    visualAssert(visualIsText(d.purpose, 400), where + ': dependency purpose too long.');
+    visualAssert(!seen.has(d.package), where + ': duplicate dependency ' + d.package + '.');
+    seen.add(d.package);
+  }
+}
 function vvContract(contract, where) {
   const { props, slots, emits, variants } = contract;
   visualAssert([props, slots, emits, variants].every(Array.isArray) && [props, slots, emits].every(l => l.length <= VISUAL_LIMITS.contract) && variants.length <= 12, where + ': contract lists exceed their limits.');
@@ -95,7 +107,7 @@ function vvComponentNode(node, scope, where) {
 }
 function vvNode(node, scope, at) {
   const where = scope.where + ' / ' + (node?.name || node?.id || 'element');
-  const keys = { element: ['id', 'kind', 'tag', 'attrs', 'children', 'events'], text: ['id', 'kind', 'role', 'value'], slot: ['id', 'kind', 'name', 'fallback'], component: ['id', 'kind', 'ref', 'props', 'slots', 'events'] }[node?.kind];
+  const keys = { element: ['id', 'kind', 'tag', 'attrs', 'children', 'events'], text: ['id', 'kind', 'role', 'value'], slot: ['id', 'kind', 'name', 'fallback'], component: ['id', 'kind', 'ref', 'props', 'slots', 'events'], external: ['id', 'kind', 'package', 'adapter', 'props', 'events'] }[node?.kind];
   visualAssert(keys, where + ': unsupported element kind ' + JSON.stringify(node?.kind) + '.');
   visualAssert(at.depth <= VISUAL_LIMITS.depth, where + ': nesting exceeds ' + VISUAL_LIMITS.depth + ' levels.');
   visualAssert(vvObject(node, keys, [...vvCommon, ...(node.kind === 'component' ? ['variantId', 'control'] : [])]), where + ': unsupported element fields.');
@@ -111,16 +123,26 @@ function vvNode(node, scope, at) {
     vvEvents(node, scope, null, where);
   } else if (node.kind === 'text') { visualAssert(VISUAL_TEXT_ROLES.includes(node.role), where + ': unsupported text role.'); vvValue(node.value, scope, where); }
   else if (node.kind === 'slot') { visualAssert(scope.slots.includes(node.name), where + ': slot ' + JSON.stringify(node.name) + ' is not declared.'); visualAssert(Array.isArray(node.fallback), where + ': invalid slot fallback.'); }
+  else if (node.kind === 'external') {
+    visualAssert(scope.external, where + ': external libraries belong in component templates.');
+    visualAssert(scope.dependencies.some(d => d.package === node.package), where + ': ' + node.package + ' is not a declared dependency of this component.');
+    visualAssert(typeof node.adapter === 'string' && /^[a-z][a-z0-9-]*$/.test(node.adapter) && node.adapter.length <= 60, where + ': adapter name must be lowercase kebab-case.');
+    visualAssert(!scope.adapters.has(node.adapter), where + ': adapter "' + node.adapter + '" is used twice.'); scope.adapters.add(node.adapter);
+    visualAssert(visualIsPlain(node.props) && Object.keys(node.props).length <= 40, where + ': invalid props.');
+    for (const [key, value] of Object.entries(node.props)) { visualAssert(visualIsKey(key), where + ': invalid prop name ' + key + '.'); vvValue(value, scope, where + ' :' + key, 'json'); }
+    vvEvents(node, scope, null, where);
+  }
   else vvComponentNode(node, scope, where);
 }
-function vvDefinition(store, root, kind, context, identity, where, contract, slots = []) {
+function vvDefinition(store, root, kind, context, identity, where, contract, slots = [], dependencies = []) {
   visualAssert(Array.isArray(root), where + ': missing structure.');
   const nodes = new Map();
   visualWalk(root, node => { visualAssert(visualIsPlain(node) && !nodes.has(node.id), where + ': duplicate element ID ' + JSON.stringify(node?.id) + '.'); nodes.set(node.id, node); });
   visualAssert(nodes.size <= VISUAL_LIMITS.nodes, where + ': supports at most ' + VISUAL_LIMITS.nodes + ' elements.');
   const pinned = kind === 'revision', scoped = pinned ? () => {} : identity;
   for (const id of nodes.keys()) scoped(id, 'vn');
-  const scope = { store, context, nodes, contract, where, pinned, slots: kind === 'page' ? [] : slots, identity: scoped };
+  const external = kind === 'component' || kind === 'revision';
+  const scope = { store, context, nodes, contract, where, pinned, slots: kind === 'page' ? [] : slots, identity: scoped, dependencies, external, adapters: new Set() };
   visualWalk(root, (node, at) => vvNode(node, scope, at));
   return nodes;
 }
@@ -136,7 +158,7 @@ export function validateVisualDesigns(store, context = {}) {
   visualAssert(store.pages.length + store.components.length <= VISUAL_LIMITS.definitions && store.layouts.length <= VISUAL_LIMITS.layouts && store.revisions.length <= VISUAL_LIMITS.revisions, 'Too many visual definitions.');
   const ids = new Set(); let highest = 0;
   const identity = (id, prefix) => { const m = typeof id === 'string' && vvIdPattern.exec(id); visualAssert(m && m[1] === prefix && !ids.has(id), 'Duplicate or malformed ID ' + JSON.stringify(id) + '.'); ids.add(id); highest = Math.max(highest, Number(m[2])); };
-  const owners = new Set(), libraries = new Set(), exportNames = new Set(), versions = new Set();
+  const owners = new Set(), libraries = new Set(), exportNames = new Set(), versions = new Set(), depVersions = new Map();
   for (const page of store.pages) {
     const where = 'Page ' + JSON.stringify(page?.name ?? page?.id);
     visualAssert(vvObject(page, ['id', 'ownerId', 'name', 'root', 'scenarios', 'notes']), where + ': unsupported page fields.'); identity(page.id, 'vp');
@@ -146,12 +168,18 @@ export function validateVisualDesigns(store, context = {}) {
   }
   for (const c of store.components) {
     const where = 'Component ' + JSON.stringify(c?.exportName ?? c?.id);
-    visualAssert(vvObject(c, ['id', 'libraryId', 'exportName', 'description', 'props', 'slots', 'emits', 'variants', 'template', 'scenarios'], ['implementation', 'notes']), where + ': unsupported component fields.'); identity(c.id, 'vc');
+    visualAssert(vvObject(c, ['id', 'libraryId', 'exportName', 'description', 'props', 'slots', 'emits', 'variants', 'template', 'scenarios'], ['implementation', 'notes', 'dependencies']), where + ': unsupported component fields.'); identity(c.id, 'vc');
     visualAssert(typeof c.exportName === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(c.exportName) && c.exportName.length <= 60 && !exportNames.has(c.exportName), where + ': export name must be a unique PascalCase Vue name.'); exportNames.add(c.exportName);
     visualAssert(visualIsRef(c.libraryId) && !libraries.has(c.libraryId) && (!context.library || context.library.has(c.libraryId)), where + ': library entry is missing or already designed.'); libraries.add(c.libraryId);
     visualAssert(visualIsText(c.description, 2000) && (c.notes === undefined || visualIsText(c.notes, 8000)), where + ': description or notes too long.');
     visualAssert(c.implementation === undefined || (vvObject(c.implementation, ['catalog', 'entryId']) && c.implementation.catalog === 'nuxt-ui' && visualCatalogEntry(c.implementation.entryId)), where + ': unknown implementation primitive.');
-    vvContract(c, where); vvScenarios(c, vvDefinition(store, c.template, 'component', context, identity, where, c, c.slots.map(s => s.name)), where);
+    vvDependencies(c.dependencies ?? [], where);
+    for (const d of c.dependencies ?? []) {
+      const first = depVersions.get(d.package);
+      if (first) visualAssert(first.version === d.version, d.package + ' is pinned to ' + first.version + ' in ' + first.exportName + ' and ' + d.version + ' in ' + c.exportName + '.');
+      else depVersions.set(d.package, { version: d.version, exportName: c.exportName });
+    }
+    vvContract(c, where); vvScenarios(c, vvDefinition(store, c.template, 'component', context, identity, where, c, c.slots.map(s => s.name), c.dependencies ?? []), where);
   }
   for (const l of store.layouts) {
     const where = 'Layout ' + JSON.stringify(l?.name ?? l?.id);
@@ -162,11 +190,12 @@ export function validateVisualDesigns(store, context = {}) {
   }
   for (const r of store.revisions) {
     const where = 'Revision ' + JSON.stringify(r?.id);
-    visualAssert(vvObject(r, ['id', 'componentId', 'version', 'contract', 'template'], ['designSystem']), where + ': unsupported revision fields.'); identity(r.id, 'vr');
+    visualAssert(vvObject(r, ['id', 'componentId', 'version', 'contract', 'template'], ['designSystem', 'dependencies']), where + ': unsupported revision fields.'); identity(r.id, 'vr');
     visualAssert(store.components.some(c => c.id === r.componentId) && typeof r.version === 'string' && r.version.length <= 40 && /^\d+\.\d+\.\d+$/.test(r.version) && !versions.has(r.componentId + '@' + r.version), where + ': revision needs an existing component and a unique x.y.z version.'); versions.add(r.componentId + '@' + r.version);
     visualAssert(vvObject(r.contract, ['props', 'slots', 'emits', 'variants']), where + ': invalid published contract.'); vvContract(r.contract, where);
+    vvDependencies(r.dependencies ?? [], where);
     if (r.designSystem !== undefined) vvWithin(where, () => validateCompositionDesignSystem(r.designSystem));
-    vvDefinition(store, r.template, 'revision', context, identity, where, r.contract, r.contract.slots.map(s => s.name));
+    vvDefinition(store, r.template, 'revision', context, identity, where, r.contract, r.contract.slots.map(s => s.name), r.dependencies ?? []);
   }
   visualAssert(store.nextId > highest, 'The visual ID counter could reuse an existing ID.');
   visualCompositionGraph(store);

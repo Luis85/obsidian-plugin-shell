@@ -12,7 +12,9 @@ export type TextNode = Common & { kind: 'text'; role: 'h1' | 'h2' | 'h3' | 'p' |
 export type SlotNode = Common & { kind: 'slot'; name: string; fallback: UiNode[] };
 export type ComponentRef = { kind: 'nuxt-ui'; entryId: string } | { kind: 'project'; componentId: string; revisionId?: string };
 export type ComponentNode = Common & { kind: 'component'; ref: ComponentRef; props: Record<string, ValueExpression>; slots: Record<string, UiNode[]>; events: Interaction[]; variantId?: string; control?: { kind: string; required?: boolean; options?: { label: string; value: string }[]; maxBytes?: number } };
-export type UiNode = ElementNode | TextNode | SlotNode | ComponentNode;
+export interface Dependency { package: string; version: string; purpose: string }
+export type ExternalNode = Common & { kind: 'external'; package: string; adapter: string; props: Record<string, ValueExpression>; events: Interaction[] };
+export type UiNode = ElementNode | TextNode | SlotNode | ComponentNode | ExternalNode;
 export interface Scenario { id: string; name: string; state: VisualState; width: 'wide' | 'narrow'; values: Record<string, unknown>; bindings: { sourceId: string; operationId: string; value: unknown }[]; recipe?: unknown }
 export interface PropDefinition { name: string; type: 'string' | 'number' | 'boolean'; required: boolean; default?: Scalar; description?: string }
 export interface SlotDefinition { name: string; required: boolean; description?: string }
@@ -20,9 +22,9 @@ export interface EmitDefinition { name: string; payloadType: 'void' | 'string' |
 export interface Variant { id: string; name: string; values: Record<string, Scalar> }
 export interface Contract { props: PropDefinition[]; slots: SlotDefinition[]; emits: EmitDefinition[]; variants: Variant[] }
 export interface PageDefinition { id: string; ownerId: string; name: string; root: UiNode[]; scenarios: Scenario[]; notes: string }
-export interface ComponentDefinition extends Contract { id: string; libraryId: string; exportName: string; description: string; template: UiNode[]; scenarios: Scenario[]; notes?: string; implementation?: { catalog: 'nuxt-ui'; entryId: string } }
+export interface ComponentDefinition extends Contract { id: string; libraryId: string; exportName: string; description: string; template: UiNode[]; scenarios: Scenario[]; notes?: string; implementation?: { catalog: 'nuxt-ui'; entryId: string }; dependencies?: Dependency[] }
 export interface LayoutDefinition { id: string; name: string; description: string; scope: 'page' | 'region'; category: string; root: UiNode[]; slots: SlotDefinition[]; sourcePageId?: string }
-export interface ComponentRevision { id: string; componentId: string; version: string; contract: Contract; template: UiNode[]; designSystem?: unknown }
+export interface ComponentRevision { id: string; componentId: string; version: string; contract: Contract; template: UiNode[]; designSystem?: unknown; dependencies?: Dependency[] }
 export interface VisualDesigns { schema: 3; nextId: number; catalog: { id: 'nuxt-ui'; version: 1 }; pages: PageDefinition[]; components: ComponentDefinition[]; layouts: LayoutDefinition[]; revisions: ComponentRevision[] }
 export type DefinitionRef = { kind: 'page' | 'component' | 'layout'; id: string };
 export interface WalkAt { parent: UiNode | null; depth: number; list: UiNode[]; index: number }
@@ -30,6 +32,7 @@ export const VISUAL_SCHEMA: 3; export const VISUAL_CATALOG: { readonly id: 'nuxt
 export const VISUAL_TAGS: readonly string[]; export const VISUAL_TEXT_ROLES: readonly string[]; export const VISUAL_STATES: readonly VisualState[];
 export const VISUAL_PROP_TYPES: readonly string[]; export const VISUAL_PAYLOAD_TYPES: readonly string[]; export const VISUAL_LAYOUT_MODES: readonly string[]; export const VISUAL_DOM_EVENTS: readonly string[];
 export const VISUAL_LIMITS: Readonly<Record<'nodes' | 'definitions' | 'depth' | 'composition' | 'layouts' | 'revisions' | 'interactions' | 'actions' | 'scenarios' | 'contract', number>>;
+export const VISUAL_DEPENDENCY_LIMIT: number;
 export function visualAssert(ok: unknown, message: string): asserts ok;
 export function visualIsRef(value: unknown): value is string; export function visualIsText(value: unknown, max: number, required?: boolean): value is string;
 export function visualIsLine(value: unknown, max: number): value is string; export function visualIsKey(value: unknown): value is string;
@@ -43,3 +46,5 @@ export function visualLiteral(value: unknown): ValueExpression; export function 
 export function visualElement(id: string, tag: string, extra?: Partial<ElementNode>): ElementNode; export function visualText(id: string, value: Scalar, role?: TextNode['role'], extra?: Partial<TextNode>): TextNode;
 export function visualSlot(id: string, name: string, extra?: Partial<SlotNode>): SlotNode; export function visualNuxt(id: string, entryId: string, props?: Record<string, ValueExpression>, extra?: Partial<ComponentNode>): ComponentNode;
 export function visualProject(id: string, componentId: string, extra?: Partial<ComponentNode>): ComponentNode;
+export function visualIsPackage(value: unknown): value is string; export function visualIsExactVersion(value: unknown): value is string;
+export function visualExternal(id: string, packageName: string, adapter: string, extra?: Partial<ExternalNode>): ExternalNode;
