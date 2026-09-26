@@ -1,6 +1,5 @@
-import { requireThat, type Request, type Values } from './contracts.ts';
+import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../contracts/json-data.mjs';
-import { OperationError } from './contracts.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {
   id: string; summary: string; options: Record<string, 'value' | 'flag'>;
@@ -78,7 +77,7 @@ export function parseCliArguments(argv: string[]): Request {
     if (!arg.startsWith('--')) { positional.push(arg); continue; }
     const key = arg.slice(2);
     if (!Object.hasOwn(available, key)) throw unknownOption(arg, Object.keys(available));
-    requireThat(!Object.hasOwn(options, key), 'INVALID_OPTION', `Unknown or repeated option: ${arg}.`);
+    requireThat(!Object.hasOwn(options, key), 'INVALID_OPTION', `Repeated option: ${arg}.`);
     if (available[key] === 'flag') options[key] = true;
     else { const value = argv[++i]; requireThat(value !== undefined && !value.startsWith('--'), 'MISSING_VALUE', `Supply a value for ${arg}.`); options[key] = value; }
   }
@@ -100,7 +99,7 @@ function validateFields(entry: Command, args: string[], options: Values): Reques
 }
 function unknownOption(arg: string, available: string[], command?: string): OperationError {
   const found = suggestions(arg.replace(/^--/, ''), available).map(name => '--' + name);
-  const error = new OperationError('INVALID_OPTION', `${command ? `${arg} is not supported by ${command}.` : `Unknown or repeated option: ${arg}.`}${didYouMean(found)}`, command ? `node shell.mjs help ${command}` : 'node shell.mjs help');
+  const error = new OperationError('INVALID_OPTION', `${command ? `${arg} is not supported by ${command}.` : `Unknown option: ${arg}.`}${didYouMean(found)}`, command ? `node shell.mjs help ${command}` : 'node shell.mjs help');
   error.details = { suggestions: found }; return error;
 }
 export function validateRequest(value: unknown): Request {
