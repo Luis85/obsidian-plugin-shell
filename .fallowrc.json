@@ -165,6 +165,7 @@
     "scripts/companion/visual/visual-validate.mjs",
     "scripts/companion/visual/visual-layout.mjs",
     "scripts/companion/visual/visual-commands.mjs",
+    "scripts/companion/visual/visual-session.mjs",
     "docs/concepts/companion/src/composition-model.js",
     "docs/concepts/companion/src/composition-fields.js",
     "docs/concepts/companion/src/composition-preview.js",
