@@ -73,8 +73,8 @@ contained sandbox vault, reloads the plugin once and prints one JSON summary:
 `status`, `errors` (deduplicated, with `src/...` frames), `pluginConsole`,
 `commands`, and paths to `last-run.png` (screenshot), `dev.log` and
 `debug-report.json` under `.obsidian-sandbox/logs/`. Read those files for detail.
-Exit code 2 means Obsidian is not provisioned: ask before adding
-`--allow-download`. Specs: `tests/obsidian/*.obsidian.ts`, run with
+Exit code 2 means Obsidian is not provisioned: ask the user to run it once
+with `--allow-download` (agents never download it themselves). Specs: `tests/obsidian/*.obsidian.ts`, run with
 `npm run test:obsidian -- <filter>`; evidence lands in `reports/obsidian/`.
 Guide: `docs/testing/OBSIDIAN-DEV-LOOP.md`.
 

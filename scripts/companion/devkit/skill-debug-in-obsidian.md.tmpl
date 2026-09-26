@@ -10,12 +10,14 @@ The loop is: reload → errors → screenshot → console/log → fix → repeat
 1. Run one iteration (build with inline source maps, launch the contained sandbox
    vault, reload the plugin, collect evidence):
    `npm run -s dev:obsidian -- --json`
-   - Exit 2 with "not provisioned": ask the user before re-running with
-     `--allow-download` (downloads the pinned Obsidian into `.native-cache/`).
+   - Exit 2 with "not provisioned": downloads are denied to agents. Ask the user to
+     run `npm run dev:obsidian -- --allow-download` once (it downloads the pinned
+     Obsidian into `.native-cache/`), then continue.
    - `NATIVE_SOCKET_PATH_TOO_LONG`: the project path is too long on Linux; tell the user.
 2. Read the JSON summary: `status`, `plugin.loaded`/`plugin.enabled`, `errors[]`
    (`text`, `count`, `frames` already mapped to `src/...:line:column`),
-   `pluginConsole`, `commands`.
+   `pluginConsole`, `commands`, `view` (the plugin view opened for the screenshot).
+   A run where Obsidian exits or crashes reports `status: "failed"` with `error`.
 3. Look at the screenshot in `files.screenshot` (`.obsidian-sandbox/logs/last-run.png`)
    when the problem is visual.
 4. For more context read `.obsidian-sandbox/logs/dev.log` (all console output) and

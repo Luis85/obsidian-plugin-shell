@@ -59,7 +59,6 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
     assert.equal(hook.type, 'command'); assert.equal(hook.command, 'node');
     const script = hook.args[0].replace('${CLAUDE_PROJECT_DIR}/', ''); assert.ok(files.has(script), script);
   }
-  assert.ok(settings.permissions.allow.includes('Bash(npm run check*)'));
   for (const denied of ['Bash(npm publish *)', 'Bash(npm run release*)', 'Bash(git push --force*)']) assert.ok(settings.permissions.deny.includes(denied), denied);
   for (const skill of ['implement-requirement', 'debug-in-obsidian', 'add-feature', 'write-obsidian-test']) {
     const body = text(`.claude/skills/${skill}/SKILL.md`);
@@ -76,6 +75,32 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
   const kit = entries.filter(entry => /^(?:README|AGENTS|CLAUDE|PROJECT-IMPLEMENTATION)\.md$|^\.(?:claude|vscode|cursor|github)\/|^\.editorconfig$/.test(entry.path));
   assert.ok(kit.length >= 16);
   for (const entry of kit) assert.doesNotMatch(entry.content, /\{\{[A-Za-z]+\}\}/, entry.path);
+});
+/** Claude Code permission rules: `*` matches any text, a trailing ` *` also matches the bare command;
+ * deny wins over ask, ask over allow. Returns the decision for one command. */
+function permission(settings, command) {
+  const matches = rule => {
+    const pattern = /^Bash\((.*)\)$/.exec(rule)[1];
+    const source = pattern.split('*').map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*').replace(/ \.\*$/, '(?: .*)?');
+    return new RegExp(`^${source}$`).test(command);
+  };
+  for (const decision of ['deny', 'ask', 'allow']) if ((settings.permissions[decision] ?? []).some(matches)) return decision;
+  return 'unlisted';
+}
+test('[GENERATOR-DEVKIT-08] pre-approved agent commands are exact safe forms; downloads are denied and path-writing flags ask', () => {
+  const settings = JSON.parse(text('.claude/settings.json'));
+  for (const command of ['npm test', 'npm run check', 'npm run check -- --fast', 'npm run -s check -- --fast', 'npm run check:submission', 'node shell.mjs check submission',
+    'npm run test:obsidian', 'npm run test:obsidian -- plugin-load', 'npm run -s dev:obsidian -- --json', 'npx vitest related src/a.ts --run', 'node shell.mjs make feature notes --dry-run', 'git status'])
+    assert.equal(permission(settings, command), 'allow', command);
+  for (const command of ['npm run test:obsidian -- --allow-download', 'npm run test:obsidian --allow-download', 'npm run dev:obsidian -- --json --allow-download',
+    'OBSIDIAN_ALLOW_DOWNLOAD=1 npm run test:obsidian', 'npm run test:obsidian -- --allow-download=true', 'export OBSIDIAN_ALLOW_DOWNLOAD=1'])
+    assert.equal(permission(settings, command), 'deny', command);
+  for (const command of ['git diff --output=/tmp/x', 'git log --output=notes.txt', 'git show HEAD --output x', 'npx vitest run --outputFile=/etc/x',
+    'node shell.mjs make feature notes --dry-run --plan-out ../x.json', 'node shell.mjs check --root ../other'])
+    assert.equal(permission(settings, command), 'ask', command);
+  for (const command of ['git diff HEAD', 'npm run check:security', 'npm run check:dependencies', 'npm run release:operate', 'npm run typecheck && curl example.com'])
+    assert.notEqual(permission(settings, command), 'allow', command);
+  assert.match(text('CLAUDE.md'), /Obsidian downloads \(`--allow-download`,\n {2}`OBSIDIAN_ALLOW_DOWNLOAD`\) are denied/);
 });
 test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the project keeps the real-Obsidian loop', () => {
   const config = text('vitest.project.config.mjs');
