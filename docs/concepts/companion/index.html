@@ -14171,6 +14171,757 @@ function detailSlotAssignments(doc) {
   }
 }
 
+// Declarative UI IR for Page, Layout and Component designs. Data only: never CSS, HTML or expressions.
+const VISUAL_SCHEMA = 3;
+const VISUAL_CATALOG = Object.freeze({ id: 'nuxt-ui', version: 1 });
+const VISUAL_TAGS = Object.freeze(['div', 'section', 'header', 'main', 'footer', 'nav', 'aside', 'button', 'input', 'label', 'p', 'h1', 'h2', 'h3', 'span', 'ul', 'li', 'img']);
+const VISUAL_TEXT_ROLES = Object.freeze(['h1', 'h2', 'h3', 'p', 'span']);
+const VISUAL_STATES = Object.freeze(['default', 'loading', 'empty', 'error', 'disabled']);
+const VISUAL_PROP_TYPES = Object.freeze(['string', 'number', 'boolean']);
+const VISUAL_PAYLOAD_TYPES = Object.freeze(['void', 'string', 'number', 'boolean', 'unknown']);
+const VISUAL_LAYOUT_MODES = Object.freeze(['stack', 'row', 'grid']);
+const VISUAL_DOM_EVENTS = Object.freeze(['click', 'focus', 'blur', 'keydown', 'change', 'input', 'submit']);
+const VISUAL_LIMITS = Object.freeze({ nodes: 120, definitions: 200, depth: 12, composition: 16, layouts: 60, revisions: 200, interactions: 40, actions: 8, scenarios: 12, contract: 32 });
+const virReserved = Object.freeze(['__proto__', 'constructor', 'prototype']);
+function visualAssert(ok, message) { if (!ok) throw Error('VISUAL_INVALID: ' + message); }
+function visualIsRef(value) { return typeof value === 'string' && value.length > 0 && value.length <= 120 && /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/.test(value) && !virReserved.includes(value); }
+function visualIsText(value, max, required = false) { return typeof value === 'string' && value.length <= max && (!required || value.trim() !== ''); }
+function visualIsLine(value, max) { return visualIsText(value, max, true) && !/[\r\n]/.test(value); }
+function visualIsKey(value) { return typeof value === 'string' && value.length <= 60 && /^[a-z][A-Za-z0-9]*$/.test(value) && !virReserved.includes(value); }
+function visualIsScalar(value) { return value === null || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value)) || visualIsText(value, 8000); }
+function visualIsPlain(value) { return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype; }
+function emptyVisualDesigns() { return { schema: VISUAL_SCHEMA, nextId: 1, catalog: { ...VISUAL_CATALOG }, pages: [], components: [], layouts: [], revisions: [] }; }
+function visualAllocate(store, prefix) {
+  visualAssert(Number.isSafeInteger(store.nextId) && store.nextId > 0 && store.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid visual ID counter.');
+  return prefix + '-' + store.nextId++;
+}
+function visualChildLists(node) {
+  if (node?.kind === 'element') return Array.isArray(node.children) ? [node.children] : [];
+  if (node?.kind === 'slot') return Array.isArray(node.fallback) ? [node.fallback] : [];
+  if (node?.kind === 'component') return visualIsPlain(node.slots) ? Object.values(node.slots).filter(Array.isArray) : [];
+  return [];
+}
+function visualWalk(nodes, visit, parent = null, depth = 1) {
+  if (!Array.isArray(nodes)) return;
+  nodes.forEach((node, index) => { visit(node, { parent, depth, list: nodes, index }); for (const list of visualChildLists(node)) visualWalk(list, visit, node, depth + 1); });
+}
+function visualLocate(nodes, id) { let found = null; visualWalk(nodes, (node, at) => { if (!found && node?.id === id) found = { node, ...at }; }); return found; }
+function visualNodes(nodes) { const out = []; visualWalk(nodes, node => out.push(node)); return out; }
+function visualRoot(definition) { return Object.hasOwn(definition, 'template') ? definition.template : definition.root; }
+function visualDefinition(store, ref) {
+  const list = ref?.kind === 'page' ? store.pages : ref?.kind === 'component' ? store.components : ref?.kind === 'layout' ? store.layouts : [];
+  return list.find(d => d.id === ref.id) ?? null;
+}
+function visualLiteral(value) { return { kind: 'literal', value }; }
+function visualLayoutRules(mode = 'stack', ui = compositionDefaultUI()) { return { mode, ui }; }
+function visualElement(id, tag, extra = {}) { return { id, kind: 'element', tag, attrs: {}, children: [], events: [], ...extra }; }
+function visualText(id, value, role = 'p', extra = {}) { return { id, kind: 'text', role, value: visualLiteral(value), ...extra }; }
+function visualSlot(id, name, extra = {}) { return { id, kind: 'slot', name, fallback: [], ...extra }; }
+function visualNuxt(id, entryId, props = {}, extra = {}) { return { id, kind: 'component', ref: { kind: 'nuxt-ui', entryId }, props, slots: {}, events: [], ...extra }; }
+function visualProject(id, componentId, extra = {}) { return { id, kind: 'component', ref: { kind: 'project', componentId }, props: {}, slots: {}, events: [], ...extra }; }
+const VISUAL_DEPENDENCY_LIMIT = 8;
+function visualIsPackage(value) { return typeof value === 'string' && value.length <= 214 && /^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(value); }
+function visualIsExactVersion(value) { return typeof value === 'string' && value.length <= 64 && /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(value); }
+function visualExternal(id, packageName, adapter, extra = {}) { return { id, kind: 'external', package: packageName, adapter, props: {}, events: [], ...extra }; }
+// Payload mappings and typed control semantics for visual designs. Data only.
+const VISUAL_CONTROL_KINDS = Object.freeze(['text', 'textarea', 'number', 'checkbox', 'date', 'datetime-local', 'select', 'json-file', 'json-editor', 'markdown-editor']);
+const vmpReserved = ['constructor', 'prototype', '__proto__'];
+function vmpObject(value, keys, optional = []) { return visualIsPlain(value) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)) && keys.every(k => Object.hasOwn(value, k)); }
+function vmpJson(value, depth = 0) {
+  if (depth > 12) return false;
+  if (value === null || typeof value === 'boolean' || typeof value === 'string') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  return !!value && typeof value === 'object' && Object.entries(value).every(([key, item]) => !vmpReserved.includes(key) && vmpJson(item, depth + 1));
+}
+function validateVisualMapping(mapping, depth = 0, budget = { count: 0 }) {
+  visualAssert(depth <= 6 && ++budget.count <= 120, 'Payload mapping is too large.');
+  visualAssert(mapping && typeof mapping === 'object', 'Missing payload mapping.');
+  if (mapping.kind === 'none' || mapping.kind === 'event') visualAssert(vmpObject(mapping, ['kind']), 'Invalid simple mapping.');
+  else if (mapping.kind === 'value') visualAssert(vmpObject(mapping, ['kind', 'value']) && vmpJson(mapping.value) && JSON.stringify(mapping.value).length <= 12000, 'Invalid literal payload.');
+  else if (mapping.kind === 'draft') visualAssert(vmpObject(mapping, ['kind', 'nodeId']) && visualIsRef(mapping.nodeId), 'Invalid draft mapping.');
+  else if (mapping.kind === 'prop') visualAssert(vmpObject(mapping, ['kind', 'name']) && visualIsKey(mapping.name), 'Invalid prop mapping.');
+  else if (mapping.kind === 'source') visualAssert(vmpObject(mapping, ['kind', 'sourceId', 'operationId', 'field']) && visualIsRef(mapping.sourceId) && visualIsRef(mapping.operationId) && visualIsText(mapping.field, 120), 'Invalid source mapping.');
+  else if (mapping.kind === 'object') {
+    visualAssert(vmpObject(mapping, ['kind', 'fields']) && visualIsPlain(mapping.fields) && Object.keys(mapping.fields).length <= 40, 'Invalid object mapping.');
+    for (const [key, value] of Object.entries(mapping.fields)) { visualAssert(/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key) && !vmpReserved.includes(key), 'Unsafe payload property.'); validateVisualMapping(value, depth + 1, budget); }
+  } else visualAssert(false, 'Unsupported payload mapping.');
+  return mapping;
+}
+function visualMappingRefs(mapping, out = { drafts: [], props: [] }) {
+  if (mapping?.kind === 'draft') out.drafts.push(mapping.nodeId);
+  else if (mapping?.kind === 'prop') out.props.push(mapping.name);
+  else if (mapping?.kind === 'object') for (const value of Object.values(mapping.fields)) visualMappingRefs(value, out);
+  return out;
+}
+function validateVisualControl(control) {
+  visualAssert(vmpObject(control, ['kind'], ['required', 'options', 'maxBytes']) && VISUAL_CONTROL_KINDS.includes(control.kind), 'Unsupported control type.');
+  if (control.required !== undefined) visualAssert(typeof control.required === 'boolean', 'Invalid required control.');
+  if (control.options !== undefined) visualAssert(control.kind === 'select' && Array.isArray(control.options) && control.options.length > 0 && control.options.length <= 60 && control.options.every(o => vmpObject(o, ['label', 'value']) && visualIsText(o.label, 120, true) && visualIsText(o.value, 120)) && new Set(control.options.map(o => o.value)).size === control.options.length, 'Invalid select options.');
+  visualAssert(control.kind !== 'select' || control.options !== undefined, 'Select options are required.');
+  if (control.maxBytes !== undefined) visualAssert(['json-file', 'json-editor', 'markdown-editor', 'textarea', 'text'].includes(control.kind) && Number.isSafeInteger(control.maxBytes) && control.maxBytes > 0 && control.maxBytes <= 4_000_000, 'Invalid control byte limit.');
+  return control;
+}
+// Pinned Nuxt UI authoring catalog v1 plus recipes that expand to ordinary IR. Generated projects pin @nuxt/ui to VISUAL_NUXT_UI_VERSION.
+const VISUAL_NUXT_UI_VERSION = '4.11.2';
+const VISUAL_PROP_KINDS = Object.freeze(['string', 'number', 'boolean', 'array', 'object', 'unknown']);
+const VISUAL_CONTROL_ENTRIES = Object.freeze(['u-input', 'u-textarea', 'u-select', 'u-checkbox', 'u-switch']);
+const vcatColors = ['primary', 'neutral', 'success', 'warning', 'error', 'info'];
+const vcatP = (name, type, extra = {}) => Object.freeze({ name, type, ...extra });
+const vcatEntry = (id, label, component, category, description, props, slots, emits, preview) => Object.freeze({ id, kind: 'primitive', label, component, category, description, props: Object.freeze(props), slots: Object.freeze(slots.map(name => Object.freeze({ name }))), emits: Object.freeze(emits.map(([name, payload]) => Object.freeze({ name, payload }))), preview });
+const visualCatalog = Object.freeze([
+  vcatEntry('u-button', 'Button', 'UButton', 'Actions', 'Primary and secondary actions', [vcatP('label', 'string'), vcatP('color', 'string', { default: 'primary', options: vcatColors }), vcatP('variant', 'string', { default: 'solid', options: ['solid', 'outline', 'soft', 'subtle', 'ghost', 'link'] }), vcatP('icon', 'string'), vcatP('loading', 'boolean', { default: false }), vcatP('disabled', 'boolean', { default: false })], ['leading', 'default', 'trailing'], [['click', 'unknown']], 'button'),
+  vcatEntry('u-input', 'Input', 'UInput', 'Forms', 'Single-line input', [vcatP('modelValue', 'unknown'), vcatP('type', 'string', { default: 'text', options: ['text', 'number', 'date', 'datetime-local', 'email', 'search'] }), vcatP('placeholder', 'string'), vcatP('icon', 'string'), vcatP('disabled', 'boolean')], [], [['update:modelValue', 'unknown']], 'input'),
+  vcatEntry('u-textarea', 'Textarea', 'UTextarea', 'Forms', 'Multi-line input', [vcatP('modelValue', 'string'), vcatP('placeholder', 'string'), vcatP('rows', 'number', { default: 3 })], [], [['update:modelValue', 'string']], 'textarea'),
+  vcatEntry('u-select', 'Select', 'USelect', 'Forms', 'Option selection', [vcatP('modelValue', 'unknown'), vcatP('items', 'array'), vcatP('placeholder', 'string')], [], [['update:modelValue', 'unknown']], 'select'),
+  vcatEntry('u-checkbox', 'Checkbox', 'UCheckbox', 'Forms', 'Boolean form control', [vcatP('modelValue', 'boolean'), vcatP('label', 'string')], [], [['update:modelValue', 'boolean']], 'checkbox'),
+  vcatEntry('u-switch', 'Switch', 'USwitch', 'Forms', 'Immediate boolean setting', [vcatP('modelValue', 'boolean'), vcatP('label', 'string')], [], [['update:modelValue', 'boolean']], 'switch'),
+  vcatEntry('u-form', 'Form', 'UForm', 'Forms', 'Validated form boundary', [vcatP('state', 'object')], ['default'], [['submit', 'unknown']], 'form'),
+  vcatEntry('u-form-field', 'Form Field', 'UFormField', 'Forms', 'Label, help and validation wrapper', [vcatP('label', 'string'), vcatP('name', 'string'), vcatP('description', 'string'), vcatP('required', 'boolean')], ['default'], [], 'field'),
+  vcatEntry('u-table', 'Data Table', 'UTable', 'Data', 'Structured records', [vcatP('data', 'array'), vcatP('columns', 'array'), vcatP('loading', 'boolean')], ['empty', 'loading'], [['select', 'unknown']], 'table'),
+  vcatEntry('u-card', 'Card', 'UCard', 'Data', 'Grouped content container', [], ['header', 'default', 'footer'], [], 'card'),
+  vcatEntry('u-badge', 'Badge', 'UBadge', 'Data', 'Compact status', [vcatP('label', 'string'), vcatP('color', 'string', { options: vcatColors }), vcatP('variant', 'string', { options: ['solid', 'outline', 'soft', 'subtle'] })], ['default'], [], 'badge'),
+  vcatEntry('u-avatar', 'Avatar', 'UAvatar', 'Data', 'User or entity identity', [vcatP('src', 'string'), vcatP('alt', 'string'), vcatP('text', 'string')], [], [], 'avatar'),
+  vcatEntry('u-tabs', 'Tabs', 'UTabs', 'Navigation', 'Peer surface navigation', [vcatP('items', 'array'), vcatP('modelValue', 'string')], [], [['update:modelValue', 'string']], 'tabs'),
+  vcatEntry('u-breadcrumb', 'Breadcrumb', 'UBreadcrumb', 'Navigation', 'Hierarchical location', [vcatP('items', 'array')], [], [], 'breadcrumb'),
+  vcatEntry('u-dropdown-menu', 'Dropdown Menu', 'UDropdownMenu', 'Navigation', 'Context actions', [vcatP('items', 'array')], ['default'], [], 'menu'),
+  vcatEntry('u-command-palette', 'Command Palette', 'UCommandPalette', 'Navigation', 'Keyboard-first command discovery', [vcatP('groups', 'array'), vcatP('placeholder', 'string')], [], [['update:modelValue', 'unknown']], 'menu'),
+  vcatEntry('u-modal', 'Modal', 'UModal', 'Overlays', 'Focused modal workflow', [vcatP('open', 'boolean'), vcatP('title', 'string'), vcatP('description', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),
+  vcatEntry('u-drawer', 'Drawer', 'UDrawer', 'Overlays', 'Contextual side or bottom workflow', [vcatP('open', 'boolean'), vcatP('title', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),
+  vcatEntry('u-alert', 'Alert', 'UAlert', 'Feedback', 'Persistent contextual feedback', [vcatP('title', 'string'), vcatP('description', 'string'), vcatP('color', 'string', { options: vcatColors })], [], [], 'alert'),
+  vcatEntry('u-progress', 'Progress', 'UProgress', 'Feedback', 'Progress indicator', [vcatP('modelValue', 'number'), vcatP('max', 'number', { default: 100 })], [], [], 'progress'),
+  vcatEntry('u-skeleton', 'Skeleton', 'USkeleton', 'Feedback', 'Loading placeholder', [], [], [], 'skeleton'),
+  vcatEntry('u-separator', 'Separator', 'USeparator', 'Layout', 'Visual separation', [vcatP('orientation', 'string', { default: 'horizontal', options: ['horizontal', 'vertical'] })], [], [], 'separator'),
+]);
+function visualCatalogEntry(id) { return visualCatalog.find(e => e.id === id) ?? null; }
+const vcatLit = values => Object.fromEntries(Object.entries(values).map(([k, v]) => [k, visualLiteral(v)]));
+const vcatBox = (s, tag, mode, name, children, ui = {}) => visualElement(visualAllocate(s, 'vn'), tag, { name, layout: visualLayoutRules(mode, { ...compositionDefaultUI(), ...ui }), children });
+const vcatUi = (s, entryId, name, props = {}, extra = {}) => visualNuxt(visualAllocate(s, 'vn'), entryId, vcatLit(props), { name, ...extra });
+const vcatTxt = (s, value, role, name) => visualText(visualAllocate(s, 'vn'), value, role, { name });
+const vcatField = (s, label, entryId, props = {}) => { const field = vcatUi(s, 'u-form-field', label + ' field', { label }); field.slots.default = [vcatUi(s, entryId, label, props)]; return field; };
+const vcatCard = (s, label, value) => { const card = vcatUi(s, 'u-card', label + ' card'); card.slots.default = [vcatTxt(s, label, 'span', label + ' label'), vcatTxt(s, value, 'h2', label + ' value')]; return card; };
+function vcatShell(s, content) {
+  return [vcatBox(s, 'div', 'row', 'Application shell', [
+    vcatBox(s, 'nav', 'stack', 'Primary sidebar', [vcatTxt(s, 'Workspace', 'span', 'Product name'), vcatUi(s, 'u-button', 'Overview link', { label: 'Overview', variant: 'ghost' })], { widthMode: 'fixed', width: 224 }),
+    vcatBox(s, 'div', 'stack', 'Workspace', [vcatBox(s, 'header', 'row', 'Command bar', [vcatUi(s, 'u-breadcrumb', 'Breadcrumb', { items: [{ label: 'Workspace' }] })]), vcatBox(s, 'main', 'stack', 'Content', content)]),
+  ])];
+}
+const vcatCrud = s => [vcatBox(s, 'section', 'stack', 'List workspace', [
+  vcatBox(s, 'header', 'row', 'Heading', [vcatTxt(s, 'Records', 'h1', 'Title'), vcatUi(s, 'u-button', 'Create action', { label: 'New record', icon: 'i-lucide-plus' })]),
+  ...vcatFilter(s),
+  vcatUi(s, 'u-table', 'Records table', { columns: [{ accessorKey: 'name', header: 'Name' }], data: [] }, { visibleIn: ['default', 'loading', 'error', 'disabled'] }),
+  vcatUi(s, 'u-alert', 'Empty message', { title: 'No records yet', description: 'Create the first record to get started.', color: 'neutral' }, { visibleIn: ['empty'] }),
+])];
+const vcatFilter = s => [vcatBox(s, 'div', 'row', 'Filter bar', [vcatUi(s, 'u-input', 'Search', { placeholder: 'Search…', icon: 'i-lucide-search' }), vcatUi(s, 'u-select', 'Filter', { items: ['All'], placeholder: 'Filter' }), vcatUi(s, 'u-button', 'Reset filters', { label: 'Reset', variant: 'ghost' })])];
+const vcatMasterDetail = s => [vcatBox(s, 'div', 'grid', 'Master / detail', [vcatBox(s, 'section', 'stack', 'Records', [vcatUi(s, 'u-table', 'Record list', { columns: [{ accessorKey: 'name', header: 'Name' }], data: [] })]), vcatBox(s, 'section', 'stack', 'Detail', [vcatTxt(s, 'Details', 'h2', 'Detail title'), vcatTxt(s, 'Select a record to see its details.', 'p', 'Detail hint')])], { columns: 2 })];
+function vcatSettings(s) { const form = vcatUi(s, 'u-form', 'Settings form'); form.slots.default = [vcatField(s, 'Name', 'u-input', { placeholder: 'Workspace name' }), vcatField(s, 'Notifications', 'u-switch', { label: 'Email notifications' })]; return [vcatBox(s, 'div', 'row', 'Settings', [vcatBox(s, 'nav', 'stack', 'Settings sections', [vcatUi(s, 'u-button', 'General section', { label: 'General', variant: 'ghost' }), vcatUi(s, 'u-button', 'Notifications section', { label: 'Notifications', variant: 'ghost' })]), form])]; }
+const vcatEmpty = s => [vcatBox(s, 'section', 'stack', 'Empty state', [vcatTxt(s, 'Nothing here yet', 'h2', 'Empty title'), vcatTxt(s, 'Create the first item to get started.', 'p', 'Empty copy'), vcatUi(s, 'u-button', 'Empty action', { label: 'Create' })])];
+const vcatDashboard = s => [vcatBox(s, 'section', 'stack', 'Dashboard', [vcatTxt(s, 'Overview', 'h1', 'Title'), vcatBox(s, 'div', 'grid', 'KPI summary', [vcatCard(s, 'Active', '0'), vcatCard(s, 'Revenue', '0'), vcatCard(s, 'Attention', '0')], { columns: 3 }), vcatUi(s, 'u-table', 'Activity', { columns: [{ accessorKey: 'event', header: 'Event' }], data: [] })])];
+function vcatForm(s) { const form = vcatUi(s, 'u-form', 'Record form'); form.slots.default = [vcatField(s, 'Title', 'u-input', { placeholder: 'Title' }), vcatField(s, 'Description', 'u-textarea', { rows: 4 })]; return [vcatBox(s, 'section', 'stack', 'Form workflow', [vcatTxt(s, 'New record', 'h1', 'Title'), form, vcatBox(s, 'footer', 'row', 'Form actions', [vcatUi(s, 'u-button', 'Cancel', { label: 'Cancel', variant: 'ghost' }), vcatUi(s, 'u-button', 'Save', { label: 'Save' })], { justify: 'end' })])]; }
+const vcatRecipe = (id, label, description, build) => Object.freeze({ id, label, category: 'Application patterns', description, build });
+const visualRecipes = Object.freeze([
+  vcatRecipe('recipe-app-shell', 'Application Shell', 'Sidebar, header and content region', s => vcatShell(s, [])),
+  vcatRecipe('recipe-crud-list', 'CRUD List Workspace', 'Heading, actions, filter bar, table and empty state', vcatCrud),
+  vcatRecipe('recipe-filter-bar', 'Filter Bar', 'Search, filter and reset', vcatFilter),
+  vcatRecipe('recipe-master-detail', 'Master / Detail', 'Record collection with a detail pane', vcatMasterDetail),
+  vcatRecipe('recipe-settings', 'Settings Form', 'Section navigation plus grouped validated form', vcatSettings),
+  vcatRecipe('recipe-empty-state', 'Empty State', 'Message, supporting copy and primary action', vcatEmpty),
+]);
+const vcatLayout = (id, name, category, description, build) => Object.freeze({ id, name, category, scope: 'page', description, build });
+const visualBuiltinLayouts = Object.freeze([
+  vcatLayout('builtin-list-workspace', 'List workspace', 'application', 'Sidebar, command bar, filters and data table', s => vcatShell(s, vcatCrud(s))),
+  vcatLayout('builtin-dashboard', 'Operations dashboard', 'dashboard', 'KPI row and activity table', vcatDashboard),
+  vcatLayout('builtin-master-detail', 'Master / detail', 'master-detail', 'Record list with persistent detail pane', s => vcatShell(s, vcatMasterDetail(s))),
+  vcatLayout('builtin-form', 'Form workflow', 'form', 'Sectioned form with actions', vcatForm),
+  vcatLayout('builtin-settings', 'Settings', 'settings', 'Settings navigation and grouped forms', s => vcatShell(s, vcatSettings(s))),
+]);
+function visualExpand(store, id) {
+  const item = visualRecipes.find(r => r.id === id) ?? visualBuiltinLayouts.find(l => l.id === id);
+  visualAssert(item, 'Unknown recipe or layout ' + JSON.stringify(id) + '.');
+  return item.build(store);
+}
+// Component dependency graph over stable IDs. Pure.
+function visualDependencies(nodes) { const found = new Set(); visualWalk(nodes, n => { if (n?.kind === 'component' && n.ref?.kind === 'project') found.add(n.ref.componentId); }); return [...found]; }
+function vcmpEdges(nodes) { const out = []; visualWalk(nodes, n => { if (n?.kind === 'component' && n.ref?.kind === 'project') out.push(n.ref.revisionId ? 'rev:' + n.ref.revisionId : 'live:' + n.ref.componentId); }); return out; }
+function vcmpGraphs(store) { const graphs = new Map(store.components.map(c => ['live:' + c.id, c.template])); for (const r of store.revisions) graphs.set('rev:' + r.id, r.template); return graphs; }
+function vcmpLabel(store, key) { const [kind, id] = key.split(':'); const componentId = kind === 'rev' ? store.revisions.find(r => r.id === id)?.componentId : id; return store.components.find(c => c.id === componentId)?.exportName ?? id; }
+function visualWouldCycle(store, parentId, childId) {
+  if (parentId === childId) return true;
+  const graphs = vcmpGraphs(store), seen = new Set();
+  const reaches = key => { const id = key.startsWith('rev:') ? store.revisions.find(r => 'rev:' + r.id === key)?.componentId : key.slice(5); if (id === parentId) return true; if (seen.has(key)) return false; seen.add(key); return vcmpEdges(graphs.get(key) ?? []).some(reaches); };
+  return reaches('live:' + childId);
+}
+function visualCompositionGraph(store) {
+  const graphs = vcmpGraphs(store), done = new Set(), active = [];
+  const visit = key => {
+    visualAssert(!active.includes(key), 'Component cycle: ' + [...active.slice(active.indexOf(key)), key].map(k => vcmpLabel(store, k)).join(' → ') + '.');
+    visualAssert(active.length < VISUAL_LIMITS.composition, 'Component composition is deeper than ' + VISUAL_LIMITS.composition + ' levels.');
+    if (done.has(key)) return; active.push(key); for (const next of vcmpEdges(graphs.get(key) ?? [])) visit(next); active.pop(); done.add(key);
+  };
+  for (const key of graphs.keys()) visit(key);
+}
+function visualUsages(store, componentId) {
+  const out = [];
+  for (const [kind, list, root] of [['page', store.pages, 'root'], ['component', store.components, 'template'], ['layout', store.layouts, 'root']])
+    for (const d of list) visualWalk(d[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.componentId === componentId) out.push({ kind, definitionId: d.id, definitionName: d.name ?? d.exportName, nodeId: n.id }); });
+  return out;
+}
+// Complete, pure validation for visual designs. Gates save, export, import and generation.
+const vvCommon = ['name', 'visibleIn', 'a11y', 'layout', 'notes'];
+const vvForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style', 'constructor', 'prototype', '__proto__'];
+const vvCategories = ['application', 'dashboard', 'master-detail', 'form', 'settings', 'website', 'custom'];
+const vvIdPattern = /^(vn|vp|vc|vl|vr|vi)-([1-9][0-9]*)$/;
+function vvObject(value, keys, optional = []) { return visualIsPlain(value) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)) && keys.every(k => Object.hasOwn(value, k)); }
+function vvWithin(where, fn) {
+  try { return fn(); }
+  catch (err) { throw Error('VISUAL_INVALID: ' + where + ': ' + String(err?.message ?? err).replace(/^(VISUAL_INVALID|COMPOSITION_INVALID): /, '')); }
+}
+function visualIsControl(node) { return node?.kind === 'component' && node.ref?.kind === 'nuxt-ui' && VISUAL_CONTROL_ENTRIES.includes(node.ref.entryId); }
+function vvDependencies(list, where) {
+  visualAssert(Array.isArray(list) && list.length <= VISUAL_DEPENDENCY_LIMIT, where + ': at most 8 dependencies.');
+  const seen = new Set();
+  for (const d of list) {
+    visualAssert(vvObject(d, ['package', 'version', 'purpose']), where + ': unsupported dependency fields.');
+    visualAssert(visualIsPackage(d.package), where + ': ' + JSON.stringify(d.package) + ' is not an npm package name (no URLs, git or file specifiers).');
+    visualAssert(visualIsExactVersion(d.version), where + ': ' + d.package + ' needs an exact version such as 1.2.3, not ' + JSON.stringify(d.version) + '.');
+    visualAssert(visualIsText(d.purpose, 400), where + ': dependency purpose too long.');
+    visualAssert(!seen.has(d.package), where + ': duplicate dependency ' + d.package + '.');
+    seen.add(d.package);
+  }
+}
+function vvContract(contract, where) {
+  const { props, slots, emits, variants } = contract;
+  visualAssert([props, slots, emits, variants].every(Array.isArray) && [props, slots, emits].every(l => l.length <= VISUAL_LIMITS.contract) && variants.length <= 12, where + ': contract lists exceed their limits.');
+  for (const p of props) {
+    visualAssert(vvObject(p, ['name', 'type', 'required'], ['default', 'description']) && visualIsKey(p.name) && !vvForbidden.includes(p.name) && VISUAL_PROP_TYPES.includes(p.type) && typeof p.required === 'boolean', where + ': invalid prop ' + JSON.stringify(p?.name) + '.');
+    visualAssert(p.default === undefined || (typeof p.default === p.type && visualIsScalar(p.default)), where + ': default of prop ' + p.name + ' must be a ' + p.type + '.');
+    visualAssert(p.description === undefined || visualIsText(p.description, 2000), where + ': prop description too long.');
+  }
+  for (const s of slots) visualAssert(vvObject(s, ['name', 'required'], ['description']) && /^[a-z][A-Za-z0-9-]*$/.test(s.name) && s.name.length <= 60 && !vvForbidden.includes(s.name) && typeof s.required === 'boolean' && (s.description === undefined || visualIsText(s.description, 2000)), where + ': invalid slot ' + JSON.stringify(s?.name) + '.');
+  for (const e of emits) visualAssert(vvObject(e, ['name', 'payloadType'], ['description']) && visualIsKey(e.name) && !vvForbidden.includes(e.name) && VISUAL_PAYLOAD_TYPES.includes(e.payloadType) && (e.description === undefined || visualIsText(e.description, 2000)), where + ': invalid emit ' + JSON.stringify(e?.name) + '.');
+  for (const [label, names] of [['prop', props.map(p => p.name)], ['slot', slots.map(s => s.name)], ['emit', emits.map(e => e.name)], ['variant', variants.map(v => v?.id)]]) visualAssert(new Set(names).size === names.length, where + ': duplicate ' + label + ' name.');
+  for (const v of variants) {
+    visualAssert(vvObject(v, ['id', 'name', 'values']) && visualIsRef(v.id) && visualIsLine(v.name, 120) && visualIsPlain(v.values), where + ': invalid variant.');
+    for (const [key, value] of Object.entries(v.values)) { const p = props.find(p => p.name === key); visualAssert(p && typeof value === p.type && visualIsScalar(value), where + ': variant ' + v.name + ' sets undeclared or mistyped prop ' + key + '.'); }
+  }
+}
+function vvSource(ref, scope, where) { const ops = scope.context.sources?.get(ref.sourceId); visualAssert(!scope.context.sources || (ops && ops.has(ref.operationId)), where + ': unknown source operation ' + ref.sourceId + '/' + ref.operationId + '.'); }
+function vvValue(expr, scope, where, type = 'scalar') {
+  visualAssert(visualIsPlain(expr), where + ': missing value.');
+  if (expr.kind === 'literal') {
+    visualAssert(vvObject(expr, ['kind', 'value']), where + ': invalid literal.');
+    if (type === 'json') vvWithin(where, () => compositionLiteral(expr.value));
+    else visualAssert(visualIsScalar(expr.value) && (type === 'scalar' || expr.value === null || typeof expr.value === type), where + ': literal must be ' + (type === 'scalar' ? 'a string, number, boolean or null' : 'a ' + type) + '.');
+  } else if (expr.kind === 'prop') visualAssert(vvObject(expr, ['kind', 'name']) && !!scope.contract?.props.some(p => p.name === expr.name), where + ': binds undeclared prop ' + JSON.stringify(expr.name) + '.');
+  else if (expr.kind === 'state') visualAssert(vvObject(expr, ['kind', 'nodeId']) && visualIsControl(scope.nodes.get(expr.nodeId)), where + ': state binding must reference a form control in this design.');
+  else if (expr.kind === 'source') { visualAssert(vvObject(expr, ['kind', 'sourceId', 'operationId', 'field']) && visualIsRef(expr.sourceId) && visualIsRef(expr.operationId) && visualIsText(expr.field, 120), where + ': invalid source binding.'); vvSource(expr, scope, where); }
+  else visualAssert(false, where + ': unsupported value kind ' + JSON.stringify(expr.kind) + '.');
+}
+function vvMapping(mapping, scope, where) {
+  vvWithin(where, () => validateVisualMapping(mapping)); const refs = visualMappingRefs(mapping);
+  for (const id of refs.drafts) visualAssert(visualIsControl(scope.nodes.get(id)), where + ': mapped draft input ' + id + ' is missing.');
+  for (const name of refs.props) visualAssert(!!scope.contract?.props.some(p => p.name === name), where + ': maps undeclared prop ' + name + '.');
+}
+function vvAction(a, scope, where) {
+  const target = id => { visualAssert(scope.nodes.has(id), where + ': action targets missing element ' + JSON.stringify(id) + '.'); return scope.nodes.get(id); };
+  switch (a?.kind) {
+    case 'emit': visualAssert(vvObject(a, ['kind', 'event', 'payload']) && visualIsKey(a.event) && (!scope.contract || scope.contract.emits.some(e => e.name === a.event)), where + ': emits undeclared event ' + JSON.stringify(a?.event) + '.'); vvMapping(a.payload, scope, where); break;
+    case 'navigate': visualAssert(vvObject(a, ['kind', 'surfaceId']) && visualIsRef(a.surfaceId) && (!scope.context.surfaces || scope.context.surfaces.has(a.surfaceId)), where + ': navigation target is missing.'); break;
+    case 'set-state': visualAssert(vvObject(a, ['kind', 'state']) && VISUAL_STATES.includes(a.state), where + ': unknown state.'); break;
+    case 'toggle': visualAssert(vvObject(a, ['kind', 'nodeId']), where + ': invalid toggle.'); target(a.nodeId); break;
+    case 'focus': { visualAssert(vvObject(a, ['kind', 'nodeId']), where + ': invalid focus.'); const n = target(a.nodeId); visualAssert(visualIsControl(n) || n.ref?.entryId === 'u-button' || ['button', 'input'].includes(n.tag), where + ': focus needs a focusable target.'); break; }
+    case 'set-value': visualAssert(vvObject(a, ['kind', 'nodeId', 'value']) && visualIsScalar(a.value), where + ': invalid value action.'); visualAssert(visualIsControl(target(a.nodeId)), where + ': values can only be set on form controls.'); break;
+    case 'source': visualAssert(vvObject(a, ['kind', 'sourceId', 'operationId', 'input']) && visualIsRef(a.sourceId) && visualIsRef(a.operationId), where + ': invalid source action.'); vvSource(a, scope, where); vvMapping(a.input, scope, where); break;
+    default: visualAssert(false, where + ': unsupported action ' + JSON.stringify(a?.kind) + '.');
+  }
+}
+function vvEvents(node, scope, allowed, where) {
+  visualAssert(Array.isArray(node.events) && node.events.length <= VISUAL_LIMITS.interactions, where + ': too many interactions.');
+  for (const i of node.events) {
+    visualAssert(vvObject(i, ['id', 'event', 'label', 'actions', 'notes', 'acceptance']), where + ': unsupported interaction fields.'); scope.identity(i.id, 'vi');
+    visualAssert(typeof i.event === 'string' && i.event.length <= 60 && /^[a-zA-Z][a-zA-Z0-9:_-]*$/.test(i.event) && (!allowed || allowed.includes(i.event)), where + ': event ' + JSON.stringify(i.event) + ' is not declared by this element.');
+    visualAssert(visualIsLine(i.label, 120) && visualIsText(i.notes, 4000) && visualIsText(i.acceptance, 8000), where + ': interaction needs a single-line label and bounded notes.');
+    visualAssert(Array.isArray(i.actions) && i.actions.length <= VISUAL_LIMITS.actions, where + ': at most eight actions per interaction.');
+    for (const a of i.actions) vvAction(a, scope, where + ' → ' + i.label);
+  }
+}
+function vvComponentNode(node, scope, where) {
+  const ref = node.ref; let contract;
+  if (ref?.kind === 'nuxt-ui') {
+    visualAssert(vvObject(ref, ['kind', 'entryId']), where + ': invalid catalog reference.');
+    const entry = visualCatalogEntry(ref.entryId); visualAssert(entry, where + ': unknown Nuxt UI catalog entry ' + JSON.stringify(ref.entryId) + '.');
+    contract = { props: entry.props, slots: entry.slots.map(s => s.name), emits: entry.emits.map(e => e.name), required: [] };
+    visualAssert(node.variantId === undefined, where + ': catalog components have no project variants.');
+  } else if (ref?.kind === 'project') {
+    visualAssert(vvObject(ref, ['kind', 'componentId'], ['revisionId']), where + ': invalid component reference.');
+    const target = ref.revisionId ? scope.store.revisions.find(r => r.id === ref.revisionId && r.componentId === ref.componentId)?.contract : scope.store.components.find(c => c.id === ref.componentId);
+    visualAssert(target, where + ': references missing component ' + JSON.stringify(ref.revisionId ?? ref.componentId) + '.');
+    contract = { props: target.props, slots: target.slots.map(s => s.name), emits: target.emits.map(e => e.name), required: target.props.filter(p => p.required).map(p => p.name) };
+    visualAssert(node.variantId === undefined || target.variants.some(v => v.id === node.variantId), where + ': unknown variant.');
+    visualAssert(!scope.pinned || ref.revisionId, where + ': published dependencies must pin a revision.');
+  } else visualAssert(false, where + ': choose a Nuxt UI entry or project component.');
+  visualAssert(visualIsPlain(node.props) && Object.keys(node.props).length <= 40, where + ': invalid props.');
+  for (const [key, value] of Object.entries(node.props)) { const p = contract.props.find(p => p.name === key); visualAssert(p, where + ': prop ' + key + ' is not declared by the component.'); vvValue(value, scope, where + ' :' + key, VISUAL_PROP_TYPES.includes(p.type) ? p.type : 'json'); }
+  for (const name of contract.required) visualAssert(Object.hasOwn(node.props, name), where + ': required prop ' + name + ' is missing.');
+  visualAssert(visualIsPlain(node.slots), where + ': invalid slot content.');
+  for (const [name, list] of Object.entries(node.slots)) visualAssert(contract.slots.includes(name) && Array.isArray(list), where + ': slot ' + name + ' is not declared by the component.');
+  if (node.control !== undefined) { visualAssert(visualIsControl(node), where + ': only form controls have control semantics.'); vvWithin(where, () => validateVisualControl(node.control)); }
+  vvEvents(node, scope, [...contract.emits, ...VISUAL_DOM_EVENTS], where);
+}
+function vvNode(node, scope, at) {
+  const where = scope.where + ' / ' + (node?.name || node?.id || 'element');
+  const keys = { element: ['id', 'kind', 'tag', 'attrs', 'children', 'events'], text: ['id', 'kind', 'role', 'value'], slot: ['id', 'kind', 'name', 'fallback'], component: ['id', 'kind', 'ref', 'props', 'slots', 'events'], external: ['id', 'kind', 'package', 'adapter', 'props', 'events'] }[node?.kind];
+  visualAssert(keys, where + ': unsupported element kind ' + JSON.stringify(node?.kind) + '.');
+  visualAssert(at.depth <= VISUAL_LIMITS.depth, where + ': nesting exceeds ' + VISUAL_LIMITS.depth + ' levels.');
+  visualAssert(vvObject(node, keys, [...vvCommon, ...(node.kind === 'component' ? ['variantId', 'control'] : [])]), where + ': unsupported element fields.');
+  if (node.name !== undefined) visualAssert(visualIsLine(node.name, 120), where + ': name must be a single line.');
+  if (node.visibleIn !== undefined) visualAssert(Array.isArray(node.visibleIn) && node.visibleIn.length > 0 && new Set(node.visibleIn).size === node.visibleIn.length && node.visibleIn.every(s => VISUAL_STATES.includes(s)), where + ': choose at least one supported preview state.');
+  if (node.a11y !== undefined) visualAssert(visualIsText(node.a11y, 2000), where + ': accessibility notes too long.');
+  if (node.notes !== undefined) visualAssert(visualIsText(node.notes, 4000), where + ': element notes too long.');
+  if (node.layout !== undefined) { visualAssert(vvObject(node.layout, ['mode', 'ui']) && VISUAL_LAYOUT_MODES.includes(node.layout.mode), where + ': invalid layout.'); vvWithin(where, () => validateCompositionUI(node.layout.ui)); }
+  if (node.kind === 'element') {
+    visualAssert(VISUAL_TAGS.includes(node.tag), where + ': unsupported tag.');
+    visualAssert(visualIsPlain(node.attrs) && Object.keys(node.attrs).length <= 16, where + ': invalid attributes.');
+    for (const [key, value] of Object.entries(node.attrs)) { visualAssert(/^[a-z][a-z0-9-]*$/.test(key) && !key.startsWith('on') && !['style', 'class', 'is', 'key', 'ref'].includes(key), where + ': attribute ' + key + ' is not allowed.'); vvValue(value, scope, where + ' @' + key); }
+    visualAssert(Array.isArray(node.children) && (!['input', 'img'].includes(node.tag) || node.children.length === 0), where + ': ' + node.tag + ' cannot contain children.');
+    vvEvents(node, scope, null, where);
+  } else if (node.kind === 'text') { visualAssert(VISUAL_TEXT_ROLES.includes(node.role), where + ': unsupported text role.'); vvValue(node.value, scope, where); }
+  else if (node.kind === 'slot') { visualAssert(scope.slots.includes(node.name), where + ': slot ' + JSON.stringify(node.name) + ' is not declared.'); visualAssert(Array.isArray(node.fallback), where + ': invalid slot fallback.'); }
+  else if (node.kind === 'external') {
+    visualAssert(scope.external, where + ': external libraries belong in component templates.');
+    visualAssert(scope.dependencies.some(d => d.package === node.package), where + ': ' + node.package + ' is not a declared dependency of this component.');
+    visualAssert(typeof node.adapter === 'string' && /^[a-z][a-z0-9-]*$/.test(node.adapter) && node.adapter.length <= 60, where + ': adapter name must be lowercase kebab-case.');
+    visualAssert(!scope.adapters.has(node.adapter), where + ': adapter "' + node.adapter + '" is used twice.'); scope.adapters.add(node.adapter);
+    visualAssert(visualIsPlain(node.props) && Object.keys(node.props).length <= 40, where + ': invalid props.');
+    for (const [key, value] of Object.entries(node.props)) { visualAssert(visualIsKey(key), where + ': invalid prop name ' + key + '.'); vvValue(value, scope, where + ' :' + key, 'json'); }
+    vvEvents(node, scope, null, where);
+  }
+  else vvComponentNode(node, scope, where);
+}
+function vvDefinition(store, root, kind, context, identity, where, contract, slots = [], dependencies = []) {
+  visualAssert(Array.isArray(root), where + ': missing structure.');
+  const nodes = new Map();
+  visualWalk(root, node => { visualAssert(visualIsPlain(node) && !nodes.has(node.id), where + ': duplicate element ID ' + JSON.stringify(node?.id) + '.'); nodes.set(node.id, node); });
+  visualAssert(nodes.size <= VISUAL_LIMITS.nodes, where + ': supports at most ' + VISUAL_LIMITS.nodes + ' elements.');
+  const pinned = kind === 'revision', scoped = pinned ? () => {} : identity;
+  for (const id of nodes.keys()) scoped(id, 'vn');
+  const external = kind === 'component' || kind === 'revision';
+  const scope = { store, context, nodes, contract, where, pinned, slots: kind === 'page' ? [] : slots, identity: scoped, dependencies, external, adapters: new Set() };
+  visualWalk(root, (node, at) => vvNode(node, scope, at));
+  return nodes;
+}
+function vvScenarios(definition, nodes, where) {
+  visualAssert(Array.isArray(definition.scenarios) && definition.scenarios.length <= VISUAL_LIMITS.scenarios, where + ': invalid scenarios.');
+  vvWithin(where, () => validateCompositionScenarios({ scenarios: definition.scenarios, nodes: [...nodes.values()] }));
+}
+function validateVisualDesigns(store, context = {}) {
+  visualAssert(vvObject(store, ['schema', 'nextId', 'catalog', 'pages', 'components', 'layouts', 'revisions']) && store.schema === VISUAL_SCHEMA, 'Unsupported visual-design collection.');
+  visualAssert(Number.isSafeInteger(store.nextId) && store.nextId > 0 && store.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid visual ID counter.');
+  visualAssert(vvObject(store.catalog, ['id', 'version']) && store.catalog.id === VISUAL_CATALOG.id && store.catalog.version === VISUAL_CATALOG.version, 'Unsupported component catalog ' + JSON.stringify(store.catalog) + '; this editor pins nuxt-ui v1.');
+  for (const key of ['pages', 'components', 'layouts', 'revisions']) visualAssert(Array.isArray(store[key]), 'Invalid ' + key + ' collection.');
+  visualAssert(store.pages.length + store.components.length <= VISUAL_LIMITS.definitions && store.layouts.length <= VISUAL_LIMITS.layouts && store.revisions.length <= VISUAL_LIMITS.revisions, 'Too many visual definitions.');
+  const ids = new Set(); let highest = 0;
+  const identity = (id, prefix) => { const m = typeof id === 'string' && vvIdPattern.exec(id); visualAssert(m && m[1] === prefix && !ids.has(id), 'Duplicate or malformed ID ' + JSON.stringify(id) + '.'); ids.add(id); highest = Math.max(highest, Number(m[2])); };
+  const owners = new Set(), libraries = new Set(), exportNames = new Set(), versions = new Set(), depVersions = new Map();
+  for (const page of store.pages) {
+    const where = 'Page ' + JSON.stringify(page?.name ?? page?.id);
+    visualAssert(vvObject(page, ['id', 'ownerId', 'name', 'root', 'scenarios', 'notes']), where + ': unsupported page fields.'); identity(page.id, 'vp');
+    visualAssert(visualIsRef(page.ownerId) && !owners.has(page.ownerId) && (!context.surfaces || context.surfaces.has(page.ownerId)), where + ': owner surface is missing or already designed.'); owners.add(page.ownerId);
+    visualAssert(visualIsLine(page.name, 120) && visualIsText(page.notes, 8000), where + ': invalid name or notes.');
+    vvScenarios(page, vvDefinition(store, page.root, 'page', context, identity, where, null), where);
+  }
+  for (const c of store.components) {
+    const where = 'Component ' + JSON.stringify(c?.exportName ?? c?.id);
+    visualAssert(vvObject(c, ['id', 'libraryId', 'exportName', 'description', 'props', 'slots', 'emits', 'variants', 'template', 'scenarios'], ['implementation', 'notes', 'dependencies']), where + ': unsupported component fields.'); identity(c.id, 'vc');
+    visualAssert(typeof c.exportName === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(c.exportName) && c.exportName.length <= 60 && !exportNames.has(c.exportName), where + ': export name must be a unique PascalCase Vue name.'); exportNames.add(c.exportName);
+    visualAssert(visualIsRef(c.libraryId) && !libraries.has(c.libraryId) && (!context.library || context.library.has(c.libraryId)), where + ': library entry is missing or already designed.'); libraries.add(c.libraryId);
+    visualAssert(visualIsText(c.description, 2000) && (c.notes === undefined || visualIsText(c.notes, 8000)), where + ': description or notes too long.');
+    visualAssert(c.implementation === undefined || (vvObject(c.implementation, ['catalog', 'entryId']) && c.implementation.catalog === 'nuxt-ui' && visualCatalogEntry(c.implementation.entryId)), where + ': unknown implementation primitive.');
+    vvDependencies(c.dependencies ?? [], where);
+    for (const d of c.dependencies ?? []) {
+      const first = depVersions.get(d.package);
+      if (first) visualAssert(first.version === d.version, d.package + ' is pinned to ' + first.version + ' in ' + first.exportName + ' and ' + d.version + ' in ' + c.exportName + '.');
+      else depVersions.set(d.package, { version: d.version, exportName: c.exportName });
+    }
+    vvContract(c, where); vvScenarios(c, vvDefinition(store, c.template, 'component', context, identity, where, c, c.slots.map(s => s.name), c.dependencies ?? []), where);
+  }
+  for (const l of store.layouts) {
+    const where = 'Layout ' + JSON.stringify(l?.name ?? l?.id);
+    visualAssert(vvObject(l, ['id', 'name', 'description', 'scope', 'category', 'root', 'slots'], ['sourcePageId']), where + ': unsupported layout fields.'); identity(l.id, 'vl');
+    visualAssert(visualIsLine(l.name, 120) && visualIsText(l.description, 400) && ['page', 'region'].includes(l.scope) && vvCategories.includes(l.category) && (l.sourcePageId === undefined || visualIsRef(l.sourcePageId)), where + ': invalid layout metadata.');
+    visualAssert(Array.isArray(l.slots) && l.slots.length <= 12 && l.slots.every(s => vvObject(s, ['name', 'required'], ['description']) && /^[a-z][A-Za-z0-9-]*$/.test(s.name) && typeof s.required === 'boolean'), where + ': invalid layout slots.');
+    vvDefinition(store, l.root, 'layout', context, identity, where, null, l.slots.map(s => s.name));
+  }
+  for (const r of store.revisions) {
+    const where = 'Revision ' + JSON.stringify(r?.id);
+    visualAssert(vvObject(r, ['id', 'componentId', 'version', 'contract', 'template'], ['designSystem', 'dependencies', 'notes', 'scenarios']), where + ': unsupported revision fields.'); identity(r.id, 'vr');
+    visualAssert(store.components.some(c => c.id === r.componentId) && typeof r.version === 'string' && r.version.length <= 40 && /^\d+\.\d+\.\d+$/.test(r.version) && !versions.has(r.componentId + '@' + r.version), where + ': revision needs an existing component and a unique x.y.z version.'); versions.add(r.componentId + '@' + r.version);
+    visualAssert(vvObject(r.contract, ['props', 'slots', 'emits', 'variants']), where + ': invalid published contract.'); vvContract(r.contract, where);
+    vvDependencies(r.dependencies ?? [], where);
+    visualAssert(r.notes === undefined || visualIsText(r.notes, 8000), where + ': revision notes too long.');
+    if (r.designSystem !== undefined) vvWithin(where, () => validateCompositionDesignSystem(r.designSystem));
+    const nodes = vvDefinition(store, r.template, 'revision', context, identity, where, r.contract, r.contract.slots.map(s => s.name), r.dependencies ?? []);
+    if (r.scenarios !== undefined) vvScenarios(r, nodes, where);
+  }
+  visualAssert(store.nextId > highest, 'The visual ID counter could reuse an existing ID.');
+  visualCompositionGraph(store);
+  return store;
+}
+// Structural copies with fresh IDs. Component definitions stay references.
+function vlayRemapMapping(m, remap) { if (m?.kind === 'draft') return { ...m, nodeId: remap(m.nodeId) }; if (m?.kind === 'object') return { ...m, fields: Object.fromEntries(Object.entries(m.fields).map(([k, v]) => [k, vlayRemapMapping(v, remap)])) }; return m; }
+function visualClone(store, nodes, { external = 'keep', slotsToRegions = false } = {}) {
+  const map = new Map(); visualWalk(nodes, n => map.set(n.id, visualAllocate(store, 'vn')));
+  const labels = new Map(); visualWalk(nodes, n => { for (const i of n.events ?? []) labels.set(i.id, i.label); });
+  const remap = (id, label) => { if (map.has(id)) return map.get(id); visualAssert(external === 'keep', 'Interaction ' + JSON.stringify(label) + ' targets an element outside the copied structure.'); return id; };
+  const copy = n => {
+    const out = structuredClone(n); out.id = map.get(n.id);
+    if (out.kind === 'element') out.children = n.children.map(copy);
+    if (out.kind === 'slot') out.fallback = n.fallback.map(copy);
+    if (out.kind === 'component') out.slots = Object.fromEntries(Object.entries(n.slots).map(([k, v]) => [k, v.map(copy)]));
+    if (out.kind === 'text' && out.value.kind === 'state') out.value = { ...out.value, nodeId: remap(out.value.nodeId, n.name ?? n.id) };
+    for (const key of ['props', 'attrs']) if (out[key]) for (const [k, v] of Object.entries(out[key])) if (v.kind === 'state') out[key][k] = { ...v, nodeId: remap(v.nodeId, n.name ?? n.id) };
+    if (out.events) out.events = out.events.map(i => ({ ...i, id: visualAllocate(store, 'vi'), actions: i.actions.map(a => ['toggle', 'focus', 'set-value'].includes(a.kind) ? { ...a, nodeId: remap(a.nodeId, i.label) } : a.kind === 'emit' ? { ...a, payload: vlayRemapMapping(a.payload, id => remap(id, i.label)) } : a.kind === 'source' ? { ...a, input: vlayRemapMapping(a.input, id => remap(id, i.label)) } : a) }));
+    if (slotsToRegions && out.kind === 'slot') return visualElement(out.id, 'div', { name: out.name, children: out.fallback, ...(out.layout ? { layout: out.layout } : {}), ...(out.visibleIn ? { visibleIn: out.visibleIn } : {}) });
+    return out;
+  };
+  return nodes.map(copy);
+}
+function visualInstantiateLayout(store, id) {
+  if (visualBuiltinLayouts.some(l => l.id === id)) return visualExpand(store, id);
+  const layout = store.layouts.find(l => l.id === id); visualAssert(layout, 'Unknown layout ' + JSON.stringify(id) + '.');
+  for (const n of visualNodes(layout.root)) if (n.kind === 'component' && n.ref.kind === 'project') visualAssert(store.components.some(c => c.id === n.ref.componentId), 'Layout ' + JSON.stringify(layout.name) + ' uses a component that no longer exists.');
+  return visualClone(store, layout.root, { external: 'reject', slotsToRegions: true });
+}
+function visualSaveLayout(store, { name, description, category, scope, nodeIds, pageId }) {
+  const page = store.pages.find(p => p.id === pageId); visualAssert(page, 'Choose a page to save from.');
+  const nodes = nodeIds.map(id => { const hit = visualLocate(page.root, id); visualAssert(hit, 'Selected element no longer exists.'); return hit.node; });
+  const layout = { id: visualAllocate(store, 'vl'), name, description, scope, category, slots: [], root: visualClone(store, nodes, { external: 'reject' }), sourcePageId: pageId };
+  store.layouts.push(layout); return layout;
+}
+// Pure authoring commands. Each mutates the given (copied) store; the caller validates and persists once.
+function vcmdDef(store, ref) { const d = visualDefinition(store, ref); visualAssert(d, 'The ' + ref.kind + ' no longer exists.'); return d; }
+function vcmdHit(def, nodeId) { const hit = visualLocate(visualRoot(def), nodeId); visualAssert(hit, 'The element no longer exists.'); return hit; }
+function vcmdSlots(store, node) {
+  if (node.ref.kind === 'nuxt-ui') return visualCatalogEntry(node.ref.entryId)?.slots.map(s => s.name) ?? [];
+  const c = node.ref.revisionId ? store.revisions.find(r => r.id === node.ref.revisionId)?.contract : store.components.find(x => x.id === node.ref.componentId);
+  return c?.slots.map(s => s.name) ?? [];
+}
+function vcmdTargetList(store, def, target) {
+  if (target.parentId === null) return visualRoot(def);
+  const parent = vcmdHit(def, target.parentId).node;
+  if (parent.kind === 'element') { visualAssert(!['input', 'img'].includes(parent.tag), 'A ' + parent.tag + ' cannot contain elements.'); return parent.children; }
+  if (parent.kind === 'slot') return parent.fallback;
+  if (parent.kind === 'component') { visualAssert(target.slot && vcmdSlots(store, parent).includes(target.slot), 'The component has no slot ' + target.slot + '.'); parent.slots[target.slot] ??= []; return parent.slots[target.slot]; }
+  visualAssert(false, 'Text cannot contain elements.');
+}
+function vcmdReferences(def, ids) {
+  const found = [];
+  visualWalk(visualRoot(def), n => {
+    if (ids.has(n.id)) return;
+    const values = [...Object.values(n.props ?? {}), ...Object.values(n.attrs ?? {}), ...(n.kind === 'text' ? [n.value] : [])];
+    if (values.some(v => v.kind === 'state' && ids.has(v.nodeId))) found.push(n.name ?? n.id);
+    for (const i of n.events ?? []) if (i.actions.some(a => (a.nodeId && ids.has(a.nodeId)) || visualMappingRefs(a.payload ?? a.input).drafts.some(id => ids.has(id)))) found.push(i.label);
+  });
+  return found;
+}
+function visualCreatePage(store, { ownerId, name }) { const page = { id: visualAllocate(store, 'vp'), ownerId, name, root: [], scenarios: [], notes: '' }; store.pages.push(page); return page; }
+function visualCreateComponent(store, { libraryId, exportName, description = '', implementation }) {
+  const c = { id: visualAllocate(store, 'vc'), libraryId, exportName, description, props: [], slots: [], emits: [], variants: [], template: [], scenarios: [] };
+  if (implementation) {
+    const entry = visualCatalogEntry(implementation.entryId); visualAssert(entry, 'Unknown catalog primitive.');
+    c.implementation = { catalog: 'nuxt-ui', entryId: entry.id };
+    c.props = entry.props.filter(p => ['string', 'number', 'boolean'].includes(p.type)).map(p => ({ name: p.name, type: p.type, required: false, ...(p.default !== undefined ? { default: p.default } : {}) }));
+    c.slots = entry.slots.map(s => ({ name: s.name, required: false }));
+    c.emits = entry.emits.filter(e => /^[a-z][A-Za-z0-9]*$/.test(e.name)).map(e => ({ name: e.name, payloadType: 'unknown' }));
+    const node = visualNuxt(visualAllocate(store, 'vn'), entry.id, Object.fromEntries(c.props.map(p => [p.name, { kind: 'prop', name: p.name }])), { name: entry.label });
+    node.events = c.emits.map(e => ({ id: visualAllocate(store, 'vi'), event: e.name, label: 'Forward ' + e.name, notes: '', acceptance: '', actions: [{ kind: 'emit', event: e.name, payload: { kind: 'event' } }] }));
+    c.template = [node];
+  }
+  store.components.push(c); return c;
+}
+function visualRemoveDefinition(store, ref) {
+  const def = vcmdDef(store, ref);
+  if (ref.kind === 'component') { const uses = visualUsages(store, def.id).filter(u => u.definitionId !== def.id); visualAssert(!uses.length, def.exportName + ' is used by ' + uses.map(u => u.definitionName).join(', ') + '. Remove those instances first.'); store.revisions = store.revisions.filter(r => r.componentId !== def.id); }
+  const key = ref.kind === 'page' ? 'pages' : ref.kind === 'component' ? 'components' : 'layouts'; store[key] = store[key].filter(d => d.id !== def.id);
+}
+function visualInsert(store, ref, target, nodes) { const list = vcmdTargetList(store, vcmdDef(store, ref), target); list.splice(target.index ?? list.length, 0, ...nodes); return nodes; }
+function visualRemoveNode(store, ref, nodeId) {
+  const def = vcmdDef(store, ref), hit = vcmdHit(def, nodeId), removed = new Set(visualNodes([hit.node]).map(n => n.id));
+  const refs = vcmdReferences(def, removed); visualAssert(!refs.length, 'Still referenced by ' + refs.join(', ') + '. Change those first.');
+  hit.list.splice(hit.index, 1);
+  for (const s of def.scenarios ?? []) for (const id of Object.keys(s.values)) if (removed.has(id)) delete s.values[id];
+}
+function visualMoveNode(store, ref, nodeId, direction) {
+  const { list, index } = vcmdHit(vcmdDef(store, ref), nodeId), to = direction === 'earlier' ? index - 1 : index + 1;
+  visualAssert(to >= 0 && to < list.length, 'The element is already ' + (direction === 'earlier' ? 'first' : 'last') + '.');
+  [list[index], list[to]] = [list[to], list[index]];
+}
+function visualReparent(store, ref, nodeId, target) {
+  const def = vcmdDef(store, ref), hit = vcmdHit(def, nodeId);
+  visualAssert(target.parentId === null || !visualLocate([hit.node], target.parentId), 'An element cannot be moved inside itself.');
+  const list = vcmdTargetList(store, def, target); hit.list.splice(hit.index, 1); list.splice(target.index ?? list.length, 0, hit.node);
+}
+function visualDuplicateNode(store, ref, nodeId) { const { node, list, index } = vcmdHit(vcmdDef(store, ref), nodeId); const [copy] = visualClone(store, [node]); list.splice(index + 1, 0, copy); return copy; }
+function visualWrapNode(store, ref, nodeId, tag = 'div') { const { node, list, index } = vcmdHit(vcmdDef(store, ref), nodeId); const wrap = visualElement(visualAllocate(store, 'vn'), tag, { name: 'Group', children: [node] }); list.splice(index, 1, wrap); return wrap; }
+const vcmdPatchKeys = ['name', 'visibleIn', 'a11y', 'layout', 'tag', 'role', 'value', 'attrs', 'props', 'variantId', 'control', 'slots', 'adapter'];
+function visualUpdateNode(store, ref, nodeId, patch) {
+  const { node } = vcmdHit(vcmdDef(store, ref), nodeId);
+  for (const [key, value] of Object.entries(patch)) { visualAssert(vcmdPatchKeys.includes(key), 'Field ' + key + ' cannot be edited here.'); if (value === undefined) delete node[key]; else node[key] = structuredClone(value); }
+  return node;
+}
+function visualSetContract(store, componentId, change) {
+  const c = vcmdDef(store, { kind: 'component', id: componentId }); const next = { ...c, ...structuredClone(change) };
+  const broken = [];
+  for (const u of visualUsages(store, componentId)) {
+    const def = vcmdDef(store, { kind: u.kind, id: u.definitionId }), n = vcmdHit(def, u.nodeId).node; if (n.ref.revisionId) continue;
+    for (const k of Object.keys(n.props)) if (!next.props.some(p => p.name === k)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': prop ' + k);
+    for (const p of next.props.filter(p => p.required)) if (!Object.hasOwn(n.props, p.name)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': required prop ' + p.name);
+    for (const k of Object.keys(n.slots)) if (!next.slots.some(s => s.name === k)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': slot ' + k);
+    for (const i of n.events) if (!next.emits.some(e => e.name === i.event) && !VISUAL_DOM_EVENTS.includes(i.event)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': event ' + i.event);
+  }
+  visualWalk(c.template, n => { for (const i of n.events ?? []) for (const a of i.actions) if (a.kind === 'emit' && !next.emits.some(e => e.name === a.event)) broken.push(c.exportName + ' template: emit ' + a.event); });
+  visualAssert(!broken.length, 'This contract change breaks ' + broken.join('; ') + '.');
+  Object.assign(c, structuredClone(change));
+}
+function visualAddInteraction(store, ref, nodeId, { event, label, actions = [], notes = '', acceptance = '' }) { const { node } = vcmdHit(vcmdDef(store, ref), nodeId); visualAssert(Array.isArray(node.events), 'Text elements have no interactions.'); const i = { id: visualAllocate(store, 'vi'), event, label, actions: structuredClone(actions), notes, acceptance }; node.events.push(i); return i; }
+function visualUpdateInteraction(store, ref, nodeId, interactionId, patch) { const i = vcmdHit(vcmdDef(store, ref), nodeId).node.events?.find(x => x.id === interactionId); visualAssert(i, 'The interaction no longer exists.'); for (const [k, v] of Object.entries(patch)) { visualAssert(['event', 'label', 'actions', 'notes', 'acceptance'].includes(k), 'Field ' + k + ' cannot be edited.'); i[k] = structuredClone(v); } return i; }
+function visualRemoveInteraction(store, ref, nodeId, interactionId) { const node = vcmdHit(vcmdDef(store, ref), nodeId).node; node.events = node.events.filter(i => i.id !== interactionId); }
+function visualSetScenarios(store, ref, scenarios) { vcmdDef(store, ref).scenarios = structuredClone(scenarios); }
+function visualSetDependencies(store, componentId, dependencies) {
+  const c = vcmdDef(store, { kind: 'component', id: componentId });
+  const used = visualNodes(c.template).filter(n => n.kind === 'external' && !dependencies.some(d => d.package === n.package));
+  visualAssert(!used.length, 'Still used by adapter ' + used.map(n => JSON.stringify(n.adapter)).join(', ') + '. Remove those external elements first.');
+  c.dependencies = structuredClone(dependencies);
+}
+const vcmdSemver = v => v.split('.').map(Number);
+const vcmdGreater = (a, b) => { const [x, y] = [vcmdSemver(a), vcmdSemver(b)]; for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
+function visualPublish(store, componentId, version) {
+  const c = vcmdDef(store, { kind: 'component', id: componentId });
+  const latest = store.revisions.filter(r => r.componentId === componentId).map(r => r.version).sort((a, b) => (vcmdGreater(a, b) ? 1 : -1)).at(-1);
+  visualAssert(/^\d+\.\d+\.\d+$/.test(version) && (!latest || vcmdGreater(version, latest)), 'Version must be x.y.z and greater than ' + (latest ?? '0.0.0') + '.');
+  const template = structuredClone(c.template);
+  visualWalk(template, n => { if (n.kind === 'component' && n.ref.kind === 'project' && !n.ref.revisionId) { const dep = store.revisions.filter(r => r.componentId === n.ref.componentId).at(-1); visualAssert(dep, 'Publish ' + (store.components.find(x => x.id === n.ref.componentId)?.exportName ?? n.ref.componentId) + ' first.'); n.ref.revisionId = dep.id; } });
+  const revision = { id: visualAllocate(store, 'vr'), componentId, version, contract: structuredClone({ props: c.props, slots: c.slots, emits: c.emits, variants: c.variants }), template, ...(c.dependencies ? { dependencies: structuredClone(c.dependencies) } : {}) };
+  store.revisions.push(revision); return revision;
+}
+// Deterministic preview/runtime session over one visual definition. No DOM or I/O.
+function visualSession(scenario = null) { return { state: scenario?.state || 'default', width: scenario?.width || 'wide', values: structuredClone(scenario?.values || {}), bindings: structuredClone(scenario?.bindings || []), hidden: {}, focused: null, emitted: [], navigation: null, requests: [] }; }
+function vsesChain(root, nodeId) {
+  const walk = (list, path) => { for (const n of list) { if (n.id === nodeId) return [...path, n]; for (const l of visualChildLists(n)) { const hit = walk(l, [...path, n]); if (hit) return hit; } } return null; };
+  return walk(root, []);
+}
+function visualVisible(definition, session, nodeId) {
+  const chain = vsesChain(visualRoot(definition), nodeId); if (!chain) return false;
+  return chain.every(n => session.hidden[n.id] !== true && (!n.visibleIn || n.visibleIn.includes(session.state)) && !(session.width === 'narrow' && n.layout?.ui.narrow.hidden));
+}
+function visualTransition(definition, session, nodeId, interactionId) {
+  const node = visualLocate(visualRoot(definition), nodeId)?.node, interaction = node?.events?.find(i => i.id === interactionId);
+  const defName = definition.name ?? definition.exportName ?? definition.id;
+  const elemName = node?.name ?? nodeId;
+  visualAssert(node && interaction, `${defName} "${elemName}": The interaction no longer exists.`);
+  visualAssert(!['loading', 'disabled'].includes(session.state) && visualVisible(definition, session, nodeId), `${defName} "${elemName}": Interaction source is not enabled and visible.`);
+  if (!interaction.actions.length) throw Error('IMPLEMENTATION_REQUIRED: ' + interaction.label);
+  const next = structuredClone(session);
+  for (const a of interaction.actions) {
+    if (a.kind === 'set-state') next.state = a.state;
+    else if (a.kind === 'toggle') next.hidden[a.nodeId] = !next.hidden[a.nodeId];
+    else if (a.kind === 'set-value') next.values[a.nodeId] = a.value;
+    else if (a.kind === 'focus') { const focusTarget = visualLocate(visualRoot(definition), a.nodeId)?.node; const targetName = focusTarget?.name ?? a.nodeId; visualAssert(visualVisible(definition, next, a.nodeId), `${defName} "${targetName}": Focus target is hidden in this state.`); next.focused = a.nodeId; }
+    else if (a.kind === 'navigate') next.navigation = a.surfaceId;
+    else if (a.kind === 'emit') next.emitted.push({ name: a.event, source: nodeId, ...(a.payload.kind === 'value' ? { payload: a.payload.value } : {}) });
+    else if (a.kind === 'source') next.requests.push({ sourceId: a.sourceId, operationId: a.operationId, interactionId });
+    else visualAssert(false, `${defName} "${elemName}": Unsupported action.`);
+  }
+  return next;
+}
+function visualRead(value, field) {
+  if (!field) return value;
+  for (const key of field.split('.')) { if (['__proto__', 'constructor', 'prototype'].includes(key) || value === null || typeof value !== 'object' || !Object.hasOwn(value, key)) return undefined; value = value[key]; }
+  return value;
+}
+function visualValue(session, expr, props = {}) {
+  if (expr.kind === 'literal') return expr.value;
+  if (expr.kind === 'prop') return Object.hasOwn(props, expr.name) ? props[expr.name] : undefined;
+  if (expr.kind === 'state') return session.values[expr.nodeId];
+  const fixture = session.bindings.find(b => b.sourceId === expr.sourceId && b.operationId === expr.operationId);
+  return fixture ? visualRead(fixture.value, expr.field) : undefined;
+}
+// Each declared action's own effect is asserted, so idempotent effects (a reset to the current state) still pass.
+function vsesExpected(actions) {
+  const j = JSON.stringify, last = kind => actions.filter(a => a.kind === kind).at(-1), out = [];
+  const state = last('set-state'); if (state) out.push(`assert.equal(next.state, ${j(state.state)});`);
+  for (const id of new Set(actions.filter(a => a.kind === 'toggle').map(a => a.nodeId))) out.push(`assert.equal(next.hidden[${j(id)}] === true, ${actions.filter(a => a.kind === 'toggle' && a.nodeId === id).length % 2 === 1});`);
+  for (const [id, value] of new Map(actions.filter(a => a.kind === 'set-value').map(a => [a.nodeId, a.value]))) out.push(`assert.deepEqual(next.values[${j(id)}], ${j(value)});`);
+  const focus = last('focus'); if (focus) out.push(`assert.equal(next.focused, ${j(focus.nodeId)});`);
+  const nav = last('navigate'); if (nav) out.push(`assert.equal(next.navigation, ${j(nav.surfaceId)});`);
+  const emits = actions.filter(a => a.kind === 'emit').map(a => a.event); if (emits.length) out.push(`assert.deepEqual(next.emitted.map(e => e.name), ${j(emits)});`);
+  const reads = actions.filter(a => a.kind === 'source').map(a => a.sourceId + '/' + a.operationId); if (reads.length) out.push(`assert.deepEqual(next.requests.map(r => r.sourceId + '/' + r.operationId), ${j(reads)});`);
+  return out.join(' ');
+}
+function visualTestSource(definition) {
+  const safe = JSON.stringify(definition).replaceAll('<', '\\u003c'), cases = [], todos = [];
+  visualWalk(visualRoot(definition), n => { for (const i of n.events ?? []) {
+    const name = JSON.stringify('[' + i.id + '] ' + i.label);
+    if (!i.actions.length) { todos.push(`test.todo(${JSON.stringify('[' + i.id + '] ' + i.label + ' — ' + (i.acceptance || i.notes || 'implementation required'))});`); continue; }
+    const state = ['default', 'empty', 'error'].find(st => visualVisible(definition, { ...visualSession(), state: st }, n.id));
+    cases.push(state ? `test(${name}, () => { const session = { ...visualSession(), state: ${JSON.stringify(state)} }; const before = JSON.stringify(session); const next = visualTransition(definition, session, ${JSON.stringify(n.id)}, ${JSON.stringify(i.id)}); assert.equal(JSON.stringify(session), before); ${vsesExpected(i.actions)} });` : `test(${name}, () => { assert.fail('No enabled visible source state: repair this interaction'); });`);
+  } });
+  return `// Generated executable model tests. No claim of business outcomes or native UI acceptance.\nimport { test } from 'node:test';\nimport assert from 'node:assert/strict';\n${[visualAssert, visualIsPlain, visualChildLists, visualRoot, visualWalk, visualLocate, visualSession, vsesChain, visualVisible, visualTransition].map(f => f.toString()).join('\n')}\nconst definition = ${safe};\n${cases.join('\n')}\n${todos.join('\n')}\n`;
+}
+// One-way migration of detail designs (schema 1/2) to visual designs (schema 3). Geometry (positions, sizes, outline references) is dropped and counted.
+// The few legacy semantics the IR cannot hold are counted too: slot capacity/kind rules, iteration of a bound list, a binding shadowed by contentProp,
+// interactions whose source is a text/heading/slot node, and unrendered text beyond the 4000-character node-notes limit.
+const vmigAll = ['default', 'loading', 'empty', 'error', 'disabled'];
+const vmigForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style'];
+function vmigPascal(name, used) { let base = String(name).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component'; if (!/^[A-Z]/.test(base)) base = 'C' + base; base = base.slice(0, 56); let out = base, i = 2; while (used.has(out)) out = base + i++; used.add(out); return out; }
+function vmigContract(lib, report) {
+  const props = [], emits = [];
+  for (const [text, events] of [[lib.props, false], [lib.events, true]]) for (const line of String(text ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean)) {
+    const m = /^([a-z][A-Za-z0-9]*):(.+)$/.exec(line);
+    if (!m || vmigForbidden.includes(m[1])) { report.unparsedMembers.push({ owner: lib.id, text: line }); continue; }
+    const type = m[2].trim();
+    if (events) emits.push({ name: m[1], payloadType: ['void', 'string', 'number', 'boolean'].includes(type) ? type : 'unknown', ...(['void', 'string', 'number', 'boolean'].includes(type) ? {} : { description: 'Migrated from: ' + line }) });
+    else if (['string', 'number', 'boolean'].includes(type)) props.push({ name: m[1], type, required: false });
+    else { props.push({ name: m[1], type: 'string', required: false, description: 'Migrated from: ' + line }); report.unparsedMembers.push({ owner: lib.id, text: line }); }
+  }
+  const slots = String(lib.slots ?? '').split(/[\n,]/).map(s => s.trim()).filter(Boolean).filter(s => /^[a-z][A-Za-z0-9-]*$/.test(s) || (report.unparsedMembers.push({ owner: lib.id, text: s }), false)).map(name => ({ name, required: false }));
+  const variants = Array.isArray(lib.variantSpecs) ? lib.variantSpecs.map(v => ({ id: v.id, name: v.name || v.id, values: Object.fromEntries(Object.entries(v.props ?? {}).filter(([k, val]) => props.some(p => p.name === k && typeof val === p.type))) })) : String(lib.variants ?? '').split(',').map(s => s.trim()).filter(Boolean).map(name => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name, values: {} }));
+  return { props: vmigUnique(props), slots: vmigUnique(slots), emits: vmigUnique(emits), variants: vmigUnique(variants, 'id') };
+}
+function vmigUnique(list, key = 'name') { const seen = new Set(); return list.filter(x => !seen.has(x[key]) && seen.add(x[key])); }
+function vmigMapping(mapping, map) {
+  if (mapping?.kind === 'draft') return { kind: 'draft', nodeId: map.get(mapping.nodeId) ?? mapping.nodeId };
+  if (mapping?.kind === 'object') return { kind: 'object', fields: Object.fromEntries(Object.entries(mapping.fields).map(([k, v]) => [k, vmigMapping(v, map)])) };
+  return structuredClone(mapping);
+}
+// Navigation first, then the local effect or mapped action, so an edge carrying both keeps both.
+function vmigActions(edge, map) {
+  const at = id => map.get(id) ?? id, e = edge.effect, a = edge.action, out = edge.targetSurfaceId ? [{ kind: 'navigate', surfaceId: edge.targetSurfaceId }] : [];
+  if (e?.type === 'state') out.push({ kind: 'set-state', state: e.value });
+  if (e?.type === 'toggle') out.push({ kind: 'toggle', nodeId: at(edge.target) });
+  if (e?.type === 'value') out.push({ kind: 'set-value', nodeId: at(edge.target), value: e.value });
+  if (e?.type === 'focus') out.push({ kind: 'focus', nodeId: at(edge.target) });
+  if (e?.type === 'emit') out.push({ kind: 'emit', event: e.value, payload: e.payload !== undefined ? { kind: 'value', value: e.payload } : { kind: 'none' } });
+  if (a?.kind === 'source') out.push({ kind: 'source', sourceId: a.sourceId, operationId: a.operationId, input: vmigMapping(a.input, map) });
+  if (a?.kind === 'emit') out.push({ kind: 'emit', event: a.event, payload: vmigMapping(a.payload, map) });
+  return out;
+}
+// The value a legacy element displays: component prop (contentProp) before data binding before authored text.
+// Authored text was the fallback for an unset contentProp, so it becomes that prop's default; otherwise it is kept in the node notes.
+function vmigShown(n, ctx, fallback) {
+  const prop = n.contentProp ? ctx.contract?.props.find(p => p.name === n.contentProp) : undefined;
+  if (prop) {
+    if (n.text && prop.default === undefined && prop.type === 'string') prop.default = n.text; else if (n.text && prop.default !== n.text) vmigKeep(ctx, n.text);
+    if (n.binding) ctx.report.droppedFallbackBindings++;
+    return { kind: 'prop', name: n.contentProp };
+  }
+  if (n.contentProp) ctx.report.droppedProps.push({ owner: ctx.owner, prop: n.contentProp });
+  if (n.binding) return { kind: 'source', sourceId: n.binding.sourceId, operationId: n.binding.operationId, field: n.binding.field };
+  return fallback === undefined ? undefined : visualLiteral(fallback);
+}
+// Legacy text that the target node does not render becomes author notes on that node.
+function vmigKeep(ctx, text) { if (text) ctx.notes.push(text); }
+function vmigLiterals(values) { return Object.fromEntries(Object.entries(values).filter(([, v]) => v !== undefined).map(([k, v]) => [k, v?.kind ? v : visualLiteral(v)])); }
+function vmigControl(n, ctx, extra) {
+  const kind = n.kind === 'input' ? n.control?.kind : n.kind, model = vmigShown(n, ctx), placeholder = n.text || undefined;
+  if (['textarea', 'json-file', 'json-editor', 'markdown-editor'].includes(kind)) return visualNuxt(ctx.id, 'u-textarea', vmigLiterals({ modelValue: model, placeholder }), extra);
+  if (kind === 'checkbox') { vmigKeep(ctx, n.text); return visualNuxt(ctx.id, 'u-checkbox', vmigLiterals({ modelValue: model, label: n.label }), extra); }
+  if (kind === 'select') return visualNuxt(ctx.id, 'u-select', vmigLiterals({ modelValue: model, items: n.options ?? n.control?.options?.map(o => o.label) ?? [], placeholder }), extra);
+  return visualNuxt(ctx.id, 'u-input', vmigLiterals({ modelValue: model, type: ['text', 'date', 'datetime-local', 'number'].includes(kind) ? kind : undefined, placeholder }), extra);
+}
+function vmigInstance(n, ctx, extra) {
+  const ref = n.component, contract = ctx.contracts.get(ref.revisionId ? 'rev:' + ref.revisionId : ref.id), props = {}, slots = {};
+  for (const [key, value] of Object.entries(n.props)) if (contract.props.some(p => p.name === key && p.type === typeof value)) props[key] = visualLiteral(value); else ctx.report.droppedProps.push({ owner: ctx.owner, prop: key });
+  for (const [name, ids] of Object.entries(n.slots ?? {})) slots[name] = ids.map(id => vmigNode(ctx.byId.get(id), ctx));
+  for (const child of ctx.kids.get(n.id) ?? []) (slots[child.slotName] ??= []).push(vmigNode(child, ctx));
+  const variant = ref.variantId !== 'default' && contract.variants.some(v => v.id === ref.variantId);
+  if (ref.variantId !== 'default' && !variant) ctx.report.droppedProps.push({ owner: ctx.owner, prop: 'variantId' });
+  const node = visualProject(ctx.id, ctx.componentFor(ref.id), { ...extra, props, slots, ...(variant ? { variantId: ref.variantId } : {}) });
+  if (ref.revisionId) node.ref.revisionId = ctx.revision(ref.revisionId);
+  return node;
+}
+function vmigList(n, ctx, extra) {
+  const bound = vmigShown(n, ctx), item = value => visualElement(visualAllocate(ctx.store, 'vn'), 'li', { children: [{ ...visualText(visualAllocate(ctx.store, 'vn'), '', 'span'), value }] });
+  if (bound) { ctx.report.listBindings++; vmigKeep(ctx, n.text); return visualElement(ctx.id, 'ul', { ...extra, children: [item(bound)] }); }
+  if (n.options?.length) vmigKeep(ctx, n.text);
+  return visualElement(ctx.id, 'ul', { ...extra, children: (n.options?.length ? n.options : [n.text || n.label]).map(o => item(visualLiteral(o))) });
+}
+function vmigKind(n, ctx, extra, events, children) {
+  const withEvents = () => ({ ...extra, events: events() });
+  switch (n.kind) {
+    case 'region': vmigKeep(ctx, n.text); return visualElement(ctx.id, 'div', { ...withEvents(), layout: visualLayoutRules(n.layout, structuredClone(n.ui ?? compositionDefaultUI())), children: children() });
+    case 'text': case 'heading': return { ...visualText(ctx.id, '', n.kind === 'heading' ? 'h2' : 'p', extra), value: vmigShown(n, ctx, n.text || n.label) };
+    case 'button': return visualNuxt(ctx.id, 'u-button', { label: vmigShown(n, ctx, n.text || n.label) }, withEvents());
+    case 'input': case 'number': case 'textarea': case 'select': case 'checkbox': {
+      const node = vmigControl(n, ctx, withEvents());
+      if (n.control !== undefined) node.control = structuredClone(n.control);
+      return node;
+    }
+    case 'tabs': vmigKeep(ctx, n.text); return visualNuxt(ctx.id, 'u-tabs', vmigLiterals({ items: n.options ?? [], modelValue: vmigShown(n, ctx) }), withEvents());
+    case 'table': return visualNuxt(ctx.id, 'u-table', vmigLiterals({ columns: (n.options ?? []).map(o => ({ accessorKey: o, header: o })), data: vmigShown(n, ctx) }), { ...withEvents(), slots: n.text ? { empty: [visualText(visualAllocate(ctx.store, 'vn'), n.text, 'p')] } : {} });
+    case 'alert': return visualNuxt(ctx.id, 'u-alert', vmigLiterals({ title: n.label, description: vmigShown(n, ctx, n.text || undefined) }), withEvents());
+    case 'divider': vmigKeep(ctx, n.text); return visualNuxt(ctx.id, 'u-separator', {}, withEvents());
+    case 'image': if (n.a11y) vmigKeep(ctx, n.text); return visualElement(ctx.id, 'img', { ...withEvents(), ...(n.a11y || n.text ? { a11y: n.a11y || n.text } : {}), attrs: { alt: visualLiteral(n.label) } });
+    case 'list': return vmigList(n, ctx, withEvents());
+    case 'slot': {
+      if (n.slotCapacity !== undefined || n.slotKinds !== undefined) ctx.report.droppedSlotRules++;
+      const fallback = children();
+      return visualSlot(ctx.id, n.label, { ...extra, fallback: fallback.length ? fallback : n.text ? [visualText(visualAllocate(ctx.store, 'vn'), n.text, 'p')] : [] });
+    }
+    default: vmigKeep(ctx, n.text); return vmigInstance(n, ctx, withEvents());
+  }
+}
+function vmigNode(n, parent) {
+  const ctx = { ...parent, id: parent.map.get(n.id), notes: [] }, { report } = ctx;
+  report.droppedPositions++; report.droppedSizes++; if (n.sourceBrickId !== null) report.droppedOutlineRefs++;
+  const common = { name: n.label, ...(vmigAll.every(s => n.visibleIn.includes(s)) ? {} : { visibleIn: [...n.visibleIn] }), ...(n.a11y ? { a11y: n.a11y } : {}) };
+  const edges = ctx.edges.filter(e => e.source === n.id), events = () => edges.map(e => ({ id: visualAllocate(ctx.store, 'vi'), event: e.event, label: e.label, notes: e.notes, acceptance: e.acceptance, actions: vmigActions(e, ctx.map) }));
+  const extra = { ...common, ...(n.ui ? { layout: visualLayoutRules(n.layout, structuredClone(n.ui)) } : {}) };
+  if (['text', 'heading', 'slot'].includes(n.kind)) report.droppedInteractions += edges.length;
+  const node = vmigKind(n, ctx, extra, events, () => (ctx.kids.get(n.id) ?? []).map(c => vmigNode(c, ctx)));
+  const notes = ctx.notes.join('\n\n');
+  if (notes.length > 4000) report.truncatedNotes++;
+  return notes ? { ...node, notes: notes.slice(0, 4000) } : node;
+}
+function vmigTree(doc, ctx) {
+  const map = new Map(doc.nodes.map(n => [n.id, visualAllocate(ctx.store, 'vn')])), assigned = new Set(doc.nodes.flatMap(n => Object.values(n.slots ?? {}).flat())), kids = new Map();
+  for (const n of doc.nodes) if (n.parentId !== null) kids.set(n.parentId, [...(kids.get(n.parentId) ?? []), n]);
+  const local = { ...ctx, map, kids, byId: new Map(doc.nodes.map(n => [n.id, n])), edges: doc.edges, owner: doc.ownerId };
+  return { map, root: doc.nodes.filter(n => n.parentId === null && !assigned.has(n.id)).map(n => vmigNode(n, local)) };
+}
+function vmigScenarios(doc, map) { return (doc.scenarios ?? []).map(s => ({ ...structuredClone(s), values: Object.fromEntries(Object.entries(s.values).filter(([k]) => map.has(k)).map(([k, v]) => [map.get(k), structuredClone(v)])) })); }
+function migrateDetailDesigns(detail, design) {
+  const store = emptyVisualDesigns(), used = new Set(), revisions = detail.revisions ?? [], docs = detail.documents, library = design.library ?? [];
+  const report = { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] };
+  const revisionMap = new Map(revisions.map(r => [r.id, visualAllocate(store, 'vr')])), componentIds = new Map(), contracts = new Map();
+  const needed = new Set([...docs.filter(d => d.kind === 'component').map(d => d.ownerId), ...[...docs, ...revisions.map(r => r.document)].flatMap(d => d.nodes.filter(n => n.component).map(n => n.component.id)), ...revisions.map(r => r.ownerId)]);
+  for (const id of needed) visualAssert(library.some(l => l.id === id), 'Detail designs use library entry ' + JSON.stringify(id) + ', which is missing from the component library.');
+  for (const lib of library) if (needed.has(lib.id)) {
+    const contract = vmigContract(lib, report), id = visualAllocate(store, 'vc');
+    store.components.push({ id, libraryId: lib.id, exportName: vmigPascal(lib.name, used), description: String(lib.description ?? '').slice(0, 2000), ...structuredClone(contract), template: [], scenarios: [] });
+    componentIds.set(lib.id, id); contracts.set(lib.id, contract);
+    if (!docs.some(d => d.kind === 'component' && d.ownerId === lib.id)) report.createdComponents.push(lib.id);
+  }
+  for (const r of revisions) {
+    const scratch = { unparsedMembers: [] }; contracts.set('rev:' + r.id, vmigContract(r.library, scratch));
+    for (const m of scratch.unparsedMembers) if (!report.unparsedMembers.some(x => x.owner === m.owner && x.text === m.text)) report.unparsedMembers.push(m);
+  }
+  const ctx = { store, report, contracts, componentFor: id => componentIds.get(id), revision: id => revisionMap.get(id) };
+  for (const doc of docs) {
+    if (doc.kind === 'page') {
+      const id = visualAllocate(store, 'vp'), { map, root } = vmigTree(doc, { ...ctx, contract: null });
+      store.pages.push({ id, ownerId: doc.ownerId, name: doc.ownerLabel, root, scenarios: vmigScenarios(doc, map), notes: doc.notes });
+    } else {
+      const component = store.components.find(c => c.libraryId === doc.ownerId), { map, root } = vmigTree(doc, { ...ctx, contract: component });
+      Object.assign(component, { template: root, scenarios: vmigScenarios(doc, map), ...(doc.notes ? { notes: doc.notes } : {}) });
+    }
+  }
+  for (const r of revisions) {
+    const contract = structuredClone(contracts.get('rev:' + r.id)), { map, root } = vmigTree(r.document, { ...ctx, contract });
+    const extra = { ...(r.document.notes ? { notes: r.document.notes } : {}), ...(r.document.scenarios !== undefined ? { scenarios: vmigScenarios(r.document, map) } : {}), ...(r.designSystem != null ? { designSystem: structuredClone(r.designSystem) } : {}) };
+    store.revisions.push({ id: revisionMap.get(r.id), componentId: componentIds.get(r.ownerId), version: r.version, contract, template: root, ...extra });
+  }
+  return { visualDesigns: store, report };
+}
 // Renderer-independent, bounded authoring contract. References are IDs, never code.
 const STORYMAP_LIMITS = Object.freeze({ maps: 12, activities: 24, steps: 100, stories: 500, releases: 12, items: 4000, refs: 120 });
 function emptyStorymaps() { return { schema: 1, nextId: 1, maps: [] }; }
@@ -14242,11 +14993,11 @@ function validateStorymaps(value) {
 
 // Shared by the standalone concept and read-only shell entrypoint. No host I/O.
 const COMPANION_FORMAT = 'obsidian-companion-project';
-const COMPANION_VERSION = 4;
+const COMPANION_VERSION = 5;
 const COMPANION_MAX_BYTES = 4_000_000;
 const COMPANION_DEFAULT_FOLDERS = Object.freeze({ codebaseFolder: 'src', testsFolder: 'tests' });
 const companionDesignKeys = ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId',
-  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns'];
+  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns', 'visualDesigns'];
 
 function companionRequire(condition, message) {
   if (!condition) throw new Error('COMPANION_INVALID: ' + message);
@@ -14300,7 +15051,7 @@ function validateCompanionDesign(value, pluginId) {
   if (value?.detailDesigns !== undefined) validateDetailDesigns(value.detailDesigns);
   if (value?.storymaps !== undefined) validateStorymaps(value.storymaps);
   companionRequire(companionObject(value, companionDesignKeys, ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId', 'library', 'prds']), 'Unsupported design envelope.');
-  companionRequire([1, 2, 3, 4].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
+  companionRequire([1, 2, 3, 4, 5].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
     ['desktop', 'mobile-ready'].includes(value.platform), 'Unsupported design schema or platform.');
   companionRequire(Number.isSafeInteger(value.nextId) && value.nextId > 0 && value.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid design counter.');
   for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', 12]]) {
@@ -14308,11 +15059,12 @@ function validateCompanionDesign(value, pluginId) {
       item !== null && typeof item === 'object' && !Array.isArray(item) && companionText(item.id, 120, true)), 'Invalid design collection: ' + key);
     companionRequire(new Set(value[key].map(item => item.id)).size === value[key].length, 'Duplicate IDs in ' + key + '.');
   }
+  if (value.visualDesigns !== undefined) validateVisualDesigns(value.visualDesigns, { surfaces: new Set(value.nodes.map(n => n.id)), library: new Set(value.library.map(l => l.id)) });
 }
 function validateCompanionDocument(value) {
   companionSafeTree(value);
   companionRequire(companionObject(value, ['kind', 'schemaVersion', 'executable', 'project', 'settings', 'design', 'notes']), 'Expected a full companion project, not a blueprint or recovery snapshot.');
-  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, 3, COMPANION_VERSION].includes(value.schemaVersion) && value.executable === false,
+  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, 3, 4, 5].includes(value.schemaVersion) && value.executable === false,
     'Unsupported companion format/version or executable flag.');
   validateCompanionIdentity(value.project);
   validateCompanionFolders(value.settings);
@@ -14323,6 +15075,8 @@ function validateCompanionDocument(value) {
   const composition = detail && (detail.revisions !== undefined || detail.documents.some(doc => doc.scenarios !== undefined || doc.nodes.some(node => node.ui !== undefined || node.slotName !== undefined || node.contentProp !== undefined || node.options !== undefined || !['region','text','input','button','component','slot'].includes(node.kind)) || doc.edges.some(edge => edge.effect !== undefined)));
   companionRequire(value.schemaVersion >= 4 || !composition, 'Composition requires transfer version 4.');
   companionRequire(value.schemaVersion >= 3 || !Object.hasOwn(value.design, 'detailDesigns'), 'Detail designs require transfer version 3.');
+  companionRequire(value.schemaVersion < 5 || !Object.hasOwn(value.design, 'detailDesigns'), 'Transfer version 5 no longer carries detail designs.');
+  companionRequire(value.schemaVersion >= 5 || !Object.hasOwn(value.design, 'visualDesigns'), 'Visual designs require transfer version 5.');
   companionRequire(Array.isArray(value.notes) && value.notes.length <= 100 && value.notes.every(note => companionText(note, 100000)), 'Invalid project notes.');
   companionRequire(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');
   return value;
@@ -14332,6 +15086,16 @@ function parseCompanionDocument(text) {
   let value;
   try { value = JSON.parse(text); } catch { throw new Error('COMPANION_INVALID: Expected valid UTF-8 JSON.'); }
   return validateCompanionDocument(value);
+}
+function migrateCompanionDocument(value) {
+  validateCompanionDocument(value);
+  if (value.schemaVersion === COMPANION_VERSION) return { document: value, report: null };
+  const document = structuredClone(value), detail = document.design.detailDesigns;
+  const result = detail ? migrateDetailDesigns(detail, document.design) : null;
+  delete document.design.detailDesigns;
+  if (result) document.design.visualDesigns = result.visualDesigns;
+  document.schemaVersion = COMPANION_VERSION; document.design.schema = COMPANION_VERSION;
+  return { document: validateCompanionDocument(document), report: result?.report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
 }
 
 /** Built-in starters are data, not installable code or a second project format. */
@@ -17722,8 +18486,139 @@ function companionExampleStorymaps(d, surfaces) {
   store.maps.push(map); d.storymaps = store; d.schema = 2;
 }
 
+// Visual editor session state and the one guarded write path for design.visualDesigns.
+// veUi is presentation state only: it never enters project JSON, history snapshots or exports.
+const VE_UPGRADE_NOTICE = 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.';
+function veDefaults() {
+  return { ref: null, selected: null, left: 'outline', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', back: [], palette: false, error: '', notice: '' };
+}
+const veUi = veDefaults();
+function veReset() { Object.assign(veUi, veDefaults()); }
+function veStore(d = design()) { return d.visualDesigns ?? emptyVisualDesigns(); }
+// The same reference context the generator enforces: navigable surfaces, library entries and declared source operations.
+function veContext(d) {
+  return {
+    surfaces: new Set(d.nodes.filter(n => !['group', 'action'].includes(n.kind)).map(n => n.id)),
+    library: new Set(d.library.map(c => c.id)),
+    sources: new Map((d.dataSources?.sources || []).map(s => [s.id, new Set(s.operations.map(o => o.id))])),
+  };
+}
+// Context-free shape gate used by structuralDesign for current designs and history snapshots.
+// A design carries either legacy detail designs or visual designs, never both.
+function veShape(d) {
+  if (d.visualDesigns === undefined) return true;
+  if (d.detailDesigns !== undefined) return false;
+  try { validateVisualDesigns(d.visualDesigns); return true; } catch { return false; }
+}
+function veBoundHistory(candidate) {
+  // Keep the complete current design. Trim only old undo entries before the storage cap.
+  while (candidate.history.length && JSON.stringify(candidate).length > 3500000) candidate.history.shift();
+  while (candidate.future.length && JSON.stringify(candidate).length > 3500000) candidate.future.shift();
+}
+function veCanWrite(token = smToken()) {
+  if (state.activeRun || tdUi.busy) throw Error('Finish or cancel the current operation before changing a page or component design.');
+  if (token !== smToken()) throw Error('The project changed during this edit. Your draft is retained. Reopen the current element before applying.');
+  if (storageWarning || localStorage.getItem(STORAGE_KEY) !== persistenceSnapshot) throw Error('Resolve the storage conflict first. No page or component design was changed. Export recovery before closing.');
+}
+// Every visual authoring write: guards, copy, change, full validation, history snapshot, persistence or rollback.
+function veCommit(change, token = smToken()) {
+  veCanWrite(token);
+  const previous = design(), candidate = designCopy(previous), before = veStore(previous), store = designCopy(before);
+  if (previous.detailDesigns) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
+  change(store);
+  const semantic = JSON.stringify(before) !== JSON.stringify(store);
+  if (!semantic) return true;
+  validateVisualDesigns(store, veContext(candidate));
+  candidate.visualDesigns = store; candidate.schema = COMPANION_VERSION;
+  candidate.revision = previous.revision + 1;
+  candidate.history = [...previous.history, designSnapshot(previous)].slice(-DESIGN_LIMITS.history); candidate.future = []; veBoundHistory(candidate);
+  if (!validSavedDesign(candidate)) throw Error('This change would create an invalid project. Nothing was saved.');
+  project().design = candidate;
+  if (!saveConceptState()) { project().design = previous; throw Error('The change could not be saved. Previous data and history are retained; export recovery before closing.'); }
+  designUi.plan = null; veUi.error = ''; return true;
+}
+// Selection and definition references are session state; drop the ones a restored design no longer contains.
+function veRepair() {
+  if (!project()) return false;
+  const store = veStore(), definition = veUi.ref ? visualDefinition(store, veUi.ref) : null;
+  let changed = false;
+  if (veUi.ref && !definition) { veUi.ref = null; changed = true; }
+  if (veUi.selected && !(definition && visualLocate(visualRoot(definition), veUi.selected))) { veUi.selected = null; changed = true; }
+  if (veUi.scenario && !definition?.scenarios?.some(s => s.id === veUi.scenario)) { veUi.scenario = null; changed = true; }
+  return changed;
+}
+// Undo/redo shares the one design history with every other editor; failed persistence restores the previous design.
+function veTravel(direction) {
+  veCanWrite();
+  const d = design(), source = direction === 'undo' ? d.history : d.future;
+  if (!source.length) return false;
+  const previous = designCopy(d);
+  designHistory(direction);
+  if (storageWarning) { project().design = previous; render(); throw Error('History could not be saved. The previous design is retained; export recovery before closing.'); }
+  if (veRepair()) render();
+  return true;
+}
+// Legacy detail designs become visual designs. Geometry is not replayable, so the migrated report is returned.
+function veUpgradeDesign(d) {
+  const { visualDesigns, report } = migrateDetailDesigns(d.detailDesigns, d);
+  validateVisualDesigns(visualDesigns);
+  d.visualDesigns = visualDesigns; delete d.detailDesigns; d.schema = COMPANION_VERSION;
+  return report;
+}
+// Saved browser state: migrate the current design in place and clear legacy undo snapshots (spec 11.9).
+function veMigrateSaved(d) {
+  const report = veUpgradeDesign(d);
+  d.history = []; d.future = [];
+  veUi.notice = VE_UPGRADE_NOTICE;
+  return report;
+}
+function veMigrationSummary(report) {
+  if (!report) return 'No migration was needed.';
+  const parts = [], count = (n, one, many = one + 's') => n + ' ' + (n === 1 ? one : many);
+  if (report.droppedPositions) parts.push(count(report.droppedPositions, 'canvas position') + ' dropped');
+  if (report.droppedSizes) parts.push(count(report.droppedSizes, 'canvas size') + ' dropped');
+  if (report.droppedOutlineRefs) parts.push(count(report.droppedOutlineRefs, 'outline reference') + ' dropped');
+  if (report.unparsedMembers.length) parts.push(count(report.unparsedMembers.length, 'member') + ' could not be typed and kept their text as a description');
+  if (report.droppedProps.length) parts.push(count(report.droppedProps.length, 'property value') + ' dropped');
+  if (report.droppedSlotRules) parts.push(count(report.droppedSlotRules, 'slot rule') + ' dropped');
+  if (report.listBindings) parts.push(count(report.listBindings, 'list binding') + ' no longer repeat');
+  if (report.droppedFallbackBindings) parts.push(count(report.droppedFallbackBindings, 'shadowed binding') + ' dropped');
+  if (report.droppedInteractions) parts.push(count(report.droppedInteractions, 'interaction') + ' from text or slot elements dropped');
+  if (report.truncatedNotes) parts.push(count(report.truncatedNotes, 'note') + ' truncated');
+  if (report.createdComponents.length) parts.push(count(report.createdComponents.length, 'component definition') + ' created from the library');
+  return parts.length ? parts.join('; ') + '.' : 'Migrated without loss.';
+}
+// Startup restore: a legacy saved project and a saved preparation outline are upgraded once, then persisted.
+// A design that cannot be upgraded is kept unchanged and reported; nothing is overwritten.
+function veRestoreSaved() {
+  const p = state.project, w = state.wizard;
+  let changed = false;
+  if (p?.design?.detailDesigns) {
+    const candidate = designCopy(p.design);
+    try {
+      veMigrateSaved(candidate);
+      if (!validSavedDesign(candidate)) throw Error('The upgraded design did not pass validation.');
+      p.design = candidate; changed = true;
+    } catch (error) {
+      veUi.notice = '';
+      veUi.error = 'This project could not be upgraded to the new page and component editors and is kept unchanged. ' + (error instanceof Error ? error.message : '') + ' Export recovery before editing.';
+      notify(veUi.error); return false;
+    }
+  }
+  if (w?.design?.detailDesigns) {
+    // The preparation outline is a disposable copy of the project design; it is refreshed when the wizard reopens.
+    try { const copy = designCopy(w.design); veUpgradeDesign(copy); copy.history = []; copy.future = []; if (!validSavedDesign(copy)) throw Error('Invalid outline'); w.design = copy; }
+    catch { delete w.design; }
+    changed = true;
+  }
+  if (!changed) return false;
+  saveConceptState();
+  if (veUi.notice) notify(veUi.notice);
+  return true;
+}
+
 // Portable authoring documents are deliberately separate from recovery snapshots.
-const projectTransferUi = { text: '', filename: '', candidate: null, snapshot: '', error: '', serial: 0, loading: false };
+const projectTransferUi = { text: '', filename: '', candidate: null, report: null, snapshot: '', error: '', serial: 0, loading: false };
 let projectFoldersDraft = null;
 function companionFolders(p = project()) { return { ...(p?.folders || COMPANION_DEFAULT_FOLDERS) }; }
 function validCompanionProjectFolders(value) {
@@ -17759,8 +18654,9 @@ function companionCanReplace(snapshot) {
     throw Error('Project.md is not an unchanged owned record. Nothing was replaced.');
   }
 }
-function companionCandidate(text) {
-  const document = parseCompanionDocument(text);
+// Older transfer versions are migrated before review; the report names what the new editors cannot hold.
+function companionReview(text) {
+  const { document, report } = migrateCompanionDocument(parseCompanionDocument(text));
   const d = document.design;
   if (!structuralDesign(d)) throw Error('The design contains unsupported or malformed fields. Nothing was imported.');
   if (d.nextId < importCounter(d)) throw Error('The design counter could reuse an existing ID. Nothing was imported.');
@@ -17769,8 +18665,9 @@ function companionCandidate(text) {
   p.folders = designCopy(document.settings);
   p.notes = designCopy(document.notes);
   if (!validSavedDesign(p.design)) throw Error('The imported design cannot be retained safely.');
-  return p;
+  return { project: p, report };
 }
+function companionCandidate(text) { return companionReview(text).project; }
 function openCompanionImport(example = false) {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation first.');
   Object.assign(projectTransferUi, { text: example ? companionJson(companionExampleProject()) : '',
@@ -17790,11 +18687,12 @@ function reviewCompanionImport() {
     const snapshot = companionProjectToken();
     companionCanReplace(snapshot);
     projectTransferUi.snapshot = snapshot;
-    projectTransferUi.candidate = companionCandidate(projectTransferUi.text);
+    const review = companionReview(projectTransferUi.text);
+    projectTransferUi.candidate = review.project; projectTransferUi.report = review.report;
     projectTransferUi.error = '';
     redrawModal();
     document.getElementById('project-import-summary')?.focus();
-  } catch (error) { projectTransferUi.candidate = null; companionTransferError(error); }
+  } catch (error) { projectTransferUi.candidate = null; projectTransferUi.report = null; companionTransferError(error); }
 }
 function applyCompanionImport() {
   const u = projectTransferUi;
@@ -17806,10 +18704,10 @@ function applyCompanionImport() {
     state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
       wizard: null, generator: { ...state.generator, plan: null }, runs: [], view: 'overview' };
     if (!saveConceptState()) { state = before; throw Error('The project could not be saved. The current project is unchanged; export recovery before closing.'); }
-    tdDropSession(); dtReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
+    tdDropSession(); dtReset(); veReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
     designUi.error = ''; productUi.prd = null; productUi.component = null;
     dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
-    u.serial++; u.candidate = null; modalOriginal = null; closeModal(); setView('overview');
+    u.serial++; u.candidate = null; u.report = null; modalOriginal = null; closeModal(); setView('overview');
     notify('Project imported into this vault’s workspace. No source was generated, acquired or activated.');
   } catch (error) { companionTransferError(error); }
 }
@@ -17838,7 +18736,7 @@ function companionSettingsCard() {
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
   const retainedFile = !!u.filename && u.text.length > 100000;
-  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
+  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd>${u.report ? `<dt>Upgrade</dt><dd id="project-import-migration">Upgraded to project version ${COMPANION_VERSION} for the page and component editors: ${esc(veMigrationSummary(u.report))}</dd>` : ''}</dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
   return dialogBody(projectTransferUi.starter ? 'Review starter project' : 'Import a full project', starterReviewBanner() + `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
@@ -17995,6 +18893,7 @@ function companionExampleProject() {
   d.designSystem.frontend = {schema:1,target:'nuxt-ui',colorPolicy:'host',bindings:{}};
   d.canvas = emptyCanvas();
   cpCompleteSelfProject(d, surfaces);
+  veUpgradeDesign(d); // The seed is authored in the legacy detail model until the IR seeds replace it.
   p.notes = ['# Companion implementation boundary\n\nShell qualification precedes native companion conversion. Publication is last. The read-only inspection command returns JSON without writes. The separate reviewed generator emits Vue detail surfaces, source bindings and executable tests for declared UI effects. Unimplemented business handlers and PRD acceptance remain explicit implementation work. This editable self-project describes every eligible page and reusable component; it is not a completed native companion.\n'];
   return p;
 }
@@ -19667,7 +20566,7 @@ function adoptLegacyOutline(){
   const choice=legacyChoices()[modalData.index];if(!choice)throw Error('Choose one valid outline.');
   const input=choice.identity,values={};for(const k of ['name','id','author','description','version'])if(typeof input[k]==='string')values[k]=input[k];
   const p=newPlanningProject(values);if(identityError({...p,author:p.author||'Planning only'}))throw Error('Legacy identity needs manual review. Export the original, define the project, then import its data-only blueprint.');
-  p.design=designCopy(choice.design);p.design.emitted={};p.design.retired=[];p.design.generatedRevision=0;
+  p.design=designCopy(choice.design);p.design.emitted={};p.design.retired=[];p.design.generatedRevision=0;if(p.design.detailDesigns)veMigrateSaved(p.design);
   installPlanningProject(p);state.legacyHandled=true;modalOriginal=null;closeModal();setView('overview');notify('One outline copied. The full original workspace remains untouched.');
  }catch(e){modalData.error=e.message;redrawModal();}
 }
@@ -19746,6 +20645,8 @@ function exportRetainedBrowserData(){
   showModal('copy',{title:'Retained browser data — may belong to another window or use an unsupported schema. Keep private; no import or execution is performed.',text:raw,filename:'shell-workbench-retained-browser-data.json'});
  }catch{notify('Browser storage cannot be read. Export this session instead; no retained data was changed.');}
 }
+// Startup restore: legacy detail designs in the saved project are upgraded once (spec 11.9) before the first render.
+veRestoreSaved();
 
 // Presentation contracts: ownership containers are distinct from content-bearing screens.
 function allocateSurfaceCode(d,label,excludeId=null){
@@ -22382,21 +23283,21 @@ function replacementDesign(id){const d=design(),fresh=createDesign(id),mapping=n
 let designUi={selected:null,mode:'map',filter:'',category:'all',plan:null,file:0,error:'',undoMessage:'',form:null};
 function design(){const p=project();if(!p)throw Error('Define this vault’s project before editing.');if(!p.design){p.design=createDesign('blank');p.design.goal='';}return ensureProductModel(p.design);}
 function designOwner(){return project()?.key||'uninitialized-vault';}
-function designSnapshot(d){return designCopy({blueprint:d.blueprint,goal:d.goal,platform:d.platform,nodes:d.nodes,links:d.links,nextId:d.nextId,library:d.library,prds:d.prds,...(d.librarySchema?{librarySchema:d.librarySchema}:{}),...(d.canvas?{canvas:d.canvas}:{}),...(d.semantic?{semantic:d.semantic}:{}),...(d.dataSources?{dataSources:d.dataSources}:{}),...(d.designSystem?{designSystem:d.designSystem}:{}),...(d.storymaps?{storymaps:d.storymaps}:{}),...(d.detailDesigns?{detailDesigns:d.detailDesigns}:{})});}
-function recordDesign(){const d=design();d.history.push(designSnapshot(d));d.history=d.history.slice(-DESIGN_LIMITS.history);d.future=[];cpBoundHistory(d);}
-function designChanged(){const d=design();cpBoundHistory(d);d.revision++;designUi.plan=null;designUi.error='';save();}
-function designHistory(direction){const d=design(),before=designFingerprint(d);const stack=direction==='undo'?d.history:d.future;if(!stack.length)return;const other=direction==='undo'?d.future:d.history;other.push(designSnapshot(d));if(other.length>20)other.shift();const retainedDetails=d.detailDesigns?dtCopy(d.detailDesigns):null;const detailCounter=d.detailDesigns?.nextId||1;const storymapCounter=d.storymaps?.nextId||1;const sourceCounter=d.dataSources?.nextId||1;const semanticCounter=d.semantic?.nextId||1;const nextId=d.nextId,snapshot=stack.pop();Object.assign(d,snapshot);if(snapshot.detailDesigns){d.detailDesigns.nextId=Math.max(detailCounter,d.detailDesigns.nextId);}else if(detailCounter>1)d.detailDesigns={...emptyDetailDesigns(),nextId:detailCounter};else delete d.detailDesigns;cpRetainRevisions(d.detailDesigns,retainedDetails);if(d.detailDesigns?.schema===2)d.schema=4;cpBoundHistory(d);d.storymaps=snapshot.storymaps||emptyStorymaps();d.storymaps.nextId=Math.max(storymapCounter,d.storymaps.nextId);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.designSystem)delete d.designSystem;if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(nextId,d.nextId);if(before!==designFingerprint(d))designChanged();else save();render();notify((before!==designFingerprint(d)?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');}
+function designSnapshot(d){return designCopy({blueprint:d.blueprint,goal:d.goal,platform:d.platform,nodes:d.nodes,links:d.links,nextId:d.nextId,library:d.library,prds:d.prds,...(d.librarySchema?{librarySchema:d.librarySchema}:{}),...(d.canvas?{canvas:d.canvas}:{}),...(d.semantic?{semantic:d.semantic}:{}),...(d.dataSources?{dataSources:d.dataSources}:{}),...(d.designSystem?{designSystem:d.designSystem}:{}),...(d.storymaps?{storymaps:d.storymaps}:{}),...(d.detailDesigns?{detailDesigns:d.detailDesigns}:{}),...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})});}
+function recordDesign(){const d=design();d.history.push(designSnapshot(d));d.history=d.history.slice(-DESIGN_LIMITS.history);d.future=[];veBoundHistory(d);}
+function designChanged(){const d=design();veBoundHistory(d);d.revision++;designUi.plan=null;designUi.error='';save();}
+function designHistory(direction){const d=design(),before=designFingerprint(d);const stack=direction==='undo'?d.history:d.future;if(!stack.length)return;const other=direction==='undo'?d.future:d.history;other.push(designSnapshot(d));if(other.length>20)other.shift();const retainedDetails=d.detailDesigns?designCopy(d.detailDesigns):null;const detailCounter=d.detailDesigns?.nextId||1;const visualCounter=d.visualDesigns?.nextId||1;const storymapCounter=d.storymaps?.nextId||1;const sourceCounter=d.dataSources?.nextId||1;const semanticCounter=d.semantic?.nextId||1;const nextId=d.nextId,snapshot=stack.pop();Object.assign(d,snapshot);if(snapshot.detailDesigns){d.detailDesigns.nextId=Math.max(detailCounter,d.detailDesigns.nextId);}else if(detailCounter>1)d.detailDesigns={...emptyDetailDesigns(),nextId:detailCounter};else delete d.detailDesigns;cpRetainRevisions(d.detailDesigns,retainedDetails);if(d.detailDesigns?.schema===2)d.schema=4;if(snapshot.visualDesigns)d.visualDesigns.nextId=Math.max(visualCounter,d.visualDesigns.nextId);else if(visualCounter>1)d.visualDesigns={...emptyVisualDesigns(),nextId:visualCounter};else delete d.visualDesigns;if(d.visualDesigns)d.schema=COMPANION_VERSION;veBoundHistory(d);d.storymaps=snapshot.storymaps||emptyStorymaps();d.storymaps.nextId=Math.max(storymapCounter,d.storymaps.nextId);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.designSystem)delete d.designSystem;if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(nextId,d.nextId);if(before!==designFingerprint(d))designChanged();else save();render();notify((before!==designFingerprint(d)?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');}
 function selectedNode(){if(!project())return null;const d=design();return d.nodes.find(n=>n.id===designUi.selected)||null;}
 function nodeOwner(d,node){let n=node;const seen=new Set();while(n&&!seen.has(n.id)){seen.add(n.id);if(n.kind==='view')return n;n=d.nodes.find(x=>x.id===n.parent);}return null;}
 function nodePlacement(d,n){return nodeOwner(d,n)?.placement||n.placement;}
 function nodeDescendants(d,id){const found=new Set([id]);let previous=0;while(previous!==found.size){previous=found.size;for(const n of d.nodes)if(found.has(n.parent))found.add(n.id);}return found;}
 function structuralDesign(value){
- if(!value||![1,2,3,4].includes(value.schema)||!Array.isArray(value.nodes)||value.nodes.length>DESIGN_LIMITS.nodes||!Array.isArray(value.links)||value.links.length>DESIGN_LIMITS.links)return false;
+ if(!value||![1,2,3,4,5].includes(value.schema)||!Array.isArray(value.nodes)||value.nodes.length>DESIGN_LIMITS.nodes||!Array.isArray(value.links)||value.links.length>DESIGN_LIMITS.links)return false;
  if(typeof value.goal!=='string'||value.goal.length>1000||!['desktop','mobile-ready'].includes(value.platform)||!BLUEPRINTS.some(b=>b.id===value.blueprint))return false;
  const text=(x,max=120)=>typeof x==='string'&&x.length<=max;
  if(!value.nodes.every(n=>n&&text(n.id)&&text(n.slug)&&text(n.label)&&Object.hasOwn(NODE_KINDS,n.kind)&&LAYOUTS.some(l=>l.id===n.layout)&&Object.hasOwn(PLACEMENTS,n.placement)&&(n.parent===null||text(n.parent))&&['reuse','multiple'].includes(n.instance)&&['nav','command','ribbon','entry'].every(k=>typeof n[k]==='boolean')&&text(n.goal,1000)&&validIntentFields(n)&&validBricks(n)&&text(n.entity,80)&&Array.isArray(n.patterns)&&n.patterns.length<=PATTERNS.length&&n.patterns.every(p=>PATTERNS.some(x=>x.id===p))))return false;
  if(!value.links.every(e=>e&&text(e.id)&&e.id.length>0&&!e.id.startsWith('contains-')&&text(e.from)&&text(e.to)&&text(e.label)&&validLinkFields(e)))return false;
- return dtShape(value.detailDesigns)&&smShape(value.storymaps)&&validStyleGuide(value.designSystem)&&dataSourcesShape(value.dataSources)&&erShape(value.semantic)&&productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total&&dataSourceIssues(value,false).length===0;
+ return dtShape(value.detailDesigns)&&veShape(value)&&smShape(value.storymaps)&&validStyleGuide(value.designSystem)&&dataSourcesShape(value.dataSources)&&erShape(value.semantic)&&productShape(value)&&validCanvas(value.canvas)&&value.nodes.reduce((total,n)=>total+bricksOf(n).length,0)<=BRICK_LIMITS.total&&dataSourceIssues(value,false).length===0;
 }
 function designIssues(d){
  const issues=[...productIssues(d),...brickIssues(d),...semanticIssues(d),...dataSourceIssues(d),...smIssues(d),...dtIssues(d)];const add=(level,code,message,node=null)=>issues.push({level,code,message,node});
@@ -22450,7 +23351,7 @@ function importDesign(text){
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error'&&i.code!=='data-source-shape');if(issues.length)throw Error(issues[0].message);
- const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources','designSystem','storymaps','detailDesigns']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));recordDesign();const d=design();Object.assign(d,{schema:4,detailDesigns:clean.detailDesigns?{...clean.detailDesigns,nextId:Math.max(d.detailDesigns?.nextId||1,clean.detailDesigns.nextId)}:undefined,storymaps:{...(clean.storymaps||emptyStorymaps()),nextId:Math.max(d.storymaps?.nextId||1,clean.storymaps?.nextId||1)},blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},designSystem:clean.designSystem,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
+ const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources','designSystem','storymaps','detailDesigns','visualDesigns']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));if(clean.detailDesigns)veUpgradeDesign(clean);recordDesign();const d=design();Object.assign(d,{schema:clean.visualDesigns?COMPANION_VERSION:4,detailDesigns:undefined,visualDesigns:clean.visualDesigns?{...clean.visualDesigns,nextId:Math.max(d.visualDesigns?.nextId||1,clean.visualDesigns.nextId)}:undefined,storymaps:{...(clean.storymaps||emptyStorymaps()),nextId:Math.max(d.storymaps?.nextId||1,clean.storymaps?.nextId||1)},blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},designSystem:clean.designSystem,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
 }
 function validSavedDesign(d){
  const plain=o=>o&&typeof o==='object'&&!Array.isArray(o);

@@ -124,6 +124,7 @@
     "docs/concepts/companion/test-kit/client.mjs",
     "docs/concepts/companion/src/workbench.css",
     "docs/concepts/companion/src/ui-fields.js",
+    "docs/concepts/companion/src/ve-state.js",
     "docs/concepts/companion/src/project-transfer.js",
     "docs/concepts/companion/src/companion-project.js",
     "scripts/companion/project-contract.mjs",

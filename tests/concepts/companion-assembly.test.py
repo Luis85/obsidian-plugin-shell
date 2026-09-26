@@ -74,6 +74,27 @@ class AssemblyContract(unittest.TestCase):
                     self.build()
         config.write_text(original)
 
+    def test_visual_contract_modules_require_explicit_inventory(self):
+        config = self.root / '.fallowrc.json'
+        original = config.read_text()
+        for name in ['visual-ir.mjs', 'visual-validate.mjs', 'visual-migrate.mjs']:
+            with self.subTest(name=name):
+                value = json.loads(original)
+                value['entry'].remove('scripts/companion/visual/' + name)
+                config.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, 'Visual contract missing from analyzer inventory: scripts/companion/visual/' + name):
+                    self.build()
+        config.write_text(original)
+
+    def test_visual_contract_is_inlined_before_the_project_contract(self):
+        self.build()
+        text = self.output.read_text(encoding='utf-8')
+        for name in ['function emptyVisualDesigns(', 'function validateVisualDesigns(', 'function migrateDetailDesigns(', 'function visualSession(']:
+            self.assertEqual(text.count(name), 1, name)
+        self.assertLess(text.index('function migrateDetailDesigns('), text.index('function migrateCompanionDocument('))
+        self.assertNotIn("from './visual/", text)
+        self.assertIn('const COMPANION_VERSION = 5;', text)
+
     def test_unassembled_source_is_not_hidden(self):
         (self.concept / 'src/unregistered.js').write_text('console.log("unused fixture");\n')
         with self.assertRaisesRegex(ValueError, 'inventory differs'):

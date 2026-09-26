@@ -79,6 +79,7 @@ function companionExampleProject() {
   d.designSystem.frontend = {schema:1,target:'nuxt-ui',colorPolicy:'host',bindings:{}};
   d.canvas = emptyCanvas();
   cpCompleteSelfProject(d, surfaces);
+  veUpgradeDesign(d); // The seed is authored in the legacy detail model until the IR seeds replace it.
   p.notes = ['# Companion implementation boundary\n\nShell qualification precedes native companion conversion. Publication is last. The read-only inspection command returns JSON without writes. The separate reviewed generator emits Vue detail surfaces, source bindings and executable tests for declared UI effects. Unimplemented business handlers and PRD acceptance remain explicit implementation work. This editable self-project describes every eligible page and reusable component; it is not a completed native companion.\n'];
   return p;
 }

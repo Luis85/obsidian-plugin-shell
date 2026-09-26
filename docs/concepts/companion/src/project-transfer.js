@@ -1,5 +1,5 @@
 // Portable authoring documents are deliberately separate from recovery snapshots.
-const projectTransferUi = { text: '', filename: '', candidate: null, snapshot: '', error: '', serial: 0, loading: false };
+const projectTransferUi = { text: '', filename: '', candidate: null, report: null, snapshot: '', error: '', serial: 0, loading: false };
 let projectFoldersDraft = null;
 function companionFolders(p = project()) { return { ...(p?.folders || COMPANION_DEFAULT_FOLDERS) }; }
 function validCompanionProjectFolders(value) {
@@ -35,8 +35,9 @@ function companionCanReplace(snapshot) {
     throw Error('Project.md is not an unchanged owned record. Nothing was replaced.');
   }
 }
-function companionCandidate(text) {
-  const document = parseCompanionDocument(text);
+// Older transfer versions are migrated before review; the report names what the new editors cannot hold.
+function companionReview(text) {
+  const { document, report } = migrateCompanionDocument(parseCompanionDocument(text));
   const d = document.design;
   if (!structuralDesign(d)) throw Error('The design contains unsupported or malformed fields. Nothing was imported.');
   if (d.nextId < importCounter(d)) throw Error('The design counter could reuse an existing ID. Nothing was imported.');
@@ -45,8 +46,9 @@ function companionCandidate(text) {
   p.folders = designCopy(document.settings);
   p.notes = designCopy(document.notes);
   if (!validSavedDesign(p.design)) throw Error('The imported design cannot be retained safely.');
-  return p;
+  return { project: p, report };
 }
+function companionCandidate(text) { return companionReview(text).project; }
 function openCompanionImport(example = false) {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation first.');
   Object.assign(projectTransferUi, { text: example ? companionJson(companionExampleProject()) : '',
@@ -66,11 +68,12 @@ function reviewCompanionImport() {
     const snapshot = companionProjectToken();
     companionCanReplace(snapshot);
     projectTransferUi.snapshot = snapshot;
-    projectTransferUi.candidate = companionCandidate(projectTransferUi.text);
+    const review = companionReview(projectTransferUi.text);
+    projectTransferUi.candidate = review.project; projectTransferUi.report = review.report;
     projectTransferUi.error = '';
     redrawModal();
     document.getElementById('project-import-summary')?.focus();
-  } catch (error) { projectTransferUi.candidate = null; companionTransferError(error); }
+  } catch (error) { projectTransferUi.candidate = null; projectTransferUi.report = null; companionTransferError(error); }
 }
 function applyCompanionImport() {
   const u = projectTransferUi;
@@ -82,10 +85,10 @@ function applyCompanionImport() {
     state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
       wizard: null, generator: { ...state.generator, plan: null }, runs: [], view: 'overview' };
     if (!saveConceptState()) { state = before; throw Error('The project could not be saved. The current project is unchanged; export recovery before closing.'); }
-    tdDropSession(); dtReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
+    tdDropSession(); dtReset(); veReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
     designUi.error = ''; productUi.prd = null; productUi.component = null;
     dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
-    u.serial++; u.candidate = null; modalOriginal = null; closeModal(); setView('overview');
+    u.serial++; u.candidate = null; u.report = null; modalOriginal = null; closeModal(); setView('overview');
     notify('Project imported into this vault’s workspace. No source was generated, acquired or activated.');
   } catch (error) { companionTransferError(error); }
 }
@@ -114,7 +117,7 @@ function companionSettingsCard() {
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
   const retainedFile = !!u.filename && u.text.length > 100000;
-  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd></dl>
+  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd>${u.report ? `<dt>Upgrade</dt><dd id="project-import-migration">Upgraded to project version ${COMPANION_VERSION} for the page and component editors: ${esc(veMigrationSummary(u.report))}</dd>` : ''}</dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
   return dialogBody(projectTransferUi.starter ? 'Review starter project' : 'Import a full project', starterReviewBanner() + `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
