@@ -104,6 +104,12 @@ Use mutation testing selectively after a working core exists—for validation, c
 | Template qualification (future) | Working setup/makers. | Fixed set of generated repositories, identity/removal/installation/upgrade/release tests, no recursion. |
 | Release (blocked now) | Actual candidate assets and independent host evidence. | Full requirements, approved exceptions, exact hashes/source/host/devices, no high-risk unresolved defect. |
 
+The executable suites are separated by responsibility (runtime, CLI, generator,
+companion, test data, makers, native tooling, setup, release, quality, baseline and
+the opt-in browser/host suites). [Test suites](TEST-SUITES.md) lists each command,
+runner, prerequisite and whether `verify` runs it; `tests/suites.json` classifies
+every test file into exactly one suite and fails closed otherwise.
+
 **TST-10 — Fail closed.** Missing tool, missing report, malformed output, zero tests, wrong test inventory, unexpected skip/todo, timeout, stale source or unclassified error cannot be a pass. Reports retain failure and blocked/not-run state. A reporter crash is an infrastructure error, not an empty finding list.
 
 **TST-11 — Release guard.** The current release profile intentionally exits 2 as blocked. It is an honest readiness guard, not a completed release verifier. Do not remove that guard merely because the baseline is green. Implement artifact/native evidence validation in the actual release package before enabling promotion.

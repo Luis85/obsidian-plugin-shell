@@ -193,6 +193,12 @@ baseline, and harness build. Served E2E is explicit and separate. This is not th
 complete PRD release gate. See the [current test record](docs/testing/ITERATION-FOUR.md)
 for actual execution results and coverage scope.
 
+Tests are also separated by responsibility, so one part can be tested on its own:
+`npm run test:suites -- --list` shows every suite, and `npm run test:cli`,
+`test:generator`, `test:companion`, `test:makers`, `test:native-tooling`,
+`test:setup`, `test:release`, `test:quality` or `test:test-data` runs one. Every
+test file must belong to exactly one suite; see [Test suites](docs/testing/TEST-SUITES.md).
+
 `npm run help` lists commands. Setup dry-run works without project dependencies and
 does not write, install or access the network. `--yes --no-interaction` applies the
 reviewed options; `--no-local` remains a browser-profile alias.
