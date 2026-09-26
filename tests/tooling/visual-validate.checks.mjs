@@ -51,11 +51,20 @@ const rejects = [
   ['variant sets undeclared prop', s => { comp(s).variants[0].values.size = 'lg'; }, /undeclared or mistyped prop size/],
   ['revision duplicate version', s => { const r = structuredClone(s.revisions[0]); r.id = 'vr-900'; s.revisions.push(r); s.nextId = 901; }, /unique x.y.z version/],
   ['layout undeclared slot', s => { s.layouts[0].slots = []; }, /slot "body" is not declared/],
+  ['oversized node notes', s => { findByName(page(s).root, 'Title').notes = 'x'.repeat(4001); }, /element notes too long/],
+  ['oversized revision notes', s => { s.revisions[0].notes = 'x'.repeat(8001); }, /revision notes too long/],
+  ['revision scenario for a missing node', s => { s.revisions[0].scenarios = [{ id: 'scenario-1', name: 'Gone', state: 'default', width: 'wide', values: { 'vn-999': 'x' }, bindings: [] }]; }, /Revision "vr-24".*local elements/],
   ['prototype pollution key', s => { findByName(page(s).root, 'Content').attrs = JSON.parse('{"__proto__":{"kind":"literal","value":1}}'); }, /attribute|invalid|allowed/],
   ['depth over 12', s => { let n = findByName(page(s).root, 'Content'); for (let i = 0; i < 12; i++) { const child = { id: 'vn-' + (900 + i), kind: 'element', tag: 'div', attrs: {}, children: [], events: [] }; n.children.push(child); n = child; } s.nextId = 1000; }, /nesting exceeds 12/],
 ];
 for (const [name, change, pattern] of rejects) test('rejects ' + name, () => { const s = copy(); change(s); assert.throws(() => validateVisualDesigns(s, context), pattern); });
 
+test('text layout, node notes and revision notes/scenarios are accepted', () => {
+  const s = copy(), title = findByName(page(s).root, 'Title'), content = findByName(page(s).root, 'Content');
+  title.layout = structuredClone(content.layout); title.notes = 'Never rendered.'; s.revisions[0].notes = 'Published notes';
+  s.revisions[0].scenarios = [{ id: 'scenario-1', name: 'Published', state: 'empty', width: 'narrow', values: { [s.revisions[0].template[0].id]: 'x' }, bindings: [] }];
+  validateVisualDesigns(s, context);
+});
 test('cycle detection covers direct, transitive and pinned-revision recursion', () => {
   const s = copy(); const c = comp(s);
   assert.equal(visualWouldCycle(s, c.id, c.id), true);

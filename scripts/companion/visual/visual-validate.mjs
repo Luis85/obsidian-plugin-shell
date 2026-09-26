@@ -4,7 +4,7 @@ import { visualCatalogEntry, VISUAL_CONTROL_ENTRIES } from './visual-catalog.mjs
 import { visualCompositionGraph } from './visual-composition.mjs';
 import { validateVisualMapping, validateVisualControl, visualMappingRefs } from './visual-mapping.mjs';
 import { validateCompositionUI, validateCompositionScenarios, validateCompositionDesignSystem, compositionLiteral } from '../composition-contract.mjs';
-const vvCommon = ['name', 'visibleIn', 'a11y', 'layout'];
+const vvCommon = ['name', 'visibleIn', 'a11y', 'layout', 'notes'];
 const vvForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style', 'constructor', 'prototype', '__proto__'];
 const vvCategories = ['application', 'dashboard', 'master-detail', 'form', 'settings', 'website', 'custom'];
 const vvIdPattern = /^(vn|vp|vc|vl|vr|vi)-([1-9][0-9]*)$/;
@@ -114,7 +114,8 @@ function vvNode(node, scope, at) {
   if (node.name !== undefined) visualAssert(visualIsLine(node.name, 120), where + ': name must be a single line.');
   if (node.visibleIn !== undefined) visualAssert(Array.isArray(node.visibleIn) && node.visibleIn.length > 0 && new Set(node.visibleIn).size === node.visibleIn.length && node.visibleIn.every(s => VISUAL_STATES.includes(s)), where + ': choose at least one supported preview state.');
   if (node.a11y !== undefined) visualAssert(visualIsText(node.a11y, 2000), where + ': accessibility notes too long.');
-  if (node.layout !== undefined) { visualAssert(node.kind !== 'text' && vvObject(node.layout, ['mode', 'ui']) && VISUAL_LAYOUT_MODES.includes(node.layout.mode), where + ': invalid layout.'); vvWithin(where, () => validateCompositionUI(node.layout.ui)); }
+  if (node.notes !== undefined) visualAssert(visualIsText(node.notes, 4000), where + ': element notes too long.');
+  if (node.layout !== undefined) { visualAssert(vvObject(node.layout, ['mode', 'ui']) && VISUAL_LAYOUT_MODES.includes(node.layout.mode), where + ': invalid layout.'); vvWithin(where, () => validateCompositionUI(node.layout.ui)); }
   if (node.kind === 'element') {
     visualAssert(VISUAL_TAGS.includes(node.tag), where + ': unsupported tag.');
     visualAssert(visualIsPlain(node.attrs) && Object.keys(node.attrs).length <= 16, where + ': invalid attributes.');
@@ -190,12 +191,14 @@ export function validateVisualDesigns(store, context = {}) {
   }
   for (const r of store.revisions) {
     const where = 'Revision ' + JSON.stringify(r?.id);
-    visualAssert(vvObject(r, ['id', 'componentId', 'version', 'contract', 'template'], ['designSystem', 'dependencies']), where + ': unsupported revision fields.'); identity(r.id, 'vr');
+    visualAssert(vvObject(r, ['id', 'componentId', 'version', 'contract', 'template'], ['designSystem', 'dependencies', 'notes', 'scenarios']), where + ': unsupported revision fields.'); identity(r.id, 'vr');
     visualAssert(store.components.some(c => c.id === r.componentId) && typeof r.version === 'string' && r.version.length <= 40 && /^\d+\.\d+\.\d+$/.test(r.version) && !versions.has(r.componentId + '@' + r.version), where + ': revision needs an existing component and a unique x.y.z version.'); versions.add(r.componentId + '@' + r.version);
     visualAssert(vvObject(r.contract, ['props', 'slots', 'emits', 'variants']), where + ': invalid published contract.'); vvContract(r.contract, where);
     vvDependencies(r.dependencies ?? [], where);
+    visualAssert(r.notes === undefined || visualIsText(r.notes, 8000), where + ': revision notes too long.');
     if (r.designSystem !== undefined) vvWithin(where, () => validateCompositionDesignSystem(r.designSystem));
-    vvDefinition(store, r.template, 'revision', context, identity, where, r.contract, r.contract.slots.map(s => s.name), r.dependencies ?? []);
+    const nodes = vvDefinition(store, r.template, 'revision', context, identity, where, r.contract, r.contract.slots.map(s => s.name), r.dependencies ?? []);
+    if (r.scenarios !== undefined) vvScenarios(r, nodes, where);
   }
   visualAssert(store.nextId > highest, 'The visual ID counter could reuse an existing ID.');
   visualCompositionGraph(store);

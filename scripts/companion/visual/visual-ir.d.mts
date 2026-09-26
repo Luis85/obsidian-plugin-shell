@@ -6,7 +6,7 @@ export type Mapping = { kind: 'none' } | { kind: 'event' } | { kind: 'value'; va
 export type VisualAction = { kind: 'emit'; event: string; payload: Mapping } | { kind: 'navigate'; surfaceId: string } | { kind: 'set-state'; state: VisualState } | { kind: 'toggle'; nodeId: string } | { kind: 'set-value'; nodeId: string; value: Scalar } | { kind: 'focus'; nodeId: string } | { kind: 'source'; sourceId: string; operationId: string; input: Mapping };
 export interface Interaction { id: string; event: string; label: string; actions: VisualAction[]; notes: string; acceptance: string }
 export interface LayoutRules { mode: 'stack' | 'row' | 'grid'; ui: CompositionUI }
-interface Common { id: string; name?: string; visibleIn?: VisualState[]; a11y?: string; layout?: LayoutRules }
+interface Common { id: string; name?: string; visibleIn?: VisualState[]; a11y?: string; layout?: LayoutRules; notes?: string }
 export type ElementNode = Common & { kind: 'element'; tag: string; attrs: Record<string, ValueExpression>; children: UiNode[]; events: Interaction[] };
 export type TextNode = Common & { kind: 'text'; role: 'h1' | 'h2' | 'h3' | 'p' | 'span'; value: ValueExpression };
 export type SlotNode = Common & { kind: 'slot'; name: string; fallback: UiNode[] };
@@ -24,7 +24,7 @@ export interface Contract { props: PropDefinition[]; slots: SlotDefinition[]; em
 export interface PageDefinition { id: string; ownerId: string; name: string; root: UiNode[]; scenarios: Scenario[]; notes: string }
 export interface ComponentDefinition extends Contract { id: string; libraryId: string; exportName: string; description: string; template: UiNode[]; scenarios: Scenario[]; notes?: string; implementation?: { catalog: 'nuxt-ui'; entryId: string }; dependencies?: Dependency[] }
 export interface LayoutDefinition { id: string; name: string; description: string; scope: 'page' | 'region'; category: string; root: UiNode[]; slots: SlotDefinition[]; sourcePageId?: string }
-export interface ComponentRevision { id: string; componentId: string; version: string; contract: Contract; template: UiNode[]; designSystem?: unknown; dependencies?: Dependency[] }
+export interface ComponentRevision { id: string; componentId: string; version: string; contract: Contract; template: UiNode[]; designSystem?: unknown; dependencies?: Dependency[]; notes?: string; scenarios?: Scenario[] }
 export interface VisualDesigns { schema: 3; nextId: number; catalog: { id: 'nuxt-ui'; version: 1 }; pages: PageDefinition[]; components: ComponentDefinition[]; layouts: LayoutDefinition[]; revisions: ComponentRevision[] }
 export type DefinitionRef = { kind: 'page' | 'component' | 'layout'; id: string };
 export interface WalkAt { parent: UiNode | null; depth: number; list: UiNode[]; index: number }
