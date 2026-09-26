@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "description": "Every file under the scanned test roots belongs to exactly one suite or one helper entry. Run `npm run test:suites -- --check` after adding a test; docs/testing/TEST-SUITES.md explains each suite.",
+  "roots": [
+    {"path": "tests/tooling"},
+    {"path": "tests/runtime"},
+    {"path": "tests/verification"},
+    {"path": "tests/harness-styles"},
+    {"path": "tests/browser-specimen"},
+    {"path": "tests/concepts", "optional": true},
+    {"path": "tests/e2e"},
+    {"path": "tests/obsidian", "optional": true},
+    {"path": "tests/project", "optional": true}
+  ],
+  "helperRoots": ["tests/support", "tests/fixtures"],
+  "prerequisites": {
+    "python3": {
+      "probe": ["{python}", "--version"],
+      "hint": "Install Python 3.11+ or set PYTHON to an interpreter."
+    },
+    "python-playwright": {
+      "probe": ["{python}", "-c", "import playwright"],
+      "hint": "Create a scratch venv, pip install playwright==1.57.0, run `python -m playwright install chromium`, then set PYTHON to that venv interpreter (see companion-concept-verification.yml)."
+    },
+    "chromium": {
+      "probe": ["{node}", "-e", "const {chromium}=require('playwright-core');const p=process.env.SHELL_CHROMIUM||chromium.executablePath();require('fs').accessSync(p)"],
+      "hint": "Provision Chromium explicitly: `node node_modules/@playwright/test/cli.js install chromium` (optionally with PLAYWRIGHT_BROWSERS_PATH in a scratch directory) or set SHELL_CHROMIUM."
+    },
+    "harness-build": {"file": "dist-harness/harness/app/index.html", "hint": "Run `npm run harness:build` first."},
+    "build": {
+      "file": "dist/main.js",
+      "hint": "Run `npm run build` first; the analyzer-archive gate copies the built dist/ assets."
+    },
+    "qualified-npm": {
+      "env": "QUALIFIED_NPM",
+      "hint": "Set QUALIFIED_NPM to the npm 11.19.1 CLI script (npm-cli.js); no global installation is used."
+    },
+    "native-runner": {
+      "file": ".native-runner/node_modules/obsidian-launcher/package.json",
+      "hint": "Provision the isolated native runner: npm install --prefix .native-runner --save-exact obsidian-launcher@3.2.1 (see TEST-SUITES.md)."
+    },
+    "concept-chromium": {
+      "probe": ["{python}", "-c", "import os; assert os.path.isfile(os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'))"],
+      "hint": "Set CHROMIUM_EXECUTABLE to the Chromium binary the Python Playwright install provides (default /usr/bin/chromium)."
+    }
+  },
+  "suites": [
+    {
+      "name": "runtime",
+      "purpose": "Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit.",
+      "runner": {"type": "vitest", "config": "vitest.config.mjs"},
+      "include": ["tests/runtime/**/*.test.ts"],
+      "verify": "own-step",
+      "verifyStep": "production coverage run (vitest.production.config.mjs) executes every runtime test",
+      "npmScript": "test:runtime",
+      "workflows": ["showcase-verification", "template-authoring", "setup-compatibility", "candidate-qualification"]
+    },
+    {
+      "name": "cli",
+      "purpose": "Central shell.mjs CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/framework-*.checks.mjs", "tests/tooling/framework-*.test.mjs", "tests/tooling/capability-discovery.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:cli",
+      "workflows": ["framework-cli"]
+    },
+    {
+      "name": "cli:journey",
+      "purpose": "Packs the framework ZIP, extracts it and builds independent generated consumers with a qualified npm (slow, writes reports/framework-cli).",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{node}", "tests/tooling/framework-journey.mjs"]
+        ]
+      },
+      "include": ["tests/tooling/framework-journey.mjs"],
+      "prerequisites": ["qualified-npm"],
+      "verify": "opt-in",
+      "npmScript": "test:cli:journey",
+      "workflows": ["framework-cli"]
+    },
+    {
+      "name": "generator",
+      "purpose": "Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/project-generator*.checks.mjs", "tests/tooling/project-starters.checks.mjs", "tests/tooling/file-plan*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:generator",
+      "workflows": ["project-generator"]
+    },
+    {
+      "name": "companion",
+      "purpose": "Companion concept contracts: project JSON, storymaps, details, composition, concept isolation zone and concept metrics.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/companion-*.checks.mjs", "tests/tooling/concept-*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:companion",
+      "workflows": ["companion-concept-verification", "project-generator"]
+    },
+    {
+      "name": "companion:assembly",
+      "purpose": "Offline companion assembly check, Python assembly/tamper test and syntax check of every authored concept module.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{python}", "scripts/concepts/build-companion.py", "--check"],
+          ["{python}", "-B", "tests/concepts/companion-assembly.test.py"],
+          {
+            "each": "docs/concepts/companion/src/*.js",
+            "argv": ["{node}", "--check", "{file}"]
+          }
+        ]
+      },
+      "include": ["tests/concepts/companion-assembly.test.py"],
+      "prerequisites": ["python3"],
+      "verify": "opt-in",
+      "npmScript": "test:companion",
+      "workflows": ["companion-concept-verification"],
+      "optional": true
+    },
+    {
+      "name": "companion:browser",
+      "purpose": "Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright + Chromium).",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{python}", "scripts/concepts/run-browser-checks.py", "--real-storage"]
+        ]
+      },
+      "include": ["tests/concepts/*.browser.py"],
+      "exclude": ["tests/concepts/companion.browser.py", "tests/concepts/companion-bricks.browser.py", "tests/concepts/companion-connections.browser.py", "tests/concepts/companion-flow.browser.py", "tests/concepts/companion-library.browser.py", "tests/concepts/companion-sitemap.browser.py", "tests/concepts/companion-studio.browser.py", "tests/concepts/companion-workflow.browser.py"],
+      "inventory": {
+        "source": "scripts/concepts/run-browser-checks.py",
+        "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)",
+        "file": "tests/concepts/companion-$1.browser.py"
+      },
+      "prerequisites": ["python-playwright", "concept-chromium"],
+      "verify": "opt-in",
+      "npmScript": "test:companion:browser",
+      "workflows": ["companion-concept-verification"],
+      "optional": true
+    },
+    {
+      "name": "companion:browser-manual",
+      "purpose": "Historical concept browser scripts that the aggregated runner does not execute; run individually per docs/concepts/companion/VERIFICATION.md.",
+      "runner": {"type": "manual", "instructions": "docs/concepts/companion/VERIFICATION.md"},
+      "include": ["tests/concepts/companion.browser.py", "tests/concepts/companion-bricks.browser.py", "tests/concepts/companion-connections.browser.py", "tests/concepts/companion-flow.browser.py", "tests/concepts/companion-library.browser.py", "tests/concepts/companion-sitemap.browser.py", "tests/concepts/companion-studio.browser.py", "tests/concepts/companion-workflow.browser.py"],
+      "prerequisites": ["python-playwright", "concept-chromium"],
+      "verify": "opt-in",
+      "workflows": [],
+      "optional": true
+    },
+    {
+      "name": "test-data",
+      "purpose": "Companion test-data kit: seeded generators, storage plans, loopback server/client and source inventory.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/test-data-*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:test-data",
+      "workflows": ["companion-concept-verification"]
+    },
+    {
+      "name": "makers",
+      "purpose": "Authoring tools: maker recipes and catalog, event contracts, generated-code formatting, example removal and README ownership.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/maker-*.checks.mjs", "tests/tooling/makers.checks.mjs", "tests/tooling/event-*.checks.mjs", "tests/tooling/example-*.checks.mjs", "tests/tooling/readme-*.checks.mjs", "tests/tooling/formatting.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:makers",
+      "workflows": ["template-authoring"]
+    },
+    {
+      "name": "native",
+      "purpose": "Native host protocol and dev-loop tooling units (isolation, identity, receipts, diagnostics, performance reports) without launching Obsidian.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/native-*.checks.mjs", "tests/tooling/obsidian-*.checks.mjs", "tests/tooling/dev-*.checks.mjs", "tests/tooling/performance-*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:native-tooling",
+      "workflows": ["showcase-verification", "candidate-qualification"]
+    },
+    {
+      "name": "native:host",
+      "purpose": "Real Obsidian smoke in an isolated scratch vault (downloads the host; never a personal vault).",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{node}", "scripts/testing/check-native.mjs", "--allow-download"]
+        ]
+      },
+      "include": [],
+      "prerequisites": ["native-runner"],
+      "verify": "opt-in",
+      "npmScript": "test:native",
+      "workflows": ["showcase-verification", "candidate-qualification"]
+    },
+    {
+      "name": "setup",
+      "purpose": "Guided setup identity, npm install policy, staged build/local install, CSS identity scoping and harness preview.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/setup-*.checks.mjs", "tests/tooling/npm-*.checks.mjs", "tests/tooling/build.checks.mjs", "tests/tooling/identity-*.checks.mjs", "tests/tooling/harness-*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:setup",
+      "workflows": ["setup-compatibility", "template-authoring"]
+    },
+    {
+      "name": "release",
+      "purpose": "Release preparation, promotion plans, remote execution, audit classification, maintenance discovery and qualification triggers.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/release*.checks.mjs", "tests/tooling/security.checks.mjs", "tests/tooling/maintenance.checks.mjs", "tests/tooling/qualification-*.checks.mjs"],
+      "verify": "tooling",
+      "npmScript": "test:release",
+      "workflows": ["release-rehearsal", "candidate-qualification"]
+    },
+    {
+      "name": "quality",
+      "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs"],
+      "prerequisites": ["build"],
+      "verify": "tooling",
+      "npmScript": "test:quality",
+      "workflows": ["showcase-verification", "template-authoring"]
+    },
+    {
+      "name": "baseline",
+      "purpose": "Dependency-free verification baseline: fault ledger, policy, runner, report, source, token and HTTP style-specimen checks, repeated three times.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{node}", "scripts/testing/verify-baseline.mjs", "--repeat", "3"]
+        ]
+      },
+      "include": ["tests/verification/*.test.mjs", "tests/harness-styles/*.test.mjs"],
+      "verify": "own-step",
+      "verifyStep": "verify-baseline --repeat 3",
+      "npmScript": "test:baseline",
+      "workflows": ["baseline-verification"]
+    },
+    {
+      "name": "browser-specimen",
+      "purpose": "Host-style specimen assertions in a real browser (served mode).",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{node}", "scripts/testing/check-browser-specimen.mjs", "--mode", "served"]
+        ]
+      },
+      "include": ["tests/browser-specimen/*.checks.mjs"],
+      "prerequisites": ["chromium"],
+      "verify": "opt-in",
+      "workflows": []
+    },
+    {
+      "name": "e2e",
+      "purpose": "Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system.",
+      "runner": {"type": "playwright"},
+      "include": ["tests/e2e/*.spec.ts"],
+      "prerequisites": ["chromium", "harness-build"],
+      "verify": "opt-in",
+      "npmScript": "test:e2e",
+      "workflows": ["showcase-verification", "template-authoring", "candidate-qualification"]
+    },
+    {
+      "name": "project",
+      "purpose": "Generated product tests (tests/project) that exist only in a project created by the companion compiler.",
+      "runner": {"type": "vitest", "config": "vitest.project.config.mjs"},
+      "include": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"],
+      "optional": true,
+      "verify": "opt-in",
+      "workflows": ["project-generator"]
+    },
+    {
+      "name": "project:ui-effects",
+      "purpose": "Generated composition/UI-effect checks of a companion-generated project.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/project/ui-effects/*.checks.mjs"],
+      "optional": true,
+      "verify": "opt-in",
+      "workflows": ["project-generator"]
+    },
+    {
+      "name": "obsidian",
+      "purpose": "Vitest-driven end-to-end tests against a real sandboxed Obsidian host.",
+      "runner": {"type": "npm-script", "script": "test:obsidian"},
+      "include": ["tests/obsidian/**/*.test.ts", "tests/obsidian/**/*.test.mjs", "tests/obsidian/**/*.spec.ts"],
+      "optional": true,
+      "prerequisites": ["native-runner"],
+      "verify": "opt-in",
+      "workflows": []
+    }
+  ],
+  "aliases": {"tooling": "Every suite that verify runs in its serialized node --test tooling step."},
+  "helpers": [
+    {
+      "purpose": "Tooling fixtures and shared helpers",
+      "include": ["tests/tooling/*-fixture.mjs", "tests/tooling/file-symlink.mjs"]
+    },
+    {
+      "purpose": "Runtime fixtures, helpers and shared types",
+      "include": ["tests/runtime/**/*-fixture.ts", "tests/runtime/**/*-helpers.ts", "tests/runtime/helpers.ts", "tests/runtime/memory-storage.ts", "tests/runtime/types.ts"]
+    },
+    {
+      "purpose": "Playwright fixtures and measurement helpers",
+      "include": ["tests/e2e/*-fixture.ts", "tests/e2e/control-metrics.ts"]
+    },
+    {
+      "purpose": "Real-host test support, fixtures and declarations",
+      "include": ["tests/obsidian/support/**", "tests/obsidian/fixtures/**", "tests/obsidian/**/*-fixture.*", "tests/obsidian/**/*-helpers.*", "tests/obsidian/**/*.d.ts"]
+    },
+    {
+      "purpose": "Generated project fixtures and ports",
+      "include": ["tests/project/fixtures/**"],
+      "exclude": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"]
+    }
+  ]
+}
