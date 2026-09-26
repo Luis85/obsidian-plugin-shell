@@ -75,7 +75,8 @@ function checkView(style: Style, value: Result): string {
   if (value.status === 'planned') return text + nextLine(style, `check${data.mode === 'fast' ? ' --fast' : ''}`);
   text += `  Summary  ${String(summary.passed)} passed, ${String(summary.failed)} failed, ${String(summary.skipped)} skipped in ${duration(Number(summary.durationMs))}\n`;
   const next = value.diagnostics[0]?.next;
-  return text + (next ? nextLine(style, next) : 'All check steps passed. Run verify for the full gate before release work.\n');
+  const gate = data.scope === 'generated-project' ? 'npm run verify:project' : 'verify';
+  return text + (next ? nextLine(style, next) : `All check steps passed. Run ${gate} for the full gate before release work.\n`);
 }
 function submissionView(style: Style, value: Result): string {
   const data = record(value.data), rules = (data.rules ?? []) as Data[], summary = record(data.summary);

@@ -6,6 +6,7 @@
 import { execFile } from 'node:child_process';
 import { join } from 'node:path';
 import { exists } from './files.ts';
+import { codeRoots, isWithinRoot, lintRoots } from '../shared/project-roots.mjs';
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 export interface CheckStep { id: string; display: string; entry: string; args: string[]; skip?: string }
@@ -13,7 +14,7 @@ export interface StepOutcome {
   id: string; command: string; status: 'passed' | 'failed' | 'skipped' | 'not-run';
   durationMs: number; exitCode: number | null; code?: string; reason?: string; outputTail?: string;
 }
-export interface Changes { source: 'git' | 'unavailable'; files: string[]; reason?: string }
+export interface Changes { source: 'git' | 'unavailable'; files: string[]; untraceable?: string[]; reason?: string }
 type Runner = typeof runNode;
 type Git = (root: string, args: string[]) => Promise<string | null>;
 const code = /\.(?:[cm]?[jt]sx?|vue)$/;
@@ -24,19 +25,34 @@ async function checkScope(root: string): Promise<'generated-project' | 'shell-re
   return await exists(join(root, '.companion/generation.json')) && await exists(join(root, 'tsconfig.project.json')) ? 'generated-project' : 'shell-repository';
 }
 const runGit: Git = (root, args) => new Promise(accept => {
-  execFile('git', args, { cwd: root, shell: false, windowsHide: true, timeout: 10_000, maxBuffer: 1_048_576, encoding: 'utf8' },
+  execFile('git', args, { cwd: root, shell: false, windowsHide: true, timeout: 10_000, maxBuffer: 16_777_216, encoding: 'utf8' },
     (error, stdout) => accept(error ? null : stdout));
 });
-/** Tracked changes against HEAD plus untracked files, relative to the project root. */
+/** Changes vitest related cannot trace: build/test configuration next to the code. */
+const configuration = /^(?:package(?:-lock)?\.json|tsconfig[^/]*\.json|vite[^/]*\.config\.[cm]?[jt]s|vitest[^/]*\.config\.[cm]?[jt]s|tests\/suites\.json)$/;
+/** NUL-separated git output keeps non-ASCII and special paths verbatim (no core.quotePath quoting). */
+const fields = (text: string) => text.split('\0').filter(Boolean);
+/** Tracked changes against HEAD plus untracked files, relative to the project root. A deleted file, a
+ * configuration change or a non-code file inside a code root (fixtures, snapshots, JSON) cannot be
+ * mapped to related tests, so it selects the full suite instead of silently skipping tests. */
 async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
-  const tracked = await git(root, ['diff', '--name-only', '--relative', 'HEAD']);
-  const untracked = tracked === null ? null : await git(root, ['ls-files', '--others', '--exclude-standard']);
+  const tracked = await git(root, ['diff', '--name-status', '--no-renames', '-z', '--relative', 'HEAD']);
+  const untracked = tracked === null ? null : await git(root, ['ls-files', '--others', '--exclude-standard', '-z']);
   if (tracked === null || untracked === null) return { source: 'unavailable', files: [], reason: 'git or a HEAD commit is unavailable; running the full suite' };
-  const files: string[] = [];
-  for (const path of new Set(`${tracked}\n${untracked}`.split('\n').map(line => line.trim()).filter(Boolean))) {
-    if (code.test(path) && !path.split('/').includes('node_modules') && await exists(join(root, path))) files.push(path);
+  const parts = fields(tracked), entries: Array<[string, string]> = [];
+  for (let index = 0; index + 1 < parts.length; index += 2) entries.push([parts[index]!, parts[index + 1]!]);
+  for (const path of fields(untracked)) entries.push(['?', path]);
+  const roots = codeRoots(root), files = new Set<string>(), untraceable = new Set<string>();
+  for (const [status, path] of entries) {
+    if (path.split('/').includes('node_modules')) continue;
+    const inRoot = roots.some(base => isWithinRoot(path, base));
+    if (status.startsWith('D') ? code.test(path) || inRoot : configuration.test(path) || (inRoot && !code.test(path))) untraceable.add(path);
+    else if (code.test(path) && await exists(join(root, path))) files.add(path);
   }
-  return { source: 'git', files: files.sort() };
+  const listed = [...untraceable].sort();
+  if (!listed.length) return { source: 'git', files: [...files].sort() };
+  return { source: 'git', files: [...files].sort(), untraceable: listed,
+    reason: `deleted, configuration or non-code files changed (${listed.slice(0, 5).join(', ')}${listed.length > 5 ? ', …' : ''}); running the full suite` };
 }
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
@@ -47,11 +63,14 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit)
   const fullTest: CheckStep = { id: 'test', display: `vitest run${project ? ' --config vitest.project.config.mjs' : ''}`, entry: vitest, args: ['run', ...config] };
   if (!fast) {
     const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
-    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: 'eslint src --max-warnings 0', entry: eslint, args: ['src', '--max-warnings', '0'] }, fullTest] };
+    // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
+    const targets = project ? lintRoots(root) : ['src'];
+    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: [...targets, '--max-warnings', '0'] }, fullTest] };
   }
   const changes = await changedFiles(root, git);
   let test = fullTest;
-  if (changes.source === 'git' && changes.files.length > maxRelated) changes.reason = `more than ${maxRelated} changed files; running the full suite`;
+  if (changes.untraceable) test = fullTest;
+  else if (changes.source === 'git' && changes.files.length > maxRelated) changes.reason = `more than ${maxRelated} changed files; running the full suite`;
   else if (changes.source === 'git' && !changes.files.length) test = { ...fullTest, display: 'vitest related (no changed source files)', skip: 'No changed source files since HEAD.' };
   else if (changes.source === 'git') test = { id: 'test', display: `vitest related --run (${changes.files.length} changed file${changes.files.length === 1 ? '' : 's'})`, entry: vitest, args: ['related', '--run', '--passWithNoTests', ...config, ...changes.files] };
   return { scope, steps: [typecheck, test], changes };

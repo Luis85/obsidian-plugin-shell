@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../scripts/framework/check.ts';
+import { codeRoots, sourceRoots } from '../../scripts/shared/project-roots.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-check-')));
@@ -76,21 +77,64 @@ test('scope detection selects project-suite steps in a generated project', async
 });
 test('fast mode runs tests related to changed and untracked source files only', async t => {
   const dir = await scratch(t);
-  await mkdir(join(dir, 'src')); await writeFile(join(dir, 'src/a.ts'), 'export const a = 1;\n'); await writeFile(join(dir, 'src/gone.ts'), 'x');
+  await mkdir(join(dir, 'src')); await writeFile(join(dir, 'src/a.ts'), 'export const a = 1;\n'); await writeFile(join(dir, 'src/Ünïcode note.ts'), 'x');
   await writeFile(join(dir, 'README.md'), 'readme');
   git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
   const clean = await checkSteps(dir, true);
   assert.deepEqual(clean.changes, { source: 'git', files: [] });
   assert.equal(clean.steps[1].skip, 'No changed source files since HEAD.');
-  await writeFile(join(dir, 'src/a.ts'), 'export const a = 2;\n'); await unlink(join(dir, 'src/gone.ts'));
-  await writeFile(join(dir, 'src/View.vue'), '<template />'); await writeFile(join(dir, 'README.md'), 'changed docs');
+  await writeFile(join(dir, 'src/a.ts'), 'export const a = 2;\n'); await writeFile(join(dir, 'src/Ünïcode note.ts'), 'y');
+  await writeFile(join(dir, 'src/View.vue'), '<template />'); await writeFile(join(dir, 'src/nouvelle-vue été.ts'), 'z');
+  await writeFile(join(dir, 'README.md'), 'changed docs');
   await mkdir(join(dir, 'node_modules/pkg'), { recursive: true }); await writeFile(join(dir, 'node_modules/pkg/index.js'), '');
   const changed = await checkSteps(dir, true);
-  assert.deepEqual(changed.changes.files, ['src/View.vue', 'src/a.ts']);
+  // Non-ASCII paths arrive verbatim (git -z), not as core.quotePath-quoted strings that would be dropped.
+  assert.deepEqual(changed.changes, { source: 'git', files: ['src/View.vue', 'src/a.ts', 'src/nouvelle-vue été.ts', 'src/Ünïcode note.ts'].sort() });
   assert.deepEqual(changed.steps.map(step => step.id), ['typecheck', 'test']);
-  assert.deepEqual(changed.steps[1].args, ['related', '--run', '--passWithNoTests', 'src/View.vue', 'src/a.ts']);
+  assert.deepEqual(changed.steps[1].args, ['related', '--run', '--passWithNoTests', ...changed.changes.files]);
   const nested = await checkSteps(join(dir, 'src'), true);
-  assert.deepEqual(nested.changes.files, ['View.vue', 'a.ts'], 'paths are relative to the checked root');
+  assert.deepEqual(nested.changes.files, ['View.vue', 'a.ts', 'nouvelle-vue été.ts', 'Ünïcode note.ts'].sort(), 'paths are relative to the checked root');
+});
+test('fast mode runs the full suite when deleted, configuration or non-code test inputs changed', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, 'src'), { recursive: true }); await mkdir(join(dir, 'tests/fixtures'), { recursive: true });
+  await writeFile(join(dir, 'src/a.ts'), 'a'); await writeFile(join(dir, 'src/gone.ts'), 'x'); await writeFile(join(dir, 'tests/fixtures/data.json'), '{}');
+  await writeFile(join(dir, 'package.json'), '{}'); await writeFile(join(dir, 'README.md'), 'readme');
+  git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
+  const full = ['run'];
+  await unlink(join(dir, 'src/gone.ts'));
+  const deleted = await checkSteps(dir, true);
+  assert.deepEqual(deleted.changes.untraceable, ['src/gone.ts']); assert.match(deleted.changes.reason, /deleted, configuration or non-code files changed \(src\/gone\.ts\); running the full suite/);
+  assert.deepEqual(deleted.steps[1].args, full);
+  git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', 'delete');
+  for (const [path, content] of [['tests/fixtures/data.json', '{"changed":true}'], ['package.json', '{"type":"module"}'], ['vitest.project.config.mjs', 'export default {};'], ['tests/fixtures/new.md', 'new']]) {
+    await writeFile(join(dir, path), content);
+    const outcome = await checkSteps(dir, true);
+    assert.deepEqual(outcome.changes.untraceable, [path], path); assert.deepEqual(outcome.steps[1].args, full, path);
+    git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', path);
+  }
+  await writeFile(join(dir, 'README.md'), 'docs only');
+  const docs = await checkSteps(dir, true);
+  assert.equal(docs.changes.untraceable, undefined); assert.equal(docs.steps[1].skip, 'No changed source files since HEAD.');
+  const { exit, result } = cli(['check', '--fast', '--dry-run', '--root', dir]);
+  assert.equal(exit, 0); assert.equal(result.data.changes.reason, undefined);
+  await unlink(join(dir, 'src/a.ts'));
+  assert.match(cli(['check', '--fast', '--dry-run', '--root', dir]).result.data.changes.reason, /src\/a\.ts\); running the full suite/);
+});
+test('a generated project lints and watches its configured product roots, not only src', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'product/code/generated'), { recursive: true }); await mkdir(join(dir, 'src'));
+  await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'] }));
+  await mkdir(join(dir, 'tests')); await writeFile(join(dir, 'tests/suites.json'), JSON.stringify({ roots: [{ path: 'verification/specs/project' }] }));
+  const full = await checkSteps(dir, false);
+  assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['src', 'product/code/generated', '--max-warnings', '0']);
+  assert.deepEqual(sourceRoots(dir), ['src', 'product/code/generated'], 'the dev watchers use the same product roots; test roots are excluded');
+  assert.deepEqual(codeRoots(dir), ['src', 'tests', 'product/code/generated', 'verification/specs/project']);
+  await writeFile(join(dir, 'product/code/generated/data.ts'), 'export {};');
+  git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
+  await writeFile(join(dir, 'product/code/generated/labels.json'), '{}');
+  assert.deepEqual((await checkSteps(dir, true)).changes.untraceable, ['product/code/generated/labels.json']);
 });
 test('fast mode falls back to the full suite without git or with too many changes', async t => {
   const dir = await scratch(t);
@@ -99,7 +143,7 @@ test('fast mode falls back to the full suite without git or with too many change
   assert.deepEqual(missing.steps[1].args, ['run']);
   const names = Array.from({ length: 201 }, (_, index) => `f${index}.ts`);
   for (const name of names) await writeFile(join(dir, name), '');
-  const many = await checkSteps(dir, true, async (_, args) => args[0] === 'diff' ? names.join('\n') : '');
+  const many = await checkSteps(dir, true, async (_, args) => args[0] === 'diff' ? names.map(name => `M\0${name}\0`).join('') : '');
   assert.equal(many.changes.files.length, 201); assert.match(many.changes.reason, /more than 200/);
   assert.deepEqual(many.steps[1].args, ['run']);
   const nodeOnly = { ...process.env, PATH: dirname(process.execPath) };

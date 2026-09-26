@@ -53,6 +53,20 @@ test('rich markers and colour appear only on a TTY without NO_COLOR or a dumb te
   const rich = renderHuman(value, { color: true, unicode: true }).text, plain = renderHuman(value, { color: false, unicode: false }).text;
   assert.match(rich, /✓/); assert.match(rich, ansi);
   assert.match(plain, /^ {2}\[ok\] {3}typecheck {2}vue-tsc --noEmit {2}1\.5s$/m); assert.doesNotMatch(plain, ansi);
+  assert.match(plain, /^All check steps passed\. Run verify for the full gate before release work\.$/m);
+});
+test('a generated project is pointed at its own npm scripts, not the shell setup or verify flow', async t => {
+  const dir = await scratch(t);
+  const value = { protocolVersion: 1, command: 'check', status: 'ok', diagnostics: [], data: { scope: 'generated-project', mode: 'fast', steps: [], summary: { passed: 2, failed: 0, skipped: 0, durationMs: 10 } } };
+  assert.match(renderHuman(value, { color: false, unicode: false }).text, /^All check steps passed\. Run npm run verify:project for the full gate before release work\.$/m);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await writeFile(join(dir, 'manifest.json'), JSON.stringify({ id: 'quick-capture', name: 'Quick Capture', version: '0.1.0', minAppVersion: '1.5.0' }));
+  const fresh = cli(['doctor', '--root', dir], { NO_COLOR: '1' });
+  assert.equal(fresh.status, 0, fresh.stderr);
+  assert.doesNotMatch(fresh.stdout, /CONFIG_MISSING|shell\.mjs setup/); assert.match(fresh.stdout, /^Next: npm ci$/m);
+  await mkdir(join(dir, 'node_modules/typescript'), { recursive: true }); await writeFile(join(dir, 'node_modules/typescript/package.json'), '{}');
+  const installed = machine(['doctor', '--root', dir]);
+  assert.equal(installed.result.data.next, 'npm run check'); assert.equal(installed.result.data.identityAuthority, 'manifest.json');
 });
 test('make list and describe render readable tables instead of raw JSON', () => {
   const list = cli(['make', 'list']);
