@@ -20,13 +20,25 @@ function veComponentIn(store, id) { const c = visualDefinition(store, { kind: 'c
 function veVariantsFor(c, from, to, type = null) {
   return c.variants.map(v => ({ ...v, values: Object.fromEntries(Object.entries(v.values).flatMap(([k, x]) => (k !== from ? [[k, x]] : to && (!type || typeof x === type) ? [[to, x]] : []))) }));
 }
+// A renamed prop keeps its own-template bindings: {kind:'prop'} values and payload mappings follow; literals do not.
+function veRenameBindings(value, from, to) {
+  if (Array.isArray(value)) { for (const item of value) veRenameBindings(item, from, to); return; }
+  if (!value || typeof value !== 'object' || ['literal', 'value'].includes(value.kind)) return;
+  if (value.kind === 'prop' && value.name === from) { value.name = to; return; }
+  for (const item of Object.values(value)) veRenameBindings(item, from, to);
+}
+function veRenamePropBindings(template, from, to) {
+  const copy = structuredClone(template);
+  visualWalk(copy, node => { for (const key of ['props', 'attrs', 'value', 'events']) veRenameBindings(node[key], from, to); });
+  return copy;
+}
 function veRowChange(c, list, index, key, raw) {
   visualAssert(Object.hasOwn(VE_API_NEW, list), 'Choose props, slots or emits.');
   const items = structuredClone(c[list]), item = items[index], out = { [list]: items };
   visualAssert(item, 'That ' + list.slice(0, -1) + ' no longer exists.');
   if (key === 'name') {
     const name = String(raw).trim();
-    if (list === 'props') out.variants = veVariantsFor(c, item.name, name);
+    if (list === 'props') Object.assign(out, { variants: veVariantsFor(c, item.name, name), template: veRenamePropBindings(c.template, item.name, name) });
     item.name = name;
   } else if (key === 'required') item.required = raw === true;
   else if (key === 'type') {
@@ -122,7 +134,7 @@ const VE_CONTRACT_ACTIONS = {
   've-dependency-add': veDependencyAdd, 've-dependency-remove': veDependencyRemove,
 };
 // Markup. Every control has an id plus data-field / data-index / data-key, so focus survives a re-render.
-function veRowAttrs(field, list, index, key) { return `id="${veFieldId(field + '-' + list + '-' + index, key)}" data-field="${field}" data-list="${list}" data-index="${index}" data-key="${key}"`; }
+function veRowAttrs(field, list, index, key) { return `id="${veFieldId(field + '-' + list + '-' + index, key)}" data-field="${esc(field)}" data-list="${esc(list)}" data-index="${index}" data-key="${esc(key)}"`; }
 function veRowInput(label, field, list, index, key, value, type = 'text', extra = '') {
   const id = veFieldId(field + '-' + list + '-' + index, key);
   return `<div class="field"><label for="${id}">${esc(label)}</label><input ${veRowAttrs(field, list, index, key)} type="${type}" value="${esc(value ?? '')}" autocomplete="off" ${extra}></div>`;
@@ -185,5 +197,5 @@ function veContractHtml(component) {
   const tabs = `<div class="ve-tabs" role="tablist" aria-label="Component sections">${VE_CONTRACT_TABS.map(([id, label]) => `<button type="button" role="tab" id="ve-ctab-${id}" aria-controls="ve-ctabpanel" aria-selected="${tab === id}" data-action="ve-contract-tab" data-value="${id}">${label}</button>`).join('')}</div>`;
   const panel = tab === 'design' ? veDesignTab(component) : tab === 'events' ? veEventsTab(component) : tab === 'dependencies' ? veDependenciesTab(component) : veContractTab(component);
   const note = locked ? '<p id="ve-preview-note" class="ve-pane-note">Preview is read-only. Switch to Design to edit.</p>' : '';
-  return `<span class="ve-eyebrow">Public API</span><h2>${esc(component.exportName)}</h2>${note}${tabs}<fieldset class="ve-inspector-body"${locked ? ' disabled aria-describedby="ve-preview-note"' : ''}><legend class="ve-sr">Edit ${esc(component.exportName)}</legend><div id="ve-ctabpanel" role="tabpanel" aria-labelledby="ve-ctab-${tab}">${panel}</div></fieldset>`;
+  return `<span class="ve-eyebrow">Public API</span><h2>${esc(component.exportName)}</h2>${note}${tabs}<fieldset class="ve-inspector-body"${locked ? ' disabled aria-describedby="ve-preview-note"' : ''}><legend class="ve-sr">Edit ${esc(component.exportName)}</legend><div id="ve-ctabpanel" role="tabpanel" aria-labelledby="ve-ctab-${tab}">${panel}</div></fieldset>${locked ? '' : button('Delete component design…', 've-delete', 'definition', 'small ghost', 'trash')}`;
 }

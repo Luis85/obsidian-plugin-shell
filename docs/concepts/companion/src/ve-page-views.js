@@ -49,7 +49,7 @@ function veSelectionBar(page) {
   const node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
   if (!node || veUi.mode !== 'design') return '';
   const tool = (label, action, ico) => `<button type="button" class="icon-button" data-action="${action}" aria-label="${esc(label)}" title="${esc(label)}">${icon(ico)}</button>`;
-  const more = veUi.more ? `<div class="ve-more-menu" role="group" aria-label="More actions">${button('Move earlier', 've-move', 'earlier', 'small ghost')}${button('Move later', 've-move', 'later', 'small ghost')}${button('Save selection as layout', 've-save-layout', 'region', 'small ghost')}</div>` : '';
+  const more = veUi.more ? `<div class="ve-more-menu" role="group" aria-label="More actions">${button('Move earlier', 've-move', 'earlier', 'small ghost')}${button('Move later', 've-move', 'later', 'small ghost')}${button('Move to…', 've-reparent', '', 'small ghost')}${button('Save selection as layout', 've-save-layout', 'region', 'small ghost')}${button('Delete…', 've-delete', '', 'small ghost', 'trash')}</div>` : '';
   return `<div class="ve-selection-holder"><div class="ve-selection-bar" role="toolbar" aria-label="${esc('Actions for ' + veNodeLabel(node))}"><span class="ve-selection-label">${esc(veNodeLabel(node))}</span>${tool('Insert after', 've-insert-after', 'plus')}${tool('Duplicate', 've-duplicate', 'copy')}${tool('Wrap in group', 've-wrap', 'box')}${tool('Bind data', 've-bind', 'layers')}${tool('Add interaction', 've-interaction', 'spark')}<button type="button" class="icon-button" data-action="ve-more" aria-label="More actions" title="More actions" aria-expanded="${veUi.more}">${icon('menu')}</button></div>${more}</div>`;
 }
 function veCanvasFooter(page, findings) {

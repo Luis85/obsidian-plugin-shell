@@ -102,8 +102,13 @@ class AssemblyContract(unittest.TestCase):
         markers += ['function vePagesView(', 'function vePageEditorView(', 'function veOutlineHtml(', 'function veInsertHtml(', 'function veLayoutsHtml(', 'role="tree"']
         markers += ['function vePageInspectorHtml(', 'function veInteractionForm(', 'function veFieldEdit(', 'function veReviewFindings(', 'function veHealthHtml(']
         markers += ['function veComponentEditorView(', 'function veContractHtml(', 'function veChildInspectorHtml(', 'Would create a cycle']
+        markers += ['function handleVisualAction(', 'if(handleVisualAction(action,value)', 'veFieldEdit(el)||', 'pages:vePagesView', "'page-editor':vePageEditorView"]
+        markers += ['function veEditorKeydown(', 'function veOutlineStep(', '...vePaletteRows(),...NAV.map(', "'ve-delete':veDeleteDialog", "'ve-reparent':veReparentDialog"]
         for marker in markers:
             self.assertIn(marker, html, marker)
+        # The visual editors have no Vue Flow island: render no longer mounts or destroys the legacy detail flow.
+        self.assertNotIn('dtMount();', html)
+        self.assertNotIn('dtDestroy();smDestroy()', html)
 
     def test_unassembled_source_is_not_hidden(self):
         (self.concept / 'src/unregistered.js').write_text('console.log("unused fixture");\n')

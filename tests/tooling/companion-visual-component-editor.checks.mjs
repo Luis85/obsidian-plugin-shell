@@ -16,7 +16,7 @@ const helpers = ['function esc(', 'function icon(', 'function button(', 'functio
   assert.equal(lines.length, 1, prefix + ' is one line of base.html');
   return lines[0];
 }).join('\n');
-const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-contract.js', 've-child-inspector.js', 've-publish.js', 've-component-views.js', 've-page-views.js', 've-actions.js'];
+const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-contract.js', 've-child-inspector.js', 've-publish.js', 've-component-views.js', 've-page-views.js', 've-structure.js', 've-entry.js', 've-actions.js'];
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'component-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
@@ -29,7 +29,7 @@ function structuredClone(v) { return v === undefined ? v : JSON.parse(JSON.strin
 function smToken() { return 'rev-' + host.design.revision; } function designCopy(v) { return structuredClone(v); }
 function designSnapshot(d) { return { visualDesigns: d.visualDesigns, library: d.library }; } function validSavedDesign() { return true; }
 function saveConceptState() { host.saves++; return true; } function render() { host.renders++; } function notify(text) { host.notices.push(text); }
-function setView(view) { state.view = view; render(); }
+function setView(view) { state.view = view; render(); } function uiFocusRecord() { return null; } function focusUiControl() { return false; }
 function showModal(type) { modalType = type; host.dom.modal.open = true; } function closeModal() { modalType = ''; host.dom.modal.open = false; }
 function redrawModal() { host.redraws++; } function realm(v) { return JSON.parse(JSON.stringify(v)); }
 function ui() { return veUi; } function modal() { return { type: modalType, original: modalOriginal }; } function view() { return state; }

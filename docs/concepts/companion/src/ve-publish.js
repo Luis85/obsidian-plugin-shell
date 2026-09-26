@@ -47,6 +47,7 @@ function vePublishDialog() {
 function vePublishConfirm() {
   const form = veUi.publishForm;
   if (!form) throw Error('Open Publish revision again.');
+  veEditable();
   if (!form.confirm) throw Error('Confirm that you reviewed the usages before publishing.');
   let revision = null;
   veCommit(store => { revision = visualPublish(store, form.componentId, form.version.trim()); }, form.token);

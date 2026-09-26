@@ -24,7 +24,7 @@ function veOpenComponent(libraryId, { push = state.view !== 'component-editor' }
   const d = design();
   if (!d.library.some(l => l.id === libraryId) && !veStore(d).components.some(c => c.libraryId === libraryId)) throw Error('That library component no longer exists.');
   if (state.view === 'component-editor' && veUi.library === libraryId) return;
-  if (push) veUi.back = [...veUi.back, veBackEntry()].slice(-12);
+  if (push) vePushBack();
   Object.assign(veUi, { library: libraryId, selected: null, scenario: null, variant: '', state: 'default', mode: 'design', query: '', left: 'outline', pane: 'canvas', after: false, more: false, error: '', slotTarget: null, depForm: null });
   if (state.view === 'component-editor') render(); else setView('component-editor');
 }
@@ -51,6 +51,7 @@ function veLibraryEntryFor(entry, name, library) {
 }
 function veCustomize(entryId) {
   const entry = visualCatalogEntry(entryId);
+  veEditable();
   if (!entry) throw Error('Choose a Nuxt UI component to customize.');
   if (design().library.length >= LIBRARY_LIMIT) throw Error('The component library holds at most ' + LIBRARY_LIMIT + ' components. Nothing was created.');
   let created = null;

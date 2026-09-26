@@ -3,7 +3,7 @@
 const VE_INSPECTOR_TABS = [['essentials', 'Essentials'], ['data', 'Data'], ['actions', 'Actions']];
 function veEditable() { if (veUi.mode === 'preview') throw Error('Preview is read-only. Switch to Design to change the ' + (veInComponent() ? 'component.' : 'page.')); }
 function veStructureActions() {
-  return `<div class="ve-inspector-actions" role="group" aria-label="Structure">${button('Move earlier', 've-move', 'earlier', 'small')}${button('Move later', 've-move', 'later', 'small')}${button('Duplicate', 've-duplicate', '', 'small', 'copy')}${button('Wrap in group', 've-wrap', '', 'small', 'box')}</div>`;
+  return `<div class="ve-inspector-actions" role="group" aria-label="Structure">${button('Move earlier', 've-move', 'earlier', 'small')}${button('Move later', 've-move', 'later', 'small')}${button('Duplicate', 've-duplicate', '', 'small', 'copy')}${button('Wrap in group', 've-wrap', '', 'small', 'box')}${button('Move to…', 've-reparent', '', 'small')}${button('Delete…', 've-delete', '', 'small ghost', 'trash')}</div>`;
 }
 function veSection(title, body) { return `<section class="ve-inspector-section"><h3>${esc(title)}</h3>${body}</section>`; }
 // Essentials: identity, catalog-schema values, layout, visibility, accessibility.
@@ -79,7 +79,7 @@ function veActionsTab(definition, node) {
   return `${items ? `<ul class="ve-interactions">${items}</ul>` : '<p class="ve-pane-note">No interactions yet.</p>'}${button('Add interaction', 've-interaction-add', '', 'small primary', 'plus', full ? 'disabled' : '')}`;
 }
 function vePageSummaryHtml(page) {
-  return `<h2>${esc(page.name)}</h2><dl class="ve-facts"><dt>Elements</dt><dd>${visualNodes(page.root).length}/${VISUAL_LIMITS.nodes}</dd><dt>Scenarios</dt><dd>${page.scenarios.length}</dd></dl><p class="small muted">Select an element in the Outline or on the canvas to see its details.</p>`;
+  return `<h2>${esc(page.name)}</h2><dl class="ve-facts"><dt>Elements</dt><dd>${visualNodes(page.root).length}/${VISUAL_LIMITS.nodes}</dd><dt>Scenarios</dt><dd>${page.scenarios.length}</dd></dl><p class="small muted">Select an element in the Outline or on the canvas to see its details.</p>${veUi.mode === 'preview' ? '' : button('Delete page design…', 've-delete', 'definition', 'small ghost', 'trash')}`;
 }
 function vePageInspectorHtml(definition, node, findings = veReviewFindings(veStore(), { kind: 'page', id: definition.id })) {
   const locked = veUi.mode === 'preview', review = veReviewHtml(findings);

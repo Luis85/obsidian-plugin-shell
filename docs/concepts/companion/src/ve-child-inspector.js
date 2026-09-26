@@ -4,7 +4,8 @@
 // fieldset was rendered for and run once through veCommit; Preview is read-only.
 const VE_CHILD_INSPECTOR_TABS = [['props', 'Props'], ['slots', 'Slots'], ['events', 'Events'], ['element', 'Element']];
 const VE_CHILD_KINDS = [['literal', 'Literal'], ['prop', 'Parent prop'], ['state', 'Form value']];
-const VE_CHILD_FIELDS = ['ve-child-kind', 've-child-prop', 've-child-adapter', 've-child-add-prop', 've-child-emit'];
+const VE_CHILD_FIELDS = ['ve-child-kind', 've-child-prop', 've-child-adapter', 've-child-add-prop', 've-child-emit', 've-child-event'];
+const VE_ADAPTER_EVENT = /^[a-zA-Z][a-zA-Z0-9:_-]*$/;
 // Declared slots of a child component (catalog entry, pinned revision or live project component).
 function veChildSlots(node) { return node.kind === 'component' ? (veNodeContract(veStore(), node)?.slots ?? []) : []; }
 // Pure: apply one child field to the node in a copied store.
@@ -36,10 +37,21 @@ function veApplyChildField(store, ref, nodeId, field, key, raw) {
   if (raw === 'literal' && node.kind === 'external') return veSetExpr(store, ref, node, key, visualLiteral(null));
   return veSetExpr(store, ref, node, key, veBindingExpr(raw, spec, component, node));
 }
+// External adapters define their own event names. A named event is listed for this session until it is mapped to an
+// emit or a local action, which persists it as an interaction.
+function veAdapterEvents(node) { return [...new Set([...node.events.map(i => i.event), ...(veUi.adapterEvents[node.id] || [])])]; }
+function veAddAdapterEvent(nodeId, raw) {
+  const name = String(raw).trim(), component = veCurrentComponent(), node = component ? visualLocate(component.template, nodeId)?.node : null;
+  if (node?.kind !== 'external') throw Error('Only external library elements declare adapter events.');
+  if (name.length > 60 || !VE_ADAPTER_EVENT.test(name)) throw Error('Adapter event names start with a letter and use only letters, digits, colon, underscore or hyphen (at most 60).');
+  if (veAdapterEvents(node).includes(name)) throw Error(name + ' is already listed for adapter ' + node.adapter + '.');
+  veUi.adapterEvents = { ...veUi.adapterEvents, [node.id]: [...(veUi.adapterEvents[node.id] || []), name] };
+}
 function veChildField(el, commit, after = render) {
   if (!VE_CHILD_FIELDS.includes(el.dataset.field)) return false;
   if (!commit) return true;
   veEditable();
+  if (el.dataset.field === 've-child-event') { veAddAdapterEvent(el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), el.value); veUi.error = ''; after(); return true; }
   const edit = veCaptureField(el);
   veCommit(store => { veApplyChildField(store, edit.ref, edit.nodeId, edit.field, edit.key, edit.raw); });
   veUi.error = ''; after();
@@ -103,12 +115,14 @@ function veChildSlotsTab(component, node) {
 }
 function veChildEventsTab(component, node) {
   if (!Array.isArray(node.events)) return '<p class="ve-pane-note">Text and slots have no events.</p>';
-  const events = [...new Set([...veEventChoices(veStore(), node), ...node.events.map(i => i.event)])], emits = component.emits.map(e => [e.name, 'Emit ' + e.name]);
+  const external = node.kind === 'external', emits = component.emits.map(e => [e.name, 'Emit ' + e.name]);
+  const events = [...new Set([...(external ? veAdapterEvents(node) : []), ...veEventChoices(veStore(), node), ...node.events.map(i => i.event)])];
+  const adapter = external ? `<div class="field"><label for="ve-child-event-add">Adapter event name</label><input id="ve-child-event-add" data-field="ve-child-event" data-key="add" type="text" value="" placeholder="update:content" maxlength="60" spellcheck="false" autocomplete="off" aria-describedby="ve-child-event-hint"><p id="ve-child-event-hint" class="ve-pane-note">The adapter defines its own events, for example update:content. Name one, then map it to an emit or a local action.</p></div>` : '';
   return `<ul class="ve-interactions">${events.map(event => {
     const mapped = node.events.filter(i => i.event === event).map(i => `<li><strong>${esc(i.label)}</strong> <span class="ve-pane-note">${esc(i.actions.length ? i.actions.map(a => veActionSummary(a, component)).join(', ') : 'Implementation required')}</span><span class="ve-inspector-actions">${button('Edit', 've-interaction-edit', i.id, 'small', '', `aria-label="${esc('Edit ' + i.label)}"`)}${button('Remove', 've-interaction-remove', i.id, 'small ghost', 'trash', `aria-label="${esc('Remove ' + i.label)}"`)}</span></li>`).join('');
     const emit = emits.length ? veSelectHtml('Emit parent event', 've-child-emit', event, [['', 'Choose an emit…'], ...emits], '') : '';
     return `<li class="ve-interaction"><div class="ve-interaction-head">${badge('@' + event)}</div>${mapped ? `<ul>${mapped}</ul>` : ''}${emit}${button('Local action…', 've-child-local', event, 'small', 'spark', `aria-label="${esc('Add a local action on ' + event)}"`)}</li>`;
-  }).join('')}</ul>${emits.length ? '' : '<p class="ve-pane-note">Declare an emit in Contract → Emits to forward child events with their payload.</p>'}`;
+  }).join('')}</ul>${adapter}${emits.length ? '' : '<p class="ve-pane-note">Declare an emit in Contract → Emits to forward child events with their payload.</p>'}`;
 }
 function veChildElementTab(node) {
   const name = node.kind === 'slot' ? '' : veControlHtml('ve-name', { key: 'name', label: 'Name', kind: 'string', type: 'string', options: [], default: veKindLabel(node) }, node.name);

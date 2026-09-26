@@ -2,7 +2,7 @@
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
 function veFail(error) {
   const text = veErrorText(error);
-  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'] }[modalType] : null;
+  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'], 've-delete': [veUi.deleteForm, 've-delete-error'], 've-reparent': [veUi.reparentForm, 've-reparent-error'] }[modalType] : null;
   if (dialog?.[0]) { dialog[0].error = text; redrawModal(); document.getElementById(dialog[1])?.focus(); return; }
   veUi.error = text;
   const output = document.getElementById('ve-error');
@@ -25,23 +25,6 @@ function veWrite(change, done = () => {}) {
   veCommit(store => { selected = change(store, ref); });
   if (typeof selected === 'string') veUi.selected = selected;
   veUi.error = ''; veUi.more = false; done(); render();
-}
-// Back entries remember the view and which page or component it showed.
-function veBackEntry() { return { view: state.view, scroll: document.getElementById('content').scrollTop, owner: veUi.owner, library: veUi.library }; }
-function veOpenPage(surfaceId) {
-  const surface = design().nodes.find(n => n.id === surfaceId);
-  if (!surface && !veStore().pages.some(p => p.ownerId === surfaceId)) throw Error('That surface no longer exists.');
-  if (state.view === 'page-editor' && veUi.owner === surfaceId) return;
-  if (state.view !== 'page-editor') veUi.back = [...veUi.back, veBackEntry()].slice(-12);
-  Object.assign(veUi, { owner: surfaceId, selected: null, scenario: null, mode: 'design', query: '', left: 'outline', pane: 'canvas', after: false, more: false, error: '' });
-  if (state.view === 'page-editor') render(); else setView('page-editor');
-}
-function veBack() {
-  const back = veUi.back.at(-1);
-  veUi.back = veUi.back.slice(0, -1); veUi.error = '';
-  if (back) Object.assign(veUi, { owner: back.owner ?? veUi.owner, library: back.library ?? veUi.library, selected: null, slotTarget: null, mode: 'design' });
-  setView(back?.view || (veInComponent() ? 'components' : 'pages'));
-  if (back) document.getElementById('content').scrollTop = back.scroll;
 }
 function veStartPage(surfaceId) {
   const surface = design().nodes.find(n => n.id === surfaceId);
@@ -81,7 +64,7 @@ function veOpenSaveLayout(scope) {
   showModal('ve-save-layout');
 }
 const VE_SESSION_ACTIONS = {
-  've-left': value => { veUi.left = VE_LEFT_PANES.some(([id]) => id === value) ? value : 'outline'; },
+  've-left': value => { veUi.left = VE_LEFT_PANES.some(([id]) => id === value) ? value : 'outline'; veUi.pane = 'left'; },
   've-pane': value => { veUi.pane = ['left', 'canvas', 'inspector'].includes(value) ? value : 'canvas'; },
   've-mode': value => { veUi.mode = (veInComponent() ? VE_COMPONENT_MODES : VE_EDITOR_MODES).some(([id]) => id === value) ? value : 'design'; veUi.more = false; },
   've-viewport': value => { veUi.viewport = VE_VIEWPORTS.includes(value) ? value : 'desktop'; },
@@ -92,10 +75,10 @@ const VE_SESSION_ACTIONS = {
   've-more': () => { veUi.more = !veUi.more; },
   've-inspector': value => { veUi.inspector = VE_INSPECTOR_TABS.some(([id]) => id === value) ? value : 'essentials'; },
   've-advanced': () => { veUi.advanced = !veUi.advanced; },
-  ...VE_COMPONENT_SESSION_ACTIONS,
+  ...VE_COMPONENT_SESSION_ACTIONS, ...VE_ENTRY_SESSION_ACTIONS,
 };
 const VE_ACTIONS = {
-  've-open-page': veOpenPage, 'dt-page': veOpenPage, 've-open-component': veOpenComponent, 'dt-component': veOpenComponent, 've-back': veBack, 've-start-page': veStartPage, 've-select': veSelect,
+  've-open-component': veOpenComponent, 'dt-component': veOpenComponent, 've-start-page': veStartPage, 've-select': veSelect,
   've-insert': value => (value.startsWith('external:') ? veOpenExternal(value.slice(9)) : veInsertValue((store, ref) => veInsertNodes(store, value, ref))),
   've-apply-layout': value => veInsertValue(store => visualInstantiateLayout(store, value)),
   've-move': veMove,
@@ -103,12 +86,14 @@ const VE_ACTIONS = {
   've-wrap': () => { const id = veSelectedId(); veWrite((store, ref) => visualWrapNode(store, ref, id).id); },
   've-save-layout': veOpenSaveLayout, 've-save-layout-confirm': veSaveLayout,
   've-health': () => showModal('ve-health'),
-  ...VE_INTERACTION_ACTIONS, ...VE_COMPONENT_ACTIONS,
+  ...VE_INTERACTION_ACTIONS, ...VE_COMPONENT_ACTIONS, ...VE_ENTRY_ACTIONS, ...VE_STRUCTURE_ACTIONS,
 };
 function handleVisualAction(action, value) {
   const session = VE_SESSION_ACTIONS[action], write = VE_ACTIONS[action];
   if (!Object.hasOwn(VE_SESSION_ACTIONS, action) && !Object.hasOwn(VE_ACTIONS, action)) return false;
   try {
+    // A palette command closes the palette first, so focus returns to the control that opened it.
+    if (modalType === 'palette' && document.getElementById('modal').open) closeModal();
     if (session) { session(value); veUi.error = ''; render(); } else write(value);
   } catch (error) { veFail(error); }
   return true;

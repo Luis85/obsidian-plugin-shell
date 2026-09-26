@@ -139,6 +139,8 @@
     "docs/concepts/companion/src/ve-publish.js",
     "docs/concepts/companion/src/ve-component-views.js",
     "docs/concepts/companion/src/ve-page-views.js",
+    "docs/concepts/companion/src/ve-structure.js",
+    "docs/concepts/companion/src/ve-entry.js",
     "docs/concepts/companion/src/ve-actions.js",
     "docs/concepts/companion/src/ve.css",
     "docs/concepts/companion/src/project-transfer.js",

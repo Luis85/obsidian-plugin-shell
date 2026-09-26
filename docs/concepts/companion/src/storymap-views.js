@@ -62,7 +62,7 @@ function smReviewAction(finding, disabled) {
 }
 function smArtifactButton(ref, kind) {
   const target = kind === 'prd' ? design().prds.find(p => p.id === ref.id) : design().nodes.find(n => n.id === ref.id);
-  return target ? button(target.title || target.label, kind === 'prd' ? 'sm-prd' : 'sm-surface', ref.id, 'small ghost') + (kind==='surface'&&dtPageEligible(target)?button('Design page','dt-page',ref.id,'small'):'') : `<span class="sm-missing">${esc(ref.label || ref.id)} — target missing</span>`;
+  return target ? button(target.title || target.label, kind === 'prd' ? 'sm-prd' : 'sm-surface', ref.id, 'small ghost') + (kind==='surface'&&vePageEligible(target)?button('Design page','ve-open-page',ref.id,'small'):'') : `<span class="sm-missing">${esc(ref.label || ref.id)} — target missing</span>`;
 }
 function smItemButtons(map, item) {
   const disabled = smReadOnly(map) ? 'disabled' : '';
@@ -106,5 +106,5 @@ function smPrdSection(prd) {
   return `<section class="sm-prd-section" aria-label="Linked storymaps">${smReturnLink()}<div class="row between wrap"><h3>Storymaps <span class="muted">(${maps.length})</span></h3><div class="row wrap">${button('Create linked storymap', 'sm-new', prd.id, 'small', 'plus')}${button('Link existing', 'sm-prd-links', prd.id, 'small')}</div></div>${maps.map(m => `<div class="sm-linked-map">${button(m.title, 'sm-open-prd', m.id, 'small ghost')}<span class="small muted">${smStateLabel(m.status)} · ${m.stories.length} stories</span></div>`).join('') || '<p class="small muted">Plan the user experience without copying this PRD’s requirements into another backlog.</p>'}</section>`;
 }
 function smSurfaceBacklinks(id) {
-  const uses = smSurfaceUses(id); return `<section class="sm-backlinks">${smReturnLink()}${dtPageEligible(design().nodes.find(n=>n.id===id))?button('Open page editor','dt-page',id,'small primary'): ""}<h3>Used in storymaps (${uses.length})</h3>${uses.map(({ map, item }) => `<p>${button(map.title + ' / ' + item.title, 'sm-backlink', map.id + ':' + item.id, 'small ghost')}</p>`).join('') || '<p class="small muted">No direct storymap links to this surface.</p>'}</section>`;
+  const uses = smSurfaceUses(id); return `<section class="sm-backlinks">${smReturnLink()}${vePageEligible(design().nodes.find(n=>n.id===id))?button('Open page editor','ve-open-page',id,'small primary'): ""}<h3>Used in storymaps (${uses.length})</h3>${uses.map(({ map, item }) => `<p>${button(map.title + ' / ' + item.title, 'sm-backlink', map.id + ':' + item.id, 'small ghost')}</p>`).join('') || '<p class="small muted">No direct storymap links to this surface.</p>'}</section>`;
 }
