@@ -40,6 +40,26 @@ node shell.mjs new <dir> --starter <id> --apply <planHash>
 Generated scaffolds keep PRD acceptance as TODO obligations; creation is not product
 acceptance, native qualification or release readiness.
 
+### From an exported companion project
+
+```sh
+node shell.mjs new <dir> --from <project.companion.json> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--yes | --apply <planHash>] [--install] [--json]
+```
+
+`--from` accepts any complete project JSON exported by the companion, not only a
+built-in starter (the shared contract accepts schemas 1–4; the tests exercise
+schema 4 exports). It has the same placement, preview, plan-hash,
+`--yes`/`--apply`/`--dry-run`, stale-hash and `--install` semantics as `--starter`;
+the two options are mutually exclusive (`SOURCE_CONFLICT`). The path is relative to
+the invoking shell. The file is read as data only: a regular, non-linked file of at
+most 4 MB, parsed as UTF-8 JSON and validated by the shared project contract. The
+identity comes from the JSON; `--id`, `--name` and `--author` override only those
+fields (no provenance note is appended). Refusals: `PROJECT_FILE_NOT_FOUND`,
+`PROJECT_JSON_MALFORMED`, `PROJECT_VERSION_UNSUPPORTED` (exported by a newer
+companion), `PROJECT_INVALID`, `INVALID_PLUGIN_ID`, `INVALID_IDENTITY`, `INPUT_LINK`
+and `INPUT_LIMIT`. Editing the file after review makes its plan hash stale. See
+[Companion handoff](COMPANION-HANDOFF.md).
+
 ## Start from the extracted archive
 
 The build of the framework distribution is an explicit maintainer action:
