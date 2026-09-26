@@ -11,19 +11,21 @@ export function visualVisible(definition, session, nodeId) {
 }
 export function visualTransition(definition, session, nodeId, interactionId) {
   const node = visualLocate(visualRoot(definition), nodeId)?.node, interaction = node?.events?.find(i => i.id === interactionId);
-  visualAssert(node && interaction, 'The interaction no longer exists.');
-  visualAssert(!['loading', 'disabled'].includes(session.state) && visualVisible(definition, session, nodeId), 'Interaction source is not enabled and visible.');
+  const defName = definition.name ?? definition.exportName ?? definition.id;
+  const elemName = node?.name ?? nodeId;
+  visualAssert(node && interaction, `VISUAL_INVALID: ${defName} "${elemName}": The interaction no longer exists.`);
+  visualAssert(!['loading', 'disabled'].includes(session.state) && visualVisible(definition, session, nodeId), `VISUAL_INVALID: ${defName} "${elemName}": Interaction source is not enabled and visible.`);
   if (!interaction.actions.length) throw Error('IMPLEMENTATION_REQUIRED: ' + interaction.label);
   const next = structuredClone(session);
   for (const a of interaction.actions) {
     if (a.kind === 'set-state') next.state = a.state;
     else if (a.kind === 'toggle') next.hidden[a.nodeId] = !next.hidden[a.nodeId];
     else if (a.kind === 'set-value') next.values[a.nodeId] = a.value;
-    else if (a.kind === 'focus') { visualAssert(visualVisible(definition, next, a.nodeId), 'Focus target is hidden in this state.'); next.focused = a.nodeId; }
+    else if (a.kind === 'focus') { const focusElem = a.nodeId; visualAssert(visualVisible(definition, next, focusElem), `VISUAL_INVALID: ${defName} "${focusElem}": Focus target is hidden in this state.`); next.focused = focusElem; }
     else if (a.kind === 'navigate') next.navigation = a.surfaceId;
     else if (a.kind === 'emit') next.emitted.push({ name: a.event, source: nodeId, ...(a.payload.kind === 'value' ? { payload: a.payload.value } : {}) });
     else if (a.kind === 'source') next.requests.push({ sourceId: a.sourceId, operationId: a.operationId, interactionId });
-    else visualAssert(false, 'Unsupported action.');
+    else visualAssert(false, `VISUAL_INVALID: ${defName} "${elemName}": Unsupported action.`);
   }
   return next;
 }

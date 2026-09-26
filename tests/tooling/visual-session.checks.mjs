@@ -36,3 +36,33 @@ test('generated model tests run green and count todos', async () => {
   const run = spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], { encoding: 'utf8', env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
   assert.equal(run.status, 0, run.stdout + run.stderr); assert.match(run.stdout, /# todo 1/); assert.match(run.stdout, /# pass [1-9]/);
 });
+test('emit action without payload', () => {
+  const def = { id: 'vp-emit', name: 'EmitTest', root: [{ id: 'vn-btn', kind: 'element', tag: 'button', name: 'Button', attrs: {}, children: [], events: [{ id: 'vi-1', label: 'click', actions: [{ kind: 'emit', event: 'search', payload: { kind: 'void' } }] }] }] };
+  const next = visualTransition(def, visualSession(), 'vn-btn', 'vi-1');
+  assert.deepEqual(next.emitted, [{ name: 'search', source: 'vn-btn' }]);
+});
+test('emit action with value payload', () => {
+  const def = { id: 'vp-emit', name: 'EmitTest', root: [{ id: 'vn-btn', kind: 'element', tag: 'button', name: 'Button', attrs: {}, children: [], events: [{ id: 'vi-1', label: 'click', actions: [{ kind: 'emit', event: 'search', payload: { kind: 'value', value: 'test' } }] }] }] };
+  const next = visualTransition(def, visualSession(), 'vn-btn', 'vi-1');
+  assert.deepEqual(next.emitted, [{ name: 'search', source: 'vn-btn', payload: 'test' }]);
+});
+test('focus action on visible target sets focused', () => {
+  const def = { id: 'vp-focus', name: 'FocusTest', root: [{ id: 'vn-btn', kind: 'element', tag: 'button', name: 'Button', attrs: {}, children: [], events: [{ id: 'vi-1', label: 'click', actions: [{ kind: 'focus', nodeId: 'vn-input' }] }] }, { id: 'vn-input', kind: 'element', tag: 'input', attrs: {}, children: [], events: [] }] };
+  const next = visualTransition(def, visualSession(), 'vn-btn', 'vi-1');
+  assert.equal(next.focused, 'vn-input');
+});
+test('focus action on hidden target throws', () => {
+  const def = { id: 'vp-focus', name: 'FocusTest', root: [{ id: 'vn-btn', kind: 'element', tag: 'button', name: 'Button', attrs: {}, children: [], events: [{ id: 'vi-1', label: 'click', actions: [{ kind: 'focus', nodeId: 'vn-hidden' }] }] }, { id: 'vn-hidden', kind: 'element', tag: 'input', attrs: {}, children: [], events: [], visibleIn: ['empty'] }] };
+  assert.throws(() => visualTransition(def, visualSession(), 'vn-btn', 'vi-1'), /hidden/);
+});
+test('narrow hiding makes node invisible when width is narrow', () => {
+  const def = { id: 'vp-narrow', name: 'NarrowTest', root: [{ id: 'vn-elem', kind: 'element', tag: 'div', attrs: {}, children: [], events: [], layout: { ui: { narrow: { hidden: true } } } }] };
+  const wideSession = visualSession();
+  assert.equal(visualVisible(def, wideSession, 'vn-elem'), true);
+  const narrowSession = { ...wideSession, width: 'narrow' };
+  assert.equal(visualVisible(def, narrowSession, 'vn-elem'), false);
+});
+test('error message names the element', () => {
+  const link = byName('Settings link');
+  assert.throws(() => visualTransition(page, { ...visualSession(), state: 'loading' }, link.id, link.events[0].id), /Settings link/);
+});
