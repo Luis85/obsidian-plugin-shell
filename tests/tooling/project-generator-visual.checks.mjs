@@ -199,3 +199,61 @@ test('external adapters mount after render and never mount an element removed be
   bind(null); const gone = dom.document.createElement('div'); bind(gone); bind(null); await settle();
   assert.equal(created, 1); assert.deepEqual(log, [['mount', true, 'v'], ['destroy']]);
 });
+
+const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
+const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
+const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
+const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
+test('model exposes validated definitions and explicit Nuxt UI imports', () => {
+  const m = projectModel(self), store = visualDefinitions(m);
+  assert.equal(visualSpecs(m).length, store.pages.length + store.components.length);
+  const imports = visualNuxtImports(store.pages.flatMap(p => p.root));
+  assert.ok(imports.every(i => /^@nuxt\/ui\/components\/[A-Z][A-Za-z]+\.vue$/.test(i.path)));
+  assert.match(visualContractTypes(store.components[0]), /export interface ComponentProps[\s\S]*export interface ComponentEvents[\s\S]*export interface ComponentSlots/);
+});
+test('invalid visual data stops generation with a named reason', () => {
+  const bad = structuredClone(self); bad.design.visualDesigns.pages[0].root.push({ id: 'vn-999999', kind: 'component', ref: { kind: 'nuxt-ui', entryId: 'u-evil' }, props: {}, slots: {}, events: [] });
+  assert.throws(() => visualDefinitions(projectModel(bad)), /u-evil/);
+});
+test('specs list pages then components with the project design system and generated paths', () => {
+  const m = projectModel(self), store = visualDefinitions(m), specs = visualSpecs(m);
+  assert.deepEqual(specs.map(s => s.kind), [...store.pages.map(() => 'page'), ...store.components.map(() => 'component')]);
+  assert.deepEqual(specs.map(s => s.id), [...store.pages, ...store.components].map(d => d.id));
+  assert.ok(self.design.designSystem); for (const spec of specs) assert.deepEqual(spec.designSystem, self.design.designSystem);
+  const [page] = store.pages, [component] = store.components;
+  assert.equal(visualPagePath(m, page), m.sourceRoot + '/presentation/components/details/' + page.id + '.vue');
+  assert.equal(visualComponentPath(m, component), m.sourceRoot + '/presentation/components/library/' + component.libraryId + '.vue');
+  assert.equal(visualComponentName(component), component.exportName);
+  assert.deepEqual(visualLibraryWithoutDefinition(m).map(l => l.id), m.components.filter(l => !store.components.some(c => c.libraryId === l.id)).map(l => l.id));
+  const trimmed = structuredClone(self); Object.assign(trimmed.design.visualDesigns, { pages: [], components: [], revisions: [] });
+  assert.equal(visualLibraryWithoutDefinition(projectModel(trimmed)).length, m.components.length);
+  const absent = structuredClone(self); delete absent.design.visualDesigns;
+  assert.deepEqual(visualDefinitions(projectModel(absent)), { schema: 3, nextId: 1, catalog: { id: 'nuxt-ui', version: 1 }, pages: [], components: [], layouts: [], revisions: [] });
+});
+test('source references are validated against the model operations', () => {
+  const bad = structuredClone(self), store = bad.design.visualDesigns;
+  store.pages[0].root.push({ id: 'vn-' + store.nextId++, kind: 'text', role: 'p', value: { kind: 'source', sourceId: 'missing-source', operationId: 'op', field: '' } });
+  assert.doesNotThrow(() => projectModel(bad));
+  assert.throws(() => visualDefinitions(projectModel(bad)), /VISUAL_INVALID: .*missing-source\/op/);
+});
+test('Nuxt UI imports are unique, sorted and cover slot content', () => {
+  const nodes = [nuxt('vn-1', 'u-card', {}, { slots: { default: [nuxt('vn-2', 'u-button'), { id: 'vn-3', kind: 'element', tag: 'div', attrs: {}, events: [], children: [nuxt('vn-4', 'u-badge'), nuxt('vn-5', 'u-button')] }] } }), nuxt('vn-6', 'u-form-field')];
+  assert.deepEqual(visualNuxtImports(nodes), [
+    { name: 'UBadge', path: '@nuxt/ui/components/Badge.vue' }, { name: 'UButton', path: '@nuxt/ui/components/Button.vue' },
+    { name: 'UCard', path: '@nuxt/ui/components/Card.vue' }, { name: 'UFormField', path: '@nuxt/ui/components/FormField.vue' },
+  ]);
+});
+test('component contracts declare typed props, emits and slots', () => {
+  const source = visualContractTypes({ props: [{ name: 'title', type: 'string', required: true }, { name: 'count', type: 'number', required: false }], slots: [{ name: 'actions', required: false }, { name: 'body', required: true }], emits: [{ name: 'close', payloadType: 'void' }, { name: 'pick', payloadType: 'unknown' }, { name: 'toggle', payloadType: 'boolean' }], variants: [] });
+  assert.equal(source, 'export interface ComponentProps {\n  "title": string;\n  "count"?: number;\n}\nexport interface ComponentEvents {\n  "close": [payload: undefined];\n  "pick": [payload: unknown];\n  "toggle": [payload: boolean];\n}\nexport interface ComponentSlots {\n  "actions"?: () => unknown;\n  "body": () => unknown;\n}\n');
+  assert.equal(visualContractTypes({ props: [], slots: [], emits: [], variants: [] }), 'export interface ComponentProps {\n}\nexport interface ComponentEvents {\n}\nexport interface ComponentSlots {\n}\n');
+});
+test('declared component packages merge as exact pins and framework conflicts name both versions', () => {
+  const withDeps = dependencies => { const doc = structuredClone(self); doc.design.visualDesigns.components[0].dependencies = dependencies; return projectModel(doc); };
+  const framework = { vue: '3.5.43', '@nuxt/ui': '4.11.2', typescript: '6.0.3' };
+  assert.deepEqual(visualPackages(projectModel(self), framework), {});
+  const name = self.design.visualDesigns.components[0].exportName;
+  const merged = visualPackages(withDeps([{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text' }, { package: 'vue', version: '3.5.43', purpose: 'Same pin' }, { package: 'a-lib', version: '1.0.0', purpose: 'Sorting' }]), framework);
+  assert.deepEqual(Object.entries(merged), [['@tiptap/vue-3', '2.11.5'], ['a-lib', '1.0.0'], ['vue', '3.5.43']]);
+  assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
+});
