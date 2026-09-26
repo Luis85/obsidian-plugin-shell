@@ -30,6 +30,10 @@ test('a downloaded companion export previews with its own identity and writes no
   assert.equal(exit, 0, JSON.stringify(result.diagnostics)); assert.equal(result.status, 'planned'); assert.equal(result.data.written, false);
   const source = await json(join(concept, 'companion-project.json'));
   assert.deepEqual(result.data.summary.identity, source.project, 'identity comes from the JSON, not the folder name');
+  // The export's own ID is kept, but its submission problem is reported with a usable --id.
+  assert.ok(result.data.summary.warnings.some(text => /"plugin-companion" will fail check submission: id must not contain "plugin" \(validate-manifest\)\. Pass --id companion/.test(text)), JSON.stringify(result.data.summary.warnings));
+  const reserved = machine(['nested/plugin-companion', '--from', 'plugin-companion.companion.json', '--id', 'my-plugin'], cwd);
+  assert.equal(reserved.exit, 1); assert.equal(reserved.result.diagnostics[0].code, 'INVALID_PLUGIN_ID'); assert.match(reserved.result.diagnostics[0].message, /--id my-project/);
   assert.equal(result.data.summary.source.file, 'plugin-companion.companion.json'); assert.equal(result.data.summary.source.schemaVersion, 4);
   assert.match(result.data.summary.source.sha256, /^[a-f0-9]{64}$/); assert.equal(result.data.summary.starter, undefined);
   assert.ok(result.data.summary.acceptanceTodos > 0 && result.data.changes.every(change => change.status === 'create'));

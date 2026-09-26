@@ -113,7 +113,7 @@ export async function executeOperation(input: Request, context: Context): Promis
     }
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
     if (command === 'check') return await checkOperation(request, context);
-    if (command === 'check submission') return await submissionCheck(context);
+    if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {

@@ -21,9 +21,16 @@ node shell.mjs new <dir> --starter <id> --apply <planHash>
   It must be absent or empty and outside the framework checkout. Its nearest existing
   ancestor becomes the generator's `--vault` and the remaining path its `--target`;
   missing folders are created only by the reviewed file plan.
-- Plugin IDs default to a slug of the folder name, use lowercase letters, digits and
-  single hyphens, start with a letter and must not contain `obsidian`. Names default
-  to the title-cased ID.
+- A `<dir>` inside an Obsidian vault (the folder or an ancestor has `.obsidian/`) is
+  refused with `TARGET_INSIDE_VAULT`, so a personal vault never becomes a project
+  folder. Pass `--inside-vault` only for a disposable test vault you own.
+- Plugin IDs use lowercase letters, digits and single hyphens, start with a letter and
+  must not contain `obsidian` or `plugin` (the same rule `check submission` applies,
+  from `scripts/framework/plugin-id.ts`). An explicit `--id my-plugin` is refused with
+  a suggestion. The default ID is the folder name without the words `obsidian` and
+  `plugin`; a remainder shorter than three characters is combined with the starter's
+  ID (`../my-plugin` with `quick-capture` gives `my-quick-capture`, with `blank` it
+  gives `my-project`). Names default to the title-cased ID.
 - Without `--yes`/`--apply` the command previews: starter, identity, directory, file
   count, plan hash, warnings and conflicts. A TTY then asks for confirmation; non-TTY
   and `--json` runs exit 0 without writing. Missing required input (`<dir>`,
@@ -59,8 +66,12 @@ most 4 MB, parsed as UTF-8 JSON and validated by the shared project contract. Th
 identity comes from the JSON; `--id`, `--name` and `--author` override only those
 fields (no provenance note is appended). Refusals: `PROJECT_FILE_NOT_FOUND`,
 `PROJECT_JSON_MALFORMED`, `PROJECT_VERSION_UNSUPPORTED` (exported by a newer
-companion), `PROJECT_INVALID`, `INVALID_PLUGIN_ID`, `INVALID_IDENTITY`, `INPUT_LINK`
-and `INPUT_LIMIT`. Editing the file after review makes its plan hash stale. See
+companion), `PROJECT_INVALID`, `INVALID_PLUGIN_ID` (also for an exported ID containing
+`obsidian`), `INVALID_IDENTITY`, `INPUT_LINK`
+and `INPUT_LIMIT`. An exported ID containing `plugin` (such as the companion's own
+`plugin-companion`) is kept but produces a preview warning that `check submission`
+will fail, with a suggested `--id`; an explicit `--id` must follow the creation rule.
+Editing the file after review makes its plan hash stale. See
 [Companion handoff](COMPANION-HANDOFF.md).
 
 ## Golden path, help and the check gate
@@ -105,17 +116,31 @@ native qualification stay in `verify` and CI.
 | Scope | Detected by | Steps |
 |---|---|---|
 | Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src --max-warnings 0`, `vitest run` |
-| Generated project | `.companion/generation.json` and `tsconfig.project.json` | `vue-tsc --noEmit --project tsconfig.project.json`, `eslint src --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
+| Generated project | `.companion/generation.json` and `tsconfig.project.json` | `vue-tsc --noEmit --project tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
+
+A generated project's product roots are the folders named in `tsconfig.project.json`
+that are not test roots (`tests/suites.json`), for example `<codebaseFolder>/generated`
+for a custom codebase folder. ESLint, the dev watchers and the agent hooks all derive
+them from `scripts/shared/project-roots.mjs`. After a passing run in a generated
+project, the summary points to `npm run verify:project`; in the shell it points to
+`verify`.
 
 `check --fast` runs the typecheck plus `vitest related --run --passWithNoTests` over
-source files changed against `HEAD` (`git diff --name-only --relative HEAD` plus
-untracked, non-ignored files; deleted files, non-code files and `node_modules` are
-excluded). With no changed source files the test step is skipped. When git or a HEAD
-commit is unavailable, or more than 200 files changed, it runs the full test suite
-and says so in `data.changes`.
+code files changed against `HEAD` (`git diff --name-status --no-renames -z --relative
+HEAD` plus untracked, non-ignored files from `git ls-files -z`, so non-ASCII paths
+arrive verbatim; `node_modules` is excluded). With no changed code files the test step
+is skipped. It runs the full test suite, and says so in `data.changes.reason`, when git
+or a HEAD commit is unavailable, more than 200 files changed, or a change cannot be
+traced by `vitest related`: a deleted code file or any deleted file in a code root, a
+non-code file inside a code root (JSON/Markdown fixtures, snapshots), or build/test
+configuration (`package.json`, `package-lock.json`, `tsconfig*.json`,
+`vite*.config.*`, `vitest*.config.*`, `tests/suites.json`). Documentation outside the
+code roots does not select tests.
 
-`check submission` is a read-only local mirror of documented Obsidian community
-review rules. Each rule reports pass, fail or warn with a remediation and cites its
+`check submission` is a local mirror of documented Obsidian community review rules.
+It writes nothing, but it runs the project's ESLint configuration and plugins, so its
+effect is `process` (trusted project code) and `--dry-run` lists it without running
+it. Each rule reports pass, fail or warn with a remediation and cites its
 source in code and JSON:
 
 - manifest fields, types and allowed keys, id format (lowercase letters and hyphens;

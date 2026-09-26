@@ -10,7 +10,7 @@ the reviewed starters. The target must be a new or empty folder outside this che
 ```sh
 npm run new -- --list                                   # starters: id, difficulty, summary
 npm run new -- ../my-plugin --starter quick-capture     # preview only; nothing is written
-npm run new -- ../my-plugin --starter quick-capture --id my-plugin --name "My Plugin" --yes
+npm run new -- ../my-plugin --starter quick-capture --id my-capture --name "My Capture" --yes
 npm run new -- ../my-plugin --starter blank --yes --install   # also runs npm ci + verify:project
 npm run new -- ../my-plugin --from my-plugin.companion.json   # any project JSON exported by the companion
 ```

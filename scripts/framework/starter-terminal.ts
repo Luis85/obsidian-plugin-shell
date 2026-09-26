@@ -41,7 +41,7 @@ export function starterText(value: Result): string | null {
   if (value.status === 'cancelled') return 'new: cancelled; nothing was written.\n';
   const data = value.data as Listing & Review;
   if (Array.isArray(data.starters)) return 'Starters (catalog SHA-256 verified):\n' + data.starters.map(entry =>
-    `  ${entry.id.padEnd(22)} ${entry.difficulty.padEnd(10)} ${entry.category.padEnd(12)} ${entry.title}: ${entry.description}\n`).join('') + '\nCreate one: node shell.mjs new ../my-plugin --starter <id> [--id my-plugin] [--name "My Plugin"] --yes\n';
+    `  ${entry.id.padEnd(22)} ${entry.difficulty.padEnd(10)} ${entry.category.padEnd(12)} ${entry.title}: ${entry.description}\n`).join('') + '\nCreate one: node shell.mjs new ../my-capture --starter <id> [--id my-capture] [--name "My Capture"] --yes\n';
   const s = data.summary, lines = [`new: ${value.status}`,
     s.starter ? `  Starter    ${s.starter.id} (${s.starter.title} ${s.starter.version}, sha256 ${s.starter.sha256.slice(0, 12)})`
       : `  From       ${s.source?.file} (companion project schema ${s.source?.schemaVersion}, sha256 ${s.source?.sha256.slice(0, 12)})`,

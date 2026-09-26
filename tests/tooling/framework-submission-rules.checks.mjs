@@ -86,3 +86,20 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   assert.match(human.stdout, /^ {2}\[ok\] {3}license +LICENSE is present\.$/m);
   assert.match(human.stdout, /Local mirror only/);
 });
+test('check submission declares that it runs trusted project code (the ESLint configuration) and honours --dry-run', async t => {
+  const help = JSON.parse(spawnSync(process.execPath, [join(root, 'shell.mjs'), 'help', 'check', 'submission', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  const [entry] = help.data.commands;
+  assert.equal(entry.id, 'check submission'); assert.equal(entry.effect, 'process'); assert.equal(entry.execution, 'trusted-project-code');
+  assert.match(entry.summary, /runs the project ESLint configuration \(trusted project code\) and writes nothing/);
+  const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-submission-dry-')));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  // An ESLint entry that would leave a trace if it ran: a dry run must not load it.
+  await mkdir(join(dir, 'node_modules/eslint/bin'), { recursive: true });
+  await writeFile(join(dir, 'node_modules/eslint/bin/eslint.js'), `require('node:fs').writeFileSync(require('node:path').join(${JSON.stringify(dir)}, 'eslint-ran'), 'yes'); console.log('[]');`);
+  const planned = JSON.parse(spawnSync(process.execPath, [join(root, 'shell.mjs'), 'check', 'submission', '--root', dir, '--dry-run', '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  assert.equal(planned.status, 'planned'); assert.equal(planned.data.execution, 'not-run');
+  assert.deepEqual(await readdir(dir), ['node_modules']);
+  const ran = JSON.parse(spawnSync(process.execPath, [join(root, 'shell.mjs'), 'check', 'submission', '--root', dir, '--json'], { encoding: 'utf8', timeout: 60000 }).stdout);
+  assert.equal(ran.data.execution, 'trusted-project-code'); assert.equal(status(ran.data.rules, 'eslint-obsidianmd'), 'pass');
+  assert.ok((await readdir(dir)).includes('eslint-ran'), 'the real run executes the project ESLint entry');
+});

@@ -13,10 +13,10 @@ import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exportedProject } from './project-from.ts';
+import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string } } }
 interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
-const idPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 /** A kit or configured consumer carries its verified template under .framework/template. */
 async function templateRoot(context: Context): Promise<string> {
   if (!await exists(join(context.frameworkRoot, '.framework/kit.json'))) return context.frameworkRoot;
@@ -32,15 +32,10 @@ export async function starterListing(context: Context): Promise<Result> {
   return result('new', { integrity: 'catalog-sha256-verified', starters: catalog.starters.map(entry => ({ id: entry.id, title: entry.name,
     category: entry.category, difficulty: entry.level, description: entry.summary, version: entry.version, sha256: entry.sha256 })) });
 }
-/** Obsidian community IDs are lowercase and must not contain "obsidian"; the project contract validates the rest. */
-export function pluginIdProblem(id: string): string | null {
-  if (id.length > 60 || !idPattern.test(id)) return 'Use lowercase letters, digits and single hyphens, starting with a letter (at most 60 characters).';
-  if (id.includes('obsidian')) return 'Obsidian plugin IDs must not contain "obsidian".';
-  return null;
-}
-export function derivedId(directory: string, fallback: string): string {
-  const slug = basename(directory).toLowerCase().replaceAll('obsidian', '-').replace(/[^a-z0-9]+/g, '-').replace(/^[^a-z]+/, '').slice(0, 60).replace(/-+$/, '');
-  return slug && pluginIdProblem(slug) === null ? slug : fallback;
+/** The shared ID rule (plugin-id.ts) that `check submission` also applies; the project contract validates the rest. */
+export { pluginIdProblem };
+export function derivedId(directory: string, starterId: string): string {
+  return derivedPluginId(basename(directory), starterId);
 }
 export function derivedName(id: string): string {
   return id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -53,7 +48,15 @@ export function invocationDirectory(path: string, environment: NodeJS.ProcessEnv
 interface Placement { directory: string; vault: string; target: string }
 /** Map <dir> onto the generator's vault/target contract without creating anything:
  * the nearest existing ancestor is the vault and the file planner creates the rest. */
-async function placement(context: Context, dir: string | undefined): Promise<Placement> {
+/** The nearest existing folder (the start or an ancestor) that holds a `.obsidian` directory. */
+export async function enclosingVault(start: string): Promise<string | null> {
+  for (let current = resolve(start); ; current = dirname(current)) {
+    const marker = join(current, '.obsidian');
+    if (await exists(marker) && (await lstat(marker)).isDirectory()) return current;
+    if (dirname(current) === current) return null;
+  }
+}
+async function placement(context: Context, dir: string | undefined, insideVault = false): Promise<Placement> {
   requireThat(dir, 'TARGET_REQUIRED', 'Supply the new project directory: new <dir> --starter <id> (see new --list).');
   const requested = resolve(context.root, dir), missing = [basename(requested)];
   let ancestor = dirname(requested);
@@ -61,6 +64,8 @@ async function placement(context: Context, dir: string | undefined): Promise<Pla
   const vault = await realpath(ancestor), directory = join(vault, ...missing), framework = await realpath(context.frameworkRoot);
   const within = relative(framework, directory);
   requireThat(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'TARGET_INSIDE_FRAMEWORK', `Create the project outside the framework checkout ${framework}, for example ../${missing.at(-1)}.`);
+  const vaultRoot = await enclosingVault(directory);
+  if (vaultRoot && !insideVault) throw new OperationError('TARGET_INSIDE_VAULT', `${directory} is inside the Obsidian vault ${vaultRoot} (it has a .obsidian folder). A plugin project must not live in a personal vault: create it elsewhere, for example next to this checkout.`, 'Choose a directory outside any vault, or pass --inside-vault if this vault is a disposable test vault you own.');
   const target = missing.join('/');
   requireThat(companionRelativeFolder(target), 'TARGET_INVALID', 'Use folder names of letters, digits, spaces, dots, hyphens or underscores, starting with a letter or digit.');
   if (await exists(directory)) {
@@ -74,7 +79,7 @@ async function placement(context: Context, dir: string | undefined): Promise<Pla
 export async function starterProjectPlan(request: Request, context: Context) {
   const from = request.options.from !== undefined;
   requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
-  const place = await placement(context, request.args[0]);
+  const place = await placement(context, request.args[0], request.options['inside-vault'] === true);
   const created = from ? await fromExport(request, context) : await fromStarter(request, context, place.directory);
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
@@ -83,14 +88,17 @@ export async function starterProjectPlan(request: Request, context: Context) {
     const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template });
     const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
-      acceptanceTodos: planned.summary.acceptanceTodos, warnings: planned.summary.warnings };
+      acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings] };
     return { ...planned, summary };
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }
 /** Any exported companion project; its own identity unless --id/--name/--author override it. */
 async function fromExport(request: Request, context: Context) {
-  const exported = await exportedProject(request, context, pluginIdProblem);
-  return { template: await templateRoot(context), document: exported.document, origin: { source: exported.source } };
+  // An explicit --id follows the creation rule; the export's own ID only has to be a valid manifest ID.
+  const explicit = stringOption(request.options, 'id') !== undefined;
+  const exported = await exportedProject(request, context, explicit ? pluginIdProblem : exportedIdProblem);
+  const warning = explicit ? null : exportedIdWarning(exported.document.project.id);
+  return { template: await templateRoot(context), document: exported.document, origin: { source: exported.source }, warnings: warning ? [warning] : [] };
 }
 async function fromStarter(request: Request, context: Context, directory: string) {
   const { template, catalog } = await starterCatalog(context);
@@ -103,7 +111,7 @@ async function fromStarter(request: Request, context: Context, directory: string
   const author = stringOption(request.options, 'author');
   // Identity only, exactly like the concept's starter configuration: never global label rewrites.
   const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }) });
-  return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } } };
+  return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } }, warnings: [] as string[] };
 }
 function nextSteps(directory: string): string[] {
   return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];

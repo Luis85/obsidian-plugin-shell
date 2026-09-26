@@ -6,7 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { derivedId, derivedName, invocationDirectory, pluginIdProblem } from '../../scripts/framework/starter-project.ts';
+import { derivedId, derivedName, enclosingVault, invocationDirectory, pluginIdProblem } from '../../scripts/framework/starter-project.ts';
+import { pluginIdWordProblem } from '../../scripts/framework/plugin-id.ts';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-project-')));
@@ -104,6 +105,29 @@ test('refuses unsafe targets and invalid identities without writing', async t =>
   assert.deepEqual((await readdir(cwd)).sort(), ['occupied']); assert.deepEqual(await readdir(join(cwd, 'occupied')), ['notes.md']);
   assert.ok(!existsSync(join(root, 'new-project-inside-checkout')));
 });
+test('a directory named like my-plugin derives a submittable ID; an explicit reserved ID is refused with a suggestion', async t => {
+  const cwd = await scratch(t);
+  const preview = machine(['my-plugin', '--starter', 'quick-capture'], cwd);
+  assert.equal(preview.exit, 0); assert.equal(preview.result.data.summary.identity.id, 'my-quick-capture');
+  const refused = machine(['my-plugin', '--starter', 'quick-capture', '--id', 'my-plugin'], cwd);
+  assert.equal(refused.exit, 1); assert.equal(refused.result.diagnostics[0].code, 'INVALID_PLUGIN_ID');
+  assert.match(refused.result.diagnostics[0].message, /must not end with "plugin"\. For example: --id my-project/);
+  assert.deepEqual(await readdir(cwd), []);
+});
+test('a target inside an Obsidian vault is refused unless --inside-vault is explicit', async t => {
+  const cwd = await scratch(t);
+  await mkdir(join(cwd, 'Personal/.obsidian'), { recursive: true }); await writeFile(join(cwd, 'Personal/Daily.md'), 'keep');
+  for (const target of [join('Personal', 'projects', 'capture'), 'Personal']) {
+    const refused = machine([target, '--starter', 'blank', '--yes'], cwd);
+    assert.equal(refused.exit, 1, target); assert.equal(refused.result.diagnostics[0].code, 'TARGET_INSIDE_VAULT');
+    assert.match(refused.result.diagnostics[0].message, /inside the Obsidian vault .*Personal/); assert.match(refused.result.diagnostics[0].next, /--inside-vault/);
+  }
+  assert.deepEqual((await readdir(join(cwd, 'Personal'))).sort(), ['.obsidian', 'Daily.md']);
+  assert.equal(await enclosingVault(join(cwd, 'elsewhere')), null);
+  const allowed = machine([join('Personal', 'projects', 'capture'), '--starter', 'blank', '--inside-vault'], cwd);
+  assert.equal(allowed.exit, 0, JSON.stringify(allowed.result.diagnostics)); assert.equal(allowed.result.status, 'planned');
+  assert.deepEqual((await readdir(join(cwd, 'Personal'))).sort(), ['.obsidian', 'Daily.md'], 'a preview writes nothing');
+});
 test('identity defaults derive from the directory and follow Obsidian ID rules', () => {
   assert.equal(derivedId('/work/My Capture Tool', 'fallback'), 'my-capture-tool');
   assert.equal(derivedId('/work/obsidian-habit-tracker', 'fallback'), 'habit-tracker');
@@ -111,7 +135,18 @@ test('identity defaults derive from the directory and follow Obsidian ID rules',
   assert.equal(derivedId('/work/123', 'fallback'), 'fallback');
   assert.equal(derivedName('habit-tracker'), 'Habit Tracker');
   assert.equal(pluginIdProblem('habit-tracker'), null);
-  for (const id of ['Habit', 'habit--tracker', '-habit', 'my-obsidian-helper', 'a'.repeat(61)]) assert.ok(pluginIdProblem(id), id);
+  for (const id of ['Habit', 'habit--tracker', '-habit', 'my-obsidian-helper', 'a'.repeat(61), 'my-plugin', 'plugin-tools']) assert.ok(pluginIdProblem(id), id);
+  // The ID rule is the one `check submission` applies: a created project never fails it on its ID.
+  assert.equal(derivedId('/work/my-plugin', 'quick-capture'), 'my-quick-capture');
+  assert.equal(derivedId('/work/my-plugin', 'my-plugin'), 'my-project', 'the blank starter\'s own ID is cleaned too');
+  assert.equal(derivedId('/work/obsidian-tasks-plugin', 'fallback'), 'tasks');
+  assert.equal(derivedId('/work/plugin', 'quick-capture'), 'quick-capture');
+  for (const name of ['my-plugin', 'obsidian-plugin', 'MyPlugin', 'x', 'pluginator', '2024 plugin notes']) {
+    const id = derivedId(join('/work', name), 'my-plugin');
+    assert.equal(pluginIdProblem(id), null, `${name} -> ${id}`); assert.equal(pluginIdWordProblem(id), null, `${name} -> ${id}`);
+  }
+  assert.match(pluginIdProblem('my-plugin'), /id must not end with "plugin"\. For example: --id my-project$/);
+  assert.match(pluginIdProblem('plugin-tools'), /id must not contain "plugin" \(validate-manifest\)\. For example: --id tools$/);
   assert.equal(invocationDirectory('x', { npm_lifecycle_event: 'new', INIT_CWD: '/caller' }, '/framework'), resolve('/caller', 'x'));
   assert.equal(invocationDirectory('x', { INIT_CWD: '/caller' }, '/framework'), resolve('/framework', 'x'));
   assert.equal(invocationDirectory('/abs/x', { npm_lifecycle_event: 'new', INIT_CWD: '/caller' }, '/framework'), resolve('/abs/x'));

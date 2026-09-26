@@ -1,11 +1,14 @@
 /**
- * `check submission`: a read-only local mirror of documented Obsidian community review rules.
+ * `check submission`: a local mirror of documented Obsidian community review rules. It writes nothing,
+ * but its ESLint rule loads the project's eslint.config.mjs and plugins: trusted project code.
  * Every rule cites its source. The Community directory scan also runs policy, vulnerability and
  * malware checks that are not reproduced here, so a pass is not a review outcome.
  */
 import { join } from 'node:path';
 import { exists, readBounded } from './files.ts';
 import { runNode } from './process.ts';
+import { pluginIdWordProblem } from './plugin-id.ts';
+import { lintRoots } from '../shared/project-roots.mjs';
 import { OperationError, result, type Context, type Result } from './contracts.ts';
 export type RuleStatus = 'pass' | 'fail' | 'warn';
 export interface RuleResult { id: string; category: 'manifest' | 'repository' | 'lint' | 'build'; status: RuleStatus; message: string; remediation?: string; source: string }
@@ -60,7 +63,7 @@ export function manifestRules(text: string | null): RuleResult[] {
     rule('manifest-required-fields', 'manifest', sources.manifest, missing.length ? `Missing or mistyped: ${missing.join(', ')}.` : null, 'All required fields are present with the right types.', 'Add id, name, version, minAppVersion, description, author (strings) and isDesktopOnly (boolean).'),
     rule('manifest-allowed-fields', 'manifest', sources.validateManifest, extra.length ? `Fields not allowed by the review rule: ${extra.join(', ')}.` : null, 'Only documented manifest fields are used.', 'Remove fields other than the required ones, authorUrl and fundingUrl.'),
     rule('id-format', 'manifest', sources.manifest, idFormat, 'id uses lowercase letters and hyphens.', 'Use an id of lowercase letters and single hyphens, e.g. "quick-capture".', /\d/.test(id) ? `id "${id}" contains digits; the Manifest reference lists only lowercase letters and hyphens.` : null),
-    rule('id-forbidden-words', 'manifest', sources.manifest, id.includes('obsidian') ? 'id must not contain "obsidian".' : id.endsWith('plugin') ? 'id must not end with "plugin".' : forbidden(id).length ? `id must not contain "${forbidden(id).join('" or "')}" (validate-manifest).` : null, 'id avoids "obsidian" and "plugin".', 'Choose an id without "obsidian" or "plugin"; it must also be unique across published plugins.'),
+    rule('id-forbidden-words', 'manifest', sources.manifest, pluginIdWordProblem(id), 'id avoids "obsidian" and "plugin".', 'Choose an id without "obsidian" or "plugin"; it must also be unique across published plugins.'),
     rule('name-forbidden-words', 'manifest', sources.validateManifest, forbidden(m.name).length ? `name must not contain "${forbidden(m.name).join('" or "')}".` : null, 'name avoids "obsidian" and "plugin".', 'Rename the plugin without the words "Obsidian" or "Plugin".'),
     rule('version-semver', 'manifest', sources.manifest, typeof m.version === 'string' && semver.test(m.version) ? null : `version "${String(m.version ?? '')}" is not x.y.z.`, 'version uses x.y.z.', 'Use Semantic Versioning in the format x.y.z, e.g. 1.0.0.'),
     rule('min-app-version', 'manifest', sources.manifest, typeof m.minAppVersion === 'string' && m.minAppVersion ? null : 'minAppVersion is missing.', 'minAppVersion is set.', 'Set minAppVersion to the lowest Obsidian version you test against, e.g. 1.5.0.', typeof m.minAppVersion === 'string' && m.minAppVersion && !semver.test(m.minAppVersion) ? `minAppVersion "${m.minAppVersion}" is not x.y.z.` : null),
@@ -98,7 +101,7 @@ export function lintRule(report: LintFile[] | null, root: string, problem?: stri
   return rule('eslint-obsidianmd', 'lint', sources.eslint, total ? `${total} ESLint problems (${obsidian} from obsidianmd rules): ${top.join('; ')}.` : null, `ESLint (with eslint-plugin-obsidianmd) reports no problems in ${report.length} files.`, remediation);
 }
 async function lint(context: Context): Promise<RuleResult> {
-  const args = ['src', '--format', 'json', '--max-warnings', '0'];
+  const args = [...lintRoots(context.root), '--format', 'json', '--max-warnings', '0'];
   let stdout: string;
   try { stdout = (await runNode({ ...context, progress: undefined }, 'node_modules/eslint/bin/eslint.js', args)).stdout; }
   catch (error) {
@@ -124,14 +127,15 @@ async function buildRule(root: string, manifestText: string | null): Promise<Rul
   return [rule('build-artifacts', 'build', sources.submit, missing.length ? `Missing release assets: ${missing.join(', ')}.` : identity, 'dist/main.js and dist/manifest.json exist and match manifest.json.', 'Build the release assets: node shell.mjs build'),
     rule('build-styles', 'build', sources.submit, null, styles ? 'dist/styles.css exists.' : '', 'Build again if the plugin ships styles: node shell.mjs build', styles ? null : 'dist/styles.css is absent (optional unless the plugin has styles).')];
 }
-export async function submissionCheck(context: Context): Promise<Result> {
+export async function submissionCheck(context: Context, dryRun = false): Promise<Result> {
+  if (dryRun) return result('check submission', { execution: 'not-run', effects: 'runs the project ESLint configuration (trusted project code); writes nothing' }, 'planned');
   const root = context.root, manifestText = await text(join(root, 'manifest.json'));
   const rules = [...manifestRules(manifestText), versionsRule(manifestText, await text(join(root, 'versions.json'))),
     rule('license', 'repository', sources.submit, (await Promise.all(['LICENSE', 'LICENSE.md', 'LICENSE.txt'].map(name => exists(join(root, name))))).some(Boolean) ? null : 'No LICENSE file in the project root.', 'LICENSE is present.', 'Add a LICENSE file (see https://choosealicense.com/).'),
     rule('readme', 'repository', sources.submit, await exists(join(root, 'README.md')) ? null : 'No README.md in the project root.', 'README.md is present.', 'Add a README.md that describes the plugin and how to use it.'),
     await lint(context), ...await buildRule(root, manifestText)];
   const failed = rules.filter(item => item.status === 'fail');
-  const outcome = result('check submission', { scope: 'local mirror of documented review rules; the Community directory also runs policy, vulnerability and malware scans not reproduced here', readOnly: true,
+  const outcome = result('check submission', { scope: 'local mirror of documented review rules; the Community directory also runs policy, vulnerability and malware scans not reproduced here', readOnly: true, execution: 'trusted-project-code',
     rules, summary: { pass: rules.filter(item => item.status === 'pass').length, warn: rules.filter(item => item.status === 'warn').length, fail: failed.length } }, failed.length ? 'blocked' : 'ok');
   if (failed.length) outcome.diagnostics.push({ code: 'SUBMISSION_RULES_FAILED', message: `${failed.length} submission rule${failed.length === 1 ? '' : 's'} failed: ${failed.map(item => item.id).join(', ')}.`, next: failed[0]!.remediation! });
   return outcome;
