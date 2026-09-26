@@ -11,6 +11,7 @@
     "tests/tooling/*.test.mjs",
     "tests/verification/*.test.mjs",
     "tests/harness-styles/*.test.mjs",
-    "tests/browser-specimen/specimen.checks.mjs"
+    "tests/browser-specimen/specimen.checks.mjs",
+    "tests/concepts/*.browser.mjs"
   ]
 }

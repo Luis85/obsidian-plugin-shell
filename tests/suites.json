@@ -129,7 +129,7 @@
     },
     {
       "name": "companion:browser",
-      "purpose": "Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright + Chromium).",
+      "purpose": "Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright suites plus the Node Playwright suites listed under companion:visual-browser, Chromium).",
       "runner": {
         "type": "command",
         "commands": [
@@ -143,9 +143,29 @@
         "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)",
         "file": "tests/concepts/companion-$1.browser.py"
       },
-      "prerequisites": ["python-playwright", "concept-chromium"],
+      "prerequisites": ["python-playwright", "concept-chromium", "chromium"],
       "verify": "opt-in",
       "npmScript": "test:companion:browser",
+      "workflows": ["companion-concept-verification"],
+      "optional": true
+    },
+    {
+      "name": "companion:visual-browser",
+      "purpose": "Visual page and component editors end to end in the assembled concept (Node Playwright + Chromium), run through the concept browser runner so the evidence is bound to the exact artifact.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          ["{python}", "scripts/concepts/run-browser-checks.py", "--only", "visual-editors"]
+        ]
+      },
+      "include": ["tests/concepts/*.browser.mjs"],
+      "inventory": {
+        "source": "scripts/concepts/run-browser-checks.py",
+        "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json', 'node'\\)",
+        "file": "tests/concepts/companion-$1.browser.mjs"
+      },
+      "prerequisites": ["python3", "chromium"],
+      "verify": "opt-in",
       "workflows": ["companion-concept-verification"],
       "optional": true
     },

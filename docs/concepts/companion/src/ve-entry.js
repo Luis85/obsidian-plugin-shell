@@ -62,6 +62,8 @@ function vePaletteRows() {
   ];
   if (page) rows.push(['ve-save-layout', 'page', 'Save page as layout', 'Reuse this page structure as a saved layout', 'layers'], ['ve-left', 'layouts', 'Apply layout…', 'Choose a built-in or saved layout', 'grid']);
   rows.push(['ve-mode', 'preview', page ? 'Preview page' : 'Preview component', 'Read-only preview in the chosen scenario or state', 'search']);
+  if (design().history.length) rows.push(['ve-undo', '', 'Undo design change', 'Step back in the shared design history', 'refresh']);
+  if (design().future.length) rows.push(['ve-redo', '', 'Redo design change', 'Reapply the change that was undone', 'refresh']);
   if (selected) rows.push(['ve-duplicate', '', 'Duplicate selected', 'Copy the selected element right after it', 'copy']);
   if (selected && page) rows.push(['ve-bind', '', 'Bind data…', 'Bind the selected element to a data source', 'layers'], ['ve-interaction', '', 'Add interaction…', 'Declare what the selected element does', 'spark']);
   return rows;
@@ -83,13 +85,15 @@ function veOutlineStep(definition, id, key, query = '') {
 // Keyboard → [action, value]. `where` is 'outline' or 'canvas' when focus is on an outline item or a canvas element,
 // `from` the element that item shows (arrows start there, so the first press moves even before anything is selected).
 function veKeyCommand(event, where, from = '') {
-  const key = event.key.length === 1 ? event.key.toLowerCase() : event.key, mod = event.ctrlKey || event.metaKey;
+  // Letter shortcuts follow the typed character; a non-Latin layout falls back to the physical key (KeyZ/KeyY/KeyD).
+  const letter = /^[a-z]$/i.test(event.key) ? event.key.toLowerCase() : /^Key[A-Z]$/.test(event.code || '') ? event.code.slice(3).toLowerCase() : '';
+  const key = letter || (event.key.length === 1 ? event.key.toLowerCase() : event.key), mod = event.ctrlKey || event.metaKey;
   if (mod && !event.altKey && key === 'z') return [event.shiftKey ? 've-redo' : 've-undo', ''];
   if (mod && !event.altKey && !event.shiftKey && key === 'y') return ['ve-redo', ''];
   if (mod && !event.altKey && !event.shiftKey && key === 'd') return veUi.selected ? ['ve-duplicate', ''] : null;
   if (mod || event.shiftKey) return null;
   if (event.altKey) return veUi.selected && ['ArrowUp', 'ArrowDown'].includes(key) ? ['ve-move', key === 'ArrowUp' ? 'earlier' : 'later'] : null;
-  if (key === 'Delete') return veUi.selected ? ['ve-delete', ''] : null;
+  if (key === 'Delete' || key === 'Backspace') return veUi.selected ? ['ve-delete', ''] : null;
   if (key === 'Escape') return veUi.selected ? ['ve-clear-selection', ''] : null;
   if (where && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) return ['ve-step', [where, key, from].join(':')];
   return null;
@@ -109,14 +113,16 @@ function veStep(value) {
   if (next && next !== veUi.selected) veSelect(next);
   veFocusNode(next ?? veUi.selected, where);
 }
+// Undo/Redo travel the one design history; like every other write they are refused in Preview.
 function veHistory(direction) {
+  veEditable();
   if (!veTravel(direction)) notify('Nothing to ' + direction + ' in the design history.');
 }
 // One listener for both editors, scoped to the editor root. Text fields keep their own keys (native text undo).
 function veEditorKeydown(event) {
   const target = event.target;
   if (!(target instanceof Element) || !veEditorOpen() || event.isComposing || document.querySelector('dialog[open]')) return;
-  if (!target.closest('.ve-page-editor') || target.closest('input,textarea,select,[contenteditable=true]')) return;
+  if (!target.closest('.ve-page-editor') || target.closest('input,textarea,select') || target.isContentEditable) return;
   const item = target.closest('#ve-outline [role="treeitem"]'), node = item ? null : target.closest('.ve-canvas-area [data-ve-node]');
   const where = item ? 'outline' : node ? 'canvas' : null, command = veKeyCommand(event, where, item?.dataset.value || node?.dataset.veNode || '');
   if (!command) return;

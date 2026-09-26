@@ -46,7 +46,7 @@ function veDeleteDialog() {
   const plan = veDeletePlan(form), lines = plan.refusal ? [] : veDeleteLines(form, plan);
   const body = `<p id="ve-delete-error" class="error" role="alert" tabindex="-1">${esc(form.error)}</p>`
     + (plan.refusal ? `<p class="ve-refusal">${icon('alert')}<span>${esc('Cannot delete: ' + plan.refusal)}</span></p>` : `<ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Undo restores it.</p>`);
-  return dialogBody('Delete ' + plan.name + '?', body, button('Cancel', 'close', '', 'ghost') + button('Delete', 've-delete-confirm', '', 'primary', 'trash', plan.refusal ? 'disabled' : ''));
+  return dialogBody('Delete ' + plan.name + '?', body, button('Cancel', 'close', '', 'ghost') + button('Delete', 've-delete-confirm', '', 'danger', 'trash', plan.refusal ? 'disabled' : 'autofocus'));
 }
 // After an element delete the selection moves to its previous sibling, else the next one, else its parent.
 function veDeleteNeighbor(form) {
@@ -77,6 +77,20 @@ function veReparentSlots(node, store) {
   if (node.ref.kind === 'nuxt-ui') { const slot = veContainerSlot(node); return slot ? [slot] : []; }
   return (veNodeContract(store, node)?.slots ?? []).map(s => s.name);
 }
+// "root", "<nodeId>" or "<nodeId>|<slot>" → the visualReparent target.
+function veReparentTarget(value) { const [parentId, slot] = value === 'root' ? [null, null] : value.split('|'); return { parentId, ...(slot ? { slot } : {}) }; }
+// Dry run with full validation, so a container the move would push past the depth or composition limits is never
+// offered. The copy holds only the moved definition (cloned) next to the components and revisions it may reference;
+// other pages and layouts cannot change the outcome, and leaving them out keeps the picker fast on large projects.
+function veReparentFits(store, definition, nodeId, value) {
+  const component = Object.hasOwn(definition, 'template'), ref = { kind: component ? 'component' : 'page', id: definition.id };
+  try {
+    const own = structuredClone(visualDefinition(store, ref));
+    const copy = { ...store, layouts: [], pages: component ? [] : [own], components: component ? store.components.map(c => (c.id === own.id ? own : c)) : store.components };
+    visualReparent(copy, ref, nodeId, veReparentTarget(value)); validateVisualDesigns(copy, veContext(design()));
+    return true;
+  } catch { return false; }
+}
 function veReparentCandidates(definition, nodeId, store = veStore()) {
   const root = visualRoot(definition), hit = visualLocate(root, nodeId);
   if (!hit) return [];
@@ -89,7 +103,7 @@ function veReparentCandidates(definition, nodeId, store = veStore()) {
       if (list !== hit.list) out.push({ value: slot === null ? node.id : node.id + '|' + slot, label: veNodeLabel(node) + (slot ? ' › ' + slot : ''), kind: veKindLabel(node), depth: at.depth });
     }
   });
-  return out;
+  return out.filter(c => veReparentFits(store, definition, nodeId, c.value));
 }
 function veOpenReparent() {
   veEditable();
@@ -113,8 +127,7 @@ function veReparentConfirm(value) {
   veEditable();
   const choice = definition ? veReparentCandidates(definition, form.nodeId).find(c => c.value === value) : null;
   if (!choice) throw Error('That container is no longer available. Choose another one.');
-  const [parentId, slot] = value === 'root' ? [null, null] : value.split('|');
-  veCommit(store => { visualReparent(store, veEditorRef(), form.nodeId, { parentId, ...(slot ? { slot } : {}) }); }, form.token);
+  veCommit(store => { visualReparent(store, veEditorRef(), form.nodeId, veReparentTarget(value)); }, form.token);
   veUi.reparentForm = null; closeModal();
   Object.assign(veUi, { selected: form.nodeId, more: false, after: false, error: '' }); render();
   notify('Moved into ' + choice.label + '. Undo is available.');

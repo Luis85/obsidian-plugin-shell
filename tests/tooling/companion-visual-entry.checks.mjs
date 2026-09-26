@@ -288,3 +288,47 @@ test('[VISUAL-ENTRY] carry-forward: external elements map free adapter event nam
   ctx.veFieldEdit(el('ve-child-event', 'add', 'custom'), true);
   assert.equal(ctx.ui().error, 'Only external library elements declare adapter events.');
 });
+
+test('[VISUAL-ENTRY] carry-forward: Backspace, physical-key fallback, contenteditable, Undo/Redo controls and Preview refusal', () => {
+  const ctx = load();
+  ctx.handleVisualAction('ve-select', 'vn-21');
+  press(ctx, 'Backspace');
+  assert.equal(ctx.modal().type, 've-delete', 'Backspace opens the delete confirmation like Delete');
+  assert.match(ctx.veDeleteDialog(), /class="btn danger" data-action="ve-delete-confirm"[^>]*autofocus/, 'the destructive confirm is styled as danger');
+  ctx.closeModal(); ctx.handleVisualAction('ve-select', 'vn-21');
+  press(ctx, 'в', { ctrlKey: true, code: 'KeyD' });
+  const copy = ctx.ui().selected;
+  assert.notEqual(copy, 'vn-21', 'Ctrl+D on a non-Latin layout duplicates through event.code');
+  press(ctx, 'я', { ctrlKey: true, code: 'KeyZ' });
+  assert.deepEqual(children(ctx), ['vn-21', 'vn-22', 'vn-23', 'vn-25'], 'Ctrl+Z through event.code undoes');
+  assert.match(ctx.veHistoryButtons(), /data-action="ve-redo" data-value="" aria-label="Redo design change">/, 'Redo is enabled after an undo');
+  press(ctx, 'н', { ctrlKey: true, code: 'KeyY' });
+  assert.ok(children(ctx).includes(copy), 'Ctrl+Y through event.code redoes');
+  const editable = ctx.field({ dataset: {}, isContentEditable: true, getAttribute: () => null, closest: sel => (sel === '.ve-page-editor' ? {} : null) });
+  const typed = { key: 'Backspace', target: editable, altKey: false, ctrlKey: false, metaKey: false, shiftKey: false, repeat: false, isComposing: false, prevented: false, preventDefault() { this.prevented = true; }, stopPropagation() {} };
+  ctx.fire('keydown', typed);
+  assert.equal(typed.prevented, false, 'a contenteditable target keeps its own keys'); assert.equal(ctx.modal().type, '');
+  assert.equal(press(ctx, 'z', { ctrlKey: true, isComposing: true }).prevented, false, 'IME composition is left alone');
+  ctx.ui().mode = 'preview';
+  const before = snapshot(ctx);
+  press(ctx, 'z', { ctrlKey: true });
+  assert.match(ctx.ui().error, /^Preview is read-only/); assert.equal(snapshot(ctx), before, 'undo is refused in Preview');
+  assert.equal((ctx.veHistoryButtons().match(/ disabled/g) || []).length, 2, 'both history controls are disabled in Preview');
+  ctx.ui().mode = 'design'; ctx.host.design.history = []; ctx.host.design.future = [];
+  assert.equal((ctx.veHistoryButtons().match(/ disabled/g) || []).length, 2, 'an empty history disables both controls');
+  assert.ok(!plain(ctx.vePaletteRows().map(r => r[0])).includes('ve-undo'), 'the palette offers Undo only with history');
+});
+
+test('[VISUAL-ENTRY] carry-forward: Move to… dry-runs each container and hides those past the nesting limit', () => {
+  const ctx = load();
+  // Levels 1..12 nest as vn-31..vn-42; the level-12 div sits at the depth limit.
+  let deepest = ctx.visualElement('vn-42', 'div', { name: 'Level 12' });
+  for (let level = 11; level >= 1; level--) deepest = ctx.visualElement('vn-' + (30 + level), 'div', { name: 'Level ' + level, children: [deepest] });
+  page(ctx).root.push(deepest); ctx.host.design.visualDesigns.nextId = 50;
+  ctx.validateVisualDesigns(ctx.veStore(), ctx.veContext(ctx.design()));
+  const values = id => plain(ctx.veReparentCandidates(page(ctx), id).map(c => c.value));
+  assert.ok(values('vn-26').includes('vn-41') && !values('vn-26').includes('vn-42'), 'a leaf fits at level 11, not inside the level-12 div');
+  assert.ok(values('vn-20').includes('vn-39') && !values('vn-20').includes('vn-40'), 'a three-level section fits at level 9, not at level 10');
+  ctx.handleVisualAction('ve-select', 'vn-26'); ctx.handleVisualAction('ve-reparent');
+  assert.ok(!ctx.veReparentDialog().includes('data-value="vn-42"'), 'the picker never offers a container the move would overflow');
+});

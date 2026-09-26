@@ -20577,7 +20577,7 @@ function veInlineSelect(label, field, options, value) {
 function veComponentToolbar(component) {
   const variants = [['', 'Default'], ...component.variants.map(v => [v.id, v.name])];
   const selectors = veUi.mode === 'compare' ? '' : veInlineSelect('Variant', 've-variant', variants, veUi.variant) + veInlineSelect('State', 've-state', VISUAL_STATES.map(s => [s, s]), veUi.state);
-  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_COMPONENT_MODES, veUi.mode)}${selectors}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
+  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_COMPONENT_MODES, veUi.mode)}${selectors}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${veHistoryButtons()}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
 }
 function veVariantValues(component, variantId) { return component.variants.find(v => v.id === variantId)?.values || {}; }
 // Compare: every variant (Default first) in every preview state, as read-only previews at the chosen width.
@@ -20681,10 +20681,15 @@ function veReadiness(page, findings = veReviewFindings(veStore(), { kind: 'page'
 function veSegment(label, action, options, current) {
   return `<div class="ve-segment" role="group" aria-label="${esc(label)}">${options.map(([id, name]) => `<button type="button" data-action="${action}" data-value="${id}" aria-pressed="${current === id}">${esc(name)}</button>`).join('')}</div>`;
 }
+// Undo/Redo for both editors' canvas toolbars; disabled in Preview and when that side of the history is empty.
+function veHistoryButtons(d = design()) {
+  const locked = veUi.mode === 'preview', tool = (label, action, empty) => button(label, action, '', 'small ghost', '', `aria-label="${label} design change"${locked || empty ? ' disabled' : ''}`);
+  return `<div class="ve-segment" role="group" aria-label="Design history">${tool('Undo', 've-undo', !d.history.length)}${tool('Redo', 've-redo', !d.future.length)}</div>`;
+}
 function veCanvasToolbar(page) {
   const options = [['', 'Default state'], ...page.scenarios.map(s => [s.id, s.name + (s.width === 'narrow' ? ' · narrow' : '')])];
   const scenario = `<label class="ve-inline-field"><span>Scenario</span><select data-field="ve-scenario" aria-label="Preview scenario">${options.map(([id, name]) => `<option value="${esc(id)}"${(veUi.scenario || '') === id ? ' selected' : ''}>${esc(name)}</option>`).join('')}</select></label>`;
-  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
+  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${veHistoryButtons()}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
 }
 function veSelectionBar(page) {
   const node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
@@ -20780,7 +20785,7 @@ function veDeleteDialog() {
   const plan = veDeletePlan(form), lines = plan.refusal ? [] : veDeleteLines(form, plan);
   const body = `<p id="ve-delete-error" class="error" role="alert" tabindex="-1">${esc(form.error)}</p>`
     + (plan.refusal ? `<p class="ve-refusal">${icon('alert')}<span>${esc('Cannot delete: ' + plan.refusal)}</span></p>` : `<ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Undo restores it.</p>`);
-  return dialogBody('Delete ' + plan.name + '?', body, button('Cancel', 'close', '', 'ghost') + button('Delete', 've-delete-confirm', '', 'primary', 'trash', plan.refusal ? 'disabled' : ''));
+  return dialogBody('Delete ' + plan.name + '?', body, button('Cancel', 'close', '', 'ghost') + button('Delete', 've-delete-confirm', '', 'danger', 'trash', plan.refusal ? 'disabled' : 'autofocus'));
 }
 // After an element delete the selection moves to its previous sibling, else the next one, else its parent.
 function veDeleteNeighbor(form) {
@@ -20811,6 +20816,20 @@ function veReparentSlots(node, store) {
   if (node.ref.kind === 'nuxt-ui') { const slot = veContainerSlot(node); return slot ? [slot] : []; }
   return (veNodeContract(store, node)?.slots ?? []).map(s => s.name);
 }
+// "root", "<nodeId>" or "<nodeId>|<slot>" → the visualReparent target.
+function veReparentTarget(value) { const [parentId, slot] = value === 'root' ? [null, null] : value.split('|'); return { parentId, ...(slot ? { slot } : {}) }; }
+// Dry run with full validation, so a container the move would push past the depth or composition limits is never
+// offered. The copy holds only the moved definition (cloned) next to the components and revisions it may reference;
+// other pages and layouts cannot change the outcome, and leaving them out keeps the picker fast on large projects.
+function veReparentFits(store, definition, nodeId, value) {
+  const component = Object.hasOwn(definition, 'template'), ref = { kind: component ? 'component' : 'page', id: definition.id };
+  try {
+    const own = structuredClone(visualDefinition(store, ref));
+    const copy = { ...store, layouts: [], pages: component ? [] : [own], components: component ? store.components.map(c => (c.id === own.id ? own : c)) : store.components };
+    visualReparent(copy, ref, nodeId, veReparentTarget(value)); validateVisualDesigns(copy, veContext(design()));
+    return true;
+  } catch { return false; }
+}
 function veReparentCandidates(definition, nodeId, store = veStore()) {
   const root = visualRoot(definition), hit = visualLocate(root, nodeId);
   if (!hit) return [];
@@ -20823,7 +20842,7 @@ function veReparentCandidates(definition, nodeId, store = veStore()) {
       if (list !== hit.list) out.push({ value: slot === null ? node.id : node.id + '|' + slot, label: veNodeLabel(node) + (slot ? ' › ' + slot : ''), kind: veKindLabel(node), depth: at.depth });
     }
   });
-  return out;
+  return out.filter(c => veReparentFits(store, definition, nodeId, c.value));
 }
 function veOpenReparent() {
   veEditable();
@@ -20847,8 +20866,7 @@ function veReparentConfirm(value) {
   veEditable();
   const choice = definition ? veReparentCandidates(definition, form.nodeId).find(c => c.value === value) : null;
   if (!choice) throw Error('That container is no longer available. Choose another one.');
-  const [parentId, slot] = value === 'root' ? [null, null] : value.split('|');
-  veCommit(store => { visualReparent(store, veEditorRef(), form.nodeId, { parentId, ...(slot ? { slot } : {}) }); }, form.token);
+  veCommit(store => { visualReparent(store, veEditorRef(), form.nodeId, veReparentTarget(value)); }, form.token);
   veUi.reparentForm = null; closeModal();
   Object.assign(veUi, { selected: form.nodeId, more: false, after: false, error: '' }); render();
   notify('Moved into ' + choice.label + '. Undo is available.');
@@ -20921,6 +20939,8 @@ function vePaletteRows() {
   ];
   if (page) rows.push(['ve-save-layout', 'page', 'Save page as layout', 'Reuse this page structure as a saved layout', 'layers'], ['ve-left', 'layouts', 'Apply layout…', 'Choose a built-in or saved layout', 'grid']);
   rows.push(['ve-mode', 'preview', page ? 'Preview page' : 'Preview component', 'Read-only preview in the chosen scenario or state', 'search']);
+  if (design().history.length) rows.push(['ve-undo', '', 'Undo design change', 'Step back in the shared design history', 'refresh']);
+  if (design().future.length) rows.push(['ve-redo', '', 'Redo design change', 'Reapply the change that was undone', 'refresh']);
   if (selected) rows.push(['ve-duplicate', '', 'Duplicate selected', 'Copy the selected element right after it', 'copy']);
   if (selected && page) rows.push(['ve-bind', '', 'Bind data…', 'Bind the selected element to a data source', 'layers'], ['ve-interaction', '', 'Add interaction…', 'Declare what the selected element does', 'spark']);
   return rows;
@@ -20942,13 +20962,15 @@ function veOutlineStep(definition, id, key, query = '') {
 // Keyboard → [action, value]. `where` is 'outline' or 'canvas' when focus is on an outline item or a canvas element,
 // `from` the element that item shows (arrows start there, so the first press moves even before anything is selected).
 function veKeyCommand(event, where, from = '') {
-  const key = event.key.length === 1 ? event.key.toLowerCase() : event.key, mod = event.ctrlKey || event.metaKey;
+  // Letter shortcuts follow the typed character; a non-Latin layout falls back to the physical key (KeyZ/KeyY/KeyD).
+  const letter = /^[a-z]$/i.test(event.key) ? event.key.toLowerCase() : /^Key[A-Z]$/.test(event.code || '') ? event.code.slice(3).toLowerCase() : '';
+  const key = letter || (event.key.length === 1 ? event.key.toLowerCase() : event.key), mod = event.ctrlKey || event.metaKey;
   if (mod && !event.altKey && key === 'z') return [event.shiftKey ? 've-redo' : 've-undo', ''];
   if (mod && !event.altKey && !event.shiftKey && key === 'y') return ['ve-redo', ''];
   if (mod && !event.altKey && !event.shiftKey && key === 'd') return veUi.selected ? ['ve-duplicate', ''] : null;
   if (mod || event.shiftKey) return null;
   if (event.altKey) return veUi.selected && ['ArrowUp', 'ArrowDown'].includes(key) ? ['ve-move', key === 'ArrowUp' ? 'earlier' : 'later'] : null;
-  if (key === 'Delete') return veUi.selected ? ['ve-delete', ''] : null;
+  if (key === 'Delete' || key === 'Backspace') return veUi.selected ? ['ve-delete', ''] : null;
   if (key === 'Escape') return veUi.selected ? ['ve-clear-selection', ''] : null;
   if (where && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) return ['ve-step', [where, key, from].join(':')];
   return null;
@@ -20968,14 +20990,16 @@ function veStep(value) {
   if (next && next !== veUi.selected) veSelect(next);
   veFocusNode(next ?? veUi.selected, where);
 }
+// Undo/Redo travel the one design history; like every other write they are refused in Preview.
 function veHistory(direction) {
+  veEditable();
   if (!veTravel(direction)) notify('Nothing to ' + direction + ' in the design history.');
 }
 // One listener for both editors, scoped to the editor root. Text fields keep their own keys (native text undo).
 function veEditorKeydown(event) {
   const target = event.target;
   if (!(target instanceof Element) || !veEditorOpen() || event.isComposing || document.querySelector('dialog[open]')) return;
-  if (!target.closest('.ve-page-editor') || target.closest('input,textarea,select,[contenteditable=true]')) return;
+  if (!target.closest('.ve-page-editor') || target.closest('input,textarea,select') || target.isContentEditable) return;
   const item = target.closest('#ve-outline [role="treeitem"]'), node = item ? null : target.closest('.ve-canvas-area [data-ve-node]');
   const where = item ? 'outline' : node ? 'canvas' : null, command = veKeyCommand(event, where, item?.dataset.value || node?.dataset.veNode || '');
   if (!command) return;

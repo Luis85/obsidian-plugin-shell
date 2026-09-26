@@ -24,7 +24,7 @@ const stubs = 'const ICONS = {}; const state = { settings: { theme: "light" }, v
 const readers = 'function ui() { return veUi; } function catalogData() { return { recipes: visualRecipes, catalog: visualCatalog, layouts: visualBuiltinLayouts }; }';
 const surfaces = [{ id: 'surface-a', kind: 'page', label: 'Customers <list>', slug: 'customers' }, { id: 'surface-b', kind: 'modal', label: 'Edit customer', slug: 'edit' }, { id: 'group-1', kind: 'group', label: 'Admin', slug: 'admin' }];
 function load(store) {
-  const host = { design: { nodes: surfaces, library: [{ id: 'lib-card', name: 'Stat card', description: 'KPI card' }, { id: 'lib-new', name: 'Not designed', description: '' }], dataSources: { sources: [] }, designSystem: undefined, visualDesigns: null } };
+  const host = { design: { nodes: surfaces, library: [{ id: 'lib-card', name: 'Stat card', description: 'KPI card' }, { id: 'lib-new', name: 'Not designed', description: '' }], dataSources: { sources: [] }, designSystem: undefined, visualDesigns: null, history: [], future: [] } };
   const ctx = vm.createContext({ host, structuredClone });
   vm.runInContext(shared + '\n' + helpers + '\n' + stubs + '\n' + concept + '\n' + readers, ctx, { filename: 'concept-visual-page-editor.js' });
   if (store) { const copy = ctx.realm(store); ctx.validateVisualDesigns(copy, ctx.veContext(host.design)); host.design.visualDesigns = copy; }
@@ -158,6 +158,7 @@ test('[VISUAL-PAGE-EDITOR] pages list and editor: surfaces only, opening an unst
   const editor = ctx.vePageEditorView();
   for (const marker of ['role="tree"', 'data-action="ve-insert-after"', 'data-action="ve-duplicate"', 'data-action="ve-wrap"', 'data-action="ve-bind"', 'data-action="ve-interaction"', 'data-action="ve-more"', 'data-field="ve-scenario"', 'data-action="ve-viewport" data-value="mobile"', 'data-action="ve-mode" data-value="review"', 'Generator ready'])
     assert.ok(editor.includes(marker), marker);
+  assert.match(editor, /data-action="ve-undo" data-value="" aria-label="Undo design change" disabled>[^]*data-action="ve-redo"[^>]*disabled>/, 'history controls sit in the canvas toolbar, disabled without history');
   assert.match(editor, /class="ve-crumbs"[^]*Page[^]*Main[^]*Summary card[^]*<strong>Open &lt;button&gt;<\/strong>/, 'breadcrumb walks page › ancestors › selection');
   assert.equal(ctx.ui().ref.id, 'vp-6');
   ctx.host.design.nodes = surfaces.filter(n => n.id !== 'surface-a');

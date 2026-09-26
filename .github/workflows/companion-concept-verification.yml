@@ -8,6 +8,8 @@ on:
       - 'tests/tooling/companion-project.checks.mjs'
       - 'tests/tooling/companion-details.checks.mjs'
       - 'tests/tooling/companion-composition.checks.mjs'
+      - 'tests/tooling/companion-visual-*.checks.mjs'
+      - 'tests/tooling/visual-*.checks.mjs'
       - 'tests/fixtures/companion/**'
       - 'package.json'
       - 'tests/concepts/**'
@@ -73,7 +75,9 @@ jobs:
       - name: Exercise real test-data generators, file safety and loopback adapters
         run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
-        run: node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-composition.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+        run: |
+          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-composition.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+          npm run test:visual
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |
@@ -93,11 +97,21 @@ jobs:
           if-no-files-found: error
   browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install the exact locked Node tooling for the Node Playwright suites without lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund --ignore-scripts
       - name: Provision isolated pinned browser test tooling
         shell: bash
         run: |
@@ -107,6 +121,8 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/companion-browser-env"
           "$RUNNER_TEMP/companion-browser-env/bin/python" -m pip install playwright==1.57.0
           "$RUNNER_TEMP/companion-browser-env/bin/python" -m playwright install chromium
+          # The Node suites drive the Chromium pinned by the locked @playwright/test into the same scratch path.
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
           "$RUNNER_TEMP/companion-browser-env/bin/python" - <<'PYTHON'
           import os
           from playwright.sync_api import sync_playwright

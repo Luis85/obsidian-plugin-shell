@@ -82,7 +82,7 @@ function veInlineSelect(label, field, options, value) {
 function veComponentToolbar(component) {
   const variants = [['', 'Default'], ...component.variants.map(v => [v.id, v.name])];
   const selectors = veUi.mode === 'compare' ? '' : veInlineSelect('Variant', 've-variant', variants, veUi.variant) + veInlineSelect('State', 've-state', VISUAL_STATES.map(s => [s, s]), veUi.state);
-  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_COMPONENT_MODES, veUi.mode)}${selectors}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
+  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_COMPONENT_MODES, veUi.mode)}${selectors}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${veHistoryButtons()}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
 }
 function veVariantValues(component, variantId) { return component.variants.find(v => v.id === variantId)?.values || {}; }
 // Compare: every variant (Default first) in every preview state, as read-only previews at the chosen width.

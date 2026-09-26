@@ -40,10 +40,15 @@ function veReadiness(page, findings = veReviewFindings(veStore(), { kind: 'page'
 function veSegment(label, action, options, current) {
   return `<div class="ve-segment" role="group" aria-label="${esc(label)}">${options.map(([id, name]) => `<button type="button" data-action="${action}" data-value="${id}" aria-pressed="${current === id}">${esc(name)}</button>`).join('')}</div>`;
 }
+// Undo/Redo for both editors' canvas toolbars; disabled in Preview and when that side of the history is empty.
+function veHistoryButtons(d = design()) {
+  const locked = veUi.mode === 'preview', tool = (label, action, empty) => button(label, action, '', 'small ghost', '', `aria-label="${label} design change"${locked || empty ? ' disabled' : ''}`);
+  return `<div class="ve-segment" role="group" aria-label="Design history">${tool('Undo', 've-undo', !d.history.length)}${tool('Redo', 've-redo', !d.future.length)}</div>`;
+}
 function veCanvasToolbar(page) {
   const options = [['', 'Default state'], ...page.scenarios.map(s => [s.id, s.name + (s.width === 'narrow' ? ' · narrow' : '')])];
   const scenario = `<label class="ve-inline-field"><span>Scenario</span><select data-field="ve-scenario" aria-label="Preview scenario">${options.map(([id, name]) => `<option value="${esc(id)}"${(veUi.scenario || '') === id ? ' selected' : ''}>${esc(name)}</option>`).join('')}</select></label>`;
-  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
+  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${veHistoryButtons()}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
 }
 function veSelectionBar(page) {
   const node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
