@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { boundedOutput, npmCommand, parseHookInput, projectRootFor } from '../../scripts/agent/hook-io.mjs';
+import { MAX_INPUT, boundedOutput, inputProblem, npmCommand, parseHookInput, projectRootFor } from '../../scripts/agent/hook-io.mjs';
 import { editedTarget, postEditOutcome, relatedArguments, watchedRoots } from '../../scripts/agent/post-edit-tests.mjs';
 import { stopOutcome } from '../../scripts/agent/stop-check.mjs';
 
@@ -26,7 +26,12 @@ const run = (script, input, env = {}) => spawnSync(process.execPath, [join(hooks
 
 test('[AGENT-HOOKS-01] hook input parsing, output bounding and npm resolution are defensive and deterministic', () => {
   assert.deepEqual(parseHookInput('{"tool_name":"Edit"}'), { tool_name: 'Edit' });
-  for (const bad of ['', 'not json', '[1]', 'null', 'x'.repeat(1_000_001)]) assert.deepEqual(parseHookInput(bad), {});
+  assert.deepEqual(parseHookInput(''), {}); assert.equal(inputProblem(parseHookInput('')), null);
+  for (const [bad, problem] of [['not json', /not valid JSON/], ['[1]', /not a JSON object/], ['null', /not a JSON object/], ['x'.repeat(MAX_INPUT + 1), /exceeds 20 MB/]])
+    assert.match(inputProblem(parseHookInput(bad)), problem);
+  // Edits of multi-megabyte files are ordinary PostToolUse events, not unusable input.
+  const large = JSON.stringify({ tool_name: 'Write', tool_input: { file_path: 'src/a.ts', content: 'x'.repeat(5_000_000) } });
+  assert.equal(parseHookInput(large).tool_input.file_path, 'src/a.ts');
   const long = boundedOutput(`\u001b[31mred\u001b[0m\r\n\n\n\n${'y'.repeat(5000)}`, 100);
   assert.ok(long.startsWith('…(truncated)\n')); assert.equal(long.length, 100 + '…(truncated)\n'.length);
   assert.equal(boundedOutput('\u001b[1mbold\u001b[22m\r\n\n\n\nend'), 'bold\n\nend');
@@ -78,4 +83,22 @@ test('[AGENT-HOOKS-05] the Stop hook blocks once on a failing fast check, then r
   assert.deepEqual(stopOutcome({}, { status: null, error: Object.assign(new Error('x'), { code: 'ETIMEDOUT' }) }).code, 2);
   await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: {} }));
   assert.equal(run('stop-check.mjs', input, { FAKE_CHECK_EXIT: '1' }).status, 0);
+});
+const raw = (script, text, env = {}) => spawnSync(process.execPath, [join(hooks, script)], { input: text, cwd: env.CLAUDE_PROJECT_DIR, encoding: 'utf8', timeout: 60000, maxBuffer: 64_000_000, env: { ...process.env, ...env } });
+test('[AGENT-HOOKS-06] unusable hook input is reported: post-edit says tests did not run, Stop runs the check without blocking', async t => {
+  const root = await project(t);
+  const oversized = JSON.stringify({ hook_event_name: 'PostToolUse', cwd: root, tool_input: { file_path: join(root, 'src/core/a.ts'), content: 'x'.repeat(MAX_INPUT) } });
+  for (const text of [oversized, '{"hook_event_name": "PostToolUse", truncated']) {
+    const post = raw('post-edit-tests.mjs', text, { FAKE_VITEST_EXIT: '1' });
+    assert.equal(post.status, 0, post.stderr); assert.match(post.stderr, /Related tests were NOT run: hook input (exceeds 20 MB|is not valid JSON)/);
+    const notice = JSON.parse(post.stdout);
+    assert.match(notice.systemMessage, /NOT run/); assert.equal(notice.hookSpecificOutput.hookEventName, 'PostToolUse'); assert.match(notice.hookSpecificOutput.additionalContext, /npm run check -- --fast/);
+  }
+  const env = { CLAUDE_PROJECT_DIR: root };
+  const failing = raw('stop-check.mjs', 'x'.repeat(MAX_INPUT + 10), { ...env, FAKE_CHECK_EXIT: '1' });
+  assert.equal(failing.status, 0, 'never blocks: stop_hook_active may have been lost');
+  const message = JSON.parse(failing.stdout).systemMessage;
+  assert.match(message, /Stop hook input could not be read \(hook input exceeds 20 MB\)/); assert.match(message, /npm run check -- --fast failed \(exit 1\)/);
+  const passing = raw('stop-check.mjs', 'not json', env);
+  assert.equal(passing.status, 0); assert.match(JSON.parse(passing.stdout).systemMessage, /could not be read \(hook input is not valid JSON\).*It passed\./);
 });

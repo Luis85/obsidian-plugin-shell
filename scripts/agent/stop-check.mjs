@@ -5,16 +5,19 @@
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { boundedOutput, npmCommand, packageScripts, projectRootFor, readHookInput } from './hook-io.mjs';
+import { boundedOutput, inputProblem, npmCommand, packageScripts, projectRootFor, readHookInput } from './hook-io.mjs';
 
 const TIMEOUT_MS = 300_000;
 const CHECK_ARGS = ['run', '-s', 'check', '--', '--fast'];
 export function stopOutcome(input, run) {
-  if (!run.error && !run.signal && run.status === 0) return { code: 0, stdout: '', stderr: '' };
+  // Unreadable input may have lost stop_hook_active: never block (no loop), but still run and report.
+  const problem = inputProblem(input);
+  const notice = problem ? `Stop hook input could not be read (${problem}); the fast check ran without blocking. ` : '';
+  if (!run.error && !run.signal && run.status === 0) return { code: 0, stdout: notice ? JSON.stringify({ systemMessage: `${notice}It passed.` }) : '', stderr: '' };
   const detail = run.error || run.signal ? `did not finish (${run.error?.code ?? run.error?.message ?? run.signal})` : `failed (exit ${run.status})`;
   const summary = `npm run check -- --fast ${detail}:\n${boundedOutput(`${run.stdout ?? ''}\n${run.stderr ?? ''}`)}`;
-  if (input?.stop_hook_active === true) {
-    return { code: 0, stdout: JSON.stringify({ systemMessage: `The fast check still fails after one retry; stopping anyway.\n${summary}` }), stderr: '' };
+  if (input?.stop_hook_active === true || problem) {
+    return { code: 0, stdout: JSON.stringify({ systemMessage: `${notice || 'The fast check still fails after one retry; stopping anyway.\n'}${summary}` }), stderr: '' };
   }
   return { code: 2, stdout: '', stderr: `Do not finish yet. ${summary}\nFix the failures (or explain precisely why they are unrelated to this change), then re-run npm run check -- --fast.` };
 }

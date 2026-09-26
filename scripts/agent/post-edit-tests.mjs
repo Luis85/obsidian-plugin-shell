@@ -3,23 +3,17 @@
  * failure summary, which Claude Code shows to the agent (the edit itself already happened).
  * Exit 1 = the hook could not run (missing dependencies, timeout); a non-blocking notice. */
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { boundedOutput, projectRootFor, readHookInput } from './hook-io.mjs';
+import { boundedOutput, inputProblem, projectRootFor, readHookInput } from './hook-io.mjs';
+import { codeRoots } from '../shared/project-roots.mjs';
 
 const code = /\.(?:[cm]?[jt]s|vue)$/;
 const TIMEOUT_MS = 120_000;
 /** src/ and tests/ plus the product roots named in tsconfig.project.json (custom generated folders). */
 export function watchedRoots(root) {
-  const roots = new Set(['src', 'tests']);
-  try {
-    for (const pattern of JSON.parse(readFileSync(join(root, 'tsconfig.project.json'), 'utf8')).include ?? []) {
-      const base = String(pattern).split('/**')[0];
-      if (base && !base.includes('*')) roots.add(base);
-    }
-  } catch { /* the defaults remain */ }
-  return [...roots];
+  return codeRoots(root);
 }
 /** The project-relative path to test for this hook event, or null when the hook has nothing to do. */
 export function editedTarget(input) {
@@ -42,7 +36,14 @@ export function postEditOutcome(target, run) {
   if (run.status === 0) return { code: 0, message: '' };
   return { code: 2, message: `Tests related to ${target.file} fail after this edit (vitest related, exit ${run.status}). Fix the code or the test before continuing:\n${boundedOutput(`${run.stdout ?? ''}\n${run.stderr ?? ''}`)}` };
 }
+/** Unusable hook input is reported, never mistaken for "no related tests" (exit 0 keeps the edit flowing). */
+function unreadableInputOutcome(problem) {
+  const message = `Related tests were NOT run: ${problem}. Run npm run check -- --fast to cover this edit.`;
+  return { code: 0, message, stdout: JSON.stringify({ systemMessage: message, hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: message } }) };
+}
 async function runHook(input) {
+  const problem = inputProblem(input);
+  if (problem) return unreadableInputOutcome(problem);
   const target = editedTarget(input);
   if (!target) return { code: 0, message: '' };
   if (!existsSync(join(target.root, 'node_modules/vitest/vitest.mjs'))) return { code: 1, message: 'Vitest is not installed in this project; run npm ci.' };
@@ -52,6 +53,7 @@ async function runHook(input) {
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const outcome = await runHook(await readHookInput());
+  if (outcome.stdout) process.stdout.write(`${outcome.stdout}\n`);
   if (outcome.message) process.stderr.write(`${outcome.message}\n`);
   process.exitCode = outcome.code;
 }

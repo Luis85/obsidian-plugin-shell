@@ -3,18 +3,28 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-const MAX_INPUT = 1_000_000;
-/** Parse the hook's stdin JSON; a malformed or oversized document is an empty event, not a crash. */
-export function parseHookInput(text) {
-  if (typeof text !== 'string' || !text.trim() || text.length > MAX_INPUT) return {};
-  try { const value = JSON.parse(text); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; }
-  catch { return {}; }
+/** PostToolUse events carry the edited file's content, so large edits need a generous bound. */
+export const MAX_INPUT = 20 * 1024 * 1024;
+/** Set on an event whose stdin could not be used; hooks must say so instead of silently doing nothing. */
+const INPUT_PROBLEM = Symbol('hook input problem');
+export function inputProblem(input) { return input?.[INPUT_PROBLEM] ?? null; }
+const unusable = reason => ({ [INPUT_PROBLEM]: reason });
+/** Parse the hook's stdin JSON. No input is an empty event; an oversized or malformed document is an
+ * event marked with INPUT_PROBLEM (never a crash, never mistaken for "nothing to do"). */
+export function parseHookInput(text, length = typeof text === 'string' ? text.length : 0) {
+  if (length > MAX_INPUT) return unusable(`hook input exceeds ${MAX_INPUT / 1024 / 1024} MB`);
+  if (typeof text !== 'string' || !text.trim()) return {};
+  try {
+    const value = JSON.parse(text);
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : unusable('hook input is not a JSON object');
+  } catch { return unusable('hook input is not valid JSON'); }
 }
 export async function readHookInput(stream = process.stdin) {
   if (stream.isTTY) return {};
-  let text = '';
-  for await (const chunk of stream) { text += chunk; if (text.length > MAX_INPUT) return {}; }
-  return parseHookInput(text);
+  let text = ''; let length = 0;
+  // Keep draining an oversized document (the writer must not see a broken pipe) without retaining it.
+  for await (const chunk of stream) { length += chunk.length; if (length <= MAX_INPUT) text += chunk; }
+  return parseHookInput(length > MAX_INPUT ? '' : text, length);
 }
 /** Nearest ancestor (including `start`) that holds this generated project's package.json and Vitest config. */
 export function projectRootFor(start) {
