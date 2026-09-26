@@ -2,7 +2,7 @@
 // veUi is presentation state only: it never enters project JSON, history snapshots or exports.
 const VE_UPGRADE_NOTICE = 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.';
 function veDefaults() {
-  return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, back: [], palette: false, error: '', notice: '' };
+  return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '' };
 }
 const veUi = veDefaults();
 function veReset() { Object.assign(veUi, veDefaults()); }

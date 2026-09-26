@@ -3,9 +3,8 @@
 function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
 function veFail(error) {
   const text = veErrorText(error);
-  if (modalType === 've-save-layout' && document.getElementById('modal').open && veUi.layoutForm) {
-    veUi.layoutForm.error = text; redrawModal(); document.getElementById('ve-layout-error')?.focus(); return;
-  }
+  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'] }[modalType] : null;
+  if (dialog?.[0]) { dialog[0].error = text; redrawModal(); document.getElementById(dialog[1])?.focus(); return; }
   veUi.error = text;
   const output = document.getElementById('ve-error');
   if (output) output.textContent = text;
@@ -18,6 +17,7 @@ function vePageRef() {
 }
 // Write to the open page, then select what the change returns (only after the write succeeded).
 function vePageWrite(change, done = () => {}) {
+  veEditable();
   const ref = vePageRef();
   let selected;
   veCommit(store => { selected = change(store, ref); });
@@ -81,6 +81,8 @@ const VE_SESSION_ACTIONS = {
   've-bind': () => { veSelectedId(); veUi.inspector = 'data'; veUi.pane = 'inspector'; },
   've-interaction': () => { veSelectedId(); veUi.inspector = 'actions'; veUi.pane = 'inspector'; },
   've-more': () => { veUi.more = !veUi.more; },
+  've-inspector': value => { veUi.inspector = VE_INSPECTOR_TABS.some(([id]) => id === value) ? value : 'essentials'; },
+  've-advanced': () => { veUi.advanced = !veUi.advanced; },
 };
 const VE_ACTIONS = {
   've-open-page': veOpenPage, 'dt-page': veOpenPage, 've-back': veBack, 've-start-page': veStartPage, 've-select': veSelect,
@@ -90,6 +92,8 @@ const VE_ACTIONS = {
   've-duplicate': () => { const id = veSelectedId(); vePageWrite((store, ref) => visualDuplicateNode(store, ref, id).id); },
   've-wrap': () => { const id = veSelectedId(); vePageWrite((store, ref) => visualWrapNode(store, ref, id).id); },
   've-save-layout': veOpenSaveLayout, 've-save-layout-confirm': veSaveLayout,
+  've-health': () => showModal('ve-health'),
+  ...VE_INTERACTION_ACTIONS,
 };
 function handleVisualAction(action, value) {
   const session = VE_SESSION_ACTIONS[action], write = VE_ACTIONS[action];
@@ -100,10 +104,12 @@ function handleVisualAction(action, value) {
   return true;
 }
 // Search fields re-render only their own results so typing keeps focus; the scenario and page switcher re-render.
-function veFieldEdit(el) {
+// Inspector text fields keep their draft while typing (commit false) and write on change; selects and checkboxes write at once.
+function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELECT') {
   const field = el.dataset.field;
   if (!field?.startsWith('ve-')) return false;
   try {
+    if (veInteractionField(el) || veInspectorField(el, commit)) return true;
     if (veSaveLayoutField(el)) return true;
     if (field === 've-page-search') { veUi.pageQuery = el.value; document.getElementById('ve-pages-results').innerHTML = vePageCards(); return true; }
     if (field === 've-outline-search') { veUi.query = el.value; const page = veCurrentPage(); if (page) document.getElementById('ve-outline').innerHTML = veOutlineHtml(page); return true; }
@@ -124,4 +130,10 @@ document.addEventListener('keydown', event => {
   if (!(item instanceof Element) || item.getAttribute('role') !== 'treeitem' || !item.closest('#ve-outline') || !['Enter', ' '].includes(event.key)) return;
   event.preventDefault();
   handleVisualAction('ve-select', item.dataset.value || '');
+});
+// Inspector text fields write once, on change (blur or Enter); the shared input listener only keeps their draft.
+// The write waits one task so a Tab has moved focus first, and the re-render restores focus to the next field.
+document.addEventListener('change', event => {
+  const el = event.target;
+  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') setTimeout(() => { if (el.isConnected) veFieldEdit(el, true); });
 });

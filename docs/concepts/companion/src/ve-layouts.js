@@ -44,6 +44,6 @@ function veSaveLayout() {
   if (!nodeIds.length) throw Error(form.scope === 'region' ? 'Select an element to save.' : 'Add elements to the page before saving it as a layout.');
   let layout = null;
   veCommit(store => { layout = visualSaveLayout(store, { name, description: form.description.trim(), category: form.category, scope: form.scope, nodeIds, pageId: page.id }); });
-  veUi.layoutForm = null; closeModal(); veUi.left = 'layouts'; render();
+  veUi.layoutForm = null; modalOriginal = null; closeModal(); veUi.left = 'layouts'; render();
   notify('Layout “' + layout.name + '” saved. The page is unchanged.');
 }

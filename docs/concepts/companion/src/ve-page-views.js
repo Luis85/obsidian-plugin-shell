@@ -32,11 +32,10 @@ function vePagesView() {
     <div id="ve-pages-results">${vePageCards(d)}</div>
     ${orphans.length ? `<section class="card mt16"><h2>Designs with a missing surface</h2><p>These page designs are kept. Restoring the original sitemap surface reconnects them.</p><ul>${orphans.map(p => `<li>${esc(p.name)}</li>`).join('')}</ul></section>` : ''}</section>`;
 }
-// Readiness: the full validation (with references) plus review errors once the review module provides them.
-function veReadiness(page) {
-  try { validateVisualDesigns(veStore(), veContext(design())); } catch (error) { return { ready: false, text: String(error.message).replace(/^VISUAL_INVALID: /, '') }; }
-  const errors = typeof veReviewFindings === 'function' ? veReviewFindings(veStore(), { kind: 'page', id: page.id }).filter(f => f.severity === 'error') : [];
-  return errors.length ? { ready: false, text: errors.length + ' review error' + (errors.length === 1 ? '' : 's') } : { ready: true, text: 'Generator ready' };
+// Readiness: the full validation (with references) and every review error; warnings do not block the generator.
+function veReadiness(page, findings = veReviewFindings(veStore(), { kind: 'page', id: page.id })) {
+  const errors = findings.filter(f => f.severity === 'error');
+  return errors.length ? { ready: false, text: errors.length === 1 ? errors[0].text : errors.length + ' review errors' } : { ready: true, text: 'Generator ready' };
 }
 function veSegment(label, action, options, current) {
   return `<div class="ve-segment" role="group" aria-label="${esc(label)}">${options.map(([id, name]) => `<button type="button" data-action="${action}" data-value="${id}" aria-pressed="${current === id}">${esc(name)}</button>`).join('')}</div>`;
@@ -44,7 +43,7 @@ function veSegment(label, action, options, current) {
 function veCanvasToolbar(page) {
   const options = [['', 'Default state'], ...page.scenarios.map(s => [s.id, s.name + (s.width === 'narrow' ? ' · narrow' : '')])];
   const scenario = `<label class="ve-inline-field"><span>Scenario</span><select data-field="ve-scenario" aria-label="Preview scenario">${options.map(([id, name]) => `<option value="${esc(id)}"${(veUi.scenario || '') === id ? ' selected' : ''}>${esc(name)}</option>`).join('')}</select></label>`;
-  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}</div>`;
+  return `<div class="ve-toolbar" role="toolbar" aria-label="Canvas">${veSegment('Editor mode', 've-mode', VE_EDITOR_MODES, veUi.mode)}${scenario}<span class="ve-grow"></span>${veSegment('Canvas width', 've-viewport', VE_VIEWPORT_LABELS, veUi.viewport)}${button('Health', 've-health', '', 'small ghost', 'shield', 'aria-label="Project health"')}</div>`;
 }
 function veSelectionBar(page) {
   const node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
@@ -53,17 +52,11 @@ function veSelectionBar(page) {
   const more = veUi.more ? `<div class="ve-more-menu" role="group" aria-label="More actions">${button('Move earlier', 've-move', 'earlier', 'small ghost')}${button('Move later', 've-move', 'later', 'small ghost')}${button('Save selection as layout', 've-save-layout', 'region', 'small ghost')}</div>` : '';
   return `<div class="ve-selection-holder"><div class="ve-selection-bar" role="toolbar" aria-label="${esc('Actions for ' + veNodeLabel(node))}"><span class="ve-selection-label">${esc(veNodeLabel(node))}</span>${tool('Insert after', 've-insert-after', 'plus')}${tool('Duplicate', 've-duplicate', 'copy')}${tool('Wrap in group', 've-wrap', 'box')}${tool('Bind data', 've-bind', 'layers')}${tool('Add interaction', 've-interaction', 'spark')}<button type="button" class="icon-button" data-action="ve-more" aria-label="More actions" title="More actions" aria-expanded="${veUi.more}">${icon('menu')}</button></div>${more}</div>`;
 }
-function veCanvasFooter(page) {
-  const trail = veOutlineTrail(page, veUi.selected), ready = veReadiness(page);
+function veCanvasFooter(page, findings) {
+  const trail = veOutlineTrail(page, veUi.selected), ready = veReadiness(page, findings);
   const crumbs = ['Page', ...trail.map(n => veNodeLabel(n))].map((label, i, all) => i === all.length - 1 ? `<strong>${esc(label)}</strong>` : `<span>${esc(label)}</span>`).join('<span aria-hidden="true">›</span>');
   const count = visualNodes(page.root).length;
   return `<div class="ve-footer"><nav class="ve-crumbs" aria-label="Selected element path">${crumbs}</nav><span class="ve-grow"></span><span>${count}/${VISUAL_LIMITS.nodes} elements</span><span aria-hidden="true">·</span><span class="ve-readiness ${ready.ready ? 'is-ready' : 'is-blocked'}" role="status">${ready.ready ? '✓' : '!'} ${esc(ready.text)}</span></div>`;
-}
-// Inspector placeholder until the page inspector lands: identity plus structure commands for the selection.
-function veInspectorSummary(page) {
-  const node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
-  if (!node) return `<h2>${esc(page.name)}</h2><dl class="ve-facts"><dt>Elements</dt><dd>${visualNodes(page.root).length}/${VISUAL_LIMITS.nodes}</dd><dt>Scenarios</dt><dd>${page.scenarios.length}</dd></dl><p class="small muted">Select an element in the Outline or on the canvas to see its details.</p>`;
-  return `<span class="ve-eyebrow">${esc(veKindLabel(node))}</span><h2>${esc(veNodeLabel(node))}</h2><div class="ve-inspector-actions">${button('Move earlier', 've-move', 'earlier', 'small')}${button('Move later', 've-move', 'later', 'small')}${button('Duplicate', 've-duplicate', '', 'small', 'copy')}${button('Wrap in group', 've-wrap', '', 'small', 'box')}</div>`;
 }
 function vePageSwitcher(surface) {
   const options = veSurfaces().map(s => [s.id, s.label + (veStore().pages.some(p => p.ownerId === s.id) ? '' : ' · not designed')]);
@@ -91,8 +84,9 @@ function vePageEditorView() {
   const scenario = page.scenarios.find(s => s.id === veUi.scenario) ?? null;
   const canvas = veCanvasHtml(page, visualSession(scenario), { mode: veUi.mode, selected: veUi.mode === 'preview' ? null : veUi.selected, viewport: veUi.viewport });
   const pane = id => 've-pane ve-pane-' + id + (veUi.pane === id ? ' is-active' : '');
+  const findings = veReviewFindings(veStore(), { kind: 'page', id: page.id }), node = veUi.selected ? visualLocate(page.root, veUi.selected)?.node ?? null : null;
   return `<section class="ve-page-editor" aria-label="${esc('Page editor · ' + page.name)}">${vePaneTabs()}<div class="ve-editor">
     <aside class="${pane('left')}" aria-label="Page structure">${veEditorHeader(surface, page)}${veSegment('Structure tools', 've-left', VE_LEFT_PANES, veUi.left)}<div class="ve-pane-body">${veLeftBody(page)}</div></aside>
-    <section class="${pane('canvas')}" aria-label="Canvas">${veCanvasToolbar(page)}<div class="ve-canvas-area">${veSelectionBar(page)}${canvas}</div>${veCanvasFooter(page)}</section>
-    <aside class="${pane('inspector')}" aria-label="Inspector"><div class="ve-pane-body">${error}${veInspectorSummary(page)}</div></aside></div></section>`;
+    <section class="${pane('canvas')}" aria-label="Canvas">${veCanvasToolbar(page)}<div class="ve-canvas-area">${veSelectionBar(page)}${canvas}</div>${veCanvasFooter(page, findings)}</section>
+    <aside class="${pane('inspector')}" aria-label="Inspector"><div class="ve-pane-body">${error}${vePageInspectorHtml(page, node, findings)}</div></aside></div></section>`;
 }
