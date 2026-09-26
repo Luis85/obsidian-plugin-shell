@@ -297,6 +297,10 @@ Subagent-driven; each stage ends green on its own checks.
 8. Removing an element that other interactions or state bindings reference is refused with the referencing list; scenario values of removed elements are pruned.
 9. Migrating saved browser state clears the design undo/redo history (legacy snapshots are not replayable) and says so.
 
+10. Text nodes may carry `layout` (so padding and typography tokens survive); every node may carry optional author `notes` (≤ 4000, never rendered) — legacy text of tabs/lists that was never rendered migrates there.
+11. ComponentRevision gains optional `notes` and `scenarios` (validated against the revision template), so revisions migrate losslessly.
+12. Migration keeps `layout` on every non-text node that had `ui` (not only regions/slots/components). An edge with both navigation and an effect migrates to both actions. Legacy edges whose source is a text, heading or slot node (none exist in real data) are the one non-geometry loss and are counted as `droppedInteractions`.
+
 ## 13. Component library dependencies (owner request, 2026-09-26)
 
 Use case: a reusable component that wraps a third-party library, e.g. a rich-text or code editor.
