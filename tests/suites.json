@@ -161,9 +161,9 @@
     },
     {
       "name": "makers",
-      "purpose": "Authoring tools: maker recipes and catalog, event contracts, generated-code formatting, example removal and README ownership.",
+      "purpose": "Authoring tools: maker recipes and catalog, checks that the custom-maker and locale recipes write into consumer projects, event contracts, generated-code formatting, example removal and README ownership.",
       "runner": {"type": "node-test"},
-      "include": ["tests/tooling/maker-*.checks.mjs", "tests/tooling/makers.checks.mjs", "tests/tooling/event-*.checks.mjs", "tests/tooling/example-*.checks.mjs", "tests/tooling/readme-*.checks.mjs", "tests/tooling/formatting.checks.mjs"],
+      "include": ["tests/tooling/maker-*.checks.mjs", "tests/tooling/makers.checks.mjs", "tests/tooling/custom-*.checks.mjs", "tests/tooling/locale-*.checks.mjs", "tests/tooling/event-*.checks.mjs", "tests/tooling/example-*.checks.mjs", "tests/tooling/readme-*.checks.mjs", "tests/tooling/formatting.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:makers",
       "workflows": ["template-authoring"]

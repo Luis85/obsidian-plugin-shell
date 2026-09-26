@@ -196,3 +196,13 @@ test('verify tooling groups cover exactly the evidence tooling inventory, each f
   assert.deepEqual([...files].sort(), await suiteInventory(process.cwd(), 'tooling'));
   assert.ok(groups.every(group => group.files.length > 0 && /^[a-z-]+$/.test(group.name)), JSON.stringify(groups.map(group => group.name)));
 });
+test('tooling checks written by the custom-maker and locale recipes are claimed by exactly one verify suite', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const real = JSON.parse(await readFile(resolve('tests/suites.json'), 'utf8'));
+  // Paths mirror scripts/makers/extra-recipes.mjs, which writes these files into consumer projects.
+  for (const path of ['tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']) {
+    const owners = real.suites.filter(entry => (entry.include ?? []).some(pattern => globToRegExp(pattern).test(path)));
+    assert.deepEqual(owners.map(entry => entry.name), ['makers'], path);
+    assert.equal(owners[0].verify, 'tooling');
+  }
+});
