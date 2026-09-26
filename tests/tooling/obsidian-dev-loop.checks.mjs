@@ -9,7 +9,7 @@ import { createRebuildLoop, watchTree } from '../../scripts/dev/rebuild-loop.mjs
 import { stagedBuild } from '../../scripts/bundling/staged-build.mjs';
 import { licenseNotices } from '../../scripts/bundling/license-notices.mjs';
 import { installLocal } from '../../scripts/dev/install-local.mjs';
-import { reloadPlugin } from '../../scripts/testing/obsidian-plugin-control.mjs';
+import { openPluginView, reloadPlugin } from '../../scripts/testing/obsidian-plugin-control.mjs';
 
 async function workspace(t) {
   const root = await mkdtemp(join(tmpdir(), 'obsidian dev ü-')); t.after(() => rm(root, { recursive: true, force: true }));
@@ -23,8 +23,11 @@ const linkType = process.platform === 'win32' ? 'junction' : 'dir';
 test('[OBSIDIAN-DEV-01] options default to a contained interactive sandbox on port 9222 and validate every flag', () => {
   assert.deepEqual(parseDevOptions([], {}), { once: false, port: 9222, logs: 'plugin', settleMs: 1500, sandbox: '.obsidian-sandbox',
     debugLogging: true, allowDownload: false, help: false });
-  const parsed = parseDevOptions(['--headless', '--port', '9333', '--logs', 'all', '--settle', '0', '--sandbox', '.agent-sandbox', '--no-debug-logging', '--allow-download'], {});
-  assert.deepEqual(parsed, { once: true, port: 9333, logs: 'all', settleMs: 0, sandbox: '.agent-sandbox', debugLogging: false, allowDownload: true, help: false });
+  const parsed = parseDevOptions(['--headless', '--port', '9333', '--logs', 'all', '--settle', '0', '--sandbox', '.obsidian-sandbox-agent', '--no-debug-logging', '--allow-download'], {});
+  assert.deepEqual(parsed, { once: true, port: 9333, logs: 'all', settleMs: 0, sandbox: '.obsidian-sandbox-agent', debugLogging: false, allowDownload: true, help: false });
+  // Only dedicated sandbox folders: project, agent, editor and test-vault folders are never a sandbox.
+  for (const name of ['.companion', '.framework', '.claude', '.vscode', '.test-vault', '.agent-sandbox', '.obsidian-sandboxes/x', '.obsidian-sandbox/../x'])
+    assert.throws(() => sandboxDirectory(name), /SANDBOX_NAME_INVALID/, name);
   assert.equal(parseDevOptions(['--json'], {}).once, true);
   assert.equal(parseDevOptions([], { OBSIDIAN_DEBUG_PORT: '9444', OBSIDIAN_ALLOW_DOWNLOAD: '1' }).port, 9444);
   assert.equal(parseDevOptions([], { OBSIDIAN_ALLOW_DOWNLOAD: '1' }).allowDownload, true);
@@ -59,11 +62,11 @@ test('[OBSIDIAN-DEV-03] seeding refuses symlinks, escapes and reserved locations
   await rm(join(root, 'tests/obsidian/vault/Linked'));
   await assert.rejects(seedSandbox({ root, source: '../outside' }), /SANDBOX_PATH_ESCAPE/);
   await assert.rejects(seedSandbox({ root, sandbox: '.dev-vault' }), /SANDBOX_NAME_INVALID/);
-  await symlink(outside, join(root, '.linked-sandbox'), linkType);
-  await assert.rejects(seedSandbox({ root, sandbox: '.linked-sandbox' }), /SANDBOX_PATH_SYMLINK/);
+  await symlink(outside, join(root, '.obsidian-sandbox-linked'), linkType);
+  await assert.rejects(seedSandbox({ root, sandbox: '.obsidian-sandbox-linked' }), /SANDBOX_PATH_SYMLINK/);
   assert.deepEqual(await readdir(outside), []);
-  await mkdir(join(root, '.file-sandbox')); await writeFile(join(root, '.file-sandbox/vault'), 'not a vault');
-  await assert.rejects(seedSandbox({ root, sandbox: '.file-sandbox' }), /SANDBOX_VAULT_INVALID/);
+  await mkdir(join(root, '.obsidian-sandbox-file')); await writeFile(join(root, '.obsidian-sandbox-file/vault'), 'not a vault');
+  await assert.rejects(seedSandbox({ root, sandbox: '.obsidian-sandbox-file' }), /SANDBOX_VAULT_INVALID/);
   await assert.rejects(assertContained(root, root), /SANDBOX_PATH_ESCAPE/);
   await assert.rejects(copyVaultTree(join(root, 'tests/obsidian/vault'), join(root, 'tests/obsidian/vault')), /VAULT_TARGET_EXISTS/);
 });
@@ -110,6 +113,22 @@ test('[OBSIDIAN-DEV-06] the source watcher still sees a file after an editor rep
   seen.length = 0; await writeFile(join(root, 'nested/added/view.ts'), 'x'); await settle();
   assert.ok(seen.includes('view.ts'), `a file in a new directory was observed: ${seen}`);
 });
+test('[OBSIDIAN-DEV-19] a watched folder that is deleted and recreated is watched again, with its new subfolders', { skip: process.platform !== 'linux' }, async t => {
+  const root = await mkdtemp(join(tmpdir(), 'obsidian watch-')); t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(join(root, 'feature/deep'), { recursive: true });
+  const seen = []; const close = watchTree(root, (_, name) => seen.push(String(name))); t.after(close);
+  const settle = () => new Promise(resolve => setTimeout(resolve, 150));
+  await settle();
+  assert.deepEqual(close.watched().map(path => path.slice(root.length)), ['', '/feature', '/feature/deep']);
+  await rm(join(root, 'feature'), { recursive: true }); await settle();
+  assert.deepEqual(close.watched().map(path => path.slice(root.length)), [''], 'watches below a deleted folder are closed');
+  await mkdir(join(root, 'feature')); await settle();
+  seen.length = 0; await writeFile(join(root, 'feature/view.ts'), 'x'); await settle();
+  assert.ok(seen.includes('view.ts'), `a file in the recreated folder was observed: ${seen}`);
+  await mkdir(join(root, 'feature/deep')); await settle();
+  seen.length = 0; await writeFile(join(root, 'feature/deep/model.ts'), 'y'); await settle();
+  assert.ok(seen.includes('model.ts'), `a file in a recreated subfolder was observed: ${seen}`);
+});
 test('[OBSIDIAN-DEV-07] dev candidates build into a contained target and reject unsafe targets before building', async t => {
   const root = await mkdtemp(join(tmpdir(), 'obsidian build-')); t.after(() => rm(root, { recursive: true, force: true }));
   await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: 'plugin-shell', version: '1.0.0' }));
@@ -143,16 +162,34 @@ test('[OBSIDIAN-DEV-08] the license banner shifts only dev inline source maps; r
 /** Obsidian's plugin manager as observed in 1.13: the plain disable drops the id from the enabled set,
  * the plain enable loads without recording it, and only the *AndSave variants persist the set. */
 function hostPage(enabled) {
-  const saved = [[...enabled]]; const loaded = new Set(enabled);
+  const saved = [[...enabled]]; const loaded = new Set(enabled); const views = new Map(); const leaves = [];
+  const viewRegistry = { registerView(type, create) { views.set(type, create); } };
+  // Stack frames of the plugin's own script contain `plugin:<id>`, as in Obsidian.
+  const pluginScript = { 'plugin:my-plugin'() { viewRegistry.registerView('my-view', () => ({})); viewRegistry.registerView('my-panel', () => ({})); } };
+  const workspace = { getLeavesOfType: type => leaves.filter(leaf => leaf.type === type), setActiveLeaf() {}, async revealLeaf() {},
+    getLeaf: () => { const leaf = { type: 'empty', view: { getViewType: () => leaf.type }, async setViewState(state) { if (!views.has(state.type)) throw new Error('no view'); leaf.type = state.type; } }; leaves.push(leaf); return leaf; } };
   const plugins = { enabledPlugins: new Set(enabled), manifests: { 'my-plugin': { version: '1.0.0' } }, plugins: {},
     async disablePlugin(id) { loaded.delete(id); this.enabledPlugins.delete(id); },
     async loadManifests() {},
-    async enablePlugin(id) { loaded.add(id); return true; },
+    async enablePlugin(id) { loaded.add(id); viewRegistry.registerView('core-view', () => ({})); pluginScript['plugin:my-plugin'](); return true; },
     async enablePluginAndSave(id) { await this.enablePlugin(id); this.enabledPlugins.add(id); saved.push([...this.enabledPlugins]); return true; } };
   Object.defineProperty(plugins.plugins, 'my-plugin', { enumerable: true, get: () => ({ _loaded: loaded.has('my-plugin') }) });
-  const page = { evaluate: async (fn, arg) => { globalThis.window = { app: { plugins } }; try { return await fn(arg); } finally { delete globalThis.window; } } };
-  return { page, saved };
+  const window = { app: { plugins, viewRegistry, workspace } };
+  const page = { evaluate: async (fn, arg) => { globalThis.window = window; try { return await fn(arg); } finally { delete globalThis.window; } } };
+  return { page, saved, viewRegistry, leaves };
 }
+test('[OBSIDIAN-DEV-20] a reload reports only this plugin\'s views and the first one is shown; no view is not an error', async () => {
+  const host = hostPage(['my-plugin']); const original = host.viewRegistry.registerView;
+  const reload = await reloadPlugin(host.page, 'my-plugin', { timeout: 500 });
+  assert.deepEqual(reload.viewTypes, ['my-view', 'my-panel'], 'registration order, core views excluded');
+  assert.equal(host.viewRegistry.registerView, original, 'the host method is restored');
+  assert.deepEqual(await openPluginView(host.page, reload.viewTypes), { type: 'my-view', opened: true, registered: ['my-view', 'my-panel'] });
+  assert.deepEqual(await openPluginView(host.page, reload.viewTypes), { type: 'my-view', opened: true, registered: ['my-view', 'my-panel'] });
+  assert.equal(host.leaves.length, 1, 'an open leaf of that view is reused');
+  assert.equal(await openPluginView(host.page, []), null);
+  const failed = await openPluginView(host.page, ['missing-view']);
+  assert.deepEqual({ opened: failed.opened, error: failed.error }, { opened: false, error: 'no view' });
+});
 test('[OBSIDIAN-DEV-09] a hot reload keeps a persisted enablement enabled and saved, and never persists a transient one', async () => {
   const persisted = hostPage(['other', 'my-plugin']);
   const reload = await reloadPlugin(persisted.page, 'my-plugin', { timeout: 500 });

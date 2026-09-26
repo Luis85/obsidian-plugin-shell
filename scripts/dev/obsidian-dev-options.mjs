@@ -7,7 +7,7 @@ Build, watch and hot-reload the plugin in real Obsidian on a contained sandbox v
   --port <n>           Remote debugging port on 127.0.0.1 (default 9222, env OBSIDIAN_DEBUG_PORT)
   --logs plugin|all    Terminal/log filter: plugin output plus every error (default), or all
   --settle <ms>        Once mode: wait after reload before collecting (default 1500)
-  --sandbox <.name>    Sandbox directory in this checkout (default .obsidian-sandbox)
+  --sandbox <.name>    Sandbox directory in this checkout: .obsidian-sandbox or .obsidian-sandbox-<suffix>
   --no-debug-logging   Do not run the plugin's debug-toggle command after each load
   --allow-download     Opt in to provisioning obsidian-launcher/Obsidian (env OBSIDIAN_ALLOW_DOWNLOAD=1)
 The sandbox is seeded once from tests/obsidian/vault and never replaced; personal vaults are never opened.`;

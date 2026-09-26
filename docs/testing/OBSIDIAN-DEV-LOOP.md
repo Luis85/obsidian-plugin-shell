@@ -37,12 +37,23 @@ release build in `dist/` is unchanged (no source maps, same bytes). On every
 successful rebuild the assets are installed atomically, and the plugin is
 hot-reloaded over the DevTools protocol. The loop disables the plugin, re-reads
 its manifest and enables it again. A status line reports build, reload and total
-time. A failed build keeps the last good build installed. Ctrl-C or SIGTERM
-closes Obsidian and the watcher and removes the per-run profile under `.nq/`.
+time. A failed build keeps the last good build installed. The watchers cover `src/`,
+`scripts/bundling/`, the product roots a generated project names in
+`tsconfig.project.json` (for example a custom `<codebaseFolder>/generated`) and the
+build configuration; a watched folder that is deleted and recreated is watched again.
+
+Ctrl-C or SIGTERM works at any point, including during the build and launch: every
+resource created so far (the private Xvfb display, the per-run profile under `.nq/`,
+Obsidian and its helper processes, the debugger connection and the watchers) is
+released once, newest first. A second Ctrl-C kills the tracked processes and exits
+immediately. Closing the Obsidian window ends a watch session normally (exit 0, and
+the terminal says so); an Obsidian crash or non-zero exit ends it with exit 1. On
+Windows the host is stopped with `taskkill /T /F`, so Electron helpers do not survive.
 
 Options: `--port <n>` (default 9222, or `OBSIDIAN_DEBUG_PORT`), `--logs plugin|all`,
-`--sandbox <.name>`, `--settle <ms>`, `--no-debug-logging`, `--once`/`--headless`,
-`--json`. Run `npm run dev:obsidian -- --help` for details.
+`--sandbox <.name>` (`.obsidian-sandbox` or `.obsidian-sandbox-<suffix>` only),
+`--settle <ms>`, `--no-debug-logging`, `--once`/`--headless`, `--json`. Run
+`npm run dev:obsidian -- --help` for details.
 
 ### Attaching a debugger
 
@@ -74,12 +85,22 @@ redacted JSON to `.obsidian-sandbox/logs/debug-report.json`.
 
 `npm run -s dev:obsidian -- --json` writes exactly one JSON document to stdout.
 Status and build output go to stderr. The exit code is non-zero when the plugin
-does not load or reports errors. The summary contains:
+does not load or reports errors. Before the screenshot the loop opens the plugin's
+first registered view (reusing an open leaf of that type), so `last-run.png` shows
+the plugin rather than an empty tab. The summary contains:
 
 - `status`, the plugin and Obsidian versions, and timings (`buildMs`, `reloadMs`);
+- `view`: the view type that was opened, whether it opened and every registered
+  type, or `null` when the plugin registers no view (not a failure);
 - deduplicated `errors` with counts and source-mapped `frames`;
 - plugin `pluginConsole` lines and the registered command ids;
 - the paths of `last-run.png`, `dev.log` and `debug-report.json`.
+
+If Obsidian exits or crashes before the summary exists, the run still prints one
+JSON document with `status: "failed"` and `error` (for example
+`OBSIDIAN_EXITED_UNEXPECTEDLY (exit code none, signal SIGKILL)`) and exits 1; any
+failure is logged on stderr and the worst exit code wins. An interrupt reports
+`status: "cancelled"` and exits 130.
 
 The same summary is saved as `.obsidian-sandbox/logs/last-run.json`. Use `-s` so
 npm does not print its own banner on stdout.

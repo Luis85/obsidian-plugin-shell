@@ -133,15 +133,26 @@ export async function workspacePage(browser, timeout = 45000) {
   }
   throw new Error('OBSIDIAN_WORKSPACE_TIMEOUT');
 }
-export function processRunning(proc) { return Boolean(proc?.pid) && proc.exitCode === null && proc.signalCode === null; }
+function processRunning(proc) { return Boolean(proc?.pid) && proc.exitCode === null && proc.signalCode === null; }
+/** Windows has no process groups: `proc.kill()` ends only the Electron main process and leaves its
+ * GPU/renderer helpers running, so the whole tree is ended with taskkill (argument array, no shell). */
+export function treeKillCommand(pid) {
+  return { command: 'taskkill', args: ['/T', '/F', '/PID', String(pid)] };
+}
+/** Signal the host and everything it started: the detached POSIX process group, or the Windows tree. */
+export function signalHostTree(proc, name, { platform = process.platform, kill = process.kill, run = spawnSync } = {}) {
+  if (platform === 'win32') {
+    const { command, args } = treeKillCommand(proc.pid);
+    return run(command, args, { stdio: 'ignore', windowsHide: true, shell: false, timeout: 15000 });
+  }
+  try { kill(-proc.pid, name); } catch (error) { if (error.code !== 'ESRCH') throw error; }
+  return null;
+}
 /** Stop the detached host process group, escalating to SIGKILL after a bounded wait. */
 export async function stopHost(proc, timeout = 10000) {
   if (!processRunning(proc)) return { stopped: true, signal: null };
   const exited = new Promise(ok => proc.once('exit', ok));
-  const signal = name => {
-    try { if (process.platform !== 'win32') process.kill(-proc.pid, name); else proc.kill(); }
-    catch (error) { if (error.code !== 'ESRCH') throw error; }
-  };
+  const signal = name => { signalHostTree(proc, name); };
   signal('SIGTERM');
   let timer;
   const stopped = await Promise.race([exited.then(() => true), new Promise(ok => { timer = setTimeout(() => ok(false), timeout); })]);

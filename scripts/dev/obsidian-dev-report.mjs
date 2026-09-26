@@ -26,7 +26,7 @@ function frames(stack, limit = 15) {
   return stack ? stack.split('\n').map(line => line.trim()).filter(Boolean).slice(0, limit) : [];
 }
 /** The agent loop bundle: one JSON document with status, timings, deduplicated errors and paths. */
-export async function onceSummary({ root, id, host, sandbox, logFile, recorder, result, debugReport, manifest }) {
+export async function onceSummary({ root, id, host, sandbox, logFile, recorder, result, debugReport, manifest, view = null }) {
   const screenshot = join(sandbox.logs, 'last-run.png');
   let screenshotError = null;
   await result.page.screenshot({ path: screenshot }).catch(error => { screenshotError = error.message; });
@@ -40,6 +40,8 @@ export async function onceSummary({ root, id, host, sandbox, logFile, recorder, 
     obsidian: { requested: host.requestedVersion, app: host.appVersion, installer: host.installerVersion, launcher: host.launcherVersion },
     timings: { buildMs: timing.buildMs, buildAndInstallMs: timing.totalMs, reloadMs: reload.durationMs },
     debugLogging: result.debugLogging,
+    // The plugin view shown in the screenshot (null when the plugin registers no view).
+    view,
     commands: (await pluginCommands(result.page, id).catch(() => [])).map(command => command.id),
     errors: dedupeEntries(failures).map(({ entry, count }) => ({ count, kind: entry.kind, text: entry.text, frames: frames(entry.stack) })),
     hostErrorCount: recorder.errors().length - failures.length,
@@ -49,5 +51,21 @@ export async function onceSummary({ root, id, host, sandbox, logFile, recorder, 
     ...(screenshotError ? { screenshotError } : {}),
   };
   await writeFile(join(sandbox.logs, 'last-run.json'), `${JSON.stringify(summary, null, 2)}\n`);
+  return summary;
+}
+/** The --json summary when the run failed before a normal summary existed (for example Obsidian
+ * crashed or exited): status, the error and whatever the run already knew. Never throws. */
+export async function failureSummary({ root, error, status = 'failed', id = null, manifest = null, host = null, sandbox = null, logFile = null, recorder = null }) {
+  const failures = recorder && id ? loadErrors(recorder.entries, id) : [];
+  const summary = {
+    status,
+    error: error?.message ?? String(error),
+    plugin: id ? { id, version: manifest?.version ?? null } : null,
+    obsidian: host ? { requested: host.requestedVersion, app: host.appVersion, installer: host.installerVersion, launcher: host.launcherVersion } : null,
+    errors: dedupeEntries(failures).map(({ entry, count }) => ({ count, kind: entry.kind, text: entry.text, frames: frames(entry.stack) })),
+    pluginConsole: recorder && id ? recorder.pluginEntries().slice(-200).map(entry => formatEntry(entry, id)) : [],
+    files: { sandboxVault: sandbox ? relative(root, sandbox.vault) : null, log: logFile ? relative(root, logFile) : null, screenshot: null, debugReport: null },
+  };
+  if (sandbox) await writeFile(join(sandbox.logs, 'last-run.json'), `${JSON.stringify(summary, null, 2)}\n`).catch(() => undefined);
   return summary;
 }

@@ -3,7 +3,8 @@ import { join, relative, resolve, sep, isAbsolute } from 'node:path';
 
 /** Contained real-Obsidian vaults: a persistent developer sandbox and per-case copies.
  * Never a personal vault, never a symlinked path, never .dev-vault. */
-const reserved = new Set(['.git', '.github', '.obsidian', '.dev-vault', '.native-runner', '.native-cache', '.nq', 'node_modules']);
+/** Only dedicated sandbox folders: never .dev-vault, .test-vault, .companion, .framework, .claude, .vscode or .obsidian. */
+const sandboxName = /^\.obsidian-sandbox[a-zA-Z0-9_-]*$/;
 
 async function entry(path) {
   try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
@@ -24,7 +25,7 @@ export async function assertContained(root, target) {
   return target;
 }
 export function sandboxDirectory(name) {
-  if (typeof name !== 'string' || !/^\.[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(name) || reserved.has(name.toLowerCase())) throw new Error('SANDBOX_NAME_INVALID');
+  if (typeof name !== 'string' || !sandboxName.test(name)) throw new Error('SANDBOX_NAME_INVALID');
   return name;
 }
 /** Copy regular files and directories only; any symlink or special file fails before the copy is used. */
