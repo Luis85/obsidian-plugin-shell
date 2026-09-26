@@ -66,3 +66,14 @@ test('error message names the element', () => {
   const link = byName('Settings link');
   assert.throws(() => visualTransition(page, { ...visualSession(), state: 'loading' }, link.id, link.events[0].id), /Settings link/);
 });
+test('error message format is VISUAL_INVALID with definition and element', () => {
+  const def = { id: 'vp-err', name: 'ErrorTest', root: [{ id: 'vn-btn', kind: 'element', tag: 'button', name: 'TestBtn', attrs: {}, children: [], events: [{ id: 'vi-1', label: 'click', actions: [] }] }] };
+  try {
+    visualTransition(def, visualSession(), 'vn-btn', 'vi-missing');
+    assert.fail('Should have thrown');
+  } catch (err) {
+    assert.match(err.message, /^VISUAL_INVALID: (?!VISUAL_INVALID)/);
+    assert.match(err.message, /ErrorTest/);
+    assert.match(err.message, /TestBtn/);
+  }
+});
