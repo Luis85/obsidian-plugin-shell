@@ -440,6 +440,10 @@
     {
       "path": "scripts/testing/native-recovery-handles.d.mts",
       "sha256": "265e3f8efaa4baface8bc325afe2a3e54c5f7663f70240e3fd20d8ece9b21c82"
+    },
+    {
+      "path": "tests/runtime/obsidian-test-kit-shell.test.ts",
+      "sha256": "04878a50847d6d91029074a98ce2a6dc40e9a89cf131ee48468bef8c9a9375e8"
     }
   ]
 }
