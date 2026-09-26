@@ -30,7 +30,8 @@ function vcSlots(ctx: Lowering, slots: Record<string, UiNode[]>, owner: string, 
 
 function vcNode(ctx: Lowering, node: UiNode, depth: number): string {
   const id = vcName(ctx, node.id, vcId, 'node id');
-  const common = `data-design-node="${id}" v-if="model.visible('${id}')"${node.layout ? ` :style="model.style('${id}')"` : ''}`;
+  const described = typeof node.a11y === 'string' && node.a11y !== '' ? ` :aria-description="model.a11y('${id}')"` : '';
+  const common = `data-design-node="${id}" v-if="model.visible('${id}')"${node.layout ? ` :style="model.style('${id}')"` : ''}${described}`;
   const pad = vcPad(depth);
   if (node.kind === 'element') {
     const tag = node.tag;
@@ -65,11 +66,27 @@ function vcNode(ctx: Lowering, node: UiNode, depth: number): string {
   }
   const componentId = node.ref.componentId, target = ctx.store.components.find(c => c.id === componentId);
   visualAssert(target, `${ctx.where}: node ${id} references missing component ${componentId}.`);
+  if (node.ref.revisionId !== undefined) vcPinned(ctx, id, target, node.ref.revisionId);
   const name = vcName(ctx, target.exportName, vcExport, `node ${id} component export name`);
   visualAssert(!vcReserved.has(name), `${ctx.where}: export name ${name} used by node ${id} is reserved in generated components.`);
   ctx.projects.set(name, target);
   const open = `<${name} ${common} v-bind="model.props('${id}')" :design-state="model.state.value === 'default' ? undefined : model.state.value" v-on="model.on('${id}')">`;
   return vcBlock(open, `</${name}>`, slots, depth);
+}
+
+/** Pinned instances render the live component, so its contract must still satisfy the pinned revision's contract. */
+function vcPinned(ctx: Lowering, id: string, live: ComponentDefinition, revisionId: string): void {
+  const revision = ctx.store.revisions.find(r => r.id === revisionId && r.componentId === live.id);
+  const pin = `node ${id} pins ${live.exportName} revision ${revisionId}`;
+  visualAssert(revision, `${ctx.where}: ${pin}, which does not exist.`);
+  const pinned = revision.contract;
+  const gaps = [
+    ...pinned.props.filter(p => !live.props.some(l => l.name === p.name && l.type === p.type)).map(p => `prop ${p.name}: ${p.type}`),
+    ...live.props.filter(l => l.required && !pinned.props.some(p => p.name === l.name)).map(l => `new required prop ${l.name}`),
+    ...pinned.slots.filter(s => !live.slots.some(l => l.name === s.name)).map(s => `slot ${s.name}`),
+    ...pinned.emits.filter(e => !live.emits.some(l => l.name === e.name)).map(e => `emit ${e.name}`),
+  ];
+  visualAssert(!gaps.length, `${ctx.where}: ${pin} (version ${revision.version}), but the live contract no longer satisfies it: ${gaps.join(', ')}.`);
 }
 
 /** A runtime payload guard per declared emit, so the component only emits contract-typed payloads. */

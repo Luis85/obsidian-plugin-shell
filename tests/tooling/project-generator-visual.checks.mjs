@@ -14,7 +14,7 @@ test('visual runtime type-checks under the generator configuration', () => {
 });
 test('runtime exposes the IR surface used by generated SFCs', async () => {
   const text = await readFile('scripts/companion/runtime/use-visual.ts', 'utf8');
-  for (const name of ['visible', 'style', 'text', 'props', 'attrs', 'on', 'message', 'attach', 'theme', 'state', 'external']) assert.match(text, new RegExp('\\b' + name + '\\b'));
+  for (const name of ['visible', 'style', 'text', 'a11y', 'props', 'attrs', 'on', 'message', 'attach', 'theme', 'state', 'external']) assert.match(text, new RegExp('\\b' + name + '\\b'));
   assert.doesNotMatch(text, /\beval\b|new Function/);
 });
 
@@ -66,6 +66,11 @@ test('local interactions update session state, values and visibility without the
   assert.equal(model.state.value, 'empty'); assert.equal(model.visible('vn-5'), true);
   assert.equal(handled.length, 0); assert.deepEqual(requests.map(r => r.interactionId), ['vi-1', 'vi-2']);
   assert.equal(model.message.value, '');
+});
+test('a11y returns author accessibility notes and undefined when absent or empty', () => {
+  const { model } = mountVisual(page([text('vn-1', lit('a'), { a11y: 'Totals for the current filter' }), text('vn-2', lit('b'), { a11y: '' }), text('vn-3', lit('c'))]));
+  assert.equal(model.a11y('vn-1'), 'Totals for the current filter');
+  assert.equal(model.a11y('vn-2'), undefined); assert.equal(model.a11y('vn-3'), undefined); assert.equal(model.a11y('vn-404'), undefined);
 });
 test('source actions run the matching port with the mapped payload and report failures', async () => {
   const save = port('orders', 'save', null, async input => (input.title === 'bad' ? { ok: false } : { ok: true }));
@@ -273,16 +278,18 @@ function goldenFixture() {
   const [source] = design.dataSources.sources, [operation] = source.operations;
   design.dataSources.sources.push({ ...source, id: 'customers', slug: 'customers', name: 'Customers', operations: [{ ...operation, id: 'list', slug: 'list-customers', name: 'List customers', output: { mode: 'fields', entity: null, many: false, fields: [{ name: 'items', type: 'array', required: false }], schema: null } }] });
   const act = (id, event, actions) => ({ id, event, label: 'Interaction ' + id, notes: '', acceptance: '', actions });
+  Object.assign(store.pages[0].root[0].children.find(n => n.id === 'vn-10'), { a11y: 'evil "a11y" {{ note }}' });
+  store.pages[0].root[0].children.find(n => n.id === 'vn-10').ref.revisionId = 'vr-24';
   store.pages[0].root[0].children.unshift(text('vn-25', lit('{{ evil }} </template><script>alert(1)</script>'), { layout: store.pages[0].root[0].layout }));
   store.components.push({ id: 'vc-26', libraryId: 'library-editor', exportName: 'RichEditor', description: 'Rich text editor', notes: '',
     props: [{ name: 'doc', type: 'string', required: true }, { name: 'readonly', type: 'boolean', required: false }], slots: [{ name: 'toolbar', required: false }],
     emits: [{ name: 'change', payloadType: 'string' }, { name: 'ready', payloadType: 'void' }, { name: 'raw', payloadType: 'unknown' }], variants: [], scenarios: [],
     dependencies: [{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text editing' }],
-    template: [{ id: 'vn-27', kind: 'element', tag: 'section', attrs: { 'aria-label': lit('Editor') }, events: [], children: [
-      { id: 'vn-28', kind: 'slot', name: 'toolbar', fallback: [text('vn-29', { kind: 'prop', name: 'doc' }, { role: 'span' })], layout: store.pages[0].root[0].layout },
-      { id: 'vn-30', kind: 'external', package: '@tiptap/vue-3', adapter: 'editor', props: { content: { kind: 'prop', name: 'doc' }, editable: lit(true) }, events: [act('vi-31', 'update', [{ kind: 'emit', event: 'change', payload: { kind: 'event' } }])] },
+    template: [{ id: 'vn-27', kind: 'element', tag: 'section', a11y: 'evil element note', attrs: { 'aria-label': lit('Editor') }, events: [], children: [
+      { id: 'vn-28', kind: 'slot', name: 'toolbar', a11y: 'evil slot note', fallback: [text('vn-29', { kind: 'prop', name: 'doc' }, { role: 'span', a11y: '' })], layout: store.pages[0].root[0].layout },
+      { id: 'vn-30', kind: 'external', package: '@tiptap/vue-3', adapter: 'editor', a11y: 'evil editor note', props: { content: { kind: 'prop', name: 'doc' }, editable: lit(true) }, events: [act('vi-31', 'update', [{ kind: 'emit', event: 'change', payload: { kind: 'event' } }])] },
       { id: 'vn-32', kind: 'element', tag: 'input', attrs: { placeholder: lit('Title') }, children: [], events: [act('vi-33', 'change', [{ kind: 'emit', event: 'ready', payload: { kind: 'none' } }])] },
-      nuxt('vn-34', 'u-card', {}, { slots: { header: [text('vn-35', lit('Preview'), { role: 'h3' })] } }),
+      nuxt('vn-34', 'u-card', {}, { a11y: 'evil card note', slots: { header: [text('vn-35', lit('Preview'), { role: 'h3', a11y: 'evil text note' })] } }),
     ] }] });
   store.components.push({ id: 'vc-36', libraryId: 'library-pending', exportName: 'PendingCard', description: 'Not designed yet', props: [{ name: 'title', type: 'string', required: false }], slots: [{ name: 'actions', required: false }], emits: [], variants: [], scenarios: [], template: [] });
   store.nextId = 37; design.visualDesigns = store;
@@ -312,6 +319,32 @@ test('every lowered node carries its marker and visibility guard; externals bind
   assert.match(code, /import \{ createAdapter as createAdapter_0 \} from "\.\/library-editor\/editor\.adapter\.ts";/);
   assert.match(code, /:ref="model\.external\('vn-30', createAdapter_0\)"/);
   assert.doesNotMatch(code, /model\.on\('vn-30'\)|model\.props\('vn-30'\)/);
+});
+test('every node with accessibility notes binds them through model.a11y, and only those nodes', () => {
+  const m = projectModel(goldenFixture()), store = visualDefinitions(m);
+  let described = 0;
+  for (const spec of visualSpecs(m).filter(s => golden.has(s.id))) {
+    const code = visualSfc(m, spec, store), roots = spec.kind === 'page' ? spec.root : spec.template;
+    for (const node of visualNodes(roots)) {
+      const tag = code.split('<').find(t => t.includes(`data-design-node="${node.id}" v-if=`)) ?? '';
+      assert.equal(tag.includes(`:aria-description="model.a11y('${node.id}')"`), Boolean(node.a11y), node.id);
+      if (node.a11y) described++;
+    }
+  }
+  assert.equal(described, 6);
+});
+test('pinned instances render the live component only while its contract satisfies the pinned revision', () => {
+  const m = projectModel(goldenFixture()), store = visualDefinitions(m), [customers] = visualSpecs(m).filter(s => s.id === 'vp-2');
+  const live = changes => { const next = structuredClone(store); changes(next.components.find(c => c.id === 'vc-1')); return () => visualSfc(m, customers, next); };
+  assert.doesNotThrow(live(() => {}));
+  assert.doesNotThrow(live(c => { c.props.push({ name: 'extra', type: 'number', required: false }); }));
+  const pinned = /VISUAL_INVALID: Page "Customers": node vn-10 pins SearchField revision vr-24 \(version 1\.0\.0\), but the live contract no longer satisfies it: /;
+  assert.throws(live(c => { c.props = []; }), new RegExp(pinned.source + 'prop query: string[.]$'));
+  assert.throws(live(c => { c.props[0].type = 'number'; }), new RegExp(pinned.source + 'prop query: string[.]$'));
+  assert.throws(live(c => { c.props.push({ name: 'limit', type: 'number', required: true }); }), new RegExp(pinned.source + 'new required prop limit[.]$'));
+  assert.throws(live(c => { c.slots = []; c.emits = []; }), new RegExp(pinned.source + 'slot actions, emit search[.]$'));
+  const orphan = structuredClone(customers); orphan.root[0].children.find(n => n.id === 'vn-10').ref.revisionId = 'vr-999';
+  assert.throws(() => visualSfc(m, orphan, store), /node vn-10 pins SearchField revision vr-999, which does not exist/);
 });
 test('names and identifiers that could escape template syntax stop lowering', () => {
   const m = projectModel(goldenFixture()), store = visualDefinitions(m), [editor] = visualSpecs(m).filter(s => s.id === 'vc-26');

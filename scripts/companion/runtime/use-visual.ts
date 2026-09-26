@@ -152,6 +152,8 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const node = index.get(nodeId);
     void invoke(nodeId, node && 'events' in node ? node.events.filter(i => i.event === event) : [], payload);
   }
+  /** Author accessibility notes, bound as aria-description; never interpolated into template syntax. */
+  function a11y(id: string): string | undefined { const note = index.get(id)?.a11y; return note ? note : undefined; }
   function text(id: string): string { const node = index.get(id); return node?.kind === 'text' ? detailTextValue(value(node.value), '') : ''; }
   function resolved(id: string): Record<string, unknown> {
     const node = index.get(id);
@@ -222,5 +224,5 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const readTheme = () => { dark.value = body.classList.contains('theme-dark') || root.dataset.theme === 'dark'; }; readTheme();
     if (typeof MutationObserver !== 'undefined') { themeObserver?.disconnect(); themeObserver = new MutationObserver(readTheme); themeObserver.observe(body, { attributes: true, attributeFilter: ['class'] }); themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme'] }); }
   }
-  return { state, visible, style, text, props: nodeProps, attrs, on, message, errors, pending, attach, theme, external };
+  return { state, visible, style, text, a11y, props: nodeProps, attrs, on, message, errors, pending, attach, theme, external };
 }

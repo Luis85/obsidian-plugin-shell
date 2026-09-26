@@ -15,7 +15,7 @@ const model = useVisual(spec, props, request => emit('interaction', request));
 <main data-design-node="vn-18" v-if="model.visible('vn-18')" :style="model.style('vn-18')" v-bind="model.attrs('vn-18')" v-on="model.on('vn-18')">
   <p data-design-node="vn-25" v-if="model.visible('vn-25')" :style="model.style('vn-25')">{{ model.text('vn-25') }}</p>
   <h1 data-design-node="vn-14" v-if="model.visible('vn-14')">{{ model.text('vn-14') }}</h1>
-  <SearchField data-design-node="vn-10" v-if="model.visible('vn-10')" v-bind="model.props('vn-10')" :design-state="model.state.value === 'default' ? undefined : model.state.value" v-on="model.on('vn-10')">
+  <SearchField data-design-node="vn-10" v-if="model.visible('vn-10')" :aria-description="model.a11y('vn-10')" v-bind="model.props('vn-10')" :design-state="model.state.value === 'default' ? undefined : model.state.value" v-on="model.on('vn-10')">
     <template #actions>
       <UButton data-design-node="vn-11" v-if="model.visible('vn-11')" v-bind="model.props('vn-11')" v-on="model.on('vn-11')"></UButton>
     </template>

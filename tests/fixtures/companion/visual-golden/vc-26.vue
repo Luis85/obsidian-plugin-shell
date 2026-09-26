@@ -19,17 +19,17 @@ const model = useVisual(spec, props, request => emit('interaction', request), (n
 </script>
 <template>
 <section :ref="model.attach" :style="model.theme.value" class="generated-detail" data-design-document="vc-26" :data-design-state="model.state.value" :aria-label="spec.exportName" :aria-busy="model.state.value === 'loading'">
-<section data-design-node="vn-27" v-if="model.visible('vn-27')" v-bind="model.attrs('vn-27')" v-on="model.on('vn-27')">
-  <div data-design-node="vn-28" v-if="model.visible('vn-28')" :style="model.style('vn-28')">
+<section data-design-node="vn-27" v-if="model.visible('vn-27')" :aria-description="model.a11y('vn-27')" v-bind="model.attrs('vn-27')" v-on="model.on('vn-27')">
+  <div data-design-node="vn-28" v-if="model.visible('vn-28')" :style="model.style('vn-28')" :aria-description="model.a11y('vn-28')">
     <slot name="toolbar">
       <span data-design-node="vn-29" v-if="model.visible('vn-29')">{{ model.text('vn-29') }}</span>
     </slot>
   </div>
-  <div data-design-node="vn-30" v-if="model.visible('vn-30')" class="generated-external" :ref="model.external('vn-30', createAdapter_0)" />
+  <div data-design-node="vn-30" v-if="model.visible('vn-30')" :aria-description="model.a11y('vn-30')" class="generated-external" :ref="model.external('vn-30', createAdapter_0)" />
   <input data-design-node="vn-32" v-if="model.visible('vn-32')" v-bind="model.attrs('vn-32')" v-on="model.on('vn-32')" />
-  <UCard data-design-node="vn-34" v-if="model.visible('vn-34')" v-bind="model.props('vn-34')" v-on="model.on('vn-34')">
+  <UCard data-design-node="vn-34" v-if="model.visible('vn-34')" :aria-description="model.a11y('vn-34')" v-bind="model.props('vn-34')" v-on="model.on('vn-34')">
     <template #header>
-      <h3 data-design-node="vn-35" v-if="model.visible('vn-35')">{{ model.text('vn-35') }}</h3>
+      <h3 data-design-node="vn-35" v-if="model.visible('vn-35')" :aria-description="model.a11y('vn-35')">{{ model.text('vn-35') }}</h3>
     </template>
   </UCard>
 </section>
