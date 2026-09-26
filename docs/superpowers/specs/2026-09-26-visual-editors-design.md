@@ -285,7 +285,19 @@ Subagent-driven; each stage ends green on its own checks.
    `workflow-model.js`, `workflow-views.js`).
 6. Docs; full `verify`, browser suites, all qualify jobs; PR #5 update.
 
-## 11. Risks
+## 11. Refinements made while planning
+
+1. `state` ValueExpression is `{kind:'state', nodeId}`: the current value of a form control in the same definition.
+2. `emit.payload` and `source.input` use the existing payload Mapping (`none|event|value|draft|prop|source|object`), not a bare ValueExpression.
+3. ComponentDefinition gains optional `notes` (≤ 8000); ComponentRevision gains optional `designSystem` snapshot, so migration loses only geometry.
+4. Catalog and project component nodes accept DOM events (`click, focus, blur, keydown, change, input, submit`) in addition to declared emits (Vue attribute fallthrough).
+5. Slot nodes are valid only in component templates and layouts; applying a layout turns its slot nodes into named `div` regions containing their fallback.
+6. Catalog prop types are `string|number|boolean|array|object|unknown`; array/object/unknown props take bounded JSON literals.
+7. `detail-contract.mjs` and `composition-contract.mjs` stay as legacy-input validators and layout/style helpers; only editor and compiler modules are removed.
+8. Removing an element that other interactions or state bindings reference is refused with the referencing list; scenario values of removed elements are pruned.
+9. Migrating saved browser state clears the design undo/redo history (legacy snapshots are not replayable) and says so.
+
+## 12. Risks
 
 - Generator rewrite breaks starter qualification → stage 2 runs `qualify-starter` on migrated
   starters before stage 4 commits them.
