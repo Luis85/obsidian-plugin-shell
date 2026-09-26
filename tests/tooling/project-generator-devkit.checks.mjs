@@ -19,11 +19,13 @@ const files = new Map(entries.map(entry => [entry.path, entry]));
 const text = path => { const entry = files.get(path); assert.ok(entry, `missing ${path}`); return entry.content; };
 const identity = projectModel(document).project;
 
-test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and maintainer CI move to inert reference', () => {
+test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and maintainer CI move to inert reference', async () => {
   const readme = text('README.md');
   assert.match(readme, new RegExp(`^# ${identity.name}\\n`)); assert.match(readme, /npm run check/); assert.match(readme, /npm run dev:obsidian/);
-  assert.doesNotMatch(readme, /Framework lifecycle and recovery increment/);
-  assert.match(text('docs/framework/README.md'), /Framework lifecycle and recovery increment/);
+  // The framework README differs per checkout (examples:remove rewrites it), so compare against the actual one.
+  const frameworkHeading = (await readFile(join(root, 'README.md'), 'utf8')).split('\n')[0];
+  assert.match(frameworkHeading, /^# /); assert.notEqual(readme.split('\n')[0], frameworkHeading);
+  assert.equal(text('docs/framework/README.md').split('\n')[0], frameworkHeading);
   for (const name of ['TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md']) { assert.ok(!files.has(name)); assert.ok(files.has(`docs/framework/${name}`)); }
   const agents = text('AGENTS.md').split('\n');
   assert.ok(agents.length >= 60 && agents.length <= 120, `AGENTS.md has ${agents.length} lines`);
