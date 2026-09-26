@@ -19,6 +19,9 @@ In a terminal, `npm run new` without arguments asks for the folder, starter and
 identity, then shows the plan before writing. The result is scaffolding with TODO
 acceptance obligations, not a finished or natively qualified plugin. Details:
 [Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).
+The new project has its own README and short `AGENTS.md`, Claude Code hooks, skills
+and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
+([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
 
 `node shell.mjs help` shows the golden path (new, install, dev, test, check, make).
 `npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`

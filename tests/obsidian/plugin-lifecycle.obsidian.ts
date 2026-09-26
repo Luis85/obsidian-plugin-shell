@@ -26,6 +26,11 @@ describe('plugin unload and reload in real Obsidian', () => {
     expect(reenabled.loaded).toBe(true);
     // The retained leaves are reattached, not duplicated, and render again.
     await expect.poll(snapshot).toMatchObject({ loaded: true, commands: loaded.commands, registeredViews: [...types], leaves: types.length });
+    // Obsidian 1.7+ defers background tabs: a restored leaf renders when it is shown, like a user
+    // selecting the tab. Load each one explicitly instead of assuming every tab is visible.
+    await obsidian.eval(async ({ app }, viewTypes) => {
+      for (const type of viewTypes) for (const leaf of app.workspace.getLeavesOfType(type)) await leaf.loadIfDeferred();
+    }, types);
     await expect.poll(async () => (await snapshot()).viewDom >= types.length, { message: 'restored leaves render plugin DOM' }).toBe(true);
     const restored = await snapshot();
     await writeEvidence(obsidian.directory, 'lifecycle-snapshots', { loaded, unloaded, restored });

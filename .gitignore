@@ -17,6 +17,8 @@ node-qualified
 .native-cache/
 .nq/
 .obsidian-sandbox/
+# Personal Claude Code overrides; the shared .claude/settings.json is committed.
+.claude/settings.local.json
 
 .shell-build-lock/
 .shell-build-*/
