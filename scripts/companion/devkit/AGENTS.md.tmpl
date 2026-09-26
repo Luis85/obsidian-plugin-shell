@@ -1,0 +1,102 @@
+# Agent instructions: {{name}}
+
+Obsidian plugin (`{{id}}`) built on the Plugin Shell: TypeScript, Vue 3, Pinia,
+Nuxt UI, Vite, Vitest. Node and npm versions are pinned in `.nvmrc` and
+`package.json`; install with `npm ci` only.
+
+## Definition of done
+
+Run these before you claim a change works, and show the output:
+
+1. `npm run check` passes (typecheck, lint, product tests). During iteration use
+   `npm run check -- --fast` (typecheck + tests related to changed files).
+2. For behaviour that touches the host (commands, views, settings, vault writes):
+   `npm run -s dev:obsidian -- --json` reports `"status": "passed"` and no `errors`.
+3. For lifecycle or host-API changes also run `npm run test:obsidian`.
+4. Before a pull request: `npm run verify:project` (what CI runs).
+
+Never report success from reading code alone. If a check cannot run here (for
+example no display or no downloaded Obsidian), say so explicitly.
+
+## Project map
+
+- `{{sourceRoot}}/`: generated product code (domain, application use cases,
+  sources, Pinia stores, Vue screens). Edit freely; regeneration keeps edits and
+  reports conflicts instead of overwriting.
+- `src/features/<name>/`: hand-written features using only `src/features/api.ts`.
+- `src/main.ts`: lifecycle composition only (at most 100 code lines).
+- `{{testRoot}}/`: product tests; `acceptance/` has one TODO test per requirement.
+- `tests/obsidian/`: real-Obsidian specs and the fixture vault they copy.
+- `design/traceability.json`: requirements with acceptance text, implementation
+  path, test path and `verification` status. `design/project.json` is the design.
+- The rest of `src/`, `scripts/` and `tests/` is the shell framework. Change it only
+  when a product need cannot be met through its APIs.
+
+## Architecture rules
+
+- Domain and application code are framework-free: no imports from `obsidian`, Vue,
+  Pinia, browser or Node APIs, or concrete adapters.
+- Features depend only on feature/application/domain contracts via
+  `src/features/api.ts`; host UI goes through `services.modals` and
+  `services.notices`, never `new Notice()`/`new Modal()` in feature code.
+- Every `.vue` file lives under `src/presentation/components` or the generated
+  `presentation/components`; keep SFC scripts to imports, props and composable
+  bindings. Behaviour goes in TypeScript composables, per-view state in stores.
+- Application services own canonical data; Markdown notes stay canonical for
+  note-backed entities. Preserve note IDs, unrelated frontmatter and body bytes.
+- Publish events only after a successful write. No global singletons.
+- File size: at most 400 code lines per runtime/script/CSS file and 450 per test
+  file. Split files by responsibility instead of compressing code.
+- Do not weaken lint rules, thresholds or tests, and do not use unsafe casts.
+
+## Test-driven loop for a requirement
+
+1. Pick a requirement in `design/traceability.json` (`verification: "todo"`).
+2. Replace the `it.todo` in its `test` file with a failing behavioural assertion
+   (`npm run test:tdd` watches the acceptance folder).
+3. Implement the use case at its `implementation` path until the test passes.
+4. `npm run check`, then verify in real Obsidian when the host is involved.
+5. Set `verification` to `"implemented"` only after the test really passes.
+
+Unit tests that need Obsidian use the in-memory kit:
+`vi.mock('obsidian', () => import('@test/obsidian'))` plus `createTestApp()`.
+A bare `obsidian` import in tests throws on purpose. DOM tests need
+`// @vitest-environment happy-dom`. Example: `{{testRoot}}/plugin-host.test.ts`.
+Guide: `docs/testing/OBSIDIAN-TEST-KIT.md`.
+
+## Verify in real Obsidian
+
+`npm run -s dev:obsidian -- --json` builds with inline source maps, launches the
+contained sandbox vault, reloads the plugin once and prints one JSON summary:
+`status`, `errors` (deduplicated, with `src/...` frames), `pluginConsole`,
+`commands`, and paths to `last-run.png` (screenshot), `dev.log` and
+`debug-report.json` under `.obsidian-sandbox/logs/`. Read those files for detail.
+Exit code 2 means Obsidian is not provisioned: ask before adding
+`--allow-download`. Specs: `tests/obsidian/*.obsidian.ts`, run with
+`npm run test:obsidian -- <filter>`; evidence lands in `reports/obsidian/`.
+Guide: `docs/testing/OBSIDIAN-DEV-LOOP.md`.
+
+## Logging and debugging
+
+Use the structured logger with declared catalogs and safe metadata
+(`docs/development/LOGGING-AND-DEBUGGING.md`). Never log note content, file paths
+or raw error causes. The `debug-toggle` and `debug-report` commands expose debug
+records; the dev loop enables them automatically.
+
+## Safety
+
+- Only open contained vaults inside this folder (`.obsidian-sandbox/`, `.nq/`,
+  `tests/obsidian/vault`). Never point any tool at a personal vault.
+- Do not commit `.obsidian-sandbox/`, `.native-cache/`, `.native-runner/`,
+  `reports/` or `dist/`.
+- Do not publish, tag, push with force, run `release:operate` or install global
+  packages unless the user explicitly asks.
+- Code generators preview first: run `npm run make -- <maker> <name> --dry-run`,
+  review, then apply with `--yes`.
+
+## When stuck
+
+- `npm run doctor` for toolchain problems; `node shell.mjs help` for commands.
+- `README.md` for the command overview; `docs/development/BUILD-A-FEATURE.md`
+  for feature structure; `docs/framework/AGENTS.md` for the framework's full
+  maintainer policy (reference only).

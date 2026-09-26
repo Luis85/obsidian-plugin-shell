@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm test *)",
+      "Bash(npm run check)",
+      "Bash(npm run check *)",
+      "Bash(npm run -s check *)",
+      "Bash(npm run test *)",
+      "Bash(npm run test:watch *)",
+      "Bash(npm run test:tdd *)",
+      "Bash(npm run test:obsidian)",
+      "Bash(npm run test:obsidian *)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run typecheck:project)",
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "Bash(npm run verify:project)",
+      "Bash(npm run test:ui-effects)",
+      "Bash(npm run testdata:check)",
+      "Bash(npm run doctor)",
+      "Bash(npm run -s dev:obsidian -- --json)",
+      "Bash(npm run dev:obsidian -- --json)",
+      "Bash(npx vitest related *)",
+      "Bash(npx vitest run *)",
+      "Bash(node shell.mjs help *)",
+      "Bash(node shell.mjs status *)",
+      "Bash(node shell.mjs doctor *)",
+      "Bash(node shell.mjs make * --dry-run *)",
+      "Bash(npm run make -- --list)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)"
+    ],
+    "deny": [
+      "Bash(npm publish *)",
+      "Bash(npm run release*)",
+      "Bash(node shell.mjs release *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f *)",
+      "Bash(npm install -g *)",
+      "Bash(npm i -g *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/scripts/agent/post-edit-tests.mjs"],
+            "timeout": 150
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/scripts/agent/stop-check.mjs"],
+            "timeout": 330
+          }
+        ]
+      }
+    ]
+  }
+}

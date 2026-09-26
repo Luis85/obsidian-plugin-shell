@@ -40,15 +40,19 @@ export async function enablePlugin(page, id, options) {
   const state = await waitForPlugin(page, id, options);
   return { ...state, durationMs: Date.now() - started, viewTypes: [...new Set(registered)].sort() };
 }
-/** Hot reload: disable then enable re-reads main.js/styles.css from the vault plugin folder. */
+/** Hot reload: disable then enable re-reads main.js/styles.css from the vault plugin folder.
+ * The host's non-persistent disablePlugin drops the id from enabledPlugins and enablePlugin does not
+ * restore it, so a persisted enablement is re-recorded (and saved) instead of silently lost. */
 export async function reloadPlugin(page, id, options) {
   const started = Date.now(); let error = null;
   try {
     await page.evaluate(async pluginId => {
       const plugins = window.app.plugins;
+      const persisted = plugins.enabledPlugins.has(pluginId);
       await plugins.disablePlugin(pluginId);
       await plugins.loadManifests();
-      await plugins.enablePlugin(pluginId);
+      if (persisted) await plugins.enablePluginAndSave(pluginId);
+      else await plugins.enablePlugin(pluginId);
     }, id);
   } catch (failure) { if (options?.required !== false) throw failure; error = failure.message; }
   const state = await waitForPlugin(page, id, options);

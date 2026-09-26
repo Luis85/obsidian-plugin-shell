@@ -9,6 +9,7 @@ import { createRebuildLoop, watchTree } from '../../scripts/dev/rebuild-loop.mjs
 import { stagedBuild } from '../../scripts/bundling/staged-build.mjs';
 import { licenseNotices } from '../../scripts/bundling/license-notices.mjs';
 import { installLocal } from '../../scripts/dev/install-local.mjs';
+import { reloadPlugin } from '../../scripts/testing/obsidian-plugin-control.mjs';
 
 async function workspace(t) {
   const root = await mkdtemp(join(tmpdir(), 'obsidian dev ü-')); t.after(() => rm(root, { recursive: true, force: true }));
@@ -138,4 +139,27 @@ test('[OBSIDIAN-DEV-08] the license banner shifts only dev inline source maps; r
   const shifted = JSON.parse(Buffer.from(/base64,([A-Za-z0-9+/=]+)/.exec(dev.code)[1], 'base64').toString('utf8'));
   assert.equal(shifted.mappings, `${';'.repeat(banner.split('\n').length - 1)}AAAA`);
   assert.ok(dev.code.startsWith(`${banner}x;\n//# sourceMappingURL=`));
+});
+/** Obsidian's plugin manager as observed in 1.13: the plain disable drops the id from the enabled set,
+ * the plain enable loads without recording it, and only the *AndSave variants persist the set. */
+function hostPage(enabled) {
+  const saved = [[...enabled]]; const loaded = new Set(enabled);
+  const plugins = { enabledPlugins: new Set(enabled), manifests: { 'my-plugin': { version: '1.0.0' } }, plugins: {},
+    async disablePlugin(id) { loaded.delete(id); this.enabledPlugins.delete(id); },
+    async loadManifests() {},
+    async enablePlugin(id) { loaded.add(id); return true; },
+    async enablePluginAndSave(id) { await this.enablePlugin(id); this.enabledPlugins.add(id); saved.push([...this.enabledPlugins]); return true; } };
+  Object.defineProperty(plugins.plugins, 'my-plugin', { enumerable: true, get: () => ({ _loaded: loaded.has('my-plugin') }) });
+  const page = { evaluate: async (fn, arg) => { globalThis.window = { app: { plugins } }; try { return await fn(arg); } finally { delete globalThis.window; } } };
+  return { page, saved };
+}
+test('[OBSIDIAN-DEV-09] a hot reload keeps a persisted enablement enabled and saved, and never persists a transient one', async () => {
+  const persisted = hostPage(['other', 'my-plugin']);
+  const reload = await reloadPlugin(persisted.page, 'my-plugin', { timeout: 500 });
+  assert.deepEqual({ loaded: reload.loaded, enabled: reload.enabled, error: reload.error }, { loaded: true, enabled: true, error: null });
+  assert.deepEqual(persisted.saved.at(-1), ['other', 'my-plugin']);
+  const transient = hostPage(['other']);
+  const again = await reloadPlugin(transient.page, 'my-plugin', { timeout: 500 });
+  assert.deepEqual({ loaded: again.loaded, enabled: again.enabled }, { loaded: true, enabled: false });
+  assert.deepEqual(transient.saved, [['other']]);
 });

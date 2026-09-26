@@ -1,0 +1,115 @@
+# {{name}}
+
+{{description}}
+
+An Obsidian plugin generated from the Plugin Shell starter kit (Vue 3, Pinia, Nuxt UI,
+Vite, Vitest, Playwright). The scaffold builds and its tests pass; the product
+requirements in `design/traceability.json` are still TODO until you implement them.
+
+## Quick start
+
+```sh
+nvm use                  # Node from .nvmrc (npm 11.19.1)
+npm ci                   # exact lockfile install
+npm run check            # typecheck + lint + project tests: your definition of done
+npm run test:watch       # Vitest watch mode for the product tests
+npm run dev:obsidian -- --allow-download   # real Obsidian sandbox: build, hot reload, logs
+npm run test:obsidian    # real-Obsidian E2E suite (fresh contained vault per test)
+```
+
+The first `dev:obsidian`/`test:obsidian` run needs `--allow-download` (or
+`OBSIDIAN_ALLOW_DOWNLOAD=1`) to fetch the pinned Obsidian host into `.native-cache/`.
+Nothing is downloaded without that opt-in, and only contained vaults inside this
+folder are ever opened.
+
+## Commands
+
+| Daily loop | What it does |
+| --- | --- |
+| `npm run test:watch` | Product tests in watch mode (`vitest.project.config.mjs`) |
+| `npm run test:tdd` | Watch only the acceptance tests generated from your requirements |
+| `npm run dev:obsidian` | Build with inline source maps, launch the sandbox vault, hot-reload on save, stream logs |
+| `npm run -s dev:obsidian -- --json` | One build/launch/reload iteration with a JSON summary (errors, logs, screenshot) |
+| `npm run dev:ui` | Browser harness for the Vue UI, without Obsidian |
+| `npm run make -- --list` | Code generators (features, entities, commands, events); preview with `--dry-run` |
+
+| Gates | What it proves |
+| --- | --- |
+| `npm run check` | Fast gate: typecheck, lint and product tests (`check -- --fast` = changed files only) |
+| `npm test` | All product tests once |
+| `npm run test:obsidian` | The built plugin loads, registers and unloads in real Obsidian |
+| `npm run verify:project` | Build, typecheck, product and UI-effect tests (what CI runs) |
+| `npm run build` | Release bundle in `dist/` (`main.js`, `styles.css`, `manifest.json`) |
+| `npm run doctor` | Toolchain and configuration diagnostics |
+
+`npm run verify` is the inherited full framework gate (coverage, analyzers, baselines).
+It is much slower and is not required for day-to-day product work.
+
+## Where code lives
+
+| Path | Contents |
+| --- | --- |
+| `{{sourceRoot}}/` | Generated product code: domain, application use cases, sources, stores, Vue screens |
+| `src/features/` | Hand-written features on the shell API (`src/features/api.ts`) |
+| `src/main.ts` | Plugin entry; lifecycle composition only |
+| `{{testRoot}}/` | Product tests; `acceptance/` holds one TODO test per requirement |
+| `tests/obsidian/` | Real-Obsidian specs (`*.obsidian.ts`) and their fixture vault |
+| `design/` | The design export, requirement traceability and design system |
+| `src/` (rest) | The reusable shell foundation: services, adapters, logging, UI kit |
+
+Agent and editor setup: `AGENTS.md` (all coding agents), `CLAUDE.md` and `.claude/`
+(Claude Code hooks, permissions and skills), `.vscode/` (debugging, tasks, extensions).
+
+## Testing layers
+
+1. **Unit and service tests** (node, milliseconds): domain and application code.
+2. **In-memory Obsidian** (`@test/obsidian`): load the real plugin, run commands,
+   open views and settings against a fake vault/workspace. Opt in per file with
+   `vi.mock('obsidian', () => import('@test/obsidian'))`; a bare `obsidian` import
+   otherwise throws on purpose. Example: `{{testRoot}}/plugin-host.test.ts`.
+   Guide: [Obsidian test kit](docs/testing/OBSIDIAN-TEST-KIT.md).
+3. **Components** with `// @vitest-environment happy-dom` and `@vue/test-utils`.
+4. **Real Obsidian** (`npm run test:obsidian`): Playwright over the DevTools protocol
+   against a downloaded Obsidian, with screenshots, console logs and JUnit output in
+   `reports/obsidian/`. Guide: [dev loop and E2E](docs/testing/OBSIDIAN-DEV-LOOP.md).
+
+The in-memory host is a fast approximation, not Obsidian. Behaviour that depends on
+the real host belongs in a `tests/obsidian/*.obsidian.ts` spec.
+
+## Logging and debugging
+
+- `npm run dev:obsidian` streams plugin console output and uncaught errors to the
+  terminal and appends everything to `.obsidian-sandbox/logs/dev.log`. Stack frames
+  are mapped back to `src/...:line:column`.
+- The plugin's structured logger records only at debug level when enabled. The dev
+  loop runs the **Toggle debug logging** command (`debug-toggle`) after each load;
+  **Inspect debug report** (`debug-report`) shows the redacted records. The `--json`
+  run saves them to `.obsidian-sandbox/logs/debug-report.json`.
+- Breakpoints: while `dev:obsidian` runs, use the VS Code launch configuration
+  **Attach to Obsidian (dev:obsidian)** (port 9222) or `chrome://inspect`. Dev
+  builds carry inline source maps; release builds in `dist/` do not.
+- Tests: **Debug current Vitest file** in VS Code, or `npm run test:watch`.
+
+See [logging and debugging](docs/development/LOGGING-AND-DEBUGGING.md).
+
+## Working with coding agents
+
+`AGENTS.md` lists the commands that define "done", the architecture rules and the
+safety rules. Claude Code additionally gets a PostToolUse hook that runs the tests
+related to each edited file, a Stop hook that runs `npm run check -- --fast`, a
+permission allowlist for the safe commands, and skills (`implement-requirement`,
+`debug-in-obsidian`, `add-feature`, `write-obsidian-test`) in `.claude/skills/`.
+
+## What is and is not done
+
+- Done: a buildable, testable scaffold with typed sources, stores, screens,
+  navigation and one TODO acceptance test per requirement.
+- Not done: the product behaviour behind each requirement, native qualification on
+  other Obsidian versions or platforms, mobile support and store submission.
+
+## Links
+
+- [Implementation workspace notes](PROJECT-IMPLEMENTATION.md)
+- [Build a feature](docs/development/BUILD-A-FEATURE.md) and [makers](docs/development/SETUP-AND-MAKERS.md)
+- [Framework guide](docs/development/FRAMEWORK-GUIDE.md) and [framework CLI](docs/development/FRAMEWORK-CLI.md)
+- [Framework README](docs/framework/README.md) and [maintainer rules](docs/framework/AGENTS.md) (reference)
