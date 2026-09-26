@@ -297,6 +297,42 @@ Subagent-driven; each stage ends green on its own checks.
 8. Removing an element that other interactions or state bindings reference is refused with the referencing list; scenario values of removed elements are pruned.
 9. Migrating saved browser state clears the design undo/redo history (legacy snapshots are not replayable) and says so.
 
+## 13. Component library dependencies (owner request, 2026-09-26)
+
+Use case: a reusable component that wraps a third-party library, e.g. a rich-text or code editor.
+Decision: **declared dependency + typed, hand-owned adapter**; no library-specific presets.
+
+**Data.** `ComponentDefinition.dependencies?: { package, version, purpose }[]` (≤ 8, unique `package`).
+`package` must match the npm name grammar `^(@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$` (≤ 214 chars);
+`version` must be an exact version `^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$` — no ranges, tags, URLs, git or file
+specifiers; `purpose` ≤ 400 chars. The same package must have the same version in every component (validation
+error names both components). Published revisions snapshot `dependencies`. No code is persisted.
+
+**IR.** New node kind `external { id, kind:'external', package, adapter, props: Record<string, ValueExpression>,
+events: Interaction[] }` plus the common fields. Valid only in component templates (and their revisions);
+`package` must be declared in that component's `dependencies`; `adapter` matches `^[a-z][a-z0-9-]*$` and is unique
+per component; props take any ValueExpression (bounded JSON literals allowed); events are free names matching
+`^[a-zA-Z][a-zA-Z0-9:_-]*$` because the adapter defines them. Removing a dependency still used by an external node
+is refused, naming the adapter.
+
+**Generator.** Declared packages are merged into the generated project's `package.json` `dependencies` with the
+exact version; a conflict with a version the framework already pins (or between components) stops generation with
+both versions named. Each external node produces an extension-owned adapter file
+`presentation/components/library/<libraryId>/<adapter>.adapter.ts` exporting
+`createAdapter(): VisualExternalAdapter<Props>` with `mount(el, props, emit)`, `update(props)`, `destroy()` stubs
+that throw `NotImplementedError` and a comment naming the package to import. Regeneration never overwrites an
+edited adapter (existing ownership receipts). The wrapper SFC renders a mount element bound through
+`model.external('<id>', createAdapter)`; the runtime mounts after render, calls `update` on prop changes and
+`destroy` on unmount, and routes adapter `emit` calls to the node's interactions. Generated tests include an
+`it.todo` per adapter and a runtime lifecycle test with a fake adapter. Installing the packages remains the
+developer's (or qualification's) explicit `npm install`; licenses are the author's responsibility and are listed
+in the generated `PROJECT-IMPLEMENTATION.md`.
+
+**Concept.** Component inspector gains a **Dependencies** tab (add/edit/remove package, version, purpose);
+Insert child gains **External library** (choose a declared dependency, name the adapter); the canvas shows a
+dashed placeholder “External · <package>@<version> · adapter <name>” with its props; Review lists an info finding
+“Adapter must be implemented in code”. No migration is needed (new optional data).
+
 ## 12. Risks
 
 - Generator rewrite breaks starter qualification → stage 2 runs `qualify-starter` on migrated

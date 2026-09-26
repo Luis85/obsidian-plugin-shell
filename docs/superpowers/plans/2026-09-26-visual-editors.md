@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Node 24.21.0 / npm 11.19.1 with the exact package-lock; no new dependencies.
+- Node 24.21.0 / npm 11.19.1 with the exact package-lock; no new dependencies in this repository. Generated projects may receive author-declared, exact-pinned dependencies (spec §13) — never ranges, URLs, git or file specifiers.
 - Handwritten runtime/CSS/scripts ≤ 400 code lines per file; tests/helpers ≤ 450; count nonblank code lines excluding comments (`npm run check:source` enforces this for `scripts/`, `tests/`).
 - Concept stays one offline `index.html`: CSP unchanged (`default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`), no network, no new vendor files.
 - All `scripts/companion/visual/*.mjs` are concatenated into ONE concept script scope: every top-level name must be globally unique (use the per-file prefixes given below), every `import` must be a single line starting with `import `, exports only via `export const` / `export function`.
@@ -62,7 +62,7 @@ Delete (Task 20): concept `src/detail-*.js`, `src/composition-*.js`, `detail.css
 
 ## Execution order
 
-Tasks 1 → 7 sequential (contract freeze after Task 7). Then Tasks 8–11 (generator) and 12–18 (concept) may run in parallel; they share only the frozen contract — any contract change goes back through the coordinator. Tasks 19 → 21 sequential after both tracks.
+Tasks 1 → 5 → 5b → 6 → 7 sequential (contract freeze after Task 7). Then Tasks 8–11 (generator) and 12–18 (concept) may run in parallel; they share only the frozen contract — any contract change goes back through the coordinator. Tasks 19 → 21 sequential after both tracks.
 
 ---
 
@@ -1167,6 +1167,126 @@ export function visualTestSource(definition: PageDefinition | ComponentDefinitio
 
 ---
 
+### Task 5b: Component dependencies and external nodes (spec §13)
+
+**Files:**
+- Modify: `scripts/companion/visual/visual-ir.mjs`, `visual-ir.d.mts`, `visual-validate.mjs`, `visual-commands.mjs`
+- Create: `tests/tooling/visual-dependencies.checks.mjs`
+
+**Interfaces:**
+- Consumes: Tasks 1–5.
+- Produces: `VISUAL_DEPENDENCY_LIMIT = 8`; `visualIsPackage(value) → boolean`; `visualIsExactVersion(value) → boolean`; `visualExternal(id, packageName, adapter, extra?) → ExternalNode` (`{ id, kind:'external', package, adapter, props:{}, events:[], ...extra }`); `visualSetDependencies(store, componentId, dependencies)`; `ComponentDefinition.dependencies?: Dependency[]`, `ComponentRevision.dependencies?: Dependency[]`, `Dependency = { package: string; version: string; purpose: string }`, `ExternalNode` in the `UiNode` union (d.mts). `visualPublish` snapshots `dependencies` when present. `visualUpdateNode` accepts patch key `adapter`.
+
+- [ ] **Step 1: Failing tests** — `tests/tooling/visual-dependencies.checks.mjs`
+
+```js
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { visualExternal, visualLiteral, visualNodes, visualIsPackage, visualIsExactVersion } from '../../scripts/companion/visual/visual-ir.mjs';
+import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
+import { visualSetDependencies, visualPublish, visualDuplicateNode } from '../../scripts/companion/visual/visual-commands.mjs';
+import { visualSession, visualTransition, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
+const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-v5.json', 'utf8'));
+function withEditor() {
+  const s = structuredClone(seed), c = s.components[0];
+  c.dependencies = [{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text editing' }];
+  const node = visualExternal(`vn-${s.nextId++}`, '@tiptap/vue-3', 'editor', { name: 'Editor', props: { content: { kind: 'prop', name: 'query' }, toolbar: visualLiteral(['bold', 'italic']) } });
+  node.events = [{ id: `vi-${s.nextId++}`, event: 'update', label: 'Content changed', notes: '', acceptance: '', actions: [{ kind: 'emit', event: 'search', payload: { kind: 'event' } }] }];
+  c.template[0].children.push(node);
+  return { s, c, node };
+}
+test('predicates accept exact npm names and versions only', () => {
+  for (const ok of ['@tiptap/vue-3', 'codemirror', 'monaco-editor', '@codemirror/lang-markdown']) assert.equal(visualIsPackage(ok), true, ok);
+  for (const bad of ['Tiptap', 'github:x/y', 'https://x.y/z.tgz', '../local', '.hidden', 'a'.repeat(215), '@scope/', 'file:../x']) assert.equal(visualIsPackage(bad), false, bad);
+  for (const ok of ['2.11.5', '1.0.0-beta.1']) assert.equal(visualIsExactVersion(ok), true, ok);
+  for (const bad of ['^2.11.5', '~1.0.0', 'latest', '2.x', '>=1', '1.0', '']) assert.equal(visualIsExactVersion(bad), false, bad);
+});
+test('a wrapper component with a declared dependency and external node is valid', () => { const { s } = withEditor(); validateVisualDesigns(s); });
+const rejects = [
+  ['range version', ({ c }) => { c.dependencies[0].version = '^2.11.5'; }, /exact version/],
+  ['git specifier', ({ c }) => { c.dependencies[0].package = 'github:ueberdosis/tiptap'; }, /npm package/],
+  ['duplicate package', ({ c }) => { c.dependencies.push({ ...c.dependencies[0] }); }, /duplicate dependency/],
+  ['too many dependencies', ({ c }) => { c.dependencies = Array.from({ length: 9 }, (_, i) => ({ package: 'pkg-' + i, version: '1.0.0', purpose: '' })); }, /at most 8 dependencies/],
+  ['undeclared package', ({ node }) => { node.package = 'codemirror'; }, /codemirror is not a declared dependency/],
+  ['bad adapter name', ({ node }) => { node.adapter = 'Editor Adapter'; }, /adapter name/],
+  ['duplicate adapter', ({ c, node, s }) => { c.template[0].children.push({ ...structuredClone(node), id: `vn-${s.nextId++}`, events: [] }); }, /adapter "editor" is used twice/],
+  ['external in page', ({ s, node }) => { s.pages[0].root.push({ ...structuredClone(node), id: `vn-${s.nextId++}`, events: [] }); }, /external libraries belong in component templates/],
+  ['version conflict across components', ({ s, c }) => { const b = structuredClone(c); b.id = `vc-${s.nextId++}`; b.libraryId = 'library-b'; b.exportName = 'Other'; b.template = []; b.dependencies = [{ package: '@tiptap/vue-3', version: '2.10.0', purpose: '' }]; s.components.push(b); }, /@tiptap\/vue-3 is pinned to 2.11.5 in SearchField and 2.10.0 in Other/],
+];
+for (const [name, change, pattern] of rejects) test('rejects ' + name, () => { const ctx = withEditor(); change(ctx); assert.throws(() => validateVisualDesigns(ctx.s), pattern); });
+test('removing a dependency still used by an adapter is refused; unused removal works', () => {
+  const { s, c } = withEditor();
+  assert.throws(() => visualSetDependencies(s, c.id, []), /Still used by adapter "editor"/);
+  c.template[0].children.pop(); visualSetDependencies(s, c.id, []); assert.deepEqual(c.dependencies, []); validateVisualDesigns(s);
+});
+test('publish snapshots dependencies; duplicating an external node yields a duplicate adapter that validation rejects', () => {
+  const { s, c, node } = withEditor();
+  const r = visualPublish(s, c.id, '1.1.0'); assert.deepEqual(r.dependencies, c.dependencies);
+  validateVisualDesigns(s);
+  const copy = visualDuplicateNode(s, { kind: 'component', id: c.id }, node.id);
+  assert.notEqual(copy.id, node.id);
+  assert.throws(() => validateVisualDesigns(s), /adapter "editor" is used twice/);
+});
+test('external nodes participate in visibility and transitions', () => {
+  const { c, node } = withEditor();
+  assert.equal(visualVisible(c, visualSession(), node.id), true);
+  const next = visualTransition(c, visualSession(), node.id, node.events[0].id);
+  assert.deepEqual(next.emitted.map(e => e.name), ['search']);
+  assert.equal(visualNodes(c.template).filter(n => n.kind === 'external').length, 1);
+});
+```
+
+- [ ] **Step 2: Run** `node --test tests/tooling/visual-dependencies.checks.mjs` — Expected: FAIL (`visualExternal` not exported).
+
+- [ ] **Step 3: `visual-ir.mjs` additions** (append; keep existing exports unchanged)
+
+```js
+export const VISUAL_DEPENDENCY_LIMIT = 8;
+export function visualIsPackage(value) { return typeof value === 'string' && value.length <= 214 && /^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(value); }
+export function visualIsExactVersion(value) { return typeof value === 'string' && value.length <= 64 && /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(value); }
+export function visualExternal(id, packageName, adapter, extra = {}) { return { id, kind: 'external', package: packageName, adapter, props: {}, events: [], ...extra }; }
+```
+
+- [ ] **Step 4: `visual-validate.mjs` changes**
+  - Add `vvDependencies(list, where)`: assert `Array.isArray(list) && list.length <= VISUAL_DEPENDENCY_LIMIT` (message `where + ': at most 8 dependencies.'`); each item `vvObject(d, ['package','version','purpose'])`; `visualIsPackage(d.package)` else `where + ': ' + JSON.stringify(d.package) + ' is not an npm package name (no URLs, git or file specifiers).'`; `visualIsExactVersion(d.version)` else `where + ': ' + d.package + ' needs an exact version such as 1.2.3, not ' + JSON.stringify(d.version) + '.'`; `visualIsText(d.purpose, 400)`; unique packages else `where + ': duplicate dependency ' + d.package + '.'`.
+  - Components: allow optional key `dependencies` and call `vvDependencies(c.dependencies ?? [], where)`; revisions: allow optional `dependencies`, same check.
+  - Store level (after components): map package → `{ version, exportName }`; on mismatch fail with `pkg + ' is pinned to ' + first.version + ' in ' + first.exportName + ' and ' + version + ' in ' + c.exportName + '.'`.
+  - `vvDefinition` scope gets `dependencies` (the component/revision list, or `[]`), `external` (`true` for component and revision definitions, `false` for pages and layouts) and `adapters: new Set()`.
+  - `vvNode`: keys table adds `external: ['id','kind','package','adapter','props','events']`; add the branch:
+
+```js
+  else if (node.kind === 'external') {
+    visualAssert(scope.external, where + ': external libraries belong in component templates.');
+    visualAssert(scope.dependencies.some(d => d.package === node.package), where + ': ' + node.package + ' is not a declared dependency of this component.');
+    visualAssert(typeof node.adapter === 'string' && /^[a-z][a-z0-9-]*$/.test(node.adapter) && node.adapter.length <= 60, where + ': adapter name must be lowercase kebab-case.');
+    visualAssert(!scope.adapters.has(node.adapter), where + ': adapter "' + node.adapter + '" is used twice.'); scope.adapters.add(node.adapter);
+    visualAssert(visualIsPlain(node.props) && Object.keys(node.props).length <= 40, where + ': invalid props.');
+    for (const [key, value] of Object.entries(node.props)) { visualAssert(visualIsKey(key), where + ': invalid prop name ' + key + '.'); vvValue(value, scope, where + ' :' + key, 'json'); }
+    vvEvents(node, scope, null, where);
+  }
+```
+  `vvValue(..., 'json')` must still accept `prop`/`state`/`source` kinds (only `literal` uses the type argument). `visualChildLists` needs no change (external has no children).
+
+- [ ] **Step 5: `visual-commands.mjs` changes**
+
+```js
+export function visualSetDependencies(store, componentId, dependencies) {
+  const c = vcmdDef(store, { kind: 'component', id: componentId });
+  const used = visualNodes(c.template).filter(n => n.kind === 'external' && !dependencies.some(d => d.package === n.package));
+  visualAssert(!used.length, 'Still used by adapter ' + used.map(n => JSON.stringify(n.adapter)).join(', ') + '. Remove those external elements first.');
+  c.dependencies = structuredClone(dependencies);
+}
+```
+  In `visualPublish` add `...(c.dependencies ? { dependencies: structuredClone(c.dependencies) } : {})` to the revision object. Add `'adapter'` to `vcmdPatchKeys`. `visualClone` needs no change.
+
+- [ ] **Step 6: `visual-ir.d.mts`** — add `export interface Dependency { package: string; version: string; purpose: string }`, `export type ExternalNode = Common & { kind: 'external'; package: string; adapter: string; props: Record<string, ValueExpression>; events: Interaction[] }`, include `ExternalNode` in `UiNode`, add `dependencies?: Dependency[]` to `ComponentDefinition` and `ComponentRevision`, declare `VISUAL_DEPENDENCY_LIMIT`, `visualIsPackage`, `visualIsExactVersion`, `visualExternal`.
+
+- [ ] **Step 7: Run** `npm run test:visual && npm run check:source` — Expected: PASS (all earlier suites unchanged).
+- [ ] **Step 8: Commit** `git commit -m "feat(visual): declare component library dependencies and external adapter nodes"`
+
+---
+
 ### Task 6: Migration from detail designs
 
 **Files:**
@@ -1341,6 +1461,8 @@ Behavior of `useVisual` — port `use-detail.ts` (read it fully first; keep its 
 - `attrs(id)`: resolved `node.attrs` + `'data-design-node': id`.
 - `on(id)`: for each interaction → handler: if every action is local (`set-state|toggle|set-value|focus`) apply `visualTransition` to the reactive session (copy fields back) and move DOM focus via `data-design-node`; `navigate` → `context.navigate(surfaceId)`; `source` → find port, `run(mapDetailPayload(input, …))` with the same pending/error handling as today's action path; `emit` → components call `emitDeclared(event, mapped payload)`, pages record in session; empty actions → `emitInteraction(request)` then `context.handle(request)` (the generated `IMPLEMENTATION_REQUIRED` hook).
 
+**Spec §13 amendment (external nodes):** `useVisual` also returns `external(id, createAdapter)` — a function-ref callback for the mount element: on the first element it calls `createAdapter()` once and `await adapter.mount(el, resolvedProps, (event, payload) => <run the node's interactions for event>)`; a `watch` on the resolved props calls `adapter.update(props)`; scope dispose (and element removal) calls `adapter.destroy()` exactly once; mount/update errors are caught into `message` (never thrown into Vue). Export `interface VisualExternalAdapter<P = Record<string, unknown>> { mount(el: HTMLElement, props: P, emit: (event: string, payload: unknown) => void): void | Promise<void>; update(props: P): void; destroy(): void }` from `visual-runtime.ts`. Add `'external'` to the checked surface names in the test below.
+
 - [ ] **Step 1: Failing test** — create `tests/tooling/project-generator-visual.checks.mjs`:
 
 ```js
@@ -1382,6 +1504,7 @@ test('runtime exposes the IR surface used by generated SFCs', async () => {
   - `visualNuxtImports(nodes): { name: string; path: string }[]` — for each used catalog entry: `{ name: entry.component, path: '@nuxt/ui/components/' + entry.component.slice(1) + '.vue' }`, sorted, unique.
   - `visualContractTypes(component): string` — TS source declaring `ComponentProps` (`name?: type` or required), `ComponentEvents` (`name: [payload: T]`, `void` → `[]`… keep today's `undefined` convention), `ComponentSlots` (`name?: () => unknown`).
   - `visualLibraryWithoutDefinition(m): Row[]` — library entries with no component definition (they keep today's placeholder component).
+  - `visualPackages(m, frameworkDependencies: Record<string,string>): Record<string,string>` — merged exact pins from every component's `dependencies`; throws `VISUAL_INVALID: <package> is pinned to <a> by the framework and <b> by <ExportName>.` on conflict with the template's own `package.json` dependencies/devDependencies (spec §13). Add a test: a fixture component declaring `vue@3.0.0` conflicts; `@tiptap/vue-3@2.11.5` merges.
 
 - [ ] **Step 1: Failing tests** (append)
 
@@ -1425,6 +1548,7 @@ Lowering (every node gets `data-design-node="<id>"`, `v-if="model.visible('<id>'
 | `slot` | `<slot name="<name>">fallback</slot>` (`default` → `<slot>`) |
 | `component` nuxt-ui | `<UButton v-bind="model.props('<id>')" v-on="model.on('<id>')"><template #name>…</template></UButton>` with `import UButton from '@nuxt/ui/components/Button.vue'` |
 | `component` project | `<ExportName v-bind="model.props('<id>')" :design-state="…" v-on="model.on('<id>')">slots</ExportName>` with typed relative import of `library/<libraryId>.vue` |
+| `external` (§13) | `<div data-design-node="<id>" class="generated-external" :ref="model.external('<id>', createAdapter_<n>)" />` with `import { createAdapter as createAdapter_<n> } from './<libraryId>/<adapter>.adapter.ts'` |
 
 Script block for a page:
 ```vue
@@ -1447,6 +1571,8 @@ const model = useVisual(spec, props, request => emit('interaction', request));
 Components additionally import `ComponentProps/ComponentEvents/ComponentSlots` from `domain/components/contracts/<libraryId>.ts`, use `defineProps<ComponentProps & {…}>()`, `defineEmits<ComponentEvents & {…}>()`, `defineSlots<ComponentSlots>()`, and pass the typed `emitDeclared` switch exactly like `documentCode()` in today's `detail-code.ts:33-45` (payload type guard per emit, `VISUAL_EMIT_PAYLOAD`/`VISUAL_EMIT_UNKNOWN` errors). Component definitions with an empty template produce today's placeholder component (`detail-code.ts:54-69`), unchanged except type imports.
 
 No authored string is ever interpolated into template syntax: names and IDs are emitted only after matching `/^[A-Za-z0-9_.:-]+$/` (IDs) or `/^[A-Z][A-Za-z0-9]*$/` (export names); slot names match `/^[a-z][A-Za-z0-9-]*$/`; all text comes through `model.text()`.
+
+Golden fixture: add one component with a declared dependency and an `external` node (adapter `editor`) so the golden files cover the external lowering.
 
 - [ ] **Step 1: Failing golden test** (append)
 
@@ -1489,6 +1615,7 @@ test('SFC lowering matches reviewed golden files', async () => {
   - `tests/ui-effects/<id>.checks.mjs` from `visualTestSource(spec)` (managed).
   - `design/visual-traceability.json` (`{ definitions:[{id,kind,ownerId|libraryId,component}], interactions:[{definitionId,nodeId,…interaction, implementation, test, verification}], businessAcceptance:'not-implemented' }`), `verification` = `'navigation' | 'declarative-action' | 'executable-ui-effect' | 'business-todo'`.
   - `presentation/detail-layout.css` unchanged content.
+  - Spec §13: the generated project's `package.json` gets `visualPackages(m, templateDeps)` merged into `dependencies` (sorted keys, exact versions); each external node emits `presentation/components/library/<libraryId>/<adapter>.adapter.ts` with ownership `'extension'` containing `import type { VisualExternalAdapter } from '<relative>/domain/visual-runtime.ts'`, `import { NotImplementedError } from '<relative>/domain/contract.ts'`, a `// Implement with: import … from '<package>'` comment, an exported `Props` interface from the node's prop names (`unknown` types), and `createAdapter()` whose three methods throw `NotImplementedError('<package> adapter <adapter>')`; plus `tests/acceptance/<libraryId>-<adapter>.adapter.test.ts` with an `it.todo` and a runtime lifecycle test (a fake adapter records mount → update → destroy and routes an emitted event to the node's interaction). `PROJECT-IMPLEMENTATION.md` lists declared packages with purpose and notes that licenses are the author's responsibility. Add assertions for these files to the Step 1 test using a migrated self-project clone with one dependency-bearing component added in-test.
   - Ports: `visualPorts(m, add)` = today's `detailPorts` with bindings collected by walking IR `source` expressions/actions; `createVisualContext(sources, pinia, openModal)`.
   - Port the assertions of `detail-tests.ts` and `detail-runtime-tests.ts` into `visual-tests.ts` (read both first; for every generated test case they emit, emit the IR equivalent: component mount per definition with each scenario, state visibility per node, control parsing, source-port loading/error/empty states, emit payload guards). List the ported case names in the commit body.
 - `host-code.ts`: replace `provideDetailContext`/`createDetailContext`/`use-detail.ts` imports with the visual equivalents; keep `detail-layout.css`.
@@ -1559,6 +1686,7 @@ Expected: all pass; `index.html` rebuilt.
 
 **Interfaces:**
 - Produces: `veCanvasHtml(definition, session, { mode, selected, viewport, props })` → HTML string. Every node renders with `data-ve-node="<id>"`, `data-action="ve-select"`, `data-value="<id>"`, `tabindex="-1"`, `aria-selected` on the selected one; hidden nodes (per `visualVisible`) are omitted in preview and rendered dimmed with a “hidden in <state>” badge in design mode. Catalog previews by `entry.preview` (`button`, `input`, `textarea`, `select`, `checkbox`, `switch`, `table`, `card`, `badge`, `avatar`, `tabs`, `breadcrumb`, `menu`, `overlay`, `alert`, `progress`, `skeleton`, `separator`, `form`, `field`) — static, inert HTML styled like Nuxt UI (rounded, primary accent, neutral borders) using `esc()` for every value. Table rows come only from `visualValue(session, props.data)`; with no data show the table header and an “No rows in this scenario” line. Layout rules → inline style via `compositionStyle({kind:'region', layout: node.layout.mode, ui: node.layout.ui}, design().designSystem, viewport === 'mobile')` serialized with the existing concept helper (search `styleText`/`cssText` usage in `detail-preview.js` and reuse it).
+- External nodes (§13) render a dashed placeholder `External · <package>@<version> · adapter <name>` listing prop names; the package is never loaded.
 - `ve.css`: tokens on the concept’s existing variables (`--background-primary`, `--interactive-accent`, etc.; check `workbench.css`), three-pane grid `.ve-editor { display:grid; grid-template-columns: 260px minmax(0,1fr) 320px }`, collapsing to one column under 900px with pane tabs; canvas stage with dotted background; viewport widths desktop `max-width:1180px`, tablet `820px`, mobile `390px`; selection ring `outline: 2px solid var(--interactive-accent)` plus a label chip (not colour only); dark/light via the concept’s `data-theme`.
 
 - [ ] **Step 1: Failing assembly test** — add this method to `AssemblyContract` in `tests/concepts/companion-assembly.test.py`:
@@ -1654,6 +1782,7 @@ Expected: all PASS. Then open `index.html` in the browser pane (or run the Task 
 **Interfaces:**
 - `veComponentEditorView()` — left: Structure (`veOutlineHtml(component)`) | Insert child (`veInsertHtml('component')` with Project tab excluding the component itself and any component for which `visualWouldCycle(store, component.id, candidate)` is true — shown disabled with reason “Would create a cycle”), Basic tab (semantic elements `div section header main span p h2` and “Public slot”), bottom buttons Dependency graph (`ve-deps` modal listing dependencies and usages from `visualUsages`) and Publish revision (`ve-publish` modal: version input prefilled with next patch, list of usages affected, confirmation checkbox). Canvas modes Design / Preview / Compare / Review; variant select (`ve-variant`) and state select; Compare renders each variant × state in a grid.
 - `veContractHtml(component)` — root selected: Contract tab (export name, description, Props/Slots/Emits sub-tabs with add/edit/remove rows; prop row = name, type, required, default, description; changes go through `visualSetContract` so breaking edits show the command's message in the inspector error region), Design tab (implementation primitive read-only + defaults), Events tab (template interactions whose actions emit).
+- Dependencies (§13): the root inspector gains a **Dependencies** tab (`data-action="ve-dependency-add"` / `"ve-dependency-remove"`, fields package/version/purpose; invalid names or ranges show the validator message inline; removing a used package shows the command's refusal). Insert child gains **External library** (`data-action="ve-insert" data-value="external:<package>"`, then an adapter-name prompt), disabled with reason “Declare a dependency first” when none exist. Review lists an info finding “Adapter <name> must be implemented in code” per external node.
 - `veChildInspectorHtml(component, node)` — child selected: Props (per declared prop: Literal / Parent prop / Form value + value input), Slots (declared slots with content count and “Map slot content” → sets insert target to that slot), Events (per declared emit + DOM events: map to “Emit parent event” with payload `event` or to a local action) and “Open definition” (`ve-open-definition`, pushes Back entry).
 
 - [ ] **Step 1: Failing assembly assertion** — append the markers to `test_visual_editor_modules_are_assembled` in `tests/concepts/companion-assembly.test.py` (the method is created in Task 13):
@@ -1739,6 +1868,7 @@ Use the structure of `tests/concepts/companion-details.browser.py:1-45` (same `c
 22. `hostile v5 import rejected, project unchanged` (Review Focus 5) — catalog version 2 file.
 23. `narrow viewport (390px) editor usable without horizontal page scroll`.
 24. `no network requests, no console errors`.
+25. `component dependency: declare @tiptap/vue-3@2.11.5, insert external editor node, range version rejected inline, removing the used dependency refused` (spec §13).
 
 - [ ] **Step 1:** Write the suite with all named checks.
 - [ ] **Step 2:** Run `python3 tests/concepts/companion-visual-editors.browser.py` (needs `CHROMIUM_EXECUTABLE`; on Windows set it to the local Chromium/Chrome path) — Expected: every named check `passed`, zero console errors, zero requests.
