@@ -2,7 +2,8 @@
 // veUi is presentation state only: it never enters project JSON, history snapshots or exports.
 const VE_UPGRADE_NOTICE = 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.';
 function veDefaults() {
-  return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '' };
+  return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '',
+    library: null, variant: '', state: 'default', contractTab: 'contract', apiTab: 'props', childTab: 'props', slotTarget: null, publishForm: null, externalForm: null, depForm: null };
 }
 const veUi = veDefaults();
 function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
@@ -34,11 +35,13 @@ function veCanWrite(token = smToken()) {
   if (storageWarning || localStorage.getItem(STORAGE_KEY) !== persistenceSnapshot) throw Error('Resolve the storage conflict first. No page or component design was changed. Export recovery before closing.');
 }
 // Every visual authoring write: guards, copy, change, full validation, history snapshot, persistence or rollback.
+// `change(store, candidate)` edits the copied visual store; a write that also needs a library entry adds it to the
+// copied design, so both land (or roll back) together in one undo step.
 function veCommit(change, token = smToken()) {
   veCanWrite(token);
   const previous = design(), candidate = designCopy(previous), before = veStore(previous), store = designCopy(before);
   if (previous.detailDesigns) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
-  change(store);
+  change(store, candidate);
   const semantic = JSON.stringify(before) !== JSON.stringify(store);
   if (!semantic) return true;
   validateVisualDesigns(store, veContext(candidate));

@@ -266,3 +266,24 @@
 .ve-health-check p{margin:4px 0 0;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
 .ve-health-check.is-pass>svg{color:var(--green)}
 .ve-health-check.is-warn>svg{color:var(--amber)}
+
+/* Component editor: contract root, left footer, composite child outlines, Compare grid and contract rows. */
+.ve-tree-root{display:flex;align-items:center;gap:6px;width:100%;min-height:32px;margin-bottom:var(--space-2);padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--text);font-size:13px;font-weight:600;text-align:left}
+.ve-tree-root svg{width:14px;height:14px;color:var(--accent)}
+.ve-tree-root .ve-tree-kind{margin-left:auto}
+.ve-tree-root.is-selected{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.ve-left-foot{display:flex;flex-direction:column;gap:6px;padding:var(--space-3);border-top:1px solid var(--line)}
+.ve-left-foot .btn{justify-content:center}
+.ve-component-editor .ve-canvas-area>.ve-stage{padding-top:24px}
+.ve-component-editor .ve-stage:not(.ve-mode-preview) .ve-instance,.ve-component-editor .ve-stage:not(.ve-mode-preview) .ve-external{outline:1px dashed color-mix(in srgb,var(--ve-accent) 60%,transparent);outline-offset:2px}
+.ve-compare{list-style:none;margin:0;padding:var(--space-3);display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-3);overflow:auto}
+.ve-compare-cell{min-width:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ve-compare-label{margin:0;padding:6px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600}
+.ve-compare-cell .ve-stage{padding:12px;min-height:0}
+.ve-contract-list{list-style:none;margin:var(--space-2) 0;padding:0;display:flex;flex-direction:column;gap:var(--space-2)}
+.ve-contract-row fieldset,.ve-dep-form{margin:0;padding:var(--space-2) var(--space-3);border:1px solid var(--line);border-radius:8px}
+.ve-dep-form{margin-top:var(--space-3)}
+.ve-child-head{display:flex;align-items:center;gap:var(--space-2)}
+.ve-child-head h2{flex:1;min-width:0}
+.ve-usages{margin:4px 0 var(--space-3);padding-left:18px;font-size:13px}
+.ve-binding>.btn{margin-top:4px}

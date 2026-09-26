@@ -101,6 +101,7 @@ class AssemblyContract(unittest.TestCase):
         markers += ['function veCanvasHtml(', '.ve-editor']
         markers += ['function vePagesView(', 'function vePageEditorView(', 'function veOutlineHtml(', 'function veInsertHtml(', 'function veLayoutsHtml(', 'role="tree"']
         markers += ['function vePageInspectorHtml(', 'function veInteractionForm(', 'function veFieldEdit(', 'function veReviewFindings(', 'function veHealthHtml(']
+        markers += ['function veComponentEditorView(', 'function veContractHtml(', 'function veChildInspectorHtml(', 'Would create a cycle']
         for marker in markers:
             self.assertIn(marker, html, marker)
 

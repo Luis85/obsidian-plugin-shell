@@ -2,39 +2,45 @@
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
 function veFail(error) {
   const text = veErrorText(error);
-  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'] }[modalType] : null;
+  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'] }[modalType] : null;
   if (dialog?.[0]) { dialog[0].error = text; redrawModal(); document.getElementById(dialog[1])?.focus(); return; }
   veUi.error = text;
   const output = document.getElementById('ve-error');
   if (output) output.textContent = text;
   notify(text);
 }
-function vePageRef() {
-  const page = veCurrentPage();
-  if (!page) throw Error('Start a page design first.');
-  return { kind: 'page', id: page.id };
+// The definition the open editor works on: the page in the page editor, the component in the component editor.
+function veInComponent() { return state.view === 'component-editor'; }
+function veCurrentDef(d = design()) { return veInComponent() ? veCurrentComponent(d) : veCurrentPage(d); }
+function veEditorRef() {
+  const definition = veCurrentDef();
+  if (!definition) throw Error(veInComponent() ? 'Start a component design first.' : 'Start a page design first.');
+  return { kind: veInComponent() ? 'component' : 'page', id: definition.id };
 }
-// Write to the open page, then select what the change returns (only after the write succeeded).
-function vePageWrite(change, done = () => {}) {
+// Write to the open page or component, then select what the change returns (only after the write succeeded).
+function veWrite(change, done = () => {}) {
   veEditable();
-  const ref = vePageRef();
+  const ref = veEditorRef();
   let selected;
   veCommit(store => { selected = change(store, ref); });
   if (typeof selected === 'string') veUi.selected = selected;
   veUi.error = ''; veUi.more = false; done(); render();
 }
+// Back entries remember the view and which page or component it showed.
+function veBackEntry() { return { view: state.view, scroll: document.getElementById('content').scrollTop, owner: veUi.owner, library: veUi.library }; }
 function veOpenPage(surfaceId) {
   const surface = design().nodes.find(n => n.id === surfaceId);
   if (!surface && !veStore().pages.some(p => p.ownerId === surfaceId)) throw Error('That surface no longer exists.');
   if (state.view === 'page-editor' && veUi.owner === surfaceId) return;
-  if (state.view !== 'page-editor') veUi.back = [...veUi.back, { view: state.view, scroll: document.getElementById('content').scrollTop }].slice(-12);
+  if (state.view !== 'page-editor') veUi.back = [...veUi.back, veBackEntry()].slice(-12);
   Object.assign(veUi, { owner: surfaceId, selected: null, scenario: null, mode: 'design', query: '', left: 'outline', pane: 'canvas', after: false, more: false, error: '' });
   if (state.view === 'page-editor') render(); else setView('page-editor');
 }
 function veBack() {
   const back = veUi.back.at(-1);
   veUi.back = veUi.back.slice(0, -1); veUi.error = '';
-  setView(back?.view || 'pages');
+  if (back) Object.assign(veUi, { owner: back.owner ?? veUi.owner, library: back.library ?? veUi.library, selected: null, slotTarget: null, mode: 'design' });
+  setView(back?.view || (veInComponent() ? 'components' : 'pages'));
   if (back) document.getElementById('content').scrollTop = back.scroll;
 }
 function veStartPage(surfaceId) {
@@ -45,24 +51,28 @@ function veStartPage(surfaceId) {
   notify('Page design started. The sitemap is unchanged.');
 }
 function veSelect(nodeId) {
-  const page = veCurrentPage();
-  if (!page || !visualLocate(page.root, nodeId)) throw Error('That element no longer exists.');
-  veUi.selected = nodeId; veUi.more = false; veUi.after = false; render();
+  const definition = veCurrentDef();
+  if (!definition || !visualLocate(visualRoot(definition), nodeId)) throw Error('That element no longer exists.');
+  veUi.selected = nodeId; veUi.more = false; veUi.after = false; veUi.slotTarget = null; render();
 }
-// Insert and layout application share the insert target rule; the first new node becomes the selection.
+// Insert and layout application share the insert target rule; the first new node becomes the selection. A slot chosen
+// with "Map slot content" (component editor) takes precedence until the insert succeeds.
+function veTargetFor(definition) {
+  const slot = veUi.slotTarget;
+  return slot ? { parentId: slot.nodeId, slot: slot.slot } : veInsertTarget(definition, veUi.selected, veUi.after);
+}
 function veInsertValue(nodesFor) {
-  const after = veUi.after;
-  vePageWrite((store, ref) => {
-    const page = visualDefinition(store, ref), nodes = nodesFor(store);
-    visualInsert(store, ref, veInsertTarget(page, veUi.selected, after), nodes);
+  veWrite((store, ref) => {
+    const definition = visualDefinition(store, ref), nodes = nodesFor(store, ref);
+    visualInsert(store, ref, veTargetFor(definition), nodes);
     return nodes[0]?.id;
-  }, () => { veUi.after = false; veUi.left = 'outline'; });
+  }, () => { veUi.after = false; veUi.slotTarget = null; veUi.left = 'outline'; });
 }
 function veMove(value) {
   const [direction, id = veUi.selected] = value.split(':');
   if (!['earlier', 'later'].includes(direction)) throw Error('Choose whether to move the element earlier or later.');
   if (!id) throw Error('Select an element to move.');
-  vePageWrite((store, ref) => { visualMoveNode(store, ref, id, direction); return id; });
+  veWrite((store, ref) => { visualMoveNode(store, ref, id, direction); return id; });
 }
 function veSelectedId() { if (!veUi.selected) throw Error('Select an element first.'); return veUi.selected; }
 function veOpenSaveLayout(scope) {
@@ -73,26 +83,27 @@ function veOpenSaveLayout(scope) {
 const VE_SESSION_ACTIONS = {
   've-left': value => { veUi.left = VE_LEFT_PANES.some(([id]) => id === value) ? value : 'outline'; },
   've-pane': value => { veUi.pane = ['left', 'canvas', 'inspector'].includes(value) ? value : 'canvas'; },
-  've-mode': value => { veUi.mode = VE_EDITOR_MODES.some(([id]) => id === value) ? value : 'design'; veUi.more = false; },
+  've-mode': value => { veUi.mode = (veInComponent() ? VE_COMPONENT_MODES : VE_EDITOR_MODES).some(([id]) => id === value) ? value : 'design'; veUi.more = false; },
   've-viewport': value => { veUi.viewport = VE_VIEWPORTS.includes(value) ? value : 'desktop'; },
-  've-insert-tab': value => { veUi.insertTab = VE_INSERT_TABS.some(([id]) => id === value) ? value : 'patterns'; },
+  've-insert-tab': value => { const kind = veInComponent() ? 'component' : 'page'; veUi.insertTab = veInsertTabs(kind).some(([id]) => id === value) ? value : veInsertTabs(kind)[0][0]; },
   've-insert-after': () => { veSelectedId(); veUi.after = true; veUi.left = 'insert'; veUi.pane = 'left'; },
   've-bind': () => { veSelectedId(); veUi.inspector = 'data'; veUi.pane = 'inspector'; },
   've-interaction': () => { veSelectedId(); veUi.inspector = 'actions'; veUi.pane = 'inspector'; },
   've-more': () => { veUi.more = !veUi.more; },
   've-inspector': value => { veUi.inspector = VE_INSPECTOR_TABS.some(([id]) => id === value) ? value : 'essentials'; },
   've-advanced': () => { veUi.advanced = !veUi.advanced; },
+  ...VE_COMPONENT_SESSION_ACTIONS,
 };
 const VE_ACTIONS = {
-  've-open-page': veOpenPage, 'dt-page': veOpenPage, 've-back': veBack, 've-start-page': veStartPage, 've-select': veSelect,
-  've-insert': value => veInsertValue(store => veInsertNodes(store, value)),
+  've-open-page': veOpenPage, 'dt-page': veOpenPage, 've-open-component': veOpenComponent, 'dt-component': veOpenComponent, 've-back': veBack, 've-start-page': veStartPage, 've-select': veSelect,
+  've-insert': value => (value.startsWith('external:') ? veOpenExternal(value.slice(9)) : veInsertValue((store, ref) => veInsertNodes(store, value, ref))),
   've-apply-layout': value => veInsertValue(store => visualInstantiateLayout(store, value)),
   've-move': veMove,
-  've-duplicate': () => { const id = veSelectedId(); vePageWrite((store, ref) => visualDuplicateNode(store, ref, id).id); },
-  've-wrap': () => { const id = veSelectedId(); vePageWrite((store, ref) => visualWrapNode(store, ref, id).id); },
+  've-duplicate': () => { const id = veSelectedId(); veWrite((store, ref) => visualDuplicateNode(store, ref, id).id); },
+  've-wrap': () => { const id = veSelectedId(); veWrite((store, ref) => visualWrapNode(store, ref, id).id); },
   've-save-layout': veOpenSaveLayout, 've-save-layout-confirm': veSaveLayout,
   've-health': () => showModal('ve-health'),
-  ...VE_INTERACTION_ACTIONS,
+  ...VE_INTERACTION_ACTIONS, ...VE_COMPONENT_ACTIONS,
 };
 function handleVisualAction(action, value) {
   const session = VE_SESSION_ACTIONS[action], write = VE_ACTIONS[action];
@@ -108,11 +119,11 @@ function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELE
   const field = el.dataset.field;
   if (!field?.startsWith('ve-')) return false;
   try {
-    if (veInteractionField(el) || veInspectorField(el, commit, after)) return true;
-    if (veSaveLayoutField(el)) return true;
+    if (veInteractionField(el) || veInspectorField(el, commit, after) || veComponentField(el, commit, after)) return true;
+    if (veSaveLayoutField(el) || veComponentDialogField(el)) return true;
     if (field === 've-page-search') { veUi.pageQuery = el.value; document.getElementById('ve-pages-results').innerHTML = vePageCards(); return true; }
-    if (field === 've-outline-search') { veUi.query = el.value; const page = veCurrentPage(); if (page) document.getElementById('ve-outline').innerHTML = veOutlineHtml(page); return true; }
-    if (field === 've-insert-search') { veUi.insertQuery = el.value; document.getElementById('ve-insert-results').innerHTML = veInsertResults('page'); return true; }
+    if (field === 've-outline-search') { veUi.query = el.value; const definition = veCurrentDef(); if (definition) document.getElementById('ve-outline').innerHTML = veOutlineHtml(definition); return true; }
+    if (field === 've-insert-search') { veUi.insertQuery = el.value; document.getElementById('ve-insert-results').innerHTML = veInsertResults(veInComponent() ? 'component' : 'page'); return true; }
     if (field === 've-scenario') {
       const scenario = veCurrentPage()?.scenarios.find(s => s.id === el.value) ?? null;
       veUi.scenario = scenario?.id ?? null;
@@ -147,5 +158,5 @@ document.addEventListener('pointerup', () => { vePointerDown = false; }, true);
 document.addEventListener('pointercancel', () => { vePointerDown = false; }, true);
 document.addEventListener('change', event => {
   const el = event.target;
-  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') veFieldEdit(el, true, veRedrawAfterInput);
+  if (el instanceof Element && [...VE_INSPECTOR_FIELDS, ...VE_COMPONENT_FIELDS].includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') veFieldEdit(el, true, veRedrawAfterInput);
 });

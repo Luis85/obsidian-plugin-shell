@@ -50,17 +50,17 @@ function veNewAction(kind, definition, d = design()) {
   visualAssert(false, 'Choose an action kind.');
 }
 function veInteractionNode() {
-  const page = veCurrentPage(), node = page && veUi.selected ? visualLocate(page.root, veUi.selected)?.node : null;
+  const page = veCurrentDef(), node = page && veUi.selected ? visualLocate(visualRoot(page), veUi.selected)?.node : null;
   if (!node) throw Error('Select an element first.');
   if (!Array.isArray(node.events)) throw Error(veKindLabel(node) + ' has no interactions. Select a button, control or element.');
   return { page, node };
 }
-function veOpenInteraction(interactionId = '') {
+function veOpenInteraction(interactionId = '', event = '') {
   veEditable();
   const { node } = veInteractionNode(), existing = interactionId ? node.events.find(i => i.id === interactionId) : null;
   if (interactionId && !existing) throw Error('The interaction no longer exists.');
   if (!existing && node.events.length >= VISUAL_LIMITS.interactions) throw Error('An element holds at most ' + VISUAL_LIMITS.interactions + ' interactions.');
-  const record = existing ? structuredClone(existing) : { event: veEventChoices(veStore(), node)[0], label: '', actions: [], notes: '', acceptance: '' };
+  const record = existing ? structuredClone(existing) : { event: event || veEventChoices(veStore(), node)[0], label: '', actions: [], notes: '', acceptance: '' };
   const parts = veAcceptanceParts(record.acceptance);
   veUi.interactionForm = { nodeId: node.id, interactionId: existing?.id ?? null, record, ...parts, initial: parts, original: record.acceptance, error: '', token: smToken() };
   showModal('ve-interaction');
@@ -85,7 +85,7 @@ function veInteractionField(el) {
   if (!form) return true;
   const key = el.dataset.key, value = el.type === 'checkbox' ? el.checked : el.value;
   if (field === 've-int') { if (['given', 'when', 'then'].includes(key)) form[key] = value; else if (['event', 'label', 'notes'].includes(key)) form.record[key] = value; return true; }
-  const page = veCurrentPage();
+  const page = veCurrentDef();
   if (page && veActionField(form, Number(el.dataset.index), key, value, page)) redrawModal();
   return true;
 }
@@ -104,23 +104,23 @@ function veInteractionData(form) {
   return { event: form.record.event, label, actions, notes: form.record.notes, acceptance: veAcceptanceText(form) };
 }
 function veSaveInteraction() {
-  const form = veUi.interactionForm, page = veCurrentPage();
+  const form = veUi.interactionForm, page = veCurrentDef();
   if (!form || !page) throw Error('Reopen the interaction from the inspector.');
   veEditable();
-  const data = veInteractionData(form), ref = { kind: 'page', id: page.id };
+  const data = veInteractionData(form), ref = veEditorRef();
   veCommit(store => { if (form.interactionId) visualUpdateInteraction(store, ref, form.nodeId, form.interactionId, data); else visualAddInteraction(store, ref, form.nodeId, data); }, form.token);
   veUi.interactionForm = null; modalOriginal = null; closeModal();
-  Object.assign(veUi, { selected: form.nodeId, inspector: 'actions', error: '' }); render();
+  Object.assign(veUi, { selected: form.nodeId, inspector: 'actions', childTab: 'events', error: '' }); render();
   notify(data.actions.length ? 'Interaction saved. Undo is available.' : 'Interaction saved as “Implementation required”. The generator keeps it as a TODO.');
 }
 function veRemoveInteraction(interactionId) {
   const { node } = veInteractionNode(), interaction = node.events.find(i => i.id === interactionId);
   if (!interaction) throw Error('The interaction no longer exists.');
-  vePageWrite((store, ref) => { visualRemoveInteraction(store, ref, node.id, interactionId); return node.id; });
+  veWrite((store, ref) => { visualRemoveInteraction(store, ref, node.id, interactionId); return node.id; });
   notify('Interaction “' + interaction.label + '” removed. Undo is available.');
 }
 function veDraftActions(change) {
-  const form = veUi.interactionForm, page = veCurrentPage();
+  const form = veUi.interactionForm, page = veCurrentDef();
   if (!form || !page) throw Error('Reopen the interaction from the inspector.');
   change(form.record.actions, page); form.error = ''; redrawModal();
 }
@@ -171,7 +171,7 @@ function veActionRow(action, index, count, definition) {
   return `<li class="ve-action-row"><fieldset><legend>Action ${index + 1}</legend><div class="ve-action-grid">${veActField('Kind', index, 'kind', veActSelect(index, 'kind', VE_ACTION_KINDS, action.kind))}${veActionFields(action, index, definition)}</div><div class="ve-inspector-actions">${tools}</div></fieldset></li>`;
 }
 function veInteractionForm() {
-  const form = veUi.interactionForm, page = veCurrentPage(), node = form && page ? visualLocate(page.root, form.nodeId)?.node : null;
+  const form = veUi.interactionForm, page = veCurrentDef(), node = form && page ? visualLocate(visualRoot(page), form.nodeId)?.node : null;
   if (!node) return dialogBody('Interaction unavailable', '<p>The element no longer exists. Close this dialog; nothing was changed.</p>', button('Close', 'close'));
   const events = veEventChoices(veStore(), node), eventOptions = (events.includes(form.record.event) ? events : [form.record.event, ...events]).map(e => [e, e]);
   const actions = form.record.actions;

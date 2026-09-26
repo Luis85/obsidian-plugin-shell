@@ -49,6 +49,7 @@ function veReviewFindings(store, ref, context = veContext(design())) {
     }
     const image = (node.kind === 'element' && node.tag === 'img') || entry === 'u-avatar';
     if (image && !veHasText(node.kind === 'element' ? node.attrs.alt : node.props.alt) && !node.a11y?.trim()) add('warning', label + ' needs alternative text.', node.id);
+    if (node.kind === 'external') add('info', 'Adapter ' + node.adapter + ' must be implemented in code.', node.id);
   });
   for (const id of veHiddenEverywhere(definition)) add('info', veNodeLabel(visualLocate(visualRoot(definition), id).node) + ' is hidden in every scenario.', id);
   return findings;

@@ -1,7 +1,7 @@
 // Page inspector: Essentials | Data | Actions for the selected element, the page summary otherwise, and the review
 // findings panel. Markup only; writes go through data-field / data-action handlers and veCommit. Preview is read-only.
 const VE_INSPECTOR_TABS = [['essentials', 'Essentials'], ['data', 'Data'], ['actions', 'Actions']];
-function veEditable() { if (veUi.mode === 'preview') throw Error('Preview is read-only. Switch to Design to change the page.'); }
+function veEditable() { if (veUi.mode === 'preview') throw Error('Preview is read-only. Switch to Design to change the ' + (veInComponent() ? 'component.' : 'page.')); }
 function veStructureActions() {
   return `<div class="ve-inspector-actions" role="group" aria-label="Structure">${button('Move earlier', 've-move', 'earlier', 'small')}${button('Move later', 've-move', 'later', 'small')}${button('Duplicate', 've-duplicate', '', 'small', 'copy')}${button('Wrap in group', 've-wrap', '', 'small', 'box')}</div>`;
 }

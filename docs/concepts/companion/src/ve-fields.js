@@ -42,6 +42,7 @@ function veNodeContract(store, node) {
 // Value specs: every property the inspector can set or bind. '@value' is a text node's content.
 function veValueSpecs(store, node) {
   if (node.kind === 'text') return [{ key: '@value', label: 'Text', kind: 'string', type: 'string', required: true, options: [] }];
+  if (node.kind === 'external') return Object.keys(node.props).map(key => ({ key, label: key, kind: 'json', type: 'unknown', required: false, options: [] }));
   const contract = veNodeContract(store, node);
   return (contract?.props ?? []).map(p => ({ key: p.name, label: p.name, kind: veFieldKind(p), type: p.type, options: p.options ?? [], required: !!p.required, default: p.default, description: p.description }));
 }
@@ -84,7 +85,7 @@ function veBindingExpr(kind, spec, definition, node, d = design()) {
   }
   if (kind === 'state') {
     const control = veControls(definition, node.id)[0];
-    visualAssert(control, 'Add a form control (input, select, checkbox or switch) to this page first.');
+    visualAssert(control, 'Add a form control (input, select, checkbox or switch) to this design first.');
     return { kind: 'state', nodeId: control.id };
   }
   visualAssert(false, 'Choose Literal, Source or Form value.');
@@ -138,9 +139,9 @@ function veApplyField(store, ref, nodeId, field, key, raw) {
   if (field === 've-bind-kind') return veSetExpr(store, ref, node, key, veBindingExpr(raw, spec, definition, node));
   return veSetExpr(store, ref, node, key, veBindingPatch(veCurrentExpr(node, key), field, raw));
 }
-// Everything a commit needs, read from the field once: the page, the element the field was rendered for, field and value.
+// Everything a commit needs, read from the field once: the page or component, the element the field was rendered for, field and value.
 function veCaptureField(el) {
-  return { ref: vePageRef(), nodeId: el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), field: el.dataset.field, key: el.dataset.key || '', raw: el.type === 'checkbox' ? el.checked : el.value };
+  return { ref: veEditorRef(), nodeId: el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), field: el.dataset.field, key: el.dataset.key || '', raw: el.type === 'checkbox' ? el.checked : el.value };
 }
 // Dispatcher entry (from veFieldEdit). Text-like fields keep their draft while typing and commit on change. The write is
 // synchronous from the captured values; `after` redraws (text fields pass a deferred redraw, see ve-actions.js).

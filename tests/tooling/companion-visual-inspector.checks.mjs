@@ -16,7 +16,7 @@ const helpers = ['function esc(', 'function icon(', 'function button(', 'functio
   assert.equal(lines.length, 1, prefix + ' is one line of base.html');
   return lines[0];
 }).join('\n');
-const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-page-views.js', 've-actions.js'];
+const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-contract.js', 've-child-inspector.js', 've-publish.js', 've-component-views.js', 've-page-views.js', 've-actions.js'];
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'page-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
