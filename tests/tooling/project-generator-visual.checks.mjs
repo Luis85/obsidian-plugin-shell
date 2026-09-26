@@ -257,3 +257,76 @@ test('declared component packages merge as exact pins and framework conflicts na
   assert.deepEqual(Object.entries(merged), [['@tiptap/vue-3', '2.11.5'], ['a-lib', '1.0.0'], ['vue', '3.5.43']]);
   assert.throws(() => visualPackages(withDeps([{ package: 'vue', version: '3.0.0', purpose: 'Old' }]), framework), { message: 'VISUAL_INVALID: vue is pinned to 3.5.43 by the framework and 3.0.0 by ' + name + '.' });
 });
+
+const { visualSfc } = await import('../../scripts/companion/compiler/visual-code.ts');
+const { writeFile } = await import('node:fs/promises');
+const { readFileSync } = await import('node:fs');
+const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
+const { parse: parseSfc, compileTemplate } = await import('vue/compiler-sfc');
+/** Golden fixture: the reviewed v5 seed plus an editor wrapping a declared package and a placeholder component. */
+function goldenFixture() {
+  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-v5.json', 'utf8'));
+  const [page] = design.nodes.filter(n => n.kind === 'page');
+  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: null, components: [], bricks: [] })));
+  const [library] = design.library;
+  design.library.push(...[['library-search', 'SearchField'], ['library-editor', 'RichEditor'], ['library-pending', 'PendingCard']].map(([id, name]) => ({ ...library, id, name })));
+  const [source] = design.dataSources.sources, [operation] = source.operations;
+  design.dataSources.sources.push({ ...source, id: 'customers', slug: 'customers', name: 'Customers', operations: [{ ...operation, id: 'list', slug: 'list-customers', name: 'List customers', output: { mode: 'fields', entity: null, many: false, fields: [{ name: 'items', type: 'array', required: false }], schema: null } }] });
+  const act = (id, event, actions) => ({ id, event, label: 'Interaction ' + id, notes: '', acceptance: '', actions });
+  store.pages[0].root[0].children.unshift(text('vn-25', lit('{{ evil }} </template><script>alert(1)</script>'), { layout: store.pages[0].root[0].layout }));
+  store.components.push({ id: 'vc-26', libraryId: 'library-editor', exportName: 'RichEditor', description: 'Rich text editor', notes: '',
+    props: [{ name: 'doc', type: 'string', required: true }, { name: 'readonly', type: 'boolean', required: false }], slots: [{ name: 'toolbar', required: false }],
+    emits: [{ name: 'change', payloadType: 'string' }, { name: 'ready', payloadType: 'void' }, { name: 'raw', payloadType: 'unknown' }], variants: [], scenarios: [],
+    dependencies: [{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text editing' }],
+    template: [{ id: 'vn-27', kind: 'element', tag: 'section', attrs: { 'aria-label': lit('Editor') }, events: [], children: [
+      { id: 'vn-28', kind: 'slot', name: 'toolbar', fallback: [text('vn-29', { kind: 'prop', name: 'doc' }, { role: 'span' })], layout: store.pages[0].root[0].layout },
+      { id: 'vn-30', kind: 'external', package: '@tiptap/vue-3', adapter: 'editor', props: { content: { kind: 'prop', name: 'doc' }, editable: lit(true) }, events: [act('vi-31', 'update', [{ kind: 'emit', event: 'change', payload: { kind: 'event' } }])] },
+      { id: 'vn-32', kind: 'element', tag: 'input', attrs: { placeholder: lit('Title') }, children: [], events: [act('vi-33', 'change', [{ kind: 'emit', event: 'ready', payload: { kind: 'none' } }])] },
+      nuxt('vn-34', 'u-card', {}, { slots: { header: [text('vn-35', lit('Preview'), { role: 'h3' })] } }),
+    ] }] });
+  store.components.push({ id: 'vc-36', libraryId: 'library-pending', exportName: 'PendingCard', description: 'Not designed yet', props: [{ name: 'title', type: 'string', required: false }], slots: [{ name: 'actions', required: false }], emits: [], variants: [], scenarios: [], template: [] });
+  store.nextId = 37; design.visualDesigns = store;
+  return doc;
+}
+const golden = new Set(['vp-2', 'vc-1', 'vc-26', 'vc-36']);
+test('SFC lowering matches reviewed golden files', async () => {
+  const m = projectModel(goldenFixture()), store = visualDefinitions(m), specs = visualSpecs(m).filter(s => golden.has(s.id));
+  assert.deepEqual(specs.map(s => s.id).sort(), [...golden].sort());
+  for (const spec of specs) {
+    const actual = visualSfc(m, spec, store), path = 'tests/fixtures/companion/visual-golden/' + spec.id + '.vue';
+    if (process.env.UPDATE_GOLDEN) await writeFile(path, actual);
+    assert.equal(actual, await readFile(path, 'utf8'), spec.id);
+    assert.doesNotMatch(actual, /v-html|innerHTML|\beval\b|evil|alert/);
+    const { descriptor, errors } = parseSfc(actual, { filename: spec.id + '.vue' });
+    assert.deepEqual(errors, [], spec.id);
+    assert.deepEqual(compileTemplate({ source: descriptor.template.content, id: spec.id, filename: spec.id + '.vue' }).errors, [], spec.id);
+  }
+});
+test('every lowered node carries its marker and visibility guard; externals bind through the adapter only', async () => {
+  const m = projectModel(goldenFixture()), store = visualDefinitions(m), [editor] = visualSpecs(m).filter(s => s.id === 'vc-26');
+  const code = visualSfc(m, editor, store);
+  for (const node of visualNodes(editor.template)) {
+    assert.ok(code.includes(`data-design-node="${node.id}" v-if="model.visible('${node.id}')"`), node.id);
+    assert.equal(code.includes(`:style="model.style('${node.id}')"`), Boolean(node.layout), node.id);
+  }
+  assert.match(code, /import \{ createAdapter as createAdapter_0 \} from "\.\/library-editor\/editor\.adapter\.ts";/);
+  assert.match(code, /:ref="model\.external\('vn-30', createAdapter_0\)"/);
+  assert.doesNotMatch(code, /model\.on\('vn-30'\)|model\.props\('vn-30'\)/);
+});
+test('names and identifiers that could escape template syntax stop lowering', () => {
+  const m = projectModel(goldenFixture()), store = visualDefinitions(m), [editor] = visualSpecs(m).filter(s => s.id === 'vc-26');
+  const broken = mutate => { const spec = structuredClone(editor); mutate(spec); return () => visualSfc(m, spec, store); };
+  assert.throws(broken(s => { s.template[0].id = `vn-27" onclick="x`; }), /VISUAL_INVALID: .*RichEditor.*vn-27/);
+  assert.throws(broken(s => { s.template[0].children[0].name = 'toolbar"><script'; }), /VISUAL_INVALID: .*RichEditor.*slot/);
+  assert.throws(broken(s => { s.template[0].children[1].adapter = '../evil'; }), /VISUAL_INVALID: .*RichEditor.*adapter/);
+  assert.throws(broken(s => { s.template[0].tag = 'script'; }), /VISUAL_INVALID: .*RichEditor.*script/);
+  assert.throws(broken(s => { s.exportName = 'Teleport'; }), /VISUAL_INVALID: .*Teleport/);
+  assert.throws(broken(s => { s.libraryId = '../escape'; }), /VISUAL_INVALID: .*RichEditor.*library/);
+  const [customers] = visualSpecs(m).filter(s => s.id === 'vp-2'), paged = structuredClone(customers);
+  paged.root.push(structuredClone(editor.template[0].children[1]));
+  assert.throws(() => visualSfc(m, paged, store), /VISUAL_INVALID: Page "Customers": external node vn-30 is only valid in a component template/);
+  const scripted = broken(s => { s.emits[0].name = '</script><script>x'; })();
+  assert.ok(!scripted.includes('</script><script>'));
+  const lt = String.fromCharCode(92) + 'u003c', gt = String.fromCharCode(92) + 'u003e';
+  assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
+});
