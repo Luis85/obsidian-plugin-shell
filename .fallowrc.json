@@ -169,6 +169,7 @@
     "scripts/companion/test-data-manifest.mjs",
     "scripts/companion/starter-contract.mjs",
     "docs/concepts/companion/src/project-starters.js",
+    "docs/concepts/companion/src/project-handoff.js",
     "docs/concepts/companion/src/project-starter-views.js",
     "docs/concepts/companion/src/project-starters.css",
     "scripts/companion/starter-files.mjs",

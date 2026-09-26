@@ -12,9 +12,10 @@ import { exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { exportedProject } from './project-from.ts';
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string } } }
 interface StarterCatalog { starters: StarterEntry[] }
-interface StarterSummary { directory: string; starter: { id: string }; nextSteps?: string[] }
+interface StarterSummary { directory: string; nextSteps?: string[] }
 const idPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 /** A kit or configured consumer carries its verified template under .framework/template. */
 async function templateRoot(context: Context): Promise<string> {
@@ -71,27 +72,38 @@ async function placement(context: Context, dir: string | undefined): Promise<Pla
 }
 /** Returns the compiler's own plan; planning.ts binds it to the request and rebuilds it before apply. */
 export async function starterProjectPlan(request: Request, context: Context) {
+  const from = request.options.from !== undefined;
+  requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
   const place = await placement(context, request.args[0]);
-  const { template, catalog } = await starterCatalog(context);
-  const starterId = stringOption(request.options, 'starter');
-  requireThat(starterId, 'STARTER_REQUIRED', 'Supply --starter <id>; list the reviewed starters with new --list.');
-  const entry = catalog.starters.find(item => item.id === starterId);
-  requireThat(entry, 'STARTER_UNKNOWN', `Unknown starter ${starterId}; list the reviewed starters with new --list.`);
-  const id = stringOption(request.options, 'id') ?? derivedId(place.directory, entry.document.project.id);
-  const problem = pluginIdProblem(id); if (problem) throw new OperationError('INVALID_PLUGIN_ID', `Invalid plugin ID "${id}". ${problem}`, 'Pass --id <plugin-id>.');
-  const author = stringOption(request.options, 'author');
-  // Identity only, exactly like the concept's starter configuration: never global label rewrites.
-  const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }) });
+  const created = from ? await fromExport(request, context) : await fromStarter(request, context, place.directory);
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
     const input = join(scratch, 'project.json');
-    await writeFile(input, JSON.stringify(document, null, 2) + '\n', { flag: 'wx' });
-    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: template });
-    const summary = { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 }, identity: document.project,
+    await writeFile(input, JSON.stringify(created.document, null, 2) + '\n', { flag: 'wx' });
+    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template });
+    const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
       acceptanceTodos: planned.summary.acceptanceTodos, warnings: planned.summary.warnings };
     return { ...planned, summary };
   } finally { await rm(scratch, { recursive: true, force: true }); }
+}
+/** Any exported companion project; its own identity unless --id/--name/--author override it. */
+async function fromExport(request: Request, context: Context) {
+  const exported = await exportedProject(request, context, pluginIdProblem);
+  return { template: await templateRoot(context), document: exported.document, origin: { source: exported.source } };
+}
+async function fromStarter(request: Request, context: Context, directory: string) {
+  const { template, catalog } = await starterCatalog(context);
+  const starterId = stringOption(request.options, 'starter');
+  requireThat(starterId, 'STARTER_REQUIRED', 'Supply --starter <id> (list them with new --list) or --from <project.json> (a companion export).');
+  const entry = catalog.starters.find(item => item.id === starterId);
+  requireThat(entry, 'STARTER_UNKNOWN', `Unknown starter ${starterId}; list the reviewed starters with new --list.`);
+  const id = stringOption(request.options, 'id') ?? derivedId(directory, entry.document.project.id);
+  const problem = pluginIdProblem(id); if (problem) throw new OperationError('INVALID_PLUGIN_ID', `Invalid plugin ID "${id}". ${problem}`, 'Pass --id <plugin-id>.');
+  const author = stringOption(request.options, 'author');
+  // Identity only, exactly like the concept's starter configuration: never global label rewrites.
+  const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }) });
+  return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } } };
 }
 function nextSteps(directory: string): string[] {
   return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run verify:project', 'npm run test:watch', 'npm run dev:ui'];

@@ -66,6 +66,7 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
     // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
     if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
+    if (command === 'new' && typeof request.options.from === 'string') request = { ...request, options: { ...request.options, from: invocationDirectory(request.options.from) } };
     const root = discovery ? resolve(selected) : command === 'new' && typeof request.options.root !== 'string' ? frameworkRoot : await projectRoot(selected, typeof request.options.root === 'string');
     const context: Context = { root, frameworkRoot, signal: controller.signal, progress: text => stderr.write(text) };
     if (request.options.input === '-') context.inputText = await readInput(stdin, controller.signal);
