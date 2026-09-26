@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const concept = join(root, 'docs/concepts/companion');
 async function scratch(t) {
@@ -60,7 +61,8 @@ test('--apply creates the reviewed project from a starter export with overridden
   const manifest = await json(join(target, 'manifest.json')), design = await json(join(target, 'design/project.json')), source = JSON.parse(original);
   assert.equal(manifest.id, 'capture-inbox'); assert.equal(manifest.name, 'Capture Inbox'); assert.equal(manifest.author, 'Example Author');
   assert.deepEqual(design.project, { ...source.project, id: 'capture-inbox', name: 'Capture Inbox', author: 'Example Author' });
-  assert.deepEqual(design.design, source.design, 'identity only, never label rewrites');
+  // Generation reads through the transfer migration, so the recorded design is the export's current-schema (v5) form.
+  assert.deepEqual(design.design, migrateCompanionDocument(source).document.design, 'identity only, never label rewrites');
   assert.deepEqual(design.notes, source.notes, 'no provenance is appended to a user export');
   const trace = await json(join(target, 'design/traceability.json'));
   assert.deepEqual(trace.requirements.map(requirement => requirement.id), source.design.prds.flatMap(prd => prd.requirements.map(requirement => requirement.id)));
