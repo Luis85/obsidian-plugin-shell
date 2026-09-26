@@ -40,6 +40,7 @@ function dtTravel(direction) {
   candidate.storymaps = dtCopy(snapshot.storymaps || emptyStorymaps());
   for (const key of ['semantic', 'dataSources', 'storymaps', 'detailDesigns']) if (candidate[key]) candidate[key].nextId = Math.max(candidate[key].nextId, previous[key]?.nextId || 1);
   candidate.nextId = Math.max(previous.nextId, candidate.nextId); cpRetainRevisions(candidate.detailDesigns, previous.detailDesigns); candidate.schema = candidate.detailDesigns?.schema === 2 ? 4 : 3;
+  veRestoreVisual(candidate, snapshot, previous);
   const semantic = JSON.stringify(generationSnapshot(candidate)) !== JSON.stringify(generationSnapshot(previous));
   candidate.revision = previous.revision + (semantic ? 1 : 0);
   if (!validSavedDesign(candidate)) throw Error('That history entry cannot be restored safely.');

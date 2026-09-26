@@ -17255,6 +17255,7 @@ function dtTravel(direction) {
   candidate.storymaps = dtCopy(snapshot.storymaps || emptyStorymaps());
   for (const key of ['semantic', 'dataSources', 'storymaps', 'detailDesigns']) if (candidate[key]) candidate[key].nextId = Math.max(candidate[key].nextId, previous[key]?.nextId || 1);
   candidate.nextId = Math.max(previous.nextId, candidate.nextId); cpRetainRevisions(candidate.detailDesigns, previous.detailDesigns); candidate.schema = candidate.detailDesigns?.schema === 2 ? 4 : 3;
+  veRestoreVisual(candidate, snapshot, previous);
   const semantic = JSON.stringify(generationSnapshot(candidate)) !== JSON.stringify(generationSnapshot(previous));
   candidate.revision = previous.revision + (semantic ? 1 : 0);
   if (!validSavedDesign(candidate)) throw Error('That history entry cannot be restored safely.');
@@ -17925,6 +17926,7 @@ function smTravel(direction) {
   candidate.semantic.nextId = Math.max(previous.semantic?.nextId || 1, candidate.semantic.nextId);
   candidate.dataSources.nextId = Math.max(previous.dataSources?.nextId || 1, candidate.dataSources.nextId);
   candidate.nextId = Math.max(previous.nextId, candidate.nextId); candidate.schema = Math.max(previous.schema, 2); candidate.revision = previous.revision + 1;
+  veRestoreVisual(candidate, snapshot, previous);
   smPersistDesign(candidate, previous); render(); notify('Design ' + direction + ' complete. Source files and external artifacts were not deleted.');
 }
 function smNormalize() {
@@ -18547,13 +18549,36 @@ function veRepair() {
   if (veUi.scenario && !definition?.scenarios?.some(s => s.id === veUi.scenario)) { veUi.scenario = null; changed = true; }
   return changed;
 }
-// Undo/redo shares the one design history with every other editor; failed persistence restores the previous design.
+function veHasContent(store) { return !!store && ['pages', 'components', 'layouts', 'revisions'].some(key => store[key].length > 0); }
+// Shared by every travel path over the one design history (outline, storymap, detail and visual undo/redo).
+// `candidate` already holds the snapshot's fields; the visual store is restored with a monotonic counter and
+// validated with full references. A legacy snapshot never coexists with visual designs, and is refused rather than
+// discarding visual work.
+function veRestoreVisual(candidate, snapshot, previous) {
+  const counter = previous.visualDesigns?.nextId || 1;
+  try {
+    if (snapshot.detailDesigns) {
+      visualAssert(!veHasContent(previous.visualDesigns), 'it predates the upgrade to the page and component editors and would discard their designs.');
+      delete candidate.visualDesigns; return candidate;
+    }
+    if (snapshot.visualDesigns) candidate.visualDesigns = { ...designCopy(snapshot.visualDesigns), nextId: Math.max(snapshot.visualDesigns.nextId, counter) };
+    else if (counter > 1) candidate.visualDesigns = { ...emptyVisualDesigns(), nextId: counter };
+    else delete candidate.visualDesigns;
+    if (candidate.visualDesigns) {
+      const legacy = candidate.detailDesigns; // Only an empty counter placeholder may be dropped here.
+      visualAssert(!legacy || (!legacy.documents?.length && !legacy.revisions?.length), 'it would keep legacy detail designs next to visual designs.');
+      delete candidate.detailDesigns; candidate.schema = COMPANION_VERSION;
+      validateVisualDesigns(candidate.visualDesigns, veContext(candidate));
+    }
+    return candidate;
+  } catch (error) { throw Error('That history entry cannot be restored safely: ' + String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, '') + ' Nothing was changed.'); }
+}
+// Undo/redo shares the one design history with every other editor; a refused restore or failed save keeps the previous design.
 function veTravel(direction) {
   veCanWrite();
-  const d = design(), source = direction === 'undo' ? d.history : d.future;
-  if (!source.length) return false;
-  const previous = designCopy(d);
-  designHistory(direction);
+  const previous = design();
+  if (!(direction === 'undo' ? previous.history : previous.future).length) return false;
+  designTravel(direction);
   if (storageWarning) { project().design = previous; render(); throw Error('History could not be saved. The previous design is retained; export recovery before closing.'); }
   if (veRepair()) render();
   return true;
@@ -23286,7 +23311,9 @@ function designOwner(){return project()?.key||'uninitialized-vault';}
 function designSnapshot(d){return designCopy({blueprint:d.blueprint,goal:d.goal,platform:d.platform,nodes:d.nodes,links:d.links,nextId:d.nextId,library:d.library,prds:d.prds,...(d.librarySchema?{librarySchema:d.librarySchema}:{}),...(d.canvas?{canvas:d.canvas}:{}),...(d.semantic?{semantic:d.semantic}:{}),...(d.dataSources?{dataSources:d.dataSources}:{}),...(d.designSystem?{designSystem:d.designSystem}:{}),...(d.storymaps?{storymaps:d.storymaps}:{}),...(d.detailDesigns?{detailDesigns:d.detailDesigns}:{}),...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})});}
 function recordDesign(){const d=design();d.history.push(designSnapshot(d));d.history=d.history.slice(-DESIGN_LIMITS.history);d.future=[];veBoundHistory(d);}
 function designChanged(){const d=design();veBoundHistory(d);d.revision++;designUi.plan=null;designUi.error='';save();}
-function designHistory(direction){const d=design(),before=designFingerprint(d);const stack=direction==='undo'?d.history:d.future;if(!stack.length)return;const other=direction==='undo'?d.future:d.history;other.push(designSnapshot(d));if(other.length>20)other.shift();const retainedDetails=d.detailDesigns?designCopy(d.detailDesigns):null;const detailCounter=d.detailDesigns?.nextId||1;const visualCounter=d.visualDesigns?.nextId||1;const storymapCounter=d.storymaps?.nextId||1;const sourceCounter=d.dataSources?.nextId||1;const semanticCounter=d.semantic?.nextId||1;const nextId=d.nextId,snapshot=stack.pop();Object.assign(d,snapshot);if(snapshot.detailDesigns){d.detailDesigns.nextId=Math.max(detailCounter,d.detailDesigns.nextId);}else if(detailCounter>1)d.detailDesigns={...emptyDetailDesigns(),nextId:detailCounter};else delete d.detailDesigns;cpRetainRevisions(d.detailDesigns,retainedDetails);if(d.detailDesigns?.schema===2)d.schema=4;if(snapshot.visualDesigns)d.visualDesigns.nextId=Math.max(visualCounter,d.visualDesigns.nextId);else if(visualCounter>1)d.visualDesigns={...emptyVisualDesigns(),nextId:visualCounter};else delete d.visualDesigns;if(d.visualDesigns)d.schema=COMPANION_VERSION;veBoundHistory(d);d.storymaps=snapshot.storymaps||emptyStorymaps();d.storymaps.nextId=Math.max(storymapCounter,d.storymaps.nextId);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.designSystem)delete d.designSystem;if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(nextId,d.nextId);if(before!==designFingerprint(d))designChanged();else save();render();notify((before!==designFingerprint(d)?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');}
+function designTravel(direction){const previous=design(),before=designFingerprint(previous);if(!(direction==='undo'?previous.history:previous.future).length)return false;const d=designCopy(previous),stack=direction==='undo'?d.history:d.future,other=direction==='undo'?d.future:d.history;other.push(designSnapshot(previous));if(other.length>20)other.shift();const retainedDetails=previous.detailDesigns?designCopy(previous.detailDesigns):null;const detailCounter=previous.detailDesigns?.nextId||1;const storymapCounter=previous.storymaps?.nextId||1;const sourceCounter=previous.dataSources?.nextId||1;const semanticCounter=previous.semantic?.nextId||1;const snapshot=stack.pop();Object.assign(d,snapshot);if(snapshot.detailDesigns){d.detailDesigns.nextId=Math.max(detailCounter,d.detailDesigns.nextId);}else if(detailCounter>1)d.detailDesigns={...emptyDetailDesigns(),nextId:detailCounter};else delete d.detailDesigns;cpRetainRevisions(d.detailDesigns,retainedDetails);if(d.detailDesigns?.schema===2)d.schema=4;veRestoreVisual(d,snapshot,previous);veBoundHistory(d);d.storymaps=snapshot.storymaps||emptyStorymaps();d.storymaps.nextId=Math.max(storymapCounter,d.storymaps.nextId);if(!snapshot.dataSources)d.dataSources=emptyDataSources();d.dataSources.nextId=Math.max(sourceCounter,d.dataSources.nextId);if(!snapshot.semantic)d.semantic=emptySemantic();d.semantic.nextId=Math.max(semanticCounter,d.semantic.nextId);if(!snapshot.designSystem)delete d.designSystem;if(!snapshot.canvas)delete d.canvas;if(!snapshot.librarySchema)delete d.librarySchema;d.nextId=Math.max(previous.nextId,d.nextId);if(!validSavedDesign(d))throw Error('That history entry cannot be restored safely. Nothing was changed.');const changed=before!==designFingerprint(d);if(changed){d.revision=previous.revision+1;designUi.plan=null;designUi.error='';}project().design=d;save();render();notify((changed?'Outline ':'Map arrangement ')+direction+' complete. Generated source is never deleted.');return true;}
+// Every restore is validated first; a refused entry leaves the design, history and storage unchanged.
+function designHistory(direction){try{return designTravel(direction);}catch(error){notify(error instanceof Error?error.message:'That history entry cannot be restored safely.');return false;}}
 function selectedNode(){if(!project())return null;const d=design();return d.nodes.find(n=>n.id===designUi.selected)||null;}
 function nodeOwner(d,node){let n=node;const seen=new Set();while(n&&!seen.has(n.id)){seen.add(n.id);if(n.kind==='view')return n;n=d.nodes.find(x=>x.id===n.parent);}return null;}
 function nodePlacement(d,n){return nodeOwner(d,n)?.placement||n.placement;}
@@ -23351,7 +23378,7 @@ function importDesign(text){
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error'&&i.code!=='data-source-shape');if(issues.length)throw Error(issues[0].message);
- const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources','designSystem','storymaps','detailDesigns','visualDesigns']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));if(clean.detailDesigns)veUpgradeDesign(clean);recordDesign();const d=design();Object.assign(d,{schema:clean.visualDesigns?COMPANION_VERSION:4,detailDesigns:undefined,visualDesigns:clean.visualDesigns?{...clean.visualDesigns,nextId:Math.max(d.visualDesigns?.nextId||1,clean.visualDesigns.nextId)}:undefined,storymaps:{...(clean.storymaps||emptyStorymaps()),nextId:Math.max(d.storymaps?.nextId||1,clean.storymaps?.nextId||1)},blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},designSystem:clean.designSystem,canvas:clean.canvas||emptyCanvas(),nextId});designChanged();designUi.selected=d.nodes[0]?.id;return d;
+ const allowed=new Set(['schema','blueprint','goal','platform','nodes','links','nextId','library','prds','librarySchema','kind','executable','canvas','semantic','dataSources','designSystem','storymaps','detailDesigns','visualDesigns']);if(Object.keys(input).some(k=>!allowed.has(k)))throw Error('Unknown blueprint properties are not accepted.');const nextId=importCounter(input);const clean=ensureProductModel(designCopy(input));const migrated=!!clean.detailDesigns;if(migrated)veUpgradeDesign(clean);recordDesign();const d=design();Object.assign(d,{schema:clean.visualDesigns?COMPANION_VERSION:4,detailDesigns:undefined,visualDesigns:clean.visualDesigns?{...clean.visualDesigns,nextId:Math.max(d.visualDesigns?.nextId||1,clean.visualDesigns.nextId)}:undefined,storymaps:{...(clean.storymaps||emptyStorymaps()),nextId:Math.max(d.storymaps?.nextId||1,clean.storymaps?.nextId||1)},blueprint:clean.blueprint,goal:clean.goal,platform:clean.platform,nodes:clean.nodes,links:clean.links,library:clean.library,librarySchema:clean.librarySchema,prds:clean.prds,semantic:{...(clean.semantic||emptySemantic()),nextId:Math.max(d.semantic?.nextId||1,clean.semantic?.nextId||1)},dataSources:{...(clean.dataSources||emptyDataSources()),nextId:Math.max(d.dataSources?.nextId||1,clean.dataSources?.nextId||1)},designSystem:clean.designSystem,canvas:clean.canvas||emptyCanvas(),nextId});if(d.visualDesigns&&(migrated||[...d.history,...d.future].some(s=>s.detailDesigns))){d.history=[];d.future=[];veUi.notice=VE_UPGRADE_NOTICE;}designChanged();designUi.selected=d.nodes[0]?.id;return d;
 }
 function validSavedDesign(d){
  const plain=o=>o&&typeof o==='object'&&!Array.isArray(o);

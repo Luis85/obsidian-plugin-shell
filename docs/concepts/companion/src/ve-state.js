@@ -59,13 +59,36 @@ function veRepair() {
   if (veUi.scenario && !definition?.scenarios?.some(s => s.id === veUi.scenario)) { veUi.scenario = null; changed = true; }
   return changed;
 }
-// Undo/redo shares the one design history with every other editor; failed persistence restores the previous design.
+function veHasContent(store) { return !!store && ['pages', 'components', 'layouts', 'revisions'].some(key => store[key].length > 0); }
+// Shared by every travel path over the one design history (outline, storymap, detail and visual undo/redo).
+// `candidate` already holds the snapshot's fields; the visual store is restored with a monotonic counter and
+// validated with full references. A legacy snapshot never coexists with visual designs, and is refused rather than
+// discarding visual work.
+function veRestoreVisual(candidate, snapshot, previous) {
+  const counter = previous.visualDesigns?.nextId || 1;
+  try {
+    if (snapshot.detailDesigns) {
+      visualAssert(!veHasContent(previous.visualDesigns), 'it predates the upgrade to the page and component editors and would discard their designs.');
+      delete candidate.visualDesigns; return candidate;
+    }
+    if (snapshot.visualDesigns) candidate.visualDesigns = { ...designCopy(snapshot.visualDesigns), nextId: Math.max(snapshot.visualDesigns.nextId, counter) };
+    else if (counter > 1) candidate.visualDesigns = { ...emptyVisualDesigns(), nextId: counter };
+    else delete candidate.visualDesigns;
+    if (candidate.visualDesigns) {
+      const legacy = candidate.detailDesigns; // Only an empty counter placeholder may be dropped here.
+      visualAssert(!legacy || (!legacy.documents?.length && !legacy.revisions?.length), 'it would keep legacy detail designs next to visual designs.');
+      delete candidate.detailDesigns; candidate.schema = COMPANION_VERSION;
+      validateVisualDesigns(candidate.visualDesigns, veContext(candidate));
+    }
+    return candidate;
+  } catch (error) { throw Error('That history entry cannot be restored safely: ' + String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, '') + ' Nothing was changed.'); }
+}
+// Undo/redo shares the one design history with every other editor; a refused restore or failed save keeps the previous design.
 function veTravel(direction) {
   veCanWrite();
-  const d = design(), source = direction === 'undo' ? d.history : d.future;
-  if (!source.length) return false;
-  const previous = designCopy(d);
-  designHistory(direction);
+  const previous = design();
+  if (!(direction === 'undo' ? previous.history : previous.future).length) return false;
+  designTravel(direction);
   if (storageWarning) { project().design = previous; render(); throw Error('History could not be saved. The previous design is retained; export recovery before closing.'); }
   if (veRepair()) render();
   return true;
