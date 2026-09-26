@@ -6,6 +6,7 @@ import { validateVisualDesigns } from '../../scripts/companion/visual/visual-val
 import { visualNodes } from '../../scripts/companion/visual/visual-ir.mjs';
 import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 import { compositionDefaultUI } from '../../scripts/companion/composition-contract.mjs';
+import { validateCompanionDocument, migrateCompanionDocument, parseCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 const load = async p => JSON.parse(await readFile(p, 'utf8'));
 const inputs = [['detail-v3 fixture', await load('tests/fixtures/companion/detail-v3.json')], ['self-project v4', await load('tests/fixtures/companion/detail-v4.json')]];
 for (const file of (await readdir('docs/concepts/companion/starters')).filter(f => f.endsWith('.json') && f !== 'catalog.json')) inputs.push(['starter ' + file, await load('docs/concepts/companion/starters/' + file)]);
@@ -139,4 +140,24 @@ test('display elements map to exact catalog props, layouts and notes', () => {
 test('a library entry missing from design.library fails with a named visual error', () => {
   const root = node('region', 'Page'), use = node('component', 'Ghost use', { parentId: root.id, component: { id: 'ghost', label: 'Ghost', version: '1.0.0', variantId: 'default' } });
   assert.throws(() => migrateDetailDesigns({ schema: 2, nextId: 1000, documents: [ldoc('page', 'page-a', [root, use])] }, { ...pages, library: [] }), /^Error: VISUAL_INVALID: .*"ghost".*missing/);
+});
+test('v4 documents migrate to v5 and validate; v5 passes through unchanged', () => {
+  const v4 = inputs[1][1]; const { document, report } = migrateCompanionDocument(structuredClone(v4));
+  assert.equal(COMPANION_VERSION, 5); assert.equal(document.schemaVersion, 5); assert.equal(document.design.schema, 5);
+  assert.equal('detailDesigns' in document.design, false); assert.ok(report.droppedPositions > 0);
+  assert.equal(validateCompanionDocument(document), document);
+  const again = migrateCompanionDocument(structuredClone(document)); assert.equal(again.report, null); assert.deepEqual(again.document, document);
+});
+test('hostile or inconsistent v5 imports are rejected (Review Focus 5)', () => {
+  const { document } = migrateCompanionDocument(structuredClone(inputs[1][1]));
+  const bad = [
+    d => { d.design.detailDesigns = inputs[1][1].design.detailDesigns; },
+    d => { d.design.visualDesigns.catalog.version = 2; },
+    d => { d.design.visualDesigns.pages[0].root[0].kind = 'script'; },
+    d => { d.schemaVersion = 6; },
+    d => { d.design.schema = 4; },
+  ];
+  for (const change of bad) { const d = structuredClone(document); change(d); assert.throws(() => validateCompanionDocument(d)); }
+  assert.throws(() => parseCompanionDocument('{"kind":"obsidian-companion-project","__proto__":{"x":1}}'));
+  assert.throws(() => parseCompanionDocument('x'.repeat(5 * 1024 * 1024)), /limit/);
 });

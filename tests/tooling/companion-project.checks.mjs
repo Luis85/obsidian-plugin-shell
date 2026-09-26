@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES } from '../../scripts/companion/project-contract.mjs';
+import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -63,12 +63,14 @@ test('[COMPANION-READ] exported service returns data and canonical targets witho
   const alias = join(f.dir, 'vault-alias');
   await symlink(f.vault, alias, 'junction');
   const before = await snapshot(f.dir);
+  const migrated = migrateCompanionDocument(structuredClone(document));
   // Keep the supplied spelling, including a Windows 8.3 temp path, as the input.
   for (const vault of [f.vault, alias]) {
     for (const target of ['.', 'plugins/new companion']) {
       const result = await readCompanionProject({ input: f.input, vault, target });
       assert.equal(result.content.toString(), seed);
-      assert.deepEqual(result.document, document);
+      assert.deepEqual(result.document, migrated.document);
+      assert.deepEqual(result.migration, migrated.report);
       assert.equal(result.vault, canonicalRoot);
       assert.equal(result.target, resolve(canonicalRoot, target));
     }

@@ -2,12 +2,14 @@
 import { validateDesignSystem } from './design-system-contract.mjs';
 import { validateStorymaps } from './storymap-contract.mjs';
 import { validateDetailDesigns } from './detail-contract.mjs';
+import { validateVisualDesigns } from './visual/visual-validate.mjs';
+import { migrateDetailDesigns } from './visual/visual-migrate.mjs';
 export const COMPANION_FORMAT = 'obsidian-companion-project';
-export const COMPANION_VERSION = 4;
+export const COMPANION_VERSION = 5;
 export const COMPANION_MAX_BYTES = 4_000_000;
 export const COMPANION_DEFAULT_FOLDERS = Object.freeze({ codebaseFolder: 'src', testsFolder: 'tests' });
 const companionDesignKeys = ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId',
-  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns'];
+  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns', 'visualDesigns'];
 
 function companionRequire(condition, message) {
   if (!condition) throw new Error('COMPANION_INVALID: ' + message);
@@ -61,7 +63,7 @@ function validateCompanionDesign(value, pluginId) {
   if (value?.detailDesigns !== undefined) validateDetailDesigns(value.detailDesigns);
   if (value?.storymaps !== undefined) validateStorymaps(value.storymaps);
   companionRequire(companionObject(value, companionDesignKeys, ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId', 'library', 'prds']), 'Unsupported design envelope.');
-  companionRequire([1, 2, 3, 4].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
+  companionRequire([1, 2, 3, 4, 5].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
     ['desktop', 'mobile-ready'].includes(value.platform), 'Unsupported design schema or platform.');
   companionRequire(Number.isSafeInteger(value.nextId) && value.nextId > 0 && value.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid design counter.');
   for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', 12]]) {
@@ -69,11 +71,12 @@ function validateCompanionDesign(value, pluginId) {
       item !== null && typeof item === 'object' && !Array.isArray(item) && companionText(item.id, 120, true)), 'Invalid design collection: ' + key);
     companionRequire(new Set(value[key].map(item => item.id)).size === value[key].length, 'Duplicate IDs in ' + key + '.');
   }
+  if (value.visualDesigns !== undefined) validateVisualDesigns(value.visualDesigns, { surfaces: new Set(value.nodes.map(n => n.id)), library: new Set(value.library.map(l => l.id)) });
 }
 export function validateCompanionDocument(value) {
   companionSafeTree(value);
   companionRequire(companionObject(value, ['kind', 'schemaVersion', 'executable', 'project', 'settings', 'design', 'notes']), 'Expected a full companion project, not a blueprint or recovery snapshot.');
-  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, 3, COMPANION_VERSION].includes(value.schemaVersion) && value.executable === false,
+  companionRequire(value.kind === COMPANION_FORMAT && [1, 2, 3, 4, 5].includes(value.schemaVersion) && value.executable === false,
     'Unsupported companion format/version or executable flag.');
   validateCompanionIdentity(value.project);
   validateCompanionFolders(value.settings);
@@ -84,6 +87,8 @@ export function validateCompanionDocument(value) {
   const composition = detail && (detail.revisions !== undefined || detail.documents.some(doc => doc.scenarios !== undefined || doc.nodes.some(node => node.ui !== undefined || node.slotName !== undefined || node.contentProp !== undefined || node.options !== undefined || !['region','text','input','button','component','slot'].includes(node.kind)) || doc.edges.some(edge => edge.effect !== undefined)));
   companionRequire(value.schemaVersion >= 4 || !composition, 'Composition requires transfer version 4.');
   companionRequire(value.schemaVersion >= 3 || !Object.hasOwn(value.design, 'detailDesigns'), 'Detail designs require transfer version 3.');
+  companionRequire(value.schemaVersion < 5 || !Object.hasOwn(value.design, 'detailDesigns'), 'Transfer version 5 no longer carries detail designs.');
+  companionRequire(value.schemaVersion >= 5 || !Object.hasOwn(value.design, 'visualDesigns'), 'Visual designs require transfer version 5.');
   companionRequire(Array.isArray(value.notes) && value.notes.length <= 100 && value.notes.every(note => companionText(note, 100000)), 'Invalid project notes.');
   companionRequire(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');
   return value;
@@ -93,4 +98,14 @@ export function parseCompanionDocument(text) {
   let value;
   try { value = JSON.parse(text); } catch { throw new Error('COMPANION_INVALID: Expected valid UTF-8 JSON.'); }
   return validateCompanionDocument(value);
+}
+export function migrateCompanionDocument(value) {
+  validateCompanionDocument(value);
+  if (value.schemaVersion === COMPANION_VERSION) return { document: value, report: null };
+  const document = structuredClone(value), detail = document.design.detailDesigns;
+  const result = detail ? migrateDetailDesigns(detail, document.design) : null;
+  delete document.design.detailDesigns;
+  if (result) document.design.visualDesigns = result.visualDesigns;
+  document.schemaVersion = COMPANION_VERSION; document.design.schema = COMPANION_VERSION;
+  return { document: validateCompanionDocument(document), report: result?.report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
 }

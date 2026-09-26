@@ -9,6 +9,7 @@ import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
@@ -35,7 +36,7 @@ for(const entry of catalog.starters){
   await assert.rejects(applyProject(plan,'not-a-reviewed-hash'),/stale/);await applyProject(plan,plan.hash);
   const target=join(vault,'plugin'),pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8'));
   assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
-  assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
+  assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),migrateCompanionDocument(structuredClone(document)).document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){

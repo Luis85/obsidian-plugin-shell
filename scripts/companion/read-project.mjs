@@ -1,7 +1,7 @@
 import { constants } from 'node:fs';
 import { open, lstat, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { COMPANION_MAX_BYTES, companionRelativeFolder, parseCompanionDocument } from './project-contract.mjs';
+import { COMPANION_MAX_BYTES, companionRelativeFolder, parseCompanionDocument, migrateCompanionDocument } from './project-contract.mjs';
 
 async function checkDirectoryChain(root, path) {
   let current = root;
@@ -47,8 +47,9 @@ export async function readCompanionProject({ input, target, vault = process.cwd(
   if (!(await lstat(root)).isDirectory()) throw new Error('COMPANION_TARGET: The vault root must be an existing directory.');
   await checkDirectoryChain(root, target);
   const result = await readBoundedJson(resolve(input));
-  for (const folder of Object.values(result.document.settings)) {
+  const { document, report } = migrateCompanionDocument(result.document);
+  for (const folder of Object.values(document.settings)) {
     await checkDirectoryChain(root, target === '.' ? folder : target + '/' + folder);
   }
-  return { ...result, vault: root, target: resolve(root, target) };
+  return { ...result, document, migration: report, vault: root, target: resolve(root, target) };
 }
