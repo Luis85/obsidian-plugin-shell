@@ -2,7 +2,7 @@ import { resolve, join } from 'node:path';
 import { inspectStyles } from './styles.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
-import { commands, descriptor, validateRequest, parameterKinds } from './catalog.ts';
+import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
 import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
@@ -12,6 +12,11 @@ import { readConfiguration, exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
+import { starterListing, completeStarterProject } from './starter-project.ts';
+import { commandHelp, helpIndex } from './help-text.ts';
+import { checkOperation } from './check.ts';
+import { submissionCheck } from './submission.ts';
+import { suggestions, didYouMean } from './suggest.ts';
 async function fileOperation(request: Request, context: Context): Promise<Result> {
   const stored = request.command.startsWith('plan ');
   if (stored) requireThat(request.args[0], 'PLAN_REQUIRED', 'Supply the saved plan filename.');
@@ -23,6 +28,11 @@ async function fileOperation(request: Request, context: Context): Promise<Result
   const expected = stringOption(request.options, 'apply') ?? planned.planHash;
   const applied = await applyOperation(planned, context, expected);
   return result(request.command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged');
+}
+function acceptProfile(command: string, profile: string | undefined): void {
+  const allowed = profiles[command] ?? [];
+  const label = command[0]!.toUpperCase() + command.slice(1);
+  requireThat(profile === undefined || allowed.includes(profile), 'PROFILE_UNKNOWN', `${label} profile: ${allowed.slice(0, -1).join(', ')} or ${allowed.at(-1)}.`);
 }
 async function processOperation(request: Request, context: Context): Promise<Result> {
   const options = request.options, timeout = Number(stringOption(options, 'timeout') ?? (request.command === 'dev' ? '3600000' : '600000'));
@@ -38,18 +48,20 @@ async function processOperation(request: Request, context: Context): Promise<Res
   if (request.command === 'install') { entry = await npmEntry(); args = ['ci', '--no-fund']; }
   else if (request.command === 'build') entry = 'scripts/bundling/build.mjs';
   else if (request.command === 'test') {
-    requireThat(profile === undefined || ['unit', 'project', 'browser', 'native'].includes(profile), 'PROFILE_UNKNOWN', 'Test profile: unit, project, browser or native.');
+    acceptProfile(request.command, profile);
     if (profile === 'native') entry = 'scripts/testing/check-native.mjs';
+    // Real-Obsidian Vitest suite in contained vaults; downloads only with OBSIDIAN_ALLOW_DOWNLOAD=1.
+    else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
     else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test']; }
     else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); }
   } else if (request.command === 'verify') {
-    requireThat(profile === undefined || ['full', 'project'].includes(profile), 'PROFILE_UNKNOWN', 'Verify profile: full or project.');
+    acceptProfile(request.command, profile);
     if (profile === 'project') { entry = await npmEntry(); args = ['run', 'verify:project']; }
     else entry = 'scripts/quality/verify.mjs';
   } else if (request.command === 'dev') {
-    requireThat(profile === undefined || ['watch', 'ui'].includes(profile), 'PROFILE_UNKNOWN', 'Dev profile: watch or ui.');
-    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : 'scripts/dev/watch-local.mjs';
-    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : ['--no-local'];
+    acceptProfile(request.command, profile);
+    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
+    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
   } else {
     const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');
     requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');
@@ -87,16 +99,21 @@ export async function executeOperation(input: Request, context: Context): Promis
     if (request.options.help || command === 'help' || command === 'capabilities') {
       const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
       const entries = selected ? [descriptor(selected)] : commands;
-      return result(command, { protocolVersion: 1, commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect })),
-        makers: capabilityCatalog().makers, examples: ['node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
+      const scope = selected ? 'command' : command === 'capabilities' || request.options.all ? 'all' : 'golden-path';
+      return result(command, { protocolVersion: 1, scope, ...helpIndex(), commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect, ...commandHelp(entry) })),
+        makers: capabilityCatalog().makers, examples: ['node shell.mjs new ../my-plugin --starter blank --yes', 'node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
-      const makers = capabilityCatalog().makers.filter((item: { id: string }) => request.args[0] !== 'describe' || item.id === request.args[1]);
-      requireThat(makers.length > 0, 'MAKER_UNKNOWN', 'Supply an existing recipe ID; use make list.');
+      const catalog: Array<{ id: string }> = capabilityCatalog().makers;
+      const makers = catalog.filter(item => request.args[0] !== 'describe' || item.id === request.args[1]);
+      requireThat(makers.length > 0, 'MAKER_UNKNOWN', `Supply an existing recipe ID; use make list.${didYouMean(suggestions(request.args[1] ?? '', catalog.map(item => item.id)), value => `"${value}"`)}`);
       return result(command, { makers });
     }
+    if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command === 'check') return await checkOperation(request, context);
+    if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {

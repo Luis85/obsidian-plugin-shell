@@ -3,6 +3,10 @@ import { join, dirname, resolve } from 'node:path';
 import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';
 import { requireThat, result, type Context, type Diagnostic } from './contracts.ts';
+/** A generated project continues with its own npm scripts, not the shell's setup flow. */
+function generatedNext(dependencies: boolean, designStale: boolean | null): string {
+  return designStale ? 'generate' : !dependencies ? 'npm ci' : 'npm run check';
+}
 export async function status(context: Context, command = 'status') {
   const config = await readConfiguration(context.root);
   const manifest = await exists(join(context.root, 'manifest.json')) ? object(await readJson(join(context.root, 'manifest.json'))) : null;
@@ -10,9 +14,10 @@ export async function status(context: Context, command = 'status') {
   const dependencies = await exists(join(context.root, 'node_modules/typescript/package.json'));
   const imported = await exists(join(context.root, 'design/project.json'));
   const diagnostics: Diagnostic[] = [];
-  if (!config) diagnostics.push({ code: 'CONFIG_MISSING', message: 'Project has not been configured.', next: 'setup' });
+  // A generated project's identity authority is its manifest; shell.config.json is optional there.
+  if (!config && !generated) diagnostics.push({ code: 'CONFIG_MISSING', message: 'Project has not been configured.', next: 'setup' });
   if (config && generated && (manifest?.id !== config.project.id || manifest?.version !== config.project.version)) diagnostics.push({ code: 'IDENTITY_DRIFT', message: 'Manifest and configured plugin identity/version differ.' });
-  if (!dependencies) diagnostics.push({ code: 'DEPENDENCIES_MISSING', message: 'Project dependencies are not installed.', next: 'install --yes' });
+  if (!dependencies) diagnostics.push({ code: 'DEPENDENCIES_MISSING', message: 'Project dependencies are not installed.', next: generated ? 'npm ci' : 'install --yes' });
   if (Number(process.versions.node.split('.')[0]) < 22) diagnostics.push({ code: 'NODE_UNSUPPORTED', message: 'Node 22 or newer is required.' });
   let designStale: boolean | null = null;
   if (generated && imported) {
@@ -32,7 +37,7 @@ export async function status(context: Context, command = 'status') {
     if (obligations) diagnostics.push({ code: 'ACCEPTANCE_PENDING', message: `${obligations} generated requirements are not accepted. Scaffold tests do not prove their behavior.` });
   }
   return { ...result(command, { root: context.root, configuration: config, manifest, generated, imported, dependencies,
-    designStale, acceptanceObligations: obligations, runtime: 'not-connected', next: !config ? 'setup' : !imported ? 'project import' : !generated || designStale ? 'generate' : !dependencies ? 'install --yes' : 'verify',
+    designStale, acceptanceObligations: obligations, runtime: 'not-connected', next: generated ? generatedNext(dependencies, designStale) : !config ? 'setup' : !imported ? 'project import' : 'generate',
     identityAuthority: generated ? 'manifest.json' : 'shell.config.json', native: 'not-run', publication: 'not-authorized' }), diagnostics };
 }
 export async function releaseCheck(context: Context, input?: string) {

@@ -1,0 +1,28 @@
+---
+name: implement-requirement
+description: Implement one product requirement test-first from design/traceability.json. Use when asked to implement, build or finish a requirement, user story or acceptance criterion of this plugin.
+argument-hint: "[requirement key or title]"
+---
+
+# Implement a requirement (TDD)
+
+Requirement: $ARGUMENTS (if empty, pick the first entry with `"verification": "todo"`).
+
+1. Read the requirement in `design/traceability.json`: `title`, `acceptance`,
+   `implementation` (use case path) and `test` (acceptance test path). Read the
+   screens and sources it names in `design/project.json` only if needed.
+2. Open the `test` file. Replace the `it.todo(...)` with concrete behavioural
+   assertions derived from `acceptance`: success result, failure keeps the draft,
+   exact Markdown or data written, no writes on failure.
+3. Run the test and confirm it fails for the right reason:
+   `npx vitest run --config vitest.project.config.mjs <test path>`.
+4. Implement the smallest change at the `implementation` path (framework-free
+   application code; adapters and UI only through existing ports and stores).
+5. Re-run the test until it passes, then run `npm run check`.
+6. If the requirement involves the Obsidian host (commands, views, vault writes),
+   run `npm run -s dev:obsidian -- --json` and confirm `"status": "passed"`, or add
+   a spec with the `write-obsidian-test` skill.
+7. Update the requirement's `verification` to `"implemented"` only after the test
+   passes. Report the commands you ran and their results.
+
+Do not mark a requirement done with `it.todo`, skipped tests or snapshot-only tests.

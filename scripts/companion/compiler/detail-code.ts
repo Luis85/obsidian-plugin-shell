@@ -2,14 +2,14 @@ import { controlElement } from './detail-fields.ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { literal, json, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { componentMembers, detailDocuments, detailDefinitions } from './detail-model.ts';
 import type { DetailDocument, DetailElement } from '../runtime/detail-runtime.ts';
 import { detailTests } from './detail-tests.ts';
 import { detailPorts } from './detail-ports.ts';
 import { compositionTestSource } from '../composition-contract.mjs';
 import { detailRuntimeTests } from './detail-runtime-tests.ts';
-const detailPath = (m: Model, doc: DetailDocument) => `${m.sourceRoot}/presentation/components/${doc.kind === 'component' ? 'library/' + doc.ownerId : 'details/' + doc.id}.vue`;
+const detailPath = (m: Model, doc: DetailDocument) => `${m.sourceRoot}/presentation/components/${doc.kind === 'component' ? 'library/' + componentFile(doc.ownerId,'component') : 'details/' + doc.id}.vue`;
 function element(doc: DetailDocument, node: DetailElement, componentNames: Map<string, string>): string {
   const index = doc.nodes.indexOf(node), ref = `spec.nodes[${index}]!`;
   const attrs = `data-design-node="${node.id}" v-if="model.visible.value.has('${node.id}')" :style="model.style(${index})"`;
@@ -33,7 +33,7 @@ function element(doc: DetailDocument, node: DetailElement, componentNames: Map<s
 function documentCode(m: Model, doc: DetailDocument): string {
   const path = detailPath(m, doc); const references = [...new Set(doc.nodes.flatMap(n => n.component ? [n.component.id] : []))];
   const names = new Map(references.map((id, i) => [id, 'Reusable' + i]));
-  const imports = references.map(id => `import ${names.get(id)} from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/components/library/${id}.vue`))};`).join('\n');
+  const imports = references.map(id => `import ${names.get(id)} from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/components/library/${componentFile(id,'component')}.vue`))};`).join('\n');
   const contract = doc.kind === 'component' ? `import type { ComponentProps, ComponentEvents } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/components/contracts/${doc.ownerId}.ts`))};\n` : '';
   const events=doc.kind==='component'?componentMembers(detailDefinitions(m).find(c=>c.id===doc.ownerId)!).events:{};
   const emitted=Object.entries(events).map(([event,type])=>`case ${literal(event)}: if (${type==='undefined'?'payload === undefined':`typeof payload === ${literal(type)}`}) { emit(${literal(event)},payload); return; } throw new Error('DETAIL_EMIT_PAYLOAD');`).join('\n');
@@ -45,7 +45,7 @@ import { specification as spec } from '../../../domain/details/${doc.id}.ts';
 ${imports}
 ${contract}const props = defineProps<${doc.kind === 'component' ? 'ComponentProps & ' : ''}{ designState?: DetailState; designScenario?: string }>();
 const emit = defineEmits<${doc.kind === 'component' ? 'ComponentEvents & ' : ''}{ interaction: [request: DetailRequest] }>();
-const model = useDetail(spec, props, request => emit('interaction', request), (name,payload) => { switch(name) { ${emitted} default: throw new Error('DETAIL_EMIT_UNKNOWN'); } });
+const model = useDetail(spec, props, request => emit('interaction', request), (${emitted ? 'name,payload' : 'name'}) => { switch(name) { ${emitted} default: throw new Error('DETAIL_EMIT_UNKNOWN'); } });
 </script>
 <template>
 <section :ref="model.attach" :style="model.theme.value" class="generated-detail" data-design-document="${doc.id}" :data-design-state="model.state.value" :aria-label="spec.ownerLabel" :aria-busy="model.state.value === 'loading'">
@@ -62,7 +62,7 @@ export async function detailCode(templateRoot: string, m: Model, add: Add): Prom
     add(`${root}/domain/components/contracts/${c.id}.ts`, `export interface ComponentProps {\n${Object.entries(contract.props).map(([name, type]) => `  ${literal(name)}?: ${type};`).join('\n')}\n}\nexport interface ComponentEvents {\n${Object.entries(contract.events).map(([name, type]) => `  ${literal(name)}: [payload: ${type}];`).join('\n')}\n}\nexport type ComponentSlot = ${contract.slots.map(literal).join(' | ') || 'never'};\n`, 'managed');
     if (!documents.some(d => d.kind === 'component' && d.ownerId === c.id)) {
       const hasTitle = contract.props.title === 'string';
-      add(`${root}/presentation/components/library/${c.id}.vue`, `<script setup lang="ts">
+      add(`${root}/presentation/components/library/${componentFile(String(c.id),'component')}.vue`, `<script setup lang="ts">
 import { specification } from '../../../domain/components/${c.id}.ts';
 import type { ComponentProps, ComponentEvents } from '../../../domain/components/contracts/${c.id}.ts';
 import type { DetailState, DetailRequest } from '../../../domain/detail-runtime.ts';
@@ -89,7 +89,7 @@ ${contract.slots.map(name => `<slot name="${name}" />`).join('\n')}
     const path = detailPath(m, doc); add(path, documentCode(m, doc));
     if (doc.kind === 'page') {
       const screen = m.screens.find(s => s.id === doc.ownerId)!;
-      add(`${root}/presentation/components/screens/${screen.slug}.vue`, `<script setup lang="ts">
+      add(`${root}/presentation/components/screens/${componentFile(screen.slug,'screen')}.vue`, `<script setup lang="ts">
 import { useScreen } from '../../composables/use-screen.ts';
 import Detail from '../details/${doc.id}.vue';
 const model = useScreen(${literal(screen.id)});
@@ -108,7 +108,7 @@ const model = useScreen(${literal(screen.id)});
       if (!edge.targetSurfaceId && !edge.effect && !edge.action) {
         handlers.push(`import { execute as E${handlers.length} } from './interactions/${edge.id}.ts';`);
         cases.push(`case ${literal(edge.id)}: return E${handlers.length - 1}(request, sources);`);
-        add(implementation, `import type { DetailRequest } from '../../domain/detail-runtime.ts';\nimport type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const intent = ${literal(edge)};\n/** Start with a failing acceptance test. This hook does not infer business rules from prose. */\nexport async function execute(_request: DetailRequest, _sources: Sources): Promise<unknown> { throw new NotImplementedError(${literal(doc.id)}, ${literal(edge.id)}); }\n`);
+        add(implementation, `import type { DetailRequest } from '../../domain/detail-runtime.ts';\nimport type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const intent = ${literal(edge)};\n/** Start with a failing acceptance test. This hook does not infer business rules from prose. */\nexport const execute: (request: DetailRequest, sources: Sources) => Promise<unknown> = async () => { throw new NotImplementedError(${literal(doc.id)}, ${literal(edge.id)}); };\n`);
       }
       if (!edge.effect && (edge.acceptance || !edge.targetSurfaceId)) add(test, `import { it } from 'vitest';\n// UI dispatch/navigation tests are separate from this unimplemented business acceptance.\nit.todo(${literal('[' + edge.id + '] ' + edge.label + ' — ' + (edge.acceptance || edge.notes))});\n`);
       trace.push({ documentId: doc.id, ...edge, component: path, implementation: edge.effect || edge.action || edge.targetSurfaceId ? null : implementation, test: !edge.effect && (edge.acceptance || !edge.targetSurfaceId) ? test : null, verification: edge.action ? 'declarative-action' : edge.effect ? 'executable-ui-effect' : edge.targetSurfaceId ? 'navigation-scaffold' : 'todo' });
@@ -116,7 +116,7 @@ const model = useScreen(${literal(screen.id)});
     detailTests(m, doc, path, add);
     add(`${m.testRoot}/ui-effects/${doc.id}.checks.mjs`,compositionTestSource(doc),'managed');
   }
-  add(`${root}/application/detail-interactions.ts`, `${handlers.join('\n')}\nimport type { DetailRequest } from '../domain/detail-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport async function handleDetailInteraction(request: DetailRequest, sources: Sources): Promise<unknown> { switch (request.edgeId) { ${cases.join('\n')} default: throw new Error('DETAIL_INTERACTION_UNKNOWN'); } }\n`);
+  add(`${root}/application/detail-interactions.ts`, `${handlers.join('\n')}\nimport type { DetailRequest } from '../domain/detail-runtime.ts';\nimport type { Sources } from './sources.ts';\n${cases.length ? `export async function handleDetailInteraction(request: DetailRequest, sources: Sources): Promise<unknown> { switch (request.edgeId) { ${cases.join('\n')} default: throw new Error('DETAIL_INTERACTION_UNKNOWN'); } }` : "export const handleDetailInteraction: (request: DetailRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('DETAIL_INTERACTION_UNKNOWN'); };"}\n`);
   add('design/detail-traceability.json', json({ documents: documents.map(d => ({ id: d.id, ownerId: d.ownerId, kind: d.kind, component: detailPath(m, d) })), interactions: trace, businessAcceptance: 'not-implemented' }), 'managed');
   add(`${root}/presentation/detail-layout.css`, `.generated-detail, .generated-region, .generated-field { display: flex; flex-direction: column; gap: var(--size-4-3, 12px); min-width: 0; }
 .generated-region[data-design-layout="row"] { flex-direction: row; flex-wrap: wrap; align-items: start; }

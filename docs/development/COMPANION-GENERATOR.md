@@ -6,7 +6,16 @@ Related: issue #19, PR #5's full project JSON contract. This is shell tooling, n
 
 1. Download/extract the framework. Use its qualified Node/npm versions. `node shell.mjs setup` forwards to the existing guided setup; `node shell.mjs make` forwards to the existing maker. Both also retain their npm entrypoints.
 2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The bundled `docs/concepts/companion/companion-project.json` is the companion's own design and is the qualification fixture.
-3. Plan into a separate, empty project location. The vault must exist; the target directory may be absent. The framework checkout must not contain the target.
+3. **Recommended:** create the project in one reviewable command. It validates the export with the shared contract, keeps its identity unless `--id/--name/--author` override it, previews the plan and hash, and writes only with `--yes` or `--apply <planHash>` into an absent or empty folder outside the checkout:
+
+```sh
+node shell.mjs new ../my-plugin --from my-plugin.companion.json
+node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes
+```
+
+The companion's **Generate plugin shell** handoff copies exactly these commands, followed by `cd`, `npm ci`, `npm run check` and `npm run dev:obsidian`, plus a short coding-agent prompt. See [Companion handoff](COMPANION-HANDOFF.md) and [Framework CLI](FRAMEWORK-CLI.md#from-an-exported-companion-project). The lower-level form below remains for an explicit vault/target placement.
+
+   Plan into a separate, empty project location. The vault must exist; the target directory may be absent. The framework checkout must not contain the target.
 
 ```sh
 node shell.mjs generate \
@@ -18,7 +27,30 @@ node shell.mjs generate \
 The default is read-only: stdout is a JSON file-change inventory with `planHash`, counts, warnings, conflicts, and before/after hashes. `npm run --silent companion:scaffold -- ...` is equivalent. No dependencies are needed to plan or apply. Node 22 uses an explicit native TypeScript-stripping launch; the compiler is also type-checked separately.
 
 4. Review the paths, changes, source JSON and warnings. Apply by repeating the command with `--apply <planHash>`. The CLI reconstructs the plan; it never executes a serialized plan file. Changed input, template content, target bytes or ownership receipt invalidate the reviewed hash. A conflicting plan exits 2; invalid input/apply exits 1.
-5. Open the generated project. Run `npm ci` explicitly, then `npm run verify:project`. Build/install/test/release remain distinct operations, never hidden generation side effects. Use the shell's existing isolated local-vault setup before `npm run build:local`.
+5. Open the generated project and follow its own `README.md`: `npm ci`, `npm run check` (typecheck, ESLint with zero warnings, product tests), `npm run dev:obsidian` (contained real-Obsidian sandbox with hot reload and logs; the first run needs `--allow-download`), `npm run test:watch`, and `npm run test:obsidian`. `npm run verify:project` is what the generated CI runs. Build/install/test/release remain distinct operations, never hidden generation side effects.
+
+Starter shortcut: `node shell.mjs new ../my-plugin --starter quick-capture --author "Me" --yes` runs the same compiler on a reviewed starter ([Framework CLI](FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter)).
+
+## What the generated project contains
+
+Besides the framework copy and the generated product code, every project gets a developer and agent kit, rendered from `scripts/companion/devkit/*.tmpl` by `scripts/companion/compiler/devkit-files.ts`:
+
+| Path | Purpose |
+| --- | --- |
+| `README.md` | Product README: quick start, daily-loop and gate commands, code map, testing layers, logging and debugging |
+| `AGENTS.md`, `CLAUDE.md` | Short agent instructions (definition of done = `npm run check`, architecture and safety rules, TDD against `design/traceability.json`); `CLAUDE.md` imports `AGENTS.md` |
+| `.claude/settings.json` | Permission allowlist for safe commands, deny rules for publishing/force-push/release; a PostToolUse hook runs `vitest related` for each edited source or test file and a Stop hook runs `npm run check -- --fast` (`scripts/agent/*.mjs`) |
+| `.claude/skills/*/SKILL.md` | `implement-requirement`, `debug-in-obsidian`, `add-feature`, `write-obsidian-test` |
+| `.github/copilot-instructions.md`, `.cursor/rules/project.mdc` | One-line pointers to `AGENTS.md` |
+| `.vscode/` | Recommended extensions, Vitest pointed at `vitest.project.config.mjs`, "Attach to Obsidian (dev:obsidian)" on port 9222, "Debug current Vitest file", tasks for `dev:obsidian`, `check`, `test:watch` |
+| `.editorconfig` | Two-space, LF, UTF-8 |
+| `.github/workflows/ci.yml`, `obsidian.yml` | Product CI: `check` + `verify:project` on every push/PR; real-Obsidian tests on `main` and on demand, with cached host download and uploaded evidence |
+| `vitest.project.config.mjs` | Product tests with the shared build config, the `@test/obsidian` in-memory host and the throwing `obsidian` boundary; default reporters (agents get Vitest's `agent` reporter) |
+| `<tests>/project/plugin-host.test.ts` | Example kit test: loads `src/main.ts`, opens the workbench, toggles debug logging, unloads, and proves fixture notes are untouched |
+
+The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIRST-OVERVIEW.md` move to `docs/framework/`, and its maintainer workflows to `docs/framework/workflows/` (inert reference; copied framework docs link to them). Every copied Markdown link to a moved file is rebased. The maintainer-only Windows runner script and the maintainer CI trigger test are not copied. All kit files are `extension` ownership: regeneration updates them while unedited, keeps your edits, and reports a conflict when both you and the template changed a file. `PROJECT-IMPLEMENTATION.md` stays `managed`.
+
+Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
 The original `npm run companion:generate` and `scripts/companion/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
 
