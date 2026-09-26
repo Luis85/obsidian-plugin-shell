@@ -2,6 +2,44 @@
 
 Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI and assembled ZIP workflow, not a published framework release or native companion conversion. The [framework-first plan](FRAMEWORK-CLI-GENERATOR-PLAN.md) remains broader than the implemented and qualified scope below.
 
+## Start a new plugin from a starter
+
+`node shell.mjs new` (alias `npm run new --`) is the one-command front door to the
+existing project compiler. It loads `docs/concepts/companion/starters/catalog.json`
+through the same SHA-256-checked loader as the concept, applies the same
+identity-only customization (`id`, `name`, optional `author`; no label rewrites and a
+provenance note in `design/project.json`), then plans with the unchanged generator.
+
+```sh
+node shell.mjs new --list [--json]
+node shell.mjs new <dir> --starter <id> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--json]
+node shell.mjs new <dir> --starter <id> --yes [--install]
+node shell.mjs new <dir> --starter <id> --apply <planHash>
+```
+
+- `<dir>` is absolute or relative to the invoking shell (`INIT_CWD` under `npm run new`).
+  It must be absent or empty and outside the framework checkout. Its nearest existing
+  ancestor becomes the generator's `--vault` and the remaining path its `--target`;
+  missing folders are created only by the reviewed file plan.
+- Plugin IDs default to a slug of the folder name, use lowercase letters, digits and
+  single hyphens, start with a letter and must not contain `obsidian`. Names default
+  to the title-cased ID.
+- Without `--yes`/`--apply` the command previews: starter, identity, directory, file
+  count, plan hash, warnings and conflicts. A TTY then asks for confirmation; non-TTY
+  and `--json` runs exit 0 without writing. Missing required input (`<dir>`,
+  `--starter`) fails with exit 1 instead of prompting outside a TTY. Applying rebuilds
+  the plan and refuses a stale hash; a second run into the created folder fails with
+  `TARGET_NOT_EMPTY`.
+- `--install` runs `npm ci` and `npm run verify:project` inside the new project after
+  a successful write, streaming output to stderr. It is not part of the plan hash or a
+  saved approval. A failure reports that the project exists and how to resume.
+  Without it the result lists next steps (`npm ci`, `npm run verify:project`,
+  `npm run test:watch`, `npm run dev:ui`) and the project's README and
+  `PROJECT-IMPLEMENTATION.md`.
+
+Generated scaffolds keep PRD acceptance as TODO obligations; creation is not product
+acceptance, native qualification or release readiness.
+
 ## Start from the extracted archive
 
 The build of the framework distribution is an explicit maintainer action:

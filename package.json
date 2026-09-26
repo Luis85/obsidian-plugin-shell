@@ -95,6 +95,7 @@
     "test:generator": "node --experimental-strip-types --test tests/tooling/project-generator*.checks.mjs",
     "typecheck:generator": "tsc --noEmit --project tsconfig.generator.json",
     "shell": "node shell.mjs",
+    "new": "node shell.mjs new",
     "capabilities": "node scripts/operations/cli.mjs",
     "framework:setup": "node shell.mjs setup",
     "framework:pack": "node shell.mjs framework pack",

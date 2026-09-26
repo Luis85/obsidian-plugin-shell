@@ -5,8 +5,12 @@ import { parseCliArguments, descriptor } from './catalog.ts';
 import { executeOperation } from './operations.ts';
 import { projectRoot, exists } from './files.ts';
 import { failure, type Context, type Request, type Result } from './contracts.ts';
+import { invocationDirectory } from './starter-project.ts';
+import { guidedStarter, starterText } from './starter-terminal.ts';
 function render(value: Result, machine: boolean): void {
   if (machine) { stdout.write(JSON.stringify(value) + '\n'); return; }
+  const starter = value.command === 'new' ? starterText(value) : null;
+  if (starter !== null) { stdout.write(starter); for (const item of value.diagnostics) stderr.write(`${item.code}: ${item.message}\n`); return; }
   stdout.write(`${value.command}: ${value.status}\n`);
   if (value.data && (value.command === 'help' || value.command === 'capabilities' || (value.data as { commands?: unknown }).commands)) {
     const data = value.data as { commands: Array<{id: string; summary: string; options: Record<string, string>; effect: string}> };
@@ -66,11 +70,14 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     let request = parseCliArguments(argv); command = request.command;
     const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
-    const root = discovery ? resolve(selected) : await projectRoot(selected, typeof request.options.root === 'string');
+    // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
+    if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
+    const root = discovery ? resolve(selected) : command === 'new' && typeof request.options.root !== 'string' ? frameworkRoot : await projectRoot(selected, typeof request.options.root === 'string');
     const context: Context = { root, frameworkRoot, signal: controller.signal, progress: text => stderr.write(text) };
     if (request.options.input === '-') context.inputText = await readInput(stdin, controller.signal);
     const interactive = Boolean(stdin.isTTY && stderr.isTTY && !machine && !request.options['no-interaction'] && !request.options.yes && !request.options.help);
     if (interactive && command === 'setup' && !request.options['dry-run']) request = await guidedIdentity(request, controller.signal);
+    if (interactive && command === 'new' && !request.options.list) request = await guidedStarter(request, context, query => ask(stdin, stderr, query, controller.signal), text => stderr.write(text));
     let outcome = interactive ? await interactiveRun(request, context) : await executeOperation(request, context);
     if (interactive && command === 'setup' && !request.options['dry-run'] && ['applied', 'unchanged'].includes(outcome.status)) outcome = await setupNextSteps(outcome, context);
     render(outcome, machine);

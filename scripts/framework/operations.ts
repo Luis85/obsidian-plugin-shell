@@ -12,6 +12,7 @@ import { readConfiguration, exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
+import { starterListing, completeStarterProject } from './starter-project.ts';
 async function fileOperation(request: Request, context: Context): Promise<Result> {
   const stored = request.command.startsWith('plan ');
   if (stored) requireThat(request.args[0], 'PLAN_REQUIRED', 'Supply the saved plan filename.');
@@ -88,7 +89,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
       const entries = selected ? [descriptor(selected)] : commands;
       return result(command, { protocolVersion: 1, commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect })),
-        makers: capabilityCatalog().makers, examples: ['node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
+        makers: capabilityCatalog().makers, examples: ['node shell.mjs new ../my-plugin --starter blank --yes', 'node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
@@ -97,6 +98,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       requireThat(makers.length > 0, 'MAKER_UNKNOWN', 'Supply an existing recipe ID; use make list.');
       return result(command, { makers });
     }
+    if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {

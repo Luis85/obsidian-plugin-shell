@@ -2,6 +2,23 @@
 
 **Framework lifecycle and recovery increment, version 0.4.0.**
 
+## Start a new plugin
+
+From this checkout (after `npm ci`), create an independent project from one of
+the reviewed starters. The target must be a new or empty folder outside this checkout.
+
+```sh
+npm run new -- --list                                   # starters: id, difficulty, summary
+npm run new -- ../my-plugin --starter quick-capture     # preview only; nothing is written
+npm run new -- ../my-plugin --starter quick-capture --id my-plugin --name "My Plugin" --yes
+npm run new -- ../my-plugin --starter blank --yes --install   # also runs npm ci + verify:project
+```
+
+In a terminal, `npm run new` without arguments asks for the folder, starter and
+identity, then shows the plan before writing. The result is scaffolding with TODO
+acceptance obligations, not a finished or natively qualified plugin. Details:
+[Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).
+
 The [framework guide](docs/development/FRAMEWORK-GUIDE.md) maps the reusable
 developer API and the path from feature generation to production qualification.
 The [active plan](docs/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action
