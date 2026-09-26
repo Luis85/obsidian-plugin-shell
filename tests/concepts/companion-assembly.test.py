@@ -99,6 +99,7 @@ class AssemblyContract(unittest.TestCase):
         html = (ROOT / 'docs/concepts/companion/index.html').read_text(encoding='utf-8')
         markers = ['function veCommit(', 'function veMigrateSaved(', 'function validateVisualDesigns(']
         markers += ['function veCanvasHtml(', '.ve-editor']
+        markers += ['function vePagesView(', 'function vePageEditorView(', 'function veOutlineHtml(', 'function veInsertHtml(', 'function veLayoutsHtml(', 'role="tree"']
         for marker in markers:
             self.assertIn(marker, html, marker)
 
