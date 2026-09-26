@@ -19,6 +19,12 @@ identity, then shows the plan before writing. The result is scaffolding with TOD
 acceptance obligations, not a finished or natively qualified plugin. Details:
 [Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).
 
+`node shell.mjs help` shows the golden path (new, install, dev, test, check, make).
+`npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
+covers changed files only), and `npm run check:submission` mirrors documented
+Obsidian review rules locally. Neither replaces `npm run verify`. See
+[the check gate](docs/development/FRAMEWORK-CLI.md#golden-path-help-and-the-check-gate).
+
 The [framework guide](docs/development/FRAMEWORK-GUIDE.md) maps the reusable
 developer API and the path from feature generation to production qualification.
 The [active plan](docs/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action

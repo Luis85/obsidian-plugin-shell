@@ -7,21 +7,15 @@ import { projectRoot, exists } from './files.ts';
 import { failure, type Context, type Request, type Result } from './contracts.ts';
 import { invocationDirectory } from './starter-project.ts';
 import { guidedStarter, starterText } from './starter-terminal.ts';
+import { renderHuman } from './terminal-render.ts';
+import { terminalStyle, runnable } from './terminal-style.ts';
 function render(value: Result, machine: boolean): void {
   if (machine) { stdout.write(JSON.stringify(value) + '\n'); return; }
   const starter = value.command === 'new' ? starterText(value) : null;
-  if (starter !== null) { stdout.write(starter); for (const item of value.diagnostics) stderr.write(`${item.code}: ${item.message}\n`); return; }
-  stdout.write(`${value.command}: ${value.status}\n`);
-  if (value.data && (value.command === 'help' || value.command === 'capabilities' || (value.data as { commands?: unknown }).commands)) {
-    const data = value.data as { commands: Array<{id: string; summary: string; options: Record<string, string>; effect: string}> };
-    for (const command of data.commands) stdout.write(`  ${command.id.padEnd(21)} ${command.summary}\n`);
-    if (data.commands.length === 1) {
-      const entry = data.commands[0]!; stdout.write(`\nEffect: ${entry.effect}\nOptions:\n`);
-      for (const [name, kind] of Object.entries(entry.options)) stdout.write(`  --${name}${kind === 'value' ? ' <value>' : ''}\n`);
-    }
-    stdout.write('\nUse --json for structured output; mutations preview by default.\n');
-  } else if (value.data !== null) stdout.write(JSON.stringify(value.data, null, 2) + '\n');
-  for (const diagnostic of value.diagnostics) stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + diagnostic.next : ''}\n`);
+  const human = starter === null ? renderHuman(value, terminalStyle(stdout)) : { text: starter, diagnosticsShown: false };
+  stdout.write(human.text);
+  if (human.diagnosticsShown) return;
+  for (const diagnostic of value.diagnostics) stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
 }
 async function guidedIdentity(request: Request, signal?: AbortSignal): Promise<Request> {
   const options = { ...request.options };
