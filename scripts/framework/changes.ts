@@ -1,7 +1,7 @@
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
-import { parseCompanionDocument, COMPANION_VERSION } from '../companion/project-contract.mjs';
+import { parseCompanionDocument, migrateCompanionDocument, COMPANION_VERSION } from '../companion/project-contract.mjs';
 import { readCompanionProject } from '../companion/read-project.mjs';
 import { projectModel } from '../companion/compiler/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
@@ -11,7 +11,7 @@ type Entry = { path: string; content: string };
 export async function inspectDesign(context: Context, input: string) {
   requireThat(input !== '-' || context.inputText !== undefined, 'STDIN_REQUIRED', 'Supply JSON on stdin.');
   const source = input === '-'
-    ? { content: Buffer.from(context.inputText!), document: parseCompanionDocument(context.inputText!) }
+    ? (() => { const { document, report } = migrateCompanionDocument(parseCompanionDocument(context.inputText!)); return { content: Buffer.from(context.inputText!), document, migration: report }; })()
     : await readCompanionProject({ input: resolve(context.root, input), vault: context.root, target: '.' });
   const model = projectModel(source.document);
   return { source, model };

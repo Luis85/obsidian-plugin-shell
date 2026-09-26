@@ -69,8 +69,8 @@ test('configured/imported differences require a deliberate resolution policy', a
   const imported = await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes']);
   assert.equal(imported.status, 'applied', JSON.stringify(imported));
   const saved = JSON.parse(await readFile(join(ctx.root, 'design/project.json'), 'utf8'));
-  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 4);
-  assert.deepEqual(saved.design.detailDesigns, seed.design.detailDesigns);
+  assert.equal(saved.project.id, identity.id); assert.equal(saved.schemaVersion, 5);
+  assert.equal('detailDesigns' in saved.design, false); assert.ok(saved.design.visualDesigns);
   assert.equal((await run(ctx, ['project', 'import', '--input', 'project.json', '--resolve', 'project', '--yes'])).status, 'unchanged');
 });
 test('import preserves foreign and manually edited design snapshots', async t => {
@@ -80,8 +80,11 @@ test('import preserves foreign and manually edited design snapshots', async t =>
 });
 test('file and stdin inspection accept full v4 while rejecting executable/future envelopes', async t => {
   const ctx = await fixture(t);
+  assert.equal(seed.schemaVersion, 4);
   const inspected = await run(ctx, ['project', 'inspect', '--input', 'project.json']); assert.equal(inspected.status, 'ok'); assert.equal(inspected.data.screens, 28);
+  assert.equal(inspected.data.schemaVersion, 5, 'file-based inspection migrates a v4 input to v5');
   const stdin = await run({ ...ctx, inputText: JSON.stringify(seed) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);
+  assert.equal(stdin.data.schemaVersion, 5, 'stdin inspection migrates a v4 input to v5, matching the file branch');
   const bad = { ...seed, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
 });
 test('unsafe and overlapping folders fail before writing', () => {
