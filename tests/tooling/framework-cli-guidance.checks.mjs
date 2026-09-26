@@ -144,3 +144,12 @@ test('plans render per-file status and the exact apply follow-up', async t => {
   assert.match(output.stdout, /^ {4}create {2}shell\.config\.json$/m);
   assert.match(output.stdout, /^Next: rerun the same command with --apply [a-f0-9]{64} \(or --yes\) to write exactly this plan$/m);
 });
+test('help for new documents --from as a companion project export, not the kit-upgrade folder', () => {
+  const output = cli(['help', 'new'], { NO_COLOR: '1' });
+  assert.equal(output.status, 0, output.stderr);
+  assert.match(output.stdout, /new <dir> \(--starter <id> \| --from <project\.json>\)/);
+  assert.match(output.stdout, /--from <value>\s+Project JSON exported by the companion/);
+  assert.doesNotMatch(output.stdout, /replacement kit/);
+  const upgrade = cli(['help', 'framework upgrade'], { NO_COLOR: '1' });
+  assert.match(upgrade.stdout, /--from <value>\s+Extracted replacement kit folder\./);
+});
