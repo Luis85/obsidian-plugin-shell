@@ -97,15 +97,15 @@ import { projectKey } from '../presentation/context/project.ts';
 import type { Sources } from '../application/sources.ts';
 import { panels } from './panels.ts';
 import { bindFlows } from './flows.ts';
-import { provideDetailContext } from '../presentation/composables/use-detail.ts';
-import { createDetailContext } from './detail-context.ts';
+import { provideVisualContext } from '../presentation/composables/use-visual.ts';
+import { createVisualContext } from './visual-context.ts';
 import '../presentation/detail-layout.css';
 export function mountProject(root: HTMLElement,shell: Services,sources: Sources,openModal: (id: string) => void,initial?: string,isolated = false) {
   const pinia = createPinia(); const app = createApp(Workbench); let mounted = false; let closed = false; let theme = () => {};
   const close = () => { if (closed) return; closed = true; try { if (mounted) app.unmount(); } finally { disposePinia(pinia); theme(); } };
   try {
     root.classList.add(shell.identity.rootClass,shell.identity.scopeClass); root.dataset.pluginUi = shell.identity.id;
-    theme = bindHostTheme(root); app.use(pinia); provideDetailContext(app, createDetailContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
+    theme = bindHostTheme(root); app.use(pinia); provideVisualContext(app, createVisualContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
     app.config.errorHandler = () => shell.diagnostics.report('generated.render','view.render');
     mounted = true; app.mount(root); return close;
   } catch (error) { close(); throw error; }

@@ -1,5 +1,4 @@
 import { copyDetailData, type DetailData } from './detail-controls.ts';
-import { detailValue } from './detail-runtime.ts';
 export type DetailMapping = { kind: 'none' } | { kind: 'event' } | { kind: 'value'; value: DetailData } |
   { kind: 'draft'; nodeId: string } | { kind: 'prop'; name: string } |
   { kind: 'source'; sourceId: string; operationId: string; field: string } |
@@ -9,6 +8,17 @@ export type DetailAction = { kind: 'source'; sourceId: string; operationId: stri
 export interface DetailMappingContext {
   values: Readonly<Record<string, DetailData>>; props: Readonly<Record<string, unknown>>; payload: unknown;
   read(source: string, operation: string): unknown;
+}
+/** Reads data paths, never expressions; inherited properties and accessors are not traversed. */
+export function detailValue(value: unknown, field: string): unknown {
+  if (field === '') return value;
+  for (const key of field.split('.')) {
+    if (['constructor', 'prototype', '__proto__'].includes(key) || !value || typeof value !== 'object' || !Object.hasOwn(value, key)) return undefined;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !('value' in descriptor)) return undefined;
+    value = descriptor.value;
+  }
+  return value;
 }
 /** No eval, expressions, inherited properties, implicit conversions or filesystem paths. */
 export function mapDetailPayload(mapping: DetailMapping, context: DetailMappingContext, depth = 0, budget = {count:0}): DetailData | undefined {

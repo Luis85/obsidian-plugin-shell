@@ -6,31 +6,49 @@ import { validateCompositionDesignSystem } from '../composition-contract.mjs';
 import type { VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, row, type Model, type Row } from './model.ts';
 
-/** The validated visual-design store; generation stops on the first invalid definition, naming it. */
+const validatedStores = new WeakMap<Model, VisualDesigns>();
+/** The validated visual-design store (validated once per model); generation stops on the first invalid definition, naming it.
+ * Pages may only be owned by, and navigate to, navigable surfaces (group and action nodes host no page). */
 export function visualDefinitions(m: Model): VisualDesigns {
+  const cached = validatedStores.get(m); if (cached) return cached;
   const store: unknown = row(m.document.design).visualDesigns;
   if (store === undefined) return emptyVisualDesigns();
   const validated: VisualDesigns = validateVisualDesigns(structuredClone(store), {
-    surfaces: new Set(m.screens.map(s => s.id)),
+    surfaces: new Set(m.screens.filter(s => !['group', 'action'].includes(s.kind)).map(s => s.id)),
     library: new Set(m.components.map(c => String(c.id))),
     sources: new Map(m.sources.map(s => [s.id, new Set(s.operations.map(o => o.id))])),
   });
+  validatedStores.set(m, validated);
   return validated;
 }
 
-/** Runtime specs for every page, then every component, carrying the exported design system. */
+/** A project instance's variant supplies prop defaults; explicit instance props (including false, 0 and '') win. */
+function vmVariantDefaults(store: VisualDesigns, roots: UiNode[]): void {
+  for (const node of visualNodes(roots)) {
+    if (node.kind !== 'component' || node.ref.kind !== 'project' || node.variantId === undefined) continue;
+    const ref = node.ref, contract = ref.revisionId ? store.revisions.find(r => r.id === ref.revisionId)?.contract : store.components.find(c => c.id === ref.componentId);
+    const variant = contract?.variants.find(v => v.id === node.variantId);
+    for (const [name, value] of Object.entries(variant?.values ?? {})) if (!Object.hasOwn(node.props, name)) node.props[name] = { kind: 'literal', value };
+  }
+}
+/** Runtime specs for every page, then every component, carrying the exported design system and resolved variant defaults. */
 export function visualSpecs(m: Model): VisualSpec[] {
   const store = visualDefinitions(m);
   const designSystem: unknown = row(m.document.design).designSystem;
   validateCompositionDesignSystem(designSystem);
-  return [
-    ...store.pages.map((page): VisualSpec => ({ ...page, kind: 'page', designSystem })),
-    ...store.components.map((component): VisualSpec => ({ ...component, kind: 'component', designSystem })),
+  const specs: VisualSpec[] = [
+    ...store.pages.map((page): VisualSpec => ({ ...structuredClone(page), kind: 'page', designSystem })),
+    ...store.components.map((component): VisualSpec => ({ ...structuredClone(component), kind: 'component', designSystem })),
   ];
+  for (const spec of specs) vmVariantDefaults(store, spec.kind === 'page' ? spec.root : spec.template);
+  return specs;
 }
 
 export const visualComponentPath = (m: Model, component: ComponentDefinition): string => `${m.sourceRoot}/presentation/components/library/${component.libraryId}.vue`;
 export const visualPagePath = (m: Model, page: PageDefinition): string => `${m.sourceRoot}/presentation/components/details/${page.id}.vue`;
+export const visualDefinitionPath = (m: Model, spec: VisualSpec): string => (spec.kind === 'page' ? visualPagePath(m, spec) : visualComponentPath(m, spec));
+/** Extension-owned adapter module for one external node of a component template. */
+export const visualAdapterPath = (m: Model, component: ComponentDefinition, adapter: string): string => `${m.sourceRoot}/presentation/components/library/${component.libraryId}/${adapter}.adapter.ts`;
 export const visualComponentName = (component: ComponentDefinition): string => component.exportName;
 
 /** Explicit Nuxt UI component imports for every catalog entry used in the tree (no global plugin). */

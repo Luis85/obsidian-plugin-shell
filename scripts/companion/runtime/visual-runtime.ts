@@ -1,8 +1,11 @@
 import type { PageDefinition, ComponentDefinition, ComponentNode, UiNode, Mapping, ValueExpression } from '../visual/visual-ir.mjs';
 import { copyDetailData, type DetailData, type DetailControl } from './detail-controls.ts';
 import type { DetailMapping } from './detail-actions.ts';
+export type { VisualState } from '../visual/visual-ir.mjs';
 /** Data-only contracts shared by generated visual SFCs, their runtime and extension-owned adapters. */
-export type VisualSpec = (PageDefinition | ComponentDefinition) & { kind: 'page' | 'component'; designSystem?: unknown };
+export type VisualPageSpec = PageDefinition & { kind: 'page'; designSystem?: unknown };
+export type VisualComponentSpec = ComponentDefinition & { kind: 'component'; designSystem?: unknown };
+export type VisualSpec = VisualPageSpec | VisualComponentSpec;
 export interface VisualRequest {
   definitionId: string; nodeId: string; interactionId: string; event: string;
   values: Readonly<Record<string, DetailData>>; payload: unknown;
@@ -60,4 +63,10 @@ export function visualRawInput(value: unknown): string | boolean {
   if (value === undefined || value === null) return '';
   if (typeof value === 'number') return String(value);
   return JSON.stringify(copyDetailData(value));
+}
+/** Display text for a bound value: absent values use the fallback, structured data is shown as JSON. */
+export function visualTextValue(value: unknown, fallback: string): string {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
 }

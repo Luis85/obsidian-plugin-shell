@@ -363,3 +363,41 @@ test('names and identifiers that could escape template syntax stop lowering', ()
   const lt = String.fromCharCode(92) + 'u003c', gt = String.fromCharCode(92) + 'u003e';
   assert.ok(scripted.includes(`case "${lt}/script${gt}${lt}script${gt}x": if (typeof payload === "string")`));
 });
+
+const { projectFiles } = await import('../../scripts/companion/compiler/project-files.ts');
+test('self-project generates visual files and no detail artifacts', async () => {
+  const files = await projectFiles(process.cwd(), projectModel(self)); const paths = files.map(f => f.path);
+  assert.ok(paths.some(p => /presentation\/components\/details\/vp-\d+\.vue$/.test(p)));
+  assert.ok(paths.some(p => /domain\/visual\/vc-\d+\.ts$/.test(p)));
+  assert.ok(paths.includes('design/visual-traceability.json'));
+  assert.equal(paths.some(p => /use-detail\.ts$|domain\/details\/|detail-traceability/.test(p)), false);
+  const sfc = files.find(f => /details\/vp-\d+\.vue$/.test(f.path)).content; assert.match(sfc, /useVisual\(spec/);
+  // Lowering quotes import specifiers with JSON literals (see the golden files), so either quote style is accepted.
+  assert.ok(files.some(f => f.path.endsWith('.vue') && /from (["'])@nuxt\/ui\/components\/[A-Z]\w+\.vue\1/.test(f.content)));
+  assert.ok(files.some(f => f.path.endsWith('domain/components/' + self.design.visualDesigns.components[0].libraryId + '.ts')));
+});
+test('declared packages merge into package.json with extension-owned adapters, adapter tests and a license note', async () => {
+  const doc = structuredClone(self), store = doc.design.visualDesigns, [component] = store.components, before = JSON.parse(await readFile('package.json', 'utf8'));
+  component.dependencies = [{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text\nediting' }];
+  const interactionId = 'vi-' + (store.nextId + 1);
+  component.template.push({ id: 'vn-' + store.nextId, kind: 'external', package: '@tiptap/vue-3', adapter: 'editor', props: { content: lit('') }, events: [act(interactionId, 'update', [])] }); store.nextId += 2;
+  const files = await projectFiles(process.cwd(), projectModel(doc)), get = path => files.find(f => f.path === path);
+  const pkg = JSON.parse(get('package.json').content), names = Object.keys(pkg.dependencies);
+  assert.equal(pkg.dependencies['@tiptap/vue-3'], '2.11.5'); assert.deepEqual(names, [...names].sort()); assert.deepEqual(pkg.devDependencies, before.devDependencies);
+  assert.equal(JSON.parse(get('package-lock.json').content).packages[''].dependencies['@tiptap/vue-3'], undefined);
+  const adapter = get(`src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts`);
+  assert.equal(adapter.ownership, 'extension');
+  for (const part of ['import type { VisualExternalAdapter } from "../../../../domain/visual-runtime.ts";', 'import { NotImplementedError } from "../../../../domain/contract.ts";', '// Implement with: import … from "@tiptap/vue-3"', 'export interface Props extends Record<string, unknown> {\n  "content": unknown;\n}', 'export function createAdapter(): VisualExternalAdapter<Props>'])
+    assert.ok(adapter.content.includes(part), part);
+  assert.equal(adapter.content.match(/throw new NotImplementedError\("@tiptap\/vue-3 adapter editor", "(mount|update|destroy)"\)/g).length, 3);
+  const lifecycle = get(`tests/project/acceptance/${component.libraryId}-editor.adapter.test.ts`).content;
+  assert.match(lifecycle, /it\.todo\("\[[a-z0-9-]+\/editor\] implement the @tiptap\/vue-3 adapter/);
+  assert.ok(lifecycle.includes(`vi.mock("../../../src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts"`));
+  assert.ok(lifecycle.includes(`fake.emit("update", 'fixture'); await flushPromises();`) && lifecycle.includes(`toContain("${interactionId}");`));
+  assert.ok(lifecycle.includes('expect(fake.log).toEqual(["mount","destroy"]);'));
+  const notes = get('PROJECT-IMPLEMENTATION.md').content;
+  assert.ok(notes.includes(`- @tiptap/vue-3@2.11.5 (${component.exportName}): Rich text editing`));
+  assert.ok(notes.includes("Licenses of these packages are the author's responsibility"));
+  assert.deepEqual(JSON.parse(get('design/visual-traceability.json').content).adapters.map(a => [a.package, a.adapter]), [['@tiptap/vue-3', 'editor']]);
+  assert.ok((await projectFiles(process.cwd(), projectModel(self))).find(f => f.path === 'PROJECT-IMPLEMENTATION.md').content.includes('No visual component declares a third-party package.'));
+});

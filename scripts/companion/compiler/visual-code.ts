@@ -4,13 +4,13 @@ import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import type { VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';
-import { visualNuxtImports, visualComponentPath, visualPagePath } from './visual-model.ts';
+import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPath } from './visual-model.ts';
 
 /** Authored names reach template syntax only after matching these patterns; all authored text goes through model.text(). */
 const vcId = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/, vcExport = /^[A-Z][A-Za-z0-9]*$/, vcSlot = /^[a-z][A-Za-z0-9-]*$/;
 const vcAdapter = /^[a-z][a-z0-9-]*$/, vcLibrary = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, vcNuxt = /^U[A-Z][A-Za-z0-9]*$/;
 /** Vue resolves these tags before script-setup bindings, and the script block already declares the type names. */
-const vcReserved = new Set(['Component', 'Teleport', 'Suspense', 'KeepAlive', 'BaseTransition', 'Transition', 'TransitionGroup', 'VisualState', 'VisualRequest', 'ComponentProps', 'ComponentEvents', 'ComponentSlots']);
+const vcReserved = new Set(['Error', 'Component', 'Teleport', 'Suspense', 'KeepAlive', 'BaseTransition', 'Transition', 'TransitionGroup', 'VisualState', 'VisualRequest', 'ComponentProps', 'ComponentEvents', 'ComponentSlots']);
 const vcVoid = new Set(['input', 'img']);
 
 interface Lowering { store: VisualDesigns; where: string; path: string; component: ComponentDefinition | null; projects: Map<string, ComponentDefinition>; externals: string[] }
@@ -140,7 +140,7 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
     vcName(ctx, target.libraryId, vcLibrary, name + ' library id');
     return `import ${name} from ${literal(relativeImport(ctx.path, visualComponentPath(m, target)))};`;
   });
-  const adapters = ctx.externals.map((adapter, i) => `import { createAdapter as createAdapter_${i} } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/presentation/components/library/${libraryId}/${adapter}.adapter.ts`))};`);
+  const adapters = component ? ctx.externals.map((adapter, i) => `import { createAdapter as createAdapter_${i} } from ${literal(relativeImport(ctx.path, visualAdapterPath(m, component, adapter)))};`) : [];
   const contract = component ? `import type { ComponentProps, ComponentEvents, ComponentSlots } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`))};\n` : '';
   const emitted = component ? [...component.emits.map(vcEmitCase), "default: throw new Error('VISUAL_EMIT_UNKNOWN');"].map(line => `    ${line}\n`).join('') : '';
   const declared = component ? `, (name, payload) => {\n  switch (name) {\n${emitted}  }\n}` : '';

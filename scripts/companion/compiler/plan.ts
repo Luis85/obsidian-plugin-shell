@@ -5,7 +5,9 @@ import { readCompanionProject } from '../read-project.mjs';
 import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
 import { digest, json, projectModel, row, rows, text, requireValue } from './model.ts';
 import { projectFiles } from './project-files.ts';
-import { detailDocuments } from './detail-model.ts';
+import { visualDefinitions } from './visual-model.ts';
+import { visualVerification, visualAcceptanceTodo } from './visual-files.ts';
+import { visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 export interface GenerateOptions { input: string; target: string; vault?: string; templateRoot?: string; bootstrap?: ReadonlyArray<{path: string; hash: string}>; output?: Awaited<ReturnType<typeof projectFiles>> }
 const generationVersion = 1;
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
@@ -27,7 +29,9 @@ export async function planProject(options: GenerateOptions) {
     requireValue(new Set(records.map(f=>text(f.path).toLowerCase())).size === records.length,'Duplicate receipt paths.');
     previous = new Map(records.map(f => [text(f.path),{hash:text(f.hash),ownership:text(f.ownership)}]));
   }
-  const details = detailDocuments(model);
+  // Validation gate: invalid visual designs stop planning before any file is rendered.
+  const visual = visualDefinitions(model);
+  const interactions = [...visual.pages, ...visual.components].flatMap(d => visualNodes(visualRoot(d)).flatMap(n => 'events' in n ? n.events : []));
   const output = options.output ?? await projectFiles(templateRoot,model);
   requireValue(output.length <= 5000, 'Generated project exceeds the supported ownership inventory.');
   const candidates = await createFilePlan(input.vault,output.map(e => ({path:prefix+e.path,content:e.content,...(e.encoding ? {encoding:e.encoding} : {})})));
@@ -57,7 +61,7 @@ export async function planProject(options: GenerateOptions) {
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
   for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
   const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
-  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + details.flatMap(d=>d.edges).filter(e=>!e.effect && (e.acceptance || !e.targetSurfaceId)).length,detailDocuments:rows(row(model.document.design).detailDesigns?row(row(model.document.design).detailDesigns).documents:[]).length,publishedRevisions:details.filter(d=>d.id.startsWith('detail-revision-')).length,generatedDetailSurfaces:details.length,detailInteractions:details.reduce((n,d)=>n+d.edges.length,0),warnings:model.warnings}};
+  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings}};
 }
 /** Lossy decoding would silently rewrite a developer's bytes; only exact UTF-8 (BOM retained) or base64 survives. */
 function preservedText(bytes: Buffer, encoding?: 'base64'): string | null {

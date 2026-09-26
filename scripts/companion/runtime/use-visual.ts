@@ -1,11 +1,10 @@
 import { computed, inject, nextTick, watch, onScopeDispose, reactive, shallowReactive, ref, toRaw, type App, type InjectionKey, type WatchStopHandle } from 'vue';
-import { detailTextValue } from './detail-runtime.ts';
 import { parseDetailControl, copyDetailData, type DetailData } from './detail-controls.ts';
 import { compositionStyle, compositionTheme } from '../composition-contract.mjs';
 import { mapDetailPayload } from './detail-actions.ts';
 import { visualSession, visualTransition, visualVisible, visualRead, type Session } from '../visual/visual-session.mjs';
 import type { UiNode, ValueExpression, VisualState, Interaction, VisualAction } from '../visual/visual-ir.mjs';
-import { visualIndex, visualExpressions, visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, VISUAL_RUNTIME_LOCAL,
+import { visualIndex, visualExpressions, visualTextValue, visualMapping, visualRawInput, visualControl, VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE, VISUAL_RUNTIME_LOCAL,
   type VisualExternalAdapter, type VisualRequest, type VisualSpec } from './visual-runtime.ts';
 export interface VisualPort {
   sourceId: string; operationId: string; direction: string; requiresInput: boolean;
@@ -154,7 +153,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   }
   /** Author accessibility notes, bound as aria-description; never interpolated into template syntax. */
   function a11y(id: string): string | undefined { const note = index.get(id)?.a11y; return note ? note : undefined; }
-  function text(id: string): string { const node = index.get(id); return node?.kind === 'text' ? detailTextValue(value(node.value), '') : ''; }
+  function text(id: string): string { const node = index.get(id); return node?.kind === 'text' ? visualTextValue(value(node.value), '') : ''; }
   function resolved(id: string): Record<string, unknown> {
     const node = index.get(id);
     return node?.kind === 'component' || node?.kind === 'external' ? Object.fromEntries(Object.entries(node.props).map(([name, expr]) => [name, value(expr)])) : {};

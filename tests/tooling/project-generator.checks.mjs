@@ -9,6 +9,7 @@ import { projectModel, schema, literal } from '../../scripts/companion/compiler/
 import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.ts';
 import { matches } from '../../scripts/companion/runtime/contract.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const fixture = JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
 const clone = () => structuredClone(fixture);
@@ -82,8 +83,9 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
-  assert.deepEqual(trace.detailDesigns,fixture.design.detailDesigns);
-  assert.ok(trace.warnings.some(w=>w.includes('detail designs compile')));
+  assert.deepEqual(trace.visualDesigns,migrateCompanionDocument(fixture).document.design.visualDesigns);
+  assert.ok(trace.warnings.some(w=>w.includes('visual designs compile')));
+  const visual=JSON.parse(await readFile(join(target,'design/visual-traceability.json'),'utf8')); assert.equal(visual.definitions.length,81); assert.equal(visual.businessAcceptance,'not-implemented');
   for (const r of trace.requirements) assert.match(await readFile(join(target,r.test),'utf8'),/it.todo/);
   const pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8')); assert.equal(pkg.name,'plugin-companion'); assert.equal(pkg.scripts.verify,JSON.parse(await readFile(join(root,'package.json'),'utf8')).scripts.verify);
   assert.equal(JSON.parse(await readFile(join(target,'package-lock.json'),'utf8')).packages[''].name,pkg.name);
