@@ -214,7 +214,7 @@
       "name": "quality",
       "purpose": "Repository gates: analyzer, lint, coverage inventory, maintainability, presentation, repository and test-quality policies, evidence producers and this suite manifest.",
       "runner": {"type": "node-test"},
-      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs"],
+      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs"],
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",

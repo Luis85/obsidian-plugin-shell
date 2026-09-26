@@ -40,7 +40,7 @@ below; they are orientation, not budgets.
 | `native:host` | Real Obsidian smoke in an isolated scratch vault | `npm run test:native -- --allow-download` | node script | provisioned `.native-runner` | opt-in | not run here |
 | `setup` | Setup identity, npm install policy, staged build/local install, CSS identity, harness preview (5) | `npm run test:setup` | `node --test` | none | tooling | 6 s |
 | `release` | Release preparation/plans/execution, audit classification, maintenance, qualification triggers (8) | `npm run test:release` | `node --test` | none | tooling | 3 s |
-| `quality` | Analyzer, lint, coverage inventory, maintainability, presentation, repository/test-quality policies, evidence producers, this manifest (14) | `npm run test:quality` | `node --test` | `npm run build` (analyzer-archive copies `dist/`) | tooling | 89 s |
+| `quality` | Analyzer, lint, coverage inventory, maintainability, presentation, repository/test-quality policies, evidence producers, this manifest, agent hooks (15) | `npm run test:quality` | `node --test` | `npm run build` (analyzer-archive copies `dist/`) | tooling | 89 s |
 | `baseline` | Dependency-free verification baseline and HTTP style specimen, repeated three times (8) | `npm run test:baseline` | `verify-baseline.mjs` | none | own step | 20 s |
 | `browser-specimen` | Host-style specimen assertions in a real browser | `node scripts/testing/suites.mjs browser-specimen` | node script + Playwright | Chromium | opt-in | 11 s |
 | `e2e` | Served harness in Chromium: showcase, modals, persistence, accessibility, design system (11) | `npm run test:e2e` | Playwright | Chromium, `npm run harness:build` | opt-in | 78 s |

@@ -47,6 +47,7 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   pkg.scripts['typecheck:project'] = 'vue-tsc --noEmit --project tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
   pkg.scripts['doctor'] = 'node shell.mjs doctor';
+  pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
   // Full framework coverage/native/release gates remain present and are NOT relabelled green.
   const fixtures = await fixtureCode(templateRoot,m,add);

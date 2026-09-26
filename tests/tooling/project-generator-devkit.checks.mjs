@@ -90,6 +90,18 @@ test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the proj
   assert.match(text('src/generated/bootstrap/install.ts'), /createDebugCommands/);
   assert.match(text('src/generated/bootstrap/install.ts'), /'-view-project-workbench'/);
 });
+test('[GENERATOR-DEVKIT-07] custom test folders keep the example test, Vitest config and suite manifest aligned', async () => {
+  const custom = structuredClone(document); custom.settings = { codebaseFolder: 'product/code', testsFolder: 'verification/specs' };
+  const output = new Map((await projectFiles(root, projectModel(custom))).map(entry => [entry.path, entry]));
+  assert.ok(output.has('verification/specs/project/plugin-host.test.ts'));
+  assert.match(output.get('verification/specs/project/plugin-host.test.ts').content, /from "\.\.\/\.\.\/\.\.\/src\/main\.ts"/);
+  assert.match(output.get('vitest.project.config.mjs').content, /"verification\/specs\/project\/\*\*\/\*\.test\.\{ts,mjs\}"/);
+  const suites = JSON.parse(output.get('tests/suites.json').content);
+  assert.ok(suites.roots.some(entry => entry.path === 'verification/specs/project'));
+  assert.deepEqual(suites.suites.find(suite => suite.name === 'project').include, ['verification/specs/project/**/*.test.ts', 'verification/specs/project/**/*.test.mjs']);
+  assert.ok(!output.get('tests/suites.json').content.includes('"tests/project'));
+  assert.equal(text('tests/suites.json'), await readFile(join(root, 'tests/suites.json'), 'utf8'));
+});
 test('[GENERATOR-DEVKIT-05] templates and link rebasing are exact and fail closed', () => {
   assert.equal(renderTemplate('# {{name}} ${{ github.ref }}', { name: 'X' }), '# X ${{ github.ref }}');
   assert.throws(() => renderTemplate('{{missing}}', {}), /GENERATOR_TEMPLATE_PLACEHOLDER: missing/);

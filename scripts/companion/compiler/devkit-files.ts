@@ -34,6 +34,11 @@ export async function devkitFiles(templateRoot: string, m: Model, add: Add): Pro
     add(path, renderTemplate(await readFile(join(templateRoot, 'scripts/companion/devkit', template), 'utf8'), values), 'extension');
   }
   add('vitest.project.config.mjs', projectVitestConfig(m), 'extension');
+  // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
+  if (m.testRoot !== 'tests/project') {
+    const suites = await readFile(join(templateRoot, 'tests/suites.json'), 'utf8');
+    add('tests/suites.json', suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1)), 'framework');
+  }
   const example = `${m.testRoot}/plugin-host.test.ts`;
   add(example, pluginHostTest(example, posix.relative(posix.dirname(example), 'tests/obsidian/vault')), 'extension');
 }

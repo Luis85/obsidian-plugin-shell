@@ -44,6 +44,8 @@ folder are ever opened.
 | `npm run check:submission` | Local mirror of the Obsidian community-review rules (manifest, lint, bundle) |
 | `npm run doctor` | Toolchain and configuration diagnostics |
 
+`npm run test:suites -- --list` lists every test suite (product, framework, real Obsidian)
+with its runner and prerequisites; `npm run test:project` runs the product suites.
 `npm run verify` is the inherited full framework gate (coverage, analyzers, baselines).
 It is much slower and is not required for day-to-day product work.
 
