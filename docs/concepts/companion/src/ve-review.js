@@ -1,13 +1,17 @@
 // Review findings for one definition and the Project health slideover. Both only read the design.
 // Errors come from the complete validation (the generator gate); warnings and info are authoring advice.
 const VE_SEVERITY = { error: ['alert', 'Error'], warning: ['alert', 'Warning'], info: ['info', 'Info'] };
-// The node a validation message names ("Page "X" / <name or id>[ :prop| @attr][ → interaction]: …"), in this definition.
-function veFindingNode(definition, message) {
+// The element a validation error belongs to, in this definition: the contract's `nodeId` when present, else the one
+// element the message names. An ambiguous name (duplicates, wrap groups) links nowhere, so the finding opens Health.
+function veFindingNode(definition, error) {
+  const nodes = visualNodes(visualRoot(definition));
+  if (typeof error?.nodeId === 'string') return nodes.some(n => n.id === error.nodeId) ? error.nodeId : null;
+  const message = veErrorText(error);
   const prefix = (Object.hasOwn(definition, 'template') ? 'Component ' + JSON.stringify(definition.exportName) : 'Page ' + JSON.stringify(definition.name)) + ' / ';
   const match = message.startsWith(prefix) ? /^(.+?)(?: [:@][A-Za-z0-9-]+)?(?: → [^:]*)?: /.exec(message.slice(prefix.length)) : null;
   if (!match) return null;
-  const nodes = visualNodes(visualRoot(definition));
-  return (nodes.find(n => n.name === match[1]) ?? nodes.find(n => n.id === match[1]))?.id ?? null;
+  const hits = nodes.filter(n => n.name === match[1] || n.id === match[1]);
+  return hits.length === 1 ? hits[0].id : null;
 }
 function veHasText(expr) { return !!expr && (expr.kind !== 'literal' || (typeof expr.value === 'string' ? expr.value.trim() !== '' : expr.value !== null)); }
 // A control or button is labelled by its own label prop, an enclosing form field label, or accessibility notes.
@@ -29,10 +33,7 @@ function veHiddenEverywhere(definition) {
 function veReviewFindings(store, ref, context = veContext(design())) {
   const definition = visualDefinition(store, ref), findings = [];
   const add = (severity, text, nodeId = null) => findings.push({ severity, text, nodeId });
-  try { validateVisualDesigns(store, context); } catch (error) {
-    const text = String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, '');
-    add('error', text, definition ? veFindingNode(definition, text) : null);
-  }
+  try { validateVisualDesigns(store, context); } catch (error) { add('error', veErrorText(error), definition ? veFindingNode(definition, error) : null); }
   if (!definition) return findings;
   const stack = [];
   visualWalk(visualRoot(definition), (node, at) => {

@@ -14735,7 +14735,13 @@ function vvComponentNode(node, scope, where) {
   if (node.control !== undefined) { visualAssert(visualIsControl(node), where + ': only form controls have control semantics.'); vvWithin(where, () => validateVisualControl(node.control)); }
   vvEvents(node, scope, [...contract.emits, ...VISUAL_DOM_EVENTS], where);
 }
+// Errors raised while validating a node carry that node's id as an own `nodeId` property, so editors can link the
+// finding to the exact element even when names repeat. The message text is unchanged.
 function vvNode(node, scope, at) {
+  try { vvNodeCheck(node, scope, at); }
+  catch (err) { if (err instanceof Error && err.nodeId === undefined && typeof node?.id === 'string') err.nodeId = node.id; throw err; }
+}
+function vvNodeCheck(node, scope, at) {
   const where = scope.where + ' / ' + (node?.name || node?.id || 'element');
   const keys = { element: ['id', 'kind', 'tag', 'attrs', 'children', 'events'], text: ['id', 'kind', 'role', 'value'], slot: ['id', 'kind', 'name', 'fallback'], component: ['id', 'kind', 'ref', 'props', 'slots', 'events'], external: ['id', 'kind', 'package', 'adapter', 'props', 'events'] }[node?.kind];
   visualAssert(keys, where + ': unsupported element kind ' + JSON.stringify(node?.kind) + '.');
@@ -18763,6 +18769,7 @@ function veDefaults() {
   return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '' };
 }
 const veUi = veDefaults();
+function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
 function veReset() { Object.assign(veUi, veDefaults()); }
 function veStore(d = design()) { return d.visualDesigns ?? emptyVisualDesigns(); }
 // The same reference context the generator enforces: navigable surfaces, library entries and declared source operations.
@@ -19392,7 +19399,7 @@ function veSaveLayout() {
 
 // Inspector fields: typed value conversion, value specs per node, field markup and the field dispatcher.
 // Conversions throw plain errors naming the field. veApplyField is pure over a copied store; veInspectorField runs it
-// inside veCommit (through vePageWrite), so a failed conversion or validation changes nothing.
+// inside veCommit, so a failed conversion or validation changes nothing.
 const VE_BINDING_KINDS = [['literal', 'Literal'], ['source', 'Source'], ['state', 'Form value']];
 const VE_INSPECTOR_FIELDS = ['ve-name', 've-prop', 've-attr', 've-role', 've-tag', 've-layout-mode', 've-layout', 've-visible', 've-a11y', 've-bind-kind', 've-bind-source', 've-bind-operation', 've-bind-field', 've-bind-state'];
 const VE_ELEMENT_ATTRS = { img: ['alt', 'src'], input: ['placeholder', 'type', 'name'], button: ['type'], label: ['for'] };
@@ -19530,15 +19537,20 @@ function veApplyField(store, ref, nodeId, field, key, raw) {
   if (field === 've-bind-kind') return veSetExpr(store, ref, node, key, veBindingExpr(raw, spec, definition, node));
   return veSetExpr(store, ref, node, key, veBindingPatch(veCurrentExpr(node, key), field, raw));
 }
-// Dispatcher entry (from veFieldEdit). Text-like fields keep their draft while typing and commit on change.
-function veInspectorField(el, commit) {
+// Everything a commit needs, read from the field once: the page, the element the field was rendered for, field and value.
+function veCaptureField(el) {
+  return { ref: vePageRef(), nodeId: el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), field: el.dataset.field, key: el.dataset.key || '', raw: el.type === 'checkbox' ? el.checked : el.value };
+}
+// Dispatcher entry (from veFieldEdit). Text-like fields keep their draft while typing and commit on change. The write is
+// synchronous from the captured values; `after` redraws (text fields pass a deferred redraw, see ve-actions.js).
+function veInspectorField(el, commit, after = render) {
   if (!VE_INSPECTOR_FIELDS.includes(el.dataset.field)) return false;
   if (!commit) return true;
-  // The element the field was rendered for, even if the selection changed before a deferred commit.
-  const id = el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), inline = el.dataset.error ? document.getElementById(el.dataset.error) : null;
-  try {
-    vePageWrite((store, ref) => { veApplyField(store, ref, id, el.dataset.field, el.dataset.key || '', el.type === 'checkbox' ? el.checked : el.value); return id; });
-  } catch (error) { if (inline) inline.textContent = veErrorText(error); throw error; }
+  veEditable();
+  const edit = veCaptureField(el), inline = el.dataset.error ? document.getElementById(el.dataset.error) : null;
+  try { veCommit(store => { veApplyField(store, edit.ref, edit.nodeId, edit.field, edit.key, edit.raw); }); }
+  catch (error) { if (inline) inline.textContent = veErrorText(error); throw error; }
+  veUi.error = ''; veUi.more = false; after();
   return true;
 }
 // Field markup. Every control carries data-field + data-key so focus survives re-render.
@@ -19577,13 +19589,17 @@ function veBindingText(expr, definition, d = design()) {
 // Review findings for one definition and the Project health slideover. Both only read the design.
 // Errors come from the complete validation (the generator gate); warnings and info are authoring advice.
 const VE_SEVERITY = { error: ['alert', 'Error'], warning: ['alert', 'Warning'], info: ['info', 'Info'] };
-// The node a validation message names ("Page "X" / <name or id>[ :prop| @attr][ → interaction]: …"), in this definition.
-function veFindingNode(definition, message) {
+// The element a validation error belongs to, in this definition: the contract's `nodeId` when present, else the one
+// element the message names. An ambiguous name (duplicates, wrap groups) links nowhere, so the finding opens Health.
+function veFindingNode(definition, error) {
+  const nodes = visualNodes(visualRoot(definition));
+  if (typeof error?.nodeId === 'string') return nodes.some(n => n.id === error.nodeId) ? error.nodeId : null;
+  const message = veErrorText(error);
   const prefix = (Object.hasOwn(definition, 'template') ? 'Component ' + JSON.stringify(definition.exportName) : 'Page ' + JSON.stringify(definition.name)) + ' / ';
   const match = message.startsWith(prefix) ? /^(.+?)(?: [:@][A-Za-z0-9-]+)?(?: → [^:]*)?: /.exec(message.slice(prefix.length)) : null;
   if (!match) return null;
-  const nodes = visualNodes(visualRoot(definition));
-  return (nodes.find(n => n.name === match[1]) ?? nodes.find(n => n.id === match[1]))?.id ?? null;
+  const hits = nodes.filter(n => n.name === match[1] || n.id === match[1]);
+  return hits.length === 1 ? hits[0].id : null;
 }
 function veHasText(expr) { return !!expr && (expr.kind !== 'literal' || (typeof expr.value === 'string' ? expr.value.trim() !== '' : expr.value !== null)); }
 // A control or button is labelled by its own label prop, an enclosing form field label, or accessibility notes.
@@ -19605,10 +19621,7 @@ function veHiddenEverywhere(definition) {
 function veReviewFindings(store, ref, context = veContext(design())) {
   const definition = visualDefinition(store, ref), findings = [];
   const add = (severity, text, nodeId = null) => findings.push({ severity, text, nodeId });
-  try { validateVisualDesigns(store, context); } catch (error) {
-    const text = String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, '');
-    add('error', text, definition ? veFindingNode(definition, text) : null);
-  }
+  try { validateVisualDesigns(store, context); } catch (error) { add('error', veErrorText(error), definition ? veFindingNode(definition, error) : null); }
   if (!definition) return findings;
   const stack = [];
   visualWalk(visualRoot(definition), (node, at) => {
@@ -20057,7 +20070,6 @@ function vePageEditorView() {
 
 // Visual editor action and field dispatch. Session changes (selection, panes, modes) touch veUi only; every design write
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
-function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
 function veFail(error) {
   const text = veErrorText(error);
   const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'] }[modalType] : null;
@@ -20162,11 +20174,11 @@ function handleVisualAction(action, value) {
 }
 // Search fields re-render only their own results so typing keeps focus; the scenario and page switcher re-render.
 // Inspector text fields keep their draft while typing (commit false) and write on change; selects and checkboxes write at once.
-function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELECT') {
+function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELECT', after = render) {
   const field = el.dataset.field;
   if (!field?.startsWith('ve-')) return false;
   try {
-    if (veInteractionField(el) || veInspectorField(el, commit)) return true;
+    if (veInteractionField(el) || veInspectorField(el, commit, after)) return true;
     if (veSaveLayoutField(el)) return true;
     if (field === 've-page-search') { veUi.pageQuery = el.value; document.getElementById('ve-pages-results').innerHTML = vePageCards(); return true; }
     if (field === 've-outline-search') { veUi.query = el.value; const page = veCurrentPage(); if (page) document.getElementById('ve-outline').innerHTML = veOutlineHtml(page); return true; }
@@ -20189,10 +20201,23 @@ document.addEventListener('keydown', event => {
   handleVisualAction('ve-select', item.dataset.value || '');
 });
 // Inspector text fields write once, on change (blur or Enter); the shared input listener only keeps their draft.
-// The write waits one task so a Tab has moved focus first, and the re-render restores focus to the next field.
+// The write happens at once, but the redraw waits: a Tab first moves focus (restored after the redraw), and a pointer
+// press that blurred the field must finish its click on the current DOM, so the click is not lost to a replaced target.
+let vePointerDown = false;
+function veRedrawAfterInput() {
+  const redraw = () => setTimeout(render);
+  if (!vePointerDown) { redraw(); return; }
+  let done = false;
+  const once = () => { if (!done) { done = true; redraw(); } };
+  document.addEventListener('pointerup', once, { once: true, capture: true });
+  document.addEventListener('pointercancel', once, { once: true, capture: true });
+}
+document.addEventListener('pointerdown', () => { vePointerDown = true; }, true);
+document.addEventListener('pointerup', () => { vePointerDown = false; }, true);
+document.addEventListener('pointercancel', () => { vePointerDown = false; }, true);
 document.addEventListener('change', event => {
   const el = event.target;
-  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') setTimeout(() => { if (el.isConnected) veFieldEdit(el, true); });
+  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') veFieldEdit(el, true, veRedrawAfterInput);
 });
 
 // Portable authoring documents are deliberately separate from recovery snapshots.

@@ -22,7 +22,11 @@ const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, v
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
 const STORAGE_KEY = 'concept', COMPANION_VERSION = 5, DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false };
 const localStorage = { getItem: () => null };
-const document = { addEventListener() {}, getElementById: id => host.dom[id] ?? null };
+class Element {}
+const document = { addEventListener(type, fn, options) { (host.listeners[type] ??= []).push({ fn, once: !!options?.once }); }, getElementById: id => host.dom[id] ?? null };
+// Dispatch a document event to the registered listeners (once-listeners are removed), as the browser would.
+function fire(type, event = {}) { const list = host.listeners[type] ?? []; host.listeners[type] = list.filter(l => !l.once); for (const l of list) l.fn(event); }
+function field(props) { return Object.assign(new Element(), props); }
 function design() { return host.design; } function project() { return host.project; }
 function structuredClone(v) { return v === undefined ? v : JSON.parse(JSON.stringify(v)); } // Realm-local, so copies keep this realm's prototypes.
 function smToken() { return 'rev-' + host.design.revision; } function designCopy(v) { return structuredClone(v); }
@@ -36,9 +40,9 @@ const output = { mode: 'fields', entity: null, many: true, fields: [{ name: 'nam
 const sources = [{ id: 'ds-source-1', name: 'Customers API', operations: [{ id: 'ds-operation-2', name: 'List customers', direction: 'read', output }, { id: 'ds-operation-3', name: 'Create customer', direction: 'write', output: { mode: 'none', entity: null, many: false, fields: [], schema: null } }] }];
 const surfaces = [{ id: 'surface-a', kind: 'page', label: 'Customers' }, { id: 'surface-b', kind: 'modal', label: 'Edit customer' }];
 function load() {
-  const host = { design: null, saves: 0, renders: 0, redraws: 0, notices: [], dom: { modal: { open: false }, 've-error': { textContent: '' } } };
+  const host = { listeners: {}, design: null, saves: 0, renders: 0, redraws: 0, notices: [], dom: { modal: { open: false }, 've-error': { textContent: '' } } };
   host.project = { get design() { return host.design; }, set design(v) { host.design = v; } };
-  const ctx = vm.createContext({ host });
+  const ctx = vm.createContext({ host, setTimeout });
   vm.runInContext(shared + '\n' + helpers + '\n' + stubs + '\n' + concept, ctx, { filename: 'concept-visual-inspector.js' });
   const n = (id, entryId, props = {}, extra = {}) => ctx.visualNuxt(id, entryId, props, extra);
   const field = n('vn-6', 'u-form-field', { label: lit('Email') }, { name: 'Email field' }); field.slots.default = [n('vn-7', 'u-input', {}, { name: 'Email' })];
@@ -254,4 +258,37 @@ test('[VISUAL-INSPECTOR] Project health lists every check and opens the export p
   assert.match(broken[3][2], /owner surface is missing/);
   ctx.handleVisualAction('ve-health', '');
   assert.equal(ctx.modal().type, 've-health');
+});
+
+test('[VISUAL-INSPECTOR] text edits commit at once from the captured field; a pointer press keeps its click before the redraw', async () => {
+  const ctx = load(), tick = () => new Promise(resolve => setTimeout(resolve, 5)), label = () => node(ctx, 'vn-2').props.label.value;
+  const input = ctx.field({ dataset: { field: 've-prop', key: 'label' }, value: 'Renamed', type: 'text', tagName: 'INPUT', closest: () => ({ dataset: { inspected: 'vn-2' } }) });
+  const renders = ctx.host.renders;
+  ctx.fire('pointerdown'); ctx.fire('change', { target: input });
+  assert.equal(label(), 'Renamed', 'the edit is saved when the field blurs');
+  await tick();
+  assert.equal(ctx.host.renders, renders, 'no redraw while the pointer is down, so the pressed target still receives its click');
+  ctx.ui().selected = 'vn-5'; // the click selects another element on the current DOM
+  ctx.fire('pointerup'); await tick();
+  assert.equal(ctx.host.renders, renders + 1, 'one redraw after the pointer sequence');
+  assert.equal(ctx.ui().selected, 'vn-5', 'the commit does not take the selection back');
+  input.value = 'Again'; ctx.fire('change', { target: input });
+  assert.equal(label(), 'Again', 'a later edit still targets the element the field was rendered for');
+  await tick(); assert.equal(ctx.host.renders, renders + 2, 'keyboard commits redraw after focus has moved');
+  const before = JSON.stringify(ctx.veStore());
+  ctx.fire('change', { target: ctx.field({ dataset: { field: 've-name', key: 'name' }, value: 'Two' + String.fromCharCode(10) + 'lines', type: 'text', tagName: 'INPUT', closest: input.closest }) });
+  assert.match(ctx.ui().error, /name must be a single line/); assert.equal(JSON.stringify(ctx.veStore()), before, 'a refused edit keeps the model');
+});
+
+test('[VISUAL-INSPECTOR] validation findings link by the contract node id, never to a same-named sibling', () => {
+  const ctx = load(), store = ctx.veStore(), ref = { kind: 'page', id: 'vp-9' };
+  const copy = ctx.visualDuplicateNode(store, ref, 'vn-2');
+  assert.equal(copy.name, 'Save button', 'duplicates share the name');
+  copy.props.label = ctx.realm({ kind: 'prop', name: 'title' });
+  const [error] = plain(ctx.veReviewFindings(store, ref));
+  assert.deepEqual(error, { severity: 'error', text: 'Page "Customers" / Save button :label: binds undeclared prop "title".', nodeId: copy.id });
+  const RealmError = vm.runInContext('Error', ctx), page = store.pages[0], message = text => new RealmError('VISUAL_INVALID: ' + text);
+  assert.equal(ctx.veFindingNode(page, message('Page "Customers" / Save button: something.')), null, 'an ambiguous name without a node id links nowhere');
+  assert.equal(ctx.veFindingNode(page, message('Page "Customers" / Hero image: something.')), 'vn-4', 'a unique name still links');
+  assert.equal(ctx.veFindingNode(page, Object.assign(new RealmError('x'), { nodeId: 'vn-99' })), null, 'a node of another definition links nowhere');
 });

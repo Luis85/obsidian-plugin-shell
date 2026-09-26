@@ -1,6 +1,6 @@
 // Inspector fields: typed value conversion, value specs per node, field markup and the field dispatcher.
 // Conversions throw plain errors naming the field. veApplyField is pure over a copied store; veInspectorField runs it
-// inside veCommit (through vePageWrite), so a failed conversion or validation changes nothing.
+// inside veCommit, so a failed conversion or validation changes nothing.
 const VE_BINDING_KINDS = [['literal', 'Literal'], ['source', 'Source'], ['state', 'Form value']];
 const VE_INSPECTOR_FIELDS = ['ve-name', 've-prop', 've-attr', 've-role', 've-tag', 've-layout-mode', 've-layout', 've-visible', 've-a11y', 've-bind-kind', 've-bind-source', 've-bind-operation', 've-bind-field', 've-bind-state'];
 const VE_ELEMENT_ATTRS = { img: ['alt', 'src'], input: ['placeholder', 'type', 'name'], button: ['type'], label: ['for'] };
@@ -138,15 +138,20 @@ function veApplyField(store, ref, nodeId, field, key, raw) {
   if (field === 've-bind-kind') return veSetExpr(store, ref, node, key, veBindingExpr(raw, spec, definition, node));
   return veSetExpr(store, ref, node, key, veBindingPatch(veCurrentExpr(node, key), field, raw));
 }
-// Dispatcher entry (from veFieldEdit). Text-like fields keep their draft while typing and commit on change.
-function veInspectorField(el, commit) {
+// Everything a commit needs, read from the field once: the page, the element the field was rendered for, field and value.
+function veCaptureField(el) {
+  return { ref: vePageRef(), nodeId: el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), field: el.dataset.field, key: el.dataset.key || '', raw: el.type === 'checkbox' ? el.checked : el.value };
+}
+// Dispatcher entry (from veFieldEdit). Text-like fields keep their draft while typing and commit on change. The write is
+// synchronous from the captured values; `after` redraws (text fields pass a deferred redraw, see ve-actions.js).
+function veInspectorField(el, commit, after = render) {
   if (!VE_INSPECTOR_FIELDS.includes(el.dataset.field)) return false;
   if (!commit) return true;
-  // The element the field was rendered for, even if the selection changed before a deferred commit.
-  const id = el.closest?.('[data-inspected]')?.dataset.inspected || veSelectedId(), inline = el.dataset.error ? document.getElementById(el.dataset.error) : null;
-  try {
-    vePageWrite((store, ref) => { veApplyField(store, ref, id, el.dataset.field, el.dataset.key || '', el.type === 'checkbox' ? el.checked : el.value); return id; });
-  } catch (error) { if (inline) inline.textContent = veErrorText(error); throw error; }
+  veEditable();
+  const edit = veCaptureField(el), inline = el.dataset.error ? document.getElementById(el.dataset.error) : null;
+  try { veCommit(store => { veApplyField(store, edit.ref, edit.nodeId, edit.field, edit.key, edit.raw); }); }
+  catch (error) { if (inline) inline.textContent = veErrorText(error); throw error; }
+  veUi.error = ''; veUi.more = false; after();
   return true;
 }
 // Field markup. Every control carries data-field + data-key so focus survives re-render.

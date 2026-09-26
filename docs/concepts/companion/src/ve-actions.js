@@ -1,6 +1,5 @@
 // Visual editor action and field dispatch. Session changes (selection, panes, modes) touch veUi only; every design write
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
-function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
 function veFail(error) {
   const text = veErrorText(error);
   const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'] }[modalType] : null;
@@ -105,11 +104,11 @@ function handleVisualAction(action, value) {
 }
 // Search fields re-render only their own results so typing keeps focus; the scenario and page switcher re-render.
 // Inspector text fields keep their draft while typing (commit false) and write on change; selects and checkboxes write at once.
-function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELECT') {
+function veFieldEdit(el, commit = el.type === 'checkbox' || el.tagName === 'SELECT', after = render) {
   const field = el.dataset.field;
   if (!field?.startsWith('ve-')) return false;
   try {
-    if (veInteractionField(el) || veInspectorField(el, commit)) return true;
+    if (veInteractionField(el) || veInspectorField(el, commit, after)) return true;
     if (veSaveLayoutField(el)) return true;
     if (field === 've-page-search') { veUi.pageQuery = el.value; document.getElementById('ve-pages-results').innerHTML = vePageCards(); return true; }
     if (field === 've-outline-search') { veUi.query = el.value; const page = veCurrentPage(); if (page) document.getElementById('ve-outline').innerHTML = veOutlineHtml(page); return true; }
@@ -132,8 +131,21 @@ document.addEventListener('keydown', event => {
   handleVisualAction('ve-select', item.dataset.value || '');
 });
 // Inspector text fields write once, on change (blur or Enter); the shared input listener only keeps their draft.
-// The write waits one task so a Tab has moved focus first, and the re-render restores focus to the next field.
+// The write happens at once, but the redraw waits: a Tab first moves focus (restored after the redraw), and a pointer
+// press that blurred the field must finish its click on the current DOM, so the click is not lost to a replaced target.
+let vePointerDown = false;
+function veRedrawAfterInput() {
+  const redraw = () => setTimeout(render);
+  if (!vePointerDown) { redraw(); return; }
+  let done = false;
+  const once = () => { if (!done) { done = true; redraw(); } };
+  document.addEventListener('pointerup', once, { once: true, capture: true });
+  document.addEventListener('pointercancel', once, { once: true, capture: true });
+}
+document.addEventListener('pointerdown', () => { vePointerDown = true; }, true);
+document.addEventListener('pointerup', () => { vePointerDown = false; }, true);
+document.addEventListener('pointercancel', () => { vePointerDown = false; }, true);
 document.addEventListener('change', event => {
   const el = event.target;
-  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') setTimeout(() => { if (el.isConnected) veFieldEdit(el, true); });
+  if (el instanceof Element && VE_INSPECTOR_FIELDS.includes(el.dataset.field) && el.type !== 'checkbox' && el.tagName !== 'SELECT') veFieldEdit(el, true, veRedrawAfterInput);
 });

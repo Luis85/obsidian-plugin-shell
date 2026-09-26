@@ -105,7 +105,13 @@ function vvComponentNode(node, scope, where) {
   if (node.control !== undefined) { visualAssert(visualIsControl(node), where + ': only form controls have control semantics.'); vvWithin(where, () => validateVisualControl(node.control)); }
   vvEvents(node, scope, [...contract.emits, ...VISUAL_DOM_EVENTS], where);
 }
+// Errors raised while validating a node carry that node's id as an own `nodeId` property, so editors can link the
+// finding to the exact element even when names repeat. The message text is unchanged.
 function vvNode(node, scope, at) {
+  try { vvNodeCheck(node, scope, at); }
+  catch (err) { if (err instanceof Error && err.nodeId === undefined && typeof node?.id === 'string') err.nodeId = node.id; throw err; }
+}
+function vvNodeCheck(node, scope, at) {
   const where = scope.where + ' / ' + (node?.name || node?.id || 'element');
   const keys = { element: ['id', 'kind', 'tag', 'attrs', 'children', 'events'], text: ['id', 'kind', 'role', 'value'], slot: ['id', 'kind', 'name', 'fallback'], component: ['id', 'kind', 'ref', 'props', 'slots', 'events'], external: ['id', 'kind', 'package', 'adapter', 'props', 'events'] }[node?.kind];
   visualAssert(keys, where + ': unsupported element kind ' + JSON.stringify(node?.kind) + '.');

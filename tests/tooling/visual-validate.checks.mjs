@@ -88,3 +88,16 @@ test('a bad mapping inside a page interaction names the page and the element', (
     return true;
   });
 });
+
+test('node-level errors carry the offending node id; store-level errors do not', () => {
+  const s = copy(), title = findByName(page(s).root, 'Title');
+  title.value = { kind: 'prop', name: 'query' };
+  const error = (() => { try { validateVisualDesigns(s); } catch (e) { return e; } })();
+  assert.match(error.message, /^VISUAL_INVALID: [^]*undeclared prop/);
+  assert.equal(error.message.match(/VISUAL_INVALID/g).length, 1, 'one prefix');
+  assert.ok(Object.hasOwn(error, 'nodeId')); assert.equal(error.nodeId, title.id);
+  const content = findByName(page(copy()).root, 'Content'), t = copy(); findByName(page(t).root, 'Content').attrs.onclick = { kind: 'literal', value: 'x' };
+  assert.equal((() => { try { validateVisualDesigns(t); } catch (e) { return e.nodeId; } })(), content.id, 'attribute errors name their element');
+  const u = copy(); u.nextId = 2;
+  assert.equal((() => { try { validateVisualDesigns(u); } catch (e) { return Object.hasOwn(e, 'nodeId'); } })(), false);
+});

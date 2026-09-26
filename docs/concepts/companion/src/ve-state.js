@@ -5,6 +5,7 @@ function veDefaults() {
   return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '' };
 }
 const veUi = veDefaults();
+function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
 function veReset() { Object.assign(veUi, veDefaults()); }
 function veStore(d = design()) { return d.visualDesigns ?? emptyVisualDesigns(); }
 // The same reference context the generator enforces: navigable surfaces, library entries and declared source operations.
