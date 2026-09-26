@@ -6,7 +6,16 @@ Related: issue #19, PR #5's full project JSON contract. This is shell tooling, n
 
 1. Download/extract the framework. Use its qualified Node/npm versions. `node shell.mjs setup` forwards to the existing guided setup; `node shell.mjs make` forwards to the existing maker. Both also retain their npm entrypoints.
 2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The bundled `docs/concepts/companion/companion-project.json` is the companion's own design and is the qualification fixture.
-3. Plan into a separate, empty project location. The vault must exist; the target directory may be absent. The framework checkout must not contain the target.
+3. **Recommended:** create the project in one reviewable command. It validates the export with the shared contract, keeps its identity unless `--id/--name/--author` override it, previews the plan and hash, and writes only with `--yes` or `--apply <planHash>` into an absent or empty folder outside the checkout:
+
+```sh
+node shell.mjs new ../my-plugin --from my-plugin.companion.json
+node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes
+```
+
+The companion's **Generate plugin shell** handoff copies exactly these commands, followed by `cd`, `npm ci`, `npm run check` and `npm run dev:obsidian`, plus a short coding-agent prompt. See [Companion handoff](COMPANION-HANDOFF.md) and [Framework CLI](FRAMEWORK-CLI.md#from-an-exported-companion-project). The lower-level form below remains for an explicit vault/target placement.
+
+   Plan into a separate, empty project location. The vault must exist; the target directory may be absent. The framework checkout must not contain the target.
 
 ```sh
 node shell.mjs generate \

@@ -10,14 +10,23 @@ Start Blank supplies only a minimal runnable workspace entry, settings surface a
 
 After confirmation, use the existing PRD, sitemap, Page, Component, entity, source, test-data and Design System editors. The JSON is an independent copy, not a live link to the catalog. The built-in project stays unchanged.
 
-Use **Generate plugin shell** on the project overview to review the real compiler handoff. Export the project JSON, run the plan from the extracted shell framework, then apply only its returned hash:
+Use **Generate plugin shell** on the project overview to open the handoff. It offers three copy/download-only paths and never runs anything:
+
+1. **Download project JSON** saves `<id>.companion.json`; put it in the extracted shell framework checkout.
+2. Terminal commands, each with its own copy button (and **Copy all commands**):
 
 ```sh
-npm run companion:scaffold -- --input "my-plugin.companion.json" --vault "/absolute/path/to/vault" --target "plugins/my-plugin"
-npm run companion:scaffold -- --input "my-plugin.companion.json" --vault "/absolute/path/to/vault" --target "plugins/my-plugin" --apply "PASTE_REVIEWED_HASH"
+node shell.mjs new ../my-plugin --from my-plugin.companion.json   # preview: plan + plan hash, writes nothing
+node shell.mjs new ../my-plugin --from my-plugin.companion.json --yes   # or --apply <planHash>
+cd ../my-plugin
+npm ci
+npm run check          # generated-project script
+npm run dev:obsidian   # generated-project script; isolated sandbox vault only
 ```
 
-The equivalent human/agent entry point is `node shell.mjs generate` with the same arguments. Install dependencies explicitly in the generated target using the repository's pinned Node/npm versions, then run `npm run verify:project`. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
+3. **Copy agent prompt**: a short prompt for Claude Code, Codex or another coding agent with the plugin ID/name, the `new --from` command, "read AGENTS.md", the requirement IDs in `design/traceability.json`, the `npm run test:tdd` loop and "finish only when `npm run check` passes".
+
+`new --from` validates the JSON with the same shared contract, keeps its identity (unless `--id/--name/--author` override it) and plans with the unchanged compiler; see [Companion handoff](../../development/COMPANION-HANDOFF.md). The lower-level `node shell.mjs generate --input … --vault … --target …` (alias `npm run companion:scaffold --`) remains available. Output is `dist/main.js`, `dist/styles.css` and `dist/manifest.json`. Dependency installation, build, isolated-vault installation, enabling and publishing are distinct steps. The old `companion:generate` command remains a read-only JSON inspector; it is not the compiler.
 
 The custom folders configure **generated product code and tests**, such as `plugin/src/generated` and `plugin/tests/project`. They do not relocate the shell's internal foundation. No handoff command is executed in the browser.
 
