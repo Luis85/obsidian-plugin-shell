@@ -75,7 +75,7 @@ export function compositionVisible(doc, session, node) {
   const visited = new Set(); let current = node;
   while (current) {
     if (visited.has(current.id) || session.hidden?.[current.id] === true || !current.visibleIn.includes(session.state) || session.width === 'narrow' && current.ui?.narrow.hidden) return false;
-    visited.add(current.id); if (!current.parentId) return true; current = doc.nodes.find(n => n.id === current.parentId);
+    visited.add(current.id); const parent=current.parentId || doc.nodes.find(n=>Object.values(n.slots || {}).some(ids=>ids.includes(current.id)))?.id; if (!parent) return true; current = doc.nodes.find(n => n.id === parent);
   }
   return false;
 }

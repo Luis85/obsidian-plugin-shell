@@ -65,11 +65,12 @@ function dsSave(){
    if(m.sources.some(x=>x.id!==s.id&&x.slug===s.slug))throw Error('That source code name already exists.');
    if(old)m.sources[m.sources.indexOf(old)]=s;else m.sources.push(s);selected=s.id;
   }else if(f.formKind==='operation'){
+   if(f.implementationText!==undefined)f.implementation=f.implementationText.trim()?JSON.parse(f.implementationText):undefined;
    const source=m.sources.find(s=>s.id===f.sourceId);if(!source)throw Error('The source no longer exists.');
    const old=source.operations.find(o=>o.id===f.id);if(f.id&&!old)throw Error('The operation no longer exists.');
    if(old&&old.slug!==f.slug.trim())throw Error('Operation code names are stable.');
    const shape=side=>{const s=designCopy(f[side]);if(s.mode==='schema'){try{s.schema=JSON.parse(f[side+'SchemaText']);}catch{throw Error(side+': enter valid JSON Schema, not a sample payload.');}}if(!dsShapeValid(s))throw Error(side+': check field names, duplicates and the supported schema subset. Remote references and executable expressions are not supported.');return s;};
-   const o={id:f.id||dsNext(m,'operation'),slug:f.slug.trim(),name:f.name.trim(),direction:f.direction,method:source.kind==='api'?f.method:'adapter',resource:f.resource.trim(),description:f.description.trim(),input:shape('input'),output:shape('output')};
+   const o={...(f.implementation?{implementation:designCopy(f.implementation)}:{}),id:f.id||dsNext(m,'operation'),slug:f.slug.trim(),name:f.name.trim(),direction:f.direction,method:source.kind==='api'?f.method:'adapter',resource:f.resource.trim(),description:f.description.trim(),input:shape('input'),output:shape('output')};
    if(!dsResourceValid(source,o.resource))throw Error('Use a safe resource path or table name. No credentials, query string, protected folder or parent traversal.');
    if(source.operations.some(x=>x.id!==o.id&&x.slug===o.slug))throw Error('That operation code name already exists on this source.');
    if(m.flows.some(x=>x.operation===o.id&&o.direction!=='both'&&x.direction!==o.direction))throw Error('Existing flows need this operation’s current direction. Update or remove those flows first.');
@@ -140,6 +141,7 @@ function editDataSourceField(el){
   else if(name==='name'||name==='type'||name==='required'){const field=s.fields[Number(el.dataset.index)];if(field)field[name]=name==='required'?el.checked:el.value;}
   return true;
  }
+ if(key==='ds-implementation'){try{const value=el.value.trim();f.implementation=value?JSON.parse(value):undefined;}catch{dsUi.error='Native adapter metadata must be valid JSON.';} f.implementationText=el.value;return true;}
  const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
  if(name==='name'&&!f.id&&f.slug===semanticName(previous)){f.slug=semanticName(f.name);const control=document.getElementById('ds-slug');if(control)control.value=f.slug;}
  if(name==='kind'){f.locator=f.kind==='vault'?'vault://active':'';f.auth='none';f.credentialRef='';redrawModal();}

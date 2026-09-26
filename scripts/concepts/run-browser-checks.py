@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
 OUT = ROOT / 'reports/concepts'
 SUITES = [
+    ('generator-fixtures', 'generator-fixtures/checks.json'),
+    ('generator-boundaries', 'generator-boundaries/checks.json'),
     ('project-starters', 'project-starters/checks.json'),
     ('design-styles', 'design-styles/checks.json'),
     ('composition', 'composition/checks.json'),
@@ -74,7 +76,7 @@ report = {
     'chromium_executable': os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
     'real_storage_requested': args.real_storage,
     'passed': sum(r.get('passed', 0) for r in results), 'suites': results,
-    'scope': 'Companion UI, full-project read-only CLI and the explicitly scoped exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, production CLI generation or release qualification.',
+    'scope': 'Companion UI, full-project read-only CLI, reviewed project generation and the exported test-data CLI in isolated temporary directories. Assertion totals include model, geometry and controlled-state fixtures; not native host, generated-project dependency/build qualification or release qualification.',
 }
 (OUT / 'browser-summary.json').write_text(json.dumps(report, indent=2) + '\n')
 raise SystemExit(0 if report['status'] == 'passed' else 1)

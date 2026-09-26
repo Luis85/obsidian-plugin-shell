@@ -80,7 +80,9 @@ export function validateCompanionDocument(value) {
   validateCompanionDesign(value.design, value.project.id);
   companionRequire(value.design.schema === value.schemaVersion, 'Transfer and design schema versions must match.');
   companionRequire(value.schemaVersion >= 2 || !Object.hasOwn(value.design, 'storymaps'), 'Storymaps require transfer version 2 or later.');
-  companionRequire(value.schemaVersion >= 4 || !value.design.detailDesigns || value.design.detailDesigns.schema === 1, 'Composition requires transfer version 4.');
+  const detail = value.design.detailDesigns;
+  const composition = detail && (detail.revisions !== undefined || detail.documents.some(doc => doc.scenarios !== undefined || doc.nodes.some(node => node.ui !== undefined || node.slotName !== undefined || node.contentProp !== undefined || node.options !== undefined || !['region','text','input','button','component','slot'].includes(node.kind)) || doc.edges.some(edge => edge.effect !== undefined)));
+  companionRequire(value.schemaVersion >= 4 || !composition, 'Composition requires transfer version 4.');
   companionRequire(value.schemaVersion >= 3 || !Object.hasOwn(value.design, 'detailDesigns'), 'Detail designs require transfer version 3.');
   companionRequire(Array.isArray(value.notes) && value.notes.length <= 100 && value.notes.every(note => companionText(note, 100000)), 'Invalid project notes.');
   companionRequire(new TextEncoder().encode(JSON.stringify(value)).length <= COMPANION_MAX_BYTES, 'Project exceeds the 4 MB import/export limit.');

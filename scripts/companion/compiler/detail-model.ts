@@ -1,3 +1,5 @@
+import { validateMappings } from './detail-mappings.ts';
+import type { DetailMapping } from '../runtime/detail-actions.ts';
 import { matches } from '../runtime/contract.ts';
 import { validateCompositionDesignSystem } from '../composition-contract.mjs';
 import { visibleDetails, type DetailDocument, type DetailElement, type DetailLiteral } from '../runtime/detail-runtime.ts';
@@ -59,7 +61,9 @@ export function detailDocuments(m: Model): DetailDocument[] {
     if (revision) {
       const prefix = String(revision.id) + '-'; const ids = new Map(doc.nodes.map(n => [n.id, prefix + n.id]));
       doc.id = String(revision.id); doc.ownerId = String(revision.id);
-      for (const n of doc.nodes) { n.id = ids.get(n.id)!; if (n.parentId) n.parentId = ids.get(n.parentId)!; }
+      function remap(mapping:DetailMapping):void { if(mapping.kind==='draft')mapping.nodeId=ids.get(mapping.nodeId)!; if(mapping.kind==='object')Object.values(mapping.fields).forEach(remap); }
+      for (const n of doc.nodes) { n.id = ids.get(n.id)!; if (n.parentId) n.parentId = ids.get(n.parentId)!; if(n.slots)n.slots=Object.fromEntries(Object.entries(n.slots).map(([name,roots])=>[name,roots.map(id=>ids.get(id)!)])); }
+      for(const e of doc.edges)if(e.action)remap(e.action.kind==='source'?e.action.input:e.action.payload);
       for (const e of doc.edges) { e.id = prefix + e.id; e.source = ids.get(e.source)!; e.target = ids.get(e.target)!; }
       for (const scenario of doc.scenarios || []) scenario.values = Object.fromEntries(Object.entries(scenario.values).map(([id, v]) => [ids.get(id)!, v]));
     }
@@ -67,9 +71,27 @@ export function detailDocuments(m: Model): DetailDocument[] {
     return doc;
   };
   const documents = [...rows(row(store).documents, 200).map(doc => makeDocument(doc)), ...revisions.map(r => makeDocument(row(r.document), r))];
+  const resolved=new Set<string>();
+  function resolveSlots(doc: DetailDocument,depth=0): void {
+    requireValue(depth<=12,'Slot composition exceeds twelve levels.'); if(resolved.has(doc.id))return;
+    for(const node of doc.nodes){
+      if(!node.component || !node.slots)continue;
+      const target=documents.find(d=>d.kind==='component'&&d.ownerId===node.component!.id);if(!target)continue;
+      resolveSlots(target,depth+1);
+      for(const [name,ids] of Object.entries(node.slots)){
+        const slots=target.nodes.filter(n=>n.kind==='slot'&&n.label===name);
+        requireValue(slots.length===1,'Assigned slot needs exactly one authored placeholder: '+name);
+        const states=slots[0]!.visibleIn.filter(state=>visibleDetails(target,state).some(n=>n.id===slots[0]!.id));
+        for(const id of ids){const root=doc.nodes.find(n=>n.id===id)!;root.visibleIn=root.visibleIn.filter(state=>states.includes(state));}
+      }
+    }
+    resolved.add(doc.id);
+  }
+  for(const doc of documents)resolveSlots(doc);
   for (const doc of documents) {
     const owner = doc.kind === 'page' ? m.screens.find(s => s.id === doc.ownerId) : definitions.find(c => c.id === doc.ownerId);
     requireValue(owner && (doc.kind !== 'page' || !['group', 'action'].includes(String(owner.kind))), 'Missing detail owner: ' + doc.ownerId);
+    validateMappings(m,doc,doc.kind==='component'?componentMembers(row(owner)):{props:{},events:{},slots:[]});
     for(const scenario of doc.scenarios||[])for(const fixture of scenario.bindings){const op=m.sources.find(s=>s.id===fixture.sourceId)?.operations.find(o=>o.id===fixture.operationId);requireValue(op && matches(fixture.value,op.output),'Scenario fixture does not match a known output: '+scenario.id);}
     const keys = new Set<string>();
     for (const edge of doc.edges) {
@@ -84,7 +106,11 @@ export function detailDocuments(m: Model): DetailDocument[] {
       if (edge.targetSurfaceId) requireValue(m.screens.some(s => s.id === edge.targetSurfaceId && !['group', 'action'].includes(s.kind)), 'Missing detail navigation target: ' + edge.id);
     }
     for (const node of doc.nodes) {
-      if (node.component) node.props = instanceProps(node, definitions);
+      if (node.component) {
+        node.props = instanceProps(node, definitions);
+        const slots=componentMembers(definitions.find(c=>c.id===node.component!.id)!).slots;
+        requireValue(Object.keys(node.slots ?? {}).every(name=>slots.includes(name)),'Undeclared instance slot: '+node.id);
+      }
       if (node.kind === 'slot' && doc.kind === 'component') requireValue(componentMembers(row(owner)).slots.includes(node.label), 'Undeclared component slot: ' + node.id);
       if (node.contentProp) requireValue(doc.kind==='component' && Object.hasOwn(componentMembers(row(owner)).props,node.contentProp), 'Undeclared content property: '+node.id);
       const parent = doc.nodes.find(n=>n.id===node.parentId);
@@ -100,7 +126,7 @@ export function detailDocuments(m: Model): DetailDocument[] {
     const internal=documents.find(d=>d.kind==='component' && d.ownerId===node.component!.id);
     const children=doc.nodes.filter(n=>n.parentId===node.id);
     for(const declaration of internal?.nodes.filter(n=>n.kind==='slot')||[]) {
-      const contents=children.filter(n=>n.slotName===declaration.label);
+      const contents=[...children.filter(n=>n.slotName===declaration.label),...(node.slots?.[declaration.label] ?? []).map(id=>doc.nodes.find(n=>n.id===id)!)];
       requireValue(declaration.slotCapacity!=='one'||contents.length<=1,'Slot cardinality exceeded: '+node.id+'/'+declaration.label);
       requireValue(!declaration.slotKinds?.length || contents.every(n=>declaration.slotKinds!.includes(n.kind)),'Unsupported slot content kind: '+node.id);
     }
@@ -122,6 +148,8 @@ export function detailDocuments(m: Model): DetailDocument[] {
     component: node.component ? { id: node.component.id, version: node.component.version, variantId: node.component.variantId } : null,
     ...(node.ui ? {ui:node.ui} : {}), ...(node.slotName ? {slotName:node.slotName} : {}), ...(node.contentProp ? {contentProp:node.contentProp} : {}), ...(node.options ? {options:node.options} : {}),
     props: node.props, binding: node.binding, a11y: node.a11y, visibleIn: node.visibleIn,
+    ...(node.control ? {control:node.control} : ['number','checkbox','textarea','select'].includes(node.kind) ? {control:{kind:node.kind as 'number'|'checkbox'|'textarea'|'select',...(node.kind==='select'?{options:(node.options ?? []).map(value=>({label:value,value}))}:{})}} : {}),
+    ...(node.slots ? {slots:node.slots} : {}), ...(node.slotCapacity ? {slotCapacity:node.slotCapacity} : {}), ...(node.slotKinds ? {slotKinds:node.slotKinds} : {}),
   })) }));
 }
 

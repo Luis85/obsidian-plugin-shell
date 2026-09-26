@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { sourceInputs, sha256 } from '../../scripts/testing/source-inputs.mjs';
 import assert from 'node:assert/strict';
 import { generatorCli } from '../../scripts/companion/compiler/cli.ts';
-import { NotImplementedError } from '../../scripts/companion/runtime/contract.ts';
+import { matches, NotImplementedError } from '../../scripts/companion/runtime/contract.ts';
 
 test('shared generator command rejects invalid arguments before touching a project', async () => {
   await assert.rejects(generatorCli(['--input']), /GENERATOR_USAGE/);
@@ -29,4 +29,15 @@ test('root CLI and compiler policy are fingerprinted and covered as tooling', as
   const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
   assert.equal(config.boundaries.coverage.requireAllFiles, true);
   assert.ok(config.boundaries.zones.find(zone => zone.name === 'tooling').patterns.includes('shell.mjs'));
+});
+
+test('runtime contracts reject accessors, sparse arrays, symbols and nested undefined without invoking code', () => {
+  let calls=0;
+  const object={type:'object',properties:{value:{type:'string'}},required:['value'],additionalProperties:false};
+  assert.equal(matches({get value(){calls++;return 'unsafe';}},object),false);
+  assert.equal(calls,0);assert.equal(matches({value:undefined},object),false);
+  assert.equal(matches({value:'safe',[Symbol('hidden')]:'unsafe'},object),false);
+  assert.equal(matches(new Array(2),{type:'array',items:{type:'string'}}),false);
+  assert.equal(matches(undefined,null),true);
+  assert.equal(matches({value:'safe'},object),true);
 });

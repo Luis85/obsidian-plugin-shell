@@ -16,7 +16,7 @@ function detailLiteralProps(value) {
       (typeof item === 'boolean' || typeof item === 'number' && Number.isFinite(item) || detailText(item, 2000)));
 }
 function detailNode(node, identity, extended) {
-  detailRequire(detailObject(node, ['id', 'kind', 'label', 'text', 'parentId', 'layout', 'position', 'size', 'component', 'props', 'binding', 'a11y', 'visibleIn', 'sourceBrickId'], extended ? ['ui', 'slotName', 'contentProp', 'options','slotCapacity','slotKinds'] : []), 'Unsupported element fields.');
+  detailRequire(detailObject(node, ['id', 'kind', 'label', 'text', 'parentId', 'layout', 'position', 'size', 'component', 'props', 'binding', 'a11y', 'visibleIn', 'sourceBrickId'], extended ? ['ui', 'slotName', 'contentProp', 'options','slotCapacity','slotKinds','control','slots'] : []), 'Unsupported element fields.');
   identity(node.id, 'node'); if (extended) validateCompositionNode(node);
   detailRequire(DETAIL_NODE_KINDS.includes(node.kind) && (extended || !COMPOSITION_CONTROLS.includes(node.kind)) && detailText(node.label, 120, true) && !/[\r\n]/.test(node.label), 'Choose an element kind and single-line label.');
   detailRequire(detailText(node.text, 8000) && detailText(node.a11y, 2000), 'Element content exceeds its limit.');
@@ -34,16 +34,23 @@ function detailNode(node, identity, extended) {
   }
   detailRequire(node.kind !== 'component' || node.component !== null, 'Choose a reusable component.');
   detailRequire(node.kind === 'component' || Object.keys(node.props).length === 0, 'Props belong to reusable component instances.');
+  if (node.control !== undefined) { detailRequire(node.kind === 'input', 'Only inputs have control semantics.'); validateDetailControl(node.control); }
+  if (node.slots !== undefined) detailRequire(node.kind === 'component' && node.slots && typeof node.slots === 'object' && !Array.isArray(node.slots) && Object.keys(node.slots).length <= 8 && Object.entries(node.slots).every(([name, ids]) => /^[a-z][A-Za-z0-9-]*$/.test(name) && !['constructor', 'prototype'].includes(name) && Array.isArray(ids) && ids.length <= 12 && ids.every(detailReference) && new Set(ids).size === ids.length), 'Invalid instance slot assignment.');
   if (node.binding !== null) detailRequire(detailObject(node.binding, ['sourceId', 'operationId', 'field']) && detailReference(node.binding.sourceId) && detailReference(node.binding.operationId) && detailText(node.binding.field, 120), 'Invalid data binding.');
 }
 function detailEdges(doc, identity, extended) {
   const seen = new Set();
   for (const e of doc.edges) {
-    detailRequire(detailObject(e, ['id', 'source', 'target', 'event', 'label', 'notes', 'acceptance', 'targetSurfaceId'], extended ? ['effect'] : []), 'Unsupported interaction fields.');
+    detailRequire(detailObject(e, ['id', 'source', 'target', 'event', 'label', 'notes', 'acceptance', 'targetSurfaceId'], extended ? ['effect','action'] : []), 'Unsupported interaction fields.');
     identity(e.id, 'edge'); if (extended) validateCompositionEffect(e, doc);
     detailRequire(doc.nodes.some(n => n.id === e.source) && doc.nodes.some(n => n.id === e.target) && e.source !== e.target, 'Interactions need two existing, different elements.');
     detailRequire(detailText(e.event, 60, true) && /^[a-zA-Z][a-zA-Z0-9:_-]*$/.test(e.event) && detailText(e.label, 120, true) && !/[\r\n]/.test(e.label), 'Use an event name and single-line interaction label.');
     detailRequire(detailText(e.notes, 4000) && detailText(e.acceptance, 8000) && (e.targetSurfaceId === null || detailReference(e.targetSurfaceId)), 'Invalid interaction notes or navigation target.');
+    detailRequire(!e.action || !e.effect, 'Choose one local effect or mapped action.');
+    if (e.action !== undefined) { detailRequire(e.targetSurfaceId === null, 'Choose navigation or a mapped action, not both.'); validateDetailAction(e.action);
+      const check = mapping => { if (mapping.kind === 'draft') detailRequire(doc.nodes.some(n => n.id === mapping.nodeId && ['input','number','checkbox','select','textarea','tabs'].includes(n.kind)), 'Mapped draft input is missing.'); if (mapping.kind === 'object') Object.values(mapping.fields).forEach(check); };
+      check(e.action.kind === 'source' ? e.action.input : e.action.payload);
+    }
     const key = JSON.stringify([e.source, e.target, e.event]); detailRequire(!seen.has(key), 'This event already connects these elements.'); seen.add(key);
   }
 }
@@ -98,7 +105,7 @@ export function validateDetailDesigns(store) {
     detailRequire(Array.isArray(doc.nodes) && doc.nodes.length <= 120 && Array.isArray(doc.edges) && doc.edges.length <= 240, 'A detail design supports 120 elements and 240 interactions.');
     count += doc.nodes.length + doc.edges.length; detailRequire(count <= 4000, 'Project detail-design limit exceeded.');
     for (const node of doc.nodes) detailNode(node, identity, store.schema === 2);
-    detailHierarchy(doc); detailEdges(doc, identity, store.schema === 2);
+    detailSlotAssignments(doc); detailHierarchy(doc); detailEdges(doc, identity, store.schema === 2);
   }
   for (const doc of store.documents) {
     const key = doc.kind + ':' + doc.ownerId; detailRequire(!owners.has(key), 'An owner may have only one detail design.'); owners.add(key); checkDocument(doc);
@@ -118,4 +125,58 @@ export function validateDetailDesigns(store) {
   }
   detailRequire(store.nextId > highest, 'The detail counter could reuse an existing ID.');
   detailComposition(store); return store;
+}
+
+// Schema 1 documents retain text-only behavior.
+function validateDetailControl(control) {
+  detailRequire(detailObject(control, ['kind'], ['required', 'options', 'maxBytes']), 'Invalid control fields.');
+  detailRequire(['text', 'textarea', 'number', 'checkbox', 'date', 'datetime-local', 'select', 'json-file', 'json-editor', 'markdown-editor'].includes(control.kind), 'Unsupported control type.');
+  if (control.required !== undefined) detailRequire(typeof control.required === 'boolean', 'Invalid required control.');
+  if (control.options !== undefined) detailRequire(control.kind === 'select' && Array.isArray(control.options) && control.options.length > 0 && control.options.length <= 60 && control.options.every(o => detailObject(o, ['label', 'value']) && detailText(o.label, 120, true) && detailText(o.value, 120)) && new Set(control.options.map(o => o.value)).size === control.options.length, 'Invalid select options.');
+  detailRequire(control.kind !== 'select' || control.options !== undefined, 'Select options are required.');
+  if (control.maxBytes !== undefined) detailRequire(['json-file', 'json-editor', 'markdown-editor', 'textarea', 'text'].includes(control.kind) && Number.isSafeInteger(control.maxBytes) && control.maxBytes > 0 && control.maxBytes <= 4_000_000, 'Invalid control byte limit.');
+}
+function detailJson(value, depth = 0) {
+  if (depth > 12) return false;
+  if (value === null || typeof value === 'boolean' || typeof value === 'string') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  return value && typeof value === 'object' && Object.entries(value).every(([key, v]) => !['constructor', 'prototype', '__proto__'].includes(key) && detailJson(v, depth + 1));
+}
+function validateDetailMapping(mapping, depth = 0, budget = { count: 0 }) {
+  detailRequire(depth <= 6 && ++budget.count <= 120, 'Payload mapping is too large.');
+  detailRequire(mapping && typeof mapping === 'object', 'Missing payload mapping.');
+  if (mapping.kind === 'none' || mapping.kind === 'event') detailRequire(detailObject(mapping, ['kind']), 'Invalid simple mapping.');
+  else if (mapping.kind === 'value') detailRequire(detailObject(mapping, ['kind', 'value']) && detailJson(mapping.value) && JSON.stringify(mapping.value).length <= 12000, 'Invalid literal payload.');
+  else if (mapping.kind === 'draft') detailRequire(detailObject(mapping, ['kind', 'nodeId']) && detailReference(mapping.nodeId), 'Invalid draft mapping.');
+  else if (mapping.kind === 'prop') detailRequire(detailObject(mapping, ['kind', 'name']) && /^[a-z][A-Za-z0-9]*$/.test(mapping.name) && !['constructor', 'prototype'].includes(mapping.name), 'Invalid prop mapping.');
+  else if (mapping.kind === 'source') detailRequire(detailObject(mapping, ['kind', 'sourceId', 'operationId', 'field']) && detailReference(mapping.sourceId) && detailReference(mapping.operationId) && detailText(mapping.field, 120), 'Invalid source mapping.');
+  else if (mapping.kind === 'object') {
+    detailRequire(mapping.fields && !Array.isArray(mapping.fields) && typeof mapping.fields === 'object' && detailObject(mapping, ['kind', 'fields']) && Object.keys(mapping.fields).length <= 40, 'Invalid object mapping.');
+    for (const [key, value] of Object.entries(mapping.fields)) { detailRequire(/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key) && !['constructor', 'prototype'].includes(key), 'Unsafe payload property.'); validateDetailMapping(value, depth + 1, budget); }
+  } else detailRequire(false, 'Unsupported payload mapping.');
+  return mapping;
+}
+function validateDetailAction(action) {
+  if (action?.kind === 'source') {
+    detailRequire(detailObject(action, ['kind', 'sourceId', 'operationId', 'input']) && detailReference(action.sourceId) && detailReference(action.operationId), 'Invalid source action.');
+    validateDetailMapping(action.input);
+  } else {
+    detailRequire(action?.kind === 'emit' && detailObject(action, ['kind', 'event', 'payload']) && /^[a-z][A-Za-z0-9]*$/.test(action.event), 'Invalid component emission.');
+    validateDetailMapping(action.payload);
+  }
+}
+function detailSlotAssignments(doc) {
+  const owners = new Map();
+  for (const node of doc.nodes) for (const ids of Object.values(node.slots || {})) for (const id of ids) {
+    const root = doc.nodes.find(n => n.id === id);
+    detailRequire(root && root.parentId === null && root.id !== node.id && !owners.has(id), 'Slot content must be an unassigned root element.'); owners.set(id, node.id);
+  }
+  for (const node of doc.nodes) {
+    detailRequire(!node.slots || !doc.nodes.some(n => n.parentId === node.id), 'Use one slot-content representation per instance.');
+    const seen = new Set(); let cursor = node;
+    while (cursor) {
+      detailRequire(!seen.has(cursor.id), 'Slot containment must not be recursive.'); seen.add(cursor.id);
+      cursor = doc.nodes.find(n => n.id === (cursor.parentId || owners.get(cursor.id)));
+    }
+  }
 }

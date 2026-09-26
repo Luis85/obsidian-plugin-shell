@@ -16,8 +16,6 @@
   },
   "include": [
     "scripts/companion/compiler/**/*.ts",
-    "scripts/companion/runtime/contract.ts",
-    "scripts/companion/runtime/detail-runtime.ts",
-    "scripts/companion/runtime/use-detail.ts"
+    "scripts/companion/runtime/**/*.ts"
   ]
 }

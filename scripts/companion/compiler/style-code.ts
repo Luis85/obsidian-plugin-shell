@@ -1,6 +1,6 @@
 import { compileDesignSystem } from '../design-system-css.mjs';
 import { json, type Model } from './model.ts';
-import type { Add } from './data-code.ts';
+import type { Add } from './file-code.ts';
 /** Managed styles participate in the original plan/hash/ownership transaction. */
 export function styleCode(m: Model, add: Add): void {
   const declaration = (m.document.design as Record<string, unknown>).designSystem;

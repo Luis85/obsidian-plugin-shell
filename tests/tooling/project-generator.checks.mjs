@@ -77,7 +77,8 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   const target=join(options.vault,options.target);
   assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.match(await readFile(join(target,'src/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);
-  assert.match(await readFile(join(target,'src/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/NotImplementedError/);
+  assert.match(await readFile(join(target,'src/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/repositories.GRequirement.list/);
+  assert.match(await readFile(join(target,'src/bootstrap/features.ts'),'utf8'),/GRequirement: register\(GRequirement\)/);
   assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
