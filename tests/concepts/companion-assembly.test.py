@@ -95,6 +95,13 @@ class AssemblyContract(unittest.TestCase):
         self.assertNotIn("from './visual/", text)
         self.assertIn('const COMPANION_VERSION = 5;', text)
 
+    def test_visual_editor_modules_are_assembled(self):
+        html = (ROOT / 'docs/concepts/companion/index.html').read_text(encoding='utf-8')
+        markers = ['function veCommit(', 'function veMigrateSaved(', 'function validateVisualDesigns(']
+        markers += ['function veCanvasHtml(', '.ve-editor']
+        for marker in markers:
+            self.assertIn(marker, html, marker)
+
     def test_unassembled_source_is_not_hidden(self):
         (self.concept / 'src/unregistered.js').write_text('console.log("unused fixture");\n')
         with self.assertRaisesRegex(ValueError, 'inventory differs'):

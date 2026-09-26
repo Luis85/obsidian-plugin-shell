@@ -73,7 +73,7 @@ jobs:
       - name: Exercise real test-data generators, file safety and loopback adapters
         run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
-        run: node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-composition.checks.mjs tests/tooling/companion-visual-state.checks.mjs
+        run: node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-composition.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |
