@@ -1,8 +1,9 @@
-import type { ComponentDefinition, ExternalNode } from '../visual/visual-ir.mjs';
+import type { ComponentDefinition, ExternalNode, UiNode, ValueExpression } from '../visual/visual-ir.mjs';
+import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { visualRead, visualSession, visualVisible } from '../visual/visual-session.mjs';
-import { visualExpressions, visualTextValue, type VisualSpec } from '../runtime/visual-runtime.ts';
+import { visualTextValue, type VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, symbol, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { sample, sampleCode } from './schema-code.ts';
 import { visualDefinitionPath, visualComponentPath } from './visual-model.ts';
 import { visualFixtureProps, visualRendered } from './visual-tests.ts';
@@ -92,34 +93,79 @@ it('maps source pending, error and empty states without starting a source operat
 `);
 }
 
-/** Source-bound nodes render validated store output through the real Pinia store and generated context. */
-function vrBindings(m: Model, spec: VisualSpec, add: Add): void {
+/** Legacy parity: at most 50 table rows are asserted row by row; the bound data itself is compared in full. */
+const vrRows = 50;
+/** Text a table cell shows for a primitive value (TanStack's default cell renders value.toString()); plain objects are not asserted. */
+const vrCell = (value: unknown): string | null => (value === undefined || value === null ? '' : typeof value === 'object' && !Array.isArray(value) ? null : String(value));
+const vrPort = (slug: string) => 'port' + slug.replace(/[^A-Za-z0-9]/g, '');
+/** The rendered component name Vue records for a project instance (script-setup __name comes from the file name). */
+function vrComponentName(specs: VisualSpec[], node: UiNode): string {
+  if (node.kind !== 'component') return '';
+  if (node.ref.kind === 'nuxt-ui') return visualCatalogEntry(node.ref.entryId)?.component.slice(1) ?? '';
+  const ref = node.ref, target = specs.find(s => s.id === ref.componentId);
+  return target?.kind === 'component' ? componentFile(target.libraryId, 'component') : '';
+}
+/** Assertions for one source expression: text content, element attribute, or the prop the rendered component instance received. */
+function vrExpect(specs: VisualSpec[], node: UiNode, name: string | null, expected: unknown): string[] {
+  const selector = literal(`[data-design-node="${node.id}"]`);
+  if (node.kind === 'text') return [`expect(wrapper.get(${selector}).text()).toBe(${literal(visualTextValue(expected, '').trim())});`];
+  if (node.kind === 'element') return typeof expected === 'string' || typeof expected === 'number' ? [`expect(wrapper.get(${selector}).attributes(${literal(name)})).toBe(${literal(String(expected))});`] : [`expect(wrapper.find(${selector}).exists()).toBe(true);`];
+  // External props reach the adapter, not the DOM; the adapter lifecycle test covers their delivery.
+  if (node.kind !== 'component') return [`expect(wrapper.find(${selector}).exists()).toBe(true);`];
+  const lines = [`expect(bound(wrapper.findAllComponents({ name: ${literal(vrComponentName(specs, node))} }), ${literal(node.id)}, ${literal(name)})).toEqual(${expected === undefined ? 'undefined' : literal(expected)});`];
+  if (node.ref.kind !== 'nuxt-ui' || node.ref.entryId !== 'u-table' || name !== 'data') return lines;
+  const rows = Array.isArray(expected) ? expected.slice(0, vrRows) : [], declared = node.props.columns;
+  const columns = declared?.kind === 'literal' && Array.isArray(declared.value)
+    ? declared.value.flatMap(c => (c && typeof c === 'object' && typeof (c as { accessorKey?: unknown }).accessorKey === 'string' ? [(c as { accessorKey: string }).accessorKey] : []))
+    : Object.keys(rows[0] && typeof rows[0] === 'object' ? rows[0] : {});
+  lines.push(`expect(wrapper.get(${selector}).findAll('tbody tr')).toHaveLength(${rows.length || 1});`);
+  rows.forEach((row, i) => columns.forEach((key, j) => {
+    const text = vrCell(row && typeof row === 'object' ? (row as Record<string, unknown>)[key] : undefined);
+    if (text !== null) lines.push(`expect(wrapper.get(${selector}).findAll('tbody tr')[${i}]!.findAll('td')[${j}]!.text()).toBe(${literal(text)});`);
+  }));
+  return lines;
+}
+/** Source-bound nodes render validated store output through the real Pinia store and generated context; every source expression is asserted. */
+function vrBindings(m: Model, specs: VisualSpec[], spec: VisualSpec, add: Add): void {
   const roots = spec.kind === 'page' ? spec.root : spec.template, session = { ...visualSession(), state: 'default' as const };
-  const cases = visualRendered(roots).filter(r => r.marked).flatMap(({ node }) => visualExpressions(node).filter(e => e.kind === 'source').slice(0, 1).map(expr => {
-    const source = m.sources.find(s => s.id === expr.sourceId)!, op = source.operations.find(o => o.id === expr.operationId)!;
-    const visible = visualVisible(spec, session, node.id), selector = literal(`[data-design-node="${node.id}"]`);
-    const check = node.kind === 'text' && visible ? `expect(wrapper.get(${selector}).text()).toBe(${literal(visualTextValue(visualRead(sample(op.output), expr.field), '').trim())});` : `expect(wrapper.find(${selector}).exists()).toBe(${visible});`;
-    return `it(${literal('[' + node.id + '] displays validated source output through the actual Pinia store')}, async () => {
+  const cases = visualRendered(roots).filter(r => r.marked).flatMap(({ node }) => {
+    const named: [string | null, ValueExpression][] = node.kind === 'text' ? [[null, node.value]] : Object.entries(node.kind === 'element' ? node.attrs : node.kind === 'component' || node.kind === 'external' ? node.props : {});
+    const bindings = named.flatMap(([name, expr]) => (expr.kind === 'source' ? [{ name, expr }] : []));
+    if (!bindings.length) return [];
+    const operations = [...new Map(bindings.map(({ expr }) => [expr.sourceId + '\u0000' + expr.operationId, expr])).values()].map(expr => {
+      const source = m.sources.find(s => s.id === expr.sourceId)!; return { source, op: source.operations.find(o => o.id === expr.operationId)! };
+    });
+    const output = (sourceId: string, operationId: string) => sample(operations.find(o => o.source.id === sourceId && o.op.id === operationId)!.op.output);
+    const checks = visualVisible(spec, session, node.id) ? bindings.flatMap(({ name, expr }) => vrExpect(specs, node, name, visualRead(output(expr.sourceId, expr.operationId), expr.field))) : [`expect(wrapper.find(${literal(`[data-design-node="${node.id}"]`)}).exists()).toBe(false);`];
+    const runs = operations.map(({ source, op }) => `const ${vrPort(op.slug)} = context.ports.find(p => p.sourceId === ${literal(source.id)} && p.operationId === ${literal(op.id)})!;
+    await ${vrPort(op.slug)}.run(${sampleCode(op.input)}); await flushPromises();
+    expect(${vrPort(op.slug)}.pending).toBe(false); expect(${vrPort(op.slug)}.error).toBe(null);`);
+    return [`it(${literal('[' + node.id + '] displays validated source output through the actual Pinia store')}, async () => {
   const pinia = createPinia(); const context = createVisualContext(fixtureSources(), pinia, () => {});
   const wrapper = mount(Subject, { props: ${literal(visualFixtureProps(spec))}, global: { plugins: [pinia], provide: { [visualKey as symbol]: context } } });
-  try { const port = context.ports.find(p => p.sourceId === ${literal(source.id)} && p.operationId === ${literal(op.id)})!;
-    await port.run(${sampleCode(op.input)}); await flushPromises();
-    ${check}
-    expect(port.pending).toBe(false); expect(port.error).toBe(null);
+  try {
+    ${runs.join('\n    ')}
+    ${checks.join('\n    ')}
   } finally { wrapper.unmount(); disposePinia(pinia); }
-});`;
-  }));
+});`];
+  });
   if (!cases.length) return;
-  const path = `${m.testRoot}/visual/${spec.id}-bindings.test.ts`;
+  const path = `${m.testRoot}/visual/${spec.id}-bindings.test.ts`, usesBound = cases.some(c => c.includes('bound('));
   add(path, `// @vitest-environment happy-dom
 import { it, expect } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, disposePinia } from 'pinia';
-import { fixtureSources } from '../fixtures/visual-sources.ts';
+${usesBound ? "import type { ComponentPublicInstance } from 'vue';\n" : ''}import { fixtureSources } from '../fixtures/visual-sources.ts';
 import Subject from ${literal(relativeImport(path, visualDefinitionPath(m, spec)))};
 import { createVisualContext } from ${literal(relativeImport(path, `${m.sourceRoot}/bootstrap/visual-context.ts`))};
 import { visualKey } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-visual.ts`))};
-${cases.join('\n')}
+${usesBound ? `/** The value one rendered component instance (found by its node marker) received for a bound prop, declared or fallthrough. */
+function bound(found: { vm: ComponentPublicInstance }[], id: string, name: string): unknown {
+  const instance = found.find(c => c.vm.$attrs['data-design-node'] === id); if (!instance) throw new Error('Missing component instance ' + id);
+  const props: Record<string, unknown> = instance.vm.$props;
+  return Object.hasOwn(props, name) ? props[name] : instance.vm.$attrs[name];
+}
+` : ''}${cases.join('\n')}
 `);
 }
 
@@ -157,6 +203,6 @@ export function visualRuntimeTests(m: Model, specs: VisualSpec[], adapters: { co
   vrRuntime(m, add);
   const fixture = `${m.testRoot}/fixtures/visual-sources.ts`;
   add(fixture, m.sources.map(source => `import { create${symbol(source.slug)}Service } from ${literal(relativeImport(fixture, `${m.sourceRoot}/application/${source.slug}/service.ts`))};`).join('\n') + `\nexport function fixtureSources() { return {${m.sources.map(s => `${literal(s.slug)}: create${symbol(s.slug)}Service({${s.operations.map(op => `${literal(op.slug)}: async () => structuredClone(${sampleCode(op.output)})`).join(',')}})`).join(',')}}; }\n`);
-  for (const spec of specs) vrBindings(m, spec, add);
+  for (const spec of specs) vrBindings(m, specs, spec, add);
   for (const adapter of adapters) vrAdapter(m, adapter.component, adapter.node, adapter.path, add);
 }
