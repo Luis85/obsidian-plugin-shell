@@ -40,6 +40,79 @@ node shell.mjs new <dir> --starter <id> --apply <planHash>
 Generated scaffolds keep PRD acceptance as TODO obligations; creation is not product
 acceptance, native qualification or release readiness.
 
+## Golden path, help and the check gate
+
+`node shell.mjs help` starts with the golden path (`new` → `install` → `dev` → `test`
+→ `check` → `make`), each with a runnable example, then lists the remaining
+commands by group. `help --all` lists every command with its summary, and
+`help <command>` (or `<command> --help`) shows usage, options with allowed values
+and defaults, common options for that command's effect, and examples. The help and
+`capabilities` JSON carry the same data additively (`scope`, `goldenPath`, `groups`
+and per-command `group`, `usage`, `examples`, `optionHelp`) under protocol version 1;
+existing fields are unchanged. `--profile` values come from the same list that the
+handlers validate.
+
+Human mode never prints raw JSON: `status`/`doctor`, `make list`/`describe`, plans,
+`check` and `check submission` have readable views, and other results are shown as
+aligned key/value rows. Views end with a `Next:` command where one exists. Markers
+and colour (`✓ ✗ !`) appear only on a TTY without `NO_COLOR` and with a non-`dumb`
+`TERM`; otherwise output is plain ASCII (`[ok] [FAIL] [warn]`). `--json` output keeps
+the same single versioned envelope.
+
+Mistyped commands, options and maker recipes get "did you mean" suggestions from the
+catalog, including multi-word commands (`plan aply` → `plan apply`). They keep the
+documented exit code 1 for rejected requests; JSON results carry the candidates in
+`data.suggestions` and a `next` hint such as `node shell.mjs help status`.
+
+```sh
+node shell.mjs check                 # or npm run check
+node shell.mjs check --fast --json   # or npm run check:fast; for agent Stop hooks
+node shell.mjs check --dry-run       # list the steps without running them
+node shell.mjs check submission      # or npm run check:submission
+```
+
+`check` is the fast daily and agent gate. It runs every step even after a failure,
+then prints one summary with each step's status and duration, and the tail of each
+failing step's output (last 60 lines, ANSI removed). It exits 1 if any step failed.
+Child output is captured, not streamed. Steps call installed tool entry points with
+argument arrays: no shell and no recursive npm delegation. `--timeout` applies per
+step. It is not `verify`: coverage, analyzers, builds, tooling suites, browser and
+native qualification stay in `verify` and CI.
+
+| Scope | Detected by | Steps |
+|---|---|---|
+| Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src --max-warnings 0`, `vitest run` |
+| Generated project | `.companion/generation.json` and `tsconfig.project.json` | `vue-tsc --noEmit --project tsconfig.project.json`, `eslint src --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
+
+`check --fast` runs the typecheck plus `vitest related --run --passWithNoTests` over
+source files changed against `HEAD` (`git diff --name-only --relative HEAD` plus
+untracked, non-ignored files; deleted files, non-code files and `node_modules` are
+excluded). With no changed source files the test step is skipped. When git or a HEAD
+commit is unavailable, or more than 200 files changed, it runs the full test suite
+and says so in `data.changes`.
+
+`check submission` is a read-only local mirror of documented Obsidian community
+review rules. Each rule reports pass, fail or warn with a remediation and cites its
+source in code and JSON:
+
+- manifest fields, types and allowed keys, id format (lowercase letters and hyphens;
+  digits warn), no `obsidian`/`plugin` in id or name, `x.y.z` version, `minAppVersion`,
+  description format (10-250 characters, capital first letter, final period, plain
+  characters) and `fundingUrl` shape ([Manifest reference](https://docs.obsidian.md/Reference/Manifest),
+  [validate-manifest](https://github.com/obsidianmd/eslint-plugin/blob/master/docs/rules/validate-manifest.md));
+- `versions.json` maps the current version to its `minAppVersion`
+  ([sample plugin](https://github.com/obsidianmd/obsidian-sample-plugin#releasing-new-releases));
+- `LICENSE` and `README.md` exist, and the built `dist/main.js` and `dist/manifest.json`
+  exist and match `manifest.json`, with `styles.css` optional
+  ([Submit your plugin](https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin));
+- `eslint src` with the project's configuration, which includes
+  `eslint-plugin-obsidianmd` recommended and type-checked rules, summarized by rule.
+
+A pass is not a review outcome: the Community directory also runs policy,
+vulnerability and malware checks that are not reproduced here. This framework
+checkout itself fails the forbidden-word and description rules (`plugin-shell`,
+"Plugin Shell"), because it is a template, not a submission.
+
 ## Start from the extracted archive
 
 The build of the framework distribution is an explicit maintainer action:
