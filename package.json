@@ -71,6 +71,8 @@
     "dev:local": "node scripts/dev/watch-local.mjs",
     "check:architecture": "node scripts/quality/check-architecture.mjs",
     "test:native": "node scripts/testing/check-native.mjs",
+    "test:obsidian": "node scripts/testing/run-obsidian-tests.mjs",
+    "dev:obsidian": "node scripts/dev/obsidian-dev.mjs",
     "test:setup-policy": "node --test tests/tooling/npm-install.checks.mjs",
     "check:analyzer": "node scripts/quality/check-analyzer.mjs",
     "check:maintainability": "node scripts/quality/check-maintainability.mjs",

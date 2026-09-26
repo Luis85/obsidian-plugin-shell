@@ -5,6 +5,7 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",
+    "vitest.obsidian.config.mjs",
     "scripts/testing/evidence-vitest-reporter.mjs",
     "scripts/styles/export-host-css.mjs",
     "scripts/testing/check-browser-specimen.mjs",

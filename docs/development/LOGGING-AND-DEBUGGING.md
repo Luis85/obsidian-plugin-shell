@@ -11,6 +11,9 @@ The toggle uses a localized `NoticeService.info` message. Inspection uses the ow
 with retained/exported/omitted counts. Closing the modal does
 not clear evidence, retry an operation, or change canonical data.
 
+`npm run dev:obsidian` runs the toggle after every sandbox reload and, with `--json`,
+saves the inspection report; see [the real-Obsidian dev loop](../testing/OBSIDIAN-DEV-LOOP.md).
+
 ## Developer API
 
 Use known codes and operations, with a logger-issued correlation for one operation:
