@@ -40,7 +40,7 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Optional installed capabilities and their actual reference input must travel
   // with source-only archives and invalidate receipts when their bytes change.
-  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json',
+  for (const extra of ['shell.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vitest.obsidian.config.mjs',
     'docs/concepts/companion/companion-project.json']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }

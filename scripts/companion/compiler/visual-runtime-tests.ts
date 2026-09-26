@@ -4,7 +4,7 @@ import { visualExpressions, visualTextValue, type VisualSpec } from '../runtime/
 import { literal, symbol, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
 import { sample, sampleCode } from './schema-code.ts';
-import { visualDefinitionPath } from './visual-model.ts';
+import { visualDefinitionPath, visualComponentPath } from './visual-model.ts';
 import { visualFixtureProps, visualRendered } from './visual-tests.ts';
 
 /** Generic runtime behavior of the copied use-visual composable, independent of any authored definition. */
@@ -136,7 +136,7 @@ function vrAdapter(m: Model, component: ComponentDefinition, node: ExternalNode,
 import { it, expect, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import type { VisualRequest } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/visual-runtime.ts`))};
-import Subject from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/components/library/${component.libraryId}.vue`))};
+import Subject from ${literal(relativeImport(path, visualComponentPath(m, component)))};
 const fake = vi.hoisted(() => ({ log: [] as string[], emit: (_event: string, _payload: unknown): void => {} }));
 vi.mock(${literal(relativeImport(path, adapterPath))}, () => ({ createAdapter: () => ({
   mount: (_el: HTMLElement, _props: Record<string, unknown>, emit: (event: string, payload: unknown) => void) => { fake.log.push('mount'); fake.emit = emit; },

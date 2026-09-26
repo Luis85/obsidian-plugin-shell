@@ -13,6 +13,8 @@ npm run events:catalog    Print the source-derived event catalog (also supports 
 npm run dev:ui            Real plugin UI in the browser
 npm run build:local       Build/install to .dev-vault without touching notes or security settings
 npm run dev:local         Rebuild and install successful changes; manually reload Obsidian
+npm run dev:obsidian      Real Obsidian on a contained sandbox: watch, hot reload, logs (-- --json for agents)
+npm run test:obsidian     Vitest E2E in real Obsidian, fresh vault copy per case (first run: -- --allow-download)
 npm run verify            Current iteration's type/lint/architecture/unit/build/baseline checks
 npm run test:e2e          Served real-component browser tests (provision browsers first)
 npm run test:coverage     Enforce selected-core/feature coverage

@@ -41,16 +41,6 @@ function starterReviewBanner() {
   const entry = starterEntry(provenance.id);
   return `<section class="callout" id="starter-review-context"><div><strong>Review ${esc(entry.name)} · ${esc(entry.version)}</strong><p>Creates an independent project copy. Only confirmed replacement changes this workspace. No source files are generated here.</p><p class="small">Still to implement: ${esc(entry.implementation.join(' · '))}</p></div></section>`;
 }
-function starterGenerationDialog() {
-  const p = project(); if (!p) return dialogBody('Generate a starter', '<p>Choose and confirm a starter first.</p>', button('Close','close','','ghost'));
-  const filename = p.id + '.companion.json';
-  // Identity is validated on export; quote all shell arguments anyway.
-  const plan = 'npm run companion:scaffold -- --input "' + filename + '" --vault "/absolute/path/to/vault" --target "plugins/' + p.id + '"';
-  return dialogBody('From project JSON to a runnable shell', `<p>Run these commands from an extracted copy of the shell framework, using its pinned Node and npm versions. Replace the vault path. The browser never runs a command or installs a plugin.</p>
-    <ol class="starter-steps"><li><strong>Export the current project.</strong> Save the JSON next to the framework commands, or adjust <code>--input</code>.</li><li><strong>Review a read-only generation plan.</strong><pre class="starter-command">${esc(plan)}</pre></li><li><strong>Apply the exact reviewed plan.</strong><pre class="starter-command">${esc(plan + ' --apply "PASTE_REVIEWED_HASH"')}</pre><p>A changed input, conflicting file, or stale hash must stop generation. Never invent an approval hash.</p></li><li><strong>Install dependencies and verify in the generated target.</strong><pre class="starter-command">cd "/absolute/path/to/vault/plugins/${esc(p.id)}"
-npm ci
-npm run verify:project</pre></li></ol><p>Output: <code>dist/main.js</code>, <code>dist/styles.css</code> and <code>dist/manifest.json</code>. Install and enable separately in an isolated development vault. A runnable scaffold is not a completed feature or native acceptance.</p><p class="small">Source: <code>${esc(companionFolders().codebaseFolder)}/generated</code> · Tests: <code>${esc(companionFolders().testsFolder)}/project</code>. Custom folders relocate generated product code, not the framework foundation. DataSource adapters and PRD business tests remain explicit implementation hooks.</p>`, button('Close','close','','ghost') + button('Export project JSON','project-backup','','primary','download'));
-}
 function handleStarterAction(action, value) {
   if (action === 'starter-open') { openStarter(value); return true; }
   if (action === 'starter-review') { reviewStarter(); return true; }

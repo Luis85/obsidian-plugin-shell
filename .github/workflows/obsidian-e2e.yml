@@ -1,0 +1,54 @@
+name: Real Obsidian E2E
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: obsidian-e2e-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  real-obsidian:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Select qualified npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact dependencies
+        run: node "$QUALIFIED_NPM" ci --no-fund
+      - name: Install Electron system libraries (no browser download)
+        run: node node_modules/@playwright/test/cli.js install-deps chromium
+      - name: Restore the pinned Obsidian host download
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: .native-cache
+          key: obsidian-host-${{ runner.os }}-app-1.13.7-launcher-3.2.1
+      - name: Real-Obsidian Vitest suite (private Xvfb display, no retries)
+        env:
+          OBSIDIAN_ALLOW_DOWNLOAD: '1'
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: node "$QUALIFIED_NPM" run test:obsidian
+      - name: Agent loop smoke (build, launch, reload once, JSON summary)
+        if: always()
+        run: |
+          mkdir -p reports/obsidian
+          node scripts/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
+      - name: Retain real-Obsidian evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: real-obsidian-evidence
+          path: |
+            reports/obsidian/
+            .obsidian-sandbox/logs/
+          retention-days: 7
+          if-no-files-found: warn

@@ -5,19 +5,17 @@ import { parseCliArguments, descriptor } from './catalog.ts';
 import { executeOperation } from './operations.ts';
 import { projectRoot, exists } from './files.ts';
 import { failure, type Context, type Request, type Result } from './contracts.ts';
+import { invocationDirectory } from './starter-project.ts';
+import { guidedStarter, starterText } from './starter-terminal.ts';
+import { renderHuman } from './terminal-render.ts';
+import { terminalStyle, runnable } from './terminal-style.ts';
 function render(value: Result, machine: boolean): void {
   if (machine) { stdout.write(JSON.stringify(value) + '\n'); return; }
-  stdout.write(`${value.command}: ${value.status}\n`);
-  if (value.data && (value.command === 'help' || value.command === 'capabilities' || (value.data as { commands?: unknown }).commands)) {
-    const data = value.data as { commands: Array<{id: string; summary: string; options: Record<string, string>; effect: string}> };
-    for (const command of data.commands) stdout.write(`  ${command.id.padEnd(21)} ${command.summary}\n`);
-    if (data.commands.length === 1) {
-      const entry = data.commands[0]!; stdout.write(`\nEffect: ${entry.effect}\nOptions:\n`);
-      for (const [name, kind] of Object.entries(entry.options)) stdout.write(`  --${name}${kind === 'value' ? ' <value>' : ''}\n`);
-    }
-    stdout.write('\nUse --json for structured output; mutations preview by default.\n');
-  } else if (value.data !== null) stdout.write(JSON.stringify(value.data, null, 2) + '\n');
-  for (const diagnostic of value.diagnostics) stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + diagnostic.next : ''}\n`);
+  const starter = value.command === 'new' ? starterText(value) : null;
+  const human = starter === null ? renderHuman(value, terminalStyle(stdout)) : { text: starter, diagnosticsShown: false };
+  stdout.write(human.text);
+  if (human.diagnosticsShown) return;
+  for (const diagnostic of value.diagnostics) stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
 }
 async function guidedIdentity(request: Request, signal?: AbortSignal): Promise<Request> {
   const options = { ...request.options };
@@ -66,11 +64,15 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     let request = parseCliArguments(argv); command = request.command;
     const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
-    const root = discovery ? resolve(selected) : await projectRoot(selected, typeof request.options.root === 'string');
+    // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
+    if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
+    if (command === 'new' && typeof request.options.from === 'string') request = { ...request, options: { ...request.options, from: invocationDirectory(request.options.from) } };
+    const root = discovery ? resolve(selected) : command === 'new' && typeof request.options.root !== 'string' ? frameworkRoot : await projectRoot(selected, typeof request.options.root === 'string');
     const context: Context = { root, frameworkRoot, signal: controller.signal, progress: text => stderr.write(text) };
     if (request.options.input === '-') context.inputText = await readInput(stdin, controller.signal);
     const interactive = Boolean(stdin.isTTY && stderr.isTTY && !machine && !request.options['no-interaction'] && !request.options.yes && !request.options.help);
     if (interactive && command === 'setup' && !request.options['dry-run']) request = await guidedIdentity(request, controller.signal);
+    if (interactive && command === 'new' && !request.options.list) request = await guidedStarter(request, context, query => ask(stdin, stderr, query, controller.signal), text => stderr.write(text));
     let outcome = interactive ? await interactiveRun(request, context) : await executeOperation(request, context);
     if (interactive && command === 'setup' && !request.options['dry-run'] && ['applied', 'unchanged'].includes(outcome.status)) outcome = await setupNextSteps(outcome, context);
     render(outcome, machine);

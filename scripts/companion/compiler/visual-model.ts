@@ -5,6 +5,7 @@ import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
 import { validateCompositionDesignSystem } from '../composition-contract.mjs';
 import type { VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, row, type Model, type Row } from './model.ts';
+import { componentFile } from './file-code.ts';
 
 const validatedStores = new WeakMap<Model, VisualDesigns>();
 /** The validated visual-design store (validated once per model); generation stops on the first invalid definition, naming it.
@@ -44,11 +45,12 @@ export function visualSpecs(m: Model): VisualSpec[] {
   return specs;
 }
 
-export const visualComponentPath = (m: Model, component: ComponentDefinition): string => `${m.sourceRoot}/presentation/components/library/${component.libraryId}.vue`;
+/** Library files use the shared multi-word component naming (componentFile), like the placeholders uiCode writes. */
+export const visualComponentPath = (m: Model, component: ComponentDefinition): string => `${m.sourceRoot}/presentation/components/library/${componentFile(component.libraryId, 'component')}.vue`;
 export const visualPagePath = (m: Model, page: PageDefinition): string => `${m.sourceRoot}/presentation/components/details/${page.id}.vue`;
 export const visualDefinitionPath = (m: Model, spec: VisualSpec): string => (spec.kind === 'page' ? visualPagePath(m, spec) : visualComponentPath(m, spec));
 /** Extension-owned adapter module for one external node of a component template. */
-export const visualAdapterPath = (m: Model, component: ComponentDefinition, adapter: string): string => `${m.sourceRoot}/presentation/components/library/${component.libraryId}/${adapter}.adapter.ts`;
+export const visualAdapterPath = (m: Model, component: ComponentDefinition, adapter: string): string => `${m.sourceRoot}/presentation/components/library/${componentFile(component.libraryId, 'component')}/${adapter}.adapter.ts`;
 export const visualComponentName = (component: ComponentDefinition): string => component.exportName;
 
 /** Explicit Nuxt UI component imports for every catalog entry used in the tree (no global plugin). */

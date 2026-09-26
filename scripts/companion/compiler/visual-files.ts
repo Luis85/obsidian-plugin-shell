@@ -5,7 +5,7 @@ import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 import { visualTestSource } from '../visual/visual-session.mjs';
 import type { VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, json, requireValue, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { visualDefinitions, visualSpecs, visualDefinitionPath, visualAdapterPath, visualContractTypes } from './visual-model.ts';
 import { visualSfc } from './visual-code.ts';
 import { visualPorts, visualSources } from './visual-ports.ts';
@@ -57,8 +57,9 @@ export interface Props extends Record<string, unknown> {
 ${Object.keys(node.props).map(name => `  ${literal(name)}: unknown;\n`).join('')}}
 export function createAdapter(): VisualExternalAdapter<Props> {
   return {
-    mount(_el: HTMLElement, _props: Props, _emit: (event: string, payload: unknown) => void): void { ${fail('mount')} },
-    update(_props: Props): void { ${fail('update')} },
+    // Implement mount(el, props, emit), update(props) and destroy(); the stubs declare no unused parameters.
+    mount(): void { ${fail('mount')} },
+    update(): void { ${fail('update')} },
     destroy(): void { ${fail('destroy')} },
   };
 }
@@ -68,7 +69,7 @@ export function createAdapter(): VisualExternalAdapter<Props> {
 function vfScreen(m: Model, spec: VisualSpec & { kind: 'page' }, add: Add): void {
   const screen = m.screens.find(s => s.id === spec.ownerId);
   requireValue(screen, 'Missing page owner: ' + spec.ownerId);
-  add(`${m.sourceRoot}/presentation/components/screens/${screen.slug}.vue`, `<script setup lang="ts">
+  add(`${m.sourceRoot}/presentation/components/screens/${componentFile(screen.slug, 'screen')}.vue`, `<script setup lang="ts">
 import { useScreen } from '../../composables/use-screen.ts';
 import Detail from '../details/${spec.id}.vue';
 const model = useScreen(${literal(screen.id)});
@@ -109,14 +110,17 @@ export async function visualCode(templateRoot: string, m: Model, add: Add): Prom
       if (verification === 'business-todo') {
         handlers.push(`import { execute as E${handlers.length} } from './interactions/${interactionId}.ts';`);
         cases.push(`case ${literal(interactionId)}: return E${handlers.length - 1}(request, sources);`);
-        add(implementation, `import type { VisualRequest } from '../../domain/visual-runtime.ts';\nimport type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const intent = ${literal({ definitionId: spec.id, nodeId: node.id, ...interaction })};\n/** Start with a failing acceptance test. This hook does not infer business rules from prose. */\nexport async function execute(_request: VisualRequest, _sources: Sources): Promise<unknown> { throw new NotImplementedError(${literal(spec.id)}, ${literal(interactionId)}); }\n`);
+        add(implementation, `import type { VisualRequest } from '../../domain/visual-runtime.ts';\nimport type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const intent = ${literal({ definitionId: spec.id, nodeId: node.id, ...interaction })};\n/** Start with a failing acceptance test. This hook does not infer business rules from prose. */\nexport const execute: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new NotImplementedError(${literal(spec.id)}, ${literal(interactionId)}); };\n`);
       }
       const accepted = visualAcceptanceTodo(interaction);
       if (accepted) add(test, `import { it } from 'vitest';\n// UI dispatch/navigation tests are separate from this unimplemented business acceptance.\nit.todo(${literal('[' + interactionId + '] ' + interaction.label + ' — ' + (interaction.acceptance || interaction.notes || 'implementation required'))});\n`);
       trace.push({ definitionId: spec.id, nodeId: node.id, ...interaction, component: path, implementation: verification === 'business-todo' ? implementation : null, test: accepted ? test : null, verification });
     }
   }
-  add(`${root}/application/visual-interactions.ts`, `${handlers.map(line => line + '\n').join('')}import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport async function handleVisualInteraction(request: VisualRequest, sources: Sources): Promise<unknown> {\n  switch (request.interactionId) {\n${cases.map(line => '    ' + line + '\n').join('')}    default: void sources; throw new Error('VISUAL_INTERACTION_UNKNOWN');\n  }\n}\n`);
+  // Without hooks the dispatcher declares no parameters it would never read.
+  const dispatch = cases.length ? `export async function handleVisualInteraction(request: VisualRequest, sources: Sources): Promise<unknown> {\n  switch (request.interactionId) {\n${cases.map(line => '    ' + line + '\n').join('')}    default: throw new Error('VISUAL_INTERACTION_UNKNOWN');\n  }\n}\n`
+    : "export const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n";
+  add(`${root}/application/visual-interactions.ts`, `${handlers.map(line => line + '\n').join('')}import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\n${dispatch}`);
   const definitions = specs.map(spec => ({ id: spec.id, kind: spec.kind, ...(spec.kind === 'page' ? { ownerId: spec.ownerId } : { libraryId: spec.libraryId }), component: visualDefinitionPath(m, spec) }));
   add('design/visual-traceability.json', json({ definitions, interactions: trace, adapters: adapters.map(a => ({ componentId: a.component.id, nodeId: a.node.id, package: a.node.package, adapter: a.node.adapter, path: a.path })), businessAcceptance: 'not-implemented' }), 'managed');
   add(`${root}/presentation/detail-layout.css`, vfLayout);

@@ -7,6 +7,10 @@ import { relativeImport, type Add } from './file-code.ts';
 function contract(name: string, schema: Schema | null): string {
   return `export type ${name} = ${typeCode(schema)};\nexport const ${name}Schema: Schema | null = ${literal(schema)};\nexport function is${name}(value: unknown): value is ${name} { return matches(value,${name}Schema); }\n`;
 }
+/** Declare only the adapter parameters the generated body reads; the exported type keeps the full signature. */
+function adapterParameters(body: string): string {
+  return /\bintegrity\b/.test(body) ? '_shell, integrity' : /\b_shell\b/.test(body) ? '_shell' : '';
+}
 export function dataCode(m: Model, add: Add): void {
   const integrity=relationshipScope(m);
   const root = m.sourceRoot; const tests = m.testRoot; const serviceImports: string[] = []; const serviceProps: string[] = []; const sourceInit: string[] = []; const sourceTypes: string[] = []; const portTypes: string[] = []; const portProps: string[] = [];
@@ -42,7 +46,7 @@ export function dataCode(m: Model, add: Add): void {
     const adapterMethods = source.operations.map(op => {
       const entity = noteEntity(m,source.id,op.id);
       if (source.kind === 'api') return `    ${literal(op.slug)}: http.port[${literal(op.slug)}],`;
-      if (!entity) return `    async ${literal(op.slug)}(_input, _signal) { throw new NotImplementedError(${literal(source.id)},${literal(op.id)}); },`;
+      if (!entity) return `    async ${literal(op.slug)}() { throw new NotImplementedError(${literal(source.id)},${literal(op.id)}); },`;
       if (op.contract.implementation) return `    ${literal(op.slug)}: ${symbol(entity.slug)}Notes.${(op.contract.implementation as {operation:string}).operation},`;
       return `    async ${literal(op.slug)}(_input, signal) { if(signal?.aborted) throw new Error('OPERATION_ABORTED'); const result=await _shell.repositories.${symbol(entity.slug)}.list(); if(!result.ok) throw new Error('NOTE_READ_FAILED'); return result.value.map(snapshot=>({...snapshot.values,id:snapshot.id,type:${literal(entity.slug)}})); },`;
     }).join('\n');
@@ -55,13 +59,13 @@ ${[...native.values()].some(e=>integrity.entities.some(x=>x.id===e.id))?"import 
 ${source.kind==='api'?`import { create${name}HttpProvider } from './${source.slug}-http.ts';`:''}
 ${nativeImports}
 /** Native mappings use the shell's canonical repositories; other adapters remain explicit. */
-export function create${name}Adapter(_shell: Services${integrity.rules.length?', integrity: RelationshipSession':''}): ${name}Port {
+export const create${name}Adapter: (shell: Services${integrity.rules.length?', integrity: RelationshipSession':''}) => ${name}Port = (${adapterParameters(nativeInit+adapterMethods)}) => {
 ${nativeInit}
 ${source.kind==='api'?`  const http=create${name}HttpProvider();`:''}
   return {
 ${adapterMethods}
   };
-}
+};
 `);
     add(`${root}/presentation/stores/${source.slug}.ts`,`import { defineStore } from 'pinia';\nimport { operation } from '../composables/operation.ts';\nimport type { ${name}Service } from '../../application/${source.slug}/service.ts';\nexport function define${name}Store(service: ${name}Service) {\n  return defineStore(${literal(String(m.project.id)+':source:'+source.slug)}, () => ({\n${actions}  }));\n}\n`);
     add(`${tests}/sources/${source.slug}.test.ts`,`import { it, expect } from 'vitest';\nimport { createPinia, disposePinia } from 'pinia';\nimport { create${name}Service } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,`${dir}/service.ts`))};\nimport { define${name}Store } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,`${root}/presentation/stores/${source.slug}.ts`))};\nimport type { ${name}Port } from ${literal(relativeImport(`${tests}/sources/${source.slug}.test.ts`,path))};\nconst fixture = (): ${name}Port => ({${fixtures.join(',\n')}});\n${cases.join('\n')}`);
@@ -73,10 +77,10 @@ ${adapterMethods}
     sourceInit.push(`${literal(source.slug)}: ${name}Service;`);
     add(`design/sources/${source.slug}.json`,json(source.contract),'managed');
   }
-  add(`${root}/application/sources.ts`,sourceTypes.join('\n')+'\n'+portTypes.join('\n')+`\nexport interface Sources { ${sourceInit.join('\n')} }\nexport interface SourcePorts { ${portProps.join('\n')} }\n`,'managed');
+  add(`${root}/application/sources.ts`,sourceTypes.join('\n')+'\n'+portTypes.join('\n')+`\n${sourceInit.length ? `export interface Sources { ${sourceInit.join('\n')} }\nexport interface SourcePorts { ${portProps.join('\n')} }` : 'export type Sources = Record<string, never>;\nexport type SourcePorts = Record<string, never>;'}\n`,'managed');
   add(`${root}/bootstrap/sources.ts`,serviceImports.join('\n')+`\n${integrity.rules.length ? "import { createRelationshipIntegrity } from './relationships.ts';" : ''}\nimport type { Services } from ${literal(relativeImport(`${root}/bootstrap/sources.ts`,'src/bootstrap/services.ts'))};\nimport type { Sources, SourcePorts } from '../application/sources.ts';\nimport { validateSourceOverrides } from '../application/source-overrides.ts';\nexport function createSources(shell: Services, overrides: Partial<SourcePorts> = {}): Sources {\n validateSourceOverrides(overrides,${literal(Object.fromEntries(m.sources.map(source=>[source.slug,source.operations.map(op=>op.slug)])))});\n ${integrity.rules.length ? 'const integrity=createRelationshipIntegrity(shell);' : ''}\n return {${serviceProps.join(',\n')}}; }\n`,'managed');
   for (const r of m.requirements) {
-    add(`${root}/application/use-cases/${r.key}.ts`,`import type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const requirement = ${literal(r)};\n/** Refine input/output and implement only after writing the failing acceptance test. */\nexport async function execute(_input: unknown, _sources: Sources): Promise<unknown> {\n  throw new NotImplementedError(${literal(r.prd)},${literal(r.id)});\n}\n`);
+    add(`${root}/application/use-cases/${r.key}.ts`,`import type { Sources } from '../sources.ts';\nimport { NotImplementedError } from '../../domain/contract.ts';\nexport const requirement = ${literal(r)};\n/** Refine input/output and implement only after writing the failing acceptance test. */\nexport const execute: (input: unknown, sources: Sources) => Promise<unknown> = async () => {\n  throw new NotImplementedError(${literal(r.prd)},${literal(r.id)});\n};\n`);
     add(`${tests}/acceptance/${r.key}.test.ts`,`import { it } from 'vitest';\n// Implement a failing behavioral assertion against application/use-cases/${r.key}.ts first.\n// This TODO is intentionally NOT verification evidence. Do not replace it with a trivial assertion.\nit.todo(${literal('['+r.id+'] '+r.title+' — '+r.acceptance)});\n`);
   }
 }

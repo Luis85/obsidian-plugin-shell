@@ -19,6 +19,7 @@ const clone = () => structuredClone(fixture);
 const files = async d => new Map((await projectFiles(root, projectModel(d))).map(e => [e.path, e.content]));
 const store = d => d.design.visualDesigns;
 const libraryPage = d => store(d).pages[1].root[0];
+const review = d => store(d).components[0], confirm = d => review(d).template[0].children.find(n => n.id === 'vn-5');
 const lit = value => ({ kind: 'literal', value });
 const nuxt = (id, entryId, events = []) => ({ id, kind: 'component', ref: { kind: 'nuxt-ui', entryId }, props: {}, slots: {}, events });
 const act = (id, event, actions) => ({ id, event, label: 'Interaction ' + id, notes: '', acceptance: '', actions });
@@ -103,4 +104,25 @@ test('generated model tests execute every declared local effect and navigation i
     assert.ok(executable > 120); assert.match(run.stdout, new RegExp('pass ' + executable + '(?:\\n|\\r)'));
     assert.match(run.stdout, new RegExp('todo ' + (interactions.length - executable) + '(?:\\n|\\r)'));
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+test('single-word library and screen names get the shared multi-word component file names', async () => {
+  const d = clone(), library = d.design.library.find(l => l.id === 'project-json-review');
+  library.id = 'review'; review(d).libraryId = 'review'; review(d).dependencies = [{ package: 'editor-lib', version: '1.0.0', purpose: 'Editing' }];
+  review(d).template.push({ id: 'vn-40', kind: 'external', package: 'editor-lib', adapter: 'editor', props: {}, events: [] }); store(d).nextId = 41;
+  for (const node of d.design.nodes) node.components = (node.components ?? []).map(c => (c.id === 'project-json-review' ? { ...c, id: 'review' } : c));
+  const entries = await files(d), code = 'src/generated/presentation/components/';
+  assert.ok(entries.has(code + 'library/review-component.vue')); assert.ok(!entries.has(code + 'library/review.vue'));
+  assert.ok(entries.has(code + 'library/review-component/editor.adapter.ts'));
+  assert.ok(entries.has(code + 'screens/components-screen.vue')); assert.match(entries.get(code + 'screens/components-screen.vue'), /import Detail from '\.\.\/details\/vp-15\.vue';/);
+  assert.match(entries.get(code + 'details/vp-8.vue'), /import ProjectJsonReview from "\.\.\/library\/review-component\.vue";/);
+  assert.match(entries.get(code + 'library/review-component.vue'), /from "\.\/review-component\/editor\.adapter\.ts"/);
+  assert.match(entries.get('src/generated/domain/components/contracts/review.ts'), /export interface ComponentProps/);
+});
+test('emit switches and the interaction dispatcher declare only parameters they read', async () => {
+  const d = clone(); review(d).emits = []; confirm(d).events[0].actions = [{ kind: 'navigate', surfaceId: 'node-17' }];
+  store(d).pages[0].root[0].children.find(n => n.id === 'vn-10').events[0].actions = [{ kind: 'set-state', state: 'empty' }];
+  const entries = await files(d);
+  assert.match(entries.get('src/generated/presentation/components/library/project-json-review.vue'), /request => emit\('interaction', request\), \(name\) => \{/);
+  assert.equal(entries.get('src/generated/application/visual-interactions.ts'), "import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n");
+  assert.match((await files(fixture)).get('src/generated/application/interactions/vi-14.ts'), /export const execute: \(request: VisualRequest, sources: Sources\) => Promise<unknown> = async \(\) => \{ throw new NotImplementedError\("vp-8", "vi-14"\); \};/);
 });

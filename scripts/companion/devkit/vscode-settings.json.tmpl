@@ -1,0 +1,26 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "vitest.rootConfig": "vitest.project.config.mjs",
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["javascript", "typescript", "vue"],
+  "files.exclude": {
+    ".native-cache": true,
+    ".native-runner": true,
+    ".nq": true,
+    ".shell-build-*": true
+  },
+  "search.exclude": {
+    ".obsidian-sandbox": true,
+    "reports": true,
+    "dist": true,
+    "package-lock.json": true
+  },
+  "files.watcherExclude": {
+    "**/.native-cache/**": true,
+    "**/.native-runner/**": true,
+    "**/.nq/**": true,
+    "**/.obsidian-sandbox/**": true,
+    "**/reports/**": true
+  }
+}

@@ -143,7 +143,7 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
   const adapters = component ? ctx.externals.map((adapter, i) => `import { createAdapter as createAdapter_${i} } from ${literal(relativeImport(ctx.path, visualAdapterPath(m, component, adapter)))};`) : [];
   const contract = component ? `import type { ComponentProps, ComponentEvents, ComponentSlots } from ${literal(relativeImport(ctx.path, `${m.sourceRoot}/domain/components/contracts/${libraryId}.ts`))};\n` : '';
   const emitted = component ? [...component.emits.map(vcEmitCase), "default: throw new Error('VISUAL_EMIT_UNKNOWN');"].map(line => `    ${line}\n`).join('') : '';
-  const declared = component ? `, (name, payload) => {\n  switch (name) {\n${emitted}  }\n}` : '';
+  const declared = component ? `, (${component.emits.length ? 'name, payload' : 'name'}) => {\n  switch (name) {\n${emitted}  }\n}` : '';
   const imports = [...nuxt, ...projects, ...adapters].map(line => line + '\n').join('');
   return `<script setup lang="ts">
 import { useVisual } from '../../composables/use-visual.ts';

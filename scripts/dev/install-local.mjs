@@ -15,18 +15,19 @@ async function contained(root, target) {
     if (stat && current !== target && !stat.isDirectory()) throw new Error('TARGET_PARENT_NOT_DIRECTORY');
   }
 }
-export async function installLocal({ root = process.cwd(), vault = '.dev-vault', configDir = '.obsidian', dryRun = false, beforePromote, beforeRestore } = {}) {
+export async function installLocal({ root = process.cwd(), vault = '.dev-vault', configDir = '.obsidian', source = 'dist', dryRun = false, beforePromote, beforeRestore } = {}) {
   root = resolve(root);
   if (!/^\.[a-zA-Z0-9_-]+$/.test(configDir)) throw new Error('INVALID_CONFIG_DIRECTORY');
-  const manifest = JSON.parse(await readFile(join(root, 'dist/manifest.json'), 'utf8'));
+  const sourcePath = resolve(root, source); await contained(root, sourcePath);
+  const manifest = JSON.parse(await readFile(join(sourcePath, 'manifest.json'), 'utf8'));
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.id)) throw new Error('INVALID_PLUGIN_ID');
   const vaultPath = resolve(root, vault); await contained(root, vaultPath);
   const target = join(vaultPath, configDir, 'plugins', manifest.id); await contained(root, target);
   const plan = []; const snapshot = new Map();
   for (const name of assets) {
-    const source = join(root, 'dist', name); const stat = await lstat(source);
+    const artifact = join(sourcePath, name); const stat = await lstat(artifact);
     if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('INVALID_ARTIFACT');
-    const bytes = await readFile(source); if (!bytes.length) throw new Error('EMPTY_ARTIFACT');
+    const bytes = await readFile(artifact); if (!bytes.length) throw new Error('EMPTY_ARTIFACT');
     const previous = await absent(join(target, name)); if (previous && (!previous.isFile() || previous.isSymbolicLink())) throw new Error('UNSAFE_EXISTING_ASSET');
     snapshot.set(name, bytes);
     plan.push({ name, sha256: createHash('sha256').update(bytes).digest('hex') });

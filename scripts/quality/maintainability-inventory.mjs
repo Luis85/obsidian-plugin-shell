@@ -32,7 +32,8 @@ export async function maintainabilityInventory(root) {
       else view = 'tooling';
     }
     const python = conceptPython.test(path);
-    const templateData = path.startsWith('scripts/examples/templates/') && /\.(?:json|css|md)\.txt$/.test(path);
+    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) are rendered text, not code.
+    const templateData = (path.startsWith('scripts/examples/templates/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^scripts\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {

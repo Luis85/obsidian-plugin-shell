@@ -47,7 +47,7 @@ export async function checkTestQuality(root = process.cwd()) {
       else if (entry.name.endsWith('.ts')) files.push(path);
     }
   }
-  for (const path of ['tests/runtime', 'tests/e2e']) await walk(resolve(root, path));
+  for (const path of ['tests/runtime', 'tests/e2e', 'tests/obsidian']) await walk(resolve(root, path));
   if (!files.length) throw new Error('NO_TEST_INPUTS');
   const failures = [];
   for (const file of files) failures.push(...inspectTestQuality(await readFile(file, 'utf8'), relative(root, file)));
