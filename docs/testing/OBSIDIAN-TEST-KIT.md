@@ -43,7 +43,9 @@ kit.metadataCache.getFileCache(kit.file('Inbox.md'))?.links; // seeded files are
 ```
 
 Use `loadVaultFixtures(new URL('../fixtures/obsidian-vault', import.meta.url))` to load
-a folder of Markdown files as `files`. `createTestVault(files)` gives a standalone
+a folder of Markdown files as `files`. In `happy-dom` test files pass a path instead
+(`join(import.meta.dirname, '../fixtures/obsidian-vault')`): Vite rewrites
+`new URL(..., import.meta.url)` to an `http:` URL in DOM environments. `createTestVault(files)` gives a standalone
 vault when nothing else is needed.
 
 Vault writes emit `create`/`modify`/`delete`/`rename` synchronously. The metadata

@@ -9,6 +9,9 @@ import { createServices } from ${ref('src/bootstrap/services.ts')};
 import { nativeAdapters } from ${ref('src/infrastructure/obsidian/adapters.ts')};
 import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obsidian/showcase-view.ts')};
 import { bindHostEvents } from ${ref('src/infrastructure/obsidian/event-bridge.ts')};
+import { bindCommands } from ${ref('src/infrastructure/obsidian/commands.ts')};
+import { CommandService } from ${ref('src/application/command-service.ts')};
+import { createDebugCommands } from ${ref('src/features/debugging/commands.ts')};
 import { screens } from '../domain/screens.ts';
 import { createSources } from './sources.ts';
 ${relationshipScope(m,true).rules.length ? "import { disposeRelationshipIntegrity } from './relationships.ts';" : ''}
@@ -19,13 +22,14 @@ export async function initializeProject(plugin: Plugin) {
   let sources: ReturnType<typeof createSources>;
   let providers: ReturnType<typeof configureSourceProviders> | undefined;
   const views = new Set<ShowcaseView>(); const modals = new Set<Modal>(); const settings = new Set<() => void>();
-  let disposed = false; let stopEvents = () => {};
+  let disposed = false; let stopEvents = () => {}; let stopCommands = () => {};
   const dispose = () => {
     if (disposed) return; disposed = true;
     for (const modal of modals) { try { modal.close(); } catch { shell.diagnostics.report('generated.cleanup','modal.close'); } }
     for (const release of settings) { try { release(); } catch { shell.diagnostics.report('generated.cleanup','settings.close'); } }
     for (const view of views) { try { view.disposeView(); } catch { shell.diagnostics.report('generated.cleanup','view.close'); } }
     ${relationshipScope(m,true).rules.length ? 'disposeRelationshipIntegrity(shell);' : ''}
+    try { stopCommands(); } catch { shell.diagnostics.report('generated.cleanup','command.dispose'); }
     try { providers?.dispose(); } catch { shell.diagnostics.report('generated.cleanup','sources.dispose'); }
     try { stopEvents(); } finally { shell.dispose(); }
   };
@@ -39,7 +43,8 @@ export async function initializeProject(plugin: Plugin) {
     modals.add(modal);
     try { modal.open(); } catch (error) { modal.close(); throw error; }
   }
-  const viewType = plugin.manifest.id + '-project-workbench';
+  // The shell's view-header binding owns only <id>-view-* types; any other view type fails to open.
+  const viewType = plugin.manifest.id + '-view-project-workbench';
   async function open(id?: string) {
     if (disposed) return;
     if (id && screens.find(s => s.id === id)?.kind === 'modal') { openModal(id); return; }
@@ -73,6 +78,10 @@ export async function initializeProject(plugin: Plugin) {
       }
       plugin.addSettingTab(new ProjectSettings(plugin.app,plugin));
     }
+    // Runtime debug controls (the dev loop toggles them after each load); records stay redacted.
+    const debugCommands = new CommandService([createDebugCommands({debugging:shell.debugging,modals:shell.modals,notices:shell.notices})],shell.diagnostics,
+      {validKey:key=>shell.i18n.global.te(key),onFailure:(error,id)=>{ shell.notifications.show('command:'+id,'error',error.key,true,'runtime'); }});
+    stopCommands = bindCommands(plugin,debugCommands,key=>shell.i18n.global.t(key),shell.diagnostics);
     stopEvents = bindHostEvents(plugin,shell.hostEvents,shell.diagnostics,shell.scheduler);
     return {dispose};
   } catch (error) { dispose(); throw error; }
