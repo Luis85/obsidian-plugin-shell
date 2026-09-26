@@ -52,7 +52,7 @@ test('--yes creates a blank project with the chosen identity and refuses a secon
   const cwd = await scratch(t), target = join(cwd, 'field-notes');
   const created = machine(['field-notes', '--starter', 'blank', '--id', 'field-kit', '--name', 'Field Kit', '--author', 'Example Author', '--yes'], cwd);
   assert.equal(created.exit, 0, JSON.stringify(created.result.diagnostics)); assert.equal(created.result.status, 'applied'); assert.equal(created.result.data.written, true);
-  assert.deepEqual(created.result.data.nextSteps, [`cd ${JSON.stringify(target)}`, 'npm ci', 'npm run verify:project', 'npm run test:watch', 'npm run dev:ui']);
+  assert.deepEqual(created.result.data.nextSteps, [`cd ${JSON.stringify(target)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch']);
   const manifest = await json(join(target, 'manifest.json')), pkg = await json(join(target, 'package.json')), design = await json(join(target, 'design/project.json'));
   assert.equal(manifest.id, 'field-kit'); assert.equal(manifest.name, 'Field Kit'); assert.equal(manifest.author, 'Example Author');
   assert.equal(pkg.name, 'field-kit'); assert.ok(pkg.scripts['verify:project'] && pkg.scripts['test:watch']);

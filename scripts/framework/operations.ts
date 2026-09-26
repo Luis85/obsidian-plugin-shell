@@ -50,6 +50,8 @@ async function processOperation(request: Request, context: Context): Promise<Res
   else if (request.command === 'test') {
     acceptProfile(request.command, profile);
     if (profile === 'native') entry = 'scripts/testing/check-native.mjs';
+    // Real-Obsidian Vitest suite in contained vaults; downloads only with OBSIDIAN_ALLOW_DOWNLOAD=1.
+    else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
     else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test']; }
     else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); }
   } else if (request.command === 'verify') {
@@ -58,8 +60,8 @@ async function processOperation(request: Request, context: Context): Promise<Res
     else entry = 'scripts/quality/verify.mjs';
   } else if (request.command === 'dev') {
     acceptProfile(request.command, profile);
-    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : 'scripts/dev/watch-local.mjs';
-    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : ['--no-local'];
+    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
+    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
   } else {
     const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');
     requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');

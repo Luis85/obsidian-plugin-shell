@@ -33,9 +33,12 @@ node shell.mjs new <dir> --starter <id> --apply <planHash>
 - `--install` runs `npm ci` and `npm run verify:project` inside the new project after
   a successful write, streaming output to stderr. It is not part of the plan hash or a
   saved approval. A failure reports that the project exists and how to resume.
-  Without it the result lists next steps (`npm ci`, `npm run verify:project`,
-  `npm run test:watch`, `npm run dev:ui`) and the project's README and
-  `PROJECT-IMPLEMENTATION.md`.
+  Without it the result lists next steps (`npm ci`, `npm run check`,
+  `npm run dev:obsidian`, `npm run test:watch`) and the project's README and
+  `PROJECT-IMPLEMENTATION.md`. The generated project's `README.md` and `AGENTS.md`
+  describe its developer and agent kit ([generator guide](COMPANION-GENERATOR.md)).
+  Pass `--author` so `manifest.json` and `package.json` name you; without it the
+  author stays empty and `check submission` reports it.
 
 Generated scaffolds keep PRD acceptance as TODO obligations; creation is not product
 acceptance, native qualification or release readiness.

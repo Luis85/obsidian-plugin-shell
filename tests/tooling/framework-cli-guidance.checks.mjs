@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, realpath, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -114,7 +114,7 @@ test('command help lists options with allowed values, defaults and examples', ()
   assert.match(styles.stdout, /--format <css\|json\|markdown\|html> +Export format\. \(default: css\)/);
   assert.match(styles.stdout, /^Examples\n {2}node shell\.mjs styles export /m);
   const profile = cli(['test', '--help']);
-  assert.match(profile.stdout, /--profile <unit\|project\|browser\|native>/);
+  assert.match(profile.stdout, /--profile <unit\|project\|browser\|native\|obsidian>/);
   assert.match(profile.stdout, /^Effect: process, /m);
   const check = cli(['help', 'check']);
   assert.match(check.stdout, /--fast +Typecheck plus tests related to changed files/);
@@ -134,7 +134,7 @@ test('help JSON carries the same tiers and returns isolated copies', async () =>
   assert.equal((await executeOperation({ command: 'help', args: [], options: {} }, context)).data.goldenPath[0].command, 'new');
   assert.equal((await executeOperation({ command: 'help', args: [], options: { all: true } }, context)).data.scope, 'all');
   const test = (await executeOperation({ command: 'capabilities', args: [], options: {} }, context)).data.commands.find(entry => entry.id === 'test');
-  assert.deepEqual(test.optionHelp.profile.values, ['unit', 'project', 'browser', 'native']);
+  assert.deepEqual(test.optionHelp.profile.values, ['unit', 'project', 'browser', 'native', 'obsidian']);
 });
 test('plans render per-file status and the exact apply follow-up', async t => {
   const dir = await scratch(t);
@@ -152,4 +152,17 @@ test('help for new documents --from as a companion project export, not the kit-u
   assert.doesNotMatch(output.stdout, /replacement kit/);
   const upgrade = cli(['help', 'framework upgrade'], { NO_COLOR: '1' });
   assert.match(upgrade.stdout, /--from <value>\s+Extracted replacement kit folder\./);
+});
+test('the obsidian profiles run the real-Obsidian test suite and dev loop scripts of the project', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, 'scripts/testing'), { recursive: true }); await mkdir(join(dir, 'scripts/dev'), { recursive: true });
+  const fake = name => `console.log(${JSON.stringify(name)} + ' ran with [' + process.argv.slice(2).join(' ') + ']');\n`;
+  await writeFile(join(dir, 'scripts/testing/run-obsidian-tests.mjs'), fake('real-obsidian tests'));
+  await writeFile(join(dir, 'scripts/dev/obsidian-dev.mjs'), fake('real-obsidian dev loop'));
+  const tests = machine(['test', '--profile', 'obsidian', '--root', dir]);
+  assert.equal(tests.exit, 0); assert.equal(tests.result.data.profile, 'obsidian');
+  assert.match(tests.result.data.execution.stdout, /^real-obsidian tests ran with \[\]$/m);
+  const dev = machine(['dev', '--profile', 'obsidian', '--root', dir]);
+  assert.equal(dev.exit, 0); assert.match(dev.result.data.execution.stdout, /^real-obsidian dev loop ran with \[\]$/m);
+  assert.equal(goldenPath.find(step => step.command === 'dev').example, 'node shell.mjs dev --profile obsidian');
 });

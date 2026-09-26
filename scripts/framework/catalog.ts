@@ -30,11 +30,11 @@ export const commands: readonly Command[] = [
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },
   { id: 'install', summary: 'Explicit exact-lock npm ci; reviewed lifecycle hooks may run.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'build', summary: 'Run the existing production bundler.', options: {}, maxArgs: 0, effect: 'process' },
-  { id: 'test', summary: 'Run unit/project, browser or native qualification.', options: values('profile'), maxArgs: 0, effect: 'process' },
+  { id: 'test', summary: 'Run unit/project, browser, native qualification or real-Obsidian tests.', options: values('profile'), maxArgs: 0, effect: 'process' },
   { id: 'check', summary: 'Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. Not verify.', options: { fast: 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'check submission', summary: 'Read-only local mirror of documented Obsidian community review rules.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'verify', summary: 'Run existing full verification; project scope is explicitly separate.', options: values('profile'), maxArgs: 0, effect: 'process' },
-  { id: 'dev', summary: 'Run development watch or UI harness; cancel with Ctrl-C.', options: values('profile'), maxArgs: 0, effect: 'process' },
+  { id: 'dev', summary: 'Run development watch, UI harness or the real-Obsidian sandbox; cancel with Ctrl-C.', options: values('profile'), maxArgs: 0, effect: 'process' },
   { id: 'vault prepare', summary: 'Plan a marker in the configured isolated test vault.', options: {}, maxArgs: 0, effect: 'plan' },
   { id: 'plugin install', summary: 'Install exact built assets into the approved test vault; never enable.', options: {}, maxArgs: 0, effect: 'plan' },
   { id: 'data plan', summary: 'Shared owned test-data plan; never touches production sources.', options: values('input'), maxArgs: 0, effect: 'fixtures' },
@@ -53,7 +53,7 @@ for (const entry of commands) { Object.freeze(entry.options); Object.freeze(entr
 Object.freeze(commands);
 /** Accepted --profile values; help renders these same lists. */
 export const profiles: Readonly<Record<string, readonly string[]>> = Object.freeze({
-  test: Object.freeze(['unit', 'project', 'browser', 'native']), verify: Object.freeze(['full', 'project']), dev: Object.freeze(['watch', 'ui']),
+  test: Object.freeze(['unit', 'project', 'browser', 'native', 'obsidian']), verify: Object.freeze(['full', 'project']), dev: Object.freeze(['watch', 'ui', 'obsidian']),
 });
 export function parameterKinds(entry: Command): Record<string, 'value' | 'flag'> {
   return { ...common, ...entry.options };

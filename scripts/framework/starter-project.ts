@@ -106,7 +106,7 @@ async function fromStarter(request: Request, context: Context, directory: string
   return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } } };
 }
 function nextSteps(directory: string): string[] {
-  return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run verify:project', 'npm run test:watch', 'npm run dev:ui'];
+  return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];
 }
 /** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
 export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
@@ -128,5 +128,5 @@ export async function completeStarterProject(outcome: Result, request: Request, 
       failed.details = { written: true, directory, completed: executions, failure: error.details ?? null, automaticRetry: false }; throw failed;
     }
   }
-  return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => !['npm ci', 'npm run verify:project'].includes(step)), guide } };
+  return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => step !== 'npm ci'), guide } };
 }

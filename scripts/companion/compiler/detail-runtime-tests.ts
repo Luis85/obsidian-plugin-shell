@@ -1,5 +1,5 @@
 import { literal, symbol, type Model } from './model.ts';
-import { relativeImport, type Add } from './file-code.ts';
+import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { sampleCode } from './schema-code.ts';
 import type { DetailDocument } from '../runtime/detail-runtime.ts';
 export function detailRuntimeTests(m: Model, documents: DetailDocument[], add: Add): void {
@@ -98,7 +98,7 @@ it('maps source pending, error and empty states without starting a source operat
     const source = m.sources.find(s => s.id === node.binding!.sourceId)!;
     const op = source.operations.find(o => o.id === node.binding!.operationId)!;
     const test = `${m.testRoot}/details/${node.id}-binding.test.ts`;
-    const component = `${m.sourceRoot}/presentation/components/${doc.kind === 'component' ? 'library/' + doc.ownerId : 'details/' + doc.id}.vue`;
+    const component = `${m.sourceRoot}/presentation/components/${doc.kind === 'component' ? 'library/' + componentFile(doc.ownerId,'component') : 'details/' + doc.id}.vue`;
     add(test, `// @vitest-environment happy-dom
 import { it, expect } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';

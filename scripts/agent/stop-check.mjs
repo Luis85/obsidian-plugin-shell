@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { boundedOutput, npmCommand, packageScripts, projectRootFor, readHookInput } from './hook-io.mjs';
 
 const TIMEOUT_MS = 300_000;
-export const CHECK_ARGS = ['run', '-s', 'check', '--', '--fast'];
+const CHECK_ARGS = ['run', '-s', 'check', '--', '--fast'];
 export function stopOutcome(input, run) {
   if (!run.error && !run.signal && run.status === 0) return { code: 0, stdout: '', stderr: '' };
   const detail = run.error || run.signal ? `did not finish (${run.error?.code ?? run.error?.message ?? run.signal})` : `failed (exit ${run.status})`;
@@ -18,7 +18,7 @@ export function stopOutcome(input, run) {
   }
   return { code: 2, stdout: '', stderr: `Do not finish yet. ${summary}\nFix the failures (or explain precisely why they are unrelated to this change), then re-run npm run check -- --fast.` };
 }
-export function main(input, env = process.env) {
+function runHook(input, env = process.env) {
   const root = projectRootFor(typeof input?.cwd === 'string' ? input.cwd : process.cwd()) ?? projectRootFor(env.CLAUDE_PROJECT_DIR ?? process.cwd());
   if (!root || !packageScripts(root).check) return { code: 0, stdout: '', stderr: '' };
   const npm = npmCommand(CHECK_ARGS, env);
@@ -27,7 +27,7 @@ export function main(input, env = process.env) {
   return stopOutcome(input, run);
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const outcome = main(await readHookInput());
+  const outcome = runHook(await readHookInput());
   if (outcome.stdout) process.stdout.write(`${outcome.stdout}\n`);
   if (outcome.stderr) process.stderr.write(`${outcome.stderr}\n`);
   process.exitCode = outcome.code;

@@ -76,7 +76,9 @@ export function createJsonHttpPort(source:JsonHttpSource,configuration?:JsonHttp
     if(!matches(input,op.input))throw new Error('HTTP_INPUT_INVALID');input=structuredClone(input);
     const url=requestUrl(base,op,input);const controller=new AbortController();
     const abort=()=>controller.abort();if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
-    pending.add(controller);const timer=setTimeout(abort,timeout);
+    pending.add(controller);
+    // eslint-disable-next-line obsidianmd/prefer-window-timers -- portable runtime: Node contract tests have no window; the timer is always cleared below.
+    const timer=setTimeout(abort,timeout);
     try{
       const headers=new Headers({'Accept':'application/json'});
       if(source.auth!=='none'&&!configuration.headers)throw new Error('HTTP_CREDENTIAL_PROVIDER_REQUIRED');
@@ -102,7 +104,10 @@ export function createJsonHttpPort(source:JsonHttpSource,configuration?:JsonHttp
       // Do not expose response bodies, credentials, request paths or transport exception text.
       if(error instanceof Error && /^HTTP_[A-Z_]+$/.test(error.message))throw error;
       throw new Error(controller.signal.aborted?'HTTP_ABORTED':'HTTP_REQUEST_FAILED');
-    }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);pending.delete(controller);}
+    }finally{
+      // eslint-disable-next-line obsidianmd/prefer-window-timers -- pairs with the portable setTimeout above.
+      clearTimeout(timer);signal?.removeEventListener('abort',abort);pending.delete(controller);
+    }
   }
   const port=Object.fromEntries(source.operations.map(op=>[op.slug,(input:unknown,signal?:AbortSignal)=>execute(op,input,signal)]));
   return {port,dispose(){disposed=true;for(const controller of pending)controller.abort();pending.clear();}};

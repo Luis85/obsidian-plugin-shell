@@ -35,11 +35,13 @@ folder are ever opened.
 
 | Gates | What it proves |
 | --- | --- |
-| `npm run check` | Fast gate: typecheck, lint and product tests (`check -- --fast` = changed files only) |
+| `npm run check` | Definition of done: typecheck, ESLint (`src`, zero warnings) and product tests |
+| `npm run check:fast` | Typecheck plus only the tests related to files changed since the last commit |
 | `npm test` | All product tests once |
 | `npm run test:obsidian` | The built plugin loads, registers and unloads in real Obsidian |
 | `npm run verify:project` | Build, typecheck, product and UI-effect tests (what CI runs) |
 | `npm run build` | Release bundle in `dist/` (`main.js`, `styles.css`, `manifest.json`) |
+| `npm run check:submission` | Local mirror of the Obsidian community-review rules (manifest, lint, bundle) |
 | `npm run doctor` | Toolchain and configuration diagnostics |
 
 `npm run verify` is the inherited full framework gate (coverage, analyzers, baselines).
@@ -106,6 +108,9 @@ permission allowlist for the safe commands, and skills (`implement-requirement`,
   navigation and one TODO acceptance test per requirement.
 - Not done: the product behaviour behind each requirement, native qualification on
   other Obsidian versions or platforms, mobile support and store submission.
+- Before publishing: set `author` (and optionally `authorUrl`/`fundingUrl`) in
+  `manifest.json` and `package.json` if the project was created without `--author`,
+  then run `npm run check:submission`.
 
 ## Links
 

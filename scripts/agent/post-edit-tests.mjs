@@ -42,7 +42,7 @@ export function postEditOutcome(target, run) {
   if (run.status === 0) return { code: 0, message: '' };
   return { code: 2, message: `Tests related to ${target.file} fail after this edit (vitest related, exit ${run.status}). Fix the code or the test before continuing:\n${boundedOutput(`${run.stdout ?? ''}\n${run.stderr ?? ''}`)}` };
 }
-export async function main(input) {
+async function runHook(input) {
   const target = editedTarget(input);
   if (!target) return { code: 0, message: '' };
   if (!existsSync(join(target.root, 'node_modules/vitest/vitest.mjs'))) return { code: 1, message: 'Vitest is not installed in this project; run npm ci.' };
@@ -51,7 +51,7 @@ export async function main(input) {
   return postEditOutcome(target, run);
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const outcome = await main(await readHookInput());
+  const outcome = await runHook(await readHookInput());
   if (outcome.message) process.stderr.write(`${outcome.message}\n`);
   process.exitCode = outcome.code;
 }

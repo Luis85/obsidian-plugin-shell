@@ -56,7 +56,7 @@ export async function persistenceCode(templateRoot: string, m: Model, add: Add):
     const name = symbol(entity.slug); const file = `${m.sourceRoot}/application/documents/${entity.slug}.ts`;
     const fields = props.map(([key],index) => `${literal(key)}: ${entity.schema.required?.includes(key) ? 'f'+index : `fields.optional(f${index})`}`).join(',\n');
     const validators = props.map(([,schema],index) => field(schema,index)).join('\n');
-    add(file, `import { defineEntity, fields } from ${literal(relativeImport(file, 'src/domain/entity.ts'))};
+    add(file, `import { defineEntity${fields.includes('fields.optional(') ? ', fields' : ''} } from ${literal(relativeImport(file, 'src/domain/entity.ts'))};
 import { matches } from '../../domain/contract.ts';
 import { success, failure } from ${literal(relativeImport(file, 'src/domain/outcome.ts'))};
 import { defineDocument, heading } from ${literal(relativeImport(file, 'src/application/document-definition.ts'))};

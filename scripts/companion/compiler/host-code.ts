@@ -71,6 +71,7 @@ export async function initializeProject(plugin: Plugin) {
       if (screen.ribbon) plugin.addRibbonIcon('blocks',screen.label,()=>invoke(screen.id));
     }
     for (const screen of screens.filter(s => s.kind === 'settings')) {
+      // eslint-disable-next-line obsidianmd/settings-tab/prefer-setting-definitions -- this tab mounts the generated Vue settings screen in display(); its controls have no declarative definitions to index.
       class ProjectSettings extends PluginSettingTab {
         private release = () => {};
         display() { this.hide(); this.containerEl.empty(); this.release = mountProject(this.containerEl,shell,sources,openModal,screen.id,true); settings.add(this.release); }
@@ -92,16 +93,14 @@ export async function initializeProject(plugin: Plugin) {
 import type { SourcePorts } from '../application/sources.ts';
 /** Developer-owned runtime configuration. Portable JSON never authorizes network access.
  * Return complete source ports. Dispose each configured provider on plugin unload. */
-export function configureSourceProviders(_shell: Services): {ports: Partial<SourcePorts>; dispose(): void} {
-  return {ports: {}, dispose() {}};
-}
+export const configureSourceProviders: (shell: Services) => {ports: Partial<SourcePorts>; dispose(): void} = () => ({ports: {}, dispose() {}});
 `);
   const mount = `${root}/bootstrap/mount.ts`;
   add(mount,`import { createApp } from 'vue';
 import { createPinia, disposePinia } from 'pinia';
 import type { Services } from ${literal(relativeImport(mount,'src/bootstrap/services.ts'))};
 import { bindHostTheme } from ${literal(relativeImport(mount,'src/infrastructure/ui/host-theme.ts'))};
-import Workbench from '../presentation/components/Workbench.vue';
+import Workbench from '../presentation/components/ProjectWorkbench.vue';
 import { projectKey } from '../presentation/context/project.ts';
 import type { Sources } from '../application/sources.ts';
 import { panels } from './panels.ts';
