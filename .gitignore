@@ -16,9 +16,15 @@ node-qualified
 .native-runner/
 .native-cache/
 .nq/
+.obsidian-sandbox*/
+# Personal Claude Code overrides; the shared .claude/settings.json is committed.
+.claude/settings.local.json
 
 .shell-build-lock/
 .shell-build-*/
 .template-state/
 .template-setup.lock/
 .codex-authoring.lock/
+
+# Isolated generated-plugin test data and local mock sessions
+/.test-vault/

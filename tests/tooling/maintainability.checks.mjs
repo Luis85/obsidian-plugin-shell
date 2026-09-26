@@ -134,3 +134,91 @@ test('maintainability inventories exact immutable vendor data and refuses change
     assert.equal(run(root).status, 1);
   });
 });
+
+
+test('maintainability inventories unsupported Python fixtures without diluting production metrics', async () => {
+  await fixture(async root => {
+    const before = run(root); assert.equal(before.status, 0, before.stderr);
+    const baseline = JSON.parse(await readFile(join(packet(before).output, 'report.json'), 'utf8'));
+    const sources = [];
+    for (const path of ['scripts/concepts/assembly-fixture.py', 'tests/concepts/browser-fixture.py']) {
+      const bytes = Buffer.from('# Unsupported-language inventory fixture\nprint("fixture")\n');
+      await mkdir(join(root, path, '..'), { recursive: true });
+      await writeFile(join(root, path), bytes); sources.push({path, bytes});
+    }
+    const result = run(root); assert.equal(result.status, 0, result.stderr);
+    const output = packet(result).output;
+    const reportPath = join(output, 'report.json');
+    const report = JSON.parse(await readFile(reportPath, 'utf8'));
+    const inventoried = report.inventory.files.filter(file => file.extension === 'py');
+    assert.equal(inventoried.length, sources.length);
+    for (const source of sources) {
+      const entry = inventoried.find(file => file.path === source.path);
+      assert.ok(entry, source.path);
+      assert.equal(entry.sha256, sha256(source.bytes));
+      assert.equal(entry.bytes, source.bytes.length);
+      assert.equal(entry.view, 'unsupported');
+      assert.equal(entry.measurement, 'not-measured');
+      assert.match(entry.reason, /Python concept tooling/);
+      for (const view of Object.values(report.views)) assert.ok(!view.inputs.some(input => input.path === source.path));
+    }
+    assert.deepEqual(report.views.production.inputs, baseline.views.production.inputs);
+    assert.deepEqual(report.views.production.health, baseline.views.production.health);
+    assert.deepEqual(report.views.production.duplication, baseline.views.production.duplication);
+    assert.equal(run(root, ['--check', output]).status, 0);
+    // Unsupported by Fallow does not mean absent from stale/tampered evidence checks.
+    const original = await readFile(reportPath, 'utf8');
+    report.inventory.files = report.inventory.files.filter(file => file.path !== sources[0].path);
+    await writeFile(reportPath, JSON.stringify(report));
+    assert.match(run(root, ['--check', output]).stderr, /METRIC_STALE_INVENTORY/);
+    await writeFile(reportPath, original);
+    await writeFile(join(root, sources[0].path), Buffer.concat([sources[0].bytes, Buffer.from('\n# changed Python source\n')]));
+    assert.match(run(root, ['--check', output]).stderr, /METRIC_STALE_INVENTORY/);
+  });
+});
+
+test('maintainability rejects unknown languages, production Python and unclassified concept inputs', async () => {
+  await fixture(async root => {
+    for (const path of ['src/probe.py', 'scripts/probe.py', 'tests/probe.py', 'harness/probe.py',
+      'scripts/concepts/probe.svelte', 'scripts/concepts/probe.pyc', 'scripts/concepts/nested/probe.py']) {
+      await mkdir(join(root, path, '..'), { recursive: true });
+      await writeFile(join(root, path), 'not an approved metric input');
+      const result = run(root);
+      assert.equal(result.status, 1, path);
+      assert.ok(result.stderr.includes(`METRIC_UNCLASSIFIED_INPUT: ${path}`), result.stderr);
+      await rm(join(root, path));
+    }
+  });
+});
+
+
+test('shared composition declarations retain exact measured bytes without ambient parse degradation', async () => {
+  await fixture(async root => {
+    const path = 'scripts/companion/composition-contract.d.mts';
+    const source = await readFile(resolve(path), 'utf8');
+    await mkdir(join(root, 'scripts/companion'), { recursive: true });
+    await writeFile(join(root, path), source);
+    const valid = run(root); assert.equal(valid.status, 0, valid.stderr);
+    const output = packet(valid).output;
+    const report = JSON.parse(await readFile(join(output, 'report.json'), 'utf8'));
+    const input = report.views.tooling.inputs.find(file => file.path === path);
+    assert.ok(input, 'The declaration must remain a measured tooling input');
+    assert.equal(input.sha256, sha256(source));
+    assert.equal(input.bytes, Buffer.byteLength(source));
+    assert.equal(report.views.tooling.health.inputs, 1);
+    assert.equal(report.views.tooling.health.findings.length, 0);
+    const health = JSON.parse(await readFile(join(output, 'tooling-health.json'), 'utf8'));
+    assert.equal(health.workspace_diagnostics?.length ?? 0, 0);
+    assert.equal(health.parse_errors?.length ?? 0, 0);
+    assert.equal(health.skipped_files?.length ?? 0, 0);
+    assert.equal(run(root, ['--check', output]).status, 0);
+    // Reproduce the original lost ambient context under the exact staging policy.
+    const degraded = source.replace('export declare const COMPOSITION_CONTROLS', 'export const COMPOSITION_CONTROLS');
+    assert.notEqual(degraded, source);
+    await writeFile(join(root, path), degraded);
+    const invalid = run(root); assert.equal(invalid.status, 1, invalid.stdout);
+    assert.match(invalid.stderr, /METRIC_REPORT_INCOMPLETE/);
+    await writeFile(join(root, path), source);
+    assert.equal(run(root, ['--check', output]).status, 0);
+  });
+});

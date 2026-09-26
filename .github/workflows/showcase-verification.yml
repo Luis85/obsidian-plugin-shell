@@ -13,18 +13,26 @@ jobs:
   verify:
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    # Guided setup runs the complete verify gates once before the served showcase.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # On pull requests Template authoring's renamed-feature job already runs
+        # setup, the complete verify and served e2e on Ubuntu with the same
+        # toolchain; Ubuntu showcase runs on pushes and manual dispatch.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["windows-latest"]' || '["ubuntu-latest", "windows-latest"]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: Put temporary files on a Dev Drive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./.github/scripts/prepare-windows-runner.ps1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 24.21.0
+          node-version-file: .nvmrc
           package-manager-cache: false
       - name: Select exact npm independently without global installation
         shell: pwsh
@@ -33,12 +41,19 @@ jobs:
           npm install --prefix "$tool" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "QUALIFIED_NPM_CLI=$(Join-Path $tool 'node_modules/npm/bin/npm-cli.js')" >> $env:GITHUB_ENV
-      - name: Guided setup from a clean checkout without node_modules
+      - name: Guided setup and complete verification from a clean checkout without node_modules
         shell: pwsh
         run: node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction
-      - name: Verify production coverage, contracts and retained baseline
-        shell: pwsh
-        run: node "$env:QUALIFIED_NPM_CLI" run verify
+      - name: Resolve the pinned Playwright version
+        id: playwright
+        if: matrix.os == 'ubuntu-latest'
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Restore the pinned Chromium download
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Provision pinned Chromium
         if: matrix.os == 'ubuntu-latest'
         run: |

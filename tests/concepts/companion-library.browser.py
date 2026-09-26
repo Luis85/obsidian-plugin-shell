@@ -1,0 +1,126 @@
+"""Actual bundled concept interactions plus named legacy/security fixtures.
+Uses exact HTML injection and explicit Storage substitute. No native/CLI claim.
+"""
+from pathlib import Path
+import argparse, json, hashlib
+from playwright.sync_api import sync_playwright
+R=Path(__file__).resolve().parents[2]
+a=argparse.ArgumentParser();a.add_argument('--html',default=str(R/'docs/concepts/companion/index.html'));a.add_argument('--out',default=str(R/'reports/concepts/library'))
+args=a.parse_args();HTML=Path(args.html);OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True)
+checks=[];errors=[];requests=[]
+def check(name,ok=True,scope='browser interaction / resulting state'):
+ checks.append({'name':name,'passed':bool(ok),'scope':scope});print('PASS' if ok else 'FAIL',name,flush=True);assert ok,name
+def act(p,k,v=None,scope=''):
+ p.locator(f'{scope} [data-action="{k}"]'+(f'[data-value="{v}"]' if v is not None else '')+':visible').first.click();p.wait_for_timeout(60)
+def nav(p,v):act(p,'nav',v,'#sidebar')
+def close(p):act(p,'close',scope='#modal')
+def ev(p,code):return p.evaluate(code)
+def card(p,id='node-2'):return p.locator(f'.map-node[data-node="{id}"]')
+def focus(p,id='node-2'):
+ card(p,id).locator('.map-card-title').click();act(p,'canvas-focus');p.wait_for_timeout(120)
+def sortids(p):return ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.map(b=>b.id)')
+def drag(p,one,two,frac=.2):
+ x=one.bounding_box();y=two.bounding_box();p.mouse.move(x['x']+x['width']/2,x['y']+x['height']/2);p.mouse.down();p.mouse.move(y['x']+y['width']/2,y['y']+y['height']*frac,steps=20);p.wait_for_timeout(80);p.mouse.up();p.wait_for_timeout(180)
+def report():
+ (OUT/'checks.json').write_text(json.dumps({'artifact_sha256':hashlib.sha256(HTML.read_bytes()).hexdigest(),'checks':checks,'passed':sum(x['passed'] for x in checks),'total':len(checks),'errors':errors,'requests':requests,'scope':'Injected browser concept; controlled Storage; native/CLI untested'},indent=2))
+with sync_playwright() as pw:
+ browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+ def new(storage=''):
+  p=browser.new_page(viewport={'width':1600,'height':1050});p.set_default_timeout(7000)
+  p.on('pageerror',lambda e:errors.append(str(e)));p.on('console',lambda m:errors.append(m.text) if m.type=='error' else None);p.on('request',lambda r:requests.append(r.url))
+  p.evaluate('''raw=>{window.fixtureStore={};if(raw)fixtureStore['shell-workbench-concept-v1']=raw;Object.defineProperty(window,'localStorage',{value:{getItem:k=>fixtureStore[k]??null,setItem:(k,v)=>fixtureStore[k]=String(v),removeItem:k=>delete fixtureStore[k]},configurable:true});}''',storage)
+  p.set_content(HTML.read_text());return p
+ try:
+  p=new();act(p,'sample');nav(p,'components')
+  check('One library includes 14 brick definitions and six UI contracts',ev(p,'design().library.length===20 && design().library.filter(isBrickComponent).length===14'))
+  check('Sample bricks point to shared versioned definitions',ev(p,'design().nodes.flatMap(bricksOf).every(b=>b.definition&&b.version&&b.defaults)'))
+  check('Seeded project passes structural validation',ev(p,'structuralDesign(design()) && !designIssues(design()).some(i=>i.level==="error")'))
+  act(p,'library-filter','bricks');check('Content filter has fourteen entries',p.locator('.library-item').count()==14)
+  p.locator('#component-filter').fill('board');check('Search finds reusable Board definition',p.locator('.library-item').count()==1)
+  p.locator('#component-filter').fill('not-present');check('No-results state also clears unrelated detail','No matching components' in p.locator('#component-detail').inner_text())
+  p.locator('#component-filter').fill('');act(p,'product-component-select','content-board')
+  check('Library preview uses the existing approved wireframe',p.locator('.library-preview-block .brick-wireframe').count()==1)
+  act(p,'workflow-component-tab','contract');check('Definition exposes defaults, props and accessibility','Default screen content' in p.locator('#component-detail').inner_text() and 'Accessibility' in p.locator('#component-detail').inner_text())
+  act(p,'product-component-duplicate','content-board');p.locator('#p-name').fill('SprintBoard');p.locator('#p-id').fill('sprint-board');p.locator('#library-spec-title').fill('Sprint work');p.locator('#library-spec-purpose').fill('See work by status');act(p,'product-component-save')
+  check('Custom brick is managed in the same library',ev(p,'design().library.some(c=>c.id==="sprint-board"&&c.contentSpec.title==="Sprint work")'))
+  act(p,'library-place','sprint-board');act(p,'library-place-confirm');close(p)
+  check('An untouched custom-component draft closes without false unsaved warning',(p.locator('#discard-dialog').count()==0 or not p.locator('#discard-dialog').evaluate('(x)=>x.open')))
+  nav(p,'sitemap');focus(p)
+  toolbar=card(p).locator('.card-actions-compact');check('Card has exactly three compact actions',toolbar.locator('button').count()==3)
+  cb=card(p).bounding_box();tb=toolbar.bounding_box();check('Toolbar stays inside card bounds',tb['y']>=cb['y'] and tb['y']+tb['height']<=cb['y']+cb['height']+2)
+  act(p,'library-card-add','node-2');check('Add menu separates content, connection and containment','Content component' in p.locator('#modal').inner_text() and 'Connected card' in p.locator('#modal').inner_text() and 'Screen inside' in p.locator('#modal').inner_text())
+  act(p,'brick-add','node-2',scope='#modal');check('Palette includes custom definition',p.locator('[data-action="library-pick"][data-value="node-2:sprint-board"]').count()==1)
+  act(p,'library-pick','node-2:sprint-board');p.locator('#brick-title').fill('This sprint only');p.locator('#brick-content').fill('Keep local filters when returning.');act(p,'brick-save')
+  instance=ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.at(-1).id')
+  check('Placement retains a stable versioned library reference',ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.at(-1).definition==="sprint-board"'))
+  check('Editing instance leaves shared title unchanged',ev(p,'design().library.find(c=>c.id==="sprint-board").contentSpec.title==="Sprint work"'))
+  before=sortids(p);positions=ev(p,'JSON.stringify(canvasState().positions)');history=ev(p,'design().history.length');fp=ev(p,'designFingerprint(design())')
+  focus(p);drag(p,card(p).locator('[data-brick-drag="node-2:'+instance+'"]'),card(p).locator('[data-brick-id="'+before[0]+'"]'))
+  check('Actual grip drag reorders within card',sortids(p)[0]==instance)
+  check('Sort commits one history operation',ev(p,'design().history.length')==min(history+1,20))
+  check('Sorting preserves card positions and hierarchy',ev(p,'JSON.stringify(canvasState().positions)')==positions)
+  check('Reading order invalidates semantic plan fingerprint',ev(p,'designFingerprint(design())')!=fp)
+  act(p,'design-undo');check('One Undo restores prior reading order',sortids(p)==before)
+  act(p,'design-redo');check('Redo restores reordered instance identity',sortids(p)[0]==instance)
+  focus(p);tile=card(p).locator('[data-brick-id="'+instance+'"]');tile.hover();tile.locator('[data-action="brick-down"]').click();p.wait_for_timeout(140)
+  check('Inline Later button provides a non-drag reorder route',sortids(p)[1]==instance)
+  grip=card(p).locator('[data-brick-drag="node-2:'+instance+'"]');grip.focus();p.keyboard.press('Alt+ArrowUp');p.wait_for_timeout(160)
+  check('Alt ArrowUp reorders the focused brick',sortids(p)[0]==instance)
+  check('Keyboard sorting retains focus on the grip',p.locator('[data-brick-drag="node-2:'+instance+'"]').evaluate('(x)=>x===document.activeElement'))
+  p.screenshot(path=str(OUT/'01-refined-card.png'))
+  nav(p,'components');act(p,'library-filter','bricks');act(p,'product-component-select','sprint-board');act(p,'workflow-component-tab','usage')
+  check('Usage links to the exact screen instance','This sprint only' in p.locator('#component-detail').inner_text())
+  act(p,'product-component-delete','sprint-board');check('Referenced definition cannot be deleted',ev(p,'design().library.some(c=>c.id==="sprint-board")') and not p.locator('#modal').evaluate('(x)=>x.open'))
+  act(p,'product-component-edit','sprint-board');p.locator('#library-spec-title').fill('Current sprint');p.locator('#library-spec-purpose').fill('See the current sprint at a glance');act(p,'product-component-save')
+  check('Changed defaults require a version bump','Bump' in p.locator('#modal .error').inner_text())
+  p.locator('#p-version').fill('0.2.0');act(p,'product-component-save')
+  check('Definition updates never rewrite existing instances',ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.find(b=>b.id==="'+instance+'").title==="This sprint only"'))
+  check('Stale component version is visible and blocks generation',ev(p,'designIssues(design()).some(i=>i.code==="brick-definition-drift"&&i.level==="error")'))
+  act(p,'workflow-component-tab','usage');act(p,'library-upgrade','node-2:'+instance)
+  check('Upgrade review identifies local overrides','Keep local override' in p.locator('#modal').inner_text())
+  p.screenshot(path=str(OUT/'02-reviewed-upgrade.png'));act(p,'library-upgrade-save')
+  check('Reviewed upgrade preserves local title and notes',ev(p,'(()=>{const b=design().nodes.find(n=>n.id==="node-2").bricks.find(b=>b.id==="'+instance+'");return b.title==="This sprint only"&&b.content==="Keep local filters when returning."&&b.version==="0.2.0"})()'))
+  check('Unmodified defaults adopt the reviewed version',ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.find(b=>b.id==="'+instance+'").purpose==="See the current sprint at a glance"'))
+  check('Reviewed instance clears its drift finding',not ev(p,'designIssues(design()).some(i=>i.code==="brick-definition-drift")'))
+  act(p,'product-component-deprecate','sprint-board');check('Deprecation preserves existing instance',ev(p,'design().nodes.find(n=>n.id==="node-2").bricks.some(b=>b.id==="'+instance+'")'))
+  nav(p,'sitemap');focus(p);act(p,'brick-add','node-2');check('Deprecated definitions are not offered for new placement',p.locator('[data-action="library-pick"][data-value="node-2:sprint-board"]').count()==0);close(p)
+  nav(p,'components');act(p,'library-deprecated');act(p,'product-component-select','sprint-board');check('Deprecated definition remains discoverable', 'Deprecated.' in p.locator('#component-detail').inner_text())
+  act(p,'product-component-edit','sprint-board');p.locator('#p-status').select_option('ready');act(p,'product-component-save');check('Lifecycle can be restored',ev(p,'design().library.find(c=>c.id==="sprint-board").status==="ready"'))
+  act(p,'library-new-brick');p.locator('#p-name').fill('DisposableBlock');p.locator('#p-id').fill('disposable-block');act(p,'product-component-save');act(p,'product-component-delete','disposable-block');act(p,'product-component-delete-save');check('Unused custom definition can be removed after confirmation',not ev(p,'design().library.some(c=>c.id==="disposable-block")'))
+  check('Deleted definitions do not reappear on rerender',ev(p,'(()=>{render();return !design().library.some(c=>c.id==="disposable-block")})()'))
+  act(p,'product-component-select','content-table');act(p,'product-component-edit','content-table');p.locator('#library-spec-title').fill('Unsaved title');close(p)
+  check('Shared-definition edits have discard protection',p.locator('#discard-dialog').evaluate('(x)=>x.open'));p.locator('#discard-keep').click();check('Keep editing retains draft','Unsaved title'==p.locator('#library-spec-title').input_value());close(p);p.locator('#discard-confirm').click()
+  check('Discard preserves stored definition',ev(p,'design().library.find(c=>c.id==="content-table").contentSpec.title==="Data table"'))
+  act(p,'product-component-select','content-board');p.screenshot(path=str(OUT/'03-component-library-dark.png'));act(p,'theme');p.screenshot(path=str(OUT/'04-component-library-light.png'))
+  nav(p,'sitemap');focus(p);p.screenshot(path=str(OUT/'05-sitemap-light.png'))
+  for width in [1024,390]:
+   p.set_viewport_size({'width':width,'height':920});p.wait_for_timeout(150)
+   check('No document overflow at '+str(width),ev(p,'document.documentElement.scrollWidth<=innerWidth'))
+   p.screenshot(path=str(OUT/f'06-responsive-{width}.png'))
+  p.set_viewport_size({'width':1600,'height':1050});nav(p,'components')
+  check('Export contains library definitions and stable instance references',ev(p,'(()=>{const d=portableDesign();return d.librarySchema===2&&d.library.some(isBrickComponent)&&d.nodes.flatMap(bricksOf).every(b=>b.definition)})()'))
+  check('Generation handoff includes ordered definition references',ev(p,'planDesign(design()).files.some(f=>f.content.includes("sprint-board"))') if ev(p,'typeof planDesign==="function"') else ev(p,'JSON.stringify(portableDesign()).includes("sprint-board")'))
+  saved=ev(p,'fixtureStore["shell-workbench-concept-v1"]')
+  restored=new(saved)
+  check('Controlled Storage rehydrates the unified library and local overrides',ev(restored,'design().librarySchema===2 && design().library.some(c=>c.id==="sprint-board") && design().nodes.flatMap(bricksOf).some(b=>b.title==="This sprint only")'),'controlled Storage fixture')
+  restored.close()
+  # Explicit UI recovery when a starter definition has been deliberately removed.
+  nav(p,'components');act(p,'library-filter','bricks');p.locator('#component-filter').fill('');act(p,'product-component-select','content-heading')
+  # The sample uses heading, so use a copy of the current state only for this fault injection.
+  snapshot=ev(p,'JSON.stringify(design())');ev(p,'design().library=design().library.filter(c=>c.id!=="content-heading")')
+  nav(p,'sitemap');focus(p);act(p,'brick-starter','node-2');before=ev(p,'JSON.stringify(design().nodes)');act(p,'brick-starter-confirm')
+  check('Missing starter definition gives recovery guidance without partial changes','missing or deprecated' in p.locator('#modal .error').inner_text() and ev(p,'JSON.stringify(design().nodes)')==before,'UI recovery with explicit missing-definition fixture')
+  close(p);p.evaluate('raw=>{const d=JSON.parse(raw);Object.assign(design(),d);render();}',snapshot)
+  # Scope-labeled model cases; these do not stand in for user interaction tests.
+  check('Legacy migration preserves authored bytes and IDs',ev(p,'(()=>{const old=createDesign("document-manager");seedContentBricks(old);delete old.librarySchema;old.library=old.library.filter(c=>!isBrickComponent(c));for(const b of old.nodes.flatMap(bricksOf)){delete b.definition;delete b.version;delete b.defaults;b.content="User notes";}const before=old.nodes.flatMap(bricksOf).map(b=>[b.id,b.title,b.content]);ensureProductModel(old);return JSON.stringify(before)===JSON.stringify(old.nodes.flatMap(bricksOf).map(b=>[b.id,b.title,b.content]))&&old.nodes.flatMap(bricksOf).every(b=>b.definition)})()'),'legacy model fixture')
+  check('Unknown library schema fails validation',ev(p,'(()=>{const d=designCopy(design());d.librarySchema=999;return !structuralDesign(d)})()'),'model negative fixture')
+  check('Executable component content is rejected as a schema',ev(p,'(()=>{const d=designCopy(design());d.library.find(isBrickComponent).contentSpec.execute="shell";return !structuralDesign(d)})()'),'model negative fixture')
+  check('Missing definition reference is not silently repaired',ev(p,'(()=>{const d=designCopy(design());d.nodes.find(n=>bricksOf(n).length).bricks[0].definition="missing-component";ensureProductModel(d);return brickIssues(d).some(i=>i.code==="brick-definition-missing")})()'),'model negative fixture')
+  check('Stale sorting operation preserves order',ev(p,'(()=>{const n=design().nodes.find(n=>n.id==="node-2"),before=JSON.stringify(n.bricks);reorderBrick(n.id,n.bricks[0].id,null,{owner:designOwner(),revision:design().revision-1});return before===JSON.stringify(n.bricks)})()'),'model negative fixture')
+  check('Local screen edits never mutate source component defaults',ev(p,'(()=>{const d=designCopy(design()),b=d.nodes.flatMap(bricksOf)[0],c=d.library.find(c=>c.id===b.definition),before=JSON.stringify(c);b.title="local";return before===JSON.stringify(c)})()'),'model fixture')
+  check('Runtime network requests remain absent',not requests)
+  check('No browser page or console errors',not errors)
+  report();browser.close()
+ except Exception:
+  if 'p' in locals():p.screenshot(path=str(OUT/'failure.png'))
+  report();browser.close();raise

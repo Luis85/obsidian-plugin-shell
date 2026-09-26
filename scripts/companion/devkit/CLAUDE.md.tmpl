@@ -1,0 +1,18 @@
+@AGENTS.md
+
+## Claude Code specifics
+
+- Hooks in `.claude/settings.json`: after every Edit/Write under the source or test
+  roots, `scripts/agent/post-edit-tests.mjs` runs `vitest related` for that file and
+  reports failures back to you. When you stop, `scripts/agent/stop-check.mjs` runs
+  `npm run check -- --fast` and blocks once if it fails. Fix the reported failures;
+  do not disable the hooks. A hook that cannot read its input says that tests were
+  not run; then run `npm run check -- --fast` yourself.
+- Skills in `.claude/skills/`: `implement-requirement`, `debug-in-obsidian`,
+  `add-feature`, `write-obsidian-test`. Use them for those workflows.
+- Safe commands are pre-approved in exact forms; publishing, force pushes,
+  `release:operate` and Obsidian downloads (`--allow-download`,
+  `OBSIDIAN_ALLOW_DOWNLOAD`) are denied. When Obsidian is not provisioned, ask the
+  user to run the first download themselves; ask before any other network-dependent
+  step. Commands that write to a chosen path (`--plan-out`, `--output`,
+  `--outputFile`) or act on another folder (`--root`) always ask first.

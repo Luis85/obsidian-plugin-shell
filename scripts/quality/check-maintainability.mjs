@@ -98,7 +98,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
   const failures = failureList(views);
   const report = { schema: 'plugin-maintainability/v1', status: failures.length ? 'failed' : 'passed', policy,
     tool: toolVersion, inventory: before, views, failures,
-    scope: 'Production thresholds block. Tooling, fixtures and removal templates are separate measured diagnostic views; CSS/markup/data are inventoried without function/clone qualification.' };
+    scope: 'Production thresholds block. Tooling, fixtures and removal templates are separate measured diagnostic views; CSS/markup/data and Python concept tooling are inventoried without JS/TS/Vue function/clone qualification.' };
   await writeFile(join(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
   return { report, output };
 }

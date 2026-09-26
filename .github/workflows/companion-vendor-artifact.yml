@@ -1,0 +1,43 @@
+name: Companion concept vendor artifact
+on:
+  push:
+    branches: [docs/companion-plugin-prd]
+    paths: [.github/workflows/companion-vendor-artifact.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve exact public packages without running lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/companion-vendor"
+          cd "$RUNNER_TEMP/companion-vendor"
+          npm pack --ignore-scripts --json vue@3.5.43 @vue-flow/core@1.48.2 pinia@4.0.3 > packages.json
+          python3 - <<'PY'
+          import hashlib, json, pathlib, tarfile
+          root=pathlib.Path.cwd()
+          packages=json.loads((root/'packages.json').read_text())
+          for package in packages:
+              name=package['name'].replace('@','').replace('/','-')
+              dest=root/name
+              dest.mkdir()
+              with tarfile.open(root/package['filename']) as archive:
+                  archive.extractall(dest, filter='data')
+          files=[]
+          for path in sorted(root.rglob('*')):
+              if path.is_file():
+                  files.append({'path':str(path.relative_to(root)), 'sha256':hashlib.sha256(path.read_bytes()).hexdigest(), 'bytes':path.stat().st_size})
+          (root/'artifact-manifest.json').write_text(json.dumps({'scope':'Pinned upstream packages only; not native or integration qualification','files':files},indent=2)+'\n')
+          PY
+      - name: Preserve retrieved package bytes, licenses and integrity metadata
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-vue-flow-vendor
+          path: ${{ runner.temp }}/companion-vendor
+          retention-days: 7
+          if-no-files-found: error

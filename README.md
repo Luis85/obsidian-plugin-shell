@@ -2,6 +2,33 @@
 
 **Framework lifecycle and recovery increment, version 0.4.0.**
 
+## Start a new plugin
+
+From this checkout (after `npm ci`), create an independent project from one of
+the reviewed starters. The target must be a new or empty folder outside this checkout.
+
+```sh
+npm run new -- --list                                   # starters: id, difficulty, summary
+npm run new -- ../my-plugin --starter quick-capture     # preview only; nothing is written
+npm run new -- ../my-plugin --starter quick-capture --id my-capture --name "My Capture" --yes
+npm run new -- ../my-plugin --starter blank --yes --install   # also runs npm ci + verify:project
+npm run new -- ../my-plugin --from my-plugin.companion.json   # any project JSON exported by the companion
+```
+
+In a terminal, `npm run new` without arguments asks for the folder, starter and
+identity, then shows the plan before writing. The result is scaffolding with TODO
+acceptance obligations, not a finished or natively qualified plugin. Details:
+[Framework CLI](docs/development/FRAMEWORK-CLI.md#start-a-new-plugin-from-a-starter).
+The new project has its own README and short `AGENTS.md`, Claude Code hooks, skills
+and permissions, VS Code debugging, product CI and an in-memory Obsidian example test
+([what it contains](docs/development/COMPANION-GENERATOR.md#what-the-generated-project-contains)).
+
+`node shell.mjs help` shows the golden path (new, install, dev, test, check, make).
+`npm run check` is the fast daily and agent gate (types, lint, tests; `check:fast`
+covers changed files only), and `npm run check:submission` mirrors documented
+Obsidian review rules locally. Neither replaces `npm run verify`. See
+[the check gate](docs/development/FRAMEWORK-CLI.md#golden-path-help-and-the-check-gate).
+
 The [framework guide](docs/development/FRAMEWORK-GUIDE.md) maps the reusable
 developer API and the path from feature generation to production qualification.
 The [active plan](docs/development/FRAMEWORK-LIFECYCLE-PLAN.md) adds retained-action
@@ -166,6 +193,12 @@ baseline, and harness build. Served E2E is explicit and separate. This is not th
 complete PRD release gate. See the [current test record](docs/testing/ITERATION-FOUR.md)
 for actual execution results and coverage scope.
 
+Tests are also separated by responsibility, so one part can be tested on its own:
+`npm run test:suites -- --list` shows every suite, and `npm run test:cli`,
+`test:generator`, `test:companion`, `test:makers`, `test:native-tooling`,
+`test:setup`, `test:release`, `test:quality` or `test:test-data` runs one. Every
+test file must belong to exactly one suite; see [Test suites](docs/testing/TEST-SUITES.md).
+
 `npm run help` lists commands. Setup dry-run works without project dependencies and
 does not write, install or access the network. `--yes --no-interaction` applies the
 reviewed options; `--no-local` remains a browser-profile alias.
@@ -235,3 +268,15 @@ release promotion require separate evidence and authorization.
 | [Maintenance/release](docs/development/MAINTENANCE-AND-RELEASE.md) | Full update/candidate/promotion contract. |
 
 [Agent instructions](AGENTS.md) · [License](LICENSE)
+
+## Generate a plugin from a companion design
+
+Export Project JSON from the companion HTML concept. From this framework checkout, run
+`node shell.mjs generate --input /path/to/project.json --vault /path/to/vault --target projects/my-plugin`
+to inspect the file plan, then repeat with `--apply <planHash>`. The npm equivalent is
+`npm run companion:scaffold -- ...`. In the generated project run `npm ci`,
+`npm run verify:project`, then `npm run test:tdd`. Generation performs no installation, activation or publishing.
+
+The compiler creates the shell, entity contracts, DataSource services/Pinia stores, native hosts,
+Vue detail layouts and traceable tests. Business behavior stays in explicit implementation hooks.
+See [the generator guide](docs/development/COMPANION-GENERATOR.md) for supported contracts and boundaries.

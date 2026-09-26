@@ -1,0 +1,74 @@
+import { readFile } from 'node:fs/promises';
+import { resolve, relative, isAbsolute, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { readCompanionProject } from '../read-project.mjs';
+import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
+import { digest, json, projectModel, row, rows, text, requireValue } from './model.ts';
+import { projectFiles } from './project-files.ts';
+import { detailDocuments } from './detail-model.ts';
+export interface GenerateOptions { input: string; target: string; vault?: string; templateRoot?: string; bootstrap?: ReadonlyArray<{path: string; hash: string}>; output?: Awaited<ReturnType<typeof projectFiles>> }
+const generationVersion = 1;
+/** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
+export async function planProject(options: GenerateOptions) {
+  const input = await readCompanionProject(options); const model = projectModel(input.document);
+  const templateRoot = resolve(options.templateRoot ?? fileURLToPath(new URL('../../../',import.meta.url)));
+  const within = relative(templateRoot,input.target);
+  requireValue(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'Use a target outside this framework checkout; do not recursively copy or overwrite the template.');
+  const prefix = options.target === '.' ? '' : options.target+'/';
+  const receiptPath = prefix+'.companion/generation.json';
+  const inspected = await createFilePlan(input.vault,[{path:receiptPath,content:null}]); const receiptBefore = inspected.changes[0]!.beforeHash;
+  for (const file of options.bootstrap ?? []) requireValue(['shell.mjs','package.json','README.md','LICENSE','design/project.json'].includes(file.path) && /^[a-f0-9]{64}$/.test(file.hash), 'Invalid bootstrap ownership.');
+  let previous = new Map<string,{hash:string;ownership:string}>((options.bootstrap ?? []).map(file => [file.path,{hash:file.hash,ownership:'framework'}]));
+  if (receiptBefore) {
+    const raw = await readFile(resolve(input.vault,receiptPath),'utf8'); requireValue(digest(raw) === receiptBefore,'Receipt changed while reading.');
+    const receipt = row(JSON.parse(raw)); requireValue(receipt.version === generationVersion && receipt.projectId === model.project.id,'Receipt belongs to another project/version.');
+    const records = rows(receipt.files,5000);
+    for (const f of records) requireValue(/^[a-f0-9]{64}$/.test(text(f.hash)) && ['managed','extension','framework'].includes(text(f.ownership)), 'Invalid ownership receipt.');
+    requireValue(new Set(records.map(f=>text(f.path).toLowerCase())).size === records.length,'Duplicate receipt paths.');
+    previous = new Map(records.map(f => [text(f.path),{hash:text(f.hash),ownership:text(f.ownership)}]));
+  }
+  const details = detailDocuments(model);
+  const output = options.output ?? await projectFiles(templateRoot,model);
+  requireValue(output.length <= 5000, 'Generated project exceeds the supported ownership inventory.');
+  const candidates = await createFilePlan(input.vault,output.map(e => ({path:prefix+e.path,content:e.content,...(e.encoding ? {encoding:e.encoding} : {})})));
+  const preserved: string[] = []; const conflicts: string[] = []; const entries: Array<{path:string;content:string;encoding?:'base64'}> = [];
+  const ownership: Array<{path:string;hash:string;ownership:string}> = [];
+  for (let i = 0; i < output.length; i++) {
+    const file = output[i]!; const change = candidates.changes[i]!; const old = previous.get(file.path);
+    let content = file.content; let ownedHash = change.afterHash!;
+    if (old && change.beforeHash === null) conflicts.push(file.path+': previously generated file was removed');
+    else if (change.beforeHash !== null && !old) conflicts.push(file.path+': existing unowned file');
+    else if (old && change.beforeHash !== null && change.beforeHash !== old.hash) {
+      if (file.ownership === 'managed' || change.afterHash !== old.hash) conflicts.push(file.path+': customized file conflicts with generated change');
+      else {
+        const bytes = await readFile(resolve(input.vault,prefix+file.path)); requireValue(digest(bytes) === change.beforeHash,'Extension changed while reading.');
+        const kept = preservedText(bytes, file.encoding);
+        if (kept === null) conflicts.push(file.path+': customized file is not UTF-8 text and cannot be preserved byte-for-byte');
+        else { content = kept; preserved.push(file.path); ownedHash = old.hash; }
+      }
+    }
+    entries.push({path:prefix+file.path,content,...(file.encoding ? {encoding:file.encoding} : {})}); ownership.push({path:file.path,hash:ownedHash,ownership:file.ownership});
+  }
+  // Retired files remain tracked, but are never implicitly removed.
+  for (const [path,value] of previous) if (!ownership.some(e => e.path === path)) ownership.push({path,hash:value.hash,ownership:value.ownership});
+  const receipt = {version:generationVersion,projectId:model.project.id,inputHash:digest(input.content.toString('utf8')),files:ownership};
+  entries.push({path:receiptPath,content:json(receipt)});
+  const plan = await createFilePlan(input.vault,entries);
+  requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
+  for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
+  const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
+  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + details.flatMap(d=>d.edges).filter(e=>!e.effect && (e.acceptance || !e.targetSurfaceId)).length,detailDocuments:rows(row(model.document.design).detailDesigns?row(row(model.document.design).detailDesigns).documents:[]).length,publishedRevisions:details.filter(d=>d.id.startsWith('detail-revision-')).length,generatedDetailSurfaces:details.length,detailInteractions:details.reduce((n,d)=>n+d.edges.length,0),warnings:model.warnings}};
+}
+/** Lossy decoding would silently rewrite a developer's bytes; only exact UTF-8 (BOM retained) or base64 survives. */
+function preservedText(bytes: Buffer, encoding?: 'base64'): string | null {
+  if (encoding) return bytes.toString('base64');
+  try { return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); } catch { return null; }
+}
+export async function applyProject(result: Awaited<ReturnType<typeof planProject>>, expectedHash: string) {
+  requireValue(result.hash === expectedHash,'Reviewed plan hash is stale; inspect a fresh plan.');
+  requireValue(result.conflicts.length === 0,'Generation conflicts: '+result.conflicts.join('; '));
+  return applyFilePlan(result.plan);
+}
+export function reviewProject(result: Awaited<ReturnType<typeof planProject>>) {
+  return {mode:'plan',planHash:result.hash,...result.summary,conflicts:result.conflicts,preserved:result.preserved,changes:result.plan.changes.map(({path,status,beforeHash,afterHash})=>({path,status,beforeHash,afterHash}))};
+}

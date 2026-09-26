@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Obsidian (dev:obsidian)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "address": "127.0.0.1",
+      "webRoot": "${workspaceFolder}/.obsidian-sandbox/build",
+      "sourceMaps": true,
+      "resolveSourceMapLocations": null,
+      "sourceMapPathOverrides": {
+        "../../src/*": "${workspaceFolder}/src/*",
+        "../../node_modules/*": "${workspaceFolder}/node_modules/*"
+      },
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "name": "Debug current Vitest file",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--config", "vitest.project.config.mjs", "${relativeFile}"],
+      "autoAttachChildProcesses": true,
+      "smartStep": true,
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    }
+  ]
+}

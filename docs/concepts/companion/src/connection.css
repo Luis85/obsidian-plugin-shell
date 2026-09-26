@@ -1,0 +1,27 @@
+/* Local menu stays at readable viewport scale rather than shrinking with graph zoom. */
+.connection-quick-menu{position:fixed;z-index:1100;width:302px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 34px #0005;padding:6px}
+.connection-menu-head{padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px;overflow-wrap:anywhere}
+.connection-menu-head>span{font-weight:650;display:flex;gap:8px;align-items:center;font-size:13px}.connection-menu-head small{font-size:11px;color:var(--muted)}
+.connection-quick-menu svg{width:16px;height:16px;flex-shrink:0}
+.connection-quick-menu button{display:flex;align-items:center;gap:10px;text-align:left;width:100%;border:0;border-radius:6px;color:var(--text);background:transparent;padding:10px;font:inherit;cursor:pointer;min-height:56px}
+.connection-quick-menu button>span:nth-child(2){display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}.connection-quick-menu strong{font-size:12px;font-weight:600}.connection-quick-menu small{font-size:11px;color:var(--muted);line-height:1.4}
+.connection-quick-menu button:hover,.connection-quick-menu button:focus-visible{background:var(--accent-soft);outline:2px solid var(--accent);outline-offset:-2px}
+.connection-quick-menu button:disabled{opacity:.45;cursor:not-allowed}.connection-menu-icon{color:var(--accent);display:flex}
+.connection-menu-divider{height:1px;background:var(--line);margin:6px}.connection-menu-hint{font-size:11px;color:var(--muted);padding:10px 12px 7px;line-height:1.6}
+.connection-review-strip,.relationship-family{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--surface-2);border-radius:6px;font-size:13px;margin-bottom:18px}
+.connection-review-strip>span{display:flex;align-items:center;gap:7px}.connection-review-strip>span:last-child{margin-left:auto;color:var(--muted);font-size:12px}
+.connection-review-strip svg,.relationship-family svg,.connection-save-note svg,.structure-row svg{width:16px;height:16px;flex-shrink:0}.relationship-family span{color:var(--muted);font-size:12px}
+.connection-kind-note{font-size:13px;padding:15px 0}.connection-kind-note small{display:block;color:var(--muted);font-size:12px;line-height:1.6;margin-top:8px}
+.connection-form-section{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.connection-form-section h3{font-size:14px;margin:0 0 10px}
+.connection-direction span{overflow-wrap:anywhere;min-width:0}.connection-intent-details{margin:16px 0}.connection-intent-details .field{margin-top:14px}
+.connection-save-note{display:flex;gap:8px;align-items:flex-start;margin:16px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.structure-row{display:flex;align-items:center;gap:10px;width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);padding:12px 0;font:inherit;text-align:left;cursor:pointer}
+.structure-row>span{display:flex;flex-direction:column;flex:1;min-width:0;gap:5px}.structure-row strong{font-size:12px;overflow-wrap:anywhere}.structure-row small{font-size:11px;color:var(--muted)}.structural-relationships{border-top:1px solid var(--line);padding-top:18px;margin-top:22px}
+#vf-root .flow-containment{pointer-events:all;opacity:1}#vf-root .flow-containment .vue-flow__edge-path{opacity:.68}#vf-root .flow-containment:hover .vue-flow__edge-path{opacity:1;stroke:var(--accent)}
+#vf-root .flow-containment .flow-edge-label{color:var(--muted);background:var(--bg);font-size:10px}
+#vf-root .flow-edge-label span{font-weight:400;opacity:.85;margin-left:6px}#vf-root .flow-edge-label{max-width:210px}
+#vf-root .flow-port[aria-expanded=true]:after{inset:3px;background:var(--accent)}#vf-root .flow-port:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#vf-root .flow-port:hover:before,#vf-root .flow-port:focus-visible:before{content:'+';position:absolute;inset:0;z-index:2;display:grid;place-items:center;color:var(--bg);font:600 16px/1 system-ui;pointer-events:none}
+#vf-root .flow-port-target:hover:after,#vf-root .flow-port-target:focus-visible:after{background:var(--accent)}
+.card-menu-sections{display:grid;gap:18px}.card-menu-sections h3{font-size:13px;margin-bottom:6px}.card-menu-sections p{font-size:12px;color:var(--muted);margin:0 0 10px}.card-menu-sections .row{gap:8px}
+@media(max-width:650px){.connection-review-strip{align-items:flex-start;flex-direction:column}.connection-review-strip>span:last-child{margin-left:0}.connection-direction{gap:8px}}

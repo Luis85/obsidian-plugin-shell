@@ -1,0 +1,72 @@
+/* Geometry is authoritative for every display, including non-content surfaces. */
+#vf-root .map-node{box-sizing:border-box;height:var(--brick-height)!important;width:244px;padding:0;overflow:visible}
+#vf-root .map-node .flow-node-content{box-sizing:border-box;min-width:0;min-height:0;height:100%;padding:12px 14px;gap:0}
+#vf-root .map-node .map-card-layout{height:86px;min-height:86px;margin:5px 0 8px;overflow:visible;flex:none}
+#vf-root .map-node .surface-layout-svg{display:block;width:100%;height:100%;stroke:none;fill:var(--accent-soft)}
+.surface-layout-svg .outlet{fill:var(--raised);stroke:var(--line);stroke-width:1.2}
+.surface-layout-svg .rail{fill:var(--accent-soft);stroke:var(--accent);stroke-opacity:.3;stroke-width:1}
+#vf-root .map-node .map-card-title{flex:none;line-height:22px;margin:4px 0;max-height:44px}
+#vf-root .map-node .map-card-slug{flex:none;line-height:14px;margin-bottom:2px}
+#vf-root .map-node:not(.brick-page) .flow-card-intent{flex:none;min-height:16px;max-height:32px;font-size:11px;line-height:16px}
+#vf-root .map-node .flow-card-meta{flex:none;margin-top:4px;min-height:22px;font-size:10px;gap:6px;display:flex;align-items:center}
+#vf-root .map-node:not(.brick-page) .flow-card-bindings{margin-top:auto;max-height:21px;min-height:16px;overflow:hidden;font-size:10px}
+#vf-root .map-node.kind-view{border:2px solid var(--map-accent);border-radius:12px;background:var(--surface)}
+#vf-root .map-node.kind-view .flow-node-content{padding:12px;overflow:hidden;gap:3px}
+.container-heading{display:flex;align-items:center;justify-content:space-between;min-height:21px;color:var(--muted);font-size:10px;flex:none}
+.container-heading>span{display:flex;gap:6px;align-items:center}.container-heading svg{width:14px;height:14px;color:var(--accent)}
+.container-heading .ref-card-more{position:static!important;width:22px;height:20px;display:grid;place-items:center}
+.container-identity{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;min-height:18px;flex:none}
+.container-identity code{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;opacity:.75}
+.container-entry{color:var(--accent);font-size:9px;font-weight:600;white-space:nowrap}
+.container-layout{border:1px dashed var(--line);border-radius:6px;padding:7px;background:var(--bg);height:107px;flex:none;margin:6px 0}
+.container-layout-label{display:flex;align-items:center;justify-content:space-between;font-size:10px;line-height:17px;margin-bottom:4px;color:var(--text)}
+.container-layout-label small{font-size:8px;color:var(--muted)}
+#vf-root .map-node .container-layout .surface-layout-svg{height:68px!important;width:100%!important}
+.container-outlet{display:flex;justify-content:space-between;align-items:center;gap:7px;font-size:9px;color:var(--muted);line-height:16px;flex:none}
+.container-outlet span{display:flex;align-items:center;gap:5px}.container-outlet svg{width:12px;height:12px}
+.container-caption{font-size:9px!important;line-height:14px;margin:0!important;color:var(--muted);flex:none}
+.container-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto;min-height:25px;border-top:1px solid var(--line);padding-top:4px}
+.container-footer button{font-size:9px;line-height:16px;border:0;background:transparent;color:var(--accent);padding:2px 0;display:inline-flex;gap:3px;align-items:center}
+.container-footer svg{width:12px;height:12px}.container-footer .flow-collapse{position:static!important;margin-left:auto}
+.container-footer .retained-view-content{font-size:8px;color:var(--muted);margin-left:auto}
+#vf-root .map-node.kind-group{border:1px dashed var(--map-accent);background:var(--panel);border-radius:9px}
+#vf-root .kind-group .flow-node-content{padding:10px 12px;gap:1px}
+#vf-root .kind-group .map-card-title{font-size:15px;line-height:20px;margin:2px 0}
+.navigation-group-body{margin:3px 0;flex:1;min-height:0;overflow:auto;font-size:10px;color:var(--muted)}
+.container-child{display:flex;align-items:center;gap:5px;width:100%;border:0;background:transparent;color:var(--text);font-size:9px;padding:2px 0;text-align:left}
+.container-child span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.container-child svg{width:11px;height:11px}
+.card-layout-name{display:flex;align-items:center;justify-content:center;gap:4px;flex:0 0 20px;font-size:9px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-layout-name svg{width:11px;height:11px}
+#vf-root .brick-page .flow-node-content{padding:0;overflow:hidden}
+/* Each SVG lives in graph coordinates. Only the outer viewport clips to the visible canvas. */
+#vf-root svg.vue-flow__edges{overflow:visible!important;max-width:none;max-height:none}
+#vf-root .vue-flow__edgeupdater{fill:var(--surface);stroke:var(--map-accent);stroke-width:2;cursor:crosshair;pointer-events:all}
+#vf-root .vue-flow__edgeupdater:hover{fill:var(--accent-soft);stroke-width:3}
+#vf-root[data-reconnecting="true"] .flow-port{opacity:1!important;pointer-events:all!important}
+.edge-reconnect-hint{font-size:12px;line-height:1.6;background:var(--panel);padding:10px 12px;border-radius:6px}
+.spatial-zone-heading{top:12px;line-height:18px}
+
+#vf-root .flow-edge-label{max-width:176px;white-space:nowrap}
+#vf-root .flow-edge-label span{max-width:125px;overflow:hidden;text-overflow:ellipsis}
+
+/* Remove the obsolete space reserved for the former below-card toolbar. */
+#vf-root .map-node:not(.brick-page) .flow-node-content{padding:12px 14px}
+#vf-root .map-node .map-card-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:22px}
+#vf-root .map-node.kind-view .flow-node-content{padding:12px;gap:3px}
+#vf-root .map-node.kind-group .flow-node-content{padding:10px 12px;gap:1px}
+#vf-root .map-node .map-node-top{flex:none}
+.container-footer{flex:none}
+.surface-form-layout{max-width:360px;height:140px;margin:12px auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.surface-form-layout .surface-layout-svg{width:100%;height:100%}
+
+.spatial-zone-heading{min-width:0;overflow:hidden;line-height:1.4}.spatial-zone-heading strong{overflow:hidden;text-overflow:ellipsis}.spatial-zone-heading>span{font-size:.85em;flex:none}
+
+body{display:flex;flex-direction:column;height:100dvh}
+.concept-bar,.host-title,.host-status{flex-shrink:0}
+.app-frame{height:auto;flex:1;min-height:0}
+/* Recovery stays visible even in narrow panes; never hide a persistence failure. */
+#storage-recovery{font-size:11px;min-height:26px;border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:2px 8px;white-space:nowrap}
+#storage-recovery[hidden]{display:none}
+.host-status.storage-warning{height:auto;min-height:32px;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:5px 12px}
+.host-status.storage-warning #storage-status{display:block;flex:1;min-width:160px;white-space:normal;line-height:1.5;color:var(--text)}
+@media(max-width:650px){.host-status.storage-warning #status-left,.host-status.storage-warning>span:last-child{display:none}.host-status.storage-warning{font-size:11px;gap:6px}}

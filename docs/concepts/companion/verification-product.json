@@ -1,0 +1,88 @@
+{
+  "schema": "companion-concept-browser/v1",
+  "status": "passed",
+  "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7",
+  "html_bytes": 1119472,
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "playwright": "1.57.0",
+  "chromium_executable": "/usr/bin/chromium",
+  "real_storage_requested": false,
+  "passed": 270,
+  "suites": [
+    {
+      "suite": "containers",
+      "status": "passed",
+      "passed": 64,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/containers/checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    },
+    {
+      "suite": "reference",
+      "status": "passed",
+      "passed": 50,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reference/checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    },
+    {
+      "suite": "reference-graph",
+      "status": "passed",
+      "passed": 8,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reference/graph-checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    },
+    {
+      "suite": "reconciliation",
+      "status": "passed",
+      "passed": 34,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/reconciliation/checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    },
+    {
+      "suite": "unified",
+      "status": "passed",
+      "passed": 67,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/unified/checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    },
+    {
+      "suite": "safety",
+      "status": "passed",
+      "passed": 47,
+      "failed": 0,
+      "exit": 0,
+      "evidence": "reports/concepts/safety/checks.json",
+      "html_sha256": "7c8fe3feaf3acf4cfcbd39de7c61e7c4957c4a2233c7ca94c4f4a8537b17dfb7"
+    }
+  ],
+  "scope": "Concept UI only. Assertion totals include model, geometry and controlled-state fixtures; not native host, actual CLI or release qualification.",
+  "baseline_commit": "b79605eb1f8694770078126b33e79a118448dc8a",
+  "local_browser": "Chromium 144.0.7559.96, Debian Linux headless",
+  "assembly_tests": {
+    "passed": 5,
+    "command": "python3 tests/concepts/companion-assembly.test.py"
+  },
+  "authored_javascript_syntax": {
+    "passed": 48,
+    "node": "22.16.0",
+    "scope": "syntax only; not root template qualification"
+  },
+  "real_storage_local": {
+    "status": "blocked",
+    "reason": "Browser administrator policy: ERR_BLOCKED_BY_ADMINISTRATOR on loopback navigation"
+  },
+  "pinned_analyzer_local": {
+    "status": "not-run",
+    "reason": "Root npm dependencies unavailable in local review environment; CI required"
+  },
+  "ci_status": "See GitHub checks on the final PR head; not claimed from local evidence."
+}

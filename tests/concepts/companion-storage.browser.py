@@ -1,0 +1,148 @@
+"""Real loopback-origin storage checks. These complement, not replace, adapter fixtures.
+Never loads Obsidian, a personal vault or an external site. No production persistence claim.
+"""
+import hashlib
+import json
+import os
+import threading
+import traceback
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+ROOT = Path(__file__).resolve().parents[2]
+HTML = ROOT / 'docs/concepts/companion/index.html'
+OUT = ROOT / 'reports/concepts/storage'
+OUT.mkdir(parents=True, exist_ok=True)
+checks, errors, requests = [], [], []
+fatal = None
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store')
+        self.end_headers()
+        self.wfile.write(HTML.read_bytes())
+
+    def log_message(self, *_args):
+        pass
+
+
+def check(name, value):
+    checks.append({'name': name, 'result': 'passed' if value else 'failed', 'scope': 'real Chromium Storage on loopback HTTP origin'})
+    print(('PASS' if value else 'FAIL'), name, flush=True)
+    assert value, name
+
+
+server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+url = f'http://127.0.0.1:{server.server_port}/'
+try:
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
+        context = browser.new_context(viewport={'width': 1280, 'height': 1000})
+        context.on('request', lambda request: requests.append(request.url) if not request.url.startswith(url) else None)
+        p = context.new_page()
+        p.on('pageerror', lambda e: errors.append(str(e)))
+        p.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
+        p.goto(url)
+        p.locator('main [data-action="sample"]').click()
+        p.locator('#sidebar [data-action="nav"][data-value="entities"]').click()
+        p.locator('[data-action="er-example"]').click()
+        p.evaluate('variantOpen(design().library.find(c=>c.contentSpec).id)')
+        p.locator('#v-id').fill('storage-variant');p.locator('#v-name').fill('Persisted variant')
+        p.locator('#modal [data-action="variant-save"]').click()
+        p.evaluate('design().goal="Real-origin saved outline";designChanged()')
+        p.reload()
+        check('Native browser storage restores committed project data after reload', p.evaluate('!!state.project&&design().goal==="Real-origin saved outline"&&!storageWarning'))
+        check('Real browser storage restores entities and grouped relationships', p.evaluate('semanticModel().entities.length===3&&semanticModel().sections.length===2&&semanticModel().relationships.length===2'))
+        check('Real browser storage restores structured component variants', p.evaluate('design().library.some(c=>c.variantSpecs?.some(v=>v.id==="storage-variant"))'))
+        # A second page reads and normalizes the same state. Reload the first page
+        # before the deliberate conflict so both start from the accepted snapshot.
+        q = context.new_page()
+        q.on('pageerror', lambda e: errors.append(str(e)))
+        q.goto(url)
+        p.reload()
+        q.evaluate('design().goal="Newer second-window edit";designChanged()')
+        p.wait_for_function('() => storageWarning.includes("another window")')
+        p.evaluate('design().goal="First-window unpersisted draft";save()')
+        check('Real storage event stops the stale window from overwriting newer data', p.evaluate('JSON.parse(localStorage.getItem(STORAGE_KEY)).project.design.goal==="Newer second-window edit"'))
+        check('Stale window retains its local session for recovery', p.evaluate('design().goal==="First-window unpersisted draft"') and p.locator('#storage-recovery').is_visible())
+        p.evaluate('showModal("reset")')
+        p.locator('#modal [data-action="reset-confirm"]').click()
+        check('Actual stale-window reset cannot delete the second window saved edit', p.evaluate('JSON.parse(localStorage.getItem(STORAGE_KEY)).project.design.goal==="Newer second-window edit"&&storageWarning.startsWith("Reset blocked")'))
+        p.evaluate('closeModal();exportRetainedBrowserData()')
+        # The textarea is a bounded preview, not the downloadable recovery payload.
+        retained = p.evaluate('localStorage.getItem(STORAGE_KEY)')
+        with p.expect_download() as event:
+            p.locator('#modal [data-action="download-text"]').click()
+        event.value.save_as(str(OUT / 'retained-browser-data.json'))
+        recovered = (OUT / 'retained-browser-data.json').read_text()
+        check('Retained export recovers the actual second-window bytes separately',
+              recovered == retained and json.loads(recovered)['project']['design']['goal'] == 'Newer second-window edit')
+        check('Large recovery export bounds only its preview and retains every saved byte',
+              len(recovered) > 100000 and len(p.locator('#copy-text').input_value()) == 30000
+              and 'full text' in p.locator('label[for=copy-text]').inner_text())
+        p.evaluate('closeModal()')
+        q.close()
+        p.reload()
+        check('Reload adopts the latest retained snapshot and clears the conflict', p.evaluate('design().goal==="Newer second-window edit"&&!storageWarning'))
+        p.locator('[data-action="settings"]').first.click()
+        p.locator('#modal [data-action="project-example"]').click()
+        p.locator('#project-import-confirm').check()
+        p.locator('#modal [data-action="project-import-apply"]').click()
+        portable = p.evaluate('companionJson()')
+        p.reload()
+        check('Full companion import survives real-origin reload without restoring execution trust',
+              p.evaluate('companionJson()') == portable and p.evaluate('!project().trusted && project().phase==="planning"'))
+        p.locator('#sidebar [data-action="nav"][data-value="pages"]').click()
+        detail_owner = p.evaluate('dtStore().documents.find(d=>d.kind==="page").ownerId')
+        p.locator('[data-action="dt-page"][data-value="'+detail_owner+'"]').click()
+        detail_data = p.evaluate('JSON.stringify(dtStore())')
+        p.reload()
+        check('Actual reload from page editor restores all details and safely opens Pages',
+              p.evaluate('state.view==="pages"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(dtStore())') == detail_data)
+        p.locator('#sidebar [data-action="nav"][data-value="components"]').click()
+        p.evaluate('dtOpen("component","project-json-review")')
+        p.reload()
+        check('Actual reload from component editor retains reusable designs and opens the library',
+              p.evaluate('state.view==="components"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(dtStore())') == detail_data)
+        p.locator('[data-action="settings"]').first.click()
+        p.locator('#modal [data-action="project-folders"]').click()
+        p.locator('#f-project-codebase-folder').fill('plugin/src')
+        p.locator('#f-project-tests-folder').fill('plugin/tests')
+        p.locator('#modal [data-action="project-folders-save"]').click()
+        p.reload()
+        check('Custom codebase and tests folders survive actual browser reload',
+              p.evaluate('companionFolders().codebaseFolder==="plugin/src" && companionFolders().testsFolder==="plugin/tests"'))
+        q = context.new_page(); q.on('pageerror', lambda e: errors.append(str(e))); q.goto(url); p.reload()
+        p.locator('[data-action="settings"]').first.click()
+        p.locator('#modal [data-action="project-example"]').click()
+        q.evaluate('design().goal="Newer imported project edit";designChanged()')
+        p.wait_for_function('() => storageWarning.includes("another window")')
+        p.locator('#project-import-confirm').check()
+        p.locator('#modal [data-action="project-import-apply"]').click()
+        check('Actual two-window conflict prevents full-project replacement',
+              p.evaluate('JSON.parse(localStorage.getItem(STORAGE_KEY)).project.design.goal==="Newer imported project edit"'))
+        check('Blocked import retains the stale session for separate recovery',
+              p.evaluate('design().goal!=="Newer imported project edit" && companionFolders().codebaseFolder==="plugin/src"'))
+        q.close(); p.evaluate('modalOriginal=null;closeModal()'); p.reload()
+        p.evaluate('localStorage.setItem("unrelated-review-key","keep");state.settings.remember=false;save()')
+        check('Memory-only preference removes only the concept storage key', p.evaluate('localStorage.getItem(STORAGE_KEY)===null&&localStorage.getItem("unrelated-review-key")==="keep"'))
+        p.evaluate('localStorage.setItem(STORAGE_KEY,"{invalid-json")')
+        p.reload()
+        check('Malformed native storage is preserved rather than silently overwritten', p.evaluate('localStorage.getItem(STORAGE_KEY)==="{invalid-json"&&storageWarning.includes("preserved")'))
+        check('Real-origin checks have no observed runtime errors or external requests', not errors and not requests)
+        browser.close()
+except Exception:
+    fatal = traceback.format_exc()
+    print(fatal)
+finally:
+    server.shutdown()
+    server.server_close()
+    report = {'scope': 'Real loopback HTTP origin; Chromium Storage; no file-origin or native Obsidian claim', 'html_sha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'passed': sum(c['result'] == 'passed' for c in checks), 'failed': sum(c['result'] == 'failed' for c in checks), 'fatal': fatal, 'checks': checks, 'errors': errors, 'requests': requests}
+    (OUT / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
+if fatal or errors or requests or report['failed']:
+    raise SystemExit(1)

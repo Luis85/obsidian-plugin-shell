@@ -1,0 +1,56 @@
+name: Framework CLI and release archive
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: framework-cli-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  archive-consumer:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Put temporary files on a Dev Drive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./.github/scripts/prepare-windows-runner.ps1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Select qualified npm locally and install locked build dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/framework-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/framework-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/framework-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Typecheck and exercise actual CLI, plans, data and archive contracts
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
+          node scripts/quality/check-source.mjs
+      - name: Extract the actual ZIP and build independent generated consumers
+        run: node tests/tooling/framework-journey.mjs
+      - name: Record exact source revision
+        if: always()
+        run: |
+          mkdir -p reports/framework-cli
+          git rev-parse HEAD > reports/framework-cli/source-commit.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: framework-cli-${{ matrix.os }}
+          path: reports/framework-cli/
+          retention-days: 7
+          if-no-files-found: error

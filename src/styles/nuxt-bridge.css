@@ -1,32 +1,32 @@
 /* Native semantic roles, on every owned view or portal root. No host palette override. */
 [data-plugin-ui="plugin-shell"] {
-  --plugin-shell-accent-contrast: var(--text-normal);
-  --ui-primary: color-mix(in srgb, var(--interactive-accent) 70%, var(--plugin-shell-accent-contrast));
-  --ui-success: var(--text-success);
-  --ui-info: var(--text-accent);
-  --ui-warning: var(--text-warning);
-  --ui-error: var(--text-error);
-  --ui-text-dimmed: var(--text-muted);
-  --ui-text-muted: var(--text-muted);
-  --ui-text-toned: var(--text-muted);
-  --ui-text: var(--text-normal);
-  --ui-text-highlighted: var(--text-normal);
-  --ui-text-inverted: var(--text-on-accent);
-  --ui-bg: var(--background-primary);
-  --ui-bg-muted: var(--background-primary-alt);
-  --ui-bg-elevated: var(--background-secondary);
-  --ui-bg-accented: var(--background-modifier-hover);
-  --ui-bg-inverted: var(--text-normal);
-  --ui-border: var(--background-modifier-border);
-  --ui-border-muted: var(--background-modifier-border);
-  --ui-border-accented: var(--background-modifier-border-hover);
-  --ui-border-inverted: var(--text-normal);
-  --ui-radius: var(--radius-s);
-  --ps-font-sans: var(--font-interface);
-  --ps-font-mono: var(--font-monospace);
-  font-family: var(--font-interface);
-  color: var(--text-normal);
-  accent-color: var(--interactive-accent);
+  --plugin-shell-accent-contrast: var(--plugin-shell-text);
+  --ui-primary: color-mix(in srgb, var(--plugin-shell-accent) 70%, var(--plugin-shell-accent-contrast));
+  --ui-success: var(--plugin-shell-success);
+  --ui-info: var(--plugin-shell-link);
+  --ui-warning: var(--plugin-shell-warning);
+  --ui-error: var(--plugin-shell-error);
+  --ui-text-dimmed: var(--plugin-shell-text-muted);
+  --ui-text-muted: var(--plugin-shell-text-muted);
+  --ui-text-toned: var(--plugin-shell-text-muted);
+  --ui-text: var(--plugin-shell-text);
+  --ui-text-highlighted: var(--plugin-shell-text);
+  --ui-text-inverted: var(--plugin-shell-text-on-accent);
+  --ui-bg: var(--plugin-shell-surface);
+  --ui-bg-muted: var(--plugin-shell-surface-muted);
+  --ui-bg-elevated: var(--plugin-shell-surface-raised);
+  --ui-bg-accented: var(--plugin-shell-hover);
+  --ui-bg-inverted: var(--plugin-shell-text);
+  --ui-border: var(--plugin-shell-border);
+  --ui-border-muted: var(--plugin-shell-border);
+  --ui-border-accented: var(--plugin-shell-border-hover);
+  --ui-border-inverted: var(--plugin-shell-text);
+  --ui-radius: var(--plugin-shell-radius-sm);
+  --ps-font-sans: var(--plugin-shell-font-ui);
+  --ps-font-mono: var(--plugin-shell-font-code);
+  font-family: var(--plugin-shell-font-ui);
+  color: var(--plugin-shell-text);
+  accent-color: var(--plugin-shell-accent);
 }
 /* Minimal owned reset. Tailwind Preflight is deliberately not imported. */
 [data-plugin-ui="plugin-shell"] *,
@@ -34,19 +34,19 @@
 [data-plugin-ui="plugin-shell"] *::after { box-sizing: border-box; border-style: solid; border-width: 0; }
 [data-plugin-ui="plugin-shell"] button { background-color: transparent; cursor: pointer; font: inherit; height: auto; box-shadow: none; }
 [data-plugin-ui="plugin-shell"] input { font: inherit; }
-[data-plugin-ui="plugin-shell"] :focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 3px; }
+[data-plugin-ui="plugin-shell"] :focus-visible { outline: 2px solid var(--plugin-shell-accent); outline-offset: 3px; }
 [data-plugin-ui="plugin-shell"] h1,
 [data-plugin-ui="plugin-shell"] h2,
 [data-plugin-ui="plugin-shell"] h3,
 [data-plugin-ui="plugin-shell"] p { margin: 0; }
 [data-plugin-ui="plugin-shell"] h1,
 [data-plugin-ui="plugin-shell"] h2,
-[data-plugin-ui="plugin-shell"] h3 { font-family: var(--font-interface); font-style: normal; font-variant: normal; }
+[data-plugin-ui="plugin-shell"] h3 { font-family: var(--plugin-shell-font-ui); font-style: normal; font-variant: normal; }
 [data-plugin-ui="plugin-shell"] svg { flex-shrink: 0; }
-[data-plugin-ui="plugin-shell"].dark { --plugin-shell-accent-contrast: var(--background-primary); }
+[data-plugin-ui="plugin-shell"].dark { --plugin-shell-accent-contrast: var(--plugin-shell-surface); }
 /* Text uses readable host foregrounds; accent/status fills remain semantic cues. */
 [data-plugin-ui="plugin-shell"] [class~="ps:text-primary"],
-[data-plugin-ui="plugin-shell"] [class~="ps:text-success"] { color: var(--text-normal); }
+[data-plugin-ui="plugin-shell"] [class~="ps:text-success"] { color: var(--plugin-shell-text); }
 @media (forced-colors: active) {
   [data-plugin-ui="plugin-shell"],
   [data-plugin-ui="plugin-shell"] * { color: CanvasText !important; background-color: Canvas !important; border-color: CanvasText !important; }

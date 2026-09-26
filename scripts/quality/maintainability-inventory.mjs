@@ -6,6 +6,10 @@ import { parse } from 'vue/compiler-sfc';
 
 const executable = /\.(?:[cm]?[jt]sx?|vue)$/;
 const nonExecutable = /\.(?:json|css|html|md)$/;
+// The concept uses Python to assemble and test its offline artifact. Keep these
+// exact bytes in the inventory, but never present them as JS/TS/Vue measurements.
+// This is a language classification, not a directory or production exemption.
+const conceptPython = /^(?:scripts|tests)\/concepts\/[^/]+\.py$/;
 export async function maintainabilityInventory(root) {
   const files = [];
   async function visit(path) {
@@ -27,8 +31,10 @@ export async function maintainabilityInventory(root) {
       else if (path.startsWith('tests/') || path.startsWith('harness/')) view = 'fixtures';
       else view = 'tooling';
     }
-    const templateData = path.startsWith('scripts/examples/templates/') && /\.(?:json|css|md)\.txt$/.test(path);
-    if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
+    const python = conceptPython.test(path);
+    // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) are rendered text, not code.
+    const templateData = (path.startsWith('scripts/examples/templates/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^scripts\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
+    if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
     let templateRegion = null;
     if (/\.vue(?:\.txt)?$/.test(path)) {
       const parsed = parse(data.toString('utf8'), { filename: path });
@@ -37,6 +43,7 @@ export async function maintainabilityInventory(root) {
       if (template) templateRegion = { startLine: template.loc.start.line, endLine: template.loc.end.line };
     }
     files.push({ path, sha256: sha256(data), bytes: data.length, physicalLines: physicalLines(data.toString('utf8')), view,
+      ...(python ? { measurement: 'not-measured', reason: 'Python concept tooling; syntax, assembly and browser evidence are separate from JS/TS/Vue metrics.' } : {}),
       templateRegion, extension: template ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });
   }
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);

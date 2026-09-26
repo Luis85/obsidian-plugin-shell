@@ -1,0 +1,223 @@
+"""Reference-led canvas acceptance. Browser concept only, not native Obsidian.
+Uses the exact inline HTML in Chromium. File navigation is not required.
+No install, source generation, network service, or production CLI is executed.
+"""
+import os
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+ROOT=Path(__file__).resolve().parents[2]
+parser=argparse.ArgumentParser()
+parser.add_argument('--browser',default=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'))
+parser.add_argument('--report',default=str(ROOT/'reports/concepts/reference/checks.json'))
+parser.add_argument('--screenshots',default=str(ROOT/'reports/concepts/reference/screenshots'))
+args=parser.parse_args()
+HTML=ROOT/'docs/concepts/companion/index.html'
+shots=Path(args.screenshots);shots.mkdir(parents=True,exist_ok=True)
+checks=[];errors=[];requests=[];fatal=None
+def check(name,condition,scope='browser interaction'):
+    checks.append({'name':name,'result':'passed' if condition else 'failed','scope':scope})
+    assert condition,name
+    print('PASS',name,flush=True)
+def act(p,name,value=None,scope=''):
+    q=f'{scope} [data-action="{name}"]'
+    if value is not None:q+=f'[data-value="{value}"]'
+    if name=='ref-content' and scope=='#ref-node-toolbar' and not p.locator('#ref-node-toolbar').is_visible():
+        p.locator(f'.map-node[data-node="{value}"] .ref-card-open').click()
+    else:p.locator(q.strip()).first.click()
+def js(p,expr):return p.evaluate(expr)
+def header(p,id='node-2'):
+    p.locator(f'.map-node[data-node="{id}"] .map-card-title').click()
+def select(p,id='node-2'):
+    header(p,id)
+    p.wait_for_selector('#ref-node-toolbar:not([hidden])')
+def close(p):
+    act(p,'close',scope='#modal')
+def snap(p,name):
+    p.screenshot(path=str(shots/name))
+def rect_inside(r,w,h):
+    return r is not None and r['x']>=0 and r['y']>=0 and r['x']+r['width']<=w+1 and r['y']+r['height']<=h+1
+
+with sync_playwright() as pw:
+    browser=pw.chromium.launch(executable_path=args.browser,headless=True,args=['--no-sandbox'])
+    def new(width=1600,height=1000,theme='light'):
+        p=browser.new_page(viewport={'width':width,'height':height})
+        p.set_default_timeout(6000)
+        p.on('pageerror',lambda e:errors.append(str(e)))
+        p.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+        p.on('request',lambda r:requests.append(r.url))
+        p.set_content(HTML.read_text())
+        act(p,'sample',scope='main')
+        p.evaluate('(t)=>{state.settings.theme=t;render();}',theme)
+        if width<650:act(p,'menu')
+        act(p,'nav','sitemap','#sidebar')
+        p.wait_for_selector('.vue-flow__node')
+        p.wait_for_timeout(120)
+        return p
+    p=None
+    try:
+        p=new()
+        check('Actual Vue Flow runtime renders all five sample surfaces',p.locator('.vue-flow__node').count()==5 and js(p,'!!flowUi.api'))
+        check('All fifteen instances remain, with view-owned legacy content retained separately',js(p,'design().nodes.reduce((sum,n)=>sum+bricksOf(n).length,0)')==15 and p.locator('.content-brick').count()==12 and p.locator('.retained-view-content').count()==1)
+        check('Canvas-first controls replace detached per-card toolbars',p.locator('.map-node .flow-card-toolbar').count()==0 and p.locator('.ref-main-dock').count()==1)
+        check('Fresh canvas has a plain background and structure panel',js(p,'!canvasPreferences().grid') and p.locator('.outline-tree.ref-panel').is_visible())
+        snap(p,'01-canvas-light.png')
+        select(p)
+        check('Selecting a title exposes the contextual toolbar',p.locator('#ref-node-toolbar').is_visible() and js(p,'designUi.selected==="node-2"'))
+        check('Selection toolbar stays inside the viewport',rect_inside(p.locator('#ref-node-toolbar').bounding_box(),1600,1000))
+        snap(p,'02-selection-toolbar.png')
+        p.locator('#vf-root .vue-flow__pane').click(position={'x':20,'y':140})
+        check('Blank canvas clears selection and toolbar',js(p,'designUi.selected===null') and p.locator('#ref-node-toolbar').is_hidden())
+        p.locator('#map-search').fill('collection')
+        check('Structure search filters to the matching screen',p.locator('.ref-structure-list .outline-node').count()==1)
+        p.locator('#map-search').fill('not-a-screen')
+        check('No-results state is explicit and source is untouched',p.locator('.ref-no-results').is_visible() and js(p,'design().nodes.length===5'))
+        p.locator('#map-search').fill('')
+        act(p,'ref-reveal','node-2')
+        check('Structure selection reveals and focuses the selected screen',js(p,'designUi.selected==="node-2"') and p.locator('#ref-node-toolbar').is_visible())
+        # Real handle menu; old create/connect workflow remains available.
+        p.locator('[data-port-node="node-2"][data-port-side="right"]').click()
+        check('Connector click opens the retained creation menu',p.locator('[role="menu"]').count()>0)
+        p.keyboard.press('Escape')
+        act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        check('Content editing opens a full-page draft with three blocks',p.locator('.ref-write-block').count()==3 and p.locator('.ref-mini-block').count()==3)
+        original=js(p,'JSON.stringify(design().nodes.find(n=>n.id==="node-2"))')
+        library=js(p,'JSON.stringify(design().library)')
+        revision=js(p,'design().revision')
+        history=js(p,'design().history.length')
+        first=js(p,'referenceUi.content.bricks[0].id')
+        second=js(p,'referenceUi.content.bricks[1].id')
+        p.locator('[data-field="ref-block-title"]').first.fill('Find the right note')
+        check('Draft title synchronizes into the miniature page',p.locator('.ref-mini-block').first.inner_text().startswith('Find the right note'))
+        p.locator('[data-field="ref-block-content"]').first.fill('Find notes without losing the current filter.')
+        check('Typing has not changed canonical content',js(p,'JSON.stringify(design().nodes.find(n=>n.id==="node-2"))')==original)
+        act(p,'ref-block-focus',second)
+        check('Miniature selection focuses the corresponding editor',js(p,'document.activeElement.id')=='ref-body-'+second)
+        p.locator('#ref-body-'+second).fill('Compare status, due date and tags.')
+        p.locator('#ref-body-'+second).select_text()
+        act(p,'ref-format',second+':bold')
+        check('Formatting inserts Markdown without HTML execution',p.locator('#ref-body-'+second).input_value()=='**Compare status, due date and tags.**')
+        act(p,'ref-block-down',first)
+        check('Draft reorder changes preview order without changing saved order',js(p,'referenceUi.content.bricks[1].id')==first and js(p,'JSON.stringify(design().nodes.find(n=>n.id==="node-2"))')==original)
+        snap(p,'03-content-editor.png')
+        act(p,'ref-content-save')
+        check('Save commits content and order exactly once',js(p,'design().revision')==revision+1 and js(p,'design().history.length')==history+1)
+        check('Library definitions and versions are unchanged by local writing',js(p,'JSON.stringify(design().library)')==library)
+        act(p,'design-undo')
+        check('One global Undo restores the complete previous screen',js(p,'JSON.stringify(design().nodes.find(n=>n.id==="node-2"))')==original)
+        act(p,'design-redo')
+        check('Redo restores the edited title and order',js(p,'bricksOf(design().nodes.find(n=>n.id==="node-2"))[1].title')=='Find the right note')
+        select(p)
+        act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        p.locator('[data-field="ref-block-content"]').first.fill('Uncommitted edit')
+        close(p)
+        check('Unsaved content uses Keep editing / Discard protection',p.locator('#discard-dialog').is_visible())
+        p.locator('#discard-keep').click()
+        check('Keep editing preserves the pending text',p.locator('[data-field="ref-block-content"]').first.input_value()=='Uncommitted edit')
+        close(p);p.locator('#discard-confirm').click()
+        check('Discard leaves saved content intact',js(p,'bricksOf(design().nodes.find(n=>n.id==="node-2"))[0].content')!='Uncommitted edit')
+        select(p);act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        count=js(p,'bricksOf(design().nodes.find(n=>n.id==="node-2")).length')
+        act(p,'ref-editor-library')
+        check('The editor reuses the managed component library',p.locator('.ref-library-item').count()==js(p,'design().library.filter(c=>c.status!=="deprecated").length'))
+        p.locator('#ref-library-search').fill('content-board')
+        check('Component picker search is local and scoped',p.locator('.ref-library-item').count()==1)
+        act(p,'ref-block-add',scope='.ref-editor-library')
+        check('New component is draft-only until saving',js(p,'referenceUi.content.bricks.length')==count+1 and js(p,'bricksOf(design().nodes.find(n=>n.id==="node-2")).length')==count)
+        act(p,'ref-editor-preview')
+        added=js(p,'referenceUi.content.bricks[referenceUi.content.bricks.length-1].id')
+        # Actual HTML drag event lifecycle inside the writing view.
+        p.locator('.ref-write-column').evaluate('(e)=>e.scrollTop=0')
+        dragged=js(p,'referenceUi.content.bricks[0].id')
+        p.locator('[data-ref-drag="'+dragged+'"]').drag_to(p.locator('.ref-write-block').nth(1).locator('.ref-block-details summary'))
+        check('Content-editor dragging reorders visible blocks only in its pending draft',js(p,'referenceUi.content.bricks[1].id')==dragged and js(p,'bricksOf(design().nodes.find(n=>n.id==="node-2")).length')==count)
+        act(p,'ref-content-save')
+        check('Saved new component has stable ID and library reference',js(p,'(()=>{const b=bricksOf(design().nodes.find(n=>n.id==="node-2")).at(-1);return /^brick-/.test(b.id)&&!!b.definition&&!!b.version})()'))
+        # Typing and formatting are plain text; no script or remote content is inserted.
+        select(p);act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        p.locator('[data-field="ref-block-title"]').first.fill('<img src=x onerror=alert(1)>')
+        p.locator('[data-field="ref-block-content"]').first.fill('<script>alert(1)</script>')
+        check('Untrusted editor text is rendered inert',p.locator('.ref-editor img,.ref-editor script').count()==0)
+        close(p);p.locator('#discard-confirm').click()
+        # Explicit stale-draft control: the concurrent mutation is a named model fixture.
+        select(p);act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        p.locator('[data-field="ref-block-content"]').first.fill('Stale draft')
+        p.evaluate('design().revision++')
+        act(p,'ref-content-save')
+        check('Concurrent source revision prevents draft overwrite','changed outside your draft' in p.locator('#ref-content-error').inner_text(),'controlled concurrent-revision fixture')
+        close(p);p.locator('#discard-confirm').click()
+        fingerprint=js(p,'designFingerprint(design())')
+        nodes=js(p,'JSON.stringify(design().nodes)')
+        rev=js(p,'design().revision')
+        act(p,'ref-section',scope='.ref-main-dock')
+        p.locator('[data-field="ref-section-name"]').fill('Capture & preferences')
+        p.locator('[data-field="ref-section-root"][data-id="node-5"]').check()
+        p.locator('[data-field="ref-section-root"][data-id="node-7"]').check()
+        act(p,'ref-section-save')
+        check('A visual section creates two content-aware drop zones',js(p,'canvasState().sections.length===1') and p.locator('.spatial-zone').count()==2)
+        check('Visual sections do not change structure, revision or source fingerprint',js(p,'JSON.stringify(design().nodes)')==nodes and js(p,'design().revision')==rev and js(p,'designFingerprint(design())')==fingerprint)
+        snap(p,'04-visual-sections.png')
+        act(p,'ref-section','section-1',scope='.ref-structure-sections')
+        p.locator('[data-field="ref-section-name"]').fill('Capture & support')
+        act(p,'ref-section-save')
+        check('Section names remain editable without renaming views','Capture & support' in p.locator('.ref-structure-sections').inner_text() and js(p,'JSON.stringify(design().nodes)')==nodes)
+        act(p,'ref-section','section-1',scope='.ref-structure-sections')
+        act(p,'ref-section-remove')
+        check('Removing a section preserves every screen and component',js(p,'canvasState().sections.length===0') and js(p,'JSON.stringify(design().nodes)')==nodes)
+        act(p,'ref-panel-close',scope='.outline-tree')
+        check('Structure panel can close without changing selection or source',p.locator('.outline-tree').is_hidden() and js(p,'designFingerprint(design())')==fingerprint)
+        # Layout, inspection, preview and editable structural lines remain reachable.
+        p.locator('.ref-arrange-popover summary').click()
+        p.locator('#map-layout').select_option('horizontal')
+        p.wait_for_timeout(100)
+        header(p)
+        act(p,'ref-inspect','node-2',scope='#ref-node-toolbar')
+        check('Detailed inspector is available on demand',p.locator('.node-inspector').is_visible())
+        act(p,'canvas-inspector','intent')
+        check('Intent and goals remain available through the inspector','Find a note' in p.locator('.inspector-body').inner_text())
+        act(p,'ref-panel-close',scope='.node-inspector')
+        act(p,'ref-mode','preview')
+        check('Layout preview retains an explicit route back',p.locator('[data-action="ref-mode"][data-value="map"]').is_visible())
+        act(p,'ref-mode','map')
+        check('Returning from preview remounts real Vue Flow',p.locator('.vue-flow__node').count()==5)
+        act(p,'nav','prds','#sidebar')
+        check('PRD workspace is preserved',p.locator('h1').count()>0 and 'requirements' in p.locator('main').inner_text().lower())
+        act(p,'nav','components','#sidebar')
+        check('Unified component library is preserved',p.locator('[data-field="unified-sort"]').is_visible() and p.locator('[data-action="library-filter"]').count()==0)
+        p.close();p=new(theme='dark')
+        snap(p,'05-canvas-dark.png')
+        check('Dark theme keeps the canvas within the host theme',p.locator('html').get_attribute('data-theme')=='dark')
+        p.close();p=new(390,844,'dark')
+        check('Narrow canvas has no document overflow',js(p,'document.documentElement.scrollWidth<=innerWidth'))
+        check('Narrow primary toolbar stays inside the screen',rect_inside(p.locator('.ref-main-dock').bounding_box(),390,844))
+        check('Narrow zoom controls stay inside the screen',rect_inside(p.locator('.ref-zoom-dock').bounding_box(),390,844))
+        snap(p,'06-narrow-canvas.png')
+        act(p,'canvas-outline')
+        p.locator('#map-search').fill('collection')
+        act(p,'ref-reveal','node-2')
+        act(p,'ref-panel-close',scope='.outline-tree')
+        act(p,'canvas-focus',scope='.ref-zoom-dock')
+        header(p)
+        act(p,'ref-content','node-2',scope='#ref-node-toolbar')
+        check('Narrow content editor fits the viewport',rect_inside(p.locator('#modal').bounding_box(),390,844))
+        check('Narrow content editor preserves three blocks and preview',p.locator('.ref-write-block').count()==3 and p.locator('.ref-mini-block').count()==3)
+        snap(p,'07-narrow-content.png')
+        p.close();p=None
+        check('No observed page or console errors',not errors,'observed runtime output')
+        check('No observed runtime network requests',not requests,'observed network output')
+    except Exception as e:
+        fatal=str(e)
+        if p is not None:
+            try:snap(p,'failure.png')
+            except Exception:pass
+        print('FAILED',fatal,flush=True)
+    finally:
+        browser.close()
+        report={'scope':'Browser concept only; no native/CLI/production qualification','html_sha256':hashlib.sha256(HTML.read_bytes()).hexdigest(),
+                'checks':checks,'passed':sum(c['result']=='passed' for c in checks),'failed':sum(c['result']=='failed' for c in checks),
+                'errors':errors,'requests':requests,'fatal':fatal}
+        output=Path(args.report);output.parent.mkdir(parents=True,exist_ok=True);output.write_text(json.dumps(report,indent=2)+'\n')
+if fatal:raise SystemExit(1)
