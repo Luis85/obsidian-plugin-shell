@@ -14,7 +14,7 @@ const commands = [
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
   ['node_modules/eslint/bin/eslint.js', 'src', '--max-warnings', '0'],
-  ['node_modules/eslint/bin/eslint.js', 'tests/runtime', 'tests/support', 'tests/e2e', 'harness/app', '--max-warnings', '0'],
+  ['node_modules/eslint/bin/eslint.js', 'tests/runtime', 'tests/support', 'tests/e2e', 'tests/obsidian', 'harness/app', '--max-warnings', '0'],
   ['scripts/quality/check-test-quality.mjs'],
   ['scripts/quality/check-repository.mjs'],
   ['scripts/quality/check-source.mjs'],

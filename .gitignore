@@ -16,6 +16,7 @@ node-qualified
 .native-runner/
 .native-cache/
 .nq/
+.obsidian-sandbox/
 
 .shell-build-lock/
 .shell-build-*/

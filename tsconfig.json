@@ -34,6 +34,7 @@
     "tests/runtime/**/*.ts",
     "tests/support/**/*.ts",
     "tests/e2e/**/*.ts",
+    "tests/obsidian/**/*.ts",
     "playwright.config.ts",
     "vitest.config.ts"
   ]

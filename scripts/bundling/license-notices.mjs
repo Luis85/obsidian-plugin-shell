@@ -1,5 +1,15 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+const inlineMap = /(\/\/# sourceMappingURL=data:application\/json;(?:charset=utf-8;)?base64,)([A-Za-z0-9+/=]+)(\s*)$/;
+/** Dev-only inline source maps were generated before the banner; shift them by its lines.
+ * Release builds carry no source map, so their bytes are unchanged. */
+function shiftInlineMap(code, banner) {
+  const match = inlineMap.exec(code);
+  if (!match) return code;
+  const map = JSON.parse(Buffer.from(match[2], 'base64').toString('utf8'));
+  map.mappings = ';'.repeat(banner.split('\n').length - 1) + map.mappings;
+  return code.slice(0, match.index) + match[1] + Buffer.from(JSON.stringify(map)).toString('base64') + match[3];
+}
 /** Retain the licenses of bundled modules in the native JS artifact itself. */
 export function licenseNotices() {
   return {
@@ -30,7 +40,7 @@ export function licenseNotices() {
       }
       if (!notices.length) throw new Error('Bundled dependency license inventory is empty');
       const banner = `/*!\nPlugin Shell — bundled dependency notices\n${notices.join('\n\n----------------------------------------\n\n').replaceAll('*/', '* /')}\n*/\n`;
-      for (const value of Object.values(bundle)) if (value.type === 'chunk' && value.isEntry) value.code = banner + value.code;
+      for (const value of Object.values(bundle)) if (value.type === 'chunk' && value.isEntry) value.code = shiftInlineMap(banner + value.code, banner);
     },
   };
 }
