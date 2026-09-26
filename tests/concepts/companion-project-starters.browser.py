@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import subprocess
+import tempfile
 import traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -27,6 +28,22 @@ def reset():
 def configure(identifier):act('starter-open',identifier)
 def review():act('starter-review',scope='#modal')
 def apply():page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
+def handoff_checks():
+    modal=page.locator('#modal');text=modal.inner_text();commands=js('handoffCommands().map(([,c])=>c)')
+    check('Handoff lists the current journey with the project id',commands==['node shell.mjs new ../capture-tools --from capture-tools.companion.json','cd ../capture-tools','npm ci','npm run check','npm run dev:obsidian'] and all(c in text for c in commands) and 'companion:scaffold' not in text)
+    check('Every command has its own labelled copy button',all(modal.locator('.handoff-commands [data-action="copy"][data-value='+json.dumps(c)+']').get_attribute('aria-label')=='Copy: '+c for c in commands))
+    check('Generated-project scripts and the download are disclosed','scripts of the generated project' in text and 'dist/main.js' in text and modal.locator('.dialog-footer [data-action="project-backup"]').inner_text().strip()=='Download project JSON')
+    prompt=page.locator('#handoff-agent-prompt');ids=js('allRequirements(project().design).map(r=>r.id)');value=prompt.input_value()
+    check('Agent prompt is labelled, read-only and names the plugin and every requirement',page.locator('label[for="handoff-agent-prompt"]').inner_text()=='Agent prompt' and prompt.get_attribute('readonly') is not None and len(ids)>0 and all(i in value for i in ids) and all(t in value for t in ['capture-tools','Capture Tools','AGENTS.md','design/traceability.json','npm run test:tdd','npm run check','--from capture-tools.companion.json']))
+    check('Agent prompt stays short and curated',len(value.splitlines())<=12 and len(value)<=1400)
+    check('Dialog opens with focus on the primary download',js('document.activeElement.dataset.action')=='project-backup')
+    js('window.__copied=[];Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async t=>{window.__copied.push(t)}}});void 0')
+    modal.get_by_role('button',name='Copy agent prompt').click();modal.get_by_role('button',name='Copy all commands').click();modal.get_by_role('button',name='Copy: npm run check',exact=True).click()
+    page.wait_for_function('window.__copied.length===3')
+    check('Copy buttons copy exact text and execute nothing',js('window.__copied')==[value,'\n'.join(commands),'npm run check'] and js('state.runs.length')==0 and modal.locator('#handoff-agent-prompt').count()==1)
+    page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(OUT/'05-handoff-narrow.png'))
+    check('Handoff has no horizontal overflow at phone width',js('(()=>{const d=document.getElementById("modal");return d.scrollWidth<=d.clientWidth+1&&[...d.querySelectorAll(".command")].every(e=>e.getBoundingClientRect().right<=d.getBoundingClientRect().right+1)})()'))
+    page.set_viewport_size({'width':1440,'height':1000})
 
 with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
@@ -66,13 +83,18 @@ with sync_playwright() as pw:
         page.screenshot(path=str(OUT/'02-starter-review.png'));apply()
         check('Confirmation installs exactly one planning project',js('project().id==="capture-tools" && !project().trusted && !project().enabled && project().phase==="planning" && validState(state)'))
         check('Starter provenance survives normal export',js('JSON.parse(companionJson()).notes.some(n=>n.includes("quick-capture @ 1.0.0"))'))
-        original=js('companionProjectToken()');act('starter-generate')
-        check('Handoff uses real plan/hash/apply and qualified project verification',all(t in page.locator('#modal').inner_text() for t in ['companion:scaffold','--apply','npm ci','verify:project','dist/main.js']))
+        original=js('companionProjectToken()');act('starter-generate');handoff_checks()
         with page.expect_download() as event:act('project-backup',scope='#modal')
         download=event.value;download.save_as(str(OUT/'configured-project.json'));exported=(OUT/'configured-project.json').read_text()
         check('Actual handoff download is the complete configured project',json.loads(exported)==json.loads(js('companionJson()')) and download.suggested_filename=='capture-tools.companion.json')
         probe=subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',"import {projectModel} from './scripts/companion/compiler/model.ts';let t='';for await(const c of process.stdin)t+=c;const m=projectModel(JSON.parse(t));console.log(JSON.stringify({id:m.project.id,source:m.sourceRoot,tests:m.testRoot}));"],input=exported,text=True,capture_output=True,cwd=ROOT,timeout=20)
         check('Actual browser download is consumed by the real compiler',probe.returncode==0 and json.loads(probe.stdout)=={'id':'capture-tools','source':'plugin/src/generated','tests':'plugin/tests/project'},'Actual Node compiler subprocess on downloaded bytes')
+        with tempfile.TemporaryDirectory(prefix='companion-handoff-') as scratch:
+            work=Path(scratch)/'framework-checkout';work.mkdir();(work/download.suggested_filename).write_text(exported)
+            shown=page.locator('#modal .handoff-commands code').first.inner_text().split()
+            run=subprocess.run(['node',str(ROOT/'shell.mjs'),*shown[2:],'--json'],text=True,capture_output=True,cwd=work,timeout=120)
+            result=json.loads(run.stdout) if run.returncode==0 else {}
+            check('Displayed new --from command plans the actual download without writing',shown[:3]==['node','shell.mjs','new'] and result.get('status')=='planned' and result['data']['summary']['identity']['id']=='capture-tools' and result['data']['written'] is False and sorted(p.name for p in Path(scratch).iterdir())==['framework-checkout'],'Actual framework CLI subprocess on the downloaded bytes; preview only')
         act('close',scope='#modal');act('nav','starters','#sidebar');configure('blank');review();act('close',scope='#modal')
         check('Cancelled replacement preserves the full current project and files',js('companionProjectToken()')==original)
         # Controlled states are safety negative proofs, not real native operations.

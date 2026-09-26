@@ -11,6 +11,8 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
     const answer = (await prompt('New project directory (outside this checkout, e.g. ../my-plugin): ')).trim();
     requireThat(answer, 'TARGET_REQUIRED', 'Supply the new project directory.'); args[0] = invocationDirectory(answer);
   }
+  // An exported project carries its own identity; --id/--name/--author remain explicit overrides.
+  if (typeof options.from === 'string') return { ...request, args, options };
   if (typeof options.starter !== 'string') {
     write('\nStarters:\n');
     catalog.starters.forEach((entry, index) => write(`  ${String(index + 1).padStart(2)}. ${entry.id.padEnd(22)} ${entry.level.padEnd(10)} ${entry.summary}\n`));
@@ -30,7 +32,7 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
   if (typeof options.name !== 'string') options.name = (await prompt(`Plugin name [${derivedName(options.id)}]: `)).trim() || derivedName(options.id);
   return { ...request, args, options };
 }
-interface Summary { starter: { id: string; title: string; version: string; sha256: string }; identity: { id: string; name: string; author: string }; directory: string; vault: string; files: number; acceptanceTodos: number; warnings: string[] }
+interface Summary { starter?: { id: string; title: string; version: string; sha256: string }; source?: { file: string; sha256: string; schemaVersion: number }; identity: { id: string; name: string; author: string }; directory: string; vault: string; files: number; acceptanceTodos: number; warnings: string[] }
 interface Listing { starters: Array<{ id: string; title: string; category: string; difficulty: string; description: string }> }
 interface Review { planHash: string; summary: Summary; conflicts: string[]; next?: string; nextSteps?: string[]; guide?: { readme: string; implementation: string }; install?: Record<string, { exitCode: number }> }
 /** Returns null when the generic renderer should present the result (failures keep their recovery data). */
@@ -41,7 +43,8 @@ export function starterText(value: Result): string | null {
   if (Array.isArray(data.starters)) return 'Starters (catalog SHA-256 verified):\n' + data.starters.map(entry =>
     `  ${entry.id.padEnd(22)} ${entry.difficulty.padEnd(10)} ${entry.category.padEnd(12)} ${entry.title}: ${entry.description}\n`).join('') + '\nCreate one: node shell.mjs new ../my-plugin --starter <id> [--id my-plugin] [--name "My Plugin"] --yes\n';
   const s = data.summary, lines = [`new: ${value.status}`,
-    `  Starter    ${s.starter.id} (${s.starter.title} ${s.starter.version}, sha256 ${s.starter.sha256.slice(0, 12)})`,
+    s.starter ? `  Starter    ${s.starter.id} (${s.starter.title} ${s.starter.version}, sha256 ${s.starter.sha256.slice(0, 12)})`
+      : `  From       ${s.source?.file} (companion project schema ${s.source?.schemaVersion}, sha256 ${s.source?.sha256.slice(0, 12)})`,
     `  Plugin     ${s.identity.id} "${s.identity.name}"${s.identity.author ? ' by ' + s.identity.author : ''}`,
     `  Directory  ${s.directory}`, `  Files      ${s.files} generated (+ .companion/generation.json ownership receipt)`,
     `  Plan hash  ${data.planHash}`, `  PRD TODOs  ${s.acceptanceTodos} acceptance obligations remain TODO`,

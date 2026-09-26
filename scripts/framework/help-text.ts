@@ -75,7 +75,7 @@ const specific: Record<string, OptionHelp> = {
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
-  new: 'node shell.mjs new <dir> --starter <id> [options]', help: 'node shell.mjs help [command] [--all]',
+  new: 'node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]', help: 'node shell.mjs help [command] [--all]',
   'plan inspect': 'node shell.mjs plan inspect <plan-file>', 'plan apply': 'node shell.mjs plan apply <plan-file> --yes',
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
@@ -93,7 +93,7 @@ const examples: Record<string, string[]> = {
   setup: ['node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
-  new: ['node shell.mjs new --list', 'node shell.mjs new ../quick-capture --starter quick-capture --yes'],
+  new: ['node shell.mjs new --list', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../my-plugin --from my-plugin.companion.json'],
   generate: ['node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs generate --yes'],
   make: ['node shell.mjs make list', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
@@ -126,6 +126,7 @@ export function commandHelp(entry: Command): CommandHelp {
     const doc = { ...(specific[name] ?? { description: '' }) };
     if (name === 'profile' && profiles[entry.id]) { doc.values = profiles[entry.id]; doc.default = profileDefaults[entry.id]; }
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
+    if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
   for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && entry.id === 'dev' ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
