@@ -15,7 +15,8 @@ argument-hint: "[maker] [name] [options]"
 3. Apply exactly that plan: re-run the same command with `--yes` instead of
    `--dry-run` (ask the user first if the plan touches files outside
    `src/features/<name>/`, locales or the bootstrap registry).
-4. Write tests for the new behaviour next to the feature's existing tests (real
+4. The makers write starter tests to `tests/runtime/generated/`; `npm run check`
+   runs them with the product tests. Extend them for the new behaviour (real
    services, exact Markdown/data assertions), then run `npm run check`.
 5. Verify the command or view in Obsidian with `npm run -s dev:obsidian -- --json`
    (the new command id appears in `commands`).

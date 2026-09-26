@@ -23,6 +23,8 @@ export function renderTemplate(text: string, values: Readonly<Record<string, str
     return values[key]!;
   });
 }
+/** Where the framework makers put the tests of generated features; product checks run them too. */
+export const makerTests = 'tests/runtime/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
 export async function devkitFiles(templateRoot: string, m: Model, add: Add): Promise<void> {
   const project = m.project as unknown as Record<string, unknown>;
@@ -50,8 +52,9 @@ const hostBoundary = { name: 'vitest-obsidian-boundary',
 const testKit = { '@test/obsidian': fileURLToPath(new URL('./tests/support/obsidian/index.ts', import.meta.url)) };
 // DOM tests (views, settings, Vue components) start with \`// @vitest-environment happy-dom\`.
 // Reporters are left at Vitest's defaults so coding agents automatically get the concise \`agent\` reporter.
+// \`npm run make\` writes the tests of the features it creates to ${makerTests}.
 export default defineConfig({ ...shared, resolve: { ...shared.resolve, alias: { ...shared.resolve?.alias, ...testKit } }, plugins: [...shared.plugins, hostBoundary], test: {
-  include: [${literal(m.testRoot + '/**/*.test.{ts,mjs}')}], environment: 'node', fileParallelism: false,
+  include: [${literal(m.testRoot + '/**/*.test.{ts,mjs}')}, ${literal(makerTests + '/**/*.test.ts')}], environment: 'node', fileParallelism: false,
 } });
 `;
 }

@@ -12,7 +12,7 @@ import { navigationCode } from './navigation-code.ts';
 import { hostCode } from './host-code.ts';
 import { detailCode } from './detail-code.ts';
 import { styleCode } from './style-code.ts';
-import { devkitFiles, renderTemplate } from './devkit-files.ts';
+import { devkitFiles, makerTests, renderTemplate } from './devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments } from './framework-docs.ts';
 const roots = ['src','scripts','tests','harness','docs','.github'];
 const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','vitest.obsidian.config.mjs','tsconfig.generator.json','tsconfig.framework.json'];
@@ -54,7 +54,7 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   if(fixtures) for(const command of ['plan','apply','reset-plan','reset','serve']) pkg.scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts']}));
+  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts',makerTests+'/**/*.ts']}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,detailDesigns:((m.document.design as Record<string,unknown>).detailDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');

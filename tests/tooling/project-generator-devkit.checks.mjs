@@ -79,6 +79,8 @@ test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the proj
   const config = text('vitest.project.config.mjs');
   assert.match(config, /'@test\/obsidian': fileURLToPath\(new URL\('\.\/tests\/support\/obsidian\/index\.ts'/);
   assert.match(config, /OBSIDIAN_BOUNDARY_REQUIRES_EXPLICIT_TEST_DOUBLE/); assert.doesNotMatch(config, /reporters/);
+  assert.match(config, /include: \["tests\/project\/\*\*\/\*\.test\.\{ts,mjs\}", "tests\/runtime\/generated\/\*\*\/\*\.test\.ts"\]/);
+  assert.ok(JSON.parse(text('tsconfig.project.json')).include.includes('tests/runtime/generated/**/*.ts'));
   const example = text('tests/project/plugin-host.test.ts');
   assert.match(example, /vi\.mock\('obsidian', \(\) => import\('@test\/obsidian'\)\)/); assert.match(example, /from "\.\.\/\.\.\/src\/main\.ts"/);
   assert.match(example, /join\(import\.meta\.dirname, "\.\.\/obsidian\/vault"\)/);
