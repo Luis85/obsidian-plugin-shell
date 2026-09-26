@@ -160,6 +160,7 @@
     "scripts/companion/composition-contract.mjs",
     "scripts/companion/visual/visual-ir.mjs",
     "scripts/companion/visual/visual-mapping.mjs",
+    "scripts/companion/visual/visual-catalog.mjs",
     "docs/concepts/companion/src/composition-model.js",
     "docs/concepts/companion/src/composition-fields.js",
     "docs/concepts/companion/src/composition-preview.js",
