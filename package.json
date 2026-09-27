@@ -125,7 +125,7 @@
     "test:prototypes:python": "node scripts/testing/suites.mjs prototypes:python",
     "prototype:tools": "node .claude/skills/companion-prototype-design/scripts/prototype.mjs",
     "memory": "node --experimental-strip-types scripts/hindsight/cli.ts",
-    "test:memory": "node --experimental-strip-types --test tests/hindsight/*.test.mjs",
+    "test:memory": "node --experimental-strip-types --test tests/hindsight/*.checks.mjs",
     "test:memory:python": "python -m unittest discover -s tests/hindsight -p test_*.py -v",
     "typecheck:memory": "tsc --noEmit --project tsconfig.hindsight.json"
   },

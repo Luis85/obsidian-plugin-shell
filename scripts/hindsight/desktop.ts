@@ -5,7 +5,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { digest, object, requireThat, type Identity, type JsonObject } from './policy.ts';
 import { launcherPlan, stageLauncher, type LauncherPlan } from './launcher.ts';
 import { readText, readConfig, saveText, run, type Paths } from './io.ts';
-export const CLIENTS = ['claude-code', 'codex', 'claude-desktop'] as const;
+const CLIENTS = ['claude-code', 'codex', 'claude-desktop'] as const;
 export type DesktopClient = typeof CLIENTS[number];
 export function desktopClient(value: string): DesktopClient {
   requireThat(CLIENTS.some(c => c === value), 'CLIENT_REQUIRED', 'Choose --client claude-code, codex, or claude-desktop.'); return value as DesktopClient;

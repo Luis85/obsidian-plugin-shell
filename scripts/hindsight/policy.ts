@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 export const PYTHON_VERSION = '0.10.1';
 export const AGENT_VERSION = '0.7.0';
 export const PROFILE = 'obsidian-shell';
-export const AGENTS = ['claude-code', 'codex', 'cursor-cli', 'copilot-cli', 'opencode'] as const;
+const AGENTS = ['claude-code', 'codex', 'cursor-cli', 'copilot-cli', 'opencode'] as const;
 export type Agent = typeof AGENTS[number];
 export type JsonObject = Record<string, unknown>;
 export type GitMode = 'none' | 'message' | 'full';
