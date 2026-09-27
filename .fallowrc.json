@@ -186,7 +186,6 @@
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
-    "scripts/concepts/build-mvp.mjs",
     "scripts/concepts/mvp-bridge.js"
   ],
   "plugins": [
@@ -498,8 +497,13 @@
         ".claude/skills/companion-prototype-design/scripts/prototype.mjs",
         ".claude/skills/companion-prototype-design/scripts/save-concept.mjs",
         ".claude/skills/companion-prototype-design/scripts/validate-project.mjs",
-        ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs"
-      ]
+        ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs",
+        "scripts/concepts/build-mvp.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
+      }
     },
     {
       "name": "prototype-build-tests",
@@ -509,7 +513,11 @@
         ".claude/skills/companion-prototype-design/tests/integration.checks.mjs",
         ".claude/skills/companion-prototype-design/tests/validator.checks.mjs",
         ".claude/skills/companion-prototype-design/tests/worker-output.checks.mjs"
-      ]
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
+      }
     }
   ]
 }

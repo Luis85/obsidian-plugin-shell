@@ -37,8 +37,8 @@ const model = useClickdummy();
 <UApp><div class="clickdummy-preview">
 <header class="clickdummy-toolbar">
   <div><strong>{{ model.name }}</strong><p>Clickdummy · synthetic read data · business writes unavailable</p></div>
-  <label>Browse surfaces<select :value="model.current()" @change="model.open(($event.target as HTMLSelectElement).value)"><option v-for="surface in model.surfaces" :key="surface.id" :value="surface.id">{{ surface.label }}</option></select></label>
-  <label>Preview state<select v-model="model.state.value"><option value="default">Default</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="disabled">Disabled</option></select></label>
+  <div class="clickdummy-control"><label for="clickdummy-surface">Browse surfaces</label><select id="clickdummy-surface" :value="model.current()" @change="model.open(($event.target as HTMLSelectElement).value)"><option v-for="surface in model.surfaces" :key="surface.id" :value="surface.id">{{ surface.label }}</option></select></div>
+  <div class="clickdummy-control"><label for="clickdummy-state">Preview state</label><select id="clickdummy-state" v-model="model.state.value"><option value="default">Default</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="disabled">Disabled</option></select></div>
   <button type="button" @click="model.reset">Reset preview</button><button type="button" @click="model.exportProject">Project JSON</button>
 </header>
 <p class="clickdummy-route">{{ model.route() || 'No authored route for this surface' }}</p>
@@ -128,7 +128,7 @@ window.addEventListener('pagehide', () => { dialogs.slice().reverse().forEach(cl
 @import '../styles/simulated.css';
 body { margin:0; font-family:var(--font-interface,system-ui,sans-serif); background:var(--background-primary); color:var(--text-normal); }
 .clickdummy-toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-bottom:1px solid var(--background-modifier-border); }
-.clickdummy-toolbar div { flex:1 1 250px; } .clickdummy-toolbar p { margin:4px 0; } .clickdummy-toolbar label { display:grid; gap:4px; }
+.clickdummy-toolbar div { flex:1 1 250px; } .clickdummy-toolbar p { margin:4px 0; } .clickdummy-toolbar .clickdummy-control { flex:0 1 250px; display:grid; gap:4px; }
 .clickdummy-toolbar select { max-width:250px; } .clickdummy-route,.clickdummy-error { padding-inline:16px; overflow-wrap:anywhere; }
 .clickdummy-dialog { color:var(--text-normal); background:var(--background-primary); max-width:min(960px,90vw); max-height:90vh; overflow:auto; border:1px solid var(--background-modifier-border); border-radius:12px; }
 .clickdummy-dialog::backdrop { background:rgba(0,0,0,.55); }
