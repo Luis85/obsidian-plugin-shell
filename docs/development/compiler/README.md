@@ -34,7 +34,7 @@ In a click-dummy workspace run `npm run typecheck:clickdummy`, then `npm run bui
 
 ## Compatibility and guarantees
 
-Companion v1–v4 migration and the current v5 contract remain authoritative. The existing visual IR is reused, not duplicated. Independent reference errors carry original JSON pointers; errors detected only after migration identify the normalized document and may name its root instead of inventing a source location.
+The shared authoring reader accepts current Companion v6, including routes and journeys, while retaining v1–v5 normalization and the documented historical migration loss. The checked-in v5 concept/export remains a compatibility fixture, not the latest authoring artifact. See [post-MVP integration](POST-MVP-INTEGRATION.md), the [integrated review](../../product/PR5-PRODUCT-REVIEW.md) and [current evidence](../../testing/PR5-REVIEW-EVIDENCE.md). The existing visual IR is reused, not duplicated. Operation request/result schemas are not the complete public project-v6 schema; that discovery/parity gap remains tracked in the improvement plan. Independent reference errors carry original JSON pointers; errors detected only after migration identify the normalized document and may name its root instead of inventing a source location.
 
 Compilation uses immutable snapshot data. Fingerprints bind compiler version, input bytes, template fingerprint, output kind, paths, ownership and artifact content. Telemetry clocks/run IDs are excluded. These fingerprints are not approvals or signatures. The workspace plan separately binds existing target bytes and the local ownership receipt. Apply reconstructs/checks the reviewed state through the existing file-plan engine.
 

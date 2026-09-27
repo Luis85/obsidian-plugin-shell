@@ -1,5 +1,15 @@
 # Shell Workbench companion concept
 
+## Current integrated authoring entry — 2026-09-27
+
+Read the [PR #5 product review](../../product/PR5-PRODUCT-REVIEW.md), [improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) and [current artifact evidence](../../testing/PR5-REVIEW-EVIDENCE.md). With the qualified checkout dependencies installed, `npm run companion:build` creates `reports/companion-mvp/index.html` and its full v6 `companion-project.json`. That build contains the actual integrated Vue 3/Pinia/Nuxt UI/Vue Flow Journey Lens editor. Open that HTML to review the current authoring milestone.
+
+The checked-in `index.html` and `companion-project.json` linked below remain the explicit **v5 compatibility pair**. Their verified legacy behavior is retained; they are not the latest v6 authoring artifact. v6 is accepted through the shared authoring/compiler adapter, while the old byte-exact inspection contract keeps its historical boundary. The catalog now has **11 starters**, including the [custom-file view and context-menu starters](../../development/native-file-integrations.md).
+
+A [generated clickdummy](../../development/COMPANION-CLICKDUMMY.md) is a separate output built from generated Vue source, not this authoring HTML. Neither artifact is a completed native companion. The current generated receipt still has 31 pending requirements and no native companion acceptance. The sections below describe retained concept capabilities and their dated increments; use the current review to reconcile later integration.
+
+## Retained v5 concept and feature guides
+
 > Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
 > **One vault, one project · Visual page/component editors, Storymaps and full-project JSON v5 — 2026-09-26.** Interactive browser concept, not an installable native Obsidian companion.
 

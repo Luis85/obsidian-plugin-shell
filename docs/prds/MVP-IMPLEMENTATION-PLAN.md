@@ -2,11 +2,13 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Planned; no work package is marked implemented by this document |
+| Status | Original delivery contract retained; current implementation/acceptance status is reconciled in the 2026-09-27 review linked below |
 | Date | 2026-09-27 |
 | Parent PR | #5, `docs/companion-plugin-prd` |
 | Inspected baseline | `6178b1025336941ad6fb10eae4e26930622363f9` |
 | Product contract | [MVP PRD](MVP-JSON-TO-CLICKDUMMY.md) |
+
+> **Current status (2026-09-27):** Read the [integrated review](../product/PR5-PRODUCT-REVIEW.md), [work-package and A01–A20 reconciliation](../product/PR5-IMPROVEMENT-PLAN.md) and [evidence](../testing/PR5-REVIEW-EVIDENCE.md). The original plan below is preserved as the acceptance contract. Later source implements the integrated v6 editor, dedicated compiler, generated clickdummy and concept intake; native companion and complete release-journey acceptance remain open. “Proposed” in the original command table is historical, not proof that the command is still absent.
 
 ## 1. Delivery sequence
 
@@ -227,4 +229,4 @@ Maintain unit/contract tests, filesystem/generator integration, independent gene
 
 Create a dated MVP verification record in `docs/testing` during implementation, containing baseline/final commit and tree, input JSON/schema hashes, kit and output hashes, tool versions, commands, each A01–A20 outcome, warnings, unresolved obligations and explicit approvals for external operations. Link it from the gap register and PR #5.
 
-The current PR contains only the PRD, plan and index. None of the work packages, proposed schemas/commands, end-to-end tests, native conversion or publication are claimed executed by adding these files.
+At this plan's original creation, its PR contained only the PRD, plan and index. That historical documentation-only statement is not the current integrated PR #5 status. Use the dated review and evidence linked above; adding or updating documentation does not itself complete implementation, native acceptance or publication.

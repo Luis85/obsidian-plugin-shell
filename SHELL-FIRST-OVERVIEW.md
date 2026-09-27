@@ -1,63 +1,52 @@
-# Shell-first delivery overview
+# Shell-first product overview
 
-**Implementation checkpoint, 2026-09-25:** The central CLI and compiled-kit workflow are now implemented on PR #18. See [current workflow](docs/development/FRAMEWORK-CLI.md). Remaining task criteria and native/publication gates are not marked complete.
-A reusable TypeScript/Vue/Pinia/Nuxt UI foundation for building Obsidian plugins, with guided setup, shared runtime services, generators and verification tooling.
+**Current integrated review:** 2026-09-27, PR #5 source `ec70e2cee7d8aed6e794a15252b2b9cc48b05dcf`. Read the [product review](docs/product/PR5-PRODUCT-REVIEW.md), [improvement and polishing plan](docs/product/PR5-IMPROVEMENT-PLAN.md) and [evidence record](docs/testing/PR5-REVIEW-EVIDENCE.md). These replace older milestone summaries as the current orientation; dated execution records retain their historical scope.
 
-## Delivery order: shell first
+## Products and delivery order
 
-**First qualify and ship the framework developer kit: shell, project generator and TypeScript CLI. Then convert the evolving companion concept on that shipped framework. Publish the companion last.**
+The **framework developer kit** is the reusable shell, shared TypeScript CLI, compiler, generators, safe lifecycle tooling and distributable archive. A generated consumer owns its source and continues without an installed companion or maintainer checkout. The **companion** is an optional authoring interface and later a demanding native consumer, not a prerequisite to begin development.
 
-| Product | Current boundary | Next priority |
-| --- | --- | --- |
-| Plugin Shell | Implemented foundation with evidence-bound gaps; not fully release-qualified | Complete and verify reusable features for standalone consumers and the future companion. |
-| Shell Workbench companion | Interactive browser concept and proposed product contracts; features are still being developed | Continue concept work, then implement the agreed scope on the qualified shell. |
-| Framework distribution | Planned compiled developer-kit archive; not yet qualified/shipped | SH-022 technical readiness → separately approved SH-034 shipment, before native conversion. |
-| Companion distribution | Future milestone, not an available native installation route | CP-010 → separately authorized PUB tasks; do not delay the first framework release here. |
+The controlling [delivery strategy](docs/product/DELIVERY-STRATEGY.md) remains: framework technical readiness (SH-022) → separately authorized framework shipment (SH-034) → agreed native companion conversion (CX-007/CP-001) → native acceptance (CP-010) → separately authorized companion publication. The complete [JSON-to-clickdummy MVP](docs/prds/MVP-JSON-TO-CLICKDUMMY.md) still includes the complete generated native companion; first framework shipment does not close that larger outcome.
 
-The companion is not feature-complete or an installable native product merely because its browser concept works. This documentation update does not change runtime code, manifests, versions, dependency pins or release authorization.
+No release was present in the repository release listing inspected for this review. Packaging and CLI implementation are real, but the complete published-asset first-use journey and release approvals remain separate.
 
-Start with the [CLI/generator implementation plan](docs/development/FRAMEWORK-CLI-GENERATOR-PLAN.md), [PR #5 framework review](docs/development/PR5-FRAMEWORK-READINESS-REVIEW.md), [delivery strategy](docs/product/DELIVERY-STRATEGY.md), [revised improvement plan](docs/product/COMPANION-IMPROVEMENT-PLAN.md) and [individual task backlog](docs/tasks/README.md). These establish the current execution order; earlier companion-first scheduling recommendations are superseded, not the retained functional requirements.
+## Choose the right entry
 
-## Primary release journey — planned
-
-Download the framework release asset → extract into a new project folder → run the bundled console setup → configure project/plugin → import project JSON → review/generate → develop/build/test → publish the generated plugin with explicit approval → maintain. No installed companion, source checkout or global CLI is required. Direct Node and npm entry points use the same TypeScript-authored operations. The project root need not be an Obsidian vault. This is the SH-023–SH-034 implementation target, not an available release claim.
-
-## Use the shell today
-
-Read the [current template guide](README.md), [framework guide](docs/development/FRAMEWORK-GUIDE.md), [parent PRD](docs/product/PRD.md), [authoring tools](docs/development/AUTHORING-TOOLS.md) and [readiness ledger](docs/development/TEMPLATE-READINESS-LEDGER.md). The root README remains the current operational guide, including lifecycle ownership, recovery contracts and qualification limits. The [original template guide](TEMPLATE-GUIDE.md) remains a historical snapshot; use the current guide for development.
-
-From a dedicated development checkout, use the repository-selected toolchain and exact lockfile:
-
-```sh
-npm run setup
-```
-
-For the existing native setup profile:
-
-```sh
-npm run setup -- --profile native
-```
-
-The existing contained target is `.dev-vault`; open it separately and deliberately enable the generated plugin. Do not use a personal vault for development. Installing assets is not enabling a plugin. Follow [setup and identity](docs/development/SETUP-IDENTITY.md) for plans, profiles, resume and protected data.
-
-| Need | Start here |
+| Goal | Current entry and boundary |
 | --- | --- |
-| Build a business feature | [Feature guide](docs/development/BUILD-A-FEATURE.md), [public authoring API](src/features/api.ts) |
-| Generate source | [Authoring tools](docs/development/AUTHORING-TOOLS.md) |
-| Documents and persistence | [Document creation](docs/architecture/DOCUMENT-CREATION.md), [plugin-data entities](docs/development/PLUGIN-DATA-ENTITIES.md) |
-| Events, feedback and UI | [Events](docs/architecture/EVENT-BUS.md), [errors and notifications](docs/architecture/ERRORS-AND-NOTIFICATIONS.md), [styles](docs/architecture/STYLES.md) |
-| Test and qualify | [Test strategy](docs/testing/TEST-STRATEGY.md), [test concept](docs/testing/TEST-CONCEPT.md), [executable qualification](docs/testing/EXECUTABLE-QUALIFICATION.md) |
+| Develop using the existing shell | [Root README](README.md), [framework guide](docs/development/FRAMEWORK-GUIDE.md), [feature guide](docs/development/BUILD-A-FEATURE.md) |
+| Create an independent consumer | [CLI guide](docs/development/FRAMEWORK-CLI.md); `new` supports reviewed starters or project JSON |
+| Inspect/compile a design | [Dedicated compiler](docs/development/compiler/README.md); generation is separate from dependency installation and acceptance |
+| Use the current companion authoring build | [Companion guide](docs/concepts/companion/README.md); `npm run companion:build` emits the integrated v6 HTML/JSON under `reports/companion-mvp` |
+| Inspect the retained compatibility concept | [Checked-in HTML](docs/concepts/companion/index.html) and adjacent JSON remain the v5 compatibility pair, not the latest v6 artifact |
+| Build a generated offline preview | [Clickdummy guide](docs/development/COMPANION-CLICKDUMMY.md); same generated Vue source, synthetic reads and explicit unavailable business writes |
+| Integrate an approved concept | [Data-only concept intake](docs/development/CONCEPT-INTAKE.md); project/feature/improvement imports are distinct from selected-output compiler generation |
+| Add a custom extension/view or file menu | [Native integration guide](docs/development/native-file-integrations.md); two new starters bring the catalog to 11 |
+| Use optional design/agent tooling | [Prototype tools](docs/development/PROTOTYPE-TOOLING.md), [Hindsight](docs/development/HINDSIGHT.md), [Jev Studio](docs/concepts/jev-prompt-editor/README.md); none is a hidden core prerequisite |
 
-## Explore the companion concept
+## Use the framework today
 
-Open the [concept guide](docs/concepts/companion/README.md) and [interactive HTML](docs/concepts/companion/index.html). This is a browser concept with simulated host and development operations, not the native companion installation.
+Use the repository-selected Node/npm toolchain and exact lockfile. From a prepared checkout, inspect supported starters and a new-project plan before writing:
 
-Its eventual journey remains: install the companion in a dedicated authoring vault, design one project without developer tools, optionally add the shell template, generate reviewed boilerplate, and continue independently through an editor and CLI. That user journey is not the repository's implementation order.
+```sh
+node shell.mjs help
+node shell.mjs new --list
+node shell.mjs new ../my-plugin --starter quick-capture
+node shell.mjs new ../my-plugin --from ./project.companion.json
+```
 
-The [concept roadmap](docs/concepts/companion/ROADMAP.md) keeps feature exploration open. The explicit [native conversion task](docs/tasks/companion/CP-001.md) is blocked until shell readiness, separately authorized framework shipment and an agreed conversion scope are evidenced. It requires genuine reuse of shell services and public APIs, not an iframe, a webview wrapper or a privately copied foundation.
+The target for `new` must be a new or empty independent directory. Review the returned plan before applying it. Installation runs trusted project lifecycle code and is a separate explicit step. Follow the CLI guide for exact flags, existing-project import, conflicts, regeneration and recovery; a future extracted-kit wizard must not be confused with this checkout path.
 
-## Contribute and track progress
+For the existing template itself, `npm run setup` uses reviewed setup and the exact dependencies. The optional `--profile native` installs assets only into the contained development vault. Open it separately and deliberately enable the plugin. Do not use a personal vault; setup does not authorize activation or change Restricted Mode. The [setup guide](docs/development/SETUP-IDENTITY.md) retains identity, protected-data and resume behavior.
 
-Read [AGENTS.md](AGENTS.md) and select a task from [docs/tasks](docs/tasks/README.md). Tasks record dependencies, acceptance criteria and required evidence. A planned task does not mean its entire capability is missing: inspect existing implementation and close only the demonstrated gap.
+## What the evidence supports
 
-Shell work has highest priority. Concept improvements may continue without displacing shell prerequisites. Native conversion follows technical readiness and framework shipment; companion publication follows native qualification and separate owner authorization. Existing release tooling is retained, but this plan neither runs it nor authorizes tags, publishing, directory submissions or permission changes.
+The current hosted authoring artifact has 26 browser assertions. Its independently generated workspace installed, verified and built an offline clickdummy with nine browser assertions. The self-project has 28 surfaces, 23 routes, three journeys, three features, 27 visual page designs and 54 component definitions/revisions.
+
+The generated receipt still reports 31 pending requirements and no native companion acceptance. A buildable scaffold is not a completed editor engine, business implementation or release-ready product. The reviewed broad CI run failed on the unclassified Hindsight Python helper (`METRIC_UNCLASSIFIED_INPUT`); targeted success is not full qualification. Local checks, job-level evidence and unexecuted modes are listed in the evidence record. Repair that integration and inspect the exact current candidate's full workflows before closing a gate.
+
+## Contribute and maintain
+
+Read [AGENTS.md](AGENTS.md), select existing [tasks](docs/tasks/README.md), and use the new review work packages to close demonstrated gaps rather than recreate implemented code. Preserve framework-free domain/application contracts, the dedicated compiler seam, one canonical data owner, safe plans, developer-owned files, scoped styles and all quality thresholds.
+
+The first priority is the demonstrated maintainability-inventory CI blocker. The next priorities are public v6 contract parity, one extracted-kit starter/JSON journey, scoped generation, generated-output fidelity and focused authoring/accessibility. Native companion conversion follows the retained framework gates. Publication always requires a separately qualified candidate and fresh explicit approval; this document grants none.
