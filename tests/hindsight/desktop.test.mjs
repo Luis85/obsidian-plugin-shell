@@ -86,7 +86,9 @@ test('stale desktop plans reject concurrent edits without destroying them', t =>
 });
 test('chat desktop uses a repo-specific server name and explicit root instead of ambiguous cwd', t => {
   const f = fixture(t); const c = connection(f.repo, f.p, 'claude-desktop', false, 'darwin');
-  assert.equal(c.plan.server, `hindsight-${f.repo.bank}`); assert.ok(c.plan.entry.args.includes('--root')); assert.ok(c.plan.entry.args.includes(f.root));
+  assert.equal(c.plan.server, `hindsight-${f.repo.bank}`); assert.ok(c.plan.entry.args.includes('--root'));
+  // repository() canonicalizes the Git path; Windows may normalize drive/path casing.
+  assert.equal(c.plan.entry.args.at(-1), f.repo.root);
   assert.equal(existsSync(c.path), false);
 });
 const python = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
