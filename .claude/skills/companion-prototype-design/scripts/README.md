@@ -93,9 +93,13 @@ checks and state those gaps honestly.
 ## Run helper tests
 
 ```sh
-node --test tests/helpers.test.mjs tests/validator.test.mjs tests/integration.test.mjs
+node --test tests/helpers.checks.mjs tests/validator.checks.mjs tests/integration.checks.mjs tests/worker-output.checks.mjs
 python -B -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 The validator tests use clearly named fake CLI fixtures to test dispatch/failure/byte
 handling. They are **not** evidence that a real project is generator-compatible.
+
+Portable Node helpers use `.checks.mjs`, the repository tooling convention. They are
+executed through `tests/tooling/prototype-helpers.checks.mjs`; `.test.mjs` is reserved
+by the finite baseline inventory. Renaming does not remove any tests or source inputs.

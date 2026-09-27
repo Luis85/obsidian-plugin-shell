@@ -53,3 +53,21 @@ coverage/analyzer gates, real browser/native acceptance, companion round-trip, f
 archive/generator requalification, actual Claude/Codex/image-tool sessions and the eight
 conversation scenarios. Hosted CI after push is independent; no green result is assumed.
 No concept-board images were generated for this skill-maintenance request.
+
+## Subsequent hosted inventory correction
+
+The first v1.2.0 head `e8895ebd3e2a581d2feaa8547a6fa50842f9a0b5` exposed
+`UNREGISTERED_TEST_FILE` in baseline run `36321157416`. The finite baseline treats
+all source-inventoried `.test.mjs` files as its own registered fixtures. Portable skill
+helpers entered that inventory with v1.1.0, so their suffix collided with the baseline.
+
+Rename the four portable Node suites to `.checks.mjs`, the existing tooling convention,
+and update the one repository wrapper, current commands and package inventory. Test
+contents are byte-identical; the wrapper still executes all four in `prototypes`.
+No baseline test IDs, scan coverage, source hashes, thresholds or exclusions are relaxed.
+Historical commands above retain their original names at the tested revision.
+
+After the rename, 18 static skill-contract tests (including a naming regression) and
+four worker-output tests passed locally. Current commands are `node --test
+tests/worker-output.checks.mjs` and the unchanged Python discovery command. Hosted
+baseline/prototype requalification after this correction remains separate.

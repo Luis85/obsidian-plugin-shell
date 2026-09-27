@@ -79,8 +79,8 @@
     },
     {
       "path": "references/concept-boards-verification.md",
-      "bytes": 2993,
-      "sha256": "0892485af1a0db5f07b3252d1c66e19b6cbf81a59d2c5f7d2b2d11646495699f"
+      "bytes": 4111,
+      "sha256": "39b8a32234acd370873c3059a203e8f44c5ecccd6dd40039e3c92d36d6bd1158"
     },
     {
       "path": "references/concept-boards.md",
@@ -124,8 +124,8 @@
     },
     {
       "path": "scripts/README.md",
-      "bytes": 5958,
-      "sha256": "285335615156bd36aa43b91a3896753243cbe62ec8b874a55743663578242e70"
+      "bytes": 6255,
+      "sha256": "7a5fd8c814b91ee52a473ba1d1d1c3984ca8f6f7fe89043ed5fce73ce36c0814"
     },
     {
       "path": "scripts/build-prototype.mjs",
@@ -208,12 +208,12 @@
       "sha256": "728c0c180c9abdcb8e30ff9b8c7bfa46cabb01e484f93f7eb6b9b5485ae540c8"
     },
     {
-      "path": "tests/helpers.test.mjs",
+      "path": "tests/helpers.checks.mjs",
       "bytes": 7999,
       "sha256": "019751847fff14b14c5faad27048b4040e48b39b6945fd4af645176beb7dde30"
     },
     {
-      "path": "tests/integration.test.mjs",
+      "path": "tests/integration.checks.mjs",
       "bytes": 5655,
       "sha256": "af78dea73b00b31ab5c82d2871c7eb44c5ac7748a26fcb0eaf61b3970efbc54b"
     },
@@ -224,16 +224,16 @@
     },
     {
       "path": "tests/test_skill_contract.py",
-      "bytes": 7961,
-      "sha256": "4d347a35cab008cfc102bc18976da9d7cec8148f2fa69e059812dfe1032005ee"
+      "bytes": 8394,
+      "sha256": "c0e54d7c8a7bcf2508abc8276eccb7abf58b434ce064eeb7a6179e11b954e6c3"
     },
     {
-      "path": "tests/validator.test.mjs",
+      "path": "tests/validator.checks.mjs",
       "bytes": 4299,
       "sha256": "da833c86367e65d2d395fc79c2a2a6beada08cdccbef21d91ce4642240383a5c"
     },
     {
-      "path": "tests/worker-output.test.mjs",
+      "path": "tests/worker-output.checks.mjs",
       "bytes": 3218,
       "sha256": "39c63a26dff368d2fb131f5d3b2116f9a49f9979a493665fd7adb147c8c6347e"
     }

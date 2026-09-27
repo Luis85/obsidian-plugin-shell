@@ -142,5 +142,14 @@ class ConceptBoardContractTests(unittest.TestCase):
         self.assertIn('not claims of automated live-agent evaluation', text)
         self.assertEqual(len(re.findall(r'^\d+\.', text, re.M)), 8)
 
+class PortableTestNamingTests(unittest.TestCase):
+    def test_portable_node_tests_use_tooling_names_not_finite_baseline_names(self):
+        tests = list((ROOT/'tests').glob('*.mjs'))
+        self.assertTrue(tests)
+        for path in tests:
+            with self.subTest(path=path.name):
+                self.assertTrue(path.name.endswith('.checks.mjs'))
+        self.assertTrue((ROOT/'tests/worker-output.checks.mjs').is_file())
+
 if __name__ == '__main__':
     unittest.main()
