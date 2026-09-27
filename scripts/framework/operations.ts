@@ -1,5 +1,6 @@
 import { resolve, join } from 'node:path';
 import { inspectStyles } from './styles.ts';
+import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
 import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
@@ -81,7 +82,7 @@ async function readOperation(request: Request, context: Context): Promise<Result
   if (request.command === 'project inspect') {
     const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
     const { model, source } = await inspectDesign(context, input);
-    return result(request.command, { schemaVersion: source.document.schemaVersion, project: model.project, entities: model.entities.length, sources: model.sources.length, screens: model.screens.length, components: model.components.length, acceptanceObligations: model.requirements.length, warnings: model.warnings });
+    return result(request.command, { schemaVersion: source.document.schemaVersion, project: model.project, entities: model.entities.length, sources: model.sources.length, screens: model.screens.length, components: model.components.length, acceptanceObligations: model.requirements.length, warnings: model.warnings, sitemap: inspectSitemapSummary(source.document.design) });
   }
   if (request.command === 'framework status') {
     const kit = await verifyKit(context.root); return result(request.command, { version: kit.version, sourceHash: kit.sourceHash, compilerVersion: kit.compilerVersion, verifiedFiles: kit.files.length, authenticity: 'checksums-are-not-signatures' });
@@ -123,7 +124,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       if (request.options.execute) { const authorization = stringOption(request.options, 'authorize'); requireThat(authorization, 'RELEASE_AUTHORIZATION', 'Public execution requires a separate --authorize digest. --yes is not authorization.'); args.push('--execute', '--authorize', authorization); }
       else requireThat(request.options.authorize === undefined, 'RELEASE_AUTHORIZATION', '--authorize requires --execute.');
       const exit = await runNode(context, 'scripts/release/cli.mjs', args);
-      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'Release output exceeded its bound; do not infer success or retry writes automatically.');
+      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'RELEASE_OUTPUT_LIMIT');
       return result(command, { execution: exit, receipt: JSON.parse(exit.stdout) });
     }
     return await readOperation(request, context);
