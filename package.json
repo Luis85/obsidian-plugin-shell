@@ -120,6 +120,8 @@
     "check": "node shell.mjs check",
     "check:fast": "node shell.mjs check --fast",
     "check:submission": "node shell.mjs check submission",
+    "companion:build": "node scripts/concepts/build-mvp.mjs",
+    "typecheck:authoring": "vue-tsc --noEmit --project tsconfig.authoring.json",
     "prototype:build": "node .claude/skills/companion-prototype-design/scripts/prototype.mjs build",
     "test:prototypes": "node scripts/testing/suites.mjs prototypes",
     "test:prototypes:python": "node scripts/testing/suites.mjs prototypes:python",
