@@ -182,7 +182,8 @@ The report also counts these edge cases, all 0 on real data:
 a design.
 
 An undo entry recorded before the upgrade is refused while visual designs exist, rather than discarding them. A restored
-entry without a legacy store also drops a legacy store inherited from the current design.
+entry that holds visual designs drops a legacy store inherited from the current design; a design that is still legacy
+(for example after a failed startup upgrade) keeps its store across every undo/redo path.
 
 ## Keyboard map
 

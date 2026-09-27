@@ -8,8 +8,8 @@ qualification or release, which remain separate gates.
 
 | Item | Value |
 | --- | --- |
-| Measured code commit | `c4af1bd` (last code change). The later commits change only `docs/` (handoff archive, guides and this receipt). |
-| `docs/concepts/companion/index.html` | 3,362,068 bytes · SHA-256 `50751c8a15ae5d53cb8a68df3a49e240863907db421c71fbb5511caaf5c42b89` |
+| Measured code commit | `c4af1bd` for `npm run verify`, `test:generator` and the generated-output qualification. The fix round (concept `ve-state.js` legacy-store restore rule and its node checks, no generator, contract or `src/` input) was re-verified with the concept checks, the Node browser suite, build `--check`, assembly, `check:analyzer` and `check:source` (see Fix round 1). |
+| `docs/concepts/companion/index.html` | 3,362,339 bytes · SHA-256 `5caecf01eab2b2542c9b606b85c10145fcc9ee304cf5ed48f03c139116b1cd17` (after fix round 1; `c4af1bd` built 3,362,068 bytes · `50751c8a…2b89`) |
 | `docs/concepts/companion/companion-project.json` | 2,242,139 bytes · SHA-256 `030d63a2a56e847de682205916aedb861a8ab0ed2457e4ba66fc2efd5a8c16ab` (v5: 27 pages, 54 components, 0 layouts, 54 revisions, 726 elements) |
 | Platform | Windows 11 Pro 10.0.26200, Git Bash |
 | Node / npm | Node 24.15.0 and npm 12.0.2 locally, **not** the pinned 24.21.0/11.19.1. The generated workspaces were installed with a separately installed npm 11.19.1 (`QUALIFIED_NPM`), as the workflow does. |
@@ -20,13 +20,13 @@ qualification or release, which remain separate gates.
 
 | Command | Exit | Result |
 | --- | --- | --- |
-| `python3 scripts/concepts/build-companion.py --check` | 0 | Verified 3,362,068 bytes, SHA-256 as above |
+| `python3 scripts/concepts/build-companion.py --check` | 0 | Verified 3,362,339 bytes, SHA-256 as above |
 | `python3 -B tests/concepts/companion-assembly.test.py` | 0 | 19 tests OK |
 | `python3 scripts/concepts/export-companion-project.py --check` | 0 | Self-project verified: 2,242,139 bytes (Node Playwright fallback path, see untested scope) |
 | `npm run test:visual` | 0 | 117 tests: 117 pass, 0 fail, 0 skipped, 0 todo |
 | `npm run test:generator` | 0 | 295 tests: 294 pass, 0 fail, 1 skipped (“file loader rejects symlink source”: Windows refused a file symlink), 0 todo |
 | `node tests/concepts/companion-visual-editors.browser.mjs` | 0 | 39/39 named checks passed |
-| `python3 scripts/concepts/run-browser-checks.py --only visual-editors` | 0 | `visual-editors` (runner `node`): passed 39, failed 0. Evidence is bound to `html_sha256` `50751c8a…2b89` |
+| `python3 scripts/concepts/run-browser-checks.py --only visual-editors` | 0 | `visual-editors` (runner `node`): passed 39, failed 0. Evidence is bound to `html_sha256` `5caecf01…cd17` |
 | `python3 scripts/concepts/run-browser-checks.py --real-storage` | 1 | Stops at its first suite, `generator-fixtures` (Python): `ModuleNotFoundError: No module named 'playwright'`. No Python browser suite ran (environment) |
 | `npm run check:analyzer` | 0 | Full fallow dead-code, dependency, cycle, suppression and boundary analysis: zero findings, with the handoff archive present |
 | `npm run check:source` | 0 | 796 inputs within code-line limits; locale parity passed |
@@ -45,7 +45,7 @@ therefore run individually with the same arguments, in the same order and on the
 | Tooling · cli | 1 | 96 tests: 94 pass, **1 fail, 1 cancelled** (see Windows-only failures) |
 | Tooling · generator | 0 | 295: 294 pass, 1 skipped |
 | Tooling · visual | 0 | 117: 117 pass |
-| Tooling · companion | 0 | 188: 187 pass, 1 skipped |
+| Tooling · companion | 0 | 188: 187 pass, 1 skipped (at `c4af1bd`; after fix round 1 `npm run test:companion`: 191, 190 pass, 1 skipped) |
 | Tooling · test-data / makers / release | 0 | 30/30 · 34/34 · 49/49 |
 | Tooling · native | 0 | 81: 79 pass, 2 skipped (`OBSIDIAN-DEV-06`, `-19`, platform watcher cases) |
 | Tooling · setup | 0 | 34: 33 pass, 1 skipped |
@@ -152,3 +152,18 @@ The other counters are `droppedOutlineRefs`, `droppedSlotRules`, `listBindings`,
   - native companion conversion (the concept is a browser prototype);
   - real Nuxt UI rendering inside the concept (only generated projects use Nuxt UI);
   - external-library adapters beyond generated stubs and a fake-adapter lifecycle test.
+
+## Fix round 1 — legacy store kept for a failed upgrade
+
+`veRestoreVisual` dropped an inherited legacy store whenever the restored snapshot had none. For a project whose
+startup upgrade failed (schema 4, the only copy in `detailDesigns`), undo of any unrelated edit deleted that copy and
+persisted the loss. The store is now dropped only when the restored design holds visual designs (upgrade completed);
+a still-legacy design keeps it on every travel path (outline, storymap, visual undo/redo).
+
+| Command | Exit | Result |
+| --- | --- | --- |
+| `node --test tests/tooling/companion-visual-state.checks.mjs` | 0 | 17/17 (RED on the previous source: 6 fail, “legacy store lost after undo”) |
+| `npm run test:companion` | 0 | 191 tests: 190 pass, 1 skipped |
+| `python3 scripts/concepts/build-companion.py --check` · assembly test | 0 · 0 | 3,362,339 bytes `5caecf01…cd17` · 19 tests OK |
+| `node tests/concepts/companion-visual-editors.browser.mjs` · `run-browser-checks.py --only visual-editors` | 0 · 0 | 39/39 · passed 39, bound to `5caecf01…cd17` |
+| `npm run check:analyzer` · `npm run check:source` | 0 · 0 | zero findings · 796 inputs |

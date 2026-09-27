@@ -76,8 +76,10 @@ function veHasContent(store) { return !!store && ['pages', 'components', 'layout
 // Shared by every travel path over the one design history (outline, storymap and visual undo/redo).
 // `candidate` already holds the snapshot's fields; the visual store is restored with a monotonic counter and
 // validated with full references. A legacy snapshot never coexists with visual designs, and is refused rather than
-// discarding visual work. A snapshot without a legacy store restores a design without one: a legacy store the
-// candidate inherited from the previous design is dropped.
+// discarding visual work. Snapshots never carry a legacy store (designSnapshot omits it), and a legacy store cannot be
+// edited (veCommit refuses), so a design that is still legacy keeps the store it inherited from the previous design:
+// a project whose startup upgrade failed never loses its only copy through undo/redo. The inherited store is dropped
+// only when the restored design holds visual designs, i.e. it has completed the upgrade.
 function veRestoreVisual(candidate, snapshot, previous) {
   const counter = previous.visualDesigns?.nextId || 1;
   try {
@@ -85,12 +87,11 @@ function veRestoreVisual(candidate, snapshot, previous) {
       visualAssert(!veHasContent(previous.visualDesigns), 'it predates the upgrade to the page and component editors and would discard their designs.');
       delete candidate.visualDesigns; return candidate;
     }
-    companionDropLegacy(candidate);
     if (snapshot.visualDesigns) candidate.visualDesigns = { ...designCopy(snapshot.visualDesigns), nextId: Math.max(snapshot.visualDesigns.nextId, counter) };
     else if (counter > 1) candidate.visualDesigns = { ...emptyVisualDesigns(), nextId: counter };
     else delete candidate.visualDesigns;
     if (candidate.visualDesigns) {
-      candidate.schema = COMPANION_VERSION;
+      companionDropLegacy(candidate); candidate.schema = COMPANION_VERSION;
       validateVisualDesigns(candidate.visualDesigns, veContext(candidate));
     }
     return candidate;

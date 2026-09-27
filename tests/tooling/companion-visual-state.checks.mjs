@@ -23,7 +23,8 @@ function project() { return host.p; } function ensureProductModel(d) { return d;
 function generationSnapshot(d) { const v = designSnapshot(d); delete v.canvas; delete v.storymaps; if (!veHasContent(v.visualDesigns)) delete v.visualDesigns; return v; }
 function emptySemantic() { return { schema: 1, nextId: 1, entities: [] }; }
 function emptyDataSources() { return { schema: 1, nextId: 1, sources: [], flows: [], positions: {} }; }
-function saveConceptState() { host.saves++; return true; } function save() { host.saves++; } function render() {} function notify(text) { host.notices.push(text); }`;
+function persist() { host.saves++; host.persisted = JSON.stringify(host.p.design); }
+function saveConceptState() { persist(); return true; } function save() { persist(); } function render() {} function notify(text) { host.notices.push(text); }`;
 // Declared after the concept sources, so this reduced gate replaces design-model.js's full structural one.
 const gate = 'function validSavedDesign(d) { return veShape(d) && [...d.history, ...d.future].every(s => veShape(s)); }';
 async function load(extra = '') {
@@ -106,7 +107,7 @@ for (const path of ['outline', 'storymap', 'visual']) {
 
 const legacyStore = JSON.parse(await readFile('tests/fixtures/companion/detail-v4.json', 'utf8')).design.detailDesigns;
 for (const path of ['outline', 'storymap', 'visual']) {
-  test(`[VISUAL-HISTORY] ${path} redo to an entry without a legacy store drops a non-empty legacy store`, async () => {
+  test(`[VISUAL-HISTORY] ${path} redo drops a legacy store reintroduced by time travel only once the design is visual`, async () => {
     const { ctx, host } = await load(), travel = travels(ctx)[path];
     const store = { ...legacyStore, documents: [legacyStore.documents[2]], revisions: [] };
     assert.ok(store.documents.length > 0);
@@ -117,8 +118,26 @@ for (const path of ['outline', 'storymap', 'visual']) {
       travel('undo');
       assert.deepEqual(plain(ctx.design().detailDesigns.documents), store.documents);
       travel('redo');
-      assert.equal(ctx.design().detailDesigns, undefined, `counter ${counter}`);
-      assert.equal(ctx.design().visualDesigns?.nextId, counter > 1 ? counter : undefined);
+      if (counter > 1) { // the restored design holds visual designs: the upgrade is complete, the transient store goes
+        assert.equal(ctx.design().detailDesigns, undefined); assert.equal(ctx.design().visualDesigns.nextId, counter);
+      } else { // still a legacy design: its store is kept (it is upgraded on the next load)
+        assert.deepEqual(plain(ctx.design().detailDesigns), store); assert.equal(ctx.design().visualDesigns, undefined);
+      }
+    }
+  });
+  // A project whose startup upgrade failed stays legacy (schema 4) with its only copy of the detail designs.
+  test(`[VISUAL-HISTORY] ${path} undo and redo of an unrelated edit keep a failed-upgrade project's legacy store`, async () => {
+    const { ctx, host } = await load(), travel = travels(ctx)[path], d = baseDesign(ctx);
+    d.detailDesigns = ctx.designCopy(legacyStore); host.p = { design: d };
+    assert.ok(legacyStore.documents.length > 1);
+    outlineWrite(ctx, x => x.nodes.push(ctx.designCopy(surface('node-2'))));
+    for (const direction of ['undo', 'redo']) {
+      travel(direction);
+      assert.equal(ctx.design().nodes.some(n => n.id === 'node-2'), direction === 'redo', direction);
+      assert.ok(ctx.design().detailDesigns, 'legacy store lost after ' + direction);
+      assert.deepEqual(plain(ctx.design().detailDesigns), legacyStore, direction);
+      assert.equal(ctx.design().visualDesigns, undefined); assert.equal(ctx.design().schema, 4);
+      assert.deepEqual(JSON.parse(host.persisted).detailDesigns, legacyStore, 'persisted after ' + direction);
     }
   });
 }
