@@ -68,7 +68,7 @@ import ${from('presentation/detail-layout.css')};
 const root = document.getElementById('prototype-app');
 if (!root) throw new Error('CLICKDUMMY_ROOT');
 const owner = ${literal(m.project.id)}, name = ${literal(m.project.name)};
-const routes: ReadonlyArray<{surface: string; path: string}> = ${literal((m.document.design as {sitemap?: {routes?: unknown[]}}).sitemap?.routes ?? [])};
+const routes: ReadonlyArray<{id: string; surface: string; path: string}> = ${literal((m.document.design as {sitemap?: {routes?: unknown[]}}).sitemap?.routes ?? [])};
 const state = ref<VisualState>('default'), error = ref('');
 const dialogs: Array<() => void> = []; let stopMain: (() => void) | undefined;
 document.body.classList.add('theme-dark');

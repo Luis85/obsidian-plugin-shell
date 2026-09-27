@@ -58,3 +58,18 @@ test('full generator includes the public command, fixed browser entry and native
   const page=[...files].find(([path])=>path.includes('/screens/')&&files.get(path).content.includes('import Detail'));
   assert.ok(page); assert.match(page[1].content,/:design-state="props.designState"/);
 });
+test('full v6 route declarations compile with stable IDs and parameter paths intact', async t => {
+  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
+  const v6 = migrateAuthoringDocument(document).document;
+  const owner = v6.design.nodes.find(node => node.kind === 'page');
+  v6.design.sitemap = { schema: 1, routes: [{ id: 'route-regression', surface: owner.id, path: '/record/:recordId' }], journeys: [] };
+  const source = emitted(projectModel(v6)).get('harness/prototype/clickdummy.ts').content;
+  const ast = ts.createSourceFile('entry.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const declaration = ast.statements.find(statement => ts.isVariableStatement(statement) &&
+    statement.declarationList.declarations.some(item => item.name.getText(ast) === 'routes'));
+  assert.ok(declaration); assert.match(declaration.getText(ast), /route-regression/);
+  const dir = await mkdtemp(join(tmpdir(), 'clickdummy-route-')); t.after(() => rm(dir, { recursive: true, force: true }));
+  const file = join(dir, 'routes.ts'); await writeFile(file, declaration.getText(ast));
+  const program = ts.createProgram([file], { strict: true, noEmit: true, target: ts.ScriptTarget.ES2022, types: [] });
+  assert.deepEqual(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')), []);
+});
