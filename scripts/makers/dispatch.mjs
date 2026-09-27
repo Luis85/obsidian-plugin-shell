@@ -1,5 +1,5 @@
 import { nativeRecipe } from './native.mjs';
-import { slug, symbol } from './arguments.mjs';
+import { slug, makerSymbol as symbol } from './arguments.mjs';
 import { entityRecipe } from './entities-recipe.mjs';
 import { action } from './primitives.mjs';
 import { component } from './ui.mjs';

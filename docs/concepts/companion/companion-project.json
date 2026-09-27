@@ -189,11 +189,11 @@
         "entry": false,
         "instance": "reuse",
         "patterns": [],
-        "goal": "Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
+        "goal": "Browse eleven built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
         "entity": "",
-        "intent": "Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
+        "intent": "Browse eleven built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
         "goals": [
-          "Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation."
+          "Browse eleven built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation."
         ],
         "components": [
           {
@@ -208,8 +208,8 @@
             "id": "brick-6",
             "kind": "heading",
             "title": "Project Starters",
-            "purpose": "Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
-            "content": "Browse nine built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
+            "purpose": "Browse eleven built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
+            "content": "Browse eleven built-in JSON starters, inspect included scope and remaining implementation, configure identity, and review atomic project replacement before export and generation.",
             "region": "content",
             "component": null,
             "definition": "content-heading",
@@ -3640,7 +3640,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Browse and filter nine offline JSON starters including a minimal runnable Start Blank. Inspect scope, configure identity and folders, review the exact project, explicitly confirm replacement, and preserve the old project on invalid input, stale state or failed persistence. Templates remain immutable and exported projects stay generator-compatible.",
+            "acceptance": "Browse and filter eleven offline JSON starters including a minimal runnable Start Blank. Inspect scope, configure identity and folders, review the exact project, explicitly confirm replacement, and preserve the old project on invalid input, stale state or failed persistence. Templates remain immutable and exported projects stay generator-compatible.",
             "nodes": [
               "node-5"
             ],

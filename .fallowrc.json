@@ -448,6 +448,10 @@
   ],
   "usedClassMembers": [
     {
+      "extends": "TextFileView",
+      "members": ["getIcon", "getViewData", "setViewData", "save", "disposeNativeView"]
+    },
+    {
       "extends": "PluginSettingTab",
       "members": [
         "getSettingDefinitions",
