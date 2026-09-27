@@ -1,6 +1,8 @@
 import { resolve, join } from 'node:path';
 import { buildClickdummy } from './clickdummy.ts';
 import { inspectStyles } from './styles.ts';
+import { inspectConcept } from './concepts.ts';
+import { conceptSchema } from '../companion/concepts/contract.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
 import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
@@ -72,6 +74,8 @@ async function processOperation(request: Request, context: Context): Promise<Res
   return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
 }
 async function readOperation(request: Request, context: Context): Promise<Result> {
+  if (request.command === 'concept schema') return result(request.command, conceptSchema());
+  if (request.command === 'concept inspect') return result(request.command, await inspectConcept(request, context));
   if (request.command === 'version') {
     const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
     const { readJson } = await import('./files.ts');
