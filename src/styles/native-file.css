@@ -1,0 +1,21 @@
+/* Native file editor: existing Obsidian theme variables, no host-wide selectors. */
+:where(.plugin-shell).shell-native-file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-2);
+  padding: var(--size-4-4);
+  min-width: 0;
+}
+:where(.plugin-shell).shell-native-file textarea {
+  display: block;
+  width: 100%;
+  min-height: 16rem;
+  flex: 1;
+  resize: vertical;
+  font-family: var(--font-monospace);
+  white-space: pre;
+  tab-size: 2;
+}
+:where(.plugin-shell).shell-native-file [role='status'] {
+  min-height: 1.5em;
+}

@@ -15,16 +15,16 @@ export function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) &&
     (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null);
 }
-export function object(value: unknown, keys: string[], required = keys): asserts value is Record<string, unknown> {
+export function sitemapObject(value: unknown, keys: string[], required = keys): asserts value is Record<string, unknown> {
   requireSitemap(record(value) && Object.keys(value).every(key => keys.includes(key)) &&
     required.every(key => Object.hasOwn(value, key)), 'SITEMAP_SHAPE', 'Unexpected or missing record fields.');
 }
-export function text(value: unknown, limit = 120, nonempty = true): asserts value is string {
+export function sitemapText(value: unknown, limit = 120, nonempty = true): asserts value is string {
   requireSitemap(typeof value === 'string' && value.length <= limit && (!nonempty || value.trim().length > 0),
     'SITEMAP_SHAPE', 'Expected bounded text.');
 }
 export function id(value: unknown): asserts value is string {
-  text(value);
+  sitemapText(value);
   requireSitemap(!['__proto__', 'constructor', 'prototype'].includes(value) && !/[\u0000-\u001f\u007f]/u.test(value),
     'SITEMAP_SHAPE', 'Unsafe identity.');
 }

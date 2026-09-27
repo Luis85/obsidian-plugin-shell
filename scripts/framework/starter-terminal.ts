@@ -30,6 +30,15 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
     requireThat(typeof options.id === 'string', 'INVALID_PLUGIN_ID', 'No valid plugin ID was entered.');
   }
   if (typeof options.name !== 'string') options.name = (await prompt(`Plugin name [${derivedName(options.id)}]: `)).trim() || derivedName(options.id);
+  const native = catalog.starters.find(entry => entry.id === options.starter)?.document.design?.nativeIntegrations;
+  if (native?.fileTypes.length === 1 && typeof options.extension !== 'string') {
+    const fallback = native.fileTypes[0]!.extension;
+    options.extension = (await prompt(`Custom extension without dot [${fallback}]: `)).trim() || fallback;
+  }
+  if (native?.contextMenus.length === 1 && typeof options.extensions !== 'string') {
+    const fallback = native.contextMenus[0]!.extensions.join(',');
+    options.extensions = (await prompt(`File menu extension filters [${fallback}]: `)).trim() || fallback;
+  }
   return { ...request, args, options };
 }
 interface Summary { starter?: { id: string; title: string; version: string; sha256: string }; source?: { file: string; sha256: string; schemaVersion: number }; identity: { id: string; name: string; author: string }; directory: string; vault: string; files: number; acceptanceTodos: number; warnings: string[] }

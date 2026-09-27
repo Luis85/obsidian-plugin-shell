@@ -81,10 +81,11 @@ run; the selected `verify` gate cannot certify those scopes.
 
 ## Actions and manual acceptance
 
-The topic-branch **Candidate qualification** workflow runs the same fixed-source
+The **Candidate qualification** workflow (pushes to `main` that change execution
+inputs, or manual dispatch) runs the same fixed-source
 rehearsal before browser/native checks. Its recovery archive stays under ignored
 `reports/`, so source cleanliness remains an actual gate. The retained packet and
-subsequent unchanged-asset evidence are uploaded together. This proposal-level
+subsequent unchanged-asset evidence are uploaded together. This post-merge
 qualification has read-only permissions and cannot publish or create a tag.
 
 After merge, **Release rehearsal** accepts a full source SHA and stable version.

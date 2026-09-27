@@ -1,5 +1,5 @@
 import { templates } from './templates.mjs';
-import { symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from './arguments.mjs';
 import { readRegistry, extendRegistry, validateRegistrySource } from './registry.mjs';
 import { generatedTest } from './primitives.mjs';
 

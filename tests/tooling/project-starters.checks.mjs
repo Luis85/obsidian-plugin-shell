@@ -13,11 +13,11 @@ import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs'
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
 // Page counts equal the page documents each starter held before the visual-design migration.
-const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4};
+const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
-test('nine original data-only starters include a genuinely domain-free minimal shell',()=>{
- assert.equal(catalog.starters.length,9);assert.equal(validateStarterCatalog(catalog),catalog);
+test('eleven original data-only starters include a genuinely domain-free minimal shell',()=>{
+ assert.equal(catalog.starters.length,11);assert.equal(validateStarterCatalog(catalog),catalog);
  const blank=catalog.starters.find(s=>s.id==='blank').document.design;
  assert.equal(blank.nodes.length,2);assert.equal(blank.nodes[0].kind,'view');assert.equal(blank.nodes[1].kind,'settings');
  assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);

@@ -24,7 +24,7 @@
       "id": "CONSUMER-REMOVAL",
       "requirements": ["EXA-05", "TPL-04", "EVT-15"],
       "relatedAcceptance": ["AC-24", "AC-43"],
-      "files": ["tests/tooling/example-removal.checks.mjs", ".github/workflows/template-authoring.yml"],
+      "files": ["tests/tooling/example-removal.checks.mjs", ".github/workflows/ci.yml"],
       "modes": ["tooling", "generated-consumer", "source-archive-dry-run"],
       "scope": "Reviewed exact example ownership; distinct identity with consumer edits, custom maker, generated event/listener/plugin-data entity, full verification before/after removal and independent extension afterward"
     },

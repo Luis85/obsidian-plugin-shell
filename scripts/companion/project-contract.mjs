@@ -1,3 +1,4 @@
+import { validateNativeIntegrations } from './native-contract.mjs';
 // Shared by the standalone concept and read-only shell entrypoint. No host I/O.
 import { validateDesignSystem } from './design-system-contract.mjs';
 import { validateStorymaps } from './storymap-contract.mjs';
@@ -9,7 +10,7 @@ export const COMPANION_VERSION = 5;
 export const COMPANION_MAX_BYTES = 4_000_000;
 export const COMPANION_DEFAULT_FOLDERS = Object.freeze({ codebaseFolder: 'src', testsFolder: 'tests' });
 const companionDesignKeys = ['schema', 'blueprint', 'goal', 'platform', 'nodes', 'links', 'nextId',
-  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns', 'visualDesigns'];
+  'library', 'prds', 'librarySchema', 'canvas', 'semantic', 'dataSources', 'designSystem', 'storymaps', 'detailDesigns', 'visualDesigns', 'nativeIntegrations'];
 
 function companionRequire(condition, message) {
   if (!condition) throw new Error('COMPANION_INVALID: ' + message);
@@ -59,6 +60,7 @@ function validateCompanionIdentity(value) {
   companionRequire(companionText(value.version, 40) && /^\d+\.\d+\.\d+$/.test(value.version), 'Expected an x.y.z project version.');
 }
 function validateCompanionDesign(value, pluginId) {
+  validateNativeIntegrations(value?.nativeIntegrations);
   validateDesignSystem(value?.designSystem, pluginId);
   if (value?.detailDesigns !== undefined) validateDetailDesigns(value.detailDesigns);
   if (value?.storymaps !== undefined) validateStorymaps(value.storymaps);

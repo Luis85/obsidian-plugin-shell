@@ -1,7 +1,7 @@
 import type { SitemapCommand, SitemapDesign } from './model.ts';
 import type { SitemapChange, SitemapHistory, SitemapChangeResult } from './transaction.ts';
 import { applySitemapChange, planSitemapChange, travelSitemapHistory } from './transaction.ts';
-import { assertJson, canonicalKey, object, record, requireSitemap, text } from './safety.ts';
+import { assertJson, canonicalKey, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
 import { validateSitemapModel } from './validate.ts';
 
 export interface SitemapSnapshot<T extends SitemapDesign> {

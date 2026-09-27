@@ -145,6 +145,7 @@
     "docs/concepts/companion/src/ve.css",
     "docs/concepts/companion/src/project-transfer.js",
     "docs/concepts/companion/src/companion-project.js",
+    "scripts/companion/native-contract.mjs",
     "scripts/companion/project-contract.mjs",
     "shell.mjs",
     "scripts/companion/runtime/operation.ts",
@@ -212,6 +213,7 @@
           "scripts/companion/sitemap/**",
           "scripts/companion/visual/**",
           "scripts/companion/project-contract.mjs",
+          "scripts/companion/native-contract.mjs",
           "scripts/companion/design-system-contract.mjs",
           "scripts/companion/design-system-roles.mjs",
           "scripts/companion/storymap-contract.mjs",
@@ -472,6 +474,10 @@
     "./vendor/obsidian.css"
   ],
   "usedClassMembers": [
+    {
+      "extends": "TextFileView",
+      "members": ["getIcon", "getViewData", "setViewData", "save", "disposeNativeView"]
+    },
     {
       "extends": "PluginSettingTab",
       "members": [

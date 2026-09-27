@@ -4,8 +4,8 @@ import { object } from './configuration.ts';
 import { hash } from './files.ts';
 import { requireThat } from './contracts.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
-const excludedRoots = ['docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'scripts/concepts/', 'tests/concepts/'];
-const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs']);
+const excludedRoots = ['docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
+const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs']);
 export function included(path: string): boolean {
   return !excludedFiles.has(path) && !excludedRoots.some(prefix => path.startsWith(prefix));
 }
