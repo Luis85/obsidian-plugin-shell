@@ -134,6 +134,8 @@ export async function removeMakerExamples(root) {
 export async function copyMakerSuite(root) {
   for (const path of [
     'scripts/makers',
+    'scripts/companion/native-boilerplate.mjs',
+    'scripts/companion/native-contract.mjs',
     'scripts/events',
     'scripts/examples/plan.mjs',
     'scripts/shared',
