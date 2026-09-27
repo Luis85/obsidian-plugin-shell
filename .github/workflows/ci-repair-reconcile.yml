@@ -1,0 +1,34 @@
+name: Reconcile verified CI repair trees
+on:
+  push:
+    branches: [chore/ci-repair-snapshots-20260927]
+    paths: [.github/workflows/ci-repair-reconcile.yml]
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    if: github.repository == 'Luis85/obsidian-plugin-shell'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 371146f6b7c1535251ddc55aa335b896e12b3501
+          fetch-depth: 0
+      - name: Reproduce exact locally qualified trees without executing candidate code
+        env:
+          CI_REPAIR_PUBLISH: 'yes'
+        run: |
+          test "$(git hash-object .ci-repair/reconcile/apply.py)" = 0c01204afc3a96a284e5f1e784714e0f2d9ad0c0
+          git config user.name 'Luis Mendez'
+          git config user.email '3923861+Luis85@users.noreply.github.com'
+          python3 .ci-repair/reconcile/apply.py
+      - name: Retain exact branch candidate identities
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: reconciled-ci-repair-identities
+          path: ${{ runner.temp }}/ci-reconciled.json
+          if-no-files-found: error
+          retention-days: 1
