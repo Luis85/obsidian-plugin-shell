@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument, authoringDesignKey } from '../../scripts/companion/authoring-contract.ts';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 
 const path = new URL('../../docs/concepts/companion/companion-project.json', import.meta.url);
@@ -52,4 +52,9 @@ test('legacy migration preserves its explicit loss report rather than inventing 
 test('import bounds apply to exact UTF-8 input including whitespace', () => {
   assert.throws(() => parseAuthoringDocument(' '.repeat(4_000_001)), /limit|bound|4 MB/i);
   assert.throws(() => parseAuthoringDocument('null'));
+});
+
+test('authoring design keys accept exactly the extensions in addition to retained subsystem names', () => {
+  for (const key of ['nodes','links','visualDesigns','sitemap','features']) assert.equal(authoringDesignKey(key),true);
+  for (const key of ['run','commands','__proto__','pages']) assert.equal(authoringDesignKey(key),false);
 });

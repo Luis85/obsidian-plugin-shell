@@ -187,7 +187,6 @@
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
     "scripts/concepts/build-mvp.mjs",
-    "docs/concepts/companion/editor/main.ts",
     "scripts/concepts/mvp-bridge.js"
   ],
   "plugins": [
