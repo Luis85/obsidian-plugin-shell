@@ -1,0 +1,70 @@
+name: Publish verified memory registrations
+on:
+  push:
+    branches: [chore/ci-stack-reconcile-20260927]
+    paths: [.github/workflows/memory-registration-sync.yml]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: bb218e900c0762e789297e084473c401546f255b
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Reproduce the locally tested semantic-preserving registration move
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          p = Path('package.json'); before = p.read_text(); data = json.loads(before)
+          names = ['memory','test:memory','test:memory:python','typecheck:memory']
+          moved, rest = [], []
+          for line in before.splitlines(True):
+              if any(line.startswith('    '+json.dumps(name)+':') for name in names):
+                  moved.append(line.rstrip().rstrip(',')+',\n')
+              else:
+                  rest.append(line)
+          assert len(moved) == 4
+          text = ''.join(rest).replace('"prototype:tools": "node .claude/skills/companion-prototype-design/scripts/prototype.mjs",','"prototype:tools": "node .claude/skills/companion-prototype-design/scripts/prototype.mjs"')
+          text = text.replace('  "scripts": {\n','  "scripts": {\n'+''.join(moved))
+          assert json.loads(text) == data
+          p.write_text(text)
+          p = Path('tests/suites.json'); before = p.read_text(); data = json.loads(before)
+          start = before.index('    {\n      "name": "memory",')
+          end = before.index('    {\n      "name": "prototypes",', start)
+          block = before[start:end]; text = before[:start]+before[end:]
+          anchor = '    {\n      "name": "native",'; assert text.count(anchor) == 1
+          text = text.replace(anchor, block+anchor)
+          result = json.loads(text)
+          assert {s['name']:s for s in result['suites']} == {s['name']:s for s in data['suites']}
+          result['suites'] = data['suites']; assert result == data
+          p.write_text(text)
+          PY
+          git add -- package.json tests/suites.json
+          git diff --cached --check
+          test "$(git write-tree)" = 7f1ad3d1ecbdddece8916a7d86026bdd308149fb
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(ci): keep memory registrations independent of the compiler stack'
+          git show -s --format='%H%n%T%n%P'
+          # Both actual merge orders must produce the independently checked tree.
+          test "$(git merge-tree --write-tree HEAD 0154a00a8acc11df49f194f1d56ed6afbd4b81e4)" = 3b74116d0a892d21661da8e01871b2e4d55b50c3
+          test "$(git merge-tree --write-tree 0154a00a8acc11df49f194f1d56ed6afbd4b81e4 HEAD)" = 3b74116d0a892d21661da8e01871b2e4d55b50c3
+      - name: Advance only the isolated candidate, never a PR or its base
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EXPECTED=bb218e900c0762e789297e084473c401546f255b
+          test "$(git ls-remote origin refs/heads/feat/hindsight-opt-in-memory | cut -f1)" = "$EXPECTED"
+          test "$(git ls-remote origin refs/heads/chore/ci-memory-candidate-20260927 | cut -f1)" = "$EXPECTED"
+          git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin HEAD:refs/heads/chore/ci-memory-candidate-20260927
