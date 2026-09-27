@@ -1,6 +1,6 @@
 import ts from 'typescript';
 /** Replace named functions in a trusted assembled fixture, never execute authored project text. */
-export function composeMvp(base,bundle,css,bridge) {
+export function composeMvp(base,bundle,css,bridge,graphStyle) {
   const markers=[...base.matchAll(/<script>([\s\S]*?)<\/script>/g)].filter(m=>m[1].includes('function render()'));
   if(markers.length!==1)throw Error('MVP_ASSEMBLY: Expected one legacy companion program.');
   const marker=markers[0];let program=marker[1];
@@ -32,7 +32,7 @@ export function composeMvp(base,bundle,css,bridge) {
   once('blueprint:clean.blueprint,goal:clean.goal','sitemap:clean.sitemap,features:clean.features,blueprint:clean.blueprint,goal:clean.goal');
   once('schema:clean.visualDesigns?COMPANION_VERSION:4','schema:COMPANION_VERSION');
   once('function setView(view){','function setView(view){if(jmEditor&&!jmEditor.canLeave())return;');
-  once('function render(){','function render(){jmUnmount();');
+  once('function render(){','function render(){if(jmEditor&&!jmEditor.canLeave())return;jmUnmount();');
   once('restoreUiFocus(uiFocus);','restoreUiFocus(uiFocus);jmMount();');
   once("  return p;\n}\nfunction companionExampleRequirements", "  return jmSeed(p);\n}\nfunction companionExampleRequirements");
   // Functions are hoisted; state must be initialized before the preserved startup restore/render.
@@ -41,8 +41,8 @@ export function composeMvp(base,bundle,css,bridge) {
   const script='<script data-journey-runtime>'+safe(bundle)+'</script>\n<script>'+safe(program)+'</script>';
   let html=base.slice(0,marker.index)+script+base.slice(marker.index+marker[0].length);
   // The scoped graph stylesheet is already verified by the old assembly; reuse its namespace for this island.
-  const existingStyle=base.match(/<style>([\s\S]*?)<\/style>/)?.[1]??'';
-  const graphCss=existingStyle.split('\n').filter(line=>line.includes('#vf-root')).join('\n').replaceAll('#vf-root','#jm-root');
+  if(typeof graphStyle!=='string'||!graphStyle.includes('#vf-root .vue-flow__container {'))throw Error('MVP_ASSEMBLY: Missing complete scoped Vue Flow stylesheet.');
+  const graphCss=graphStyle.replaceAll('#vf-root','#jm-root');
   html=html.replace('</head>','<style data-journey-style>'+css+'\n'+graphCss+'</style></head>');
   return html;
 }

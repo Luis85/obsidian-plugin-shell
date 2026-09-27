@@ -16,11 +16,11 @@ await build({...config,configFile:false,build:{...config.build,outDir:join(out,'
   lib:{entry:'docs/concepts/companion/editor/main.ts',name:'CompanionJourney',formats:['iife'],fileName:()=> 'journey.js',cssFileName:'journey'},
   rolldownOptions:{external:['vue','pinia'],output:{globals:{vue:'Vue',pinia:'Pinia'},codeSplitting:false}},
 }});
-const [base,bundle,css,bridge]=await Promise.all([
+const [base,bundle,css,bridge,graphStyle]=await Promise.all([
   readFile('docs/concepts/companion/index.html','utf8'),readFile(join(out,'bundle/journey.js'),'utf8'),
-  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),
+  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),
 ]);
-const html=composeMvp(base,bundle,css,bridge);
+const html=composeMvp(base,bundle,css,bridge,graphStyle);
 await writeFile(join(out,'index.html'),html);
 const exportResult=spawnSync(process.env.PYTHON??'python3',['-B','scripts/concepts/export-companion-project.py','--html',join(out,'index.html'),'--output',join(out,'companion-project.json')],{stdio:'inherit'});
 if(exportResult.status!==0)throw Error('MVP_EXPORT: Current self-project failed export.');
