@@ -46,6 +46,36 @@
   },
   "suites": [
     {
+      "name": "compiler",
+      "purpose": "Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "tests/tooling/compiler-*.checks.mjs"
+      ],
+      "verify": "tooling",
+      "npmScript": "test:compiler",
+      "workflows": [
+        "compiler-qualification"
+      ]
+    },
+    {
+      "name": "compiler:properties",
+      "purpose": "Seeded fast-check compiler invariants; requires installed development dependencies.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "tests/tooling/compiler-*.test.mjs"
+      ],
+      "verify": "tooling",
+      "npmScript": "test:compiler:properties",
+      "workflows": [
+        "compiler-qualification"
+      ]
+    },
+    {
       "name": "prototypes",
       "purpose": "Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries.",
       "runner": {

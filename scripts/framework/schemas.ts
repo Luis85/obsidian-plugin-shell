@@ -1,6 +1,8 @@
 import { commands, parameterKinds } from './catalog.ts';
 /** These describe transport shape, not trust, filesystem containment or business readiness. */
 export function operationSchemas() {
+  const sourceLocation = { type: 'object', required: ['file', 'jsonPointer'], additionalProperties: false, properties: { file: { type: 'string' }, jsonPointer: { type: 'string' }, entityId: { type: 'string' }, document: { enum: ['input', 'normalized'] } } };
+  const compilerDiagnostic = { severity: { enum: ['error', 'warning', 'info'] }, phase: { enum: ['parse', 'migrate', 'validate', 'resolve', 'lower', 'emit'] }, help: { type: 'string' }, retryable: { type: 'boolean' }, source: sourceLocation, related: { type: 'array', items: sourceLocation } };
   const common = { root: { type: 'string' }, json: { const: true }, help: { const: true }, 'no-interaction': { const: true }, yes: { const: true }, 'dry-run': { const: true }, apply: { type: 'string', pattern: '^[a-f0-9]{64}$' }, 'plan-out': { type: 'string' }, timeout: { type: 'string', pattern: '^[0-9]+$' } };
   return { protocolVersion: 1, request: { $schema: 'https://json-schema.org/draft/2020-12/schema', oneOf: commands.map(command => ({
     type: 'object', additionalProperties: false, required: ['command', 'args', 'options'],
@@ -9,6 +11,6 @@ export function operationSchemas() {
     } },
   })) }, result: { type: 'object', additionalProperties: false, required: ['protocolVersion', 'command', 'status', 'data', 'diagnostics'], properties: {
     protocolVersion: { const: 1 }, command: { type: 'string' }, status: { enum: ['ok', 'planned', 'applied', 'unchanged', 'blocked', 'cancelled', 'failed'] }, data: {},
-    diagnostics: { type: 'array', items: { type: 'object', required: ['code', 'message'], properties: { code: { type: 'string' }, message: { type: 'string' }, next: { type: 'string' } }, additionalProperties: false } },
+    diagnostics: { type: 'array', items: { type: 'object', required: ['code', 'message'], properties: { code: { type: 'string' }, message: { type: 'string' }, next: { type: 'string' }, ...compilerDiagnostic }, additionalProperties: false } },
   } } };
 }

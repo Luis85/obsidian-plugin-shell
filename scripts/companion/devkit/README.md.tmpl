@@ -3,14 +3,19 @@
 {{description}}
 
 An Obsidian plugin generated from the Plugin Shell starter kit (Vue 3, Pinia, Nuxt UI,
-Vite, Vitest, Playwright). The scaffold builds and its tests pass; the product
+Vite, Vitest, Playwright). Generation does not run the build or tests; the product
 requirements in `design/traceability.json` are still TODO until you implement them.
 
 ## Quick start
 
+Read `design/compiler-readiness.json` first. When dependencies are `resolution-required`,
+review the declared packages and run `npm install` explicitly to update the lockfile
+before using `npm ci`. Generation never contacts the package registry. Build, typecheck,
+tests and business acceptance start as **not run**, not as passing evidence.
+
 ```sh
 nvm use                  # Node from .nvmrc (npm 11.19.1)
-npm ci                   # exact lockfile install
+npm ci                   # only after dependency readiness is locked
 npm run check            # typecheck + lint + project tests: your definition of done
 npm run test:watch       # Vitest watch mode for the product tests
 npm run dev:obsidian -- --allow-download   # real Obsidian sandbox: build, hot reload, logs
@@ -108,7 +113,7 @@ permission allowlist for the safe commands, and skills (`implement-requirement`,
 
 ## What is and is not done
 
-- Done: a buildable, testable scaffold with typed sources, stores, screens,
+- Generated: a scaffold with typed sources, stores, screens,
   navigation and one TODO acceptance test per requirement.
 - Not done: the product behaviour behind each requirement, native qualification on
   other Obsidian versions or platforms, mobile support and store submission.

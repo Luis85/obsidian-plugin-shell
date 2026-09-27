@@ -17,6 +17,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
   { id: 'vault', title: 'Test vault and data', commands: ['vault prepare', 'plugin install', 'data plan', 'data apply', 'data reset-plan', 'data reset'] },
@@ -35,6 +36,10 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  stage: { description: 'Compiler inspection stage.', values: ['ir', 'artifacts'], default: 'ir' },
+  'output-kind': { description: 'Compiler output; --target remains a folder.', values: ['obsidian-plugin', 'clickdummy'], default: 'obsidian-plugin' },
+  'report-dir': { description: 'Explicit new report directory beneath reports/compiler; omitted means no reports are written.' },
+  debug: { description: 'Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing.' },
   input: { description: 'Input JSON file (use - for stdin where supported).' },
   format: { description: 'Export format.', values: ['css', 'json', 'markdown', 'html'], default: 'css' },
   out: { description: 'Output file path.' },
@@ -81,6 +86,9 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'compiler check': ['node shell.mjs compiler check --input project.json --json'],
+  'compiler inspect': ['node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json'],
+  'compiler explain': ['node shell.mjs compiler explain COMPILER_REFERENCE_MISSING'],
   version: ['node shell.mjs --version --json'],
   'styles inspect': ['node shell.mjs styles inspect --input design/project.json'],
   'styles export': ['node shell.mjs styles export --input design/project.json --format css --dry-run', 'node shell.mjs styles export --input design/project.json --format html --yes'],

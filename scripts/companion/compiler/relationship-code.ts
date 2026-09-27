@@ -1,22 +1,21 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
 import { literal, json, symbol, type Model } from './model.ts';
 import { relationshipDefinitions, relationshipScope } from './relationship-model.ts';
 import { sample } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';
-export async function relationshipCode(template:string,m:Model,add:Add):Promise<void>{
+export async function relationshipCode(template: TemplateSnapshot,m:Model,add:Add):Promise<void>{
   const all=relationshipDefinitions(m);if(!all.length)return;
   const scope=relationshipScope(m); const auditScope=relationshipScope(m,true);
   add('design/relationships.json',json({rules:all,writeGuard:scope.rules.map(r=>r.id),scope:'generated-runtime-preflight-not-cross-process-transaction'}),'managed');
-  add(`${m.sourceRoot}/domain/note-values.ts`,await readFile(join(template,'scripts/companion/runtime/note-values.ts'),'utf8'),'managed');
-  add(`${m.sourceRoot}/domain/relationships.ts`,await readFile(join(template,'scripts/companion/runtime/relationships.ts'),'utf8'),'managed');
-  const tests=await readFile(join(template,'tests/tooling/project-generator-relationships.checks.mjs'),'utf8');
+  add(`${m.sourceRoot}/domain/note-values.ts`,await template.text(['scripts/companion/runtime/note-values.ts'].join('/')),'managed');
+  add(`${m.sourceRoot}/domain/relationships.ts`,await template.text(['scripts/companion/runtime/relationships.ts'].join('/')),'managed');
+  const tests=await template.text(['tests/tooling/project-generator-relationships.checks.mjs'].join('/'));
   const testPath=`${m.testRoot}/relationships.test.mjs`;
   // This is the same executable suite against the emitted runtime, not source-text assertions.
   add(testPath,tests.replace("import { test } from 'node:test';","import { test } from 'vitest';")
     .replace("../../scripts/companion/runtime/relationships.ts",relativeImport(testPath,`${m.sourceRoot}/domain/relationships.ts`))
     .replace("../../scripts/companion/runtime/relationship-session.ts",relativeImport(testPath,`${m.sourceRoot}/application/relationship-session.ts`)),'managed');
-  add(`${m.sourceRoot}/application/relationship-session.ts`,(await readFile(join(template,'scripts/companion/runtime/relationship-session.ts'),'utf8')).replace("'./relationships.ts'","'../domain/relationships.ts'").replace("'./note-values.ts'","'../domain/note-values.ts'"),'managed');
+  add(`${m.sourceRoot}/application/relationship-session.ts`,(await template.text(['scripts/companion/runtime/relationship-session.ts'].join('/'))).replace("'./relationships.ts'","'../domain/relationships.ts'").replace("'./note-values.ts'","'../domain/note-values.ts'"),'managed');
   if(!auditScope.rules.length)return;
   nativeRelationshipTests(m,add);
   const file=`${m.sourceRoot}/bootstrap/relationships.ts`;

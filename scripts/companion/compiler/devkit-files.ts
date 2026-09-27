@@ -1,12 +1,11 @@
+import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
 /** The generated project's developer and agent kit: product README/AGENTS.md, Claude Code settings
  * and skills, VS Code configuration, product CI, and a Vitest config wired to the Obsidian test kit.
  * Every file is 'extension' ownership: regeneration keeps a developer's edits and reports a conflict
  * instead of overwriting when the template itself changed. */
-import { readFile } from 'node:fs/promises';
-import { join, posix } from 'node:path';
+import { posix } from 'node:path';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
-import { prototypeSkillFiles } from '../prototype-skill.mjs';
 
 const templates: ReadonlyArray<readonly [string, string]> = [
   ['README.md', 'README.md.tmpl'], ['AGENTS.md', 'AGENTS.md.tmpl'], ['CLAUDE.md', 'CLAUDE.md.tmpl'],
@@ -27,18 +26,18 @@ export function renderTemplate(text: string, values: Readonly<Record<string, str
 /** Where the framework makers put the tests of generated features; product checks run them too. */
 export const makerTests = 'tests/runtime/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
-export async function devkitFiles(templateRoot: string, m: Model, add: Add): Promise<void> {
+export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
   const project = m.project as unknown as Record<string, unknown>;
   const values = { name: oneLine(project.name) || String(m.project.id), id: String(m.project.id),
     description: oneLine(project.description) || 'An Obsidian plugin.', sourceRoot: m.sourceRoot, testRoot: m.testRoot };
   for (const [path, template] of templates) {
-    add(path, renderTemplate(await readFile(join(templateRoot, 'scripts/companion/devkit', template), 'utf8'), values), 'extension');
+    add(path, renderTemplate(await templateRoot.text(['scripts/companion/devkit', template].join('/')), values), 'extension');
   }
-  for (const file of await prototypeSkillFiles(templateRoot)) add(file.path, file.bytes.toString('utf8'), 'extension');
+  for (const file of templateRoot.skillFiles) add(file.path, file.content, 'extension');
   add('vitest.project.config.mjs', projectVitestConfig(m), 'extension');
   // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
   if (m.testRoot !== 'tests/project') {
-    const suites = await readFile(join(templateRoot, 'tests/suites.json'), 'utf8');
+    const suites = await templateRoot.text(['tests/suites.json'].join('/'));
     add('tests/suites.json', suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1)), 'framework');
   }
   const example = `${m.testRoot}/plugin-host.test.ts`;

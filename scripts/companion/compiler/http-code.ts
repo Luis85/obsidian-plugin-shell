@@ -1,5 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
 import { validateHttpSource, type JsonHttpSource } from '../runtime/json-http.ts';
 import { literal, text, symbol, type Model, type Source } from './model.ts';
 import { sampleCode } from './schema-code.ts';
@@ -8,9 +7,9 @@ function httpDefinition(source:Source):JsonHttpSource {
   const definition={id:source.id,locator:text(source.contract.locator,240),auth:text(source.contract.auth,40),credentialRef:text(source.contract.credentialRef,60),operations:source.operations.map(op=>({slug:op.slug,method:text(op.contract.method,10),resource:text(op.contract.resource,500),input:op.input,output:op.output}))};
   validateHttpSource(definition);return definition;
 }
-export async function httpCode(template:string,m:Model,add:Add):Promise<void>{
+export async function httpCode(template: TemplateSnapshot,m:Model,add:Add):Promise<void>{
   const sources=m.sources.filter(s=>s.kind==='api');if(!sources.length)return;
-  add(`${m.sourceRoot}/infrastructure/json-http.ts`,(await readFile(join(template,'scripts/companion/runtime/json-http.ts'),'utf8')).replace("'./contract.ts'","'../domain/contract.ts'"),'managed');
+  add(`${m.sourceRoot}/infrastructure/json-http.ts`,(await template.text(['scripts/companion/runtime/json-http.ts'].join('/'))).replace("'./contract.ts'","'../domain/contract.ts'"),'managed');
   for(const source of sources){
     const definition=httpDefinition(source),name=symbol(source.slug);
     add(`${m.sourceRoot}/infrastructure/sources/${source.slug}-http.ts`,`import { createJsonHttpPort, type JsonHttpConfiguration } from '../json-http.ts';
@@ -37,7 +36,7 @@ ${tests}
 `,'managed');
   }
   const test=`${m.testRoot}/http.test.mjs`;
-  add(test,(await readFile(join(template,'tests/tooling/project-generator-http.checks.mjs'),'utf8'))
+  add(test,(await template.text(['tests/tooling/project-generator-http.checks.mjs'].join('/')))
     .replace("import { test } from 'node:test';","import { test } from 'vitest';")
     .replace('../../scripts/companion/runtime/json-http.ts',relativeImport(test,`${m.sourceRoot}/infrastructure/json-http.ts`)),'managed');
 }

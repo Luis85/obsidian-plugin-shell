@@ -1,3 +1,6 @@
+import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
+import { readBounded } from './files.ts';
+import { compilerOperation } from '../compiler/adapters/cli.ts';
 import { resolve, join } from 'node:path';
 import { inspectStyles } from './styles.ts';
 import { fixtureOperation } from './fixtures.ts';
@@ -22,12 +25,13 @@ async function fileOperation(request: Request, context: Context): Promise<Result
   if (stored) requireThat(request.args[0], 'PLAN_REQUIRED', 'Supply the saved plan filename.');
   const planned = stored ? await loadPlan(context, request.args[0]!) : await planOperation(request, context);
   const output = stringOption(request.options, 'plan-out');
+  const diagnostics = (planned.review as {compiler?: {diagnostics?: Result['diagnostics']}}).compiler?.diagnostics ?? [];
   const saved = output ? await savePlan(context, planned, output) : null;
   const apply = request.command !== 'plan inspect' && !request.options['dry-run'] && (request.options.apply !== undefined || request.options.yes === true);
-  if (!apply) return result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned');
+  if (!apply) return { ...result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned'), diagnostics };
   const expected = stringOption(request.options, 'apply') ?? planned.planHash;
   const applied = await applyOperation(planned, context, expected);
-  return result(request.command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged');
+  return { ...result(request.command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged'), diagnostics };
 }
 function acceptProfile(command: string, profile: string | undefined): void {
   const allowed = profiles[command] ?? [];
@@ -45,7 +49,11 @@ async function processOperation(request: Request, context: Context): Promise<Res
   let entry: string, args: string[] = [];
   const environment: Record<string, string> = {};
   const profile = stringOption(options, 'profile');
-  if (request.command === 'install') { entry = await npmEntry(); args = ['ci', '--no-fund']; }
+  if (request.command === 'install') {
+    const manifests = await Promise.all(['package.json','package-lock.json'].map(async path => ({path,content:(await readBounded(join(context.root,path),8_000_000)).toString('utf8'),ownership:'extension' as const})));
+    const readiness = dependencyReadiness(manifests);
+    if (!readiness.ready) return { ...result(request.command,{execution:'not-run',dependencies:'resolution-required'},'blocked'),diagnostics:readiness.diagnostics };
+    entry = await npmEntry(); args = ['ci', '--no-fund']; }
   else if (request.command === 'build') entry = 'scripts/bundling/build.mjs';
   else if (request.command === 'test') {
     acceptProfile(request.command, profile);
@@ -112,6 +120,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       return result(command, { makers });
     }
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command.startsWith('compiler ')) return await compilerOperation(request, context);
     if (command === 'check') return await checkOperation(request, context);
     if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);

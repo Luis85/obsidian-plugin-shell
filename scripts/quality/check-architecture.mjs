@@ -1,3 +1,5 @@
+import { checkCompilerArchitecture } from '../compiler/check-architecture.mjs';
+await checkCompilerArchitecture(process.cwd());
 import { spawnSync } from 'node:child_process';
 const result = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', '--boundary-violations'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30000 });
 if (result.error) throw result.error;
