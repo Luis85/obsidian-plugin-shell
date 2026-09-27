@@ -195,7 +195,8 @@
     "dist/styles.css",
     "dist/manifest.json",
     "dist-harness/**",
-    "reports/**"
+    "reports/**",
+    "docs/concepts/sitemap-editor/**"
   ],
   "boundaries": {
     "coverage": {
