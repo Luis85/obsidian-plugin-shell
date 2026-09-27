@@ -1,0 +1,29 @@
+name: Stack source snapshot
+on:
+  push:
+    branches: [chore/ci-stack-reconcile-20260927]
+    paths: [.github/workflows/ci-stack-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Archive source Git objects only, without configuration or credentials
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/stack-snapshot"
+          git bundle create "$RUNNER_TEMP/stack-snapshot/current.bundle" --all
+          git show-ref > "$RUNNER_TEMP/stack-snapshot/heads.txt"
+          shasum -a 256 "$RUNNER_TEMP/stack-snapshot/current.bundle"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: stack-source-objects
+          path: ${{ runner.temp }}/stack-snapshot/
+          retention-days: 1
+          if-no-files-found: error
