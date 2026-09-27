@@ -99,13 +99,24 @@ export function parseCompanionDocument(text) {
   try { value = JSON.parse(text); } catch { throw new Error('COMPANION_INVALID: Expected valid UTF-8 JSON.'); }
   return validateCompanionDocument(value);
 }
+// Companion v1-4 designs may carry legacy detail designs. Only the shared contracts name that store: editors ask here
+// whether a design (or history snapshot) is legacy, upgrade it through the frozen visual migration, or drop it.
+export function companionLegacyDetails(design) { return design?.detailDesigns; }
+export function companionDropLegacy(design) { delete design.detailDesigns; return design; }
+export function companionDesignKey(key) { return companionDesignKeys.includes(key); }
+// Upgrades in place after the migrated store validates; the geometry-loss report is returned.
+export function companionUpgradeDesign(design) {
+  const { visualDesigns, report } = migrateDetailDesigns(design.detailDesigns, design);
+  validateVisualDesigns(visualDesigns);
+  companionDropLegacy(design); design.visualDesigns = visualDesigns; design.schema = COMPANION_VERSION;
+  return report;
+}
 export function migrateCompanionDocument(value) {
   validateCompanionDocument(value);
   if (value.schemaVersion === COMPANION_VERSION) return { document: value, report: null };
-  const document = structuredClone(value), detail = document.design.detailDesigns;
-  const result = detail ? migrateDetailDesigns(detail, document.design) : null;
-  delete document.design.detailDesigns;
-  if (result) document.design.visualDesigns = result.visualDesigns;
+  const document = structuredClone(value);
+  const report = companionLegacyDetails(document.design) ? companionUpgradeDesign(document.design) : null;
+  companionDropLegacy(document.design);
   document.schemaVersion = COMPANION_VERSION; document.design.schema = COMPANION_VERSION;
-  return { document: validateCompanionDocument(document), report: result?.report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
+  return { document: validateCompanionDocument(document), report: report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
 }

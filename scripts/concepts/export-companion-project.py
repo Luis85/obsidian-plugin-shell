@@ -23,7 +23,7 @@ import { chromium } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const [html, storage, expression] = process.argv.slice(1), errors = [];
 const executable = process.env.CHROMIUM_EXECUTABLE;
-const browser = await chromium.launch({ headless: true, ...(executable ? { executablePath: executable } : {}) });
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'], ...(executable ? { executablePath: executable } : {}) });
 try {
   const page = await browser.newPage();
   await page.route('**/*', route => route.abort());

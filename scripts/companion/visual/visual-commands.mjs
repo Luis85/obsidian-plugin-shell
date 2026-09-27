@@ -1,5 +1,5 @@
 // Pure authoring commands. Each mutates the given (copied) store; the caller validates and persists once.
-import { visualAssert, visualAllocate, visualWalk, visualNodes, visualLocate, visualDefinition, visualRoot, visualElement, visualLiteral, visualNuxt, VISUAL_DOM_EVENTS } from './visual-ir.mjs';
+import { visualAssert, visualAllocate, visualWalk, visualNodes, visualLocate, visualDefinition, visualRoot, visualElement, visualNuxt, VISUAL_DOM_EVENTS } from './visual-ir.mjs';
 import { visualCatalogEntry } from './visual-catalog.mjs';
 import { visualUsages } from './visual-composition.mjs';
 import { visualClone } from './visual-layout.mjs';

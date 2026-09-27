@@ -300,7 +300,7 @@ test('SFC lowering matches reviewed golden files', async () => {
   const m = projectModel(goldenFixture()), store = visualDefinitions(m), specs = visualSpecs(m).filter(s => golden.has(s.id));
   assert.deepEqual(specs.map(s => s.id).sort(), [...golden].sort());
   for (const spec of specs) {
-    const actual = visualSfc(m, spec, store), path = 'tests/fixtures/companion/visual-golden/' + spec.id + '.vue';
+    const actual = visualSfc(m, spec, store), path = 'tests/fixtures/companion/visual-golden/' + spec.id + '.vue.txt';
     if (process.env.UPDATE_GOLDEN) await writeFile(path, actual);
     assert.equal(actual, await readFile(path, 'utf8'), spec.id);
     assert.doesNotMatch(actual, /v-html|innerHTML|\beval\b|evil|alert/);

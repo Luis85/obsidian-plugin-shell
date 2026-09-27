@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules];
+const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
@@ -20,7 +20,7 @@ const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalo
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'page-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
-const STORAGE_KEY = 'concept', COMPANION_VERSION = 5, DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false };
+const STORAGE_KEY = 'concept', DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false };
 const localStorage = { getItem: () => null };
 class Element {}
 const document = { addEventListener(type, fn, options) { (host.listeners[type] ??= []).push({ fn, once: !!options?.once }); }, getElementById: id => host.dom[id] ?? null };

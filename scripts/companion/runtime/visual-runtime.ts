@@ -20,7 +20,7 @@ export interface VisualExternalAdapter<P = Record<string, unknown>> {
 export const VISUAL_RUNTIME_CONTROLS: readonly string[] = Object.freeze(['u-input', 'u-textarea', 'u-select', 'u-checkbox', 'u-switch']);
 export const VISUAL_RUNTIME_INTERACTIVE: readonly string[] = Object.freeze([...VISUAL_RUNTIME_CONTROLS, 'u-button']);
 export const VISUAL_RUNTIME_LOCAL: readonly string[] = Object.freeze(['set-state', 'toggle', 'set-value', 'focus']);
-export function visualChildren(node: UiNode): UiNode[][] {
+function visualChildren(node: UiNode): UiNode[][] {
   if (node.kind === 'element') return [node.children];
   if (node.kind === 'slot') return [node.fallback];
   if (node.kind === 'component') return Object.values(node.slots);

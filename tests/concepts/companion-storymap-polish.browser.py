@@ -92,7 +92,7 @@ with sync_playwright() as pw:
         check('Linked sitemap opens the shared target and offers return navigation', js('state.view==="sitemap"') and page.locator('[data-action="sm-return-map"]').count() > 0)
         act('sm-return-map')
         check('Sitemap round-trip preserves story identity', js('smUi.item') == story_id)
-        act('dt-page', scope='#sm-inspector'); act('dt-back')
+        act('ve-open-page', scope='#sm-inspector'); act('ve-back')
         check('Page editor integration and Back retain the same map', js('state.view==="storymaps" && smUi.map===' + json.dumps(original)))
         before = js('companionJson()'); act('sm-mode', 'review')
         check('Review lists actionable missing acceptance notes', page.locator('.sm-review-list li').count() >= 5)

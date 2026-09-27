@@ -98,17 +98,17 @@ try:
         check('Full companion import survives real-origin reload without restoring execution trust',
               p.evaluate('companionJson()') == portable and p.evaluate('!project().trusted && project().phase==="planning"'))
         p.locator('#sidebar [data-action="nav"][data-value="pages"]').click()
-        detail_owner = p.evaluate('dtStore().documents.find(d=>d.kind==="page").ownerId')
-        p.locator('[data-action="dt-page"][data-value="'+detail_owner+'"]').click()
-        detail_data = p.evaluate('JSON.stringify(dtStore())')
+        page_owner = p.evaluate('veStore().pages[0].ownerId')
+        p.locator('#content [data-action="ve-open-page"][data-value="'+page_owner+'"]').first.click()
+        visual_data = p.evaluate('JSON.stringify(veStore())')
         p.reload()
-        check('Actual reload from page editor restores all details and safely opens Pages',
-              p.evaluate('state.view==="pages"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(dtStore())') == detail_data)
+        check('Actual reload from page editor restores all page designs and safely opens Pages',
+              p.evaluate('state.view==="pages"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(veStore())') == visual_data)
         p.locator('#sidebar [data-action="nav"][data-value="components"]').click()
-        p.evaluate('dtOpen("component","project-json-review")')
+        p.evaluate('veOpenComponent("project-json-review")')
         p.reload()
         check('Actual reload from component editor retains reusable designs and opens the library',
-              p.evaluate('state.view==="components"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(dtStore())') == detail_data)
+              p.evaluate('state.view==="components"&&!storageWarning&&validState(state)') and p.evaluate('JSON.stringify(veStore())') == visual_data)
         p.locator('[data-action="settings"]').first.click()
         p.locator('#modal [data-action="project-folders"]').click()
         p.locator('#f-project-codebase-folder').fill('plugin/src')

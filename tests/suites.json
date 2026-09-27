@@ -95,11 +95,11 @@
       "include": ["tests/tooling/visual-*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:visual",
-      "workflows": ["project-generator"]
+      "workflows": ["project-generator", "companion-concept-verification"]
     },
     {
       "name": "companion",
-      "purpose": "Companion concept contracts: project JSON, storymaps, details, composition, concept isolation zone and concept metrics.",
+      "purpose": "Companion concept contracts: project JSON, storymaps, legacy detail and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
       "runner": {"type": "node-test"},
       "include": ["tests/tooling/companion-*.checks.mjs", "tests/tooling/concept-*.checks.mjs"],
       "verify": "tooling",

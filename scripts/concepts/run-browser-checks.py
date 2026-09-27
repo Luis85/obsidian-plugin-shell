@@ -17,10 +17,7 @@ SUITES = [
     ('generator-boundaries', 'generator-boundaries/checks.json'),
     ('project-starters', 'project-starters/checks.json'),
     ('design-styles', 'design-styles/checks.json'),
-    ('composition', 'composition/checks.json'),
     ('storymap-polish', 'storymap-polish/checks.json'),
-    ('detail-polish', 'detail-polish/checks.json'),
-    ('details', 'details/checks.json'),
     ('storymaps', 'storymaps/checks.json'),
     ('project-transfer', 'project-transfer/checks.json'),
     ('product-audit', 'product-audit/checks.json'),
@@ -41,7 +38,7 @@ SUITES = [
     # Node Playwright suites (owner decision 2026-09-26) share the same checks.json contract.
     ('visual-editors', 'visual-editors/checks.json', 'node'),
 ]
-SLOW = {'composition', 'visual-editors'}
+SLOW = {'visual-editors'}
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--real-storage', action='store_true', help='Also require real loopback-origin browser storage evidence.')
 parser.add_argument('--only', action='append', default=[], metavar='SUITE', help='Run only the named suite (repeatable); the summary then covers just those suites.')

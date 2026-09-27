@@ -30,9 +30,10 @@ below; they are orientation, not budgets.
 | `cli` | Central `shell.mjs` CLI: parsing, plans, processes, kit/archive distribution, `new`, capability discovery (7) | `npm run test:cli` | `node --test` | none | tooling | 91 s |
 | `cli:journey` | Packs the framework ZIP, extracts it and builds generated consumers (1 script) | `npm run test:cli:journey` | node script | `QUALIFIED_NPM` | opt-in | 190 s |
 | `generator` | Project compiler, runtime guards, starters and the shared safe file-plan engine (15) | `npm run test:generator` | `node --test` | none | tooling | 187 s |
-| `companion` | Companion concept contracts: project JSON, storymaps, details, composition, isolation zone, concept metrics (6) | `npm run test:companion` | `node --test` | none | tooling | 13 s |
+| `visual` | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests (7) | `npm run test:visual` | `node --test` | none | tooling | not measured |
+| `companion` | Companion concept contracts: project JSON, storymaps, legacy detail/composition contracts, visual editor harnesses, isolation zone, concept metrics (11) | `npm run test:companion` | `node --test` | none | tooling | 13 s |
 | `companion:assembly` | Offline assembly check, Python assembly/tamper test, syntax check of every concept module | `npm run test:companion` (runs with `companion`) | Python + `node --check` | `python3` | opt-in | 5 s |
-| `companion:browser` | Aggregated concept browser suites, including real-origin storage, on one exact artifact (26 Python scripts; the runner also executes the Node suite below) | `npm run test:companion:browser` | Python Playwright + Node Playwright | `PYTHON` with `playwright`, `CHROMIUM_EXECUTABLE`, Node Playwright Chromium | opt-in | 411 s |
+| `companion:browser` | Aggregated concept browser suites, including real-origin storage, on one exact artifact (23 Python scripts; the runner also executes the Node suite below) | `npm run test:companion:browser` | Python Playwright + Node Playwright | `PYTHON` with `playwright`, `CHROMIUM_EXECUTABLE`, Node Playwright Chromium | opt-in | 411 s |
 | `companion:visual-browser` | Page and component editors end to end: both editors, keyboard-only paths, Back navigation, legacy migration, hostile imports (1 script) | `node scripts/testing/suites.mjs companion:visual-browser` | Node Playwright via `run-browser-checks.py --only visual-editors` | `python3`, Node Playwright Chromium | opt-in | 45 s |
 | `companion:browser-manual` | Historical concept browser scripts the aggregated runner does not execute (8) | see [concept verification](../concepts/companion/VERIFICATION.md) | manual | Python `playwright` | opt-in | not automated |
 | `test-data` | Companion test-data kit: generators, storage plans, loopback server/client, inventory (5) | `npm run test:test-data` | `node --test` | none | tooling | 7 s |
@@ -127,8 +128,8 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
 | `showcase-verification`, `template-authoring` | all `verify` suites (via setup/verify), `e2e`; showcase also `native:host` |
 | `setup-compatibility` | all `verify` suites via setup, npm install policy of `setup` |
 | `framework-cli` | `cli`, `cli:journey` |
-| `project-generator` | `generator`, `companion-project` of `companion`, generated `project` suites |
-| `companion-concept-verification` | `companion:assembly`, `test-data`, the concept `companion` files, `companion:browser` including `companion:visual-browser` |
+| `project-generator` | `generator`, `visual`, `companion-project` of `companion`, generated `project` suites |
+| `companion-concept-verification` | `companion:assembly`, `test-data`, `visual`, the concept `companion` files, `companion:visual-browser` (its own step first), then `companion:browser` |
 | `baseline-verification` | `baseline` |
 | `candidate-qualification` | `runtime`, `e2e`, `native:host` through evidence producers; `release` via rehearsal |
 | `release-rehearsal` | `release` path via `release:rehearse` |

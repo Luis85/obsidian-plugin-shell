@@ -85,7 +85,7 @@ function applyCompanionImport() {
     state = { ...state, project: p, vaultFiles: { ...state.vaultFiles, 'Project.md': p.projectNote },
       wizard: null, generator: { ...state.generator, plan: null }, runs: [], view: 'overview' };
     if (!saveConceptState()) { state = before; throw Error('The project could not be saved. The current project is unchanged; export recovery before closing.'); }
-    tdDropSession(); dtReset(); veReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
+    tdDropSession(); veReset(); smUi.owner=null; smNormalize(); designUi.plan = null; designUi.selected = p.design.nodes[0]?.id || null;
     designUi.error = ''; productUi.prd = null; productUi.component = null;
     dsUi.selected = null; dsUi.catalogSelected = null; erUi.selected = null; erUi.edge = null;
     u.serial++; u.candidate = null; u.report = null; modalOriginal = null; closeModal(); setView('overview');

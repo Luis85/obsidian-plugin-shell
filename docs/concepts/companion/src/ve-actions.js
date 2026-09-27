@@ -78,7 +78,7 @@ const VE_SESSION_ACTIONS = {
   ...VE_COMPONENT_SESSION_ACTIONS, ...VE_ENTRY_SESSION_ACTIONS,
 };
 const VE_ACTIONS = {
-  've-open-component': veOpenComponent, 'dt-component': veOpenComponent, 've-start-page': veStartPage, 've-select': veSelect,
+  've-open-component': veOpenComponent, 've-start-page': veStartPage, 've-select': veSelect,
   've-insert': value => (value.startsWith('external:') ? veOpenExternal(value.slice(9)) : veInsertValue((store, ref) => veInsertNodes(store, value, ref))),
   've-apply-layout': value => veInsertValue(store => visualInstantiateLayout(store, value)),
   've-move': veMove,

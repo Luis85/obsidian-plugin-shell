@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { visualWouldCycle, visualUsages, visualDependencies } from '../../scripts/companion/visual/visual-composition.mjs';
-import { visualLocate, visualProject } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualProject } from '../../scripts/companion/visual/visual-ir.mjs';
 const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-v5.json', 'utf8'));
 const copy = () => structuredClone(seed);
 const context = { surfaces: new Set(['node-customers', 'node-settings']), library: new Set(['library-search']), sources: new Map([['customers', new Set(['list'])]]) };

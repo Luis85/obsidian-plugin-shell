@@ -4,7 +4,6 @@ import { visualExpand, visualBuiltinLayouts } from './visual-catalog.mjs';
 function vlayRemapMapping(m, remap) { if (m?.kind === 'draft') return { ...m, nodeId: remap(m.nodeId) }; if (m?.kind === 'object') return { ...m, fields: Object.fromEntries(Object.entries(m.fields).map(([k, v]) => [k, vlayRemapMapping(v, remap)])) }; return m; }
 export function visualClone(store, nodes, { external = 'keep', slotsToRegions = false } = {}) {
   const map = new Map(); visualWalk(nodes, n => map.set(n.id, visualAllocate(store, 'vn')));
-  const labels = new Map(); visualWalk(nodes, n => { for (const i of n.events ?? []) labels.set(i.id, i.label); });
   const remap = (id, label) => { if (map.has(id)) return map.get(id); visualAssert(external === 'keep', 'Interaction ' + JSON.stringify(label) + ' targets an element outside the copied structure.'); return id; };
   const copy = n => {
     const out = structuredClone(n); out.id = map.get(n.id);

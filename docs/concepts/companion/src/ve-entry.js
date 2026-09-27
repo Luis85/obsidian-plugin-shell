@@ -2,6 +2,8 @@
 // origin view with its own selection (storymap item, sitemap surface, library component or the previous editor).
 function vePageEligible(node) { return !!node && ['page', 'modal', 'settings'].includes(node.kind); }
 function veEditorOpen() { return ['page-editor', 'component-editor'].includes(state.view); }
+// The sidebar highlights the list an editor belongs to (Pages or Component library).
+function veNavigationView() { return state.view === 'page-editor' ? 'pages' : state.view === 'component-editor' ? 'components' : state.view; }
 // A Back entry remembers the view, the page or component it showed, the origin's selection and the control that opened
 // the editor, so focus can return to it.
 function veBackEntry() {
@@ -62,8 +64,9 @@ function vePaletteRows() {
   ];
   if (page) rows.push(['ve-save-layout', 'page', 'Save page as layout', 'Reuse this page structure as a saved layout', 'layers'], ['ve-left', 'layouts', 'Apply layout…', 'Choose a built-in or saved layout', 'grid']);
   rows.push(['ve-mode', 'preview', page ? 'Preview page' : 'Preview component', 'Read-only preview in the chosen scenario or state', 'search']);
-  if (design().history.length) rows.push(['ve-undo', '', 'Undo design change', 'Step back in the shared design history', 'refresh']);
-  if (design().future.length) rows.push(['ve-redo', '', 'Redo design change', 'Reapply the change that was undone', 'refresh']);
+  // History travel is a write: like the toolbar buttons, it is not offered in Preview.
+  if (veUi.mode !== 'preview' && design().history.length) rows.push(['ve-undo', '', 'Undo design change', 'Step back in the shared design history', 'undo']);
+  if (veUi.mode !== 'preview' && design().future.length) rows.push(['ve-redo', '', 'Redo design change', 'Reapply the change that was undone', 'redo']);
   if (selected) rows.push(['ve-duplicate', '', 'Duplicate selected', 'Copy the selected element right after it', 'copy']);
   if (selected && page) rows.push(['ve-bind', '', 'Bind data…', 'Bind the selected element to a data source', 'layers'], ['ve-interaction', '', 'Add interaction…', 'Declare what the selected element does', 'spark']);
   return rows;
@@ -139,6 +142,6 @@ const VE_ENTRY_SESSION_ACTIONS = {
   've-clear-selection': () => { Object.assign(veUi, { selected: null, slotTarget: null, after: false, more: false }); },
 };
 const VE_ENTRY_ACTIONS = {
-  've-open-page': veOpenPage, 'dt-page': veOpenPage, 've-back': veBack, 've-step': veStep,
+  've-open-page': veOpenPage, 've-back': veBack, 've-step': veStep,
   've-undo': () => veHistory('undo'), 've-redo': () => veHistory('redo'),
 };

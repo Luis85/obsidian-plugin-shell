@@ -36,7 +36,7 @@ for (const [id, paths] of [['field-notes', {codebaseFolder: 'app/source', testsF
     node.parent = null; node.components = []; node.slug = 'tasks'; node.label = 'Tasks';
     design.design.links = []; design.design.library = []; node.bricks = [];
     design.design.prds = []; design.design.storymaps = {schema: 1, nextId: 1, maps: []};
-    delete design.design.detailDesigns;
+    delete design.design.visualDesigns;
     design.design.dataSources = {schema: 1, nextId: 1, sources: [], flows: []};
     design.design.semantic = { entities: [{id: 'tasks', slug: 'task', name: 'Task', folder: 'Tasks', properties: [{key:'title', type:'text', required:true}, {key:'done', type:'checkbox', required:true}]}], relationships: [] };
   }

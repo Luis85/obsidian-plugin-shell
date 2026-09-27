@@ -25,7 +25,11 @@ export async function maintainabilityInventory(root) {
     if (path === vendorArchive) decodeVendor(data);
     let view = 'unsupported';
     const template = path.startsWith('scripts/examples/templates/') && executable.test(path.replace(/\.txt$/, ''));
+    // Reviewed golden SFC outputs are stored as `.vue.txt` so the analyzer and bundlers never resolve their
+    // generated-project imports; they stay measured as Vue in the fixtures view.
+    const golden = /^tests\/fixtures\/.+\.vue\.txt$/.test(path);
     if (template) view = 'templates';
+    else if (golden) view = 'fixtures';
     else if (executable.test(path)) {
       if (path.startsWith('src/')) view = 'production';
       else if (path.startsWith('tests/') || path.startsWith('harness/')) view = 'fixtures';
@@ -44,7 +48,7 @@ export async function maintainabilityInventory(root) {
     }
     files.push({ path, sha256: sha256(data), bytes: data.length, physicalLines: physicalLines(data.toString('utf8')), view,
       ...(python ? { measurement: 'not-measured', reason: 'Python concept tooling; syntax, assembly and browser evidence are separate from JS/TS/Vue metrics.' } : {}),
-      templateRegion, extension: template ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });
+      templateRegion, extension: template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });
   }
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);
   for (const name of (await readdir(root)).sort()) if (executable.test(name)) await visit(name);

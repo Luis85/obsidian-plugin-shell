@@ -39,6 +39,7 @@ jobs:
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
+          node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
           node scripts/companion/qualify-project.mjs

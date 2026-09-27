@@ -40,7 +40,7 @@ function adoptLegacyOutline(){
   const choice=legacyChoices()[modalData.index];if(!choice)throw Error('Choose one valid outline.');
   const input=choice.identity,values={};for(const k of ['name','id','author','description','version'])if(typeof input[k]==='string')values[k]=input[k];
   const p=newPlanningProject(values);if(identityError({...p,author:p.author||'Planning only'}))throw Error('Legacy identity needs manual review. Export the original, define the project, then import its data-only blueprint.');
-  p.design=designCopy(choice.design);p.design.emitted={};p.design.retired=[];p.design.generatedRevision=0;if(p.design.detailDesigns)veMigrateSaved(p.design);
+  p.design=designCopy(choice.design);p.design.emitted={};p.design.retired=[];p.design.generatedRevision=0;if(companionLegacyDetails(p.design))veMigrateSaved(p.design);
   installPlanningProject(p);state.legacyHandled=true;modalOriginal=null;closeModal();setView('overview');notify('One outline copied. The full original workspace remains untouched.');
  }catch(e){modalData.error=e.message;redrawModal();}
 }

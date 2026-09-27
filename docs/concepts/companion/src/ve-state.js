@@ -17,12 +17,21 @@ function veContext(d) {
     sources: new Map((d.dataSources?.sources || []).map(s => [s.id, new Set(s.operations.map(o => o.id))])),
   };
 }
-// Context-free shape gate used by structuralDesign for current designs and history snapshots.
-// A design carries either legacy detail designs or visual designs, never both.
+// Context-free shape gate used by structuralDesign for current designs and history snapshots. A design carries either
+// a legacy (pre-v5) detail store awaiting its one-time upgrade or visual designs, never both.
 function veShape(d) {
-  if (d.visualDesigns === undefined) return true;
-  if (d.detailDesigns !== undefined) return false;
-  try { validateVisualDesigns(d.visualDesigns); return true; } catch { return false; }
+  const legacy = companionLegacyDetails(d);
+  try {
+    if (legacy !== undefined) { validateDetailDesigns(legacy); return d.visualDesigns === undefined; }
+    if (d.visualDesigns !== undefined) validateVisualDesigns(d.visualDesigns);
+    return true;
+  } catch { return false; }
+}
+// Design checks: the generator's full validation with references. Legacy stores are upgraded on load, not reviewed.
+function veIssues(d) {
+  if (d.visualDesigns === undefined || companionLegacyDetails(d) !== undefined) return [];
+  try { validateVisualDesigns(d.visualDesigns, veContext(d)); return []; }
+  catch (error) { return [{ level: 'warning', code: 'visual-reference', message: 'Pages and components: ' + veErrorText(error), node: null }]; }
 }
 function veBoundHistory(candidate) {
   // Keep the complete current design. Trim only old undo entries before the storage cap.
@@ -40,7 +49,7 @@ function veCanWrite(token = smToken()) {
 function veCommit(change, token = smToken()) {
   veCanWrite(token);
   const previous = design(), candidate = designCopy(previous), before = veStore(previous), store = designCopy(before);
-  if (previous.detailDesigns) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
+  if (companionLegacyDetails(previous) !== undefined) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
   change(store, candidate);
   const semantic = JSON.stringify(before) !== JSON.stringify(store);
   if (!semantic) return true;
@@ -64,14 +73,14 @@ function veRepair() {
   return changed;
 }
 function veHasContent(store) { return !!store && ['pages', 'components', 'layouts', 'revisions'].some(key => store[key].length > 0); }
-// Shared by every travel path over the one design history (outline, storymap, detail and visual undo/redo).
+// Shared by every travel path over the one design history (outline, storymap and visual undo/redo).
 // `candidate` already holds the snapshot's fields; the visual store is restored with a monotonic counter and
 // validated with full references. A legacy snapshot never coexists with visual designs, and is refused rather than
 // discarding visual work.
 function veRestoreVisual(candidate, snapshot, previous) {
   const counter = previous.visualDesigns?.nextId || 1;
   try {
-    if (snapshot.detailDesigns) {
+    if (companionLegacyDetails(snapshot) !== undefined) {
       visualAssert(!veHasContent(previous.visualDesigns), 'it predates the upgrade to the page and component editors and would discard their designs.');
       delete candidate.visualDesigns; return candidate;
     }
@@ -79,9 +88,9 @@ function veRestoreVisual(candidate, snapshot, previous) {
     else if (counter > 1) candidate.visualDesigns = { ...emptyVisualDesigns(), nextId: counter };
     else delete candidate.visualDesigns;
     if (candidate.visualDesigns) {
-      const legacy = candidate.detailDesigns; // Only an empty counter placeholder may be dropped here.
+      const legacy = companionLegacyDetails(candidate); // Only an empty counter placeholder may be dropped here.
       visualAssert(!legacy || (!legacy.documents?.length && !legacy.revisions?.length), 'it would keep legacy detail designs next to visual designs.');
-      delete candidate.detailDesigns; candidate.schema = COMPANION_VERSION;
+      companionDropLegacy(candidate); candidate.schema = COMPANION_VERSION;
       validateVisualDesigns(candidate.visualDesigns, veContext(candidate));
     }
     return candidate;
@@ -97,16 +106,10 @@ function veTravel(direction) {
   if (veRepair()) render();
   return true;
 }
-// Legacy detail designs become visual designs. Geometry is not replayable, so the migrated report is returned.
-function veUpgradeDesign(d) {
-  const { visualDesigns, report } = migrateDetailDesigns(d.detailDesigns, d);
-  validateVisualDesigns(visualDesigns);
-  d.visualDesigns = visualDesigns; delete d.detailDesigns; d.schema = COMPANION_VERSION;
-  return report;
-}
-// Saved browser state: migrate the current design in place and clear legacy undo snapshots (spec 11.9).
+// Saved browser state: legacy detail designs become visual designs in place (geometry is not replayable, so the
+// migration report is returned) and legacy undo snapshots are cleared (spec 11.9).
 function veMigrateSaved(d) {
-  const report = veUpgradeDesign(d);
+  const report = companionUpgradeDesign(d);
   d.history = []; d.future = [];
   veUi.notice = VE_UPGRADE_NOTICE;
   return report;
@@ -132,7 +135,7 @@ function veMigrationSummary(report) {
 function veRestoreSaved() {
   const p = state.project, w = state.wizard;
   let changed = false;
-  if (p?.design?.detailDesigns) {
+  if (companionLegacyDetails(p?.design)) {
     const candidate = designCopy(p.design);
     try {
       veMigrateSaved(candidate);
@@ -144,9 +147,9 @@ function veRestoreSaved() {
       notify(veUi.error); return false;
     }
   }
-  if (w?.design?.detailDesigns) {
+  if (companionLegacyDetails(w?.design)) {
     // The preparation outline is a disposable copy of the project design; it is refreshed when the wizard reopens.
-    try { const copy = designCopy(w.design); veUpgradeDesign(copy); copy.history = []; copy.future = []; if (!validSavedDesign(copy)) throw Error('Invalid outline'); w.design = copy; }
+    try { const copy = designCopy(w.design); companionUpgradeDesign(copy); copy.history = []; copy.future = []; if (!validSavedDesign(copy)) throw Error('Invalid outline'); w.design = copy; }
     catch { delete w.design; }
     changed = true;
   }

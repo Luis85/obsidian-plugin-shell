@@ -6,8 +6,7 @@ on:
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
       - 'tests/tooling/companion-project.checks.mjs'
-      - 'tests/tooling/companion-details.checks.mjs'
-      - 'tests/tooling/companion-composition.checks.mjs'
+      - 'tests/tooling/companion-detail-contract.checks.mjs'
       - 'tests/tooling/companion-visual-*.checks.mjs'
       - 'tests/tooling/visual-*.checks.mjs'
       - 'tests/fixtures/companion/**'
@@ -76,7 +75,7 @@ jobs:
         run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
-          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-details.checks.mjs tests/tooling/companion-composition.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-detail-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
           npm run test:visual
       - name: Package exact review source without Git metadata or credentials
         shell: bash
@@ -130,6 +129,12 @@ jobs:
               with open(os.environ['GITHUB_ENV'], 'a') as output:
                   output.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
           PYTHON
+      # The aggregated runner stops at the first failing suite; run the page and component editors on their own first.
+      - name: Exercise the page and component editors on the exact artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/companion-browser-env/bin/python" scripts/concepts/run-browser-checks.py --only visual-editors
       - name: Exercise current concept and real-origin storage on one exact artifact
         shell: bash
         run: |

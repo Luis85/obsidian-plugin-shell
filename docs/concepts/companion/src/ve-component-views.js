@@ -33,6 +33,11 @@ function veOpenDefinition(componentId) {
   if (!target) throw Error('The component definition no longer exists.');
   veOpenComponent(target.libraryId, { push: true });
 }
+// Component designs whose library entry is gone are kept; restoring the entry's stable ID reconnects them.
+function veOrphanComponents(d = design()) {
+  const orphaned = veStore(d).components.filter(c => !d.library.some(l => l.id === c.libraryId));
+  return orphaned.length ? `<section class="card mt16"><h2>Retained component designs</h2><p>These library entries are missing. Their component designs remain available; restore the original stable ID to reconnect them.</p>${orphaned.map(c => button(c.exportName, 've-open-component', c.libraryId, 'small')).join('')}</section>` : '';
+}
 function veStartComponent(libraryId) {
   const lib = design().library.find(l => l.id === libraryId);
   if (!lib) throw Error('Choose a component from the library.');

@@ -17,7 +17,7 @@ function smCanWrite(token = smToken()) {
   if (storageWarning || localStorage.getItem(STORAGE_KEY) !== persistenceSnapshot) throw Error('Resolve the storage conflict first. Export this session and the retained copy; no storymap was changed.');
 }
 function smPersistDesign(candidate, previous) {
-  cpRetainRevisions(candidate.detailDesigns, previous.detailDesigns);if(candidate.detailDesigns?.schema===2)candidate.schema=4;cpBoundHistory(candidate);
+  veBoundHistory(candidate);
   if (!validSavedDesign(candidate)) throw Error('The change would create an invalid project. Nothing was saved.');
   project().design = candidate;
   if (!saveConceptState()) { project().design = previous; throw Error('The change could not be saved. Previous data and history are retained; export recovery before closing.'); }
@@ -49,9 +49,7 @@ function smTravel(direction) {
   const other = direction === 'undo' ? candidate.future : candidate.history;
   other.push(designSnapshot(previous)); if (other.length > DESIGN_LIMITS.history) other.shift();
   const snapshot = source.pop(); Object.assign(candidate, snapshot);
-  for (const key of ['canvas', 'librarySchema', 'designSystem', 'detailDesigns']) if (!Object.hasOwn(snapshot, key)) delete candidate[key];
-  if(previous.detailDesigns&&!candidate.detailDesigns)candidate.detailDesigns=emptyDetailDesigns();
-  if(candidate.detailDesigns)candidate.detailDesigns.nextId=Math.max(candidate.detailDesigns.nextId, previous.detailDesigns?.nextId||1);
+  for (const key of ['canvas', 'librarySchema', 'designSystem']) if (!Object.hasOwn(snapshot, key)) delete candidate[key];
   candidate.storymaps = smCopy(snapshot.storymaps || emptyStorymaps());
   candidate.storymaps.nextId = Math.max(candidate.storymaps.nextId, smStore(previous).nextId);
   candidate.semantic = snapshot.semantic || emptySemantic(); candidate.dataSources = snapshot.dataSources || emptyDataSources();

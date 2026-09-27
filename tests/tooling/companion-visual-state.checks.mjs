@@ -1,4 +1,4 @@
-// Real concept sources (design history, storymap/detail undo, visual write path) over the shared contracts, assembled
+// Real concept sources (design history, storymap undo, visual write path) over the shared contracts, assembled
 // into one script realm the way build-companion.py inlines them. Host-only adapters (storage, rendering, notices)
 // are recording stubs; validSavedDesign is reduced to its visual part (veShape over the design and every snapshot)
 // because the full structural gate needs the whole page.
@@ -10,17 +10,17 @@ import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs'
 
 const plain = value => JSON.parse(JSON.stringify(value));
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs'];
+const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
-const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 'detail-actions.js', 've-state.js'];
+const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js'];
 const concept = (await Promise.all(sources.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
-const stubs = `const COMPANION_VERSION = ${COMPANION_VERSION}; const DESIGN_LIMITS = { history: 20 };
-function designCopy(v) { return JSON.parse(JSON.stringify(v)); } const dtCopy = designCopy;
+const stubs = `const DESIGN_LIMITS = { history: 20 };
+function designCopy(v) { return JSON.parse(JSON.stringify(v)); }
 const state = { activeRun: null }, tdUi = { busy: false }, storageWarning = '', STORAGE_KEY = 'k', persistenceSnapshot = null, modalType = '', innerWidth = 1200;
 const localStorage = { getItem: () => null }, document = { addEventListener() {}, getElementById: () => null };
-function project() { return host.p; } function ensureProductModel(d) { return d; } function cpRetainRevisions() {} function cpBoundHistory() {}
-function generationSnapshot(d) { const v = designSnapshot(d); delete v.canvas; delete v.storymaps; return v; }
+function project() { return host.p; } function ensureProductModel(d) { return d; }
+function generationSnapshot(d) { const v = designSnapshot(d); delete v.canvas; delete v.storymaps; if (!veHasContent(v.visualDesigns)) delete v.visualDesigns; return v; }
 function emptySemantic() { return { schema: 1, nextId: 1, entities: [] }; }
 function emptyDataSources() { return { schema: 1, nextId: 1, sources: [], flows: [], positions: {} }; }
 function saveConceptState() { host.saves++; return true; } function save() { host.saves++; } function render() {} function notify(text) { host.notices.push(text); }`;
@@ -39,7 +39,7 @@ function baseDesign(ctx) {
 }
 // Outline-style write through the shared history (records a snapshot, then changes the design).
 function outlineWrite(ctx, change) { ctx.recordDesign(); change(ctx.design()); ctx.designChanged(); }
-const travels = ctx => ({ outline: d => { if (!ctx.designTravel(d)) throw Error('refused'); }, storymap: d => ctx.smTravel(d), detail: d => ctx.dtTravel(d), visual: d => ctx.veTravel(d) });
+const travels = ctx => ({ outline: d => { if (!ctx.designTravel(d)) throw Error('refused'); }, storymap: d => ctx.smTravel(d), visual: d => ctx.veTravel(d) });
 const addPage = (ctx, ownerId, name) => ctx.veCommit(store => { ctx.visualCreatePage(store, { ownerId, name }); });
 
 // add surface S -> page for S -> sitemap removes S (orphaned page; the context-free shape gate allows it)
@@ -51,7 +51,7 @@ async function orphanScenario() {
   return env;
 }
 
-for (const path of ['outline', 'storymap', 'detail', 'visual']) {
+for (const path of ['outline', 'storymap', 'visual']) {
   test(`[VISUAL-HISTORY] ${path} undo after a visual commit drops the page, keeps the counter monotonic and refuses an invalid restore`, async () => {
     const { ctx, host } = await orphanScenario(), travel = travels(ctx)[path];
     travel('undo'); // restores S with its page
@@ -82,7 +82,7 @@ test('[VISUAL-HISTORY] outline undo reports a refused restore instead of throwin
   assert.match(host.notices.at(-1), /cannot be restored safely/);
 });
 
-for (const path of ['outline', 'storymap', 'detail', 'visual']) {
+for (const path of ['outline', 'storymap', 'visual']) {
   test(`[VISUAL-HISTORY] ${path} undo never yields detailDesigns next to visualDesigns`, async () => {
     const { ctx, host } = await load(), travel = travels(ctx)[path];
     const legacy = { ...plain(ctx.designSnapshot(baseDesign(ctx))), detailDesigns: plain(ctx.emptyDetailDesigns()) };
@@ -118,4 +118,15 @@ test('[VISUAL-MIGRATE] saved legacy designs migrate in place, clear history and 
   assert.equal(d.history.length + d.future.length, 0);
   ctx.validateVisualDesigns(d.visualDesigns, ctx.veContext(d));
   assert.equal(vm.runInContext('veUi.notice', ctx), 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.');
+});
+
+test('[VISUAL-ISSUES] design checks report a page whose surface is gone as a reference warning, never legacy stores', async () => {
+  const { ctx } = await orphanScenario(), issues = plain(ctx.veIssues(ctx.design()));
+  assert.equal(issues.length, 1);
+  assert.deepEqual([issues[0].level, issues[0].code, issues[0].node], ['warning', 'visual-reference', null]);
+  assert.match(issues[0].message, /^Pages and components: .*owner surface is missing/);
+  const { ctx: clean, host } = await load(); host.p = { design: baseDesign(clean) }; addPage(clean, 'node-1', 'Home');
+  assert.deepEqual(plain(clean.veIssues(clean.design())), []);
+  const legacy = baseDesign(clean); legacy.detailDesigns = clean.emptyDetailDesigns();
+  assert.deepEqual(plain(clean.veIssues(legacy)), []);
 });

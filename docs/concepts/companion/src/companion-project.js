@@ -77,8 +77,8 @@ function companionExampleProject() {
   d.designSystem.description = 'Host-friendly tokens for scoped Nuxt UI styles, component previews and generated detail surfaces. Published component revisions retain their own reviewed token snapshot.';
   d.designSystem.frontend = {schema:1,target:'nuxt-ui',colorPolicy:'host',bindings:{}};
   d.canvas = emptyCanvas();
-  // Pages and components come from the embedded, hash-pinned IR seed (seeds/visual-self-project.json); every call gets a fresh copy.
-  const visual = structuredClone(JSON.parse(document.getElementById('companion-visual-seed').textContent));
+  // Pages and components come from the embedded, hash-pinned IR seed (seeds/visual-self-project.json); each call parses a fresh copy.
+  const visual = JSON.parse(document.getElementById('companion-visual-seed').textContent);
   validateVisualDesigns(visual, veContext(d));
   d.visualDesigns = visual; d.schema = COMPANION_VERSION;
   p.notes = ['# Companion implementation boundary\n\nShell qualification precedes native companion conversion. Publication is last. The read-only inspection command returns JSON without writes. The separate reviewed generator emits Vue detail surfaces, source bindings and executable tests for declared UI effects. Unimplemented business handlers and PRD acceptance remain explicit implementation work. This editable self-project describes every eligible page and reusable component; it is not a completed native companion.\n'];

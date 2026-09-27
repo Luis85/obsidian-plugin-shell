@@ -3,8 +3,6 @@ export type DetailMapping = { kind: 'none' } | { kind: 'event' } | { kind: 'valu
   { kind: 'draft'; nodeId: string } | { kind: 'prop'; name: string } |
   { kind: 'source'; sourceId: string; operationId: string; field: string } |
   { kind: 'object'; fields: Record<string, DetailMapping> };
-export type DetailAction = { kind: 'source'; sourceId: string; operationId: string; input: DetailMapping } |
-  { kind: 'emit'; event: string; payload: DetailMapping };
 export interface DetailMappingContext {
   values: Readonly<Record<string, DetailData>>; props: Readonly<Record<string, unknown>>; payload: unknown;
   read(source: string, operation: string): unknown;

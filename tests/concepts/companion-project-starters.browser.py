@@ -107,7 +107,7 @@ with sync_playwright() as pw:
         check('Edited import bytes invalidate provenance and old review',js('!projectTransferUi.starter && !projectTransferUi.candidate') and page.locator('#starter-review-context').count()==0 and page.locator('#modal [data-action="project-import-apply"]').is_disabled())
         act('close',scope='#modal');page.locator('#discard-confirm').click()
         configure('blank');review();apply()
-        check('Start Blank has no example domain, recipes, PRDs or detail designs',js('project().design.semantic.entities.length===0 && project().design.dataSources.sources.length===0 && project().design.prds.length===0 && project().design.library.length===0 && project().design.detailDesigns.documents.length===0'))
+        check('Start Blank has no example domain, recipes, PRDs or page and component designs',js('project().design.semantic.entities.length===0 && project().design.dataSources.sources.length===0 && project().design.prds.length===0 && project().design.library.length===0 && veStore(project().design).pages.length===0 && veStore(project().design).components.length===0'))
         check('Confirmed replacement retains unrelated host files',js('state.vaultFiles["unrelated.md"]==="changed after review"'))
         # Every built-in goes through real configuration/review/confirm, not just JSON parsing.
         for identifier in js('starterCatalog.starters.map(s=>s.id)'):

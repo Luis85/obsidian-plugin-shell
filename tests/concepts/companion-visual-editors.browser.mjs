@@ -111,11 +111,11 @@ async function inspectorBindingsAndInteractions() {
   check('bind table data to source operation', tab === 'Data' && data?.kind === 'source' && declared && !(await page.locator('.ve-review').innerText()).includes('Records table has no data binding'), { tab, data });
   await pick('Create action'); await act('ve-interaction', undefined, '.ve-selection-bar'); await act('ve-interaction-add', undefined, '.ve-pane-inspector');
   // The native modal dialog makes the page inert: Tab cycles through the dialog (and the browser chrome), never the page.
-  const inDialog = [];
-  for (let i = 0; i < 14; i++) { await page.keyboard.press('Tab'); inDialog.push(await js(() => document.activeElement === document.body || !!document.activeElement?.closest('#modal'))); }
+  const stops = [];
+  for (let i = 0; i < 14; i++) { await page.keyboard.press('Tab'); stops.push(await js(() => document.activeElement?.closest('#modal') ? 'modal' : document.activeElement === document.body ? 'chrome' : 'page')); }
   await escape();
   const restored = await focused();
-  check('interaction dialog traps focus and returns it to its opener', inDialog.every(Boolean) && restored.action === 've-interaction-add', { inDialog, restored });
+  check('interaction dialog traps focus and returns it to its opener', !stops.includes('page') && stops.filter(s => s === 'modal').length >= 3 && restored.action === 've-interaction-add', { stops, restored });
   await act('ve-interaction-add', undefined, '.ve-pane-inspector'); await page.locator('#ve-int-label').fill('Open customer');
   await act('ve-act-add', undefined, '#modal'); await page.locator('#ve-act-0-surfaceId').selectOption('node-3');
   await page.locator('#ve-int-given').fill('a customer list'); await page.locator('#ve-int-when').fill('I press Add record'); await page.locator('#ve-int-then').fill('the project overview opens');
@@ -185,7 +185,10 @@ async function layoutsAcrossPages() {
   await act('ve-left', 'layouts'); await act('ve-apply-layout', layout.id);
   const after = await ids(), added = after.filter(id => !before.includes(id));
   await page.locator('.ve-toolbar [data-action="ve-undo"]').click(); const undone = JSON.stringify(await ids()) === JSON.stringify(before);
-  await page.keyboard.press('Control+k'); await page.locator('#palette-search').fill('Redo design change');
+  await page.keyboard.press('Control+k');
+  const icons = await page.locator('#palette-results').evaluate(el => ['ve-undo', 've-redo'].map(a => el.querySelector(`[data-action="${a}"] svg path`)?.getAttribute('d') ?? null));
+  check('palette Undo and Redo carry distinct icons', !!icons[0] && !!icons[1] && icons[0] !== icons[1], icons);
+  await page.locator('#palette-search').fill('Redo design change');
   await page.locator('#palette-results [data-action="ve-redo"]').click(); await closed();
   const redone = JSON.stringify(await ids()) === JSON.stringify(after), size = await js(l => visualNodes(l.root).length, layout);
   const sourceIds = await js(() => visualNodes(veStore().pages.find(p => p.ownerId === 'node-5').root).map(n => n.id));
@@ -218,6 +221,10 @@ async function guardedWrites() {
   const previewUndo = await page.locator('.ve-toolbar [data-action="ve-undo"]').isDisabled();
   await outlineItem(target).focus(); await page.keyboard.press('Control+z');
   const preview = { disabled: previewUndo, error: await errorText(), same: before === await snapshot() };
+  await page.keyboard.press('Control+k'); await opened();
+  const offered = { history: await js(() => design().history.length), rows: await page.locator('#palette-results [data-action="ve-undo"], #palette-results [data-action="ve-redo"]').count(), preview: await page.locator('#palette-results [data-action="ve-mode"]').count() };
+  await escape();
+  check('Preview offers no Undo or Redo in the palette', offered.history > 0 && offered.rows === 0 && offered.preview === 1, offered);
   await act('ve-mode', 'design');
   await selectNode(await js(() => visualNodes(veCurrentPage().root).find(n => n.ref?.entryId === 'u-table').id));
   await act('ve-inspector', 'essentials', '.ve-pane-inspector'); before = await snapshot();
@@ -235,16 +242,18 @@ async function hostilePageNames() {
   hostile.page = { name: (await nodeOf(id)).name === HOSTILE, outline: outline === HOSTILE, delete: deleteDialog.includes('Delete ' + HOSTILE + '?'), reparent: reparentDialog.includes('Move ' + HOSTILE + ' to…'), clean: await noInjection() };
 }
 
-async function legacyEntryActions() {
-  const before = await snapshot(), legacy = async (action, value) => {
-    await js(([a, v]) => document.getElementById('content').insertAdjacentHTML('beforeend', `<button type="button" id="legacy-entry" data-action="${a}" data-value="${v}">Legacy</button>`), [action, value]);
-    await page.locator('#legacy-entry').click();
+// The retired detail editors' entry actions are gone: every entry point emits ve-* actions, and an injected legacy
+// control is inert (no navigation, no write, no error).
+async function retiredEntryActions() {
+  const before = await snapshot(), origin = await js(() => ({ view: state.view, owner: veUi.owner, library: veUi.library }));
+  const emitted = await page.locator('[data-action^="dt-"], [data-action^="cp-"]').count(), retired = async (action, value) => {
+    await js(([a, v]) => document.getElementById('content').insertAdjacentHTML('beforeend', `<button type="button" id="retired-entry" data-action="${a}" data-value="${v}">Retired</button>`), [action, value]);
+    await page.locator('#retired-entry').click(); await page.waitForTimeout(60);
+    return js(() => { document.getElementById('retired-entry')?.remove(); return { view: state.view, owner: veUi.owner, library: veUi.library }; });
   };
-  await legacy('dt-page', 'node-3'); const page3 = await js(() => ({ view: state.view, owner: veUi.owner }));
-  await legacy('dt-component', 'project-json-review'); const opened = await js(() => ({ view: state.view, library: veUi.library, name: veCurrentComponent()?.exportName }));
-  await act('ve-back');
-  check('legacy dt-page and dt-component actions open the visual editors without writing', page3.view === 'page-editor' && page3.owner === 'node-3' && opened.view === 'component-editor' && opened.library === 'project-json-review' && !!opened.name
-    && await js(() => state.view === 'page-editor' && veUi.owner === 'node-3') && before === await snapshot(), { page3, opened }, 'Injected legacy data-action control through the real click delegation');
+  const afterPage = await retired('dt-page', 'node-3'), afterComponent = await retired('dt-component', 'project-json-review');
+  check('retired dt-page and dt-component actions are inert and write nothing', emitted === 0 && JSON.stringify(afterPage) === JSON.stringify(origin) && JSON.stringify(afterComponent) === JSON.stringify(origin) && before === await snapshot(),
+    { emitted, origin, afterPage, afterComponent }, 'Injected retired data-action control through the real click delegation');
 }
 
 async function customizeAndContract() {
@@ -454,7 +463,7 @@ async function selfProjectHealthAndHostileImports() {
   check('hostile v5 import rejected, project unchanged', proto.includes('__proto__') && outcomes.every(o => o.ok) && await js(() => ({}).polluted === undefined), outcomes);
 }
 
-const phases = [legacyImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, legacyEntryActions,
+const phases = [legacyImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, retiredEntryActions,
   customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, legacySavedState, scenariosAndNarrow, legacyOutlineAdoption, selfProjectHealthAndHostileImports];
 browser = await chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}) });
 try {

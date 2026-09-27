@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules];
+const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
@@ -20,7 +20,7 @@ const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalo
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'page-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = null;
-const STORAGE_KEY = 'concept', COMPANION_VERSION = 5, DESIGN_LIMITS = { history: 50 }, tdUi = { busy: false }, LIBRARY_LIMIT = 64;
+const STORAGE_KEY = 'concept', DESIGN_LIMITS = { history: 50 }, tdUi = { busy: false }, LIBRARY_LIMIT = 64;
 const localStorage = { getItem: () => null }, CSS = { escape: s => s };
 const smUi = { map: null, item: null }, designUi = { selected: null }, canvasUi = { inspector: 'intent' }, productUi = { component: null };
 class Element {}
@@ -314,7 +314,11 @@ test('[VISUAL-ENTRY] carry-forward: Backspace, physical-key fallback, contentedi
   press(ctx, 'z', { ctrlKey: true });
   assert.match(ctx.ui().error, /^Preview is read-only/); assert.equal(snapshot(ctx), before, 'undo is refused in Preview');
   assert.equal((ctx.veHistoryButtons().match(/ disabled/g) || []).length, 2, 'both history controls are disabled in Preview');
-  ctx.ui().mode = 'design'; ctx.host.design.history = []; ctx.host.design.future = [];
+  const history = () => plain(ctx.vePaletteRows().filter(r => ['ve-undo', 've-redo'].includes(r[0])).map(r => [r[0], r[4]]));
+  assert.ok(ctx.host.design.history.length > 0); assert.deepEqual(history(), [], 'Preview offers no Undo or Redo in the palette');
+  ctx.ui().mode = 'design'; assert.deepEqual(history(), [['ve-undo', 'undo']], 'Design offers Undo with its own icon');
+  ctx.handleVisualAction('ve-undo'); assert.deepEqual(history(), [['ve-redo', 'redo']], 'and Redo with a distinct icon');
+  ctx.host.design.history = []; ctx.host.design.future = [];
   assert.equal((ctx.veHistoryButtons().match(/ disabled/g) || []).length, 2, 'an empty history disables both controls');
   assert.ok(!plain(ctx.vePaletteRows().map(r => r[0])).includes('ve-undo'), 'the palette offers Undo only with history');
 });

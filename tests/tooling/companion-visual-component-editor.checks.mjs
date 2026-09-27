@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules];
+const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
@@ -20,7 +20,7 @@ const files = ['ui-fields.js', 'data-source-model.js', 've-state.js', 've-catalo
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const ICONS = {}; const state = { settings: { theme: 'light' }, view: 'component-editor', activeRun: false };
 let storageWarning = '', persistenceSnapshot = null, modalType = '', modalOriginal = 'unsaved';
-const STORAGE_KEY = 'concept', COMPANION_VERSION = 5, DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false }, LIBRARY_LIMIT = 64;
+const STORAGE_KEY = 'concept', DESIGN_LIMITS = { history: 50 }, designUi = {}, tdUi = { busy: false }, LIBRARY_LIMIT = 64;
 const localStorage = { getItem: () => null };
 class Element {}
 const document = { addEventListener(type, fn) { (host.listeners[type] ??= []).push(fn); }, getElementById: id => host.dom[id] ?? null };
@@ -231,7 +231,7 @@ test('[VISUAL-COMPONENT] customize as component seeds the contract from the prim
   assert.match(ctx.veComponentEditorView(), /Component editor · Customized UButton/);
   ctx.handleVisualAction('ve-customize', 'u-button');
   assert.equal(ctx.veStore().components.at(-1).exportName, 'AppButton2');
-  ctx.handleVisualAction('dt-component', 'plain-card');
+  ctx.handleVisualAction('ve-open-component', 'plain-card');
   assert.equal(ctx.ui().library, 'plain-card');
   const revision = ctx.host.design.revision;
   assert.match(ctx.veComponentEditorView(), /data-action="ve-start-component" data-value="plain-card"/);
