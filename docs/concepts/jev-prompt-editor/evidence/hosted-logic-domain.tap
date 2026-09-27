@@ -1,0 +1,898 @@
+TAP version 13
+# Subtest: all four templates validate
+ok 1 - all four templates validate
+  ---
+  duration_ms: 2.798694
+  type: 'test'
+  ...
+# Subtest: blank recipe validates
+ok 2 - blank recipe validates
+  ---
+  duration_ms: 1.600874
+  type: 'test'
+  ...
+# Subtest: exact three-key request envelope
+ok 3 - exact three-key request envelope
+  ---
+  duration_ms: 3.531626
+  type: 'test'
+  ...
+# Subtest: choice criteria are a map
+ok 4 - choice criteria are a map
+  ---
+  duration_ms: 0.877421
+  type: 'test'
+  ...
+# Subtest: score criteria are an ordered array
+ok 5 - score criteria are an ordered array
+  ---
+  duration_ms: 0.816257
+  type: 'test'
+  ...
+# Subtest: noul criteria use true/false keys
+ok 6 - noul criteria use true/false keys
+  ---
+  duration_ms: 0.955027
+  type: 'test'
+  ...
+# Subtest: policies and metadata never leak into wire shape
+ok 7 - policies and metadata never leak into wire shape
+  ---
+  duration_ms: 0.79102
+  type: 'test'
+  ...
+# Subtest: duplicate question IDs rejected
+ok 8 - duplicate question IDs rejected
+  ---
+  duration_ms: 0.231043
+  type: 'test'
+  ...
+# Subtest: unsafe question ID rejected
+ok 9 - unsafe question ID rejected
+  ---
+  duration_ms: 0.420136
+  type: 'test'
+  ...
+# Subtest: empty instructions rejected
+ok 10 - empty instructions rejected
+  ---
+  duration_ms: 0.436687
+  type: 'test'
+  ...
+# Subtest: duplicate choice keys rejected
+ok 11 - duplicate choice keys rejected
+  ---
+  duration_ms: 0.268512
+  type: 'test'
+  ...
+# Subtest: choice minimum enforced
+ok 12 - choice minimum enforced
+  ---
+  duration_ms: 0.155291
+  type: 'test'
+  ...
+# Subtest: choice maximum enforced
+ok 13 - choice maximum enforced
+  ---
+  duration_ms: 0.677127
+  type: 'test'
+  ...
+# Subtest: unknown option fields rejected
+ok 14 - unknown option fields rejected
+  ---
+  duration_ms: 0.869977
+  type: 'test'
+  ...
+# Subtest: score cannot have one level
+ok 15 - score cannot have one level
+  ---
+  duration_ms: 0.163386
+  type: 'test'
+  ...
+# Subtest: score maximum ten
+ok 16 - score maximum ten
+  ---
+  duration_ms: 0.157925
+  type: 'test'
+  ...
+# Subtest: noul criteria required by editor subset
+ok 17 - noul criteria required by editor subset
+  ---
+  duration_ms: 0.143147
+  type: 'test'
+  ...
+# Subtest: invalid review band rejected
+ok 18 - invalid review band rejected
+  ---
+  duration_ms: 0.136445
+  type: 'test'
+  ...
+# Subtest: model alias accepted
+ok 19 - model alias accepted
+  ---
+  duration_ms: 0.136575
+  type: 'test'
+  ...
+# Subtest: unknown model rejected
+ok 20 - unknown model rejected
+  ---
+  duration_ms: 0.162845
+  type: 'test'
+  ...
+# Subtest: future format version rejected
+ok 21 - future format version rejected
+  ---
+  duration_ms: 0.140272
+  type: 'test'
+  ...
+# Subtest: unknown recipe fields rejected
+ok 22 - unknown recipe fields rejected
+  ---
+  duration_ms: 0.142476
+  type: 'test'
+  ...
+# Subtest: JSON prototype pollution keys rejected recursively
+ok 23 - JSON prototype pollution keys rejected recursively
+  ---
+  duration_ms: 0.33142
+  type: 'test'
+  ...
+# Subtest: over-nested JSON rejected
+ok 24 - over-nested JSON rejected
+  ---
+  duration_ms: 0.221574
+  type: 'test'
+  ...
+# Subtest: request cannot masquerade as authoring recipe
+ok 25 - request cannot masquerade as authoring recipe
+  ---
+  duration_ms: 1.640287
+  type: 'test'
+  ...
+# Subtest: recipe JSON round trips exactly
+ok 26 - recipe JSON round trips exactly
+  ---
+  duration_ms: 0.798474
+  type: 'test'
+  ...
+# Subtest: library duplicates rejected
+ok 27 - library duplicates rejected
+  ---
+  duration_ms: 0.663882
+  type: 'test'
+  ...
+# Subtest: missing bindings rejected
+ok 28 - missing bindings rejected
+  ---
+  duration_ms: 0.16026
+  type: 'test'
+  ...
+# Subtest: invalid body limit rejected
+ok 29 - invalid body limit rejected
+  ---
+  duration_ms: 0.137076
+  type: 'test'
+  ...
+# Subtest: parses simple metadata/tasks/links/headings
+ok 30 - parses simple metadata/tasks/links/headings
+  ---
+  duration_ms: 0.281346
+  type: 'test'
+  ...
+# Subtest: multiline metadata tags parsed
+ok 31 - multiline metadata tags parsed
+  ---
+  duration_ms: 0.279653
+  type: 'test'
+  ...
+# Subtest: private metadata excluded
+ok 32 - private metadata excluded
+  ---
+  duration_ms: 0.111148
+  type: 'test'
+  ...
+# Subtest: ai false excluded
+ok 33 - ai false excluded
+  ---
+  duration_ms: 0.109155
+  type: 'test'
+  ...
+# Subtest: private tags excluded
+ok 34 - private tags excluded
+  ---
+  duration_ms: 0.12274
+  type: 'test'
+  ...
+# Subtest: hidden paths excluded
+ok 35 - hidden paths excluded
+  ---
+  duration_ms: 0.099637
+  type: 'test'
+  ...
+# Subtest: private folder excluded case-insensitively
+ok 36 - private folder excluded case-insensitively
+  ---
+  duration_ms: 0.087864
+  type: 'test'
+  ...
+# Subtest: folder exclusion uses path boundaries
+ok 37 - folder exclusion uses path boundaries
+  ---
+  duration_ms: 0.105477
+  type: 'test'
+  ...
+# Subtest: traversal rejected
+ok 38 - traversal rejected
+  ---
+  duration_ms: 0.139601
+  type: 'test'
+  ...
+# Subtest: unselected references not included
+ok 39 - unselected references not included
+  ---
+  duration_ms: 0.360013
+  type: 'test'
+  ...
+# Subtest: one-hop links opt in
+ok 40 - one-hop links opt in
+  ---
+  duration_ms: 0.658161
+  type: 'test'
+  ...
+# Subtest: ambiguous wiki links do not guess
+ok 41 - ambiguous wiki links do not guess
+  ---
+  duration_ms: 0.138749
+  type: 'test'
+  ...
+# Subtest: private active note blocks request
+ok 42 - private active note blocks request
+  ---
+  duration_ms: 0.477854
+  type: 'test'
+  ...
+# Subtest: body clipping is explicit
+ok 43 - body clipping is explicit
+  ---
+  duration_ms: 0.559176
+  type: 'test'
+  ...
+# Subtest: property allowlist excludes arbitrary secret metadata
+ok 44 - property allowlist excludes arbitrary secret metadata
+  ---
+  duration_ms: 0.818328
+  type: 'test'
+  ...
+# Subtest: recipe export contains no resolved note bodies
+ok 45 - recipe export contains no resolved note bodies
+  ---
+  duration_ms: 0.127158
+  type: 'test'
+  ...
+# Subtest: clear fixture validates all three types
+ok 46 - clear fixture validates all three types
+  ---
+  duration_ms: 0.665615
+  type: 'test'
+  ...
+# Subtest: ambiguous fixture produces review for every question
+ok 47 - ambiguous fixture produces review for every question
+  ---
+  duration_ms: 0.382606
+  type: 'test'
+  ...
+# Subtest: clear fixture returns suggestions, never writes
+ok 48 - clear fixture returns suggestions, never writes
+  ---
+  duration_ms: 0.273392
+  type: 'test'
+  ...
+# Subtest: catch-all choice forces review
+ok 49 - catch-all choice forces review
+  ---
+  duration_ms: 0.215454
+  type: 'test'
+  ...
+# Subtest: noul has no fabricated confidence field
+ok 50 - noul has no fabricated confidence field
+  ---
+  duration_ms: 0.134311
+  type: 'test'
+  ...
+# Subtest: response noul confidence rejected
+ok 51 - response noul confidence rejected
+  ---
+  duration_ms: 0.224561
+  type: 'test'
+  ...
+# Subtest: probabilities must sum to one
+ok 52 - probabilities must sum to one
+  ---
+  duration_ms: 0.205354
+  type: 'test'
+  ...
+# Subtest: choice must be a highest-probability option
+ok 53 - choice must be a highest-probability option
+  ---
+  duration_ms: 0.269535
+  type: 'test'
+  ...
+# Subtest: response IDs must match exactly
+ok 54 - response IDs must match exactly
+  ---
+  duration_ms: 0.213129
+  type: 'test'
+  ...
+# Subtest: response pinned model enforced
+ok 55 - response pinned model enforced
+  ---
+  duration_ms: 0.182922
+  type: 'test'
+  ...
+# Subtest: score equals weighted mean
+ok 56 - score equals weighted mean
+  ---
+  duration_ms: 0.42778
+  type: 'test'
+  ...
+# Subtest: canonical transaction rolls back on failed persistence
+ok 57 - canonical transaction rolls back on failed persistence
+  ---
+  duration_ms: 1.859517
+  type: 'test'
+  ...
+# Subtest: revision is independent of future edits
+ok 58 - revision is independent of future edits
+  ---
+  duration_ms: 0.906536
+  type: 'test'
+  ...
+# Subtest: import creates new IDs and preserves originals
+ok 59 - import creates new IDs and preserves originals
+  ---
+  duration_ms: 1.004309
+  type: 'test'
+  ...
+# Subtest: library export and import retain version snapshots
+ok 60 - library export and import retain version snapshots
+  ---
+  duration_ms: 2.799075
+  type: 'test'
+  ...
+# Subtest: import count fails atomically above 100 prompts
+ok 61 - import count fails atomically above 100 prompts
+  ---
+  duration_ms: 8.2336
+  type: 'test'
+  ...
+# Subtest: malformed stored library is retained and memory fallback used
+ok 62 - malformed stored library is retained and memory fallback used
+  ---
+  duration_ms: 0.330438
+  type: 'test'
+  ...
+# Subtest: browser repository stores only the recipe library
+ok 63 - browser repository stores only the recipe library
+  ---
+  duration_ms: 0.184515
+  type: 'test'
+  ...
+# Subtest: no UI service triggers model or vault writes
+ok 64 - no UI service triggers model or vault writes
+  ---
+  duration_ms: 0.97825
+  type: 'test'
+  ...
+# Subtest: seed 1 validates and is executable
+ok 65 - seed 1 validates and is executable
+  ---
+  duration_ms: 21.184642
+  type: 'test'
+  ...
+# Subtest: seed 2 validates and is executable
+ok 66 - seed 2 validates and is executable
+  ---
+  duration_ms: 10.640561
+  type: 'test'
+  ...
+# Subtest: seed 3 validates and is executable
+ok 67 - seed 3 validates and is executable
+  ---
+  duration_ms: 10.166906
+  type: 'test'
+  ...
+# Subtest: prompt-rule-process-prompt chain has seven meaningful steps
+ok 68 - prompt-rule-process-prompt chain has seven meaningful steps
+  ---
+  duration_ms: 12.378272
+  type: 'test'
+  ...
+# Subtest: ambiguous evidence requires review, never triggers task
+ok 69 - ambiguous evidence requires review, never triggers task
+  ---
+  duration_ms: 10.620404
+  type: 'test'
+  ...
+# Subtest: negative evidence requires review, never triggers task
+ok 70 - negative evidence requires review, never triggers task
+  ---
+  duration_ms: 9.777217
+  type: 'test'
+  ...
+# Subtest: requests carry the resolved vault and explicit process input, without transport
+ok 71 - requests carry the resolved vault and explicit process input, without transport
+  ---
+  duration_ms: 8.365476
+  type: 'test'
+  ...
+# Subtest: initial library and logic are never mutated by simulation
+ok 72 - initial library and logic are never mutated by simulation
+  ---
+  duration_ms: 9.443773
+  type: 'test'
+  ...
+# Subtest: one Step advances exactly one node, retaining a paused queue
+ok 73 - one Step advances exactly one node, retaining a paused queue
+  ---
+  duration_ms: 5.016102
+  type: 'test'
+  ...
+# Subtest: finished simulation is inert when stepped again
+ok 74 - finished simulation is inert when stepped again
+  ---
+  duration_ms: 6.996025
+  type: 'test'
+  ...
+# Subtest: strict scalar equality does not coerce strings
+ok 75 - strict scalar equality does not coerce strings
+  ---
+  duration_ms: 0.465801
+  type: 'test'
+  ...
+# Subtest: object equality asks for a scalar field
+ok 76 - object equality asks for a scalar field
+  ---
+  duration_ms: 0.161942
+  type: 'test'
+  ...
+# Subtest: operator eq 2 is deterministic
+ok 77 - operator eq 2 is deterministic
+  ---
+  duration_ms: 0.131305
+  type: 'test'
+  ...
+# Subtest: operator neq 2 is deterministic
+ok 78 - operator neq 2 is deterministic
+  ---
+  duration_ms: 0.079879
+  type: 'test'
+  ...
+# Subtest: operator gt 3 is deterministic
+ok 79 - operator gt 3 is deterministic
+  ---
+  duration_ms: 0.066875
+  type: 'test'
+  ...
+# Subtest: operator gte 2 is deterministic
+ok 80 - operator gte 2 is deterministic
+  ---
+  duration_ms: 0.109375
+  type: 'test'
+  ...
+# Subtest: operator lt 1 is deterministic
+ok 81 - operator lt 1 is deterministic
+  ---
+  duration_ms: 0.067706
+  type: 'test'
+  ...
+# Subtest: operator lte 2 is deterministic
+ok 82 - operator lte 2 is deterministic
+  ---
+  duration_ms: 0.080681
+  type: 'test'
+  ...
+# Subtest: operator contains "hello" is deterministic
+ok 83 - operator contains "hello" is deterministic
+  ---
+  duration_ms: 0.074068
+  type: 'test'
+  ...
+# Subtest: operator contains [1,2] is deterministic
+ok 84 - operator contains [1,2] is deterministic
+  ---
+  duration_ms: 0.073357
+  type: 'test'
+  ...
+# Subtest: operator lt 4 is deterministic
+ok 85 - operator lt 4 is deterministic
+  ---
+  duration_ms: 0.062306
+  type: 'test'
+  ...
+# Subtest: exists and missing intentionally distinguish absence
+ok 86 - exists and missing intentionally distinguish absence
+  ---
+  duration_ms: 0.131666
+  type: 'test'
+  ...
+# Subtest: missing operands fail closed rather than selecting Else
+ok 87 - missing operands fail closed rather than selecting Else
+  ---
+  duration_ms: 0.183443
+  type: 'test'
+  ...
+# Subtest: missing or mismatched required contract input fails before branch execution
+ok 88 - missing or mismatched required contract input fails before branch execution
+  ---
+  duration_ms: 0.214491
+  type: 'test'
+  ...
+# Subtest: first matching branch wins
+ok 89 - first matching branch wins
+  ---
+  duration_ms: 0.148518
+  type: 'test'
+  ...
+# Subtest: AND short circuits after false before an unavailable value
+ok 90 - AND short circuits after false before an unavailable value
+  ---
+  duration_ms: 0.129272
+  type: 'test'
+  ...
+# Subtest: OR short circuits after true before an unavailable value
+ok 91 - OR short circuits after true before an unavailable value
+  ---
+  duration_ms: 0.128409
+  type: 'test'
+  ...
+# Subtest: no matched branch yields an explicit decision
+ok 92 - no matched branch yields an explicit decision
+  ---
+  duration_ms: 0.111579
+  type: 'test'
+  ...
+# Subtest: rule preserves continue decision type
+ok 93 - rule preserves continue decision type
+  ---
+  duration_ms: 0.124483
+  type: 'test'
+  ...
+# Subtest: rule preserves process decision type
+ok 94 - rule preserves process decision type
+  ---
+  duration_ms: 0.175548
+  type: 'test'
+  ...
+# Subtest: rule preserves end decision type
+ok 95 - rule preserves end decision type
+  ---
+  duration_ms: 0.101149
+  type: 'test'
+  ...
+# Subtest: rule preserves review decision type
+ok 96 - rule preserves review decision type
+  ---
+  duration_ms: 0.082925
+  type: 'test'
+  ...
+# Subtest: rule End cancels queued event work
+ok 97 - rule End cancels queued event work
+  ---
+  duration_ms: 5.112783
+  type: 'test'
+  ...
+# Subtest: bounded while executes exactly three body iterations then exits
+ok 98 - bounded while executes exactly three body iterations then exits
+  ---
+  duration_ms: 4.564026
+  type: 'test'
+  ...
+# Subtest: false initial While executes no body
+ok 99 - false initial While executes no body
+  ---
+  duration_ms: 4.208641
+  type: 'test'
+  ...
+# Subtest: exact natural exit at quota is allowed
+ok 100 - exact natural exit at quota is allowed
+  ---
+  duration_ms: 5.053572
+  type: 'test'
+  ...
+# Subtest: loop quota produces Review without false true-phase publication
+ok 101 - loop quota produces Review without false true-phase publication
+  ---
+  duration_ms: 4.936042
+  type: 'test'
+  ...
+# Subtest: zero, negative, excessive, and nonfinite budgets fail shape validation
+ok 102 - zero, negative, excessive, and nonfinite budgets fail shape validation
+  ---
+  duration_ms: 4.25102
+  type: 'test'
+  ...
+# Subtest: global step budget halts before executing the next node
+ok 103 - global step budget halts before executing the next node
+  ---
+  duration_ms: 6.186851
+  type: 'test'
+  ...
+# Subtest: control cycle requires an explicit bounded While on every cycle
+ok 104 - control cycle requires an explicit bounded While on every cycle
+  ---
+  duration_ms: 0.534339
+  type: 'test'
+  ...
+# Subtest: event cycles are stopped by the global event budget
+ok 105 - event cycles are stopped by the global event budget
+  ---
+  duration_ms: 3.454631
+  type: 'test'
+  ...
+# Subtest: process transforms are actual local data transformations
+ok 106 - process transforms are actual local data transformations
+  ---
+  duration_ms: 4.520975
+  type: 'test'
+  ...
+# Subtest: external process requests stop without a completed event
+ok 107 - external process requests stop without a completed event
+  ---
+  duration_ms: 4.774871
+  type: 'test'
+  ...
+# Subtest: fixture process is visibly labeled rather than called real execution
+ok 108 - fixture process is visibly labeled rather than called real execution
+  ---
+  duration_ms: 5.88075
+  type: 'test'
+  ...
+# Subtest: process output type mismatch fails before its events publish
+ok 109 - process output type mismatch fails before its events publish
+  ---
+  duration_ms: 4.890787
+  type: 'test'
+  ...
+# Subtest: safe Add requires finite numeric source and result
+ok 110 - safe Add requires finite numeric source and result
+  ---
+  duration_ms: 0.241061
+  type: 'test'
+  ...
+# Subtest: contracts reject undeclared output and nested forbidden keys
+ok 111 - contracts reject undeclared output and nested forbidden keys
+  ---
+  duration_ms: 0.219831
+  type: 'test'
+  ...
+# Subtest: optional fields may be absent but cannot have wrong types
+ok 112 - optional fields may be absent but cannot have wrong types
+  ---
+  duration_ms: 0.146824
+  type: 'test'
+  ...
+# Subtest: safe paths do not reach inherited object members or execute expressions
+ok 113 - safe paths do not reach inherited object members or execute expressions
+  ---
+  duration_ms: 0.171841
+  type: 'test'
+  ...
+# Subtest: numeric overflow in JSON is refused rather than serialized as null
+ok 114 - numeric overflow in JSON is refused rather than serialized as null
+  ---
+  duration_ms: 0.121097
+  type: 'test'
+  ...
+# Subtest: event payload follows named publisher, with correlation and cause
+ok 115 - event payload follows named publisher, with correlation and cause
+  ---
+  duration_ms: 6.04697
+  type: 'test'
+  ...
+# Subtest: prompt definitions and node instances both emit declared events
+ok 116 - prompt definitions and node instances both emit declared events
+  ---
+  duration_ms: 7.027253
+  type: 'test'
+  ...
+# Subtest: flow Start and End node events are supported
+ok 117 - flow Start and End node events are supported
+  ---
+  duration_ms: 6.335019
+  type: 'test'
+  ...
+# Subtest: flow lifecycle emits once after the run outcome
+ok 118 - flow lifecycle emits once after the run outcome
+  ---
+  duration_ms: 6.984543
+  type: 'test'
+  ...
+# Subtest: review phase is distinct from completed
+ok 119 - review phase is distinct from completed
+  ---
+  duration_ms: 5.420297
+  type: 'test'
+  ...
+# Subtest: event contract validation rejects duplicate names and undeclared payload fields
+ok 120 - event contract validation rejects duplicate names and undeclared payload fields
+  ---
+  duration_ms: 0.273301
+  type: 'test'
+  ...
+# Subtest: invalid event payload blocks normal publication and routes through Error
+ok 121 - invalid event payload blocks normal publication and routes through Error
+  ---
+  duration_ms: 4.435296
+  type: 'test'
+  ...
+# Subtest: error event is emitted only after failure and does not claim completion
+ok 122 - error event is emitted only after failure and does not claim completion
+  ---
+  duration_ms: 4.700111
+  type: 'test'
+  ...
+# Subtest: renaming an event preserves ID-based subscriptions
+ok 123 - renaming an event preserves ID-based subscriptions
+  ---
+  duration_ms: 6.562454
+  type: 'test'
+  ...
+# Subtest: duplicate identical event listener edges are refused
+ok 124 - duplicate identical event listener edges are refused
+  ---
+  duration_ms: 0.66847
+  type: 'test'
+  ...
+# Subtest: unsupported rule phases on nonrule items fail preflight
+ok 125 - unsupported rule phases on nonrule items fail preflight
+  ---
+  duration_ms: 0.485488
+  type: 'test'
+  ...
+# Subtest: definition and instance event ID collisions fail preflight
+ok 126 - definition and instance event ID collisions fail preflight
+  ---
+  duration_ms: 0.544137
+  type: 'test'
+  ...
+# Subtest: process decision must connect to the selected process
+ok 127 - process decision must connect to the selected process
+  ---
+  duration_ms: 0.439382
+  type: 'test'
+  ...
+# Subtest: limit output is terminal rather than pretending to route a connection
+ok 128 - limit output is terminal rather than pretending to route a connection
+  ---
+  duration_ms: 0.402623
+  type: 'test'
+  ...
+# Subtest: reserved branch IDs cannot shadow Else or Error
+ok 129 - reserved branch IDs cannot shadow Else or Error
+  ---
+  duration_ms: 3.495357
+  type: 'test'
+  ...
+# Subtest: dangling and archived references block simulation
+ok 130 - dangling and archived references block simulation
+  ---
+  duration_ms: 1.750013
+  type: 'test'
+  ...
+# Subtest: unknown fields and unknown versions fail closed
+ok 131 - unknown fields and unknown versions fail closed
+  ---
+  duration_ms: 4.456455
+  type: 'test'
+  ...
+# Subtest: maximum records and unsafe IDs are enforced
+ok 132 - maximum records and unsafe IDs are enforced
+  ---
+  duration_ms: 1.824422
+  type: 'test'
+  ...
+# Subtest: version-1 prompt/library remains byte-equivalent after read
+ok 133 - version-1 prompt/library remains byte-equivalent after read
+  ---
+  duration_ms: 1.278531
+  type: 'test'
+  ...
+# Subtest: v2 workspace round trips all entities, mappings, events and checkpoints
+ok 134 - v2 workspace round trips all entities, mappings, events and checkpoints
+  ---
+  duration_ms: 8.927317
+  type: 'test'
+  ...
+# Subtest: v1 cannot silently accept v2 logic or prompt fields
+ok 135 - v1 cannot silently accept v2 logic or prompt fields
+  ---
+  duration_ms: 1.236883
+  type: 'test'
+  ...
+# Subtest: linked workspace import remaps all prompt/rule/process references
+ok 136 - linked workspace import remaps all prompt/rule/process references
+  ---
+  duration_ms: 7.436408
+  type: 'test'
+  ...
+# Subtest: import does not rewrite ordinary authored strings
+ok 137 - import does not rewrite ordinary authored strings
+  ---
+  duration_ms: 4.945249
+  type: 'test'
+  ...
+# Subtest: historical-only process identities are consistently remapped in checkpoint
+ok 138 - historical-only process identities are consistently remapped in checkpoint
+  ---
+  duration_ms: 8.865682
+  type: 'test'
+  ...
+# Subtest: import into a prompt-only library does not inject extra example flows
+ok 139 - import into a prompt-only library does not inject extra example flows
+  ---
+  duration_ms: 4.513752
+  type: 'test'
+  ...
+# Subtest: prompt-only import refuses a linked workspace rather than discarding logic
+ok 140 - prompt-only import refuses a linked workspace rather than discarding logic
+  ---
+  duration_ms: 0.827949
+  type: 'test'
+  ...
+# Subtest: logic save uses the one canonical repository and preserves prompts
+ok 141 - logic save uses the one canonical repository and preserves prompts
+  ---
+  duration_ms: 3.986596
+  type: 'test'
+  ...
+# Subtest: failed logic persistence leaves the previous canonical workspace intact
+ok 142 - failed logic persistence leaves the previous canonical workspace intact
+  ---
+  duration_ms: 3.873966
+  type: 'test'
+  ...
+# Subtest: prompt events can be saved and versioned without losing logic
+ok 143 - prompt events can be saved and versioned without losing logic
+  ---
+  duration_ms: 10.209415
+  type: 'test'
+  ...
+# Subtest: restoring a logic checkpoint first preserves the current work
+ok 144 - restoring a logic checkpoint first preserves the current work
+  ---
+  duration_ms: 5.020009
+  type: 'test'
+  ...
+# Subtest: checkpoint overflow refuses silent history loss
+ok 145 - checkpoint overflow refuses silent history loss
+  ---
+  duration_ms: 202.76032
+  type: 'test'
+  ...
+# Subtest: runtime traces and vault snapshots do not enter saved/exported workspace
+ok 146 - runtime traces and vault snapshots do not enter saved/exported workspace
+  ---
+  duration_ms: 8.263386
+  type: 'test'
+  ...
+# Subtest: trace retention budget aborts publication of an oversized step
+ok 147 - trace retention budget aborts publication of an oversized step
+  ---
+  duration_ms: 4.451476
+  type: 'test'
+  ...
+# Subtest: shipped runtime has no transport or executable rule evaluation
+ok 148 - shipped runtime has no transport or executable rule evaluation
+  ---
+  duration_ms: 0.960576
+  type: 'test'
+  ...
+1..148
+# tests 148
+# suites 0
+# pass 148
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 634.861302

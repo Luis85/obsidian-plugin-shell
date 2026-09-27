@@ -10,7 +10,7 @@ import { COMPANION_VERSION, migrateCompanionDocument, parseCompanionDocument } f
 
 const plain = value => JSON.parse(JSON.stringify(value));
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['design-system-roles.mjs', 'design-system-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'project-contract.mjs'];
+const contracts = ['native-contract.mjs', 'design-system-roles.mjs', 'design-system-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
 const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js', 'project-transfer.js'];

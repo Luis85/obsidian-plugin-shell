@@ -104,7 +104,8 @@ export class WorkspaceLeaf extends Events {
     return view;
   }
   async openFile(file: TFile, openState: { active?: boolean } = {}): Promise<void> {
-    await this.setViewState({ type: 'markdown', state: { file: file.path }, active: openState.active ?? true });
+    const type = this.app.viewRegistry.typeByExtension.get(file.extension.toLowerCase()) ?? 'markdown';
+    await this.setViewState({ type, state: { file: file.path }, active: openState.active ?? true });
     this.workspace.setActiveFile(file);
   }
   getDisplayText(): string { return this.view.getDisplayText(); }

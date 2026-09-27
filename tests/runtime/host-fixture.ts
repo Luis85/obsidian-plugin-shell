@@ -109,6 +109,6 @@ class MenuItem {
 }
 class HostNotice { constructor(text: string) { hostState.notices.push(text); } hide = vi.fn(); setMessage = vi.fn(); }
 class HostFolder { readonly children: unknown[] = []; readonly path = ''; readonly name = ''; }
-export const hostModule = { App: HostApp, Plugin: HostPlugin, ItemView: HostItemView, PluginSettingTab: HostSettingsTab,
+export const hostModule = { App: HostApp, Plugin: HostPlugin, ItemView: HostItemView, TextFileView: HostItemView, PluginSettingTab: HostSettingsTab,
   WorkspaceLeaf: Leaf, Menu: HostMenu, Notice: HostNotice, TFile: class {}, TFolder: HostFolder, Modal: class {},
   Setting: HostSetting, SettingGroup: HostSettingGroup, ToggleComponent: HostToggle };

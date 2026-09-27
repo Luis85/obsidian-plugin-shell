@@ -1,5 +1,6 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
+import { nativeCode } from '../../companion/compiler/native-code.ts';
 import { httpCode } from '../../companion/compiler/http-code.ts';
 import { relationshipCode } from '../../companion/compiler/relationship-code.ts';
 import { renderFixtureCode as fixtureCode } from './fixture-emitter.ts';
@@ -67,6 +68,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('data', () => dataCode(m,add));
   await emit('navigation', () => navigationCode(m,add));
   await emit('ui', () => uiCode(m,add));
+  await emit('native', () => nativeCode(m,add));
   await emit('host', () => hostCode(m,add));
   await emit('style', () => styleCode(m,add));
   await emit('persistence', () => persistenceCode(templateRoot,m,add));

@@ -1,0 +1,22 @@
+<section v-if="ui.area==='logic'" class="logic-workspace">
+  <header class="logic-heading">
+    <div class="logic-title">
+      <div class="eyebrow">BUSINESS LOGIC <span class="badge micro">LOCAL SIMULATOR</span></div>
+      <template v-if="['flows','rules','processes'].includes(logic.view)&&logicCurrent"><input class="title-field" v-model="logicCurrent.name" maxlength="160" aria-label="Logic item name"><input class="description-field" v-model="logicCurrent.description" maxlength="4000" aria-label="Logic item description" placeholder="Describe this item's business purpose…"></template>
+      <template v-else><h1>{{({events:'Events connect the pieces',versions:'Checkpoints for your logic',json:'Portable by design',rules:'Your business rules',processes:'Your reusable processes'})[logic.view]||'Decision workbench'}}</h1><p>Explicit contracts. Inspectable decisions. No hidden execution.</p></template>
+    </div>
+    <div class="logic-heading-actions"><span class="save-state" :class="{warning:logic.saved.includes('not saved')||logic.saved==='Not saved'}">{{logic.saved}}</span><div class="button-row"><button class="button" @click="openModal('logic-checkpoint')" :disabled="logicShape.length>0"><svg class="icon small"><use href="#i-clock"/></svg>Checkpoint</button><button class="button primary" @click="logicOpenExport()"><svg class="icon small"><use href="#i-download"/></svg>Export workspace</button></div></div>
+  </header>
+  <nav class="logic-tabs" aria-label="Business logic sections"><button v-for="tab in [{id:'flows',label:'Flows',icon:'branch'},{id:'rules',label:'Business rules',icon:'sliders'},{id:'processes',label:'Processes',icon:'grid'},{id:'events',label:'Events',icon:'link'},{id:'versions',label:'Checkpoints',icon:'clock'},{id:'json',label:'JSON',icon:'code'}]" :key="tab.id" :class="{active:logic.view===tab.id}" :aria-current="logic.view===tab.id?'page':undefined" @click="logicSwitch(tab.id)"><svg class="icon small"><use :href="'#i-'+tab.icon"/></svg>{{tab.label}}<span v-if="tab.id==='events'" class="tab-count">{{logicCatalog.length}}</span></button></nav>
+  <div v-if="logic.error" class="banner danger logic-global-error" role="alert">{{logic.error}}<button class="text-button" @click="logic.error=''">Dismiss</button></div>
+  <div v-if="logicShape.length" class="banner danger logic-global-error"><strong>Draft not saved</strong><div v-for="issue in logicShape.slice(0,3)" :key="issue.path"><code>{{issue.path}}</code> — {{issue.message}}</div><small>Repair these fields. The last saved workspace remains unchanged.</small></div>
+  <div v-if="logic.guide" class="logic-explainer"><div><strong>01 · Prepare input</strong><span>Processes declare what they accept and return.</span></div><div><strong>02 · Ask Jev</strong><span>A prompt returns typed answers, not business logic.</span></div><div><strong>03 · Decide</strong><span>Rules branch, stop, request a process, or ask for review.</span></div><div><strong>04 · Connect events</strong><span>Declared facts trigger only explicit listeners.</span></div><button class="icon-button" @click="logic.guide=false" aria-label="Dismiss logic guide">×</button></div>
+  <div class="logic-body">
+    <!--LOGIC-FLOW-->
+    <!--LOGIC-RULES-->
+    <!--LOGIC-PROCESSES-->
+    <!--LOGIC-EVENTS-->
+    <!--LOGIC-HISTORY-->
+  </div>
+  <footer class="statusbar"><span>Typed decisions · bounded execution · explicit events</span><button class="text-button" @click="logic.guide=!logic.guide">How business logic works</button></footer>
+</section>

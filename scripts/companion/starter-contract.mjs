@@ -27,12 +27,20 @@ export function customizeStarter(catalog, id, fields) {
   validateStarterCatalog(catalog);
   const entry = catalog.starters.find(s => s.id === id);
   starterAssert(entry, 'Unknown starter.');
-  starterAssert(fields && Object.keys(fields).every(k => ['id','name','author','version','description','codebaseFolder','testsFolder'].includes(k)), 'Unknown configuration.');
+  starterAssert(fields && Object.keys(fields).every(k => ['id','name','author','version','description','codebaseFolder','testsFolder','extension','extensions'].includes(k)), 'Unknown configuration.');
   starterAssert(Object.values(fields).every(v => typeof v === 'string'), 'Configuration values must be text.');
   const document = JSON.parse(JSON.stringify(entry.document));
   for (const key of ['id','name','author','version','description']) document.project[key] = String(fields[key] ?? document.project[key]).trim();
   document.settings = validateCompanionFolders({ codebaseFolder: fields.codebaseFolder ?? document.settings.codebaseFolder, testsFolder: fields.testsFolder ?? document.settings.testsFolder });
   for (const folder of Object.values(document.settings)) starterAssert(!['scripts','docs','harness','dist'].includes(folder.split('/')[0].toLowerCase()), 'Folder overlaps framework tooling.');
+  if (fields.extension !== undefined) {
+    starterAssert(document.design.nativeIntegrations?.fileTypes.length === 1, '--extension requires a starter with exactly one custom file type.');
+    document.design.nativeIntegrations.fileTypes[0].extension = fields.extension;
+  }
+  if (fields.extensions !== undefined) {
+    starterAssert(document.design.nativeIntegrations?.contextMenus.length === 1, '--extensions requires a starter with exactly one context action.');
+    document.design.nativeIntegrations.contextMenus[0].extensions = fields.extensions.split(',');
+  }
   // Provenance is informational Markdown, not a schema extension or execution authority.
   document.notes.push('# Project starter\n\nBuilt-in: ' + entry.id + ' @ ' + entry.version + '\nSource SHA-256: ' + entry.sha256 + '\n\nThis project is an independent editable copy. Catalog updates never overwrite it. No execution approvals, credentials, machine paths, test results or plugin installation are imported.\n');
   return parseCompanionDocument(JSON.stringify(document));
