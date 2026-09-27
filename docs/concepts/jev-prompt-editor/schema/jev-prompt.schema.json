@@ -1,0 +1,307 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "jev-prompt"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "\\S"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 4000
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 40
+      },
+      "minItems": 0,
+      "maxItems": 12
+    },
+    "model": {
+      "enum": [
+        "jev-1.13.0",
+        "jev-latest",
+        "jev-preview"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready",
+        "archived"
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "boolean"
+        },
+        "frontmatter": {
+          "type": "boolean"
+        },
+        "tasks": {
+          "type": "boolean"
+        },
+        "headings": {
+          "type": "boolean"
+        },
+        "selection": {
+          "type": "boolean"
+        },
+        "linkedNotes": {
+          "type": "boolean"
+        },
+        "maxChars": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 30000
+        },
+        "maxReferences": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 100
+          },
+          "minItems": 0,
+          "maxItems": 30
+        },
+        "excludedFolders": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 100
+          },
+          "minItems": 0,
+          "maxItems": 30
+        }
+      },
+      "required": [
+        "body",
+        "frontmatter",
+        "tasks",
+        "headings",
+        "selection",
+        "linkedNotes",
+        "maxChars",
+        "maxReferences",
+        "fields",
+        "excludedFolders"
+      ]
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$",
+            "not": {
+              "enum": [
+                "constructor",
+                "prototype",
+                "__proto__"
+              ]
+            }
+          },
+          "type": {
+            "enum": [
+              "choice",
+              "score",
+              "noul"
+            ]
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "options": {
+            "type": "array"
+          },
+          "levels": {
+            "type": "array"
+          },
+          "yes": {
+            "type": "string"
+          },
+          "no": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "instructions",
+          "options",
+          "levels",
+          "yes",
+          "no"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "choice"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$",
+                        "not": {
+                          "enum": [
+                            "constructor",
+                            "prototype",
+                            "__proto__"
+                          ]
+                        }
+                      },
+                      "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "description"
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 255
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "score"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "levels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "minItems": 2,
+                  "maxItems": 10
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "noul"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "yes": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "no": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 24
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "yes": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "no": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "confidence",
+        "yes",
+        "no"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "schemaVersion",
+    "id",
+    "name",
+    "description",
+    "tags",
+    "model",
+    "status",
+    "bindings",
+    "questions",
+    "policy"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jev-studio:prompt:1",
+  "title": "Jev Studio editable prompt recipe v1",
+  "$comment": "Product-owned authoring format, not the TypeSafe API nor a companion project. Runtime validation additionally checks whitespace-only instructions, safe nested keys, duplicate IDs/option keys and policy.no < policy.yes. Only the active primitive uses its corresponding options/levels/yes/no fields."
+}

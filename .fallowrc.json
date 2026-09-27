@@ -145,6 +145,7 @@
     "docs/concepts/companion/src/ve.css",
     "docs/concepts/companion/src/project-transfer.js",
     "docs/concepts/companion/src/companion-project.js",
+    "scripts/companion/native-contract.mjs",
     "scripts/companion/project-contract.mjs",
     "shell.mjs",
     "scripts/companion/runtime/operation.ts",
@@ -446,6 +447,10 @@
     "./vendor/obsidian.css"
   ],
   "usedClassMembers": [
+    {
+      "extends": "TextFileView",
+      "members": ["getIcon", "getViewData", "setViewData", "save", "disposeNativeView"]
+    },
     {
       "extends": "PluginSettingTab",
       "members": [

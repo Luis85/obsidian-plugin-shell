@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "destination": {
+      "type": "choice",
+      "confidence": 0.91,
+      "probabilities": {
+        "project": 0.94,
+        "reference": 0.02,
+        "meeting": 0.02,
+        "other": 0.02
+      },
+      "choice": "project"
+    },
+    "has_next_action": {
+      "type": "noul",
+      "noul": 0.94
+    },
+    "action_clarity": {
+      "type": "score",
+      "confidence": 0.91,
+      "probabilities": {
+        "0": 0.03,
+        "1": 0.94,
+        "2": 0.03
+      },
+      "score": 1,
+      "legend": {
+        "0": "No next action is stated.",
+        "1": "A next action is stated, but the deliverable or owner is unclear.",
+        "2": "The next action names a concrete deliverable and an owner."
+      }
+    }
+  },
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

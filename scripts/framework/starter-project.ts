@@ -1,6 +1,7 @@
 /** One-command project creation from a reviewed built-in starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
+import type { NativeProjectIntegrations } from '../companion/native-contract.mjs';
 import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
@@ -14,7 +15,7 @@ import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { exportedProject } from './project-from.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
-interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string } } }
+interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
 interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
 /** A kit or configured consumer carries its verified template under .framework/template. */
@@ -78,6 +79,7 @@ async function placement(context: Context, dir: string | undefined, insideVault 
 /** Returns the compiler's own plan; planning.ts binds it to the request and rebuilds it before apply. */
 export async function starterProjectPlan(request: Request, context: Context) {
   const from = request.options.from !== undefined;
+  requireThat(!from || (request.options.extension === undefined && request.options.extensions === undefined), 'NATIVE_OPTIONS_REQUIRE_STARTER', 'Use native options with --starter, or edit design.nativeIntegrations in the exported JSON.');
   requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
   const place = await placement(context, request.args[0], request.options['inside-vault'] === true);
   const created = from ? await fromExport(request, context) : await fromStarter(request, context, place.directory);
@@ -109,8 +111,9 @@ async function fromStarter(request: Request, context: Context, directory: string
   const id = stringOption(request.options, 'id') ?? derivedId(directory, entry.document.project.id);
   const problem = pluginIdProblem(id); if (problem) throw new OperationError('INVALID_PLUGIN_ID', `Invalid plugin ID "${id}". ${problem}`, 'Pass --id <plugin-id>.');
   const author = stringOption(request.options, 'author');
-  // Identity only, exactly like the concept's starter configuration: never global label rewrites.
-  const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }) });
+  // Scoped declaration options and identity only; never globally rewrite authored domain labels.
+  const extension = stringOption(request.options, 'extension'); const extensions = stringOption(request.options, 'extensions');
+  const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }), ...(extension === undefined ? {} : { extension }), ...(extensions === undefined ? {} : { extensions }) });
   return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } }, warnings: [] as string[] };
 }
 function nextSteps(directory: string): string[] {

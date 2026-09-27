@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { symbol, title, builtinRecipes } from './arguments.mjs';
+import { makerSymbol as symbol, title, builtinRecipes } from './arguments.mjs';
 import { localeSkeleton } from './pending-locale.mjs';
 import { defineLocalMaker } from './custom-contract.mjs';
 
