@@ -11,9 +11,11 @@ const maintainerWorkflows = '.github/workflows/';
 export function relocatedPath(path: string): string {
   return frameworkDocuments.get(path) ?? (path.startsWith(maintainerWorkflows) ? 'docs/framework/workflows/' + path.slice(maintainerWorkflows.length) : path);
 }
-/** The maintainer runner script and the policy test for maintainer CI triggers are not copied. */
+/** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
+ * sitemap-editor prototype (its own app, binary QA screenshots) are not copied. */
 export function maintainerOnly(path: string): boolean {
-  return path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs';
+  return path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
+    || path.startsWith('docs/concepts/sitemap-editor/');
 }
 const external = /^(?:[a-z][a-z\d+.-]*:|#|\/\/|\/)/i;
 function relink(value: string, from: string, to: string): string {
