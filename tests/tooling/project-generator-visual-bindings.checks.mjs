@@ -5,6 +5,7 @@ import { readFile, writeFile, mkdir, mkdtemp, rm, symlink, realpath } from 'node
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { stripVTControlCharacters } from 'node:util';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
@@ -45,10 +46,11 @@ test('generated binding tests pass in a generated workspace and fail once bound 
     }
     await symlink(modules, join(dir, 'node_modules'), 'junction');
     const green = run();
-    assert.equal(green.status, 0, green.stdout + green.stderr); assert.match(green.stdout, /Tests\s+3 passed/);
+    assert.equal(green.status, 0, green.stdout + green.stderr); assert.match(stripVTControlCharacters(green.stdout), /Tests\s+3 passed/);
     const sfc = await readFile(join(dir, page), 'utf8'), unbound = sfc.replace(` v-bind="model.props('vn-40')"`, '');
     assert.notEqual(unbound, sfc); await writeFile(join(dir, page), unbound);
     const red = run();
-    assert.notEqual(red.status, 0, red.stdout); assert.match(red.stdout, /\[vn-40\] displays validated source output/); assert.match(red.stdout, /Tests\s+1 failed \| 2 passed/);
+    assert.notEqual(red.status, 0, red.stdout); const redOutput = stripVTControlCharacters(red.stdout);
+    assert.match(redOutput, /\[vn-40\] displays validated source output/); assert.match(redOutput, /Tests\s+1 failed \| 2 passed/);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
