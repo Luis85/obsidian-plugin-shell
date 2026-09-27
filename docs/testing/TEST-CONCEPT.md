@@ -160,7 +160,7 @@ Invoke real Oxlint/ESLint/fallow/type/style checks over isolated deliberately in
 
 ## 8. CI and promotion
 
-The supplied `baseline-verification.yml` calls the same Node baseline command on Linux and Windows. Official actions are pinned by full commit and credentials are not persisted; permissions are read-only. Reports upload even on failure, missing evidence is an error, and retention is seven days. It installs no unqualified npm graph.
+The `baseline` job of `.github/workflows/ci.yml` (formerly `baseline-verification.yml`) calls the same Node baseline command on Linux and Windows. Official actions are pinned by full commit and credentials are not persisted; permissions are read-only. Reports upload even on failure, missing evidence is an error, and retention is seven days. It installs no unqualified npm graph.
 
 The workflow's exact Node 24.21.0 target is a declared CI qualification target, not a claim that the editing environment ran it. Local execution used Node 22.16.0. The real plugin's WP-00 version matrix remains outstanding. Windows process handling and hosted action execution must be confirmed from actual workflow results.
 
