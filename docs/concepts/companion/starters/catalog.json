@@ -252,6 +252,60 @@
       "version": "1.0.0",
       "file": "import-integration.companion.json",
       "sha256": "49ecc9fd2cac615cf20f7ff4005b9e39b1bab7e48f1418f8b632754e8d133098"
+    },
+    {
+      "id": "custom-file-view",
+      "name": "Custom File View",
+      "category": "Foundations",
+      "level": "Foundation",
+      "summary": "Own a text-backed file format and open it in a dedicated Obsidian editor.",
+      "outcome": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
+      "tags": [
+        "file-extension",
+        "file-view",
+        "json",
+        "native",
+        "editor"
+      ],
+      "includes": [
+        "Real .folio extension registration and TextFileView",
+        "Create command, folder-create menu and matching-file open menu",
+        "Raw JSON editing, validation messages and original-text preservation"
+      ],
+      "implementation": [
+        "Design a domain-specific editor or schema when needed",
+        "Qualify reload, external edits and conflicts in a disposable native vault"
+      ],
+      "version": "1.0.0",
+      "file": "custom-file-view.companion.json",
+      "sha256": "643dcb70a0a706a2af07b138e599ca6d8694ac7bef9429e3a55a822342d5ae55"
+    },
+    {
+      "id": "context-menu",
+      "name": "File Context Menu",
+      "category": "Foundations",
+      "level": "Foundation",
+      "summary": "Add a focused, extension-filtered action to Obsidian’s file context menu.",
+      "outcome": "Right-click a Markdown file and inspect its metadata through an editable, host-independent action.",
+      "tags": [
+        "context-menu",
+        "file-menu",
+        "markdown",
+        "native",
+        "action"
+      ],
+      "includes": [
+        "Plugin-owned file-menu event with Markdown filtering",
+        "Read-only inspect-file handler and native result dialog",
+        "Domain context contract, safe error boundary and unload cleanup"
+      ],
+      "implementation": [
+        "Replace the inspection handler with your own business operation",
+        "Introduce explicit application ports and confirmation before adding writes"
+      ],
+      "version": "1.0.0",
+      "file": "context-menu.companion.json",
+      "sha256": "ebfb84289a2bdc7d0604667f607c577af4db85b627a4a05a0a008683e3370438"
     }
   ]
 }

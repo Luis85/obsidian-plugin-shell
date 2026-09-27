@@ -1,3 +1,4 @@
+import { nativeCode } from './native-code.ts';
 import { httpCode } from './http-code.ts';
 import { relationshipCode } from './relationship-code.ts';
 import { fixtureCode } from './fixture-code.ts';
@@ -67,7 +68,7 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   add(`${m.sourceRoot}/domain/contract.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/contract.ts'),'utf8'));
   add(`${m.sourceRoot}/presentation/composables/operation.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/operation.ts'),'utf8'));
   add(`${m.sourceRoot}/application/source-overrides.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/source-overrides.ts'),'utf8'),'managed');
-  dataCode(m,add); navigationCode(m,add); uiCode(m,add); hostCode(m,add); styleCode(m,add); await persistenceCode(templateRoot,m,add); await visualCode(templateRoot,m,add); await relationshipCode(templateRoot,m,add); await httpCode(templateRoot,m,add);
+  dataCode(m,add); navigationCode(m,add); uiCode(m,add); nativeCode(m,add); hostCode(m,add); styleCode(m,add); await persistenceCode(templateRoot,m,add); await visualCode(templateRoot,m,add); await relationshipCode(templateRoot,m,add); await httpCode(templateRoot,m,add);
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {

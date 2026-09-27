@@ -1,3 +1,5 @@
+import { bindNativeIntegrations } from '../infrastructure/obsidian/native-integrations';
+import { nativeFileTypes, nativeContextMenus } from './native-integrations';
 import { Notice, type Plugin } from 'obsidian';
 import { createServices } from './services';
 import { mountShowcase } from './mount-ui';
@@ -20,10 +22,12 @@ export async function initializePlugin(plugin: Plugin) {
   let stopHostEvents = () => {};
   let stopCommands = () => {};
   let stopSettings = () => {};
+  let stopNative = () => {};
   const text = (key: string) => services.i18n.global.t(key);
   const dispose = () => {
     if (disposed) return;
     disposed = true;
+    stopNative();
     stopSettings();
     stopCommands();
     for (const view of Array.from(views)) {
@@ -40,6 +44,7 @@ export async function initializePlugin(plugin: Plugin) {
       .catch(() => services.diagnostics.report('header.toggle', 'view.header'));
   };
   try {
+    stopNative = bindNativeIntegrations(plugin, nativeFileTypes, nativeContextMenus, code => services.diagnostics.report(code, 'native.integration'));
     const definitions = [{ id: undefined, type: SHOWCASE_VIEW, title: () => services.identity.name },
       ...authoringViewDefinitions(authoringPanels).map(panel => ({ ...panel, title: () => text(panel.titleKey) }))];
     for (const definition of definitions) {
