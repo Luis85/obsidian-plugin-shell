@@ -25,9 +25,10 @@ export async function maintainabilityInventory(root) {
     if (path === vendorArchive) decodeVendor(data);
     let view = 'unsupported';
     const template = path.startsWith('scripts/examples/templates/') && executable.test(path.replace(/\.txt$/, ''));
-    // Reviewed golden SFC outputs are stored as `.vue.txt` so the analyzer and bundlers never resolve their
-    // generated-project imports; they stay measured as Vue in the fixtures view.
-    const golden = /^tests\/fixtures\/.+\.vue\.txt$/.test(path);
+    // Reviewed generated-output fixtures (golden SFCs, a retained pre-visual runtime module) are stored as `.vue.txt` /
+    // `.ts.txt` so the analyzer and bundlers never resolve their generated-project imports; they stay measured as
+    // Vue/TypeScript in the fixtures view.
+    const golden = /^tests\/fixtures\/.+\.(?:vue|ts)\.txt$/.test(path);
     if (template) view = 'templates';
     else if (golden) view = 'fixtures';
     else if (executable.test(path)) {

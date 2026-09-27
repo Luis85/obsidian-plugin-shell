@@ -8,8 +8,8 @@ qualification or release, which remain separate gates.
 
 | Item | Value |
 | --- | --- |
-| Measured code commit | `c4af1bd` for `npm run verify`, `test:generator` and the generated-output qualification. The fix round (concept `ve-state.js` legacy-store restore rule and its node checks, no generator, contract or `src/` input) was re-verified with the concept checks, the Node browser suite, build `--check`, assembly, `check:analyzer` and `check:source` (see Fix round 1). |
-| `docs/concepts/companion/index.html` | 3,362,339 bytes · SHA-256 `5caecf01eab2b2542c9b606b85c10145fcc9ee304cf5ed48f03c139116b1cd17` (after fix round 1; `c4af1bd` built 3,362,068 bytes · `50751c8a…2b89`) |
+| Measured code commit | Final fix wave: `db95ad1` for every command in “Final fix wave” below (the maintainability classification change of the verification commit was measured by its own `check:maintainability` run). Earlier rows below record `c4af1bd` and fix round 1. |
+| `docs/concepts/companion/index.html` | 3,374,608 bytes · SHA-256 `ba3a5b657ddea349c5c49c5dbc8857f7bcf06e2dc84b3fb27131187c02712d3a` (final fix wave; fix round 1 built 3,362,339 bytes · `5caecf01…cd17`) |
 | `docs/concepts/companion/companion-project.json` | 2,242,139 bytes · SHA-256 `030d63a2a56e847de682205916aedb861a8ab0ed2457e4ba66fc2efd5a8c16ab` (v5: 27 pages, 54 components, 0 layouts, 54 revisions, 726 elements) |
 | Platform | Windows 11 Pro 10.0.26200, Git Bash |
 | Node / npm | Node 24.15.0 and npm 12.0.2 locally, **not** the pinned 24.21.0/11.19.1. The generated workspaces were installed with a separately installed npm 11.19.1 (`QUALIFIED_NPM`), as the workflow does. |
@@ -167,3 +167,59 @@ a still-legacy design keeps it on every travel path (outline, storymap, visual u
 | `python3 scripts/concepts/build-companion.py --check` · assembly test | 0 · 0 | 3,362,339 bytes `5caecf01…cd17` · 19 tests OK |
 | `node tests/concepts/companion-visual-editors.browser.mjs` · `run-browser-checks.py --only visual-editors` | 0 · 0 | 39/39 · passed 39, bound to `5caecf01…cd17` |
 | `npm run check:analyzer` · `npm run check:source` | 0 · 0 | zero findings · 796 inputs |
+
+## Final fix wave — review findings C1, I1–I5, M1–M8
+
+Fixes: failed-upgrade legacy designs survive project/blueprint export and blueprint import is refused (C1); designed or
+navigated-to surfaces cannot be removed and orphaned designs are listed, openable and repairable (I1); longest-path
+composition depth (I2); closed per-tag attribute contract with safe literal `img src` (I3); internal-reference
+remapping tests (I4); deprecated `DetailAction`, edge → interaction mapping and the documented regeneration path (I5);
+reserved export names, real adapter paths, authored action order, message patterns, control-list drift guard, revision
+usages, slot notes/a11y (M1–M7). Details and RED/GREEN evidence: the wave's report.
+
+| Command | Exit | Result |
+| --- | --- | --- |
+| `npm run test:visual` | 0 | 164 tests: 164 pass, 0 fail |
+| `npm run test:generator` | 0 | 301 tests: 300 pass, 0 fail, 1 skipped (“file loader rejects symlink source”, Windows symlink privilege); 1,333.5 s |
+| `node --test tests/tooling/companion-*.checks.mjs` (10 files) | 0 | 197 tests: 196 pass, 1 skipped |
+| `node tests/concepts/companion-visual-editors.browser.mjs` | 0 | 42/42 named checks (new: failed-upgrade recovery, designed-surface removal refused, orphan repair; the legacy import check also requires the interaction ID list) |
+| `python3 scripts/concepts/run-browser-checks.py --only visual-editors` | 0 | passed 42, failed 0, bound to `html_sha256` `ba3a5b65…12d3a` |
+| `python3 scripts/concepts/build-companion.py --check` | 0 | Verified 3,374,608 bytes, `ba3a5b65…12d3a` |
+| `python3 -B tests/concepts/companion-assembly.test.py` | 0 | 19 tests OK |
+| `python3 scripts/concepts/export-companion-project.py --check` | 0 | Self-project unchanged: 2,242,139 bytes · `030d63a2…c16ab` (Node fallback path) |
+| `npm run check:analyzer` | 0 | Zero findings (`scripts/companion/runtime/detail-actions.ts` is an analyzer entry: generated projects and the retained pre-visual runtime import its types, like `visual-runtime.ts`) |
+| `npm run check:source` | 0 | 798 inputs within code-line limits |
+| `npm run check:maintainability` | 0 | `status: passed`, `failures: []` (656 s). The first run stopped with `METRIC_UNCLASSIFIED_INPUT` for the new `tests/fixtures/companion/legacy-generated/detail-runtime.ts.txt`; generated-output fixtures stored as `.ts.txt` are now measured as TypeScript fixtures, like the `.vue.txt` golden SFCs |
+| `npm run typecheck:generator` | 0 | |
+| `node scripts/companion/qualify-project.mjs` | 0 | `scaffold-qualified`: 81 definitions, 131 visual interactions, 1,845 files. Vitest 35 files passed / 33 skipped; 861 passed, 33 todo. ui-effects 129 pass, 0 fail, 2 todo |
+| `… --boundary-fixture` | 0 | Vitest 892 passed, 34 todo. ui-effects 131 pass, 0 fail, 1 todo |
+| `… --provider-fixture` | 0 | Vitest 894 passed, 33 todo. ui-effects 129 pass, 0 fail, 2 todo |
+| `node scripts/companion/qualify-starter.mjs <id>` × 9 | 0 × 9 | Every starter `status: passed`, `npm ci` 0, `verify:project` 0; table below |
+
+Each generated project gains one runtime test (“runs mixed actions in authored order and stops at the first failing
+action”), hence +1 passed everywhere.
+
+| Starter | Vitest | ui-effects |
+| --- | --- | --- |
+| blank | 13 passed | 0 / 0 |
+| command-utility | 51 passed, 10 todo | 6 pass, 3 todo |
+| quick-capture | 75 passed, 12 todo | 8 pass, 4 todo |
+| tasks-projects | 91 passed, 13 todo | 8 pass, 4 todo |
+| knowledge-collection | 91 passed, 12 todo | 8 pass, 4 todo |
+| daily-journal | 75 passed, 13 todo | 8 pass, 4 todo |
+| vault-dashboard | 75 passed, 13 todo | 8 pass, 4 todo |
+| note-inspector | 61 passed, 10 todo | 6 pass, 3 todo |
+| import-integration | 83 passed, 13 todo | 8 pass, 4 todo |
+
+**Known flake (M8): `tests/tooling/project-starters.checks.mjs` in the full generator suite.** Its per-starter
+“real plan/apply yields an independent workspace, safe replay and owned input” cases (and the fixture-parity
+“real generated CLI reviews, applies, replays…” case) plan, apply and replay real workspaces for about a minute each.
+When the generator's template inputs change during the run, or the machine is saturated, the replay no longer sees
+only `unchanged` files and they fail: an earlier run of this wave, overlapping source edits and a browser run, failed
+7 starter cases and the parity case at `project-starters.checks.mjs:67` / `project-generator-fixture-parity.checks.mjs:105`.
+The clean rerun on the committed tree above passed all of them. Treat such a failure as a rerun candidate only after
+confirming nothing changed the tree during the run.
+
+Still not executed locally: the Python browser suites (no Python Playwright), `npm run verify` as a whole (the
+Windows-only failures and the inherited `ARTIFACT_SIZE_BUDGET` above are unchanged by this wave, which has no `src/`
+change), the pinned Node 24.21.0 (Node 24.15.0/npm 12.0.2 locally; generated workspaces used npm 11.19.1).
