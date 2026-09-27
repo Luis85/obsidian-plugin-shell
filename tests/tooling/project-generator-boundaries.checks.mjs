@@ -17,7 +17,8 @@ import { migrateCompanionDocument } from '../../scripts/companion/project-contra
 import { visualSession, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
 import { visualLocate } from '../../scripts/companion/visual/visual-ir.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const original=JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
+// The boundary fixture is authored as legacy detail data, so it extends the last v4 self-project retained as a fixture.
+const original=JSON.parse(await readFile(new URL('../fixtures/companion/detail-v4.json',import.meta.url),'utf8'));
 const legacyProject=JSON.parse(await readFile(new URL('../fixtures/companion/detail-v3.json',import.meta.url),'utf8'));
 const fixture=()=>boundaryProject(original);
 // The boundary design is authored as legacy detail data and generated after the v5 migration, exactly like a read project.

@@ -18,6 +18,16 @@ def load_starters(root):
  if len(ids)>24 or 'blank' not in ids or files!={p.name for p in folder.iterdir()}:raise ValueError('Starter source inventory differs')
  return manifest
 
+# The self-project's visual designs are reviewed IR data; pin the exact bytes like the vendor provenance.
+VISUAL_SEED_SHA256='a8d8d2cfac556516e93a707f06ebc4d11c74aad944e93de0f45ef9c6d9b673af'
+def load_visual_seed(root):
+ folder=root/'seeds';path=folder/'visual-self-project.json'
+ if not folder.is_dir() or {p.name for p in folder.iterdir()}!={path.name}:raise ValueError('Visual seed inventory differs')
+ if path.is_symlink() or not path.is_file():raise ValueError('Nonregular visual seed')
+ raw=path.read_bytes()
+ if hashlib.sha256(raw).hexdigest()!=VISUAL_SEED_SHA256:raise ValueError('Unreviewed visual seed: '+path.name)
+ return json.loads(raw)
+
 def build(output: Path, check: bool = False):
  s=(ROOT/'src/base.html').read_text(encoding='utf-8')
  def change(old,new):
@@ -93,6 +103,7 @@ def build(output: Path, check: bool = False):
  adapters=tool_sources['adapters.mjs'].replace("import { createFixtureEngine } from './engine.mjs';\n",'',1).replace('export function createFixtureAdapter(', 'function createFixtureAdapter(',1)
  extension=engine+'\n'+adapters+'\n'+'\n'.join((ROOT/'src'/m).read_text(encoding='utf-8') for m in modules)
  s=s.replace('</head>', '<script type="application/json" id="project-starters-data">'+json.dumps(load_starters(ROOT),ensure_ascii=False).replace('<','\\u003c')+'</script>\n</head>',1)
+ s=s.replace('</head>', '<script type="application/json" id="companion-visual-seed">'+json.dumps(load_visual_seed(ROOT),ensure_ascii=False).replace('<','\\u003c')+'</script>\n</head>',1)
  s=s.replace('</head>', '<script type="application/json" id="test-data-tool-sources">'+json.dumps(tool_sources).replace('<','\\u003c')+'</script>\n</head>',1)
  change("window.addEventListener('beforeunload',save);\nrender();", "window.addEventListener('beforeunload',save);\n"+extension+"\nrender();")
  contract=ROOT.parents[2]/'scripts/companion/project-contract.mjs'

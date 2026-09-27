@@ -1,6 +1,6 @@
 {
   "kind": "obsidian-companion-project",
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "executable": false,
   "project": {
     "id": "import-integration-plugin",
@@ -14,7 +14,7 @@
     "testsFolder": "tests"
   },
   "design": {
-    "schema": 4,
+    "schema": 5,
     "blueprint": "blank",
     "goal": "Use for CSV/JSON intake or a future external-service adapter.",
     "platform": "desktop",
@@ -607,593 +607,524 @@
       "nextId": 1,
       "maps": []
     },
-    "detailDesigns": {
-      "schema": 2,
-      "nextId": 73,
-      "documents": [
+    "visualDesigns": {
+      "schema": 3,
+      "nextId": 60,
+      "catalog": {
+        "id": "nuxt-ui",
+        "version": 1
+      },
+      "pages": [
         {
-          "id": "detail-document-1",
-          "kind": "page",
+          "id": "vp-1",
           "ownerId": "node-2",
-          "ownerLabel": "Import preview",
-          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
-          "nodes": [
+          "name": "Import preview",
+          "root": [
             {
-              "id": "detail-node-2",
-              "kind": "region",
-              "label": "Import preview layout",
-              "text": "",
-              "parentId": null,
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 24
-              },
-              "size": {
-                "width": 676,
-                "height": 776
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 16,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
+              "id": "vn-2",
+              "kind": "element",
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                {
+                  "id": "vn-3",
+                  "kind": "text",
+                  "role": "h2",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Import preview"
+                  },
+                  "name": "Import preview",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": "section-title"
+                      }
+                    }
+                  }
                 },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
+                {
+                  "id": "vn-4",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation."
+                  },
+                  "name": "Implementation scope",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-5",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-input"
+                  },
+                  "props": {},
+                  "slots": {},
+                  "events": [],
+                  "name": "Search or filter draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-6",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-table"
+                  },
+                  "props": {
+                    "columns": {
+                      "kind": "literal",
+                      "value": [
+                        {
+                          "accessorKey": "title",
+                          "header": "title"
+                        },
+                        {
+                          "accessorKey": "external_id",
+                          "header": "external_id"
+                        },
+                        {
+                          "accessorKey": "status",
+                          "header": "status"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "kind": "source",
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "field": ""
+                    }
+                  },
+                  "slots": {
+                    "empty": [
+                      {
+                        "id": "vn-12",
+                        "kind": "text",
+                        "role": "p",
+                        "value": {
+                          "kind": "literal",
+                          "value": "No fixture records."
+                        }
+                      }
+                    ]
+                  },
+                  "events": [],
+                  "name": "Example records",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-7",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Clear draft"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-13",
+                      "event": "click",
+                      "label": "Clear only this local input",
+                      "notes": "No note or business record is deleted.",
+                      "acceptance": "Local input becomes empty.",
+                      "actions": [
+                        {
+                          "kind": "set-value",
+                          "nodeId": "vn-5",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Clear local draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-8",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Run action (implementation hook)"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-14",
+                      "event": "click",
+                      "label": "Implement import preview",
+                      "notes": "Explicit business hook; not a success simulation.",
+                      "acceptance": "Replace the generated TODO with a failing business assertion.",
+                      "actions": []
+                    }
+                  ],
+                  "name": "Implement import preview",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-9",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Open Mapping review"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-15",
+                      "event": "click",
+                      "label": "Open Mapping review",
+                      "notes": "Declared navigation only.",
+                      "acceptance": "Open the existing surface.",
+                      "actions": [
+                        {
+                          "kind": "navigate",
+                          "surfaceId": "node-3"
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Open Mapping review",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-10",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-alert"
+                  },
+                  "props": {
+                    "title": {
+                      "kind": "literal",
+                      "value": "Recoverable failure"
+                    },
+                    "description": {
+                      "kind": "literal",
+                      "value": "The operation did not complete. The draft remains unchanged."
+                    }
+                  },
+                  "slots": {},
+                  "events": [],
+                  "name": "Recoverable failure",
+                  "visibleIn": [
+                    "error"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-11",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "No records yet. Define the capture or import action for your domain."
+                  },
+                  "name": "Empty state",
+                  "visibleIn": [
+                    "empty"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "events": [],
+              "name": "Import preview layout",
+              "layout": {
+                "mode": "stack",
+                "ui": {
+                  "gap": 12,
+                  "padding": 16,
+                  "columns": 2,
+                  "align": "stretch",
+                  "justify": "start",
+                  "wrap": true,
+                  "overflow": "visible",
+                  "widthMode": "fill",
+                  "width": 320,
+                  "minWidth": 0,
+                  "maxWidth": 1600,
+                  "narrow": {
+                    "layout": "stack",
+                    "columns": 1,
+                    "hidden": false
+                  },
+                  "tokens": {
+                    "gap": "",
+                    "padding": "",
+                    "color": "",
+                    "background": "",
+                    "radius": "",
+                    "typography": ""
+                  }
                 }
               }
-            },
-            {
-              "id": "detail-node-3",
-              "kind": "heading",
-              "label": "Import preview",
-              "text": "Import preview",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": "section-title"
-                }
-              }
-            },
-            {
-              "id": "detail-node-4",
-              "kind": "text",
-              "label": "Implementation scope",
-              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-5",
-              "kind": "input",
-              "label": "Search or filter draft",
-              "text": "",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-6",
-              "kind": "table",
-              "label": "Example records",
-              "text": "No fixture records.",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 180
-              },
-              "component": null,
-              "props": {},
-              "binding": {
-                "sourceId": "ds-source-1",
-                "operationId": "ds-operation-2",
-                "field": ""
-              },
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              },
-              "options": [
-                "title",
-                "external_id",
-                "status"
-              ]
-            },
-            {
-              "id": "detail-node-7",
-              "kind": "button",
-              "label": "Clear local draft",
-              "text": "Clear draft",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-9",
-              "kind": "button",
-              "label": "Implement import preview",
-              "text": "Run action (implementation hook)",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-11",
-              "kind": "button",
-              "label": "Open Mapping review",
-              "text": "Open Mapping review",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-13",
-              "kind": "alert",
-              "label": "Recoverable failure",
-              "text": "The operation did not complete. The draft remains unchanged.",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "error"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-14",
-              "kind": "text",
-              "label": "Empty state",
-              "text": "No records yet. Define the capture or import action for your domain.",
-              "parentId": "detail-node-2",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 630
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "empty"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            }
-          ],
-          "edges": [
-            {
-              "id": "detail-edge-8",
-              "source": "detail-node-7",
-              "target": "detail-node-5",
-              "event": "click",
-              "label": "Clear only this local input",
-              "notes": "No note or business record is deleted.",
-              "acceptance": "Local input becomes empty.",
-              "targetSurfaceId": null,
-              "effect": {
-                "type": "value",
-                "value": ""
-              }
-            },
-            {
-              "id": "detail-edge-10",
-              "source": "detail-node-9",
-              "target": "detail-node-5",
-              "event": "click",
-              "label": "Implement import preview",
-              "notes": "Explicit business hook; not a success simulation.",
-              "acceptance": "Replace the generated TODO with a failing business assertion.",
-              "targetSurfaceId": null
-            },
-            {
-              "id": "detail-edge-12",
-              "source": "detail-node-11",
-              "target": "detail-node-5",
-              "event": "click",
-              "label": "Open Mapping review",
-              "notes": "Declared navigation only.",
-              "acceptance": "Open the existing surface.",
-              "targetSurfaceId": "node-3"
             }
           ],
           "scenarios": [
@@ -1319,591 +1250,519 @@
                 }
               ]
             }
-          ]
+          ],
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests."
         },
         {
-          "id": "detail-document-19",
-          "kind": "page",
+          "id": "vp-16",
           "ownerId": "node-3",
-          "ownerLabel": "Mapping review",
-          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
-          "nodes": [
+          "name": "Mapping review",
+          "root": [
             {
-              "id": "detail-node-20",
-              "kind": "region",
-              "label": "Mapping review layout",
-              "text": "",
-              "parentId": null,
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 24
-              },
-              "size": {
-                "width": 676,
-                "height": 776
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 16,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
+              "id": "vn-17",
+              "kind": "element",
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                {
+                  "id": "vn-18",
+                  "kind": "text",
+                  "role": "h2",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Mapping review"
+                  },
+                  "name": "Mapping review",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": "section-title"
+                      }
+                    }
+                  }
                 },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
+                {
+                  "id": "vn-19",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation."
+                  },
+                  "name": "Implementation scope",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-20",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-textarea"
+                  },
+                  "props": {},
+                  "slots": {},
+                  "events": [],
+                  "name": "Draft content",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-21",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-table"
+                  },
+                  "props": {
+                    "columns": {
+                      "kind": "literal",
+                      "value": [
+                        {
+                          "accessorKey": "title",
+                          "header": "title"
+                        },
+                        {
+                          "accessorKey": "external_id",
+                          "header": "external_id"
+                        },
+                        {
+                          "accessorKey": "status",
+                          "header": "status"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "kind": "source",
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "field": ""
+                    }
+                  },
+                  "slots": {
+                    "empty": [
+                      {
+                        "id": "vn-27",
+                        "kind": "text",
+                        "role": "p",
+                        "value": {
+                          "kind": "literal",
+                          "value": "No fixture records."
+                        }
+                      }
+                    ]
+                  },
+                  "events": [],
+                  "name": "Example records",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-22",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Clear draft"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-28",
+                      "event": "click",
+                      "label": "Clear only this local input",
+                      "notes": "No note or business record is deleted.",
+                      "acceptance": "Local input becomes empty.",
+                      "actions": [
+                        {
+                          "kind": "set-value",
+                          "nodeId": "vn-20",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Clear local draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-23",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Run action (implementation hook)"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-29",
+                      "event": "click",
+                      "label": "Implement mapping review",
+                      "notes": "Explicit business hook; not a success simulation.",
+                      "acceptance": "Replace the generated TODO with a failing business assertion.",
+                      "actions": []
+                    }
+                  ],
+                  "name": "Implement mapping review",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-24",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Open Import preview"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-30",
+                      "event": "click",
+                      "label": "Open Import preview",
+                      "notes": "Declared navigation only.",
+                      "acceptance": "Open the existing surface.",
+                      "actions": [
+                        {
+                          "kind": "navigate",
+                          "surfaceId": "node-2"
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Open Import preview",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-25",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-alert"
+                  },
+                  "props": {
+                    "title": {
+                      "kind": "literal",
+                      "value": "Recoverable failure"
+                    },
+                    "description": {
+                      "kind": "literal",
+                      "value": "The operation did not complete. The draft remains unchanged."
+                    }
+                  },
+                  "slots": {},
+                  "events": [],
+                  "name": "Recoverable failure",
+                  "visibleIn": [
+                    "error"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-26",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "No records yet. Define the capture or import action for your domain."
+                  },
+                  "name": "Empty state",
+                  "visibleIn": [
+                    "empty"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "events": [],
+              "name": "Mapping review layout",
+              "layout": {
+                "mode": "stack",
+                "ui": {
+                  "gap": 12,
+                  "padding": 16,
+                  "columns": 2,
+                  "align": "stretch",
+                  "justify": "start",
+                  "wrap": true,
+                  "overflow": "visible",
+                  "widthMode": "fill",
+                  "width": 320,
+                  "minWidth": 0,
+                  "maxWidth": 1600,
+                  "narrow": {
+                    "layout": "stack",
+                    "columns": 1,
+                    "hidden": false
+                  },
+                  "tokens": {
+                    "gap": "",
+                    "padding": "",
+                    "color": "",
+                    "background": "",
+                    "radius": "",
+                    "typography": ""
+                  }
                 }
               }
-            },
-            {
-              "id": "detail-node-21",
-              "kind": "heading",
-              "label": "Mapping review",
-              "text": "Mapping review",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": "section-title"
-                }
-              }
-            },
-            {
-              "id": "detail-node-22",
-              "kind": "text",
-              "label": "Implementation scope",
-              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-23",
-              "kind": "textarea",
-              "label": "Draft content",
-              "text": "",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-24",
-              "kind": "table",
-              "label": "Example records",
-              "text": "No fixture records.",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 180
-              },
-              "component": null,
-              "props": {},
-              "binding": {
-                "sourceId": "ds-source-1",
-                "operationId": "ds-operation-2",
-                "field": ""
-              },
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              },
-              "options": [
-                "title",
-                "external_id",
-                "status"
-              ]
-            },
-            {
-              "id": "detail-node-25",
-              "kind": "button",
-              "label": "Clear local draft",
-              "text": "Clear draft",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-27",
-              "kind": "button",
-              "label": "Implement mapping review",
-              "text": "Run action (implementation hook)",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-29",
-              "kind": "button",
-              "label": "Open Import preview",
-              "text": "Open Import preview",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-31",
-              "kind": "alert",
-              "label": "Recoverable failure",
-              "text": "The operation did not complete. The draft remains unchanged.",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "error"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-32",
-              "kind": "text",
-              "label": "Empty state",
-              "text": "No records yet. Define the capture or import action for your domain.",
-              "parentId": "detail-node-20",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 630
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "empty"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            }
-          ],
-          "edges": [
-            {
-              "id": "detail-edge-26",
-              "source": "detail-node-25",
-              "target": "detail-node-23",
-              "event": "click",
-              "label": "Clear only this local input",
-              "notes": "No note or business record is deleted.",
-              "acceptance": "Local input becomes empty.",
-              "targetSurfaceId": null,
-              "effect": {
-                "type": "value",
-                "value": ""
-              }
-            },
-            {
-              "id": "detail-edge-28",
-              "source": "detail-node-27",
-              "target": "detail-node-23",
-              "event": "click",
-              "label": "Implement mapping review",
-              "notes": "Explicit business hook; not a success simulation.",
-              "acceptance": "Replace the generated TODO with a failing business assertion.",
-              "targetSurfaceId": null
-            },
-            {
-              "id": "detail-edge-30",
-              "source": "detail-node-29",
-              "target": "detail-node-23",
-              "event": "click",
-              "label": "Open Import preview",
-              "notes": "Declared navigation only.",
-              "acceptance": "Open the existing surface.",
-              "targetSurfaceId": "node-2"
             }
           ],
           "scenarios": [
@@ -2029,591 +1888,519 @@
                 }
               ]
             }
-          ]
+          ],
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests."
         },
         {
-          "id": "detail-document-37",
-          "kind": "page",
+          "id": "vp-31",
           "ownerId": "node-4",
-          "ownerLabel": "Import result",
-          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
-          "nodes": [
+          "name": "Import result",
+          "root": [
             {
-              "id": "detail-node-38",
-              "kind": "region",
-              "label": "Import result layout",
-              "text": "",
-              "parentId": null,
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 24
-              },
-              "size": {
-                "width": 676,
-                "height": 776
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 16,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
+              "id": "vn-32",
+              "kind": "element",
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                {
+                  "id": "vn-33",
+                  "kind": "text",
+                  "role": "h2",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Import result"
+                  },
+                  "name": "Import result",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": "section-title"
+                      }
+                    }
+                  }
                 },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
+                {
+                  "id": "vn-34",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation."
+                  },
+                  "name": "Implementation scope",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-35",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-input"
+                  },
+                  "props": {},
+                  "slots": {},
+                  "events": [],
+                  "name": "Search or filter draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-36",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-table"
+                  },
+                  "props": {
+                    "columns": {
+                      "kind": "literal",
+                      "value": [
+                        {
+                          "accessorKey": "title",
+                          "header": "title"
+                        },
+                        {
+                          "accessorKey": "external_id",
+                          "header": "external_id"
+                        },
+                        {
+                          "accessorKey": "status",
+                          "header": "status"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "kind": "source",
+                      "sourceId": "ds-source-1",
+                      "operationId": "ds-operation-2",
+                      "field": ""
+                    }
+                  },
+                  "slots": {
+                    "empty": [
+                      {
+                        "id": "vn-42",
+                        "kind": "text",
+                        "role": "p",
+                        "value": {
+                          "kind": "literal",
+                          "value": "No fixture records."
+                        }
+                      }
+                    ]
+                  },
+                  "events": [],
+                  "name": "Example records",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-37",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Clear draft"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-43",
+                      "event": "click",
+                      "label": "Clear only this local input",
+                      "notes": "No note or business record is deleted.",
+                      "acceptance": "Local input becomes empty.",
+                      "actions": [
+                        {
+                          "kind": "set-value",
+                          "nodeId": "vn-35",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Clear local draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-38",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Run action (implementation hook)"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-44",
+                      "event": "click",
+                      "label": "Implement import result",
+                      "notes": "Explicit business hook; not a success simulation.",
+                      "acceptance": "Replace the generated TODO with a failing business assertion.",
+                      "actions": []
+                    }
+                  ],
+                  "name": "Implement import result",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-39",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Open Import preview"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-45",
+                      "event": "click",
+                      "label": "Open Import preview",
+                      "notes": "Declared navigation only.",
+                      "acceptance": "Open the existing surface.",
+                      "actions": [
+                        {
+                          "kind": "navigate",
+                          "surfaceId": "node-2"
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Open Import preview",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-40",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-alert"
+                  },
+                  "props": {
+                    "title": {
+                      "kind": "literal",
+                      "value": "Recoverable failure"
+                    },
+                    "description": {
+                      "kind": "literal",
+                      "value": "The operation did not complete. The draft remains unchanged."
+                    }
+                  },
+                  "slots": {},
+                  "events": [],
+                  "name": "Recoverable failure",
+                  "visibleIn": [
+                    "error"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-41",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "No records yet. Define the capture or import action for your domain."
+                  },
+                  "name": "Empty state",
+                  "visibleIn": [
+                    "empty"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "events": [],
+              "name": "Import result layout",
+              "layout": {
+                "mode": "stack",
+                "ui": {
+                  "gap": 12,
+                  "padding": 16,
+                  "columns": 2,
+                  "align": "stretch",
+                  "justify": "start",
+                  "wrap": true,
+                  "overflow": "visible",
+                  "widthMode": "fill",
+                  "width": 320,
+                  "minWidth": 0,
+                  "maxWidth": 1600,
+                  "narrow": {
+                    "layout": "stack",
+                    "columns": 1,
+                    "hidden": false
+                  },
+                  "tokens": {
+                    "gap": "",
+                    "padding": "",
+                    "color": "",
+                    "background": "",
+                    "radius": "",
+                    "typography": ""
+                  }
                 }
               }
-            },
-            {
-              "id": "detail-node-39",
-              "kind": "heading",
-              "label": "Import result",
-              "text": "Import result",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": "section-title"
-                }
-              }
-            },
-            {
-              "id": "detail-node-40",
-              "kind": "text",
-              "label": "Implementation scope",
-              "text": "Starter scaffold. Examples below are synthetic; domain actions and persistence require implementation.",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-41",
-              "kind": "input",
-              "label": "Search or filter draft",
-              "text": "",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-42",
-              "kind": "table",
-              "label": "Example records",
-              "text": "No fixture records.",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 180
-              },
-              "component": null,
-              "props": {},
-              "binding": {
-                "sourceId": "ds-source-1",
-                "operationId": "ds-operation-2",
-                "field": ""
-              },
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              },
-              "options": [
-                "title",
-                "external_id",
-                "status"
-              ]
-            },
-            {
-              "id": "detail-node-43",
-              "kind": "button",
-              "label": "Clear local draft",
-              "text": "Clear draft",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-45",
-              "kind": "button",
-              "label": "Implement import result",
-              "text": "Run action (implementation hook)",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 394
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-47",
-              "kind": "button",
-              "label": "Open Import preview",
-              "text": "Open Import preview",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-49",
-              "kind": "alert",
-              "label": "Recoverable failure",
-              "text": "The operation did not complete. The draft remains unchanged.",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 512
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "error"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-50",
-              "kind": "text",
-              "label": "Empty state",
-              "text": "No records yet. Define the capture or import action for your domain.",
-              "parentId": "detail-node-38",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 630
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "empty"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            }
-          ],
-          "edges": [
-            {
-              "id": "detail-edge-44",
-              "source": "detail-node-43",
-              "target": "detail-node-41",
-              "event": "click",
-              "label": "Clear only this local input",
-              "notes": "No note or business record is deleted.",
-              "acceptance": "Local input becomes empty.",
-              "targetSurfaceId": null,
-              "effect": {
-                "type": "value",
-                "value": ""
-              }
-            },
-            {
-              "id": "detail-edge-46",
-              "source": "detail-node-45",
-              "target": "detail-node-41",
-              "event": "click",
-              "label": "Implement import result",
-              "notes": "Explicit business hook; not a success simulation.",
-              "acceptance": "Replace the generated TODO with a failing business assertion.",
-              "targetSurfaceId": null
-            },
-            {
-              "id": "detail-edge-48",
-              "source": "detail-node-47",
-              "target": "detail-node-41",
-              "event": "click",
-              "label": "Open Import preview",
-              "notes": "Declared navigation only.",
-              "acceptance": "Open the existing surface.",
-              "targetSurfaceId": "node-2"
             }
           ],
           "scenarios": [
@@ -2739,582 +2526,481 @@
                 }
               ]
             }
-          ]
+          ],
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests."
         },
         {
-          "id": "detail-document-55",
-          "kind": "page",
+          "id": "vp-46",
           "ownerId": "node-5",
-          "ownerLabel": "Preferences",
-          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests.",
-          "nodes": [
+          "name": "Preferences",
+          "root": [
             {
-              "id": "detail-node-56",
-              "kind": "region",
-              "label": "Preferences layout",
-              "text": "",
-              "parentId": null,
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 24
-              },
-              "size": {
-                "width": 676,
-                "height": 686
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 16,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
+              "id": "vn-47",
+              "kind": "element",
+              "tag": "div",
+              "attrs": {},
+              "children": [
+                {
+                  "id": "vn-48",
+                  "kind": "text",
+                  "role": "h2",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Preferences"
+                  },
+                  "name": "Preferences",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": "section-title"
+                      }
+                    }
+                  }
                 },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
+                {
+                  "id": "vn-49",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Configure your own plugin settings here. This surface does not change Obsidian settings."
+                  },
+                  "name": "Implementation scope",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-50",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-textarea"
+                  },
+                  "props": {},
+                  "slots": {},
+                  "events": [],
+                  "name": "Draft content",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-51",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "Your result appears here after implementing the use case."
+                  },
+                  "name": "Result area",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-52",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Clear draft"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-57",
+                      "event": "click",
+                      "label": "Clear only this local input",
+                      "notes": "No note or business record is deleted.",
+                      "acceptance": "Local input becomes empty.",
+                      "actions": [
+                        {
+                          "kind": "set-value",
+                          "nodeId": "vn-50",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Clear local draft",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-53",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Run action (implementation hook)"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-58",
+                      "event": "click",
+                      "label": "Implement preferences",
+                      "notes": "Explicit business hook; not a success simulation.",
+                      "acceptance": "Replace the generated TODO with a failing business assertion.",
+                      "actions": []
+                    }
+                  ],
+                  "name": "Implement preferences",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-54",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-button"
+                  },
+                  "props": {
+                    "label": {
+                      "kind": "literal",
+                      "value": "Open Import preview"
+                    }
+                  },
+                  "slots": {},
+                  "events": [
+                    {
+                      "id": "vi-59",
+                      "event": "click",
+                      "label": "Open Import preview",
+                      "notes": "Declared navigation only.",
+                      "acceptance": "Open the existing surface.",
+                      "actions": [
+                        {
+                          "kind": "navigate",
+                          "surfaceId": "node-2"
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Open Import preview",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-55",
+                  "kind": "component",
+                  "ref": {
+                    "kind": "nuxt-ui",
+                    "entryId": "u-alert"
+                  },
+                  "props": {
+                    "title": {
+                      "kind": "literal",
+                      "value": "Recoverable failure"
+                    },
+                    "description": {
+                      "kind": "literal",
+                      "value": "The operation did not complete. The draft remains unchanged."
+                    }
+                  },
+                  "slots": {},
+                  "events": [],
+                  "name": "Recoverable failure",
+                  "visibleIn": [
+                    "error"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "vn-56",
+                  "kind": "text",
+                  "role": "p",
+                  "value": {
+                    "kind": "literal",
+                    "value": "No records yet. Define the capture or import action for your domain."
+                  },
+                  "name": "Empty state",
+                  "visibleIn": [
+                    "empty"
+                  ],
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 0,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "events": [],
+              "name": "Preferences layout",
+              "layout": {
+                "mode": "stack",
+                "ui": {
+                  "gap": 12,
+                  "padding": 16,
+                  "columns": 2,
+                  "align": "stretch",
+                  "justify": "start",
+                  "wrap": true,
+                  "overflow": "visible",
+                  "widthMode": "fill",
+                  "width": 320,
+                  "minWidth": 0,
+                  "maxWidth": 1600,
+                  "narrow": {
+                    "layout": "stack",
+                    "columns": 1,
+                    "hidden": false
+                  },
+                  "tokens": {
+                    "gap": "",
+                    "padding": "",
+                    "color": "",
+                    "background": "",
+                    "radius": "",
+                    "typography": ""
+                  }
                 }
               }
-            },
-            {
-              "id": "detail-node-57",
-              "kind": "heading",
-              "label": "Preferences",
-              "text": "Preferences",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": "section-title"
-                }
-              }
-            },
-            {
-              "id": "detail-node-58",
-              "kind": "text",
-              "label": "Implementation scope",
-              "text": "Configure your own plugin settings here. This surface does not change Obsidian settings.",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 68
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-59",
-              "kind": "textarea",
-              "label": "Draft content",
-              "text": "",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-60",
-              "kind": "text",
-              "label": "Result area",
-              "text": "Your result appears here after implementing the use case.",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 186
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-61",
-              "kind": "button",
-              "label": "Clear local draft",
-              "text": "Clear draft",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 304
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-63",
-              "kind": "button",
-              "label": "Implement preferences",
-              "text": "Run action (implementation hook)",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 304
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-65",
-              "kind": "button",
-              "label": "Open Import preview",
-              "text": "Open Import preview",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 422
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "default",
-                "loading",
-                "empty",
-                "error",
-                "disabled"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-67",
-              "kind": "alert",
-              "label": "Recoverable failure",
-              "text": "The operation did not complete. The draft remains unchanged.",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 352,
-                "y": 422
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "error"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            },
-            {
-              "id": "detail-node-68",
-              "kind": "text",
-              "label": "Empty state",
-              "text": "No records yet. Define the capture or import action for your domain.",
-              "parentId": "detail-node-56",
-              "layout": "stack",
-              "position": {
-                "x": 24,
-                "y": 540
-              },
-              "size": {
-                "width": 300,
-                "height": 90
-              },
-              "component": null,
-              "props": {},
-              "binding": null,
-              "a11y": "",
-              "visibleIn": [
-                "empty"
-              ],
-              "sourceBrickId": null,
-              "ui": {
-                "gap": 12,
-                "padding": 0,
-                "columns": 2,
-                "align": "stretch",
-                "justify": "start",
-                "wrap": true,
-                "overflow": "visible",
-                "widthMode": "fill",
-                "width": 320,
-                "minWidth": 0,
-                "maxWidth": 1600,
-                "narrow": {
-                  "layout": "stack",
-                  "columns": 1,
-                  "hidden": false
-                },
-                "tokens": {
-                  "gap": "",
-                  "padding": "",
-                  "color": "",
-                  "background": "",
-                  "radius": "",
-                  "typography": ""
-                }
-              }
-            }
-          ],
-          "edges": [
-            {
-              "id": "detail-edge-62",
-              "source": "detail-node-61",
-              "target": "detail-node-59",
-              "event": "click",
-              "label": "Clear only this local input",
-              "notes": "No note or business record is deleted.",
-              "acceptance": "Local input becomes empty.",
-              "targetSurfaceId": null,
-              "effect": {
-                "type": "value",
-                "value": ""
-              }
-            },
-            {
-              "id": "detail-edge-64",
-              "source": "detail-node-63",
-              "target": "detail-node-59",
-              "event": "click",
-              "label": "Implement preferences",
-              "notes": "Explicit business hook; not a success simulation.",
-              "acceptance": "Replace the generated TODO with a failing business assertion.",
-              "targetSurfaceId": null
-            },
-            {
-              "id": "detail-edge-66",
-              "source": "detail-node-65",
-              "target": "detail-node-59",
-              "event": "click",
-              "label": "Open Import preview",
-              "notes": "Declared navigation only.",
-              "acceptance": "Open the existing surface.",
-              "targetSurfaceId": "node-2"
             }
           ],
           "scenarios": [
@@ -3350,9 +3036,12 @@
               "values": {},
               "bindings": []
             }
-          ]
+          ],
+          "notes": "Runnable UI composition with synthetic fixtures; implement the business adapter and acceptance tests."
         }
       ],
+      "components": [],
+      "layouts": [],
       "revisions": []
     }
   },

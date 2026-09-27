@@ -17,7 +17,8 @@ const output = join(root, 'reports/project-generator', ...(boundary ? ['boundari
 // Canonical path: Windows 8.3 temp aliases break test-module resolution in the generated workspace.
 const vault = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), 'companion-qualification-')));
 let input = join(root,'docs/concepts/companion/companion-project.json');
-if(boundary || provider){const document=(boundary?boundaryProject:providerProject)(JSON.parse(await readFile(input,'utf8')));input=join(vault,'boundary-project.json');await writeFile(input,JSON.stringify(document,null,2));}
+// The boundary fixture is authored as legacy detail data on the last v4 self-project (retained as a migration fixture).
+if(boundary || provider){const document=boundary?boundaryProject(JSON.parse(await readFile(join(root,'tests/fixtures/companion/detail-v4.json'),'utf8'))):providerProject(JSON.parse(await readFile(input,'utf8')));input=join(vault,'boundary-project.json');await writeFile(input,JSON.stringify(document,null,2));}
 const options = { input, vault, target: boundary ? 'boundary-companion' : provider ? 'provider-companion' : 'companion' };
 const result = await planProject(options); await writeFile(join(output, 'plan.json'), JSON.stringify(reviewProject(result), null, 2));
 await applyProject(result, result.hash); const target = join(vault, options.target);

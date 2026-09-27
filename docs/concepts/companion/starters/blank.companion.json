@@ -1,6 +1,6 @@
 {
   "kind": "obsidian-companion-project",
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "executable": false,
   "project": {
     "id": "my-plugin",
@@ -14,7 +14,7 @@
     "testsFolder": "tests"
   },
   "design": {
-    "schema": 4,
+    "schema": 5,
     "blueprint": "blank",
     "goal": "",
     "platform": "desktop",
@@ -332,10 +332,16 @@
       "nextId": 1,
       "maps": []
     },
-    "detailDesigns": {
-      "schema": 2,
+    "visualDesigns": {
+      "schema": 3,
       "nextId": 1,
-      "documents": [],
+      "catalog": {
+        "id": "nuxt-ui",
+        "version": 1
+      },
+      "pages": [],
+      "components": [],
+      "layouts": [],
       "revisions": []
     }
   },

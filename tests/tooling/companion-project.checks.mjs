@@ -6,7 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
+import { migrateDetailDesigns } from '../../scripts/companion/visual/visual-migrate.mjs';
 import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -49,6 +50,18 @@ test('[COMPANION-SEED] full companion definition has authored coverage, not exec
   assert.equal(Object.hasOwn(document, 'trusted'), false);
   assert.equal(Object.hasOwn(document.design, 'emitted'), false);
 });
+test('[COMPANION-VISUAL-SEED] self-project is v5 visual designs equal to the embedded seed and to its v4 migration', async () => {
+  const v = document.design.visualDesigns;
+  assert.equal(document.schemaVersion, COMPANION_VERSION); assert.equal(document.design.schema, COMPANION_VERSION);
+  assert.equal(Object.hasOwn(document.design, 'detailDesigns'), false);
+  assert.deepEqual([v.pages.length, v.components.length, v.revisions.length, v.layouts.length], [27, 54, 54, 0]);
+  const embedded = JSON.parse(await readFile(join(root, 'docs/concepts/companion/seeds/visual-self-project.json'), 'utf8'));
+  assert.deepEqual(v, embedded);
+  // The seed was produced from the last v4 self-project, retained as the migration fixture.
+  const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
+  assert.deepEqual(migrateDetailDesigns(structuredClone(legacy.design.detailDesigns), legacy.design).visualDesigns, embedded);
+  assert.deepEqual(migrateCompanionDocument(structuredClone(document)), { document, report: null });
+});
 test('[COMPANION-CLI] original Unicode/whitespace bytes returned, zero writes even to missing target', async t => {
   const f = await fixture(t), text = '  ' + seed.replace('Plugin Companion', 'Plugin Companion — ä') + '\n\n';
   await writeFile(f.input, text);
@@ -76,6 +89,14 @@ test('[COMPANION-READ] exported service returns data and canonical targets witho
     }
   }
   assert.deepEqual(await snapshot(f.dir), before);
+});
+test('[COMPANION-READ] a v4 export is migrated on read and reports what the migration dropped', async t => {
+  const f = await fixture(t), legacy = await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8');
+  await writeFile(f.input, legacy);
+  const expected = migrateCompanionDocument(JSON.parse(legacy)), result = await readCompanionProject({ input: f.input, vault: f.vault, target: '.' });
+  assert.equal(result.content.toString(), legacy);
+  assert.deepEqual(result.document, expected.document); assert.deepEqual(result.migration, expected.report);
+  assert.equal(result.document.schemaVersion, COMPANION_VERSION); assert.ok(result.migration.droppedPositions > 0);
 });
 test('[COMPANION-CWD] explicit vault and default current-vault invocation work outside the shell', async t => {
   const f = await fixture(t);

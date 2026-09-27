@@ -9,22 +9,33 @@ import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
 import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
+import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
+// Page counts equal the page documents each starter held before the visual-design migration.
+const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
 test('nine original data-only starters include a genuinely domain-free minimal shell',()=>{
  assert.equal(catalog.starters.length,9);assert.equal(validateStarterCatalog(catalog),catalog);
  const blank=catalog.starters.find(s=>s.id==='blank').document.design;
  assert.equal(blank.nodes.length,2);assert.equal(blank.nodes[0].kind,'view');assert.equal(blank.nodes[1].kind,'settings');
- assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);assert.equal(blank.detailDesigns.documents.length,0);
+ assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);
+ assert.equal('detailDesigns' in blank,false);assert.deepEqual([blank.visualDesigns.pages.length,blank.visualDesigns.components.length,blank.visualDesigns.layouts.length,blank.visualDesigns.revisions.length],[0,0,0,0]);
 });
 for(const entry of catalog.starters){
+ test(entry.id+': built-in visual designs are current v'+COMPANION_VERSION+' pages over its own surfaces',()=>{
+  const d=entry.document.design,v=d.visualDesigns;
+  assert.equal(entry.document.schemaVersion,COMPANION_VERSION);assert.equal(d.schema,COMPANION_VERSION);assert.equal('detailDesigns' in d,false);
+  assert.equal(v.pages.length,pageCounts[entry.id]);assert.deepEqual([v.components.length,v.revisions.length],[0,0]);
+  const surfaces=new Set(d.nodes.map(n=>n.id));assert.ok(v.pages.every(p=>surfaces.has(p.ownerId)));
+  validateVisualDesigns(v,{surfaces,library:new Set(d.library.map(l=>l.id)),sources:new Map(d.dataSources.sources.map(s=>[s.id,new Set(s.operations.map(o=>o.id))]))});
+ });
  test(entry.id+': immutable independent copy, compatible compiler model and explicit native boundary',()=>{
   const before=JSON.stringify(catalog),document=customizeStarter(catalog,entry.id,choices),model=projectModel(document);
   assert.deepEqual(document.project,Object.fromEntries(['id','name','author','description','version'].map(k=>[k,choices[k]])));
   assert.equal(JSON.stringify(catalog),before);assert.notEqual(document,entry.document);assert.notEqual(document.design,entry.document.design);
-  assert.deepEqual(document.design,entry.document.design);assert.equal(document.executable,false);assert.equal(document.schemaVersion,4);
+  assert.deepEqual(document.design,entry.document.design);assert.equal(document.executable,false);assert.equal(document.schemaVersion,COMPANION_VERSION);
   assert.ok(document.notes.at(-1).includes(entry.sha256));assert.ok(document.notes.at(-1).includes('independent editable copy'));
   assert.equal(model.screens.length,document.design.nodes.length);assert.ok(model.warnings.length>0);
   assert.ok(model.requirements.every(r=>r.status!=='tested' && r.status!=='done'));
@@ -36,7 +47,7 @@ for(const entry of catalog.starters){
   await assert.rejects(applyProject(plan,'not-a-reviewed-hash'),/stale/);await applyProject(plan,plan.hash);
   const target=join(vault,'plugin'),pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8'));
   assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
-  assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),migrateCompanionDocument(structuredClone(document)).document);
+  assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){
@@ -67,6 +78,10 @@ for(const [label,fields,pattern] of [
 for(const [label,mutate] of [
  ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['missing blank',c=>c.starters.shift()],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
+test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
+ const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
+ assert.throws(()=>validateStarterCatalog(c),new RegExp('Built-ins require project v'+COMPANION_VERSION));
+});
 test('case-sensitive identity changes do not replace domain words or authored content',()=>{
  const source=catalog.starters.find(s=>s.id==='quick-capture').document;const document=customizeStarter(catalog,'quick-capture',{...choices,name:'<b>Not HTML</b>'});
  assert.equal(document.project.name,'<b>Not HTML</b>');assert.deepEqual(document.design,source.design);assert.equal(document.design.nodes.find(n=>n.slug==='capture').label,'Capture an idea');

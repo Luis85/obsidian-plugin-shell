@@ -111,10 +111,10 @@ test('status derives regeneration freshness from actual design bytes', async t =
   assert.ok(response.diagnostics.some(item => item.code === 'DESIGN_GENERATION_STALE'));
 });
 
-test('large v4 design traceability remains inspectable without broadening operation input limits', async t => {
+test('large design traceability remains inspectable without broadening operation input limits', async t => {
   const ctx = await fixture(t);
   await run(ctx, ['setup', '--input', 'input.json', '--yes']);
-  const trace = JSON.stringify({requirements: [{verification: 'todo'}], detailDesigns: seed.design.detailDesigns}, null, 2);
+  const trace = JSON.stringify({requirements: [{verification: 'todo'}], visualDesigns: seed.design.visualDesigns}, null, 2);
   assert.ok(Buffer.byteLength(trace) > 1_048_576, 'exercise the real large-project metadata boundary');
   await writeFile(join(ctx.root, 'design/traceability.json'), trace);
   const response = await run(ctx, ['status']);

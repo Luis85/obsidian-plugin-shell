@@ -12,6 +12,8 @@ import { configuration, defaults } from '../../scripts/framework/configuration.t
 import { readBounded } from '../../scripts/framework/files.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+// The last v4 self-project, retained as a migration input.
+const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
 const identity = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
 async function fixture(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-cli-')));
@@ -79,13 +81,13 @@ test('import preserves foreign and manually edited design snapshots', async t =>
   assert.equal(result.diagnostics[0].code, 'IMPORT_OWNERSHIP'); assert.equal(await readFile(join(ctx.root, 'design/project.json'), 'utf8'), 'foreign');
 });
 test('file and stdin inspection accept full v4 while rejecting executable/future envelopes', async t => {
-  const ctx = await fixture(t);
-  assert.equal(seed.schemaVersion, 4);
+  const ctx = await fixture(t); await writeFile(join(ctx.root, 'project.json'), JSON.stringify(legacy));
+  assert.equal(legacy.schemaVersion, 4);
   const inspected = await run(ctx, ['project', 'inspect', '--input', 'project.json']); assert.equal(inspected.status, 'ok'); assert.equal(inspected.data.screens, 28);
   assert.equal(inspected.data.schemaVersion, 5, 'file-based inspection migrates a v4 input to v5');
-  const stdin = await run({ ...ctx, inputText: JSON.stringify(seed) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);
+  const stdin = await run({ ...ctx, inputText: JSON.stringify(legacy) }, ['project', 'inspect', '--input', '-']); assert.deepEqual(stdin.data, inspected.data);
   assert.equal(stdin.data.schemaVersion, 5, 'stdin inspection migrates a v4 input to v5, matching the file branch');
-  const bad = { ...seed, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
+  const bad = { ...legacy, executable: true }; const result = await run({ ...ctx, inputText: JSON.stringify(bad) }, ['project', 'inspect', '--input', '-']); assert.equal(result.status, 'failed');
 });
 test('unsafe and overlapping folders fail before writing', () => {
   for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'docs', 'Docs/site', 'node_modules/x', 'tests/nested']) {

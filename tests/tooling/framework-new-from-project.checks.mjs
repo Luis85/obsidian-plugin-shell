@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { migrateCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const concept = join(root, 'docs/concepts/companion');
 async function scratch(t) {
@@ -35,13 +35,13 @@ test('a downloaded companion export previews with its own identity and writes no
   assert.ok(result.data.summary.warnings.some(text => /"plugin-companion" will fail check submission: id must not contain "plugin" \(validate-manifest\)\. Pass --id companion/.test(text)), JSON.stringify(result.data.summary.warnings));
   const reserved = machine(['nested/plugin-companion', '--from', 'plugin-companion.companion.json', '--id', 'my-plugin'], cwd);
   assert.equal(reserved.exit, 1); assert.equal(reserved.result.diagnostics[0].code, 'INVALID_PLUGIN_ID'); assert.match(reserved.result.diagnostics[0].message, /--id my-project/);
-  assert.equal(result.data.summary.source.file, 'plugin-companion.companion.json'); assert.equal(result.data.summary.source.schemaVersion, 4);
+  assert.equal(result.data.summary.source.file, 'plugin-companion.companion.json'); assert.equal(result.data.summary.source.schemaVersion, COMPANION_VERSION);
   assert.match(result.data.summary.source.sha256, /^[a-f0-9]{64}$/); assert.equal(result.data.summary.starter, undefined);
   assert.ok(result.data.summary.acceptanceTodos > 0 && result.data.changes.every(change => change.status === 'create'));
   const overridden = machine(['nested/plugin-companion', '--from', 'plugin-companion.companion.json', '--id', 'design-kit'], cwd);
   assert.equal(overridden.result.data.summary.identity.id, 'design-kit'); assert.notEqual(overridden.result.data.planHash, result.data.planHash);
   const human = cli(['nested/plugin-companion', '--from', 'plugin-companion.companion.json'], cwd);
-  assert.equal(human.status, 0, human.stderr); assert.match(human.stdout, /From +plugin-companion\.companion\.json \(companion project schema 4/);
+  assert.equal(human.status, 0, human.stderr); assert.match(human.stdout, /From +plugin-companion\.companion\.json \(companion project schema 5/);
   assert.match(human.stdout, /Nothing has been written/); assert.match(human.stdout, new RegExp(result.data.planHash));
   assert.deepEqual(await readdir(cwd), ['plugin-companion.companion.json']); assert.ok(!existsSync(join(cwd, 'nested')));
 });
@@ -74,7 +74,7 @@ test('invalid, malformed, future, unsafe or conflicting sources are refused with
   const write = (name, value) => writeFile(join(cwd, name), typeof value === 'string' ? value : JSON.stringify(value));
   await write('malformed.json', '{"kind": "obsidian-companion-project",');
   await writeFile(join(cwd, 'latin1.json'), Buffer.from([0x7b, 0xe9, 0x7d]));
-  await write('future.json', { ...blank, schemaVersion: 5, design: { ...blank.design, schema: 5 } });
+  await write('future.json', { ...blank, schemaVersion: COMPANION_VERSION + 1, design: { ...blank.design, schema: COMPANION_VERSION + 1 } });
   await write('executable.json', { ...blank, executable: true });
   await write('blueprint.json', blank.design);
   await copyFile(join(concept, 'starters/catalog.json'), join(cwd, 'catalog.json'));
@@ -111,7 +111,7 @@ test('invalid, malformed, future, unsafe or conflicting sources are refused with
   }
   assert.deepEqual((await readdir(cwd)).sort(), before); assert.ok(!existsSync(join(cwd, 'fresh')));
   const future = machine(['fresh', '--from', 'future.json'], cwd).result.diagnostics[0];
-  assert.match(future.message, /schema 5; this framework reads schema 4 and earlier/); assert.match(future.next, /Upgrade the framework/);
+  assert.match(future.message, new RegExp(`schema ${COMPANION_VERSION + 1}; this framework reads schema ${COMPANION_VERSION} and earlier`)); assert.match(future.next, /Upgrade the framework/);
 });
 test('discovery advertises --from on new as a value option', async t => {
   const cwd = await scratch(t);

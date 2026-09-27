@@ -15,6 +15,8 @@ import { providerProject } from '../fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const original=JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
+// Legacy-authored boundary data extends the last v4 self-project retained as a fixture.
+const legacy=JSON.parse(await readFile(join(root,'tests/fixtures/companion/detail-v4.json'),'utf8'));
 function cli(cwd, command, ...args) {
   const run=spawnSync(process.execPath,['scripts/test-data/'+(command==='verify'?'verify.mjs':'cli.mjs'),...(command==='verify'?[]:[command,...args])],{cwd,encoding:'utf8',timeout:20000,maxBuffer:5_000_000});
   assert.equal(run.status,0,run.stderr+'\n'+run.stdout);return JSON.parse(run.stdout);
@@ -34,7 +36,7 @@ test('shared translator preserves deterministic recipes without endpoints, authe
   const adapter=createFixtureAdapter(manifest);adapter.dispose();assert.throws(()=>adapter.reset(),/disposed/);
 });
 test('optional browser fields do not break preview after portable blueprint import',()=>{
-  const design=structuredClone(original.design);design.detailDesigns=undefined;design.designSystem=undefined;
+  const design=structuredClone(original.design);design.visualDesigns=undefined;design.designSystem=undefined;
   assert.deepEqual(buildCompanionFixtureManifest(design),buildCompanionFixtureManifest(original.design));
 });
 test('generated notes carry canonical metadata but operation DTOs retain their declared shape',()=>{
@@ -46,7 +48,7 @@ test('generated notes carry canonical metadata but operation DTOs retain their d
   assert.equal(output.operations[0].outputValue[0].schema_version,undefined);
 });
 test('native wire recipes seed the mapped entity instead of trying to persist a snapshot DTO',()=>{
-  const p=boundaryProject(original), source=p.design.dataSources.sources.at(-1), op=source.operations[0];
+  const p=boundaryProject(legacy), source=p.design.dataSources.sources.at(-1), op=source.operations[0];
   p.design.dataSources.testing.recipes.push({source:source.id,operation:op.id,enabled:true,behavior:'list',dataset:'native-records',keyField:'id',scenario:'populated',latencyMs:0,errorStatus:503,rules:[]});
   const m=buildCompanionFixtureManifest(p.design), output=createFixtureEngine().generate(m);
   const adapter=createFixtureAdapter(m);adapter.dispose();
@@ -73,8 +75,8 @@ test('fixture translator rejects getters, symbols, sparse arrays and executable 
 });
 test('large unrelated authoring state does not consume the recipe budget, while oversized recipe inputs still fail',()=>{
   const large=structuredClone(original.design);let calls=0;
-  large.detailDesigns={...large.detailDesigns,history:Array.from({length:130000},(_,i)=>({i}))};
-  Object.defineProperty(large.detailDesigns,'unread',{enumerable:true,get(){calls++;return 'never read';}});
+  large.visualDesigns={...large.visualDesigns,history:Array.from({length:130000},(_,i)=>({i}))};
+  Object.defineProperty(large.visualDesigns,'unread',{enumerable:true,get(){calls++;return 'never read';}});
   assert.deepEqual(buildCompanionFixtureManifest(large),buildCompanionFixtureManifest(original.design));assert.equal(calls,0);
   const oversized=structuredClone(original.design);oversized.semantic.entities[0].padding=[0,1,2].map(()=>Array.from({length:50000},(_,i)=>i));
   assert.throws(()=>buildCompanionFixtureManifest(oversized),/Input limit exceeded/);

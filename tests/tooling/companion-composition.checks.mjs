@@ -8,7 +8,8 @@ import vm from 'node:vm';
 import { validateDetailDesigns, emptyDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 import { compositionDefaultUI, compositionSession, compositionTransition, compositionVisible, compositionStyle, compositionTheme, compositionTestSource, validateCompositionUI } from '../../scripts/companion/composition-contract.mjs';
-const seed=JSON.parse(await readFile('docs/concepts/companion/companion-project.json','utf8'));
+// The last v4 self-project, retained as the legacy composition input after the checked-in project moved to v5 visual designs.
+const seed=JSON.parse(await readFile('tests/fixtures/companion/detail-v4.json','utf8'));
 const clone=()=>structuredClone(seed), store=()=>clone().design.detailDesigns;
 const context=vm.createContext({emptyDetailDesigns,compositionDefaultUI,compositionStyle,structuredClone});
 vm.runInContext(await readFile('docs/concepts/companion/src/detail-model.js','utf8'),context);

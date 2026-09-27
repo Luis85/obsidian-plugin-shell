@@ -159,7 +159,7 @@ test('composition snapshots and previews share declared rem and local font seman
   const style=compositionStyle(node,s);
   assert.equal(style.fontSize,'1.75rem');assert.equal(style.fontFamily,'"Example Sans", "Second Family", system-ui');
   assert.equal(style.gap,'100rem');assert.equal(style.borderRadius,'1600px');
-  const doc=structuredClone(fixture);doc.design.detailDesigns.revisions[0].designSystem=s;
+  const doc=structuredClone(fixture);doc.design.visualDesigns.revisions[0].designSystem=s;
   assert.doesNotThrow(()=>validateCompanionDocument(doc));
 });
 test('composition native font preferences remain scoped references and injection stays inert',()=>{

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { emptyStorymaps, validateStorymaps } from '../../scripts/companion/storymap-contract.mjs';
-import { parseCompanionDocument, validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { parseCompanionDocument, validateCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 
 const seed = JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'));
 const source = await readFile('docs/concepts/companion/src/storymap-model.js', 'utf8');
@@ -17,7 +17,7 @@ const plain = value => JSON.parse(JSON.stringify(value));
 test('[STORYMAP-SCHEMA] empty and self-project collections have bounded stable identities', () => {
   assert.equal(validateStorymaps(emptyStorymaps()).maps.length, 0);
   assert.equal(validateStorymaps(fixture()).maps[0].stories.length, 5);
-  assert.equal(seed.schemaVersion, 4); assert.equal(seed.design.schema, 4);
+  assert.equal(seed.schemaVersion, COMPANION_VERSION); assert.equal(seed.design.schema, COMPANION_VERSION);
   assert.deepEqual(parseCompanionDocument(JSON.stringify(seed)), seed);
 });
 for (const [name, mutate] of [
@@ -107,7 +107,7 @@ test('[STORYMAP-MARKDOWN] authored content is escaped and release order is retai
   assert.equal(out, ctx.smMarkdown(m, d));
 });
 test('[STORYMAP-VERSION] legacy projects remain readable; old-version envelopes cannot conceal storymaps', () => {
-  const legacy = copy(seed); legacy.schemaVersion = 1; legacy.design.schema = 1; delete legacy.design.storymaps; delete legacy.design.detailDesigns;
+  const legacy = copy(seed); legacy.schemaVersion = 1; legacy.design.schema = 1; delete legacy.design.storymaps; delete legacy.design.visualDesigns;
   assert.deepEqual(validateCompanionDocument(legacy), legacy);
   legacy.design.storymaps = fixture(); assert.throws(() => validateCompanionDocument(legacy), /version 2/);
   const future = copy(seed); future.schemaVersion = 999; assert.throws(() => validateCompanionDocument(future), /Unsupported companion/);

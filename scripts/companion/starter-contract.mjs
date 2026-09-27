@@ -1,5 +1,5 @@
 /** Built-in starters are data, not installable code or a second project format. */
-import { validateCompanionDocument, validateCompanionFolders, parseCompanionDocument } from './project-contract.mjs';
+import { validateCompanionDocument, validateCompanionFolders, parseCompanionDocument, COMPANION_VERSION } from './project-contract.mjs';
 export const STARTER_CATALOG_VERSION = 1;
 const STARTER_FIELDS = ['id', 'name', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'version', 'file', 'sha256', 'document'];
 function starterAssert(ok, message) { if (!ok) throw Error('STARTER_INVALID: ' + message); }
@@ -18,7 +18,7 @@ export function validateStarterCatalog(value) {
     starterAssert(entry.file === entry.id + '.companion.json' && /^[a-f0-9]{64}$/.test(entry.sha256), 'Invalid local source identity.');
     for (const key of ['includes', 'implementation', 'tags']) starterAssert(Array.isArray(entry[key]) && entry[key].length > 0 && entry[key].length <= 12 && entry[key].every(v => starterText(v)), 'Invalid ' + key + '.');
     validateCompanionDocument(entry.document);
-    starterAssert(entry.document.schemaVersion === 4, 'Built-ins require project v4.');
+    starterAssert(entry.document.schemaVersion === COMPANION_VERSION, 'Built-ins require project v' + COMPANION_VERSION + '.');
   }
   starterAssert(ids.has('blank'), 'Start Blank must always be available.');
   return value;
