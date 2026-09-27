@@ -8,6 +8,8 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },
+  { id: 'project validate', summary: 'Validate/migrate complete project JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'compiler check', summary: 'Analyze project JSON without generation or writes; --report-dir explicitly retains diagnostics.', options: { ...values('input', 'output-kind', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
   { id: 'compiler inspect', summary: 'Inspect normalized IR or an in-memory artifact inventory; never applies a workspace plan.', options: { ...values('input', 'output-kind', 'stage', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
   { id: 'compiler explain', summary: 'Explain a stable compiler diagnostic code.', options: {}, maxArgs: 1, effect: 'read' },
@@ -23,14 +25,16 @@ export const commands: readonly Command[] = [
   { id: 'config explain', summary: 'Explain persisted configuration and identity authority.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'config validate', summary: 'Validate configuration without changes.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'config set', summary: 'Plan a validated configuration update from JSON.', options: values('input'), maxArgs: 0, effect: 'plan' },
-  { id: 'setup', summary: 'Configure this project; optional JSON intake. No implicit install.', options: { ...values('id', 'name', 'author', 'version', 'description', 'source', 'tests', 'test-vault', 'config-dir', 'input', 'resolve'), blank: 'flag' }, maxArgs: 0, effect: 'plan' },
+  { id: 'setup status', summary: 'Inspect resumable setup progress against actual current input bytes; no processes or writes.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'setup resume', summary: 'Explicitly run one setup stage with fresh input checks and retained interruption/failure history.', options: { ...values('stage', 'resume-hash'), recover: 'flag' }, maxArgs: 0, effect: 'process' },
+  { id: 'setup', summary: 'Configure this folder from a verified starter, blank project or JSON; no implicit install.', options: { ...values('id', 'name', 'author', 'version', 'description', 'source', 'tests', 'test-vault', 'config-dir', 'input', 'resolve', 'starter', 'extension', 'extensions'), blank: 'flag' }, maxArgs: 0, effect: 'plan' },
   { id: 'concept schema', summary: 'Discover the data-only concept manifest contract.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'concept inspect', summary: 'Inspect a docs/concepts JSON/HTML input, or return the current project base hash.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'concept import', summary: 'Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'project inspect', summary: 'Validate a companion export and report compiler obligations.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'new', summary: 'Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.', options: { ...values('starter', 'from', 'id', 'name', 'author', 'extension', 'extensions'), list: 'flag', install: 'flag', 'inside-vault': 'flag' }, maxArgs: 1, effect: 'plan' },
-  { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('input', 'vault', 'target', 'output-kind'), maxArgs: 0, effect: 'plan' },
+  { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('input', 'vault', 'target', 'output-kind', 'scope'), maxArgs: 0, effect: 'plan' },
   { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },

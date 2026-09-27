@@ -37,10 +37,17 @@ export function rebaseMarkdown(text: string, from: string, to: string): string {
     if (marker && !fence) { fence = marker; return line; }
     if (marker && fence && marker[0] === fence[0] && marker.length >= fence.length) { fence = null; return line; }
     if (fence) return line;
-    return line.replace(/(\]\()(<[^>]+>|[^\s)]+)/g, (_whole, open: string, raw: string) => {
+    return line.replace(/(!?\[[^\]\n]*\]\()(<[^>]+>|[^\s)]+)(\))/g, (whole, open: string, raw: string, close: string) => {
       const angled = raw.startsWith('<');
-      const next = relink(angled ? raw.slice(1, -1) : raw, from, to);
-      return open + (angled ? `<${next}>` : next);
+      const value = angled ? raw.slice(1, -1) : raw;
+      if (!external.test(value)) {
+        let resolved: string;
+        try { resolved = posix.normalize(posix.join(posix.dirname(from), decodeURIComponent(value.split(/[?#]/, 1)[0]!))); }
+        catch { return whole; }
+        if (maintainerOnly(resolved)) return open.replace(/^!?\[/, '').slice(0, -2) + ' (maintainer-only asset, not included)';
+      }
+      const next = relink(value, from, to);
+      return open + (angled ? `<${next}>` : next) + close;
     });
   }).join('\n');
 }

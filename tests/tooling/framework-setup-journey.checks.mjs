@@ -1,0 +1,145 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { executeOperation } from '../../scripts/framework/operations.ts';
+import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { setupProgress } from '../../scripts/framework/setup-progress.ts';
+import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
+import { result } from '../../scripts/framework/contracts.ts';
+const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
+async function fixture(t) {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'setup-journey-')));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  return { root, frameworkRoot };
+}
+const run = (context, argv) => executeOperation(parseCliArguments(argv), context);
+const identity = ['--id', 'capture', '--name', 'Capture', '--author', 'Example'];
+async function configured(t) {
+  const ctx = await fixture(t);
+  assert.equal((await run(ctx, ['setup', '--starter', 'quick-capture', ...identity, '--yes'])).status, 'applied');
+  return ctx;
+}
+const status = async ctx => (await run(ctx, ['setup', 'status'])).data;
+function request(stage, resumeHash, extra = {}) {
+  return { command: 'setup resume', args: [], options: { stage, yes: true, 'resume-hash': resumeHash, ...extra } };
+}
+test('setup in the current folder accepts a verified starter and retains the ordinary canonical model', async t => {
+  const ctx = await fixture(t); await writeFile(join(ctx.root, 'README.md'), 'existing kit or user readme\n');
+  const preview = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio']);
+  assert.equal(preview.status, 'planned', JSON.stringify(preview));
+  assert.deepEqual(await readdir(ctx.root), ['README.md']);
+  assert.equal(preview.data.summary.starter.id, 'custom-file-view');
+  const applied = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio', '--apply', preview.data.planHash]);
+  assert.equal(applied.status, 'applied', JSON.stringify(applied));
+  const document = JSON.parse(await readFile(join(ctx.root, 'design/project.json')));
+  assert.equal(document.schemaVersion, 6);
+  assert.equal(document.design.nativeIntegrations.fileTypes[0].extension, 'folio');
+  assert.equal(document.project.id, 'capture');
+  assert.equal(await readFile(join(ctx.root, 'README.md'), 'utf8'), 'existing kit or user readme\n');
+  assert.equal((await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio', '--yes'])).status, 'unchanged');
+});
+test('source choice ambiguity, unknown starters and native options without a starter fail before writes', async t => {
+  const ctx = await fixture(t);
+  for (const args of [['--starter', 'blank', '--blank'], ['--starter', 'blank', '--input', 'missing.json'], ['--starter', 'unknown'], ['--blank', '--extension', 'folio']]) {
+    assert.equal((await run(ctx, ['setup', ...identity, ...args, '--yes'])).status, 'failed');
+    assert.deepEqual(await readdir(ctx.root), []);
+  }
+});
+test('headless import preserves imported identity; wizard does not request a replacement identity for JSON', async t => {
+  const ctx = await fixture(t);
+  const document = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  document.project.author = 'Synthetic author';
+  await writeFile(join(ctx.root, 'input.json'), JSON.stringify(document));
+  const prompts = [], answers = ['json', 'input.json'];
+  const chosen = await guidedSetup({ command: 'setup', args: [], options: {} }, ctx, async q => { prompts.push(q); return answers.shift(); }, () => {});
+  assert.equal(prompts.length, 2); assert.equal(chosen.options.id, undefined);
+  const imported = await executeOperation({ ...chosen, options: { ...chosen.options, yes: true } }, ctx);
+  assert.equal(imported.status, 'applied', JSON.stringify(imported));
+  assert.deepEqual(JSON.parse(await readFile(join(ctx.root, 'design/project.json'))).project, document.project);
+});
+test('status and unapproved resume are read-only, even when verification is requested', async t => {
+  const ctx = await configured(t), original = await readdir(join(ctx.root, '.framework'));
+  let calls = 0;
+  const value = await setupProgress({ command: 'setup resume', args: [], options: { stage: 'verify' } }, ctx, async () => { calls++; throw Error('must not run'); });
+  assert.equal(value.status, 'planned'); assert.equal(calls, 0);
+  assert.deepEqual(await readdir(join(ctx.root, '.framework')), original);
+  assert.equal((await status(ctx)).productAcceptance, 'not-inferred');
+});
+test('resume keeps real failure metadata codes and does not retry or call the next stage', async t => {
+  const ctx = await configured(t);
+  await mkdir(join(ctx.root, '.companion')); await writeFile(join(ctx.root, '.companion/generation.json'), JSON.stringify({ version: 1, projectId: 'capture', files: [{ path: 'design/project.json' }] }));
+  let calls = 0;
+  const receipt = await setupProgress(request('install', (await status(ctx)).resumeHash), ctx, async command => {
+    calls++; assert.equal(command.command, 'install'); return { ...result('install', { exitCode: 23 }, 'failed'), diagnostics: [{ code: 'PROCESS_FAILED', message: 'synthetic secret must not enter progress' }] };
+  });
+  assert.equal(receipt.status, 'failed'); assert.equal(calls, 1);
+  const text = await readFile(join(ctx.root, '.framework/setup-progress.json'), 'utf8');
+  assert.doesNotMatch(text, /secret|exitCode/); assert.match(text, /PROCESS_FAILED/);
+  const state = await status(ctx); assert.equal(state.current, true); assert.equal(state.attempts.length, 1);
+  const retried = await setupProgress(request('install', state.resumeHash), ctx, async () => { calls++; return result('install', {}); });
+  assert.equal(retried.status, 'ok'); assert.equal(calls, 2);
+  assert.equal((await status(ctx)).attempts[0].status, 'failed');
+});
+test('changed code invalidates a retained resume hash; aborted and corrupt progress never run', async t => {
+  const ctx = await configured(t), before = await status(ctx);
+  await mkdir(join(ctx.root, 'src')); await writeFile(join(ctx.root, 'src/new.ts'), 'export const x = 1;');
+  let calls = 0; const execute = async () => { calls++; return result('generate', {}); };
+  await assert.rejects(setupProgress(request('generate', before.resumeHash), ctx, execute), /current resumeHash/);
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(setupProgress(request('generate', (await status(ctx)).resumeHash), { ...ctx, signal: controller.signal }, execute), /Cancelled/);
+  await writeFile(join(ctx.root, '.framework/setup-progress.json'), '{broken');
+  await assert.rejects(setupProgress(request('generate', before.resumeHash), ctx, execute));
+  assert.equal(calls, 0); assert.equal(await readFile(join(ctx.root, '.framework/setup-progress.json'), 'utf8'), '{broken');
+});
+test('interrupted intent blocks concurrent execution and is recovered only by explicit current-hash acknowledgment', async t => {
+  const ctx = await configured(t);
+  let release; const waiting = new Promise(resolve => { release = resolve; }); let started;
+  const entered = new Promise(resolve => { started = resolve; });
+  const active = setupProgress(request('generate', (await status(ctx)).resumeHash), ctx, async () => { started(); await waiting; return result('generate', {}, 'applied'); });
+  await entered;
+  const current = await status(ctx); assert.equal(current.attempts[0].status, 'running');
+  await assert.rejects(setupProgress(request('generate', current.resumeHash), ctx, async () => { throw Error('must not run'); }), /previous setup process is still present/);
+  release(); assert.equal((await active).status, 'applied');
+});
+test('source changes during verification block reported acceptance; foreign progress edits are preserved', async t => {
+  const ctx = await configured(t);
+  await mkdir(join(ctx.root, '.companion')); await writeFile(join(ctx.root, '.companion/generation.json'), JSON.stringify({ version: 1, projectId: 'capture', files: [{ path: 'design/project.json' }] }));
+  await mkdir(join(ctx.root, 'src')); await writeFile(join(ctx.root, 'src/a.ts'), 'before');
+  const changed = await setupProgress(request('verify', (await status(ctx)).resumeHash), ctx, async () => {
+    await writeFile(join(ctx.root, 'src/a.ts'), 'after'); return result('verify', {});
+  });
+  assert.equal(changed.status, 'failed'); assert.equal(changed.data.attempt.status, 'blocked');
+  const conflict = await setupProgress(request('generate', (await status(ctx)).resumeHash), ctx, async () => {
+    await writeFile(join(ctx.root, '.framework/setup-progress.json'), 'foreign'); return result('generate', {}, 'applied');
+  });
+  assert.equal(conflict.status, 'failed'); assert.equal(conflict.data.stageOutcome, 'applied');
+  assert.equal(await readFile(join(ctx.root, '.framework/setup-progress.json'), 'utf8'), 'foreign');
+});
+test('wizard stops after denied installation without silently invoking verification or a native host', async () => {
+  const calls = [], answers = ['yes', 'yes', 'no'];
+  const execute = async command => { if (command.command === 'setup resume') assert.equal(command.options.apply, 'b'.repeat(64)); calls.push(command.command); return command.command === 'generate' ? result('generate', { planHash: 'b'.repeat(64) }, 'planned')
+    : command.command === 'setup status' ? result(command.command, { resumeHash: 'a'.repeat(64) }) : result(command.command, {}, 'applied'); };
+  const response = await continueSetup({ root: '/', frameworkRoot: '/' }, execute, async () => answers.shift(), () => {}, result('setup', {}, 'applied'));
+  assert.equal(response.status, 'applied'); assert.deepEqual(calls, ['generate', 'setup status', 'setup resume']);
+});
+
+test('resume rejects silently ignored approval options and invalid generation state', async t => {
+  const ctx = await configured(t); let calls = 0;
+  const execute = async () => { calls++; return result('install', {}); };
+  await assert.rejects(setupProgress(request('install', (await status(ctx)).resumeHash, { apply: 'a'.repeat(64) }), ctx, execute), /only binds a reviewed generate plan/);
+  await assert.rejects(setupProgress(request('generate', (await status(ctx)).resumeHash, { 'plan-out': 'anything' }), ctx, execute), /not a portable/);
+  await mkdir(join(ctx.root, '.companion')); await writeFile(join(ctx.root, '.companion/generation.json'), '{}');
+  assert.equal((await run(ctx, ['setup', 'status'])).diagnostics[0].code, 'SETUP_GENERATION_INVALID');
+  assert.equal(calls, 0);
+});
+test('a reviewed generation hash survives the resume adapter instead of being replaced with latest input approval', async t => {
+  const ctx = await configured(t), planHash = 'b'.repeat(64);
+  const response = await setupProgress(request('generate', (await status(ctx)).resumeHash, { apply: planHash }), ctx, async operation => {
+    assert.equal(operation.command, 'generate'); assert.equal(operation.options.apply, planHash);
+    return { ...result('generate', {}, 'blocked'), diagnostics: [{ code: 'PLAN_STALE', message: 'synthetic' }] };
+  });
+  assert.equal(response.status, 'blocked'); assert.equal(response.data.attempt.status, 'blocked');
+});

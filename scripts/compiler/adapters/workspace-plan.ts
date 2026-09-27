@@ -1,3 +1,4 @@
+import type { GenerationSelection } from '../domain/selection.ts';
 import type { Model } from '../../companion/compiler/model.ts';
 import type { Entry } from '../../companion/compiler/file-code.ts';
 import { readFile } from 'node:fs/promises';
@@ -7,7 +8,7 @@ import { digest, json, row, rows, text, requireValue } from '../../companion/com
 import { visualDefinitions } from '../../companion/compiler/visual-model.ts';
 import { visualVerification, visualAcceptanceTodo } from '../../companion/compiler/visual-files.ts';
 import { visualNodes, visualRoot } from '../../companion/visual/visual-ir.mjs';
-export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}> }
+export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?:ReadonlyArray<{path:string;hash:string}>;selection?:GenerationSelection }
 interface InputSnapshot { content:Buffer;vault:string;target:string;migration?:{interactionIds?:Record<string,string>} | null }
 
 const generationVersion = 1;
@@ -35,10 +36,23 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   requireValue(output.length <= 5000, 'Generated project exceeds the supported ownership inventory.');
   const candidates = await createFilePlan(input.vault,output.map(e => ({path:prefix+e.path,content:e.content,...(e.encoding ? {encoding:e.encoding} : {})})));
   const preserved: string[] = []; const conflicts: string[] = []; const entries: Array<{path:string;content:string;encoding?:'base64'}> = [];
+  const retained = new Set(options.selection?.retainedPaths ?? []);
   const ownership: Array<{path:string;hash:string;ownership:string}> = [];
   for (let i = 0; i < output.length; i++) {
     const file = output[i]!; const change = candidates.changes[i]!; const old = previous.get(file.path);
     let content = file.content; let ownedHash = change.afterHash!;
+    if (retained.has(file.path)) {
+      if (!old || change.beforeHash === null || change.afterHash !== old.hash) {
+        conflicts.push(file.path + ': excluded artifact needs generation; use a wider feature or --scope all');
+      } else {
+        // Keep excluded developer bytes as an unchanged precondition. Do not normalize UTF-8 or update their ownership hash.
+        const bytes = await readFile(resolve(input.vault, prefix + file.path));
+        requireValue(digest(bytes) === change.beforeHash, 'Excluded artifact changed while reading.');
+        entries.push({ path: prefix + file.path, content: bytes.toString('base64'), encoding: 'base64' });
+        ownership.push({ path: file.path, hash: old.hash, ownership: old.ownership });
+        continue;
+      }
+    }
     if (old && change.beforeHash === null) conflicts.push(file.path+': previously generated file was removed');
     else if (change.beforeHash !== null && !old) conflicts.push(file.path+': existing unowned file');
     else if (old && change.beforeHash !== null && change.beforeHash !== old.hash) {
@@ -54,15 +68,15 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   }
   // Retired files remain tracked, but are never implicitly removed.
   for (const [path,value] of previous) if (!ownership.some(e => e.path === path)) ownership.push({path,hash:value.hash,ownership:value.ownership});
-  const receipt = {version:generationVersion,projectId:model.project.id,inputHash:digest(input.content.toString('utf8')),files:ownership};
+  const receipt = {version:generationVersion,projectId:model.project.id,inputHash:digest(input.content.toString('utf8')),files:ownership,...(options.selection ? {selection:options.selection} : {})};
   entries.push({path:receiptPath,content:json(receipt)});
   const plan = await createFilePlan(input.vault,entries);
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
   for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
-  const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
+  const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,...(options.selection ? {selection:options.selection} : {}),changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
   // A legacy input names the interaction IDs that replaced its edge IDs (hooks were generated per edge before).
   const interactionIds: Record<string,string> = input.migration?.interactionIds ?? {};
-  return {hash,plan,conflicts,preserved,interactionIds,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings}};
+  return {hash,plan,conflicts,preserved,interactionIds,summary:{...(options.selection ? {selection:options.selection} : {}),project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings}};
 }
 /** Lossy decoding would silently rewrite a developer's bytes; only exact UTF-8 (BOM retained) or base64 survives. */
 function preservedText(bytes: Buffer, encoding?: 'base64'): string | null {

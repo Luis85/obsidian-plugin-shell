@@ -77,6 +77,12 @@ jobs:
         run: |
           node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-detail-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
           npm run test:visual
+      - name: Validate the published project schema with an independent implementation
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/project-schema-env"
+          "$RUNNER_TEMP/project-schema-env/bin/python" -m pip install jsonschema==4.26.0
+          "$RUNNER_TEMP/project-schema-env/bin/python" -B tests/concepts/companion-schema.test.py
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |

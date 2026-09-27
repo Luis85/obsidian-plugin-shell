@@ -1,3 +1,4 @@
+import { setupSource } from './setup-source.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
@@ -46,7 +47,8 @@ export async function configurationPlan(request: Request, context: Context) {
       selected = configuration(selected);
     }
   }
-  const input = stringOption(options, 'input');
+  const intake = request.command === 'setup' ? await setupSource(request, context, selected) : { input: stringOption(options, 'input'), context, origin: null };
+  const input = intake.input;
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
   if ((input || options.blank) && request.command !== 'config set') {
     requireThat(input || selected, 'IDENTITY_REQUIRED', 'Configure identity before creating a blank design.');
@@ -55,7 +57,7 @@ export async function configurationPlan(request: Request, context: Context) {
         schema: COMPANION_VERSION, blueprint: selected.project.name, goal: selected.project.description, platform: 'desktop', nextId: 2, library: [], prds: [], links: [],
         nodes: [{id: 'node-1', slug: 'main', label: selected.project.name, kind: 'view', parent: null, nav: true, entry: true, command: true, ribbon: false, components: [], goal: ''}],
       }}) : '';
-    const { source } = await inspectDesign(input ? context : {...context, inputText: blank}, input ?? '-');
+    const { source } = await inspectDesign(input ? intake.context : {...context, inputText: blank}, input ?? '-');
     const resolved = resolveImport(selected, source.document, stringOption(options, 'resolve')); selected = resolved.config;
     entries.push({ path: designFile, content: json(resolved.document) });
     // Original data remains available for review; it carries no execution authority.
@@ -84,7 +86,7 @@ export async function configurationPlan(request: Request, context: Context) {
     }
   }
   const plan = await createFilePlan(context.root, entries);
-  return { plan, summary: { configuration: selected, imported: Boolean(input), blank: options.blank === true, next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
+  return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true, next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
 }
 export async function vaultPlan(context: Context) {
   const config = await readConfiguration(context.root); requireThat(config, 'CONFIG_REQUIRED', 'Run setup first.');

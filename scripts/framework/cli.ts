@@ -1,3 +1,4 @@
+import { guidedSetup, continueSetup } from './setup-terminal.ts';
 import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
 import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 import { ask, readInput } from './input.ts';
@@ -22,17 +23,6 @@ function render(value: Result, machine: boolean): void {
     stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
   }
 }
-async function guidedIdentity(request: Request, signal?: AbortSignal): Promise<Request> {
-  const options = { ...request.options };
-  if (!options.id && !options.input) {
-    const path = (await ask(stdin, stderr, 'Project JSON path (leave empty for a new project): ', signal)).trim();
-    if (path) options.input = path; else options.blank = true;
-  }
-  if (!options.input) for (const key of ['id', 'name', 'author']) {
-    if (!options[key]) options[key] = (await ask(stdin, stderr, `Plugin ${key}: `, signal)).trim();
-  }
-  return { ...request, options };
-}
 async function confirm(message: string, signal?: AbortSignal): Promise<boolean> {
   return /^y(?:es)?$/i.test((await ask(stdin, stderr, message + ' [y/N] ', signal)).trim());
 }
@@ -46,19 +36,9 @@ async function interactiveRun(request: Request, context: Context): Promise<Resul
   }
   return outcome;
 }
-async function setupNextSteps(configured: Result, context: Context): Promise<Result> {
-  if (!await exists(join(context.root, '.framework/kit.json')) || !await exists(join(context.root, 'design/project.json'))) return configured;
-  render(configured, false);
-  if (!await confirm('Review boilerplate generation for this accepted design?', context.signal)) return configured;
-  const generated = await interactiveRun({ command: 'generate', args: [], options: {} }, context);
-  if (!['applied', 'unchanged'].includes(generated.status)) return generated;
-  render(generated, false);
-  if (!await confirm('Install exact locked dependencies now? This accesses the package registry and may run approved lifecycle scripts.', context.signal)) return generated;
-  return executeOperation({ command: 'install', args: [], options: { yes: true } }, context);
-}
 export async function main(argv: string[], frameworkRoot: string): Promise<number> {
   // Preserve the published workspace compiler's raw JSON protocol and --help entry.
-  if (argv[0] === 'generate' && (argv.includes('--target') || (argv.length === 2 && argv[1] === '--help')) && !argv.includes('--json')) {
+  if (argv[0] === 'generate' && (argv.includes('--target') && !argv.includes('--scope') || (argv.length === 2 && argv[1] === '--help')) && !argv.includes('--json')) {
     try { const { generatorCli } = await import('../companion/compiler/cli.ts'); await generatorCli(argv.slice(1)); return Number(process.exitCode ?? 0); }
     catch (error) { stderr.write((error instanceof Error ? error.message : 'Generation failed.') + '\n'); return 1; }
   }
@@ -67,7 +47,7 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
   let command = 'unknown';
   try {
     let request = parseCliArguments(argv); command = request.command;
-    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version', 'compiler explain'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
+    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
     // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
     if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
@@ -76,10 +56,12 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     const context: Context = { root, frameworkRoot, signal: controller.signal, progress: text => stderr.write(text) };
     if (request.options.input === '-') context.inputText = await readInput(stdin, controller.signal);
     const interactive = Boolean(stdin.isTTY && stderr.isTTY && !machine && !request.options['no-interaction'] && !request.options.yes && !request.options.help);
-    if (interactive && command === 'setup' && !request.options['dry-run']) request = await guidedIdentity(request, controller.signal);
+    if (interactive && command === 'setup' && !request.options['dry-run']) request = await guidedSetup(request, context, query => ask(stdin, stderr, query, controller.signal), text => stderr.write(text));
     if (interactive && command === 'new' && !request.options.list) request = await guidedStarter(request, context, query => ask(stdin, stderr, query, controller.signal), text => stderr.write(text));
     let outcome = interactive ? await interactiveRun(request, context) : await executeOperation(request, context);
-    if (interactive && command === 'setup' && !request.options['dry-run'] && ['applied', 'unchanged'].includes(outcome.status)) outcome = await setupNextSteps(outcome, context);
+    if (interactive && command === 'setup' && !request.options['dry-run'] && ['applied', 'unchanged'].includes(outcome.status)) {
+      if (await exists(join(context.root, '.framework/kit.json')) && await exists(join(context.root, 'design/project.json'))) outcome = await continueSetup(context, executeOperation, query => ask(stdin, stderr, query, controller.signal), value => render(value, false), outcome);
+    }
     render(outcome, machine);
     return outcome.status === 'failed' || outcome.status === 'blocked' ? 1 : outcome.status === 'cancelled' ? 130 : 0;
   } catch (error) { const outcome = failure(command, error); render(outcome, machine); return outcome.status === 'cancelled' ? 130 : 1; }

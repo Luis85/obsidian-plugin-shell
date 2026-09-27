@@ -15,7 +15,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
-  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
+  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
@@ -37,6 +37,7 @@ const common: Record<string, OptionHelp> = {
 };
 const specific: Record<string, OptionHelp> = {
   stage: { description: 'Compiler inspection stage.', values: ['ir', 'artifacts'], default: 'ir' },
+  scope: { description: 'Generation selection: all, feature:<id>, page:<surface-or-design-id>, component:<library-or-design-id>. Shared registries remain complete; excluded artifacts must already exist unchanged in the generated definition.', default: 'all' },
   'output-kind': { description: 'Compiler output; --target remains a folder.', values: ['obsidian-plugin', 'clickdummy'], default: 'obsidian-plugin' },
   'report-dir': { description: 'Explicit new report directory beneath reports/compiler; omitted means no reports are written.' },
   debug: { description: 'Retain bounded compiler error/cause stacks; requires --report-dir and review before sharing.' },
@@ -57,6 +58,8 @@ const specific: Record<string, OptionHelp> = {
   starter: { description: 'Starter ID (see new --list).' },
   list: { description: 'List the available entries instead of creating one.' },
   install: { description: 'After writing, run npm ci and project verification in the new folder.' },
+  recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },
+  'resume-hash': { description: 'Exact current input/progress digest returned by setup status or setup resume preview.' },
   'inside-vault': { description: 'Allow a target inside a folder that contains .obsidian/ (an Obsidian vault). Refused by default so a personal vault is never used as a project folder.' },
   vault: { description: 'Existing folder that contains the generation target (compatibility mode).' },
   target: { description: 'Target folder relative to --vault (compatibility mode).' },
@@ -102,14 +105,18 @@ const examples: Record<string, string[]> = {
   doctor: ['node shell.mjs doctor'],
   'config get': ['node shell.mjs config get --json'], 'config explain': ['node shell.mjs config explain'],
   'config validate': ['node shell.mjs config validate'], 'config set': ['node shell.mjs config set --input config.json --dry-run'],
-  setup: ['node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
+  'setup status': ['node shell.mjs setup status --json'],
+  'setup resume': ['node shell.mjs setup resume --stage verify --dry-run --json', 'node shell.mjs setup resume --stage verify --resume-hash <digest> --yes'],
+  setup: ['node shell.mjs setup --starter quick-capture --id capture --name Capture --author Me --dry-run', 'node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
   'concept schema': ['node shell.mjs concept schema --json'],
   'concept inspect': ['node shell.mjs concept inspect --json', 'node shell.mjs concept inspect --input docs/concepts/capture/concept.json'],
   'concept import': ['node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node shell.mjs plan apply concept.plan.json --yes'],
+  'project schema': ['node shell.mjs project schema --version 6 --json'],
+  'project validate': ['node shell.mjs project validate --input project.json --json'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
   new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../my-plugin --from my-plugin.companion.json'],
-  generate: ['node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs generate --yes'],
+  generate: ['node shell.mjs generate --scope feature:workspace --plan-out generation.plan.json', 'node shell.mjs generate --yes'],
   make: ['node shell.mjs make list', 'node shell.mjs make file-extension board --feature documents --extension board', 'node shell.mjs make context-menu inspect --feature documents --extensions md,board', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
   install: ['node shell.mjs install --yes'], build: ['node shell.mjs build'],
@@ -129,7 +136,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(['install', 'framework pack'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(entry.id === 'setup resume' ? ['apply'] : []), ...(['install', 'framework pack', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release') return ['dry-run', ...shared];
   return shared;
@@ -141,6 +148,8 @@ export function commandHelp(entry: Command): CommandHelp {
   for (const name of Object.keys(entry.options)) {
     const doc = { ...(specific[name] ?? { description: '' }) };
     if (name === 'profile' && profiles[entry.id]) { doc.values = profiles[entry.id]; doc.default = profileDefaults[entry.id]; }
+    if (entry.id === 'setup resume' && name === 'stage') { doc.description = 'Run only this explicitly approved setup stage.'; doc.values = ['generate', 'install', 'verify', 'preview']; delete doc.default; }
+    if (entry.id === 'project schema' && name === 'version') { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
     if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
