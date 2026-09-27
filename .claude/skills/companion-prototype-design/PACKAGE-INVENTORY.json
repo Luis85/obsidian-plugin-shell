@@ -159,18 +159,18 @@
     },
     {
       "path": "scripts/lib/build-worker.mjs",
-      "bytes": 4579,
-      "sha256": "6e6788f1de942bbc05ce4bbdbaebef0237ccd12e792bff81bba7ded73044d2b0"
+      "bytes": 4572,
+      "sha256": "b049d433a3bc9a5f5060b74cd84613687526edc321a033434d89cf3055cd862f"
     },
     {
       "path": "scripts/lib/framework.mjs",
-      "bytes": 6637,
-      "sha256": "927c0b1fb031605f48853bc22b080d9086f4b5f72bac99989e0f83102d9353bd"
+      "bytes": 6630,
+      "sha256": "e235d3cb84568106f6cd27289f50de99b5078c2dc520ae6ec5225a04d9be9d38"
     },
     {
       "path": "scripts/lib/io.mjs",
-      "bytes": 3710,
-      "sha256": "61857c84300a97e7bebc75dff6ba9a18994a8ad860e9ddfb1d687e266ed76c33"
+      "bytes": 3703,
+      "sha256": "c3778d5d2c8b7da9f00e1df8143c7928cbcfe432c574560517640e7f8dc3b27a"
     },
     {
       "path": "scripts/lib/offline.mjs",
@@ -219,13 +219,13 @@
     },
     {
       "path": "tests/test_pack_concept.py",
-      "bytes": 8447,
-      "sha256": "a855186b3df7242805eafc5d2dbd72ab6ded97c575bfa339a20a6161dceca184"
+      "bytes": 8923,
+      "sha256": "b3e91647de9b54df729ad271d8a65e581d55c43942d2b52a63cb16b83b97b828"
     },
     {
       "path": "tests/test_skill_contract.py",
-      "bytes": 8394,
-      "sha256": "c0e54d7c8a7bcf2508abc8276eccb7abf58b434ce064eeb7a6179e11b954e6c3"
+      "bytes": 8506,
+      "sha256": "f8e1bc22eccdd673dc3e56067015845718779b0c85c8e17c1a309554901dbe67"
     },
     {
       "path": "tests/validator.checks.mjs",

@@ -20,7 +20,7 @@ export function prototypeBuildConfig({ shared, entry, licenses }) {
       rolldownOptions: { output: { inlineDynamicImports: true } } },
   };
 }
-export async function compile(options) {
+async function compile(options) {
   const root = noLinks(process.cwd());
   const entry = noLinks(need(options, 'entry'));
   const relative = path.relative(root, entry).split(path.sep).join('/');
