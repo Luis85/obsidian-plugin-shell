@@ -61,7 +61,7 @@ export async function shellOperation(directory, argv, { execute = false, signal 
   return api.executeOperation(request, { ...api.context, signal });
 }
 
-export const qualityScripts = Object.freeze([
+const qualityScripts = Object.freeze([
   'typecheck', 'typecheck:project', 'typecheck:generator', 'typecheck:framework', 'lint',
   'check:architecture', 'check:presentation', 'check:source', 'check:tokens',
   'check:artifacts', 'check:maintainability', 'check:analyzer', 'check:test-quality',

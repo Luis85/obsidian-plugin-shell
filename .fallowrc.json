@@ -185,7 +185,20 @@
     "scripts/companion/starter-files.mjs",
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
-    "scripts/framework/cli.ts"
+    "scripts/framework/cli.ts",
+    ".claude/skills/companion-prototype-design/scripts/build-prototype.mjs",
+    ".claude/skills/companion-prototype-design/scripts/build-single-file.mjs",
+    ".claude/skills/companion-prototype-design/scripts/check-offline.mjs",
+    ".claude/skills/companion-prototype-design/scripts/diff-project.mjs",
+    ".claude/skills/companion-prototype-design/scripts/inspect-repository.mjs",
+    ".claude/skills/companion-prototype-design/scripts/prototype.mjs",
+    ".claude/skills/companion-prototype-design/scripts/save-concept.mjs",
+    ".claude/skills/companion-prototype-design/scripts/validate-project.mjs",
+    ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs",
+    ".claude/skills/companion-prototype-design/tests/helpers.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/integration.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/validator.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/worker-output.checks.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -284,6 +297,12 @@
         "patterns": [
           "docs/concepts/companion/test-kit/**"
         ]
+      },
+      {
+        "name": "prototype-skill",
+        "patterns": [
+          ".claude/skills/**"
+        ]
       }
     ],
     "rules": [
@@ -352,7 +371,8 @@
           "tooling",
           "styles",
           "companion-test-kit",
-          "fixture-compiler"
+          "fixture-compiler",
+          "prototype-skill"
         ]
       },
       {
@@ -408,6 +428,12 @@
         "allow": [
           "tooling",
           "companion-test-kit"
+        ]
+      },
+      {
+        "from": "prototype-skill",
+        "allow": [
+          "prototype-skill"
         ]
       }
     ]
