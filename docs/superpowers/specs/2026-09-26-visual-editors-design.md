@@ -133,6 +133,12 @@ limits; raised only if the migrated self-project requires it, with the reason re
 keys rejected; literals bounded (existing `compositionLiteral` limits). Validation gates
 save, export, import and generation.
 
+Amended in the final fix wave (2026-09-27, coordinator-approved, before v5 is a persisted format): element attributes
+are a closed per-tag list (`img` alt/src, `input` placeholder/type/name, `button` type, `label` for, plus `title`,
+`role` and `aria-*` on every tag; a literal `img src` is a relative path or a `data:image/` URL); composition depth is
+the memoized longest chain of component levels, independent of definition order; component export names must not be
+Vue built-ins, names the generated script declares, or Nuxt UI catalog component names.
+
 ### 2.6 Migration v3/v4 → v5
 
 `migrateDetailDesigns(detailDesigns, design) → { visualDesigns, report }`:
@@ -153,6 +159,10 @@ save, export, import and generation.
   `name:type` grammar; unparseable lines become `string`/`unknown` with the original
   text as `description` and are listed in the report.
 - Dropped: `position`, `size`, `sourceBrickId` (counted in the report).
+- The report maps every legacy edge of a live document to the interaction that replaced it
+  (`interactionIds: { <edgeId>: 'vi-N' }`), so hooks generated per edge can be ported (§5).
+- A design whose upgrade fails is kept, and exported, unchanged at its legacy version with `detailDesigns`; importing
+  that export retries the upgrade. A blueprint import over it is refused.
 
 ### 2.7 Session state
 
@@ -228,8 +238,13 @@ replace `detail-model.ts`, `detail-code.ts`, `detail-fields.ts`, `detail-mapping
 - All literal text/attributes escaped.
 
 Runtime `use-detail.ts`, `detail-actions.ts`, `detail-controls.ts` adapted to a tree spec;
-`operation.ts`, `json-http.ts`, fixtures, relationships unchanged. Output paths unchanged
-(`presentation/components/library/<id>.vue`, `details/<pageId>.vue`). Generated tests:
+`operation.ts`, `json-http.ts`, fixtures, relationships unchanged. Output paths: library components keep
+`presentation/components/library/<componentFile(libraryId)>.vue`; page components move from `details/<detail
+document ID>.vue` to `details/<vp-N>.vue` and interaction hooks from `application/interactions/<edgeId>.ts` to
+`<vi-N>.ts` (amended 2026-09-27; the earlier text said “Output paths unchanged”). Regeneration keeps the old files as
+retired, `detail-actions.ts` keeps a deprecated `DetailAction` type for the retained `domain/detail-runtime.ts`, and
+the plan of a legacy input lists `legacyInteractionIds` so hooks can be ported, or the project regenerated into a
+fresh target. Generated tests:
 interaction transitions from IR, contract tests, scenario render checks. Repo golden tests
 for lowering. `compositionTestSource` replaced by the IR equivalent. Catalog v1 ↔ generated
 `@nuxt/ui` version asserted.

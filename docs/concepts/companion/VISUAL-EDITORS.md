@@ -29,6 +29,13 @@ build, analyzer, linter or dependency scanner treats them as project code or dep
 | Insert pane | **Customize as component** on a Nuxt UI primitive | New library entry plus a component that wraps it |
 
 Opening an editor never writes. **Start design** is the explicit write that creates a page or component definition.
+
+A sitemap surface that owns a page design, or that an interaction navigates to, cannot be removed (nor turned into a
+group or action, nor replaced by applying a blueprint). The removal dialog names each page design and interaction
+instead of offering the confirmation. Imported data can still name a missing surface; **Pages** then lists those
+designs under “Designs with a missing surface”. Each page opens in the editor, whose writes are refused while the
+reference dangles, and **Remove designs and links to missing surfaces…** deletes those page designs and removes the
+navigate actions to missing surfaces in one reviewed, undoable write. Restoring the surface reconnects them instead.
 **Back** returns to the origin view with its selection (storymap item, sitemap surface, library component or the
 previous editor) and focus on the control that opened the editor. The Back stack keeps 12 entries. An origin that was
 removed meanwhile falls back to its view's default.
@@ -77,6 +84,9 @@ widths the panes become tabs (Structure, Canvas, Inspector).
 - **Publish revision** shows every usage first. Live instances follow the new source, and pinned instances keep their
   revision. It then publishes an immutable `x.y.z` snapshot of the contract and template. The first revision is 1.0.0,
   and later ones default to the next patch.
+- A published revision of another component that pins this one is a usage too: the dependency graph and Publish list
+  it as pinned and unchanged, and deleting this component's design is refused while it exists, naming the revision
+  (for example “Toolbar v1.0.0”).
 
 ## Component library dependencies and external adapters (spec §13)
 
@@ -105,7 +115,9 @@ library code.
 The generator merges the declared packages, at their exact versions, into the generated `package.json`. It stops,
 naming both versions, if one conflicts with a framework-pinned version or with another component. For each external
 node it writes the extension-owned
-`presentation/components/library/<component>/<adapter>.adapter.ts`, which exports
+`presentation/components/library/<component file>/<adapter>.adapter.ts`, where the component file is the library ID,
+with a `-component` suffix when the ID is a single word (`editor` → `library/editor-component/`, `rich-editor` →
+`library/rich-editor/`). `PROJECT-IMPLEMENTATION.md` lists every adapter at its real path. The adapter exports
 `createAdapter(): VisualExternalAdapter<Props>` with `mount(el, props, emit)`, `update(props)` and `destroy()` stubs.
 The stubs throw `NotImplementedError` and a comment names the package to import. Regeneration never overwrites an
 edited adapter. The wrapper SFC mounts it after render, calls `update` on prop changes and `destroy` on unmount, and
@@ -132,13 +144,24 @@ design.visualDesigns = { schema: 3, nextId, catalog: { id: 'nuxt-ui', version: 1
   (default/loading/empty/error/disabled), `a11y`, typed `layout` rules (token IDs, never raw CSS) and author `notes`.
 - Values: `literal`, `prop`, `state` (a form control's current value) and `source` (data source operation field).
   Interactions hold `emit`, `navigate`, `set-state`, `toggle`, `set-value`, `focus` and `source` actions. Empty
-  `actions` is an explicit implementation TODO.
+  `actions` is an explicit implementation TODO. Generated code runs the actions of an interaction in their authored
+  order (local effects, source calls, emits and navigation alike) and stops at the first failure; a mapping reads
+  drafts as the earlier actions left them.
+- Element attributes are a closed per-tag list: `img` `alt`/`src`, `input` `placeholder`/`type`/`name`, `button`
+  `type`, `label` `for`, plus `title`, `role` and `aria-*` on every tag. A literal `img src` is a relative path or a
+  `data:image/` URL. No event, URL-navigating or document-bearing attribute (`href`, `action`, `formaction`,
+  `srcdoc` …) exists.
+- Component export names are unique PascalCase names that are not reserved: Vue built-ins (`Component`, `Transition`,
+  `TransitionGroup`, `BaseTransition`, `KeepAlive`, `Suspense`, `Teleport`, `Slot`, `Template`), names the generated
+  script declares (`Error`, `VisualState`, `VisualRequest`, `ComponentProps`, `ComponentEvents`, `ComponentSlots`)
+  and every Nuxt UI catalog component (`UButton` …). Migration appends a number (`Component2`) instead.
 - IDs are deterministic (`vn-`, `vp-`, `vc-`, `vl-`, `vr-`, `vi-` from `nextId`). No clock values or random UUIDs are
   persisted.
 - Validation gates save, import, export and generation, and fails with
   `VISUAL_INVALID: <message naming the page/component/layout and element>`. It checks references (owners, library,
   components, revisions, sources, surfaces, action and scenario targets), contracts, catalog props and types, instance
-  props/slots/events against the target contract, acyclic composition and the limits below.
+  props/slots/events against the target contract, acyclic composition and the limits below. Composition depth is the
+  longest chain of nested component levels, whatever order the definitions are stored in.
 - Editor session state (selection, viewport, open panes, inspector tab, scenario, palette) lives in `veUi` and never
   enters project JSON.
 
@@ -156,7 +179,30 @@ Companion v5 documents carry `visualDesigns` and must not carry `detailDesigns`.
 Migration runs on import, on reading an export (`companion:generate`/scaffold) and once on startup for saved browser
 state. Saved-state migration clears the design undo/redo history, because legacy snapshots cannot be replayed, and
 says so: “This project was upgraded to the new page and component editors. Earlier undo history was cleared.”
-Import shows the migration report before the explicit replacement.
+Import shows the migration report before the explicit replacement. The report also maps every legacy edge to the
+interaction that replaced it (`interactionIds: { "detail-edge-13": "vi-14" }`); import review lists it under
+“Interaction IDs”, and a generator plan from a legacy file prints it as `legacyInteractionIds`.
+
+A saved project whose one-time upgrade fails is kept unchanged, with its only copy of the legacy detail designs. The
+notice and the Pages view name the recovery: **Export project JSON** on the Pages view writes the unchanged legacy
+document at its legacy version, `detailDesigns` included, and importing that file retries the upgrade; **Export
+recovery snapshot** is the raw alternative. The blueprint export keeps the legacy store too, and a blueprint import
+over such a project is refused, because it would discard the store. Editing pages and components stays refused until
+the project is upgraded.
+
+### Regenerating a project generated from detail designs
+
+Generated file paths changed with the visual IR, and regeneration never deletes a file:
+
+- page SFCs moved from `presentation/components/details/<detail document ID>.vue` to
+  `presentation/components/details/<vp-N>.vue`, and their spec modules from `domain/details/` to `domain/visual/`;
+- interaction hooks moved from `application/interactions/<edge ID>.ts` to `application/interactions/<vi-N>.ts`.
+
+Either regenerate into a fresh target and move your business code across, or regenerate in place: the old files stay
+(the reviewed plan tracks them as retired), `domain/detail-actions.ts` keeps a deprecated `DetailAction` type so the
+retained `domain/detail-runtime.ts` still type-checks, and you port each hook from `<edge ID>.ts` to the `<vi-N>.ts`
+named by the migration's `interactionIds` (import review or the plan's `legacyInteractionIds`). Delete the retired
+files once nothing imports them.
 
 **Dropped by design:** free canvas geometry (`position`, `size`) and outline references (`sourceBrickId`), counted as
 `droppedPositions`, `droppedSizes` and `droppedOutlineRefs`. Real data lost nothing else:
