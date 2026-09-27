@@ -310,6 +310,11 @@ jobs:
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
+      - name: Typecheck and verify canonical sitemap authoring and project intake
+        shell: bash
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
       - name: Record exact source revision

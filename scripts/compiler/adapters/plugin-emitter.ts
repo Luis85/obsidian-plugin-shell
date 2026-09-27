@@ -1,6 +1,7 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
+import { clickdummyCode } from '../../companion/compiler/clickdummy-code.ts';
 import { httpCode } from '../../companion/compiler/http-code.ts';
 import { relationshipCode } from '../../companion/compiler/relationship-code.ts';
 import { renderFixtureCode as fixtureCode } from './fixture-emitter.ts';
@@ -16,7 +17,7 @@ import { visualDefinitions, visualPackages, visualAdapterPath } from '../../comp
 import { visualNodes } from '../../companion/visual/visual-ir.mjs';
 import { styleCode } from '../../companion/compiler/style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from '../../companion/compiler/devkit-files.ts';
-import { maintainerOnly, relocateFrameworkDocuments } from '../../companion/compiler/framework-docs.ts';
+import { relocateFrameworkDocuments } from '../../companion/compiler/framework-docs.ts';
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
   const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file }]));
@@ -45,6 +46,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   pkg.scripts['test:tdd'] = `vitest --config vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
   pkg.scripts['typecheck:project'] = 'vue-tsc --noEmit --project tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
+  pkg.scripts['build:clickdummy'] = 'node shell.mjs clickdummy build';
   pkg.scripts['doctor'] = 'node shell.mjs doctor';
   pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
@@ -58,7 +60,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts',makerTests+'/**/*.ts']}));
+  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');
@@ -75,6 +77,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('visual', () => visualCode(templateRoot,m,add));
   await emit('relationships', () => relationshipCode(templateRoot,m,add));
   await emit('http', () => httpCode(templateRoot,m,add));
+  await emit('clickdummy', () => clickdummyCode(m,add));
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {

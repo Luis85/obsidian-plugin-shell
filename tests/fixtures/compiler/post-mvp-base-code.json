@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "931db74da3576d20b862583395cb0a1b9a4412e5",
+  "scope": "Independent unchanged parent generator; product sources/tests, browser composition, native composition, canonical JSON and traceability",
+  "cases": [
+    {
+      "source": "docs/concepts/companion/starters/blank.companion.json",
+      "inputSha256": "509163e5e584bc1df415fd2aca91aea608886291a9a6ca8dc113ef8402aa1f3a",
+      "files": 58,
+      "sha256": "189896c7ee2b7e699286fbeb4eab4d634c4205d38a9d2d74b8462abff0f58034"
+    },
+    {
+      "source": "docs/concepts/companion/starters/command-utility.companion.json",
+      "inputSha256": "e73c9c80d9c585c0f7bd7887594ecd01df03c26f6777cf984373912f373b9310",
+      "files": 87,
+      "sha256": "8055052bf067bc65a188c1aa8e61cf47a7e01eb18657a660419aafe782c3b3bf"
+    },
+    {
+      "source": "docs/concepts/companion/starters/context-menu.companion.json",
+      "inputSha256": "ebfb84289a2bdc7d0604667f607c577af4db85b627a4a05a0a008683e3370438",
+      "files": 79,
+      "sha256": "8d38d8dccd07f363df1e97c9471f0ff31e08b7a873ae729404e4cb2f7f9aac5d"
+    },
+    {
+      "source": "docs/concepts/companion/starters/custom-file-view.companion.json",
+      "inputSha256": "643dcb70a0a706a2af07b138e599ca6d8694ac7bef9429e3a55a822342d5ae55",
+      "files": 79,
+      "sha256": "5c26a6749a517b65ea66fbdf007228c80ec105aa84d8db095b5d2342a0200148"
+    },
+    {
+      "source": "docs/concepts/companion/starters/daily-journal.companion.json",
+      "inputSha256": "b6deca87530c9d7ef6e1358d65c03dd2ece012e887dc477f4557c0168c4d5e99",
+      "files": 113,
+      "sha256": "2ff5b1dfba419f353d5979cf1c9eeae920310ba661849a6055b57bfcd380f888"
+    },
+    {
+      "source": "docs/concepts/companion/starters/import-integration.companion.json",
+      "inputSha256": "49ecc9fd2cac615cf20f7ff4005b9e39b1bab7e48f1418f8b632754e8d133098",
+      "files": 113,
+      "sha256": "87f8dc6da731d54c7c1688c998719d69af8ef14b2a8a5e82294c378e667ce44a"
+    },
+    {
+      "source": "docs/concepts/companion/starters/knowledge-collection.companion.json",
+      "inputSha256": "9ebf7cae597ab52123fc11a3221d854511db05738687c707a9183a0768f379fa",
+      "files": 121,
+      "sha256": "16060ab8c664079b6b96b4c89414ef311f86da3efe08607b9638ab7e709293af"
+    },
+    {
+      "source": "docs/concepts/companion/starters/note-inspector.companion.json",
+      "inputSha256": "efc7d59fb8f957c7577ea85f7b9928720b153ee465af3fdc528daa1ffb0d7c8c",
+      "files": 103,
+      "sha256": "46a6a24c7c94ab8d29423bc2059fc3ff8a7f2a4a316c9c18fa125505830b9f4d"
+    },
+    {
+      "source": "docs/concepts/companion/starters/quick-capture.companion.json",
+      "inputSha256": "6d0bd4a5f798e56847c0d5b4b310e80dd872f71fa589f3bc5ffc0497aca76b92",
+      "files": 111,
+      "sha256": "fed736d9d8b8468005a77aef6a4e56ef01f6eded75abe9794950fa6b05983e84"
+    },
+    {
+      "source": "docs/concepts/companion/starters/tasks-projects.companion.json",
+      "inputSha256": "c4375bd8f6261dea7e4f96fe69f3483120c8e20d902f74fe47b42b805e3fe822",
+      "files": 123,
+      "sha256": "cf56292e78f43760505cff8a6d93f77f4e17f7fc30117d6da75af8fc57c976bc"
+    },
+    {
+      "source": "docs/concepts/companion/starters/vault-dashboard.companion.json",
+      "inputSha256": "17bc46401a7403f847ee09dc9f439e417b5bbda35cc84c673c823d69ab4d4139",
+      "files": 113,
+      "sha256": "54f0d2c7e7947995d49373a7af924b8bb8e10530c42fc313f2a471871cd4395c"
+    },
+    {
+      "source": "docs/concepts/companion/companion-project.json",
+      "inputSha256": "be2c2f4a0dd9f1829426e839cc2ccfef6c2df81fe1ab741c19226160d1c74d5f",
+      "files": 556,
+      "sha256": "90a188c2c82d663dd6ddbff3f30d75eb8869684f388e86bbe980ba6363b06a30"
+    }
+  ]
+}

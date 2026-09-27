@@ -15,8 +15,8 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
-  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate'] },
-  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
+  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -79,6 +79,7 @@ const specific: Record<string, OptionHelp> = {
   authorize: { description: 'Separately reviewed candidate authorization digest.' },
   execute: { description: 'Request candidate writes (still requires --authorize).' },
   all: { description: 'List every command with its summary, grouped.' },
+  replace: { description: 'Replace the previous local clickdummy only after successful build and static offline validation.' },
   fast: { description: 'Typecheck plus tests related to changed files (git); for agent Stop hooks.' },
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
@@ -102,6 +103,9 @@ const examples: Record<string, string[]> = {
   'config get': ['node shell.mjs config get --json'], 'config explain': ['node shell.mjs config explain'],
   'config validate': ['node shell.mjs config validate'], 'config set': ['node shell.mjs config set --input config.json --dry-run'],
   setup: ['node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
+  'concept schema': ['node shell.mjs concept schema --json'],
+  'concept inspect': ['node shell.mjs concept inspect --json', 'node shell.mjs concept inspect --input docs/concepts/capture/concept.json'],
+  'concept import': ['node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node shell.mjs plan apply concept.plan.json --yes'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
   new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../my-plugin --from my-plugin.companion.json'],
@@ -109,6 +113,7 @@ const examples: Record<string, string[]> = {
   make: ['node shell.mjs make list', 'node shell.mjs make file-extension board --feature documents --extension board', 'node shell.mjs make context-menu inspect --feature documents --extensions md,board', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
   install: ['node shell.mjs install --yes'], build: ['node shell.mjs build'],
+  'clickdummy build': ['node shell.mjs clickdummy build', 'node shell.mjs clickdummy build --replace'],
   test: ['node shell.mjs test', 'node shell.mjs test --profile obsidian', 'node shell.mjs test --profile browser'],
   check: ['node shell.mjs check', 'node shell.mjs check --fast --json'],
   'check submission': ['node shell.mjs check submission', 'node shell.mjs check submission --json'],

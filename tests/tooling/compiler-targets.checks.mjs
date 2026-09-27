@@ -14,7 +14,13 @@ test('browser output shares generated product code and packages an explicit offl
   const entry=browser.artifacts.find(file=>file.path==='harness/prototype/main.ts').content;
   const parsed=ts.transpileModule(entry,{fileName:'main.ts',reportDiagnostics:true,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}});
   assert.ok(!parsed.diagnostics?.some(d=>d.category===ts.DiagnosticCategory.Error));
-  assert.ok(!entry.includes("from 'obsidian'"));assert.match(entry,/preview never writes business data/);
+  assert.ok(!entry.includes("from 'obsidian'"));assert.match(entry,/import '\.\/clickdummy\.ts'/);
+  const shared = browser.artifacts.find(file => file.path === 'harness/prototype/clickdummy.ts');
+  assert.equal(shared.content, plugin.artifacts.find(file => file.path === shared.path).content);
+  const sources = browser.artifacts.find(file => file.path.endsWith('/bootstrap/clickdummy-sources.ts'));
+  assert.match(sources.content, /throw new Error\('NOT_IMPLEMENTED: Clickdummy has no business-write adapter\.'/);
+  assert.match(shared.content, /createClickdummySources/);assert.match(shared.content, /exportProject/);
+  assert.match(shared.content, /designState/);assert.match(shared.content, /function reset/);
   assert.equal(browser.readiness.bundle,'not-run');assert.notEqual(browser.fingerprint,plugin.fingerprint);
   const pkg=JSON.parse(browser.artifacts.find(file=>file.path==='package.json').content);assert.equal(pkg.scripts['build:clickdummy'],'node scripts/compiler/build-clickdummy.mjs');
 });
@@ -29,4 +35,36 @@ test('pure rendering never schedules a runtime provider, timer or network call',
   globalThis.fetch=()=>{throw new Error('unexpected network');};globalThis.setTimeout=()=>{throw new Error('unexpected timer');};
   try{const result=await compileProject({source,template});assert.equal(result.status,'ok',JSON.stringify(result.diagnostics));}
   finally{globalThis.fetch=fetch;globalThis.setTimeout=timer;}
+});
+
+
+test('v6 authoring routes survive compiler analysis, emission and both output targets', async () => {
+  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
+  const document = migrateAuthoringDocument(JSON.parse(source)).document;
+  const surface = document.design.nodes.find(node => !['group','action','modal'].includes(node.kind));
+  document.design.sitemap = { schema: 1, routes: [{ id: 'compiler-route', surface: surface.id, path: '/capture/:recordId' }], journeys: [] };
+  const text = JSON.stringify(document);
+  for (const outputKind of ['obsidian-plugin', 'clickdummy']) {
+    const result = await compileProject({ source: text, template, outputKind });
+    assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
+    assert.deepEqual(result.model.document, document);
+    assert.deepEqual(JSON.parse(result.artifacts.find(file => file.path === 'design/project.json').content), document);
+    assert.match(result.artifacts.find(file => file.path === 'harness/prototype/clickdummy.ts').content, /capture\/:recordId/);
+    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.sitemap.json'));
+    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.authoring.json'));
+  }
+  assert.equal(JSON.stringify(document), text);
+});
+test('typed authoring validation failures are schema diagnostics, never internal compiler defects', async () => {
+  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
+  for (const mutate of [
+    document => { document.schemaVersion = document.design.schema = 7; },
+    document => { document.design.sitemap = { schema: 1, routes: [{ id: 'bad', surface: 'absent', path: '/bad' }], journeys: [] }; },
+  ]) {
+    const document = migrateAuthoringDocument(JSON.parse(source)).document; mutate(document);
+    const result = await compileProject({ source: JSON.stringify(document), template });
+    assert.equal(result.status, 'failed'); assert.deepEqual(result.artifacts, []);
+    assert.ok(result.diagnostics.some(item => item.code === 'COMPILER_SCHEMA_INVALID'), JSON.stringify(result.diagnostics));
+    assert.ok(result.diagnostics.every(item => item.code !== 'COMPILER_INTERNAL_ERROR'));
+  }
 });
