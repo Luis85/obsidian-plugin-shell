@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { prototypeSkillFiles, prototypeSkillRoot, prototypeCodexSkillPath } from '../../scripts/companion/prototype-skill.mjs';
 import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function copySkill(t) {
   const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'prototype-inventory-'));
@@ -45,6 +46,7 @@ test('source-only evidence inventories include the skill and enforce existing pe
   for (const file of found) assert.ok(file.limit === null || file.lines <= file.limit, `${file.path}: ${file.lines}/${file.limit}`);
 });
 test('actual archive assembler preserves exact skill bytes in its verified template inventory', { timeout: 60000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples were removed from this checkout; kit packing needs the reviewed framework sources'); return; }
   const { assembleKit } = await import('../../scripts/framework/kit.ts');
   let compiler;
   try { const { installedCompiler } = await import('../../scripts/framework/kit.ts'); compiler = await installedCompiler(); }
