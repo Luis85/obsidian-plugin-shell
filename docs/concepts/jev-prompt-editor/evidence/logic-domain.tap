@@ -1,0 +1,514 @@
+TAP version 13
+# Subtest: seed 1 validates and is executable
+ok 1 - seed 1 validates and is executable
+  ---
+  duration_ms: 16.799979
+  type: 'test'
+  ...
+# Subtest: seed 2 validates and is executable
+ok 2 - seed 2 validates and is executable
+  ---
+  duration_ms: 5.400081
+  type: 'test'
+  ...
+# Subtest: seed 3 validates and is executable
+ok 3 - seed 3 validates and is executable
+  ---
+  duration_ms: 6.898615
+  type: 'test'
+  ...
+# Subtest: prompt-rule-process-prompt chain has seven meaningful steps
+ok 4 - prompt-rule-process-prompt chain has seven meaningful steps
+  ---
+  duration_ms: 5.968229
+  type: 'test'
+  ...
+# Subtest: ambiguous evidence requires review, never triggers task
+ok 5 - ambiguous evidence requires review, never triggers task
+  ---
+  duration_ms: 4.848437
+  type: 'test'
+  ...
+# Subtest: negative evidence requires review, never triggers task
+ok 6 - negative evidence requires review, never triggers task
+  ---
+  duration_ms: 4.334692
+  type: 'test'
+  ...
+# Subtest: requests carry the resolved vault and explicit process input, without transport
+ok 7 - requests carry the resolved vault and explicit process input, without transport
+  ---
+  duration_ms: 4.868928
+  type: 'test'
+  ...
+# Subtest: initial library and logic are never mutated by simulation
+ok 8 - initial library and logic are never mutated by simulation
+  ---
+  duration_ms: 6.127781
+  type: 'test'
+  ...
+# Subtest: one Step advances exactly one node, retaining a paused queue
+ok 9 - one Step advances exactly one node, retaining a paused queue
+  ---
+  duration_ms: 4.375963
+  type: 'test'
+  ...
+# Subtest: finished simulation is inert when stepped again
+ok 10 - finished simulation is inert when stepped again
+  ---
+  duration_ms: 5.424939
+  type: 'test'
+  ...
+# Subtest: strict scalar equality does not coerce strings
+ok 11 - strict scalar equality does not coerce strings
+  ---
+  duration_ms: 0.347996
+  type: 'test'
+  ...
+# Subtest: object equality asks for a scalar field
+ok 12 - object equality asks for a scalar field
+  ---
+  duration_ms: 0.137728
+  type: 'test'
+  ...
+# Subtest: operator eq 2 is deterministic
+ok 13 - operator eq 2 is deterministic
+  ---
+  duration_ms: 0.074893
+  type: 'test'
+  ...
+# Subtest: operator neq 2 is deterministic
+ok 14 - operator neq 2 is deterministic
+  ---
+  duration_ms: 0.044196
+  type: 'test'
+  ...
+# Subtest: operator gt 3 is deterministic
+ok 15 - operator gt 3 is deterministic
+  ---
+  duration_ms: 0.036565
+  type: 'test'
+  ...
+# Subtest: operator gte 2 is deterministic
+ok 16 - operator gte 2 is deterministic
+  ---
+  duration_ms: 0.035374
+  type: 'test'
+  ...
+# Subtest: operator lt 1 is deterministic
+ok 17 - operator lt 1 is deterministic
+  ---
+  duration_ms: 0.050537
+  type: 'test'
+  ...
+# Subtest: operator lte 2 is deterministic
+ok 18 - operator lte 2 is deterministic
+  ---
+  duration_ms: 0.034792
+  type: 'test'
+  ...
+# Subtest: operator contains "hello" is deterministic
+ok 19 - operator contains "hello" is deterministic
+  ---
+  duration_ms: 0.0395
+  type: 'test'
+  ...
+# Subtest: operator contains [1,2] is deterministic
+ok 20 - operator contains [1,2] is deterministic
+  ---
+  duration_ms: 0.074292
+  type: 'test'
+  ...
+# Subtest: operator lt 4 is deterministic
+ok 21 - operator lt 4 is deterministic
+  ---
+  duration_ms: 0.042173
+  type: 'test'
+  ...
+# Subtest: exists and missing intentionally distinguish absence
+ok 22 - exists and missing intentionally distinguish absence
+  ---
+  duration_ms: 0.096987
+  type: 'test'
+  ...
+# Subtest: missing operands fail closed rather than selecting Else
+ok 23 - missing operands fail closed rather than selecting Else
+  ---
+  duration_ms: 0.134153
+  type: 'test'
+  ...
+# Subtest: missing or mismatched required contract input fails before branch execution
+ok 24 - missing or mismatched required contract input fails before branch execution
+  ---
+  duration_ms: 0.11234
+  type: 'test'
+  ...
+# Subtest: first matching branch wins
+ok 25 - first matching branch wins
+  ---
+  duration_ms: 0.113611
+  type: 'test'
+  ...
+# Subtest: AND short circuits after false before an unavailable value
+ok 26 - AND short circuits after false before an unavailable value
+  ---
+  duration_ms: 0.095985
+  type: 'test'
+  ...
+# Subtest: OR short circuits after true before an unavailable value
+ok 27 - OR short circuits after true before an unavailable value
+  ---
+  duration_ms: 0.093842
+  type: 'test'
+  ...
+# Subtest: no matched branch yields an explicit decision
+ok 28 - no matched branch yields an explicit decision
+  ---
+  duration_ms: 0.076806
+  type: 'test'
+  ...
+# Subtest: rule preserves continue decision type
+ok 29 - rule preserves continue decision type
+  ---
+  duration_ms: 0.117077
+  type: 'test'
+  ...
+# Subtest: rule preserves process decision type
+ok 30 - rule preserves process decision type
+  ---
+  duration_ms: 0.096095
+  type: 'test'
+  ...
+# Subtest: rule preserves end decision type
+ok 31 - rule preserves end decision type
+  ---
+  duration_ms: 0.061713
+  type: 'test'
+  ...
+# Subtest: rule preserves review decision type
+ok 32 - rule preserves review decision type
+  ---
+  duration_ms: 0.048503
+  type: 'test'
+  ...
+# Subtest: rule End cancels queued event work
+ok 33 - rule End cancels queued event work
+  ---
+  duration_ms: 4.342152
+  type: 'test'
+  ...
+# Subtest: bounded while executes exactly three body iterations then exits
+ok 34 - bounded while executes exactly three body iterations then exits
+  ---
+  duration_ms: 3.798611
+  type: 'test'
+  ...
+# Subtest: false initial While executes no body
+ok 35 - false initial While executes no body
+  ---
+  duration_ms: 3.437655
+  type: 'test'
+  ...
+# Subtest: exact natural exit at quota is allowed
+ok 36 - exact natural exit at quota is allowed
+  ---
+  duration_ms: 4.031393
+  type: 'test'
+  ...
+# Subtest: loop quota produces Review without false true-phase publication
+ok 37 - loop quota produces Review without false true-phase publication
+  ---
+  duration_ms: 3.942509
+  type: 'test'
+  ...
+# Subtest: zero, negative, excessive, and nonfinite budgets fail shape validation
+ok 38 - zero, negative, excessive, and nonfinite budgets fail shape validation
+  ---
+  duration_ms: 2.712059
+  type: 'test'
+  ...
+# Subtest: global step budget halts before executing the next node
+ok 39 - global step budget halts before executing the next node
+  ---
+  duration_ms: 3.865261
+  type: 'test'
+  ...
+# Subtest: control cycle requires an explicit bounded While on every cycle
+ok 40 - control cycle requires an explicit bounded While on every cycle
+  ---
+  duration_ms: 0.321956
+  type: 'test'
+  ...
+# Subtest: event cycles are stopped by the global event budget
+ok 41 - event cycles are stopped by the global event budget
+  ---
+  duration_ms: 2.880813
+  type: 'test'
+  ...
+# Subtest: process transforms are actual local data transformations
+ok 42 - process transforms are actual local data transformations
+  ---
+  duration_ms: 3.707303
+  type: 'test'
+  ...
+# Subtest: external process requests stop without a completed event
+ok 43 - external process requests stop without a completed event
+  ---
+  duration_ms: 4.133557
+  type: 'test'
+  ...
+# Subtest: fixture process is visibly labeled rather than called real execution
+ok 44 - fixture process is visibly labeled rather than called real execution
+  ---
+  duration_ms: 4.912344
+  type: 'test'
+  ...
+# Subtest: process output type mismatch fails before its events publish
+ok 45 - process output type mismatch fails before its events publish
+  ---
+  duration_ms: 3.991072
+  type: 'test'
+  ...
+# Subtest: safe Add requires finite numeric source and result
+ok 46 - safe Add requires finite numeric source and result
+  ---
+  duration_ms: 0.164799
+  type: 'test'
+  ...
+# Subtest: contracts reject undeclared output and nested forbidden keys
+ok 47 - contracts reject undeclared output and nested forbidden keys
+  ---
+  duration_ms: 0.193162
+  type: 'test'
+  ...
+# Subtest: optional fields may be absent but cannot have wrong types
+ok 48 - optional fields may be absent but cannot have wrong types
+  ---
+  duration_ms: 0.111108
+  type: 'test'
+  ...
+# Subtest: safe paths do not reach inherited object members or execute expressions
+ok 49 - safe paths do not reach inherited object members or execute expressions
+  ---
+  duration_ms: 0.110797
+  type: 'test'
+  ...
+# Subtest: numeric overflow in JSON is refused rather than serialized as null
+ok 50 - numeric overflow in JSON is refused rather than serialized as null
+  ---
+  duration_ms: 0.080411
+  type: 'test'
+  ...
+# Subtest: event payload follows named publisher, with correlation and cause
+ok 51 - event payload follows named publisher, with correlation and cause
+  ---
+  duration_ms: 4.952856
+  type: 'test'
+  ...
+# Subtest: prompt definitions and node instances both emit declared events
+ok 52 - prompt definitions and node instances both emit declared events
+  ---
+  duration_ms: 5.506982
+  type: 'test'
+  ...
+# Subtest: flow Start and End node events are supported
+ok 53 - flow Start and End node events are supported
+  ---
+  duration_ms: 5.125566
+  type: 'test'
+  ...
+# Subtest: flow lifecycle emits once after the run outcome
+ok 54 - flow lifecycle emits once after the run outcome
+  ---
+  duration_ms: 6.694998
+  type: 'test'
+  ...
+# Subtest: review phase is distinct from completed
+ok 55 - review phase is distinct from completed
+  ---
+  duration_ms: 4.527873
+  type: 'test'
+  ...
+# Subtest: event contract validation rejects duplicate names and undeclared payload fields
+ok 56 - event contract validation rejects duplicate names and undeclared payload fields
+  ---
+  duration_ms: 0.1851
+  type: 'test'
+  ...
+# Subtest: invalid event payload blocks normal publication and routes through Error
+ok 57 - invalid event payload blocks normal publication and routes through Error
+  ---
+  duration_ms: 3.674253
+  type: 'test'
+  ...
+# Subtest: error event is emitted only after failure and does not claim completion
+ok 58 - error event is emitted only after failure and does not claim completion
+  ---
+  duration_ms: 3.830328
+  type: 'test'
+  ...
+# Subtest: renaming an event preserves ID-based subscriptions
+ok 59 - renaming an event preserves ID-based subscriptions
+  ---
+  duration_ms: 5.298979
+  type: 'test'
+  ...
+# Subtest: duplicate identical event listener edges are refused
+ok 60 - duplicate identical event listener edges are refused
+  ---
+  duration_ms: 0.413004
+  type: 'test'
+  ...
+# Subtest: unsupported rule phases on nonrule items fail preflight
+ok 61 - unsupported rule phases on nonrule items fail preflight
+  ---
+  duration_ms: 0.374947
+  type: 'test'
+  ...
+# Subtest: definition and instance event ID collisions fail preflight
+ok 62 - definition and instance event ID collisions fail preflight
+  ---
+  duration_ms: 0.535229
+  type: 'test'
+  ...
+# Subtest: process decision must connect to the selected process
+ok 63 - process decision must connect to the selected process
+  ---
+  duration_ms: 0.4702
+  type: 'test'
+  ...
+# Subtest: limit output is terminal rather than pretending to route a connection
+ok 64 - limit output is terminal rather than pretending to route a connection
+  ---
+  duration_ms: 0.276417
+  type: 'test'
+  ...
+# Subtest: reserved branch IDs cannot shadow Else or Error
+ok 65 - reserved branch IDs cannot shadow Else or Error
+  ---
+  duration_ms: 3.013013
+  type: 'test'
+  ...
+# Subtest: dangling and archived references block simulation
+ok 66 - dangling and archived references block simulation
+  ---
+  duration_ms: 1.434818
+  type: 'test'
+  ...
+# Subtest: unknown fields and unknown versions fail closed
+ok 67 - unknown fields and unknown versions fail closed
+  ---
+  duration_ms: 3.854666
+  type: 'test'
+  ...
+# Subtest: maximum records and unsafe IDs are enforced
+ok 68 - maximum records and unsafe IDs are enforced
+  ---
+  duration_ms: 2.321188
+  type: 'test'
+  ...
+# Subtest: version-1 prompt/library remains byte-equivalent after read
+ok 69 - version-1 prompt/library remains byte-equivalent after read
+  ---
+  duration_ms: 1.309058
+  type: 'test'
+  ...
+# Subtest: v2 workspace round trips all entities, mappings, events and checkpoints
+ok 70 - v2 workspace round trips all entities, mappings, events and checkpoints
+  ---
+  duration_ms: 5.515636
+  type: 'test'
+  ...
+# Subtest: v1 cannot silently accept v2 logic or prompt fields
+ok 71 - v1 cannot silently accept v2 logic or prompt fields
+  ---
+  duration_ms: 0.513306
+  type: 'test'
+  ...
+# Subtest: linked workspace import remaps all prompt/rule/process references
+ok 72 - linked workspace import remaps all prompt/rule/process references
+  ---
+  duration_ms: 5.28056
+  type: 'test'
+  ...
+# Subtest: import does not rewrite ordinary authored strings
+ok 73 - import does not rewrite ordinary authored strings
+  ---
+  duration_ms: 3.640452
+  type: 'test'
+  ...
+# Subtest: historical-only process identities are consistently remapped in checkpoint
+ok 74 - historical-only process identities are consistently remapped in checkpoint
+  ---
+  duration_ms: 7.164048
+  type: 'test'
+  ...
+# Subtest: import into a prompt-only library does not inject extra example flows
+ok 75 - import into a prompt-only library does not inject extra example flows
+  ---
+  duration_ms: 2.711798
+  type: 'test'
+  ...
+# Subtest: prompt-only import refuses a linked workspace rather than discarding logic
+ok 76 - prompt-only import refuses a linked workspace rather than discarding logic
+  ---
+  duration_ms: 0.410821
+  type: 'test'
+  ...
+# Subtest: logic save uses the one canonical repository and preserves prompts
+ok 77 - logic save uses the one canonical repository and preserves prompts
+  ---
+  duration_ms: 2.602342
+  type: 'test'
+  ...
+# Subtest: failed logic persistence leaves the previous canonical workspace intact
+ok 78 - failed logic persistence leaves the previous canonical workspace intact
+  ---
+  duration_ms: 2.34897
+  type: 'test'
+  ...
+# Subtest: prompt events can be saved and versioned without losing logic
+ok 79 - prompt events can be saved and versioned without losing logic
+  ---
+  duration_ms: 6.066398
+  type: 'test'
+  ...
+# Subtest: restoring a logic checkpoint first preserves the current work
+ok 80 - restoring a logic checkpoint first preserves the current work
+  ---
+  duration_ms: 4.093546
+  type: 'test'
+  ...
+# Subtest: checkpoint overflow refuses silent history loss
+ok 81 - checkpoint overflow refuses silent history loss
+  ---
+  duration_ms: 162.597431
+  type: 'test'
+  ...
+# Subtest: runtime traces and vault snapshots do not enter saved/exported workspace
+ok 82 - runtime traces and vault snapshots do not enter saved/exported workspace
+  ---
+  duration_ms: 7.531222
+  type: 'test'
+  ...
+# Subtest: trace retention budget aborts publication of an oversized step
+ok 83 - trace retention budget aborts publication of an oversized step
+  ---
+  duration_ms: 4.043611
+  type: 'test'
+  ...
+# Subtest: shipped runtime has no transport or executable rule evaluation
+ok 84 - shipped runtime has no transport or executable rule evaluation
+  ---
+  duration_ms: 0.77378
+  type: 'test'
+  ...
+1..84
+# tests 84
+# suites 0
+# pass 84
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 467.745285

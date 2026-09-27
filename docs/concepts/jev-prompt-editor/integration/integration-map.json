@@ -1,0 +1,56 @@
+{
+  "kind": "jev-studio-prototype-integration-map",
+  "schemaVersion": 1,
+  "informationalOnly": true,
+  "companionImportable": false,
+  "repository": "Luis85/obsidian-plugin-shell",
+  "basePullRequest": 5,
+  "baseBranch": "docs/companion-plugin-prd",
+  "inspectedCommit": "b66200e2f43cd0682028f0151f9bdffc853cd2bf",
+  "repositoryWritesPerformed": true,
+  "nativePluginImplemented": false,
+  "surfaces": [
+    "PromptLibrary",
+    "QuestionComposer",
+    "VaultState",
+    "TestBench",
+    "VersionHistory",
+    "JsonReview"
+  ],
+  "entities": [
+    "PromptRecipe",
+    "Question",
+    "StateBinding",
+    "ReviewPolicy",
+    "PromptRevision",
+    "TransientVaultSnapshot"
+  ],
+  "currentAdapters": [
+    "BrowserLibrary",
+    "BrowserMarkdownFileChooser",
+    "JsonDownload"
+  ],
+  "requiredNativeAdapters": [
+    "NoteBackedPromptRepository",
+    "ObsidianContextCapture",
+    "ObsidianSecretLookup",
+    "TypeSafeTransport"
+  ],
+  "supportedExports": [
+    "jev-prompt/schema1",
+    "jev-prompt-library/schema1",
+    "TypeSafe request text subset"
+  ],
+  "unimplemented": [
+    "native vault watching",
+    "active editor capture",
+    "native Markdown persistence",
+    "live inference",
+    "labeled model evaluation",
+    "companion project generation"
+  ],
+  "sourceBuildReceipt": "../evidence/build.json",
+  "handoff": "PR5-HANDOFF.md",
+  "repositoryAdditionBaseCommit": "e540157e63c9b81fdadb7bd84eca4aa56a8809b0",
+  "destination": "docs/concepts/jev-prompt-editor"
+}

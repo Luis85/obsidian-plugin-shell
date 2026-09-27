@@ -1,0 +1,412 @@
+{
+  "artifactSha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
+  "browser": "144.0.7559.96",
+  "renderMode": "exact HTML via Playwright set_content",
+  "storageMode": "explicit in-memory Storage adapter; native persistence not qualified",
+  "nativeObsidianTested": false,
+  "liveJevTested": false,
+  "results": [
+    {
+      "name": "Opening logic is read-only until an edit or explicit run",
+      "status": "passed"
+    },
+    {
+      "name": "Default visual graph contains seven real selectable nodes",
+      "status": "passed"
+    },
+    {
+      "name": "Default visual graph exposes six connections",
+      "status": "passed"
+    },
+    {
+      "name": "Business-logic guide opens",
+      "status": "passed"
+    },
+    {
+      "name": "Real local simulation executes seven connected steps",
+      "status": "passed"
+    },
+    {
+      "name": "Business decision is inspectable in the trace",
+      "status": "passed"
+    },
+    {
+      "name": "Trace download needs fresh explicit consent",
+      "status": "passed"
+    },
+    {
+      "name": "Simulation export records synthetic/no-external execution",
+      "status": "passed"
+    },
+    {
+      "name": "Process output actually feeds the second Jev request",
+      "status": "passed"
+    },
+    {
+      "name": "Simulated typed event payloads are exported",
+      "status": "passed"
+    },
+    {
+      "name": "Changing inputs marks earlier trace stale",
+      "status": "passed"
+    },
+    {
+      "name": "Stale trace export is blocked",
+      "status": "passed"
+    },
+    {
+      "name": "Ambiguous results stop before task process",
+      "status": "passed"
+    },
+    {
+      "name": "Step starts a fresh flow and executes one node",
+      "status": "passed"
+    },
+    {
+      "name": "Step resumes rather than restarting",
+      "status": "passed"
+    },
+    {
+      "name": "Cancel clears scheduled work",
+      "status": "passed"
+    },
+    {
+      "name": "While fixture executes body and exits after nine steps",
+      "status": "passed"
+    },
+    {
+      "name": "Editable while bound is enforced in execution",
+      "status": "passed"
+    },
+    {
+      "name": "New business rule persists conditions and typed fallback",
+      "status": "passed"
+    },
+    {
+      "name": "Else-if branch can be authored",
+      "status": "passed"
+    },
+    {
+      "name": "Branch priority can be edited",
+      "status": "passed"
+    },
+    {
+      "name": "OR matching persists",
+      "status": "passed"
+    },
+    {
+      "name": "Malformed condition JSON is visibly retained as an unsaved draft",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid condition never overwrites last good canonical library",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate rule creates an independent definition",
+      "status": "passed"
+    },
+    {
+      "name": "Rule archive is reversible",
+      "status": "passed"
+    },
+    {
+      "name": "Unused rule is removable without deleting original",
+      "status": "passed"
+    },
+    {
+      "name": "Deletion is blocked for a referenced rule",
+      "status": "passed"
+    },
+    {
+      "name": "Named process input/output and safe arithmetic mapping persist",
+      "status": "passed"
+    },
+    {
+      "name": "Adding output creates an editable schema and mapping",
+      "status": "passed"
+    },
+    {
+      "name": "Removing field removes its mapping",
+      "status": "passed"
+    },
+    {
+      "name": "Process duplicate/delete preserves the source contract",
+      "status": "passed"
+    },
+    {
+      "name": "Prompt declares an emitted typed event in schema v2",
+      "status": "passed"
+    },
+    {
+      "name": "Event catalog includes prompt contracts",
+      "status": "passed"
+    },
+    {
+      "name": "Event rename preserves stable identity",
+      "status": "passed"
+    },
+    {
+      "name": "Referenced events cannot be deleted underneath listeners",
+      "status": "passed"
+    },
+    {
+      "name": "Rules can declare review-specific events",
+      "status": "passed"
+    },
+    {
+      "name": "Flows can declare lifecycle events",
+      "status": "passed"
+    },
+    {
+      "name": "Start/end or other instances have their own event contracts",
+      "status": "passed"
+    },
+    {
+      "name": "Unreferenced event deletion is persisted explicitly",
+      "status": "passed"
+    },
+    {
+      "name": "Logic checkpoint captures shared definitions and connections",
+      "status": "passed"
+    },
+    {
+      "name": "Checkpoint diff shows changed definitions",
+      "status": "passed"
+    },
+    {
+      "name": "Restore preserves the pre-restore state as a second checkpoint",
+      "status": "passed"
+    },
+    {
+      "name": "Restore recovers former rule definition",
+      "status": "passed"
+    },
+    {
+      "name": "Complete workspace export contains all four editable definition collections",
+      "status": "passed"
+    },
+    {
+      "name": "Actual JSON file import provides review before mutation",
+      "status": "passed"
+    },
+    {
+      "name": "Linked import preserves existing work and appends independent copies",
+      "status": "passed"
+    },
+    {
+      "name": "Imported references remain executable",
+      "status": "passed"
+    },
+    {
+      "name": "Event-connected prompt/rule chain executes",
+      "status": "passed"
+    },
+    {
+      "name": "Trace download needs fresh explicit consent",
+      "status": "passed"
+    },
+    {
+      "name": "Event subscriber receives the emitted typed answers",
+      "status": "passed"
+    },
+    {
+      "name": "Keyboard movement updates model position",
+      "status": "passed"
+    },
+    {
+      "name": "Pointer drag changes authored node geometry",
+      "status": "passed"
+    },
+    {
+      "name": "Disconnected completion is surfaced as a blocking error",
+      "status": "passed"
+    },
+    {
+      "name": "Typed event output can be connected to the next prompt",
+      "status": "passed"
+    },
+    {
+      "name": "Connection addition is undoable",
+      "status": "passed"
+    },
+    {
+      "name": "Connection addition is redoable",
+      "status": "passed"
+    },
+    {
+      "name": "Adding a node does not create fake wiring",
+      "status": "passed"
+    },
+    {
+      "name": "Node deletion retains shared process definition",
+      "status": "passed"
+    },
+    {
+      "name": "Trace download needs fresh explicit consent",
+      "status": "passed"
+    },
+    {
+      "name": "Actual selected Markdown reaches prepared Jev inputs",
+      "status": "passed"
+    },
+    {
+      "name": "Workspace exports omit runtime vault snapshot and trace",
+      "status": "passed"
+    },
+    {
+      "name": "Autosave never stores runtime bodies",
+      "status": "passed"
+    },
+    {
+      "name": "Imported HTML never executes",
+      "status": "passed"
+    },
+    {
+      "name": "Persistence failure is visible without overwriting durable state",
+      "status": "passed"
+    },
+    {
+      "name": "Later explicit edit can recover persistence",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in Flows",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in Business rules",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in Processes",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in Events",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in Checkpoints",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1600px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "Graph retains usable height with trace at 1600px",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in Flows",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in Business rules",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in Processes",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in Events",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in Checkpoints",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 1280px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "Graph retains usable height with trace at 1280px",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in Flows",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in Business rules",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in Processes",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in Events",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in Checkpoints",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 820px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "Graph retains usable height with trace at 820px",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in Flows",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in Business rules",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in Processes",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in Events",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in Checkpoints",
+      "status": "passed"
+    },
+    {
+      "name": "No page overflow at 390px in JSON",
+      "status": "passed"
+    },
+    {
+      "name": "Graph retains usable height with trace at 390px",
+      "status": "passed"
+    },
+    {
+      "name": "Mobile flow creation works",
+      "status": "passed"
+    },
+    {
+      "name": "Guide is usable on a narrow screen",
+      "status": "passed"
+    },
+    {
+      "name": "Logic uses the existing light theme",
+      "status": "passed"
+    },
+    {
+      "name": "Escape dismisses export without side effects",
+      "status": "passed"
+    },
+    {
+      "name": "No page errors",
+      "status": "passed"
+    },
+    {
+      "name": "No network requests",
+      "status": "passed"
+    }
+  ],
+  "pageErrors": [],
+  "networkRequests": []
+}
