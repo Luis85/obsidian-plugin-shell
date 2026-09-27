@@ -40,6 +40,10 @@ jobs:
           node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
           node scripts/quality/check-source.mjs
+      - name: Typecheck and verify canonical sitemap authoring and project intake
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
         run: node tests/tooling/framework-journey.mjs
       - name: Record exact source revision
