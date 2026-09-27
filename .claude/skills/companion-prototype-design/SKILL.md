@@ -5,23 +5,25 @@ description: >-
   Luis85/obsidian-plugin-shell and its companion. Use when the user wants to
   brainstorm or design a whole Obsidian plugin, a new plugin feature, or an
   improvement before implementation; wants an importable companion prototype;
+  wants image-based concept boards to explore UX/UI/interaction design;
   or asks to execute an approved prototype prompt. Produces a self-contained
   HTML clickdummy, independently buildable TypeScript/Vue 3/Pinia/Nuxt UI sources,
   and the real companion project JSON when execution is authorized.
 compatibility: >-
   An agent with repository read access. Execution requires the checkout's pinned
   Node/npm toolchain, an installed browser test runner, and Python 3 for ZIP
-  packaging. Subagents are optional. No Nuxt framework or online runtime required.
+  packaging. Subagents and image-generation tools are optional capabilities;
+  unavailable image tools must be disclosed. No Nuxt framework or online runtime required.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   repository: Luis85/obsidian-plugin-shell
   reference-pr: "5"
 ---
 
 # Companion prototype design
 
-Turn **an idea → a shared design → a copy-and-paste execution prompt → an importable
-prototype package**. A design conversation is not permission to start implementing,
+Turn **an idea → a working brief → optional image-based concept boards → a shared
+design → a copy-and-paste execution prompt → an importable prototype package**. A design conversation is not permission to start implementing,
 replace the current companion project, write into a vault, or change production code.
 
 ## Canonical skill and Codex entrypoint
@@ -93,26 +95,58 @@ For improvements establish observable before/after problems and behaviors that m
 not regress. Read the baseline rather than asking the user to repeat it.
 
 Research current or unfamiliar constraints using primary sources when needed. Record
-what the evidence supports and what remains a design decision. Offer visual directions
-only when they help resolve a decision. Use available image/design tools for requested
-visuals, but do not substitute a picture for interaction or import contracts.
+what the evidence supports and what remains a design decision. After brainstorming,
+offer the visual exploration checkpoint below; do not silently skip it or substitute
+a picture for interaction or import contracts.
 
 After each round: summarize the decisions, flag contradictions, and ask only the next
 highest-value questions. Track stable IDs for journeys, surfaces, components, rules,
 scenarios and acceptance cases. Keep a decision/gap log and shared vocabulary.
 
-## 3. Obtain design agreement
+## 3. Offer concept boards and iterate on visual design
+
+Once brainstorming yields a coherent working brief, and before final design agreement
+or the prototype prompt, ask once:
+**“Shall I generate a few concept boards to explore the UX, UI and interaction design,
+or proceed directly to the prototype prompt?”**
+Honor an already explicit request to create boards or skip them without asking again.
+The offer is required; creating images is optional and needs the user's choice.
+Read `references/concept-boards.md` and use `assets/templates/concept-board.md`.
+
+If accepted, use an actually available image-generation tool to create 2–3 distinct
+candidate directions by default, grounded in the brief, host constraints and real
+component vocabulary. Show actual generated images, not only image prompts or textual
+boards. Do not implement code yet. With no image tool or a failed generation, disclose
+that state and offer a usable image prompt or a direct continuation; never claim images
+exist. Follow host image-tool turn rules; collect feedback on the next turn when needed.
+
+Invite the user to iterate, select a direction, combine named elements, or proceed to
+the prototype prompt. Preserve board IDs/revisions, the keep/change/reject decisions,
+and the selected direction in the brief. Resolve conflicts in mixed directions. Repeat
+visual exploration only while useful or requested; a skip is not a blocking design gap.
+Material scope/interaction changes reopen the relevant questions and agreement.
+
+Before handoff, translate accepted visuals into explicit layout, component, responsive,
+state/action and accessibility rules. Keep rejected alternatives out of implementation.
+Board selection is not permission to execute the prototype or persist repository files.
+
+## 4. Obtain design agreement
 
 Play back a coherent walkthrough with the brief version, mode, user/outcome, in/out
 scope, surfaces, key interactions, data, visual direction, edge states, simulations,
-integration plan and observable acceptance criteria. State the remaining questions.
+integration plan and observable acceptance criteria. Include the concept-board outcome
+(skipped, selected, or unavailable with an accepted fallback), exact selected revisions
+and any reconciled visual decisions. State the remaining questions.
 
 Ask: **“Does this describe the prototype we should build, or what should change?”**
 Only an explicit agreement with no blocking gaps moves to prompt generation. Record
 agreement in the conversation; persist it only under separately authorized file writes.
 Agreement on the concept does not approve target code changes or CLI apply operations.
+An explicit request to proceed to the prototype prompt can also confirm the current
+brief when it clearly accepts that brief and no blocking gaps remain; do not reconfirm
+an already supplied agreement. A request to iterate is never treated as approval.
 
-## 4. Produce the fresh-session prompt, inline
+## 5. Produce the fresh-session prompt, inline
 
 Read `assets/templates/execution-prompt.md` and replace every placeholder with the
 approved design and inspected repository facts. The template is a construction aid,
@@ -127,6 +161,12 @@ Describe both machine-representable features and source-owned extension seams. R
 real Vue components, not HTML with Vue-like class names. Include concrete acceptance
 journeys and negative scenarios, not just “follow best practices.”
 
+Carry accepted concept-board decisions inline, with board IDs/revisions, image access
+instructions and hashes only when actual bytes are available. Text must fully describe
+the selected UX/UI/interactions without relying on a previous session's image IDs.
+Mark unavailable images honestly; do not reopen the optional board stage during approved
+execution unless the user requests it or consequential design drift requires a decision.
+
 If a long original artifact is indispensable, identify its exact path, hash and how
 the executor obtains it; keep enough design detail inline to understand the task.
 Attach access-dependent baselines or give precise access instructions. The prompt must
@@ -140,7 +180,7 @@ Save only after authorization, without overwriting an existing file. An executio
 request authorizes an isolated build workspace, not automatic repository persistence,
 commit, push, plugin installation, or replacement of the companion's live project.
 
-## 5. Execute only when requested
+## 6. Execute only when requested
 
 Read `references/execution-and-qa.md`, `references/artifact-contract.md`, and
 `references/subagents.md`. Also apply `references/vue-typescript-quality.md`.
@@ -186,7 +226,7 @@ native modules into the browser entry or fake required typed service injections.
 an alternative import schema. Keep prototype metadata, source inventories and change
 sets in separate files. Do not insert them into the closed companion envelope.
 
-## 6. Deliver and offer persistence
+## 7. Deliver and offer persistence
 
 Provide an actual link/attachment for `prototype.html` and the source package in the
 same response. Also expose `companion.project.json` and verification/integration notes.

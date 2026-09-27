@@ -53,5 +53,94 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn('not claims of automated live-agent evaluation', text)
         self.assertEqual(len(re.findall(r'^\d+\.', text, re.M)), 15)
 
+class ConceptBoardContractTests(unittest.TestCase):
+    """Static workflow regressions; live image generation is not executed here."""
+
+    def read(self, name):
+        return (ROOT / name).read_text(encoding='utf-8')
+
+    def test_offer_precedes_agreement_and_prompt(self):
+        text = self.read('SKILL.md')
+        stages = ['## 2. Conduct', '## 3. Offer concept boards',
+                  '## 4. Obtain design agreement', '## 5. Produce the fresh-session prompt']
+        positions = [text.index(stage) for stage in stages]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn('Shall I generate a few concept boards', text)
+        self.assertIn('or proceed directly to the prototype prompt?', text)
+
+    def test_explicit_skip_and_existing_choices_are_respected(self):
+        text = self.read('references/concept-boards.md')
+        for phrase in ['already chose a route', 'explicit skip', 'not a missing',
+                       'already approved execution prompt', 'do not ask for the same approval twice']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_images_use_actual_tools_and_honest_failure_states(self):
+        text = self.read('references/concept-boards.md')
+        for phrase in ['actually available', 'present its image outputs', 'unavailable',
+                       'failed', 'No tool attempt/result', 'host ends the response',
+                       'Do not invent a shell-cli', 'actually available in the']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_boards_explore_interactions_not_just_colors(self):
+        text = self.read('references/concept-boards.md')
+        for phrase in ['2–3', 'only color variations', 'interaction sequence',
+                       'synthetic data', 'Nuxt UI', 'editor-only', 'keyboard/focus']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_iteration_combination_and_stale_prompt_rules(self):
+        text = self.read('references/concept-boards.md')
+        for phrase in ['keep / change / reject', 'no fixed', 'CB-01-r01',
+                       'reconcile conflicting', 'Rejected and superseded',
+                       'invalidates an older final prompt', 'reopens the affected']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_board_selection_does_not_authorize_execution_or_save(self):
+        text = self.read('references/concept-boards.md')
+        for phrase in ['not full-brief agreement', 'implementation execution',
+                       'repository', 'commit/push', 'live companion import',
+                       'separate authority', 'private data']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_brief_records_review_without_extending_import_schema(self):
+        text = self.read('assets/templates/design-brief.md')
+        for phrase in ['Concept-board exploration', 'skipped', 'selected', 'unavailable',
+                       'keep/change/reject', 'hashes only for available bytes',
+                       'closed JSON envelope']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_prompt_carries_accepted_decisions_and_real_image_access(self):
+        text = self.read('assets/templates/execution-prompt.md')
+        for phrase in ['Accepted visual direction', 'exact IDs/revisions',
+                       'complete chosen design', 'another conversation',
+                       'not source components', 'Do not require a concept-boards folder',
+                       'existing package/save helpers', 'supersede image artifacts']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_canonical_reference_and_template_are_connected(self):
+        text = self.read('SKILL.md')
+        for name in ['references/concept-boards.md', 'assets/templates/concept-board.md']:
+            with self.subTest(name=name):
+                self.assertIn(f'`{name}`', text)
+                self.assertTrue((ROOT/name).is_file())
+        template = self.read('assets/templates/concept-board.md')
+        for phrase in ['Image-generation prompt', 'Iteration record', 'Accepted handoff',
+                       'not invented acceptance', 'actually available image reference']:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, template)
+        self.assertIn('single source of truth', text)
+        self.assertIn('.agents/skills/companion-prototype-design/SKILL.md', text)
+
+    def test_new_conversation_scenarios_are_explicitly_not_live_evidence(self):
+        text = self.read('examples/concept-board-conversations.md')
+        self.assertIn('not claims of automated live-agent evaluation', text)
+        self.assertEqual(len(re.findall(r'^\d+\.', text, re.M)), 8)
+
 if __name__ == '__main__':
     unittest.main()

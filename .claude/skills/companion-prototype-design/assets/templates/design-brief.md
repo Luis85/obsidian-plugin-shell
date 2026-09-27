@@ -35,6 +35,17 @@ Stable ID | prior state | action | result | focus | draft/persistence effect | r
 Selected direction, hierarchy, density, tokens, light/dark, responsive behavior,
 keyboard/touch alternatives, focus, reduced motion, content and labels.
 
+## Concept-board exploration
+Choice: not-offered | offered | exploring | skipped | selected | unavailable
+Tool/image status: not-run | generated | failed | unavailable
+Brief version used; offered/answered choice; actual tool; board IDs and revisions;
+image attachments or portable paths; hashes only for available bytes; generation prompts.
+For each round: keep/change/reject, unresolved questions, superseded revisions.
+Selected direction or explicit skip/fallback; reconciled combinations; accepted changes
+to hierarchy, layouts, components, state/action rules, responsive behavior and accessibility.
+Selection is not full-brief agreement, build execution, or repository-save approval.
+Do not add these review records to the companion project's closed JSON envelope.
+
 ## Capability truth table
 Capability | implemented in prototype | simulated | generator representation |
 source-only extension | native implementation remaining.

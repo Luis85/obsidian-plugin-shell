@@ -70,6 +70,14 @@ reason. Destructive actions need recovery/confirmation appropriate to risk. Navi
 must not strand the user. Use deterministic error and delay scenarios rather than
 random failures. Distinguish simulated successful writes from real vault writes.
 
+## Visual exploration checkpoint
+
+After a coherent brainstorming recap, offer optional image-based concept boards before
+the final agreement and prototype prompt. Follow `references/concept-boards.md` relative
+to the canonical skill directory. Honor an explicit skip or prior request without
+repeating the offer. Each visual iteration updates the same brief and decision log;
+selecting or combining boards does not automatically execute or save the prototype.
+
 ## Readiness gate
 
 Before agreement, every mandatory category is resolved, not applicable with a reason,

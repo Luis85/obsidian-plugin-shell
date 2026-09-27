@@ -9,6 +9,22 @@ baseline/preserve list, scope and non-goals, named surfaces and page/component c
 complete journeys, data/rules, visual direction, state/action matrix, accessibility,
 responsive behavior, fixtures and Given/When/Then acceptance with stable IDs.}}
 
+## Accepted visual direction — include inline
+{{State concept-board outcome: skipped, selected, or unavailable with an accepted
+fallback. For selected boards include exact IDs/revisions, accepted keep/change/reject
+and combined-direction decisions, hierarchy/layout/density, real component mapping,
+key state transitions, keyboard/focus behavior and narrow/light/dark adaptations.
+List only real accessible image attachments or portable paths, hashes when bytes are
+available, and how this fresh session obtains them. Describe the complete chosen design
+in text even when images are supplied; exclude rejected and superseded alternatives.}}
+
+Do not assume access to images from another conversation or regenerate concept boards
+instead of implementing this approved design. Missing images alone do not reopen discovery
+when the inline contract is sufficient; missing essential visual requirements must be
+reported and resolved without inventing an approved design. Approved textual decisions
+supersede image artifacts; reconcile consequential discrepancies rather than guessing.
+Concept images are design references, not source components, import JSON or test evidence.
+
 ## Target and authority
 Repository: Luis85/obsidian-plugin-shell.
 Inspected branch/commit: {{actual branch and 40-character SHA}}.
@@ -105,6 +121,13 @@ Deliver one complete package:
   `THIRD-PARTY-NOTICES.md`, `integration-map.json`, `prototype.manifest.json`.
 - `tests/prototype.journeys.mjs`, actual evidence/verification records, and existing-mode
   baseline/change/regression metadata without unauthorized private baseline bytes.
+
+When visual exploration was used, include authorized, available reference images and
+review records under `concept-boards/`, with selected IDs/revisions and generation prompts.
+Use existing package/save helpers; no parallel archive or importer format. Missing or
+private reference bytes are explicitly documented, not fabricated or silently published.
+Do not require a concept-boards folder when exploration was skipped. Do not embed boards
+as runtime application assets unless separately required by the approved product brief.
 
 `source/` must rebuild `../prototype.html` from a clean extraction using documented commands.
 No absolute/workspace/file links back to the creator's checkout. No node_modules, .git,

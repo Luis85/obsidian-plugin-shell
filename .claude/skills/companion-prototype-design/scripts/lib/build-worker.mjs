@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { args, need, readBytes, readJson, noLinks, writeBuild, sha256, isMain, cli } from './io.mjs';
 import { assemble } from '../build-single-file.mjs';
 import { singleBundle } from './build-output.mjs';
+import { withBuildDiagnostics } from './worker-output.mjs';
 
 export function prototypeBuildConfig({ shared, entry, licenses }) {
   const native = new Set(builtinModules.map(name => name.replace(/^node:/, '')));
@@ -55,5 +56,5 @@ export async function compile(options) {
 }
 if (isMain(import.meta.url)) cli(async () => {
   const options = args(process.argv.slice(2), ['--entry', '--project', '--out', '--title'], ['--replace']);
-  console.log(JSON.stringify(await compile(options)));
+  console.log(JSON.stringify(await withBuildDiagnostics(() => compile(options))));
 });
