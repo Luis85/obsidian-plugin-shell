@@ -40,7 +40,7 @@ test('generated source reads return detached schema-valid fixtures and writes fa
   await writeFile(join(dir,'package.json'),' {"type":"module"} ');
   const {createClickdummySources} = await import(pathToFileURL(join(dir,m.sourceRoot,'bootstrap/clickdummy-sources.ts')));
   const services=createClickdummySources();
-  const first=await services[source.slug][operation.slug](undefined), second=await services[source.slug][operation.slug](undefined);
+  const first=await services[source.slug][operation.slug](undefined), second=await services[source.slug][operation.slug](operation.input===null?undefined:first);
   assert.equal(matches(first,operation.output),true); assert.deepEqual(first,second);
   if(first && typeof first==='object') assert.notEqual(first,second);
   await assert.rejects(services[source.slug]['write-fixture'](undefined),/NOT_IMPLEMENTED/);
@@ -72,4 +72,12 @@ test('full v6 route declarations compile with stable IDs and parameter paths int
   const file = join(dir, 'routes.ts'); await writeFile(file, declaration.getText(ast));
   const program = ts.createProgram([file], { strict: true, noEmit: true, target: ts.ScriptTarget.ES2022, types: [] });
   assert.deepEqual(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')), []);
+});
+test('preview selects have explicit labels independent of their option text', () => {
+  const component = emitted().get(`${model.sourceRoot}/presentation/components/ClickdummyPreview.vue`).content;
+  for (const [id, label] of [['clickdummy-surface', 'Browse surfaces'], ['clickdummy-state', 'Preview state']]) {
+    assert.ok(component.includes(`<label for="${id}">${label}</label>`));
+    assert.ok(component.includes(`<select id="${id}"`));
+  }
+  assert.doesNotMatch(component, /<label>[^<]*<select/);
 });
