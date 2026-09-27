@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 SPEC = importlib.util.spec_from_file_location('packer', Path(__file__).parents[1] / 'scripts/pack-concept.py')
@@ -112,8 +113,14 @@ class PackagingTests(unittest.TestCase):
                 (self.root/name).unlink()
 
     def test_case_collision_is_refused(self):
-        self.write('ReadMe.md', 'collision')
-        with self.assertRaisesRegex(ValueError, 'colliding'): self.pack()
+        # A case-insensitive filesystem (Windows, default macOS) cannot hold both names, so the
+        # collision is added to the real directory listing the packer walks instead of to disk.
+        walk = PACKER.os.walk
+        def colliding(top, **options):
+            for directory, dirs, names in walk(top, **options):
+                yield directory, dirs, names + ['ReadMe.md'] if Path(directory) == self.root else names
+        with mock.patch.object(PACKER.os, 'walk', colliding):
+            with self.assertRaisesRegex(ValueError, 'colliding'): self.pack()
 
     def test_vault_directories_are_refused(self):
         (self.root/'.dev-vault').mkdir()
