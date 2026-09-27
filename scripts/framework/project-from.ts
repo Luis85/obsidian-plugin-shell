@@ -3,10 +3,11 @@
  * uses, and only its identity may be overridden before the unchanged compiler plans
  * it. Nothing in the document is evaluated, imported or executed. */
 import { basename, resolve } from 'node:path';
-import { COMPANION_FORMAT, COMPANION_MAX_BYTES, AUTHORING_VERSION as COMPANION_VERSION, validateAuthoringDocument as validateCompanionDocument, type AuthoringDocument } from '../companion/authoring-contract.ts';
+import { COMPANION_FORMAT, COMPANION_MAX_BYTES, COMPANION_VERSION, validateCompanionDocument } from '../companion/project-contract.mjs';
 import { exists, hash, readBounded } from './files.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request } from './contracts.ts';
-export type CompanionDocument = AuthoringDocument;
+interface Identity { id: string; name: string; author: string; version: string; description: string }
+export interface CompanionDocument { schemaVersion: number; project: Identity; [key: string]: unknown }
 export interface ExportedProject { document: CompanionDocument; source: { file: string; path: string; sha256: string; schemaVersion: number } }
 const reexport = 'Download the project JSON from the companion again ("Download project JSON"); do not edit it by hand.';
 function contractMessage(error: unknown): string {
@@ -36,7 +37,7 @@ export async function exportedProject(request: Request, context: Context, idProb
   const value = parsed(bytes, path), future = versionProblem(value);
   if (future !== null) throw new OperationError('PROJECT_VERSION_UNSUPPORTED', `${path} uses companion project schema ${future}; this framework reads schema ${COMPANION_VERSION} and earlier.`, 'Upgrade the framework, or export from a companion that matches this framework version.');
   let document: CompanionDocument;
-  try { document = validateCompanionDocument(value); }
+  try { document = validateCompanionDocument(value) as CompanionDocument; }
   catch (error) { throw new OperationError('PROJECT_INVALID', `${path} is not a complete companion project export: ${contractMessage(error)}`, reexport); }
   const overrides = Object.fromEntries((['id', 'name', 'author'] as const).flatMap(key => {
     const option = stringOption(request.options, key); return option === undefined ? [] : [[key, option.trim()]];

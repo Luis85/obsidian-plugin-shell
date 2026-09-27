@@ -187,7 +187,19 @@
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
-    "scripts/concepts/mvp-bridge.js"
+    ".claude/skills/companion-prototype-design/scripts/build-prototype.mjs",
+    ".claude/skills/companion-prototype-design/scripts/build-single-file.mjs",
+    ".claude/skills/companion-prototype-design/scripts/check-offline.mjs",
+    ".claude/skills/companion-prototype-design/scripts/diff-project.mjs",
+    ".claude/skills/companion-prototype-design/scripts/inspect-repository.mjs",
+    ".claude/skills/companion-prototype-design/scripts/prototype.mjs",
+    ".claude/skills/companion-prototype-design/scripts/save-concept.mjs",
+    ".claude/skills/companion-prototype-design/scripts/validate-project.mjs",
+    ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs",
+    ".claude/skills/companion-prototype-design/tests/helpers.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/integration.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/validator.checks.mjs",
+    ".claude/skills/companion-prototype-design/tests/worker-output.checks.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -205,22 +217,6 @@
       "requireAllFiles": true
     },
     "zones": [
-      {
-        "name": "companion-authoring-contract",
-        "patterns": [
-          "scripts/companion/authoring-contract.ts",
-          "scripts/companion/concepts/**",
-          "scripts/companion/sitemap/**",
-          "scripts/companion/visual/**",
-          "scripts/companion/project-contract.mjs",
-          "scripts/companion/native-contract.mjs",
-          "scripts/companion/design-system-contract.mjs",
-          "scripts/companion/design-system-roles.mjs",
-          "scripts/companion/storymap-contract.mjs",
-          "scripts/companion/detail-contract.mjs",
-          "scripts/companion/composition-contract.mjs"
-        ]
-      },
       {
         "name": "fixture-compiler",
         "patterns": [
@@ -304,12 +300,6 @@
         ]
       },
       {
-        "name": "companion-editor",
-        "patterns": [
-          "docs/concepts/companion/editor/**"
-        ]
-      },
-      {
         "name": "prototype-skill",
         "patterns": [
           ".claude/skills/**"
@@ -383,7 +373,6 @@
           "styles",
           "companion-test-kit",
           "fixture-compiler",
-          "companion-authoring-contract",
           "prototype-skill"
         ]
       },
@@ -399,8 +388,7 @@
           "test",
           "harness",
           "tooling",
-          "styles",
-          "companion-authoring-contract"
+          "styles"
         ]
       },
       {
@@ -417,8 +405,7 @@
           "tooling",
           "styles",
           "fixture-compiler",
-          "companion-test-kit",
-          "companion-authoring-contract"
+          "companion-test-kit"
         ]
       },
       {
@@ -441,21 +428,7 @@
         "from": "fixture-compiler",
         "allow": [
           "tooling",
-          "companion-test-kit",
-          "companion-authoring-contract"
-        ]
-      },
-      {
-        "from": "companion-authoring-contract",
-        "allow": [
-          "companion-authoring-contract"
-        ]
-      },
-      {
-        "from": "companion-editor",
-        "allow": [
-          "companion-editor",
-          "companion-authoring-contract"
+          "companion-test-kit"
         ]
       },
       {
@@ -490,41 +463,5 @@
   ],
   "rules": {
     "policy-violation": "off"
-  },
-  "framework": [
-    {
-      "name": "prototype-build-tools",
-      "entryPointRole": "support",
-      "entryPoints": [
-        ".claude/skills/companion-prototype-design/scripts/build-prototype.mjs",
-        ".claude/skills/companion-prototype-design/scripts/build-single-file.mjs",
-        ".claude/skills/companion-prototype-design/scripts/check-offline.mjs",
-        ".claude/skills/companion-prototype-design/scripts/diff-project.mjs",
-        ".claude/skills/companion-prototype-design/scripts/inspect-repository.mjs",
-        ".claude/skills/companion-prototype-design/scripts/prototype.mjs",
-        ".claude/skills/companion-prototype-design/scripts/save-concept.mjs",
-        ".claude/skills/companion-prototype-design/scripts/validate-project.mjs",
-        ".claude/skills/companion-prototype-design/scripts/verify-browser.mjs",
-        "scripts/concepts/build-mvp.mjs"
-      ],
-      "detection": {
-        "type": "fileExists",
-        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
-      }
-    },
-    {
-      "name": "prototype-build-tests",
-      "entryPointRole": "test",
-      "entryPoints": [
-        ".claude/skills/companion-prototype-design/tests/helpers.checks.mjs",
-        ".claude/skills/companion-prototype-design/tests/integration.checks.mjs",
-        ".claude/skills/companion-prototype-design/tests/validator.checks.mjs",
-        ".claude/skills/companion-prototype-design/tests/worker-output.checks.mjs"
-      ],
-      "detection": {
-        "type": "fileExists",
-        "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
-      }
-    }
-  ]
+  }
 }

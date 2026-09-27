@@ -1,6 +1,0 @@
-/* The shell deliberately omits Preflight. Reset only this island's native button defaults,
-   with lower specificity than Nuxt utilities, so semantic fills and hover/focus states remain effective. */
-@layer base {
-  :where(.jm-root) :where(button) { appearance:none;border:0 solid transparent;background:transparent;font:inherit;cursor:pointer;height:auto;box-shadow:none; }
-  :where(.jm-root) :where(button:disabled) { cursor:not-allowed; }
-}

@@ -5,7 +5,6 @@ import { parseArguments as makerArguments, builtinRecipes } from '../makers/argu
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
-import { conceptImportPlan } from './concepts.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';
 import { upgradePlan } from './kit.ts';
@@ -55,7 +54,6 @@ export async function planOperation(request: Request, context: Context) {
   switch (request.command) {
     case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
     case 'generate': planned = await generationPlan(request, context); break;
-    case 'concept import': planned = await conceptImportPlan(request, context); break;
     case 'new': planned = await starterProjectPlan(request, context); break;
     case 'styles export': planned = await styleExportPlan(request, context); break;
     case 'make': planned = await makerPlan(request, context); break;
