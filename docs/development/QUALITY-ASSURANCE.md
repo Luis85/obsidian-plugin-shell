@@ -77,6 +77,27 @@ not a substitute for the complete GitHub Actions schema or actionlint. Privilege
 publication workflows are not allowed by this iteration's checker; introducing
 them requires a separate authorized design and scoped policy change.
 
+Current workflows, all read-only:
+
+- `ci.yml` (pull requests, `main`, manual): dependency-free `baseline` on
+  Linux/Windows; `showcase` guided setup + `verify` (Windows on pull requests,
+  plus Linux served e2e on pushes); three parallel template-authoring journeys
+  (`renamed-feature`, `source-archive`, `example-removal`). On pull requests and
+  manual runs only: `framework-cli` on Linux/Windows/macOS, `real-obsidian`,
+  `generated-companion` and three grouped `starter` jobs.
+- `setup-compatibility.yml` (setup/toolchain input changes): Node 24.15.0 +
+  npm 12.0.2 and Node 24.21.0 + npm 11.19.1 on Linux/Windows with the real npm
+  install-policy fixture.
+- `companion-concept-verification.yml` (concept input changes): concept
+  assembly, test data, visual editors and browser suites. Kept separate because
+  the framework kit excludes it.
+- `candidate-qualification.yml` (`main` pushes touching execution inputs,
+  manual): fixed-source rehearsal, repeated runtime suites, both coverage scopes,
+  served browser, three native sessions, timing samples and the live audit.
+- `release-rehearsal.yml` (manual only): rehearsal of a reviewed default-branch
+  commit and version; it cannot publish or tag.
+- `maintenance-status.yml` (weekly, manual): version and action-pin discovery.
+
 Owned CSS is parsed with the already selected PostCSS and selector parser. Empty
 declarations and selectors without an owned class or plugin attribute fail. This
 checks source syntax and obvious broad selectors; token roles and complete final
