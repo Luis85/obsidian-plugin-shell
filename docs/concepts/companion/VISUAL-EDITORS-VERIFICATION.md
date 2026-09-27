@@ -233,3 +233,21 @@ inventories all treat `src/` as owned source. The owner chose a reviewed budget 
 [QUALITY-ASSURANCE](../../development/QUALITY-ASSURANCE.md)). With every one of the 118 Nuxt UI components the
 stylesheet would be 264.51 kB, so new component mentions anywhere in the repository, including `docs/`, can still
 exceed it.
+
+## Follow-up — surfaces named by published revisions
+
+Published revisions are never edited. A surface that only unpinned revisions navigate to is removed together with
+those revisions (named in the removal dialog, one undoable write); a revision pinned by a kept page, component, layout
+or revision blocks, naming what pins it. The missing-surface repair deletes unpinned revisions instead of editing their
+navigate actions, says when an interaction is left without actions (an implementation TODO), and is blocked by pinned
+revisions. The blueprint dialog names page-design and navigation blockers up front and offers no apply while they
+exist.
+
+| Command | Exit | Result |
+| --- | --- | --- |
+| `node --test tests/tooling/companion-visual-surfaces.checks.mjs` | 0 | 9/9 (the two earlier surface tests moved here). Before the change: 6 fail (missing plan, blueprint notice, revision deletion, TODO wording, pinned block); the layout-branch test passed (coverage only) |
+| `node tests/concepts/companion-visual-editors.browser.mjs` | 0 | 44/44 named checks; with the sitemap removal and blueprint wiring reverted, the new removal check fails (RED) |
+| `node --test tests/tooling/companion-*.checks.mjs tests/tooling/concept-*.checks.mjs` | 0 | 205: 204 pass, 1 skipped |
+| `build-companion.py --check` · assembly test · `export-companion-project.py --check` | 0 · 0 · 0 | 3,379,672 B `7526600b…60f1` · OK · self-project unchanged (2,242,139 B `030d63a2…c16ab`) |
+| `check-source` · `check-analyzer` · `check-architecture` · `check-repository` · `check-test-quality` · `suites.mjs --check` | 0 | 800 inputs · zero findings · passed · passed · passed · 237 files in 23 suites |
+| `check-maintainability` | 0 | `status: passed`, `failures: []` |
