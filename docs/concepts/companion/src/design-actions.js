@@ -5,7 +5,7 @@ function handleDesignAction(action,value){
  switch(action){
   case 'outline-start':designUi.selected=null;designUi.plan=null;closeModal();setView('sitemap');break;
   case 'blueprint-choose':showModal('design-replace',value);break;
-  case 'blueprint-apply':{if(dataSources().flows.length){notify('Remove or reassign data flows before replacing their sitemap cards. Source declarations are preserved.');break;}const block=veSurfaceBlock(d.nodes.map(x=>x.id));if(block){notify(block.replace('No surface was removed.','The sitemap was not replaced.'));break;}recordDesign();const fresh=replacementDesign(value);Object.assign(d,fresh);designChanged();designUi.selected=d.nodes[0]?.id;closeModal();setView('sitemap');break;}
+  case 'blueprint-apply':{if(dataSources().flows.length){notify('Remove or reassign data flows before replacing their sitemap cards. Source declarations are preserved.');break;}const block=veSurfaceBlock(d.nodes.map(x=>x.id));if(block){notify(block.replace('No surface was removed.','The sitemap was not replaced.'));break;}recordDesign();veRemoveSurfaceRevisions(d,d.nodes.map(x=>x.id));const fresh=replacementDesign(value);Object.assign(d,fresh);designChanged();designUi.selected=d.nodes[0]?.id;closeModal();setView('sitemap');break;}
   case 'design-select':showMapNode(value);break;
   case 'design-mode':designUi.mode=value;render();break;
   case 'design-add':startNodeForm(value);break;
@@ -22,7 +22,7 @@ function handleDesignAction(action,value){
   }
   case 'design-duplicate':duplicateDesignSurface(value);break;
   case 'design-remove':showModal('design-remove',value);break;
-  case 'design-remove-confirm':{if(dataSources().flows.some(f=>nodeDescendants(d,value).has(f.card))){notify('Remove or reassign this surface’s data flows first. No surface was removed.');break;}const block=veSurfaceBlock([...nodeDescendants(d,value)]);if(block){notify(block);closeModal();break;}if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}
+  case 'design-remove-confirm':{if(dataSources().flows.some(f=>nodeDescendants(d,value).has(f.card))){notify('Remove or reassign this surface’s data flows first. No surface was removed.');break;}const block=veSurfaceBlock([...nodeDescendants(d,value)]);if(block){notify(block);closeModal();break;}if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value),dropped=veRemoveSurfaceRevisions(d,[...ids]);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.'+(dropped.length?' Deleted unpinned published revision(s): '+dropped.join(', ')+'.':''));break;}
   case 'design-connect':{
    const available=d.nodes.filter(n=>n.kind!=='group');if(available.length<2){notify('Add two surfaces to connect.');break;}
    const from=n?.kind!=='group'&&n?n:available[0];const to=available.find(x=>x.id!==from.id);

@@ -134,48 +134,95 @@ function veReparentConfirm(value) {
 }
 // Sitemap surfaces referenced by designs: page designs they own and navigate actions that target them, in every
 // definition (published revisions included). Full validation refuses every write while such a reference dangles.
+const veRevisionName = (store, r) => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
+const veDefinitionLists = store => [['page', store.pages, 'root', x => x.name], ['component', store.components, 'template', x => x.exportName], ['layout', store.layouts, 'root', x => x.name], ['revision', store.revisions, 'template', r => veRevisionName(store, r)]];
 function veNavigations(store, test) {
-  const out = [], revisionName = r => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
-  for (const [kind, list, root, name] of [['page', store.pages, 'root', x => x.name], ['component', store.components, 'template', x => x.exportName], ['layout', store.layouts, 'root', x => x.name], ['revision', store.revisions, 'template', revisionName]])
+  const out = [];
+  for (const [kind, list, root, name] of veDefinitionLists(store))
     for (const def of list) visualWalk(def[root], n => { for (const i of n.events ?? []) if (i.actions.some(a => a.kind === 'navigate' && test(a.surfaceId))) out.push({ kind, def, name: name(def), interaction: i }); });
   return out;
 }
-const veNavigationWhere = u => u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.name + ' / ' + u.interaction.label;
-function veSurfaceUses(ids, d = design()) {
-  const store = veStore(d), set = new Set(ids);
-  return [...store.pages.filter(p => set.has(p.ownerId)).map(p => 'page design ' + p.name), ...veNavigations(store, id => set.has(id)).map(u => 'interaction ' + u.interaction.label + ' in ' + u.kind + ' ' + u.name)];
+// Published revisions are never edited. Those that navigate to a matching surface are deleted when nothing that stays
+// pins them (a page, component or layout outside `gone`, or a published revision that is kept); a revision that stays
+// pinned blocks, naming what pins it.
+function veRevisionPlan(store, test, gone = new Set()) {
+  const hits = new Set(veNavigations(store, test).filter(u => u.kind === 'revision').map(u => u.def)), drop = new Set(hits);
+  const pinners = r => {
+    const out = new Set();
+    for (const [kind, list, root, name] of veDefinitionLists(store))
+      for (const def of list) if (!drop.has(def) && !gone.has(def)) visualWalk(def[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.revisionId === r.id) out.add(kind + ' ' + name(def)); });
+    return [...out];
+  };
+  for (let changed = true; changed;) { changed = false; for (const r of drop) if (pinners(r).length) { drop.delete(r); changed = true; } }
+  return { revisions: [...drop], pinned: [...hits].filter(r => !drop.has(r)).map(r => 'published revision ' + veRevisionName(store, r) + ' (pinned by ' + pinners(r).join(', ') + ')') };
 }
+const veNavigationWhere = u => u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.name + ' / ' + u.interaction.label;
+function veSurfacePlan(ids, d = design()) {
+  const store = veStore(d), set = new Set(ids), test = id => set.has(id), revisions = veRevisionPlan(store, test);
+  const uses = [...store.pages.filter(p => set.has(p.ownerId)).map(p => 'page design ' + p.name), ...veNavigations(store, test).filter(u => u.kind !== 'revision').map(u => 'interaction ' + u.interaction.label + ' in ' + u.kind + ' ' + u.name), ...revisions.pinned];
+  return { uses, revisions: revisions.revisions };
+}
+function veSurfaceUses(ids, d = design()) { return veSurfacePlan(ids, d).uses; }
 function veSurfaceBlock(ids, d = design()) {
   const uses = veSurfaceUses(ids, d);
   return uses.length ? 'In use by page and component designs: ' + uses.join('; ') + '. Delete those page designs and change those navigate actions first. No surface was removed.' : '';
 }
-// Orphans: page designs whose surface is gone (or can no longer hold a page) and navigation to such surfaces.
+function veSurfaceRevisionNote(ids, d = design()) {
+  const store = veStore(d), { revisions } = veSurfacePlan(ids, d), one = revisions.length === 1;
+  return revisions.length ? 'Also deletes ' + veCount(revisions.length, 'published revision') + ' that navigate' + (one ? 's' : '') + ' here and that nothing pins: ' + revisions.map(r => veRevisionName(store, r)).join(', ') + '. Undo restores ' + (one ? 'it' : 'them') + '.' : '';
+}
+// Part of a sitemap write that removes or replaces surfaces, after its history record: drops the unpinned published
+// revisions that navigate to them. A blocked plan changes nothing.
+function veRemoveSurfaceRevisions(d, ids) {
+  if (!d.visualDesigns) return [];
+  const plan = veSurfacePlan(ids, d), drop = new Set(plan.revisions);
+  if (plan.uses.length || !drop.size) return [];
+  d.visualDesigns.revisions = d.visualDesigns.revisions.filter(r => !drop.has(r));
+  return plan.revisions.map(r => veRevisionName(d.visualDesigns, r));
+}
+function veReplaceNotice(d = design()) {
+  const ids = d.nodes.map(n => n.id), block = veSurfaceBlock(ids, d);
+  return block ? block.replace('No surface was removed.', 'The sitemap cannot be replaced until then.') : veSurfaceRevisionNote(ids, d);
+}
+// Orphans: page designs whose surface is gone (or can no longer hold a page), navigation to such surfaces and the
+// published revisions that navigate there (deleted when unpinned, blocking when pinned).
 function veOrphans(d = design()) {
-  const store = veStore(d), surfaces = veContext(d).surfaces, pages = store.pages.filter(p => !surfaces.has(p.ownerId));
-  return { pages, links: veNavigations(store, id => !surfaces.has(id)).filter(u => !pages.includes(u.def)) };
+  const store = veStore(d), surfaces = veContext(d).surfaces, missing = id => !surfaces.has(id), pages = store.pages.filter(p => missing(p.ownerId));
+  const plan = veRevisionPlan(store, missing, new Set(pages));
+  return { pages, links: veNavigations(store, missing).filter(u => u.kind !== 'revision' && !pages.includes(u.def)), revisions: plan.revisions, pinned: plan.pinned, missing };
 }
 function veOpenOrphans() {
-  const { pages, links } = veOrphans();
-  if (!pages.length && !links.length) throw Error('No design names a missing surface.');
+  const { pages, links, revisions, pinned } = veOrphans();
+  if (!pages.length && !links.length && !revisions.length && !pinned.length) throw Error('No design names a missing surface.');
   veUi.orphansForm = { error: '', token: smToken() }; showModal('ve-orphans');
 }
+const veEmptied = (u, missing) => u.interaction.actions.every(a => a.kind === 'navigate' && missing(a.surfaceId));
 function veOrphansDialog() {
-  const form = veUi.orphansForm, { pages, links } = veOrphans();
-  const lines = [...pages.map(p => 'Delete the page design ' + p.name + ' (' + veCount(visualNodes(p.root).length, 'element') + ').'), ...links.map(u => 'Remove navigation to a missing surface from ' + veNavigationWhere(u) + '.')];
-  const body = `<p id="ve-orphans-error" class="error" role="alert" tabindex="-1">${esc(form?.error || '')}</p><p>These designs name a sitemap surface that no longer exists. Until they are removed or the surface is restored, page and component edits, export and generation are refused.</p><ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Other actions of those interactions are kept. Undo restores everything.</p>`;
-  return dialogBody('Remove designs that name missing surfaces?', body, button('Cancel', 'close', '', 'ghost') + button('Remove', 've-orphans-confirm', '', 'danger', 'trash', lines.length ? 'autofocus' : 'disabled'));
+  const form = veUi.orphansForm, { pages, links, revisions, pinned, missing } = veOrphans(), store = veStore();
+  const lines = [...pages.map(p => 'Delete the page design ' + p.name + ' (' + veCount(visualNodes(p.root).length, 'element') + ').'),
+    ...revisions.map(r => 'Delete the published revision ' + veRevisionName(store, r) + ': it navigates to a missing surface and nothing pins it.'),
+    ...links.map(u => 'Remove navigation to a missing surface from ' + veNavigationWhere(u) + (veEmptied(u, missing) ? '; that interaction then has no actions and becomes an implementation TODO.' : '.'))];
+  const blocked = pinned.length ? `<p class="ve-refusal" role="alert">${esc('Published revisions are never edited, and these are pinned: ' + pinned.join('; ') + '. Restore the missing surface (Undo, or import a corrected project) to repair them.')}</p>` : '';
+  const body = `<p id="ve-orphans-error" class="error" role="alert" tabindex="-1">${esc(form?.error || '')}</p><p>These designs name a sitemap surface that no longer exists. Until they are removed or the surface is restored, page and component edits, export and generation are refused.</p>${blocked}<ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Other actions of those interactions are kept. Undo restores everything.</p>`;
+  return dialogBody('Remove designs that name missing surfaces?', body, button('Cancel', 'close', '', 'ghost') + button('Remove', 've-orphans-confirm', '', 'danger', 'trash', lines.length && !pinned.length ? 'autofocus' : 'disabled'));
 }
+const veJoin = parts => (parts.length > 2 ? parts.slice(0, -1).join(', ') + ' and ' + parts.at(-1) : parts.join(' and '));
 function veOrphansConfirm() {
   const form = veUi.orphansForm;
   if (!form) throw Error('Open the missing-surface review again.');
-  let pages = 0, links = 0;
+  const { pinned } = veOrphans();
+  if (pinned.length) throw Error('Published revisions are never edited, and these are pinned: ' + pinned.join('; ') + '. Nothing was removed.');
+  let pages = 0, links = 0, revisions = 0, todos = 0;
   veCommit((store, candidate) => {
-    const surfaces = veContext(candidate).surfaces, gone = new Set(store.pages.filter(p => !surfaces.has(p.ownerId)).map(p => p.id));
-    pages = gone.size; store.pages = store.pages.filter(p => !gone.has(p.id));
-    for (const u of veNavigations(store, id => !surfaces.has(id))) { u.interaction.actions = u.interaction.actions.filter(a => a.kind !== 'navigate' || surfaces.has(a.surfaceId)); links++; }
+    const surfaces = veContext(candidate).surfaces, missing = id => !surfaces.has(id), gone = new Set(store.pages.filter(p => missing(p.ownerId)));
+    const drop = new Set(veRevisionPlan(store, missing, gone).revisions);
+    pages = gone.size; store.pages = store.pages.filter(p => !gone.has(p));
+    revisions = drop.size; store.revisions = store.revisions.filter(r => !drop.has(r));
+    for (const u of veNavigations(store, missing)) { u.interaction.actions = u.interaction.actions.filter(a => a.kind !== 'navigate' || !missing(a.surfaceId)); links++; if (!u.interaction.actions.length) todos++; }
   }, form.token);
   veUi.orphansForm = null; closeModal(); veRepair(); render();
-  notify('Removed ' + veCount(pages, 'page design') + ' and ' + veCount(links, 'navigation') + ' to missing surfaces. Undo is available.');
+  const parts = [veCount(pages, 'page design'), veCount(links, 'navigation'), ...(revisions ? [veCount(revisions, 'published revision')] : [])];
+  notify('Removed ' + veJoin(parts) + ' to missing surfaces.' + (todos ? ' ' + veCount(todos, 'interaction') + (todos === 1 ? ' now has no actions and is an implementation TODO.' : ' now have no actions and are implementation TODOs.') : '') + ' Undo is available.');
 }
 const VE_STRUCTURE_ACTIONS = {
   've-delete': veOpenDelete, 've-delete-confirm': veDeleteConfirm, 've-reparent': veOpenReparent, 've-reparent-confirm': veReparentConfirm,

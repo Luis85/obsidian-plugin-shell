@@ -32,10 +32,15 @@ Opening an editor never writes. **Start design** is the explicit write that crea
 
 A sitemap surface that owns a page design, or that an interaction navigates to, cannot be removed (nor turned into a
 group or action, nor replaced by applying a blueprint). The removal dialog names each page design and interaction
-instead of offering the confirmation. Imported data can still name a missing surface; **Pages** then lists those
+instead of offering the confirmation; the blueprint dialog names them up front and offers no apply. Published
+revisions are never edited: a revision that navigates to the surface and that nothing pins (no page, component or
+layout, and no kept revision) is deleted with the surface, named in the dialog and restored by Undo. A pinned
+revision blocks, naming what pins it. Imported data can still name a missing surface; **Pages** then lists those
 designs under “Designs with a missing surface”. Each page opens in the editor, whose writes are refused while the
-reference dangles, and **Remove designs and links to missing surfaces…** deletes those page designs and removes the
-navigate actions to missing surfaces in one reviewed, undoable write. Restoring the surface reconnects them instead.
+reference dangles, and **Remove designs and links to missing surfaces…** deletes those page designs and unpinned
+revisions and removes the navigate actions to missing surfaces in one reviewed, undoable write. The review says when
+an interaction is left without actions (an implementation TODO); a pinned revision blocks the repair. Restoring the
+surface reconnects them instead.
 **Back** returns to the origin view with its selection (storymap item, sitemap surface, library component or the
 previous editor) and focus on the control that opened the editor. The Back stack keeps 12 entries. An origin that was
 removed meanwhile falls back to its view's default.
