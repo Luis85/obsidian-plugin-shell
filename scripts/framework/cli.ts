@@ -1,3 +1,5 @@
+import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
+import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 import { ask, readInput } from './input.ts';
 import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';
@@ -15,7 +17,10 @@ function render(value: Result, machine: boolean): void {
   const human = starter === null ? renderHuman(value, terminalStyle(stdout)) : { text: starter, diagnosticsShown: false };
   stdout.write(human.text);
   if (human.diagnosticsShown) return;
-  for (const diagnostic of value.diagnostics) stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
+  for (const diagnostic of value.diagnostics) {
+    if (diagnostic.severity && diagnostic.phase && diagnostic.help) { stderr.write(formatDiagnostics([diagnostic as CompilerDiagnostic])); continue; }
+    stderr.write(`${diagnostic.code}: ${diagnostic.message}${diagnostic.next ? '\nNext: ' + runnable(diagnostic.next) : ''}\n`);
+  }
 }
 async function guidedIdentity(request: Request, signal?: AbortSignal): Promise<Request> {
   const options = { ...request.options };
@@ -62,7 +67,7 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
   let command = 'unknown';
   try {
     let request = parseCliArguments(argv); command = request.command;
-    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
+    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version', 'compiler explain'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
     // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
     if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };

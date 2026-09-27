@@ -16,7 +16,7 @@ async function checkDirectoryChain(root, path) {
     }
   }
 }
-async function readBoundedJson(input, parse) {
+async function readBoundedJson(input, parse = parseCompanionDocument) {
   const before = await lstat(input);
   if (!before.isFile() || before.isSymbolicLink()) throw new Error('COMPANION_INPUT: Expected a regular JSON file, not a link.');
   const file = await open(input, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
@@ -34,7 +34,7 @@ async function readBoundedJson(input, parse) {
     if (length > COMPANION_MAX_BYTES) throw new Error('COMPANION_INPUT: File exceeds 4 MB.');
     const content = buffer.subarray(0, length);
     const text = new TextDecoder('utf-8', { fatal: true }).decode(content);
-    const document = parse(text);
+    const document = parse ? parse(text) : undefined;
     return { content, document };
   } finally { await file.close(); }
 }
@@ -52,4 +52,15 @@ export async function readCompanionProject({ input, target, vault = process.cwd(
     await checkDirectoryChain(root, target === '.' ? folder : target + '/' + folder);
   }
   return { ...result, document, migration: report, vault: root, target: resolve(root, target) };
+}
+
+/** Raw input for the dedicated compiler. Same containment and bounded byte checks; no semantic parsing. */
+export async function readCompanionInput({input,target,vault=process.cwd()}) {
+  if(typeof input!=='string' || !input.trim())throw new Error('COMPANION_INPUT: Supply --input <project.json>.');
+  if(!companionRelativeFolder(target,true))throw new Error('COMPANION_TARGET: Use a portable vault-relative --target path.');
+  const root=await realpath(resolve(vault));
+  if(!(await lstat(root)).isDirectory())throw new Error('COMPANION_TARGET: Expected an existing directory.');
+  await checkDirectoryChain(root,target);
+  const {content}=await readBoundedJson(resolve(input),false);
+  return {content,vault:root,target:resolve(root,target)};
 }

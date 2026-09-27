@@ -8,9 +8,14 @@ product requirements in `design/traceability.json` stay TODO until implemented a
 
 ## Quick start
 
+Read `design/compiler-readiness.json` first. When dependencies are `resolution-required`,
+review the declared packages and run `npm install` explicitly to update the lockfile
+before using `npm ci`. Generation never contacts the package registry. Build, typecheck,
+tests and business acceptance start as **not run**, not as passing evidence.
+
 ```sh
 nvm use                  # Node from .nvmrc (npm 11.19.1)
-npm ci                   # exact lockfile install
+npm ci                   # only after dependency readiness is locked
 npm run check            # typecheck + lint + project tests: your definition of done
 npm run test:watch       # Vitest watch mode for the product tests
 npm run dev:obsidian -- --allow-download   # real Obsidian sandbox: build, hot reload, logs

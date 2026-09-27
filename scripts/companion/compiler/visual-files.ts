@@ -1,5 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
 import type { ComponentDefinition, ExternalNode, Interaction } from '../visual/visual-ir.mjs';
 import { visualAssert, visualNodes, visualRoot } from '../visual/visual-ir.mjs';
 import { visualTestSource } from '../visual/visual-session.mjs';
@@ -35,8 +34,8 @@ function vfRewrite(source: string, pairs: [string, string][], file: string): str
   return source;
 }
 /** Runtime modules are copied from the trusted template with import paths rewritten to the generated layout. */
-async function vfRuntime(templateRoot: string, m: Model, add: Add): Promise<void> {
-  const read = (path: string) => readFile(join(templateRoot, 'scripts/companion', path), 'utf8'), domain = `${m.sourceRoot}/domain`;
+async function vfRuntime(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
+  const read = (path: string) => templateRoot.text(['scripts/companion', path].join('/')), domain = `${m.sourceRoot}/domain`;
   for (const file of ['detail-controls.ts', 'detail-actions.ts']) add(`${domain}/${file}`, await read('runtime/' + file));
   add(`${domain}/visual-runtime.ts`, vfRewrite(await read('runtime/visual-runtime.ts'), [["'../visual/visual-ir.mjs'", "'./visual/visual-ir.mjs'"]], 'visual-runtime.ts'));
   for (const name of ['composition-contract.mjs', 'composition-contract.d.mts']) add(`${domain}/${name}`, await read(name));
@@ -92,7 +91,7 @@ const vfLayout = `.generated-detail, .generated-region, .generated-field { displ
 `;
 
 /** Emits every page/component definition as typed spec, SFC, contract, tests, hooks, adapters and traceability. */
-export async function visualCode(templateRoot: string, m: Model, add: Add): Promise<void> {
+export async function visualCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
   const root = m.sourceRoot, store = visualDefinitions(m), specs = visualSpecs(m);
   visualSources(m, specs);
   await vfRuntime(templateRoot, m, add);

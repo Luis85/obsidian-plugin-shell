@@ -1,7 +1,9 @@
+import { CompilerError, CompilationFailure } from '../compiler/domain/diagnostics.ts';
+import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
 export interface Request { command: string; args: string[]; options: Values }
-export interface Diagnostic { code: string; message: string; next?: string }
+export interface Diagnostic extends Partial<Omit<CompilerDiagnostic, 'code' | 'message'>> { code: string; message: string; next?: string }
 export interface Result {
   protocolVersion: 1;
   command: string;
@@ -31,6 +33,8 @@ export function result(command: string, data: unknown, status: Result['status'] 
   return { protocolVersion: 1, command, status, data, diagnostics: [] };
 }
 export function failure(command: string, error: unknown): Result {
+  if (error instanceof CompilerError) return { ...result(command, null, error.diagnostic.code === 'COMPILER_CANCELLED' ? 'cancelled' : 'failed'),
+    diagnostics: error instanceof CompilationFailure ? error.diagnostics : [error.diagnostic] };
   const code = error instanceof OperationError ? error.code : error instanceof Error ? /^([A-Z][A-Z_0-9]+)(?::|$)/.exec(error.message)?.[1] ?? 'OPERATION_FAILED' : 'OPERATION_FAILED';
   const message = error instanceof Error ? error.message : 'Operation failed.';
   return { ...result(command, recoveryDetails(error), code === 'CANCELLED' ? 'cancelled' : 'failed'),

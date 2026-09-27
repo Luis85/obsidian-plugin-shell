@@ -1,6 +1,5 @@
+import type { TemplateSnapshot } from '../../compiler/domain/contracts.ts';
 import { relationshipScope } from './relationship-model.ts';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { literal, requireValue, symbol, type Model, type Entity } from './model.ts';
 import type { Schema } from '../runtime/contract.ts';
 import { relativeImport, type Add } from './file-code.ts';
@@ -41,7 +40,7 @@ function registerFeatures(original: string, names: string[]): string {
   const header = parameter === '()' ? register : parameter!;
   return original.replace(whole!, () => `createNoteFeatures(services, ${header} => ({\n${body}\n${names.map(name => `    ${name}: ${register}(${name}),`).join('\n')}\n  }));`);
 }
-export async function persistenceCode(templateRoot: string, m: Model, add: Add): Promise<void> {
+export async function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
   const selected = new Map<string, Entity>();
   for (const source of m.sources) for (const op of source.operations) { const entity = noteEntity(m, source.id, op.id); if (entity) selected.set(entity.id, entity); }
   for(const entity of relationshipScope(m,true).entities) selected.set(entity.id,entity);
@@ -100,7 +99,7 @@ it('persists every ${entity.slug} field, rejects stale edits and preserves unrel
 });
 `);
   }
-  const original = await readFile(join(templateRoot, 'src/bootstrap/features.ts'), 'utf8');
+  const original = await templateRoot.text(['src/bootstrap/features.ts'].join('/'));
   add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
   const registryTest = `${m.testRoot}/persistence/registry.test.ts`;
   add(registryTest, `import { it, expect } from 'vitest';
@@ -120,5 +119,5 @@ it('composes every generated repository with the actual retained framework regis
 });
 `);
   const sourceFile = `${m.sourceRoot}/application/note-operations.ts`;
-  add(sourceFile, await readFile(join(templateRoot,'scripts/companion/runtime/note-operations.ts'),'utf8'));
+  add(sourceFile, await templateRoot.text(['scripts/companion/runtime/note-operations.ts'].join('/')));
 }

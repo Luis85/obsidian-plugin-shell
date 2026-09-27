@@ -8,6 +8,9 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'compiler check', summary: 'Analyze project JSON without generation or writes; --report-dir explicitly retains diagnostics.', options: { ...values('input', 'output-kind', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
+  { id: 'compiler inspect', summary: 'Inspect normalized IR or an in-memory artifact inventory; never applies a workspace plan.', options: { ...values('input', 'output-kind', 'stage', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
+  { id: 'compiler explain', summary: 'Explain a stable compiler diagnostic code.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'version', summary: 'Report the pinned framework and current Node versions.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'styles inspect', summary: 'Validate saved design tokens and inspect scoped Nuxt UI bindings.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'styles export', summary: 'Plan deterministic CSS, JSON, Markdown or HTML exports.', options: values('input', 'format', 'out'), maxArgs: 0, effect: 'plan' },
@@ -27,7 +30,7 @@ export const commands: readonly Command[] = [
   { id: 'project inspect', summary: 'Validate a companion export and report compiler obligations.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'new', summary: 'Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.', options: { ...values('starter', 'from', 'id', 'name', 'author', 'extension', 'extensions'), list: 'flag', install: 'flag', 'inside-vault': 'flag' }, maxArgs: 1, effect: 'plan' },
-  { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('input', 'vault', 'target'), maxArgs: 0, effect: 'plan' },
+  { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('input', 'vault', 'target', 'output-kind'), maxArgs: 0, effect: 'plan' },
   { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },

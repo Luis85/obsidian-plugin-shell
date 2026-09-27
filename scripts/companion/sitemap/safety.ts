@@ -1,6 +1,6 @@
 import { SITEMAP_LIMITS } from './model.ts';
 
-class SitemapError extends Error {
+export class SitemapError extends Error {
   readonly code: string;
   constructor(code: string, message: string) {
     super(message);

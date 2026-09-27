@@ -1,0 +1,25 @@
+# Compiler qualification and extension
+
+## Commands and evidence
+
+`npm run test:compiler` runs unit, compatibility, CLI/reporting, architecture, artifact-origin, packed-distribution and four targeted mutation checks. `npm run test:compiler:properties` runs seeded fast-check invariants. `npm run test:compiler:coverage` measures domain/application coverage separately from generated product tests, with minimums of 95% lines, 90% branches and 90% functions. Coverage is not a substitute for observable output assertions.
+
+The golden manifest in `tests/fixtures/compiler/legacy-code.json` captures emitted product code/tests from PR5 commit `b66200e2f43cd0682028f0151f9bdffc853cd2bf`, reconstructed from its published workflow kit. This original pre-native baseline remains unchanged as historical evidence. After PR34 was merged into PR5, generated bootstrap now registers native capabilities and emits a native registry even for an empty declaration. The executable equivalence gate therefore uses `native-base-code.json`, captured independently from the **unextracted PR5 generator**, commit `e14831f09b73f9a99610ea911a854f419c1bb52c`, tree `0e9808e8aeec459207acc193af63441ee62513cb`. It covers all eleven starters plus the complete Companion self-project, pins each exact input SHA-256, and compares the count and full digest of the same selected product paths. No output from the dedicated compiler under test was used to create these expectations. The native registry and changed bootstrap remain inside the comparison; they are not filtered out to make the gate pass. Copied framework files, developer documentation and additive compiler reports are deliberately outside that equivalence scope; generated business/runtime code is not excluded.
+
+Mutation tests execute a baseline and actual mutated copies of collision and reference guards. A mutant is killed only by the expected assertion after its probe executes, never by a syntax/import failure. Property tests retain seed `20260927` and 250 cases per property.
+
+`QUALIFIED_NPM` must identify the explicitly installed npm 11.19.1 CLI for `npm run qualify:compiler`. The qualifier creates an isolated temporary workspace, compiles click-dummy output, installs its own lockfile, verifies the generated plugin, type-checks and bundles the browser entry, and executes independent offline navigation assertions. It retains step logs, hashes and an explicit passed/failed summary under `reports/compiler-qualification`. Temporary projects are removed. Compilation's warm-snapshot budget is 15 seconds for Quick Capture; this is a regression guard, not a product latency claim or maximum-scale benchmark.
+
+The dedicated GitHub workflow runs contracts on Linux, Windows and macOS using the repository-qualified Node/npm. Linux additionally performs real browser qualification. Existing generator/starter/native workflows are unchanged; this workflow does not relabel their results.
+
+## Adding a rule
+
+Add the diagnostic code/help to `domain/diagnostics.ts`. For an independently safe reference check, retain the original JSON pointer and stable entity ID, and test a valid document, the failure and a simultaneous independent failure. Do not guess source positions from arbitrary exception prose. Regenerate/check the diagnostic catalog documentation.
+
+## Adding an emitter or output
+
+Accept the existing resolved model and a frozen template snapshot. Produce artifacts with explicit producer and ownership metadata. Reuse the collector, declare only intentional replacements and test duplicate and case-collision behavior. No filesystem reads, dependency installs or shell commands are allowed inside emitters. Add the emitter to the resolved architecture entry inventory and add behavior-based generated-output qualification, not only source substring tests.
+
+## Compatibility review
+
+A change to artifact bytes, migration semantics, diagnostic codes, approval hashes or legacy command behavior needs an explicit compatibility decision. Do not update golden hashes just to make a test pass. New output kinds use `--output-kind`; the existing `--target` folder meaning is reserved. Installation, generation, bundling, typechecking, tests, native acceptance and business acceptance are separate evidence dimensions.
