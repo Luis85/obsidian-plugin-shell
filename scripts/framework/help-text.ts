@@ -16,7 +16,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate'] },
-  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
   { id: 'vault', title: 'Test vault and data', commands: ['vault prepare', 'plugin install', 'data plan', 'data apply', 'data reset-plan', 'data reset'] },
@@ -72,7 +72,6 @@ const specific: Record<string, OptionHelp> = {
   authorize: { description: 'Separately reviewed candidate authorization digest.' },
   execute: { description: 'Request candidate writes (still requires --authorize).' },
   all: { description: 'List every command with its summary, grouped.' },
-  replace: { description: 'Replace the previous local clickdummy only after successful build and static offline validation.' },
   fast: { description: 'Typecheck plus tests related to changed files (git); for agent Stop hooks.' },
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
@@ -100,7 +99,6 @@ const examples: Record<string, string[]> = {
   make: ['node shell.mjs make list', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
   install: ['node shell.mjs install --yes'], build: ['node shell.mjs build'],
-  'clickdummy build': ['node shell.mjs clickdummy build', 'node shell.mjs clickdummy build --replace'],
   test: ['node shell.mjs test', 'node shell.mjs test --profile obsidian', 'node shell.mjs test --profile browser'],
   check: ['node shell.mjs check', 'node shell.mjs check --fast --json'],
   'check submission': ['node shell.mjs check submission', 'node shell.mjs check submission --json'],

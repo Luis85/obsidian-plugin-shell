@@ -1,5 +1,5 @@
 import { relative, resolve, isAbsolute, sep } from 'node:path';
-import { parseAuthoringDocument as parseCompanionDocument } from '../companion/authoring-contract.ts';
+import { parseCompanionDocument } from '../companion/project-contract.mjs';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { exportDesignSystem } from './style-export.ts';
 import { readBounded, readConfiguration, hash } from './files.ts';

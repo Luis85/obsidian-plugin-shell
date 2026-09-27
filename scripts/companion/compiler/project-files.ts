@@ -1,4 +1,3 @@
-import { clickdummyCode } from './clickdummy-code.ts';
 import { httpCode } from './http-code.ts';
 import { relationshipCode } from './relationship-code.ts';
 import { fixtureCode } from './fixture-code.ts';
@@ -18,7 +17,7 @@ import { styleCode } from './style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from './devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments } from './framework-docs.ts';
 const roots = ['src','scripts','tests','harness','docs','.github'];
-const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','vitest.obsidian.config.mjs','tsconfig.generator.json','tsconfig.framework.json','tsconfig.sitemap.json','tsconfig.authoring.json'];
+const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','vitest.obsidian.config.mjs','tsconfig.generator.json','tsconfig.framework.json'];
 export async function projectFiles(templateRoot: string, m: Model): Promise<Entry[]> {
   const entries = new Map<string,Entry>();
   const add: Add = (path,content,ownership = 'extension') => { entries.set(path,{path,content,ownership}); };
@@ -49,7 +48,6 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   pkg.scripts['test:tdd'] = `vitest --config vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
   pkg.scripts['typecheck:project'] = 'vue-tsc --noEmit --project tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
-  pkg.scripts['build:clickdummy'] = 'node shell.mjs clickdummy build';
   pkg.scripts['doctor'] = 'node shell.mjs doctor';
   pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
@@ -62,14 +60,14 @@ export async function projectFiles(templateRoot: string, m: Model): Promise<Entr
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
+  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts',makerTests+'/**/*.ts']}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');
   add(`${m.sourceRoot}/domain/contract.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/contract.ts'),'utf8'));
   add(`${m.sourceRoot}/presentation/composables/operation.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/operation.ts'),'utf8'));
   add(`${m.sourceRoot}/application/source-overrides.ts`,await readFile(join(templateRoot,'scripts/companion/runtime/source-overrides.ts'),'utf8'),'managed');
-  dataCode(m,add); navigationCode(m,add); uiCode(m,add); hostCode(m,add); styleCode(m,add); await persistenceCode(templateRoot,m,add); await visualCode(templateRoot,m,add); await relationshipCode(templateRoot,m,add); await httpCode(templateRoot,m,add); clickdummyCode(m,add);
+  dataCode(m,add); navigationCode(m,add); uiCode(m,add); hostCode(m,add); styleCode(m,add); await persistenceCode(templateRoot,m,add); await visualCode(templateRoot,m,add); await relationshipCode(templateRoot,m,add); await httpCode(templateRoot,m,add);
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {

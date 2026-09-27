@@ -1,7 +1,6 @@
 import { matches, type Schema } from '../runtime/contract.ts';
 import { createHash } from 'node:crypto';
-import { companionRelativeFolder } from '../project-contract.mjs';
-import { validateAuthoringDocument as validateCompanionDocument } from '../authoring-contract.ts';
+import { validateCompanionDocument, companionRelativeFolder } from '../project-contract.mjs';
 export type Row = Record<string, unknown>;
 export interface Entity { id: string; slug: string; name: string; folder: string; schema: Schema }
 export interface Operation { id: string; slug: string; name: string; direction: string; input: Schema | null; output: Schema | null; contract: Row }

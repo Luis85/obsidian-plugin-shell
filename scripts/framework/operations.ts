@@ -1,5 +1,4 @@
 import { resolve, join } from 'node:path';
-import { buildClickdummy } from './clickdummy.ts';
 import { inspectStyles } from './styles.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
@@ -9,7 +8,6 @@ import { result, failure, requireThat, stringOption, type Context, type Request,
 import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
 import { status, releaseCheck } from './inspection.ts';
 import { inspectDesign } from './changes.ts';
-import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
 import { readConfiguration, exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { packKit } from './kit.ts';
@@ -83,7 +81,7 @@ async function readOperation(request: Request, context: Context): Promise<Result
   if (request.command === 'project inspect') {
     const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
     const { model, source } = await inspectDesign(context, input);
-    return result(request.command, { schemaVersion: source.document.schemaVersion, project: model.project, entities: model.entities.length, sources: model.sources.length, screens: model.screens.length, components: model.components.length, acceptanceObligations: model.requirements.length, warnings: model.warnings, sitemap: inspectSitemapSummary(source.document.design) });
+    return result(request.command, { schemaVersion: source.document.schemaVersion, project: model.project, entities: model.entities.length, sources: model.sources.length, screens: model.screens.length, components: model.components.length, acceptanceObligations: model.requirements.length, warnings: model.warnings });
   }
   if (request.command === 'framework status') {
     const kit = await verifyKit(context.root); return result(request.command, { version: kit.version, sourceHash: kit.sourceHash, compilerVersion: kit.compilerVersion, verifiedFiles: kit.files.length, authenticity: 'checksums-are-not-signatures' });
@@ -114,7 +112,6 @@ export async function executeOperation(input: Request, context: Context): Promis
       return result(command, { makers });
     }
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
-    if (command === 'clickdummy build') return await buildClickdummy(request, context);
     if (command === 'check') return await checkOperation(request, context);
     if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);

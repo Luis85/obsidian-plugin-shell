@@ -29,9 +29,6 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   let output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
   assert.ok(files.some(file => file.path === '.framework/compiled/scripts/framework/cli.js'));
-  for (const name of ['tsconfig.sitemap.json', 'tsconfig.authoring.json']) {
-    assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
-  }
   const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
   design.settings = { codebaseFolder: 'app/source', testsFolder: 'spec' };

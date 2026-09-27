@@ -16,7 +16,7 @@ async function checkDirectoryChain(root, path) {
     }
   }
 }
-async function readBoundedJson(input, parse) {
+async function readBoundedJson(input) {
   const before = await lstat(input);
   if (!before.isFile() || before.isSymbolicLink()) throw new Error('COMPANION_INPUT: Expected a regular JSON file, not a link.');
   const file = await open(input, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
@@ -34,20 +34,20 @@ async function readBoundedJson(input, parse) {
     if (length > COMPANION_MAX_BYTES) throw new Error('COMPANION_INPUT: File exceeds 4 MB.');
     const content = buffer.subarray(0, length);
     const text = new TextDecoder('utf-8', { fatal: true }).decode(content);
-    const document = parse(text);
+    const document = parseCompanionDocument(text);
     return { content, document };
   } finally { await file.close(); }
 }
 
 /** Read and return a project definition. This v1 seam never generates files. */
-export async function readCompanionProject({ input, target, vault = process.cwd() }, reader = { parse: parseCompanionDocument, migrate: migrateCompanionDocument }) {
+export async function readCompanionProject({ input, target, vault = process.cwd() }) {
   if (typeof input !== 'string' || !input.trim()) throw new Error('COMPANION_INPUT: Supply --input <project.json>.');
   if (!companionRelativeFolder(target, true)) throw new Error('COMPANION_TARGET: Use a portable vault-relative --target path, or dot for the vault root.');
   const root = await realpath(resolve(vault));
   if (!(await lstat(root)).isDirectory()) throw new Error('COMPANION_TARGET: The vault root must be an existing directory.');
   await checkDirectoryChain(root, target);
-  const result = await readBoundedJson(resolve(input), reader.parse);
-  const { document, report } = reader.migrate(result.document);
+  const result = await readBoundedJson(resolve(input));
+  const { document, report } = migrateCompanionDocument(result.document);
   for (const folder of Object.values(document.settings)) {
     await checkDirectoryChain(root, target === '.' ? folder : target + '/' + folder);
   }
