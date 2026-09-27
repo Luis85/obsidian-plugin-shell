@@ -21,6 +21,10 @@ export function composeMvp(base,bundle,css,bridge) {
   for(const [start,end,text] of changes.reverse())program=program.slice(0,start)+text+program.slice(end);
   function once(from,to){if(program.split(from).length!==2)throw Error('MVP_ASSEMBLY: Ambiguous seam '+from.slice(0,100));program=program.replace(from,to);}
   once('const COMPANION_VERSION = 5;','const COMPANION_VERSION = 6;');
+  // The immutable embedded catalog was hash-verified as v5 by the retained builder.
+  // Import migrates its configured copy through the v6 authoring validator.
+  once("entry.document.schemaVersion === COMPANION_VERSION, 'Built-ins require project v' + COMPANION_VERSION + '.'",
+    "entry.document.schemaVersion === 5, 'The retained catalog requires project v5.'");
   once("![1,2,3,4,5].includes(value.schema)","![1,2,3,4,5,6].includes(value.schema)");
   once('return veShape(value)&&smShape(value.storymaps)','return jmValidFields(value)&&veShape(value)&&smShape(value.storymaps)');
   once('...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})','...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{}),...(d.sitemap?{sitemap:d.sitemap}:{}),...(d.features?{features:d.features}:{})');

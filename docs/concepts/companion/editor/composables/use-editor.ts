@@ -1,4 +1,4 @@
-import { computed, markRaw, ref, shallowRef } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
 import { defineStore } from 'pinia';
 import type { EditorHost } from '../contracts.ts';
 import type { SitemapCommand, SitemapDesign, SurfaceKind, SitemapJourney } from '../../../../../scripts/companion/sitemap/model.ts';
@@ -30,7 +30,7 @@ export function editorStore(host: EditorHost) {
     const route = computed(() => snapshot.value?.sitemap?.routes.find(r => r.surface === selectedId.value));
     function resetDraft() { draftName.value=selected.value?.label ?? '';dirty.value=false; }
     function sync() {
-      const current=session.snapshot(); snapshot.value=current ? markRaw(current.design) : null;
+      const current=session.snapshot(); snapshot.value=current ? current.design : null;
       const state=session.state(); available.value=state.writable;canUndo.value=state.canUndo;canRedo.value=state.canRedo;
       if (!snapshot.value?.nodes.some(n=>n.id===selectedId.value)) selectedId.value=snapshot.value?.nodes[0]?.id ?? '';
       if (!snapshot.value?.sitemap?.journeys.some(j=>j.id===journeyId.value)) journeyId.value='';
