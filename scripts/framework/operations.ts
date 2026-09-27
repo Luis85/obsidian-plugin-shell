@@ -1,6 +1,5 @@
 import { resolve, join } from 'node:path';
 import { inspectStyles } from './styles.ts';
-import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
 import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
@@ -9,6 +8,7 @@ import { result, failure, requireThat, stringOption, type Context, type Request,
 import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
 import { status, releaseCheck } from './inspection.ts';
 import { inspectDesign } from './changes.ts';
+import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
 import { readConfiguration, exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { packKit } from './kit.ts';
@@ -124,7 +124,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       if (request.options.execute) { const authorization = stringOption(request.options, 'authorize'); requireThat(authorization, 'RELEASE_AUTHORIZATION', 'Public execution requires a separate --authorize digest. --yes is not authorization.'); args.push('--execute', '--authorize', authorization); }
       else requireThat(request.options.authorize === undefined, 'RELEASE_AUTHORIZATION', '--authorize requires --execute.');
       const exit = await runNode(context, 'scripts/release/cli.mjs', args);
-      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'RELEASE_OUTPUT_LIMIT');
+      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'Release output exceeded its bound; do not infer success or retry writes automatically.');
       return result(command, { execution: exit, receipt: JSON.parse(exit.stdout) });
     }
     return await readOperation(request, context);
