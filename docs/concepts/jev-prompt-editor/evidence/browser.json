@@ -1,5 +1,5 @@
 {
-  "artifactSha256": "f6261d764e2579a4ace89db034973f3da0b30a61bd744615b7dcea25598ded07",
+  "artifactSha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
   "browser": "144.0.7559.96",
   "renderMode": "exact HTML bytes via set_content; managed browser blocks file and localhost navigation",
   "storageMode": "in-memory Storage test adapter; native browser persistence not qualified",

@@ -20,7 +20,754 @@ var Jev;
 })(Jev || (Jev = {}));
 var Jev;
 (function (Jev) {
+    Jev.literal = (value) => ({ mode: 'literal', value: JSON.stringify(value), amount: 1 });
+    Jev.reference = (value) => ({ mode: 'path', value, amount: 1 });
+    Jev.binding = (name, value) => ({ name, binding: value });
+    Jev.field = (name, type, required = true) => ({ name, type, required, description: '' });
+    Jev.decision = (type = 'continue', code = 'continue', processId = '') => ({ type, code, processId });
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    const blockedSegments = new Set(['__proto__', 'constructor', 'prototype']);
+    function validPath(value) {
+        const segments = value.split('.');
+        return value.length <= 300 && segments.length <= 20 && segments.every(p => /^[a-zA-Z0-9_-]+$/.test(p) && !blockedSegments.has(p));
+    }
+    Jev.validPath = validPath;
+    function readPath(root, path, optional = false) {
+        if (!validPath(path))
+            throw new Error('Unsafe or invalid data path: ' + path);
+        let current = root;
+        for (const segment of path.split('.')) {
+            if ((!Jev.record(current) && !Array.isArray(current)) || !Object.prototype.hasOwnProperty.call(current, segment)) {
+                if (optional)
+                    return undefined;
+                throw new Error('Missing input at ' + path + '. Bind it explicitly or use an exists condition.');
+            }
+            current = Reflect.get(current, segment);
+        }
+        return current;
+    }
+    Jev.readPath = readPath;
+    function resolveValue(value, context, optional = false) {
+        if (value.mode === 'literal')
+            return Jev.parseJson(value.value);
+        const result = readPath(context, value.value, optional);
+        if (value.mode === 'path')
+            return result;
+        if (value.mode !== 'add' || typeof result !== 'number' || !Number.isFinite(result) || !Number.isFinite(value.amount))
+            throw new Error('Add requires a finite numeric source and increment.');
+        const added = result + value.amount;
+        if (!Number.isFinite(added))
+            throw new Error('Numeric result is not finite.');
+        return added;
+    }
+    Jev.resolveValue = resolveValue;
+    function resolveBindings(values, context) {
+        const result = {};
+        for (const row of values) {
+            if (!Jev.safeKey(row.name) || Object.prototype.hasOwnProperty.call(result, row.name))
+                throw new Error('Duplicate or unsafe binding name: ' + row.name);
+            const value = resolveValue(row.binding, context);
+            if (value === undefined)
+                throw new Error('Binding ' + row.name + ' has no value.');
+            result[row.name] = Jev.clone(value);
+        }
+        return result;
+    }
+    Jev.resolveBindings = resolveBindings;
+    function matchesType(value, type) {
+        if (type === 'number')
+            return typeof value === 'number' && Number.isFinite(value);
+        if (type === 'array')
+            return Array.isArray(value);
+        if (type === 'object')
+            return Jev.record(value);
+        return typeof value === type;
+    }
+    Jev.matchesType = matchesType;
+    function checkContract(fields, value, label) {
+        Jev.assertSafe(value);
+        for (const item of fields) {
+            const present = Object.prototype.hasOwnProperty.call(value, item.name);
+            if (item.required && !present)
+                throw new Error(label + '.' + item.name + ': required ' + item.type + ' is missing.');
+            if (present && !matchesType(value[item.name], item.type))
+                throw new Error(label + '.' + item.name + ': expected ' + item.type + '. No implicit coercion.');
+        }
+        for (const name of Object.keys(value))
+            if (!fields.some(f => f.name === name))
+                throw new Error(label + '.' + name + ': undeclared field.');
+    }
+    Jev.checkContract = checkContract;
+    function evaluateCondition(condition, context) {
+        const exists = condition.operator === 'exists' || condition.operator === 'missing';
+        const left = resolveValue(condition.left, context, exists);
+        if (exists)
+            return condition.operator === 'exists' ? left !== undefined : left === undefined;
+        const right = resolveValue(condition.right, context);
+        if (condition.operator === 'eq' || condition.operator === 'neq') {
+            if ((Jev.record(left) || Array.isArray(left)) || (Jev.record(right) || Array.isArray(right)))
+                throw new Error('Equality compares scalar values; select a specific field.');
+            if (typeof left !== typeof right)
+                throw new Error('Equality operands must have the same type.');
+            return condition.operator === 'eq' ? left === right : left !== right;
+        }
+        if (condition.operator === 'contains') {
+            if (typeof left === 'string' && typeof right === 'string')
+                return left.includes(right);
+            if (Array.isArray(left) && ['string', 'number', 'boolean'].includes(typeof right))
+                return left.includes(right);
+            throw new Error('Contains needs text/text or an array/scalar.');
+        }
+        if (typeof left !== 'number' || typeof right !== 'number' || !Number.isFinite(left) || !Number.isFinite(right))
+            throw new Error('Ordered comparisons require two finite numbers.');
+        switch (condition.operator) {
+            case 'gt': return left > right;
+            case 'gte': return left >= right;
+            case 'lt': return left < right;
+            case 'lte': return left <= right;
+            default: throw new Error('Unknown condition operator.');
+        }
+    }
+    Jev.evaluateCondition = evaluateCondition;
+    /** Ordered, short-circuit rules. Missing data fails closed; it never selects ELSE. */
+    function evaluateRule(rule, input, context, completedIterations = 0) {
+        checkContract(rule.inputs, input, 'Rule input');
+        const conditions = [];
+        for (const branch of rule.branches) {
+            const matches = [];
+            for (const condition of branch.conditions) {
+                const result = evaluateCondition(condition, { ...context, input });
+                matches.push(result);
+                if (branch.match === 'all' && !result || branch.match === 'any' && result)
+                    break;
+            }
+            const matched = branch.match === 'all' ? matches.every(Boolean) : matches.some(Boolean);
+            conditions.push({ branch: branch.name, matches, matched });
+            if (matched) {
+                if (rule.mode === 'while' && completedIterations >= rule.maxIterations)
+                    return { decision: Jev.decision('review', 'loop_limit'), port: 'limit', conditions, iteration: completedIterations };
+                return { decision: Jev.clone(branch.decision), port: branch.id, conditions, iteration: completedIterations + (rule.mode === 'while' ? 1 : 0) };
+            }
+        }
+        return { decision: Jev.clone(rule.fallback), port: 'else', conditions, iteration: completedIterations };
+    }
+    Jev.evaluateRule = evaluateRule;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    const bad = (issues, path, message) => { issues.push({ path, message }); };
+    const text = (limit = 4000, required = false) => (v, p, e) => {
+        if (typeof v !== 'string' || v.length > limit || (required && !v.trim()))
+            bad(e, p, 'Expected ' + (required ? 'non-empty ' : '') + 'text, at most ' + limit + ' characters.');
+    };
+    const choice = (...values) => (v, p, e) => { if (!values.includes(v))
+        bad(e, p, 'Expected one of: ' + values.join(', ')); };
+    const integer = (min, max) => (v, p, e) => { if (typeof v !== 'number' || !Number.isInteger(v) || v < min || v > max)
+        bad(e, p, 'Expected an integer from ' + min + ' to ' + max + '.'); };
+    const numberShape = (v, p, e) => { if (typeof v !== 'number' || !Number.isFinite(v))
+        bad(e, p, 'Expected a finite number.'); };
+    const keyShape = (v, p, e) => { if (typeof v !== 'string' || !Jev.safeKey(v))
+        bad(e, p, 'Use a lowercase ID, letters/numbers/underscores, starting with a letter.'); };
+    const refShape = (v, p, e) => { if (typeof v !== 'string' || !/^([a-zA-Z0-9_-]{1,80})?$/.test(v) || ['__proto__', 'constructor', 'prototype'].includes(v))
+        bad(e, p, 'Invalid portable reference.'); };
+    const objectShape = (fields) => (v, p, e) => {
+        if (!Jev.record(v)) {
+            bad(e, p, 'Expected an object.');
+            return;
+        }
+        for (const key of Object.keys(v))
+            if (!Object.prototype.hasOwnProperty.call(fields, key))
+                bad(e, p + '.' + key, 'Unknown field; import will not discard it.');
+        for (const [key, check] of Object.entries(fields))
+            check(v[key], p + '.' + key, e);
+    };
+    const arrayShape = (item, max = 30, min = 0, unique) => (v, p, e) => {
+        if (!Array.isArray(v) || v.length < min || v.length > max) {
+            bad(e, p, 'Expected ' + min + '–' + max + ' items.');
+            return;
+        }
+        const seen = new Set();
+        v.forEach((value, i) => { item(value, p + '.' + i, e); if (unique && Jev.record(value)) {
+            if (seen.has(value[unique]))
+                bad(e, p + '.' + i, 'Duplicate ' + unique + '.');
+            seen.add(value[unique]);
+        } });
+    };
+    const bindingShape = objectShape({ mode: choice('literal', 'path', 'add'), value: text(16000), amount: numberShape });
+    const checkedBinding = (v, p, e) => {
+        bindingShape(v, p, e);
+        if (!Jev.record(v) || typeof v.value !== 'string')
+            return;
+        if (v.mode === 'literal') {
+            try {
+                Jev.parseJson(v.value);
+            }
+            catch (error) {
+                bad(e, p + '.value', error.message);
+            }
+        }
+        else if (!Jev.validPath(v.value))
+            bad(e, p + '.value', 'Use a safe dot-separated data path, not code.');
+    };
+    const namedShape = objectShape({ name: keyShape, binding: checkedBinding });
+    const namedArray = arrayShape(namedShape, 40, 0, 'name');
+    const fieldShape = objectShape({ name: keyShape, type: choice('string', 'number', 'boolean', 'object', 'array'), required: choice(true, false), description: text(1000) });
+    const fieldArray = arrayShape(fieldShape, 40, 0, 'name');
+    const eventShape = objectShape({
+        id: keyShape, name: (v, p, e) => { if (typeof v !== 'string' || v.length > 100 || !v.split('.').every(s => Jev.safeKey(s)))
+            bad(e, p, 'Use a dotted event name, such as note.classified.'); },
+        description: text(), when: choice('completed', 'true', 'false', 'review', 'error'), fields: fieldArray, payload: namedArray,
+    });
+    const eventArray = arrayShape(eventShape, 12, 0, 'id');
+    function validateEvents(value) {
+        const errors = [];
+        eventArray(value, 'events', errors);
+        if (Array.isArray(value)) {
+            const names = new Set();
+            value.forEach((event, index) => {
+                if (!Jev.record(event))
+                    return;
+                if (typeof event.name === 'string') {
+                    if (names.has(event.name))
+                        bad(errors, 'events.' + index, 'Event names must be unique within this item.');
+                    names.add(event.name);
+                }
+                if (Array.isArray(event.fields) && Array.isArray(event.payload)) {
+                    const fields = event.fields.filter(Jev.record), payload = event.payload.filter(Jev.record);
+                    for (const f of fields)
+                        if (f.required && !payload.some(b => b.name === f.name))
+                            bad(errors, 'events.' + index + '.payload', 'Missing required binding: ' + f.name);
+                    for (const b of payload)
+                        if (!fields.some(f => f.name === b.name))
+                            bad(errors, 'events.' + index + '.payload', 'Undeclared payload field: ' + b.name);
+                }
+            });
+        }
+        return errors;
+    }
+    Jev.validateEvents = validateEvents;
+    const eventsShape = (v, p, e) => { for (const check of validateEvents(v))
+        bad(e, p + check.path.slice(6), check.message); };
+    const base = { id: keyShape, name: text(160, true), description: text(), status: choice('draft', 'ready', 'archived'), events: eventsShape };
+    const decisionShape = objectShape({ type: choice('continue', 'process', 'end', 'review'), code: keyShape, processId: refShape });
+    const conditionShape = objectShape({ id: keyShape, left: checkedBinding, operator: choice('eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'contains', 'exists', 'missing'), right: checkedBinding });
+    const branchKey = (v, p, e) => { keyShape(v, p, e); if (['else', 'error', 'limit', 'success'].includes(String(v)))
+        bad(e, p, 'This branch ID is reserved by the runtime.'); };
+    const branchShape = objectShape({ id: branchKey, name: text(160, true), match: choice('all', 'any'), conditions: arrayShape(conditionShape, 12, 1, 'id'), decision: decisionShape });
+    const ruleShape = objectShape({ ...base, mode: choice('if', 'while'), inputs: fieldArray, branches: arrayShape(branchShape, 12, 1, 'id'), fallback: decisionShape, maxIterations: integer(1, 25) });
+    const processShape = objectShape({ ...base, mode: choice('transform', 'fixture', 'external'), inputs: fieldArray, outputs: fieldArray, mappings: namedArray });
+    const nodeShape = objectShape({ id: keyShape, kind: choice('start', 'prompt', 'rule', 'process', 'end'), name: text(160, true), refId: refShape, x: integer(-4000, 12000), y: integer(-4000, 12000), inputs: namedArray, events: eventsShape });
+    const edgeShape = objectShape({ id: keyShape, source: keyShape, port: text(100, true), target: keyShape, kind: choice('control', 'event') });
+    const flowShape = objectShape({ ...base, nodes: arrayShape(nodeShape, 60, 1, 'id'), edges: arrayShape(edgeShape, 120, 0, 'id'), sampleInput: text(40000, true), maxSteps: integer(1, 200), maxEvents: integer(1, 100) });
+    const snapshotFields = { rules: arrayShape(ruleShape, 40, 0, 'id'), processes: arrayShape(processShape, 40, 0, 'id'), flows: arrayShape(flowShape, 20, 1, 'id') };
+    const snapshotShape = objectShape(snapshotFields);
+    const revisionShape = objectShape({ id: keyShape, name: text(160, true), createdAt: text(80, true), snapshot: snapshotShape });
+    const libraryShape = objectShape({ kind: choice('jev-logic'), schemaVersion: choice(1), ...snapshotFields, revisions: arrayShape(revisionShape, 20, 0, 'id') });
+    function validateLogic(value) {
+        const issues = [];
+        try {
+            Jev.assertSafe(value);
+        }
+        catch (error) {
+            return [{ path: '$', message: error.message }];
+        }
+        libraryShape(value, 'logic', issues);
+        return issues;
+    }
+    Jev.validateLogic = validateLogic;
+    function readLogic(value) {
+        const issues = validateLogic(value);
+        if (issues.length)
+            throw new Error(issues.slice(0, 4).map(i => i.path + ': ' + i.message).join('\n'));
+        return Jev.clone(value);
+    }
+    Jev.readLogic = readLogic;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    function nodeDefinition(node, logic, prompts) {
+        if (node.kind === 'prompt')
+            return prompts.find(p => p.id === node.refId);
+        if (node.kind === 'rule')
+            return logic.rules.find(r => r.id === node.refId);
+        if (node.kind === 'process')
+            return logic.processes.find(p => p.id === node.refId);
+        return undefined;
+    }
+    Jev.nodeDefinition = nodeDefinition;
+    function nodeEvents(node, logic, prompts) {
+        return [...(nodeDefinition(node, logic, prompts)?.events || []), ...node.events];
+    }
+    Jev.nodeEvents = nodeEvents;
+    function nodePorts(node, logic) {
+        if (node.kind === 'end')
+            return [];
+        if (node.kind === 'rule') {
+            const rule = logic.rules.find(r => r.id === node.refId);
+            return [...(rule?.branches.map(b => ({ id: b.id, name: b.name })) || []), { id: 'else', name: rule?.mode === 'while' ? 'Exit / else' : 'Else' }, { id: 'error', name: 'Error' }];
+        }
+        return [{ id: 'success', name: 'Completed' }, { id: 'error', name: 'Error' }];
+    }
+    Jev.nodePorts = nodePorts;
+    function controlCycles(flow) {
+        let next = 0;
+        const indices = new Map(), low = new Map(), stack = [], onStack = new Set(), cycles = [];
+        function visit(id) {
+            indices.set(id, next);
+            low.set(id, next++);
+            stack.push(id);
+            onStack.add(id);
+            for (const edge of flow.edges.filter(e => e.kind === 'control' && e.source === id)) {
+                if (!indices.has(edge.target)) {
+                    visit(edge.target);
+                    low.set(id, Math.min(low.get(id), low.get(edge.target)));
+                }
+                else if (onStack.has(edge.target))
+                    low.set(id, Math.min(low.get(id), indices.get(edge.target)));
+            }
+            if (low.get(id) !== indices.get(id))
+                return;
+            const component = [];
+            let member;
+            do {
+                member = stack.pop();
+                onStack.delete(member);
+                component.push(member);
+            } while (member !== id);
+            if (component.length > 1 || flow.edges.some(e => e.kind === 'control' && e.source === id && e.target === id))
+                cycles.push(component);
+        }
+        flow.nodes.forEach(n => { if (!indices.has(n.id))
+            visit(n.id); });
+        return cycles;
+    }
+    function inspectFlow(flow, logic, prompts) {
+        const issues = [];
+        const issue = (path, message, nodeId, severity = 'error') => issues.push({ path, message, nodeId, severity });
+        for (const event of flow.events)
+            if (['true', 'false'].includes(event.when))
+                issue('events.' + event.id, 'Flow lifecycle events support completed, review, or error only.');
+        const starts = flow.nodes.filter(n => n.kind === 'start');
+        if (starts.length !== 1)
+            issue('nodes', 'A flow needs exactly one Start.');
+        try {
+            if (!Jev.record(Jev.parseJson(flow.sampleInput)))
+                issue('sampleInput', 'Simulation input must be a JSON object.');
+        }
+        catch (e) {
+            issue('sampleInput', e.message);
+        }
+        const controls = new Set(), eventRoutes = new Set();
+        for (const edge of flow.edges) {
+            const source = flow.nodes.find(n => n.id === edge.source), target = flow.nodes.find(n => n.id === edge.target);
+            if (!source || !target) {
+                issue('edges.' + edge.id, 'Connection names a missing node.');
+                continue;
+            }
+            if (target.kind === 'start')
+                issue('edges.' + edge.id, 'Start cannot be a destination.', target.id);
+            if (source.kind === 'end')
+                issue('edges.' + edge.id, 'End stops the entire run; it cannot dispatch another step.', source.id);
+            if (edge.kind === 'control') {
+                if (!nodePorts(source, logic).some(p => p.id === edge.port))
+                    issue('edges.' + edge.id, 'Unknown control output ' + edge.port, source.id);
+                const key = edge.source + ':' + edge.port;
+                if (controls.has(key))
+                    issue('edges.' + edge.id, 'A control output can have only one destination. Use an emitted event for explicit fan-out.', source.id);
+                controls.add(key);
+            }
+            else {
+                if (!nodeEvents(source, logic, prompts).some(e => e.id === edge.port))
+                    issue('edges.' + edge.id, 'This event is no longer declared by the source item.', source.id);
+                const key = edge.source + ':' + edge.port + ':' + edge.target;
+                if (eventRoutes.has(key))
+                    issue('edges.' + edge.id, 'Duplicate event subscription.', source.id);
+                eventRoutes.add(key);
+            }
+        }
+        for (const node of flow.nodes) {
+            const definition = nodeDefinition(node, logic, prompts);
+            if (['prompt', 'rule', 'process'].includes(node.kind) && !definition) {
+                issue('nodes.' + node.id, 'Choose an existing ' + node.kind + ' definition.', node.id);
+                continue;
+            }
+            if (definition?.status === 'archived')
+                issue('nodes.' + node.id, 'The referenced definition is archived. Restore or replace it.', node.id);
+            for (const event of nodeEvents(node, logic, prompts))
+                if (node.kind !== 'rule' && ['true', 'false'].includes(event.when))
+                    issue('events.' + event.id, 'Only a rule can emit branch-matched or Else events.', node.id);
+            for (const check of Jev.validateEvents(nodeEvents(node, logic, prompts)))
+                issue(check.path, check.message, node.id);
+            const hasCompletionEvent = flow.edges.some(e => e.source === node.id && e.kind === 'event' && nodeEvents(node, logic, prompts).some(ev => ev.id === e.port && ev.when === 'completed'));
+            if (['start', 'prompt', 'process'].includes(node.kind) && !controls.has(node.id + ':success') && !hasCompletionEvent)
+                issue('nodes.' + node.id, 'Connect Completed or a completed event to a next step or End.', node.id);
+            if (node.kind === 'prompt' && definition)
+                for (const check of Jev.validateRecipe(definition))
+                    issue(check.path, check.message, node.id);
+            const contract = node.kind === 'rule' ? logic.rules.find(r => r.id === node.refId)?.inputs : node.kind === 'process' ? logic.processes.find(p => p.id === node.refId)?.inputs : undefined;
+            if (contract && node.inputs.length) {
+                for (const f of contract)
+                    if (f.required && !node.inputs.some(b => b.name === f.name))
+                        issue('nodes.' + node.id, 'Bind required input ' + f.name + '.', node.id);
+                for (const b of node.inputs)
+                    if (!contract.some(f => f.name === b.name))
+                        issue('nodes.' + node.id, 'Input ' + b.name + ' is not declared by the contract.', node.id);
+            }
+            if (node.kind === 'rule') {
+                const rule = logic.rules.find(r => r.id === node.refId);
+                if (rule.mode === 'while' && rule.branches.length !== 1)
+                    issue('rule.' + rule.id, 'While supports exactly one condition branch plus Else.', node.id);
+                for (const branch of [...rule.branches.map(b => ({ id: b.id, decision: b.decision })), { id: 'else', decision: rule.fallback }]) {
+                    const edge = flow.edges.find(e => e.source === node.id && e.kind === 'control' && e.port === branch.id);
+                    if (['end', 'review'].includes(branch.decision.type) && edge)
+                        issue('edges.' + edge.id, 'This decision terminates the run; remove its unreachable control connection.', node.id);
+                    if (['continue', 'process'].includes(branch.decision.type) && !edge)
+                        issue('nodes.' + node.id, 'Connect ' + branch.id + ' or change its decision to End / Review.', node.id);
+                    if (branch.decision.type === 'process') {
+                        const target = flow.nodes.find(n => n.id === edge?.target);
+                        if (!branch.decision.processId || target?.kind !== 'process' || target.refId !== branch.decision.processId)
+                            issue('nodes.' + node.id, 'Process decisions must connect to a node using the selected process.', node.id);
+                    }
+                }
+            }
+            if (node.kind === 'process') {
+                const process = logic.processes.find(p => p.id === node.refId);
+                for (const f of process.outputs)
+                    if (f.required && process.mode !== 'external' && !process.mappings.some(m => m.name === f.name))
+                        issue('process.' + process.id, 'Map required output ' + f.name + '.', node.id);
+                for (const m of process.mappings)
+                    if (!process.outputs.some(f => f.name === m.name))
+                        issue('process.' + process.id, 'Undeclared output ' + m.name + '.', node.id);
+                if (process.mode === 'external')
+                    issue('process.' + process.id, 'External process: the simulator stops for review and performs no side effect.', node.id, 'warning');
+            }
+            for (const e of nodeEvents(node, logic, prompts))
+                if (!flow.edges.some(edge => edge.kind === 'event' && edge.source === node.id && edge.port === e.id))
+                    issue('events.' + e.id, 'Event ' + e.name + ' is observable only; no listener in this flow.', node.id, 'warning');
+        }
+        // Every cycle must traverse a bounded While, not merely share a component with one.
+        const bounded = new Set(flow.nodes.filter(n => n.kind === 'rule' && logic.rules.find(r => r.id === n.refId)?.mode === 'while').map(n => n.id));
+        const unbounded = { ...flow, nodes: flow.nodes.filter(n => !bounded.has(n.id)), edges: flow.edges.filter(e => !bounded.has(e.source) && !bounded.has(e.target)) };
+        for (const cycle of controlCycles(unbounded))
+            issue('edges', 'Control cycle without an explicit bounded While: ' + cycle.join(' → '));
+        if (starts[0]) {
+            const reached = new Set();
+            const queue = [starts[0].id];
+            while (queue.length) {
+                const id = queue.shift();
+                if (reached.has(id))
+                    continue;
+                reached.add(id);
+                for (const e of flow.edges.filter(e => e.source === id))
+                    queue.push(e.target);
+            }
+            for (const node of flow.nodes)
+                if (!reached.has(node.id))
+                    issue('nodes.' + node.id, 'Unreachable from Start.', node.id, 'warning');
+        }
+        return issues;
+    }
+    Jev.inspectFlow = inspectFlow;
+    function definitionUsages(logic, kind, id) {
+        return logic.flows.flatMap(f => f.nodes.filter(n => n.kind === kind && n.refId === id).map(n => ({ flow: f.name, node: n.name })));
+    }
+    Jev.definitionUsages = definitionUsages;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    function startSimulation(flow, logic, prompts, scenario = 'clear') {
+        const shape = Jev.validateLogic(logic);
+        if (shape.length)
+            throw new Error(shape[0].path + ': ' + shape[0].message);
+        const invalid = Jev.inspectFlow(flow, logic, prompts).find(i => i.severity === 'error');
+        if (invalid)
+            throw new Error(invalid.message);
+        if (flow.status === 'archived')
+            throw new Error('Restore this archived flow before simulating it.');
+        const input = Jev.parseJson(flow.sampleInput);
+        if (!Jev.record(input))
+            throw new Error('Expected an input object.');
+        return { retainedCharacters: 0, status: 'paused', reason: 'Ready to step through synthetic inputs.', runId: 'run_' + Jev.fingerprint({ flow, logic, prompts, scenario }), queue: [{ nodeId: flow.nodes.find(n => n.kind === 'start').id, input: Jev.clone(input) }], trace: [], events: [], outputs: {}, visits: {}, iterations: {}, input: Jev.clone(input), scenario };
+    }
+    Jev.startSimulation = startSimulation;
+    function emitted(events, phases, context, nodeId, run, cause = '') {
+        return events.filter(e => phases.includes(e.when)).map((event, i) => {
+            const payload = Jev.resolveBindings(event.payload, context);
+            Jev.checkContract(event.fields, payload, 'Event ' + event.name);
+            return { id: run.runId + '_e' + (run.events.length + i + 1), name: event.name, source: nodeId, sequence: run.events.length + i + 1, correlationId: run.runId, causationId: cause || run.runId + '_s' + (run.trace.length + 1), payload };
+        });
+    }
+    function finish(run, flow) {
+        const when = run.status === 'completed' ? 'completed' : run.status === 'review' ? 'review' : run.status === 'error' ? 'error' : '';
+        if (!when)
+            return;
+        try {
+            const events = emitted(flow.events, [when], { input: run.input, output: { status: run.status, reason: run.reason, steps: run.trace.length }, steps: run.outputs }, flow.id, run);
+            if (run.events.length + events.length > flow.maxEvents)
+                throw new Error('Event budget exceeded by flow lifecycle events.');
+            run.events.push(...events);
+        }
+        catch (error) {
+            run.status = 'error';
+            run.reason = 'Flow event failed: ' + error.message;
+        }
+        run.queue = [];
+    }
+    /** One deterministic task per step. No endpoint, disk, script, or external process is invoked. */
+    function stepSimulation(previous, flow, logic, prompts, vault) {
+        const run = Jev.clone(previous);
+        if (run.status !== 'paused')
+            return run;
+        if (run.trace.length >= flow.maxSteps) {
+            run.status = 'review';
+            run.reason = 'Global step limit reached. No further node was executed.';
+            finish(run, flow);
+            return run;
+        }
+        const pending = run.queue.shift();
+        if (!pending) {
+            run.status = 'completed';
+            run.reason = 'All scheduled work completed.';
+            finish(run, flow);
+            return run;
+        }
+        const node = flow.nodes.find(n => n.id === pending.nodeId);
+        if (!node) {
+            run.status = 'error';
+            run.reason = 'Scheduled node is missing.';
+            finish(run, flow);
+            return run;
+        }
+        run.visits[node.id] = (run.visits[node.id] || 0) + 1;
+        const environment = { input: pending.input, initial: run.input, steps: run.outputs, event: pending.event || {}, loop: { iteration: run.iterations[node.id] || 0 } };
+        const entry = { sequence: run.trace.length + 1, nodeId: node.id, name: node.name, kind: node.kind, port: 'success', input: {}, output: {}, events: [], status: 'completed', detail: '', conditions: [] };
+        let halt;
+        try {
+            entry.input = node.inputs.length ? Jev.resolveBindings(node.inputs, environment) : Jev.clone(pending.input);
+            const context = { ...environment, input: entry.input };
+            if (node.kind === 'start') {
+                entry.output = Jev.clone(entry.input);
+                entry.detail = 'Manual simulation trigger. No vault watcher is running.';
+            }
+            if (node.kind === 'prompt') {
+                const recipe = prompts.find(p => p.id === node.refId);
+                if (!recipe)
+                    throw new Error('Prompt reference is missing.');
+                const request = Jev.compileRequest(recipe, Jev.compileSnapshot(recipe, vault));
+                request.state = { ...request.state, workflow_input: Jev.clone(entry.input) };
+                entry.request = request;
+                entry.output = { ...Jev.validateResponse(recipe, Jev.fixtureResponse(recipe, run.scenario)) };
+                entry.detail = 'Synthetic ' + run.scenario + ' response. Prepared request is inspectable; nothing was sent to Jev.';
+            }
+            if (node.kind === 'rule') {
+                const rule = logic.rules.find(r => r.id === node.refId);
+                if (!rule)
+                    throw new Error('Rule reference is missing.');
+                const result = Jev.evaluateRule(rule, entry.input, context, run.iterations[node.id] || 0);
+                run.iterations[node.id] = result.iteration;
+                entry.port = result.port;
+                entry.conditions = result.conditions;
+                entry.output = { decision: result.decision, iteration: result.iteration, evaluatedInput: Jev.clone(entry.input) };
+                entry.detail = result.decision.code + ' · ' + result.decision.type;
+                if (result.decision.type === 'end')
+                    halt = 'completed';
+                if (result.decision.type === 'review') {
+                    entry.status = 'review';
+                    halt = 'review';
+                }
+            }
+            if (node.kind === 'process') {
+                const process = logic.processes.find(p => p.id === node.refId);
+                if (!process)
+                    throw new Error('Process reference is missing.');
+                Jev.checkContract(process.inputs, entry.input, 'Process ' + process.name + ' input');
+                if (process.mode === 'external') {
+                    entry.output = { requestedProcess: process.id, status: 'requires_native_adapter' };
+                    entry.status = 'review';
+                    entry.port = 'review';
+                    entry.detail = 'External action requested, not executed. Native adapter and explicit approval are required.';
+                    halt = 'review';
+                }
+                else {
+                    entry.output = Jev.resolveBindings(process.mappings, context);
+                    Jev.checkContract(process.outputs, entry.output, 'Process ' + process.name + ' output');
+                    entry.detail = process.mode === 'fixture' ? 'Configured fixture output, not a real process result.' : 'Pure local data transformation.';
+                }
+            }
+            if (node.kind === 'end') {
+                entry.output = { decision: Jev.decision('end', 'completed') };
+                entry.detail = 'Explicit End: remaining queued work will be cancelled.';
+                halt = 'completed';
+            }
+            const phases = entry.status === 'review' ? ['review'] : ['completed'];
+            if (node.kind === 'rule' && entry.port !== 'limit')
+                phases.push(entry.port === 'else' ? 'false' : 'true');
+            entry.events = emitted(Jev.nodeEvents(node, logic, prompts), phases, { ...context, output: entry.output }, node.id, run, pending.event?.id);
+            if (run.events.length + entry.events.length > flow.maxEvents)
+                throw new Error('Event budget exceeded. Emissions from this step were not published.');
+        }
+        catch (error) {
+            entry.status = 'error';
+            entry.port = 'error';
+            entry.output = { error: { code: 'STEP_FAILED', message: error.message } };
+            entry.detail = error.message;
+            entry.events = [];
+            try {
+                entry.events = emitted(Jev.nodeEvents(node, logic, prompts), ['error'], { ...environment, input: entry.input, output: entry.output }, node.id, run, pending.event?.id);
+            }
+            catch {
+                entry.detail += ' Error-event payload also failed validation; no error event was published.';
+            }
+            if (run.events.length + entry.events.length > flow.maxEvents)
+                entry.events = [];
+            halt = undefined;
+        }
+        const retained = JSON.stringify(entry).length;
+        if (run.retainedCharacters + retained > 2000000) {
+            run.status = 'review';
+            run.reason = 'Trace size limit reached. This step was not published; pending work was cancelled.';
+            finish(run, flow);
+            return run;
+        }
+        run.retainedCharacters += retained;
+        run.outputs[node.id] = { output: Jev.clone(entry.output) };
+        run.events.push(...entry.events);
+        run.trace.push(entry);
+        if (halt) {
+            run.status = halt;
+            run.reason = entry.detail;
+            finish(run, flow);
+            return run;
+        }
+        const control = flow.edges.find(e => e.kind === 'control' && e.source === node.id && e.port === entry.port);
+        if (control)
+            run.queue.push({ nodeId: control.target, input: Jev.clone(entry.output) });
+        for (const event of entry.events) {
+            const definition = Jev.nodeEvents(node, logic, prompts).find(e => e.name === event.name);
+            for (const edge of flow.edges.filter(e => e.kind === 'event' && e.source === node.id && e.port === definition?.id))
+                run.queue.push({ nodeId: edge.target, input: Jev.clone(event.payload), event });
+        }
+        if (entry.status === 'error' && !control && !entry.events.some(ev => flow.edges.some(e => e.source === node.id && e.kind === 'event' && Jev.nodeEvents(node, logic, prompts).find(d => d.id === e.port)?.name === ev.name))) {
+            run.status = 'error';
+            run.reason = entry.detail;
+        }
+        else if (run.queue.length > 200) {
+            run.status = 'review';
+            run.reason = 'Queue limit reached. Pending work was cancelled.';
+        }
+        else if (!run.queue.length) {
+            run.status = 'completed';
+            run.reason = 'All connected work completed.';
+        }
+        else
+            run.reason = 'Next: ' + (flow.nodes.find(n => n.id === run.queue[0].nodeId)?.name || 'unknown');
+        finish(run, flow);
+        return run;
+    }
+    Jev.stepSimulation = stepSimulation;
+    function runSimulation(flow, logic, prompts, vault, scenario = 'clear') {
+        let run = startSimulation(flow, logic, prompts, scenario);
+        for (let i = 0; i <= flow.maxSteps && run.status === 'paused'; i++)
+            run = stepSimulation(run, flow, logic, prompts, vault);
+        return run;
+    }
+    Jev.runSimulation = runSimulation;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    function freshEvent(id = 'event_1') {
+        return { id, name: 'item.completed', description: 'A fact emitted after successful local completion.', when: 'completed', fields: [Jev.field('result', 'object')], payload: [Jev.binding('result', Jev.reference('output'))] };
+    }
+    Jev.freshEvent = freshEvent;
+    function freshRule(id = 'rule_1') {
+        return { id, name: 'New business rule', description: 'Evaluate typed evidence, then return an explicit decision.', status: 'draft', events: [], mode: 'if', inputs: [Jev.field('value', 'number')], branches: [{ id: 'match', name: 'Condition matches', match: 'all', conditions: [{ id: 'condition_1', left: Jev.reference('input.value'), operator: 'gte', right: Jev.literal(0.8) }], decision: Jev.decision('continue', 'accepted') }], fallback: Jev.decision('review', 'needs_review'), maxIterations: 5 };
+    }
+    Jev.freshRule = freshRule;
+    function freshProcess(id = 'process_1') {
+        return { id, name: 'New process', description: 'A named process with an explicit input and output contract.', status: 'draft', events: [], mode: 'transform', inputs: [Jev.field('value', 'string')], outputs: [Jev.field('value', 'string')], mappings: [Jev.binding('value', Jev.reference('input.value'))] };
+    }
+    Jev.freshProcess = freshProcess;
+    function freshNode(kind, id, refId = '', name = '') {
+        return { id, kind, refId, name: name || kind[0].toUpperCase() + kind.slice(1), x: 80, y: 80, inputs: [], events: [] };
+    }
+    Jev.freshNode = freshNode;
+    function freshFlow(id = 'flow_1') {
+        const start = freshNode('start', 'start'), end = freshNode('end', 'end');
+        end.x = 440;
+        return { id, name: 'New decision flow', description: 'Connect prompts, rules, and processes. All execution is local simulation.', status: 'draft', events: [], nodes: [start, end], edges: [{ id: 'edge_1', source: 'start', port: 'success', target: 'end', kind: 'control' }], sampleInput: '{}', maxSteps: 60, maxEvents: 30 };
+    }
+    Jev.freshFlow = freshFlow;
+    function initialLogic(prompts) {
+        const route = prompts.find(p => p.id === 'inbox-routing') || prompts[0];
+        const follow = prompts.find(p => p.id === 'next-action') || route;
+        const question = route.questions.find(q => q.type === 'choice');
+        const prepare = freshProcess('prepare_context');
+        prepare.name = 'Prepare decision context';
+        prepare.inputs = [Jev.field('body', 'string')];
+        prepare.outputs = [Jev.field('body', 'string')];
+        prepare.mappings = [Jev.binding('body', Jev.reference('input.body'))];
+        prepare.events = [{ id: 'context_ready', name: 'context.prepared', description: 'The input is ready for classification.', when: 'completed', fields: [Jev.field('body', 'string')], payload: [Jev.binding('body', Jev.reference('output.body'))] }];
+        const task = freshProcess('prepare_task');
+        task.name = 'Draft a task payload';
+        task.description = 'Build data for a next step, without writing a vault note.';
+        task.inputs = [Jev.field('destination', 'string')];
+        task.outputs = [Jev.field('title', 'string'), Jev.field('destination', 'string')];
+        task.mappings = [Jev.binding('title', Jev.literal('Review the classified inbox note')), Jev.binding('destination', Jev.reference('input.destination'))];
+        const guard = freshRule('routing_policy');
+        guard.name = 'Route only clear project notes';
+        guard.description = 'First matching branch wins. Uncertain or fallback classifications require review.';
+        guard.inputs = [Jev.field('answers', 'object')];
+        guard.branches[0] = { id: 'accepted', name: 'Confident project decision', match: 'all', conditions: question ? [{ id: 'confidence', left: Jev.reference('input.answers.' + question.id + '.confidence'), operator: 'gte', right: Jev.literal(0.85) }, { id: 'destination', left: Jev.reference('input.answers.' + question.id + '.choice'), operator: 'eq', right: Jev.literal(question.options[0].key) }] : [{ id: 'known', left: Jev.reference('input.answers'), operator: 'exists', right: Jev.literal(null) }], decision: Jev.decision('process', 'prepare_task', 'prepare_task') };
+        guard.events = [{ id: 'decision_made', name: 'routing.decided', description: 'The rule made a deterministic decision from the supplied evidence.', when: 'completed', fields: [Jev.field('code', 'string')], payload: [Jev.binding('code', Jev.reference('output.decision.code'))] }];
+        const loop = freshRule('bounded_retry');
+        loop.name = 'Repeat while attempts remain';
+        loop.mode = 'while';
+        loop.inputs = [Jev.field('attempt', 'number')];
+        loop.branches[0] = { id: 'repeat', name: 'Attempt is below 3', match: 'all', conditions: [{ id: 'remaining', left: Jev.reference('input.attempt'), operator: 'lt', right: Jev.literal(3) }], decision: Jev.decision('process', 'next_attempt', 'increment_attempt') };
+        loop.fallback = Jev.decision('continue', 'finished');
+        loop.maxIterations = 5;
+        const increment = freshProcess('increment_attempt');
+        increment.name = 'Increment attempt';
+        increment.inputs = [Jev.field('attempt', 'number')];
+        increment.outputs = [Jev.field('attempt', 'number')];
+        increment.mappings = [Jev.binding('attempt', { mode: 'add', value: 'input.attempt', amount: 1 })];
+        increment.events = [{ id: 'attempt_counted', name: 'attempt.counted', description: 'The synthetic attempt counter was incremented.', when: 'completed', fields: [Jev.field('attempt', 'number')], payload: [Jev.binding('attempt', Jev.reference('output.attempt'))] }];
+        const flow = freshFlow('inbox_decision');
+        flow.name = 'From inbox note to next action';
+        flow.description = 'Prepare context → Jev → rule → process → Jev. Follow the data and every emitted fact.';
+        flow.sampleInput = JSON.stringify({ body: 'Synthetic intake: prepare a plan for the kitchen renovation.' }, null, 2);
+        const make = (kind, id, x, y, refId = '', name = '') => ({ ...freshNode(kind, id, refId, name), x, y });
+        flow.nodes = [make('start', 'start', 60, 130, '', 'Manual start'), make('process', 'prepare', 360, 130, prepare.id, prepare.name), make('prompt', 'classify', 660, 130, route.id, 'Classify the note'), make('rule', 'route', 960, 130, guard.id, 'Apply routing policy'), make('process', 'task', 960, 390, task.id, 'Draft task data'), make('prompt', 'verify', 660, 390, follow.id, 'Check the next action'), make('end', 'end', 360, 390, '', 'End with decision')];
+        flow.nodes.find(n => n.id === 'route').inputs = [Jev.binding('answers', Jev.reference('input.answers'))];
+        flow.nodes.find(n => n.id === 'task').inputs = [Jev.binding('destination', question ? Jev.reference('steps.classify.output.answers.' + question.id + '.choice') : Jev.literal('project'))];
+        const connect = (id, source, target, port = 'success', kind = 'control') => ({ id, source, target, port, kind });
+        flow.edges = [connect('e1', 'start', 'prepare'), connect('e2', 'prepare', 'classify'), connect('e3', 'classify', 'route'), connect('e4', 'route', 'task', 'accepted'), connect('e5', 'task', 'verify'), connect('e6', 'verify', 'end')];
+        const retry = freshFlow('retry_with_limit');
+        retry.name = 'A bounded while-loop';
+        retry.description = 'Repeat a deterministic process, re-evaluate the rule, then exit. Limits stop misconfigured loops.';
+        retry.sampleInput = '{"attempt": 0}';
+        retry.nodes = [make('start', 'start', 60, 180), make('rule', 'guard', 360, 180, loop.id, 'While attempt < 3'), make('process', 'increment', 660, 180, increment.id, 'Increment attempt'), make('end', 'end', 360, 470)];
+        retry.nodes[2].inputs = [Jev.binding('attempt', Jev.reference('input.evaluatedInput.attempt'))];
+        retry.edges = [connect('e1', 'start', 'guard'), connect('e2', 'guard', 'increment', 'repeat'), connect('e3', 'increment', 'guard'), connect('e4', 'guard', 'end', 'else')];
+        const events = Jev.clone(flow);
+        events.id = 'event_driven_intake';
+        events.name = 'Event-driven intake';
+        events.description = 'Events carry typed payloads and explicitly trigger subscribers. No hidden global event bus.';
+        events.edges[1] = connect('e2', 'prepare', 'classify', 'context_ready', 'event');
+        events.nodes[2].events = [{ id: 'classified', name: 'note.classified', description: 'Classification answers are available for the next rule.', when: 'completed', fields: [Jev.field('answers', 'object')], payload: [Jev.binding('answers', Jev.reference('output.answers'))] }];
+        events.edges[2] = connect('e3', 'classify', 'route', 'classified', 'event');
+        events.nodes[3].inputs = [Jev.binding('answers', Jev.reference('event.payload.answers'))];
+        return { kind: 'jev-logic', schemaVersion: 1, rules: [guard, loop], processes: [prepare, task, increment], flows: [flow, retry, events], revisions: [] };
+    }
+    Jev.initialLogic = initialLogic;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
     function assertSafe(value, depth = 0) {
+        if (typeof value === 'number' && !Number.isFinite(value))
+            throw new Error('JSON numbers must be finite.');
         if (depth > 30)
             throw new Error('JSON nesting exceeds 30 levels.');
         if (Array.isArray(value)) {
@@ -54,9 +801,9 @@ var Jev;
         const issue = (path, message) => issues.push({ path, message });
         if (!Jev.record(value))
             return [{ path: '$', message: 'Expected a prompt recipe object.' }];
-        if (value.kind !== 'jev-prompt' || value.schemaVersion !== 1)
-            issue('$', 'Expected jev-prompt schemaVersion 1. Unknown formats are not converted.');
-        const allowed = ['kind', 'schemaVersion', 'id', 'name', 'description', 'tags', 'model', 'status', 'bindings', 'questions', 'policy'];
+        if (value.kind !== 'jev-prompt' || (value.schemaVersion !== 1 && value.schemaVersion !== 2))
+            issue('$', 'Expected jev-prompt schemaVersion 1 or 2. Unknown formats are not converted.');
+        const allowed = ['kind', 'schemaVersion', 'id', 'name', 'description', 'tags', 'model', 'status', 'bindings', 'questions', 'policy', ...(value.schemaVersion === 2 ? ['events'] : [])];
         for (const key of Object.keys(value))
             if (!allowed.includes(key))
                 issue(key, 'Unknown field. Nothing will be silently discarded.');
@@ -117,6 +864,9 @@ var Jev;
                 if (q.type === 'noul' && (!q.yes.trim() || !q.no.trim() || q.yes.length > 4000 || q.no.length > 4000))
                     issue(p + '.criteria', 'Describe both yes and no (up to 4,000 characters each).');
             });
+        if (value.events !== undefined)
+            for (const check of Jev.validateEvents(value.events))
+                issue(check.path, check.message);
         const b = value.bindings;
         if (!Jev.record(b))
             issue('bindings', 'State bindings are required.');
@@ -142,7 +892,7 @@ var Jev;
             issue('policy', 'A decision policy is required.');
         else {
             for (const k of ['confidence', 'yes', 'no'])
-                if (typeof p[k] !== 'number' || Number(p[k]) < 0 || Number(p[k]) > 1)
+                if (typeof p[k] !== 'number' || !Number.isFinite(p[k]) || Number(p[k]) < 0 || Number(p[k]) > 1)
                     issue('policy.' + k, 'Use a number from 0 to 1.');
             if (Number(p.no) >= Number(p.yes))
                 issue('policy', 'Noul no threshold must be below its yes threshold.');
@@ -161,12 +911,12 @@ var Jev;
             const errors = validateRecipe(value);
             if (errors.length)
                 throw new Error(errors.map(e => e.path + ': ' + e.message).slice(0, 4).join('\n'));
-            return { kind: 'jev-prompt-library', schemaVersion: 1, prompts: [Jev.clone(value)], revisions: {} };
+            return { kind: 'jev-prompt-library', schemaVersion: value.schemaVersion === 2 ? 2 : 1, prompts: [Jev.clone(value)], revisions: {} };
         }
-        if (value.kind !== 'jev-prompt-library' || value.schemaVersion !== 1 || !Array.isArray(value.prompts) || !Jev.record(value.revisions))
+        if (value.kind !== 'jev-prompt-library' || (value.schemaVersion !== 1 && value.schemaVersion !== 2) || !Array.isArray(value.prompts) || !Jev.record(value.revisions))
             throw new Error('Import a Jev Studio recipe or library, not an API request or companion project.');
         for (const k of Object.keys(value))
-            if (!['kind', 'schemaVersion', 'prompts', 'revisions'].includes(k))
+            if (!['kind', 'schemaVersion', 'prompts', 'revisions', ...(value.schemaVersion === 2 ? ['logic'] : [])].includes(k))
                 throw new Error('Unknown library field: ' + k);
         if (!value.prompts.length || value.prompts.length > 100)
             throw new Error('A library contains 1–100 prompts.');
@@ -187,6 +937,10 @@ var Jev;
                 if (!Jev.record(rev) || typeof rev.id !== 'string' || typeof rev.createdAt !== 'string' || typeof rev.message !== 'string' || !Jev.record(rev.recipe) || rev.recipe.id !== id || validateRecipe(rev.recipe).length)
                     throw new Error('Invalid revision snapshot.');
         }
+        if (value.logic !== undefined)
+            Jev.readLogic(value.logic);
+        if (value.schemaVersion === 1 && value.prompts.some(p => Jev.record(p) && p.schemaVersion === 2))
+            throw new Error('A version-2 prompt requires a version-2 library.');
         return Jev.clone(value);
     }
     Jev.readLibrary = readLibrary;
@@ -389,7 +1143,7 @@ var Jev;
                 throw new Error(q.id + ': choice must be a highest-probability option.');
             if (q.type === 'score') {
                 const mean = keys.reduce((sum, k) => sum + Number(k) * Number(probabilities[k]), 0);
-                if (typeof a.score !== 'number' || Math.abs(a.score - mean) > 0.02 || !Jev.record(a.legend) || keys.some(k => typeof a.legend[k] !== 'string'))
+                if (typeof a.score !== 'number' || !Number.isFinite(a.score) || Math.abs(a.score - mean) > 0.02 || !Jev.record(a.legend) || keys.some(k => typeof a.legend[k] !== 'string'))
                     throw new Error(q.id + ': score must match the weighted rubric value and include its legend.');
             }
         }
@@ -510,7 +1264,8 @@ var Jev;
         }
         get persistent() { return this.repository.persistent; }
         get warning() { return this.repository.warning; }
-        commit(next) { Jev.readLibrary(next); this.repository.write(next); this.library = Jev.clone(next); }
+        commit(next) { Jev.readLibrary(next); if (JSON.stringify(next).length > 2000000)
+            throw new Error('Workspace exceeds 2 MB. Export a backup and reduce retained checkpoints.'); this.repository.write(next); this.library = Jev.clone(next); }
         save(recipe) {
             const errors = Jev.validateRecipe(recipe);
             if (errors.length)
@@ -521,8 +1276,17 @@ var Jev;
                 next.prompts.push(Jev.clone(recipe));
             else
                 next.prompts[index] = Jev.clone(recipe);
+            if (recipe.schemaVersion === 2)
+                next.schemaVersion = 2;
             this.commit(next);
         }
+        saveLogic(logic) {
+            const next = Jev.clone(this.library);
+            next.logic = Jev.readLogic(logic);
+            next.schemaVersion = 2;
+            this.commit(next);
+        }
+        replaceWorkspace(library) { this.commit(Jev.readLibrary(library)); }
         create(template) { const recipe = Jev.makeRecipe(template, this.id()); this.save(recipe); return Jev.clone(recipe); }
         duplicate(recipe) { const copy = Jev.clone(recipe); copy.id = this.id(); copy.name = (copy.name + ' · copy').slice(0, 160); copy.status = 'draft'; this.save(copy); return copy; }
         revision(recipe, message) {
@@ -534,6 +1298,8 @@ var Jev;
             if (i < 0)
                 throw new Error('Save the recipe before versioning it.');
             next.prompts[i] = Jev.clone(recipe);
+            if (recipe.schemaVersion === 2)
+                next.schemaVersion = 2;
             const revisions = next.revisions[recipe.id] || [];
             if (revisions.length >= 50)
                 throw new Error('This prototype keeps up to 50 versions per recipe. Export a library backup before starting a new recipe.');
@@ -541,6 +1307,8 @@ var Jev;
             this.commit(next);
         }
         importCopies(candidate) {
+            if (candidate.logic)
+                throw new Error('Use Business logic → Import workspace for a linked workspace; prompt-only import must not discard its logic.');
             const next = Jev.clone(this.library);
             let first = '';
             for (const recipe of candidate.prompts) {
@@ -551,6 +1319,8 @@ var Jev;
                 if (next.prompts.some(p => p.name === copy.name))
                     copy.name = (copy.name + ' · imported').slice(0, 160);
                 next.prompts.push(copy);
+                if (copy.schemaVersion === 2)
+                    next.schemaVersion = 2;
                 next.revisions[copy.id] = (candidate.revisions[oldId] || []).map(r => ({ ...Jev.clone(r), id: this.id(), recipe: { ...Jev.clone(r.recipe), id: copy.id } }));
             }
             this.commit(next);
@@ -558,6 +1328,86 @@ var Jev;
         }
     }
     Jev.StudioService = StudioService;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    /** Remap definition identities, not arbitrary user strings. Preserve all existing work. */
+    function mergeLogicWorkspace(current, imported, nextId) {
+        const source = Jev.readLibrary(imported), target = Jev.clone(current);
+        if (!source.logic)
+            throw new Error('This file has no business logic. Use prompt import for a recipe-only library.');
+        const promptIds = new Map(), ruleIds = new Map(), processIds = new Map(), flowIds = new Map();
+        source.prompts.forEach(p => promptIds.set(p.id, nextId()));
+        // Allocate each identity once across live definitions and historical snapshots.
+        for (const snapshot of [source.logic, ...source.logic.revisions.map(r => r.snapshot)]) {
+            for (const rule of snapshot.rules)
+                if (!ruleIds.has(rule.id))
+                    ruleIds.set(rule.id, nextId());
+            for (const process of snapshot.processes)
+                if (!processIds.has(process.id))
+                    processIds.set(process.id, nextId());
+            for (const flow of snapshot.flows)
+                if (!flowIds.has(flow.id))
+                    flowIds.set(flow.id, nextId());
+        }
+        const renamePrompt = (p) => ({ ...Jev.clone(p), id: promptIds.get(p.id), name: (p.name + ' · imported').slice(0, 160) });
+        target.prompts.push(...source.prompts.map(renamePrompt));
+        for (const [id, revisions] of Object.entries(source.revisions))
+            target.revisions[promptIds.get(id)] = revisions.map(r => ({ ...Jev.clone(r), id: nextId(), recipe: renamePrompt(r.recipe) }));
+        const remap = (snapshot) => {
+            const copy = Jev.clone(snapshot);
+            const remapDecision = (d) => { if (d.processId && processIds.has(d.processId))
+                d.processId = processIds.get(d.processId); };
+            for (const rule of copy.rules) {
+                rule.id = ruleIds.get(rule.id) || nextId();
+                rule.name = (rule.name + ' · imported').slice(0, 160);
+                rule.branches.forEach(b => remapDecision(b.decision));
+                remapDecision(rule.fallback);
+            }
+            for (const process of copy.processes) {
+                process.id = processIds.get(process.id) || nextId();
+                process.name = (process.name + ' · imported').slice(0, 160);
+            }
+            for (const flow of copy.flows) {
+                flow.id = flowIds.get(flow.id) || nextId();
+                flow.name = (flow.name + ' · imported').slice(0, 160);
+                for (const node of flow.nodes) {
+                    const map = node.kind === 'prompt' ? promptIds : node.kind === 'rule' ? ruleIds : processIds;
+                    if (['prompt', 'rule', 'process'].includes(node.kind))
+                        node.refId = map.get(node.refId) || node.refId;
+                }
+            }
+            return copy;
+        };
+        const logic = target.logic || { kind: 'jev-logic', schemaVersion: 1, rules: [], processes: [], flows: [], revisions: [] };
+        const copied = remap(source.logic);
+        logic.rules.push(...copied.rules);
+        logic.processes.push(...copied.processes);
+        logic.flows.push(...copied.flows);
+        for (const revision of source.logic.revisions)
+            logic.revisions.push({ ...Jev.clone(revision), id: nextId(), snapshot: remap(revision.snapshot) });
+        target.logic = logic;
+        target.schemaVersion = 2;
+        return Jev.readLibrary(target);
+    }
+    Jev.mergeLogicWorkspace = mergeLogicWorkspace;
+    function logicCheckpoint(library, id, name, createdAt) {
+        if (library.revisions.length >= 20)
+            throw new Error('20 checkpoints are retained. Export a workspace backup before removing an older checkpoint.');
+        const copy = Jev.clone(library);
+        const { rules, processes, flows } = Jev.clone(library);
+        copy.revisions.unshift({ id, name: name.trim() || 'Logic checkpoint', createdAt, snapshot: { rules, processes, flows } });
+        return Jev.readLogic(copy);
+    }
+    Jev.logicCheckpoint = logicCheckpoint;
+    function restoreLogicCheckpoint(library, revisionId, id, createdAt) {
+        const revision = library.revisions.find(r => r.id === revisionId);
+        if (!revision)
+            throw new Error('Checkpoint is missing.');
+        const copy = logicCheckpoint(library, id, 'Before restoring ' + revision.name, createdAt);
+        return { ...copy, ...Jev.clone(revision.snapshot) };
+    }
+    Jev.restoreLogicCheckpoint = restoreLogicCheckpoint;
 })(Jev || (Jev = {}));
 var Jev;
 (function (Jev) {
@@ -649,10 +1499,531 @@ var Jev;
 })(Jev || (Jev = {}));
 var Jev;
 (function (Jev) {
+    function graphBounds(flow) {
+        const xs = flow.nodes.map(n => n.x), ys = flow.nodes.map(n => n.y);
+        return { x: Math.min(...xs), y: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs) + 236, height: Math.max(...ys) - Math.min(...ys) + 128 };
+    }
+    Jev.graphBounds = graphBounds;
+    function graphEdgePath(edge, flow) {
+        const a = flow.nodes.find(n => n.id === edge.source), b = flow.nodes.find(n => n.id === edge.target);
+        if (!a || !b)
+            return '';
+        const dx = b.x - a.x, dy = b.y - a.y;
+        if (Math.abs(dy) > Math.abs(dx)) {
+            const sign = dy >= 0 ? 1 : -1, x1 = a.x + 118, y1 = a.y + (sign > 0 ? 128 : 0), x2 = b.x + 118, y2 = b.y + (sign > 0 ? 0 : 128), bend = Math.max(60, Math.abs(y2 - y1) / 2);
+            return `M ${x1} ${y1} C ${x1} ${y1 + sign * bend}, ${x2} ${y2 - sign * bend}, ${x2} ${y2}`;
+        }
+        const sign = dx >= 0 ? 1 : -1, x1 = a.x + (sign > 0 ? 236 : 0), y1 = a.y + 64, x2 = b.x + (sign > 0 ? 0 : 236), y2 = b.y + 64, bend = Math.max(70, Math.abs(x2 - x1) / 2);
+        // Reciprocal edges take opposite lanes so loop direction remains readable.
+        const reciprocal = flow.edges.some(e => e.source === edge.target && e.target === edge.source);
+        const lane = reciprocal ? (sign > 0 ? -48 : 48) : 0;
+        return `M ${x1} ${y1} C ${x1 + sign * bend} ${y1 + lane}, ${x2 - sign * bend} ${y2 + lane}, ${x2} ${y2}`;
+    }
+    Jev.graphEdgePath = graphEdgePath;
+    function graphEdgeLabel(edge, flow) {
+        const a = flow.nodes.find(n => n.id === edge.source), b = flow.nodes.find(n => n.id === edge.target);
+        if (!a || !b)
+            return { x: 0, y: 0 };
+        return { x: (a.x + b.x) / 2 + 118, y: (a.y + b.y) / 2 + 48 + (a.x > b.x ? 30 : 0) };
+    }
+    Jev.graphEdgeLabel = graphEdgeLabel;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
+    function setupLogicWorkbench(service, host) {
+        const prompts = () => host.ui.library.prompts.map(p => p.id === host.ui.draft.id ? host.ui.draft : p);
+        const seeded = Jev.clone(service.library.logic || Jev.initialLogic(prompts()));
+        const logic = Vue.reactive({ doc: seeded, view: 'flows', flowId: seeded.flows[0].id, ruleId: seeded.rules[0]?.id || '', processId: seeded.processes[0]?.id || '', nodeId: 'route', edgeId: '', search: '', archive: false,
+            zoom: 0.65, panX: 20, panY: 40, addKind: 'prompt', connectionKind: 'control', connectionPort: 'success', connectionTarget: '',
+            saved: service.library.logic ? 'Saved locally' : 'Examples · not yet saved', error: '', run: undefined, runStamp: '', scenario: 'clear', traceIndex: -1, showTrace: false,
+            eventOwner: '', eventDraft: [], eventIndex: 0, checkpointName: '', restoreId: '', importText: '', candidate: undefined,
+            deleteTitle: '', deleteDetail: '', exportMode: 'workspace', jsonScope: 'workspace', guide: false, history: [], redo: [] });
+        let canonical = Jev.clone(seeded), timer = 0, suppress = false, remove = () => { };
+        const nextId = () => 'l_' + (typeof crypto.randomUUID === 'function' ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Date.now().toString(36) + Math.random().toString(36).slice(2, 9));
+        const logicFlow = Vue.computed(() => logic.doc.flows.find(f => f.id === logic.flowId) || logic.doc.flows[0]);
+        const logicRule = Vue.computed(() => logic.doc.rules.find(r => r.id === logic.ruleId));
+        const logicProcess = Vue.computed(() => logic.doc.processes.find(p => p.id === logic.processId));
+        const logicNode = Vue.computed(() => logicFlow.value.nodes.find(n => n.id === logic.nodeId));
+        const logicShape = Vue.computed(() => Jev.validateLogic(logic.doc));
+        const logicIssues = Vue.computed(() => logicShape.value.length ? logicShape.value.map(e => ({ ...e, severity: 'error' })) : Jev.inspectFlow(logicFlow.value, logic.doc, prompts()));
+        const logicBlocking = Vue.computed(() => logicIssues.value.filter(e => e.severity === 'error'));
+        const logicCurrent = Vue.computed(() => logic.view === 'rules' ? logicRule.value : logic.view === 'processes' ? logicProcess.value : logicFlow.value);
+        const logicItems = Vue.computed(() => { const list = logic.view === 'rules' ? logic.doc.rules : logic.view === 'processes' ? logic.doc.processes : logic.doc.flows; return list.filter(p => (logic.archive ? p.status === 'archived' : p.status !== 'archived') && (p.name + ' ' + p.description).toLowerCase().includes(logic.search.toLowerCase())); });
+        const logicOwners = Vue.computed(() => [
+            ...prompts().map(p => ({ key: 'prompt:' + p.id, name: p.name, kind: 'Prompt', events: p.events || [] })),
+            ...logic.doc.rules.map(p => ({ key: 'rule:' + p.id, name: p.name, kind: 'Rule', events: p.events })),
+            ...logic.doc.processes.map(p => ({ key: 'process:' + p.id, name: p.name, kind: 'Process', events: p.events })),
+            ...logic.doc.flows.map(p => ({ key: 'flow:' + p.id, name: p.name, kind: 'Flow', events: p.events })),
+            ...logic.doc.flows.flatMap(f => f.nodes.map(n => ({ key: 'node:' + f.id + ':' + n.id, name: f.name + ' / ' + n.name, kind: 'Node', events: n.events }))),
+        ]);
+        const logicOwner = Vue.computed(() => logicOwners.value.find(o => o.key === logic.eventOwner));
+        const logicEventErrors = Vue.computed(() => Jev.validateEvents(logic.eventDraft));
+        const logicEventDirty = Vue.computed(() => !!logicOwner.value && !Jev.same(logic.eventDraft, logicOwner.value.events));
+        const logicCatalog = Vue.computed(() => logicOwners.value.flatMap(owner => owner.events.map(event => ({ ...event, owner: owner.key, ownerName: owner.name, ownerKind: owner.kind, listeners: eventListeners(owner.key, event.id) }))));
+        const runStamp = () => Jev.fingerprint({ flowId: logic.flowId, logic: logic.doc, prompts: prompts(), vault: host.ui.vault, scenario: logic.scenario });
+        const logicStale = Vue.computed(() => !!logic.run && logic.runStamp !== runStamp());
+        const logicTrace = Vue.computed(() => logic.run?.trace[logic.traceIndex < 0 ? (logic.run?.trace.length || 1) - 1 : logic.traceIndex]);
+        const logicPorts = Vue.computed(() => logicNode.value ? Jev.nodePorts(logicNode.value, logic.doc) : []);
+        const logicEmissions = Vue.computed(() => logicNode.value ? Jev.nodeEvents(logicNode.value, logic.doc, prompts()) : []);
+        const logicReferences = Vue.computed(() => logicNode.value?.kind === 'prompt' ? prompts() : logicNode.value?.kind === 'rule' ? logic.doc.rules : logic.doc.processes);
+        const logicUsages = Vue.computed(() => logicCurrent.value ? Jev.definitionUsages(logic.doc, logic.view === 'rules' ? 'rule' : 'process', logicCurrent.value.id) : []);
+        const logicPaths = Vue.computed(() => ['input', 'initial', 'event.payload', 'output', 'loop.iteration', ...prompts().flatMap(p => p.questions.flatMap(q => q.type === 'noul' ? ['input.answers.' + q.id + '.noul'] : ['input.answers.' + q.id + '.' + (q.type === 'choice' ? 'choice' : 'score'), 'input.answers.' + q.id + '.confidence'])), ...logicFlow.value.nodes.map(n => 'steps.' + n.id + '.output')]);
+        const logicJson = Vue.computed(() => JSON.stringify(logic.jsonScope === 'item' ? logicCurrent.value : { ...Jev.clone(host.ui.library), schemaVersion: 2, prompts: prompts(), logic: logic.doc }, null, 2));
+        function sync() { host.ui.library = Jev.clone(service.library); }
+        function logicSave() {
+            window.clearTimeout(timer);
+            if (logicShape.value.length) {
+                logic.saved = 'Needs attention · not saved';
+                return false;
+            }
+            try {
+                service.saveLogic(logic.doc);
+                sync();
+                if (!Jev.same(canonical, logic.doc)) {
+                    logic.history.push(canonical);
+                    if (logic.history.length > 40)
+                        logic.history.shift();
+                    logic.redo = [];
+                    canonical = Jev.clone(logic.doc);
+                }
+                logic.saved = service.persistent ? 'Saved locally' : 'Memory only';
+                logic.error = '';
+                return true;
+            }
+            catch (e) {
+                logic.error = e.message;
+                logic.saved = 'Not saved';
+                return false;
+            }
+        }
+        function replaceDoc(value) { window.clearTimeout(timer); suppress = true; logic.doc = Jev.clone(value); canonical = Jev.clone(value); Vue.nextTick(() => { suppress = false; }); }
+        function logicUndo(redo = false) {
+            if (!logicSave())
+                return;
+            const from = redo ? logic.redo : logic.history, to = redo ? logic.history : logic.redo;
+            const candidate = from[from.length - 1];
+            if (!candidate)
+                return;
+            try {
+                service.saveLogic(candidate);
+                to.push(Jev.clone(logic.doc));
+                from.pop();
+                replaceDoc(candidate);
+                sync();
+                host.notify(redo ? 'Logic change reapplied.' : 'Logic change undone.');
+            }
+            catch (e) {
+                logic.error = e.message;
+            }
+        }
+        function logicEnter() { host.ui.area = 'logic'; host.ui.sidebar = false; Vue.nextTick(logicFit); }
+        function logicSwitch(view) { logic.view = view; logic.search = ''; logic.archive = false; host.ui.sidebar = false; if (view === 'events' && !logic.eventOwner)
+            logicOpenEvents('prompt:' + host.ui.draft.id); if (view === 'flows')
+            Vue.nextTick(logicFit); }
+        function logicSelect(id) { if (logic.view === 'rules')
+            logic.ruleId = id;
+        else if (logic.view === 'processes')
+            logic.processId = id;
+        else {
+            logic.flowId = id;
+            logic.nodeId = '';
+            logic.edgeId = '';
+            Vue.nextTick(logicFit);
+        } host.ui.sidebar = false; }
+        function logicCreate(kind = logic.view) {
+            const id = nextId();
+            if (kind === 'rules') {
+                logic.doc.rules.push(Jev.freshRule(id));
+                logic.ruleId = id;
+                logic.view = 'rules';
+            }
+            else if (kind === 'processes') {
+                logic.doc.processes.push(Jev.freshProcess(id));
+                logic.processId = id;
+                logic.view = 'processes';
+            }
+            else {
+                logic.doc.flows.push(Jev.freshFlow(id));
+                logic.flowId = id;
+                logic.view = 'flows';
+                logic.nodeId = 'start';
+                Vue.nextTick(logicFit);
+            }
+            host.ui.sidebar = false;
+            logicSave();
+        }
+        function logicDuplicate() {
+            const item = logicCurrent.value;
+            if (!item)
+                return;
+            const copy = Jev.clone(item);
+            copy.id = nextId();
+            copy.name = (copy.name + ' · copy').slice(0, 160);
+            copy.status = 'draft';
+            if (logic.view === 'rules') {
+                logic.doc.rules.push(copy);
+                logic.ruleId = copy.id;
+            }
+            else if (logic.view === 'processes') {
+                logic.doc.processes.push(copy);
+                logic.processId = copy.id;
+            }
+            else {
+                logic.doc.flows.push(copy);
+                logic.flowId = copy.id;
+            }
+            logicSave();
+            host.notify('Independent definition created. Existing instances are unchanged.');
+        }
+        function logicAskDelete() {
+            const item = logicCurrent.value;
+            if (!item)
+                return;
+            const used = logic.view === 'rules' ? Jev.definitionUsages(logic.doc, 'rule', item.id) : logic.view === 'processes' ? Jev.definitionUsages(logic.doc, 'process', item.id) : [];
+            const decisions = logic.view === 'processes' ? logic.doc.rules.filter(r => [...r.branches.map(b => b.decision), r.fallback].some(d => d.processId === item.id)) : [];
+            if (used.length || decisions.length) {
+                host.notify('Cannot delete: ' + used.length + ' flow instances and ' + decisions.length + ' rules still reference this definition.');
+                return;
+            }
+            if (!['rules', 'processes'].includes(logic.view) && logic.doc.flows.length === 1) {
+                host.notify('Keep at least one flow.');
+                return;
+            }
+            logic.deleteTitle = 'Delete ' + item.name + '?';
+            logic.deleteDetail = 'This removes the unused definition. Saved checkpoints and other items remain. Undo is available.';
+            const collection = logic.view === 'rules' ? logic.doc.rules : logic.view === 'processes' ? logic.doc.processes : logic.doc.flows;
+            remove = () => { const i = collection.findIndex(p => p.id === item.id); if (i >= 0)
+                collection.splice(i, 1); logic.ruleId = logic.doc.rules[0]?.id || ''; logic.processId = logic.doc.processes[0]?.id || ''; logic.flowId = logic.doc.flows[0].id; };
+            host.openModal('logic-delete');
+        }
+        function logicConfirmDelete() { remove(); logicSave(); host.closeModal(); }
+        function logicArchive() { const item = logicCurrent.value; if (!item)
+            return; item.status = item.status === 'archived' ? 'draft' : 'archived'; logic.archive = item.status === 'archived'; logicSave(); host.notify('Status updated. References remain visible; archived definitions cannot run.'); }
+        function logicAddNode() {
+            const kind = logic.addKind;
+            const defs = kind === 'prompt' ? prompts() : kind === 'rule' ? logic.doc.rules : logic.doc.processes;
+            const definition = defs.find(p => p.status !== 'archived');
+            if (kind !== 'end' && !definition) {
+                host.notify('Create an active ' + kind + ' definition first.');
+                return;
+            }
+            const node = Jev.freshNode(kind, nextId(), kind === 'end' ? '' : definition.id, kind === 'end' ? 'End' : definition.name);
+            const last = logicNode.value;
+            node.x = Math.min(11000, last ? last.x + 300 : 80 + logicFlow.value.nodes.length * 40);
+            node.y = last?.y || 120;
+            logicFlow.value.nodes.push(node);
+            logic.nodeId = node.id;
+            logic.edgeId = '';
+            logicSave();
+            Vue.nextTick(logicFit);
+        }
+        function logicRemoveNode() {
+            const node = logicNode.value;
+            if (!node)
+                return;
+            if (node.kind === 'start') {
+                host.notify('Start is required.');
+                return;
+            }
+            const flow = logicFlow.value, count = flow.edges.filter(e => e.source === node.id || e.target === node.id).length;
+            logic.deleteTitle = 'Remove ' + node.name + '?';
+            logic.deleteDetail = 'Remove this flow instance and ' + count + ' connections. Its reusable definition is preserved.';
+            remove = () => { flow.nodes = flow.nodes.filter(n => n.id !== node.id); flow.edges = flow.edges.filter(e => e.source !== node.id && e.target !== node.id); logic.nodeId = ''; };
+            host.openModal('logic-delete');
+        }
+        function logicConnect() {
+            const node = logicNode.value;
+            if (!node || !logic.connectionTarget) {
+                host.notify('Select an output and destination first.');
+                return;
+            }
+            if (node.kind === 'end') {
+                host.notify('End cannot have an outgoing connection.');
+                return;
+            }
+            const edge = { id: nextId(), source: node.id, target: logic.connectionTarget, port: logic.connectionPort, kind: logic.connectionKind };
+            if (logicFlow.value.edges.some(e => e.source === edge.source && e.port === edge.port && e.kind === edge.kind && (edge.kind === 'control' || e.target === edge.target))) {
+                host.notify('That output is already connected. Edit or remove its connection first.');
+                return;
+            }
+            logicFlow.value.edges.push(edge);
+            logic.edgeId = edge.id;
+            logicSave();
+            host.notify('Connection added. Data bindings are configured on the destination.');
+        }
+        function logicRemoveEdge(id) { logicFlow.value.edges = logicFlow.value.edges.filter(e => e.id !== id); logic.edgeId = ''; logicSave(); }
+        function logicSelectNode(id) { logic.nodeId = id; logic.edgeId = ''; logic.connectionKind = 'control'; logic.connectionPort = Jev.nodePorts(logicFlow.value.nodes.find(n => n.id === id), logic.doc)[0]?.id || 'success'; }
+        function logicEditDefinition() { const n = logicNode.value; if (!n)
+            return; if (n.kind === 'prompt') {
+            if (!host.flush())
+                return;
+            const p = service.library.prompts.find(p => p.id === n.refId);
+            if (p) {
+                host.ui.draft = Jev.clone(p);
+                host.ui.area = 'prompts';
+                host.ui.tab = 'compose';
+            }
+        }
+        else if (n.kind === 'rule') {
+            logic.ruleId = n.refId;
+            logicSwitch('rules');
+        }
+        else if (n.kind === 'process') {
+            logic.processId = n.refId;
+            logicSwitch('processes');
+        } }
+        function logicAddBranch() { if (!logicRule.value || logicRule.value.branches.length >= 12)
+            return; const branch = Jev.clone(Jev.freshRule().branches[0]); branch.id = nextId(); branch.name = 'Else if'; logicRule.value.branches.push(branch); }
+        function logicAddCondition(branch) { if (branch.conditions.length < 12)
+            branch.conditions.push({ id: nextId(), left: Jev.reference('input.value'), operator: 'gte', right: Jev.literal(0.8) }); }
+        function logicMove(rows, index, offset) { const target = index + offset; if (target < 0 || target >= rows.length)
+            return; const [value] = rows.splice(index, 1); rows.splice(target, 0, value); }
+        function logicAddField(fields, mappings) { let n = 1; while (fields.some(f => f.name === 'field_' + n))
+            n++; const name = 'field_' + n; fields.push(Jev.field(name, 'string')); if (mappings)
+            mappings.push(Jev.binding(name, Jev.literal(''))); }
+        function logicRemoveField(fields, index, mappings) { const name = fields[index].name; fields.splice(index, 1); if (mappings) {
+            const i = mappings.findIndex(m => m.name === name);
+            if (i >= 0)
+                mappings.splice(i, 1);
+        } }
+        function logicRenameField(fields, index, event, mappings) { const name = event.target.value, old = fields[index].name; fields[index].name = name; const m = mappings?.find(b => b.name === old); if (m)
+            m.name = name; }
+        function logicAddBinding(rows) { let n = 1; while (rows.some(r => r.name === 'field_' + n))
+            n++; rows.push(Jev.binding('field_' + n, Jev.literal(''))); }
+        function logicFit() { const stage = document.querySelector('.logic-stage'); if (!stage)
+            return; const b = Jev.graphBounds(logicFlow.value), size = stage.getBoundingClientRect(); logic.zoom = Math.max(0.25, Math.min(1, (size.width - 70) / b.width, (size.height - 70) / b.height)); logic.panX = Math.round((size.width - b.width * logic.zoom) / 2 - b.x * logic.zoom); logic.panY = Math.round((size.height - b.height * logic.zoom) / 2 - b.y * logic.zoom); }
+        function logicZoom(delta) { logic.zoom = Math.max(0.25, Math.min(1.5, logic.zoom + delta)); }
+        let drag;
+        function logicPointerDown(event, id = '') { if (event.button !== 0)
+            return; const node = logicFlow.value.nodes.find(n => n.id === id); if (id)
+            logicSelectNode(id); drag = { id, x: event.clientX, y: event.clientY, initialX: node?.x ?? logic.panX, initialY: node?.y ?? logic.panY, pan: !node }; event.currentTarget.setPointerCapture(event.pointerId); }
+        function logicPointerMove(event) { if (!drag)
+            return; const dx = event.clientX - drag.x, dy = event.clientY - drag.y; if (drag.pan) {
+            logic.panX = drag.initialX + dx;
+            logic.panY = drag.initialY + dy;
+        }
+        else {
+            const node = logicFlow.value.nodes.find(n => n.id === drag.id);
+            if (node) {
+                node.x = Math.max(-4000, Math.min(12000, Math.round(drag.initialX + dx / logic.zoom)));
+                node.y = Math.max(-4000, Math.min(12000, Math.round(drag.initialY + dy / logic.zoom)));
+            }
+        } }
+        function logicPointerUp() { drag = undefined; }
+        function logicNodeKey(event, id) { const node = logicFlow.value.nodes.find(n => n.id === id); if (!node)
+            return; const d = event.shiftKey ? 40 : 10; if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+            event.preventDefault();
+            node.x = Math.max(-4000, Math.min(12000, node.x + (event.key === 'ArrowLeft' ? -d : event.key === 'ArrowRight' ? d : 0)));
+            node.y = Math.max(-4000, Math.min(12000, node.y + (event.key === 'ArrowUp' ? -d : event.key === 'ArrowDown' ? d : 0)));
+        } }
+        function eventListeners(owner, id) { const [kind, ref, nodeId] = owner.split(':'); return logic.doc.flows.reduce((total, flow) => total + flow.edges.filter(e => { const n = flow.nodes.find(n => n.id === e.source); return e.kind === 'event' && e.port === id && (kind === 'node' ? flow.id === ref && n?.id === nodeId : n?.kind === kind && n.refId === ref); }).length, 0); }
+        function mutableOwner(key) { const [kind, id, node] = key.split(':'); return kind === 'rule' ? logic.doc.rules.find(r => r.id === id) : kind === 'process' ? logic.doc.processes.find(r => r.id === id) : kind === 'flow' ? logic.doc.flows.find(r => r.id === id) : kind === 'node' ? logic.doc.flows.find(f => f.id === id)?.nodes.find(n => n.id === node) : undefined; }
+        function logicSaveEvents() {
+            if (logicEventErrors.value.length) {
+                logic.error = logicEventErrors.value[0].message;
+                return false;
+            }
+            if (!logicOwner.value)
+                return false;
+            try {
+                if (logic.eventOwner.startsWith('prompt:')) {
+                    if (!host.flush())
+                        throw new Error('Repair the active prompt before saving event contracts.');
+                    const p = service.library.prompts.find(p => 'prompt:' + p.id === logic.eventOwner);
+                    if (!p)
+                        throw new Error('Prompt no longer exists.');
+                    const copy = { ...Jev.clone(p), schemaVersion: 2, events: Jev.clone(logic.eventDraft) };
+                    service.save(copy);
+                    sync();
+                    if (host.ui.draft.id === copy.id)
+                        host.ui.draft = Jev.clone(copy);
+                }
+                else {
+                    const owner = mutableOwner(logic.eventOwner);
+                    if (!owner)
+                        throw new Error('Event owner no longer exists.');
+                    owner.events = Jev.clone(logic.eventDraft);
+                    if (!logicSave())
+                        return false;
+                }
+                logic.error = '';
+                host.notify('Event contracts saved. No event was emitted.');
+                return true;
+            }
+            catch (e) {
+                logic.error = e.message;
+                return false;
+            }
+        }
+        function logicOpenEvents(key) { if (logicEventDirty.value && !logicSaveEvents())
+            return; logic.eventOwner = key; logic.eventDraft = Jev.clone(logicOwners.value.find(o => o.key === key)?.events || []); logic.eventIndex = 0; logic.view = 'events'; host.ui.area = 'logic'; host.ui.sidebar = false; }
+        function logicAddEvent() { if (logic.eventDraft.length >= 12)
+            return; const event = Jev.freshEvent(nextId()); event.name = 'item.event_' + (logic.eventDraft.length + 1); logic.eventDraft.push(event); logic.eventIndex = logic.eventDraft.length - 1; }
+        function logicRemoveEvent(index) { const event = logic.eventDraft[index]; if (eventListeners(logic.eventOwner, event.id)) {
+            host.notify('Remove the event’s listener connections before deleting its contract.');
+            return;
+        } logic.eventDraft.splice(index, 1); logic.eventIndex = Math.max(0, index - 1); }
+        function logicRun(step = false) {
+            if (logicEventDirty.value) {
+                host.notify('Save event contracts before simulating.');
+                return;
+            }
+            try {
+                if (!host.flush() || !logicSave())
+                    throw new Error('Repair unsaved edits before simulating.');
+                if (!step || !logic.run || logic.run.status !== 'paused' || logicStale.value) {
+                    logic.run = Jev.startSimulation(logicFlow.value, logic.doc, prompts(), logic.scenario);
+                    logic.runStamp = runStamp();
+                }
+                if (step)
+                    logic.run = Jev.stepSimulation(logic.run, logicFlow.value, logic.doc, prompts(), host.ui.vault);
+                else
+                    logic.run = Jev.runSimulation(logicFlow.value, logic.doc, prompts(), host.ui.vault, logic.scenario);
+                logic.traceIndex = -1;
+                logic.showTrace = true;
+                logic.error = '';
+            }
+            catch (e) {
+                logic.error = e.message;
+                logic.showTrace = true;
+            }
+        }
+        function logicCancel() { if (logic.run) {
+            logic.run.status = 'cancelled';
+            logic.run.reason = 'Cancelled by the user.';
+            logic.run.queue = [];
+        } }
+        function logicCheckpointSave() { try {
+            if (!logicSave())
+                throw new Error('Repair the current logic first.');
+            const next = Jev.logicCheckpoint(logic.doc, nextId(), logic.checkpointName, new Date().toISOString());
+            service.saveLogic(next);
+            replaceDoc(next);
+            sync();
+            logic.checkpointName = '';
+            host.closeModal();
+            host.notify('Logic checkpoint saved. Prompt versions remain in the prompt workspace.');
+        }
+        catch (e) {
+            host.ui.error = e.message;
+        } }
+        function logicRestore() { try {
+            if (!logicSave())
+                throw new Error('Repair the current logic first.');
+            const next = Jev.restoreLogicCheckpoint(logic.doc, logic.restoreId, nextId(), new Date().toISOString());
+            service.saveLogic(next);
+            replaceDoc(next);
+            sync();
+            logic.flowId = next.flows[0].id;
+            logic.ruleId = next.rules[0]?.id || '';
+            logic.processId = next.processes[0]?.id || '';
+            host.closeModal();
+            host.notify('Restored. The previous logic was checkpointed first.');
+        }
+        catch (e) {
+            host.ui.error = e.message;
+        } }
+        function logicPreviewImport() { try {
+            logic.candidate = Jev.readLibrary(Jev.parseJson(logic.importText));
+            if (!logic.candidate.logic)
+                throw new Error('Use a version-2 workspace with business logic.');
+            host.ui.error = '';
+        }
+        catch (e) {
+            logic.candidate = undefined;
+            host.ui.error = e.message;
+        } }
+        async function logicImportFile(event) { const input = event.target, file = input.files?.[0]; input.value = ''; if (!file)
+            return; try {
+            if (file.size > 2000000)
+                throw new Error('Choose a JSON file below 2 MB.');
+            logic.importText = await file.text();
+            await Vue.nextTick();
+            logicPreviewImport();
+        }
+        catch (e) {
+            host.ui.error = e.message;
+        } }
+        function logicImport() { try {
+            if (!logic.candidate)
+                return;
+            if (!host.flush() || !logicSave())
+                throw new Error('Repair the current workspace first.');
+            const next = Jev.mergeLogicWorkspace(service.library, logic.candidate, nextId);
+            service.replaceWorkspace(next);
+            replaceDoc(next.logic);
+            sync();
+            logic.flowId = next.logic.flows[next.logic.flows.length - 1].id;
+            logic.view = 'flows';
+            host.closeModal();
+            Vue.nextTick(logicFit);
+            host.notify('Imported linked copies. Existing definitions, prompts, and history were preserved.');
+        }
+        catch (e) {
+            host.ui.error = e.message;
+        } }
+        function logicOpenExport(mode = 'workspace') { logic.exportMode = mode; host.openModal('logic-export'); }
+        function logicExport() {
+            try {
+                if (logic.exportMode === 'trace') {
+                    if (!logic.run || logicStale.value || !host.ui.consent)
+                        throw new Error('Review and acknowledge the current trace before exporting.');
+                    Jev.downloadJson(Jev.slug(logicFlow.value.name) + '.simulation.json', { kind: 'jev-simulation', schemaVersion: 1, inferencePerformed: false, externalProcessesExecuted: false, flowId: logicFlow.value.id, run: logic.run });
+                }
+                else {
+                    if (logicEventDirty.value && !logicSaveEvents())
+                        throw new Error('Repair the event contracts first.');
+                    if (!host.flush() || !logicSave())
+                        throw new Error('Repair the current workspace first.');
+                    Jev.downloadJson('jev-studio.workspace.json', service.library);
+                }
+                host.closeModal();
+                host.notify('JSON exported. No process or provider was invoked.');
+            }
+            catch (e) {
+                host.ui.error = e.message;
+            }
+        }
+        function logicDiff(revision) {
+            const changes = [];
+            for (const kind of ['rules', 'processes', 'flows']) {
+                const before = revision.snapshot[kind], after = logic.doc[kind];
+                for (const item of after) {
+                    const old = before.find(p => p.id === item.id);
+                    if (!old || !Jev.same(old, item))
+                        changes.push({ id: kind + item.id, name: item.name, kind, change: old ? 'changed' : 'added' });
+                }
+                for (const item of before)
+                    if (!after.some(p => p.id === item.id))
+                        changes.push({ id: kind + item.id, name: item.name, kind, change: 'removed' });
+            }
+            return changes;
+        }
+        async function logicCopyJson() { try {
+            await navigator.clipboard.writeText(logicJson.value);
+            host.notify('Definition JSON copied.');
+        }
+        catch {
+            host.notify('Clipboard unavailable. Select the JSON or export the workspace.');
+        } }
+        Vue.watch(() => logic.doc, () => { if (suppress)
+            return; logic.saved = 'Unsaved changes'; window.clearTimeout(timer); timer = window.setTimeout(() => logicSave(), 650); }, { deep: true });
+        Vue.watch(() => logic.showTrace, () => Vue.nextTick(logicFit));
+        Vue.watch(() => logic.importText, () => { logic.candidate = undefined; });
+        window.addEventListener('beforeunload', event => { if (logicEventDirty.value || logic.saved === 'Unsaved changes' || logic.saved.includes('not saved') || logic.saved === 'Not saved')
+            event.preventDefault(); });
+        return { logic, logicFlow, logicRule, logicProcess, logicNode, logicShape, logicIssues, logicBlocking, logicCurrent, logicItems, logicOwners, logicOwner, logicEventErrors, logicEventDirty, logicCatalog, logicStale, logicTrace, logicPorts, logicEmissions, logicReferences, logicUsages, logicPaths, logicJson,
+            logicSave, logicUndo, logicEnter, logicSwitch, logicSelect, logicCreate, logicDuplicate, logicAskDelete, logicConfirmDelete, logicArchive, logicAddNode, logicRemoveNode, logicConnect, logicRemoveEdge, logicSelectNode, logicEditDefinition, logicAddBranch, logicAddCondition, logicMove, logicAddField, logicRemoveField, logicRenameField, logicAddBinding, logicFit, logicZoom, logicPointerDown, logicPointerMove, logicPointerUp, logicNodeKey, logicSaveEvents, logicOpenEvents, logicAddEvent, logicRemoveEvent, logicRun, logicCancel, logicCheckpointSave, logicRestore, logicPreviewImport, logicImportFile, logicImport, logicOpenExport, logicExport,
+            logicDiff, logicCopyJson, graphEdgePath: Jev.graphEdgePath, graphEdgeLabel: Jev.graphEdgeLabel, nodePorts: Jev.nodePorts, nodeEvents: Jev.nodeEvents, logicPrompts: Vue.computed(prompts) };
+    }
+    Jev.setupLogicWorkbench = setupLogicWorkbench;
+})(Jev || (Jev = {}));
+var Jev;
+(function (Jev) {
     function setupWorkbench(service) {
         const ui = Vue.reactive({
             library: Jev.clone(service.library), draft: Jev.clone(service.library.prompts.find(p => p.status !== 'archived') || service.library.prompts[0]),
-            vault: Jev.demoVault(), tab: 'compose', search: '', folder: 'all', openIndex: 0, theme: 'dark',
+            vault: Jev.demoVault(), area: 'prompts', tab: 'compose', search: '', folder: 'all', openIndex: 0, theme: 'dark',
             modal: '', error: '', toast: '', saved: service.persistent ? 'Saved locally' : 'Memory only', sidebar: false,
             jsonMode: 'recipe', exportMode: 'recipe', consent: false, versionMessage: '', compareId: '',
             importText: '', candidate: undefined, pendingVault: undefined,
@@ -843,6 +2214,8 @@ var Jev;
         }
         function previewImport() { try {
             ui.candidate = Jev.readLibrary(Jev.parseJson(ui.importText));
+            if (ui.candidate.logic)
+                throw new Error('This file contains linked business logic. Use Business logic → Import workspace JSON.');
             ui.error = '';
         }
         catch (e) {
@@ -976,11 +2349,14 @@ var Jev;
                 }
                 if (event.key.toLowerCase() === 's') {
                     event.preventDefault();
-                    openModal('version');
+                    openModal(ui.area === 'logic' ? 'logic-checkpoint' : 'version');
                 }
                 if (event.key.toLowerCase() === 'e') {
                     event.preventDefault();
-                    exportOpen();
+                    if (ui.area === 'logic')
+                        openModal('logic-export');
+                    else
+                        exportOpen();
                 }
             }
         });
@@ -989,7 +2365,8 @@ var Jev;
         } });
         const date = (s) => new Date(s).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         const pretty = (value) => JSON.stringify(value, null, 2);
-        return { ui, errors, hints, snapshot, activeNote, revisions, filtered, visibleNotes, stale, decisions, jsonText, responseJson, modelWarnings, changes, service,
+        const logicWorkbench = Jev.setupLogicWorkbench(service, { ui, flush, notify, openModal, closeModal });
+        return { ...logicWorkbench, ui, errors, hints, snapshot, activeNote, revisions, filtered, visibleNotes, stale, decisions, jsonText, responseJson, modelWarnings, changes, service,
             notify, flush, select, openModal, closeModal, create, duplicate, addQuestion, removeQuestion, moveQuestion, addOption, setTags, setList, toggleReference, importMarkdown, applyVault, resetVault, exportOpen, exportFile, copyJson, previewImport, importJsonFile, applyImport, saveVersion, askRestore, restoreVersion, archive, replay, acceptResponse, exportEvidence, nextTour, tour, setTheme, date, pretty };
     }
     Jev.setupWorkbench = setupWorkbench;

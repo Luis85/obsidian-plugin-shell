@@ -1,7 +1,7 @@
 {
   "artifact": "jev-studio.html",
-  "sha256": "f6261d764e2579a4ace89db034973f3da0b30a61bd744615b7dcea25598ded07",
-  "bytes": 368132,
+  "sha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
+  "bytes": 629151,
   "builtWith": {
     "node": "v22.16.0",
     "typescript": "Version 5.8.3",

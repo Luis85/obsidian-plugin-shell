@@ -9,7 +9,7 @@ namespace Jev {
   export function setupWorkbench(service: StudioService): Record<string, unknown> {
     const ui=Vue.reactive({
       library:clone(service.library),draft:clone(service.library.prompts.find(p=>p.status!=='archived')||service.library.prompts[0]),
-      vault:demoVault(),tab:'compose',search:'',folder:'all',openIndex:0,theme:'dark',
+      vault:demoVault(),area:'prompts',tab:'compose',search:'',folder:'all',openIndex:0,theme:'dark',
       modal:'',error:'',toast:'',saved:service.persistent?'Saved locally':'Memory only',sidebar:false,
       jsonMode:'recipe',exportMode:'recipe',consent:false,versionMessage:'',compareId:'',
       importText:'',candidate:undefined as Library|undefined,pendingVault:undefined as VaultState|undefined,
@@ -87,7 +87,7 @@ namespace Jev {
       if(ui.jsonMode==='request'){exportOpen('request');return;}
       try{await navigator.clipboard.writeText(jsonText.value);ui.copyLabel='Copied';window.setTimeout(()=>ui.copyLabel='Copy JSON',1800);}catch{notify('Clipboard unavailable. Select the JSON text or use Export.');}
     }
-    function previewImport():void {try{ui.candidate=readLibrary(parseJson(ui.importText));ui.error='';}catch(e){ui.candidate=undefined;ui.error=(e as Error).message;}}
+    function previewImport():void {try{ui.candidate=readLibrary(parseJson(ui.importText));if(ui.candidate.logic)throw new Error('This file contains linked business logic. Use Business logic → Import workspace JSON.');ui.error='';}catch(e){ui.candidate=undefined;ui.error=(e as Error).message;}}
     async function importJsonFile(event:Event):Promise<void> {const input=event.target as HTMLInputElement;const file=input.files?.[0];input.value='';if(!file)return;try{if(file.size>2_000_000)throw new Error('JSON file exceeds 2 MB.');ui.importText=await file.text();await Vue.nextTick();previewImport();}catch(e){ui.error=(e as Error).message;}}
     function applyImport():void {try{if(!ui.candidate)return;if(!flush())throw new Error('Repair the current recipe before importing.');const id=service.importCopies(ui.candidate);ui.library=clone(service.library);ui.draft=clone(service.library.prompts.find(p=>p.id===id)!);ui.response=undefined;ui.tab='compose';ui.folder='all';ui.sidebar=false;closeModal();notify('Imported as independent copies. Existing prompts were preserved.');}catch(e){ui.error=(e as Error).message;}}
     function saveVersion():void {try{service.revision(ui.draft,ui.versionMessage);ui.library=clone(service.library);ui.versionMessage='';closeModal();notify('Immutable version saved.');}catch(e){ui.error=(e as Error).message;}}
@@ -111,14 +111,15 @@ namespace Jev {
       }
       if((event.ctrlKey||event.metaKey)&&!event.altKey){
         if(event.key.toLowerCase()==='k'){event.preventDefault();ui.sidebar=true;Vue.nextTick(()=>document.querySelector<HTMLInputElement>('#library-search')?.focus());}
-        if(event.key.toLowerCase()==='s'){event.preventDefault();openModal('version');}
-        if(event.key.toLowerCase()==='e'){event.preventDefault();exportOpen();}
+        if(event.key.toLowerCase()==='s'){event.preventDefault();openModal(ui.area==='logic'?'logic-checkpoint':'version');}
+        if(event.key.toLowerCase()==='e'){event.preventDefault();if(ui.area==='logic')openModal('logic-export');else exportOpen();}
       }
     });
     window.addEventListener('beforeunload',event=>{if(!service.persistent||ui.saved==='Not saved'||ui.saved.includes('not saved')||ui.saved==='Unsaved changes'){event.preventDefault();}});
     const date=(s:string)=>new Date(s).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const pretty=(value:unknown)=>JSON.stringify(value,null,2);
-    return {ui,errors,hints,snapshot,activeNote,revisions,filtered,visibleNotes,stale,decisions,jsonText,responseJson,modelWarnings,changes,service,
+    const logicWorkbench=setupLogicWorkbench(service,{ui,flush,notify,openModal,closeModal});
+    return {...logicWorkbench,ui,errors,hints,snapshot,activeNote,revisions,filtered,visibleNotes,stale,decisions,jsonText,responseJson,modelWarnings,changes,service,
       notify,flush,select,openModal,closeModal,create,duplicate,addQuestion,removeQuestion,moveQuestion,addOption,setTags,setList,toggleReference,importMarkdown,applyVault,resetVault,exportOpen,exportFile,copyJson,previewImport,importJsonFile,applyImport,saveVersion,askRestore,restoreVersion,archive,replay,acceptResponse,exportEvidence,nextTour,tour,setTheme,date,pretty};
   }
 }

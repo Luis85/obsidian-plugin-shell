@@ -18,7 +18,7 @@ namespace Jev {
       if (q.type === 'choice' && (typeof a.choice !== 'string' || !keys.includes(a.choice) || Number(probabilities[a.choice]) < Math.max(...keys.map(k=>Number(probabilities[k])))-0.0001)) throw new Error(q.id+': choice must be a highest-probability option.');
       if (q.type === 'score') {
         const mean = keys.reduce((sum,k)=>sum+Number(k)*Number(probabilities[k]),0);
-        if (typeof a.score !== 'number' || Math.abs(a.score-mean)>0.02 || !record(a.legend) || keys.some(k=>typeof (a.legend as Record<string,unknown>)[k]!=='string')) throw new Error(q.id+': score must match the weighted rubric value and include its legend.');
+        if (typeof a.score !== 'number' || !Number.isFinite(a.score) || Math.abs(a.score-mean)>0.02 || !record(a.legend) || keys.some(k=>typeof (a.legend as Record<string,unknown>)[k]!=='string')) throw new Error(q.id+': score must match the weighted rubric value and include its legend.');
       }
     }
     return clone(value) as unknown as ResponseBody;

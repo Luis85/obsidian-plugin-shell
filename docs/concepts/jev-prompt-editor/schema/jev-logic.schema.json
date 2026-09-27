@@ -1,0 +1,699 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "jev-logic"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rule"
+      },
+      "maxItems": 40,
+      "minItems": 0
+    },
+    "processes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/process"
+      },
+      "maxItems": 40,
+      "minItems": 0
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flow"
+      },
+      "maxItems": 20,
+      "minItems": 1
+    },
+    "revisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/revision"
+      },
+      "maxItems": 20,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "kind",
+    "schemaVersion",
+    "rules",
+    "processes",
+    "flows",
+    "revisions"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jev-studio:logic:1",
+  "title": "Jev Studio business logic v1",
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "literal",
+            "path",
+            "add"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 16000,
+          "minLength": 0
+        },
+        "amount": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "mode",
+        "value",
+        "amount"
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "array"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 0
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "required",
+        "description"
+      ]
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        }
+      },
+      "required": [
+        "name",
+        "binding"
+      ]
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "when": {
+          "enum": [
+            "completed",
+            "true",
+            "false",
+            "review",
+            "error"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "payload": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mapping"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "when",
+        "fields",
+        "payload"
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "continue",
+            "process",
+            "end",
+            "review"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "processId": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$|__proto__$)[a-zA-Z0-9_-]{0,80}$"
+        }
+      },
+      "required": [
+        "type",
+        "code",
+        "processId"
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "left": {
+          "$ref": "#/$defs/binding"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "neq",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "contains",
+            "exists",
+            "missing"
+          ]
+        },
+        "right": {
+          "$ref": "#/$defs/binding"
+        }
+      },
+      "required": [
+        "id",
+        "left",
+        "operator",
+        "right"
+      ]
+    },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$",
+          "not": {
+            "enum": [
+              "else",
+              "error",
+              "limit",
+              "success"
+            ]
+          }
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "match": {
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/condition"
+          },
+          "maxItems": 12,
+          "minItems": 1
+        },
+        "decision": {
+          "$ref": "#/$defs/decision"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "match",
+        "conditions",
+        "decision"
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "ready",
+            "archived"
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        },
+        "mode": {
+          "enum": [
+            "if",
+            "while"
+          ]
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/branch"
+          },
+          "maxItems": 12,
+          "minItems": 1
+        },
+        "fallback": {
+          "$ref": "#/$defs/decision"
+        },
+        "maxIterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 25
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "status",
+        "events",
+        "mode",
+        "inputs",
+        "branches",
+        "fallback",
+        "maxIterations"
+      ]
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "ready",
+            "archived"
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        },
+        "mode": {
+          "enum": [
+            "transform",
+            "fixture",
+            "external"
+          ]
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mapping"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "status",
+        "events",
+        "mode",
+        "inputs",
+        "outputs",
+        "mappings"
+      ]
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "kind": {
+          "enum": [
+            "start",
+            "prompt",
+            "rule",
+            "process",
+            "end"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "refId": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$|__proto__$)[a-zA-Z0-9_-]{0,80}$"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": -4000,
+          "maximum": 12000
+        },
+        "y": {
+          "type": "integer",
+          "minimum": -4000,
+          "maximum": 12000
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mapping"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "refId",
+        "x",
+        "y",
+        "inputs",
+        "events"
+      ]
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "port": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "kind": {
+          "enum": [
+            "control",
+            "event"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "port",
+        "target",
+        "kind"
+      ]
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "ready",
+            "archived"
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          },
+          "maxItems": 60,
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edge"
+          },
+          "maxItems": 120,
+          "minItems": 0
+        },
+        "sampleInput": {
+          "type": "string",
+          "maxLength": 40000,
+          "minLength": 1
+        },
+        "maxSteps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "maxEvents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "status",
+        "events",
+        "nodes",
+        "edges",
+        "sampleInput",
+        "maxSteps",
+        "maxEvents"
+      ]
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rule"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "processes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/process"
+          },
+          "maxItems": 40,
+          "minItems": 0
+        },
+        "flows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/flow"
+          },
+          "maxItems": 20,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "rules",
+        "processes",
+        "flows"
+      ]
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?!constructor$|prototype$)[a-z][a-z0-9_]{0,47}$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "snapshot": {
+          "$ref": "#/$defs/snapshot"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "createdAt",
+        "snapshot"
+      ]
+    }
+  },
+  "$comment": "No executable code. Runtime validation additionally checks uniqueness, safe paths/literal JSON, references, contracts, and bounded graph semantics."
+}

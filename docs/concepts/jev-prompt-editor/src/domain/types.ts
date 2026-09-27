@@ -12,15 +12,15 @@ namespace Jev {
   }
   export interface Policy { confidence: number; yes: number; no: number }
   export interface Recipe {
-    kind: 'jev-prompt'; schemaVersion: 1; id: string; name: string;
+    kind: 'jev-prompt'; schemaVersion: 1 | 2; id: string; name: string;
     description: string; tags: string[]; model: string;
     status: 'draft' | 'ready' | 'archived'; bindings: Bindings;
-    questions: Question[]; policy: Policy;
+    questions: Question[]; policy: Policy; events?: LogicEvent[];
   }
   export interface Revision { id: string; createdAt: string; message: string; recipe: Recipe }
   export interface Library {
-    kind: 'jev-prompt-library'; schemaVersion: 1;
-    prompts: Recipe[]; revisions: Record<string, Revision[]>;
+    kind: 'jev-prompt-library'; schemaVersion: 1 | 2;
+    prompts: Recipe[]; revisions: Record<string, Revision[]>; logic?: LogicLibrary;
   }
   export interface Note {
     path: string; name: string; body: string; properties: Record<string, string | boolean | number | string[]>;

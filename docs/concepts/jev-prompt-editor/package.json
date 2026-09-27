@@ -1,13 +1,17 @@
 {
   "name": "jev-studio-offline-prototype",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Standalone Jev decision-prompt workbench; see README for build prerequisites and native integration limits.",
   "scripts": {
     "build": "node scripts/build.cjs",
-    "test": "node --test tests/domain.test.cjs",
+    "test": "node --test tests/domain.test.cjs tests/logic.test.cjs",
     "test:browser": "python tests/browser.test.py",
     "test:schema": "python tests/schema.test.py",
-    "examples": "node scripts/export-examples.cjs"
+    "examples": "node scripts/export-examples.cjs",
+    "test:logic": "node --test tests/logic.test.cjs",
+    "test:logic-browser": "python tests/logic.browser.py",
+    "examples:logic": "node scripts/export-logic-examples.cjs",
+    "schema:logic": "python scripts/build-logic-schemas.py"
   }
 }

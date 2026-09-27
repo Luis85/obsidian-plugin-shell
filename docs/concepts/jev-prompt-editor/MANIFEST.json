@@ -1,7 +1,7 @@
 {
   "kind": "jev-studio-repository-manifest",
   "schemaVersion": 1,
-  "artifactSha256": "f6261d764e2579a4ace89db034973f3da0b30a61bd744615b7dcea25598ded07",
+  "artifactSha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
   "files": [
     {
       "path": ".gitattributes",
@@ -15,13 +15,23 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 59435,
-      "sha256": "5b3d73eb661635e88583845d9213da45a8bc79dd8c62f95f5022cfca86763821"
+      "bytes": 146282,
+      "sha256": "93bf23dc3bd81426f6797c0a22b3293d770771c500f4e3759dc50f0501d5a563"
     },
     {
       "path": "dist/template.html",
-      "bytes": 48293,
-      "sha256": "e511afaae13f271d20eeb5ed7153c1c46608ba877f88041905a3ee71302485fb"
+      "bytes": 103315,
+      "sha256": "2f0a67074f8f1f3c4d599cb4127a6e4f200e8a7cebb47c4a7cecc04f39e5e634"
+    },
+    {
+      "path": "docs/BUSINESS-LOGIC-VERIFICATION.md",
+      "bytes": 3915,
+      "sha256": "5a444b2e677cc79733be7659a87ad7ef6fe2f055370c14f879eaa7db8b610296"
+    },
+    {
+      "path": "docs/BUSINESS-LOGIC.md",
+      "bytes": 12094,
+      "sha256": "9a409baf5a0960216e3fcb70cb469f6bb6b5aab8d26c6fbabf76e2ba8dc6a6e8"
     },
     {
       "path": "docs/RESEARCH.html",
@@ -34,19 +44,49 @@
       "sha256": "fa82c182d0ac26bc7b8fdfa5ed29163778967c7f8020c46ca588935eb77ea102"
     },
     {
+      "path": "evidence/all-domain.tap",
+      "bytes": 23967,
+      "sha256": "8d1b7eb62a59dfa27c8ba173682301aa567892da0af10f9cab64202e843404a9"
+    },
+    {
       "path": "evidence/browser.json",
       "bytes": 5085,
-      "sha256": "e59c3911b009dd9f41f20cecba2068c8821397c1f80c707c1d8c7786e23c2f8a"
+      "sha256": "cf9777e658e59fb2685e36a195ebf5e66a2aa8d18f803c4a57e7271421e06e1a"
     },
     {
       "path": "evidence/build.json",
       "bytes": 461,
-      "sha256": "8a65b79aab32b66cc4db4750996c0b15850af47c501ef91a6d0f8d91e410a6bb"
+      "sha256": "8911186f6c8a8a4b58c1a778823dcad3a12b17cbc8f2c784787977bbc74146ac"
     },
     {
       "path": "evidence/domain.tap",
       "bytes": 8998,
       "sha256": "fc3ed4a13fb26ca7a2f20f240b70d03aa248cad2a0a9f7e2fb43e2c730f02115"
+    },
+    {
+      "path": "evidence/hosted-distribution.tap",
+      "bytes": 1378,
+      "sha256": "424dd139291feb3876a7db96f6806a3513e43be8fad25cefe872b4e99ad3678d"
+    },
+    {
+      "path": "evidence/hosted-logic-domain.tap",
+      "bytes": 23972,
+      "sha256": "e41d6b7b86fb1e776b1a53c8f9952557a109e68dbcdd61e802a74525b397ba63"
+    },
+    {
+      "path": "evidence/logic-browser.json",
+      "bytes": 10283,
+      "sha256": "44f545bf8f281315c12f42917e6be8cd61c099c7d81d9a49c844492d9e40904e"
+    },
+    {
+      "path": "evidence/logic-domain.tap",
+      "bytes": 15022,
+      "sha256": "134a4f9027755c671b6fc50cde47db6924d7cafc0340721cc0a99c05ac335b35"
+    },
+    {
+      "path": "evidence/logic-publication.json",
+      "bytes": 897,
+      "sha256": "45151a08aa05f1e5b9c434a631a29c387ef562006c67e862690f918d9b4acb38"
     },
     {
       "path": "evidence/README.md",
@@ -65,13 +105,23 @@
     },
     {
       "path": "evidence/schema.json",
-      "bytes": 913,
-      "sha256": "b956effc50612d3c3c5903f54eebcd66268289c87995ec3cb9bedcce14cd5acd"
+      "bytes": 1959,
+      "sha256": "38d8e8181ec63dbe805d3f9e8d8269b1800c6273f72b5c2b904b0e3596d82304"
+    },
+    {
+      "path": "examples/business-logic.workspace.json",
+      "bytes": 30093,
+      "sha256": "317d851fefd2a215c432bd698469b80e07be1fcb71e71e6345e8ee31e28b5e17"
     },
     {
       "path": "examples/edited-roundtrip.prompt.json",
       "bytes": 3595,
       "sha256": "26fc4fa2eeea9c22aa29de06d978e79722001597a2546a01365cfd9595955829"
+    },
+    {
+      "path": "examples/event-capable.prompt.json",
+      "bytes": 4155,
+      "sha256": "7e245af53bfb1b8622349f5685fb20df2afd6374dffed8b56c669a7a5aab0d8d"
     },
     {
       "path": "examples/inbox-routing.demo-request.json",
@@ -110,23 +160,33 @@
     },
     {
       "path": "jev-studio.html",
-      "bytes": 368132,
-      "sha256": "f6261d764e2579a4ace89db034973f3da0b30a61bd744615b7dcea25598ded07"
+      "bytes": 629151,
+      "sha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df"
     },
     {
       "path": "package.json",
-      "bytes": 475,
-      "sha256": "feeed6a4c4c02e3554d06df53f10a9e1ee03ef0fd09ca733892f6517555eb30c"
+      "bytes": 734,
+      "sha256": "bd0ed58765600c076900b4077386efeb06eae7ea182c325a317f4bfd8535b74a"
     },
     {
       "path": "README.md",
-      "bytes": 10568,
-      "sha256": "4e5929567b662d5403bd90666976208efe95e66c034706b06f23e4cd4b1798b3"
+      "bytes": 9863,
+      "sha256": "9d8c2d3bae95f94f0985018b342f059ed40da001015e108935ecdadcbf31ee1e"
     },
     {
       "path": "schema/jev-library.schema.json",
       "bytes": 1506,
       "sha256": "09277a4177ac0d4ad315891fcfefb7814414ac4b5812e8d4a01d82269b9b95ac"
+    },
+    {
+      "path": "schema/jev-logic.schema.json",
+      "bytes": 14964,
+      "sha256": "a5c385a8fac4097a7225b1abd945796db04e6f1b1af97d0be5900d6be7534559"
+    },
+    {
+      "path": "schema/jev-prompt-v2.schema.json",
+      "bytes": 7267,
+      "sha256": "9e3a518bd24044ac5a55e497402873e4d74f09b099b2a458ada16d6136ace03f"
     },
     {
       "path": "schema/jev-prompt.schema.json",
@@ -139,9 +199,24 @@
       "sha256": "bd440a8a3f34d23e65a1ca8e26bc1079474e1d178f58fe053cbfd730fc49a209"
     },
     {
+      "path": "schema/jev-workspace.schema.json",
+      "bytes": 1865,
+      "sha256": "14fa6d98429f0a6d03ff078f34a675e67f65a6499a20bba3486d1826572fc19b"
+    },
+    {
+      "path": "scripts/build-logic-schemas.py",
+      "bytes": 4642,
+      "sha256": "b9a0060b1705b93ab036e60045ea350bee0af99c8d7763d54b50c4e3202aca49"
+    },
+    {
       "path": "scripts/build.cjs",
-      "bytes": 3225,
-      "sha256": "81e6598da4a2368d906fa79787aadef018c260a23bc9576b37c01066a0c86c0e"
+      "bytes": 4038,
+      "sha256": "fc9b12b119ef72efff5481913a1dfccc4ed429019bedce09d28f06f3a279a5e6"
+    },
+    {
+      "path": "scripts/capture-logic.py",
+      "bytes": 1388,
+      "sha256": "f9f426c31ee260a38995a6a875fdf36d63a6fa5ff37738c85c59c07170b40428"
     },
     {
       "path": "scripts/capture-previews.py",
@@ -152,6 +227,11 @@
       "path": "scripts/export-examples.cjs",
       "bytes": 951,
       "sha256": "4a793eb8d931675a61a925c0b4a6e903fea15de7d5472caa405d24c1180e72fc"
+    },
+    {
+      "path": "scripts/export-logic-examples.cjs",
+      "bytes": 971,
+      "sha256": "0f6180234962b12cbfba353a7057d258764202ed7031538bdee523ee2037992b"
     },
     {
       "path": "scripts/manifest.cjs",
@@ -169,9 +249,14 @@
       "sha256": "078e18a77b9812c6f87a22e886f798e2d67bc2b50273ac0f5f8d2170c0370820"
     },
     {
+      "path": "src/application/logic-workspace.ts",
+      "bytes": 3767,
+      "sha256": "bd34b77ba204cd4f1099ba036785347719f7ddec2d9e37b585402296820b9c89"
+    },
+    {
       "path": "src/application/service.ts",
-      "bytes": 2691,
-      "sha256": "c703663f76cb7900f507e26f55c83054d2cc03b676ef42a7428f8a17af7d1806"
+      "bytes": 3378,
+      "sha256": "b6adea00254b351e651d8f75d9f9e2e3e478e7141cd96f4583899caac86ce174"
     },
     {
       "path": "src/bootstrap/main.ts",
@@ -189,24 +274,54 @@
       "sha256": "679b402a0d4725e3863ca4aeb7423688987dc900b317eb82be418bc582125a50"
     },
     {
+      "path": "src/domain/logic/fixtures.ts",
+      "bytes": 7800,
+      "sha256": "80d58dba80421db567a8423b1201fbb039ac637c3ea54139425706ca8898e9eb"
+    },
+    {
+      "path": "src/domain/logic/references.ts",
+      "bytes": 9099,
+      "sha256": "161b176ef52efea394671e0ec6c074fb943cfd89ea29a6439f766f45db9001a3"
+    },
+    {
+      "path": "src/domain/logic/runner.ts",
+      "bytes": 8800,
+      "sha256": "de475c9450a022ee2eec6ef292a160ffbc81a3a4b72721463e2f900d97edbca9"
+    },
+    {
+      "path": "src/domain/logic/types.ts",
+      "bytes": 4430,
+      "sha256": "abcf23630789c717b4858c29517b0056e0384c823ac5cf89542fcc39a0681b39"
+    },
+    {
+      "path": "src/domain/logic/validation.ts",
+      "bytes": 6778,
+      "sha256": "d1742a991ffe79f8b60fc145f662b180ae1f1b4cb8a7ed2204124ec930ffd19b"
+    },
+    {
+      "path": "src/domain/logic/values.ts",
+      "bytes": 5761,
+      "sha256": "2b27a68c9a73b7da4e730ce944dbc3a4bad50b0007bc4b7c4eda1744eda32138"
+    },
+    {
       "path": "src/domain/policy.ts",
-      "bytes": 5129,
-      "sha256": "eef12f7216e1de3e248e5e379188d0c8b8513694a99c2b18c21411d43ab4a895"
+      "bytes": 5158,
+      "sha256": "e79738b48d51c2fb583b9f88e9328880695ffd1b2edd6968a9668b8db0ac8bf2"
     },
     {
       "path": "src/domain/types.ts",
-      "bytes": 3276,
-      "sha256": "340e1f59f4f1488b37a1a70167af3c760769aa42dcb7341065aa6620eb1092d9"
+      "bytes": 3329,
+      "sha256": "ce25d40d67d1a1b3e47f42a8de9c04fe4f9f87cf173a30058f6532879ba6e30c"
     },
     {
       "path": "src/domain/validation.ts",
-      "bytes": 8403,
-      "sha256": "22436fc695c0c3b2412f0c6284160829ddfc596ab4b7bec06eaf8979e040d4c6"
+      "bytes": 9039,
+      "sha256": "8bd6abe9e757aadd1fb81eab0520c027849cb5abcaf61e233cde91f81fb513e1"
     },
     {
       "path": "src/presentation/compose.html",
-      "bytes": 6795,
-      "sha256": "9272a956842685a8a880016d220cd9110403e984964b06de0193289c94d4bf12"
+      "bytes": 7301,
+      "sha256": "8dbfe59a7204ca7e7c8ff722232d7ef20a68388ca2ca6bbf3b57b671f920b538"
     },
     {
       "path": "src/presentation/json.html",
@@ -220,13 +335,73 @@
     },
     {
       "path": "src/presentation/layout.html",
-      "bytes": 13459,
-      "sha256": "c23ae647ac4cec0bbe2ddd8f000083c0bd3d4a63960f42b7067cca55f511f89d"
+      "bytes": 14182,
+      "sha256": "271e9b947ca398f5b4839157a1005fed79413218f8f1ff0fc116f700a85146f4"
+    },
+    {
+      "path": "src/presentation/logic/events.html",
+      "bytes": 7642,
+      "sha256": "f69d1d9cd44ef065152423d9036a4ca58fd06c385dade4a3cdc64b715f1e3bd9"
+    },
+    {
+      "path": "src/presentation/logic/flow.html",
+      "bytes": 13040,
+      "sha256": "d769936d60c479dcddc1ee0ad407bbd8d95f681b3ba167c26d22d846e7770e0c"
+    },
+    {
+      "path": "src/presentation/logic/graph.ts",
+      "bytes": 1605,
+      "sha256": "d56e51d4cceb5b8afd03d2620f74b82b51be500a19f9e0cb3961811f352954af"
+    },
+    {
+      "path": "src/presentation/logic/history.html",
+      "bytes": 2551,
+      "sha256": "c326833b1a2b42d5e15df58f9b3b2c7fe93064cf4a0e39002d534bada5d1cf0a"
+    },
+    {
+      "path": "src/presentation/logic/layout.html",
+      "bytes": 3529,
+      "sha256": "515aef8d055f8bfb9af6d05a9ea509356d1ee7c0ec00b8dee8544f9b2bd3ff16"
+    },
+    {
+      "path": "src/presentation/logic/library.html",
+      "bytes": 2163,
+      "sha256": "4b394f7b74915a1d4cf0f0c439c4b0e7c10dd55d17b8f801c59329627b8d1a84"
+    },
+    {
+      "path": "src/presentation/logic/modals.html",
+      "bytes": 4671,
+      "sha256": "e8b8caecf462f03130d4cf78c977b1685e9b6f62bb562ffea2221739c7c4fec5"
+    },
+    {
+      "path": "src/presentation/logic/processes.html",
+      "bytes": 6704,
+      "sha256": "4df7694337928b3eee79a4a4cda1924b1df4c46fb4b854ca1092026b6fc472fe"
+    },
+    {
+      "path": "src/presentation/logic/rules.html",
+      "bytes": 9838,
+      "sha256": "9a680594c3cd3ee0daccf36c6583684920320e4415e60d919c3a98525200bc15"
+    },
+    {
+      "path": "src/presentation/logic/styles.css",
+      "bytes": 30108,
+      "sha256": "934b6823ad23b63c0f6162180053476ac7aa9ec78f5acac299b38068d50eb660"
+    },
+    {
+      "path": "src/presentation/logic/trace.html",
+      "bytes": 3568,
+      "sha256": "c93cab752b088c70cb6b96bd2d5cce97d0480807faf36bf4239b74dd070e76e3"
+    },
+    {
+      "path": "src/presentation/logic/workbench.ts",
+      "bytes": 25055,
+      "sha256": "eaf565cf95a336736e25c265e1cfc64c652291825ccdb312a585f46f7966ab29"
     },
     {
       "path": "src/presentation/modals.html",
-      "bytes": 12865,
-      "sha256": "2fdd2e7a20887820d6bf09e5398c6d8be1da9cb95d8194d26a62fbe5295e1e4b"
+      "bytes": 13117,
+      "sha256": "fb051f0cb906e4b06ad32ed9d98b20199edee410d54fee380ccfc488f1bd0257"
     },
     {
       "path": "src/presentation/state.html",
@@ -245,8 +420,8 @@
     },
     {
       "path": "src/presentation/workbench.ts",
-      "bytes": 14942,
-      "sha256": "d5c18bc4698d0f633471944fca483db633616d570b4b5481bbd2539c2fdc4aed"
+      "bytes": 15287,
+      "sha256": "701ddfe60d5c64fed20de8c1a0b06184df71c2569d383948c5723c29b36261c1"
     },
     {
       "path": "tests/browser.test.py",
@@ -259,9 +434,19 @@
       "sha256": "2c56f9d9ce14a9073a07a69cb73b31de37b205de1d521e494fd84b7a219cab96"
     },
     {
+      "path": "tests/logic.browser.py",
+      "bytes": 20150,
+      "sha256": "1d8a1d224ff8d1135b837c699f7d1f4f5fd683524b6cef60e55f9089ad562c20"
+    },
+    {
+      "path": "tests/logic.test.cjs",
+      "bytes": 20386,
+      "sha256": "563a119ebca5c53cbe36c5c7c2f551c417d2eb279f6bd6ab36123f370e870636"
+    },
+    {
       "path": "tests/schema.test.py",
-      "bytes": 1756,
-      "sha256": "db605dbafd4be05063d36c0bba14d2e38e2fd914d9dd6198095c48e64d921a72"
+      "bytes": 2826,
+      "sha256": "d829d0c031386637677ac5047f728e2173a747973d97cb11768af286ec9a02ba"
     },
     {
       "path": "THIRD-PARTY-NOTICES.md",

@@ -1,5 +1,6 @@
 namespace Jev {
   export function assertSafe(value: unknown, depth = 0): void {
+    if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('JSON numbers must be finite.');
     if (depth > 30) throw new Error('JSON nesting exceeds 30 levels.');
     if (Array.isArray(value)) { value.forEach(v => assertSafe(v, depth + 1)); return; }
     if (record(value)) for (const [key, child] of Object.entries(value)) {
@@ -17,8 +18,8 @@ namespace Jev {
     const issues: Check[] = [];
     const issue = (path: string, message: string) => issues.push({path, message});
     if (!record(value)) return [{path: '$', message: 'Expected a prompt recipe object.'}];
-    if (value.kind !== 'jev-prompt' || value.schemaVersion !== 1) issue('$', 'Expected jev-prompt schemaVersion 1. Unknown formats are not converted.');
-    const allowed = ['kind','schemaVersion','id','name','description','tags','model','status','bindings','questions','policy'];
+    if (value.kind !== 'jev-prompt' || (value.schemaVersion!==1&&value.schemaVersion!==2)) issue('$', 'Expected jev-prompt schemaVersion 1 or 2. Unknown formats are not converted.');
+    const allowed = ['kind','schemaVersion','id','name','description','tags','model','status','bindings','questions','policy',...(value.schemaVersion===2?['events']:[])];
     for (const key of Object.keys(value)) if (!allowed.includes(key)) issue(key, 'Unknown field. Nothing will be silently discarded.');
     for (const key of ['id','name','description','model']) if (typeof value[key] !== 'string' || String(value[key]).length > (key === 'description' ? 4000 : 160)) issue(key, 'Expected bounded text.');
     if (typeof value.id === 'string' && !/^[a-zA-Z0-9_-]{1,80}$/.test(value.id)) issue('id','Use a portable ID (letters, numbers, hyphens, underscores).');
@@ -48,6 +49,7 @@ namespace Jev {
       if (q.type === 'score' && (q.levels.length < 2 || q.levels.length > 10 || q.levels.some(s => typeof s !== 'string' || !s.trim() || s.length > 4000))) issue(p+'.levels','Score needs 2–10 independently meaningful rubric descriptions.');
       if (q.type === 'noul' && (!q.yes.trim() || !q.no.trim() || q.yes.length > 4000 || q.no.length > 4000)) issue(p+'.criteria','Describe both yes and no (up to 4,000 characters each).');
     });
+    if (value.events!==undefined) for (const check of validateEvents(value.events)) issue(check.path,check.message);
     const b = value.bindings;
     if (!record(b)) issue('bindings', 'State bindings are required.');
     else {
@@ -61,7 +63,7 @@ namespace Jev {
     const p = value.policy;
     if (!record(p)) issue('policy','A decision policy is required.');
     else {
-      for (const k of ['confidence','yes','no']) if (typeof p[k] !== 'number' || Number(p[k]) < 0 || Number(p[k]) > 1) issue('policy.'+k,'Use a number from 0 to 1.');
+      for (const k of ['confidence','yes','no']) if (typeof p[k] !== 'number' || !Number.isFinite(p[k]) || Number(p[k]) < 0 || Number(p[k]) > 1) issue('policy.'+k,'Use a number from 0 to 1.');
       if (Number(p.no) >= Number(p.yes)) issue('policy','Noul no threshold must be below its yes threshold.');
       for (const k of Object.keys(p)) if (!['confidence','yes','no'].includes(k)) issue('policy.'+k,'Unknown policy field.');
     }
@@ -72,10 +74,10 @@ namespace Jev {
     if (!record(value)) throw new Error('Expected a JSON object.');
     if (value.kind === 'jev-prompt') {
       const errors = validateRecipe(value); if (errors.length) throw new Error(errors.map(e => e.path+': '+e.message).slice(0,4).join('\n'));
-      return {kind:'jev-prompt-library',schemaVersion:1,prompts:[clone(value) as unknown as Recipe],revisions:{}};
+      return {kind:'jev-prompt-library',schemaVersion:value.schemaVersion===2?2:1,prompts:[clone(value) as unknown as Recipe],revisions:{}};
     }
-    if (value.kind !== 'jev-prompt-library' || value.schemaVersion !== 1 || !Array.isArray(value.prompts) || !record(value.revisions)) throw new Error('Import a Jev Studio recipe or library, not an API request or companion project.');
-    for (const k of Object.keys(value)) if (!['kind','schemaVersion','prompts','revisions'].includes(k)) throw new Error('Unknown library field: '+k);
+    if (value.kind !== 'jev-prompt-library' || (value.schemaVersion!==1&&value.schemaVersion!==2) || !Array.isArray(value.prompts) || !record(value.revisions)) throw new Error('Import a Jev Studio recipe or library, not an API request or companion project.');
+    for (const k of Object.keys(value)) if (!['kind','schemaVersion','prompts','revisions',...(value.schemaVersion===2?['logic']:[])].includes(k)) throw new Error('Unknown library field: '+k);
     if (!value.prompts.length || value.prompts.length > 100) throw new Error('A library contains 1–100 prompts.');
     const ids = new Set<string>();
     for (const prompt of value.prompts) {
@@ -86,6 +88,8 @@ namespace Jev {
       if (!ids.has(id) || !Array.isArray(revisions) || revisions.length > 50) throw new Error('Invalid revision collection.');
       for (const rev of revisions) if (!record(rev) || typeof rev.id !== 'string' || typeof rev.createdAt !== 'string' || typeof rev.message !== 'string' || !record(rev.recipe) || rev.recipe.id !== id || validateRecipe(rev.recipe).length) throw new Error('Invalid revision snapshot.');
     }
+    if (value.logic!==undefined) readLogic(value.logic);
+    if (value.schemaVersion===1 && value.prompts.some(p=>record(p)&&p.schemaVersion===2)) throw new Error('A version-2 prompt requires a version-2 library.');
     return clone(value) as unknown as Library;
   }
 }
