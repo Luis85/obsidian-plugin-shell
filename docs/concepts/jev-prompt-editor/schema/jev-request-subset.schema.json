@@ -1,0 +1,165 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "enum": [
+        "jev-1.13.0",
+        "jev-latest",
+        "jev-preview"
+      ]
+    },
+    "state": {
+      "type": "object",
+      "required": [
+        "active_note",
+        "references"
+      ],
+      "properties": {
+        "active_note": {
+          "type": "object"
+        },
+        "references": {
+          "type": "array"
+        }
+      }
+    },
+    "questions": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 24,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,47}$",
+        "not": {
+          "enum": [
+            "constructor",
+            "prototype",
+            "__proto__"
+          ]
+        }
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "choice"
+              },
+              "instructions": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 16000
+              },
+              "criteria": {
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 255,
+                "propertyNames": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$",
+                  "not": {
+                    "enum": [
+                      "constructor",
+                      "prototype",
+                      "__proto__"
+                    ]
+                  }
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              }
+            },
+            "required": [
+              "type",
+              "instructions",
+              "criteria"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "score"
+              },
+              "instructions": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 16000
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "minItems": 2,
+                "maxItems": 10
+              }
+            },
+            "required": [
+              "type",
+              "instructions",
+              "criteria"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "noul"
+              },
+              "instructions": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 16000
+              },
+              "criteria": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "true": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "false": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                },
+                "required": [
+                  "true",
+                  "false"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "instructions",
+              "criteria"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "model",
+    "state",
+    "questions"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jev-studio:request-subset:1",
+  "title": "Jev Studio emitted request subset",
+  "$comment": "This is the subset emitted by this editor, NOT the complete provider API schema. The provider also accepts other state/instructions/criteria structures. No credentials or local approval flags belong in this body."
+}

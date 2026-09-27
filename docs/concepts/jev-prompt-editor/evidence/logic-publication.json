@@ -1,0 +1,20 @@
+{
+  "scope": "Clean source restore, exact artifact rebuild, domain, schema and distribution checks",
+  "baseCommit": "1c1ec7a62933b2a7eae4f5b957211a4f227582ea",
+  "sourceArchiveSha256": "86aa77e3bb1da2c0d59673482929c0579fdfb22eaab3fc89830c9e06a3d3a1e8",
+  "artifactSha256": "be94cfe344eb66ba9b27869f25ba7e57d8044a6b7fc30773077081b5f44283df",
+  "artifactBytes": 629151,
+  "node": "v22.16.0",
+  "typescript": "5.8.3",
+  "vue": "3.5.13",
+  "domainPassed": 148,
+  "schemaPassed": 20,
+  "distributionPassed": 6,
+  "retainedLocalBrowserChecks": 149,
+  "hostedBrowserTested": false,
+  "browserScope": "Exact HTML via Playwright set_content with explicit in-memory Storage adapter. Not real file-origin persistence.",
+  "nativeObsidianTested": false,
+  "liveJevTested": false,
+  "fullRootQualification": false,
+  "workflowRun": "https://github.com/Luis85/obsidian-plugin-shell/actions/runs/36331935995"
+}

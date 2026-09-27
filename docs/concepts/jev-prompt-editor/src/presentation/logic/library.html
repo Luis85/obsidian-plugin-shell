@@ -1,0 +1,12 @@
+<template v-if="ui.area==='logic'">
+  <div class="logic-library-intro"><span class="section-label">DECISION AUTOMATION</span><p>Connect judgments to clear, inspectable business logic.</p></div>
+  <div class="search-box"><svg class="icon small"><use href="#i-search"/></svg><input v-model="logic.search" placeholder="Find a definition…" aria-label="Search logic definitions"></div>
+  <button class="button primary new-prompt" @click="logicCreate()"><svg class="icon small"><use href="#i-plus"/></svg>{{logic.view==='rules'?'New rule':logic.view==='processes'?'New process':'New flow'}}</button>
+  <div class="logic-library-filter"><strong>{{logic.view==='rules'?'BUSINESS RULES':logic.view==='processes'?'PROCESSES':'DECISION FLOWS'}}</strong><button class="text-button" @click="logic.archive=!logic.archive">{{logic.archive?'Show active':'Archive'}}</button></div>
+  <div class="prompt-list">
+    <button v-for="item in logicItems" :key="item.id" class="prompt-item logic-library-item" :class="{selected:logicCurrent?.id===item.id}" @click="logicSelect(item.id)"><span class="prompt-glyph" :class="logic.view==='rules'?'score':'choice'"><svg class="icon small"><use :href="logic.view==='processes'?'#i-grid':'#i-branch'"/></svg></span><span class="prompt-info"><strong>{{item.name}}</strong><small>{{item.status}} · {{item.events.length}} declared events</small></span></button>
+    <div v-if="!logicItems.length" class="empty-small">No matching definitions.<br><button class="text-button" @click="logic.search='';logic.archive=false">Clear filters</button></div>
+  </div>
+  <div class="logic-library-metrics"><span><b>{{logic.doc.flows.length}}</b> flows</span><span><b>{{logic.doc.rules.length}}</b> rules</span><span><b>{{logic.doc.processes.length}}</b> processes</span></div>
+  <div class="library-bottom"><button class="button subtle wide" @click="openModal('logic-import')"><svg class="icon small"><use href="#i-upload"/></svg>Import workspace JSON</button><div class="local-note"><svg class="icon small"><use href="#i-shield"/></svg><span>Design. Simulate. Inspect.<small>No live model, scripts, or vault writes.</small></span></div></div>
+</template>
