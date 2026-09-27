@@ -66,7 +66,7 @@ export function readBytes(file, limit = 30_000_000) {
 }
 export function readText(file, limit) { return new TextDecoder('utf-8', { fatal: true }).decode(readBytes(file, limit)); }
 export function readJson(file, limit) { return JSON.parse(readText(file, limit)); }
-export function writeFresh(file, text) {
+function writeFresh(file, text) {
   const full = noLinks(file);
   if (!fs.statSync(path.dirname(full)).isDirectory()) throw new Error('Output parent must exist');
   fs.writeFileSync(full, text, { flag: 'wx', mode: 0o600 });
