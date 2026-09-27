@@ -39,3 +39,12 @@ See [strategy](../docs/testing/TEST-STRATEGY.md) and [concept](../docs/testing/T
 ## Native stylesheet and token tools
 
 `styles/check-tokens.mjs` verifies the pinned snapshot, reviewed aliases, inventories and profile order offline. `styles/export-host-css.mjs` exports verified runtime CSS to stdout; redirection is explicit. `harness/style-profile.mjs` defines the extracted versus simulated inputs. These tools do not download dependencies, regenerate the source snapshot, or publish. See [the token contract](../docs/design/OBSIDIAN-TOKENS.md).
+
+## Design-first prototype tooling
+
+`npm run prototype:tools -- discover --repo .` reads the real shell command/maker
+catalog. The skill delegates generation, fixtures and checks to the existing shell,
+compiles HTML through the shared Vue/Nuxt UI pipeline, and saves reviewed concept
+packages through the common file planner. Its tests use `tests/suites.json`; the
+framework archive and generated developer kit ship the explicitly inventoried skill.
+See [prototype tooling](../docs/development/PROTOTYPE-TOOLING.md).

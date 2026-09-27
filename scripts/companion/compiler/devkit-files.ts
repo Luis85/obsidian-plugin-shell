@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 import { join, posix } from 'node:path';
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
+import { prototypeSkillFiles } from '../prototype-skill.mjs';
 
 const templates: ReadonlyArray<readonly [string, string]> = [
   ['README.md', 'README.md.tmpl'], ['AGENTS.md', 'AGENTS.md.tmpl'], ['CLAUDE.md', 'CLAUDE.md.tmpl'],
@@ -33,6 +34,7 @@ export async function devkitFiles(templateRoot: string, m: Model, add: Add): Pro
   for (const [path, template] of templates) {
     add(path, renderTemplate(await readFile(join(templateRoot, 'scripts/companion/devkit', template), 'utf8'), values), 'extension');
   }
+  for (const file of await prototypeSkillFiles(templateRoot)) add(file.path, file.bytes.toString('utf8'), 'extension');
   add('vitest.project.config.mjs', projectVitestConfig(m), 'extension');
   // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
   if (m.testRoot !== 'tests/project') {

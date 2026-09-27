@@ -1,4 +1,5 @@
 import { serializeJson as json } from '../contracts/serialization.ts';
+import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { readBounded, hash, readJson, exists } from './files.ts';
@@ -21,7 +22,8 @@ export async function installedCompiler(): Promise<Compiler> {
   } };
 }
 export async function assembleKit(context: Context, compiler: Compiler): Promise<ArchiveFile[]> {
-  const paths = [...templateFiles];
+  const skill = new Map((await prototypeSkillFiles(context.frameworkRoot)).map(file => [file.path, file.bytes]));
+  const paths = [...templateFiles, ...skill.keys()];
   for (const folder of templateRoots) paths.push(...await listFiles(context.frameworkRoot, folder));
   const files: ArchiveFile[] = [], records: KitFile[] = [];
   const add = (path: string, bytes: Buffer) => { files.push({ path, bytes }); records.push({ path, hash: hash(bytes), bytes: bytes.length }); };
@@ -30,7 +32,8 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   for (const path of paths.filter(included).sort()) {
     requireThat(!/\.(?:ttf|otf|woff2?)$/i.test(path) && !/(?:^|\/)(?:\.env(?:\..*)?|credentials|node_modules|reports)(?:\/|$)/i.test(path), 'KIT_PRIVATE_INPUT', `Disallowed distribution input: ${path}.`);
     const original = await readBounded(join(context.frameworkRoot, path), 8_000_000); originals.set(path, original); sourceInventory.push({ path, hash: hash(original) });
-    const bytes = standaloneSource(path, original);
+    // Skill templates are literal authoring inputs; preserve their byte-exact inventory.
+    const bytes = skill.get(path) ?? standaloneSource(path, original);
     add('.framework/template/' + path, bytes);
     if (path.startsWith('scripts/') || path.startsWith('docs/concepts/companion/test-kit/')) {
       if (path.endsWith('.ts') && !path.endsWith('.d.ts')) add('.framework/compiled/' + path.slice(0, -3) + '.js', Buffer.from(compiler.compile(bytes.toString('utf8'), path)));

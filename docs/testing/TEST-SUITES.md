@@ -127,7 +127,7 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
 | Workflow | Suites |
 | --- | --- |
 | `ci` › `showcase`, template-authoring jobs | all `verify` suites (via setup/verify), `e2e` |
-| `ci` › `framework-cli` | `cli`, `cli:journey` |
+| `ci` › `framework-cli` | `cli`, `cli:journey`, `prototypes`, `prototypes:python` |
 | `ci` › `generated-companion`, `starter` | `generator`, `visual`, `companion-project` of `companion`, generated `project` suites |
 | `ci` › `real-obsidian` | `obsidian` |
 | `ci` › `baseline` | `baseline` |
