@@ -1,0 +1,161 @@
+{
+  "kind": "agent-skill-package-inventory",
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3272,
+      "sha256": "0a1e226ae78be0d5596bca92dde8b75cd46b13e8bdcda542742be492015f33e7"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 10863,
+      "sha256": "8a2c476e9aa48807d045836ee3fa31ae7d6492173a1b8972a3b73335e52f166c"
+    },
+    {
+      "path": "VERIFICATION.md",
+      "bytes": 3517,
+      "sha256": "d9cf2d846ad9b1090a4cd0d992865ab9102fbfa22fe7d2051a74deed32de9ed4"
+    },
+    {
+      "path": "assets/templates/design-brief.md",
+      "bytes": 2253,
+      "sha256": "e72976497ba7d4eeadaa48f45e175c3afdeb43f55c56a083d9fbc1e4e7634b70"
+    },
+    {
+      "path": "assets/templates/execution-prompt.md",
+      "bytes": 8325,
+      "sha256": "1bfb895a1bb31635d9cc954705f72242879ad4504969837fab26f9ac3be05dfa"
+    },
+    {
+      "path": "assets/templates/integration-map.json",
+      "bytes": 451,
+      "sha256": "343de4e1fb4b06bd673d236e9ed2de4793d49833af0f992c0e0fcf3c218b376f"
+    },
+    {
+      "path": "assets/templates/prototype.manifest.json",
+      "bytes": 503,
+      "sha256": "e7a0cb240c4cda8fa2af544d37f81565d333ef695d4850293d27cd2499ac62b2"
+    },
+    {
+      "path": "evidence/helper-node.tap",
+      "bytes": 4803,
+      "sha256": "3dbb51e3a141e6ee1be7efb7e00b7b10b1131d304f241ee4bff5d624b3bc103e"
+    },
+    {
+      "path": "evidence/helper-python.log",
+      "bytes": 3199,
+      "sha256": "3db41d539d3e130846db41c51fe0d18f5ff0717e4ad5c11a52911e6e0096aa30"
+    },
+    {
+      "path": "evidence/verification.json",
+      "bytes": 1083,
+      "sha256": "1b98e4be4428a30149298c2485eec8f057214d187fba6e5cb9cde1a9157b25fa"
+    },
+    {
+      "path": "examples/conversation-contracts.md",
+      "bytes": 2416,
+      "sha256": "a7aa012296234d5ed810fd6c189a26ee4c4a424bc8c1dc67f418369741ef0d9d"
+    },
+    {
+      "path": "references/artifact-contract.md",
+      "bytes": 7064,
+      "sha256": "cb7cebf322a38a2f74dabae363c66615f4da9a89489e2ea3ac3e540039fd9d4e"
+    },
+    {
+      "path": "references/design-interview.md",
+      "bytes": 5496,
+      "sha256": "cbf706f2437763afe71dc5ce11acd25961871c04752113fc57ea7aed94314880"
+    },
+    {
+      "path": "references/execution-and-qa.md",
+      "bytes": 6305,
+      "sha256": "3ce39735093ba667f17471eae56b6a6550b016fd6e5a8427c33321bcc7ee9895"
+    },
+    {
+      "path": "references/repository-contract.md",
+      "bytes": 9593,
+      "sha256": "cf62a4f43e71e3b97795c190b57194c81f625c639ba069d6d52af4b047b58a68"
+    },
+    {
+      "path": "references/subagents.md",
+      "bytes": 2112,
+      "sha256": "38d1bd54a323c6500a267cbc565591fea3aa81af0e7cd835f3e72b0454d64ed8"
+    },
+    {
+      "path": "references/vue-typescript-quality.md",
+      "bytes": 6044,
+      "sha256": "ca8d0dd5aebd68b4db80fdde87a3739c6c5b351016740c82da468e744cf65c2d"
+    },
+    {
+      "path": "scripts/README.md",
+      "bytes": 4782,
+      "sha256": "f0f47222d52f508b97ede61564f7939301bcc38fc3da07c02bc2bbde543ae030"
+    },
+    {
+      "path": "scripts/build-single-file.mjs",
+      "bytes": 3652,
+      "sha256": "272c227b590155ca3192f23e1766e6a10abdb9b2a29535afd4ea2b4feeabc3c5"
+    },
+    {
+      "path": "scripts/check-offline.mjs",
+      "bytes": 728,
+      "sha256": "c5e5d97576b7088014647ad98a5724da59427219234c2e4d8bfadbd17f0a810c"
+    },
+    {
+      "path": "scripts/diff-project.mjs",
+      "bytes": 2422,
+      "sha256": "8dc7a87d3bb46387d2ab9103018665072084980f4e34c74c7273bd3f50107981"
+    },
+    {
+      "path": "scripts/inspect-repository.mjs",
+      "bytes": 3405,
+      "sha256": "f5a51667d4857b94ae5b43c63c9c64539b50044a7982907064b2c2fda85c4a54"
+    },
+    {
+      "path": "scripts/lib/io.mjs",
+      "bytes": 3710,
+      "sha256": "61857c84300a97e7bebc75dff6ba9a18994a8ad860e9ddfb1d687e266ed76c33"
+    },
+    {
+      "path": "scripts/lib/offline.mjs",
+      "bytes": 3195,
+      "sha256": "d4c8132f6dc63f7c5e37d0f2a383acaeb72faa2c3f9e81614d7d364d1e237ee6"
+    },
+    {
+      "path": "scripts/pack-concept.py",
+      "bytes": 10068,
+      "sha256": "868cbb15766b1c2d6c0f0f2646f3ea0feea315b8a2bc0baf025e7bdfa85d0318"
+    },
+    {
+      "path": "scripts/validate-project.mjs",
+      "bytes": 4134,
+      "sha256": "036cf2a168820a1042464d98bcd67bcfd876e0a13bc7c31e39fb5d98e1fad658"
+    },
+    {
+      "path": "scripts/verify-browser.mjs",
+      "bytes": 5588,
+      "sha256": "5786c0fb8513d803ca12076a464056bcd3041d84a9cac2c199e2ed30d59a02cf"
+    },
+    {
+      "path": "tests/helpers.test.mjs",
+      "bytes": 7832,
+      "sha256": "787f8efa7081ea1dd2e2ff5640aee9479d50ce69af8ff26312095650a5b793c0"
+    },
+    {
+      "path": "tests/test_pack_concept.py",
+      "bytes": 7535,
+      "sha256": "0b32966917adbcc119c817e00184b0e86f64cddb802b0ebabc467706200d9dbd"
+    },
+    {
+      "path": "tests/test_skill_contract.py",
+      "bytes": 2978,
+      "sha256": "106826c17c123786b04133b3f47ca6c1aa5adc970c98539d5d4d4ec2a584a379"
+    },
+    {
+      "path": "tests/validator.test.mjs",
+      "bytes": 4282,
+      "sha256": "7e4e19a1e42bdb33095d1a2bca2ec9479ffd6c14813757fd15cfb6303af79ca3"
+    }
+  ]
+}

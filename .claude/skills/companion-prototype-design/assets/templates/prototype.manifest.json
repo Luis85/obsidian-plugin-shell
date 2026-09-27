@@ -1,0 +1,11 @@
+{
+  "kind": "obsidian-prototype-package",
+  "schemaVersion": 1,
+  "slug": "replace-with-approved-slug",
+  "mode": "new-plugin",
+  "repository": {"name": "Luis85/obsidian-plugin-shell", "commit": "REPLACE_WITH_ACTUAL_40_HEX_SHA"},
+  "project": {"path": "companion.project.json", "sha256": "REPLACE_WITH_ACTUAL_SHA256"},
+  "artifact": {"path": "prototype.html", "sha256": "REPLACE_WITH_ACTUAL_SHA256"},
+  "source": {"path": "source", "packageManager": "REPLACE_FROM_CHECKOUT"},
+  "status": "incomplete"
+}
