@@ -43,6 +43,10 @@
     "npm": ">=11.19.1 <13"
   },
   "scripts": {
+    "memory": "node --experimental-strip-types scripts/hindsight/cli.ts",
+    "test:memory": "node --experimental-strip-types --test tests/hindsight/*.checks.mjs",
+    "test:memory:python": "python -m unittest discover -s tests/hindsight -p test_*.py -v",
+    "typecheck:memory": "tsc --noEmit --project tsconfig.hindsight.json",
     "setup": "node scripts/setup.mjs",
     "make": "node scripts/makers/cli.mjs",
     "entities:check": "node scripts/makers/entities.mjs --check",

@@ -10,7 +10,8 @@
     {"path": "tests/concepts", "optional": true},
     {"path": "tests/e2e"},
     {"path": "tests/obsidian", "optional": true},
-    {"path": "tests/project", "optional": true}
+    {"path": "tests/project", "optional": true},
+    {"path": "tests/hindsight", "optional": true}
   ],
   "helperRoots": ["tests/support", "tests/fixtures"],
   "prerequisites": {
@@ -281,6 +282,30 @@
       "verify": "tooling",
       "npmScript": "test:makers",
       "workflows": ["ci"]
+    },
+    {
+      "name": "memory",
+      "purpose": "Opt-in Hindsight contracts, keyless configuration, real Git/venv/stdio fixtures and desktop registration, without installing Hindsight or calling an LLM.",
+      "runner": {"type": "node-test"},
+      "include": ["tests/hindsight/*.checks.mjs"],
+      "prerequisites": ["python3"],
+      "optional": true,
+      "verify": "own-step",
+      "verifyStep": "Optional memory tooling contracts workflow; no SDK/provider dependency in normal verify",
+      "npmScript": "test:memory",
+      "workflows": ["hindsight-tooling"]
+    },
+    {
+      "name": "memory:python",
+      "purpose": "Stdlib-only Python adapter tests with explicit SDK/manager doubles; not live Hindsight inference.",
+      "runner": {"type": "command", "commands": [["{python}", "-B", "-m", "unittest", "discover", "-s", "tests/hindsight", "-p", "test_*.py", "-v"]]},
+      "include": ["tests/hindsight/test_*.py"],
+      "prerequisites": ["python3"],
+      "optional": true,
+      "verify": "own-step",
+      "verifyStep": "Optional memory tooling contracts workflow",
+      "npmScript": "test:memory:python",
+      "workflows": ["hindsight-tooling"]
     },
     {
       "name": "native",

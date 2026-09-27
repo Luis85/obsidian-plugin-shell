@@ -1,0 +1,47 @@
+name: Optional memory tooling contracts
+on:
+  pull_request:
+    paths: &memory-inputs
+      - 'scripts/hindsight/**'
+      - 'tests/hindsight/**'
+      - 'tests/support/hindsight-fixture.mjs'
+      - 'tests/suites.json'
+      - 'shell.mjs'
+      - 'package.json'
+      - 'tsconfig.hindsight.json'
+      - '.github/workflows/hindsight-tooling.yml'
+  push:
+    branches: [main]
+    paths: *memory-inputs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hindsight-tooling-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Check Python prerequisite for stdlib TOML and disposable venv fixtures
+        shell: bash
+        run: python3 -c 'import sys; assert sys.version_info >= (3, 11)'
+      - name: Verify every test directory is registered
+        run: node scripts/testing/suites.mjs --check
+      - name: Node policy, real Git, venv and stdio contracts without Hindsight installation
+        run: npm run test:memory
+      - name: Stdlib Python adapter contracts with explicit SDK doubles
+        shell: bash
+        run: python3 -B -m unittest discover -s tests/hindsight -p 'test_*.py' -v
