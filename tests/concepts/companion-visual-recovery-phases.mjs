@@ -50,3 +50,37 @@ export async function surfaceRemovalAndOrphans(h) {
   h.check('an orphaned page design opens and is removed with one reviewed write that makes the project valid again', /owner surface is missing/.test(blocked) && listed && opened && review.includes('Delete the page design') && after.ok && after.orphans === 0 && after.history === history + 1
     && !(await page.locator('section[aria-label="Designs with a missing surface"]').count()), { blocked, listed, opened, review, after }, 'Controlled imported-orphan fixture, real Pages controls');
 }
+
+// Published revisions are never edited: a surface only an unpinned revision navigates to is removed together with
+// that revision (named first, one undoable write), and the blueprint dialog names page-design blockers up front.
+export async function revisionSurfaceAndBlueprint(h) {
+  const page = h.page();
+  // Controlled fixture: a new leaf surface (a copy of an existing one) and an unpinned published revision that
+  // navigates to it; nothing else names the surface.
+  const fixture = await h.js(() => {
+    const d = design(), store = veStore(), surfaces = veContext(d).surfaces, pins = new Set();
+    for (const def of [...store.pages, ...store.components, ...store.layouts, ...store.revisions]) visualWalk(def.root ?? def.template, n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.revisionId) pins.add(n.ref.revisionId); });
+    const base = d.nodes.find(n => surfaces.has(n.id) && !d.nodes.some(c => c.parent === n.id)), target = { ...structuredClone(base), id: 'node-' + d.nextId++, label: 'Retired screen' };
+    d.nodes.push(target);
+    const eventful = n => Array.isArray(n.events) && !['text', 'slot'].includes(n.kind), revision = store.revisions.find(r => !pins.has(r.id) && visualNodes(r.template).some(eventful));
+    visualNodes(revision.template).find(eventful).events.push({ id: visualAllocate(store, 'vi'), event: 'click', label: 'Open retired', actions: [{ kind: 'navigate', surfaceId: target.id }], notes: '', acceptance: '' });
+    validateVisualDesigns(store, veContext(d)); save();
+    return { target: target.id, revision: revision.id, name: veRevisionName(store, revision), revisions: store.revisions.length };
+  });
+  await h.navigate('sitemap');
+  const card = page.locator(`.map-node[data-node="${fixture.target}"]`); await card.focus(); await page.keyboard.press('Delete'); await h.opened();
+  const dialog = await h.modalText(), history = await h.js(() => design().history.length);
+  await h.act('design-remove-confirm', fixture.target, '#modal'); await h.closed();
+  const notice = await h.toast();
+  const after = await h.js(({ target, revision }) => { try { validateVisualDesigns(veStore(), veContext(design())); companionJson(); return { ok: true, node: design().nodes.some(n => n.id === target), revision: veStore().revisions.some(r => r.id === revision), history: design().history.length }; } catch (error) { return { ok: false, error: error.message }; } }, fixture);
+  await h.js(() => designHistory('undo'));
+  const undone = await h.js(({ target, revision }) => ({ node: design().nodes.some(n => n.id === target), revision: veStore().revisions.some(r => r.id === revision) }), fixture);
+  h.check('a surface only an unpinned published revision navigates to is removed with that revision in one undoable write', dialog.includes('Also deletes 1 published revision that navigates here and that nothing pins: ' + fixture.name)
+    && notice.includes('Deleted unpinned published revision(s): ' + fixture.name) && after.ok && !after.node && !after.revision && after.history === history + 1 && undone.node && undone.revision,
+  { fixture, dialog, notice, after, undone }, 'Controlled fixture (new leaf surface, navigate action added to an unpinned revision), real sitemap Delete and confirm controls');
+  await h.navigate('blueprints');
+  await page.locator('#content [data-action="blueprint-choose"]').first().click(); await h.opened();
+  const replace = await h.modalText(), apply = await page.locator('#modal [data-action="blueprint-apply"]').count(); await h.escape();
+  h.check('the blueprint dialog names page-design blockers up front and offers no apply while they exist', replace.includes('In use by page and component designs: page design') && replace.includes('The sitemap cannot be replaced until then.') && apply === 0,
+    { replace: replace.slice(0, 400), apply }, 'Real blueprint chooser on the self-project');
+}

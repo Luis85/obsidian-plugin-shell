@@ -7,7 +7,7 @@ import { chromium } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { failedUpgradeRecovery, surfaceRemovalAndOrphans } from './companion-visual-recovery-phases.mjs';
+import { failedUpgradeRecovery, surfaceRemovalAndOrphans, revisionSurfaceAndBlueprint } from './companion-visual-recovery-phases.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const HTML = ROOT + 'docs/concepts/companion/index.html', OUT = ROOT + 'reports/concepts/visual-editors', FIXTURES = ROOT + 'tests/fixtures/companion/';
@@ -467,7 +467,7 @@ async function selfProjectHealthAndHostileImports() {
 
 const phases = [legacyImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, retiredEntryActions,
   customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, legacySavedState, scenariosAndNarrow, legacyOutlineAdoption,
-  () => failedUpgradeRecovery(harness), selfProjectHealthAndHostileImports, () => surfaceRemovalAndOrphans(harness)];
+  () => failedUpgradeRecovery(harness), selfProjectHealthAndHostileImports, () => surfaceRemovalAndOrphans(harness), () => revisionSurfaceAndBlueprint(harness)];
 browser = await chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}) });
 try {
   await load();
