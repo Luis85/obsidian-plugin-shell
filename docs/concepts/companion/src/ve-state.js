@@ -76,7 +76,8 @@ function veHasContent(store) { return !!store && ['pages', 'components', 'layout
 // Shared by every travel path over the one design history (outline, storymap and visual undo/redo).
 // `candidate` already holds the snapshot's fields; the visual store is restored with a monotonic counter and
 // validated with full references. A legacy snapshot never coexists with visual designs, and is refused rather than
-// discarding visual work.
+// discarding visual work. A snapshot without a legacy store restores a design without one: a legacy store the
+// candidate inherited from the previous design is dropped.
 function veRestoreVisual(candidate, snapshot, previous) {
   const counter = previous.visualDesigns?.nextId || 1;
   try {
@@ -84,13 +85,12 @@ function veRestoreVisual(candidate, snapshot, previous) {
       visualAssert(!veHasContent(previous.visualDesigns), 'it predates the upgrade to the page and component editors and would discard their designs.');
       delete candidate.visualDesigns; return candidate;
     }
+    companionDropLegacy(candidate);
     if (snapshot.visualDesigns) candidate.visualDesigns = { ...designCopy(snapshot.visualDesigns), nextId: Math.max(snapshot.visualDesigns.nextId, counter) };
     else if (counter > 1) candidate.visualDesigns = { ...emptyVisualDesigns(), nextId: counter };
     else delete candidate.visualDesigns;
     if (candidate.visualDesigns) {
-      const legacy = companionLegacyDetails(candidate); // Only an empty counter placeholder may be dropped here.
-      visualAssert(!legacy || (!legacy.documents?.length && !legacy.revisions?.length), 'it would keep legacy detail designs next to visual designs.');
-      companionDropLegacy(candidate); candidate.schema = COMPANION_VERSION;
+      candidate.schema = COMPANION_VERSION;
       validateVisualDesigns(candidate.visualDesigns, veContext(candidate));
     }
     return candidate;

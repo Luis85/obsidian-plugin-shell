@@ -15,7 +15,7 @@ const shared = (await Promise.all(contracts.map(name => readFile('scripts/compan
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
 const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js'];
 const concept = (await Promise.all(sources.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
-const stubs = `const DESIGN_LIMITS = { history: 20 };
+const stubs = `const DESIGN_LIMITS = { history: 20, importBytes: 4000000 };
 function designCopy(v) { return JSON.parse(JSON.stringify(v)); }
 const state = { activeRun: null }, tdUi = { busy: false }, storageWarning = '', STORAGE_KEY = 'k', persistenceSnapshot = null, modalType = '', innerWidth = 1200;
 const localStorage = { getItem: () => null }, document = { addEventListener() {}, getElementById: () => null };
@@ -26,9 +26,9 @@ function emptyDataSources() { return { schema: 1, nextId: 1, sources: [], flows:
 function saveConceptState() { host.saves++; return true; } function save() { host.saves++; } function render() {} function notify(text) { host.notices.push(text); }`;
 // Declared after the concept sources, so this reduced gate replaces design-model.js's full structural one.
 const gate = 'function validSavedDesign(d) { return veShape(d) && [...d.history, ...d.future].every(s => veShape(s)); }';
-async function load() {
+async function load(extra = '') {
   const host = { p: null, saves: 0, notices: [] }, ctx = vm.createContext({ host });
-  vm.runInContext(shared + '\n' + stubs + '\n' + concept + '\n' + gate, ctx, { filename: 'concept-visual-state.js' });
+  vm.runInContext(shared + '\n' + stubs + '\n' + concept + '\n' + gate + '\n' + extra, ctx, { filename: 'concept-visual-state.js' });
   return { ctx, host };
 }
 const surface = id => ({ id, slug: id, label: id, kind: 'page', parent: null });
@@ -103,6 +103,49 @@ for (const path of ['outline', 'storymap', 'visual']) {
     for (const s of [ctx.design(), ...ctx.design().history, ...ctx.design().future]) assert.ok(!(s.detailDesigns && s.visualDesigns));
   });
 }
+
+const legacyStore = JSON.parse(await readFile('tests/fixtures/companion/detail-v4.json', 'utf8')).design.detailDesigns;
+for (const path of ['outline', 'storymap', 'visual']) {
+  test(`[VISUAL-HISTORY] ${path} redo to an entry without a legacy store drops a non-empty legacy store`, async () => {
+    const { ctx, host } = await load(), travel = travels(ctx)[path];
+    const store = { ...legacyStore, documents: [legacyStore.documents[2]], revisions: [] };
+    assert.ok(store.documents.length > 0);
+    const legacy = { ...plain(ctx.designSnapshot(baseDesign(ctx))), detailDesigns: store };
+    for (const counter of [9, 1]) { // redo target: an empty visual store with its counter, or no visual store at all
+      const d = baseDesign(ctx); if (counter > 1) { d.visualDesigns = ctx.designCopy({ ...plain(ctx.emptyVisualDesigns()), nextId: counter }); d.schema = COMPANION_VERSION; }
+      d.history = ctx.designCopy([legacy]); host.p = { design: d };
+      travel('undo');
+      assert.deepEqual(plain(ctx.design().detailDesigns.documents), store.documents);
+      travel('redo');
+      assert.equal(ctx.design().detailDesigns, undefined, `counter ${counter}`);
+      assert.equal(ctx.design().visualDesigns?.nextId, counter > 1 ? counter : undefined);
+    }
+  });
+}
+
+// Blueprint import: the real importDesign behind reduced gates (the visual shape and reference checks), so the
+// property allow-list is what decides.
+const importGate = `function structuralDesign(d) { return veShape(d); } function designIssues(d) { return veIssues(d); }
+function bricksOf(n) { return n?.bricks || []; } function emptyCanvas() { return { schema: 1 }; }`;
+test('[VISUAL-IMPORT] blueprint import refuses unknown properties before any write and upgrades a legacy store', async () => {
+  const { ctx, host } = await load(importGate); host.p = { design: baseDesign(ctx) }; addPage(ctx, 'node-1', 'Home');
+  const portable = plain(ctx.portableDesign()), before = JSON.stringify(ctx.design()), saves = host.saves;
+  assert.deepEqual([portable.kind, portable.executable], ['plugin-shell-blueprint', false]);
+  for (const key of ['bogus', '__proto__', 'history', 'revision']) {
+    const text = JSON.stringify({ ...portable, [key]: 1 });
+    assert.ok(text.includes(JSON.stringify(key)), key);
+    assert.throws(() => ctx.importDesign(text), /^Error: Unknown blueprint properties are not accepted\.$/, key);
+  }
+  assert.equal(JSON.stringify(ctx.design()), before); assert.equal(host.saves, saves);
+  // The same blueprint without the extra property imports; a legacy one is upgraded and clears the history.
+  ctx.importDesign(JSON.stringify(portable));
+  assert.equal(ctx.design().visualDesigns.pages.length, 1); assert.ok(ctx.design().history.length > 0);
+  const legacy = { ...portable, schema: 4, detailDesigns: plain(ctx.emptyDetailDesigns()) }; delete legacy.visualDesigns;
+  ctx.importDesign(JSON.stringify(legacy));
+  assert.equal(Object.hasOwn(ctx.design(), 'detailDesigns'), false); assert.equal(ctx.design().schema, COMPANION_VERSION);
+  assert.equal(ctx.design().history.length + ctx.design().future.length, 0);
+  assert.match(vm.runInContext('veUi.notice', ctx), /upgraded to the new page and component editors/);
+});
 
 test('[VISUAL-HISTORY] veCommit refuses a design that still holds legacy detail designs', async () => {
   const { ctx, host } = await load(); const d = baseDesign(ctx); d.detailDesigns = ctx.emptyDetailDesigns(); host.p = { design: d };

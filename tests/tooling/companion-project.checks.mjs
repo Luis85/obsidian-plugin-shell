@@ -6,7 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
+import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument, COMPANION_VERSION,
+  companionDesignKey, companionDropLegacy, companionLegacyDetails, companionUpgradeDesign } from '../../scripts/companion/project-contract.mjs';
 import { migrateDetailDesigns } from '../../scripts/companion/visual/visual-migrate.mjs';
 import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
 
@@ -61,6 +62,29 @@ test('[COMPANION-VISUAL-SEED] self-project is v5 visual designs equal to the emb
   const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
   assert.deepEqual(migrateDetailDesigns(structuredClone(legacy.design.detailDesigns), legacy.design).visualDesigns, embedded);
   assert.deepEqual(migrateCompanionDocument(structuredClone(document)), { document, report: null });
+});
+test('[COMPANION-LEGACY] design keys are an explicit allow-list; kind, executable and prototype names are not design keys', () => {
+  for (const key of ['schema', 'blueprint', 'nodes', 'library', 'storymaps', 'detailDesigns', 'visualDesigns']) assert.equal(companionDesignKey(key), true, key);
+  for (const key of ['kind', 'executable', 'bogus', '__proto__', 'constructor', 'toString', 'history', '']) assert.equal(companionDesignKey(key), false, key);
+});
+test('[COMPANION-LEGACY] legacy stores are read and dropped only through the contract', () => {
+  const design = { schema: 4, nodes: [], detailDesigns: { schema: 1, nextId: 1, documents: [] }, visualDesigns: undefined };
+  assert.equal(companionLegacyDetails(design), design.detailDesigns);
+  assert.equal(companionLegacyDetails(undefined), undefined); assert.equal(companionLegacyDetails({ nodes: [] }), undefined);
+  assert.equal(companionDropLegacy(design), design);
+  assert.deepEqual(Object.keys(design), ['schema', 'nodes', 'visualDesigns']);
+  assert.deepEqual(companionDropLegacy({ schema: 5 }), { schema: 5 });
+});
+test('[COMPANION-LEGACY] upgrade replaces a legacy store with its validated migration or leaves the design untouched', async () => {
+  const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8')).design;
+  const expected = migrateDetailDesigns(structuredClone(legacy.detailDesigns), structuredClone(legacy)), design = structuredClone(legacy);
+  assert.deepEqual(companionUpgradeDesign(design), expected.report);
+  assert.equal(design.schema, COMPANION_VERSION); assert.equal(Object.hasOwn(design, 'detailDesigns'), false);
+  assert.deepEqual(design.visualDesigns, expected.visualDesigns); assert.ok(design.visualDesigns.pages.length > 0);
+  // A component design whose library entry is missing cannot migrate: nothing about the design changes.
+  const broken = { ...structuredClone(legacy), library: [] }, before = structuredClone(broken);
+  assert.throws(() => companionUpgradeDesign(broken), /^Error: VISUAL_INVALID: Detail designs use library entry .* missing from the component library\.$/);
+  assert.deepEqual(broken, before);
 });
 test('[COMPANION-CLI] original Unicode/whitespace bytes returned, zero writes even to missing target', async t => {
   const f = await fixture(t), text = '  ' + seed.replace('Plugin Companion', 'Plugin Companion — ä') + '\n\n';

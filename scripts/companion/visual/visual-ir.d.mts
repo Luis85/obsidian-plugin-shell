@@ -28,11 +28,11 @@ export interface ComponentRevision { id: string; componentId: string; version: s
 export interface VisualDesigns { schema: 3; nextId: number; catalog: { id: 'nuxt-ui'; version: 1 }; pages: PageDefinition[]; components: ComponentDefinition[]; layouts: LayoutDefinition[]; revisions: ComponentRevision[] }
 export type DefinitionRef = { kind: 'page' | 'component' | 'layout'; id: string };
 export interface WalkAt { parent: UiNode | null; depth: number; list: UiNode[]; index: number }
-export const VISUAL_SCHEMA: 3; export const VISUAL_CATALOG: { readonly id: 'nuxt-ui'; readonly version: 1 };
-export const VISUAL_TAGS: readonly string[]; export const VISUAL_TEXT_ROLES: readonly string[]; export const VISUAL_STATES: readonly VisualState[];
-export const VISUAL_PROP_TYPES: readonly string[]; export const VISUAL_PAYLOAD_TYPES: readonly string[]; export const VISUAL_LAYOUT_MODES: readonly string[]; export const VISUAL_DOM_EVENTS: readonly string[];
-export const VISUAL_LIMITS: Readonly<Record<'nodes' | 'definitions' | 'depth' | 'composition' | 'layouts' | 'revisions' | 'interactions' | 'actions' | 'scenarios' | 'contract', number>>;
-export const VISUAL_DEPENDENCY_LIMIT: number;
+export declare const VISUAL_SCHEMA: 3; export declare const VISUAL_CATALOG: { readonly id: 'nuxt-ui'; readonly version: 1 };
+export declare const VISUAL_TAGS: readonly string[]; export declare const VISUAL_TEXT_ROLES: readonly string[]; export declare const VISUAL_STATES: readonly VisualState[];
+export declare const VISUAL_PROP_TYPES: readonly string[]; export declare const VISUAL_PAYLOAD_TYPES: readonly string[]; export declare const VISUAL_LAYOUT_MODES: readonly string[]; export declare const VISUAL_DOM_EVENTS: readonly string[];
+export declare const VISUAL_LIMITS: Readonly<Record<'nodes' | 'definitions' | 'depth' | 'composition' | 'layouts' | 'revisions' | 'interactions' | 'actions' | 'scenarios' | 'contract', number>>;
+export declare const VISUAL_DEPENDENCY_LIMIT: number;
 export function visualAssert(ok: unknown, message: string): asserts ok;
 export function visualIsRef(value: unknown): value is string; export function visualIsText(value: unknown, max: number, required?: boolean): value is string;
 export function visualIsLine(value: unknown, max: number): value is string; export function visualIsKey(value: unknown): value is string;
