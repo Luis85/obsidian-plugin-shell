@@ -4,28 +4,33 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 3272,
-      "sha256": "0a1e226ae78be0d5596bca92dde8b75cd46b13e8bdcda542742be492015f33e7"
+      "bytes": 4687,
+      "sha256": "1c7d8645b04b8155a42e93869d07039b8f06937de494bb2c18a00611ae158097"
     },
     {
       "path": "SKILL.md",
-      "bytes": 10863,
-      "sha256": "8a2c476e9aa48807d045836ee3fa31ae7d6492173a1b8972a3b73335e52f166c"
+      "bytes": 11884,
+      "sha256": "d68bde3875ecb07c6de3dcf3ba82ce3d3894e18a44609d8ee099002d0e5b7f37"
     },
     {
       "path": "VERIFICATION.md",
-      "bytes": 3517,
-      "sha256": "d9cf2d846ad9b1090a4cd0d992865ab9102fbfa22fe7d2051a74deed32de9ed4"
+      "bytes": 3798,
+      "sha256": "45fdba08b227814f6de021ec39c51ae9f0384bb56a1545ffb19de822ba062674"
+    },
+    {
+      "path": "assets/templates/browser-entry.ts.tmpl",
+      "bytes": 1566,
+      "sha256": "ed8d37548737b9ef9a533e1d90e1da0a0881e5b664a3fa6987a4e7850b2f152e"
     },
     {
       "path": "assets/templates/design-brief.md",
-      "bytes": 2253,
-      "sha256": "e72976497ba7d4eeadaa48f45e175c3afdeb43f55c56a083d9fbc1e4e7634b70"
+      "bytes": 2259,
+      "sha256": "eb1b9775019dae51669a62083f3adc0d0c024269b35d50bb17dbaa34ef77ac21"
     },
     {
       "path": "assets/templates/execution-prompt.md",
-      "bytes": 8325,
-      "sha256": "1bfb895a1bb31635d9cc954705f72242879ad4504969837fab26f9ac3be05dfa"
+      "bytes": 9661,
+      "sha256": "03033c6240638ad804c117216993d9214280658ca3b40ad03042b0fc94128916"
     },
     {
       "path": "assets/templates/integration-map.json",
@@ -83,19 +88,34 @@
       "sha256": "38d1bd54a323c6500a267cbc565591fea3aa81af0e7cd835f3e72b0454d64ed8"
     },
     {
+      "path": "references/tooling-integration.md",
+      "bytes": 9759,
+      "sha256": "6d28c18ca6e6796e29f8d4a15294495177b79b67a2309ff72d88713b5e275f79"
+    },
+    {
+      "path": "references/tooling-verification.md",
+      "bytes": 4092,
+      "sha256": "e8d7f94244050215c7c77b2a2dff6561f37e8ecc87f8ebb8a50eda872ad92cad"
+    },
+    {
       "path": "references/vue-typescript-quality.md",
       "bytes": 6044,
       "sha256": "ca8d0dd5aebd68b4db80fdde87a3739c6c5b351016740c82da468e744cf65c2d"
     },
     {
       "path": "scripts/README.md",
-      "bytes": 4782,
-      "sha256": "f0f47222d52f508b97ede61564f7939301bcc38fc3da07c02bc2bbde543ae030"
+      "bytes": 5958,
+      "sha256": "285335615156bd36aa43b91a3896753243cbe62ec8b874a55743663578242e70"
+    },
+    {
+      "path": "scripts/build-prototype.mjs",
+      "bytes": 1414,
+      "sha256": "666aa0ccd98c38d94265a1c72fa2c4684bfbdb1da1b86e5ebdbe12cb98b42b7d"
     },
     {
       "path": "scripts/build-single-file.mjs",
-      "bytes": 3652,
-      "sha256": "272c227b590155ca3192f23e1766e6a10abdb9b2a29535afd4ea2b4feeabc3c5"
+      "bytes": 3938,
+      "sha256": "dc5a49591714072931720108acb01d6e6878e70fb5c582730b5d32367cc00909"
     },
     {
       "path": "scripts/check-offline.mjs",
@@ -113,6 +133,21 @@
       "sha256": "f5a51667d4857b94ae5b43c63c9c64539b50044a7982907064b2c2fda85c4a54"
     },
     {
+      "path": "scripts/lib/build-output.mjs",
+      "bytes": 1621,
+      "sha256": "727dfd07d90e145d4b440eb63d0161b3c39085c1f03a6249ebe3ed837fed023f"
+    },
+    {
+      "path": "scripts/lib/build-worker.mjs",
+      "bytes": 4491,
+      "sha256": "628e125784fa879850e8698b6de89ffee15ae3c83be293e7cd7ca289f4f702b4"
+    },
+    {
+      "path": "scripts/lib/framework.mjs",
+      "bytes": 6637,
+      "sha256": "927c0b1fb031605f48853bc22b080d9086f4b5f72bac99989e0f83102d9353bd"
+    },
+    {
       "path": "scripts/lib/io.mjs",
       "bytes": 3710,
       "sha256": "61857c84300a97e7bebc75dff6ba9a18994a8ad860e9ddfb1d687e266ed76c33"
@@ -124,8 +159,18 @@
     },
     {
       "path": "scripts/pack-concept.py",
-      "bytes": 10068,
-      "sha256": "868cbb15766b1c2d6c0f0f2646f3ea0feea315b8a2bc0baf025e7bdfa85d0318"
+      "bytes": 10673,
+      "sha256": "7d9531b496ed0788338e4484a1c336f8ffe0f6600673cbe50ac98afff0b42179"
+    },
+    {
+      "path": "scripts/prototype.mjs",
+      "bytes": 6580,
+      "sha256": "021399931925e1a96cea2c52a70c90ff8db70cb91d363dd60fc708cfe1d9918e"
+    },
+    {
+      "path": "scripts/save-concept.mjs",
+      "bytes": 4028,
+      "sha256": "1ecd8bb2e02a3ba7177d5a3f5793cdf7d93253b5a1d2446875bb32d5598df2cc"
     },
     {
       "path": "scripts/validate-project.mjs",
@@ -134,18 +179,23 @@
     },
     {
       "path": "scripts/verify-browser.mjs",
-      "bytes": 5588,
-      "sha256": "5786c0fb8513d803ca12076a464056bcd3041d84a9cac2c199e2ed30d59a02cf"
+      "bytes": 5684,
+      "sha256": "728c0c180c9abdcb8e30ff9b8c7bfa46cabb01e484f93f7eb6b9b5485ae540c8"
     },
     {
       "path": "tests/helpers.test.mjs",
-      "bytes": 7832,
-      "sha256": "787f8efa7081ea1dd2e2ff5640aee9479d50ce69af8ff26312095650a5b793c0"
+      "bytes": 7999,
+      "sha256": "019751847fff14b14c5faad27048b4040e48b39b6945fd4af645176beb7dde30"
+    },
+    {
+      "path": "tests/integration.test.mjs",
+      "bytes": 5655,
+      "sha256": "af78dea73b00b31ab5c82d2871c7eb44c5ac7748a26fcb0eaf61b3970efbc54b"
     },
     {
       "path": "tests/test_pack_concept.py",
-      "bytes": 7535,
-      "sha256": "0b32966917adbcc119c817e00184b0e86f64cddb802b0ebabc467706200d9dbd"
+      "bytes": 8447,
+      "sha256": "a855186b3df7242805eafc5d2dbd72ab6ded97c575bfa339a20a6161dceca184"
     },
     {
       "path": "tests/test_skill_contract.py",
@@ -154,8 +204,15 @@
     },
     {
       "path": "tests/validator.test.mjs",
-      "bytes": 4282,
-      "sha256": "7e4e19a1e42bdb33095d1a2bca2ec9479ffd6c14813757fd15cfb6303af79ca3"
+      "bytes": 4299,
+      "sha256": "da833c86367e65d2d395fc79c2a2a6beada08cdccbef21d91ce4642240383a5c"
+    }
+  ],
+  "entrypoints": [
+    {
+      "path": ".agents/skills/companion-prototype-design/SKILL.md",
+      "bytes": 1609,
+      "sha256": "2b26c9fa66576b7339df12c40d490d63554999fd56a1709db0dffda9618c30fa"
     }
   ]
 }

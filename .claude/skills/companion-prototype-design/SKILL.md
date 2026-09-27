@@ -13,7 +13,7 @@ compatibility: >-
   Node/npm toolchain, an installed browser test runner, and Python 3 for ZIP
   packaging. Subagents are optional. No Nuxt framework or online runtime required.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   repository: Luis85/obsidian-plugin-shell
   reference-pr: "5"
 ---
@@ -23,6 +23,14 @@ metadata:
 Turn **an idea → a shared design → a copy-and-paste execution prompt → an importable
 prototype package**. A design conversation is not permission to start implementing,
 replace the current companion project, write into a vault, or change production code.
+
+## Canonical skill and Codex entrypoint
+
+This directory is the single source of truth. The repository's
+`.agents/skills/companion-prototype-design/SKILL.md` is a thin Codex adapter that
+reads this file and follows these same references and scripts. Do not fork the
+workflow, prompt templates, helper code or approval rules for an agent host.
+Use actual host capabilities; a Claude directory name never requires launching Claude.
 
 ## Operating rules
 
@@ -152,20 +160,27 @@ Default implementation direction:
    source integration and report any generator/custom-adapter limitations.
 7. Deliver the HTML, sources, authoring JSON, traceability and evidence together.
 
-Use these helpers where applicable; read `scripts/README.md` before running them:
+Read `references/tooling-integration.md` and `scripts/README.md` first. Prefer the
+unified `npm run prototype:tools --` entrypoint and the actual live shell capability catalog.
+Reuse shell new/import/generate/makers/styles/fixtures/checks instead of writing parallel
+tools. Source generation and dependency installation require separate explicit authority.
 
 ```sh
-node <skill>/scripts/validate-project.mjs --repo <checkout> --input <project.json>
-node <skill>/scripts/build-single-file.mjs --js <compiled-iife.js> --css <scoped.css> --project <project.json> --out <prototype.html> --title <title>
-node <skill>/scripts/check-offline.mjs --html <prototype.html>
-node <skill>/scripts/verify-browser.mjs --root <package-root>
-python <skill>/scripts/pack-concept.py --root <package-root> --output <new.zip>
+npm run prototype:tools -- discover --repo <checkout>
+npm run prototype:tools -- new --repo <checkout> --out <source> --input <project.json>
+# After exact plan review, repeat with --execute --apply <planHash>.
+npm run prototype:tools -- shell --repo <source> --execute -- check
+npm run prototype:tools -- build --repo <source> --entry harness/prototype/main.ts --project <project.json> --out <prototype.html> --title <title> --execute
+npm run prototype:tools -- browser --root <package-root>
 ```
 
-The HTML assembler is **not** a Vue compiler. First build one classic IIFE plus CSS
-with the repository's reviewed Vue/Vite pipeline; no chunks, imports or runtime CDN.
-Its offline check is a conservative static check, not a browser or security audit.
-The validator runs the real read-only reader and generator plan; it does not apply.
+The build adapter runs real workspace Vite with the shell's shared config, hash-guarded
+Nuxt UI adaptation, scoped CSS and license notices. It then calls the single-file
+assembler. No additional dependency or alternate UI pipeline is installed. Compilation
+is not type checking or acceptance; run applicable existing gates and actual browser
+journeys. The low-level assembler remains available only for already compiled output.
+For source-only bootstrap, adapt `assets/templates/browser-entry.ts.tmpl`; do not import
+native modules into the browser entry or fake required typed service injections.
 
 `companion.project.json` must be accepted by the real importer/compiler. Never invent
 an alternative import schema. Keep prototype metadata, source inventories and change

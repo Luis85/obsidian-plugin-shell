@@ -13,7 +13,7 @@ const project = Buffer.from('{ "kind":"obsidian-companion-project", "executable"
 const configuration = { javascript: '(function(){document.documentElement.dataset.prototypeReady="true"})();',
   css: '.prototype-root { color: var(--text-normal); }', projectBytes: project, title: 'Café & notes' };
 function scratch(t) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-helper-test-'));
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'skill-helper-test-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   return root;
 }
@@ -35,9 +35,10 @@ test('bounded UTF-8 reading rejects oversized, directories and invalid bytes', t
 test('reads and output checks refuse linked files and linked ancestors', t => {
   const root = scratch(t), file = path.join(root, 'file');
   fs.writeFileSync(file, 'ok');
-  fs.symlinkSync(file, path.join(root, 'linked'));
+  try { fs.symlinkSync(file, path.join(root, 'linked')); }
+  catch (error) { if (['EPERM', 'EACCES'].includes(error.code)) return t.skip('Host does not grant symlink privilege'); throw error; }
   assert.throws(() => readText(path.join(root, 'linked')), /Symlink/);
-  fs.symlinkSync(root, path.join(root, 'linked-directory'));
+  fs.symlinkSync(root, path.join(root, 'linked-directory'), 'dir');
   assert.throws(() => noLinks(path.join(root, 'linked-directory', 'future')), /Symlink/);
 });
 test('build output is fresh by default; replacement requires explicit flag', t => {

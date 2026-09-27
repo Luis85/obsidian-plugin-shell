@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { validateProject } from '../scripts/validate-project.mjs';
 function fakeCheckout(t, readerBody, plannerBody) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'fake-prototype-cli-'));
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'fake-prototype-cli-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, 'scripts/companion'), { recursive: true });
   const prelude = `import fs from 'node:fs'; import path from 'node:path';

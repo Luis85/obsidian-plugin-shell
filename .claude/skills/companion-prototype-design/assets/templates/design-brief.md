@@ -1,4 +1,4 @@
-# {{Concept name}} — design brief {{version}}
+# {{Concept name}} — design brief {{brief_version}}
 
 Status: discovery | ready-for-review | agreed | reopened
 Mode: new-plugin | new-feature | improvement

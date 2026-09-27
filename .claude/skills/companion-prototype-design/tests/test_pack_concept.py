@@ -1,5 +1,6 @@
 """Synthetic package-fixture tests; not a compiled prototype or real integration claim."""
 import importlib.util
+import errno
 import json
 from pathlib import Path
 import tempfile
@@ -12,7 +13,7 @@ SPEC.loader.exec_module(PACKER)
 
 class PackagingTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
+        self.temp = tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve())
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
         self.root = self.base / 'prototype'
@@ -36,6 +37,22 @@ class PackagingTests(unittest.TestCase):
             'artifact': {'path': 'prototype.html', 'sha256': PACKER.digest((self.root/'prototype.html').read_bytes())},
             'source': {'path': 'source', 'packageManager': 'npm@11.19.1'}, 'status': 'incomplete'}
         self.update_manifest()
+
+    def symlink(self, path, target, directory=False):
+        try:
+            path.symlink_to(target, target_is_directory=directory)
+        except OSError as error:
+            if error.errno in (errno.EACCES, errno.EPERM) or getattr(error, 'winerror', None) == 1314:
+                self.skipTest('Host does not grant symlink privilege')
+            raise
+
+    def test_read_only_inspection_returns_the_same_inventory_without_writes(self):
+        before = sorted(str(p.relative_to(self.root)) for p in self.root.rglob('*'))
+        result = PACKER.inspect(self.root)
+        self.assertEqual(result['slug'], 'fixture')
+        self.assertEqual(result['prototypeStatus'], 'incomplete')
+        self.assertEqual(len(result['files']), len(PACKER.scan(self.root)))
+        self.assertEqual(before, sorted(str(p.relative_to(self.root)) for p in self.root.rglob('*')))
 
     def write(self, name, content):
         target = self.root / name
@@ -79,12 +96,12 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'SFC'): self.pack()
 
     def test_symlink_is_refused(self):
-        (self.root/'link').symlink_to(self.base)
+        self.symlink(self.root/'link', self.base, True)
         with self.assertRaisesRegex(ValueError, 'Symlink'): self.pack()
 
     def test_symlinked_root_is_refused(self):
         linked = self.base/'linked'
-        linked.symlink_to(self.root, target_is_directory=True)
+        self.symlink(linked, self.root, True)
         with self.assertRaisesRegex(ValueError, 'Symlink'): PACKER.package(linked, self.base/'out.zip')
 
     def test_secret_and_font_files_are_refused(self):

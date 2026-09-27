@@ -1,12 +1,14 @@
 # Helpers and trust boundaries
 
-All Node helpers use built-in modules except `verify-browser.mjs`, which resolves the
-already installed `@playwright/test` from the prototype's source/package.json. ZIP
+The standalone inspection/assembly helpers use Node built-ins. Integrated helpers load
+the trusted shell API; building resolves Vite and stack dependencies from its lockfile.
+`verify-browser.mjs` resolves installed `@playwright/test` from source/package.json. ZIP
 packaging needs only Python 3. Prefer the repository's qualified runtime; helper unit
 tests in this delivery were run separately, as recorded in VERIFICATION.md.
 
-No helper installs dependencies, fetches a template, commits/pushes, runs native Obsidian,
-or imports into the user's live companion. `validate-project` executes the inspected
+No helper implicitly installs dependencies, fetches a template, commits/pushes, runs native
+Obsidian, or imports into the user's live companion. Only a separately authorized
+`prototype shell --execute -- install --yes` invokes the existing exact-lock installer. `validate-project` executes the inspected
 local repository's code. `verify-browser` executes the supplied browser artifact and
 trusted journey test module. Point them only at trusted inputs in isolated workspaces.
 
@@ -39,24 +41,35 @@ Local path checks reduce accidental traversal/symlink mistakes, but do not promi
 transactional safety against concurrent malicious filesystem mutation. Repository
 plan/apply retains its own authoritative containment/ownership checks.
 
-## Single-file build integration
+## Integrated compilation and save workflow
 
-Reuse/copy the shell's approved Vue/Vite transform, scoped styles and Nuxt UI runtime
-patches into the independently buildable source workspace. Emit one classic browser IIFE
-and one CSS file with all assets inlined; verify no additional files are needed. The
-assembler takes those files plus the real companion JSON and outputs prototype.html.
-It does not compile `.vue`, install Nuxt UI, prove stylesheet scoping, or invent styles.
+Read `../references/tooling-integration.md` for the complete lifecycle, command owners,
+examples and approval boundaries. `prototype.mjs` is the preferred entrypoint (also
+`npm run prototype:tools --` in the shell and its generated projects). Live discovery resolves
+the actual source/compiled shell API. `shell` delegates to its parser/operations; `npm`
+selects a bounded existing quality script and uses its process runner. Default behavior
+is read/plan; `--execute` is explicit process authority and planned writes also need the
+current `--apply` hash. Install remains explicit, never a hidden generation effect.
 
-Mount Vue on `#prototype-app`. Read `#prototype-project-data` as inert JSON with
-`encoding`, `sha256`, and base64 `content`; decode original UTF-8 bytes in a browser
-adapter. The separate companion.project.json is what the actual importer consumes.
-Download that exact decoded data, not the carrier object. Use the adapter at bootstrap,
-not from a pure domain module. Set `data-prototype-ready="true"` on `<html>` after mount.
+`build` invokes the workspace's Vite/sharedConfig/CSS scoper/qualified vendor adapter
+and bundled-license plugin, emits one in-memory IIFE/CSS result, then calls the assembler.
+Use an authored TypeScript entry under `harness/prototype/`. All native imports, dynamic
+chunks, external assets, dependency-pin mismatches and missing real stack modules fail.
+The low-level assembler above is not itself a Vue compiler; the new build adapter is the
+composition of the existing compiler pipeline with that assembler. The HTML is separate
+from native `dist/` and only changes after successful compilation and static checks.
 
-The assembler's CSP blocks network/eval/foreign objects, but permits inline styles for
-Vue's runtime style bindings. This is not a hostile-code sandbox. Offline inspection is
-conservative; escaped CSS or unusual constructs may require inlining/simplification.
-Do not disable CSP/checks merely to make a broken artifact appear successful.
+The scoped mount is `#prototype-app.ps--<plugin-id>[data-plugin-ui="<plugin-id>"]`.
+Read `#prototype-project-data` as inert JSON with encoding/hash/base64 bytes. Export those
+original bytes, not the carrier. Set the ready marker after real Vue mount and inject only
+typed deterministic browser adapters. The browser helper resolves the locked Playwright
+from source/ and honors `SHELL_CHROMIUM`, without provisioning or changing versions.
+
+`save` calls the **same** Python package scanner as ZIP (`--check`, read-only), rechecks
+all byte hashes, then uses `scripts/shared/file-plan.mjs`. Preview and apply are separate;
+only a new `docs/concepts/<slug>/` directory is allowed. A save is not Git commit/push,
+companion import, or a claim of verification. Python discovery uses `PYTHON`/`python3`,
+matching the repository's suite runner. The existing direct helpers remain supported.
 
 ## Browser journey module
 
@@ -80,7 +93,7 @@ checks and state those gaps honestly.
 ## Run helper tests
 
 ```sh
-node --test tests/helpers.test.mjs tests/validator.test.mjs
+node --test tests/helpers.test.mjs tests/validator.test.mjs tests/integration.test.mjs
 python -B -m unittest discover -s tests -p 'test_*.py' -v
 ```
 

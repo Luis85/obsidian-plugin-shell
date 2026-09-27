@@ -137,6 +137,19 @@ def validate(files: dict[str, bytes]) -> dict:
             raise ValueError('Existing feature/improvement requires baseline/change/regression artifacts')
     return manifest
 
+def inventory(files: dict[str, bytes], manifest: dict) -> dict:
+    return {'kind': 'prototype-package-inventory', 'schemaVersion': 1,
+            'slug': manifest['slug'], 'prototypeStatus': manifest['status'],
+            'status': 'structure-and-hashes-only-not-execution-proof',
+            'files': [{'path': p, 'bytes': len(b), 'sha256': digest(b)} for p, b in sorted(files.items())]}
+
+def inspect(root: Path) -> dict:
+    root = safe_path(root)
+    if not root.is_dir():
+        raise ValueError('Root must be an existing directory')
+    files = scan(root)
+    return inventory(files, validate(files))
+
 def package(root: Path, output: Path) -> dict:
     root, output = safe_path(root), safe_path(output)
     if not root.is_dir():
@@ -147,9 +160,7 @@ def package(root: Path, output: Path) -> dict:
         raise ValueError('Output parent must exist')
     files = scan(root)
     manifest = validate(files)
-    receipt = {'kind': 'prototype-package-inventory', 'schemaVersion': 1,
-               'status': 'structure-and-hashes-only-not-execution-proof',
-               'files': [{'path': p, 'bytes': len(b), 'sha256': digest(b)} for p, b in sorted(files.items())]}
+    receipt = inventory(files, manifest)
     files['PACKAGE-INVENTORY.json'] = (json.dumps(receipt, indent=2) + '\n').encode()
     created = False
     try:
@@ -172,10 +183,12 @@ def package(root: Path, output: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--output', type=Path, required=True)
+    action = parser.add_mutually_exclusive_group(required=True)
+    action.add_argument('--output', type=Path)
+    action.add_argument('--check', action='store_true', help='Read-only inventory for the shared concept save planner')
     options = parser.parse_args()
     try:
-        print(json.dumps(package(options.root, options.output), indent=2))
+        print(json.dumps(inspect(options.root) if options.check else package(options.root, options.output), indent=2))
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as error:
         print(str(error), file=sys.stderr)
         raise SystemExit(1) from error

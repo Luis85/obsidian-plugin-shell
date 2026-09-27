@@ -46,6 +46,24 @@ Use actual plan paths, not a guessed parallel architecture. Keep generated UI de
 from the authoring model; record all source-owned custom behavior and native remaining work.
 Do not hand-code a separate HTML imitation of the Vue application.
 
+## Existing-tool-first execution
+Read the installed skill's `references/tooling-integration.md`. Discover the real
+commands/makers/profiles with `npm run prototype:tools -- discover --repo <trusted checkout>`.
+Prefer shell `project inspect`, `new --from`, `project import`, `generate`, maker recipes,
+styles/fixture operations and the existing check/test/verify gates. Preserve exact-plan
+approval and the distinct explicit dependency install. Use `prototype.mjs shell` for
+these operations; do not create parallel parsers, file planners, dependency resolution,
+generator formats or shell command strings. Capture actual machine-readable results.
+
+Build with `npm run prototype:build -- --repo . --entry harness/prototype/main.ts
+--project ../companion.project.json --out ../prototype.html --title <agreed title> --execute`
+from source/. This uses its real Vite, shared Vue/Nuxt UI adaptation, CSS ownership and
+license pipeline, then the installed single-file assembler. Adapt the provided browser
+entry template, typed fixture injections and portal ownership to the actual component.
+Do not replace this path with a CDN or plain-JS imitation. Run type checks separately.
+Use the same package scanner for ZIP and the shared file planner for an approved save.
+Never patch global exclusions or regenerate somebody else's ownership receipts.
+
 ## Import and integration contract
 {{Insert inspected envelope/subsystem versions, catalog/pins, byte limits, validator/
 compiler entrypoints, and exact code/test root behavior. Include current model facts,
@@ -93,9 +111,8 @@ No absolute/workspace/file links back to the creator's checkout. No node_modules
 secrets, personal vaults, caches or font files. Preserve dependency/license notices.
 
 Bundle all runtime code/styles/icons/assets/fixtures; no CDN, dynamic external chunks,
-server, remote JSON fetch or runtime Vue template compiler. Reuse the installed skill's
-single-file assembler after generating a real IIFE + scoped CSS, or supply an equally
-verified pipeline. Embed exact original project JSON bytes for download. Set the documented
+server, remote JSON fetch or runtime Vue template compiler. Use the installed skill's integrated
+prototype build adapter and its single-file assembler, producing a real IIFE + scoped CSS. Embed exact original project JSON bytes for download. Set the documented
 ready marker only after real Vue mount. Test blocked storage as well as normal loading.
 
 ## Required verification

@@ -15,6 +15,9 @@ export function assemble({ javascript, css, projectBytes, title }) {
   if (project.kind !== 'obsidian-companion-project' || project.executable !== false) {
     throw new Error('Expected non-executable full companion project; run real validator separately');
   }
+  const pluginId = project.project?.id;
+  if (pluginId !== undefined && !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(pluginId)) throw new Error('Invalid prototype CSS identity');
+  const owner = pluginId ? ` class="prototype-root ps--${pluginId}" data-plugin-ui="${pluginId}"` : ' class="prototype-root"';
   const cssIssues = checkCss(css);
   if (cssIssues.length) throw new Error(cssIssues.join('; '));
   if (/<\/style/i.test(css)) throw new Error('CSS contains an HTML style closing sequence');
@@ -23,7 +26,7 @@ export function assemble({ javascript, css, projectBytes, title }) {
   const scriptHash = Buffer.from(sha256(js), 'hex').toString('base64');
   const policy = `default-src 'none'; script-src 'sha256-${scriptHash}'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`;
   const data = JSON.stringify({ encoding: 'base64', sha256: sha256(projectBytes), content: projectBytes.toString('base64') });
-  const html = `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${escape(policy)}"><title>${escape(title)}</title><style>${css}</style></head><body><div id="prototype-app" class="prototype-root"></div><script id="prototype-project-data" type="application/json">${data}</script><script>${js}</script></body></html>\n`;
+  const html = `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${escape(policy)}"><title>${escape(title)}</title><style>${css}</style></head><body><div id="prototype-app"${owner}></div><script id="prototype-project-data" type="application/json">${data}</script><script>${js}</script></body></html>\n`;
   const issues = checkHtml(html);
   if (issues.length) throw new Error(issues.join('; '));
   return html;

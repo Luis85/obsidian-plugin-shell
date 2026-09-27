@@ -20,10 +20,11 @@ progressively loaded references/scripts. It is not a ChatGPT connector installat
 No account, plugin permission, repository change or global install is performed by
 extracting this archive.
 
-For existing generated plugins, installing this folder only changes agent guidance.
-For future generator output, extend `scripts/companion/devkit` and its compiler inventory
-under the repository's normal review/tests; this package does **not** silently patch
-that generator or claim automatic propagation to every generated project.
+The repository integrates this complete package into `devkitFiles` with extension
+ownership and into the framework release-template inventory. New generated projects
+receive the skill, helpers and npm aliases; regeneration preserves user edits. Only this
+explicit skill subtree is shipped, never personal `.claude` settings or unrelated skills.
+See `references/tooling-integration.md` for the source/compiled-kit boundary and commands.
 
 ## Start a session
 
@@ -43,7 +44,7 @@ A second discovery interview is unnecessary unless a genuine compatibility gap r
 
 SKILL.md; design interview, repository/import constraints, architecture/QA, subagent and
 artifact references; brief/manifest/integration/prompt templates; read-only inspection,
-real reader/compiler-plan validation, single-file assembly, offline inspection, actual
+real reader/compiler-plan validation, real shell command/maker/generator delegation, shared-pipeline Vue builds, single-file assembly, offline inspection, actual
 browser-check runner, change reporting, safe ZIP packaging; helper regression tests.
 See `scripts/README.md` for commands and `VERIFICATION.md` for tested/untested scope.
 
@@ -60,4 +61,23 @@ magic merges. `companion:generate` is read-only byte echo; `shell.mjs generate` 
 already compiled Vue output; it does not fake a Nuxt UI application or compiler.
 
 This delivery creates the skill, not a bespoke prototype without a product brief.
-No changes have been committed or pushed to the repository by this package.
+Repository installation and updates are reviewed in PR #27; executing the skill never implicitly commits or pushes.
+
+## Codex support — same workflow, no fork
+
+Claude reads this directory's `SKILL.md`. Codex discovers the thin entrypoint at
+`.agents/skills/companion-prototype-design/SKILL.md` in the same repository. Invoke
+`$companion-prototype-design` in Codex or select it through `/skills`; the adapter
+reads the canonical `.claude/skills/companion-prototype-design/SKILL.md` directly.
+It does not require a Claude account, a Claude process, or duplicated helper scripts.
+Install both repository directories together for Codex use; copying only the adapter
+is incomplete. Relative canonical resources resolve from the Claude skill directory,
+not from `.agents` or the terminal's working directory.
+
+The canonical package inventory records the single external Codex entrypoint's hash.
+The generator and framework kit copy only that allowlisted entrypoint, never other
+`.agents` content. Workflow maintenance happens only here. User-edited canonical and
+adapter files keep the existing generator's extension-ownership conflict protection.
+
+Discovery reference, checked 2026-09-27: https://developers.openai.com/codex/skills/
+(official documentation redirects to https://learn.chatgpt.com/docs/build-skills).

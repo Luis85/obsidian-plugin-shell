@@ -1,4 +1,8 @@
-# Verification receipt
+# Verification receipt — original v1.0.0 archive
+
+This is the historical archive receipt. The v1.1.0 repository integration and new
+verification results are recorded in `references/tooling-verification.md`. Statements
+below about unperformed repository integration apply only to the original delivery.
 
 Date: 2026-09-27. Skill version: 1.0.0.
 

@@ -23,7 +23,7 @@ export async function verifyBrowser(directory) {
   const journeys = await import(pathToFileURL(modulePath).href);
   if (typeof journeys.runJourneys !== 'function') throw new Error('Journey module must export runJourneys({page, expect})');
   let browser;
-  try { browser = await runner.chromium.launch({ headless: true }); }
+  try { browser = await runner.chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: noLinks(process.env.SHELL_CHROMIUM) } : {}) }); }
   catch (error) { throw new Error(`BLOCKED: pinned browser unavailable: ${error.message}`); }
   const report = { kind: 'prototype-browser-verification', schemaVersion: 1,
     artifactSha256: sha256(bytes), checks: [], status: 'failed',
