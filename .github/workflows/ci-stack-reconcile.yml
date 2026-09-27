@@ -6,35 +6,122 @@ on:
 permissions:
   contents: read
 jobs:
-  inspect:
+  reconcile:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [memory, compiler]
     runs-on: macos-latest
-    timeout-minutes: 10
+    timeout-minutes: 35
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Inspect exact branch merges without committing or pushing
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact tooling and stage the reviewed helper outside the candidate
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'CI stack inspection'
-          git config user.email 'ci-inspection@users.noreply.github.com'
+          cp .github/scripts/reconcile-post-mvp-stack.py "$RUNNER_TEMP/reconcile-post-mvp-stack.py"
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          QUALIFIED_NPM="$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js"
+          echo "QUALIFIED_NPM=$QUALIFIED_NPM" >> "$GITHUB_ENV"
+          node "$QUALIFIED_NPM" ci --no-fund
+      - name: Reconcile the pinned feature and parent without changing any PR branch
+        shell: bash
+        env:
+          KIND: ${{ matrix.kind }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 "$RUNNER_TEMP/reconcile-post-mvp-stack.py" "$KIND"
+          if test "$KIND" = compiler; then
+            python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/tooling/compiler-targets.checks.mjs')
+          before = "['plugin', 'clickdummy']"
+          text = p.read_text()
+          assert text.count(before) == 1
+          p.write_text(text.replace(before, "['obsidian-plugin', 'clickdummy']"))
+          PY
+          fi
+          git add --update
+          git diff --check --cached
+          test -z "$(git diff --name-only --diff-filter=U)"
+          test ! -e .github/workflows/ci-stack-reconcile.yml
+          test ! -e .github/scripts/reconcile-post-mvp-stack.py
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          git commit -m "fix($KIND): reconcile current PR5 after merged MVP and retain integration contracts"
+          git rev-parse HEAD
+          git rev-parse HEAD^{tree}
+      - name: Publish only a new isolated candidate branch with stale-head guards
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KIND: ${{ matrix.kind }}
+        run: |
+          set -euo pipefail
           BASE=931db74da3576d20b862583395cb0a1b9a4412e5
-          for ITEM in '30:54b008c961e2a8a07792e0a0a124d58055765d06' '31:34f2366c4b7534ed717b11a5856ff2a6e7823029'; do
-            PR=${ITEM%%:*}; HEAD=${ITEM#*:}
-            echo "::group::PR $PR exact post-PR28 merge"
-            git checkout --detach "$HEAD"
-            git merge-base "$HEAD" "$BASE"
-            if git merge --no-commit --no-ff "$BASE"; then
-              echo "MERGE_CLEAN PR=$PR HEAD=$HEAD BASE=$BASE"
-              git diff --stat --cached
-              git write-tree
-            else
-              git diff --name-only --diff-filter=U
-              git diff --cc
-              echo "MERGE_CONFLICTS PR=$PR HEAD=$HEAD BASE=$BASE"
-            fi
-            git merge --abort
-            echo '::endgroup::'
-          done
+          if test "$KIND" = memory; then
+            FEATURE=feat/hindsight-opt-in-memory
+            EXPECTED=54b008c961e2a8a07792e0a0a124d58055765d06
+          else
+            FEATURE=refactor/dedicated-project-compiler
+            EXPECTED=34f2366c4b7534ed717b11a5856ff2a6e7823029
+          fi
+          CANDIDATE="chore/ci-$KIND-candidate-20260927"
+          test "$(git ls-remote origin "refs/heads/$FEATURE" | cut -f1)" = "$EXPECTED"
+          test "$(git ls-remote origin refs/heads/docs/companion-plugin-prd | cut -f1)" = "$BASE"
+          test -z "$(git ls-remote origin "refs/heads/$CANDIDATE")"
+          git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin "HEAD:refs/heads/$CANDIDATE"
+          mkdir -p reports/stack-reconciliation
+          git show -s --format='%H%n%T%n%P' HEAD > reports/stack-reconciliation/source.txt
+      - name: Shared registry, schema and generator integration checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
+          node --test --test-concurrency=1 tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs tests/tooling/project-generator-clickdummy.checks.mjs
+          node scripts/quality/check-source.mjs
+      - name: Memory contracts and Python behavior
+        if: matrix.kind == 'memory'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$QUALIFIED_NPM" run typecheck:memory
+          node "$QUALIFIED_NPM" run test:memory
+          python3 -m unittest discover -s tests/hindsight -p 'test_*.py' -v
+      - name: Compiler architecture, golden parity, properties and coverage
+        if: matrix.kind == 'compiler'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$QUALIFIED_NPM" run check:compiler-architecture
+          node "$QUALIFIED_NPM" run test:compiler
+          node "$QUALIFIED_NPM" run test:compiler:properties
+          node "$QUALIFIED_NPM" run test:compiler:coverage
+      - name: Full analyzer and repository gates after a real build
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/bundling/build.mjs
+          node scripts/quality/check-analyzer.mjs
+          node scripts/quality/check-repository.mjs
+      - name: Retain candidate identity and bounded verification receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: stack-reconciliation-${{ matrix.kind }}
+          path: |
+            reports/stack-reconciliation/
+            reports/compiler-qualification/
+            tests/fixtures/compiler/post-mvp-base-code.json
+          if-no-files-found: ignore
+          retention-days: 3
