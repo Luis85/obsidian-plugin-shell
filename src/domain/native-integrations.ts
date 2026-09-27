@@ -110,12 +110,12 @@ export function validateNativeDefinitions(
 }
 /** A single basename, not a path: prevents traversal and hidden/configuration files. */
 export function customFileBasename(value: string): string | null {
-  if (/[\x00-\x1f]/.test(value)) return null;
+  if (Array.from(value).some((character) => character.charCodeAt(0) < 32)) return null;
   const name = value.trim();
   if (
     !name ||
     name.length > 100 ||
-    /[<>:"/\\|?*\x00-\x1f]/.test(name) ||
+    /[<>:"/\\|?*]/.test(name) ||
     /^[.]/.test(name) ||
     /[. ]$/.test(name) ||
     /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)

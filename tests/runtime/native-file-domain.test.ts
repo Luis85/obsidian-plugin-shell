@@ -78,6 +78,12 @@ describe('native file domain safety', () => {
   ])('refuses unsafe basename %j', (value) => {
     expect(customFileBasename(value)).toBeNull();
   });
+  it.each(Array.from({ length: 32 }, (_, code) => code))('refuses ASCII control code %i before trimming', (code) => {
+    const character = String.fromCharCode(code);
+    expect(customFileBasename(character + 'plan')).toBeNull();
+    expect(customFileBasename('plan' + character)).toBeNull();
+    expect(customFileBasename('a' + character + 'b')).toBeNull();
+  });
   it('accepts user-facing Unicode names as a single basename', () => {
     expect(customFileBasename('  Renovación 🛠  ')).toBe('Renovación 🛠');
     expect(customFileBasename('plan.folio')).toBe('plan.folio');

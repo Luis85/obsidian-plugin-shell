@@ -26,7 +26,7 @@ export function slug(value, label) {
   if (typeof value !== 'string' || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value) || value.length > 48 || /^(con|prn|aux|nul|com[1-9]|lpt[1-9]|constructor|prototype|default|class|function|var|let|const|export|import)$/i.test(value)) throw new Error(`Invalid ${label}: use a lowercase non-reserved hyphenated name`);
   return value;
 }
-export const symbol = value => value.replace(/-([a-z0-9])/g, (_, letter) => letter.toUpperCase());
+export const makerSymbol = value => value.replace(/-([a-z0-9])/g, (_, letter) => letter.toUpperCase());
 export const title = value => value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ');
 export const help = `Template maker v2 — explicit, local authoring recipes
 

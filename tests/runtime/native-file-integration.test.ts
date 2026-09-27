@@ -56,6 +56,7 @@ it('opens associated files in distinct TextFileViews, preserves bytes and saves 
   const first = await open(kit, 'Plans/a.folio'),
     second = await open(kit, 'b.folio');
   expect(first.getViewType()).toBe(manifest.id + '-file-folio');
+  expect(first.getIcon()).toBe('file-code');
   expect(first.getDisplayText()).toBe('a');
   expect(first.getViewData()).toBe(' {"title":"A"}\r\n');
   expect(second.getViewData()).toBe('{malformed');

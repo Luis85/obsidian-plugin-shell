@@ -1,4 +1,4 @@
-import { symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from './arguments.mjs';
 
 export const registryPath = 'src/bootstrap/authoring.ts';
 const testPath = (owner, name, kind) => `tests/runtime/generated/${owner}-${name}-${kind}.test.ts`;

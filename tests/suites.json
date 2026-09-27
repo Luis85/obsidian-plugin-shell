@@ -52,7 +52,8 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/prototype-*.checks.mjs"
+        "tests/tooling/prototype-*.checks.mjs",
+        "tests/tooling/jev-concept-distribution.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:prototypes",

@@ -1,6 +1,6 @@
 import { checkNativeRegistration } from './native-registrations.mjs';
 import { posix } from 'node:path';
-import { symbol, title } from './arguments.mjs';
+import { makerSymbol as symbol, title } from './arguments.mjs';
 import { nativeDeclarationSource, nativeDeclarationTest } from '../companion/native-boilerplate.mjs';
 import { validateNativeIntegrations } from '../companion/native-contract.mjs';
 const relative = (from, to) => {
