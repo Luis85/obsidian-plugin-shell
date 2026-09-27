@@ -1,0 +1,82 @@
+<div class="studio" :data-theme="ui.theme">
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h7l2 3h9v12H3z"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 7v10M18 7v2c0 5-12 3-12 8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 8 3-3a4 4 0 0 1 6 6l-3 3M14 16l-3 3a4 4 0 0 1-6-6l3-3M8 16l8-8"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M5 3v8m0 4v6M12 3v3m0 4v11M19 3v11m0 4v3M2 11h6M9 6h6M16 14h6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 4H4v12"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11z"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 5-5 7 5 7m8-14 5 7-5 7M14 3l-4 18"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 9v12h16V9M3 3h18v6H3zM9 13h6"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17h.01"/></symbol>
+  </defs></svg>
+  <nav class="host-rail" aria-label="Workbench shortcuts">
+    <div class="obsidian-mark" title="Obsidian-style workspace">◈</div>
+    <button class="rail-button" title="Prompt library" aria-label="Show prompt library" @click="ui.sidebar=!ui.sidebar"><svg class="icon"><use href="#i-grid"/></svg></button>
+    <button class="rail-button active" title="Compose" aria-label="Compose prompt" @click="ui.tab='compose'"><svg class="icon"><use href="#i-branch"/></svg></button>
+    <button class="rail-button" title="Vault state" aria-label="Open vault state" @click="ui.tab='state'"><svg class="icon"><use href="#i-folder"/></svg></button>
+    <div class="rail-spacer"></div>
+    <button class="rail-button" title="How it works" aria-label="Open tutorial" @click="tour"><svg class="icon"><use href="#i-help"/></svg></button>
+    <button class="rail-button" title="Integration details" aria-label="Integration details" @click="openModal('about')"><svg class="icon"><use href="#i-sliders"/></svg></button>
+  </nav>
+  <aside class="library" :class="{'mobile-open':ui.sidebar}">
+    <div class="brand"><div class="brand-mark">j<span>.</span></div><div><strong>Jev Studio</strong><span>THE DECISION WORKBENCH</span></div><button class="mobile-close icon-button" aria-label="Close library" @click="ui.sidebar=false">×</button></div>
+    <button class="vault-switch" @click="ui.tab='state';ui.sidebar=false"><div class="vault-icon"><svg class="icon"><use href="#i-folder"/></svg></div><div><strong>{{ui.vault.name}}</strong><small>{{ui.vault.synthetic?'Demo vault · synthetic notes':'Imported snapshot · read only'}}</small></div><svg class="icon small muted"><use href="#i-chevron"/></svg></button>
+    <div class="search-box"><svg class="icon small"><use href="#i-search"/></svg><input id="library-search" v-model="ui.search" placeholder="Find a prompt…" aria-label="Search prompts"><kbd>⌘ K</kbd></div>
+    <button class="button primary new-prompt" @click="openModal('new')"><svg class="icon small"><use href="#i-plus"/></svg>New prompt</button>
+    <div class="library-nav">
+      <button :class="{selected:ui.folder==='all'}" @click="ui.folder='all'"><svg class="icon small"><use href="#i-grid"/></svg>All prompts<span>{{ui.library.prompts.filter(p=>p.status!=='archived').length}}</span></button>
+      <button :class="{selected:ui.folder==='ready'}" @click="ui.folder='ready'"><svg class="icon small"><use href="#i-check"/></svg>Marked ready<span>{{ui.library.prompts.filter(p=>p.status==='ready').length}}</span></button>
+      <button :class="{selected:ui.folder==='archived'}" @click="ui.folder='archived'"><svg class="icon small"><use href="#i-archive"/></svg>Archive<span>{{ui.library.prompts.filter(p=>p.status==='archived').length}}</span></button>
+    </div>
+    <div class="section-label library-section">YOUR PROMPTS <span>{{filtered.length}}</span></div>
+    <div class="prompt-list">
+      <button v-for="p in filtered" :key="p.id" class="prompt-item" :class="{selected:ui.draft.id===p.id}" @click="select(p.id)"><span class="prompt-glyph" :class="p.questions[0]?.type">{{p.questions[0]?.type==='choice'?'⌘':p.questions[0]?.type==='noul'?'?':'≋'}}</span><span class="prompt-info"><strong>{{p.name}}</strong><small>{{p.questions.length}} {{p.questions.length===1?'question':'questions'}}<span class="dot-separator">·</span>{{p.tags[0]||'untagged'}}</small></span><span v-if="p.status==='ready'" class="tiny-dot"></span></button>
+      <div v-if="!filtered.length" class="empty-small">No prompts here.<br><button class="text-button" @click="ui.search='';ui.folder='all'">Show all prompts</button></div>
+    </div>
+    <div class="library-bottom"><button class="button subtle wide" @click="openModal('import')"><svg class="icon small"><use href="#i-upload"/></svg>Import prompt JSON</button><div class="local-note"><svg class="icon small"><use href="#i-shield"/></svg><span>Local first. Nothing sent.<small>Native Obsidian connection is not active.</small></span></div></div>
+  </aside>
+  <main class="main">
+    <header class="workspace-header"><button class="icon-button mobile-menu" aria-label="Toggle library" @click="ui.sidebar=!ui.sidebar"><svg class="icon"><use href="#i-grid"/></svg></button><div class="breadcrumb">Workbench <span>/</span> <strong>Jev Studio</strong></div><div class="header-actions"><span class="badge neutral"><span class="tiny-dot"></span>Offline prototype</span><button class="text-button hide-narrow" @click="tour">How it works</button><button class="icon-button" aria-label="Toggle light and dark theme" title="Toggle theme" @click="setTheme"><svg class="icon"><use href="#i-moon"/></svg></button></div></header>
+    <div v-if="service.warning" class="banner warn">{{service.warning}}</div>
+    <section class="prompt-heading">
+      <div class="prompt-heading-main"><div class="eyebrow">PROMPT WORKSPACE <span class="badge micro">{{ui.draft.model}}</span></div><input class="title-field" v-model="ui.draft.name" maxlength="160" aria-label="Prompt name"><input class="description-field" v-model="ui.draft.description" maxlength="4000" aria-label="Prompt description" placeholder="What should this decision help you do?"></div>
+      <div class="prompt-heading-actions"><span class="save-state" :class="{warning:ui.saved.includes('not saved')||ui.saved==='Not saved'}"><span class="tiny-dot"></span>{{ui.saved}}</span><div class="button-row"><button class="button" @click="openModal('version')" :disabled="errors.length>0"><svg class="icon small"><use href="#i-clock"/></svg>Save version</button><button class="button primary" @click="exportOpen()"><svg class="icon small"><use href="#i-download"/></svg>Export JSON</button></div></div>
+    </section>
+    <nav class="workspace-tabs" aria-label="Editor sections"><button v-for="item in [{id:'compose',name:'Compose',icon:'branch'},{id:'state',name:'Vault state',icon:'folder'},{id:'lab',name:'Test bench',icon:'play'},{id:'versions',name:'Versions',icon:'clock'},{id:'json',name:'JSON',icon:'code'}]" :key="item.id" :class="{active:ui.tab===item.id}" @click="ui.tab=item.id" :aria-current="ui.tab===item.id?'page':undefined"><svg class="icon small"><use :href="'#i-'+item.icon"/></svg>{{item.name}}<span v-if="item.id==='state'" class="tab-count">{{snapshot.included.length}}</span><span v-if="item.id==='versions'&&revisions.length" class="tab-count">{{revisions.length}}</span></button><button class="inspector-toggle icon-button" title="Toggle context inspector" aria-label="Toggle context inspector" @click="ui.inspector=!ui.inspector"><svg class="icon small"><use href="#i-sliders"/></svg></button></nav>
+    <div class="editor-body" :class="{'no-inspector':!ui.inspector}">
+      <div class="editor-scroll" id="main-content">
+        <div v-if="errors.length" class="banner danger"><strong>{{errors.length}} {{errors.length===1?'issue needs':'issues need'}} attention</strong><div v-for="(error,i) in errors.slice(0,4)" :key="i"><code>{{error.path}}</code> — {{error.message}}</div><small>Invalid edits stay in this session; the last valid saved recipe is preserved.</small></div>
+        <!--COMPOSE-->
+        <!--STATE-->
+        <!--LAB-->
+        <!--VERSIONS-->
+        <!--JSON-->
+      </div>
+      <aside v-if="ui.inspector" class="inspector">
+        <div class="inspector-title"><span>Context inspector</span><span class="badge micro">{{ui.vault.synthetic?'DEMO':'LOCAL'}}</span></div>
+        <section class="inspector-section"><div class="section-label">ACTIVE NOTE <button class="text-button" @click="ui.tab='state'">Change</button></div><div class="active-note-card"><div class="note-icon"><svg class="icon"><use href="#i-file"/></svg></div><div><strong>{{activeNote?.name||'No active note'}}</strong><small>{{activeNote?.path||'Select a note in Vault state'}}</small></div></div><div class="note-excerpt">{{activeNote?.body.slice(0,230)}}<span v-if="(activeNote?.body.length||0)>230">…</span></div><div class="tags"><span v-for="tag in activeNote?.tags.slice(0,4)" :key="tag">#{{tag}}</span></div></section>
+        <section class="inspector-section"><div class="section-label">RESOLVED CONTEXT <span>{{snapshot.included.length}} notes</span></div><div v-for="path in snapshot.included.slice(1)" :key="path" class="reference-row"><svg class="icon small"><use href="#i-link"/></svg><span>{{path.split('/').pop()}}</span><svg class="icon tiny green"><use href="#i-check"/></svg></div><div v-if="snapshot.included.length<2" class="muted small-text">No reference notes selected.</div><button class="add-context text-button" @click="ui.tab='state'"><svg class="icon small"><use href="#i-plus"/></svg>Manage context</button><div class="context-meter"><div><span>State size</span><strong>{{snapshot.characters.toLocaleString()}} characters</strong></div><div class="meter-track"><span :style="{width:Math.min(100,snapshot.characters/300)+'%'}"></span></div><small>Character count, not a token budget check.</small></div></section>
+        <section class="inspector-section"><div class="section-label">EXPECTED ANSWERS</div><div v-for="(q,i) in ui.draft.questions" :key="i" class="output-row"><span class="type-dot" :class="q.type"></span><code>{{q.id||'unnamed'}}</code><small>{{q.type==='choice'?'key':q.type==='score'?'0–'+(q.levels.length-1):'P(yes)'}}</small></div><div class="mini-note">Questions share the same state.<br>Each one is evaluated independently.</div></section>
+        <section class="inspector-section" v-if="snapshot.warnings.length||hints.length"><div class="section-label">REVIEW NOTES <span class="amber">{{snapshot.warnings.length+hints.length}}</span></div><p v-for="(warning,i) in [...snapshot.warnings,...hints].slice(0,4)" :key="i" class="inspection-warning">{{warning}}</p></section>
+        <div class="privacy-card"><svg class="icon green"><use href="#i-shield"/></svg><strong>You control what leaves.</strong><p>Recipes contain bindings, not resolved note bodies. Request exports include the context you review.</p><button class="text-button" @click="exportOpen('request')">Review request <span>↗</span></button></div>
+        <div class="snapshot-id">Snapshot <code>{{snapshot.fingerprint}}</code><span>Display-only change ID</span></div>
+      </aside>
+    </div>
+    <footer class="statusbar"><span><span class="tiny-dot"></span>{{ui.vault.synthetic?'Synthetic demo vault':'Local read-only snapshot'}}<span class="dot-separator">·</span>{{ui.draft.questions.length}} typed questions</span><button class="text-button" @click="openModal('about')">PR #5 concept <span class="dot-separator">·</span> No live inference</button></footer>
+  </main>
+  <!--MODALS-->
+  <div v-if="ui.toast" role="status" aria-live="polite" class="toast"><svg class="icon small"><use href="#i-check"/></svg>{{ui.toast}}<button class="icon-button" aria-label="Dismiss message" @click="ui.toast=''">×</button></div>
+</div>

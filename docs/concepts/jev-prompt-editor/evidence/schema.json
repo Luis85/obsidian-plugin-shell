@@ -1,0 +1,41 @@
+{
+  "passed": 9,
+  "checks": [
+    {
+      "name": "inbox-routing.prompt.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "edited-roundtrip.prompt.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "starter-library.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "inbox-routing.demo-request.json validates",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio portable library v1 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio editable prompt recipe v1 is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "Jev Studio emitted request subset is a valid schema",
+      "status": "passed"
+    },
+    {
+      "name": "API request is not accepted as editable recipe",
+      "status": "passed"
+    },
+    {
+      "name": "Future recipe version rejected",
+      "status": "passed"
+    }
+  ]
+}
