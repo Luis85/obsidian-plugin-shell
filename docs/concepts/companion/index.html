@@ -14120,6 +14120,10 @@ const visualCatalog = Object.freeze([
   vcatEntry('u-separator', 'Separator', 'USeparator', 'Layout', 'Visual separation', [vcatP('orientation', 'string', { default: 'horizontal', options: ['horizontal', 'vertical'] })], [], [], 'separator'),
 ]);
 function visualCatalogEntry(id) { return visualCatalog.find(e => e.id === id) ?? null; }
+// Export names a generated component cannot take: Vue built-ins that templates resolve before script-setup bindings,
+// the type names every generated script declares, and each catalog component the generator imports explicitly.
+const VISUAL_RESERVED_EXPORTS = Object.freeze(['Component', 'Transition', 'TransitionGroup', 'BaseTransition', 'KeepAlive', 'Suspense', 'Teleport', 'Slot', 'Template', 'Error', 'VisualState', 'VisualRequest', 'ComponentProps', 'ComponentEvents', 'ComponentSlots']);
+function visualReservedExport(name) { return VISUAL_RESERVED_EXPORTS.includes(name) || visualCatalog.some(e => e.component === name); }
 const vcatLit = values => Object.fromEntries(Object.entries(values).map(([k, v]) => [k, visualLiteral(v)]));
 const vcatBox = (s, tag, mode, name, children, ui = {}) => visualElement(visualAllocate(s, 'vn'), tag, { name, layout: visualLayoutRules(mode, { ...compositionDefaultUI(), ...ui }), children });
 const vcatUi = (s, entryId, name, props = {}, extra = {}) => visualNuxt(visualAllocate(s, 'vn'), entryId, vcatLit(props), { name, ...extra });
@@ -14177,19 +14181,26 @@ function visualWouldCycle(store, parentId, childId) {
   const reaches = key => { const id = key.startsWith('rev:') ? store.revisions.find(r => 'rev:' + r.id === key)?.componentId : key.slice(5); if (id === parentId) return true; if (seen.has(key)) return false; seen.add(key); return vcmpEdges(graphs.get(key) ?? []).some(reaches); };
   return reaches('live:' + childId);
 }
+// Cycles, and the longest chain of component levels (memoized per definition, so the result does not depend on the
+// order definitions are listed in or on which one is visited first).
 function visualCompositionGraph(store) {
-  const graphs = vcmpGraphs(store), done = new Set(), active = [];
+  const graphs = vcmpGraphs(store), depth = new Map(), active = [];
   const visit = key => {
     visualAssert(!active.includes(key), 'Component cycle: ' + [...active.slice(active.indexOf(key)), key].map(k => vcmpLabel(store, k)).join(' → ') + '.');
-    visualAssert(active.length < VISUAL_LIMITS.composition, 'Component composition is deeper than ' + VISUAL_LIMITS.composition + ' levels.');
-    if (done.has(key)) return; active.push(key); for (const next of vcmpEdges(graphs.get(key) ?? [])) visit(next); active.pop(); done.add(key);
+    if (depth.has(key)) return depth.get(key);
+    active.push(key); let deepest = 0;
+    for (const next of vcmpEdges(graphs.get(key) ?? [])) deepest = Math.max(deepest, visit(next));
+    active.pop();
+    visualAssert(deepest + 1 <= VISUAL_LIMITS.composition, 'Component composition is deeper than ' + VISUAL_LIMITS.composition + ' levels: ' + vcmpLabel(store, key) + ' nests ' + (deepest + 1) + '.');
+    depth.set(key, deepest + 1); return deepest + 1;
   };
   for (const key of graphs.keys()) visit(key);
 }
+// Every instance of a component: in pages, components, layouts and published revisions (whose templates pin it).
 function visualUsages(store, componentId) {
-  const out = [];
-  for (const [kind, list, root] of [['page', store.pages, 'root'], ['component', store.components, 'template'], ['layout', store.layouts, 'root']])
-    for (const d of list) visualWalk(d[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.componentId === componentId) out.push({ kind, definitionId: d.id, definitionName: d.name ?? d.exportName, nodeId: n.id }); });
+  const out = [], revisionName = r => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
+  for (const [kind, list, root, name] of [['page', store.pages, 'root', d => d.name], ['component', store.components, 'template', d => d.exportName], ['layout', store.layouts, 'root', d => d.name], ['revision', store.revisions, 'template', revisionName]])
+    for (const d of list) visualWalk(d[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.componentId === componentId) out.push({ kind, definitionId: d.id, definitionName: name(d), nodeId: n.id }); });
   return out;
 }
 // Complete, pure validation for visual designs. Gates save, export, import and generation.
@@ -14197,6 +14208,16 @@ const vvCommon = ['name', 'visibleIn', 'a11y', 'layout', 'notes'];
 const vvForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style', 'constructor', 'prototype', '__proto__'];
 const vvCategories = ['application', 'dashboard', 'master-detail', 'form', 'settings', 'website', 'custom'];
 const vvIdPattern = /^(vn|vp|vc|vl|vr|vi)-([1-9][0-9]*)$/;
+// Element attributes: this per-tag list (the concept inspector offers exactly these) plus title, role and aria-* on
+// every tag. No event, URL-navigating or document-bearing attribute (href, action, formaction, srcdoc …) exists.
+const VISUAL_ELEMENT_ATTRS = Object.freeze({ img: Object.freeze(['alt', 'src']), input: Object.freeze(['placeholder', 'type', 'name']), button: Object.freeze(['type']), label: Object.freeze(['for']) });
+function vvAttrAllowed(tag, key) { return ['title', 'role'].includes(key) || /^aria-[a-z]+(?:-[a-z]+)*$/.test(key) || (VISUAL_ELEMENT_ATTRS[tag] ?? []).includes(key); }
+// A literal image source is a relative path or an inline image. Browsers drop tabs/newlines and leading controls
+// before reading a scheme, so the check does too.
+function vvSafeSrc(value) {
+  const url = typeof value === 'string' ? value.replace(/[\t\n\r]/g, '').replace(/^[\x00-\x20]+/, '') : '';
+  return typeof value === 'string' && (/^data:image\//i.test(url) || (!/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^[/\\]/.test(url)));
+}
 function vvObject(value, keys, optional = []) { return visualIsPlain(value) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)) && keys.every(k => Object.hasOwn(value, k)); }
 function vvWithin(where, fn) {
   try { return fn(); }
@@ -14314,7 +14335,10 @@ function vvNodeCheck(node, scope, at) {
   if (node.kind === 'element') {
     visualAssert(VISUAL_TAGS.includes(node.tag), where + ': unsupported tag.');
     visualAssert(visualIsPlain(node.attrs) && Object.keys(node.attrs).length <= 16, where + ': invalid attributes.');
-    for (const [key, value] of Object.entries(node.attrs)) { visualAssert(/^[a-z][a-z0-9-]*$/.test(key) && !key.startsWith('on') && !['style', 'class', 'is', 'key', 'ref'].includes(key), where + ': attribute ' + key + ' is not allowed.'); vvValue(value, scope, where + ' @' + key); }
+    for (const [key, value] of Object.entries(node.attrs)) {
+      visualAssert(/^[a-z][a-z0-9-]*$/.test(key) && vvAttrAllowed(node.tag, key), where + ': attribute ' + key + ' is not allowed on <' + node.tag + '>.'); vvValue(value, scope, where + ' @' + key);
+      if (node.tag === 'img' && key === 'src' && value.kind === 'literal') visualAssert(vvSafeSrc(value.value), where + ' @src: img src must be a relative path or a data:image/ URL.');
+    }
     visualAssert(Array.isArray(node.children) && (!['input', 'img'].includes(node.tag) || node.children.length === 0), where + ': ' + node.tag + ' cannot contain children.');
     vvEvents(node, scope, null, where);
   } else if (node.kind === 'text') { visualAssert(VISUAL_TEXT_ROLES.includes(node.role), where + ': unsupported text role.'); vvValue(node.value, scope, where); }
@@ -14366,6 +14390,7 @@ function validateVisualDesigns(store, context = {}) {
     const where = 'Component ' + JSON.stringify(c?.exportName ?? c?.id);
     visualAssert(vvObject(c, ['id', 'libraryId', 'exportName', 'description', 'props', 'slots', 'emits', 'variants', 'template', 'scenarios'], ['implementation', 'notes', 'dependencies']), where + ': unsupported component fields.'); identity(c.id, 'vc');
     visualAssert(typeof c.exportName === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(c.exportName) && c.exportName.length <= 60 && !exportNames.has(c.exportName), where + ': export name must be a unique PascalCase Vue name.'); exportNames.add(c.exportName);
+    visualAssert(!visualReservedExport(c.exportName), where + ': export name ' + c.exportName + ' is reserved (a Vue built-in, a generated type or a Nuxt UI component).');
     visualAssert(visualIsRef(c.libraryId) && !libraries.has(c.libraryId) && (!context.library || context.library.has(c.libraryId)), where + ': library entry is missing or already designed.'); libraries.add(c.libraryId);
     visualAssert(visualIsText(c.description, 2000) && (c.notes === undefined || visualIsText(c.notes, 8000)), where + ': description or notes too long.');
     visualAssert(c.implementation === undefined || (vvObject(c.implementation, ['catalog', 'entryId']) && c.implementation.catalog === 'nuxt-ui' && visualCatalogEntry(c.implementation.entryId)), where + ': unknown implementation primitive.');
@@ -14412,7 +14437,7 @@ function visualClone(store, nodes, { external = 'keep', slotsToRegions = false }
     if (out.kind === 'text' && out.value.kind === 'state') out.value = { ...out.value, nodeId: remap(out.value.nodeId, n.name ?? n.id) };
     for (const key of ['props', 'attrs']) if (out[key]) for (const [k, v] of Object.entries(out[key])) if (v.kind === 'state') out[key][k] = { ...v, nodeId: remap(v.nodeId, n.name ?? n.id) };
     if (out.events) out.events = out.events.map(i => ({ ...i, id: visualAllocate(store, 'vi'), actions: i.actions.map(a => ['toggle', 'focus', 'set-value'].includes(a.kind) ? { ...a, nodeId: remap(a.nodeId, i.label) } : a.kind === 'emit' ? { ...a, payload: vlayRemapMapping(a.payload, id => remap(id, i.label)) } : a.kind === 'source' ? { ...a, input: vlayRemapMapping(a.input, id => remap(id, i.label)) } : a) }));
-    if (slotsToRegions && out.kind === 'slot') return visualElement(out.id, 'div', { name: out.name, children: out.fallback, ...(out.layout ? { layout: out.layout } : {}), ...(out.visibleIn ? { visibleIn: out.visibleIn } : {}) });
+    if (slotsToRegions && out.kind === 'slot') return visualElement(out.id, 'div', { name: out.name, children: out.fallback, ...Object.fromEntries(['layout', 'visibleIn', 'a11y', 'notes'].filter(k => out[k] !== undefined).map(k => [k, out[k]])) });
     return out;
   };
   return nodes.map(copy);
@@ -14503,7 +14528,7 @@ function visualUpdateNode(store, ref, nodeId, patch) {
 function visualSetContract(store, componentId, change) {
   const c = vcmdDef(store, { kind: 'component', id: componentId }); const next = { ...c, ...structuredClone(change) };
   const broken = [];
-  for (const u of visualUsages(store, componentId)) {
+  for (const u of visualUsages(store, componentId).filter(x => x.kind !== 'revision')) { // published revisions pin and never change
     const def = vcmdDef(store, { kind: u.kind, id: u.definitionId }), n = vcmdHit(def, u.nodeId).node; if (n.ref.revisionId) continue;
     for (const k of Object.keys(n.props)) if (!next.props.some(p => p.name === k)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': prop ' + k);
     for (const p of next.props.filter(p => p.required)) if (!Object.hasOwn(n.props, p.name)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': required prop ' + p.name);
@@ -14604,7 +14629,7 @@ function visualTestSource(definition) {
 // interactions whose source is a text/heading/slot node, and unrendered text beyond the 4000-character node-notes limit.
 const vmigAll = ['default', 'loading', 'empty', 'error', 'disabled'];
 const vmigForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style'];
-function vmigPascal(name, used) { let base = String(name).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component'; if (!/^[A-Z]/.test(base)) base = 'C' + base; base = base.slice(0, 56); let out = base, i = 2; while (used.has(out)) out = base + i++; used.add(out); return out; }
+function vmigPascal(name, used) { let base = String(name).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component'; if (!/^[A-Z]/.test(base)) base = 'C' + base; base = base.slice(0, 56); let out = base, i = 2; while (used.has(out) || visualReservedExport(out)) out = base + i++; used.add(out); return out; }
 function vmigContract(lib, report) {
   const props = [], emits = [];
   for (const [text, events] of [[lib.props, false], [lib.events, true]]) for (const line of String(text ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean)) {
@@ -14706,7 +14731,7 @@ function vmigNode(n, parent) {
   const ctx = { ...parent, id: parent.map.get(n.id), notes: [] }, { report } = ctx;
   report.droppedPositions++; report.droppedSizes++; if (n.sourceBrickId !== null) report.droppedOutlineRefs++;
   const common = { name: n.label, ...(vmigAll.every(s => n.visibleIn.includes(s)) ? {} : { visibleIn: [...n.visibleIn] }), ...(n.a11y ? { a11y: n.a11y } : {}) };
-  const edges = ctx.edges.filter(e => e.source === n.id), events = () => edges.map(e => ({ id: visualAllocate(ctx.store, 'vi'), event: e.event, label: e.label, notes: e.notes, acceptance: e.acceptance, actions: vmigActions(e, ctx.map) }));
+  const edges = ctx.edges.filter(e => e.source === n.id), events = () => edges.map(e => ({ id: vmigTrace(ctx, e.id, visualAllocate(ctx.store, 'vi')), event: e.event, label: e.label, notes: e.notes, acceptance: e.acceptance, actions: vmigActions(e, ctx.map) }));
   const extra = { ...common, ...(n.ui ? { layout: visualLayoutRules(n.layout, structuredClone(n.ui)) } : {}) };
   if (['text', 'heading', 'slot'].includes(n.kind)) report.droppedInteractions += edges.length;
   const node = vmigKind(n, ctx, extra, events, () => (ctx.kids.get(n.id) ?? []).map(c => vmigNode(c, ctx)));
@@ -14714,6 +14739,8 @@ function vmigNode(n, parent) {
   if (notes.length > 4000) report.truncatedNotes++;
   return notes ? { ...node, notes: notes.slice(0, 4000) } : node;
 }
+// Live documents record legacy edge → interaction IDs (generated hooks were named after edges); revisions do not.
+function vmigTrace(ctx, edgeId, id) { if (ctx.trace) ctx.trace[edgeId] = id; return id; }
 function vmigTree(doc, ctx) {
   const map = new Map(doc.nodes.map(n => [n.id, visualAllocate(ctx.store, 'vn')])), assigned = new Set(doc.nodes.flatMap(n => Object.values(n.slots ?? {}).flat())), kids = new Map();
   for (const n of doc.nodes) if (n.parentId !== null) kids.set(n.parentId, [...(kids.get(n.parentId) ?? []), n]);
@@ -14723,7 +14750,7 @@ function vmigTree(doc, ctx) {
 function vmigScenarios(doc, map) { return (doc.scenarios ?? []).map(s => ({ ...structuredClone(s), values: Object.fromEntries(Object.entries(s.values).filter(([k]) => map.has(k)).map(([k, v]) => [map.get(k), structuredClone(v)])) })); }
 function migrateDetailDesigns(detail, design) {
   const store = emptyVisualDesigns(), used = new Set(), revisions = detail.revisions ?? [], docs = detail.documents, library = design.library ?? [];
-  const report = { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] };
+  const report = { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [], interactionIds: {} };
   const revisionMap = new Map(revisions.map(r => [r.id, visualAllocate(store, 'vr')])), componentIds = new Map(), contracts = new Map();
   const needed = new Set([...docs.filter(d => d.kind === 'component').map(d => d.ownerId), ...[...docs, ...revisions.map(r => r.document)].flatMap(d => d.nodes.filter(n => n.component).map(n => n.component.id)), ...revisions.map(r => r.ownerId)]);
   for (const id of needed) visualAssert(library.some(l => l.id === id), 'Detail designs use library entry ' + JSON.stringify(id) + ', which is missing from the component library.');
@@ -14737,13 +14764,13 @@ function migrateDetailDesigns(detail, design) {
     const scratch = { unparsedMembers: [] }; contracts.set('rev:' + r.id, vmigContract(r.library, scratch));
     for (const m of scratch.unparsedMembers) if (!report.unparsedMembers.some(x => x.owner === m.owner && x.text === m.text)) report.unparsedMembers.push(m);
   }
-  const ctx = { store, report, contracts, componentFor: id => componentIds.get(id), revision: id => revisionMap.get(id) };
+  const ctx = { store, report, contracts, componentFor: id => componentIds.get(id), revision: id => revisionMap.get(id) }, trace = report.interactionIds;
   for (const doc of docs) {
     if (doc.kind === 'page') {
-      const id = visualAllocate(store, 'vp'), { map, root } = vmigTree(doc, { ...ctx, contract: null });
+      const id = visualAllocate(store, 'vp'), { map, root } = vmigTree(doc, { ...ctx, contract: null, trace });
       store.pages.push({ id, ownerId: doc.ownerId, name: doc.ownerLabel, root, scenarios: vmigScenarios(doc, map), notes: doc.notes });
     } else {
-      const component = store.components.find(c => c.libraryId === doc.ownerId), { map, root } = vmigTree(doc, { ...ctx, contract: component });
+      const component = store.components.find(c => c.libraryId === doc.ownerId), { map, root } = vmigTree(doc, { ...ctx, contract: component, trace });
       Object.assign(component, { template: root, scenarios: vmigScenarios(doc, map), ...(doc.notes ? { notes: doc.notes } : {}) });
     }
   }
@@ -14938,7 +14965,7 @@ function migrateCompanionDocument(value) {
   const report = companionLegacyDetails(document.design) ? companionUpgradeDesign(document.design) : null;
   companionDropLegacy(document.design);
   document.schemaVersion = COMPANION_VERSION; document.design.schema = COMPANION_VERSION;
-  return { document: validateCompanionDocument(document), report: report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
+  return { document: validateCompanionDocument(document), report: report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [], interactionIds: {} } };
 }
 
 /** Built-in starters are data, not installable code or a second project format. */
@@ -15683,7 +15710,7 @@ function makerCode(index){const g=state.generator;const group=g.kind==='feature'
 function makerReview(){const g=state.generator;const files=makerFiles();return dialogBody('Review generated changes',`<div class="row between"><p class="mb0">${esc(g.entity)} · ${esc(g.preset)} preset</p>${badge('5 illustrative files','purple')}</div><div class="grid2 mt16"><div class="file-list">${files.map((f,i)=>`<button class="file-row ${state.selectedFile===i?'active':''}" data-action="file-preview" data-value="${i}"><span class="plus">${i===2?'~':'+'}</span><code>${esc(f)}</code></button>`).join('')}</div><div class="code-panel"><div class="code-title">Illustrative source · not executable output</div><pre class="code-body">${esc(makerCode(state.selectedFile))}</pre></div></div><div class="mt16">${command(getMakerCommand(false))}</div><p class="scope-label">The real maker is authoritative for paths, validation and generated bytes. These snippets are UX fixtures only.</p><div class="mt16">${callout('Apply runs typecheck, the generated test and entity validation. Full verify is separate. Edited files must never be force-overwritten.')}</div><div id="maker-error" class="error" role="alert">${esc(g.error||'')}</div>`,`${button('Back to form','close','','ghost')}${button('Apply simulated changes','maker-apply','','primary','wand')}`);}
 
 // Concept section: dialogs
-function drawModal(){const factories={'starter-configure':starterConfigureDialog,'starter-generation':starterGenerationDialog,'ve-save-layout':veSaveLayoutDialog,'ve-interaction':veInteractionForm,'ve-health':veHealthHtml,'ve-publish':vePublishDialog,'ve-deps':veDepsDialog,'ve-external':veExternalDialog,'ve-delete':veDeleteDialog,'ve-reparent':veReparentDialog,'storymap-form':storymapForm,'project-import':companionImportDialog,'project-folders':companionFoldersDialog,'project-handoff':companionHandoffDialog,'style-guide-form':styleGuideForm,'test-data-form':testDataForm,'test-data-target':testDataTargetForm,'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('starter-modal',['starter-configure','starter-generation'].includes(modalType));document.getElementById('modal').classList.toggle('storymap-modal',modalType==='storymap-form');document.getElementById('modal').classList.toggle('test-data-modal',modalType==='test-data-form');document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').classList.toggle('ve-modal',['ve-save-layout','ve-interaction','ve-health','ve-publish','ve-deps','ve-external','ve-delete','ve-reparent'].includes(modalType));document.getElementById('modal').classList.toggle('ve-slideover',modalType==='ve-health');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
+function drawModal(){const factories={'starter-configure':starterConfigureDialog,'starter-generation':starterGenerationDialog,'ve-save-layout':veSaveLayoutDialog,'ve-interaction':veInteractionForm,'ve-health':veHealthHtml,'ve-publish':vePublishDialog,'ve-deps':veDepsDialog,'ve-external':veExternalDialog,'ve-delete':veDeleteDialog,'ve-reparent':veReparentDialog,'ve-orphans':veOrphansDialog,'storymap-form':storymapForm,'project-import':companionImportDialog,'project-folders':companionFoldersDialog,'project-handoff':companionHandoffDialog,'style-guide-form':styleGuideForm,'test-data-form':testDataForm,'test-data-target':testDataTargetForm,'data-source-form':dataSourceFormDialog,'semantic-form':semanticFormDialog,'component-variant':variantDialog,'vault-identity':vaultIdentityDialog,'vault-legacy':vaultLegacyDialog,'edge-detach':edgeDetachDialog,'ref-content':referenceContentDialog,'ref-section':referenceSectionDialog,'library-place':libraryPlacementDialog,'library-upgrade':libraryUpgradeDialog,'library-card-add':libraryCardAddDialog,'brick-edit':brickEditDialog,'brick-palette':brickPaletteDialog,'brick-transfer':brickTransferDialog,'brick-remove':brickRemoveDialog,'brick-method':brickMethodDialog,'brick-starter':brickStarterDialog,'connection-create':connectedCardDialog,'connection-structure':structureRelationshipDialog,'flow-settings':flowSettingsDialog,'flow-intent':flowIntentDialog,'flow-binding':flowBindingDialog,'flow-binding-remove':flowBindingRemoveDialog,'workflow-context':workflowContextDialog,'canvas-card-menu':canvasCardMenu,'canvas-help':canvasHelp,'canvas-edge-remove':canvasEdgeRemoveDialog,'product-component':componentFormDialog,'product-bind':componentBindDialog,'product-upgrade':productUpgradeDialog,'product-component-remove':productDeleteDialog,'product-prd':prdFormDialog,'product-requirement':requirementFormDialog,'product-baseline':baselineReviewDialog,'design-node':designNodeDialog,'design-connect':designConnectDialog,'design-plan':designPlanDialog,'design-goal':designGoalDialog,'design-replace':designReplaceDialog,'design-remove':designRemoveDialog,'design-transfer':designTransferDialog,'design-wizard-confirm':()=>dialogBody('Use this outline in setup?', '<p>Keep the existing identity and environment answers, replace the outline, and review the setup plan again. No real files are changed.</p>',button('Cancel','close','','ghost')+button('Use this outline','design-create-confirm','','primary')),wizard:wizardView,trust:trustDialog,lab:labDialog,switch:switchDialog,attach:attachDialog,settings:settingsDialog,palette:paletteDialog,maker:makerReview,activate:activationDialog,check:checkDialog,tool:toolDialog,service:serviceDialog,session:sessionDialog,deploy:deployDialog,'run-detail':runDialog,'preview-plugin':previewDialog,note:noteDialog,copy:copyDialog,reset:resetDialog};document.getElementById('modal').classList.toggle('starter-modal',['starter-configure','starter-generation'].includes(modalType));document.getElementById('modal').classList.toggle('storymap-modal',modalType==='storymap-form');document.getElementById('modal').classList.toggle('test-data-modal',modalType==='test-data-form');document.getElementById('modal').classList.toggle('data-source-modal',modalType==='data-source-form');document.getElementById('modal').classList.toggle('semantic-modal',modalType==='semantic-form');document.getElementById('modal').classList.toggle('reference-content-modal',modalType==='ref-content');document.getElementById('modal').classList.toggle('ve-modal',['ve-save-layout','ve-interaction','ve-health','ve-publish','ve-deps','ve-external','ve-delete','ve-reparent'].includes(modalType));document.getElementById('modal').classList.toggle('ve-slideover',modalType==='ve-health');document.getElementById('modal').innerHTML=(factories[modalType]||(()=>dialogBody('Details','No matching concept view.')))();}
 function labDialog(){return dialogBody('Review the concept',`<p>Choose an edge case, then use the normal workflow. Every operation remains a browser-only simulation.</p><div class="lab-grid">${SCENARIOS.map(([id,t,d])=>`<button class="scenario-choice ${state.scenario===id?'selected':''}" data-action="scenario" data-value="${id}"><span class="check-icon ${state.scenario===id?'active':''}">${state.scenario===id?'✓':'○'}</span><div><strong>${t}</strong><p>${d}</p></div></button>`).join('')}</div><div class="mt24">${callout('Useful review routes: fresh-vault creation; dependency failure and resume; stale plan; maker conflict; generated test failure; stale verification after a source edit.')}</div><div class="button-row">${button('Load example project','sample','','','box',state.activeRun?'disabled':'')}${button('Reset to fresh vault','reset','','danger','refresh',state.activeRun?'disabled':'')}</div>`,`${badge(`Active: ${SCENARIOS.find(s=>s[0]===state.scenario)?.[1]||'Happy path'}`,'purple')}${button('Return to workspace','close','','primary')}`);}
 function switchDialog(){return vaultContextDialog();}
 function attachDialog(){return vaultContextDialog();}
@@ -17056,9 +17083,11 @@ function companionExampleStorymaps(d, surfaces) {
 // Visual editor session state and the one guarded write path for design.visualDesigns.
 // veUi is presentation state only: it never enters project JSON, history snapshots or exports.
 const VE_UPGRADE_NOTICE = 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.';
+// The one recovery path for a design whose upgrade failed: the project JSON export keeps its legacy detail designs.
+const VE_LEGACY_RECOVERY = 'Use Export project JSON on the Pages view: the file keeps the legacy detail designs, and importing it retries the upgrade.';
 function veDefaults() {
   return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '',
-    library: null, variant: '', state: 'default', contractTab: 'contract', apiTab: 'props', childTab: 'props', slotTarget: null, publishForm: null, externalForm: null, depForm: null, deleteForm: null, reparentForm: null, adapterEvents: {} };
+    library: null, variant: '', state: 'default', contractTab: 'contract', apiTab: 'props', childTab: 'props', slotTarget: null, publishForm: null, externalForm: null, depForm: null, deleteForm: null, reparentForm: null, orphansForm: null, adapterEvents: {} };
 }
 const veUi = veDefaults();
 function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
@@ -17104,7 +17133,7 @@ function veCanWrite(token = smToken()) {
 function veCommit(change, token = smToken()) {
   veCanWrite(token);
   const previous = design(), candidate = designCopy(previous), before = veStore(previous), store = designCopy(before);
-  if (companionLegacyDetails(previous) !== undefined) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
+  if (companionLegacyDetails(previous) !== undefined) throw Error('This project still holds legacy detail designs that could not be upgraded. ' + VE_LEGACY_RECOVERY + ' Nothing was saved.');
   change(store, candidate);
   const semantic = JSON.stringify(before) !== JSON.stringify(store);
   if (!semantic) return true;
@@ -17199,7 +17228,7 @@ function veRestoreSaved() {
       p.design = candidate; changed = true;
     } catch (error) {
       veUi.notice = '';
-      veUi.error = 'This project could not be upgraded to the new page and component editors and is kept unchanged. ' + (error instanceof Error ? error.message : '') + ' Export recovery before editing.';
+      veUi.error = 'This project could not be upgraded to the new page and component editors and is kept unchanged. ' + veErrorText(error) + ' ' + VE_LEGACY_RECOVERY;
       notify(veUi.error); return false;
     }
   }
@@ -17738,7 +17767,7 @@ function veSaveLayout() {
 // inside veCommit, so a failed conversion or validation changes nothing.
 const VE_BINDING_KINDS = [['literal', 'Literal'], ['source', 'Source'], ['state', 'Form value']];
 const VE_INSPECTOR_FIELDS = ['ve-name', 've-prop', 've-attr', 've-role', 've-tag', 've-layout-mode', 've-layout', 've-visible', 've-a11y', 've-bind-kind', 've-bind-source', 've-bind-operation', 've-bind-field', 've-bind-state'];
-const VE_ELEMENT_ATTRS = { img: ['alt', 'src'], input: ['placeholder', 'type', 'name'], button: ['type'], label: ['for'] };
+const VE_ELEMENT_ATTRS = VISUAL_ELEMENT_ATTRS; // the contract's per-tag attribute list (title, role, aria-* are also valid)
 const VE_LAYOUT_BOUNDS = { gap: [0, 160], padding: [0, 160], columns: [1, 12], width: [24, 1600], minWidth: [0, 1600], maxWidth: [24, 4000], 'narrow.columns': [1, 12] };
 const VE_LAYOUT_CHOICES = { align: ['start', 'center', 'end', 'stretch'], justify: ['start', 'center', 'end', 'space-between'], overflow: ['visible', 'auto', 'hidden'], widthMode: ['fill', 'hug', 'fixed'], 'narrow.layout': ['stack', 'row', 'grid'] };
 const VE_TOKEN_GROUPS = { gap: 'spacing', padding: 'spacing', color: 'colors', background: 'colors', radius: 'radii', typography: 'typography' };
@@ -18669,10 +18698,11 @@ function veNextPatch(store, componentId) {
   return major + '.' + minor + '.' + (patch + 1);
 }
 function veComponentOrThrow() { const c = veCurrentComponent(); if (!c) throw Error('Open a component design first.'); return c; }
-// Every place that renders this component: live instances follow the next revision's source, pinned ones keep theirs.
+// Every place that renders this component: live instances follow the next revision's source, pinned ones keep theirs
+// (published revisions of other components always pin).
 function veUsageRows(store, component) {
   return visualUsages(store, component.id).filter(u => u.definitionId !== component.id).map(u => {
-    const definition = visualDefinition(store, { kind: u.kind, id: u.definitionId }), node = visualLocate(visualRoot(definition), u.nodeId)?.node;
+    const definition = u.kind === 'revision' ? store.revisions.find(r => r.id === u.definitionId) : visualDefinition(store, { kind: u.kind, id: u.definitionId }), node = visualLocate(visualRoot(definition), u.nodeId)?.node;
     const pinned = node?.ref.revisionId ? store.revisions.find(r => r.id === node.ref.revisionId) : null;
     return { where: u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.definitionName + ' / ' + (node ? veNodeLabel(node) : u.nodeId), pinned };
   });
@@ -18783,7 +18813,8 @@ function vePascal(text) {
   const base = String(text).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component';
   return (/^[A-Z]/.test(base) ? base : 'C' + base).slice(0, 56);
 }
-function veUniqueName(base, taken) { let name = base, i = 2; while (taken.has(name)) name = base + i++; return name; }
+// Unique among `taken` and never a reserved component export name (the migration skips the same names).
+function veUniqueName(base, taken) { let name = base, i = 2; while (taken.has(name) || visualReservedExport(name)) name = base + i++; return name; }
 // Opening never writes. The Back stack remembers the previous view and which page or component it showed.
 function veOpenComponent(libraryId, { push = state.view !== 'component-editor' } = {}) {
   const d = design();
@@ -18942,11 +18973,23 @@ function vePageCards(d = design()) {
 }
 function vePagesView() {
   const d = design(), all = veSurfaces(d), designed = veStore(d).pages.filter(p => all.some(s => s.id === p.ownerId)).length;
-  const orphans = veStore(d).pages.filter(p => !all.some(s => s.id === p.ownerId));
   return `<section class="ve-pages"><header class="page-heading"><div><h1>Pages</h1><p>Design the inside of every sitemap surface with Nuxt UI patterns, reusable components and layouts.</p></div><div class="row">${badge(designed + ' of ' + all.length + ' designed')}${button('Open sitemap', 'nav', 'sitemap', 'small', 'grid')}</div></header>
     <div class="ve-pages-search"><input class="ve-search" type="search" data-field="ve-page-search" value="${esc(veUi.pageQuery)}" placeholder="Find a page, modal or settings surface" aria-label="Find a page, modal or settings surface" maxlength="160" autocomplete="off"></div>
     <div id="ve-pages-results">${vePageCards(d)}</div>
-    ${orphans.length ? `<section class="card mt16"><h2>Designs with a missing surface</h2><p>These page designs are kept. Restoring the original sitemap surface reconnects them.</p><ul>${orphans.map(p => `<li>${esc(p.name)}</li>`).join('')}</ul></section>` : ''}</section>`;
+    ${veOrphansCard(veOrphans(d))}${veLegacyCard(d)}</section>`;
+}
+// Designs naming a missing surface stay reachable: each page opens (writes are refused while the reference dangles) and
+// one reviewed write removes them with navigation to missing surfaces. Restoring the surface reconnects them instead.
+function veOrphansCard({ pages, links }) {
+  if (!pages.length && !links.length) return '';
+  const rows = pages.map(p => `<li>${esc(p.name + ' · ' + veCount(visualNodes(p.root).length, 'element'))} ${button('Open', 've-open-page', p.ownerId, 'small', 'grid', `aria-label="${esc('Open ' + p.name)}"`)}</li>`).join('');
+  const nav = links.length ? `<p class="small muted">${esc(veCount(links.length, 'interaction') + ' navigate to a missing surface: ' + links.map(veNavigationWhere).join('; ') + '.')}</p>` : '';
+  return `<section class="card mt16" aria-label="Designs with a missing surface"><h2>Designs with a missing surface</h2><p>These designs are kept. Restoring the sitemap surface reconnects them; until then page and component edits, export and generation are refused.</p>${rows ? `<ul class="ve-orphans">${rows}</ul>` : ''}${nav}${button('Remove designs and links to missing surfaces…', 've-orphans', '', 'small danger', 'trash')}</section>`;
+}
+// A design whose one-time upgrade failed keeps its legacy detail designs; its concrete recovery is the project export.
+function veLegacyCard(d) {
+  if (companionLegacyDetails(d) === undefined) return '';
+  return `<section class="card mt16" role="alert" aria-label="Legacy detail designs"><h2>Legacy detail designs kept unchanged</h2><p>This project could not be upgraded to the page and component editors, so its pages and components cannot be edited here. ${esc(VE_LEGACY_RECOVERY)}</p><div class="row wrap">${button('Export project JSON', 'project-export', '', 'small primary', 'download')}${button('Export recovery snapshot', 'storage-recovery', '', 'small', 'download')}</div></section>`;
 }
 // Readiness: the full validation (with references) and every review error; warnings do not block the generator.
 function veReadiness(page, findings = veReviewFindings(veStore(), { kind: 'page', id: page.id })) {
@@ -19146,8 +19189,54 @@ function veReparentConfirm(value) {
   Object.assign(veUi, { selected: form.nodeId, more: false, after: false, error: '' }); render();
   notify('Moved into ' + choice.label + '. Undo is available.');
 }
+// Sitemap surfaces referenced by designs: page designs they own and navigate actions that target them, in every
+// definition (published revisions included). Full validation refuses every write while such a reference dangles.
+function veNavigations(store, test) {
+  const out = [], revisionName = r => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
+  for (const [kind, list, root, name] of [['page', store.pages, 'root', x => x.name], ['component', store.components, 'template', x => x.exportName], ['layout', store.layouts, 'root', x => x.name], ['revision', store.revisions, 'template', revisionName]])
+    for (const def of list) visualWalk(def[root], n => { for (const i of n.events ?? []) if (i.actions.some(a => a.kind === 'navigate' && test(a.surfaceId))) out.push({ kind, def, name: name(def), interaction: i }); });
+  return out;
+}
+const veNavigationWhere = u => u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.name + ' / ' + u.interaction.label;
+function veSurfaceUses(ids, d = design()) {
+  const store = veStore(d), set = new Set(ids);
+  return [...store.pages.filter(p => set.has(p.ownerId)).map(p => 'page design ' + p.name), ...veNavigations(store, id => set.has(id)).map(u => 'interaction ' + u.interaction.label + ' in ' + u.kind + ' ' + u.name)];
+}
+function veSurfaceBlock(ids, d = design()) {
+  const uses = veSurfaceUses(ids, d);
+  return uses.length ? 'In use by page and component designs: ' + uses.join('; ') + '. Delete those page designs and change those navigate actions first. No surface was removed.' : '';
+}
+// Orphans: page designs whose surface is gone (or can no longer hold a page) and navigation to such surfaces.
+function veOrphans(d = design()) {
+  const store = veStore(d), surfaces = veContext(d).surfaces, pages = store.pages.filter(p => !surfaces.has(p.ownerId));
+  return { pages, links: veNavigations(store, id => !surfaces.has(id)).filter(u => !pages.includes(u.def)) };
+}
+function veOpenOrphans() {
+  const { pages, links } = veOrphans();
+  if (!pages.length && !links.length) throw Error('No design names a missing surface.');
+  veUi.orphansForm = { error: '', token: smToken() }; showModal('ve-orphans');
+}
+function veOrphansDialog() {
+  const form = veUi.orphansForm, { pages, links } = veOrphans();
+  const lines = [...pages.map(p => 'Delete the page design ' + p.name + ' (' + veCount(visualNodes(p.root).length, 'element') + ').'), ...links.map(u => 'Remove navigation to a missing surface from ' + veNavigationWhere(u) + '.')];
+  const body = `<p id="ve-orphans-error" class="error" role="alert" tabindex="-1">${esc(form?.error || '')}</p><p>These designs name a sitemap surface that no longer exists. Until they are removed or the surface is restored, page and component edits, export and generation are refused.</p><ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Other actions of those interactions are kept. Undo restores everything.</p>`;
+  return dialogBody('Remove designs that name missing surfaces?', body, button('Cancel', 'close', '', 'ghost') + button('Remove', 've-orphans-confirm', '', 'danger', 'trash', lines.length ? 'autofocus' : 'disabled'));
+}
+function veOrphansConfirm() {
+  const form = veUi.orphansForm;
+  if (!form) throw Error('Open the missing-surface review again.');
+  let pages = 0, links = 0;
+  veCommit((store, candidate) => {
+    const surfaces = veContext(candidate).surfaces, gone = new Set(store.pages.filter(p => !surfaces.has(p.ownerId)).map(p => p.id));
+    pages = gone.size; store.pages = store.pages.filter(p => !gone.has(p.id));
+    for (const u of veNavigations(store, id => !surfaces.has(id))) { u.interaction.actions = u.interaction.actions.filter(a => a.kind !== 'navigate' || surfaces.has(a.surfaceId)); links++; }
+  }, form.token);
+  veUi.orphansForm = null; closeModal(); veRepair(); render();
+  notify('Removed ' + veCount(pages, 'page design') + ' and ' + veCount(links, 'navigation') + ' to missing surfaces. Undo is available.');
+}
 const VE_STRUCTURE_ACTIONS = {
   've-delete': veOpenDelete, 've-delete-confirm': veDeleteConfirm, 've-reparent': veOpenReparent, 've-reparent-confirm': veReparentConfirm,
+  've-orphans': veOpenOrphans, 've-orphans-confirm': veOrphansConfirm,
 };
 
 // Editor entry points, the Back stack, palette commands and the editor keyboard. Opening never writes; Back restores the
@@ -19196,7 +19285,7 @@ function veOpenPage(surfaceId) {
 function veLibraryUses(libraryId, d = design()) {
   const store = veStore(d), component = store.components.find(c => c.libraryId === libraryId);
   if (!component) return [];
-  return visualUsages(store, component.id).filter(u => u.kind !== 'layout' && u.definitionId !== component.id).map(u => {
+  return visualUsages(store, component.id).filter(u => ['page', 'component'].includes(u.kind) && u.definitionId !== component.id).map(u => {
     const definition = visualDefinition(store, { kind: u.kind, id: u.definitionId });
     return u.kind === 'page' ? { label: 'Page ' + definition.name, action: 've-open-page', value: definition.ownerId } : { label: 'Component ' + definition.exportName, action: 've-open-component', value: definition.libraryId };
   });
@@ -19302,7 +19391,7 @@ const VE_ENTRY_ACTIONS = {
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
 function veFail(error) {
   const text = veErrorText(error);
-  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'], 've-delete': [veUi.deleteForm, 've-delete-error'], 've-reparent': [veUi.reparentForm, 've-reparent-error'] }[modalType] : null;
+  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'], 've-delete': [veUi.deleteForm, 've-delete-error'], 've-reparent': [veUi.reparentForm, 've-reparent-error'], 've-orphans': [veUi.orphansForm, 've-orphans-error'] }[modalType] : null;
   if (dialog?.[0]) { dialog[0].error = text; redrawModal(); document.getElementById(dialog[1])?.focus(); return; }
   veUi.error = text;
   const output = document.getElementById('ve-error');
@@ -19454,11 +19543,19 @@ function validCompanionProjectFolders(value) {
   if (value === undefined) return true;
   try { validateCompanionFolders(value); return true; } catch { return false; }
 }
+// A design whose one-time upgrade failed still holds its only copy of the legacy detail designs: it is exported unchanged,
+// at its legacy version, so nothing is dropped and importing the file retries the upgrade.
+function companionDesignExport(d) {
+  const legacy = companionLegacyDetails(d);
+  if (legacy === undefined) return { schema: COMPANION_VERSION, ...designSnapshot(d) };
+  return { schema: [3, 4].includes(d.schema) ? d.schema : 4, ...designSnapshot(d), detailDesigns: designCopy(legacy) };
+}
 function companionProjectDocument(p = project()) {
   if (!p) throw Error('Define a project before exporting.');
   const identity = Object.fromEntries(['id', 'name', 'author', 'version', 'description'].map(key => [key, p[key] || '']));
-  return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: COMPANION_VERSION, executable: false,
-    project: identity, settings: companionFolders(p), design: { schema: COMPANION_VERSION, ...designSnapshot(ensureProductModel(p.design)) }, notes: designCopy(p.notes || []) });
+  const design = companionDesignExport(ensureProductModel(p.design));
+  return validateCompanionDocument({ kind: COMPANION_FORMAT, schemaVersion: design.schema, executable: false,
+    project: identity, settings: companionFolders(p), design, notes: designCopy(p.notes || []) });
 }
 function companionJson(p = project()) {
   const text = JSON.stringify(companionProjectDocument(p), null, 2) + '\n';
@@ -19469,7 +19566,8 @@ function companionExport() {
   if (state.activeRun || tdUi.busy) return notify('Finish or cancel the current operation before exporting.');
   try {
     const text = companionJson();
-    showModal('copy', { title: 'Full project JSON — saved authoring data and folder settings. Keep private. No trust, source files, approvals or verification receipts.',
+    const legacy = companionLegacyDetails(project().design) !== undefined ? ' Legacy version: it keeps the detail designs that could not be upgraded; importing it retries the upgrade.' : '';
+    showModal('copy', { title: 'Full project JSON — saved authoring data and folder settings. Keep private. No trust, source files, approvals or verification receipts.' + legacy,
       text, filename: project().id + '.companion.json' });
   } catch (error) { notify(error.message); }
 }
@@ -19562,10 +19660,17 @@ function companionSettingsCard() {
     <div class="row wrap">${p ? button('Configure project folders', 'project-folders', '', 'small', 'folder') + button('Export project JSON', 'project-export', '', 'small', 'download') : ''}${button('Import project JSON', 'project-import', '', 'small', 'file')}${button('Load companion project', 'project-example', '', 'small', 'box')}${button('Project Starters', 'palette-nav', 'starters', 'small', 'grid')}${p ? button('Generate plugin shell','starter-generate','','small','terminal') : ''}</div>
     <p class="small muted">Import replaces the one project only after review. Recovery snapshots below are a different format. The read-only inspector prints JSON; the separate reviewed generator creates the shell.</p></section>`;
 }
+// Generated interaction hooks were named after legacy edge IDs; the new IDs let a developer port hooks written for an
+// earlier generation (application/interactions/<edge>.ts → <vi-N>.ts).
+function companionInteractionIds(report) {
+  const ids = Object.entries(report?.interactionIds || {});
+  if (!ids.length) return '';
+  return `<dt>Interaction IDs</dt><dd><details id="project-import-interactions"><summary>${ids.length} legacy interaction${ids.length === 1 ? '' : 's'} renamed. Hooks generated earlier move from application/interactions/&lt;edge&gt;.ts to &lt;new ID&gt;.ts.</summary><ul>${ids.map(([edge, id]) => `<li><code>${esc(edge)}</code> → <code>${esc(id)}</code></li>`).join('')}</ul></details></dd>`;
+}
 function companionImportDialog() {
   const u = projectTransferUi, p = u.candidate, current = project();
   const retainedFile = !!u.filename && u.text.length > 100000;
-  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd>${u.report ? `<dt>Upgrade</dt><dd id="project-import-migration">Upgraded to project version ${COMPANION_VERSION} for the page and component editors: ${esc(veMigrationSummary(u.report))}</dd>` : ''}</dl>
+  const summary = p ? `<section class="card mt16" id="project-import-summary" tabindex="-1"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><dl class="receipt"><dt>Plugin ID</dt><dd>${esc(p.id)}</dd><dt>Design</dt><dd>${p.design.nodes.length} surfaces · ${p.design.prds.length} PRDs · ${allRequirements(p.design).length} requirements</dd><dt>Models</dt><dd>${p.design.semantic?.entities.length || 0} entities · ${p.design.dataSources?.sources.length || 0} data sources · ${p.design.library.length} components</dd><dt>Codebase / tests</dt><dd>${esc(p.folders.codebaseFolder)} / ${esc(p.folders.testsFolder)}</dd><dt>Review findings</dt><dd>${designIssues(p.design).length} — a valid draft is not generation readiness</dd>${u.report ? `<dt>Upgrade</dt><dd id="project-import-migration">Upgraded to project version ${COMPANION_VERSION} for the page and component editors: ${esc(veMigrationSummary(u.report))}</dd>` : ''}${companionInteractionIds(u.report)}</dl>
     <label class="checkbox"><input type="checkbox" id="project-import-confirm"><span>${current ? 'Replace ' + esc(current.name) + ' with this project.' : 'Load this project into the current workspace.'} Clear simulated runs, approvals and prepared state. Keep host files.</span></label></section>` : '';
   return dialogBody(projectTransferUi.starter ? 'Review starter project' : 'Import a full project', starterReviewBanner() + `<p>Choose an export or paste JSON, then review it. Use the file picker for large exports. No file is executed. Your current project is unchanged until confirmation.</p>
     <div class="field"><label for="project-import-file">Project JSON file (up to 4 MB)</label><input type="file" id="project-import-file" accept=".json,application/json" ${u.loading ? 'disabled' : ''}></div>
@@ -24176,8 +24281,10 @@ function designIssues(d){
  return issues;
 }
 function designFingerprint(d){return JSON.stringify(generationSnapshot(d));}
-function portableDesign(){const d=design();return {schema:d.schema,...designSnapshot(d),kind:'plugin-shell-blueprint',executable:false};}
+// A failed-upgrade design keeps its legacy store (and version) in the blueprint too; import upgrades it.
+function portableDesign(){const d=design(),legacy=companionLegacyDetails(d);return {schema:d.schema,...designSnapshot(d),...(legacy!==undefined?{detailDesigns:designCopy(legacy)}:{}),kind:'plugin-shell-blueprint',executable:false};}
 function importDesign(text){
+ if(companionLegacyDetails(design())!==undefined)throw Error('This project still holds legacy detail designs that could not be upgraded. A blueprint import would discard them. Use Export project JSON on the Pages view first, then import that file or replace the project. Nothing was imported.');
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error'&&i.code!=='data-source-shape');if(issues.length)throw Error(issues[0].message);
@@ -24310,7 +24417,8 @@ function designConnectDialog(){return typedConnectionDialog();}
 function linkKind(n){return n?.kind==='modal'?'open':n?.kind==='settings'?'configure':n?.kind==='action'?'execute':'navigate';}
 function designGoalDialog(){return dialogBody('Define the product intent',`${designInput('What should the plugin help people do?','goal',designUi.goalDraft.goal,'This guides the business-logic handoff; no behavior is inferred from prose.',true)}${designSelect('Target ambition','platform',[['desktop','Desktop-first'],['mobile-ready','Mobile-ready design (requires qualification)']],designUi.goalDraft.platform,'This changes design checks, not the manifest or tested-platform claims.')}<p class="error" role="alert">${esc(designUi.error)}</p>`,button('Cancel','close','','ghost')+button('Save intent','design-goal-save','','primary'));}
 function designReplaceDialog(){const b=BLUEPRINTS.find(b=>b.id===modalData);return dialogBody('Use '+b.name+'?',`${layoutThumbnail(b.layout,true)}<p>${b.description}</p>${callout('This replaces the editable sitemap only. PRDs, components and source declarations are preserved. Connected data flows must first be reassigned or removed explicitly; they block replacement. Existing requirement links to replaced surfaces become explicit blockers; no source files are deleted. Undo restores the previous outline.','warn')}`,button('Cancel','close','','ghost')+button('Use blueprint','blueprint-apply',b.id,'primary','check'));}
-function designRemoveDialog(){const n=design().nodes.find(n=>n.id===modalData);if(!n)return dialogBody('Surface not found','It may already have been removed.');const nodes=nodeDescendants(design(),n.id);return dialogBody('Remove '+n.label+'?',`<p>This removes ${nodes.size} surface(s) and ${design().links.filter(e=>nodes.has(e.from)||nodes.has(e.to)).length} related user-flow connection(s) from the outline.</p><p class="small muted">${dataSources().flows.filter(f=>nodes.has(f.card)).length} data flow(s) reference these surfaces. Removal is blocked until you reassign or explicitly remove them in Data Sources.</p><p class="small muted">${allRequirements().filter(r=>r.nodes.some(id=>nodes.has(id))).length} requirement reference(s) are retained and will need remapping. Shared component definitions are kept.</p><p class="small muted">${smSurfaceUses([...nodes]).length} storymap item(s) retain their links as missing targets until explicitly relinked. No storymap is deleted.</p>${callout('Previously scaffolded files are retained. This is not a code deletion or migration. You can undo the outline change.','warn')}`,button('Cancel','close','','ghost')+button('Remove from outline','design-remove-confirm',n.id,'danger'));}
+// A surface (or descendant) that owns a page design or is a navigation target is not removable: the uses are named.
+function designRemoveDialog(){const n=design().nodes.find(n=>n.id===modalData);if(!n)return dialogBody('Surface not found','It may already have been removed.');const nodes=nodeDescendants(design(),n.id),block=veSurfaceBlock([...nodes]);if(block)return dialogBody('Cannot remove '+n.label,`<p class="ve-refusal" role="alert">${icon('alert')}<span>${esc(block)}</span></p>`,button('Close','close','','ghost'));return dialogBody('Remove '+n.label+'?',`<p>This removes ${nodes.size} surface(s) and ${design().links.filter(e=>nodes.has(e.from)||nodes.has(e.to)).length} related user-flow connection(s) from the outline.</p><p class="small muted">${dataSources().flows.filter(f=>nodes.has(f.card)).length} data flow(s) reference these surfaces. Removal is blocked until you reassign or explicitly remove them in Data Sources.</p><p class="small muted">${allRequirements().filter(r=>r.nodes.some(id=>nodes.has(id))).length} requirement reference(s) are retained and will need remapping. Shared component definitions are kept.</p><p class="small muted">${smSurfaceUses([...nodes]).length} storymap item(s) retain their links as missing targets until explicitly relinked. No storymap is deleted.</p>${callout('Previously scaffolded files are retained. This is not a code deletion or migration. You can undo the outline change.','warn')}`,button('Cancel','close','','ghost')+button('Remove from outline','design-remove-confirm',n.id,'danger'));}
 function designTransferDialog(){return dialogBody('Portable plugin blueprint',`<p>Export the sitemap, layouts, patterns and product intent as data. Declared note folders and public source locations may be included. No execution trust, credential values or test results are included. Do not place secrets in descriptive text. Import validates schema and structure before replacing the outline.</p><label for="blueprint-json">Blueprint JSON</label><textarea id="blueprint-json" data-field="design-transfer-json" aria-describedby="design-error" aria-invalid="${!!designUi.error}" class="mono transfer-area" spellcheck="false">${esc(designUi.transfer?.text??JSON.stringify(portableDesign(),null,2))}</textarea><p id="design-error" class="error" role="alert">${esc(designUi.error)}</p>`,button('Close','close','','ghost')+button('Import reviewed JSON','design-import','','','upload')+button('Download saved blueprint','design-export','','primary','download'));}
 function startNodeForm(kind='view',editId=null){
  const d=design(),n=d.nodes.find(n=>n.id===editId),selected=selectedNode();
@@ -24333,6 +24441,7 @@ function saveDesignNode(){
  if(n.entry)candidate.nodes.forEach(x=>{if(x.id!==n.id)x.entry=false;});
  const issues=newDesignErrors(d,candidate);
  if(issues.length){designUi.error=issues[0].message;redrawModal();return;}
+ if(f.editing&&['group','action'].includes(n.kind)){const block=veSurfaceBlock([n.id]);if(block){designUi.error=block.replace('No surface was removed.','A group or action cannot hold a page or be a navigation target.');redrawModal();return;}}
  if(f.editing&&JSON.stringify(d.nodes.map(surfaceEditIdentity))===JSON.stringify(candidate.nodes.map(surfaceEditIdentity))){closeModal();return;}
  recordDesign();d.nodes=candidate.nodes;if(!f.editing){d.nextId++;canvasState(d);if(n.parent)assignCardToSection(d,n.id,sectionForCard(d,n.parent));}linkCreatedRequirement(n);designChanged();selectSitemapItem('surface',n.id);closeModal();render();notify('Surface saved to the outline. Source is unchanged.');
 }
@@ -24368,7 +24477,7 @@ function handleDesignAction(action,value){
  switch(action){
   case 'outline-start':designUi.selected=null;designUi.plan=null;closeModal();setView('sitemap');break;
   case 'blueprint-choose':showModal('design-replace',value);break;
-  case 'blueprint-apply':{if(dataSources().flows.length){notify('Remove or reassign data flows before replacing their sitemap cards. Source declarations are preserved.');break;}recordDesign();const fresh=replacementDesign(value);Object.assign(d,fresh);designChanged();designUi.selected=d.nodes[0]?.id;closeModal();setView('sitemap');break;}
+  case 'blueprint-apply':{if(dataSources().flows.length){notify('Remove or reassign data flows before replacing their sitemap cards. Source declarations are preserved.');break;}const block=veSurfaceBlock(d.nodes.map(x=>x.id));if(block){notify(block.replace('No surface was removed.','The sitemap was not replaced.'));break;}recordDesign();const fresh=replacementDesign(value);Object.assign(d,fresh);designChanged();designUi.selected=d.nodes[0]?.id;closeModal();setView('sitemap');break;}
   case 'design-select':showMapNode(value);break;
   case 'design-mode':designUi.mode=value;render();break;
   case 'design-add':startNodeForm(value);break;
@@ -24385,7 +24494,7 @@ function handleDesignAction(action,value){
   }
   case 'design-duplicate':duplicateDesignSurface(value);break;
   case 'design-remove':showModal('design-remove',value);break;
-  case 'design-remove-confirm':{if(dataSources().flows.some(f=>nodeDescendants(d,value).has(f.card))){notify('Remove or reassign this surface’s data flows first. No surface was removed.');break;}if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}
+  case 'design-remove-confirm':{if(dataSources().flows.some(f=>nodeDescendants(d,value).has(f.card))){notify('Remove or reassign this surface’s data flows first. No surface was removed.');break;}const block=veSurfaceBlock([...nodeDescendants(d,value)]);if(block){notify(block);closeModal();break;}if(!validDestructiveReview('design-remove',value))break;recordDesign();const ids=nodeDescendants(d,value);d.nodes=d.nodes.filter(n=>!ids.has(n.id));d.links=d.links.filter(e=>!ids.has(e.from)&&!ids.has(e.to));designChanged();designUi.selected=d.nodes[0]?.id;closeModal();render();notify('Removed from the outline only. Existing source previews are retained.');break;}
   case 'design-connect':{
    const available=d.nodes.filter(n=>n.kind!=='group');if(available.length<2){notify('Add two surfaces to connect.');break;}
    const from=n?.kind!=='group'&&n?n:available[0];const to=available.find(x=>x.id!==from.id);

@@ -132,6 +132,52 @@ function veReparentConfirm(value) {
   Object.assign(veUi, { selected: form.nodeId, more: false, after: false, error: '' }); render();
   notify('Moved into ' + choice.label + '. Undo is available.');
 }
+// Sitemap surfaces referenced by designs: page designs they own and navigate actions that target them, in every
+// definition (published revisions included). Full validation refuses every write while such a reference dangles.
+function veNavigations(store, test) {
+  const out = [], revisionName = r => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
+  for (const [kind, list, root, name] of [['page', store.pages, 'root', x => x.name], ['component', store.components, 'template', x => x.exportName], ['layout', store.layouts, 'root', x => x.name], ['revision', store.revisions, 'template', revisionName]])
+    for (const def of list) visualWalk(def[root], n => { for (const i of n.events ?? []) if (i.actions.some(a => a.kind === 'navigate' && test(a.surfaceId))) out.push({ kind, def, name: name(def), interaction: i }); });
+  return out;
+}
+const veNavigationWhere = u => u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.name + ' / ' + u.interaction.label;
+function veSurfaceUses(ids, d = design()) {
+  const store = veStore(d), set = new Set(ids);
+  return [...store.pages.filter(p => set.has(p.ownerId)).map(p => 'page design ' + p.name), ...veNavigations(store, id => set.has(id)).map(u => 'interaction ' + u.interaction.label + ' in ' + u.kind + ' ' + u.name)];
+}
+function veSurfaceBlock(ids, d = design()) {
+  const uses = veSurfaceUses(ids, d);
+  return uses.length ? 'In use by page and component designs: ' + uses.join('; ') + '. Delete those page designs and change those navigate actions first. No surface was removed.' : '';
+}
+// Orphans: page designs whose surface is gone (or can no longer hold a page) and navigation to such surfaces.
+function veOrphans(d = design()) {
+  const store = veStore(d), surfaces = veContext(d).surfaces, pages = store.pages.filter(p => !surfaces.has(p.ownerId));
+  return { pages, links: veNavigations(store, id => !surfaces.has(id)).filter(u => !pages.includes(u.def)) };
+}
+function veOpenOrphans() {
+  const { pages, links } = veOrphans();
+  if (!pages.length && !links.length) throw Error('No design names a missing surface.');
+  veUi.orphansForm = { error: '', token: smToken() }; showModal('ve-orphans');
+}
+function veOrphansDialog() {
+  const form = veUi.orphansForm, { pages, links } = veOrphans();
+  const lines = [...pages.map(p => 'Delete the page design ' + p.name + ' (' + veCount(visualNodes(p.root).length, 'element') + ').'), ...links.map(u => 'Remove navigation to a missing surface from ' + veNavigationWhere(u) + '.')];
+  const body = `<p id="ve-orphans-error" class="error" role="alert" tabindex="-1">${esc(form?.error || '')}</p><p>These designs name a sitemap surface that no longer exists. Until they are removed or the surface is restored, page and component edits, export and generation are refused.</p><ul class="ve-usages">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul><p class="ve-pane-note">Other actions of those interactions are kept. Undo restores everything.</p>`;
+  return dialogBody('Remove designs that name missing surfaces?', body, button('Cancel', 'close', '', 'ghost') + button('Remove', 've-orphans-confirm', '', 'danger', 'trash', lines.length ? 'autofocus' : 'disabled'));
+}
+function veOrphansConfirm() {
+  const form = veUi.orphansForm;
+  if (!form) throw Error('Open the missing-surface review again.');
+  let pages = 0, links = 0;
+  veCommit((store, candidate) => {
+    const surfaces = veContext(candidate).surfaces, gone = new Set(store.pages.filter(p => !surfaces.has(p.ownerId)).map(p => p.id));
+    pages = gone.size; store.pages = store.pages.filter(p => !gone.has(p.id));
+    for (const u of veNavigations(store, id => !surfaces.has(id))) { u.interaction.actions = u.interaction.actions.filter(a => a.kind !== 'navigate' || surfaces.has(a.surfaceId)); links++; }
+  }, form.token);
+  veUi.orphansForm = null; closeModal(); veRepair(); render();
+  notify('Removed ' + veCount(pages, 'page design') + ' and ' + veCount(links, 'navigation') + ' to missing surfaces. Undo is available.');
+}
 const VE_STRUCTURE_ACTIONS = {
   've-delete': veOpenDelete, 've-delete-confirm': veDeleteConfirm, 've-reparent': veOpenReparent, 've-reparent-confirm': veReparentConfirm,
+  've-orphans': veOpenOrphans, 've-orphans-confirm': veOrphansConfirm,
 };

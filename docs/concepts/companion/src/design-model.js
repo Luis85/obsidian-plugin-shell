@@ -67,8 +67,10 @@ function designIssues(d){
  return issues;
 }
 function designFingerprint(d){return JSON.stringify(generationSnapshot(d));}
-function portableDesign(){const d=design();return {schema:d.schema,...designSnapshot(d),kind:'plugin-shell-blueprint',executable:false};}
+// A failed-upgrade design keeps its legacy store (and version) in the blueprint too; import upgrades it.
+function portableDesign(){const d=design(),legacy=companionLegacyDetails(d);return {schema:d.schema,...designSnapshot(d),...(legacy!==undefined?{detailDesigns:designCopy(legacy)}:{}),kind:'plugin-shell-blueprint',executable:false};}
 function importDesign(text){
+ if(companionLegacyDetails(design())!==undefined)throw Error('This project still holds legacy detail designs that could not be upgraded. A blueprint import would discard them. Use Export project JSON on the Pages view first, then import that file or replace the project. Nothing was imported.');
  if(text.length>DESIGN_LIMITS.importBytes)throw Error('Blueprint exceeds the import limit.');
  const input=JSON.parse(text);if(!structuralDesign(input))throw Error('Expected a supported data-only blueprint. Unknown types and schemas are rejected.');
  const issues=designIssues(input).filter(i=>i.level==='error'&&i.code!=='data-source-shape');if(issues.length)throw Error(issues[0].message);

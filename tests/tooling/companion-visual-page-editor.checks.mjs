@@ -16,7 +16,7 @@ const helpers = ['function esc(', 'function icon(', 'function button(', 'functio
   assert.equal(lines.length, 1, prefix + ' is one line of base.html');
   return lines[0];
 }).join('\n');
-const files = ['ui-fields.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-page-views.js'];
+const files = ['ui-fields.js', 've-state.js', 've-catalog-preview.js', 've-canvas.js', 've-outline.js', 've-insert.js', 've-layouts.js', 've-fields.js', 've-review.js', 've-interactions.js', 've-page-inspector.js', 've-page-views.js', 've-structure.js'];
 const concept = (await Promise.all(files.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = 'const ICONS = {}; const state = { settings: { theme: "light" }, view: "page-editor" }; function design() { return host.design; } function project() { return { design: host.design }; } function realm(v) { return JSON.parse(JSON.stringify(v)); }';
 

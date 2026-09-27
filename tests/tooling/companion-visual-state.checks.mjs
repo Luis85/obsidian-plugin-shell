@@ -6,19 +6,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
+import { COMPANION_VERSION, migrateCompanionDocument, parseCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 
 const plain = value => JSON.parse(JSON.stringify(value));
 const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'project-contract.mjs'];
+const contracts = ['design-system-roles.mjs', 'design-system-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'storymap-contract.mjs', 'project-contract.mjs'];
 const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
   .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
-const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js'];
+const sources = ['design-model.js', 'storymap-model.js', 'storymap-actions.js', 've-state.js', 'project-transfer.js'];
 const concept = (await Promise.all(sources.map(name => readFile('docs/concepts/companion/src/' + name, 'utf8')))).join('\n');
 const stubs = `const DESIGN_LIMITS = { history: 20, importBytes: 4000000 };
 function designCopy(v) { return JSON.parse(JSON.stringify(v)); }
 const state = { activeRun: null }, tdUi = { busy: false }, storageWarning = '', STORAGE_KEY = 'k', persistenceSnapshot = null, modalType = '', innerWidth = 1200;
-const localStorage = { getItem: () => null }, document = { addEventListener() {}, getElementById: () => null };
+const localStorage = { getItem: () => null }, document = { addEventListener() {}, getElementById: id => (id === 'modal' ? { addEventListener() {} } : null) };
 function project() { return host.p; } function ensureProductModel(d) { return d; }
 function generationSnapshot(d) { const v = designSnapshot(d); delete v.canvas; delete v.storymaps; if (!veHasContent(v.visualDesigns)) delete v.visualDesigns; return v; }
 function emptySemantic() { return { schema: 1, nextId: 1, entities: [] }; }
@@ -28,7 +28,7 @@ function saveConceptState() { persist(); return true; } function save() { persis
 // Declared after the concept sources, so this reduced gate replaces design-model.js's full structural one.
 const gate = 'function validSavedDesign(d) { return veShape(d) && [...d.history, ...d.future].every(s => veShape(s)); }';
 async function load(extra = '') {
-  const host = { p: null, saves: 0, notices: [] }, ctx = vm.createContext({ host });
+  const host = { p: null, saves: 0, notices: [] }, ctx = vm.createContext({ host, TextEncoder, structuredClone });
   vm.runInContext(shared + '\n' + stubs + '\n' + concept + '\n' + gate + '\n' + extra, ctx, { filename: 'concept-visual-state.js' });
   return { ctx, host };
 }
@@ -191,4 +191,47 @@ test('[VISUAL-ISSUES] design checks report a page whose surface is gone as a ref
   assert.deepEqual(plain(clean.veIssues(clean.design())), []);
   const legacy = baseDesign(clean); legacy.detailDesigns = clean.emptyDetailDesigns();
   assert.deepEqual(plain(clean.veIssues(legacy)), []);
+});
+
+// A project whose startup upgrade failed (schema 4) holds the only copy of its detail designs. Every export keeps it,
+// and a blueprint import that would replace the design is refused. The fixture store is valid legacy data that the
+// one-way upgrade cannot hold: a 120-element page whose list options each add two elements.
+const v4 = JSON.parse(await readFile('tests/fixtures/companion/detail-v4.json', 'utf8'));
+function unmigratable(store) {
+  const s = structuredClone(store), doc = s.documents.find(d => d.kind === 'page'), root = doc.nodes.find(n => n.parentId === null);
+  const base = { kind: 'text', label: 'Filler', text: 'x', parentId: root.id, layout: 'stack', position: { x: 0, y: 0 }, size: { width: 80, height: 80 }, component: null, props: {}, binding: null, a11y: '', visibleIn: ['default', 'loading', 'empty', 'error', 'disabled'], sourceBrickId: null };
+  doc.nodes.push({ ...base, id: 'detail-node-' + s.nextId++, kind: 'list', label: 'Options', options: ['a', 'b'] });
+  while (doc.nodes.length < 120) doc.nodes.push({ ...base, id: 'detail-node-' + s.nextId++ });
+  return s;
+}
+const failedUpgrade = ctx => ctx.designCopy({ ...v4.project, notes: [], design: { ...v4.design, detailDesigns: unmigratable(v4.design.detailDesigns), revision: 3, emitted: {}, history: [], future: [] } });
+test('[VISUAL-LEGACY] a failed startup upgrade keeps the design unchanged and names the concrete recovery export', async () => {
+  const { ctx, host } = await load(), p = failedUpgrade(ctx), before = JSON.stringify(p);
+  vm.runInContext('state', ctx).project = p; host.p = p;
+  assert.equal(ctx.veRestoreSaved(), false);
+  assert.equal(JSON.stringify(p), before); assert.equal(host.saves, 0);
+  assert.match(host.notices.at(-1), /^This project could not be upgraded .*supports at most 120 elements\. Use Export project JSON on the Pages view: the file keeps the legacy detail designs, and importing it retries the upgrade\.$/);
+  assert.throws(() => addPage(ctx, 'node-5', 'Home'), /legacy detail designs .*Export project JSON on the Pages view.*Nothing was saved/);
+});
+test('[VISUAL-LEGACY] project JSON export of a failed-upgrade design is the unchanged legacy document; importing it retries the upgrade', async () => {
+  const { ctx, host } = await load(); host.p = failedUpgrade(ctx);
+  const text = ctx.companionJson(), doc = JSON.parse(text);
+  assert.deepEqual([doc.schemaVersion, doc.design.schema, Object.hasOwn(doc.design, 'visualDesigns')], [4, 4, false]);
+  for (const key of Object.keys(doc.design)) assert.deepEqual(doc.design[key], plain(host.p.design[key]), key);
+  assert.deepEqual(doc.design.detailDesigns, plain(host.p.design.detailDesigns));
+  assert.throws(() => migrateCompanionDocument(parseCompanionDocument(text)), /supports at most 120 elements/, 'the same upgrade failure, named; nothing is dropped');
+  const fixed = JSON.parse(text), page = fixed.design.detailDesigns.documents.find(d => d.kind === 'page'); page.nodes = page.nodes.filter(n => n.label !== 'Filler');
+  const { document, report } = migrateCompanionDocument(parseCompanionDocument(JSON.stringify(fixed)));
+  assert.equal(document.schemaVersion, COMPANION_VERSION); assert.ok(document.design.visualDesigns.pages.some(p => p.ownerId === page.ownerId)); assert.ok(report.droppedPositions > 0);
+  host.p = { ...host.p, design: ctx.designCopy(document.design) }; delete host.p.design.detailDesigns;
+  assert.equal(JSON.parse(ctx.companionJson()).schemaVersion, COMPANION_VERSION, 'an upgraded design exports as version 5');
+});
+test('[VISUAL-LEGACY] blueprint export keeps the legacy store; blueprint import over a failed-upgrade design is refused before any write', async () => {
+  const { ctx, host } = await load(importGate); host.p = failedUpgrade(ctx);
+  const portable = plain(ctx.portableDesign());
+  assert.deepEqual([portable.schema, portable.kind, portable.detailDesigns], [4, 'plugin-shell-blueprint', plain(host.p.design.detailDesigns)]);
+  const before = JSON.stringify(ctx.design()), saves = host.saves;
+  const blueprint = JSON.stringify({ ...plain(ctx.designSnapshot(baseDesign(ctx))), schema: 4, kind: 'plugin-shell-blueprint', executable: false });
+  assert.throws(() => ctx.importDesign(blueprint), /^Error: This project still holds legacy detail designs that could not be upgraded\. A blueprint import would discard them\. Use Export project JSON on the Pages view first, then import that file or replace the project\. Nothing was imported\.$/);
+  assert.equal(JSON.stringify(ctx.design()), before); assert.equal(host.saves, saves);
 });

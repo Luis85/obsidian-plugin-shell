@@ -3,7 +3,7 @@
 // inside veCommit, so a failed conversion or validation changes nothing.
 const VE_BINDING_KINDS = [['literal', 'Literal'], ['source', 'Source'], ['state', 'Form value']];
 const VE_INSPECTOR_FIELDS = ['ve-name', 've-prop', 've-attr', 've-role', 've-tag', 've-layout-mode', 've-layout', 've-visible', 've-a11y', 've-bind-kind', 've-bind-source', 've-bind-operation', 've-bind-field', 've-bind-state'];
-const VE_ELEMENT_ATTRS = { img: ['alt', 'src'], input: ['placeholder', 'type', 'name'], button: ['type'], label: ['for'] };
+const VE_ELEMENT_ATTRS = VISUAL_ELEMENT_ATTRS; // the contract's per-tag attribute list (title, role, aria-* are also valid)
 const VE_LAYOUT_BOUNDS = { gap: [0, 160], padding: [0, 160], columns: [1, 12], width: [24, 1600], minWidth: [0, 1600], maxWidth: [24, 4000], 'narrow.columns': [1, 12] };
 const VE_LAYOUT_CHOICES = { align: ['start', 'center', 'end', 'stretch'], justify: ['start', 'center', 'end', 'space-between'], overflow: ['visible', 'auto', 'hidden'], widthMode: ['fill', 'hug', 'fixed'], 'narrow.layout': ['stack', 'row', 'grid'] };
 const VE_TOKEN_GROUPS = { gap: 'spacing', padding: 'spacing', color: 'colors', background: 'colors', radius: 'radii', typography: 'typography' };

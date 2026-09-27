@@ -11,10 +11,11 @@ function veNextPatch(store, componentId) {
   return major + '.' + minor + '.' + (patch + 1);
 }
 function veComponentOrThrow() { const c = veCurrentComponent(); if (!c) throw Error('Open a component design first.'); return c; }
-// Every place that renders this component: live instances follow the next revision's source, pinned ones keep theirs.
+// Every place that renders this component: live instances follow the next revision's source, pinned ones keep theirs
+// (published revisions of other components always pin).
 function veUsageRows(store, component) {
   return visualUsages(store, component.id).filter(u => u.definitionId !== component.id).map(u => {
-    const definition = visualDefinition(store, { kind: u.kind, id: u.definitionId }), node = visualLocate(visualRoot(definition), u.nodeId)?.node;
+    const definition = u.kind === 'revision' ? store.revisions.find(r => r.id === u.definitionId) : visualDefinition(store, { kind: u.kind, id: u.definitionId }), node = visualLocate(visualRoot(definition), u.nodeId)?.node;
     const pinned = node?.ref.revisionId ? store.revisions.find(r => r.id === node.ref.revisionId) : null;
     return { where: u.kind[0].toUpperCase() + u.kind.slice(1) + ' ' + u.definitionName + ' / ' + (node ? veNodeLabel(node) : u.nodeId), pinned };
   });

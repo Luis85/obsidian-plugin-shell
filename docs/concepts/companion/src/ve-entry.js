@@ -44,7 +44,7 @@ function veOpenPage(surfaceId) {
 function veLibraryUses(libraryId, d = design()) {
   const store = veStore(d), component = store.components.find(c => c.libraryId === libraryId);
   if (!component) return [];
-  return visualUsages(store, component.id).filter(u => u.kind !== 'layout' && u.definitionId !== component.id).map(u => {
+  return visualUsages(store, component.id).filter(u => ['page', 'component'].includes(u.kind) && u.definitionId !== component.id).map(u => {
     const definition = visualDefinition(store, { kind: u.kind, id: u.definitionId });
     return u.kind === 'page' ? { label: 'Page ' + definition.name, action: 've-open-page', value: definition.ownerId } : { label: 'Component ' + definition.exportName, action: 've-open-component', value: definition.libraryId };
   });

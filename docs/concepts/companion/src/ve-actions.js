@@ -2,7 +2,7 @@
 // goes through veCommit. Failures land in veUi.error and the visible alert region, never as a thrown exception.
 function veFail(error) {
   const text = veErrorText(error);
-  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'], 've-delete': [veUi.deleteForm, 've-delete-error'], 've-reparent': [veUi.reparentForm, 've-reparent-error'] }[modalType] : null;
+  const dialog = document.getElementById('modal').open ? { 've-save-layout': [veUi.layoutForm, 've-layout-error'], 've-interaction': [veUi.interactionForm, 've-int-error'], 've-publish': [veUi.publishForm, 've-publish-error'], 've-external': [veUi.externalForm, 've-external-error'], 've-delete': [veUi.deleteForm, 've-delete-error'], 've-reparent': [veUi.reparentForm, 've-reparent-error'], 've-orphans': [veUi.orphansForm, 've-orphans-error'] }[modalType] : null;
   if (dialog?.[0]) { dialog[0].error = text; redrawModal(); document.getElementById(dialog[1])?.focus(); return; }
   veUi.error = text;
   const output = document.getElementById('ve-error');

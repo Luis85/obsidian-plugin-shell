@@ -1,9 +1,11 @@
 // Visual editor session state and the one guarded write path for design.visualDesigns.
 // veUi is presentation state only: it never enters project JSON, history snapshots or exports.
 const VE_UPGRADE_NOTICE = 'This project was upgraded to the new page and component editors. Earlier undo history was cleared.';
+// The one recovery path for a design whose upgrade failed: the project JSON export keeps its legacy detail designs.
+const VE_LEGACY_RECOVERY = 'Use Export project JSON on the Pages view: the file keeps the legacy detail designs, and importing it retries the upgrade.';
 function veDefaults() {
   return { ref: null, owner: null, selected: null, left: 'outline', pane: 'canvas', mode: 'design', inspector: 'essentials', scenario: null, viewport: 'desktop', query: '', pageQuery: '', insertTab: 'patterns', insertQuery: '', after: false, more: false, layoutForm: null, interactionForm: null, advanced: false, back: [], palette: false, error: '', notice: '',
-    library: null, variant: '', state: 'default', contractTab: 'contract', apiTab: 'props', childTab: 'props', slotTarget: null, publishForm: null, externalForm: null, depForm: null, deleteForm: null, reparentForm: null, adapterEvents: {} };
+    library: null, variant: '', state: 'default', contractTab: 'contract', apiTab: 'props', childTab: 'props', slotTarget: null, publishForm: null, externalForm: null, depForm: null, deleteForm: null, reparentForm: null, orphansForm: null, adapterEvents: {} };
 }
 const veUi = veDefaults();
 function veErrorText(error) { return String(error instanceof Error ? error.message : error).replace(/^VISUAL_INVALID: /, ''); }
@@ -49,7 +51,7 @@ function veCanWrite(token = smToken()) {
 function veCommit(change, token = smToken()) {
   veCanWrite(token);
   const previous = design(), candidate = designCopy(previous), before = veStore(previous), store = designCopy(before);
-  if (companionLegacyDetails(previous) !== undefined) throw Error('This project still holds legacy detail designs. Reload to upgrade them first. Nothing was saved.');
+  if (companionLegacyDetails(previous) !== undefined) throw Error('This project still holds legacy detail designs that could not be upgraded. ' + VE_LEGACY_RECOVERY + ' Nothing was saved.');
   change(store, candidate);
   const semantic = JSON.stringify(before) !== JSON.stringify(store);
   if (!semantic) return true;
@@ -144,7 +146,7 @@ function veRestoreSaved() {
       p.design = candidate; changed = true;
     } catch (error) {
       veUi.notice = '';
-      veUi.error = 'This project could not be upgraded to the new page and component editors and is kept unchanged. ' + (error instanceof Error ? error.message : '') + ' Export recovery before editing.';
+      veUi.error = 'This project could not be upgraded to the new page and component editors and is kept unchanged. ' + veErrorText(error) + ' ' + VE_LEGACY_RECOVERY;
       notify(veUi.error); return false;
     }
   }

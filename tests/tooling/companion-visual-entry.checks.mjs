@@ -336,3 +336,41 @@ test('[VISUAL-ENTRY] carry-forward: Move to… dry-runs each container and hides
   ctx.handleVisualAction('ve-select', 'vn-26'); ctx.handleVisualAction('ve-reparent');
   assert.ok(!ctx.veReparentDialog().includes('data-value="vn-42"'), 'the picker never offers a container the move would overflow');
 });
+
+// A sitemap surface that owns a page design or is a navigation target cannot be removed; the uses are named.
+test('[VISUAL-SURFACES] surface uses name owned page designs and navigate actions in every definition kind', () => {
+  const ctx = load(), bar = ctx.host.design.visualDesigns.components[1].template[0];
+  bar.events = ctx.realm([{ id: 'vi-29', event: 'click', label: 'Open editor', actions: [{ kind: 'navigate', surfaceId: 'surface-b' }], notes: '', acceptance: '' }]);
+  ctx.validateVisualDesigns(ctx.host.design.visualDesigns, ctx.veContext(ctx.host.design));
+  assert.deepEqual(plain(ctx.veSurfaceUses(['surface-a'])), ['page design Customers']);
+  assert.deepEqual(plain(ctx.veSurfaceUses(['surface-b'])), ['interaction Open editor in component Toolbar']);
+  assert.deepEqual(plain(ctx.veSurfaceUses(['surface-a', 'surface-b'])), ['page design Customers', 'interaction Open editor in component Toolbar']);
+  assert.deepEqual(plain(ctx.veSurfaceUses(['elsewhere'])), []);
+  assert.equal(ctx.veSurfaceBlock(['surface-b']), 'In use by page and component designs: interaction Open editor in component Toolbar. Delete those page designs and change those navigate actions first. No surface was removed.');
+});
+// Imported (or otherwise orphaned) designs that name a missing surface stay reachable: each opens, and one reviewed
+// write removes them together with navigation to missing surfaces, after which every edit validates again.
+test('[VISUAL-SURFACES] orphaned page designs are listed, openable and removable with dangling navigation in one write', () => {
+  const ctx = load(), d = ctx.host.design, bar = d.visualDesigns.components[1].template[0];
+  bar.events = ctx.realm([{ id: 'vi-29', event: 'click', label: 'Open <gone>', actions: [{ kind: 'navigate', surfaceId: 'surface-gone' }, { kind: 'set-state', state: 'loading' }], notes: '', acceptance: '' }]);
+  d.nodes = d.nodes.filter(n => n.id !== 'surface-a'); ctx.view().view = 'pages';
+  const html = ctx.vePagesView();
+  assert.ok(html.includes('Designs with a missing surface') && html.includes('data-action="ve-open-page" data-value="surface-a"') && html.includes('data-action="ve-orphans"'), html);
+  assert.ok(!html.includes('<gone>'), 'labels are escaped');
+  ctx.handleVisualAction('ve-open-page', 'surface-a');
+  assert.deepEqual([ctx.view().view, ctx.veCurrentPage()?.id], ['page-editor', 'vp-6']);
+  const before = snapshot(ctx);
+  ctx.ui().selected = 'vn-26'; ctx.handleVisualAction('ve-duplicate');
+  assert.match(ctx.ui().error, /owner surface is missing/); assert.equal(snapshot(ctx), before);
+  ctx.handleVisualAction('ve-orphans');
+  const dialog = ctx.veOrphansDialog();
+  assert.equal(ctx.modal().type, 've-orphans');
+  assert.ok(dialog.includes('Delete the page design Customers') && dialog.includes('Remove navigation to a missing surface from Component Toolbar / Open &lt;gone&gt;'), dialog);
+  const history = d.history.length;
+  ctx.handleVisualAction('ve-orphans-confirm');
+  const store = ctx.veStore();
+  assert.deepEqual([store.pages.length, plain(store.components[1].template[0].events[0].actions), ctx.host.design.history.length, ctx.modal().type], [0, [{ kind: 'set-state', state: 'loading' }], history + 1, '']);
+  ctx.validateVisualDesigns(store, ctx.veContext(ctx.host.design));
+  assert.match(ctx.host.notices.at(-1), /^Removed 1 page design and 1 navigation to missing surfaces\. Undo is available\.$/);
+  assert.ok(!ctx.vePagesView().includes('Designs with a missing surface'));
+});

@@ -7,6 +7,7 @@ import { chromium } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { failedUpgradeRecovery, surfaceRemovalAndOrphans } from './companion-visual-recovery-phases.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const HTML = ROOT + 'docs/concepts/companion/index.html', OUT = ROOT + 'reports/concepts/visual-editors', FIXTURES = ROOT + 'tests/fixtures/companion/';
@@ -61,13 +62,14 @@ const store = () => js(() => JSON.stringify(veStore()));
 const component = () => js(() => JSON.parse(JSON.stringify(veCurrentComponent())));
 const errorText = () => page.locator('#ve-error').innerText();
 const toast = () => page.locator('#toasts').innerText();
+const harness = { FIXTURES, check, js, act, navigate, load, toast, snapshot, opened, closed, escape, modalText, page: () => page };
 
 async function legacyImportAndPages() {
   await importFile(FIXTURES + 'detail-v3.json');
-  const report = await page.locator('#project-import-migration').innerText();
+  const report = await page.locator('#project-import-migration').innerText(), mapped = await page.locator('#project-import-interactions li').count();
   await applyImport();
   const migrated = await js(() => ({ schema: design().visualDesigns?.schema, legacy: 'detailDesigns' in design(), pages: veStore().pages.map(p => p.ownerId), components: veStore().components.map(c => c.libraryId), valid: validSavedDesign(design()) }));
-  check('legacy v3 import migrates with report', report.includes('canvas positions dropped') && migrated.schema === 3 && !migrated.legacy && migrated.valid && migrated.pages.join() === 'node-48,node-27' && migrated.components.includes('project-json-review'), { report, migrated });
+  check('legacy v3 import migrates with report', report.includes('canvas positions dropped') && mapped > 0 && migrated.schema === 3 && !migrated.legacy && migrated.valid && migrated.pages.join() === 'node-48,node-27' && migrated.components.includes('project-json-review'), { report, mapped, migrated });
   await navigate('pages');
   const cards = await page.locator('.ve-page-card').count(), before = await snapshot();
   await act('ve-open-page', 'node-5');
@@ -464,7 +466,8 @@ async function selfProjectHealthAndHostileImports() {
 }
 
 const phases = [legacyImportAndPages, insertAndLayouts, inspectorBindingsAndInteractions, keyboardOnly, moveTo, layoutsAcrossPages, guardedWrites, hostilePageNames, retiredEntryActions,
-  customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, legacySavedState, scenariosAndNarrow, legacyOutlineAdoption, selfProjectHealthAndHostileImports];
+  customizeAndContract, dependencies, childComposition, componentRefusals, publish, backNavigation, legacySavedState, scenariosAndNarrow, legacyOutlineAdoption,
+  () => failedUpgradeRecovery(harness), selfProjectHealthAndHostileImports, () => surfaceRemovalAndOrphans(harness)];
 browser = await chromium.launch({ headless: true, ...(process.env.SHELL_CHROMIUM ? { executablePath: process.env.SHELL_CHROMIUM } : {}) });
 try {
   await load();

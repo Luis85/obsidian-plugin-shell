@@ -324,6 +324,10 @@
       "include": ["tests/obsidian/vault/**"]
     },
     {
+      "purpose": "Concept browser-suite phases imported by a *.browser.mjs suite",
+      "include": ["tests/concepts/*-phases.mjs"]
+    },
+    {
       "purpose": "Tooling fixtures and shared helpers",
       "include": ["tests/tooling/*-fixture.mjs", "tests/tooling/file-symlink.mjs"]
     },

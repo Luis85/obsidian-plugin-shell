@@ -18,7 +18,8 @@ function vePascal(text) {
   const base = String(text).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component';
   return (/^[A-Z]/.test(base) ? base : 'C' + base).slice(0, 56);
 }
-function veUniqueName(base, taken) { let name = base, i = 2; while (taken.has(name)) name = base + i++; return name; }
+// Unique among `taken` and never a reserved component export name (the migration skips the same names).
+function veUniqueName(base, taken) { let name = base, i = 2; while (taken.has(name) || visualReservedExport(name)) name = base + i++; return name; }
 // Opening never writes. The Back stack remembers the previous view and which page or component it showed.
 function veOpenComponent(libraryId, { push = state.view !== 'component-editor' } = {}) {
   const d = design();

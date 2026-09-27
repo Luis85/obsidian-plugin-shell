@@ -253,3 +253,23 @@ test('[VISUAL-COMPONENT] contract text fields commit once on change; the redraw 
   await new Promise(resolve => setTimeout(resolve));
   assert.equal(ctx.host.renders, renders + 1);
 });
+// A published revision of another component pins this one: it is a usage (listed as pinned and unchanged) that blocks
+// deleting the design by name, while the library "Used in" list keeps naming only page and component designs.
+test('[VISUAL-COMPONENT] published revisions that pin a component are listed usages and block deleting it', () => {
+  const ctx = load();
+  ctx.veCommit(store => { ctx.visualPublish(store, 'vc-1', '1.0.0'); ctx.visualPublish(store, 'vc-3', '1.0.0'); });
+  const search = component(ctx, 'vc-1');
+  assert.deepEqual(plain(ctx.veUsageRows(ctx.veStore(), search)).map(u => [u.where, u.pinned?.version ?? null]), [['Component Toolbar / Search', null], ['Revision Toolbar v1.0.0 / Search', '1.0.0']]);
+  assert.deepEqual(plain(ctx.veLibraryUses('search-field')).map(u => u.label), ['Component Toolbar']);
+  ctx.veCommit(store => { ctx.visualDefinition(store, { kind: 'component', id: 'vc-3' }).template = []; });
+  const plan = ctx.veDeletePlan({ target: 'definition', kind: 'component', definitionId: 'vc-1', nodeId: null });
+  assert.equal(plan.refusal, 'SearchField is used by Toolbar v1.0.0. Remove those instances first.');
+});
+// Start design derives the export name from the library name and skips reserved names (Vue built-ins, generated types,
+// Nuxt UI components) exactly like the migration does, so a library entry called "Error" or "UButton" can be designed.
+test('[VISUAL-COMPONENT] start design never picks a reserved export name', () => {
+  const ctx = load();
+  ctx.host.design.library.push(...ctx.realm([{ id: 'error-panel', name: 'Error', description: '' }, { id: 'u-button-wrap', name: 'U button', description: '' }]));
+  ctx.veStartComponent('error-panel'); ctx.veStartComponent('u-button-wrap');
+  assert.deepEqual(plain(ctx.veStore().components.slice(-2).map(c => c.exportName)), ['Error2', 'UButton2']);
+});
