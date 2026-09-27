@@ -1,4 +1,5 @@
 import { resolve, join } from 'node:path';
+import { buildClickdummy } from './clickdummy.ts';
 import { inspectStyles } from './styles.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { operationSchemas } from './schemas.ts';
@@ -113,6 +114,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       return result(command, { makers });
     }
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command === 'clickdummy build') return await buildClickdummy(request, context);
     if (command === 'check') return await checkOperation(request, context);
     if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);

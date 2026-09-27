@@ -29,6 +29,7 @@ export const commands: readonly Command[] = [
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },
   { id: 'install', summary: 'Explicit exact-lock npm ci; reviewed lifecycle hooks may run.', options: {}, maxArgs: 0, effect: 'process' },
+  { id: 'clickdummy build', summary: 'Build the generated Vue project as offline HTML with synthetic read data. No native/business writes.', options: { replace: 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'build', summary: 'Run the existing production bundler.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'test', summary: 'Run unit/project, browser, native qualification or real-Obsidian tests.', options: values('profile'), maxArgs: 0, effect: 'process' },
   { id: 'check', summary: 'Fast daily/agent gate: typecheck, lint and tests; runs every step and summarizes failures. Not verify.', options: { fast: 'flag' }, maxArgs: 0, effect: 'process' },

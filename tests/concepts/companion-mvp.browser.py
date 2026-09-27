@@ -2,12 +2,16 @@
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'reports/companion-mvp'
-HTML = OUT / 'index.html'
+CLICKDUMMY = sys.argv[1:] == ['--clickdummy']
+if sys.argv[1:] and not CLICKDUMMY:
+    raise ValueError('Expected no arguments or --clickdummy')
+HTML = OUT / ('generation/clickdummy.html' if CLICKDUMMY else 'index.html')
 results, errors, requests = [], [], []
 
 def check(name, condition):
@@ -125,6 +129,44 @@ def run(page):
     check('offline runtime requests no external assets', not requests)
     check('no uncaught browser exceptions', not errors)
 
+def run_clickdummy(page):
+    data = json.loads((OUT / 'generation/generated-project.json').read_text(encoding='utf8'))
+    page.goto(HTML.as_uri())
+    expect(page.locator('.clickdummy-toolbar')).to_contain_text('synthetic read data')
+    check('generated clickdummy runs from a single file', page.locator('script[src],link[href]').count() == 0)
+    surfaces = [n for n in data['design']['nodes'] if n['kind'] not in ['group', 'action', 'modal']]
+    picker = page.get_by_label('Browse surfaces', exact=True)
+    for surface in surfaces:
+        picker.select_option(surface['id'])
+        expect(page.locator('.generated-screen > h2').first).to_have_text(surface['label'])
+    check('all generated non-modal surfaces render their actual compiled page', len(surfaces) > 0)
+    start = next(n for n in data['design']['nodes'] if n['slug'] == 'overview')
+    picker.select_option(start['id'])
+    for state in ['loading', 'empty', 'error', 'disabled', 'default']:
+        page.get_by_label('Preview state', exact=True).select_option(state)
+        expect(page.locator('.generated-detail').first).to_have_attribute('data-design-state', state)
+    check('preview states reach the real generated visual component', True)
+    edge = next(e for e in data['design']['links'] if e['from'] == start['id'] and next(n for n in data['design']['nodes'] if n['id'] == e['to'])['kind'] == 'modal')
+    page.locator('.generated-screen > button').filter(has_text=edge['label']).click()
+    expect(page.locator('.clickdummy-dialog')).to_be_visible()
+    check('generated modal has native focus containment', page.locator('.clickdummy-dialog').evaluate('(el)=>el.matches(":modal")'))
+    page.get_by_role('button', name='Close dialog', exact=True).click()
+    expect(page.locator('.clickdummy-dialog')).to_have_count(0)
+    expect(page.locator('.generated-screen > h2').first).to_have_text(start['label'])
+    check('closing generated modal retains the underlying page', True)
+    with page.expect_download() as download:
+        page.get_by_role('button', name='Project JSON', exact=True).click()
+    export = OUT / 'generation/clickdummy-export.json'
+    download.value.save_as(export)
+    check('clickdummy exports the full project without transient preview state', json.loads(export.read_text(encoding='utf8')) == data)
+    page.get_by_label('Preview state', exact=True).select_option('disabled')
+    page.get_by_role('button', name='Reset preview', exact=True).click()
+    expect(page.get_by_label('Preview state', exact=True)).to_have_value('default')
+    check('reset restores an independent preview session', True)
+    check('no live assets or services requested', not requests)
+    check('no uncaught clickdummy errors', not errors)
+    page.screenshot(path=str(OUT / 'generation/clickdummy.png'))
+
 OUT.mkdir(parents=True, exist_ok=True)
 try:
     with sync_playwright() as pw:
@@ -133,8 +175,8 @@ try:
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
         page.route('**/*', lambda route: route.continue_() if route.request.url.startswith('file:') else (requests.append(route.request.url), route.abort())[1])
-        run(page)
+        (run_clickdummy if CLICKDUMMY else run)(page)
         browser.close()
 finally:
-    (OUT / 'browser.json').write_text(json.dumps({'htmlSha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'assertions': results, 'errors': errors, 'externalRequests': requests}, indent=2)+'\n', encoding='utf8')
+    (OUT / ('generation/browser.json' if CLICKDUMMY else 'browser.json')).write_text(json.dumps({'htmlSha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'assertions': results, 'errors': errors, 'externalRequests': requests}, indent=2)+'\n', encoding='utf8')
 print(f'Passed {len(results)} integrated companion browser assertions')
