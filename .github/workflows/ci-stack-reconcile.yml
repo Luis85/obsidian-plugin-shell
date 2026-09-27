@@ -1,0 +1,40 @@
+name: CI stack reconciliation
+on:
+  push:
+    branches: [chore/ci-stack-reconcile-20260927]
+    paths: [.github/workflows/ci-stack-reconcile.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Inspect exact branch merges without committing or pushing
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CI stack inspection'
+          git config user.email 'ci-inspection@users.noreply.github.com'
+          BASE=931db74da3576d20b862583395cb0a1b9a4412e5
+          for ITEM in '30:54b008c961e2a8a07792e0a0a124d58055765d06' '31:34f2366c4b7534ed717b11a5856ff2a6e7823029'; do
+            PR=${ITEM%%:*}; HEAD=${ITEM#*:}
+            echo "::group::PR $PR exact post-PR28 merge"
+            git checkout --detach "$HEAD"
+            git merge-base "$HEAD" "$BASE"
+            if git merge --no-commit --no-ff "$BASE"; then
+              echo "MERGE_CLEAN PR=$PR HEAD=$HEAD BASE=$BASE"
+              git diff --stat --cached
+              git write-tree
+            else
+              git diff --name-only --diff-filter=U
+              git diff --cc
+              echo "MERGE_CONFLICTS PR=$PR HEAD=$HEAD BASE=$BASE"
+            fi
+            git merge --abort
+            echo '::endgroup::'
+          done
