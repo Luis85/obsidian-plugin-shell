@@ -18,9 +18,9 @@ The framework-free per-view session integrates through a required full-project v
 
 The real `project inspect` operation now returns an additive read-only sitemap summary. Full transport stays v5; staged extension fields are not accepted by the current full-project importer. No source JSON or assembled concept HTML was regenerated in this increment.
 
-## Verification actually run locally
+## Initial subset verification
 
-The workspace could not clone GitHub because DNS resolution failed, so the local test workspace contains the new core and focused tests, not a full checkout. Files were read/pushed through the connected GitHub API. Vue/Nuxt UI/Vue Flow dependencies were not available locally.
+Initially the workspace could not clone GitHub because DNS resolution failed, so validation began with the new core and focused tests in a partial workspace. Files were read/pushed through the connected GitHub API. The full review source was subsequently retrieved from the existing CI artifact, as recorded below. Vue/Nuxt UI/Vue Flow build dependencies remained unavailable locally.
 
 | Check | Actual result and scope |
 | --- | --- |
@@ -48,6 +48,38 @@ node --experimental-strip-types --test \
 Regression development included red tests for missing core/session modules and two actual JSON safety defects: a sparse array disguised with an extra property, and an array subclass serialization hook. Both defects were fixed and their negative tests pass. These assertions test the actual implementation, not a separate rewrite.
 
 The framework CLI workflow now includes the strict core check and all four sitemap test files on its existing OS matrix. A configured workflow is not a passing result. Exact hosted run status and any unresolved checks belong in the implementation PR; no green hosted qualification is asserted by this record.
+
+## Follow-up: full review source and integration checks
+
+The existing source-verification workflow produced artifact `10932015585` in run `36319059023`. It was downloaded through the GitHub artifact API, verified and extracted without executing archive content. ZIP SHA-256: `429f97f2bedeb9cf5ae6fc32b0328098c55c2bf150cf6ada8cc58e2214be55f7`.
+
+Its recorded merge-checkout commit is `821afae80024f6352641893be7f49b81b475b4f9`, from head `b673943fd7d62aa9ac9ff8b9d1b6ee99c2ff115d`. Reconstructing all Git blob/tree hashes from the archive produced the exact GitHub tree `eb3b24af6a832ab61aefd7f32500a098b5ee4c47`. All 18 implementation source/test/config/document files matched the locally tested files before the follow-up one-line export cleanup.
+
+On this full review source, the following commands ran locally:
+
+```sh
+node --experimental-strip-types --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs
+node --experimental-strip-types --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs
+node --experimental-strip-types shell.mjs project inspect --input docs/concepts/companion/companion-project.json --json
+python -B scripts/concepts/build-companion.py --check
+python -B tests/concepts/companion-assembly.test.py
+node scripts/quality/check-source.mjs
+```
+
+| Follow-up check | Actual result |
+| --- | --- |
+| Complete sitemap suite, including four real-checkout integration cases | **71 passed**, zero failed/skipped/TODO; this includes the initial 67, not 71 additional tests |
+| Existing project JSON / Storymaps compatibility suites | **67 passed**, separate from the sitemap suite |
+| Actual CLI invocation against the golden companion JSON | Status `ok`, no diagnostics; 28 surfaces, one native view, 23 internal pages, 26 transitions; no invented route/journey/feature metadata |
+| Exact offline concept assembly | Passed; unchanged HTML SHA-256 `ba3a5b657ddea349c5c49c5dbc8857f7bcf06e2dc84b3fb27131187c02712d3a` |
+| Assembly/inventory/tamper tests | **19 passed** |
+| Source line limits and locale parity | Passed; 811 inputs, 202 translated keys |
+
+The local tools remain Node 22.16.0 and TypeScript 5.8.3. Recovering source did not install the qualified toolchain or frontend dependencies, and these results do not establish native companion or MVP acceptance.
+
+The first hosted project-generator run `36319059029` built the shell but stopped at the unchanged analyzer gate because the new internal `SitemapError` class was unnecessarily exported. The class was made module-private; no suppression or gate change was introduced. The strict core check, all 71 sitemap tests and source-limit checks passed locally again after that cleanup. The same first hosted run's three starter shards passed generation/install/build/typecheck/test for all nine starters. Existing shell E2E and fixture/baseline workflows also reported success on the pre-cleanup head; neither is acceptance of a generated native companion.
+
+Hosted checks on the follow-up head must be read separately in PR #28. Prior successes are not relabelled as final-head qualification, and the failed pre-cleanup generator run is retained honestly.
 
 ## Work-package gap register
 
