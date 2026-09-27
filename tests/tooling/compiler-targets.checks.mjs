@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import ts from 'typescript';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),template=await loadTemplateSnapshot(root);
@@ -18,11 +19,31 @@ test('browser output shares generated product code and packages an explicit offl
   const shared = browser.artifacts.find(file => file.path === 'harness/prototype/clickdummy.ts');
   assert.equal(shared.content, plugin.artifacts.find(file => file.path === shared.path).content);
   const sources = browser.artifacts.find(file => file.path.endsWith('/bootstrap/clickdummy-sources.ts'));
-  assert.match(sources.content, /throw new Error\('NOT_IMPLEMENTED: Clickdummy has no business-write adapter\.'/);
+  assert.match(sources.content, /Synthetic read values/);
   assert.match(shared.content, /createClickdummySources/);assert.match(shared.content, /exportProject/);
   assert.match(shared.content, /designState/);assert.match(shared.content, /function reset/);
   assert.equal(browser.readiness.bundle,'not-run');assert.notEqual(browser.fingerprint,plugin.fingerprint);
   const pkg=JSON.parse(browser.artifacts.find(file=>file.path==='package.json').content);assert.equal(pkg.scripts['build:clickdummy'],'node scripts/compiler/build-clickdummy.mjs');
+});
+test('compiled browser sources refuse an explicitly writable operation at runtime', async t => {
+  const document = JSON.parse(source);
+  const contract = document.design.dataSources.sources[0];
+  const operation = contract.operations[0];
+  operation.direction = 'both';
+  const compiled = await compileProject({ source: JSON.stringify(document), template, outputKind: 'clickdummy' });
+  assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
+  const dir = await mkdtemp(join(tmpdir(), 'compiler-write-refusal-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const sourceRoot = compiled.model.sourceRoot;
+  for (const file of compiled.artifacts) {
+    if (!file.path.startsWith(sourceRoot + '/') || !file.path.endsWith('.ts') || !/(?:application\/|domain\/contract|clickdummy-sources)/.test(file.path)) continue;
+    await mkdir(dirname(join(dir, file.path)), { recursive: true });
+    await writeFile(join(dir, file.path), file.content);
+  }
+  await writeFile(join(dir, 'package.json'), '{"type":"module"}');
+  const { createClickdummySources } = await import(pathToFileURL(join(dir, sourceRoot, 'bootstrap/clickdummy-sources.ts')).href);
+  const services = createClickdummySources();
+  await assert.rejects(services[contract.slug][operation.slug](undefined), /NOT_IMPLEMENTED: Clickdummy has no business-write adapter/);
 });
 test('origin maps retain normalized entity IDs and actual generated Vue line locations',async()=>{
   const compiled=await compileProject({source,sourceName:'quick.json',template});
@@ -36,7 +57,6 @@ test('pure rendering never schedules a runtime provider, timer or network call',
   try{const result=await compileProject({source,template});assert.equal(result.status,'ok',JSON.stringify(result.diagnostics));}
   finally{globalThis.fetch=fetch;globalThis.setTimeout=timer;}
 });
-
 
 test('v6 authoring routes survive compiler analysis, emission and both output targets', async () => {
   const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
