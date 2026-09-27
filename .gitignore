@@ -28,3 +28,10 @@ node-qualified
 
 # Isolated generated-plugin test data and local mock sessions
 /.test-vault/
+
+# Optional developer memory is private, never part of Git or plugin artifacts.
+.hindsight/
+.pg0/
+.venv-hindsight/
+.env.hindsight
+__pycache__/
