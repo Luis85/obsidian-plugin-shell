@@ -61,7 +61,9 @@ export async function planProject(options: GenerateOptions) {
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
   for (let i=0;i<candidates.changes.length;i++) requireValue(candidates.changes[i]!.beforeHash === plan.changes[i]!.beforeHash,'Target changed during planning.');
   const hash = digest(json({version:generationVersion,root:plan.root,inputHash:receipt.inputHash,changes:plan.changes.map(({path,beforeHash,afterHash})=>({path,beforeHash,afterHash}))}));
-  return {hash,plan,conflicts,preserved,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings}};
+  // A legacy input names the interaction IDs that replaced its edge IDs (hooks were generated per edge before).
+  const interactionIds: Record<string,string> = input.migration?.interactionIds ?? {};
+  return {hash,plan,conflicts,preserved,interactionIds,summary:{project:model.project.id,target:input.target,files:output.length,entities:model.entities.length,sources:model.sources.length,operations:model.sources.reduce((n,s)=>n+s.operations.length,0),screens:model.screens.length,components:model.components.length,acceptanceTodos:model.requirements.length + interactions.filter(visualAcceptanceTodo).length,definitions:visual.pages.length+visual.components.length,pages:visual.pages.length,componentDefinitions:visual.components.length,publishedRevisions:visual.revisions.length,visualInteractions:interactions.length,businessTodos:interactions.filter(i=>visualVerification(i)==='business-todo').length,warnings:model.warnings}};
 }
 /** Lossy decoding would silently rewrite a developer's bytes; only exact UTF-8 (BOM retained) or base64 survives. */
 function preservedText(bytes: Buffer, encoding?: 'base64'): string | null {
@@ -74,5 +76,6 @@ export async function applyProject(result: Awaited<ReturnType<typeof planProject
   return applyFilePlan(result.plan);
 }
 export function reviewProject(result: Awaited<ReturnType<typeof planProject>>) {
-  return {mode:'plan',planHash:result.hash,...result.summary,conflicts:result.conflicts,preserved:result.preserved,changes:result.plan.changes.map(({path,status,beforeHash,afterHash})=>({path,status,beforeHash,afterHash}))};
+  const legacy = Object.keys(result.interactionIds).length ? {legacyInteractionIds:result.interactionIds} : {};
+  return {mode:'plan',planHash:result.hash,...result.summary,...legacy,conflicts:result.conflicts,preserved:result.preserved,changes:result.plan.changes.map(({path,status,beforeHash,afterHash})=>({path,status,beforeHash,afterHash}))};
 }

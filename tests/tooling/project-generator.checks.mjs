@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { projectModel, schema, literal } from '../../scripts/companion/compiler/model.ts';
 import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.ts';
 import { matches } from '../../scripts/companion/runtime/contract.ts';
-import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { planProject, applyProject, reviewProject } from '../../scripts/companion/compiler/plan.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const fixture = JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
@@ -141,4 +141,13 @@ test('unsafe vault targets and target symlinks are rejected without writes',()=>
 test('public CLI has no implicit apply and rejects repeated/unknown flags',()=>sandbox(async options=>{
   for (const extra of [['--target','again'],['--force','yes'],['--apply']]) { const result=cli(options,extra); assert.equal(result.status,1); }
   assert.deepEqual(await readdir(options.vault),['project.json']);
+}));
+// Hooks generated from legacy detail designs were named after edge IDs; a legacy input's plan names their new IDs.
+test('a legacy input reports its edge-to-interaction ID mapping in the reviewed plan',()=>sandbox(async options=>{
+  const legacy = await readFile(join(root,'tests/fixtures/companion/detail-v3.json'),'utf8'), mapping = migrateCompanionDocument(JSON.parse(legacy)).report.interactionIds;
+  await writeFile(options.input,legacy); const review = reviewProject(await planProject(options));
+  assert.ok(Object.keys(mapping).length > 0); assert.deepEqual(review.legacyInteractionIds, mapping);
+  const hooks = review.changes.map(c => /^plugin\/src\/generated\/application\/interactions\/(vi-\d+)\.ts$/.exec(c.path)?.[1]).filter(Boolean);
+  assert.ok(hooks.length > 0 && hooks.every(id => Object.values(mapping).includes(id)), 'every generated hook is named by a mapped interaction ID');
+  await writeFile(options.input,JSON.stringify(fixture)); assert.equal(Object.hasOwn(reviewProject(await planProject(options)),'legacyInteractionIds'),false);
 }));

@@ -103,12 +103,13 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const target = host.value?.querySelector<HTMLElement>('[data-design-node="' + id + '"]');
     (target?.matches('button,input,textarea,select,[tabindex]') ? target : target?.querySelector<HTMLElement>('button,input,textarea,select,[tabindex]'))?.focus();
   }
-  function applyLocal(next: Session, actions: VisualAction[]): void {
-    for (const [key, entry] of Object.entries(next.values)) values[key] = copyDetailData(entry);
-    for (const action of actions) if (action.kind === 'set-value') { delete drafts[action.nodeId]; delete errors[action.nodeId]; }
-    Object.assign(session.hidden, next.hidden); session.focused = next.focused;
-    if (spec.kind === 'page') session.emitted = next.emitted.slice(-50);
-    if (actions.some(a => a.kind === 'set-state')) localState.value = next.state;
+  /** One local effect at its authored position, as visualTransition defines it; a page also records its emits. */
+  function applyLocal(nodeId: string, action: VisualAction): void {
+    if (action.kind === 'set-state') localState.value = action.state;
+    else if (action.kind === 'toggle') session.hidden[action.nodeId] = !session.hidden[action.nodeId];
+    else if (action.kind === 'set-value') { values[action.nodeId] = copyDetailData(action.value); delete drafts[action.nodeId]; delete errors[action.nodeId]; }
+    else if (action.kind === 'focus') session.focused = action.nodeId;
+    else if (action.kind === 'emit' && spec.kind === 'page') session.emitted = [...session.emitted, { name: action.event, source: nodeId, ...(action.payload.kind === 'value' ? { payload: action.payload.value } : {}) }].slice(-50);
   }
   async function perform(nodeId: string, action: VisualAction, captured: Record<string, DetailData>, payload: unknown): Promise<void> {
     if (action.kind === 'navigate') { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); context.navigate(action.surfaceId); return; }
@@ -124,7 +125,8 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     if (!outcome || typeof outcome !== 'object' || !('ok' in outcome) || outcome.ok !== true) throw new Error('VISUAL_SOURCE_FAILED');
   }
   const isLocal = (interaction: Interaction) => interaction.actions.length > 0 && interaction.actions.every(a => VISUAL_RUNTIME_LOCAL.includes(a.kind));
-  /** Runs every interaction declared for one event in order, inside one pending span and epoch; the first failure stops the rest. */
+  /** Runs every interaction declared for one event, and every action of each, in authored order inside one pending span and
+   * epoch; the first failure stops the rest. Source and emit mappings read drafts as the earlier actions left them. */
   async function invoke(nodeId: string, interactions: Interaction[], payload: unknown): Promise<void> {
     if (!interactions.length || !enabled(nodeId)) return;
     let validated: Record<string, DetailData> = {};
@@ -138,10 +140,12 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
         emitInteraction(request);
         if (stale()) return;
         if (!actions.length) { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); if (stale()) return; continue; }
-        const next = visualTransition(spec, frozen(), nodeId, interaction.id);
-        applyLocal(next, actions);
-        for (const action of actions) { await perform(nodeId, action, captured, payload); if (stale()) return; }
-        if (actions.some(a => a.kind === 'focus') && next.focused) { await nextTick(); if (stale()) return; focus(next.focused); }
+        visualTransition(spec, frozen(), nodeId, interaction.id); // refuses a disabled source or hidden focus target before any effect
+        for (const action of actions) {
+          if (!VISUAL_RUNTIME_LOCAL.includes(action.kind)) { await perform(nodeId, action, { ...validated, ...snapshot(false) }, payload); if (stale()) return; }
+          applyLocal(nodeId, action);
+          if (action.kind === 'focus') { await nextTick(); if (stale()) return; focus(action.nodeId); }
+        }
       }
     } catch (error) {
       if (!stale()) message.value = requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';

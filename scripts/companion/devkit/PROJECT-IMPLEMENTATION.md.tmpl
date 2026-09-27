@@ -50,3 +50,11 @@ your edits to extension files (including README.md, AGENTS.md, `.claude/`,
 `.vscode/` and CI workflows), and reports a conflict instead of overwriting when
 both changed. Files are never deleted implicitly. Generation never installs
 dependencies, builds, enables plugins, publishes or authorizes a release.
+
+Projects first generated from detail designs (before the visual page and component editors) change paths on
+regeneration: page components move from `{{sourceRoot}}/presentation/components/details/<detail document ID>.vue` to
+`<vp-N>.vue`, and interaction hooks from `{{sourceRoot}}/application/interactions/<edge ID>.ts` to `<vi-N>.ts`. The old
+files are kept and tracked as retired, and `{{sourceRoot}}/domain/detail-actions.ts` keeps a deprecated `DetailAction` type so the
+retained `{{sourceRoot}}/domain/detail-runtime.ts` still type-checks. Port each hook to the `<vi-N>.ts` named by the plan's
+`legacyInteractionIds` (the migration's edge → interaction mapping), or regenerate into a fresh target, then delete
+the retired files once nothing imports them.

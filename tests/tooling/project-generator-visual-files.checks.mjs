@@ -1,7 +1,8 @@
 // Visual equivalents of the retired detail/composition emission checks: SFCs, specs, ports, hooks, generated tests and model tests.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { readFile, mkdtemp, writeFile, rm, mkdir } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -125,4 +126,19 @@ test('emit switches and the interaction dispatcher declare only parameters they 
   assert.match(entries.get('src/generated/presentation/components/library/project-json-review.vue'), /request => emit\('interaction', request\), \(name\) => \{/);
   assert.equal(entries.get('src/generated/application/visual-interactions.ts'), "import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n");
   assert.match((await files(fixture)).get('src/generated/application/interactions/vi-14.ts'), /export const execute: \(request: VisualRequest, sources: Sources\) => Promise<unknown> = async \(\) => \{ throw new NotImplementedError\("vp-8", "vi-14"\); \};/);
+});
+
+// A project generated before the visual editors keeps its old domain/detail-runtime.ts (regeneration never deletes a
+// file); the regenerated domain copies must still satisfy its imports so the project keeps type-checking.
+const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
+test('a retained pre-visual domain/detail-runtime.ts still type-checks against the regenerated domain copies', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'legacy-domain-')), entries = await files(fixture), domain = 'src/generated/domain/';
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await mkdir(join(dir, 'domain'));
+  for (const name of ['detail-actions.ts', 'detail-controls.ts', 'composition-contract.mjs', 'composition-contract.d.mts']) { assert.ok(entries.has(domain + name), name); await writeFile(join(dir, 'domain', name), entries.get(domain + name)); }
+  await writeFile(join(dir, 'domain', 'detail-runtime.ts'), await readFile(new URL('../fixtures/companion/legacy-generated/detail-runtime.ts.txt', import.meta.url), 'utf8'));
+  await writeFile(join(dir, 'package.json'), '{ "type": "module" }');
+  await writeFile(join(dir, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true, noEmit: true, allowImportingTsExtensions: true, allowJs: true, skipLibCheck: true, types: [] }, include: ['domain/**/*.ts'] }));
+  const run = spawnSync(process.execPath, [tsc, '--project', join(dir, 'tsconfig.json')], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stdout + run.stderr);
 });

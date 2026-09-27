@@ -182,6 +182,19 @@ test('every interaction declared for one event runs, in order, within one pendin
   assert.equal(model.text('vn-2'), 'first'); assert.equal(model.visible('vn-3'), false); assert.deepEqual(navigated, ['surface-b']);
   assert.deepEqual(requests.map(r => r.interactionId), ['vi-1', 'vi-2']); assert.equal(model.message.value, ''); assert.equal(model.state.value, 'default');
 });
+// Local effects, source calls and navigation run in the authored order; a failed source stops the rest of the interaction.
+test('mixed interactions run actions in authored order and stop at the first failing action', async () => {
+  for (const ok of [true, false]) {
+    const seen = [], { port: save } = port('orders', 'save', null, async input => { seen.push([input, model.visible('vn-4'), model.state.value]); return { ok }; });
+    const actions = [{ kind: 'set-value', nodeId: 'vn-2', value: 'typed' }, { kind: 'source', sourceId: 'orders', operationId: 'save', input: { kind: 'draft', nodeId: 'vn-2' } }, { kind: 'toggle', nodeId: 'vn-4' }, { kind: 'navigate', surfaceId: 'surface-b' }, { kind: 'set-state', state: 'empty' }];
+    const spec = page([nuxt('vn-1', 'u-button', {}, { events: [act('vi-1', 'click', actions)] }), nuxt('vn-2', 'u-input'), text('vn-3', { kind: 'state', nodeId: 'vn-2' }), text('vn-4', lit('Shown until toggled'))]);
+    const { model, navigated } = mountVisual(spec, {}, [save]);
+    model.on('vn-1').click(); await settle();
+    assert.deepEqual(seen, [['typed', true, 'loading']], 'the source sees the earlier set-value and not the later toggle');
+    assert.equal(model.text('vn-3'), 'typed');
+    assert.deepEqual([model.visible('vn-4'), navigated, model.state.value], ok ? [false, ['surface-b'], 'empty'] : [true, [], 'error'], ok ? 'all actions ran' : 'nothing after the failed source ran');
+  }
+});
 const editorTemplate = (props, extra = []) => ({ kind: 'component', id: 'vc-1', libraryId: 'lib', exportName: 'Editor', description: '', props: [], slots: [], emits: [], variants: [], scenarios: [], dependencies: [{ package: 'editor-lib', version: '1.0.0', purpose: 'Editing' }],
   template: [{ id: 'vn-1', kind: 'external', package: 'editor-lib', adapter: 'editor', props, events: [] }, ...extra] });
 const recorder = log => () => ({ mount: (el, props) => { log.push(['mount', el.isConnected, props.value]); }, update: props => { log.push(['update', props.value]); }, destroy: () => { log.push(['destroy']); } });
@@ -398,6 +411,8 @@ test('declared packages merge into package.json with extension-owned adapters, a
   const notes = get('PROJECT-IMPLEMENTATION.md').content;
   assert.ok(notes.includes(`- @tiptap/vue-3@2.11.5 (${component.exportName}): Rich text editing`));
   assert.ok(notes.includes("Licenses of these packages are the author's responsibility"));
+  assert.ok(notes.includes(`- \`src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts\` (@tiptap/vue-3, ${component.exportName})`), 'the real adapter path');
+  assert.ok(!notes.includes('library/<library>/'), 'no placeholder path');
   assert.deepEqual(JSON.parse(get('design/visual-traceability.json').content).adapters.map(a => [a.package, a.adapter]), [['@tiptap/vue-3', 'editor']]);
   assert.ok((await projectFiles(process.cwd(), projectModel(self))).find(f => f.path === 'PROJECT-IMPLEMENTATION.md').content.includes('No visual component declares a third-party package.'));
 });

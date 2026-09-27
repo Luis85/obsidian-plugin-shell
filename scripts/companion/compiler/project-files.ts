@@ -11,7 +11,8 @@ import { uiCode } from './ui-code.ts';
 import { navigationCode } from './navigation-code.ts';
 import { hostCode } from './host-code.ts';
 import { visualCode } from './visual-files.ts';
-import { visualDefinitions, visualPackages } from './visual-model.ts';
+import { visualDefinitions, visualPackages, visualAdapterPath } from './visual-model.ts';
+import { visualNodes } from '../visual/visual-ir.mjs';
 import { styleCode } from './style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from './devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments } from './framework-docs.ts';
@@ -85,9 +86,12 @@ it('does not issue a duplicate pending write', async () => { const scope = effec
   add('PROJECT-IMPLEMENTATION.md',renderTemplate(await readFile(join(templateRoot,'scripts/companion/devkit/PROJECT-IMPLEMENTATION.md.tmpl'),'utf8'),values),'managed');
   return [...entries.values()].sort((a,b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
 }
-/** Declared third-party packages with purpose; installing them and reviewing their licenses stays with the author. */
+/** Declared third-party packages with purpose and the real path of every extension-owned adapter; installing the
+ * packages and reviewing their licenses stays with the author. */
 function dependencySection(m: Model): string {
-  const uses = visualDefinitions(m).components.flatMap(c => (c.dependencies ?? []).map(d => ({...d,component:c.exportName})));
+  const components = visualDefinitions(m).components;
+  const uses = components.flatMap(c => (c.dependencies ?? []).map(d => ({...d,component:c.exportName})));
   if (!uses.length) return '## Component library dependencies\n\nNo visual component declares a third-party package.';
-  return `## Component library dependencies\n\nThese exact versions are merged into package.json dependencies. Run npm install explicitly to add them to package-lock.json before npm ci. Each external node has an extension-owned adapter in presentation/components/library/<library>/<adapter>.adapter.ts whose stubs throw NotImplementedError until you implement them; its acceptance TODO stays open. Licenses of these packages are the author's responsibility; review them before distribution.\n\n${uses.map(u => `- ${u.package}@${u.version} (${u.component}): ${u.purpose.replace(/\s+/g,' ')}`).join('\n')}`;
+  const adapters = components.flatMap(c => visualNodes(c.template).flatMap(n => n.kind === 'external' ? [`- \`${visualAdapterPath(m,c,n.adapter)}\` (${n.package}, ${c.exportName})`] : []));
+  return `## Component library dependencies\n\nThese exact versions are merged into package.json dependencies. Run npm install explicitly to add them to package-lock.json before npm ci. Each external node has an extension-owned adapter at presentation/components/library/<component file>/<adapter>.adapter.ts, where the component file is the library ID, with a -component suffix when the ID is a single word (listed below). Its stubs throw NotImplementedError until you implement them; its acceptance TODO stays open. Licenses of these packages are the author's responsibility; review them before distribution.\n\n${uses.map(u => `- ${u.package}@${u.version} (${u.component}): ${u.purpose.replace(/\s+/g,' ')}`).join('\n')}${adapters.length ? '\n\nAdapters:\n\n' + adapters.join('\n') : ''}`;
 }

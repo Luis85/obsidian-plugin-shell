@@ -161,6 +161,7 @@
     "scripts/companion/detail-contract.mjs",
     "scripts/companion/runtime/use-visual.ts",
     "scripts/companion/runtime/visual-runtime.ts",
+    "scripts/companion/runtime/detail-actions.ts",
     "docs/concepts/companion/src/style-guide-frontend.js",
     "scripts/companion/design-system-roles.mjs",
     "scripts/companion/design-system-contract.mjs",

@@ -78,6 +78,17 @@ it('ignores duplicate dispatch while pending and late results after unmount', as
   expect(model.state.value).toBe('loading'); wrapper.unmount(); finish(); await flushPromises();
   model.on('change').click!(); expect(handle).toHaveBeenCalledOnce(); expect(model.message.value).toBe('');
 });
+it('runs mixed actions in authored order and stops at the first failing action', async () => {
+  for (const ok of [true, false]) {
+    const seen: unknown[] = [], navigated: string[] = [], note: UiNode = { id: 'note', kind: 'text', role: 'p', value: { kind: 'literal', value: 'Note' } };
+    const run = vi.fn(async (input?: unknown) => { seen.push([input, wrapper.vm.model.visible('note')]); return { ok }; });
+    const go = button('go', [{ kind: 'set-value', nodeId: 'input', value: 'typed' }, { kind: 'source', sourceId: 'source', operationId: 'save', input: { kind: 'draft', nodeId: 'input' } }, { kind: 'toggle', nodeId: 'note' }, { kind: 'navigate', surfaceId: 'next' }]);
+    const wrapper = subject({ ports: [port(run)], navigate: target => { navigated.push(target); }, handle: wrong }, page([control('input', 'text'), note, go]));
+    try { const model = wrapper.vm.model; model.on('go').click!(); await flushPromises();
+      expect(seen).toEqual([['typed', true]]); expect(model.visible('note')).toBe(!ok); expect(navigated).toEqual(ok ? ['next'] : []);
+    } finally { wrapper.unmount(); }
+  }
+});
 it('maps source pending, error and empty states without starting a source operation', async () => {
   const run = vi.fn(async (_input?: unknown) => undefined);
   const source = reactive({ ...port(run, 'read'), direction: 'read', requiresInput: false, data: undefined as unknown, pending: false, error: null as string | null });
