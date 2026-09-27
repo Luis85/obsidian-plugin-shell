@@ -91,7 +91,7 @@ Handwritten runtime/CSS/scripts: 400 code lines. Tests/helpers: 450; main.ts: 10
 
 Name executable tests, scripts and workflows by behavior or responsibility, not iteration number. Historical iteration guides/evidence records may retain iteration names. Update imports, workflows and inventories whenever executable files are renamed.
 
-Do not weaken thresholds, suppress whole directories, remove meaningful tests, accept screenshot baselines, use unsafe casts, or disable both linters for convenience. Negative fixtures must prove actual checker failure. Native/browser/inline/fixture evidence have different scopes.
+Do not weaken thresholds, suppress whole directories, remove meaningful tests, accept screenshot baselines, use unsafe casts, or disable both linters for convenience. Owner-decided exception: `docs/` is a design working directory. The repository analyzer and the Markdown/link check ignore it; Nuxt UI component names in it can still add plugin styles. The companion concept keeps its own assembly, analyzer-inventory and browser verification. Negative fixtures must prove actual checker failure. Native/browser/inline/fixture evidence have different scopes.
 
 Tests claiming application behavior run real services/actions, not default-stubbed stores. Check exact Markdown, write count, no-success-on-failure, owner cleanup, independent caught-error records and host-style containment. The legacy machine acceptance plan remains separate from the new iteration test IDs; no automatic promotion of all earlier cases.
 

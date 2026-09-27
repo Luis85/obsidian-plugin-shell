@@ -46,6 +46,51 @@
   },
   "suites": [
     {
+      "name": "prototypes",
+      "purpose": "Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "tests/tooling/prototype-*.checks.mjs"
+      ],
+      "verify": "tooling",
+      "npmScript": "test:prototypes",
+      "workflows": [
+        "framework-cli"
+      ]
+    },
+    {
+      "name": "prototypes:python",
+      "purpose": "Portable prototype package safety and static skill contract tests.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{python}",
+            "-B",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            ".claude/skills/companion-prototype-design/tests",
+            "-p",
+            "test_*.py",
+            "-v"
+          ]
+        ]
+      },
+      "include": [],
+      "prerequisites": [
+        "python3"
+      ],
+      "verify": "opt-in",
+      "npmScript": "test:prototypes:python",
+      "workflows": [
+        "framework-cli"
+      ]
+    },
+    {
       "name": "companion:mvp",
       "purpose": "Compiled Vue/Nuxt UI/Vue Flow sitemap and complete v6 companion authoring round trip.",
       "runner": {"type": "command", "commands": [["{node}", "scripts/concepts/build-mvp.mjs"], ["{python}", "-B", "tests/concepts/companion-mvp.browser.py"]]},

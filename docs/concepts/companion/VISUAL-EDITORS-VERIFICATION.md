@@ -64,7 +64,7 @@ therefore run individually with the same arguments, in the same order and on the
 | Production coverage (`vitest.production.config.mjs`) | 0 | 73 files, 413 tests passed; all files 97.57 % statements, 95.11 % branches, 97.79 % functions, 99.5 % lines |
 | `coverage-inventory.mjs --selected-core` | 0 | |
 | `check-tokens.mjs` | 0 | 968 observed, 133 reviewed token names |
-| `check-artifacts.mjs` | **1** | `ARTIFACT_SIZE_BUDGET`: `dist/styles.css` is 153,511 B against the 100 KiB budget (`dist/main.js` is 599,267 B against 1 MiB). Inherited; see below |
+| `check-artifacts.mjs` | **1** | `ARTIFACT_SIZE_BUDGET`: `dist/styles.css` is 153,511 B against the 100 KiB budget (`dist/main.js` is 599,267 B against 1 MiB). Caused by this work; see below |
 | `verify-baseline.mjs --repeat 3` | 0 | 52 tests × 3 runs passed (the baseline itself reports “Release blocked”, as intended) |
 | `vite build --config vite.harness.config.mjs` | 0 | Built |
 
@@ -77,15 +77,12 @@ therefore run individually with the same arguments, in the same order and on the
 - **quality:** `[ANALYZER-ARCHIVE]` fails because GNU `tar` reads `C:` as a remote host: `tar: Cannot connect to C:
   resolve failed`, exit 128.
 
-**Inherited artifact budget.** `dist/styles.css` (153,511 B) exceeds the 100 KiB budget. This branch has no `src/`,
-style-pipeline, bundling or `check-artifacts.mjs` changes since upstream `0121893`, which merged PR #24 and is an
-ancestor of HEAD:
-
-- `git diff 0121893 HEAD -- src/` is empty.
-- The only `package.json` change is the added `test:visual` script.
-
-The overage therefore comes from the PR branch state, not from the visual editors, and is surfaced for the owner's
-decision. No threshold was changed.
+**Artifact budget (corrected).** `dist/styles.css` (153,511 B) exceeded the 100 KiB budget. An earlier version of
+this receipt called the overage inherited because `git diff 0121893 HEAD -- src/` is empty. That was wrong: Nuxt UI
+`experimental.componentDetection` scans the whole repository for `U<Name>` tokens, so the Nuxt UI catalog v1
+(`scripts/companion/visual/visual-catalog.mjs`, added by this work) and five visual tests pulled 19 unused component
+themes into the plugin stylesheet (33 detected components instead of 14; temporarily removing those files built
+94,109 B). See “Stylesheet budget change” below.
 
 ## Generated-output qualification
 
@@ -141,8 +138,8 @@ The other counters are `droppedOutlineRefs`, `droppedSlotRules`, `listBindings`,
 - **`export-companion-project.py`'s Python Playwright branch is unverified.** Only its Node fallback ran.
 - **Windows-only tooling failures** (symlink privilege, the compiled-kit timeout, GNU `tar` with `C:` paths) hide those
   tests' real outcome on this machine. CI Windows/Linux runners are the evidence of record.
-- **`ARTIFACT_SIZE_BUDGET`** fails on `dist/styles.css`, 153,511 B against 100 KiB. This is inherited from the PR
-  branch and is an open gate.
+- **`ARTIFACT_SIZE_BUDGET`** failed on `dist/styles.css`, 153,511 B against 100 KiB, because of this work's catalog;
+  resolved by the owner-reviewed 160 KiB budget (“Stylesheet budget change” below).
 - **Pinned toolchain:** local runs used Node 24.15.0/npm 12.0.2. The generated workspaces used the pinned npm 11.19.1,
   but not the pinned Node.
 - **Not tested at all:**
@@ -221,5 +218,18 @@ The clean rerun on the committed tree above passed all of them. Treat such a fai
 confirming nothing changed the tree during the run.
 
 Still not executed locally: the Python browser suites (no Python Playwright), `npm run verify` as a whole (the
-Windows-only failures and the inherited `ARTIFACT_SIZE_BUDGET` above are unchanged by this wave, which has no `src/`
-change), the pinned Node 24.21.0 (Node 24.15.0/npm 12.0.2 locally; generated workspaces used npm 11.19.1).
+Windows-only failures and the `ARTIFACT_SIZE_BUDGET` above are unchanged by this wave), the pinned Node 24.21.0 (Node 24.15.0/npm 12.0.2 locally; generated workspaces used npm 11.19.1).
+
+## Stylesheet budget change
+
+Hosted CI on `6178b10` confirmed the cause: all eight `verify` jobs (Showcase, Template authoring ×3, Setup npm policy
+×4) passed every earlier step and failed only at `check-artifacts` with `ARTIFACT_SIZE_BUDGET` (153,647 B; the
+sitemap-editor prototype adds a 34th component).
+
+Scoping Nuxt UI detection to `src` built 94,109 B, but was rejected: Nuxt UI writes its generated templates under its
+root, and the kit, generator copy, dev watchers, setup journal and the source, maintainability and coverage
+inventories all treat `src/` as owned source. The owner chose a reviewed budget change instead: 160 KiB CSS in
+`check-artifacts.mjs` and the performance report, a documented deviation from NFR-04 (see
+[QUALITY-ASSURANCE](../../development/QUALITY-ASSURANCE.md)). With every one of the 118 Nuxt UI components the
+stylesheet would be 264.51 kB, so new component mentions anywhere in the repository, including `docs/`, can still
+exceed it.

@@ -1,0 +1,148 @@
+TAP version 13
+# Subtest: strict arguments reject unknown, duplicate and missing values
+ok 1 - strict arguments reject unknown, duplicate and missing values
+  ---
+  duration_ms: 1.949181
+  type: 'test'
+  ...
+# Subtest: bounded UTF-8 reading rejects oversized, directories and invalid bytes
+ok 2 - bounded UTF-8 reading rejects oversized, directories and invalid bytes
+  ---
+  duration_ms: 2.37498
+  type: 'test'
+  ...
+# Subtest: reads and output checks refuse linked files and linked ancestors
+ok 3 - reads and output checks refuse linked files and linked ancestors
+  ---
+  duration_ms: 1.403153
+  type: 'test'
+  ...
+# Subtest: build output is fresh by default; replacement requires explicit flag
+ok 4 - build output is fresh by default; replacement requires explicit flag
+  ---
+  duration_ms: 1.738599
+  type: 'test'
+  ...
+# Subtest: assembler is deterministic and preserves original UTF-8 project bytes
+ok 5 - assembler is deterministic and preserves original UTF-8 project bytes
+  ---
+  duration_ms: 3.689221
+  type: 'test'
+  ...
+# Subtest: assembler escapes script termination and CSP hash matches executable bytes
+ok 6 - assembler escapes script termination and CSP hash matches executable bytes
+  ---
+  duration_ms: 1.601717
+  type: 'test'
+  ...
+# Subtest: assembler rejects ESM, dynamic imports and sourcemap resource dependencies
+ok 7 - assembler rejects ESM, dynamic imports and sourcemap resource dependencies
+  ---
+  duration_ms: 0.836947
+  type: 'test'
+  ...
+# Subtest: assembler rejects unsafe CSS, empty JavaScript and wrong project carrier
+ok 8 - assembler rejects unsafe CSS, empty JavaScript and wrong project carrier
+  ---
+  duration_ms: 0.616881
+  type: 'test'
+  ...
+# Subtest: static HTML checker rejects external resources and executable HTML handlers
+ok 9 - static HTML checker rejects external resources and executable HTML handlers
+  ---
+  duration_ms: 0.367533
+  type: 'test'
+  ...
+# Subtest: static checker permits embedded images, local anchors and nonexecuted URL text
+ok 10 - static checker permits embedded images, local anchors and nonexecuted URL text
+  ---
+  duration_ms: 0.300494
+  type: 'test'
+  ...
+# Subtest: change diff ignores property order, escapes pointers and flags changed arrays
+ok 11 - change diff ignores property order, escapes pointers and flags changed arrays
+  ---
+  duration_ms: 0.545055
+  type: 'test'
+  ...
+# Subtest: change report preserves identity and never claims to be executable
+ok 12 - change report preserves identity and never claims to be executable
+  ---
+  duration_ms: 0.426921
+  type: 'test'
+  ...
+# Subtest: repository inspection reports declared/locked mismatch without executing source
+ok 13 - repository inspection reports declared/locked mismatch without executing source
+  ---
+  duration_ms: 8.890256
+  type: 'test'
+  ...
+# Subtest: inline assembler rejects HTML comment parser state ambiguity
+ok 14 - inline assembler rejects HTML comment parser state ambiguity
+  ---
+  duration_ms: 0.156131
+  type: 'test'
+  ...
+# Subtest: synthetic CLI protocol receives generate subcommand and preserves input bytes
+ok 15 - synthetic CLI protocol receives generate subcommand and preserves input bytes
+  ---
+  duration_ms: 69.39843
+  type: 'test'
+  ...
+# Subtest: reader nonzero status fails closed before planning
+ok 16 - reader nonzero status fails closed before planning
+  ---
+  duration_ms: 24.752654
+  type: 'test'
+  ...
+# Subtest: reader normalization instead of exact byte echo is rejected
+ok 17 - reader normalization instead of exact byte echo is rejected
+  ---
+  duration_ms: 27.173881
+  type: 'test'
+  ...
+# Subtest: generator nonzero status is not promoted to success
+ok 18 - generator nonzero status is not promoted to success
+  ---
+  duration_ms: 50.11604
+  type: 'test'
+  ...
+# Subtest: generator malformed JSON or missing planHash fails closed
+ok 19 - generator malformed JSON or missing planHash fails closed
+  ---
+  duration_ms: 209.949425
+  type: 'test'
+  ...
+# Subtest: generator conflicts in a zero-exit plan are rejected
+ok 20 - generator conflicts in a zero-exit plan are rejected
+  ---
+  duration_ms: 53.017121
+  type: 'test'
+  ...
+# Subtest: unexpected generation target writes are detected
+ok 21 - unexpected generation target writes are detected
+  ---
+  duration_ms: 55.874589
+  type: 'test'
+  ...
+# Subtest: timeout is failed evidence, not an empty successful result
+ok 22 - timeout is failed evidence, not an empty successful result
+  ---
+  duration_ms: 41.760934
+  type: 'test'
+  ...
+# Subtest: missing repository does not create a replacement or fabricate compatibility
+ok 23 - missing repository does not create a replacement or fabricate compatibility
+  ---
+  duration_ms: 1.072926
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 589.820081

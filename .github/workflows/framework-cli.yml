@@ -39,6 +39,7 @@ jobs:
         run: |
           node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
           node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
+          node scripts/testing/suites.mjs prototypes prototypes:python
           node scripts/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         run: |

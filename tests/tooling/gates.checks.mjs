@@ -73,6 +73,21 @@ test('[GATE-02-01] full analyzer fails for real unused files and exports', async
     assert.ok(report.summary.unused_files > 0); assert.ok(report.summary.unused_exports > 0);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+test('[GATE-02-03] the repository analyzer ignores the docs working directory but not other unused code', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shell-analysis-docs-'));
+  try {
+    const { ignorePatterns } = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+    await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry: ['entry.ts'], ignorePatterns, rules: { 'policy-violation': 'off' } }));
+    await writeFile(join(root, 'package.json'), '{"name":"analyzer-docs-probe","type":"module"}');
+    await writeFile(join(root, 'entry.ts'), 'console.log(1);');
+    await mkdir(join(root, 'docs/concepts/draft'), { recursive: true });
+    await writeFile(join(root, 'docs/concepts/draft/prototype.ts'), 'import missing from "unlisted-package"; export const draft = missing;');
+    const analyze = () => { const run = spawnSync(process.execPath, [resolve('node_modules/fallow/bin/fallow'), '--format', 'json', 'dead-code'], { cwd: root, encoding: 'utf8', timeout: 15000 }); return { status: run.status, report: JSON.parse(run.stdout) }; };
+    const clean = analyze(); assert.equal(clean.status, 0, JSON.stringify(clean.report.summary)); assert.equal(clean.report.summary.total_issues, 0);
+    await writeFile(join(root, 'dead.ts'), 'export const unreachable = 1;');
+    const dead = analyze(); assert.equal(dead.status, 1); assert.ok(dead.report.summary.unused_files > 0);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
 test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rules/parsers', async () => {
   const root = await mkdtemp(resolve('src/infrastructure/ui/lint-probe-'));
   try {
