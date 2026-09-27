@@ -1,7 +1,7 @@
 # Full-project JSON, self-project and folder settings
 
-> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). This guide describes the current v4 transfer; older verification receipts retain their original scope.
-**Current format: v4 · Offline authoring plus separate read-only inspection and reviewed generation.**
+> Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). This guide describes the current v5 transfer; older verification receipts retain their original scope.
+**Current format: v5 · Offline authoring plus separate read-only inspection and reviewed generation.**
 
 The HTML prototype contains a loadable **Plugin Companion** project. It uses the same editors, persistence, import review and JSON contract as a user-authored project; it is not a separate hardcoded presentation or a second active project. The existing simpler example and blank-project entry remain available.
 
@@ -12,10 +12,10 @@ Open `index.html` and choose **Load companion project**. Review the proposed pro
 | Authored area | Included example |
 | --- | --- |
 | Identity and purpose | Plugin Companion, `plugin-companion`, version 0.1.0, design-to-shell outcome |
-| Surfaces | 27: one workbench view and 26 eligible page/modal/settings surfaces, including Storymaps and both detail editors |
+| Surfaces | 28: one workbench view and 27 eligible page/modal/settings surfaces, including Storymaps and the page and component editors |
 | Requirements | 5 PRDs and 30 mapped requirements covering discovery, structure, composition, test-data/handoff and operational safeguards |
 | Components | 54 retained definitions: 44 starter contracts and 10 project-owned companion components, with content and default/compact variants |
-| Detail designs | All 26 eligible surfaces and all 54 reusable components: 80 working designs and 54 immutable published revisions |
+| Visual designs | All 27 eligible surfaces and all 54 reusable components: 27 page designs and 54 component designs (81 definitions, 726 elements) plus 54 immutable published revisions, migrated from the v4 detail designs with only canvas geometry dropped |
 | Domain | 11 entities and 7 relationships |
 | Source and test data | One proposed native-vault port, three declared read operations/usages, and three deterministic test recipes |
 | Storymaps | One editable map with two activities, three steps, five stories, two releases and PRD/sitemap/requirement links |
@@ -36,9 +36,17 @@ Import/export is a semantic round trip: object formatting may be normalized on b
 
 ## Format compatibility
 
-New exports use `schemaVersion: 4` and `design.schema: 4`. Storymaps retain subsystem schema 1; detailed composition uses subsystem schema 2 with working documents and immutable revisions. Layout/token references, slot content, scenarios and reviewed revision pins survive export/import. Selection, viewport, drafts, session clipboard and live preview values do not.
+New exports use `schemaVersion: 5` and `design.schema: 5`. Storymaps retain subsystem schema 1.
 
-V1/v2/v3 documents remain importable without inventing previously unauthored details. V1 cannot contain Storymaps; v1/v2 cannot contain details; v3 cannot conceal the richer composition subsystem. Unsupported versions and invalid internal references fail before replacement. See [Composition](COMPOSITION.md) and the [canonical contract](../../development/COMPANION-PROJECT-JSON.md).
+### v5: visual designs
+
+`design.visualDesigns` (subsystem schema 3) replaces `design.detailDesigns`; a v5 document must not contain `detailDesigns`. It holds `nextId` (deterministic `vn-`/`vp-`/`vc-`/`vl-`/`vr-`/`vi-` IDs), the pinned catalog `{ "id": "nuxt-ui", "version": 1 }` (generated projects use `@nuxt/ui` 4.11.2), `pages` (owned by sitemap page/modal/settings surfaces), `components` (owned by library entries; typed props/slots/emits, variants, optional `dependencies` and `implementation`), saved `layouts` and published `revisions`. Pages and templates are declarative UI trees of `element`, `text`, `slot`, `component` and (component templates only) `external` nodes with typed value expressions, interactions and scenarios. The full field list and rules are in [VISUAL-EDITORS.md](VISUAL-EDITORS.md#data-contract-summary) and the [design spec](../../superpowers/specs/2026-09-26-visual-editors-design.md) §2, §11 and §13.
+
+Validation gates import, export, save and generation: references (owners, library, components, revisions, sources, surfaces, action/scenario targets), contracts, catalog props and types, acyclic composition and limits (120 elements per definition, 200 definitions, depth 12, composition depth 16). Layout/token references, slot content, scenarios, notes, dependencies and revision pins survive export/import losslessly (v5 → v5). Selection, viewport, open panes, inspector tab, drafts and live preview values (`veUi`) do not.
+
+### Older formats
+
+V1–v4 documents remain importable without inventing previously unauthored details. V1 cannot contain Storymaps; v1/v2 cannot contain details; v3 cannot conceal the richer composition subsystem. V3/v4 detail designs are migrated to v5 visual designs on import and when an export is read; import review shows the migration report before explicit replacement. The only designed loss is canvas geometry (`position`, `size`, outline `sourceBrickId`), which the report counts; see [migration](VISUAL-EDITORS.md#migration-from-v1v4-and-what-is-dropped). Unsupported versions and invalid internal references fail before replacement. See the [canonical contract](../../development/COMPANION-PROJECT-JSON.md).
 
 ## Settings and shell handoff
 
@@ -50,7 +58,7 @@ Open **Preferences → Configure project folders**. Defaults are `src` for code 
 npm run --silent companion:generate -- --input "plugin-companion.companion.json" --vault "/path/to/vault" --target "plugins/companion"
 ```
 
-The script validates the envelope and vault-contained target, then prints the original JSON. It remains read-only. The separate `companion:scaffold` command generates a workspace through explicit plan/hash/apply review, including supported detail layouts and local UI effects. Changing these folders does not relocate the existing shell, alter its build configuration, or change the older illustrative scaffold previews. Those remain separate from this new versioned handoff.
+The script validates the envelope and vault-contained target, then prints the original JSON. It remains read-only. The separate `companion:scaffold` command generates a workspace through explicit plan/hash/apply review, including visual page/component SFCs, typed adapters and local UI effects. Changing these folders does not relocate the existing shell, alter its build configuration, or change the older illustrative scaffold previews. Those remain separate from this new versioned handoff.
 
 Read the [canonical contract, CLI reference and safety boundary](../../development/COMPANION-PROJECT-JSON.md) for all field definitions, default/path rules, excluded state and reproduction commands.
 

@@ -1,13 +1,13 @@
 # Shell Workbench companion concept
 
-> Current composition increment: [Layout, tokens, slots, revisions, scenarios and complete self-project](COMPOSITION.md). [Verification scope](COMPOSITION-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
-> **One vault, one project · Page/component detail editors, Storymaps and full-project JSON v4 — 2026-09-25.** Interactive browser concept, not an installable native Obsidian companion.
+> Current page and component editors: [Visual Page and Component editors](VISUAL-EDITORS.md). [Verification scope](VISUAL-EDITORS-VERIFICATION.md). Earlier increment-specific version/count statements below retain their historical scope.
+> **One vault, one project · Visual page/component editors, Storymaps and full-project JSON v5 — 2026-09-26.** Interactive browser concept, not an installable native Obsidian companion.
 
 Open [index.html](index.html) in a desktop browser. Scripts, styles, icons and the reviewed Vue, Pinia and Vue Flow runtime are embedded; no npm, server or runtime CDN is required. GitHub displays source instead of running HTML. Local browser policy can restrict file-origin storage; no file-origin persistence claim is made.
 
 ## Project JSON and companion self-project
 
-Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files. The separate reviewed workspace compiler generates supported Vue layouts, slots and UI effects; [Composition](COMPOSITION.md) describes the current scope and complete 80-design self-project.
+Choose **Load companion project** to review and load the companion's own authored design into the one-project workspace. Export the full design to JSON, import a file or pasted JSON with explicit replacement, and configure **Preferences → Configure project folders** (`src` / `tests` by default). **Prepare → Project JSON → shell** shows the read-only v1 CLI: it returns the provided export without generating files. The separate reviewed workspace compiler generates Vue SFCs with explicitly imported Nuxt UI components, slots, typed contracts and UI effects from the visual designs; [VISUAL-EDITORS.md](VISUAL-EDITORS.md) describes the current scope and the self-project's 27 page and 54 component designs.
 
 [PROJECT-JSON.md](PROJECT-JSON.md) explains the UI, seed content and limits; [companion-project.json](companion-project.json) is the importable self-project. The [shell contract](../../development/COMPANION-PROJECT-JSON.md) documents the command and safety boundary. This extends the existing single-project model, not a multi-project launcher.
 
@@ -15,13 +15,13 @@ Choose **Load companion project** to review and load the companion's own authore
 
 **Design → Storymaps** opens the overview and a structured Vue Flow editor with activities, steps, stories, release slices and Unplanned. PRD details can create or link existing maps. Items reference existing sitemap surfaces and requirements; sitemap inspectors link back to those maps. Non-drag Move controls, Outline and the advisory Review representation share the same records. In-map text/release/finding filters, searchable requirement links, contextual return navigation and Save & add another support capture and consumption without remounting the canvas on each keystroke. Draft protection, Undo/Redo, missing-target recovery and full project JSON round trips are included.
 
-Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 3/design schema 3; legacy format-1 and format-2 projects remain readable. The inspection CLI remains read-only; the separate reviewed scaffolding generator retains the full design without implementing native storymap behavior. See [STORYMAPS.md](STORYMAPS.md), the current [STORYMAPS-POLISH.md](STORYMAPS-POLISH.md), and historical [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
+Choose **Load companion project → Storymaps → From plugin intent to a portable design** to try the editable example. Full-project exports now use format 5/design schema 5; legacy format-1 to format-4 projects remain readable. The inspection CLI remains read-only; the separate reviewed scaffolding generator retains the full design without implementing native storymap behavior. See [STORYMAPS.md](STORYMAPS.md), the current [STORYMAPS-POLISH.md](STORYMAPS-POLISH.md), and historical [STORYMAPS-VERIFICATION.md](STORYMAPS-VERIFICATION.md). Native conversion and publication remain separate gates.
 
 ## Page and component editors
 
-**Pages** opens content-bearing sitemap surfaces. **Open page editor** is also available from sitemap inspectors and linked storymap items. **Component library → Open component editor**, or a page instance’s **Edit reusable internals**, opens reusable definitions. Both are controlled Vue Flow canvases with nested regions, primitives, component instances, source bindings, interaction drafts, non-drag Outline and symbolic state/width Preview. **Start detail design** is explicit; existing shell sketches are retained.
+**Pages** opens content-bearing sitemap surfaces. **Open page editor** is also available from sitemap inspectors and linked storymap items. **Component library → Open component editor**, or **Open definition** on a selected component instance, opens reusable definitions. Both editors share one three-pane grammar (Outline/Insert, canvas with Design/Preview/Review, inspector) over a declarative UI tree: semantic elements, Nuxt UI catalog v1 components, project components, slots, external-library adapters, source bindings, interactions and scenarios. There is no free geometry; keyboard paths (Move to…, Alt+arrows, Undo/Redo) replace drag. **Start design** is explicit; existing shell sketches are retained.
 
-Try **Pages → Import project JSON → Project review → Edit reusable internals** in the self-project. [DETAIL-EDITORS.md](DETAIL-EDITORS.md) documents authoring, versioning, safety, transfer limits and the native/generator boundaries. [DETAIL-EDITORS-VERIFICATION.md](DETAIL-EDITORS-VERIFICATION.md) records executed checks.
+Try the self-project: **Load companion project → Pages → Design page**. [VISUAL-EDITORS.md](VISUAL-EDITORS.md) documents entry points, both editors, component dependencies, the data contract, migration from v1–v4, the keyboard map and limits. [VISUAL-EDITORS-VERIFICATION.md](VISUAL-EDITORS-VERIFICATION.md) records executed checks and untested scope. The earlier Vue Flow detail editors ([DETAIL-EDITORS.md](DETAIL-EDITORS.md), [COMPOSITION.md](COMPOSITION.md)) are historical.
 
 ## Previous product audit
 
@@ -95,11 +95,15 @@ node --test tests/tooling/test-data-*.checks.mjs
 CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py
 # Require actual browser Storage, loopback HTTP and two pages as well:
 CHROMIUM_EXECUTABLE=/path/to/chromium python3 -B scripts/concepts/run-browser-checks.py --real-storage
+# Visual page/component editors only (Node Playwright suite, same checks.json contract):
+python3 -B scripts/concepts/run-browser-checks.py --only visual-editors
 ```
+
+The visual-editors suite (`tests/concepts/companion-visual-editors.browser.mjs`) uses the repository's Node Playwright and Chromium; the other suites use Python Playwright.
 
 The read-only companion workflow provisions isolated Python Playwright 1.57.0, checks Python/JavaScript syntax and exact assembly, runs all current browser suites and retains raw logs/screenshots. Its browser-storage suite has no substituted storage adapter. The local UI suites use HTML injection and explicit controlled-storage fixtures; actual-origin storage is a separately reported suite. Exported-kit filesystem and loopback HTTP tests are separate executable-tooling evidence. Final CI outcomes, artifact identity, totals and limitations belong in the verification record and PR receipts—not inferred from a scheduled run.
 
-The builder and Fallow inventory agree on **105 exact inputs: 75 maintained JS, 18 maintained CSS, 7 test-kit ES modules and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
+The builder and Fallow inventory agree on **140 exact inputs: 107 maintained JS, 21 maintained CSS, 7 test-kit ES modules and 5 vendor JS/CSS assets**. Missing/duplicate/extra inputs and altered retained vendor provenance are rejected. Concept/runtime boundaries and production thresholds remain unchanged. Root-template qualification, including the entire authoring/setup/platform workflows, is separate and must be checked on the final PR head.
 
 ## Boundaries
 
@@ -108,8 +112,9 @@ No real vault access, template acquisition, process execution, dependency instal
 Vendor provenance and notices remain under [vendor](vendor). No font binaries or extracted Obsidian stylesheet are added. The sitemap is a real embedded Vue Flow island; the surrounding concept panels are not a claim that a production Vue/Nuxt UI companion is already complete. Existing root-template CLI and native capabilities retain their own [parent PRD](../../product/PRD.md) and qualification records.
 
 
-### Page/component editor research and polish
+### Page/component editor research and polish (historical)
 
+These records describe the superseded Vue Flow detail editors; see [VISUAL-EDITORS.md](VISUAL-EDITORS.md) for the current editors.
 The [competitive research and requirements](DETAIL-EDITORS-RESEARCH.md) cover ten
 reference products/tools, observed authoring issues and the next layout/slot/test
 contracts. The [polishing receipt](DETAIL-EDITORS-POLISH.md) distinguishes delivered

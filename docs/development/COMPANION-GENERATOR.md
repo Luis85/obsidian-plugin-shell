@@ -106,7 +106,23 @@ The output is a development shell. Components without detail designs remain impl
 - Vitest test API: https://vitest.dev/api/test — TODOs identify unimplemented acceptance, not passing assertions.
 - Node TypeScript execution: https://nodejs.org/api/typescript.html — type stripping executes erasable TypeScript; it does not replace the compiler type-check.
 
-## Executable detailed-design generation (schema 1; schema 2 extensions below)
+## Visual page and component generation (companion v5)
+
+The compiler reads validated `design.visualDesigns`; v3/v4 inputs are migrated first (`migrateCompanionDocument`), so
+the detail-schema sections below are historical. `scripts/companion/compiler/visual-*.ts` lower each page to
+`presentation/components/details/<pageId>.vue` and each component to its library SFC with `defineProps`/`defineEmits`/
+`defineSlots` from the typed contract. Elements become their tags, text becomes escaped interpolation or a typed
+binding, slots become `<slot>`, project components are imported by export name and Nuxt UI entries become explicitly
+imported `U*` components (catalog v1 ↔ `@nuxt/ui` 4.11.2, asserted). Interactions call only declared actions
+(navigation port, source operation/mapping port, local runtime effects); an interaction without actions is an
+`IMPLEMENTATION_REQUIRED` TODO. External-library nodes produce extension-owned `<adapter>.adapter.ts` stubs and merge
+their exact package versions into `package.json` ([visual editors](../concepts/companion/VISUAL-EDITORS.md#component-library-dependencies-and-external-adapters-spec-13)).
+Generated tests cover interaction transitions from the IR (`ui-effects/<id>.checks.mjs`), contracts, scenario
+rendering and the adapter lifecycle; `design/visual-traceability.json` links definitions, files, interactions and
+adapters. Qualification: `qualify-project` on the self-project and fixtures, `qualify-starter` for all nine starters
+and `qualify-styles` ([verification](../concepts/companion/VISUAL-EDITORS-VERIFICATION.md)).
+
+## Executable detailed-design generation (schema 1; schema 2 extensions below) — historical
 
 Saved v3 page/component designs now compile to editable Vue SFCs. Page details replace the
 placeholder page composition; component details implement the matching reusable library SFC.
@@ -212,9 +228,10 @@ Technical basis: [Vue props](https://vuejs.org/guide/components/props.html),
 [Pinia testing](https://pinia.vuejs.org/cookbook/testing.html) and
 [Vitest test semantics](https://vitest.dev/api/test). Dependency pins are unchanged.
 
-## Complete v4 composition
+## Complete v4 composition — historical
 
-See [composition guide](../concepts/companion/COMPOSITION.md) for responsive layout, token references,
+Superseded by the visual designs above; see [visual editors](../concepts/companion/VISUAL-EDITORS.md). The historical
+[composition guide](../concepts/companion/COMPOSITION.md) described responsive layout, token references,
 instance slots, revision snapshots, fixtures and supported effects. The current self-project
 contains 80 working and 54 captured documents; code generation includes both. Live and captured
 local font references use safe declared family names or native font variables; no fonts are downloaded.

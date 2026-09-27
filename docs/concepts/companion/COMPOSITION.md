@@ -1,3 +1,5 @@
+> Historical — superseded by [VISUAL-EDITORS.md](VISUAL-EDITORS.md). This record keeps its original scope: the Vue Flow detail/composition editors, their `design.detailDesigns` store and the browser suites it names were removed; v1–v4 detail data is migrated on import ([migration](VISUAL-EDITORS.md#migration-from-v1v4-and-what-is-dropped)).
+
 # Detailed composition, review and implementation
 
 This increment extends the existing PR #5 Page and Component editors. The newer

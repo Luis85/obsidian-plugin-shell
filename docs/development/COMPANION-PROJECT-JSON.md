@@ -1,6 +1,6 @@
 # Companion project JSON → shell
 
-**Transfer format v4, with v1/v2/v3 import compatibility. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
+**Transfer format v5, with v1–v4 import compatibility. `companion:generate` remains read-only; `companion:scaffold` is the separate workspace compiler.**
 
 The companion exports a complete **saved authoring definition**. The shell accepts that definition and a target inside an explicitly chosen vault. The first script version validates the transfer envelope and paths, then returns the original JSON bytes. It does not generate, install, activate, run tests, acquire a template or create a target directory.
 
@@ -35,18 +35,18 @@ Redirection is a shell operation, not a write by this script. Never redirect out
 | Field | Contract |
 | --- | --- |
 | `kind` | Exactly `obsidian-companion-project` |
-| `schemaVersion` | Exports use `4`; reader also accepts legacy `1` without storymaps/details, `2` without details, and `3` with the original detail subsystem; unsupported versions fail closed |
+| `schemaVersion` | Exports use `5`; reader also accepts legacy `1` without storymaps/details, `2` without details, `3` with the original detail subsystem and `4` with detailed composition; v3/v4 detail designs are migrated to v5 visual designs when read; unsupported versions fail closed |
 | `executable` | Exactly `false`; an export is data, never an execution approval |
 | `project` | `id`, `name`, `author`, `version`, `description` |
 | `settings` | `codebaseFolder` and `testsFolder`, both required in supported exports |
-| `design` | Schema-4 saved authoring definition (each legacy design schema must match its transfer version): blueprint, goals, platform, screens, containment/navigation, components and their content/versions/variants, PRDs and requirement mappings, entities/relationships, source operations and shapes, test recipes, design system, visual arrangement, storymaps with release assignments and artifact links, and detailed compositions with immutable revisions and fixture scenarios |
+| `design` | Schema-5 saved authoring definition (each legacy design schema must match its transfer version): blueprint, goals, platform, screens, containment/navigation, components and their content/versions/variants, PRDs and requirement mappings, entities/relationships, source operations and shapes, test recipes, design system, visual arrangement, storymaps with release assignments and artifact links, and visual page/component designs with immutable revisions and fixture scenarios |
 | `notes` | Saved project note strings |
 
-The supplied [companion project](../concepts/companion/companion-project.json) is a complete example, not an abbreviated schema snippet. `scripts/companion/project-contract.mjs` is the shared executable envelope/path contract: imported directly by Node and embedded from those same source bytes into the offline HTML. Browser import additionally uses the existing detailed design validators; the read-only script is **not** evidence that an arbitrary nested design is ready for compilation.
+The supplied [companion project](../concepts/companion/companion-project.json) is a complete example, not an abbreviated schema snippet. `scripts/companion/project-contract.mjs` is the shared executable envelope/path contract: imported directly by Node and embedded from those same source bytes into the offline HTML. Browser import additionally uses the shared visual-design validators (`scripts/companion/visual/`); the read-only script is **not** evidence that an arbitrary nested design is ready for compilation.
 
 ### Storymaps compatibility
 
-A v2 document requires `design.schema: 2`. A v1 document requires `design.schema: 1` and cannot contain a `storymaps` property. Existing projects without maps are treated as having an empty collection; browser export upgrades to v4. The exact shared Storymaps record validator is `scripts/companion/storymap-contract.mjs`, embedded in the concept and imported by the Node boundary. Invalid internal structure, duplicate IDs, unsupported fields and excessive collections fail before import. External PRD/sitemap/requirement references can be explicitly unresolved and are preserved with last-known labels.
+A v2 document requires `design.schema: 2`. A v1 document requires `design.schema: 1` and cannot contain a `storymaps` property. Existing projects without maps are treated as having an empty collection; browser export upgrades to v5. The exact shared Storymaps record validator is `scripts/companion/storymap-contract.mjs`, embedded in the concept and imported by the Node boundary. Invalid internal structure, duplicate IDs, unsupported fields and excessive collections fail before import. External PRD/sitemap/requirement references can be explicitly unresolved and are preserved with last-known labels.
 
 Ordering and assignments are portable; transient Vue Flow state is not. The older blueprint/compiler preview excludes storymaps and remains a distinct format. The transfer version change does not authorize writes, produce boilerplate or move configured folders. See [Storymaps](../concepts/companion/STORYMAPS.md) for canonical fields and bounded limits.
 
@@ -107,32 +107,22 @@ The next writer increment must define a reviewed deterministic plan from this en
 
 The read-only handoff command above remains separate from workspace generation. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
 
-## Page and component composition (v4)
+## Page and component designs (v5)
 
-`design.detailDesigns` is validated by the shared `detail-contract.mjs` before browser import or CLI handoff. Stable owner references connect page documents to sitemap surfaces and component documents to library definitions. Ordered nodes retain containment, content, local instance props, bindings, visible states and canvas geometry; edges retain interaction and acceptance declarations. The model never evaluates those declarations. V1/v2 envelopes containing this subsystem fail before mutation. See [Detail editors](../concepts/companion/DETAIL-EDITORS.md) for the exact limits and native conversion boundary. The separate compiler retains full authoring data and generates Vue surfaces, typed contracts, source/Pinia projections, slots, captured components and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
+`design.visualDesigns` (subsystem schema 3) holds page definitions owned by sitemap page/modal/settings surfaces, component definitions owned by library entries, saved layouts and immutable published revisions as declarative UI trees. It is validated by `scripts/companion/visual/visual-validate.mjs` (delegated from `project-contract.mjs`) before browser import, export, CLI handoff and generation; a v5 document cannot also carry `detailDesigns`. The catalog is pinned to `{ "id": "nuxt-ui", "version": 1 }`, matching the generated `@nuxt/ui` 4.11.2. The model never evaluates its declarations. See [Visual editors](../concepts/companion/VISUAL-EDITORS.md) and the [design spec](../superpowers/specs/2026-09-26-visual-editors-design.md) for fields, limits, migration and the native conversion boundary. The separate compiler generates Vue SFCs with explicit Nuxt UI imports, typed contracts, source/Pinia projections, slots, extension-owned external-library adapters and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
 
 ## Design-system frontend extension
 
 Optional `design.designSystem.frontend` schema 1 declares `target: "nuxt-ui"`, `colorPolicy: "host" | "declared"` and finite role-to-token `bindings`. Both import paths validate the complete typed design system. The reviewed scaffold compiler lowers it into styles; the read-only handoff still returns the original bytes. See [the complete contract](DESIGN-SYSTEM-STYLES.md).
 
-## Composition compatibility and immutable data
+## Legacy detail designs and immutable data
 
-New exports use `design.detailDesigns.schema: 2`. The collection includes working
-documents and published revisions. Layout rules, token IDs, semantic control
-configuration, instance-owned named slot content, literal fixture scenarios and
-reviewed revision references are portable. Published revisions capture their
-contract, internal graph, Design System values and pinned dependency closure.
-Transient selection, clipboard, viewport, active preview values and drafts are not.
+V3 (`design.detailDesigns.schema: 1`) and v4 (`schema: 2`, with working documents and published revisions) detail designs remain importable. They are validated by the retained `detail-contract.mjs`/`composition-contract.mjs`, then migrated to v5 by `migrateDetailDesigns`; the migration report counts the only designed loss, canvas geometry. V1/v2 cannot contain details, and v1 cannot contain Storymaps. Unknown fields/versions, unsafe literals, internal dangling IDs, containment or composition cycles and incompatible contracts are rejected before writes. Code generation additionally requires resolvable runtime references and unambiguous effects.
 
-V3 imports retain the original detail subsystem schema 1; they cannot conceal the
-new composition fields. V1/v2 cannot contain details, and v1 cannot contain Storymaps.
-Unknown fields/versions, unsafe literals, internal dangling IDs, containment or
-composition cycles and incompatible known slot content are rejected before writes.
-External missing authoring references remain recoverable; code generation additionally
-requires resolvable runtime references and unambiguous effects.
+Layout rules, token IDs, control configuration, instance slot content, notes, literal fixture scenarios, component dependencies and revision pins are portable (v5 → v5 is lossless). Published revisions capture their contract, template, Design System values, scenarios and dependencies. Editor session state (selection, viewport, panes, inspector tab, previews, drafts) is not exported.
 
 The [complete self-project](../concepts/companion/companion-project.json) contains
-27 sitemap surfaces, all 26 eligible page designs, all 54 component designs and
+28 sitemap surfaces, 27 page designs (every eligible surface), 54 component designs and
 54 published revisions. The workbench view is an owner, not an additional page.
 `export-companion-project.py --check` verifies byte equality with the embedded seed.
 The 4 MB transfer limit and storage-bounded history remain; revisions are not
@@ -141,5 +131,5 @@ discarded to manufacture more Undo capacity.
 Large imported files remain complete in the reviewed model while the replacement
 paste control stays small. Large export previews explicitly show only their first
 30,000 characters; the downloadable JSON remains complete. See
-[Composition](../concepts/companion/COMPOSITION.md) for supported layout/effect
+[Visual editors](../concepts/companion/VISUAL-EDITORS.md) for supported layout/effect
 semantics and the separate native/business qualification boundaries.
