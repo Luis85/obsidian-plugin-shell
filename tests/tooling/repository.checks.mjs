@@ -47,9 +47,18 @@ test('repository checker discovers actual files and fails on a missing local doc
   for (const path of ['.github/workflows', 'src/styles', 'docs']) await mkdir(join(root, path), { recursive: true });
   await writeFile(join(root, '.github/workflows/check.yml'), workflow);
   await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
-  await writeFile(join(root, 'README.md'), '# Readme\n');
-  await writeFile(join(root, 'docs/guide.md'), '# Guide\n\n[Home](../README.md)\n');
+  await writeFile(join(root, 'README.md'), '# Readme\n\n[Guide](docs/guide.md)\n');
+  await writeFile(join(root, 'docs/guide.md'), '# Guide\n');
   assert.equal((await checkRepository(root)).localLinks, 1);
-  await writeFile(join(root, 'docs/guide.md'), '# Guide\n\n[Missing](missing.md)\n');
+  await writeFile(join(root, 'README.md'), '# Readme\n\n[Missing](docs/missing.md)\n');
   await assert.rejects(checkRepository(root), /MARKDOWN_MISSING_LOCAL_LINK/);
+});
+test('repository checker leaves the docs working directory out of the Markdown gate', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'repository-docs-')); t.after(() => rm(root, { recursive: true, force: true }));
+  for (const path of ['.github/workflows', 'src/styles', 'docs/concepts/draft']) await mkdir(join(root, path), { recursive: true });
+  await writeFile(join(root, '.github/workflows/check.yml'), workflow);
+  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  await writeFile(join(root, 'README.md'), '# Readme\n');
+  await writeFile(join(root, 'docs/concepts/draft/notes.md'), '# Draft\n\n[Moved](gone.md)\n\n```js\nunclosed\n');
+  const result = await checkRepository(root); assert.equal(result.markdown, 1); assert.equal(result.localLinks, 0);
 });

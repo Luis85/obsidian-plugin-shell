@@ -1,0 +1,16 @@
+{
+  "kind": "prototype-integration-map",
+  "schemaVersion": 1,
+  "notice": "Package metadata, NOT a companion import format. Replace this example with actual mappings.",
+  "entries": [
+    {
+      "designId": "REPLACE_WITH_REAL_AUTHORING_ID",
+      "kind": "page",
+      "sourceFiles": [],
+      "testIds": [],
+      "ownership": "generated",
+      "generatorSupport": "REPLACE_WITH_OBSERVED_COMPILER_SUPPORT",
+      "nativeRemaining": []
+    }
+  ]
+}

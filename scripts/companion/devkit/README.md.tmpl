@@ -31,6 +31,7 @@ folder are ever opened.
 | `npm run dev:obsidian` | Build with inline source maps, launch the sandbox vault, hot-reload on save, stream logs |
 | `npm run -s dev:obsidian -- --json` | One build/launch/reload iteration with a JSON summary (errors, logs, screenshot) |
 | `npm run dev:ui` | Browser harness for the Vue UI, without Obsidian |
+| `npm run prototype:tools -- discover --repo .` | Discover the shell-first design/prototype skill helpers and current command contracts |
 | `npm run make -- --list` | Code generators (features, entities, commands, events); preview with `--dry-run` |
 
 | Gates | What it proves |
@@ -122,3 +123,5 @@ permission allowlist for the safe commands, and skills (`implement-requirement`,
 - [Build a feature](docs/development/BUILD-A-FEATURE.md) and [makers](docs/development/SETUP-AND-MAKERS.md)
 - [Framework guide](docs/development/FRAMEWORK-GUIDE.md) and [framework CLI](docs/development/FRAMEWORK-CLI.md)
 - [Framework README](docs/framework/README.md) and [maintainer rules](docs/framework/AGENTS.md) (reference)
+
+For Codex use `$companion-prototype-design`; its `.agents/skills/companion-prototype-design/SKILL.md` entrypoint reads the canonical Claude skill. Both hosts reuse the same workflow and prototype helpers.
