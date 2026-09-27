@@ -208,6 +208,7 @@
         "name": "companion-authoring-contract",
         "patterns": [
           "scripts/companion/authoring-contract.ts",
+          "scripts/companion/concepts/**",
           "scripts/companion/sitemap/**",
           "scripts/companion/visual/**",
           "scripts/companion/project-contract.mjs",

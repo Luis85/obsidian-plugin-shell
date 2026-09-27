@@ -15,7 +15,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
-  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate'] },
+  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -93,6 +93,9 @@ const examples: Record<string, string[]> = {
   'config get': ['node shell.mjs config get --json'], 'config explain': ['node shell.mjs config explain'],
   'config validate': ['node shell.mjs config validate'], 'config set': ['node shell.mjs config set --input config.json --dry-run'],
   setup: ['node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
+  'concept schema': ['node shell.mjs concept schema --json'],
+  'concept inspect': ['node shell.mjs concept inspect --json', 'node shell.mjs concept inspect --input docs/concepts/capture/concept.json'],
+  'concept import': ['node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node shell.mjs plan apply concept.plan.json --yes'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
   new: ['node shell.mjs new --list', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../my-plugin --from my-plugin.companion.json'],

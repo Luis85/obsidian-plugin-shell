@@ -1,0 +1,97 @@
+{
+  "kind": "obsidian-companion-concept",
+  "schemaVersion": 1,
+  "id": "capture-concept",
+  "mode": "feature",
+  "projectId": "capture-notebook",
+  "baseSha256": "9afba1e4265880182772190fcfd167529bfecfd35564df5232f44d566c291331",
+  "references": [
+    {
+      "collection": "nodes",
+      "id": "node-1"
+    }
+  ],
+  "changes": [
+    {
+      "collection": "nodes",
+      "id": "node-80",
+      "op": "add",
+      "value": {
+        "id": "node-80",
+        "slug": "capture",
+        "label": "Capture",
+        "kind": "page",
+        "layout": "sidebar-left",
+        "placement": "tab",
+        "parent": "node-1",
+        "nav": true,
+        "command": false,
+        "ribbon": false,
+        "entry": false,
+        "instance": "reuse",
+        "patterns": [
+          "open-view"
+        ],
+        "goal": "Add your first feature.",
+        "entity": "",
+        "intent": "",
+        "goals": [],
+        "components": [],
+        "bricks": []
+      }
+    },
+    {
+      "collection": "links",
+      "id": "edge-81",
+      "op": "add",
+      "value": {
+        "id": "edge-81",
+        "from": "node-1",
+        "to": "node-80",
+        "kind": "navigate",
+        "label": "Open capture"
+      }
+    },
+    {
+      "collection": "visualDesigns.pages",
+      "id": "vp-100",
+      "op": "add",
+      "value": {
+        "id": "vp-100",
+        "ownerId": "node-80",
+        "name": "Capture",
+        "root": [
+          {
+            "id": "vn-101",
+            "kind": "text",
+            "role": "h1",
+            "value": {
+              "kind": "literal",
+              "value": "Capture your idea"
+            }
+          }
+        ],
+        "scenarios": [],
+        "notes": "Illustrative page; no real note write is declared."
+      }
+    },
+    {
+      "collection": "features.items",
+      "id": "capture",
+      "op": "add",
+      "value": {
+        "id": "capture",
+        "name": "Capture",
+        "surfaces": [
+          "node-80"
+        ],
+        "entryPoints": [
+          "node-80"
+        ],
+        "components": [],
+        "requirements": [],
+        "dependsOn": []
+      }
+    }
+  ]
+}
