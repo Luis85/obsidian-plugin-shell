@@ -1,6 +1,6 @@
-# {{board ID}} — {{direction name}} — {{revision}}
+# {{board ID}} — {{direction name}} — {{revision label}}
 
-Working brief: {{version}}. Purpose: {{UX/UI/interaction decision being explored}}.
+Working brief: {{working brief version}}. Purpose: {{UX/UI/interaction decision being explored}}.
 Status: proposed | generated | failed | selected | superseded | rejected
 Actual tool/image reference: {{available output or honest unavailable/not-run state}}
 Portable image path and SHA-256: {{only when image bytes actually exist}}
@@ -24,7 +24,7 @@ Map the proposed visuals to existing components or named source-owned extensions
 
 ## Iteration record
 User feedback: {{actual feedback, not invented acceptance}}
-Keep: {{board/revision + elements}}. Change: {{specific changes}}. Reject: {{elements}}.
+Keep: {{board/revision + elements}}. Change: {{specific changes}}. Reject: {{rejected elements}}.
 Combination: {{selected parts and reconciled conflicts, or none}}.
 Unresolved decisions and affected journey/acceptance IDs: {{list or none}}.
 Next choice: iterate | select | combine | proceed to prototype prompt
