@@ -13,7 +13,7 @@ import { json, type Model } from '../companion/compiler/model.ts';
 export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';
 export { compilerVersion, compilerPhases } from './application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from './domain/diagnostics.ts';
-export type { Compilation, Diagnostic, TemplateSnapshot, OutputKind } from './domain/contracts.ts';
+export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind } from './domain/contracts.ts';
 
 async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string):Promise<Artifact[]> {
   let files:Artifact[];

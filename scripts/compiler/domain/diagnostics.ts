@@ -1,4 +1,4 @@
-import type { Diagnostic, Phase, SourceLocation } from './contracts.ts';
+import type { CompilerDiagnostic, Phase, SourceLocation } from './contracts.ts';
 
 /** Codes are public API. Catalog changes require documentation and protocol tests. */
 export const diagnosticCatalog = Object.freeze({
@@ -17,20 +17,20 @@ export const diagnosticCatalog = Object.freeze({
   COMPILER_INTERNAL: 'Retain the debug report and report a compiler defect; do not edit the project spec blindly.',
 });
 export type DiagnosticCode = keyof typeof diagnosticCatalog;
-export function diagnostic(code: DiagnosticCode, phase: Phase, message: string, source?: SourceLocation): Diagnostic {
+export function diagnostic(code: DiagnosticCode, phase: Phase, message: string, source?: SourceLocation): CompilerDiagnostic {
   return { code, phase, severity: code === 'COMPILER_DEPENDENCY_RESOLUTION_REQUIRED' || code === 'COMPILER_ADAPTER_REQUIRED' ? 'warning' : 'error',
     message, help: diagnosticCatalog[code], retryable: false, ...(source ? { source } : {}) };
 }
 export class CompilerError extends Error {
-  readonly diagnostic: Diagnostic;
-  constructor(value: Diagnostic, options?: ErrorOptions) {
+  readonly diagnostic: CompilerDiagnostic;
+  constructor(value: CompilerDiagnostic, options?: ErrorOptions) {
     super(value.message, options);
     this.name = 'CompilerError';
     this.diagnostic = value;
   }
 }
-export function orderedDiagnostics(values: readonly Diagnostic[], limit = 100): Diagnostic[] {
-  const key = (d: Diagnostic) => [d.source?.file ?? '', d.source?.jsonPointer ?? '', d.code, d.message].join('\0');
+export function orderedDiagnostics(values: readonly CompilerDiagnostic[], limit = 100): CompilerDiagnostic[] {
+  const key = (d: CompilerDiagnostic) => [d.source?.file ?? '', d.source?.jsonPointer ?? '', d.code, d.message].join('\0');
   const sorted = [...values].sort((a, b) => key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
   if (sorted.length <= limit) return sorted;
   return [...sorted.slice(0, limit - 1), diagnostic('COMPILER_DIAGNOSTICS_TRUNCATED', 'validate', `${values.length - limit + 1} additional diagnostics omitted.`)];
@@ -38,8 +38,8 @@ export function orderedDiagnostics(values: readonly Diagnostic[], limit = 100): 
 
 /** Aggregate failures retain all independently actionable diagnostics at adapter boundaries. */
 export class CompilationFailure extends CompilerError {
-  readonly diagnostics: Diagnostic[];
-  constructor(values: Diagnostic[]) {
+  readonly diagnostics: CompilerDiagnostic[];
+  constructor(values: CompilerDiagnostic[]) {
     super(values.find(value=>value.severity==='error') ?? diagnostic('COMPILER_INTERNAL','emit','Compilation failed.'));
     this.diagnostics=values;
   }

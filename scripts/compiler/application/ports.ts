@@ -1,13 +1,13 @@
-import type { Artifact, Diagnostic, OutputKind, TemplateSnapshot } from '../domain/contracts.ts';
+import type { Artifact, CompilerDiagnostic, OutputKind, TemplateSnapshot } from '../domain/contracts.ts';
 
 /** Host mechanisms are supplied by composition. The compiler cannot discover files or run tools. */
 export interface CompilerPorts<Model> {
   migrate(value: unknown): { document: unknown; report: unknown };
   validate(document: unknown): Model;
   resolve(model: Model): void;
-  lower(model: Model, template: TemplateSnapshot, kind: OutputKind): Diagnostic[];
+  lower(model: Model, template: TemplateSnapshot, kind: OutputKind): CompilerDiagnostic[];
   emit(model: Model, template: TemplateSnapshot, kind: OutputKind): Promise<Artifact[]>;
-  dependencies(artifacts: readonly Artifact[]): { ready: boolean; diagnostics: Diagnostic[] };
+  dependencies(artifacts: readonly Artifact[]): { ready: boolean; diagnostics: CompilerDiagnostic[] };
   hash(value: string, encoding?: 'base64'): string;
 }
 export interface CompileRequest {

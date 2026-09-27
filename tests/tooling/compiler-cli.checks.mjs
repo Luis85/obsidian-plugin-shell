@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, realpath, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -43,7 +43,7 @@ test('terminal renderer neutralizes authored control codes',()=>{
   assert.ok(!formatDiagnostics([value]).includes('\u001b'));
 });
 test('reporting is opt-in, contained, unique and excludes raw input and debug causes by default',async()=>{
-  const folder=await mkdtemp(join(tmpdir(),'compiler-report-'));
+  const folder=await realpath(await mkdtemp(join(tmpdir(),'compiler-report-')));
   try{
     const scoped={...context,root:folder};
     assert.equal((await executeOperation(request('compiler check'),scoped)).status,'ok');assert.deepEqual(await readdir(folder),[]);

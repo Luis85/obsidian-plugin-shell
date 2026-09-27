@@ -1,5 +1,5 @@
 import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
-import type { Diagnostic as CompilerDiagnostic } from '../compiler/domain/contracts.ts';
+import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 import { ask, readInput } from './input.ts';
 import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';

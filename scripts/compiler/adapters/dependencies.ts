@@ -1,9 +1,9 @@
-import type { Artifact, Diagnostic } from '../domain/contracts.ts';
+import type { Artifact, CompilerDiagnostic } from '../domain/contracts.ts';
 import { diagnostic, CompilerError } from '../domain/diagnostics.ts';
 
 type Manifest = { dependencies?: Record<string,string>; devDependencies?: Record<string,string>; packages?: Record<string,{version?:string;dependencies?:Record<string,string>;devDependencies?:Record<string,string>}> };
 /** Inspect exact direct pins and lock root entries; never installs or accesses a registry. */
-export function dependencyReadiness(files: readonly Artifact[]): {ready:boolean;diagnostics:Diagnostic[]} {
+export function dependencyReadiness(files: readonly Artifact[]): {ready:boolean;diagnostics:CompilerDiagnostic[]} {
   const read = (path:string): Manifest => {
     const source = files.find(file=>file.path===path)?.content;
     if (!source) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID','emit','Missing generated '+path));

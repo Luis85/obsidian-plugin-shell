@@ -9,7 +9,7 @@ export interface SourceLocation {
   /** Migration-derived locations name the normalized document rather than guessing old offsets. */
   document?: 'input' | 'normalized';
 }
-export interface Diagnostic {
+export interface CompilerDiagnostic {
   code: string;
   severity: Severity;
   phase: Phase;
@@ -58,7 +58,7 @@ export interface Compilation<Model> {
   outputKind: OutputKind;
   model?: Model;
   migration: unknown;
-  diagnostics: Diagnostic[];
+  diagnostics: CompilerDiagnostic[];
   artifacts: Artifact[];
   fingerprint: string | null;
   readiness: Readiness;

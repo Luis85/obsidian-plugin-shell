@@ -1,5 +1,7 @@
 {
   "entry": [
+    "scripts/compiler/index.ts",
+    "scripts/compiler/build-clickdummy.mjs",
     "src/main.ts",
     "src/features/api.ts",
     "harness/app/main.ts",

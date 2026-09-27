@@ -1,5 +1,5 @@
 import { CompilerError, CompilationFailure } from '../compiler/domain/diagnostics.ts';
-import type { Diagnostic as CompilerDiagnostic } from '../compiler/domain/contracts.ts';
+import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
 export interface Request { command: string; args: string[]; options: Values }

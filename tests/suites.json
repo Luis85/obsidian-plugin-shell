@@ -54,6 +54,7 @@
       "include": [
         "tests/tooling/compiler-*.checks.mjs"
       ],
+      "exclude": ["tests/tooling/compiler-properties.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:compiler",
       "workflows": [
@@ -67,7 +68,7 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/compiler-*.test.mjs"
+        "tests/tooling/compiler-properties.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:compiler:properties",
@@ -87,7 +88,7 @@
       "verify": "tooling",
       "npmScript": "test:prototypes",
       "workflows": [
-        "framework-cli"
+        "ci"
       ]
     },
     {
@@ -117,7 +118,7 @@
       "verify": "opt-in",
       "npmScript": "test:prototypes:python",
       "workflows": [
-        "framework-cli"
+        "ci"
       ]
     },
     {
@@ -128,7 +129,7 @@
       "verify": "own-step",
       "verifyStep": "production coverage run (vitest.production.config.mjs) executes every runtime test",
       "npmScript": "test:runtime",
-      "workflows": ["showcase-verification", "template-authoring", "setup-compatibility", "candidate-qualification"]
+      "workflows": ["ci", "setup-compatibility", "candidate-qualification"]
     },
     {
       "name": "cli",
@@ -137,7 +138,7 @@
       "include": ["tests/tooling/framework-*.checks.mjs", "tests/tooling/framework-*.test.mjs", "tests/tooling/capability-discovery.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:cli",
-      "workflows": ["framework-cli"]
+      "workflows": ["ci"]
     },
     {
       "name": "cli:journey",
@@ -152,7 +153,7 @@
       "prerequisites": ["qualified-npm"],
       "verify": "opt-in",
       "npmScript": "test:cli:journey",
-      "workflows": ["framework-cli"]
+      "workflows": ["ci"]
     },
     {
       "name": "generator",
@@ -161,7 +162,7 @@
       "include": ["tests/tooling/project-generator*.checks.mjs", "tests/tooling/project-starters.checks.mjs", "tests/tooling/file-plan*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:generator",
-      "workflows": ["project-generator"]
+      "workflows": ["ci"]
     },
     {
       "name": "visual",
@@ -170,7 +171,7 @@
       "include": ["tests/tooling/visual-*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:visual",
-      "workflows": ["project-generator", "companion-concept-verification"]
+      "workflows": ["ci", "companion-concept-verification"]
     },
     {
       "name": "companion",
@@ -179,7 +180,7 @@
       "include": ["tests/tooling/companion-*.checks.mjs", "tests/tooling/concept-*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:companion",
-      "workflows": ["companion-concept-verification", "project-generator"]
+      "workflows": ["companion-concept-verification", "ci"]
     },
     {
       "name": "companion:assembly",
@@ -270,7 +271,7 @@
       "include": ["tests/tooling/maker-*.checks.mjs", "tests/tooling/makers.checks.mjs", "tests/tooling/custom-*.checks.mjs", "tests/tooling/locale-*.checks.mjs", "tests/tooling/event-*.checks.mjs", "tests/tooling/example-*.checks.mjs", "tests/tooling/readme-*.checks.mjs", "tests/tooling/formatting.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:makers",
-      "workflows": ["template-authoring"]
+      "workflows": ["ci"]
     },
     {
       "name": "native",
@@ -279,7 +280,7 @@
       "include": ["tests/tooling/native-*.checks.mjs", "tests/tooling/obsidian-*.checks.mjs", "tests/tooling/dev-*.checks.mjs", "tests/tooling/performance-*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:native-tooling",
-      "workflows": ["showcase-verification", "candidate-qualification"]
+      "workflows": ["ci", "candidate-qualification"]
     },
     {
       "name": "native:host",
@@ -294,7 +295,7 @@
       "prerequisites": ["native-runner"],
       "verify": "opt-in",
       "npmScript": "test:native",
-      "workflows": ["showcase-verification", "candidate-qualification"]
+      "workflows": ["candidate-qualification"]
     },
     {
       "name": "setup",
@@ -303,7 +304,7 @@
       "include": ["tests/tooling/setup-*.checks.mjs", "tests/tooling/npm-*.checks.mjs", "tests/tooling/build.checks.mjs", "tests/tooling/identity-*.checks.mjs", "tests/tooling/harness-*.checks.mjs"],
       "verify": "tooling",
       "npmScript": "test:setup",
-      "workflows": ["setup-compatibility", "template-authoring"]
+      "workflows": ["setup-compatibility", "ci"]
     },
     {
       "name": "release",
@@ -322,7 +323,7 @@
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",
-      "workflows": ["showcase-verification", "template-authoring"]
+      "workflows": ["ci"]
     },
     {
       "name": "baseline",
@@ -337,7 +338,7 @@
       "verify": "own-step",
       "verifyStep": "verify-baseline --repeat 3",
       "npmScript": "test:baseline",
-      "workflows": ["baseline-verification"]
+      "workflows": ["ci"]
     },
     {
       "name": "browser-specimen",
@@ -361,7 +362,7 @@
       "prerequisites": ["chromium", "harness-build"],
       "verify": "opt-in",
       "npmScript": "test:e2e",
-      "workflows": ["showcase-verification", "template-authoring", "candidate-qualification"]
+      "workflows": ["ci", "candidate-qualification"]
     },
     {
       "name": "project",
@@ -370,7 +371,7 @@
       "include": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"],
       "optional": true,
       "verify": "opt-in",
-      "workflows": ["project-generator"]
+      "workflows": ["ci"]
     },
     {
       "name": "project:ui-effects",
@@ -379,7 +380,7 @@
       "include": ["tests/project/ui-effects/*.checks.mjs"],
       "optional": true,
       "verify": "opt-in",
-      "workflows": ["project-generator"]
+      "workflows": ["ci"]
     },
     {
       "name": "obsidian",
@@ -389,7 +390,7 @@
       "optional": true,
       "prerequisites": ["native-runner"],
       "verify": "opt-in",
-      "workflows": ["obsidian-e2e.yml"]
+      "workflows": ["ci"]
     }
   ],
   "aliases": {"tooling": "Every suite that verify runs in its serialized node --test tooling step."},

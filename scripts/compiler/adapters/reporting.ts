@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
 import { portableArtifactPath } from '../domain/artifacts.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
-import type { CompilerEvent, Phase, Diagnostic, Readiness } from '../domain/contracts.ts';
+import type { CompilerEvent, Phase, CompilerDiagnostic, Readiness } from '../domain/contracts.ts';
 
 export interface RunSummary {
   compilerVersion: string;
@@ -11,7 +11,7 @@ export interface RunSummary {
   outputKind: string;
   fingerprint: string | null;
   artifacts: number;
-  diagnostics: Diagnostic[];
+  diagnostics: CompilerDiagnostic[];
   readiness: Readiness;
 }
 /** Telemetry is adapter-owned. Its clock and run identity never enter artifacts or fingerprints. */
@@ -57,7 +57,7 @@ export async function writeReports(root: string, directory: string, recorder: Re
   return prefix;
 }
 /** Terminal-safe rendering. Model text is data, including control sequences. */
-export function formatDiagnostics(values: readonly Diagnostic[]): string {
+export function formatDiagnostics(values: readonly CompilerDiagnostic[]): string {
   const safe = (value: string) => value.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ');
   return values.map(value => `${value.severity.toUpperCase()} ${safe(value.code)} [${value.phase}]\n` +
     (value.source ? `${safe(value.source.file)} · ${safe(value.source.jsonPointer || '/')} (${value.source.document ?? 'input'})\n` : '') +
