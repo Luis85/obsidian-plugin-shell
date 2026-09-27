@@ -1,0 +1,2 @@
+import type { EditorProject } from '../../domain/shared/project'
+export interface ProjectCodec { encode(project:EditorProject):string; decode(source:string):EditorProject }
