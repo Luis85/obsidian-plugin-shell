@@ -65,6 +65,32 @@ test('manifest validation rejects unknown runners, duplicate names, bad verify m
   assert.throws(() => validateManifest(manifest({ aliases: { alpha: 'x' } })), /shadows a suite/);
 });
 
+test('manifest names permit one namespace but reject malformed or ambiguous names', () => {
+  for (const name of ['compiler', 'compiler:properties', 'compiler2:properties-v2']) {
+    assert.doesNotThrow(() => validateManifest(manifest({ suites: [suite(name, [])] })), name);
+  }
+  for (const name of ['compiler::properties', ':properties', 'compiler:', '9compiler', 'Compiler', 'compiler:properties:extra']) {
+    assert.throws(() => validateManifest(manifest({ suites: [suite(name, [])] })), /suite name/, name);
+  }
+});
+
+test('namespaced tooling suites retain exact inventory ownership and execute through the public CLI', async t => {
+  const path = 'tests/tooling/compiler-properties.checks.mjs';
+  const data = manifest({ suites: [...manifest().suites, suite('compiler:properties', [path])] });
+  const root = await fixture(t, { [path]: passing }, data);
+  const groups = await toolingGroups(root);
+  assert.deepEqual(groups, [
+    { name: 'alpha', files: ['tests/tooling/alpha-one.checks.mjs'] },
+    { name: 'beta', files: ['tests/tooling/beta-one.checks.mjs'] },
+    { name: 'compiler:properties', files: [path] },
+  ]);
+  const result = run(root, ['compiler:properties', '--json']);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout).outcomes.map(({ name, status }) => ({ name, status })),
+    [{ name: 'compiler:properties', status: 'passed' }]);
+  assert.match(result.stderr, /(?:#|ℹ) pass 1/);
+});
+
 test('the repository manifest classifies every test file and matches the evidence tooling inventory', () => {
   const result = run(process.cwd(), ['--check', '--json']);
   assert.equal(result.status, 0, result.stdout + result.stderr);
@@ -194,7 +220,8 @@ test('verify tooling groups cover exactly the evidence tooling inventory, each f
   const files = groups.flatMap(group => group.files);
   assert.equal(new Set(files).size, files.length);
   assert.deepEqual([...files].sort(), await suiteInventory(process.cwd(), 'tooling'));
-  assert.ok(groups.every(group => group.files.length > 0 && /^[a-z-]+$/.test(group.name)), JSON.stringify(groups.map(group => group.name)));
+  assert.ok(groups.every(group => group.files.length > 0), JSON.stringify(groups.map(group => group.name)));
+  assert.doesNotThrow(() => validateManifest(manifest({ suites: groups.map(group => suite(group.name, group.files)) })));
 });
 test('tooling checks written by the custom-maker and locale recipes are claimed by exactly one verify suite', async () => {
   const { readFile } = await import('node:fs/promises');
