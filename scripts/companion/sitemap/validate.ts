@@ -1,6 +1,6 @@
 import type { SitemapDesign, SitemapFinding } from './model.ts';
 import { SITEMAP_LIMITS } from './model.ts';
-import { assertJson, distinct, id, list, object, record, requireSitemap, text } from './safety.ts';
+import { assertJson, distinct, id, list, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
 import { validateFeatureExtension, validateSitemapExtension } from './extension.ts';
 
 function assertDesign(value: unknown): asserts value is SitemapDesign {

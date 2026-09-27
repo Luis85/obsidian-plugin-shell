@@ -48,7 +48,7 @@ npm run typecheck:generator
 npm run check:source
 ```
 
-The existing framework-cli workflow runs both suites on its OS matrix with the repository
+The `framework-cli` job of `ci.yml` runs both suites on its OS matrix with the repository
 lockfile. A dependency-gated real Vite test compiles a Vue/Pinia/Nuxt UI fixture and checks
 single-file output and last-good preservation; it explicitly skips on a dependency-free
 host. That test is not a browser acceptance test. Do not count a skipped prerequisite as

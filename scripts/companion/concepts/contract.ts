@@ -2,7 +2,7 @@ import { validateAuthoringDocument, type AuthoringDocument } from '../authoring-
 import { assertJson, record, utf8Length } from '../sitemap/safety.ts';
 
 /** Fixed canonical collections, not caller-selected JSON pointers or file paths. */
-export const conceptCollections = Object.freeze(['nodes', 'links', 'library', 'prds',
+const conceptCollections = Object.freeze(['nodes', 'links', 'library', 'prds',
   'visualDesigns.pages', 'visualDesigns.components', 'visualDesigns.layouts', 'visualDesigns.revisions',
   'sitemap.routes', 'sitemap.journeys', 'features.items',
   'semantic.entities', 'semantic.relationships', 'dataSources.sources', 'dataSources.flows'] as const);

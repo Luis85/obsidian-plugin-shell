@@ -60,8 +60,9 @@ runs only the npm install policy file of the `setup` suite.
 - **CLI vs generator vs companion.** `shell.mjs` operations, packaging and
   project creation change independently from the compiler that lowers a design
   into files, and both change independently from the companion concept's JSON
-  contracts. Each has its own CI workflow (`framework-cli`, `project-generator`,
-  `companion-concept-verification`) and now its own local command.
+  contracts. Each has its own CI job (`framework-cli`, `generated-companion` and
+  `starter` in `ci.yml`) or workflow (`companion-concept-verification`) and now
+  its own local command.
 - **Test data.** The seeded test-data kit ships into generated projects, so its
   generators, storage plans and loopback adapters are tested without the concept.
 - **Makers, setup and release.** Authoring tools, first-run setup/build and the
@@ -125,12 +126,13 @@ remain dedicated `verify` steps (production coverage and `verify-baseline`).
 
 | Workflow | Suites |
 | --- | --- |
-| `showcase-verification`, `template-authoring` | all `verify` suites (via setup/verify), `e2e`; showcase also `native:host` |
+| `ci` › `showcase`, template-authoring jobs | all `verify` suites (via setup/verify), `e2e` |
+| `ci` › `framework-cli` | `cli`, `cli:journey`, `prototypes`, `prototypes:python` |
+| `ci` › `generated-companion`, `starter` | `generator`, `visual`, `companion-project` of `companion`, generated `project` suites |
+| `ci` › `real-obsidian` | `obsidian` |
+| `ci` › `baseline` | `baseline` |
 | `setup-compatibility` | all `verify` suites via setup, npm install policy of `setup` |
-| `framework-cli` | `cli`, `cli:journey` |
-| `project-generator` | `generator`, `visual`, `companion-project` of `companion`, generated `project` suites |
 | `companion-concept-verification` | `companion:assembly`, `test-data`, `visual`, the concept `companion` files, `companion:visual-browser` (its own step first), then `companion:browser` |
-| `baseline-verification` | `baseline` |
 | `candidate-qualification` | `runtime`, `e2e`, `native:host` through evidence producers; `release` via rehearsal |
 | `release-rehearsal` | `release` path via `release:rehearse` |
 

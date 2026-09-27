@@ -1,6 +1,6 @@
 import type { FeatureExtension, SitemapDesign, SitemapExtension } from './model.ts';
 import { SITEMAP_LIMITS } from './model.ts';
-import { distinct, id, ids, list, object, record, requireSitemap, text } from './safety.ts';
+import { distinct, id, ids, list, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
 
 export function validateSitemapExtension(value: unknown, design: SitemapDesign): asserts value is SitemapExtension {
   object(value, ['schema', 'routes', 'journeys']);

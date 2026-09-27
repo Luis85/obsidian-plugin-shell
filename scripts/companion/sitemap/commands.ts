@@ -1,6 +1,6 @@
 import type { RemovalImpact, SitemapCommand, SitemapDesign, Surface } from './model.ts';
 import { SITEMAP_LIMITS } from './model.ts';
-import { canonicalKey, assertJson, id, object, record, requireSitemap, text } from './safety.ts';
+import { canonicalKey, assertJson, id, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
 import { validateSitemapModel } from './validate.ts';
 
 function assertCommand(value: unknown): asserts value is SitemapCommand {
