@@ -17,7 +17,7 @@ import { styleCode } from './style-code.ts';
 import { devkitFiles, makerTests, renderTemplate } from './devkit-files.ts';
 import { maintainerOnly, relocateFrameworkDocuments } from './framework-docs.ts';
 const roots = ['src','scripts','tests','harness','docs','.github'];
-const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','vitest.obsidian.config.mjs','tsconfig.generator.json','tsconfig.framework.json'];
+const files = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs','vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs','.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md','SHELL-FIRST-OVERVIEW.md','shell.mjs','vitest.obsidian.config.mjs','tsconfig.generator.json','tsconfig.framework.json','tsconfig.sitemap.json','tsconfig.authoring.json'];
 export async function projectFiles(templateRoot: string, m: Model): Promise<Entry[]> {
   const entries = new Map<string,Entry>();
   const add: Add = (path,content,ownership = 'extension') => { entries.set(path,{path,content,ownership}); };

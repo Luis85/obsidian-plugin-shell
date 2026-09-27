@@ -61,7 +61,11 @@ def export_with_node():
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--check', action='store_true')
+parser.add_argument('--html', type=Path, default=HTML)
+parser.add_argument('--output', type=Path, default=OUTPUT)
 args = parser.parse_args()
+HTML = args.html
+OUTPUT = args.output
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:

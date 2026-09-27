@@ -1,0 +1,133 @@
+"""Exercise the built Vue/Nuxt UI/Vue Flow island through the real companion UI."""
+import hashlib
+import json
+import os
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / 'reports/companion-mvp'
+HTML = OUT / 'index.html'
+results, errors, requests = [], [], []
+
+def check(name, condition):
+    if not condition:
+        raise AssertionError(name)
+    results.append(name)
+
+def project(page):
+    return page.evaluate('companionProjectDocument()')
+
+def wait_saved(page):
+    expect(page.locator('.jm-context [role=status]')).to_contain_text('Saved project')
+
+def run(page):
+    page.goto(HTML.as_uri())
+    page.locator('[data-action="project-example"]').first.click()
+    expect(page.locator('#project-import-summary')).to_be_visible()
+    page.locator('#project-import-confirm').check()
+    page.locator('[data-action="project-import-apply"]').click()
+    page.locator('#sidebar [data-value="sitemap"]').click()
+    wait_saved(page)
+    expect(page.locator('#jm-root .vue-flow')).to_be_visible()
+    check('real Vue/Pinia/Vue Flow mount', page.evaluate('!!window.Vue && !!window.Pinia && !!window.VueFlowCore && !!document.querySelector("#jm-root").__vue_app__'))
+    seed = project(page)
+    check('full v6 self-project', seed['schemaVersion'] == 6 and seed['design']['schema'] == 6)
+    check('28 canonical surfaces retained', len(seed['design']['nodes']) == 28)
+    check('all curated routes and journeys present', len(seed['design']['sitemap']['routes']) == 23 and len(seed['design']['sitemap']['journeys']) == 3)
+    check('component revisions retained', len(seed['design']['visualDesigns']['revisions']) == 54)
+    check('one editor-only island', page.locator('#jm-root .jm-root').count() == 1 and page.locator('#jm-root #sidebar').count() == 0)
+    page.locator('.jm-lensbar').get_by_role('button', name='Outline', exact=True).click()
+    page.locator('.jm-tree button').filter(has_text='Project overview').click()
+    overview = next(n for n in seed['design']['nodes'] if n['slug'] == 'overview')
+    expect(page.locator('#jm-name')).to_have_value('Project overview')
+    page.locator('#jm-name').fill('Renamed overview')
+    page.locator('#sidebar [data-value="components"]').click()
+    expect(page.locator('.jm-error')).to_contain_text('Save or cancel')
+    check('dirty draft blocks unrelated navigation', page.evaluate('state.view') == 'sitemap')
+    page.get_by_role('button', name='Save name', exact=True).click()
+    expect(page.locator('#jm-name')).to_have_value('Renamed overview')
+    renamed = project(page)
+    check('rename retains route and slug', renamed['design']['sitemap'] == seed['design']['sitemap'] and next(n for n in renamed['design']['nodes'] if n['id'] == overview['id'])['slug'] == 'overview')
+    check('rename preserves visual definitions', renamed['design']['visualDesigns'] == seed['design']['visualDesigns'])
+    page.locator('.jm-status').get_by_role('button', name='Undo', exact=True).click()
+    expect(page.locator('#jm-name')).to_have_value('Project overview')
+    page.locator('.jm-status').get_by_role('button', name='Redo', exact=True).click()
+    expect(page.locator('#jm-name')).to_have_value('Renamed overview')
+    check('committed undo redo', project(page)['design']['sitemap'] == seed['design']['sitemap'])
+    page.get_by_role('button', name='Move surface', exact=True).click()
+    target = next(n for n in seed['design']['nodes'] if n['slug'] == 'requirements')
+    page.locator('#jm-parent').select_option(target['id'])
+    page.locator('.jm-dialog').get_by_role('button', name='Apply', exact=True).click()
+    expect(page.locator('.jm-dialog')).to_have_count(0)
+    moved = project(page)
+    check('move changes parent only', next(n for n in moved['design']['nodes'] if n['id'] == overview['id'])['parent'] == target['id'] and moved['design']['sitemap']['routes'] == seed['design']['sitemap']['routes'])
+    page.get_by_role('button', name='Open page editor', exact=True).click()
+    expect(page.locator('#jm-root')).to_have_count(0)
+    check('existing page editor opens same surface', page.evaluate('state.view') == 'page-editor')
+    page.locator('#sidebar [data-value="sitemap"]').click()
+    wait_saved(page)
+    check('mounted editor reads existing saved changes', next(n for n in project(page)['design']['nodes'] if n['id'] == overview['id'])['label'] == 'Renamed overview')
+    page.locator('.jm-tabs').first.get_by_role('button', name='Journeys', exact=True).click()
+    page.locator('#jm-journey').select_option('journey-design')
+    check('journey overlay uses canonical IDs', page.locator('#jm-root .vue-flow__edge').count() == 3)
+    page.get_by_role('button', name='New journey', exact=True).click()
+    page.locator('#jm-journey-name').fill('Review path')
+    for surface in [overview['id'], target['id']]:
+        page.locator('#jm-step').select_option(surface)
+        page.locator('.jm-dialog').get_by_role('button', name='Add step', exact=True).click()
+    page.locator('.jm-dialog').get_by_role('button', name='Apply', exact=True).click()
+    expect(page.locator('.jm-dialog')).to_have_count(0)
+    check('new journey saved in full project', any(j['name'] == 'Review path' for j in project(page)['design']['sitemap']['journeys']))
+    page.locator('.jm-toolbar').get_by_role('button', name='Add surface', exact=True).click()
+    page.locator('#jm-new-name').fill('MVP test page')
+    page.locator('#jm-parent').select_option(target['id'])
+    page.locator('.jm-dialog').get_by_role('button', name='Apply', exact=True).click()
+    expect(page.locator('.jm-dialog')).to_have_count(0)
+    expect(page.locator('#jm-name')).to_have_value('MVP test page')
+    current = project(page)
+    added = next(n for n in current['design']['nodes'] if n['label'] == 'MVP test page')
+    check('created surface has full canonical shape', added['kind'] == 'page' and added['parent'] == target['id'] and 'bricks' in added)
+    page.get_by_role('button', name='Edit route', exact=True).click()
+    page.locator('#jm-route').fill('/mvp-test/:recordId')
+    page.locator('.jm-dialog').get_by_role('button', name='Apply', exact=True).click()
+    expect(page.locator('.jm-dialog')).to_have_count(0)
+    check('explicit parameter route saved', any(r['surface'] == added['id'] and r['path'] == '/mvp-test/:recordId' for r in project(page)['design']['sitemap']['routes']))
+    before_export = project(page)
+    # Exercise actual export UI; the full source is compared through the same exporter, not a truncated preview.
+    page.locator('.jm-toolbar').get_by_role('button', name='Export JSON', exact=True).click()
+    expect(page.locator('#modal')).to_be_visible()
+    exported = page.evaluate('companionJson()')
+    (OUT / 'edited-project.json').write_text(exported, encoding='utf8')
+    check('export retains complete saved authoring state', json.loads(exported) == before_export)
+    page.locator('#modal [data-action="close"]').first.click()
+    page.locator('.jm-toolbar').get_by_role('button', name='Import', exact=True).click()
+    page.locator('#project-import-file').set_input_files(OUT / 'edited-project.json')
+    expect(page.locator('#project-import-summary')).to_be_visible()
+    page.locator('#project-import-confirm').check()
+    page.locator('[data-action="project-import-apply"]').click()
+    check('actual UI v6 import round trip is lossless', project(page) == before_export)
+    page.locator('#sidebar [data-value="sitemap"]').click()
+    wait_saved(page)
+    page.screenshot(path=str(OUT / 'desktop-dark.png'))
+    page.locator('#header [data-action="theme"]').click()
+    wait_saved(page)
+    page.screenshot(path=str(OUT / 'desktop-light.png'))
+    page.set_viewport_size({'width': 880, 'height': 900})
+    page.screenshot(path=str(OUT / 'narrow.png'))
+    check('editor fits narrow content area', page.locator('.jm-root').evaluate('(el)=>el.scrollWidth<=el.clientWidth+2'))
+    check('offline runtime requests no external assets', not requests)
+    check('no uncaught browser exceptions', not errors)
+
+OUT.mkdir(parents=True, exist_ok=True)
+try:
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), args=['--no-sandbox'])
+        page = browser.new_page(viewport={'width': 1600, 'height': 1000})
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.route('**/*', lambda route: route.continue_() if route.request.url.startswith('file:') else (requests.append(route.request.url), route.abort())[1])
+        run(page)
+        browser.close()
+finally:
+    (OUT / 'browser.json').write_text(json.dumps({'htmlSha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'assertions': results, 'errors': errors, 'externalRequests': requests}, indent=2)+'\n', encoding='utf8')
+print(f'Passed {len(results)} integrated companion browser assertions')

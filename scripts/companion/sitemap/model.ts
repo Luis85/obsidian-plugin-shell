@@ -88,6 +88,8 @@ export interface SitemapFinding {
 }
 
 export type SitemapCommand =
+  | { type: 'create'; surface: Surface }
+  | { type: 'link'; transition: Transition }
   | { type: 'move'; surface: string; parent: string | null; before: string | null }
   | { type: 'rename'; surface: string; label: string }
   | { type: 'arrange'; positions: Record<string, Position> }

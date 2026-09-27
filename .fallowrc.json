@@ -185,7 +185,10 @@
     "scripts/companion/starter-files.mjs",
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
-    "scripts/framework/cli.ts"
+    "scripts/framework/cli.ts",
+    "scripts/concepts/build-mvp.mjs",
+    "docs/concepts/companion/editor/main.ts",
+    "scripts/concepts/mvp-bridge.js"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -203,6 +206,20 @@
       "requireAllFiles": true
     },
     "zones": [
+      {
+        "name": "companion-authoring-contract",
+        "patterns": [
+          "scripts/companion/authoring-contract.ts",
+          "scripts/companion/sitemap/**",
+          "scripts/companion/visual/**",
+          "scripts/companion/project-contract.mjs",
+          "scripts/companion/design-system-contract.mjs",
+          "scripts/companion/design-system-roles.mjs",
+          "scripts/companion/storymap-contract.mjs",
+          "scripts/companion/detail-contract.mjs",
+          "scripts/companion/composition-contract.mjs"
+        ]
+      },
       {
         "name": "fixture-compiler",
         "patterns": [
@@ -284,6 +301,12 @@
         "patterns": [
           "docs/concepts/companion/test-kit/**"
         ]
+      },
+      {
+        "name": "companion-editor",
+        "patterns": [
+          "docs/concepts/companion/editor/**"
+        ]
       }
     ],
     "rules": [
@@ -352,7 +375,8 @@
           "tooling",
           "styles",
           "companion-test-kit",
-          "fixture-compiler"
+          "fixture-compiler",
+          "companion-authoring-contract"
         ]
       },
       {
@@ -367,7 +391,8 @@
           "test",
           "harness",
           "tooling",
-          "styles"
+          "styles",
+          "companion-authoring-contract"
         ]
       },
       {
@@ -384,7 +409,8 @@
           "tooling",
           "styles",
           "fixture-compiler",
-          "companion-test-kit"
+          "companion-test-kit",
+          "companion-authoring-contract"
         ]
       },
       {
@@ -407,7 +433,21 @@
         "from": "fixture-compiler",
         "allow": [
           "tooling",
-          "companion-test-kit"
+          "companion-test-kit",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "companion-authoring-contract",
+        "allow": [
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "companion-editor",
+        "allow": [
+          "companion-editor",
+          "companion-authoring-contract"
         ]
       }
     ]

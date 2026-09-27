@@ -8,6 +8,8 @@ function assertCommand(value: unknown): asserts value is SitemapCommand {
   assertJson(value, 'review');
   requireSitemap(record(value), 'SITEMAP_SHAPE', 'Expected an editor command.');
   switch (value.type) {
+    case 'create': object(value, ['type', 'surface']); requireSitemap(record(value.surface), 'SITEMAP_SHAPE', 'Expected a new surface.'); break;
+    case 'link': object(value, ['type', 'transition']); requireSitemap(record(value.transition), 'SITEMAP_SHAPE', 'Expected a transition.'); break;
     case 'move':
       object(value, ['type', 'surface', 'parent', 'before']); id(value.surface);
       if (value.parent !== null) id(value.parent);
@@ -113,11 +115,26 @@ function remove(design: SitemapDesign, key: string, review: string): void {
   }
 }
 
+function advanceCounter(design: SitemapDesign, key: string): void {
+  const match = /^(?:node|edge)-(\d+)$/.exec(key);
+  if (!match || design.nextId === undefined) return;
+  const value = Number(match[1]);
+  requireSitemap(Number.isSafeInteger(value) && value > 0 && value < Number.MAX_SAFE_INTEGER - 100000 &&
+    typeof design.nextId === 'number' && Number.isSafeInteger(design.nextId), 'SITEMAP_LIMIT', 'Invalid identity counter.');
+  design.nextId = Math.max(design.nextId, value + 1);
+}
+
 /** Applies to a detached candidate. Never mutates the input, writes storage or grants an approval. */
 export function applySitemapCommand<T extends SitemapDesign>(design: T, command: unknown): T {
   validateSitemapModel(design); assertCommand(command);
   const next = structuredClone(design);
   switch (command.type) {
+    case 'create':
+      next.nodes.push(structuredClone(command.surface));
+      advanceCounter(next, command.surface.id); break;
+    case 'link':
+      next.links.push(structuredClone(command.transition));
+      advanceCounter(next, command.transition.id); break;
     case 'move': move(next, command); break;
     case 'rename': surface(next, command.surface).label = command.label; break;
     case 'arrange':
