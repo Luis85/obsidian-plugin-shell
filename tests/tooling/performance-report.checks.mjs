@@ -42,7 +42,9 @@ test('candidate diagnostics compress existing bytes without rewriting and enforc
     }
     const cli = () => spawnSync(process.execPath, ['scripts/testing/asset-sizes.mjs', directory], { encoding: 'utf8' });
     const success = cli(); assert.equal(success.status, 0, success.stderr); assert.equal(JSON.parse(success.stdout).status, 'passed');
-    await writeFile(join(directory, 'styles.css'), Buffer.alloc(100 * 1024 + 1));
+    await writeFile(join(directory, 'styles.css'), Buffer.alloc(160 * 1024));
+    assert.equal((await candidateSizes(directory)).status, 'passed', 'The reviewed 160 KiB stylesheet budget is inclusive');
+    await writeFile(join(directory, 'styles.css'), Buffer.alloc(160 * 1024 + 1));
     assert.equal((await candidateSizes(directory)).status, 'failed');
     const oversized = cli(); assert.equal(oversized.status, 1); assert.equal(JSON.parse(oversized.stdout).status, 'failed');
     await writeFile(join(directory, 'styles.css'), ''); await assert.rejects(candidateSizes(directory), /PERFORMANCE_ASSET_INVALID/);

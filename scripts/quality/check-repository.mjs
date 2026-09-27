@@ -85,7 +85,8 @@ export async function checkRepository(root = process.cwd()) {
       else if (pattern.test(entry.name)) files.push(path);
     }
   }
-  await walk('.github/workflows', /\.ya?ml$/); await walk('src/styles', /\.css$/); await walk('docs', /\.md$/);
+  // docs/ is a design working directory (owner decision): its Markdown and links are not a repository gate.
+  await walk('.github/workflows', /\.ya?ml$/); await walk('src/styles', /\.css$/);
   for (const name of ['README.md', 'AGENTS.md', 'CHANGELOG.md']) { try { await access(join(root, name)); files.push(name); } catch (error) { if (error.code !== 'ENOENT') throw error; } }
   const counts = { workflows: 0, styles: 0, markdown: 0, localLinks: 0 }; const failures = [];
   for (const file of files) {
