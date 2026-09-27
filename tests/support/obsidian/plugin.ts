@@ -47,8 +47,9 @@ export class Plugin extends Component {
     this.register(() => { this.app.viewRegistry.unregisterView(type); this.app.workspace.unloadViewsOfType(type); });
   }
   registerExtensions(extensions: string[], viewType: string): void {
+    for (const extension of extensions) if (this.app.viewRegistry.typeByExtension.has(extension)) throw new Error('EXTENSION_ALREADY_REGISTERED');
     for (const extension of extensions) this.app.viewRegistry.typeByExtension.set(extension, viewType);
-    this.register(() => { for (const extension of extensions) this.app.viewRegistry.typeByExtension.delete(extension); });
+    this.register(() => { for (const extension of extensions) if (this.app.viewRegistry.typeByExtension.get(extension) === viewType) this.app.viewRegistry.typeByExtension.delete(extension); });
   }
   onUserEnable(): void {}
   onExternalSettingsChange(): void | Promise<void> {}

@@ -1,3 +1,4 @@
+import { nativeRecipe } from './native.mjs';
 import { slug, symbol } from './arguments.mjs';
 import { entityRecipe } from './entities-recipe.mjs';
 import { action } from './primitives.mjs';
@@ -28,6 +29,7 @@ function setting(context, input) {
 }
 /** Actual dispatch table: catalog parity tests inspect these registrations, not a second label list. */
 export const builtinHandlers = Object.freeze({
+  'file-extension': nativeRecipe, 'context-menu': nativeRecipe,
   feature, entity: entityRecipe, view: surface, component: surface, store: surface,
   usecase: primitive, command: primitive, modal: primitive, setting, event: primitive, listener: primitive,
   style: (context, { owner, name, options }) => styleRecipe(context, owner, name, slug(options['--view'], 'existing view name (--view)')),

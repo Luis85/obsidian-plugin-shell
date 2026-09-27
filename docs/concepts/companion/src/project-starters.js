@@ -11,6 +11,9 @@ function openStarter(id) {
     const entry = starterEntry(id); if (!entry) throw Error('This starter is not in the built-in catalog.');
     companionCanReplace(companionProjectToken());
     starterUi.draft = { starterId: id, snapshot: companionProjectToken(), ...entry.document.project, ...entry.document.settings };
+    const native=entry.document.design.nativeIntegrations;
+    if(native?.fileTypes.length===1)starterUi.draft.extension=native.fileTypes[0].extension;
+    if(native?.contextMenus.length===1)starterUi.draft.extensions=native.contextMenus[0].extensions.join(',');
     starterUi.error = ''; showModal('starter-configure');
   } catch (error) { notify(error.message); }
 }
@@ -55,6 +58,6 @@ function editStarterField(el) {
   if (field === 'starter-category') { starterUi.category = el.value; renderStarterResults(); return true; }
   if (!field?.startsWith('starter-') || !starterUi.draft) return false;
   const key = field.slice(8);
-  if (['name','id','author','version','description','codebaseFolder','testsFolder'].includes(key)) { starterUi.draft[key] = el.value; starterUi.error = ''; }
+  if (['name','id','author','version','description','codebaseFolder','testsFolder','extension','extensions'].includes(key)) { starterUi.draft[key] = el.value; starterUi.error = ''; }
   return true;
 }

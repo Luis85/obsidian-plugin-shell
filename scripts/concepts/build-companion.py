@@ -112,7 +112,7 @@ def build(output: Path, check: bool = False):
  if 'scripts/companion/storymap-contract.mjs' not in config['entry']:raise ValueError('Shared storymap contract missing from analyzer inventory')
  detail_contract=ROOT.parents[2]/'scripts/companion/detail-contract.mjs'
  if 'scripts/companion/detail-contract.mjs' not in config['entry']:raise ValueError('Shared detail contract missing from analyzer inventory')
- ds_modules=['test-data-manifest.mjs','design-system-roles.mjs','design-system-contract.mjs','design-system-css.mjs']
+ ds_modules=['native-contract.mjs','test-data-manifest.mjs','design-system-roles.mjs','design-system-contract.mjs','design-system-css.mjs']
  ds_shared=''
  for name in ds_modules:
   path='scripts/companion/'+name
@@ -127,7 +127,7 @@ def build(output: Path, check: bool = False):
   path='scripts/companion/visual/'+name
   if path not in config['entry']:raise ValueError('Visual contract missing from analyzer inventory: '+path)
   visual_shared+='\n'+'\n'.join(line for line in (ROOT.parents[2]/path).read_text(encoding='utf-8').splitlines() if not line.startswith('import '))
- shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+contract.read_text(encoding='utf-8').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'').replace("import { validateVisualDesigns } from './visual/visual-validate.mjs';\n",'').replace("import { migrateDetailDesigns } from './visual/visual-migrate.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
+ shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+contract.read_text(encoding='utf-8').replace("import { validateNativeIntegrations } from './native-contract.mjs';\n",'').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'').replace("import { validateVisualDesigns } from './visual/visual-validate.mjs';\n",'').replace("import { migrateDetailDesigns } from './visual/visual-migrate.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
  starter_contract=ROOT.parents[2]/'scripts/companion/starter-contract.mjs'
  if 'scripts/companion/starter-contract.mjs' not in config['entry']:raise ValueError('Starter contract missing from inventory')
  shared+='\n'+re.sub(r'^import .*\n','',starter_contract.read_text(encoding='utf-8'),flags=re.M).replace('export const ','const ').replace('export function ','function ')

@@ -1,6 +1,6 @@
 import recipes from './recipes.json' with { type: 'json' };
 const flags = new Set(['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document']);
-const values = new Set(['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference']);
+const values = new Set(['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions']);
 export const builtinRecipes = Object.freeze(recipes.map(recipe => recipe.id));
 export function recipeOptions(maker) {
   return recipes.find(recipe => recipe.id === maker)?.options ?? ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature'];
@@ -37,6 +37,8 @@ npm run make -- view|component|store|usecase|command|modal|event <name> --featur
 npm run make -- setting <name> --feature bookmarks [--preference notifySuccess|hideObsidianViewHeader]
 npm run make -- listener <name> --feature bookmarks --event <existing-event-name>
 npm run make -- style <name> --feature bookmarks --view <existing-view-name>
+npm run make -- file-extension <name> --feature bookmarks --extension folio [--format json|text]
+npm run make -- context-menu <name> --feature bookmarks [--extensions md,txt]
 npm run make -- locale <language>                 (complete pending translation skeleton)
 npm run make -- maker <recipe-name>               (trusted explicit local custom recipe)
 npm run make -- <custom-recipe> <name> --feature bookmarks

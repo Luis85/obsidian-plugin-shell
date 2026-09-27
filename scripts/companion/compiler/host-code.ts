@@ -6,6 +6,9 @@ export function hostCode(m: Model, add: Add): void {
   const ref = (path: string) => literal(relativeImport(init,path));
   add(init,`import { Modal, PluginSettingTab, type Plugin } from 'obsidian';
 import { createServices } from ${ref('src/bootstrap/services.ts')};
+import { bindNativeIntegrations } from ${ref('src/infrastructure/obsidian/native-integrations.ts')};
+import { nativeFileTypes, nativeContextMenus } from ${ref('src/bootstrap/native-integrations.ts')};
+import { projectFileTypes, projectContextMenus } from './native-integrations.ts';
 import { nativeAdapters } from ${ref('src/infrastructure/obsidian/adapters.ts')};
 import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obsidian/showcase-view.ts')};
 import { bindHostEvents } from ${ref('src/infrastructure/obsidian/event-bridge.ts')};
@@ -22,9 +25,10 @@ export async function initializeProject(plugin: Plugin) {
   let sources: ReturnType<typeof createSources>;
   let providers: ReturnType<typeof configureSourceProviders> | undefined;
   const views = new Set<ShowcaseView>(); const modals = new Set<Modal>(); const settings = new Set<() => void>();
-  let disposed = false; let stopEvents = () => {}; let stopCommands = () => {};
+  let disposed = false; let stopEvents = () => {}; let stopCommands = () => {}; let stopNative = () => {};
   const dispose = () => {
     if (disposed) return; disposed = true;
+    stopNative();
     for (const modal of modals) { try { modal.close(); } catch { shell.diagnostics.report('generated.cleanup','modal.close'); } }
     for (const release of settings) { try { release(); } catch { shell.diagnostics.report('generated.cleanup','settings.close'); } }
     for (const view of views) { try { view.disposeView(); } catch { shell.diagnostics.report('generated.cleanup','view.close'); } }
@@ -54,6 +58,7 @@ export async function initializeProject(plugin: Plugin) {
     await leaf.setViewState({type,active:true}); await plugin.app.workspace.revealLeaf(leaf);
   }
   try {
+    stopNative = bindNativeIntegrations(plugin, [...nativeFileTypes, ...projectFileTypes], [...nativeContextMenus, ...projectContextMenus], code => shell.diagnostics.report(code, 'native.integration'));
     providers = configureSourceProviders(shell); sources = createSources(shell,providers.ports);
     const definitions = [{id:undefined as string | undefined,type:viewType,label:plugin.manifest.name}, ...screens.filter(s => !['modal','group','action'].includes(s.kind)).map(s => ({id:s.id,type:viewType+'-'+s.slug,label:s.label}))];
     for (const definition of definitions) {

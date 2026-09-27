@@ -16,3 +16,5 @@ export type { AuthoringServices, AuthoringExtension } from '../application/autho
 export type { LifecycleObservation, Diagnostic } from '../application/ports';
 export type { EventDefinition, EventPayload, EventMapOf } from '../application/event-definition';
 export type { EventObserver, EventPublisher, EventSubscriber, EventInput } from '../application/events';
+
+export type { NativeFileDefinition, NativeMenuDefinition, NativeFileContext, NativeMenuResult } from '../domain/native-integrations';

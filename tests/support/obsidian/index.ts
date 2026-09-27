@@ -19,3 +19,5 @@ export { TestApp, createTestApp, hostInstance, type TestAppOptions } from './tes
 export { Menu, MenuItem, Modal, Notice, Platform, debounce, setIcon, setTooltip } from './ui';
 export { TestAdapter, Vault, createTestVault, type TrashRecord } from './vault';
 export { ItemView, MarkdownView, View, Workspace, WorkspaceLeaf, type ViewCreator } from './workspace';
+
+export { TextFileView } from './file-view';

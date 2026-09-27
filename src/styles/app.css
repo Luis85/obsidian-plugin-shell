@@ -8,5 +8,6 @@
 @import "./layout.css";
 @import "./native-header.css";
 @import "./modal.css";
+@import "./native-file.css";
 @source "../presentation";
 @source "../../node_modules/.nuxt-ui";
