@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readCompanionProject } from '../read-project.mjs';
+import { authoringReader } from '../authoring-contract.ts';
 import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
 import { digest, json, projectModel, row, rows, text, requireValue } from './model.ts';
 import { projectFiles } from './project-files.ts';
@@ -12,7 +13,7 @@ export interface GenerateOptions { input: string; target: string; vault?: string
 const generationVersion = 1;
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
 export async function planProject(options: GenerateOptions) {
-  const input = await readCompanionProject(options); const model = projectModel(input.document);
+  const input = await readCompanionProject(options, authoringReader); const model = projectModel(input.document);
   const templateRoot = resolve(options.templateRoot ?? fileURLToPath(new URL('../../../',import.meta.url)));
   const within = relative(templateRoot,input.target);
   requireValue(within === '..' || within.startsWith('..' + sep) || isAbsolute(within), 'Use a target outside this framework checkout; do not recursively copy or overwrite the template.');

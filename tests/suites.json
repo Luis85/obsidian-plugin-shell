@@ -117,6 +117,14 @@
       ]
     },
     {
+      "name": "companion:mvp",
+      "purpose": "Compiled Vue/Nuxt UI/Vue Flow sitemap and complete v6 companion authoring round trip.",
+      "runner": {"type": "command", "commands": [["{node}", "scripts/concepts/build-mvp.mjs"], ["{python}", "-B", "tests/concepts/companion-mvp.browser.py"]]},
+      "include": ["tests/concepts/companion-mvp.browser.py"],
+      "prerequisites": ["python-playwright", "concept-chromium"],
+      "verify": "opt-in", "workflows": ["companion-concept-verification"], "optional": true
+    },
+    {
       "name": "runtime",
       "purpose": "Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit.",
       "runner": {"type": "vitest", "config": "vitest.config.mjs"},
@@ -208,7 +216,7 @@
         ]
       },
       "include": ["tests/concepts/*.browser.py"],
-      "exclude": ["tests/concepts/companion.browser.py", "tests/concepts/companion-bricks.browser.py", "tests/concepts/companion-connections.browser.py", "tests/concepts/companion-flow.browser.py", "tests/concepts/companion-library.browser.py", "tests/concepts/companion-sitemap.browser.py", "tests/concepts/companion-studio.browser.py", "tests/concepts/companion-workflow.browser.py"],
+      "exclude": ["tests/concepts/companion-mvp.browser.py", "tests/concepts/companion.browser.py", "tests/concepts/companion-bricks.browser.py", "tests/concepts/companion-connections.browser.py", "tests/concepts/companion-flow.browser.py", "tests/concepts/companion-library.browser.py", "tests/concepts/companion-sitemap.browser.py", "tests/concepts/companion-studio.browser.py", "tests/concepts/companion-workflow.browser.py"],
       "inventory": {
         "source": "scripts/concepts/run-browser-checks.py",
         "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)",
