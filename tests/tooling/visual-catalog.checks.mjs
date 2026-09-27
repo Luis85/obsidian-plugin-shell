@@ -35,3 +35,8 @@ test('every recipe and built-in layout expands deterministically with fresh IDs 
   assert.equal(new Set([...visualNodes(one), ...visualNodes(two)].map(n => n.id)).size, visualNodes(one).length * 2);
   assert.throws(() => visualExpand(s, 'recipe-missing'), /VISUAL_INVALID/);
 });
+test('the generated runtime control list mirrors the contract control entries exactly (drift guard)', async () => {
+  const { VISUAL_RUNTIME_CONTROLS, VISUAL_RUNTIME_INTERACTIVE } = await import('../../scripts/companion/runtime/visual-runtime.ts');
+  assert.deepEqual([...VISUAL_RUNTIME_CONTROLS], [...VISUAL_CONTROL_ENTRIES]);
+  assert.deepEqual([...VISUAL_RUNTIME_INTERACTIVE], [...VISUAL_CONTROL_ENTRIES, 'u-button']);
+});

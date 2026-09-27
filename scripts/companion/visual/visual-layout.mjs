@@ -13,7 +13,7 @@ export function visualClone(store, nodes, { external = 'keep', slotsToRegions = 
     if (out.kind === 'text' && out.value.kind === 'state') out.value = { ...out.value, nodeId: remap(out.value.nodeId, n.name ?? n.id) };
     for (const key of ['props', 'attrs']) if (out[key]) for (const [k, v] of Object.entries(out[key])) if (v.kind === 'state') out[key][k] = { ...v, nodeId: remap(v.nodeId, n.name ?? n.id) };
     if (out.events) out.events = out.events.map(i => ({ ...i, id: visualAllocate(store, 'vi'), actions: i.actions.map(a => ['toggle', 'focus', 'set-value'].includes(a.kind) ? { ...a, nodeId: remap(a.nodeId, i.label) } : a.kind === 'emit' ? { ...a, payload: vlayRemapMapping(a.payload, id => remap(id, i.label)) } : a.kind === 'source' ? { ...a, input: vlayRemapMapping(a.input, id => remap(id, i.label)) } : a) }));
-    if (slotsToRegions && out.kind === 'slot') return visualElement(out.id, 'div', { name: out.name, children: out.fallback, ...(out.layout ? { layout: out.layout } : {}), ...(out.visibleIn ? { visibleIn: out.visibleIn } : {}) });
+    if (slotsToRegions && out.kind === 'slot') return visualElement(out.id, 'div', { name: out.name, children: out.fallback, ...Object.fromEntries(['layout', 'visibleIn', 'a11y', 'notes'].filter(k => out[k] !== undefined).map(k => [k, out[k]])) });
     return out;
   };
   return nodes.map(copy);

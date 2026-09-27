@@ -118,5 +118,5 @@ export function migrateCompanionDocument(value) {
   const report = companionLegacyDetails(document.design) ? companionUpgradeDesign(document.design) : null;
   companionDropLegacy(document.design);
   document.schemaVersion = COMPANION_VERSION; document.design.schema = COMPANION_VERSION;
-  return { document: validateCompanionDocument(document), report: report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] } };
+  return { document: validateCompanionDocument(document), report: report ?? { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [], interactionIds: {} } };
 }

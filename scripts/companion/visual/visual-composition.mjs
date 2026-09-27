@@ -10,18 +10,25 @@ export function visualWouldCycle(store, parentId, childId) {
   const reaches = key => { const id = key.startsWith('rev:') ? store.revisions.find(r => 'rev:' + r.id === key)?.componentId : key.slice(5); if (id === parentId) return true; if (seen.has(key)) return false; seen.add(key); return vcmpEdges(graphs.get(key) ?? []).some(reaches); };
   return reaches('live:' + childId);
 }
+// Cycles, and the longest chain of component levels (memoized per definition, so the result does not depend on the
+// order definitions are listed in or on which one is visited first).
 export function visualCompositionGraph(store) {
-  const graphs = vcmpGraphs(store), done = new Set(), active = [];
+  const graphs = vcmpGraphs(store), depth = new Map(), active = [];
   const visit = key => {
     visualAssert(!active.includes(key), 'Component cycle: ' + [...active.slice(active.indexOf(key)), key].map(k => vcmpLabel(store, k)).join(' → ') + '.');
-    visualAssert(active.length < VISUAL_LIMITS.composition, 'Component composition is deeper than ' + VISUAL_LIMITS.composition + ' levels.');
-    if (done.has(key)) return; active.push(key); for (const next of vcmpEdges(graphs.get(key) ?? [])) visit(next); active.pop(); done.add(key);
+    if (depth.has(key)) return depth.get(key);
+    active.push(key); let deepest = 0;
+    for (const next of vcmpEdges(graphs.get(key) ?? [])) deepest = Math.max(deepest, visit(next));
+    active.pop();
+    visualAssert(deepest + 1 <= VISUAL_LIMITS.composition, 'Component composition is deeper than ' + VISUAL_LIMITS.composition + ' levels: ' + vcmpLabel(store, key) + ' nests ' + (deepest + 1) + '.');
+    depth.set(key, deepest + 1); return deepest + 1;
   };
   for (const key of graphs.keys()) visit(key);
 }
+// Every instance of a component: in pages, components, layouts and published revisions (whose templates pin it).
 export function visualUsages(store, componentId) {
-  const out = [];
-  for (const [kind, list, root] of [['page', store.pages, 'root'], ['component', store.components, 'template'], ['layout', store.layouts, 'root']])
-    for (const d of list) visualWalk(d[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.componentId === componentId) out.push({ kind, definitionId: d.id, definitionName: d.name ?? d.exportName, nodeId: n.id }); });
+  const out = [], revisionName = r => (store.components.find(c => c.id === r.componentId)?.exportName ?? r.componentId) + ' v' + r.version;
+  for (const [kind, list, root, name] of [['page', store.pages, 'root', d => d.name], ['component', store.components, 'template', d => d.exportName], ['layout', store.layouts, 'root', d => d.name], ['revision', store.revisions, 'template', revisionName]])
+    for (const d of list) visualWalk(d[root], n => { if (n.kind === 'component' && n.ref.kind === 'project' && n.ref.componentId === componentId) out.push({ kind, definitionId: d.id, definitionName: name(d), nodeId: n.id }); });
   return out;
 }

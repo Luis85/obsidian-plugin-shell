@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { visualWouldCycle, visualUsages, visualDependencies } from '../../scripts/companion/visual/visual-composition.mjs';
-import { visualProject } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualProject, emptyVisualDesigns } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualRemoveDefinition, visualSetContract } from '../../scripts/companion/visual/visual-commands.mjs';
 const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-v5.json', 'utf8'));
 const copy = () => structuredClone(seed);
 const context = { surfaces: new Set(['node-customers', 'node-settings']), library: new Set(['library-search']), sources: new Map([['customers', new Set(['list'])]]) };
@@ -100,4 +101,59 @@ test('node-level errors carry the offending node id; store-level errors do not',
   assert.equal((() => { try { validateVisualDesigns(t); } catch (e) { return e.nodeId; } })(), content.id, 'attribute errors name their element');
   const u = copy(); u.nextId = 2;
   assert.equal((() => { try { validateVisualDesigns(u); } catch (e) { return Object.hasOwn(e, 'nodeId'); } })(), false);
+});
+
+// Attribute contract: a per-tag allow-list (the inspector's) plus title, role and aria-* everywhere; literal img
+// sources are relative paths or data:image/ URLs only.
+const lit = value => ({ kind: 'literal', value });
+const withImg = (s, attrs) => { findByName(page(s).root, 'Content').children.push({ id: 'vn-900', kind: 'element', tag: 'img', attrs, children: [], events: [] }); s.nextId = 901; };
+const attrRejects = [
+  ['formaction on a button', s => { findByName(page(s).root, 'Content').tag = 'button'; findByName(page(s).root, 'Content').attrs.formaction = lit('https://evil.example/'); }, /attribute formaction is not allowed on <button>/],
+  ['href with a javascript: URL', s => { findByName(page(s).root, 'Content').attrs.href = lit('javascript:alert(1)'); }, /attribute href is not allowed on <main>/],
+  ['srcdoc', s => { findByName(page(s).root, 'Content').attrs.srcdoc = lit('<script></script>'); }, /attribute srcdoc is not allowed/],
+  ['action', s => { findByName(page(s).root, 'Content').attrs.action = lit('/submit'); }, /attribute action is not allowed/],
+  ['alt outside img', s => { findByName(page(s).root, 'Content').attrs.alt = lit('x'); }, /attribute alt is not allowed on <main>/],
+  ['img src over https', s => withImg(s, { src: lit('https://tracker.example/pixel.png'), alt: lit('x') }), /img src must be a relative path or a data:image\/ URL/],
+  ['img src javascript:', s => withImg(s, { src: lit('javascript:alert(1)') }), /img src must be a relative path or a data:image\/ URL/],
+  ['img src javascript: behind whitespace', s => withImg(s, { src: lit(' \tjava\nscript:alert(1)') }), /img src must be a relative path/],
+  ['img src protocol-relative', s => withImg(s, { src: lit('//tracker.example/x.png') }), /img src must be a relative path/],
+  ['img src data:text/html', s => withImg(s, { src: lit('data:text/html,<script></script>') }), /img src must be a relative path/],
+];
+for (const [name, change, pattern] of attrRejects) test('rejects attribute ' + name, () => { const s = copy(); change(s); assert.throws(() => validateVisualDesigns(s, context), pattern); });
+test('allowed attributes: per-tag list, title, role, aria-* and safe literal img sources', () => {
+  const s = copy(), content = findByName(page(s).root, 'Content');
+  Object.assign(content.attrs, { title: lit('Customers'), role: lit('region'), 'aria-label': lit('Customer list'), 'aria-describedby': lit('help') });
+  withImg(s, { src: lit('images/customer.png'), alt: lit('Customer') });
+  content.children.push({ id: 'vn-901', kind: 'element', tag: 'input', attrs: { placeholder: lit('Search'), type: lit('search'), name: lit('q') }, children: [], events: [] },
+    { id: 'vn-902', kind: 'element', tag: 'label', attrs: { for: lit('q') }, children: [], events: [] }, { id: 'vn-903', kind: 'element', tag: 'button', attrs: { type: lit('submit') }, children: [], events: [] },
+    { id: 'vn-904', kind: 'element', tag: 'img', attrs: { src: lit('data:image/png;base64,iVBORw0KGgo='), alt: lit('') }, children: [], events: [] });
+  s.nextId = 905; validateVisualDesigns(s, context);
+});
+
+// Export names that would collide with Vue built-ins, generated script declarations or Nuxt UI imports.
+for (const name of ['Transition', 'TransitionGroup', 'Component', 'Error', 'KeepAlive', 'Suspense', 'Teleport', 'Slot', 'Template', 'UButton', 'UTable', 'VisualState', 'VisualRequest', 'ComponentProps'])
+  test('rejects reserved export name ' + name, () => { const s = copy(); comp(s).exportName = name; assert.throws(() => validateVisualDesigns(s, context), new RegExp('Component "' + name + '": export name ' + name + ' is reserved')); });
+
+// Composition depth is the longest chain of component levels, independent of the order definitions are listed in.
+function chain(levels, order) {
+  const s = emptyVisualDesigns(), cs = Array.from({ length: levels }, (_, i) => ({ id: 'vc-' + (i + 1), libraryId: 'lib-' + (i + 1), exportName: 'Level' + (i + 1), description: '', props: [], slots: [], emits: [], variants: [], template: i + 1 < levels ? [visualProject('vn-' + (i + 1), 'vc-' + (i + 2))] : [], scenarios: [] }));
+  s.components = order(cs); s.nextId = levels + 1; return s;
+}
+const orders = { natural: cs => cs, reversed: cs => [...cs].reverse(), 'started mid-chain': cs => [...cs.slice(cs.length >> 1), ...cs.slice(0, cs.length >> 1)], 'leaf first': cs => [cs.at(-1), ...cs.slice(0, -1)] };
+for (const [label, order] of Object.entries(orders)) test('composition depth: 20 levels rejected, 16 accepted (' + label + ')', () => {
+  assert.throws(() => validateVisualDesigns(chain(20, order)), /Component composition is deeper than 16 levels: Level\d+/);
+  assert.throws(() => validateVisualDesigns(chain(17, order)), /deeper than 16 levels/);
+  validateVisualDesigns(chain(16, order));
+});
+
+// Revision templates pin other components: those pins are usages, so deleting the pinned component is refused by name.
+test('usages include pins in published revisions; deleting a component pinned only there is refused by name', () => {
+  const s = copy(), a = { ...structuredClone(comp(s)), id: 'vc-900', libraryId: 'library-a', exportName: 'Alpha', template: [], scenarios: [] };
+  const b = { ...structuredClone(comp(s)), id: 'vc-901', libraryId: 'library-b', exportName: 'Beta', props: [], slots: [], emits: [], variants: [], template: [], scenarios: [] };
+  const pinA = { id: 'vr-902', componentId: a.id, version: '1.0.0', contract: { props: a.props, slots: a.slots, emits: a.emits, variants: a.variants }, template: [] };
+  const pinB = { id: 'vr-903', componentId: b.id, version: '1.0.0', contract: { props: [], slots: [], emits: [], variants: [] }, template: [{ ...visualProject('vn-904', a.id), ref: { kind: 'project', componentId: a.id, revisionId: pinA.id } }] };
+  s.components.push(a, b); s.revisions.push(pinA, pinB); s.nextId = 905; validateVisualDesigns(s);
+  assert.deepEqual(visualUsages(s, a.id).map(u => [u.kind, u.definitionId, u.definitionName, u.nodeId]), [['revision', pinB.id, 'Beta v1.0.0', 'vn-904']]);
+  assert.throws(() => visualRemoveDefinition(s, { kind: 'component', id: a.id }), /^Error: VISUAL_INVALID: Alpha is used by Beta v1\.0\.0\. Remove those instances first\.$/);
+  visualSetContract(s, a.id, { description: 'Pinned instances are unaffected' }); validateVisualDesigns(s);
 });

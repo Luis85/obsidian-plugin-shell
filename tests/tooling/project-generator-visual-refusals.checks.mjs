@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { migrateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-import { visualSpecs, visualContractTypes } from '../../scripts/companion/compiler/visual-model.ts';
+import { visualSpecs, visualContractTypes, visualDefinitions } from '../../scripts/companion/compiler/visual-model.ts';
+import { visualSfc } from '../../scripts/companion/compiler/visual-code.ts';
 import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
 import { detailValue } from '../../scripts/companion/runtime/detail-actions.ts';
 import { visualTextValue, visualIndex } from '../../scripts/companion/runtime/visual-runtime.ts';
@@ -50,6 +51,8 @@ const navigate = d => open(d).events[0].actions[0];
 for (const [name, change, expected] of [
   ['missing definition', d => { instance(d).ref.componentId = 'vc-404'; }, /references missing component "vc-404"/],
   ['missing variant', d => { instance(d).variantId = 'missing'; }, /unknown variant/],
+  ['reserved export name', d => { review(d).exportName = 'KeepAlive'; }, /Component "KeepAlive": export name KeepAlive is reserved/],
+  ['export name of a Nuxt UI component', d => { review(d).exportName = 'UCard'; }, /Component "UCard": export name UCard is reserved/],
   ['undeclared prop', d => { instance(d).props.unknown = lit(false); }, /prop unknown is not declared/],
   ['wrong prop type', d => { instance(d).props.busy = lit('false'); }, /literal must be a boolean/],
   ['missing owner', d => { store(d).pages[0].ownerId = 'missing'; }, /owner surface is missing/],
@@ -90,4 +93,14 @@ test('bound values are own-property data paths and never evaluated expressions',
   assert.equal(detailValue({ name: 'safe' }, 'name.toUpperCase()'), undefined);
   assert.equal(visualTextValue(false, 'fallback'), 'false'); assert.equal(visualTextValue('', 'fallback'), '');
   assert.equal(visualTextValue(undefined, 'fallback'), 'fallback'); assert.equal(visualTextValue({ a: 1 }, ''), '{\n  "a": 1\n}');
+});
+// Lowering keeps its own refusal for data that reached it without validation: the definition and every instance.
+test('lowering refuses reserved export names for the component and for instances of it', () => {
+  const m = projectModel(clone()), specs = visualSpecs(m);
+  for (const name of ['UButton', 'Slot', 'Transition', 'ComponentEvents']) {
+    const s = structuredClone(visualDefinitions(m)), component = { ...structuredClone(specs.find(x => x.kind === 'component')), exportName: name };
+    s.components.find(c => c.id === component.id).exportName = name;
+    assert.throws(() => visualSfc(m, component, s), new RegExp('VISUAL_INVALID: Component "' + name + '": export name ' + name + ' is reserved in generated components'));
+    assert.throws(() => visualSfc(m, specs[0], s), new RegExp('VISUAL_INVALID: Page ".+": export name ' + name + ' used by node vn-11 is reserved in generated components'));
+  }
 });

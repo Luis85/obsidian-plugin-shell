@@ -32,6 +32,10 @@ export const visualCatalog = Object.freeze([
   vcatEntry('u-separator', 'Separator', 'USeparator', 'Layout', 'Visual separation', [vcatP('orientation', 'string', { default: 'horizontal', options: ['horizontal', 'vertical'] })], [], [], 'separator'),
 ]);
 export function visualCatalogEntry(id) { return visualCatalog.find(e => e.id === id) ?? null; }
+// Export names a generated component cannot take: Vue built-ins that templates resolve before script-setup bindings,
+// the type names every generated script declares, and each catalog component the generator imports explicitly.
+export const VISUAL_RESERVED_EXPORTS = Object.freeze(['Component', 'Transition', 'TransitionGroup', 'BaseTransition', 'KeepAlive', 'Suspense', 'Teleport', 'Slot', 'Template', 'Error', 'VisualState', 'VisualRequest', 'ComponentProps', 'ComponentEvents', 'ComponentSlots']);
+export function visualReservedExport(name) { return VISUAL_RESERVED_EXPORTS.includes(name) || visualCatalog.some(e => e.component === name); }
 const vcatLit = values => Object.fromEntries(Object.entries(values).map(([k, v]) => [k, visualLiteral(v)]));
 const vcatBox = (s, tag, mode, name, children, ui = {}) => visualElement(visualAllocate(s, 'vn'), tag, { name, layout: visualLayoutRules(mode, { ...compositionDefaultUI(), ...ui }), children });
 const vcatUi = (s, entryId, name, props = {}, extra = {}) => visualNuxt(visualAllocate(s, 'vn'), entryId, vcatLit(props), { name, ...extra });

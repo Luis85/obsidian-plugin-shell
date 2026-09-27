@@ -3,9 +3,10 @@
 // interactions whose source is a text/heading/slot node, and unrendered text beyond the 4000-character node-notes limit.
 import { emptyVisualDesigns, visualAllocate, visualAssert, visualElement, visualText, visualSlot, visualNuxt, visualProject, visualLiteral, visualLayoutRules } from './visual-ir.mjs';
 import { compositionDefaultUI } from '../composition-contract.mjs';
+import { visualReservedExport } from './visual-catalog.mjs';
 const vmigAll = ['default', 'loading', 'empty', 'error', 'disabled'];
 const vmigForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style'];
-function vmigPascal(name, used) { let base = String(name).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component'; if (!/^[A-Z]/.test(base)) base = 'C' + base; base = base.slice(0, 56); let out = base, i = 2; while (used.has(out)) out = base + i++; used.add(out); return out; }
+function vmigPascal(name, used) { let base = String(name).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(/\s+/).map(w => w[0].toUpperCase() + w.slice(1)).join('') || 'Component'; if (!/^[A-Z]/.test(base)) base = 'C' + base; base = base.slice(0, 56); let out = base, i = 2; while (used.has(out) || visualReservedExport(out)) out = base + i++; used.add(out); return out; }
 function vmigContract(lib, report) {
   const props = [], emits = [];
   for (const [text, events] of [[lib.props, false], [lib.events, true]]) for (const line of String(text ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean)) {
@@ -107,7 +108,7 @@ function vmigNode(n, parent) {
   const ctx = { ...parent, id: parent.map.get(n.id), notes: [] }, { report } = ctx;
   report.droppedPositions++; report.droppedSizes++; if (n.sourceBrickId !== null) report.droppedOutlineRefs++;
   const common = { name: n.label, ...(vmigAll.every(s => n.visibleIn.includes(s)) ? {} : { visibleIn: [...n.visibleIn] }), ...(n.a11y ? { a11y: n.a11y } : {}) };
-  const edges = ctx.edges.filter(e => e.source === n.id), events = () => edges.map(e => ({ id: visualAllocate(ctx.store, 'vi'), event: e.event, label: e.label, notes: e.notes, acceptance: e.acceptance, actions: vmigActions(e, ctx.map) }));
+  const edges = ctx.edges.filter(e => e.source === n.id), events = () => edges.map(e => ({ id: vmigTrace(ctx, e.id, visualAllocate(ctx.store, 'vi')), event: e.event, label: e.label, notes: e.notes, acceptance: e.acceptance, actions: vmigActions(e, ctx.map) }));
   const extra = { ...common, ...(n.ui ? { layout: visualLayoutRules(n.layout, structuredClone(n.ui)) } : {}) };
   if (['text', 'heading', 'slot'].includes(n.kind)) report.droppedInteractions += edges.length;
   const node = vmigKind(n, ctx, extra, events, () => (ctx.kids.get(n.id) ?? []).map(c => vmigNode(c, ctx)));
@@ -115,6 +116,8 @@ function vmigNode(n, parent) {
   if (notes.length > 4000) report.truncatedNotes++;
   return notes ? { ...node, notes: notes.slice(0, 4000) } : node;
 }
+// Live documents record legacy edge → interaction IDs (generated hooks were named after edges); revisions do not.
+function vmigTrace(ctx, edgeId, id) { if (ctx.trace) ctx.trace[edgeId] = id; return id; }
 function vmigTree(doc, ctx) {
   const map = new Map(doc.nodes.map(n => [n.id, visualAllocate(ctx.store, 'vn')])), assigned = new Set(doc.nodes.flatMap(n => Object.values(n.slots ?? {}).flat())), kids = new Map();
   for (const n of doc.nodes) if (n.parentId !== null) kids.set(n.parentId, [...(kids.get(n.parentId) ?? []), n]);
@@ -124,7 +127,7 @@ function vmigTree(doc, ctx) {
 function vmigScenarios(doc, map) { return (doc.scenarios ?? []).map(s => ({ ...structuredClone(s), values: Object.fromEntries(Object.entries(s.values).filter(([k]) => map.has(k)).map(([k, v]) => [map.get(k), structuredClone(v)])) })); }
 export function migrateDetailDesigns(detail, design) {
   const store = emptyVisualDesigns(), used = new Set(), revisions = detail.revisions ?? [], docs = detail.documents, library = design.library ?? [];
-  const report = { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] };
+  const report = { droppedPositions: 0, droppedSizes: 0, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [], interactionIds: {} };
   const revisionMap = new Map(revisions.map(r => [r.id, visualAllocate(store, 'vr')])), componentIds = new Map(), contracts = new Map();
   const needed = new Set([...docs.filter(d => d.kind === 'component').map(d => d.ownerId), ...[...docs, ...revisions.map(r => r.document)].flatMap(d => d.nodes.filter(n => n.component).map(n => n.component.id)), ...revisions.map(r => r.ownerId)]);
   for (const id of needed) visualAssert(library.some(l => l.id === id), 'Detail designs use library entry ' + JSON.stringify(id) + ', which is missing from the component library.');
@@ -138,13 +141,13 @@ export function migrateDetailDesigns(detail, design) {
     const scratch = { unparsedMembers: [] }; contracts.set('rev:' + r.id, vmigContract(r.library, scratch));
     for (const m of scratch.unparsedMembers) if (!report.unparsedMembers.some(x => x.owner === m.owner && x.text === m.text)) report.unparsedMembers.push(m);
   }
-  const ctx = { store, report, contracts, componentFor: id => componentIds.get(id), revision: id => revisionMap.get(id) };
+  const ctx = { store, report, contracts, componentFor: id => componentIds.get(id), revision: id => revisionMap.get(id) }, trace = report.interactionIds;
   for (const doc of docs) {
     if (doc.kind === 'page') {
-      const id = visualAllocate(store, 'vp'), { map, root } = vmigTree(doc, { ...ctx, contract: null });
+      const id = visualAllocate(store, 'vp'), { map, root } = vmigTree(doc, { ...ctx, contract: null, trace });
       store.pages.push({ id, ownerId: doc.ownerId, name: doc.ownerLabel, root, scenarios: vmigScenarios(doc, map), notes: doc.notes });
     } else {
-      const component = store.components.find(c => c.libraryId === doc.ownerId), { map, root } = vmigTree(doc, { ...ctx, contract: component });
+      const component = store.components.find(c => c.libraryId === doc.ownerId), { map, root } = vmigTree(doc, { ...ctx, contract: component, trace });
       Object.assign(component, { template: root, scenarios: vmigScenarios(doc, map), ...(doc.notes ? { notes: doc.notes } : {}) });
     }
   }

@@ -1,6 +1,6 @@
 import type { UiNode, VisualDesigns, ComponentDefinition, EmitDefinition, PropDefinition, SlotDefinition } from '../visual/visual-ir.mjs';
 import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../visual/visual-ir.mjs';
-import { visualCatalogEntry } from '../visual/visual-catalog.mjs';
+import { visualCatalogEntry, visualReservedExport } from '../visual/visual-catalog.mjs';
 import type { VisualSpec } from '../runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';
@@ -9,8 +9,6 @@ import { visualNuxtImports, visualComponentPath, visualPagePath, visualAdapterPa
 /** Authored names reach template syntax only after matching these patterns; all authored text goes through model.text(). */
 const vcId = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/, vcExport = /^[A-Z][A-Za-z0-9]*$/, vcSlot = /^[a-z][A-Za-z0-9-]*$/;
 const vcAdapter = /^[a-z][a-z0-9-]*$/, vcLibrary = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, vcNuxt = /^U[A-Z][A-Za-z0-9]*$/;
-/** Vue resolves these tags before script-setup bindings, and the script block already declares the type names. */
-const vcReserved = new Set(['Error', 'Component', 'Teleport', 'Suspense', 'KeepAlive', 'BaseTransition', 'Transition', 'TransitionGroup', 'VisualState', 'VisualRequest', 'ComponentProps', 'ComponentEvents', 'ComponentSlots']);
 const vcVoid = new Set(['input', 'img']);
 
 interface Lowering { store: VisualDesigns; where: string; path: string; component: ComponentDefinition | null; projects: Map<string, ComponentDefinition>; externals: string[] }
@@ -68,7 +66,8 @@ function vcNode(ctx: Lowering, node: UiNode, depth: number): string {
   visualAssert(target, `${ctx.where}: node ${id} references missing component ${componentId}.`);
   if (node.ref.revisionId !== undefined) vcPinned(ctx, id, target, node.ref.revisionId);
   const name = vcName(ctx, target.exportName, vcExport, `node ${id} component export name`);
-  visualAssert(!vcReserved.has(name), `${ctx.where}: export name ${name} used by node ${id} is reserved in generated components.`);
+  // Validation refuses these names too (Vue built-ins, generated type names, Nuxt UI imports); lowering never trusts that.
+  visualAssert(!visualReservedExport(name), `${ctx.where}: export name ${name} used by node ${id} is reserved in generated components.`);
   ctx.projects.set(name, target);
   const open = `<${name} ${common} v-bind="model.props('${id}')" :design-state="model.state.value === 'default' ? undefined : model.state.value" v-on="model.on('${id}')">`;
   return vcBlock(open, `</${name}>`, slots, depth);
@@ -127,16 +126,15 @@ export function visualSfc(m: Model, spec: VisualSpec, store: VisualDesigns): str
   const libraryId = component ? vcName(ctx, component.libraryId, vcLibrary, 'library id') : '';
   if (component) {
     const exportName = vcName(ctx, component.exportName, vcExport, 'export name');
-    visualAssert(!vcReserved.has(exportName), `${where}: export name ${exportName} is reserved in generated components.`);
+    visualAssert(!visualReservedExport(exportName), `${where}: export name ${exportName} is reserved in generated components.`);
   }
   if (component && !component.template.length) return vcPlaceholder(libraryId, component.props, component.slots, ctx);
   ctx.path = component ? visualComponentPath(m, component) : page ? visualPagePath(m, page) : '';
   const roots = component ? component.template : page ? page.root : [];
   const body = vcList(ctx, roots, 0).join('\n');
-  const nuxtImports = visualNuxtImports(roots), taken = new Set(nuxtImports.map(i => i.name));
+  const nuxtImports = visualNuxtImports(roots);
   const nuxt = nuxtImports.map(i => `import ${vcName(ctx, i.name, vcNuxt, 'catalog component')} from ${literal(i.path)};`);
   const projects = [...ctx.projects].sort(([a], [b]) => (a < b ? -1 : 1)).map(([name, target]) => {
-    visualAssert(!taken.has(name), `${where}: export name ${name} collides with a Nuxt UI component.`);
     vcName(ctx, target.libraryId, vcLibrary, name + ' library id');
     return `import ${name} from ${literal(relativeImport(ctx.path, visualComponentPath(m, target)))};`;
   });

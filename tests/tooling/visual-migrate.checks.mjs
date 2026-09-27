@@ -4,6 +4,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { migrateDetailDesigns } from '../../scripts/companion/visual/visual-migrate.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { visualNodes } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualReservedExport } from '../../scripts/companion/visual/visual-catalog.mjs';
 import { validateDetailDesigns } from '../../scripts/companion/detail-contract.mjs';
 import { compositionDefaultUI } from '../../scripts/companion/composition-contract.mjs';
 import { validateCompanionDocument, migrateCompanionDocument, parseCompanionDocument, COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
@@ -36,7 +37,9 @@ test('self-project keeps revisions, pinned instances, scenarios and acceptance t
 });
 test('pins the self-project loss report: only geometry is dropped', () => {
   const doc = inputs[1][1], { visualDesigns: v, report } = migrateDetailDesigns(structuredClone(doc.design.detailDesigns), doc.design);
-  assert.deepEqual(report, { droppedPositions: 847, droppedSizes: 847, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] });
+  const { interactionIds, ...losses } = report;
+  assert.equal(Object.keys(interactionIds).length, doc.design.detailDesigns.documents.reduce((n, d) => n + d.edges.length, 0));
+  assert.deepEqual(losses, { droppedPositions: 847, droppedSizes: 847, droppedOutlineRefs: 0, droppedSlotRules: 0, listBindings: 0, droppedFallbackBindings: 0, droppedInteractions: 0, truncatedNotes: 0, unparsedMembers: [], droppedProps: [], createdComponents: [] });
   const all = [...v.pages.map(p => p.root), ...v.components.map(c => c.template), ...v.revisions.map(r => r.template)].flatMap(visualNodes);
   const legacyText = [...doc.design.detailDesigns.documents, ...doc.design.detailDesigns.revisions.map(r => r.document)].flatMap(d => d.nodes).filter(n => ['text', 'heading'].includes(n.kind) && n.ui);
   assert.deepEqual([all.filter(n => n.kind === 'text' && n.layout).length, legacyText.length], [233, 233], 'text/heading ui carried as layout');
@@ -151,13 +154,38 @@ test('v4 documents migrate to v5 and validate; v5 passes through unchanged', () 
 test('hostile or inconsistent v5 imports are rejected (Review Focus 5)', () => {
   const { document } = migrateCompanionDocument(structuredClone(inputs[1][1]));
   const bad = [
-    d => { d.design.detailDesigns = inputs[1][1].design.detailDesigns; },
-    d => { d.design.visualDesigns.catalog.version = 2; },
-    d => { d.design.visualDesigns.pages[0].root[0].kind = 'script'; },
-    d => { d.schemaVersion = 6; },
-    d => { d.design.schema = 4; },
+    [d => { d.design.detailDesigns = inputs[1][1].design.detailDesigns; }, /^Error: COMPANION_INVALID: Transfer version 5 no longer carries detail designs\.$/],
+    [d => { d.design.visualDesigns.catalog.version = 2; }, /^Error: VISUAL_INVALID: Unsupported component catalog .*pins nuxt-ui v1\.$/],
+    [d => { d.design.visualDesigns.pages[0].root[0].kind = 'script'; }, /^Error: VISUAL_INVALID: Page ".+" \/ .+: unsupported element kind "script"\.$/],
+    [d => { d.schemaVersion = 6; }, /^Error: COMPANION_INVALID: Unsupported companion format\/version or executable flag\.$/],
+    [d => { d.design.schema = 4; }, /^Error: COMPANION_INVALID: Transfer and design schema versions must match\.$/],
   ];
-  for (const change of bad) { const d = structuredClone(document); change(d); assert.throws(() => validateCompanionDocument(d)); }
-  assert.throws(() => parseCompanionDocument('{"kind":"obsidian-companion-project","__proto__":{"x":1}}'));
+  for (const [change, message] of bad) { const d = structuredClone(document); change(d); assert.throws(() => validateCompanionDocument(d), message); }
+  assert.throws(() => parseCompanionDocument('{"kind":"obsidian-companion-project","__proto__":{"x":1}}'), /^Error: COMPANION_INVALID: Unsafe object key\.$/);
   assert.throws(() => parseCompanionDocument('x'.repeat(5 * 1024 * 1024)), /limit/);
+});
+
+// Generated interaction hooks were named after legacy edge IDs; the report maps each one to its new interaction ID.
+for (const [name, doc] of inputs) test('reports the legacy edge → interaction ID mapping for ' + name, () => {
+  const detail = doc.design.detailDesigns; if (!detail) return;
+  const { visualDesigns: v, report } = migrateDetailDesigns(structuredClone(detail), doc.design);
+  const events = new Map([...v.pages.map(p => p.root), ...v.components.map(c => c.template)].flatMap(visualNodes).flatMap(n => (n.events ?? []).map(i => [i.id, i])));
+  const edges = detail.documents.flatMap(d => d.edges);
+  assert.deepEqual(Object.keys(report.interactionIds).sort(), edges.map(e => e.id).sort());
+  for (const e of edges) { const i = events.get(report.interactionIds[e.id]); assert.ok(i, e.id); assert.deepEqual([i.label, i.event, i.acceptance], [e.label, e.event, e.acceptance], e.id); }
+  assert.equal(new Set(Object.values(report.interactionIds)).size, edges.length, 'one interaction per edge');
+});
+test('edges from text, heading and slot elements are dropped and absent from the ID mapping', () => {
+  const root = node('region', 'Page'), text = node('text', 'Caption', { parentId: root.id }), go = node('button', 'Go', { parentId: root.id });
+  const dropped = edge(text, go), kept = edge(go, text);
+  const { visualDesigns: v, report } = migrate({ schema: 2, nextId: 1000, documents: [ldoc('page', 'page-a', [root, text, go], [dropped, kept])] }, { ...pages, library: [] });
+  assert.deepEqual([report.droppedInteractions, Object.keys(report.interactionIds)], [1, [kept.id]]);
+  assert.equal(report.interactionIds[kept.id], byName(v.pages[0].root, 'Go').events[0].id);
+});
+test('migrated export names never take a reserved Vue, generated or Nuxt UI name', () => {
+  const root = node('region', 'Page'), names = ['Component', 'error', 'Keep alive', 'U button', 'Visual state', 'Slot'];
+  const uses = names.map((label, i) => node('component', label + ' use', { parentId: root.id, component: { id: 'lib-' + i, label, version: '1.0.0', variantId: 'default' } }));
+  const { visualDesigns: v } = migrate({ schema: 2, nextId: 1000, documents: [ldoc('page', 'page-a', [root, ...uses])] }, { ...pages, library: names.map((name, i) => lib('lib-' + i, { name })) });
+  assert.deepEqual(v.components.map(c => c.exportName), ['Component2', 'Error2', 'KeepAlive2', 'UButton2', 'VisualState2', 'Slot2']);
+  for (const c of v.components) assert.equal(visualReservedExport(c.exportName), false, c.exportName);
 });

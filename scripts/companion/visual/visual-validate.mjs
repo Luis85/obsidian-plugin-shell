@@ -1,6 +1,6 @@
 // Complete, pure validation for visual designs. Gates save, export, import and generation.
 import { VISUAL_SCHEMA, VISUAL_CATALOG, VISUAL_TAGS, VISUAL_TEXT_ROLES, VISUAL_STATES, VISUAL_PROP_TYPES, VISUAL_PAYLOAD_TYPES, VISUAL_LAYOUT_MODES, VISUAL_DOM_EVENTS, VISUAL_LIMITS, VISUAL_DEPENDENCY_LIMIT, visualAssert, visualIsRef, visualIsText, visualIsLine, visualIsKey, visualIsScalar, visualIsPlain, visualIsPackage, visualIsExactVersion, visualWalk } from './visual-ir.mjs';
-import { visualCatalogEntry, VISUAL_CONTROL_ENTRIES } from './visual-catalog.mjs';
+import { visualCatalogEntry, visualReservedExport, VISUAL_CONTROL_ENTRIES } from './visual-catalog.mjs';
 import { visualCompositionGraph } from './visual-composition.mjs';
 import { validateVisualMapping, validateVisualControl, visualMappingRefs } from './visual-mapping.mjs';
 import { validateCompositionUI, validateCompositionScenarios, validateCompositionDesignSystem, compositionLiteral } from '../composition-contract.mjs';
@@ -8,6 +8,16 @@ const vvCommon = ['name', 'visibleIn', 'a11y', 'layout', 'notes'];
 const vvForbidden = ['designState', 'designScenario', 'interaction', 'ref', 'key', 'is', 'class', 'style', 'constructor', 'prototype', '__proto__'];
 const vvCategories = ['application', 'dashboard', 'master-detail', 'form', 'settings', 'website', 'custom'];
 const vvIdPattern = /^(vn|vp|vc|vl|vr|vi)-([1-9][0-9]*)$/;
+// Element attributes: this per-tag list (the concept inspector offers exactly these) plus title, role and aria-* on
+// every tag. No event, URL-navigating or document-bearing attribute (href, action, formaction, srcdoc …) exists.
+export const VISUAL_ELEMENT_ATTRS = Object.freeze({ img: Object.freeze(['alt', 'src']), input: Object.freeze(['placeholder', 'type', 'name']), button: Object.freeze(['type']), label: Object.freeze(['for']) });
+function vvAttrAllowed(tag, key) { return ['title', 'role'].includes(key) || /^aria-[a-z]+(?:-[a-z]+)*$/.test(key) || (VISUAL_ELEMENT_ATTRS[tag] ?? []).includes(key); }
+// A literal image source is a relative path or an inline image. Browsers drop tabs/newlines and leading controls
+// before reading a scheme, so the check does too.
+function vvSafeSrc(value) {
+  const url = typeof value === 'string' ? value.replace(/[\t\n\r]/g, '').replace(/^[\x00-\x20]+/, '') : '';
+  return typeof value === 'string' && (/^data:image\//i.test(url) || (!/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^[/\\]/.test(url)));
+}
 function vvObject(value, keys, optional = []) { return visualIsPlain(value) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)) && keys.every(k => Object.hasOwn(value, k)); }
 function vvWithin(where, fn) {
   try { return fn(); }
@@ -125,7 +135,10 @@ function vvNodeCheck(node, scope, at) {
   if (node.kind === 'element') {
     visualAssert(VISUAL_TAGS.includes(node.tag), where + ': unsupported tag.');
     visualAssert(visualIsPlain(node.attrs) && Object.keys(node.attrs).length <= 16, where + ': invalid attributes.');
-    for (const [key, value] of Object.entries(node.attrs)) { visualAssert(/^[a-z][a-z0-9-]*$/.test(key) && !key.startsWith('on') && !['style', 'class', 'is', 'key', 'ref'].includes(key), where + ': attribute ' + key + ' is not allowed.'); vvValue(value, scope, where + ' @' + key); }
+    for (const [key, value] of Object.entries(node.attrs)) {
+      visualAssert(/^[a-z][a-z0-9-]*$/.test(key) && vvAttrAllowed(node.tag, key), where + ': attribute ' + key + ' is not allowed on <' + node.tag + '>.'); vvValue(value, scope, where + ' @' + key);
+      if (node.tag === 'img' && key === 'src' && value.kind === 'literal') visualAssert(vvSafeSrc(value.value), where + ' @src: img src must be a relative path or a data:image/ URL.');
+    }
     visualAssert(Array.isArray(node.children) && (!['input', 'img'].includes(node.tag) || node.children.length === 0), where + ': ' + node.tag + ' cannot contain children.');
     vvEvents(node, scope, null, where);
   } else if (node.kind === 'text') { visualAssert(VISUAL_TEXT_ROLES.includes(node.role), where + ': unsupported text role.'); vvValue(node.value, scope, where); }
@@ -177,6 +190,7 @@ export function validateVisualDesigns(store, context = {}) {
     const where = 'Component ' + JSON.stringify(c?.exportName ?? c?.id);
     visualAssert(vvObject(c, ['id', 'libraryId', 'exportName', 'description', 'props', 'slots', 'emits', 'variants', 'template', 'scenarios'], ['implementation', 'notes', 'dependencies']), where + ': unsupported component fields.'); identity(c.id, 'vc');
     visualAssert(typeof c.exportName === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(c.exportName) && c.exportName.length <= 60 && !exportNames.has(c.exportName), where + ': export name must be a unique PascalCase Vue name.'); exportNames.add(c.exportName);
+    visualAssert(!visualReservedExport(c.exportName), where + ': export name ' + c.exportName + ' is reserved (a Vue built-in, a generated type or a Nuxt UI component).');
     visualAssert(visualIsRef(c.libraryId) && !libraries.has(c.libraryId) && (!context.library || context.library.has(c.libraryId)), where + ': library entry is missing or already designed.'); libraries.add(c.libraryId);
     visualAssert(visualIsText(c.description, 2000) && (c.notes === undefined || visualIsText(c.notes, 8000)), where + ': description or notes too long.');
     visualAssert(c.implementation === undefined || (vvObject(c.implementation, ['catalog', 'entryId']) && c.implementation.catalog === 'nuxt-ui' && visualCatalogEntry(c.implementation.entryId)), where + ': unknown implementation primitive.');

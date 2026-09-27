@@ -36,6 +36,54 @@ test('duplicate remaps internal references to the copies (Review Focus 4)', () =
   assert.equal(reset.events[0].actions[1].nodeId, byName(s.pages[0].root, 'Empty').id, 'external reference kept');
   validateVisualDesigns(s);
 });
+// A subtree whose interactions, state bindings and draft mappings all point inside it.
+function formRegion(s) {
+  const at = () => 'vn-' + s.nextId++, input = visualNuxt(at(), 'u-input', {}, { name: 'Query' }), panel = { id: at(), kind: 'element', tag: 'div', attrs: {}, children: [], events: [], name: 'Panel' };
+  const echo = { id: at(), kind: 'text', role: 'p', value: { kind: 'state', nodeId: input.id }, name: 'Echo' };
+  const hint = { id: at(), kind: 'element', tag: 'input', attrs: { placeholder: { kind: 'state', nodeId: input.id } }, children: [], events: [], name: 'Hint' };
+  const actions = [{ kind: 'toggle', nodeId: panel.id }, { kind: 'focus', nodeId: input.id }, { kind: 'set-value', nodeId: input.id, value: 'x' }, { kind: 'emit', event: 'go', payload: { kind: 'draft', nodeId: input.id } },
+    { kind: 'source', sourceId: 'customers', operationId: 'list', input: { kind: 'object', fields: { q: { kind: 'draft', nodeId: input.id } } } }];
+  const go = visualNuxt(at(), 'u-button', { label: visualLiteral('Go') }, { name: 'Go', events: [{ id: 'vi-' + s.nextId++, event: 'click', label: 'Go', notes: '', acceptance: '', actions }] });
+  const region = { id: at(), kind: 'element', tag: 'section', attrs: {}, children: [input, panel, echo, hint, go], events: [], name: 'Form region' };
+  s.pages[0].root.push(region); validateVisualDesigns(s); return region;
+}
+// Every node ID a subtree refers to (state values, action targets, draft mappings) with where it was found.
+function internalRefs(nodes) {
+  const out = [], drafts = m => m?.kind === 'draft' ? [m.nodeId] : m?.kind === 'object' ? Object.values(m.fields).flatMap(drafts) : [];
+  for (const n of visualNodes(nodes)) {
+    for (const v of [...Object.values(n.props ?? {}), ...Object.values(n.attrs ?? {}), ...(n.kind === 'text' ? [n.value] : [])]) if (v.kind === 'state') out.push(['state', v.nodeId]);
+    for (const a of (n.events ?? []).flatMap(i => i.actions)) { if (a.nodeId) out.push([a.kind, a.nodeId]); for (const id of drafts(a.payload ?? a.input)) out.push([a.kind + ' draft', id]); }
+  }
+  return out;
+}
+test('duplicate remaps toggle, focus, set-value, state and draft references to the copies (Review Focus 4)', () => {
+  const s = store(), region = formRegion(s), original = new Set(visualNodes([region]).map(n => n.id));
+  const copy = cmd.visualDuplicateNode(s, pageRef(s), region.id), copied = new Set(visualNodes([copy]).map(n => n.id));
+  const refs = internalRefs([copy]);
+  assert.deepEqual(refs.map(([kind]) => kind).sort(), ['emit draft', 'focus', 'set-value', 'source draft', 'state', 'state', 'toggle']);
+  for (const [kind, id] of refs) { assert.ok(copied.has(id), kind + ' → ' + id + ' points into the copy'); assert.ok(!original.has(id), kind + ' left on the original'); }
+  assert.deepEqual(internalRefs([region]).map(([, id]) => original.has(id)), Array(7).fill(true), 'the original is untouched');
+  assert.notEqual(visualNodes([copy]).find(n => n.name === 'Go').events[0].id, visualNodes([region]).find(n => n.name === 'Go').events[0].id);
+  validateVisualDesigns(s);
+});
+test('applying a saved layout twice remaps each instance to its own copies', () => {
+  const s = store(), region = formRegion(s);
+  const layout = visualSaveLayout(s, { name: 'Form', description: '', category: 'form', scope: 'region', nodeIds: [region.id], pageId: s.pages[0].id });
+  const first = visualInstantiateLayout(s, layout.id), second = visualInstantiateLayout(s, layout.id);
+  for (const [label, nodes, other] of [['first', first, second], ['second', second, first]]) {
+    const own = new Set(visualNodes(nodes).map(n => n.id)), foreign = new Set([...visualNodes(other), ...visualNodes(layout.root), ...visualNodes([region])].map(n => n.id));
+    assert.equal(internalRefs(nodes).length, 7, label);
+    for (const [kind, id] of internalRefs(nodes)) { assert.ok(own.has(id), label + ' ' + kind + ' → ' + id); assert.ok(!foreign.has(id), label + ' ' + kind + ' shares ' + id); }
+  }
+  cmd.visualInsert(s, pageRef(s), { parentId: null }, first); cmd.visualInsert(s, pageRef(s), { parentId: null }, second);
+  assert.equal(new Set(ids(s)).size, ids(s).length); validateVisualDesigns(s);
+});
+test('a slot converted to a region keeps its notes and accessibility text', () => {
+  const s = store(), slot = visualNodes(s.layouts[0].root).find(n => n.kind === 'slot');
+  Object.assign(slot, { notes: 'Filled by the page.', a11y: 'Main body region', visibleIn: ['default'] }); validateVisualDesigns(s);
+  const region = visualNodes(visualInstantiateLayout(s, s.layouts[0].id)).find(n => n.kind === 'element' && n.name === 'body');
+  assert.deepEqual([region.notes, region.a11y, region.visibleIn], ['Filled by the page.', 'Main body region', ['default']]);
+});
 test('saving a region whose interactions target outside elements is refused', () => {
   const s = store(); const search = byName(s.pages[0].root, 'Customer search');
   assert.throws(() => visualSaveLayout(s, { name: 'x', description: '', category: 'custom', scope: 'region', nodeIds: [search.id], pageId: s.pages[0].id }), /Reset view.*outside the copied structure/);

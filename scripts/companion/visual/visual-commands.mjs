@@ -77,7 +77,7 @@ export function visualUpdateNode(store, ref, nodeId, patch) {
 export function visualSetContract(store, componentId, change) {
   const c = vcmdDef(store, { kind: 'component', id: componentId }); const next = { ...c, ...structuredClone(change) };
   const broken = [];
-  for (const u of visualUsages(store, componentId)) {
+  for (const u of visualUsages(store, componentId).filter(x => x.kind !== 'revision')) { // published revisions pin and never change
     const def = vcmdDef(store, { kind: u.kind, id: u.definitionId }), n = vcmdHit(def, u.nodeId).node; if (n.ref.revisionId) continue;
     for (const k of Object.keys(n.props)) if (!next.props.some(p => p.name === k)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': prop ' + k);
     for (const p of next.props.filter(p => p.required)) if (!Object.hasOwn(n.props, p.name)) broken.push(u.definitionName + ' / ' + (n.name ?? n.id) + ': required prop ' + p.name);
