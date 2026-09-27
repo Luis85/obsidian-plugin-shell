@@ -166,7 +166,7 @@ The four starter specs work for any plugin built from this shell and read
 
 ## CI
 
-`.github/workflows/obsidian-e2e.yml` installs the Electron system libraries,
+The `real-obsidian` job of `.github/workflows/ci.yml` installs the Electron system libraries,
 restores `.native-cache` with `actions/cache` (key: OS, app version and launcher
 version), and runs `test:obsidian` with `OBSIDIAN_ALLOW_DOWNLOAD=1`. It also runs
 one `dev:obsidian --json` iteration. It uploads `reports/obsidian/` and

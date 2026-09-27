@@ -86,7 +86,7 @@ themes into the plugin stylesheet (33 detected components instead of 14; tempora
 
 ## Generated-output qualification
 
-These are the commands `project-generator.yml` runs. Each installs the generated workspace with `QUALIFIED_NPM` (npm
+These are the commands the `generated-companion` job of `ci.yml` (formerly `project-generator.yml`) runs. Each installs the generated workspace with `QUALIFIED_NPM` (npm
 11.19.1) outside the checkout, then builds, type-checks (`vue-tsc`) and tests it. All runs used code commit `c4af1bd`.
 
 | Command | Exit | Result |

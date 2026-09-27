@@ -1,7 +1,7 @@
 name: Setup npm policy compatibility
 on:
   push:
-    branches: [main, fix/setup-npm-policy, build/iteration-three]
+    branches: [main]
     paths: &setup-inputs
       - 'package.json'
       - 'package-lock.json'
@@ -15,8 +15,8 @@ on:
       - '.gitattributes'
       - '.nvmrc'
       - '.github/workflows/setup-compatibility.yml'
-  # The complete verify gates already run on every pull request in Showcase
-  # verification (both OSes, qualified toolchain). This matrix proves the npm
+  # The complete verify gates already run on every pull request in CI's
+  # showcase and template-authoring jobs (qualified toolchain). This matrix proves the npm
   # install policy and toolchain rows, so it runs when those inputs change.
   pull_request:
     paths: *setup-inputs
