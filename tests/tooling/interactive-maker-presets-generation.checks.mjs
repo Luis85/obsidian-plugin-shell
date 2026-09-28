@@ -39,6 +39,12 @@ for (const [preset, frontend, targets] of [['plugin', 'nuxt-ui'], ['plugin', 'va
     assert.ok(Object.values(allDeps).every(pin => /^\d+\.\d+\.\d+$/.test(pin)));
     assert.equal(Boolean(allDeps.vue), frontend === 'nuxt-ui'); assert.equal(Boolean(allDeps['@angular/core']), frontend === 'angular');
     assert.equal(Boolean(allDeps.obsidian), descriptor.targets.includes('plugin'));
+    const options = (await readData(join(output, 'tsconfig.json'))).compilerOptions;
+    assert.equal(options.strict, true); assert.equal(options.noUncheckedIndexedAccess, true);
+    assert.equal(options.skipLibCheck, descriptor.targets.includes('plugin') || frontend === 'nuxt-ui');
+    assert.equal(options.rewriteRelativeImportExtensions, frontend === 'angular' ? true : undefined);
+    assert.equal(options.allowImportingTsExtensions, frontend === 'angular' ? undefined : true);
+    if (frontend === 'nuxt-ui') assert.deepEqual(options.paths['#build/*'], ['./node_modules/.nuxt-ui/*']);
     if (frontend === 'nuxt-ui') {
       assert.match(await readFile(join(output, 'src/presentation/mount.ts'), 'utf8'), /app\.use\(ui\)/);
       assert.match(await readFile(join(output, 'scripts/bundling/vite-shared.mjs'), 'utf8'), /shell\.project\.json/);
