@@ -1,26 +1,45 @@
 /** Exercise the real source API and writer. Compiled-kit execution is qualified separately by framework-kit.checks.mjs. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, rm, realpath } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { assembleKit } from '../../scripts/framework/kit.ts';
-import { zip } from '../../scripts/framework/zip.ts';
-import { extractArchive } from './framework-archive-fixture.mjs';
+import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+/** Source-only fixture, not a compiled distribution. Works with showcase and example-removed templates. */
+async function sourceFixture(directory) {
+  const snapshot = await loadTemplateSnapshot(root);
+  const files = [...snapshot.frameworkFiles, ...snapshot.skillFiles].map(file => ({
+    path: '.framework/template/' + file.path, bytes: Buffer.from(file.content, file.encoding ?? 'utf8'),
+  }));
+  // verifyKit checks both directories. This inert marker supplies no compiled executable.
+  files.push({ path: '.framework/compiled/package.json', bytes: Buffer.from('{"private":true}\n') });
+  for (const file of files) {
+    await mkdir(dirname(join(directory, file.path)), { recursive: true });
+    await writeFile(join(directory, file.path), file.bytes, { flag: 'wx' });
+  }
+  const bootstrap = [];
+  for (const path of ['shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
+    const bytes = Buffer.from(snapshot.text(path));
+    await writeFile(join(directory, path), bytes, { flag: 'wx' });
+    bootstrap.push({ path, hash: digest(bytes) });
+  }
+  await writeFile(join(directory, '.framework/kit.json'), JSON.stringify({
+    schemaVersion: 1, version: JSON.parse(snapshot.text('package.json')).version,
+    compilerVersion: 'source-fixture-no-compilation', sourceHash: snapshot.fingerprint, bootstrap,
+    files: files.map(file => ({ path: file.path, hash: digest(file.bytes), bytes: file.bytes.length })),
+  }));
+}
 test('reviewed in-place opt-ins update both receipts together and the first ordinary replay writes nothing', { timeout: 120000 }, async t => {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'storybook-in-place-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
-  // This compiler double only builds a checksum-valid fixture inventory. No compiled output is executed.
+  // Test the receipt/writer on the current source profile without repackaging reviewed example preimages.
   // Real TypeScript 6 transpilation and dependency-free CLI execution remain in framework-kit.checks.mjs.
-  const files = await assembleKit({ root, frameworkRoot: root }, {
-    version: 'test-double-not-a-compiler', compile: () => '// Inert fixture: never executed.\n',
-  });
-  await extractArchive(zip(files), dir);
+  await sourceFixture(dir);
   const context = { root: dir, frameworkRoot: root };
   const run = (command, options = {}) => executeOperation({ command, args: [], options }, context);
   const read = path => readFile(join(dir, path), 'utf8');
