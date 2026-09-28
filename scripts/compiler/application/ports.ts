@@ -1,4 +1,4 @@
-import type { Artifact, CompilerDiagnostic, OutputKind, TemplateSnapshot } from '../domain/contracts.ts';
+import type { Artifact, CompilerDiagnostic, OutputKind, StorybookOptions, TemplateSnapshot } from '../domain/contracts.ts';
 
 /** Host mechanisms are supplied by composition. The compiler cannot discover files or run tools. */
 export interface CompilerPorts<Model> {
@@ -15,4 +15,5 @@ export interface CompileRequest {
   sourceName?: string;
   outputKind?: OutputKind;
   template?: TemplateSnapshot;
+  storybook?: StorybookOptions;
 }

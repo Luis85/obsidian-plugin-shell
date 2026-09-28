@@ -1,3 +1,4 @@
+function jmValidTooling(value){try{CompanionJourney.validateProjectTooling(value);return true;}catch{return false;}}
 // Trusted composition bridge. The browser concept's existing project and persistence remain authoritative.
 let jmEditor=null,jmOwner=null;
 // UI state only, keyed by the actual project object. Replacing/importing a project cannot leak a prior lens or filter.

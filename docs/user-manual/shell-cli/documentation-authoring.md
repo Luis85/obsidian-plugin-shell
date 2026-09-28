@@ -19,7 +19,7 @@ Do not duplicate command tables in authored Markdown. Link readers to generated 
 Run from the trusted framework source checkout:
 
 ```sh
-node --test scripts/documentation/manual.test.mjs
+node --test tests/tooling/framework-manual.checks.mjs
 node --experimental-strip-types scripts/documentation/manual.mjs
 node --experimental-strip-types scripts/documentation/manual.mjs --check
 node --experimental-strip-types scripts/documentation/audit.mjs

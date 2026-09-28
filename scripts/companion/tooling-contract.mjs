@@ -4,13 +4,25 @@ const AIRSHIP_DEFAULTS = Object.freeze({ enabled: false, agent: 'claude', target
 function requireTooling(condition, message) {
   if (!condition) throw new Error('COMPANION_TOOLING_INVALID: ' + message);
 }
-function object(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
+/** Inspect descriptors before reading values; settings cannot acquire capabilities through accessors. */
+function fields(value, allowed) {
+  requireTooling(value !== null && typeof value === 'object' && !Array.isArray(value) &&
+    [Object.prototype, null].includes(Object.getPrototypeOf(value)), 'Expected plain development tooling settings.');
+  requireTooling(Reflect.ownKeys(value).every(key => typeof key === 'string' && allowed.includes(key)), 'Unknown development tooling field.');
+  requireTooling(Object.values(Object.getOwnPropertyDescriptors(value)).every(field =>
+    Object.hasOwn(field, 'value') && field.enumerable), 'Tooling settings must contain only enumerable data fields.');
+}
 export function validateTooling(value) {
   if (value === undefined) return;
-  requireTooling(object(value) && Object.keys(value).every(key => key === 'airship'), 'Unknown development tooling field.');
-  if (value.airship === undefined) return;
+  fields(value, ['airship', 'storybook']);
+  if (Object.hasOwn(value, 'storybook')) {
+    fields(value.storybook, ['enabled', 'generateStories']);
+    requireTooling(Object.values(value.storybook).every(item => typeof item === 'boolean'),
+      'tooling.storybook accepts only boolean enabled and generateStories switches. Both default to false.');
+  }
+  if (!Object.hasOwn(value, 'airship')) return;
   const item = value.airship;
-  requireTooling(object(item) && Object.keys(item).every(key => ['enabled', 'agent', 'targetPort', 'port'].includes(key)), 'Unknown Airship setting.');
+  fields(item, ['enabled', 'agent', 'targetPort', 'port']);
   requireTooling(typeof item.enabled === 'boolean', 'Airship enabled must be a boolean.');
   requireTooling(item.agent === undefined || ['claude', 'codex', 'opencode'].includes(item.agent), 'Unsupported Airship agent.');
   for (const key of ['targetPort', 'port']) requireTooling(item[key] === undefined ||
@@ -29,7 +41,12 @@ export function airshipConfig(tooling) {
     mode: 'canvas', safe: true, commit: false, open: false };
 }
 export function toolingSchema() {
-  return { type: 'object', additionalProperties: false, properties: { airship: {
+  return { type: 'object', additionalProperties: false, properties: { storybook: {
+    type: 'object', additionalProperties: false, properties: {
+      enabled: { type: 'boolean', default: false, description: 'Emit an isolated Storybook workspace; installation is a separate explicit action.' },
+      generateStories: { type: 'boolean', default: false, description: 'Emit CSF stories for generated pages and components without installing Storybook.' },
+    },
+  }, airship: {
     type: 'object', additionalProperties: false, required: ['enabled'], properties: {
       enabled: { type: 'boolean', default: false }, agent: { enum: ['claude', 'codex', 'opencode'], default: 'claude' },
       targetPort: { type: 'integer', minimum: 1024, maximum: 65535, default: 5173 },

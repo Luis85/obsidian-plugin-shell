@@ -1,3 +1,4 @@
+import { storybookOperation } from './storybook.ts';
 import { airshipOperation } from './airship.ts';
 import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
 import { readBounded } from './files.ts';
@@ -128,6 +129,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       return result(command, { makers });
     }
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command.startsWith('storybook ')) return await storybookOperation(request, context);
     if (command.startsWith('compiler ')) return await compilerOperation(request, context);
     if (command === 'clickdummy build') return await buildClickdummy(request, context);
     if (command === 'check') return await checkOperation(request, context);

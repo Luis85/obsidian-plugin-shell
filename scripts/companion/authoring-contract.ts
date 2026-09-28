@@ -3,7 +3,7 @@ import {
   COMPANION_FORMAT, COMPANION_MAX_BYTES, companionDesignKey,
   validateCompanionDocument, migrateCompanionDocument,
 } from './project-contract.mjs';
-import { validateTooling } from './tooling-contract.mjs';
+import { validateProjectTooling, type ProjectTooling } from './tooling-contract.ts';
 import type { SitemapDesign } from './sitemap/model.ts';
 import { assertJson, record, requireSitemap, utf8Length } from './sitemap/safety.ts';
 import { validateSitemapModel } from './sitemap/validate.ts';
@@ -17,8 +17,8 @@ export interface AuthoringDocument {
   project: { id: string; name: string; author: string; version: string; description: string };
   settings: { codebaseFolder: string; testsFolder: string };
   design: SitemapDesign & { schema: number };
-  tooling?: { airship?: { enabled: boolean; agent?: 'claude' | 'codex' | 'opencode'; targetPort?: number; port?: number } };
   notes: string[];
+  tooling?: ProjectTooling;
 }
 export interface AuthoringMigration {
   fromVersion: number;
@@ -31,14 +31,15 @@ function assertAuthoringDocument(input: unknown): asserts input is AuthoringDocu
   assertJson(input);
   requireSitemap(record(input) && Number.isInteger(input.schemaVersion) &&
     [1, 2, 3, 4, 5, 6].includes(Number(input.schemaVersion)), 'COMPANION_VERSION', 'Unsupported authoring format/version.');
+  validateProjectTooling(input.tooling);
+  const legacy = structuredClone(input);
+  delete legacy.tooling;
   if (input.schemaVersion !== 6) {
-    validateCompanionDocument(input);
+    validateCompanionDocument(legacy);
   } else {
     requireSitemap(record(input.design) && input.design.schema === 6,
       'COMPANION_VERSION', 'Transfer and design schema versions must match.');
-    validateTooling(input.tooling);
-    // Only the declared v6 extensions are removed for legacy-field validation. Unknown fields still fail.
-    const legacy = structuredClone(input);
+    // Only explicitly validated additions are removed for legacy-field validation. Unknown fields still fail.
     requireSitemap(record(legacy.design), 'COMPANION_INVALID', 'Expected a saved design.');
     delete legacy.tooling;
     delete legacy.design.sitemap; delete legacy.design.features;
@@ -66,7 +67,7 @@ export function parseAuthoringDocument(text: string): AuthoringDocument {
 export function migrateAuthoringDocument(input: unknown): { document: AuthoringDocument; report: AuthoringMigration | null } {
   const source = validateAuthoringDocument(input);
   if (source.schemaVersion === 6) return { document: source, report: null };
-  const migrated = migrateCompanionDocument(source);
+  const migrated = legacyMigration(source);
   const document = structuredClone(migrated.document);
   document.schemaVersion = 6; document.design.schema = 6;
   return { document: validateAuthoringDocument(document), report: {
@@ -74,12 +75,19 @@ export function migrateAuthoringDocument(input: unknown): { document: AuthoringD
   } };
 }
 
+/** Preserve optional tooling across legacy migration without changing the frozen legacy validator. */
+function legacyMigration(source: AuthoringDocument) {
+  const { tooling, ...legacy } = source;
+  const migrated = migrateCompanionDocument(legacy);
+  return { ...migrated, document: { ...migrated.document, ...(tooling === undefined ? {} : { tooling }) } };
+}
+
 /** Source readers keep legacy inputs at their original normalized v5 version; new inputs retain v6. */
 export const authoringReader = {
   parse: parseAuthoringDocument,
   migrate(input: unknown) {
     const document = validateAuthoringDocument(input);
-    return document.schemaVersion === 6 ? { document, report: null } : migrateCompanionDocument(document);
+    return document.schemaVersion === 6 ? { document, report: null } : legacyMigration(document);
   },
 };
 export function authoringDesignKey(key: string): boolean {

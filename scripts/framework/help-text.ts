@@ -28,6 +28,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
@@ -48,6 +49,8 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
+  'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   airship: { description: 'Opt into Airship tooling in a generated project; no automatic installation or launch.' },
   'no-airship': { description: 'Explicitly disable Airship in an imported or new project.' },
   agent: { description: 'Airship agent backend.', values: ['claude', 'codex', 'opencode'], default: 'claude' },
@@ -106,6 +109,17 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'airship status': ['node shell.mjs airship status --json'],
+  'airship enable': ['node shell.mjs airship enable --agent codex --dry-run', 'node shell.mjs airship enable --yes'],
+  'airship disable': ['node shell.mjs airship disable --dry-run'],
+  'airship install': ['node shell.mjs airship install --yes'],
+  'airship start': ['node shell.mjs airship start --yes'],
+  'airship doctor': ['node shell.mjs airship doctor --yes'],
+  'storybook status': ['node shell.mjs storybook status --json'],
+  'storybook install': ['node shell.mjs storybook install --dry-run', 'node shell.mjs storybook install --yes'],
+  'storybook check': ['node shell.mjs storybook check'],
+  'storybook dev': ['node shell.mjs storybook dev'],
+  'storybook build': ['node shell.mjs storybook build'],
   'compiler check': ['node shell.mjs compiler check --input project.json --json'],
   'compiler inspect': ['node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json'],
   'compiler explain': ['node shell.mjs compiler explain COMPILER_REFERENCE_MISSING'],
@@ -125,7 +139,7 @@ const examples: Record<string, string[]> = {
   'concept import': ['node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node shell.mjs plan apply concept.plan.json --yes'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
-  new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../folio-tools --from folio-tools.companion.json'],
+  new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../folio-tools --from folio-tools.companion.json', 'node shell.mjs new ../folio-tools --starter blank --storybook on --storybook-stories on'],
   generate: ['node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs generate --yes'],
   make: ['node shell.mjs make list', 'node shell.mjs make file-extension board --feature documents --extension board', 'node shell.mjs make context-menu inspect --feature documents --extensions md,board', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
@@ -146,7 +160,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(['install', 'framework pack'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release') return ['dry-run', ...shared];
   return shared;
@@ -163,7 +177,7 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
-  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && entry.id === 'dev' ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
+  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && ['dev', 'storybook dev'].includes(entry.id) ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
   const argument = entry.maxArgs ? ' [arguments]' : '';
   return { group, usage: usage[entry.id] ?? `node shell.mjs ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`, examples: [...(examples[entry.id] ?? [])], optionHelp };
 }

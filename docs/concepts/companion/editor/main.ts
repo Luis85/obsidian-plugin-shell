@@ -1,3 +1,4 @@
+export { validateProjectTooling } from '../../../../scripts/companion/tooling-contract.ts';
 import { createApp, h } from 'vue';
 import { createPinia, disposePinia } from 'pinia';
 import UApp from '@nuxt/ui/components/App.vue';

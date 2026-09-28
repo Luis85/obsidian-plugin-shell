@@ -7,7 +7,7 @@ const effects = Object.freeze({
   release: 'Release workflow. Publication requires separate candidate authorization; --yes does not grant it.',
 });
 const text = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('|', '&#124;').replaceAll('\r', '').replaceAll('\n', '<br>');
-export const slug = id => id.replaceAll(' ', '-');
+const slug = id => id.replaceAll(' ', '-');
 function required(value, message) { if (!value) throw new Error(`MANUAL_CONTRACT: ${message}`); }
 function code(value) {
   const runs = String(value).match(/`+/g) ?? [];

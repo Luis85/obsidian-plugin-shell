@@ -113,7 +113,7 @@ test('help starts with the golden path and --all lists every command by group', 
   const order = [...short.stdout.matchAll(/^ {2}\d\. (\S+)/gm)].map(match => match[1]);
   assert.deepEqual(order, ['new', 'install', 'dev', 'test', 'check', 'make']);
   assert.deepEqual(order, goldenPath.map(item => item.command));
-  assert.match(short.stdout, /\$ node shell\.mjs new \.\.\/my-plugin --starter blank/);
+  assert.match(short.stdout, /\$ node shell\.mjs new \.\.\/folio-tools --starter blank/);
   assert.ok(!short.stdout.includes(commands.find(entry => entry.id === 'release operate').summary), 'the short tier omits maintainer summaries');
   assert.match(short.stdout, /help --all/);
   const all = cli(['help', '--all']);

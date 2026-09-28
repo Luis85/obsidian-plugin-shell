@@ -28,6 +28,6 @@ export function artifactOrigins(model:Model, artifacts:readonly Artifact[], file
       const source=id && nodes.get(origin.entityId+'\0'+id)?.[0];
       if(source) lines.push({line:i+1,source});
     });
-    return {path:artifact.path,producer:artifact.producer ?? 'legacy',origins:origin?[origin]:[],lines};
+    return {path:artifact.path,producer:artifact.producer ?? 'legacy',origins:origin?[origin]:(artifact.origins ?? []).map(origin=>({...origin,file})),lines};
   });
 }
