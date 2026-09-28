@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "typeRoots": ["../../tooling/documentation/node_modules/@types"]
+  },
+  "files": [
+    "../framework/catalog.ts",
+    "../framework/help-text.ts",
+    "../framework/contracts.ts",
+    "../compiler/domain/contracts.ts",
+    "../compiler/domain/diagnostics.ts"
+  ]
+}

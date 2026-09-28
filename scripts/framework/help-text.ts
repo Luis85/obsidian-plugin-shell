@@ -3,11 +3,22 @@
  * option documentation. Data only; execution policy stays in catalog.ts and the handlers.
  */
 import { commands, profiles, type Command } from './catalog.ts';
+/**
+ * Explanatory option metadata shared by terminal help and the generated manual.
+ * @remarks
+ * Accepted kinds belong to the runtime catalog. A description is not an execution policy.
+ */
 export interface OptionHelp { description: string; values?: readonly string[]; default?: string }
+/**
+ * User-facing command reference, separate from the executable request contract.
+ * @remarks
+ * Examples illustrate a workflow; documentation generation never executes them.
+ * The manual combines these facts with authored Markdown and source docblocks.
+ */
 export interface CommandHelp { group: string; usage: string; examples: string[]; optionHelp: Record<string, OptionHelp> }
 /** The short first screen of `help`: the daily loop in the order a new plugin author meets it. */
 export const goldenPath: ReadonlyArray<{ command: string; example: string; purpose: string }> = [
-  { command: 'new', example: 'node shell.mjs new ../my-plugin --starter blank', purpose: 'Create a plugin project from a starter (previews first).' },
+  { command: 'new', example: 'node shell.mjs new ../folio-tools --starter blank', purpose: 'Create a plugin project from a starter (previews first).' },
   { command: 'install', example: 'node shell.mjs install --yes', purpose: 'Install the exact locked dependencies.' },
   { command: 'dev', example: 'node shell.mjs dev --profile obsidian', purpose: 'Real Obsidian sandbox: rebuild, hot reload, logs (--profile ui: browser harness).' },
   { command: 'test', example: 'node shell.mjs test', purpose: 'Run the unit or generated-project test suite.' },
@@ -27,7 +38,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
 ];
 const common: Record<string, OptionHelp> = {
   json: { description: 'Print exactly one versioned JSON result on stdout.' },
-  'dry-run': { description: 'Preview only; never write or launch the step.' },
+  'dry-run': { description: 'Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file.' },
   yes: { description: 'Apply the freshly rebuilt plan (or run the process) without prompting.' },
   apply: { description: 'Apply only if the rebuilt plan still has this reviewed SHA-256 hash.' },
   'plan-out': { description: 'Save a replayable request plan (for plan inspect/apply).' },
@@ -108,13 +119,13 @@ const examples: Record<string, string[]> = {
   doctor: ['node shell.mjs doctor'],
   'config get': ['node shell.mjs config get --json'], 'config explain': ['node shell.mjs config explain'],
   'config validate': ['node shell.mjs config validate'], 'config set': ['node shell.mjs config set --input config.json --dry-run'],
-  setup: ['node shell.mjs setup --id my-plugin --name "My Plugin" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
+  setup: ['node shell.mjs setup --id folio-tools --name "Folio Tools" --author "Me" --blank --yes', 'node shell.mjs setup --input ./my-project.json --dry-run --json'],
   'concept schema': ['node shell.mjs concept schema --json'],
   'concept inspect': ['node shell.mjs concept inspect --json', 'node shell.mjs concept inspect --input docs/concepts/capture/concept.json'],
   'concept import': ['node shell.mjs concept import --input docs/concepts/capture/concept.json --plan-out concept.plan.json', 'node shell.mjs plan apply concept.plan.json --yes'],
   'project inspect': ['node shell.mjs project inspect --input project.json'],
   'project import': ['node shell.mjs project import --input project.json --resolve project --dry-run'],
-  new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../my-plugin --from my-plugin.companion.json'],
+  new: ['node shell.mjs new --list', 'node shell.mjs new ../folio-tools --starter custom-file-view --extension folio', 'node shell.mjs new ../quick-capture --starter quick-capture --yes', 'node shell.mjs new ../folio-tools --from folio-tools.companion.json'],
   generate: ['node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs generate --yes'],
   make: ['node shell.mjs make list', 'node shell.mjs make file-extension board --feature documents --extension board', 'node shell.mjs make context-menu inspect --feature documents --extensions md,board', 'node shell.mjs make feature bookmarks --entity bookmark --dry-run'],
   'plan inspect': ['node shell.mjs plan inspect generation.plan.json'], 'plan apply': ['node shell.mjs plan apply generation.plan.json --yes'],
