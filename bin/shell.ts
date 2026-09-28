@@ -8,21 +8,33 @@ import { failure } from '../scripts/framework/contracts.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, makerHelp, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
+import { TerminalSession } from './presentation/tui/session.ts';
+import { useTerminal, useColor } from './presentation/tui/mode.ts';
 import { safe, Back } from './presentation/prompts.ts';
-interface IO { input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
+interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
-  return Boolean(io.input.isTTY && io.error.isTTY && !args.flags.json && !args.flags['no-interaction']
-    && !args.flags.help && !args.action && !args.flags.input);
+  const env = io.env ?? process.env;
+  if (env.CI && env.CI !== 'false') return false;
+  const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
+  return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
 }
-async function interactive(args: Arguments, context: CommandContext, io: IO): Promise<void> {
+async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
+  const env = io.env ?? process.env;
+  const mode = option(args, 'ui', env.SHELL_UI ?? 'auto');
+  const terminal = useTerminal(mode, io.input, io.error, env)
+    ? new TerminalSession({ input: io.input, output: io.error, signal: controller.signal, cancel: () => controller.abort(), color: useColor(args.flags['no-color'] === true, env) }) : undefined;
   const ui = {
-    ask: (question: string) => ask(io.input, io.error, question, context.signal),
-    write: (text: string) => { io.error.write(safe(text)); },
+    rich: terminal,
+    ask: (question: string) => ask(io.input, io.error, question, context.signal, false),
+    write: (text: string) => { if (terminal) terminal.write(text); else io.error.write(safe(text)); },
   };
   const options = { ...context, project: option(args, 'project', 'design/project.json'),
     guide: option(args, 'guide') || undefined, out: option(args, 'out') || undefined, kind: option(args, 'kind') || undefined };
-  if (args.command === 'prototype') await prototypeWizard(ui, options);
-  else await studio(ui, options);
+  try {
+    terminal?.start();
+    if (args.command === 'prototype') await prototypeWizard(ui, options);
+    else await studio(ui, options);
+  } finally { terminal?.dispose(); }
 }
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;
@@ -38,7 +50,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
   try {
     const args = parseArguments(argv); command = args.command;
     const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal };
-    if (canInteract(args, io)) { await interactive(args, context, io); return 0; }
+    if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
     const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };
     if (machine) io.output.write(JSON.stringify(result) + '\n');

@@ -58,7 +58,7 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   }
   // Retired files remain tracked, but are never implicitly removed.
   for (const [path,value] of previous) if (!ownership.some(e => e.path === path)) ownership.push({path,hash:value.hash,ownership:value.ownership});
-  const receipt = generationReceipt(model.project.id, input.content.toString('utf8'), ownership);
+  const receipt = generationReceipt(text(model.project.id), input.content.toString('utf8'), ownership);
   entries.push({path:receiptPath,content:json(receipt)});
   const plan = await createFilePlan(input.vault,entries);
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');

@@ -95,6 +95,6 @@ test('CLI human help, human failures and terminal cancellation do not pollute ma
     if (String(chunk).includes('Project title: ')) queueMicrotask(() => input.write(':back\n'));
     done();
   } }); terminal.isTTY = true;
-  assert.equal(await main(['studio', '--root', root], frameworkRoot, { input, output: stdout, error: terminal }), 130);
+  assert.equal(await main(['studio', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
   input.destroy();
 }));

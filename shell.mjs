@@ -9,7 +9,7 @@ let compiled = join(root, '.framework/compiled/scripts/framework/cli.js');
 let args = process.argv.slice(2);
 if (args[0] === 'make' && args[1] === 'prototype') args = ['prototype', ...args.slice(2)];
 if (args[0] === 'help' && ['sketch', 'prototype', 'studio'].includes(args[1])) args = [args[1], '--help', ...args.slice(2)];
-const maker = !args.length || ['studio', 'sketch', 'prototype'].includes(args[0]);
+const maker = !args.length || ['studio', 'sketch', 'prototype', '--ui', '--no-color'].includes(args[0]);
 if (maker) compiled = join(root, '.framework/compiled/bin/shell.js');
 const memory = args[0] === 'memory' || (args[0] === 'help' && args[1] === 'memory');
 try {

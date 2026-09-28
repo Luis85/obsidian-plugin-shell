@@ -27,15 +27,15 @@ export const makerHelp = `Shell maker — make first, generate when ready
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy>, --guide <guide.json>,
---json, --no-interaction, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
+--json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
 All existing shell setup/make/generate/check commands remain available.
 `;
 function parseFlags(tokens: string[]): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
-  const booleans = ['json', 'no-interaction', 'help'];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply'];
+  const booleans = ['json', 'no-interaction', 'help', 'no-color'];
+  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui'];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -55,7 +55,9 @@ export function parseArguments(argv: string[]): Arguments {
   requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio', 'MAKER_COMMAND', 'Use sketch, prototype or studio.');
   const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
-  return { command, action, flags: parseFlags(tokens) };
+  const flags = parseFlags(tokens);
+  requireSketch(flags.ui === undefined || ['auto', 'tui', 'plain'].includes(String(flags.ui)), 'MAKER_UI', 'Use --ui auto, tui or plain.');
+  return { command, action, flags };
 }
 export function option(args: Arguments, name: string, fallback = ''): string {
   const value = args.flags[name]; return typeof value === 'string' ? value : fallback;

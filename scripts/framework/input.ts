@@ -30,9 +30,9 @@ export function readInput(input: Readable, signal?: AbortSignal, limit = 4_000_0
   });
 }
 /** EOF, terminal Ctrl-C and external cancellation all settle the prompt. */
-export function ask(input: Readable, output: Writable, query: string, signal?: AbortSignal): Promise<string> {
+export function ask(input: Readable, output: Writable, query: string, signal?: AbortSignal, terminal = Boolean((output as Writable & { isTTY?: boolean }).isTTY)): Promise<string> {
   requireThat(!signal?.aborted, 'CANCELLED', 'Prompt cancelled.');
-  const prompt = createInterface({ input, output, terminal: Boolean((output as Writable & { isTTY?: boolean }).isTTY) });
+  const prompt = createInterface({ input, output, terminal });
   return new Promise((accept, reject) => {
     let finished = false;
     const finish = (answer?: string) => {
