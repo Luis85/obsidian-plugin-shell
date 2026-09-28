@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { mapBounded } from '../../scripts/shared/bounded-map.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, mkdir, readdir, rm, symlink, access, realpath, rename, cp } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -116,3 +117,58 @@ test('[PLAN-03-10] real Windows 8.3 aliases support safe plans and dependency-fr
   await applyFilePlan(plan); assert.equal(await readFile(join(canonical, 'through-alias.txt'), 'utf8'), 'safe');
   await setupDryRun(alias, canonical);
 }));
+
+
+test('unchanged preimages are checked but never staged as redundant backups', () => fixture(async root => {
+  const entries = Array.from({ length: 32 }, (_, i) => ({ path: `same-${i}.txt`, content: `keep ${i}` }));
+  for (const entry of entries) await writeFile(join(root, entry.path), entry.content);
+  await writeFile(join(root, 'change.txt'), 'before');
+  entries.push({ path: 'absent.txt', content: null }, { path: 'change.txt', content: 'after' });
+  const plan = await createFilePlan(root, entries); let observed = false;
+  const report = await applyFilePlan(plan, { async beforeWrite(change, index) {
+    observed = true; assert.equal(change.path, 'change.txt'); assert.equal(index, 33);
+    assert.deepEqual((await readdir(join(root, '.codex-authoring.lock'))).sort(), ['after-33', 'before-33']);
+    assert.equal(await readFile(join(root, '.codex-authoring.lock/before-33'), 'utf8'), 'before');
+  } });
+  assert.equal(observed, true); assert.equal(report.unchanged.length, 33);
+  assert.deepEqual(report.written, ['change.txt']);
+  // No-op entries remain approval preconditions, not an excuse to ignore edits.
+  const stale = await createFilePlan(root, entries);
+  await writeFile(join(root, 'same-1.txt'), 'external');
+  await assert.rejects(applyFilePlan(stale), /PLAN_STALE/);
+  assert.equal(await readFile(join(root, 'same-1.txt'), 'utf8'), 'external');
+  await assert.rejects(access(join(root, '.codex-authoring.lock')));
+}));
+
+test('planning snapshots mutable inputs before asynchronous reads and preserves input order', () => fixture(async root => {
+  const entries = [{ path: 'safe.txt', content: 'safe' }];
+  const pending = createFilePlan(root, entries);
+  entries[0].path = '../escape'; entries[0].content = 'changed'; entries.push({ path: 'extra.txt', content: 'extra' });
+  const plan = await pending; assert.equal(plan.changes.length, 1);
+  assert.equal(plan.changes[0].path, 'safe.txt'); assert.equal(plan.changes[0].content, 'safe');
+  for (const encoding of ['', 'hex']) await assert.rejects(createFilePlan(root, [{ path: 'bad', content: '', encoding }]), /PLAN_INVALID_ENCODING/);
+  const many = Array.from({ length: 40 }, (_, i) => ({ path: `nested/${40-i}.txt`, content: String(i) }));
+  assert.deepEqual((await createFilePlan(root, many)).changes.map(c => c.path), many.map(c => c.path));
+}));
+
+test('bounded reads retain result order, reject invalid concurrency and drain failures', async () => {
+  const input = [0, 1, 2, 3, 4, 5], released = []; let active = 0, peak = 0;
+  const result = await mapBounded(input, 3, async value => {
+    active++; peak = Math.max(peak, active);
+    await new Promise(resolve => setTimeout(resolve, (6-value)*2));
+    active--; return value * 2;
+  });
+  assert.equal(peak, 3); assert.equal(active, 0); assert.deepEqual(result, input.map(v => v*2));
+  let release; const gate = new Promise(resolve => { release = resolve; });
+  const failure = new Error('read failed'); let settled = false;
+  const work = mapBounded(input, 2, async value => {
+    if (value === 0) throw failure;
+    await gate; released.push(value); return value;
+  });
+  work.catch(() => { settled = true; });
+  await new Promise(resolve => setImmediate(resolve)); assert.equal(settled, false);
+  release(); await assert.rejects(work, error => error === failure);
+  assert.deepEqual(released, [1]); assert.equal(settled, true);
+  for (const value of [0, -1, 1.5, Infinity]) await assert.rejects(mapBounded([], value, async v => v), /INVALID_CONCURRENCY/);
+  assert.deepEqual(await mapBounded([], 2, async v => v), []);
+});
