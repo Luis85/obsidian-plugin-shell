@@ -16,7 +16,7 @@ import fcntl
 
 
 class Terminal:
-    def __init__(self, node, repo, root):
+    def __init__(self, node, repo, root, command="sketch"):
         self.master, self.slave = pty.openpty()
         self.original = termios.tcgetattr(self.slave)
         self.events = []
@@ -30,7 +30,7 @@ class Terminal:
             env.pop(key, None)
         self.process = subprocess.Popen(
             [node, "--experimental-strip-types", str(repo / "shell.mjs"),
-             "studio", "--root", str(root), "--ui", "tui", "--no-color"],
+             command, "--root", str(root), "--ui", "tui", "--no-color"],
             stdin=self.slave, stdout=subprocess.PIPE, stderr=self.slave,
             cwd=repo, env=env,
         )
@@ -177,6 +177,49 @@ def cancel(node, repo, target, evidence, mode):
         terminal.close()
 
 
+def new_project(node, repo, target, agent, evidence):
+    terminal = Terminal(node, repo, target, "new")
+    try:
+        terminal.expect("Choose a project preset")
+        terminal.send("/cli\r", "Prototype title")
+        terminal.send("PTY project\r", "Problem to explore")
+        labels = ["Who will use it?", "Observable outcome", "Screens, website pages",
+                  "Reusable building blocks", "Primary journeys", "Explicit non-goals",
+                  "Data and business rules", "Failure and recovery states",
+                  "Presentation and interaction", "Concept-board checkpoint",
+                  "Accessibility and responsive", "Observable acceptance cases",
+                  "Unresolved blocking questions", "Review your prototype brief",
+                  "Do you agree to this complete brief"]
+        for label in labels:
+            terminal.send("\r", label)
+        terminal.send("\x1b[B\r", "Project package output folder")
+        terminal.send("\r", "Review before writing")
+        terminal.send("\r", "Apply this reviewed plan?")
+        terminal.send("\x1b[B\r")
+        result = terminal.finish(0)
+        request = {"schemaVersion": 1, "catalogVersion": 1, "preset": "cli",
+                   "prototypeRequest": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
+                                        "answers": {"title": "PTY project", "approved": True}}}
+        command = [node, "--experimental-strip-types", str(repo / "shell.mjs"), "new", "--root", str(agent),
+                   "--input", "-", "--json", "--no-interaction"]
+        preview = subprocess.run(command, input=json.dumps(request), text=True, capture_output=True, timeout=30, cwd=repo)
+        assert preview.returncode == 0, preview.stderr + preview.stdout
+        plan = json.loads(preview.stdout)
+        applied = subprocess.run(command + ["--apply", plan["data"]["planHash"]], input=json.dumps(request),
+                                 text=True, capture_output=True, timeout=30, cwd=repo)
+        assert applied.returncode == 0, applied.stderr + applied.stdout
+        folder = Path("projects/prepared-project")
+        files = lambda root: {str(path.relative_to(root / folder)): path.read_bytes()
+                              for path in (root / folder).rglob("*") if path.is_file()}
+        assert files(target) == files(agent), "Interactive and agent project packages differ"
+        assert files(target), "No project package was written"
+        result["completePackageByteIdentical"] = True
+        return result
+    finally:
+        terminal.retain(evidence, "new-project")
+        terminal.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--node", required=True)
@@ -188,13 +231,14 @@ def main():
     result = {"kind": "maker-real-pty", "status": "failed", "platform": os.uname().sysname}
     try:
         with tempfile.TemporaryDirectory(prefix="maker-pty-") as scratch:
-            roots = {name: Path(scratch).resolve() / name for name in ["human", "agent", "keyboard", "signal"]}
+            roots = {name: Path(scratch).resolve() / name for name in ["human", "agent", "keyboard", "signal", "new-human", "new-agent"]}
             for path in roots.values():
                 path.mkdir()
             result["authoring"] = author(args.node, repo, roots["human"], output)
             result["agentParity"] = agent_parity(args.node, repo, roots["agent"], roots["human"])
             for mode in ["keyboard", "signal"]:
                 result[mode] = cancel(args.node, repo, roots[mode], output, mode)
+            result["newProject"] = new_project(args.node, repo, roots["new-human"], roots["new-agent"], output)
             result["status"] = "passed"
     finally:
         (output / "report.json").write_text(json.dumps(result, indent=2) + "\n")

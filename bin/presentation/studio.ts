@@ -1,3 +1,5 @@
+import { projectWizard } from './project-create.ts';
+import { loadProjectCatalog, savedProjectSelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { resolve } from 'node:path';
 import { newDocument } from '../domain/document.ts';
 import { Workspace } from '../application/workspace.ts';
@@ -44,6 +46,10 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 }
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
+  const catalog = await loadProjectCatalog(), selected = await savedProjectSelection(options.root, catalog);
+  if (selected) {
+    await review(ui, await presetBoilerplatePlan(options.root, options.frameworkRoot, out, workspace.document, selected, catalog, options.signal), options.signal); return;
+  }
   const kind = await choose(ui, 'Output kind', [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], options.kind ?? 'obsidian-plugin');
@@ -66,6 +72,7 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
+    project: { label: 'Create a project: preset → frontend → prototype', run: () => projectWizard(ui, options) },
   };
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {

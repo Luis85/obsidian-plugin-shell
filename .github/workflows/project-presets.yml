@@ -1,0 +1,46 @@
+name: Project preset qualification
+on:
+  pull_request:
+    paths: ['bin/**', 'scripts/compiler/**', 'scripts/bundling/**', '.claude/skills/companion-prototype-design/**', 'package*.json', '.github/workflows/project-presets.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: project-presets-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  consumers:
+    strategy:
+      fail-fast: false
+      matrix:
+        frontend: [nuxt-ui, vanilla, angular, none]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact repository tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Check generator source with the pinned TypeScript compiler
+        run: node "$QUALIFIED_NPM" run typecheck:maker
+      - name: Provision Chromium for generated browser targets
+        if: matrix.frontend != 'none'
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Generate, resolve locks, clean-install, check, build and exercise consumers
+        run: node scripts/compiler/qualify-presets.mjs '${{ matrix.frontend }}'
+      - name: Retain exact consumer qualification and resolved lockfiles
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: project-presets-${{ matrix.frontend }}
+          path: reports/project-presets/
+          if-no-files-found: warn
+          retention-days: 7
