@@ -1,5 +1,6 @@
 import { help } from './help.ts';
-import { clean, graphemes, wrap } from './text.ts';
+import { clean, graphemes } from './text.ts';
+import { documentLines } from './documents.ts';
 import type { Key, Reply, Request, State } from './contracts.ts';
 export function initialState(request: Request): State {
   const value = request.kind === 'text' ? request.initial : '';
@@ -52,8 +53,12 @@ function editText(state: State, key: Key, text: string): Reply | undefined {
     return;
   }
   if (name === 'return') return answer(state);
-  if (name === 'enter') { if (state.request.kind === 'text' && state.request.multiline) paste(state, '\n'); else return answer(state); }
+  if (name === 'enter') return newline(state);
   else if (!key.meta && text) paste(state, text);
+}
+function newline(state: State): Reply | undefined {
+  if (state.request.kind === 'text' && state.request.multiline) { paste(state, '\n'); return; }
+  return answer(state);
 }
 function moveIndex(state: State, key: Key, height: number, max: number): boolean {
   const jumps: Record<string, number> = { up: -1, down: 1, pageup: -height, pagedown: height, home: -max, end: max };
@@ -64,11 +69,16 @@ function moveIndex(state: State, key: Key, height: number, max: number): boolean
 function selectKey(state: State, key: Key, text: string, height: number): Reply | undefined {
   if (moveIndex(state, key, height, matches(state).length)) return;
   if (key.name === 'return' || key.name === 'enter') return answer(state);
+  if (toggleSelection(state, text)) return;
+  filterKey(state, key, text);
+}
+function toggleSelection(state: State, text: string): boolean {
   const selected = matches(state)[state.index];
-  if (text === ' ' && state.request.kind === 'multi' && !state.searching && selected) {
-    state.checked = state.checked.includes(selected.id) ? state.checked.filter(id => id !== selected.id) : [...state.checked, selected.id];
-    state.error = ''; return;
-  }
+  if (text !== ' ' || state.request.kind !== 'multi' || state.searching || !selected) return false;
+  state.checked = state.checked.includes(selected.id) ? state.checked.filter(id => id !== selected.id) : [...state.checked, selected.id];
+  state.error = ''; return true;
+}
+function filterKey(state: State, key: Key, text: string): void {
   if (text === '/' && !state.searching) { state.searching = true; return; }
   if (key.name === 'tab') { state.searching = !state.searching; return; }
   if (key.ctrl || key.meta) return;
@@ -83,7 +93,7 @@ function reviewKey(state: State, key: Key, height: number, width: number): Reply
     state.section = (state.section + (key.shift ? -1 : 1) + state.request.sections.length) % state.request.sections.length;
     state.offset = 0; return;
   }
-  const count = wrap(state.request.sections[state.section]?.body ?? '', width).length;
+  const count = documentLines(state.request, state.section, width).length;
   const temp = { ...state, index: state.offset };
   moveIndex(temp, key, height, Math.max(1, count - height + 1)); state.offset = temp.index;
 }
@@ -91,17 +101,19 @@ function reviewKey(state: State, key: Key, height: number, width: number): Reply
 export function step(state: State, key: Key, text = '', height = 8, width = 70): Reply | undefined {
   if (key.ctrl && key.name === 'c') return { kind: 'cancel' };
   if (key.name === 'f1') { state.help = !state.help; state.offset = 0; return; }
-  if (state.help) {
-    const scroll = { ...state, index: state.offset };
-    moveIndex(scroll, key, height, Math.max(1, help.length - height + 1)); state.offset = scroll.index;
-    if (key.name === 'escape') { state.help = false; state.offset = 0; }
-    return;
-  }
-  if (key.name === 'escape') {
-    if (state.searching || state.query) { state.searching = false; state.query = ''; state.index = 0; return; }
-    return { kind: 'back' };
-  }
+  if (state.help) { helpKey(state, key, height); return; }
+  if (key.name === 'escape') return backKey(state);
   if (state.request.kind === 'text') return editText(state, key, text);
   if (state.request.kind === 'review') return reviewKey(state, key, height, width);
   return selectKey(state, key, text, height);
+}
+
+function helpKey(state: State, key: Key, height: number): void {
+  const scroll = { ...state, index: state.offset };
+  moveIndex(scroll, key, height, Math.max(1, help.length - height + 1)); state.offset = scroll.index;
+  if (key.name === 'escape') { state.help = false; state.offset = 0; }
+}
+function backKey(state: State): Reply | undefined {
+  if (state.searching || state.query) { state.searching = false; state.query = ''; state.index = 0; return; }
+  return { kind: 'back' };
 }

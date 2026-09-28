@@ -1,6 +1,7 @@
 import { help } from './help.ts';
 import { clean, clip, fit, graphemes, wrap } from './text.ts';
 import { matches } from './state.ts';
+import { documentLines } from './documents.ts';
 import type { Context, State } from './contracts.ts';
 export interface Size { width: number; height: number; contentWidth: number; bodyHeight: number; sidebar: number }
 export function dimensions(columns = 80, rows = 24): Size {
@@ -29,8 +30,7 @@ function textLines(state: State, size: Size): string[] {
 }
 function reviewLines(state: State, size: Size): string[] {
   if (state.request.kind !== 'review') return [];
-  const section = state.request.sections[state.section];
-  const lines = wrap(section?.body ?? '', size.contentWidth);
+  const lines = documentLines(state.request, state.section, size.contentWidth);
   const max = Math.max(0, lines.length - size.bodyHeight + 1);
   state.offset = Math.min(state.offset, max);
   return [...lines.slice(state.offset, state.offset + size.bodyHeight - 1), `Lines ${state.offset + 1}-${Math.min(lines.length, state.offset + size.bodyHeight - 1)} / ${lines.length} | Tab: next document`];
@@ -58,21 +58,29 @@ function footer(state: State | null): string {
 /** One bounded frame, with terminal-default colors and a text marker independent of color. */
 export function frame(state: State | null, context: Context, notice: string, size: Size, color: boolean): string[] {
   if (size.width < 59 || size.height < 18) {
-    return ['SHELL MAKER', 'Resize to at least 60 columns x 18 rows.', 'Draft retained. Ctrl+C cancels safely.'].slice(0, size.height).map(line => clip(line, size.width));
+    const message = ['SHELL MAKER', 'Resize to at least 60 columns x 18 rows.', 'Draft retained. Ctrl+C cancels safely.'];
+    return Array.from({ length: size.height }, (_, row) => clip(message[row] ?? '', size.width));
   }
-  const status = context.dirty ? 'UNSAVED DRAFT' : 'SAVED / NO PENDING EDITS';
-  const lines = [` SHELL / MAKER    ${context.title}`, ` ${context.location} | ${status}`, '-'.repeat(size.width),
-    ` ${state?.request.title ?? 'Preparing your workspace'}`, ` ${subheading(state)}`, ''];
+  const lines = heading(state, context, size);
   const content = state ? body(state, size) : ['Preparing the next step...'];
   const side = ['PROJECT CONTEXT', '', ...context.details.flatMap(line => wrap(line, size.sidebar - 3))];
   for (let row = 0; row < size.bodyHeight; row++) {
     const prefix = size.sidebar ? fit(side[row] ?? '', size.sidebar - 2) + '| ' : '';
     lines.push(prefix + ' ' + clip(content[row] ?? '', size.contentWidth));
   }
-  lines.push('-'.repeat(size.width), ' ' + (state?.error || notice || 'Make first. Save JSON, then generate. Nothing is published.'), ' ' + footer(state));
+  lines.push('-'.repeat(size.width), ' ' + statusLine(state, notice), ' ' + footer(state));
   while (lines.length < size.height) lines.push('');
   return lines.slice(0, size.height).map((line, index) => {
     const safe = clip(line, size.width);
     return color && (index === 0 || index === 3) ? `\x1b[36m${safe}\x1b[0m` : safe;
   });
+}
+
+function heading(state: State | null, context: Context, size: Size): string[] {
+  const status = context.dirty ? 'UNSAVED DRAFT' : 'SAVED / NO PENDING EDITS';
+  return [` SHELL / MAKER    ${context.title}`, ` ${context.location} | ${status}`, '-'.repeat(size.width),
+    ` ${state?.request.title ?? 'Preparing your workspace'}`, ` ${subheading(state)}`, ''];
+}
+function statusLine(state: State | null, notice: string): string {
+  return state?.error || notice || 'Make first. Save JSON, then generate. Nothing is published.';
 }

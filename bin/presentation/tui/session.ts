@@ -73,9 +73,7 @@ export class TerminalSession implements RichPrompts {
   }
   private key = (text: string | undefined, key: Key): void => {
     if (this.ended) return;
-    if (key.name === 'paste-start') { this.pasteBuffer = ''; return; }
-    if (key.name === 'paste-end') { this.finishPaste(); return; }
-    if (this.pasteBuffer !== null) { this.pasteBuffer = (this.pasteBuffer + (key.sequence ?? text ?? '')).slice(0, 10001); return; }
+    if (this.collectPaste(text, key)) return;
     if (key.ctrl && key.name === 'c') { this.complete({ kind: 'cancel' }); return; }
     if (!this.state) return;
     const size = dimensions(this.options.output.columns, this.options.output.rows);
@@ -84,6 +82,12 @@ export class TerminalSession implements RichPrompts {
     if (reply) this.complete(reply);
     this.draw();
   };
+  private collectPaste(text: string | undefined, key: Key): boolean {
+    if (key.name === 'paste-start') { this.pasteBuffer = ''; return true; }
+    if (key.name === 'paste-end') { this.finishPaste(); return true; }
+    if (this.pasteBuffer === null) return false;
+    this.pasteBuffer = (this.pasteBuffer + (key.sequence ?? text ?? '')).slice(0, 10001); return true;
+  }
   private finishPaste(): void {
     if (this.pasteBuffer !== null && this.state) paste(this.state, this.pasteBuffer);
     this.pasteBuffer = null; this.draw();

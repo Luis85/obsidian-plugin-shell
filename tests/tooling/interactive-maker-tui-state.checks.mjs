@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { initialState, step, paste, matches } from '../../bin/presentation/tui/state.ts';
+import { documentLines } from '../../bin/presentation/tui/documents.ts';
 import { dimensions, frame } from '../../bin/presentation/tui/frame.ts';
 import { clean, cells, clip, fit, wrap, graphemes } from '../../bin/presentation/tui/text.ts';
 import { useColor, useTerminal } from '../../bin/presentation/tui/mode.ts';
@@ -101,4 +102,14 @@ test('plain accessibility, dumb terminals and redirected streams never activate 
   assert.equal(useColor(false, {}), true); assert.equal(useColor(false, { NO_COLOR: '' }), true);
   for (const env of [{ NO_COLOR: '0' }, { NODE_DISABLE_COLORS: '1' }, { FORCE_COLOR: '0' }]) assert.equal(useColor(false, env), false);
   assert.equal(useColor(true, {}), false);
+});
+
+test('large reviews reuse wrapped content while resize, section and content edits invalidate it', () => {
+  const request = { kind: 'review', title: 'Plan', sections: [{ title: 'Files', body: 'entry\n'.repeat(5000) }, { title: 'Prompt', body: 'Another document' }] };
+  const lines = documentLines(request, 0, 80); assert.equal(lines.length, 5001);
+  assert.equal(documentLines(request, 0, 80), lines);
+  assert.notEqual(documentLines(request, 0, 70), lines);
+  assert.deepEqual(documentLines(request, 1, 80), ['Another document']);
+  request.sections[1].body = 'Changed'; assert.deepEqual(documentLines(request, 1, 80), ['Changed']);
+  assert.deepEqual(documentLines(request, 99, 80), ['']);
 });

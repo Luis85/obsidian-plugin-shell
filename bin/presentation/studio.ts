@@ -72,9 +72,7 @@ export async function studio(ui: Prompts, options: StudioOptions): Promise<Works
   const actions = studioActions(ui, options, workspace);
   const choices = [...Object.entries(actions).map(([id, action]) => ({ id, label: action.label })), { id: 'exit', label: 'Exit' }];
   while (true) {
-    workspaceContext(ui, workspace);
-    const summary = outline(workspace.document);
-    if (!ui.rich) ui.write(`\n${summary.project.name} · ${summary.pages.length} pages · ${summary.components.length} components${workspace.dirty ? ' · unsaved' : ''}\n`);
+    showWorkspace(ui, workspace);
     try {
       const action = await choose(ui, 'What would you like to make?', choices);
       if (action === 'exit') {
@@ -82,4 +80,11 @@ export async function studio(ui: Prompts, options: StudioOptions): Promise<Works
       } else await actions[action]!.run();
     } catch (error) { reportError(ui, error); }
   }
+}
+
+function showWorkspace(ui: Prompts, workspace: Workspace): void {
+  workspaceContext(ui, workspace);
+  if (ui.rich) return;
+  const summary = outline(workspace.document);
+  ui.write(`\n${summary.project.name} · ${summary.pages.length} pages · ${summary.components.length} components${workspace.dirty ? ' · unsaved' : ''}\n`);
 }
