@@ -10,6 +10,7 @@ import * as projection from '../../scripts/companion/sitemap/projection.ts';
 import * as layout from '../../scripts/companion/sitemap/layout.ts';
 import * as arrangement from '../../scripts/companion/sitemap/arrangement.ts';
 import * as create from '../../scripts/companion/sitemap/create.ts';
+import * as journeyDraft from '../../scripts/companion/sitemap/journey-draft.ts';
 import * as validate from '../../scripts/companion/sitemap/validate.ts';
 import { canonicalKey, assertJson } from '../../scripts/companion/sitemap/safety.ts';
 import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
@@ -18,7 +19,7 @@ const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');
 const Pinia = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/pinia.iife.prod.js', root), 'utf8') + ';Pinia;');
 const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'commands.ts': commands,
-  'layout.ts': layout, 'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
+  'journey-draft.ts': journeyDraft, 'layout.ts': layout, 'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
 const source = readFileSync(new URL('docs/concepts/companion/editor/composables/use-editor.ts', root), 'utf8');
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
 const exports = {};
@@ -166,4 +167,71 @@ test('non-drag position form starts from the same compact display coordinates as
   assert.equal(Number(store.form.x), positions[store.selectedId].x);
   assert.equal(Number(store.form.y), positions[store.selectedId].y);
   assert.equal(writes(), 0);
+});
+
+
+test('journey authoring selects an explicit branch, edits one saved journey and supports exact undo', async t => {
+  const {store,document,writes}=await fixture(t);
+  const edge=store.snapshot.links.find(e=>e.kind==='navigate');
+  await store.commit({type:'link',transition:{...edge,id:'edge-99000',label:'Alternative action'}});
+  const original=structuredClone(document().design);
+  store.open('journey');store.form.journeyName='Choose an action';
+  store.editJourney({type:'append',surface:edge.from});store.editJourney({type:'append',surface:edge.to});
+  assert.equal(store.journeyDraft.journey.steps[1].via,null);
+  assert.ok(store.transitionOptions(1).some(e=>e.id==='edge-99000'));
+  store.editJourney({type:'transition',step:'step-2',via:'edge-99000'});
+  assert.equal(writes(),1,'draft edits do not write');await store.applyForm();
+  const id=store.journeyId, saved=structuredClone(document().design.sitemap.journeys.find(j=>j.id===id));
+  assert.equal(saved.steps[1].via,'edge-99000');assert.equal(store.panel,'');
+  assert.equal(store.journeyDraft,null);assert.equal(store.lens,'journey');
+  store.open('journey-edit');assert.deepEqual(store.journeyDraft.journey,saved);
+  store.form.journeyName='Renamed journey';await store.applyForm();
+  const updated=document().design.sitemap.journeys.find(j=>j.id===id);
+  assert.equal(updated.name,'Renamed journey');assert.deepEqual(updated.steps,saved.steps);
+  assert.equal(document().design.sitemap.journeys.length,1);
+  assert.deepEqual(document().design.nodes,original.nodes);assert.deepEqual(document().design.links,original.links);
+  assert.deepEqual(document().design.visualDesigns,original.visualDesigns);
+  await store.undo();assert.deepEqual(document().design.sitemap.journeys.find(j=>j.id===id),saved);
+  await store.redo();assert.equal(document().design.sitemap.journeys.find(j=>j.id===id).name,'Renamed journey');
+});
+test('journey cancellation and save failure preserve the original project and editable draft', async t => {
+  const {store,host,document,writes}=await fixture(t),original=structuredClone(document());
+  const edge=store.snapshot.links.find(e=>e.kind==='navigate');
+  store.open('journey');store.form.journeyName='Pending journey';
+  for(const surface of [edge.from,edge.to])store.editJourney({type:'append',surface});
+  host.save=async()=>({status:'failed',certainty:'unchanged'});await store.applyForm();
+  assert.equal(store.panel,'journey');assert.equal(store.form.journeyName,'Pending journey');
+  assert.equal(store.journeyDraft.journey.steps.length,2);assert.equal(writes(),0);assert.deepEqual(document(),original);
+  store.cancel();assert.equal(store.journeyDraft,null);assert.equal(store.panel,'');assert.deepEqual(document(),original);
+});
+test('reload refuses dirty names and open journey drafts instead of discarding them', async t => {
+  const {store,host,writes}=await fixture(t);let reads=0;const read=host.read;
+  host.read=async()=>{reads++;return read();};
+  store.draftName='Unsubmitted name';store.dirty=true;await store.load();
+  assert.equal(store.draftName,'Unsubmitted name');assert.equal(store.dirty,true);assert.equal(reads,0);
+  store.cancel();store.open('journey');store.form.journeyName='Unsubmitted journey';await store.load();
+  assert.equal(store.form.journeyName,'Unsubmitted journey');assert.equal(store.panel,'journey');assert.equal(reads,0);
+  store.cancel();await store.load();assert.equal(reads,1);assert.equal(writes(),0);
+});
+test('a stale journey save retains its draft and cannot overwrite or reload away concurrent work', async t => {
+  const {store,host,document,writes}=await fixture(t),before=structuredClone(document());
+  const edge=store.snapshot.links.find(e=>e.kind==='navigate');
+  store.open('journey');store.form.journeyName='Stale draft';
+  for(const surface of [edge.from,edge.to])store.editJourney({type:'append',surface});
+  host.save=async()=>({status:'conflict'});await store.applyForm();
+  assert.equal(store.available,false);assert.equal(store.panel,'journey');assert.match(store.error,/Another view/);
+  const draft=structuredClone(store.journeyDraft);await store.load();assert.deepEqual(store.journeyDraft,draft);
+  assert.equal(writes(),0);assert.deepEqual(document(),before);
+});
+test('pending journey save blocks draft mutations, duplicate submissions, cancellation and reload', async t => {
+  const {store,host,writes}=await fixture(t);const save=host.save,read=host.read;let release,calls=0,reads=0;
+  host.read=async()=>{reads++;return read();};
+  host.save=async request=>{calls++;await new Promise(resolve=>{release=resolve;});return save(request);};
+  const edge=store.snapshot.links.find(e=>e.kind==='navigate');
+  store.open('journey');store.form.journeyName='One write';
+  for(const surface of [edge.from,edge.to])store.editJourney({type:'append',surface});
+  const pending=store.applyForm();assert.equal(store.busy,true);
+  store.editJourney({type:'remove',step:'step-2'});store.cancel();await store.load();await store.applyForm();
+  assert.equal(store.journeyDraft.journey.steps.length,2);assert.equal(store.panel,'journey');assert.equal(calls,1);assert.equal(reads,0);
+  release();await pending;assert.equal(writes(),1);assert.equal(store.panel,'');
 });

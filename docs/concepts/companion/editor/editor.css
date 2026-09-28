@@ -19,3 +19,13 @@
 .jm-root .jm-toolbar{flex-wrap:wrap}.jm-root .jm-zoom{max-width:calc(100% - 28px);flex-wrap:wrap}
 .jm-dialog input[type=number]{color:var(--jm-text);background:var(--jm-bg);border:1px solid var(--jm-line);border-radius:5px;padding:9px;font:inherit}
 @media(prefers-reduced-motion:reduce){.jm-root *,.jm-dialog *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Journey maintenance stays inside the existing editor dialog. */
+.jm-journey-fields { min-width:0; padding:0; border:0; margin:0; }
+.jm-edit-steps { display:grid; gap:12px; padding-left:24px; }
+.jm-edit-steps > li { min-width:0; padding:12px; border:1px solid var(--jm-line); border-radius:8px; }
+.jm-step-heading { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; }
+.jm-step-heading code { font-size:11px; overflow-wrap:anywhere; }
+.jm-edit-steps select,.jm-journey-fields .jm-actions select { max-width:100%; min-width:0; }
+.jm-edit-steps .jm-actions { margin-top:8px; flex-wrap:wrap; }
+.jm-edit-steps .jm-actions button { float:none; font-size:12px; }

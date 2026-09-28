@@ -2,9 +2,10 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import UButton from '@nuxt/ui/components/Button.vue';
 import UInput from '@nuxt/ui/components/Input.vue';
+import JourneyFields from './JourneyFields.vue';
 import type { EditorStore } from '../composables/use-editor.ts';
 defineProps<{store:EditorStore}>();
-const titles:Record<string,string>={create:'Add a surface',move:'Move surface',route:'Set an explicit route',link:'Add a navigation link',journey:'Create a journey',remove:'Review surface removal',arrange:'Arrange the complete map',position:'Set visual position'};
+const titles:Record<string,string>={create:'Add a surface',move:'Move surface',route:'Set an explicit route',link:'Add a navigation link',journey:'Create a journey','journey-edit':'Edit journey',remove:'Review surface removal',arrange:'Arrange the complete map',position:'Set visual position'};
 const dialog=ref<HTMLDialogElement|null>(null);
 let returnFocus:HTMLElement|null=null;
 onMounted(()=>{returnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;dialog.value?.showModal();});
@@ -21,12 +22,7 @@ onBeforeUnmount(()=>{dialog.value?.close();returnFocus?.focus();});
       <template v-if="store.panel==='move'||store.panel==='create'&&['page','group'].includes(store.form.kind)"><label for="jm-parent">Parent</label><select id="jm-parent" v-model="store.form.parent"><option value="">Top level</option><option v-for="node in store.snapshot?.nodes.filter(n=>['view','page','group'].includes(n.kind))" :key="node.id" :value="node.id">{{ node.label }} · {{ node.kind }}</option></select></template>
       <template v-if="store.panel==='route'"><label for="jm-route">Route</label><UInput id="jm-route" v-model="store.form.name" placeholder="/projects/:projectId" autofocus /><p class="jm-help">Local paths only. Existing routes are not derived from page names or hierarchy.</p></template>
       <template v-if="store.panel==='link'"><label for="jm-link-name">Action label</label><UInput id="jm-link-name" v-model="store.form.name" autofocus /><label for="jm-target">Destination</label><select id="jm-target" v-model="store.form.target"><option value="">Choose a surface</option><option v-for="node in store.snapshot?.nodes.filter(n=>n.kind!=='group'&&n.id!==store.selectedId)" :value="node.id" :key="node.id">{{ node.label }}</option></select></template>
-      <template v-if="store.panel==='journey'">
-        <label for="jm-journey-name">Journey name</label><UInput id="jm-journey-name" v-model="store.form.journeyName" autofocus />
-        <p class="jm-help">Add existing surfaces in order. Missing navigation transitions remain visible review findings; the editor does not invent actions.</p>
-        <ol class="jm-steps"><li v-for="(id,index) in store.form.steps" :key="index">{{ store.snapshot?.nodes.find(n=>n.id===id)?.label }} <button type="button" @click="store.form.steps.splice(index,1)" :aria-label="'Remove step '+(index+1)">Remove</button></li></ol>
-        <label for="jm-step">Next step</label><div class="jm-actions"><select id="jm-step" v-model="store.form.target"><option value="">Choose a surface</option><option v-for="node in store.snapshot?.nodes.filter(n=>n.kind!=='group')" :value="node.id" :key="node.id">{{ node.label }}</option></select><UButton color="neutral" variant="outline" :disabled="!store.form.target" @click="store.form.steps.push(store.form.target)">Add step</UButton></div>
-      </template>
+      <JourneyFields v-if="store.panel==='journey'||store.panel==='journey-edit'" :store="store" />
       <template v-if="store.panel==='remove'&&store.removal">
         <p>Removing <strong>{{ store.selected?.label }}</strong> affects {{ store.removal.links.length }} navigation links, {{ store.removal.routes.length }} routes and {{ store.removal.journeySteps.length }} journey steps.</p>
         <p v-if="store.removal.canRemove">Journey steps will remain explicitly unresolved. Undo can restore this operation.</p>
