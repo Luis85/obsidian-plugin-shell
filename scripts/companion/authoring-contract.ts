@@ -1,3 +1,4 @@
+import { validateStorybookOptions, type StorybookOptions } from './storybook-contract.mjs';
 /** Current authoring format. The retained v1–v5 contract remains the validator for unchanged subsystems. */
 import {
   COMPANION_FORMAT, COMPANION_MAX_BYTES, companionDesignKey,
@@ -15,7 +16,7 @@ export interface AuthoringDocument {
   executable: false;
   project: { id: string; name: string; author: string; version: string; description: string };
   settings: { codebaseFolder: string; testsFolder: string };
-  design: SitemapDesign & { schema: number };
+  design: SitemapDesign & { schema: number; storybook?: StorybookOptions };
   notes: string[];
 }
 export interface AuthoringMigration {
@@ -29,13 +30,16 @@ function assertAuthoringDocument(input: unknown): asserts input is AuthoringDocu
   assertJson(input);
   requireSitemap(record(input) && Number.isInteger(input.schemaVersion) &&
     [1, 2, 3, 4, 5, 6].includes(Number(input.schemaVersion)), 'COMPANION_VERSION', 'Unsupported authoring format/version.');
+  requireSitemap(record(input.design), 'COMPANION_INVALID', 'Expected a saved design.');
+  validateStorybookOptions(input.design.storybook);
+  // Strip only the recognized optional tooling namespace before frozen legacy validation.
+  const legacy = withoutStorybook(input);
   if (input.schemaVersion !== 6) {
-    validateCompanionDocument(input);
+    validateCompanionDocument(legacy);
   } else {
     requireSitemap(record(input.design) && input.design.schema === 6,
       'COMPANION_VERSION', 'Transfer and design schema versions must match.');
-    // Only the two new subsystems are removed for legacy-field validation. Unknown fields still fail.
-    const legacy = structuredClone(input);
+    // Only recognized new subsystems are removed. All other unknown fields still fail.
     requireSitemap(record(legacy.design), 'COMPANION_INVALID', 'Expected a saved design.');
     delete legacy.design.sitemap; delete legacy.design.features;
     legacy.schemaVersion = 5; legacy.design.schema = 5;
@@ -62,7 +66,7 @@ export function parseAuthoringDocument(text: string): AuthoringDocument {
 export function migrateAuthoringDocument(input: unknown): { document: AuthoringDocument; report: AuthoringMigration | null } {
   const source = validateAuthoringDocument(input);
   if (source.schemaVersion === 6) return { document: source, report: null };
-  const migrated = migrateCompanionDocument(source);
+  const migrated = migrateLegacyWithStorybook(source);
   const document = structuredClone(migrated.document);
   document.schemaVersion = 6; document.design.schema = 6;
   return { document: validateAuthoringDocument(document), report: {
@@ -75,9 +79,21 @@ export const authoringReader = {
   parse: parseAuthoringDocument,
   migrate(input: unknown) {
     const document = validateAuthoringDocument(input);
-    return document.schemaVersion === 6 ? { document, report: null } : migrateCompanionDocument(document);
+    return document.schemaVersion === 6 ? { document, report: null } : migrateLegacyWithStorybook(document);
   },
 };
 export function authoringDesignKey(key: string): boolean {
-  return key === 'sitemap' || key === 'features' || companionDesignKey(key);
+  return key === 'storybook' || key === 'sitemap' || key === 'features' || companionDesignKey(key);
+}
+
+/** Clone before adaptation: option validation never mutates a caller's imported JSON. */
+function withoutStorybook(input: Record<string, unknown>): Record<string, unknown> {
+  const legacy = structuredClone(input);
+  if (record(legacy.design)) delete legacy.design.storybook;
+  return legacy;
+}
+function migrateLegacyWithStorybook(source: AuthoringDocument) {
+  const migrated = migrateCompanionDocument(withoutStorybook({ ...source }));
+  if (source.design.storybook !== undefined) migrated.document.design.storybook = structuredClone(source.design.storybook);
+  return migrated;
 }

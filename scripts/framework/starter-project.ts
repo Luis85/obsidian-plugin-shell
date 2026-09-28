@@ -1,3 +1,4 @@
+import { validateStorybookOptions } from '../companion/storybook-contract.mjs';
 /** One-command project creation from a reviewed built-in starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
@@ -17,7 +18,7 @@ import { exportedProject } from './project-from.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
 interface StarterCatalog { starters: StarterEntry[] }
-interface StarterSummary { directory: string; nextSteps?: string[] }
+interface StarterSummary { directory: string; nextSteps?: string[]; compiler?: { readiness: { dependencies: string } } }
 /** A kit or configured consumer carries its verified template under .framework/template. */
 async function templateRoot(context: Context): Promise<string> {
   if (!await exists(join(context.frameworkRoot, '.framework/kit.json'))) return context.frameworkRoot;
@@ -83,6 +84,12 @@ export async function starterProjectPlan(request: Request, context: Context) {
   requireThat(!from || request.options.starter === undefined, 'SOURCE_CONFLICT', 'Use either --starter <id> or --from <project.json>, not both.');
   const place = await placement(context, request.args[0], request.options['inside-vault'] === true);
   const created = from ? await fromExport(request, context) : await fromStarter(request, context, place.directory);
+  if (request.options.storybook || request.options['storybook-stories']) {
+    const existing = validateStorybookOptions(created.document.design.storybook);
+    created.document.design.storybook = { ...existing,
+      ...(request.options.storybook ? { enabled: true } : {}),
+      ...(request.options['storybook-stories'] ? { generateStories: true } : {}) };
+  }
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
     const input = join(scratch, 'project.json');
@@ -90,6 +97,7 @@ export async function starterProjectPlan(request: Request, context: Context) {
     const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template });
     const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
+      compiler: planned.summary.compiler,
       acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings] };
     return { ...planned, summary };
   } finally { await rm(scratch, { recursive: true, force: true }); }
@@ -116,21 +124,23 @@ async function fromStarter(request: Request, context: Context, directory: string
   const document = customizeStarter(catalog, entry.id, { id, name: stringOption(request.options, 'name') ?? derivedName(id), ...(author === undefined ? {} : { author }), ...(extension === undefined ? {} : { extension }), ...(extensions === undefined ? {} : { extensions }) });
   return { template, document, origin: { starter: { id: entry.id, title: entry.name, version: entry.version, sha256: entry.sha256 } }, warnings: [] as string[] };
 }
-function nextSteps(directory: string): string[] {
-  return [`cd ${JSON.stringify(directory)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];
+function nextSteps(directory: string, install: string): string[] {
+  return [`cd ${JSON.stringify(directory)}`, install, 'npm run check', 'npm run dev:obsidian', 'npm run test:watch'];
 }
 /** Adds guidance, and only after a written project runs the explicitly requested install/verify. */
 export async function completeStarterProject(outcome: Result, request: Request, context: Context): Promise<Result> {
   if (!['planned', 'applied', 'blocked'].includes(outcome.status)) return outcome;
   const data = outcome.data as { summary: StarterSummary };
-  const directory = data.summary.directory, steps = nextSteps(directory);
+  const directory = data.summary.directory;
+  const install = data.summary.compiler?.readiness.dependencies === 'resolution-required' ? 'install' : 'ci';
+  const steps = nextSteps(directory, 'npm ' + install);
   const guide = { readme: join(directory, 'README.md'), implementation: join(directory, 'PROJECT-IMPLEMENTATION.md') };
   if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'Nothing has been written. To create the project, confirm when asked or re-run with --yes (or --apply <planHash>).' } };
   if (!request.options.install) return { ...outcome, data: { ...data, written: true, nextSteps: steps, guide } };
   const project: Context = { ...context, root: directory }, npm = await npmEntry();
   const timeout = Number(stringOption(request.options, 'timeout') ?? '600000');
   const executions: Record<string, unknown> = {};
-  for (const [label, args] of [['npm ci', ['ci', '--no-fund']], ['npm run verify:project', ['run', 'verify:project']]] as const) {
+  for (const [label, args] of [['npm ' + install, [install, '--no-fund']], ['npm run verify:project', ['run', 'verify:project']]] as const) {
     context.progress?.(`\n> ${label} (in ${directory})\n`);
     try { const { exitCode, signal, truncated } = await runNode(project, npm, args, timeout); executions[label] = { exitCode, signal, truncated }; }
     catch (error) {
@@ -139,5 +149,5 @@ export async function completeStarterProject(outcome: Result, request: Request, 
       failed.details = { written: true, directory, completed: executions, failure: error.details ?? null, automaticRetry: false }; throw failed;
     }
   }
-  return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => step !== 'npm ci'), guide } };
+  return { ...outcome, data: { ...data, written: true, install: executions, nextSteps: steps.filter(step => step !== 'npm ' + install), guide } };
 }

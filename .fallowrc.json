@@ -2,6 +2,7 @@
   "entry": [
     "scripts/compiler/index.ts",
     "scripts/compiler/build-clickdummy.mjs",
+    "scripts/compiler/verify-storybook.mjs",
     "src/main.ts",
     "src/features/api.ts",
     "harness/app/main.ts",
@@ -211,6 +212,7 @@
         "name": "companion-authoring-contract",
         "patterns": [
           "scripts/companion/authoring-contract.ts",
+          "scripts/companion/storybook-contract.mjs",
           "scripts/companion/concepts/**",
           "scripts/companion/sitemap/**",
           "scripts/companion/visual/**",

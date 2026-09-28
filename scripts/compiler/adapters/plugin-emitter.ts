@@ -1,3 +1,4 @@
+import { storybookPackage, storybookCode } from '../../companion/compiler/storybook-code.ts';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
@@ -58,6 +59,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   const pinned: Record<string,string> = {...pkg.devDependencies,...pkg.dependencies};
   const declared = Object.entries(visualPackages(m,pinned)).filter(([name]) => !Object.hasOwn(pinned,name));
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
+  storybookPackage(m, pkg);
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
   add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
@@ -78,6 +80,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('relationships', () => relationshipCode(templateRoot,m,add));
   await emit('http', () => httpCode(templateRoot,m,add));
   await emit('clickdummy', () => clickdummyCode(m,add));
+  await emit('storybook', () => storybookCode(m,add));
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {

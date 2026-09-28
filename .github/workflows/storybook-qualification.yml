@@ -1,0 +1,55 @@
+name: Optional Storybook qualification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storybook-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  opt-in:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Select the qualified npm and install locked framework tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Check types and independent opt-in contracts
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:compiler
+          node "$QUALIFIED_NPM" run typecheck:generator
+          node "$QUALIFIED_NPM" run typecheck:framework
+          node --test tests/tooling/compiler-storybook.checks.mjs
+      - name: Generate a separately opted-in preview project without installation
+        run: node shell.mjs new "$RUNNER_TEMP/storybook-fixture" --from tests/fixtures/companion/detail-v3.json --storybook --storybook-stories --yes --json
+      - name: Explicitly resolve Storybook development dependencies in the scratch project
+        working-directory: ${{ runner.temp }}/storybook-fixture
+        run: node "$QUALIFIED_NPM" install --no-fund
+      - name: Check generated Vue and Storybook files with the project TypeScript 6 compiler
+        working-directory: ${{ runner.temp }}/storybook-fixture
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:project
+          node "$QUALIFIED_NPM" run typecheck:storybook
+          node "$QUALIFIED_NPM" run build-storybook
+      - name: Provision a browser and exercise the real generated Storybook
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/compiler/verify-storybook.mjs "$RUNNER_TEMP/storybook-fixture"
+      - name: Retain separate browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: storybook-qualification
+          path: reports/storybook
+          if-no-files-found: ignore
+          retention-days: 7
