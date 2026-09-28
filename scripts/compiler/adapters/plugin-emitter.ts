@@ -20,7 +20,7 @@ import { devkitFiles, makerTests, renderTemplate } from '../../companion/compile
 import { relocateFrameworkDocuments } from '../../companion/compiler/framework-docs.ts';
 /** Emit the existing plugin project from explicit template data, without host I/O. */
 export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Model): Promise<Entry[]> {
-  const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file }]));
+  const entries = new Map(templateRoot.frameworkFiles.map(file => [file.path, { ...file } ]));
   relocateFrameworkDocuments(entries);
   const collector = artifactCollector([...entries.values()].map(file => ({ ...file, producer: 'framework' })));
   let producer = 'project';
@@ -44,7 +44,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   pkg.scripts['test'] = 'vitest run --config vitest.project.config.mjs';
   pkg.scripts['test:watch'] = 'vitest --config vitest.project.config.mjs';
   pkg.scripts['test:tdd'] = `vitest --config vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
-  pkg.scripts['typecheck:project'] = 'vue-tsc --noEmit --project tsconfig.project.json';
+  pkg.scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
   pkg.scripts['build:clickdummy'] = 'node shell.mjs clickdummy build';
   pkg.scripts['doctor'] = 'node shell.mjs doctor';

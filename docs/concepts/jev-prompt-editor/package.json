@@ -12,6 +12,7 @@
     "test:logic": "node --test tests/logic.test.cjs",
     "test:logic-browser": "python tests/logic.browser.py",
     "examples:logic": "node scripts/export-logic-examples.cjs",
-    "schema:logic": "python scripts/build-logic-schemas.py"
+    "schema:logic": "python scripts/build-logic-schemas.py",
+    "test:toolchain": "node --test tests/compiler.test.cjs"
   }
 }

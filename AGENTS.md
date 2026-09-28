@@ -30,7 +30,13 @@ not a newly reviewed selectable language. Do not advertise unexecuted qualificat
 
 ## Commands and environment
 
-Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
+Use the qualified Node 24.21.0/npm 11.19.1 with the exact package-lock.
+Use the repository-local **TypeScript 6.0.3** for all new source and prototype
+checks. Do not substitute a global TypeScript 5.x installation, link it into
+node_modules, or report a 5.x run as current validation. If locked tooling cannot
+be installed, report the TypeScript check as not run and use hosted qualification.
+Historical evidence records retain their actual compiler versions. Use the npm
+typecheck scripts; they select workspace compiler entrypoints, never PATH tools. `npm run setup` starts through dependency-free Node scripts, reviews its plan, installs, builds, type-checks, tests and optionally installs to .dev-vault. No install/prepare lifecycle hook may recurse into setup.
 
 `npm run verify` performs static/service/coverage/artifact/legacy-baseline/harness-build checks. Served UI requires explicit browser provisioning and `npm run test:e2e`. `test:coverage` retains the selected-core gate; `test:coverage:production` gates every production TS/Vue input at 90% lines/statements/functions and 85% branches, with independent domain/application/features 95%/90% floors. Both run in verify; invalid/missing coverage inputs fail closed. Moving business code into features never weakens its coverage gate. `check:analyzer` blocks on the full fallow report; the independent boundary gate remains. `check:security` is a separate live all-category audit and fails honestly on registry errors. Use actual tool output, not assumed success.
 

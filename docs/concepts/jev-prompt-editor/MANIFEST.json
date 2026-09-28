@@ -155,8 +155,8 @@
     },
     {
       "path": "integration/PR5-HANDOFF.md",
-      "bytes": 10816,
-      "sha256": "b99115b27056280a15a5e552d50910633c5e4669268b42a28aa3f58f834839ee"
+      "bytes": 10934,
+      "sha256": "ae4f1b064a60d3b713cbd2efcf0064c7a1acfd553f2444f244d3103fbfbdf8df"
     },
     {
       "path": "jev-studio.html",
@@ -165,13 +165,13 @@
     },
     {
       "path": "package.json",
-      "bytes": 734,
-      "sha256": "bd0ed58765600c076900b4077386efeb06eae7ea182c325a317f4bfd8535b74a"
+      "bytes": 795,
+      "sha256": "de8400eee54d68a6691348afd809a0649a3f29a5a5e700c8da0410010dbdf1be"
     },
     {
       "path": "README.md",
-      "bytes": 9863,
-      "sha256": "9d8c2d3bae95f94f0985018b342f059ed40da001015e108935ecdadcbf31ee1e"
+      "bytes": 10642,
+      "sha256": "8e2fc1eb3d34d33a09549cb4a39dd7711ce1ebbc06aa615f68fb919e7e9e740d"
     },
     {
       "path": "schema/jev-library.schema.json",
@@ -210,8 +210,8 @@
     },
     {
       "path": "scripts/build.cjs",
-      "bytes": 4038,
-      "sha256": "fc9b12b119ef72efff5481913a1dfccc4ed429019bedce09d28f06f3a279a5e6"
+      "bytes": 3407,
+      "sha256": "3afb7783d8c00fb87d5150e5765537c4fb163fdc782778b9e9bf0865fc8dc9b5"
     },
     {
       "path": "scripts/capture-logic.py",
@@ -222,6 +222,11 @@
       "path": "scripts/capture-previews.py",
       "bytes": 1840,
       "sha256": "6b70df5ae0e435b894b65670e0ce855d29c1e3a13721203c74f6eecf1b3f0a71"
+    },
+    {
+      "path": "scripts/compiler.cjs",
+      "bytes": 3784,
+      "sha256": "d9821e36e25046847adbbe7cd0e980393ecbbf26e1ca44d2606da9a5bd370486"
     },
     {
       "path": "scripts/export-examples.cjs",
@@ -429,6 +434,16 @@
       "sha256": "e7875fb91dbee711e4c8c092402ca8ed833efe85b17daf8a057ab4aabe4760da"
     },
     {
+      "path": "tests/compiler-integration.test.cjs",
+      "bytes": 2337,
+      "sha256": "77f93f16a6a3bfd828f889047f8fcd3744f69a5285994e2adbc7adfa622548b5"
+    },
+    {
+      "path": "tests/compiler.test.cjs",
+      "bytes": 5364,
+      "sha256": "87556469dce4da4220280c39f236f4cda9dd7a8143c7b05aa2d363822ab2d0c3"
+    },
+    {
       "path": "tests/domain.test.cjs",
       "bytes": 10734,
       "sha256": "2c56f9d9ce14a9073a07a69cb73b31de37b205de1d521e494fd84b7a219cab96"
@@ -452,6 +467,11 @@
       "path": "THIRD-PARTY-NOTICES.md",
       "bytes": 1694,
       "sha256": "89fcf8e3195b3bd2fa8771c5a6fe3a498723ca303c7d0bd5652875d2bc588535"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 942,
+      "sha256": "89e359718d9664ad146200a8ec0c2bb3a796907a887711510633b7ec3e95b189"
     },
     {
       "path": "vendor/vue.global.prod.js",

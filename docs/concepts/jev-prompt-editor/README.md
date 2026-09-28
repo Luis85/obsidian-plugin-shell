@@ -56,11 +56,12 @@ One repository owns the canonical workspace. Invalid edits stay visibly unsaved;
 
 ## Build and checks
 
-The isolated prototype uses **Node 22.16.0, TypeScript 5.8.3, and bundled Vue 3.5.13**. It is not a claim of integration with PR #5's production Nuxt UI/Pinia stack. No production dependency or root lockfile is changed. The included Vue license is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+The maintained build requires the repository-local **TypeScript 6.0.3**, installed from the root lockfile with the qualified **Node 24.21.0 / npm 11.19.1** toolchain. It retains bundled **Vue 3.5.13**. Earlier TypeScript 5.8.3 receipts are historical evidence, not the current build policy. It is not a claim of integration with PR #5's production Nuxt UI/Pinia stack. No production dependency or root lockfile is changed. The included Vue license is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-From this directory, with the tools already provisioned:
+Install the repository dependencies with the qualified `npm ci` from the repository root first. From this concept directory, with the tools provisioned:
 
 ```sh
+npm run test:toolchain
 node scripts/build.cjs
 npm test
 python tests/schema.test.py
@@ -68,9 +69,11 @@ python tests/browser.test.py
 python tests/logic.browser.py
 ```
 
-`TSC` selects a specific TypeScript compiler; `CHROMIUM` selects Chromium. Browser checks additionally require Python Playwright, and schema checks require Python jsonschema. Build and use require no network access. Generate new schema/example artifacts with `python scripts/build-logic-schemas.py` and `node scripts/export-logic-examples.cjs`.
+The build never resolves `tsc` through PATH or accepts a `TSC` override. It checks the exact root manifest, lockfile, policy, installed package and compiler API versions before emitting anything. TypeScript checks the explicitly ordered namespace sources with ESNext/Bundler settings; the assembler joins their checked script outputs without deprecated `module: none` or `outFile`. This assembler intentionally rejects external-module imports instead of pretending to bundle them.
 
-Latest local verification: **148 domain tests** (64 retained + 84 new), **149 browser checks** (49 retained + 100 new), and **20 schema/example checks** passed. Both browser suites recorded zero page errors and zero network requests. See [verification scope](docs/BUSINESS-LOGIC-VERIFICATION.md).
+`CHROMIUM` selects Chromium. Browser checks additionally require Python Playwright, and schema checks require Python jsonschema. Build and use require no network access. Generate new schema/example artifacts with `python scripts/build-logic-schemas.py` and `node scripts/export-logic-examples.cjs`.
+
+Historical TypeScript 5.8.3 local verification: **148 domain tests** (64 retained + 84 new), **149 browser checks** (49 retained + 100 new), and **20 schema/example checks** passed. Both browser suites recorded zero page errors and zero network requests. See [verification scope](docs/BUSINESS-LOGIC-VERIFICATION.md).
 
 Browser tests load exact HTML bytes with Playwright `set_content` and an explicit in-memory Storage adapter. They do not qualify real `file://` persistence, Safari/iOS, a screen reader, native Obsidian, live Jev accuracy, or real external process execution. Screenshots are reproducible with `scripts/capture-logic.py` and are not committed as binary assets.
 

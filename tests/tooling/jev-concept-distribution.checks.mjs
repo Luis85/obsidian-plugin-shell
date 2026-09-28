@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { included } from '../../scripts/framework/distribution.ts';
 import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
 
@@ -35,4 +37,18 @@ test('the retained HTML matches its reviewed manifest', () => {
   const hash = createHash('sha256').update(readFileSync(new URL('jev-studio.html', folder))).digest('hex');
   assert.equal(hash, manifest.artifactSha256);
   assert.equal(manifest.kind, 'jev-studio-repository-manifest');
+});
+
+test('Jev build enforces the root TypeScript 6 compiler and rejects legacy fallback', () => {
+  const result = spawnSync(process.execPath, ['--test', fileURLToPath(new URL('../../' + root + 'tests/compiler.test.cjs', import.meta.url))], {
+    encoding: 'utf8', timeout: 30000,
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+test('every root typecheck script invokes its workspace tool, not a PATH compiler', () => {
+  const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+  assert.match(pkg.devDependencies.typescript, /^6\.\d+\.\d+$/);
+  for (const [name, command] of Object.entries(pkg.scripts).filter(([name]) => name.startsWith('typecheck'))) {
+    assert.match(command, /^node node_modules\/(?:typescript\/bin\/tsc|vue-tsc\/bin\/vue-tsc\.js) --noEmit(?: |$)/, name);
+  }
 });
