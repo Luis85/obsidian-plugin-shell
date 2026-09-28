@@ -304,6 +304,11 @@ jobs:
       - *select-npm
       - name: Install locked build dependencies
         run: node "$QUALIFIED_NPM" ci --no-fund
+      - name: Verify real framework reporters and candidate-bound evidence transport
+        run: |
+          mkdir -p reports/framework-cli
+          set -o pipefail
+          node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
           node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json

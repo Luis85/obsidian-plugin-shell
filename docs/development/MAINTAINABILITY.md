@@ -72,6 +72,14 @@ it or writing bytecode, then runs the existing assembly tests and current browse
 suites. Syntax success is not Python complexity, coverage or native qualification;
 normal template setup does not acquire an additional Python runtime prerequisite.
 
+The optional memory integration similarly inventories only these reviewed Python
+paths: `scripts/hindsight/embedded.py`, `tests/hindsight/test_embedded.py` and
+`tests/hindsight/test_providers.py`. Their exact bytes remain fingerprinted with
+an explicit optional-memory reason and `measurement: not-measured`. They do not
+change any measured production denominator or add Python to default setup.
+Unreviewed files in those directories still fail `METRIC_UNCLASSIFIED_INPUT`.
+The separate optional-memory workflow owns adapter tests and provider acceptance.
+
 Four measured views are retained: production, executable tooling/configuration,
 test/harness fixtures, and executable example-removal templates. Tooling and
 fixture/template complexity and duplication are diagnostic reports, without a
