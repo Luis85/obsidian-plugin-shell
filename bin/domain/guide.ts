@@ -8,7 +8,7 @@ export interface GuideField {
   default: Answer; required?: boolean; choices?: string[]; when?: Condition;
 }
 export interface Guide {
-  schemaVersion: 1; id: string; version: number; title: string;
+  schemaVersion: 1; id: string; version: number; title: string; context?: string;
   steps: { title: string; fields: GuideField[] }[];
   constraints: { field: string; equals?: Answer; notEquals?: Answer; message: string }[];
   artifacts: { path: string; template: string }[];
@@ -38,9 +38,10 @@ function field(value: unknown, known: Set<string>): void {
   known.add(id);
 }
 export function readGuide(value: unknown): Guide {
-  const guide = object(value); keys(guide, ['schemaVersion', 'id', 'version', 'title', 'steps', 'constraints', 'artifacts']);
+  const guide = object(value); keys(guide, ['schemaVersion', 'id', 'version', 'title', 'steps', 'constraints', 'artifacts', 'context']);
   requireSketch(guide.schemaVersion === 1 && Number.isSafeInteger(guide.version) && Number(guide.version) > 0, 'GUIDE_VERSION', 'Unsupported guide version.');
   text(guide.id, 'guide.id'); text(guide.title, 'guide.title');
+  if (guide.context !== undefined) text(guide.context, 'guide.context', 10000);
   const known = new Set<string>();
   for (const raw of list(guide.steps, 'steps', 30)) {
     const step = object(raw); keys(step, ['title', 'fields']); text(step.title, 'step.title');
@@ -84,7 +85,7 @@ function formatAnswer(value: Answer | undefined): string {
   return Array.isArray(value) ? value.map(item => `- ${item}`).join('\n') : String(value);
 }
 export function guideBrief(guide: Guide, answers: Answers): string {
-  return guide.steps.map(step => `## ${step.title}\n\n` + step.fields.filter(field => visible(field.when, answers) && Object.hasOwn(answers, field.id))
+  return (guide.context ? guide.context + '\n' : '') + guide.steps.map(step => `## ${step.title}\n\n` + step.fields.filter(field => visible(field.when, answers) && Object.hasOwn(answers, field.id))
     .map(field => `### ${field.label}\n\n${formatAnswer(answers[field.id])}\n`).join('\n')).join('\n');
 }
 /** Literal token replacement only. A guide can supply data, never executable JS or process commands. */

@@ -2,18 +2,26 @@
 
 The interactive workspace now has a full-screen keyboard-driven TUI. See
 [TUI controls, accessibility modes and terminal tests](TUI.md). Use `--ui plain`
-for the original line-oriented presentation; agent commands are unchanged.
+for the line-oriented presentation. Existing agent commands remain available.
 
 `bin/` is the TypeScript application for make-first authoring. It is included in
 framework release kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
 
+## Create a project
+
+Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose a
+project preset, select a compatible frontend, and start the prototype interview.
+Plugin, webapp, website, CLI and hybrid targets generate matching source adapters;
+design agreement and file-write approval remain separate. See the
+[project preset and agent guide](PROJECT-PRESETS.md) for the eight presets,
+noninteractive requests, generated artifacts and build-qualification boundaries.
+
 ## Make a page
 
 ```sh
-node shell.mjs
-# or: npm run maker
-# or: node shell.mjs sketch
+node shell.mjs sketch
+# A saved project also opens its editor through: node shell.mjs
 ```
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { projectWizard } from './presentation/project-wizard.ts';
+import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin, stdout, stderr } from 'node:process';
@@ -33,7 +35,12 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   let completion: string | undefined;
   try {
     terminal?.start();
-    if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
+    if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
+      if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
+      completion = await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
+        framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
+    }
+    else if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
     else await studio(ui, options);
   } finally { terminal?.dispose(); }
   if (terminal && completion) io.error.write(safe(completion));

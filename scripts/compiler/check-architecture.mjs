@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 export const pureEntrypoints = [
   'scripts/compiler/adapters/plugin-emitter.ts', 'scripts/compiler/adapters/clickdummy-emitter.ts',
-  'scripts/compiler/adapters/target-lowering.ts',
+  'scripts/compiler/adapters/target-lowering.ts', 'scripts/compiler/adapters/project/emitter.ts',
   'scripts/compiler/adapters/frontend.ts', 'scripts/compiler/adapters/dependencies.ts', 'scripts/compiler/adapters/origins.ts',
 ];
 // Existing runtime modules expose pure validators alongside deferred runtime operations.

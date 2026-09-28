@@ -6,7 +6,7 @@ export function initialState(request: Request): State {
   const value = request.kind === 'text' ? request.initial : '';
   const index = request.kind === 'select' ? Math.max(0, request.items.findIndex(item => item.id === request.initial)) : 0;
   return { request, value, cursor: graphemes(value).length, query: '', searching: false,
-    index, checked: [], section: 0, offset: 0, help: false, error: '' };
+    index, checked: request.kind === 'multi' ? request.items.filter(item => request.selected?.includes(item.id)).map(item => item.id) : [], section: 0, offset: 0, help: false, error: '' };
 }
 export function matches(state: State) {
   if (state.request.kind !== 'select' && state.request.kind !== 'multi') return [];

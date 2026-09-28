@@ -23,7 +23,7 @@ export async function runCompiler<Model>(request: CompileRequest, ports: Compile
   }
   try {
     const raw = await phase('parse', () => {
-      if (!['obsidian-plugin', 'clickdummy'].includes(output.outputKind)) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'parse', 'Unknown compiler output kind.'));
+      if (!['obsidian-plugin', 'clickdummy', 'project'].includes(output.outputKind)) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'parse', 'Unknown compiler output kind.'));
       if (new TextEncoder().encode(request.source).length > 4_000_000) throw new CompilerError(diagnostic('COMPILER_INPUT_LIMIT', 'parse', 'Project input exceeds 4 MB.'));
       try { return JSON.parse(request.source) as unknown; }
       catch (error) { throw new CompilerError(diagnostic('COMPILER_JSON_INVALID', 'parse', 'Invalid project JSON.', { file: request.sourceName ?? 'project.json', jsonPointer: '' }), { cause: error }); }

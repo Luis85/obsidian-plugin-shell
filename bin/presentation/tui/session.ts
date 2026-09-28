@@ -48,8 +48,8 @@ export class TerminalSession implements RichPrompts {
   }
   text(request: Omit<TextRequest, 'kind'>): Promise<string> { return this.single({ kind: 'text', ...request }); }
   select(title: string, items: Item[], initial?: string): Promise<string> { return this.single({ kind: 'select', title, items, initial }); }
-  async multi(title: string, items: Item[]): Promise<string[]> {
-    const value = await this.request({ kind: 'multi', title, items });
+  async multi(title: string, items: Item[], selected?: string[]): Promise<string[]> {
+    const value = await this.request({ kind: 'multi', title, items, selected });
     requireSketch(Array.isArray(value), 'TUI_REPLY', 'Expected a component selection.'); return value;
   }
   async review(title: string, sections: Section[]): Promise<void> {

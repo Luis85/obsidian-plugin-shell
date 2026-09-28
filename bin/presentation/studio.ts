@@ -1,3 +1,5 @@
+import { savedProjectSelection } from '../adapters/project-selection.ts';
+import { projectWizard } from './project-wizard.ts';
 import { resolve } from 'node:path';
 import { newDocument } from '../domain/document.ts';
 import { Workspace } from '../application/workspace.ts';
@@ -44,12 +46,13 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 }
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
-  const kind = await choose(ui, 'Output kind', [
+  const selection = await savedProjectSelection(options.root);
+  const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
-  ], options.kind ?? 'obsidian-plugin');
+  ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
   ui.rich?.busy('Compiling boilerplate and inspecting conflicts. No files written yet.');
   const plan = await boilerplatePlan(options.root, options.frameworkRoot, out, workspace.document,
-    kind === 'clickdummy' ? kind : 'obsidian-plugin', options.signal);
+    kind === 'project' || kind === 'clickdummy' ? kind : 'obsidian-plugin', options.signal, selection);
   await review(ui, plan, options.signal);
 }
 interface StudioAction { label: string; run: () => unknown }
@@ -66,6 +69,7 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
+    'new-project': { label: 'Create another project from a preset', run: () => projectWizard(ui, options) },
   };
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {
