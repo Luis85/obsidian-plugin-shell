@@ -11,6 +11,9 @@ on:
       - 'tests/tooling/visual-*.checks.mjs'
       - 'tests/fixtures/companion/**'
       - 'package.json'
+      - 'package-lock.json'
+      - 'docs/concepts/jev-prompt-editor/**'
+      - 'tests/tooling/jev-concept-distribution.checks.mjs'
       - 'tests/concepts/**'
       - 'tests/tooling/test-data-*'
       - '.fallowrc.json'
@@ -209,3 +212,58 @@ jobs:
           path: reports/companion-mvp/
           retention-days: 7
           if-no-files-found: warn
+
+  jev-typescript6:
+    name: Jev / locked TypeScript 6 build and regression checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install the repository-locked TypeScript toolchain without lifecycle scripts
+        run: |
+          npm install --prefix "$RUNNER_TEMP/jev-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/jev-npm/node_modules/npm/bin/npm-cli.js" ci --ignore-scripts --no-fund
+      - name: Verify retained inventory and compiler-selection negative controls
+        run: |
+          node docs/concepts/jev-prompt-editor/scripts/manifest.cjs
+          node --test docs/concepts/jev-prompt-editor/tests/compiler.test.cjs docs/concepts/jev-prompt-editor/tests/compiler-integration.test.cjs
+      - name: Compile all Jev sources with TypeScript 6 and test the freshly emitted code
+        run: |
+          node docs/concepts/jev-prompt-editor/scripts/build.cjs
+          node --test --test-reporter=tap docs/concepts/jev-prompt-editor/tests/domain.test.cjs docs/concepts/jev-prompt-editor/tests/logic.test.cjs > docs/concepts/jev-prompt-editor/evidence/typescript6-domain.tap
+          git rev-parse HEAD > docs/concepts/jev-prompt-editor/evidence/typescript6-source.txt
+      - name: Provision isolated pinned browser and schema tooling
+        run: |
+          python3 -m venv "$RUNNER_TEMP/jev-browser"
+          "$RUNNER_TEMP/jev-browser/bin/python" -m pip install playwright==1.57.0 jsonschema==4.25.1
+          "$RUNNER_TEMP/jev-browser/bin/python" -m playwright install --with-deps chromium
+          "$RUNNER_TEMP/jev-browser/bin/python" - <<'PYTHON'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as pw:
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  output.write('CHROMIUM=' + pw.chromium.executable_path + '\n')
+          PYTHON
+      - name: Exercise rebuilt HTML with explicit test Storage and validate JSON examples
+        run: |
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/browser.test.py
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/logic.browser.py
+          "$RUNNER_TEMP/jev-browser/bin/python" docs/concepts/jev-prompt-editor/tests/schema.test.py
+      - name: Retain compiler receipt and exact rebuilt artifact, not native acceptance
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: jev-typescript6-evidence
+          path: |
+            docs/concepts/jev-prompt-editor/jev-studio.html
+            docs/concepts/jev-prompt-editor/dist/
+            docs/concepts/jev-prompt-editor/evidence/
+            !docs/concepts/jev-prompt-editor/evidence/*.png
+          retention-days: 7
+          if-no-files-found: error

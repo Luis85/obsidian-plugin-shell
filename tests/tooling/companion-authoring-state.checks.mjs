@@ -7,6 +7,7 @@ import ts from 'typescript';
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
 import * as commands from '../../scripts/companion/sitemap/commands.ts';
 import * as projection from '../../scripts/companion/sitemap/projection.ts';
+import * as layout from '../../scripts/companion/sitemap/layout.ts';
 import * as arrangement from '../../scripts/companion/sitemap/arrangement.ts';
 import * as create from '../../scripts/companion/sitemap/create.ts';
 import * as validate from '../../scripts/companion/sitemap/validate.ts';
@@ -17,7 +18,7 @@ const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');
 const Pinia = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/pinia.iife.prod.js', root), 'utf8') + ';Pinia;');
 const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'commands.ts': commands,
-  'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
+  'layout.ts': layout, 'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
 const source = readFileSync(new URL('docs/concepts/companion/editor/composables/use-editor.ts', root), 'utf8');
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
 const exports = {};
@@ -111,4 +112,58 @@ test('opening a hidden panel leaves focus mode and reveals the requested panel i
   store.showPanel('outline');assert.equal(store.focused,false);assert.equal(store.treeOpen,true);
   store.toggleFocus();store.showPanel('details');assert.equal(store.focused,false);assert.equal(store.inspectorOpen,true);
   assert.equal(writes(),0);
+});
+test('remount restores UI context without writing or duplicating project data', async t => {
+  const { store, host, document, writes } = await fixture(t);
+  store.select(store.snapshot.nodes.find(n => n.kind === 'page').id);
+  store.lens = 'navigation'; store.query = 'page'; store.treeOpen = true;
+  store.inspectorOpen = false; store.tab = 'related';
+  const saved = structuredClone(document()), context = store.viewState(), pinia = Pinia.createPinia();
+  const restored = exports.editorStore({ ...host, selected: store.selectedId, viewState: context })(pinia);
+  t.after(() => { restored.dispose(); Pinia.disposePinia(pinia); });
+  await restored.load();
+  assert.deepEqual(restored.viewState(), context); assert.equal(restored.selectedId, store.selectedId);
+  assert.equal(writes(), 0); assert.deepEqual(document(), saved);
+});
+test('navigation connector reviews a link and never silently reparents the target', async t => {
+  const { store, document, writes } = await fixture(t), before = structuredClone(document());
+  const pages = store.snapshot.nodes.filter(n => n.kind === 'page');
+  const from = pages[0], to = pages.find(n => n.id !== from.id && !store.snapshot.links.some(e => e.from === from.id && e.to === n.id));
+  assert.ok(to); store.lens = 'navigation'; store.proposeConnection(from.id, to.id);
+  assert.equal(store.panel, 'link'); assert.equal(store.selectedId, from.id); assert.equal(store.form.target, to.id);
+  assert.equal(writes(), 0); await store.applyForm();
+  assert.equal(store.panel, ''); assert.equal(writes(), 1);
+  assert.deepEqual(document().design.nodes, before.design.nodes);
+  assert.deepEqual(document().design.sitemap, before.design.sitemap);
+  assert.equal(document().design.links.length, before.design.links.length + 1);
+  assert.ok(document().design.links.some(e => e.from === from.id && e.to === to.id && e.kind === 'navigate'));
+});
+test('hierarchy connector requires confirmation; journey connections cannot reparent', async t => {
+  const { store, writes, document } = await fixture(t), before = structuredClone(document());
+  const pages = store.snapshot.nodes.filter(n => n.kind === 'page');
+  store.proposeConnection(pages[0].id, pages[1].id);
+  assert.equal(store.panel, 'move'); assert.equal(store.selectedId, pages[1].id);
+  assert.equal(store.form.parent, pages[0].id); store.cancel();
+  store.lens = 'journey'; store.proposeConnection(pages[0].id, pages[1].id);
+  assert.equal(store.panel, ''); assert.match(store.error, /journey steps/);
+  assert.equal(writes(), 0); assert.deepEqual(document(), before);
+});
+
+test('focused context survives a remount and restores the previous panels without saving', async t => {
+  const { store, host, writes } = await fixture(t);
+  store.treeOpen = true; store.inspectorOpen = false; store.toggleFocus();
+  const context = store.viewState(), pinia = Pinia.createPinia();
+  const restored = exports.editorStore({ ...host, selected: store.selectedId, viewState: context })(pinia);
+  t.after(() => { restored.dispose(); Pinia.disposePinia(pinia); });
+  await restored.load(); assert.equal(restored.focused, true); assert.equal(restored.treeOpen, false);
+  restored.toggleFocus(); assert.equal(restored.treeOpen, true); assert.equal(restored.inspectorOpen, false);
+  assert.equal(context.focused, true); assert.equal(writes(), 0);
+});
+test('non-drag position form starts from the same compact display coordinates as the canvas', async t => {
+  const { store, writes } = await fixture(t);
+  const positions = layout.sitemapDisplayLayout(store.projection.nodes);
+  store.open('position');
+  assert.equal(Number(store.form.x), positions[store.selectedId].x);
+  assert.equal(Number(store.form.y), positions[store.selectedId].y);
+  assert.equal(writes(), 0);
 });

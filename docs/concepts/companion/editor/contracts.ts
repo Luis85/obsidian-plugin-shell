@@ -2,7 +2,18 @@ import type { Component } from 'vue';
 import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
 import type { SitemapHost } from '../../../../scripts/companion/sitemap/session.ts';
 
+export interface EditorViewState {
+  lens: 'hierarchy' | 'navigation' | 'journey';
+  journeyId: string;
+  query: string;
+  treeOpen: boolean;
+  inspectorOpen: boolean;
+  tab: string;
+  focused?: boolean;
+  priorPanels?: { tree: boolean; inspector: boolean };
+}
 export interface EditorHost extends SitemapHost<SitemapDesign> {
+  viewState?: EditorViewState;
   selected: string | null;
   select(id: string): void;
   openPage(id: string): void;

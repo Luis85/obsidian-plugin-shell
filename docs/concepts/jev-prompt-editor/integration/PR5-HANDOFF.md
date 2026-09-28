@@ -6,7 +6,7 @@ The live PR was read from `Luis85/obsidian-plugin-shell`, PR #5, branch `docs/co
 
 This package is a **standalone, PR5-aligned product prototype**, not a native feature installation. The prototype is now retained under `docs/concepts/jev-prompt-editor/` in a separate change stacked on PR #5 at `e540157e63c9b81fdadb7bd84eca4aa56a8809b0`. No authoring model was imported and no compiler/generator/native compatibility is claimed. The original design inspection below remains tied to `b66200e2f43cd0682028f0151f9bdffc853cd2bf`.
 
-The browser build uses the locally available Vue 3.5.13 bundle and TypeScript 5.8.3 on Node 22.16.0. These are recorded actual tools, not substitutes advertised as the PR’s qualified pins. It does not contain Pinia or Nuxt UI. Port presentation to the actual checked-out pins before native qualification.
+The original browser build used Vue 3.5.13 and TypeScript 5.8.3 on Node 22.16.0; those receipts remain historical. The maintained build now requires the root-locked TypeScript 6.0.3 with the qualified Node/npm toolchain and rejects global compiler fallback. Vue 3.5.13 remains the isolated prototype runtime. It does not contain Pinia or Nuxt UI. Port presentation to the actual checked-out pins before native qualification.
 
 ## Additive placement
 

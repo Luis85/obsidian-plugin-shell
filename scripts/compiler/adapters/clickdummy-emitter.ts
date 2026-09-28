@@ -15,7 +15,7 @@ export function clickdummyFiles(model: Model, template: TemplateSnapshot, files:
   const pkgFile = files.find(file => file.path === 'package.json')!;
   const pkg = JSON.parse(pkgFile.content);
   pkg.scripts['build:clickdummy'] = 'node scripts/compiler/build-clickdummy.mjs';
-  pkg.scripts['typecheck:clickdummy'] = 'vue-tsc --noEmit --project tsconfig.clickdummy.json';
+  pkg.scripts['typecheck:clickdummy'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.clickdummy.json';
   return [...files.filter(file => file.path !== 'package.json'), { ...pkgFile, content: json(pkg) },
     add('tsconfig.clickdummy.json', json({ extends: './tsconfig.project.json', include: [
       'harness/prototype/**/*.ts', model.sourceRoot + '/**/*.ts', model.sourceRoot + '/**/*.vue',

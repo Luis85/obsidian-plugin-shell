@@ -1,12 +1,15 @@
 // Trusted composition bridge. The browser concept's existing project and persistence remain authoritative.
-let jmEditor=null;
-function jmUnmount(){jmEditor?.unmount();jmEditor=null;}
+let jmEditor=null,jmOwner=null;
+// UI state only, keyed by the actual project object. Replacing/importing a project cannot leak a prior lens or filter.
+const jmViews=new WeakMap();
+function jmUnmount(){if(jmEditor&&jmOwner)jmViews.set(jmOwner,jmEditor.viewState());jmEditor?.unmount();jmEditor=null;jmOwner=null;}
 function jmRead(){const p=project();if(!p)throw Error('Define a project first.');return {revision:String(p.design.revision),writable:!storageWarning&&!state.activeRun&&!tdUi.busy,design:companionProjectDocument(p).design};}
 function jmValidate(candidate){const whole=companionProjectDocument();CompanionJourney.validateAuthoringDocument({...whole,design:candidate});if(!structuralDesign(candidate))throw Error('The surface contains an unsupported field or reference.');}
 function jmMount(){
  const root=document.getElementById('jm-root');if(!root||jmEditor||!project())return;
+ jmOwner=project();
  jmEditor=CompanionJourney.mount(root,{
-  selected:designUi.selected,read:async()=>jmRead(),validate:jmValidate,
+  selected:designUi.selected,viewState:jmViews.get(jmOwner),read:async()=>jmRead(),validate:jmValidate,
   save:async request=>{
    const p=project();if(!p||state.activeRun||tdUi.busy||storageWarning)return {status:'failed',certainty:'unchanged'};
    const before=jmRead();

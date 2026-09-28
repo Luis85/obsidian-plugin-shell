@@ -1,11 +1,12 @@
 import { computed, ref, shallowRef } from 'vue';
 import { defineStore } from 'pinia';
-import type { EditorHost } from '../contracts.ts';
+import type { EditorHost, EditorViewState } from '../contracts.ts';
 import type { SitemapCommand, SitemapDesign, SurfaceKind, SitemapJourney } from '../../../../../scripts/companion/sitemap/model.ts';
 import { SitemapSession } from '../../../../../scripts/companion/sitemap/session.ts';
 import { planSurfaceRemoval } from '../../../../../scripts/companion/sitemap/commands.ts';
 import { sitemapContext, sitemapProjection } from '../../../../../scripts/companion/sitemap/projection.ts';
 import { newSitemapSurface } from '../../../../../scripts/companion/sitemap/create.ts';
+import { sitemapDisplayLayout } from '../../../../../scripts/companion/sitemap/layout.ts';
 import { arrangeSitemap } from '../../../../../scripts/companion/sitemap/arrangement.ts';
 import { inspectSitemap } from '../../../../../scripts/companion/sitemap/validate.ts';
 
@@ -16,9 +17,11 @@ export function editorStore(host: EditorHost) {
     const snapshot = shallowRef<SitemapDesign | null>(null), selectedId = ref(host.selected ?? '');
     const busy = ref(false), available = ref(false), canUndo = ref(false), canRedo = ref(false);
     const message = ref('Loading project…'), error = ref(''), query = ref('');
-    const lens = ref<'hierarchy'|'navigation'|'journey'>('hierarchy'), journeyId = ref('');
-    const focused=ref(false);let priorPanels={tree:false,inspector:true};
-    const treeOpen = ref(false), inspectorOpen = ref(true), tab = ref('details');
+    const lens = ref<'hierarchy'|'navigation'|'journey'>(host.viewState?.lens ?? 'hierarchy'), journeyId = ref(host.viewState?.journeyId ?? '');
+    const treeOpen = ref(host.viewState?.treeOpen ?? false), inspectorOpen = ref(host.viewState?.inspectorOpen ?? true), tab = ref(host.viewState?.tab ?? 'details');
+    query.value = host.viewState?.query ?? '';
+    function viewState(): EditorViewState { return { lens: lens.value, journeyId: journeyId.value, query: query.value, treeOpen: treeOpen.value, inspectorOpen: inspectorOpen.value, tab: tab.value, focused: focused.value, priorPanels: {...priorPanels} }; }
+    const focused=ref(host.viewState?.focused??false);let priorPanels=host.viewState?.priorPanels??{tree:false,inspector:true};
     const draftName = ref(''), dirty = ref(false), panel = ref('');
     const form = ref({name:'',parent:'',kind:'page' as SurfaceKind,target:'',journeyName:'',x:'',y:'',steps:[] as string[]});
     const removal = shallowRef<ReturnType<typeof planSurfaceRemoval> | null>(null);
@@ -68,13 +71,21 @@ export function editorStore(host: EditorHost) {
     function open(kind:string) {
       if(!canLeave()||!snapshot.value)return;
       error.value='';form.value={name:'',parent:selected.value && ['view','page','group'].includes(selected.value.kind)?selected.value.id:'',kind:'page',target:'',journeyName:'',x:'',y:'',steps:[]};
-      if(kind==='position'&&selected.value){const point=arrangeSitemap(snapshot.value)[selected.value.id]!;form.value.x=String(point.x);form.value.y=String(point.y);}
+      if(kind==='position'&&selected.value){const point=sitemapDisplayLayout(sitemapProjection(snapshot.value,{lens:'hierarchy'}).nodes)[selected.value.id]!;form.value.x=String(point.x);form.value.y=String(point.y);}
       if(kind==='route')form.value.name=route.value?.path??'';
       if(kind==='remove'&&selected.value)removal.value=planSurfaceRemoval(snapshot.value,selected.value.id);
       panel.value=kind;
     }
     function proposeMove(child:string,parent:string) {
       if(!canLeave())return;selectedId.value=child;resetDraft();form.value={...form.value,parent};panel.value='move';
+    }
+    function proposeConnection(source:string,target:string) {
+      if(!canLeave()||!snapshot.value||source===target)return;
+      if(lens.value==='hierarchy'){proposeMove(target,source);return;}
+      if(lens.value==='journey'){error.value='Edit the journey steps to change this path. Connections do not change hierarchy here.';return;}
+      const from=snapshot.value.nodes.find(n=>n.id===source),to=snapshot.value.nodes.find(n=>n.id===target);
+      if(!from||!to||from.kind==='group'||to.kind==='group'){error.value='Navigation connects surfaces, not navigation groups.';return;}
+      select(source);open('link');form.value.target=target;
     }
     async function applyForm(){
       if(!snapshot.value)return;
@@ -112,7 +123,8 @@ export function editorStore(host: EditorHost) {
       else if(kind==='sources')host.openSources();else if(kind==='import')host.importProject();else if(kind==='export')host.exportProject();}
     return { snapshot,selectedId,selected,context,projection,findings,lens,journeyId,query,treeOpen,inspectorOpen,tab,
       draftName,dirty,panel,form,removal,busy,available,canUndo,canRedo,message,error,route,
-      focused,toggleFocus,showPanel,saveStatus,load,select,canLeave,commit,saveName,resetDraft,open,proposeMove,applyForm,cancel,go,
+      load,select,canLeave,commit,saveName,resetDraft,open,proposeMove,proposeConnection,applyForm,cancel,go,viewState,
+      focused,toggleFocus,showPanel,saveStatus,
       undo:()=>canLeave()?run(()=>session.undo()):Promise.resolve(false),redo:()=>canLeave()?run(()=>session.redo()):Promise.resolve(false),dispose:()=>session.dispose(),
     };
   });
