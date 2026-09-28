@@ -16,7 +16,7 @@ function emitted(m=model) { const files=new Map(); clickdummyCode(m,(path,conten
 test('clickdummy emits a browser composition using the same generated panels, services and visual context', () => {
   const files = emitted(), entry = files.get('harness/prototype/clickdummy.ts').content;
   assert.match(entry,/bootstrap\/panels.ts/); assert.match(entry,/bootstrap\/visual-context.ts/);
-  assert.match(entry,/provideVisualContext\(app, createVisualContext/);
+  assert.match(entry,/provideVisualContext\(app, \{ \.\.\.createVisualContext/);
   assert.match(entry,/disposePinia/); assert.match(entry,/createDialogHost/);
   assert.match(files.get('harness/prototype/clickdummy-host.ts').content,/dialog.showModal\(\)/);
   assert.match(entry,/surface=/); assert.match(entry,/exportProject/);

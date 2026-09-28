@@ -66,3 +66,17 @@ Five new named assertions plus panel-restoration expectations are added to the a
 The [generated preview host record](GENERATED-PREVIEW-HOST.md) continues IP-05/IP-08/IP-11 from `957bf427212ffe21fcd8fbe93d42419b6344a501`. It records two reproduced modal-owner leaks, the shared generated dialog/page lifecycle, focus and narrow-toolbar improvements, and expanded independent generated-output browser assertions. Original compiler goldens remain unchanged; an exact four-file browser-only delta is verified before reconstructing each of the twelve original product digests.
 
 Twenty-six focused compatibility/emission/lifecycle tests and twelve supplementary real-dialog browser cases passed locally. The local file-origin run was blocked by browser policy; the successful browser cases used an explicitly labelled inline fixture with frame doubles. The broad compiler attempt failed overall because fallow and fast-check were unavailable. Full exact-toolchain hosted, complete generated UI, real back/forward-cache, manual accessibility, native and publication evidence remain separate; no work package is marked complete merely by adding tests.
+
+## Continuation — current base and authored preview scenarios
+
+[Base integration](PR35-MVP-BASE-INTEGRATION.md) records the conflict reconciliation
+at `ef49ab70`: both Journey Lens implementations are retained, including contextual
+navigation, compact fallback geometry, explicit arrangement and focus/draft guards.
+TypeScript 6 workspace selection remains enforced; no local TypeScript 5 substitute
+was used for this continuation.
+
+[Generated preview scenarios](GENERATED-PREVIEW-SCENARIOS.md) records the subsequent
+IP-05/IP-08/IP-11 work: exact per-surface authored samples, scoped mode inheritance,
+local reset and pending-request isolation, plus independent browser assertions.
+The [MVP closure map](MVP-CLOSURE-STATUS.md) retains complete native companion,
+manual acceptance and separately authorized shipment obligations.

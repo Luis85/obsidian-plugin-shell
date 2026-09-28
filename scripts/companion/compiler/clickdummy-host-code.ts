@@ -32,7 +32,7 @@ export function createDialogHost(options: DialogOptions) {
       ? trigger : frames.at(-1)?.closeButton ?? options.document.getElementById('clickdummy-surface');
     target?.focus({ preventScroll: true });
   }
-  function open(id: string): boolean {
+  function open(id: string, mount = options.mount): boolean {
     const label = options.label(id);
     if (label === undefined || frames.length >= 12) {
       options.error('This preview dialog is unavailable or the dialog limit has been reached.'); return false;
@@ -50,7 +50,7 @@ export function createDialogHost(options: DialogOptions) {
     dialog.addEventListener('cancel', frame.cancel); dialog.addEventListener('close', frame.close);
     document.body.append(dialog); frames.push(frame);
     try {
-      dialog.showModal(); const release = options.mount(content, id);
+      dialog.showModal(); const release = mount(content, id);
       if (!frames.includes(frame)) { release(); return false; }
       frame.release = release; closeButton.focus(); return true;
     } catch {

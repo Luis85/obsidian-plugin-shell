@@ -99,6 +99,18 @@ try {
     assert.equal(opened, false); assert.equal(await page.locator('dialog').count(), 0);
     assert.deepEqual(await page.evaluate(() => window.released), []);
   });
+  await check('per-open mount override uses the common owned teardown', async page => {
+    const result = await page.evaluate(() => {
+      let acquired = 0, released = 0;
+      window.host.open('modal-one', target => { target.textContent = 'Scenario frame'; acquired++; return () => { released++; }; });
+      const label = document.querySelector('dialog').textContent;
+      window.host.closeAll(); window.host.closeAll();
+      return { acquired, released, defaultReleases: window.released, label };
+    });
+    assert.equal(result.acquired, 1); assert.equal(result.released, 1);
+    assert.deepEqual(result.defaultReleases, []); assert.match(result.label, /Scenario frame/);
+    assert.equal(await page.locator('dialog').count(), 0);
+  });
   await check('browser page lifecycle resumes once and detaches after disposal', async page => {
     const result = await page.evaluate(() => {
       let mounts = 0, releases = 0; const lifecycle = window.hostApi.createPreviewLifecycle(window, {

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
+import { visualNodes } from '../companion/visual/visual-ir.mjs';
 const [path, projectPath, evidenceDirectory] = process.argv.slice(2);
 if (!path || !projectPath) throw new Error('Supply the built clickdummy.html and its canonical design/project.json paths.');
 const project = JSON.parse(await readFile(resolve(projectPath), 'utf8'));
@@ -40,13 +41,75 @@ try {
     assert.equal(await page.locator('main').evaluate(element => element.inert), ['loading', 'disabled'].includes(value));
   }
   cases.push('labelled preview states and inert loading/disabled content');
+  const scenarioPicker = page.getByLabel('Authored scenario', { exact: true });
+  const authored = project.design.visualDesigns.pages.find(definition =>
+    project.design.nodes.some(node => node.id === definition.ownerId && node.kind === 'page') &&
+    definition.scenarios.some(scenario => scenario.bindings.some(binding => Array.isArray(binding.value) && binding.value.length)));
+  assert.ok(authored, 'qualification requires an authored scenario with representative data');
+  const nodes = visualNodes(authored.root), table = nodes.find(node => node.kind === 'component' && node.ref.entryId === 'u-table');
+  assert.ok(table && table.props.data.kind === 'source' && table.props.data.field === '');
+  const columns = table.props.columns.value.map(column => column.accessorKey);
+  await surface.selectOption(authored.ownerId);
+  const detail = page.locator('main .generated-detail').first();
+  const rows = detail.locator('[data-design-node="' + table.id + '"] tbody tr');
+  for (const scenario of authored.scenarios) {
+    await scenarioPicker.selectOption(scenario.id);
+    await expect(state).toHaveValue(scenario.state);
+    await expect(detail).toHaveAttribute('data-design-state', scenario.state);
+    const binding = scenario.bindings.find(item => item.sourceId === table.props.data.sourceId && item.operationId === table.props.data.operationId);
+    assert.ok(binding && Array.isArray(binding.value));
+    if (binding.value.length) {
+      await expect(rows).toHaveCount(binding.value.length);
+      for (let index = 0; index < binding.value.length; index++) {
+        await expect(rows.nth(index).locator('td')).toHaveText(columns.map(key => String(binding.value[index][key] ?? '')));
+      }
+    } else {
+      const firstValue = authored.scenarios.flatMap(item => item.bindings).find(item => Array.isArray(item.value) && item.value.length).value[0][columns[0]];
+      await expect(detail).not.toContainText(String(firstValue));
+    }
+    await expect(page.locator('.clickdummy-preview > [role="status"]')).toContainText('no data is saved');
+  }
+  cases.push('every authored page scenario renders its canonical sample rows and state');
+  const populated = authored.scenarios.find(scenario => scenario.state === 'default');
+  assert.ok(populated);
+  const inputNode = nodes.find(node => node.kind === 'component' && node.ref.entryId === 'u-input');
+  const hook = nodes.find(node => node.kind === 'component' && node.events.some(event => event.event === 'click' && !event.actions.length));
+  assert.ok(inputNode && hook);
+  await scenarioPicker.selectOption(populated.id);
+  const input = detail.locator('[data-design-node="' + inputNode.id + '"] input');
+  await input.fill('Unsaved review draft');
+  await detail.locator('[data-design-node="' + hook.id + '"]').click();
+  await expect(detail).toContainText('The interaction could not be completed. Your input is retained.');
+  await expect(detail).not.toContainText('Interaction implementation required.');
+  await expect(input).toHaveValue('Unsaved review draft');
+  await scenarioPicker.selectOption(authored.scenarios.find(scenario => scenario.id !== populated.id).id);
+  await expect(input).not.toHaveValue('Unsaved review draft');
+  const nextSurface = project.design.nodes.find(node => node.id !== authored.ownerId && node.kind === 'page');
+  assert.ok(nextSurface); await surface.selectOption(nextSurface.id);
+  await expect(scenarioPicker).toHaveValue(''); await expect(state).toHaveValue('default');
+  await surface.selectOption(authored.ownerId); await expect(scenarioPicker).toHaveValue('');
+  cases.push('scenario hooks are refused, drafts reset and selection never leaks to another surface');
+  await scenarioPicker.selectOption(populated.id);
+  await page.getByRole('button', { name: 'Reset preview', exact: true }).click();
+  await expect(scenarioPicker).toHaveValue(''); await expect(state).toHaveValue('default');
+  cases.push('reset clears scenario ownership');
   const modalEdge = project.design.links.find(edge => ['open', 'navigate'].includes(edge.kind) &&
     project.design.nodes.some(node => node.id === edge.to && node.kind === 'modal'));
   assert.ok(modalEdge, 'the qualification project must contain a declared modal interaction');
   const modal = project.design.nodes.find(node => node.id === modalEdge.to);
   await surface.selectOption(modalEdge.from);
+  const parentDefinition = project.design.visualDesigns.pages.find(definition => definition.ownerId === modalEdge.from);
+  const parentScenario = parentDefinition?.scenarios.find(scenario => scenario.state === 'default');
+  const modalDefinition = project.design.visualDesigns.pages.find(definition => definition.ownerId === modalEdge.to);
+  const modalHook = modalDefinition && visualNodes(modalDefinition.root).find(node => node.kind === 'component' && node.events.some(event => event.event === 'click' && !event.actions.length));
+  assert.ok(parentScenario && modalHook, 'qualification requires a scenario opener and a nested business hook');
+  await scenarioPicker.selectOption(parentScenario.id);
   const trigger = page.locator('main').getByRole('button', { name: modalEdge.label, exact: true });
   await trigger.click(); const dialog = page.getByRole('dialog', { name: modal.label, exact: true }); await dialog.waitFor();
+  await dialog.locator('[data-design-node="' + modalHook.id + '"]').click();
+  await expect(dialog).toContainText('The interaction could not be completed. Your input is retained.');
+  await expect(dialog).not.toContainText('Interaction implementation required.');
+  cases.push('modal inherits scenario read-only mode without a foreign sample binding');
   await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'detached' });
   assert.equal(await trigger.evaluate(element => document.activeElement === element), true);
   await trigger.click(); await dialog.getByRole('button', { name: 'Close dialog', exact: true }).click();
@@ -71,7 +134,7 @@ try {
   if (evidenceDirectory) await page.screenshot({ path: join(resolve(evidenceDirectory), 'preview-desktop.png'), fullPage: true });
   await page.setViewportSize({ width: 375, height: 812 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), true, 'narrow preview has no horizontal overflow');
-  for (const control of [surface, state, page.getByRole('button', { name: 'Reset preview', exact: true })]) {
+  for (const control of [surface, state, scenarioPicker, page.getByRole('button', { name: 'Reset preview', exact: true })]) {
     const box = await control.boundingBox(); assert.ok(box && box.height >= 36 && box.width > 0);
   }
   await surface.focus(); assert.equal(await surface.evaluate(element => document.activeElement === element), true);
