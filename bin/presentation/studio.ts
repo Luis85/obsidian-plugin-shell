@@ -7,7 +7,7 @@ import { boilerplatePlan } from '../adapters/compiler.ts';
 import { loadGuide, prototypePlan } from '../adapters/prototype.ts';
 import { interview } from './guide.ts';
 import { editPage } from './page-editor.ts';
-import { choose, input, confirm, reportError, Back, type Prompts } from './prompts.ts';
+import { choose, input, confirm, reportError, type Prompts } from './prompts.ts';
 export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal }
 async function review(ui: Prompts, value: Prepared, signal?: AbortSignal): Promise<boolean> {
   const changed = value.plan.changes.filter(item => item.status !== 'unchanged');
@@ -17,10 +17,13 @@ async function review(ui: Prompts, value: Prepared, signal?: AbortSignal): Promi
   if (!await confirm(ui, 'Apply this reviewed plan?')) return false;
   await applyPrepared(value, value.planHash, signal); ui.write('Files saved. Dependencies and builds were not run.\n'); return true;
 }
+async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
+  const snapshot = await readSnapshot(options.root, options.project);
+  return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
+}
 export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<void> {
   const guide = await loadGuide(options.guide ? resolve(options.root, options.guide) : undefined);
-  const saved = workspace ? null : await readSnapshot(options.root, options.project);
-  workspace ??= saved?.document ? new Workspace(saved.document, saved.beforeHash) : undefined;
+  workspace ??= await savedWorkspace(options);
   const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
   const out = await input(ui, 'Package output folder', options.out ?? 'prototypes/prepared-prototype');
   const plan = await prototypePlan({ ...options, out, guide, baseline: workspace?.document ?? null,
@@ -80,6 +83,6 @@ export async function studio(ui: Prompts, options: StudioOptions): Promise<Works
       if (action === 'exit') {
         if (!workspace.dirty || await confirm(ui, 'Discard unsaved edits?')) return workspace;
       } else await actions[action]!.run();
-    } catch (error) { if (!(error instanceof Back)) reportError(ui, error); }
+    } catch (error) { reportError(ui, error); }
   }
 }
