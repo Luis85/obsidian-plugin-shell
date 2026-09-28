@@ -20,6 +20,9 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   if(Object.keys(replacements).length)throw Error('MVP_ASSEMBLY: Missing named composition seam.');
   for(const [start,end,text] of changes.reverse())program=program.slice(0,start)+text+program.slice(end);
   function once(from,to){if(program.split(from).length!==2)throw Error('MVP_ASSEMBLY: Ambiguous seam '+from.slice(0,100));program=program.replace(from,to);}
+  once('project: identity, settings: companionFolders(p), design, notes:',
+    'project: identity, settings: companionFolders(p), ...(p.tooling === undefined ? {} : {tooling: designCopy(p.tooling)}), design, notes:');
+  once('  p.notes = designCopy(document.notes);', '  p.notes = designCopy(document.notes); if(document.tooling !== undefined)p.tooling = designCopy(document.tooling);');
   once('const COMPANION_VERSION = 5;','const COMPANION_VERSION = 6;');
   // The immutable embedded catalog was hash-verified as v5 by the retained builder.
   // Import migrates its configured copy through the v6 authoring validator.

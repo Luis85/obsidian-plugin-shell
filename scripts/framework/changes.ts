@@ -1,3 +1,4 @@
+import { withAirshipOption } from '../companion/tooling-options.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
@@ -46,6 +47,7 @@ export async function configurationPlan(request: Request, context: Context) {
       selected = configuration(selected);
     }
   }
+  requireThat(!(options.airship || options['no-airship']) || options.input || options.blank, 'AIRSHIP_DESIGN_REQUIRED', 'Use --input/--blank, or airship enable/disable on an existing design.');
   const input = stringOption(options, 'input');
   requireThat(!(input && options.blank), 'SETUP_START_CONFLICT', 'Choose --input or --blank, not both.');
   if ((input || options.blank) && request.command !== 'config set') {
@@ -57,7 +59,7 @@ export async function configurationPlan(request: Request, context: Context) {
       }}) : '';
     const { source } = await inspectDesign(input ? context : {...context, inputText: blank}, input ?? '-');
     const resolved = resolveImport(selected, source.document, stringOption(options, 'resolve')); selected = resolved.config;
-    entries.push({ path: designFile, content: json(resolved.document) });
+    entries.push({ path: designFile, content: json(withAirshipOption(resolved.document, options)) });
     // Original data remains available for review; it carries no execution authority.
     entries.push({ path: '.framework/imported-project.json', content: source.content.toString('utf8') });
   }

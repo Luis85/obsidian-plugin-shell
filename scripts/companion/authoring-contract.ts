@@ -3,6 +3,7 @@ import {
   COMPANION_FORMAT, COMPANION_MAX_BYTES, companionDesignKey,
   validateCompanionDocument, migrateCompanionDocument,
 } from './project-contract.mjs';
+import { validateTooling } from './tooling-contract.mjs';
 import type { SitemapDesign } from './sitemap/model.ts';
 import { assertJson, record, requireSitemap, utf8Length } from './sitemap/safety.ts';
 import { validateSitemapModel } from './sitemap/validate.ts';
@@ -16,6 +17,7 @@ export interface AuthoringDocument {
   project: { id: string; name: string; author: string; version: string; description: string };
   settings: { codebaseFolder: string; testsFolder: string };
   design: SitemapDesign & { schema: number };
+  tooling?: { airship?: { enabled: boolean; agent?: 'claude' | 'codex' | 'opencode'; targetPort?: number; port?: number } };
   notes: string[];
 }
 export interface AuthoringMigration {
@@ -34,9 +36,11 @@ function assertAuthoringDocument(input: unknown): asserts input is AuthoringDocu
   } else {
     requireSitemap(record(input.design) && input.design.schema === 6,
       'COMPANION_VERSION', 'Transfer and design schema versions must match.');
-    // Only the two new subsystems are removed for legacy-field validation. Unknown fields still fail.
+    validateTooling(input.tooling);
+    // Only the declared v6 extensions are removed for legacy-field validation. Unknown fields still fail.
     const legacy = structuredClone(input);
     requireSitemap(record(legacy.design), 'COMPANION_INVALID', 'Expected a saved design.');
+    delete legacy.tooling;
     delete legacy.design.sitemap; delete legacy.design.features;
     legacy.schemaVersion = 5; legacy.design.schema = 5;
     validateCompanionDocument(legacy);

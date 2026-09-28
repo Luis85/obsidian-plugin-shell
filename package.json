@@ -137,7 +137,8 @@
     "qualify:compiler": "node scripts/compiler/qualify.mjs",
     "test:compiler:coverage": "node --experimental-test-coverage --test-coverage-lines=95 --test-coverage-branches=90 --test-coverage-functions=90 --test-coverage-include=scripts/compiler/domain/** --test-coverage-include=scripts/compiler/application/** --test --test-concurrency=1 tests/tooling/compiler-core.checks.mjs tests/tooling/compiler-cli.checks.mjs tests/tooling/compiler-compatibility.checks.mjs tests/tooling/compiler-targets.checks.mjs tests/tooling/compiler-properties.checks.mjs",
     "debug:compiler": "node --inspect-brk --experimental-strip-types scripts/compiler/debug-fixture.mjs",
-    "test:compiler:browser": "node scripts/compiler/verify-browser.mjs"
+    "test:compiler:browser": "node scripts/compiler/verify-browser.mjs",
+    "test:airship": "node scripts/testing/suites.mjs airship"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

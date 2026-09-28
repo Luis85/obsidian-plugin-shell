@@ -1,3 +1,4 @@
+import { previewCode, previewScripts } from '../../companion/compiler/preview-code.ts';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
@@ -48,6 +49,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
   pkg.scripts['build:clickdummy'] = 'node shell.mjs clickdummy build';
   pkg.scripts['doctor'] = 'node shell.mjs doctor';
+  Object.assign(pkg.scripts, previewScripts());
   pkg.scripts['test:project'] = 'node scripts/testing/suites.mjs project project:ui-effects';
   pkg.scripts['verify:project'] = 'npm run build && npm run typecheck:project && npm test && npm run test:ui-effects';
   // Full framework coverage/native/release gates remain present and are NOT relabelled green.
@@ -78,6 +80,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('relationships', () => relationshipCode(templateRoot,m,add));
   await emit('http', () => httpCode(templateRoot,m,add));
   await emit('clickdummy', () => clickdummyCode(m,add));
+  await emit('preview', () => previewCode(m,add));
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;
   add(opTest,`import { it, expect } from 'vitest';\nimport { effectScope } from 'vue';\nimport { operation } from ${literal(relativeImport(opTest,`${m.sourceRoot}/presentation/composables/operation.ts`))};
 it('latest read wins and disposal prevents late projection updates', async () => {
