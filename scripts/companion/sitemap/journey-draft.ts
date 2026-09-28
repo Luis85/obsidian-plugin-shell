@@ -62,7 +62,7 @@ function assertEdit(value: unknown): asserts value is JourneyEdit {
 }
 
 /** Detached edits preserve surviving step identities and never rewrite routes, links or hierarchy. */
-export function editJourneyDraft(design: SitemapDesign, draft: JourneyDraft, edit: unknown): JourneyDraft {
+export function editJourneyDraft(design: SitemapDesign, draft: JourneyDraft, edit: JourneyEdit): JourneyDraft {
   validateSitemapModel(design); validateDraft(design, draft); assertEdit(edit);
   const next = structuredClone(draft), steps = next.journey.steps;
   if (edit.type === 'append' || edit.type === 'surface') {
