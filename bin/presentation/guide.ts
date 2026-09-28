@@ -1,3 +1,4 @@
+import { terminalInterview } from './guide-terminal.ts';
 import { answer, visible, guideBrief, type Answers, type Answer, type Guide, type GuideField } from '../domain/guide.ts';
 import { input, choose, confirm, reportError, Back, type Prompts } from './prompts.ts';
 async function readAnswer(ui: Prompts, guide: Guide, field: GuideField, answers: Answers, fallback: Answer): Promise<unknown> {
@@ -22,6 +23,7 @@ async function askField(ui: Prompts, guide: Guide, field: GuideField, answers: A
 }
 /** No product-specific prompt branching: fields, visibility, defaults and readiness live in JSON. */
 export async function interview(ui: Prompts, guide: Guide, initial: Answers = {}): Promise<Answers> {
+  if (ui.rich) return terminalInterview({ ...ui, rich: ui.rich }, guide, initial);
   const answers: Answers = Object.create(null);
   for (const step of guide.steps) {
     ui.write(`\n${step.title}\n`);

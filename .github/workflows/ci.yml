@@ -138,7 +138,7 @@ jobs:
         run: |
           node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
           node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
-          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --yes --no-interaction
+          node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --trust-custom --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- entity rating --feature bookmarks --backend plugin-data --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- event refreshed --feature bookmarks --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- listener observe --feature bookmarks --event refreshed --yes --no-interaction

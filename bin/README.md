@@ -1,5 +1,9 @@
 # Interactive Shell Maker
 
+The interactive workspace now has a full-screen keyboard-driven TUI. See
+[TUI controls, accessibility modes and terminal tests](TUI.md). Use `--ui plain`
+for the original line-oriented presentation; agent commands are unchanged.
+
 `bin/` is the TypeScript application for make-first authoring. It is included in
 framework release kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
@@ -14,11 +18,13 @@ node shell.mjs
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page
 outline lets you create and attach components, multi-select reusable definitions,
-bulk-create components from semicolon-separated titles, add interactions, choose
+bulk-create components from one title per line (semicolons in plain mode), add
+interactions, choose
 navigation/state behavior, reorder/remove elements, change layout, or rename.
 You can return to a saved page or the component library. Undo/redo covers the last
-50 successful in-memory edits; errors never enter history. `:back` cancels a step,
-Ctrl-C cancels the session, and exiting with unsaved changes requires confirmation.
+50 successful in-memory edits; errors never enter history. Escape goes back in the
+TUI; `:back` cancels a plain-mode step. Ctrl-C cancels the session, and exiting with
+unsaved changes requires confirmation.
 
 Only a title is needed to create a project, page, component or interaction. IDs,
 portable names, routes, component exports and draft defaults are derived. Identity
@@ -146,9 +152,9 @@ Its versioned definition owns steps, text/list/select/confirm fields, defaults,
 required values, choices, earlier-field visibility conditions, readiness constraints
 and literal artifact templates. Increment `version` for changed guide contracts;
 old answer versions fail rather than silently taking new meanings. Tests verify
-added fields/templates without new UI branching. List entry in a terminal uses
-semicolons; defaults retain their original list boundaries, and JSON arrays can
-contain semicolons unchanged.
+added fields/templates without new UI branching. TUI list entry uses one item per
+line; plain-mode entry uses semicolons. Defaults retain their original list
+boundaries, and JSON arrays can contain semicolons unchanged.
 
 Template tokens are literal substitutions, never JavaScript evaluation. Every
 answer can be referenced by field ID. Built-in tokens include `title`, `slug`,

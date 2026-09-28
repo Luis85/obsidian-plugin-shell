@@ -47,6 +47,33 @@
   },
   "suites": [
     {
+      "name": "maker:pty",
+      "purpose": "Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{python}",
+            "-B",
+            "tests/tooling/interactive-maker-pty.py",
+            "--node",
+            "{node}"
+          ]
+        ]
+      },
+      "include": [
+        "tests/tooling/interactive-maker-pty.py"
+      ],
+      "prerequisites": [
+        "python3"
+      ],
+      "verify": "opt-in",
+      "npmScript": "test:maker:pty",
+      "workflows": [
+        "interactive-maker"
+      ]
+    },
+    {
       "name": "maker",
       "purpose": "Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages.",
       "runner": {
@@ -454,6 +481,7 @@
       "optional": true,
       "prerequisites": ["native-runner"],
       "verify": "opt-in",
+      "npmScript": "test:obsidian",
       "workflows": ["ci"]
     }
   ],
