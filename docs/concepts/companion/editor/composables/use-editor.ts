@@ -1,6 +1,6 @@
 import { computed, ref, shallowRef } from 'vue';
 import { defineStore } from 'pinia';
-import type { EditorHost } from '../contracts.ts';
+import type { EditorHost, EditorViewState } from '../contracts.ts';
 import type { SitemapCommand, SitemapDesign, SurfaceKind, SitemapJourney } from '../../../../../scripts/companion/sitemap/model.ts';
 import { SitemapSession } from '../../../../../scripts/companion/sitemap/session.ts';
 import { planSurfaceRemoval } from '../../../../../scripts/companion/sitemap/commands.ts';
@@ -15,8 +15,10 @@ export function editorStore(host: EditorHost) {
     const snapshot = shallowRef<SitemapDesign | null>(null), selectedId = ref(host.selected ?? '');
     const busy = ref(false), available = ref(false), canUndo = ref(false), canRedo = ref(false);
     const message = ref('Loading project…'), error = ref(''), query = ref('');
-    const lens = ref<'hierarchy'|'navigation'|'journey'>('hierarchy'), journeyId = ref('');
-    const treeOpen = ref(false), inspectorOpen = ref(true), tab = ref('details');
+    const lens = ref<'hierarchy'|'navigation'|'journey'>(host.viewState?.lens ?? 'hierarchy'), journeyId = ref(host.viewState?.journeyId ?? '');
+    const treeOpen = ref(host.viewState?.treeOpen ?? false), inspectorOpen = ref(host.viewState?.inspectorOpen ?? true), tab = ref(host.viewState?.tab ?? 'details');
+    query.value = host.viewState?.query ?? '';
+    function viewState(): EditorViewState { return { lens: lens.value, journeyId: journeyId.value, query: query.value, treeOpen: treeOpen.value, inspectorOpen: inspectorOpen.value, tab: tab.value }; }
     const draftName = ref(''), dirty = ref(false), panel = ref('');
     const form = ref({name:'',parent:'',kind:'page' as SurfaceKind,target:'',journeyName:'',steps:[] as string[]});
     const removal = shallowRef<ReturnType<typeof planSurfaceRemoval> | null>(null);
@@ -65,6 +67,14 @@ export function editorStore(host: EditorHost) {
     function proposeMove(child:string,parent:string) {
       if(!canLeave())return;selectedId.value=child;resetDraft();form.value={...form.value,parent};panel.value='move';
     }
+    function proposeConnection(source:string,target:string) {
+      if(!canLeave()||!snapshot.value||source===target)return;
+      if(lens.value==='hierarchy'){proposeMove(target,source);return;}
+      if(lens.value==='journey'){error.value='Edit the journey steps to change this path. Connections do not change hierarchy here.';return;}
+      const from=snapshot.value.nodes.find(n=>n.id===source),to=snapshot.value.nodes.find(n=>n.id===target);
+      if(!from||!to||from.kind==='group'||to.kind==='group'){error.value='Navigation connects surfaces, not navigation groups.';return;}
+      select(source);open('link');form.value.target=target;
+    }
     async function applyForm(){
       if(!snapshot.value)return;
       let change:SitemapCommand;
@@ -96,7 +106,7 @@ export function editorStore(host: EditorHost) {
       else if(kind==='sources')host.openSources();else if(kind==='import')host.importProject();else if(kind==='export')host.exportProject();}
     return { snapshot,selectedId,selected,context,projection,findings,lens,journeyId,query,treeOpen,inspectorOpen,tab,
       draftName,dirty,panel,form,removal,busy,available,canUndo,canRedo,message,error,route,
-      load,select,canLeave,commit,saveName,resetDraft,open,proposeMove,applyForm,cancel,go,
+      load,select,canLeave,commit,saveName,resetDraft,open,proposeMove,proposeConnection,applyForm,cancel,go,viewState,
       undo:()=>canLeave()?run(()=>session.undo()):Promise.resolve(false),redo:()=>canLeave()?run(()=>session.redo()):Promise.resolve(false),dispose:()=>session.dispose(),
     };
   });

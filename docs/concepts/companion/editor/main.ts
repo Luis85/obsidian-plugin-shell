@@ -9,6 +9,7 @@ import { validateSitemapModel } from '../../../../scripts/companion/sitemap/vali
 import { canonicalKey } from '../../../../scripts/companion/sitemap/safety.ts';
 import './ui.css';
 import './editor.css';
+import './integration.css';
 
 export { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument, authoringDesignKey, validateSitemapModel, canonicalKey };
 export function mount(root:HTMLElement,host:EditorHost) {
@@ -24,5 +25,5 @@ export function mount(root:HTMLElement,host:EditorHost) {
     }
   };
   root.addEventListener('keydown',shortcut);
-  return {canLeave:store.canLeave,unmount(){store.dispose();root.removeEventListener('keydown',shortcut);app.unmount();store.$dispose();disposePinia(pinia);}};
+  return {canLeave:store.canLeave,viewState:store.viewState,unmount(){store.dispose();root.removeEventListener('keydown',shortcut);app.unmount();store.$dispose();disposePinia(pinia);}};
 }
