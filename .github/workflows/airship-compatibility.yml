@@ -1,14 +1,6 @@
 name: Airship generated-project compatibility
 on:
-  push:
-    branches: [feat/generated-project-airship]
   pull_request:
-    paths:
-      - 'scripts/airship/**'
-      - 'scripts/compiler/**'
-      - 'scripts/companion/**'
-      - 'tests/airship/**'
-      - '.github/workflows/airship-compatibility.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,31 +8,50 @@ concurrency:
   group: airship-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  source-contract:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - name: Retain exact baseline for integration diagnostics
-        run: |
-          mkdir -p /tmp/airship-contract
-          git archive --format=tar HEAD > /tmp/airship-contract/shell-source.tar
-          git rev-parse HEAD > /tmp/airship-contract/shell-commit.txt
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          repository: 0xnyn/airship
-          path: .upstream-airship
-          persist-credentials: false
-      - name: Retain upstream source contract
-        working-directory: .upstream-airship
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Select qualified npm
         run: |
-          git archive --format=tar HEAD > /tmp/airship-contract/airship-source.tar
-          git rev-parse HEAD > /tmp/airship-contract/airship-commit.txt
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install and validate source contracts
+        run: |
+          node "$QUALIFIED_NPM" ci --no-fund
+          node "$QUALIFIED_NPM" run typecheck:framework
+          node "$QUALIFIED_NPM" run typecheck:compiler
+          node "$QUALIFIED_NPM" run check:compiler-architecture
+          node "$QUALIFIED_NPM" run test:airship
+          node scripts/testing/suites.mjs --check
+          python -B scripts/concepts/build-companion.py --check
+      - name: Qualify actual generated preview and pinned Airship
+        if: runner.os == 'Linux'
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          node scripts/airship/qualify.mjs
+      - name: Retain named compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: airship-source-contract
-          path: /tmp/airship-contract
-          retention-days: 1
-          if-no-files-found: error
+          name: airship-compatibility-${{ matrix.os }}
+          path: |
+            reports/airship-qualification/evidence.json
+            reports/airship-qualification/servers.log
+            reports/airship-qualification/airship-preview.png
+          if-no-files-found: ignore
+          retention-days: 7

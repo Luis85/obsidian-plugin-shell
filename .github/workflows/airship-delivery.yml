@@ -1,0 +1,20 @@
+name: One-shot Airship implementation delivery
+on:
+  push:
+    branches: [feat/generated-project-airship]
+    paths: ['.github/airship-line-edits.json']
+permissions:
+  contents: read
+jobs:
+  apply-reviewed-edits:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/feat/generated-project-airship'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/generated-project-airship
+      - name: Apply only hash-reviewed implementation edits
+        run: python3 -B .github/airship-apply.py
