@@ -1,4 +1,5 @@
 import { constants } from 'node:fs';
+import { mapBounded } from './bounded-map.mjs';
 import { lstat, realpath, readdir, readFile, writeFile, mkdir, copyFile, rename, unlink, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
@@ -69,22 +70,27 @@ async function checkedRoot(input) {
 }
 /** Read-only: no lock, staging directory, report, or other file is created. */
 export async function createFilePlan(inputRoot, entries) {
-  const root = await checkedRoot(inputRoot);
   if (!Array.isArray(entries)) throw new Error('PLAN_INVALID_ENTRIES');
-  const seen = new Set(); const changes = [];
-  for (const entry of entries) {
+  const seen = new Set();
+  // Capture caller-owned entries before the first asynchronous inspection.
+  const captured = entries.map(entry => entry && { path: entry.path, content: entry.content, ...(entry.encoding !== undefined ? { encoding: entry.encoding } : {}) });
+  for (const entry of captured) {
     if (!entry) throw new Error('PLAN_INVALID_CONTENT');
-    const bytes = contentBytes(entry);
+    contentBytes(entry);
     relativePath(entry.path);
     const identity = entry.path.toLowerCase();
     if (seen.has(identity)) throw new Error(`PLAN_DUPLICATE_PATH: ${entry.path}`);
     seen.add(identity);
+  }
+  const root = await checkedRoot(inputRoot);
+  const changes = await mapBounded(captured, 8, async entry => {
+    const bytes = contentBytes(entry);
     const original = await inspect(root, entry.path);
     const beforeHash = original.bytes === null ? null : hash(original.bytes);
     const afterHash = bytes === null ? null : hash(bytes);
     const status = beforeHash === afterHash ? 'unchanged' : beforeHash === null ? 'create' : afterHash === null ? 'delete' : 'update';
-    changes.push(Object.freeze({ path: entry.path, beforeHash, afterHash, content: entry.content, ...(entry.encoding ? { encoding: entry.encoding } : {}), status }));
-  }
+    return Object.freeze({ path: entry.path, beforeHash, afterHash, content: entry.content, ...(entry.encoding ? { encoding: entry.encoding } : {}), status });
+  });
   return Object.freeze({ version: 1, root, changes: Object.freeze(changes) });
 }
 async function precondition(root, change) {
@@ -118,8 +124,11 @@ export async function applyFilePlan(plan, { beforeWrite } = {}) {
   const applied = []; const originals = new Map();
   let retain = false;
   try {
+    // Check every preimage, including no-ops, before any staging or destination write.
+    const checked = await mapBounded(plan.changes, 8, change => precondition(root, change));
     for (const [index, change] of plan.changes.entries()) {
-      const original = await precondition(root, change); originals.set(change.path, original.bytes);
+      if (change.status === 'unchanged') continue;
+      const original = checked[index]; originals.set(change.path, original.bytes);
       if (original.bytes !== null) await writeFile(join(lock, `before-${index}`), original.bytes, { flag: 'wx' });
       if (change.content !== null) await writeFile(join(lock, `after-${index}`), contentBytes(change), { flag: 'wx' });
     }
