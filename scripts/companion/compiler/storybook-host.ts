@@ -48,8 +48,11 @@ export const withProject: Decorator = (story, context) => {
     });
     onBeforeUnmount(() => cleanup?.());
     return () => h('section', { 'data-plugin-ui': owner, 'data-story-host': '',
-      class: ['ps--' + owner, context.globals.theme === 'dark' ? 'theme-dark' : 'theme-light'],
-      style: { maxWidth: context.parameters.shell?.width === 'narrow' ? '360px' : '100%', minHeight: '120px', padding: '16px' },
+      class: ['obsidian-harness', owner, 'ps--' + owner, context.globals.theme === 'dark' ? 'theme-dark dark' : 'theme-light'],
+      style: { maxWidth: context.parameters.shell?.width === 'narrow' ? '360px' : '100%', minHeight: '120px', padding: '16px',
+        background: 'var(--' + owner + '-surface, var(--background-primary))', color: 'var(--' + owner + '-text, var(--text-normal))',
+        fontFamily: 'var(--font-interface)', fontSize: 'var(--font-ui-medium)', lineHeight: 'var(--line-height-normal)',
+      },
     }, [h('div', { ref: mount }), message.value ? h('p', { role: 'status', 'data-story-message': '' }, message.value) : null]);
   } });
 };

@@ -41,7 +41,20 @@ try {
     await page.locator('[data-story-host] [data-design-document]').waitFor();
     assert.equal(await page.locator('#error-message').isVisible(), false);
   }
+  const palette = () => page.locator('[data-story-host]').evaluate(el => {
+    const style = getComputedStyle(el);
+    return { background: style.backgroundColor, foreground: style.color, scheme: style.colorScheme,
+      surface: style.getPropertyValue('--background-primary').trim(), text: style.getPropertyValue('--text-normal').trim() };
+  });
+  const luminance = color => {
+    const rgb = /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\)$/.exec(color);
+    assert.ok(rgb, 'Expected opaque resolved RGB color: ' + color);
+    const linear = rgb.slice(1).map(value => { const n = Number(value) / 255; return n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4; });
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  };
   await open(prefix + 'default'); report.assertions.push('Real generated Vue mounted with its isolated project context');
+  const light = await palette(); assert.equal(light.scheme, 'light'); assert.ok(light.surface && light.text);
+  assert.ok(luminance(light.background) > 0.5, 'Light preview must resolve a light surface');
   await open(prefix + 'empty'); assert.equal(await page.locator('[data-design-state]').first().getAttribute('data-design-state'), 'empty');
   report.assertions.push('Empty state rendered');
   const scenario = Object.values(index.entries).find(item => item.id.startsWith(prefix + 'scenario'));
@@ -50,9 +63,17 @@ try {
   assert.equal(await page.locator('[data-story-host]').evaluate(el => getComputedStyle(el).maxWidth), '360px');
   report.assertions.push('Authored narrow scenario rendered');
   await open(prefix + 'default', '&globals=theme:dark');
-  await page.locator('[data-story-host].theme-dark').waitFor(); report.assertions.push('Theme selection applied');
+  await page.locator('[data-story-host].theme-dark.dark').waitFor();
+  const dark = await palette(); assert.equal(dark.scheme, 'dark'); assert.ok(dark.surface && dark.text);
+  assert.notEqual(dark.background, light.background); assert.notEqual(dark.foreground, light.foreground);
+  assert.ok(luminance(dark.background) < 0.1, 'Dark preview must resolve a dark surface');
+  for (const colors of [light, dark]) {
+    const levels = [luminance(colors.background), luminance(colors.foreground)].sort((a, b) => a - b);
+    assert.ok((levels[1] + 0.05) / (levels[0] + 0.05) >= 4.5, 'Fixture host text must remain readable');
+  }
+  report.palette = { light, dark }; report.assertions.push('Light/dark host tokens resolve to readable contrasting surfaces');
   assert.deepEqual(report.errors, []); assert.deepEqual(report.externalRequests, []);
-  await page.screenshot({ path: join(output, 'component-dark.png') });
+  await page.locator('[data-story-host]').screenshot({ path: join(output, 'component-dark.png') });
   report.status = 'passed';
 } catch (error) {
   report.failure = { name: error.name, message: error.message }; throw error;

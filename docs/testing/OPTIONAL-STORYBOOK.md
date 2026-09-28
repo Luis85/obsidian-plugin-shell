@@ -36,6 +36,14 @@ no-write replays in hosted CI. The dependency-free regression passed locally
 manual workflow; those are aligned with the repository's existing pinned
 checkout, Node setup and artifact actions without relaxing its policy.
 
+Visual review of that predecessor's retained screenshot found a gap: its theme
+assertion checked a class, not resolved colors. The wrapper now combines the
+simulated host class, generated token identity and authored `.dark` marker on
+one isolated root. Browser qualification now checks opaque computed palettes,
+light/dark surface luminance, fixture text contrast and both host variables;
+it retains those palettes and a cropped story screenshot. This is stronger
+fixture evidence, not a claim that every generated control is accessible.
+
 **Full main CI must be checked on the final follow-up head.** Earlier green
 workflows are not attributed to a later commit automatically. No gate,
 coverage threshold, dependency rule or production validator was disabled.

@@ -92,3 +92,14 @@ test('CSF source exposes statically indexable identifiers for titles, stable IDs
   assert.match(code, /^  name: "Narrow empty preview"/m);
   assert.doesNotMatch(code, /^  "(?:id|title|tags|name)":/m);
 });
+
+test('story host binds simulated host variables, generated identity and authored dark tokens on the same root', async () => {
+  const result = await compileProject({ source: JSON.stringify(source), template, storybook: { generateStories: true } });
+  assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
+  const host = get(result, 'storybook/generated/with-project.ts');
+  assert.match(host, /class: \['obsidian-harness', owner, 'ps--' \+ owner/);
+  assert.match(host, /'theme-dark dark'/);
+  assert.match(host, /background: 'var\(--' \+ owner \+ '-surface, var\(--background-primary\)\)'/);
+  assert.match(host, /color: 'var\(--' \+ owner \+ '-text, var\(--text-normal\)\)'/);
+  assert.doesNotMatch(host, /document\.body\.classList/);
+});
