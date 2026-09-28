@@ -30,11 +30,13 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   };
   const options = { ...context, project: option(args, 'project', 'design/project.json'),
     guide: option(args, 'guide') || undefined, out: option(args, 'out') || undefined, kind: option(args, 'kind') || undefined };
+  let completion: string | undefined;
   try {
     terminal?.start();
-    if (args.command === 'prototype') await prototypeWizard(ui, options);
+    if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
     else await studio(ui, options);
   } finally { terminal?.dispose(); }
+  if (terminal && completion) io.error.write(safe(completion));
 }
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;

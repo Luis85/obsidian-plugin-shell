@@ -57,3 +57,25 @@ animation loop and never captures the mouse. Unicode editing respects grapheme
 clusters; cell width uses conventional CJK/emoji widths. Ambiguous-width terminal
 fonts, advanced input methods, SSH/tmux, and interactive Windows Terminal sessions
 remain explicit manual acceptance scope, not inferred from stream-based tests.
+
+## Terminal regression qualification
+
+`npm run test:maker` retains the portable keyboard, frame, stream and parity tests.
+`npm run test:maker:pty` is the additional opt-in Linux/macOS acceptance suite. It
+needs Python 3's standard library only, not a new application dependency. It drives
+the actual `shell.mjs` through an OS pseudo-terminal, creates a page with bulk
+components, refuses a save first, approves a second reviewed plan, and compares
+the written bytes against agent-mode creation. It also checks small-window paste
+protection, F1 help, Ctrl+C, external SIGTERM, empty stdout and exact termios
+restoration. CI runs that suite on Linux/macOS; it is not a Windows Terminal test.
+
+The suite retains raw terminal transcripts, replayable `.cast` files and a JSON
+report under `reports/maker-pty/`. Treat captures as evidence of the scripted
+journey, not a substitute for assistive-technology or terminal-font review. No
+user vault is involved; all created projects live in isolated temporary folders.
+
+Combining accents and emoji are re-segmented after each insertion, including
+keystrokes arriving separately. Paste cannot edit a draft while the window is too
+small or help covers the field. Terminal output errors remain observed through
+restoration, including errors emitted after a failed write callback. Contextual
+shortcut rows keep Back, Help and Cancel visible at the minimum terminal size.

@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { PassThrough, Writable } from 'node:stream';
-import { realpath, mkdtemp, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { main } from '../../bin/shell.ts';
+import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { parseArguments } from '../../bin/adapters/commands.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function streams(onScreen = () => {}) {
@@ -56,5 +57,35 @@ test('plain and accessibility modes retain a line-oriented exit with no ANSI scr
         assert.deepEqual(f.raw, []); assert.ok(!f.screen.join('').includes('\x1b'));
       } finally { f.close(); }
     }
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('standalone prototype completion remains visible after leaving the alternate screen', async () => {
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-completion-'));
+  try {
+    const guide = await loadGuide();
+    const fields = guide.steps.flatMap(step => step.fields).filter(field => ['title', 'mode', 'pages', 'components', 'approved'].includes(field.id));
+    guide.steps = [{ title: 'Preparation', fields }];
+    guide.constraints = [{ field: 'approved', equals: true, message: 'Agree first.' }];
+    await writeFile(join(root, 'guide.json'), JSON.stringify(guide));
+    const script = [
+      ['Prototype title', 'Completion test\r'], ['What are you making?', '\r'], ['Pages to include', '\r'],
+      ['Components for the first page', '\r'], ['Review your prototype brief', '\r'],
+      ['Do you agree to this complete brief', '\x1b[B\r'], ['Package output folder', '\r'],
+      ['Review before writing', '\r'], ['Apply this reviewed plan?', '\x1b[B\r'],
+    ];
+    let position = 0;
+    const f = streams((screen, input) => {
+      const current = script[position];
+      if (current && screen.includes(current[0])) { position++; queueMicrotask(() => input.write(current[1])); }
+    });
+    try {
+      const code = await main(['prototype', '--root', root, '--guide', 'guide.json', '--ui', 'tui'], frameworkRoot, f.io);
+      assert.equal(code, 0, f.screen.join(''));
+      assert.equal(position, script.length);
+      const transcript = f.screen.join(''), restored = transcript.lastIndexOf('\x1b[?1049l');
+      assert.ok(restored >= 0); assert.match(transcript.slice(restored), /Start with prototypes\/prepared-prototype\/execution-prompt\.md/);
+      assert.equal(f.output.length, 0); assert.deepEqual(f.raw, [true, false]);
+    } finally { f.close(); }
   } finally { await rm(root, { recursive: true, force: true }); }
 });

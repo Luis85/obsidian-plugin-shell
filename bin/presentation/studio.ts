@@ -15,7 +15,7 @@ async function savedWorkspace(options: StudioOptions): Promise<Workspace | undef
   const snapshot = await readSnapshot(options.root, options.project);
   return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
 }
-export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<void> {
+export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
   const guide = await loadGuide(options.guide ? resolve(options.root, options.guide) : undefined);
   workspace ??= await savedWorkspace(options);
   const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
@@ -23,7 +23,9 @@ export async function prototypeWizard(ui: Prompts, options: StudioOptions, works
   ui.rich?.busy('Preparing prototype documents and source. No files written yet.');
   const plan = await prototypePlan({ ...options, out, guide, baseline: workspace?.document ?? null,
     input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers } });
-  if (await review(ui, plan, options.signal)) ui.write(`\nStart with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`);
+  if (!await review(ui, plan, options.signal)) return;
+  const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
+  ui.write(completion); return completion;
 }
 async function save(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const plan = await savePlan(options.root, options.project, workspace.document, workspace.beforeHash);

@@ -41,7 +41,8 @@ export async function maintainabilityInventory(root) {
       else if (path.startsWith('tests/') || path.startsWith('harness/')) view = 'fixtures';
       else view = 'tooling';
     }
-    const python = conceptPython.test(path) || memoryPython.has(path);
+    const terminalPython = path === 'tests/tooling/interactive-maker-pty.py';
+    const python = conceptPython.test(path) || memoryPython.has(path) || terminalPython;
     // Generated-project kit templates (README, AGENTS.md, JSON/YAML settings) are rendered text, not code.
     const templateData = (path.startsWith('scripts/examples/templates/') && /\.(?:json|css|md)\.txt$/.test(path)) || /^scripts\/companion\/devkit\/[\w.-]+\.tmpl$/.test(path);
     if (view === 'unsupported' && !nonExecutable.test(path) && path !== vendorArchive && !templateData && !python) throw new Error(`METRIC_UNCLASSIFIED_INPUT: ${path}`);
@@ -54,7 +55,9 @@ export async function maintainabilityInventory(root) {
       if (template) templateRegion = { startLine: template.loc.start.line, endLine: template.loc.end.line };
     }
     files.push({ path, sha256: sha256(data), bytes: data.length, physicalLines: physicalLines(data.toString('utf8')), view,
-      ...(python ? { measurement: 'not-measured', reason: memoryPython.has(path)
+      ...(python ? { measurement: 'not-measured', reason: terminalPython
+        ? 'Python standard-library PTY acceptance driver; real terminal evidence is separate from JS/TS/Vue metrics.'
+        : memoryPython.has(path)
         ? 'Python optional memory tooling; stdlib adapter tests and live-provider acceptance are separate from JS/TS/Vue metrics.'
         : 'Python concept tooling; syntax, assembly and browser evidence are separate from JS/TS/Vue metrics.' } : {}),
       templateRegion, extension: template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });

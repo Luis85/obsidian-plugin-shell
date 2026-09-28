@@ -42,6 +42,9 @@ jobs:
           mkdir -p reports/maker
           set -o pipefail
           node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
+      - name: Actual pseudo-terminal authoring and restoration
+        if: ${{ !cancelled() && runner.os != 'Windows' }}
+        run: node "$QUALIFIED_NPM" run test:maker:pty
       - name: Independent full-production and core coverage
         if: ${{ !cancelled() }}
         run: node "$QUALIFIED_NPM" run test:coverage:maker
@@ -63,6 +66,7 @@ jobs:
           name: maker-qualification-${{ matrix.os }}
           path: |
             reports/maker
+            reports/maker-pty
             reports/maker-coverage
             reports/maintainability
             reports/analyzer
