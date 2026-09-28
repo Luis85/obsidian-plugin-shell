@@ -89,7 +89,10 @@ export class TerminalSession implements RichPrompts {
     this.pasteBuffer = (this.pasteBuffer + (key.sequence ?? text ?? '')).slice(0, 10001); return true;
   }
   private finishPaste(): void {
-    if (this.pasteBuffer !== null && this.state) paste(this.state, this.pasteBuffer);
+    const size = dimensions(this.options.output.columns, this.options.output.rows);
+    if (this.pasteBuffer !== null && this.state && !this.state.help && size.width >= 59 && size.height >= 18) {
+      paste(this.state, this.pasteBuffer);
+    }
     this.pasteBuffer = null; this.draw();
   }
   private data = (chunk: Buffer | string): void => {
@@ -99,6 +102,7 @@ export class TerminalSession implements RichPrompts {
   private drained = (): void => { this.blocked = false; this.draw(); };
   private closed = (): void => { this.options.cancel(); this.cancelled(); };
   private failed = (error: Error): void => {
+    if (this.ended) return;
     this.pending?.reject(error); this.pending = undefined; this.options.cancel(); this.dispose();
   };
   private cancelled = (): void => {
@@ -114,9 +118,17 @@ export class TerminalSession implements RichPrompts {
   }
   private restoreOutput(): void {
     const { output } = this.options;
-    const released = () => { output.removeListener('error', this.failed); };
-    if (!this.started || output.destroyed) { released(); return; }
-    try { output.write(leave, released); } catch (error) { released(); throw error; }
+    const released = () => {
+      output.removeListener('error', this.failed); output.removeListener('error', released);
+      output.removeListener('close', released);
+    };
+    if (!this.started) { released(); return; }
+    // A failed write callback precedes its error event. Keep ownership until that
+    // event/close, even when destroy() has already scheduled the error emission.
+    output.once('close', released); output.once('error', released);
+    if (output.destroyed) return;
+    try { output.write(leave, error => { if (!error) released(); }); }
+    catch (error) { released(); throw error; }
   }
   dispose(): void {
     if (this.ended) return; this.ended = true;

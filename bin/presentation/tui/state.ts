@@ -32,10 +32,12 @@ function answer(state: State): Reply | undefined {
 export function paste(state: State, value: string): void {
   if (state.request.kind !== 'text') { state.error = 'Paste is accepted only in a text field, never as a menu command.'; return; }
   const text = clean(value), insertion = state.request.multiline ? text : text.replace(/\n/g, ' ');
-  if (state.value.length + insertion.length > 10000) { state.error = 'Input exceeds 10,000 characters. Nothing was pasted.'; return; }
+  if (value.length > 10000 || state.value.length + insertion.length > 10000) { state.error = 'Input exceeds 10,000 characters. Nothing was pasted.'; return; }
   const parts = graphemes(state.value);
-  parts.splice(state.cursor, 0, insertion); state.value = parts.join('');
-  state.cursor += graphemes(insertion).length; state.error = '';
+  const prefix = parts.slice(0, state.cursor).join('') + insertion;
+  state.value = prefix + parts.slice(state.cursor).join('');
+  // Re-segment the prefix: accents and ZWJ sequences can join the preceding cluster.
+  state.cursor = graphemes(prefix).length; state.error = '';
 }
 function editText(state: State, key: Key, text: string): Reply | undefined {
   const parts = graphemes(state.value);

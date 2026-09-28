@@ -48,12 +48,16 @@ function subheading(state: State | null): string {
   if (request.kind === 'review') return `${state.section + 1}/${request.sections.length} | ${request.sections[state.section]?.title ?? ''}`;
   return `${state.searching ? 'SEARCH' : 'Filter'}: ${state.query || '(type / to search)'}${request.kind === 'multi' ? ' | Tab switches search / selection' : ''}`;
 }
-function footer(state: State | null): string {
-  if (!state) return 'Ctrl+C Cancel | No files are changed without approval';
-  if (state.help) return 'F1 Close help | Escape Back | Ctrl+C Cancel';
-  if (state.request.kind === 'text') return 'Enter Continue | Ctrl+J New line | Ctrl+U Clear | Esc Back | F1 Help';
-  if (state.request.kind === 'review') return 'Up/Down Scroll | PgUp/PgDn Page | Tab Document | Enter Continue | Esc Back';
-  return 'Up/Down Move | Space Toggle | / Search | Enter Select | Esc Back | F1 Help';
+function footer(state: State | null): string[] {
+  const navigation = 'Esc Back | F1 Help | Ctrl+C Cancel';
+  if (!state) return ['No files are changed without approval', 'Ctrl+C Cancel'];
+  if (state.help) return ['Up/Down Scroll | F1 Close help', navigation];
+  if (state.request.kind === 'text') return [state.request.multiline
+    ? 'Enter Continue | Ctrl+J New line | Ctrl+U Clear'
+    : 'Enter Continue | Left/Right Edit | Ctrl+U Clear', navigation];
+  if (state.request.kind === 'review') return ['Up/Down Scroll | PgUp/PgDn Page | Tab Document', 'Enter Continue | ' + navigation];
+  return [state.request.kind === 'multi' ? 'Arrows Move | Space Toggle | / Search | Enter Add'
+    : 'Up/Down Move | / Search | Enter Select', navigation];
 }
 /** One bounded frame, with terminal-default colors and a text marker independent of color. */
 export function frame(state: State | null, context: Context, notice: string, size: Size, color: boolean): string[] {
@@ -68,7 +72,7 @@ export function frame(state: State | null, context: Context, notice: string, siz
     const prefix = size.sidebar ? fit(side[row] ?? '', size.sidebar - 2) + '| ' : '';
     lines.push(prefix + ' ' + clip(content[row] ?? '', size.contentWidth));
   }
-  lines.push('-'.repeat(size.width), ' ' + statusLine(state, notice), ' ' + footer(state));
+  lines.push('-'.repeat(size.width), ' ' + statusLine(state, notice), ...footer(state).map(line => ' ' + line));
   while (lines.length < size.height) lines.push('');
   return lines.slice(0, size.height).map((line, index) => {
     const safe = clip(line, size.width);
