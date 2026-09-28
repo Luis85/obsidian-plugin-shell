@@ -2,13 +2,13 @@ import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { object } from './evidence-adapters.mjs';
 import { evidenceIdentity, assetIdentity, fileIdentity, suiteInventory, candidateIdentity } from './evidence-identity.mjs';
-import { adaptProducer } from './evidence-producers.mjs';
+import { adaptProducer, producerRawKeys, evidencePacketVersion } from './evidence-producers.mjs';
 
 const equal = (left, right, code) => { if (JSON.stringify(left) !== JSON.stringify(right)) throw new Error(code); };
 export async function checkEvidence(root, path) {
   const packet = JSON.parse(await readFile(path, 'utf8'));
   object(packet, ['schemaVersion', 'producer', 'id', 'startedAt', 'finishedAt', 'before', 'after', 'suites', 'assets', 'candidate', 'execution', 'raw', 'result', 'failure', 'status']);
-  if (packet.schemaVersion !== 1 || !/^[0-9a-f-]{36}$/.test(packet.id) || !Number.isFinite(Date.parse(packet.startedAt)) || !Number.isFinite(Date.parse(packet.finishedAt)) || Date.parse(packet.finishedAt) < Date.parse(packet.startedAt)) throw new Error('EVIDENCE_SCHEMA');
+  if (![1, evidencePacketVersion].includes(packet.schemaVersion) || !/^[0-9a-f-]{36}$/.test(packet.id) || !Number.isFinite(Date.parse(packet.startedAt)) || !Number.isFinite(Date.parse(packet.finishedAt)) || Date.parse(packet.finishedAt) < Date.parse(packet.startedAt)) throw new Error('EVIDENCE_SCHEMA');
   object(packet.execution, ['exitCode', 'signal', 'retry', 'repetition']);
   if (packet.execution.retry !== 0 || packet.execution.repetition !== 0) throw new Error('EVIDENCE_ATTEMPT');
   const current = await evidenceIdentity(root, packet.producer);
@@ -17,7 +17,7 @@ export async function checkEvidence(root, path) {
   equal(packet.suites, await suiteInventory(root, packet.producer), 'EVIDENCE_SUITE_INVENTORY');
   equal(packet.assets, ['native', 'artifact', 'browser'].includes(packet.producer) ? await assetIdentity(root) : [], 'EVIDENCE_ASSET_MISMATCH');
   equal(packet.candidate, packet.producer === 'native' ? await candidateIdentity(root, current, packet.candidate?.directory) : null, 'EVIDENCE_CANDIDATE_MISMATCH');
-  const keys = ['stdout', 'stderr', ...(['runtime', 'coverage'].includes(packet.producer) ? ['framework', 'attempts'] : []), ...(['coverage', 'native'].includes(packet.producer) ? [packet.producer] : [])];
+  const keys = producerRawKeys(packet.producer, packet.schemaVersion);
   object(packet.raw, keys);
   equal(Object.keys(packet.raw).sort(), keys.sort(), 'EVIDENCE_RAW_INVENTORY');
   const raw = {};
@@ -27,7 +27,7 @@ export async function checkEvidence(root, path) {
     equal(identity, await fileIdentity(dirname(path), identity.file), 'EVIDENCE_RAW_HASH');
     raw[kind] = await readFile(join(dirname(path), identity.file), 'utf8');
   }
-  const actual = await adaptProducer(packet.producer, raw, root, packet.suites, packet.execution.exitCode);
+  const actual = await adaptProducer(packet.producer, raw, root, packet.suites, packet.execution.exitCode, packet.schemaVersion);
   if (packet.candidate && actual.candidateSource !== packet.candidate.sourceCommit) throw new Error('EVIDENCE_CANDIDATE_SOURCE');
   equal(packet.result, actual, 'EVIDENCE_RESULT_MISMATCH');
   if (actual.assets && (actual.assets.length !== packet.assets.length || actual.assets.some(asset => !packet.assets.some(expected => expected.file === asset.file && expected.sha256 === asset.sha256 && (asset.bytes === undefined || asset.bytes === expected.bytes))))) throw new Error('EVIDENCE_ASSET_MISMATCH');

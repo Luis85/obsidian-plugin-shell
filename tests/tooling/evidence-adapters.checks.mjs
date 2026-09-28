@@ -76,10 +76,35 @@ test('real Playwright JSON records passing assertions, first-failure retries and
     ['test.describe.configure({ retries: 1 }); test("real retry", ({}, info) => expect(info.retry).toBe(1));', false],
   ]) {
     const root = await browserEvidenceFixture(t, body);
+    // Deterministically reproduce setup/configuration diagnostics before the reporter starts.
+    // These are retained diagnostic streams, not assertion results or browser UI evidence.
+    const config = join(root, 'playwright.config.ts');
+    await writeFile(config, 'console.log("GitCommitInfo transport regression canary");\nconsole.error("configuration warning canary");\n' + await readFile(config, 'utf8'));
     const run = evidenceCli(root, 'run', 'browser'); const output = JSON.parse(run.stdout);
     assert.equal(run.status === 0, passing, run.stdout + run.stderr);
     assert.equal(evidenceCli(root, 'check', output.path).status === 0, passing);
+    const packet = JSON.parse(await readFile(output.path, 'utf8'));
+    assert.equal(packet.schemaVersion, 2);
+    const directory = dirname(output.path);
+    assert.match(await readFile(join(directory, packet.raw.stdout.file), 'utf8'), /GitCommitInfo transport regression canary/);
+    assert.match(await readFile(join(directory, packet.raw.stderr.file), 'utf8'), /configuration warning canary/);
+    assert.ok(JSON.parse(await readFile(join(directory, packet.raw.framework.file), 'utf8')).suites.length);
     if (passing) {
+      const original = await readFile(join(directory, packet.raw.framework.file), 'utf8');
+      for (const bytes of ['GitCommitInfo diagnostics\n' + original, '{}', '']) {
+        await writeFile(join(directory, packet.raw.framework.file), bytes);
+        const changed = structuredClone(packet);
+        changed.raw.framework = { file: packet.raw.framework.file, bytes: Buffer.byteLength(bytes), sha256: createHash('sha256').update(bytes).digest('hex') };
+        await writeFile(output.path, JSON.stringify(changed));
+        assert.notEqual(evidenceCli(root, 'check', output.path).status, 0, 'Malformed raw report cannot be laundered by rehashing');
+      }
+      await writeFile(join(directory, packet.raw.framework.file), original);
+      for (const change of [value => { delete value.raw.framework; }, value => { value.schemaVersion = 1; }]) {
+        const changed = structuredClone(packet); change(changed); await writeFile(output.path, JSON.stringify(changed));
+        assert.notEqual(evidenceCli(root, 'check', output.path).status, 0, 'Missing report or downgraded transport cannot be accepted');
+      }
+      await writeFile(output.path, JSON.stringify(packet));
+      assert.equal(evidenceCli(root, 'check', output.path).status, 0);
       await writeFile(join(root, 'dist/main.js'), 'different bytes');
       const stale = evidenceCli(root, 'check', output.path); assert.notEqual(stale.status, 0); assert.match(stale.stderr, /ASSET_MISMATCH/);
     }

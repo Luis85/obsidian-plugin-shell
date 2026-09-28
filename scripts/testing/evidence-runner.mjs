@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile, rename, appendFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { evidenceIdentity, assetIdentity, suiteInventory, fileIdentity, candidateIdentity } from './evidence-identity.mjs';
-import { producerCommand, adaptProducer } from './evidence-producers.mjs';
+import { producerCommand, adaptProducer, producerEnvironment, readFrameworkReport, evidencePacketVersion } from './evidence-producers.mjs';
 
 export function evidenceFailure(failure, before, after, assets, finalAssets, result, candidate) {
   // A missing adapted result is not a candidate mismatch. Preserve the first
@@ -16,12 +16,9 @@ export function evidenceFailure(failure, before, after, assets, finalAssets, res
   return failure;
 }
 
-async function execute(root, args, output, candidate, timeoutMs) {
+async function execute(root, producer, args, output, candidate, timeoutMs) {
   return await new Promise(resolve => {
-    const env = { ...process.env, TZ: 'UTC', LANG: 'C.UTF-8', NODE_OPTIONS: '', FORCE_COLOR: '0', SHELL_EVIDENCE_OUTPUT: output };
-    delete env.NODE_TEST_CONTEXT;
-    for (const key of Object.keys(env)) if (key.startsWith('PLAYWRIGHT_JSON_OUTPUT')) delete env[key];
-    if (candidate) env.GITHUB_SHA = candidate.sourceCommit;
+    const env = producerEnvironment(producer, output, candidate);
     const child = spawn(process.execPath, args, { cwd: root, env, shell: false, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = ''; let stderr = ''; let failure = null;
     // Heavy suites have their own assertion deadlines; this only bounds a stuck
@@ -66,12 +63,12 @@ export async function runEvidence(root, producer, { allowDownload = false, candi
   }
   const startedAt = new Date().toISOString();
   const args = producerCommand(root, producer, suites, output);
-  const execution = await execute(root, args, output, candidate, timeoutMs);
+  const execution = await execute(root, producer, args, output, candidate, timeoutMs);
   const raw = { stdout: execution.stdout, stderr: execution.stderr };
   const rawPaths = {};
   let result = null; let failure = execution.failure;
   try {
-    if (['runtime', 'coverage'].includes(producer)) raw.framework = await readFile(join(output, 'framework.json'), 'utf8');
+    if (['runtime', 'coverage', 'browser'].includes(producer)) raw.framework = await readFrameworkReport(output);
     if (['runtime', 'coverage'].includes(producer)) raw.attempts = await readFile(join(output, 'attempts.json'), 'utf8');
     if (retained) raw[producer] = await readFile(join(root, retained), 'utf8');
     result = await adaptProducer(producer, raw, root, suites, execution.exitCode);
@@ -83,7 +80,7 @@ export async function runEvidence(root, producer, { allowDownload = false, candi
   const after = await evidenceIdentity(root, producer);
   const finalAssets = assets.length ? await assetIdentity(root) : [];
   failure = evidenceFailure(failure, before, after, assets, finalAssets, result, candidate);
-  const packet = { schemaVersion: 1, producer, id, startedAt, finishedAt: new Date().toISOString(), before, after,
+  const packet = { schemaVersion: evidencePacketVersion, producer, id, startedAt, finishedAt: new Date().toISOString(), before, after,
     suites, assets, candidate, execution: { exitCode: execution.exitCode, signal: execution.signal, retry: 0, repetition: 0 },
     raw: rawPaths, result, failure, status: !failure && result?.status === 'passed' ? 'passed' : 'failed' };
   await writeFile(join(output, 'packet.json'), JSON.stringify(packet, null, 2) + '\n', { flag: 'wx' });
