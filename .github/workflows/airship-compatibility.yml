@@ -1,0 +1,46 @@
+name: Airship generated-project compatibility
+on:
+  push:
+    branches: [feat/generated-project-airship]
+  pull_request:
+    paths:
+      - 'scripts/airship/**'
+      - 'scripts/compiler/**'
+      - 'scripts/companion/**'
+      - 'tests/airship/**'
+      - '.github/workflows/airship-compatibility.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: airship-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Retain exact baseline for integration diagnostics
+        run: |
+          mkdir -p /tmp/airship-contract
+          git archive --format=tar HEAD > /tmp/airship-contract/shell-source.tar
+          git rev-parse HEAD > /tmp/airship-contract/shell-commit.txt
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: 0xnyn/airship
+          path: .upstream-airship
+          persist-credentials: false
+      - name: Retain upstream source contract
+        working-directory: .upstream-airship
+        run: |
+          git archive --format=tar HEAD > /tmp/airship-contract/airship-source.tar
+          git rev-parse HEAD > /tmp/airship-contract/airship-commit.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: airship-source-contract
+          path: /tmp/airship-contract
+          retention-days: 1
+          if-no-files-found: error
