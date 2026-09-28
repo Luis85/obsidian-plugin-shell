@@ -9,7 +9,7 @@ import { sha256 } from '../testing/source-inputs.mjs';
 import { duplicateArguments, measureCorpus, assertCorpus, checkCorpus } from './maintainability-corpus.mjs';
 
 const policy = { version: 1, cyclomatic: 10, cognitive: 15, duplication: 3, minTokens: 50, minLines: 5,
-  mode: 'mild', ignoreImports: true, production: 'every src JS/TS/Vue file, including generated consumers' };
+  mode: 'mild', ignoreImports: true, production: 'every src and bin JS/TS/Vue file, including generated consumers' };
 async function execute(tool, stage, args, output) {
   const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('FALLOW_')));
   environment.FALLOW_TELEMETRY_DISABLED = '1';

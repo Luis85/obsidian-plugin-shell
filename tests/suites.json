@@ -47,6 +47,21 @@
   },
   "suites": [
     {
+      "name": "maker",
+      "purpose": "Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "tests/tooling/interactive-maker-*.checks.mjs"
+      ],
+      "verify": "tooling",
+      "npmScript": "test:maker",
+      "workflows": [
+        "interactive-maker"
+      ]
+    },
+    {
       "name": "airship",
       "purpose": "Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation.",
       "runner": {

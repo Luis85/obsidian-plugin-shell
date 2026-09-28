@@ -37,7 +37,7 @@ export async function maintainabilityInventory(root) {
     if (template) view = 'templates';
     else if (golden) view = 'fixtures';
     else if (executable.test(path)) {
-      if (path.startsWith('src/')) view = 'production';
+      if (path.startsWith('src/') || path.startsWith('bin/')) view = 'production';
       else if (path.startsWith('tests/') || path.startsWith('harness/')) view = 'fixtures';
       else view = 'tooling';
     }
@@ -60,6 +60,7 @@ export async function maintainabilityInventory(root) {
       templateRegion, extension: template || golden ? path.replace(/\.txt$/, '').split('.').at(-1) : path.split('.').at(-1) });
   }
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);
+  if ((await readdir(root)).includes('bin')) await visit('bin');
   for (const name of (await readdir(root)).sort()) if (executable.test(name)) await visit(name);
   for (const name of ['package.json', 'package-lock.json', '.fallowrc.json']) await visit(name);
   files.sort((a, b) => a.path.localeCompare(b.path));
