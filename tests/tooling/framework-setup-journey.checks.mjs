@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -142,4 +142,58 @@ test('a reviewed generation hash survives the resume adapter instead of being re
     return { ...result('generate', {}, 'blocked'), diagnostics: [{ code: 'PLAN_STALE', message: 'synthetic' }] };
   });
   assert.equal(response.status, 'blocked'); assert.equal(response.data.attempt.status, 'blocked');
+});
+
+
+async function customConfigured(t) {
+  const ctx = await fixture(t);
+  const input = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  input.project = { ...input.project, id: 'capture', name: 'Capture', author: 'Example' };
+  input.settings = { codebaseFolder: 'application', testsFolder: 'checks' };
+  await writeFile(join(ctx.root, 'input.json'), JSON.stringify(input));
+  const imported = await run(ctx, ['setup', '--input', 'input.json', '--yes']);
+  assert.equal(imported.status, 'applied', JSON.stringify(imported));
+  return ctx;
+}
+for (const path of ['src/consumer-owned.ts', 'tests/runtime/consumer-owned.test.ts', 'application/feature.ts', 'checks/feature.test.ts']) {
+  test('custom roots still bind inherited and product source edits: ' + path, async t => {
+    const ctx = await customConfigured(t), folder = path.slice(0, path.lastIndexOf('/'));
+    await mkdir(join(ctx.root, folder), { recursive: true });
+    const before = await status(ctx); let calls = 0;
+    const execute = async () => { calls++; return result('generate', {}); };
+    await writeFile(join(ctx.root, path), 'export const consumerValue = 1;\n');
+    await assert.rejects(setupProgress(request('generate', before.resumeHash), ctx, execute), { code: 'SETUP_INPUT_CHANGED' });
+    const added = await status(ctx); assert.notEqual(added.fingerprint, before.fingerprint);
+    await writeFile(join(ctx.root, path), 'export const consumerValue = 2;\n');
+    await assert.rejects(setupProgress(request('generate', added.resumeHash), ctx, execute), { code: 'SETUP_INPUT_CHANGED' });
+    const edited = await status(ctx); assert.notEqual(edited.fingerprint, added.fingerprint);
+    await rm(join(ctx.root, path));
+    await assert.rejects(setupProgress(request('generate', edited.resumeHash), ctx, execute), { code: 'SETUP_INPUT_CHANGED' });
+    assert.equal(calls, 0);
+    assert.ok(!(await readdir(join(ctx.root, '.framework'))).includes('setup-progress.json'));
+  });
+}
+test('inherited source changes during custom-root verification cannot become current success', async t => {
+  const ctx = await customConfigured(t);
+  await mkdir(join(ctx.root, '.companion'));
+  await writeFile(join(ctx.root, '.companion/generation.json'), JSON.stringify({ version: 1, projectId: 'capture', files: [{ path: 'design/project.json' }] }));
+  await mkdir(join(ctx.root, 'src')); await writeFile(join(ctx.root, 'src/main.ts'), 'before');
+  const response = await setupProgress(request('verify', (await status(ctx)).resumeHash), ctx, async () => {
+    await writeFile(join(ctx.root, 'src/main.ts'), 'after'); return result('verify', {});
+  });
+  assert.equal(response.status, 'failed'); assert.equal(response.data.attempt.status, 'blocked');
+  assert.ok(response.data.attempt.codes.includes('SETUP_SOURCE_CHANGED'));
+  assert.equal(response.data.execution.verification, 'not-current');
+});
+test('inherited source links are rejected with custom roots and unrelated output stays outside the fingerprint', async t => {
+  const ctx = await customConfigured(t), before = await status(ctx);
+  for (const folder of ['reports', 'dist', 'node_modules']) {
+    await mkdir(join(ctx.root, folder)); await writeFile(join(ctx.root, folder, 'output.json'), '{}');
+  }
+  assert.equal((await status(ctx)).fingerprint, before.fingerprint);
+  const outside = await fixture(t); await writeFile(join(outside.root, 'outside.ts'), 'export const value = 1;');
+  await symlink(outside.root, join(ctx.root, 'src'), process.platform === 'win32' ? 'junction' : 'dir');
+  const rejected = await run(ctx, ['setup', 'status']);
+  assert.equal(rejected.status, 'failed'); assert.equal(rejected.diagnostics[0].code, 'SETUP_SYMLINK');
+  assert.equal(await readFile(join(outside.root, 'outside.ts'), 'utf8'), 'export const value = 1;');
 });

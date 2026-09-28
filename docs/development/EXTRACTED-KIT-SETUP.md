@@ -29,3 +29,21 @@ The progress file is `.framework/setup-progress.json`. Intent is written before 
 A crash can leave a running intent. A live previous process blocks another run. A dead process on the same host can be acknowledged explicitly with `--recover` and a fresh resume hash after inspecting effects; another host's interrupted intent remains blocked for manual reconciliation. Corrupt or foreign progress bytes are preserved. A failed final progress write reports that the stage may already have run; do not retry it blindly.
 
 No setup stage publishes, tags, enables a native plugin, changes Restricted Mode or deploys to a personal vault. `preview` uses the existing clickdummy builder and does not replace an existing HTML without the builder's own explicit replacement workflow. At the bounded history limit, retain/export the record before a separately reviewed new session; automatic history deletion is not implemented.
+
+
+### Custom product folders and freshness
+
+Generated product folders supplement the inherited framework; they do not replace
+`src/` and `tests/`. Setup status and resume fingerprint both the configured
+product folders and the fixed `src/`, `tests/`, `scripts/` and `harness/` trees.
+Adding, editing or deleting a file in any of those trees invalidates an earlier
+resume approval. A change during verification records a blocked attempt rather
+than a current success. Symlinked source roots remain refused even when custom
+folders are selected.
+
+Build output, reports and installed dependencies are deliberately outside this
+source fingerprint: installing dependencies or writing evidence must not make
+its own input stale. This is bounded local input tracking, not whole-repository
+attestation, installed-package integrity or authenticated acceptance evidence.
+Read the [custom-folder recovery record](../testing/SETUP-CUSTOM-ROOTS.md) for the
+reproduced defect and exact verification scope.

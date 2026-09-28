@@ -29,7 +29,10 @@ export async function setupSnapshot(context: Context) {
     else await file(path);
   }
   for (const path of [configFile, designFile, '.framework/kit.json', '.companion/generation.json', 'package.json', 'package-lock.json', 'manifest.json', 'shell.mjs']) await file(path);
-  for (const path of [config.paths.codebaseFolder, config.paths.testsFolder, 'scripts', 'harness']) if (await exists(join(context.root, path))) await visit(path);
+  // Custom folders relocate generated product code, not the inherited framework.
+  // Both still execute during verification; neither can be omitted from approval.
+  const sourceRoots = new Set(['src', 'tests', 'scripts', 'harness', config.paths.codebaseFolder, config.paths.testsFolder]);
+  for (const path of sourceRoots) if (await exists(join(context.root, path))) await visit(path);
   // Root configs can execute during a build. Include new and modified configs, not only package.json.
   for (const name of (await readdir(context.root)).sort()) if (/\.(?:[cm]?[jt]s|json)$/.test(name)) await file(name);
   let generated = false;
