@@ -54,10 +54,14 @@ async function verifyArtifacts(source, selection, log) {
   }
   return verifyPresetBrowser(source, selection);
 }
-async function verifyFailure(source, log) {
-  const before = await treeDigest(join(source, 'dist')), path = join(source, 'src/core/project.ts'), original = await readFile(path, 'utf8');
+async function verifyFailure(source, selection, log) {
+  // Static websites do not import the runtime core; corrupt an actual build input.
+  const websiteOnly = selection.targets.length === 1 && selection.targets[0] === 'website';
+  const input = websiteOnly ? 'src/targets/website/index.html' : 'src/core/project.ts';
+  const invalid = websiteOnly ? '\n<script type="module" src="./missing-qualification-entry.ts"></script>\n' : '\nthis is deliberately invalid syntax [\n';
+  const before = await treeDigest(join(source, 'dist')), path = join(source, input), original = await readFile(path, 'utf8');
   try {
-    await writeFile(path, original + '\nthis is deliberately invalid syntax [\n');
+    await writeFile(path, original + invalid);
     command(source, [npm, 'run', 'build'], log, true);
     assert.equal(await treeDigest(join(source, 'dist')), before, 'A failed build must preserve the entire last-good output.');
   } finally { await writeFile(path, original); }
@@ -80,7 +84,7 @@ for (const fixture of selected) {
     for (const script of ['typecheck', 'test', 'build']) command(source, [npm, 'run', script], log);
     const descriptor = JSON.parse(await readFile(join(source, 'shell.project.json'), 'utf8'));
     result.browser = await verifyArtifacts(source, descriptor, log);
-    result.outputSha256 = await verifyFailure(source, log);
+    result.outputSha256 = await verifyFailure(source, descriptor, log);
     result.status = 'passed';
   } catch (error) { result.error = error instanceof Error ? error.message : String(error); }
   finally {
