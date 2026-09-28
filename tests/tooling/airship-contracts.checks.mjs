@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { validateAuthoringDocument, parseAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { airshipOptions, airshipConfig, toolingSchema } from '../../scripts/companion/tooling-contract.mjs';
 import { withAirshipOption } from '../../scripts/companion/tooling-options.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
@@ -149,4 +149,13 @@ test('new/setup opt-in flags and Airship commands are discoverable; unknown laun
   assert.equal(parseCliArguments(['airship', 'enable', '--agent', 'codex']).command, 'airship enable');
   assert.throws(() => parseCliArguments(['airship', 'start', '--exec', 'unsafe']));
   assert.throws(() => parseCliArguments(['airship', 'start', '--host', '0.0.0.0']));
+});
+
+test('generated preview entry points are analyzed and inert tooling stays inside the authoring boundary', async () => {
+  const config = JSON.parse(await readFile(join(root, '.fallowrc.json'), 'utf8'));
+  for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) assert.ok(config.entry.includes(entry));
+  const zone = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract');
+  for (const file of ['scripts/companion/tooling-contract.mjs', 'scripts/companion/tooling-options.ts']) assert.ok(zone.patterns.includes(file));
+  assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name]);
+  assert.ok(!config.ignorePatterns.some(pattern => pattern.includes('airship')));
 });

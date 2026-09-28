@@ -1,6 +1,6 @@
 /** Inert optional development settings. No package, process or host is acquired here. */
 export const AIRSHIP_VERSION = '0.3.0';
-export const AIRSHIP_DEFAULTS = Object.freeze({ enabled: false, agent: 'claude', targetPort: 5173, port: 5174 });
+const AIRSHIP_DEFAULTS = Object.freeze({ enabled: false, agent: 'claude', targetPort: 5173, port: 5174 });
 function requireTooling(condition, message) {
   if (!condition) throw new Error('COMPANION_TOOLING_INVALID: ' + message);
 }
