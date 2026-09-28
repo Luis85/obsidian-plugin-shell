@@ -1,41 +1,47 @@
-# Iteration Planner — partial source transfer
+# Iteration Planner — buildable interaction prototype
 
-**The PR now contains source code and executable domain tests, but the clickdummy cannot yet be built from this checkout alone.** Uploads of `source/planning.ts` and `source/app.ts` were blocked. `prototype.html` is not committed. Keep PR #45 in draft.
+**All sixteen source/build files and both test runners are now present. The clickdummy can be built from this checkout without the conversation ZIP.** The compiled `prototype.html` is generated locally by the command below; it is not checked in.
 
-This concept is stacked on PR #5 (`docs/companion-plugin-prd`). The retry extends PR45 commit `14d55558fca71fb9bd2c9610c233d09d965fa781` without changing its base branch, production code or other concepts.
+This concept is on PR #45, branch `feat/iteration-planner-concept`, stacked on PR #5 (`docs/companion-plugin-prd`). The source completion extends `7081d06bdca784165e807a3aa3c83b62b01a8347`. GitHub reported the PR mergeable before this update: the earlier missing files were caused by tool upload blocks, not merge conflicts.
 
-## Concept
+## Build and test
 
-Help an agile team plan a useful step, walk its iteration backlog daily, review what became usable, and improve its next iteration. The intended cadence is Monday planning, daily backlog walkthroughs, iteration review and retrospective.
-
-The concept includes arbitrary backlogs; automatically indexed, goal-named iterations; descriptions and dates; people/capacity/reference resources; selected work and an agreed planning baseline; one increment report per iteration; and an approachable progress dashboard. Delivered work is distinguished from unfinished progress. Closing an iteration neither marks unfinished items Done nor automatically carries them forward.
-
-Read [the design brief](design-brief.md) for requirements, defaults, journeys and open decisions, and [the transfer record](PUBLICATION.md) for exact limitations and evidence.
-
-## What is committed
-
-Fourteen of the original sixteen files under `source/` are present: the domain model, validation, commands, fixtures, shared UI helpers, overview dashboard, ceremonies, dialogs, styles, HTML frame, build script, package manifest, lockfile and TypeScript configuration. The complete 38-case domain suite is in `tests/domain.test.mjs`.
-
-These source and test bytes match the previously delivered ZIP. They were not rewritten or replaced by placeholders. The missing planning and application modules prevent the UI from assembling. The standalone HTML, browser test script, screenshots and full package handover metadata have not been transferred.
-
-## Run the committed domain tests
-
-From the repository checkout:
+From the repository checkout, using Node.js 22.16.0 or newer:
 
 ```sh
 cd docs/concepts/iteration-planner/source
 npm ci --ignore-scripts
+npm run prototype:build
+npm run prototype:check
 npm test
 ```
 
-The partial source/test tree was checked separately with Node 22.16.0 / npm 10.9.2: install passed and all 38 domain tests passed, with zero failed, skipped or TODO. This is supplementary fallback validation, not the repository's qualified Node/npm/TypeScript toolchain.
+Open `docs/concepts/iteration-planner/prototype.html` after the build. The source package has no npm dependencies and does not require installing the framework's root package. It assembles all ten TypeScript modules, the HTML frame and styles into one offline browser artifact. Browser startup requires `DecompressionStream` support. Node's type stripping is not TypeScript type checking.
 
-**Do not treat `npm run prototype:build`, `npm run prototype:check` or `npm run test:browser` as working commands for this partial checkout.** The build was attempted and fails with `ENOENT` for `source/planning.ts`; `source/app.ts` is also absent. The browser script and HTML are absent. The original package scripts are retained unchanged so the transfer gap remains explicit.
+The optional browser journey runner is also included:
 
-[Verification metadata](evidence/transfer-checks.json) and [captured output excerpts](evidence/transfer-checks.log) distinguish this partial checkout from the complete attachment's successful local build.
+```sh
+npm run test:browser
+```
+
+That runner additionally requires Python with Playwright and a Chromium executable. It uses `/usr/bin/chromium` by default; set `CHROMIUM_PATH` to the installed browser on another system. Browser provisioning is separate from the dependency-free npm build. It writes evidence under `../evidence/` and requires the HTML build first.
+
+## Experience
+
+Manage arbitrary named backlogs and work types; create automatically indexed, goal-named iterations; describe the goal and dates; allocate people and capacity; agree selected backlog items; walk every iteration item daily; review a changelog and frozen increment; and turn a retrospective improvement into the next backlog action.
+
+The dashboard separates confirmed delivery from unfinished progress, time and capacity. Monday planning is the default cadence, not a forced date. Closing an iteration does not mark unfinished work Done or automatically carry it into the next iteration. Existing increment snapshots are retained.
+
+See [the design brief](design-brief.md), [integration boundaries](INTEGRATION.md), and [publication history](PUBLICATION.md).
+
+## Verification
+
+A fresh directory containing the complete source and test files, initially without an HTML artifact, passed `npm ci --ignore-scripts`, build, deterministic artifact check and all **38 domain tests** on Node 22.16.0 / npm 10.9.2. The generated HTML is 54,462 bytes and matches the original attachment byte-for-byte.
+
+The browser rerun recorded B01–B17 passing, then the execution environment terminated it at 120 seconds. B18–B20 and the overall suite are **not claimed as passed in this run**. See [completion metadata](evidence/completion-checks.json) and [output excerpts](evidence/completion-checks.log). Earlier [partial-checkout evidence](evidence/transfer-checks.json) is historical and retains its genuine missing-file build failure.
 
 ## Qualification boundary
 
-The separately delivered complete prototype is a TypeScript/native-browser interaction implementation, not the Vue 3/Pinia/Nuxt UI package prescribed by PR5's canonical prototype skill. Actual Companion project JSON, importer/compiler qualification, native Obsidian integration and the repository's full quality gates remain outstanding. Node type stripping is not TypeScript type checking.
+This is the existing TypeScript/native-browser interaction prototype, not the Vue 3/Pinia/Nuxt UI package required by the canonical prototype skill. Actual Companion project JSON/import/compiler qualification, pinned TypeScript checking, native Obsidian integration and full repository qualification remain outstanding. Workspace JSON is not Companion project JSON.
 
-No production runtime, current Companion project, schema, root dependency, workflow, quality threshold, vault, release, PR5 branch or main branch is changed. This commit preserves accepted source-transfer progress; it does not claim a runnable prototype on the PR.
+The PR stays draft for those separate qualification gaps. All source needed to build the fallback clickdummy is nevertheless present. No production runtime, root dependency, workflow, quality threshold, vault, release, PR5 branch or main branch is changed.
