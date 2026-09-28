@@ -63,7 +63,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
     assert.deepEqual(generated.tooling.storybook, { enabled: enabled === 'on', generateStories: stories === 'on' });
     // A reviewed override must update intake and generation ownership together; replay must not reject its own output.
     output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
-    assert.equal(JSON.parse(output.stdout).status, 'unchanged');
+    assert.equal(JSON.parse(output.stdout).status, 'unchanged', JSON.stringify(JSON.parse(output.stdout).data.applied));
   }
   assert.equal(await readFile(join(dir, 'package-lock.json'), 'utf8'), rootLock);
   output = cli(dir, ['storybook', 'install', '--yes', '--json']); assert.notEqual(output.status, 0);

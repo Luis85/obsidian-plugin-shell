@@ -32,7 +32,14 @@ export async function generationPlan(request: Request, context: Context) {
   const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap });
   const generatedDesign = planned.plan.changes.find(change => change.path === designFile);
   if (!generatedDesign || generatedDesign.afterHash === inputHash) return planned;
-  const entries = planned.plan.changes.map(({ path, content, encoding }) => ({ path, content, ...(encoding ? { encoding } : {}) }));
+  // Overrides replace the canonical input in this same plan. Both receipts must describe
+  // those accepted bytes, not the pre-override input, or the first replay writes again.
+  // planned.hash and every beforeHash still bind the original input to the approval.
+  const entries = planned.plan.changes.map(({ path, content, encoding }) => {
+    if (path !== '.companion/generation.json') return { path, content, ...(encoding ? { encoding } : {}) };
+    requireThat(typeof content === 'string' && !encoding, 'GENERATION_RECEIPT_INVALID', 'Expected the generated ownership receipt.');
+    return { path, content: json({ ...object(JSON.parse(content)), inputHash: generatedDesign.afterHash }) };
+  });
   entries.push({ path: intakePath, content: json({ ...intake, files: { ...object(intake.files), [designFile]: generatedDesign.afterHash } }) });
   const plan = await createFilePlan(context.root, entries);
   requireThat(plan.changes.at(-1)!.beforeHash === hash(intakeBytes) && planned.plan.changes.every((change, i) => change.beforeHash === plan.changes[i]!.beforeHash),
