@@ -8,6 +8,7 @@ on:
       - 'scripts/framework/**'
       - 'scripts/compiler/domain/**'
       - 'scripts/documentation/**'
+      - 'tests/tooling/framework-manual.checks.mjs'
       - 'tooling/documentation/**'
       - 'docs/user-manual/shell-cli/**'
       - '.github/workflows/shell-cli-manual.yml'
@@ -33,7 +34,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: Dependency-free contract and filesystem safety tests
-        run: node --test scripts/documentation/manual.test.mjs
+        run: node --test tests/tooling/framework-manual.checks.mjs
       - name: Generate from the actual command catalog
         run: node --experimental-strip-types scripts/documentation/manual.mjs
       - name: Verify deterministic regeneration

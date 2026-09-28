@@ -22,7 +22,7 @@ let browser;
 const report = { schemaVersion: 1, status: 'failed', assertions: [], errors: [], externalRequests: [] };
 try {
   browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
+  const context = await browser.newContext(); context.setDefaultTimeout(15000);
   await context.route('**/*', async route => {
     if (new URL(route.request().url()).origin !== base) { report.externalRequests.push(route.request().url()); await route.abort(); }
     else await route.continue();
@@ -30,10 +30,11 @@ try {
   const page = await context.newPage(); page.on('pageerror', error => report.errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') report.errors.push(message.text()); });
   const index = JSON.parse(await readFile(join(root, 'index.json'), 'utf8'));
+  await writeFile(join(output, 'story-index.json'), JSON.stringify(index, null, 2) + '\n');
   const inventory = JSON.parse(await readFile(join(target, 'design/storybook.json'), 'utf8'));
   const subject = inventory.stories.find(item => item.entityId === 'vc-1'); assert.ok(subject);
   const prefix = 'generated-component-project-json-review--';
-  assert.ok(index.entries[prefix + 'default']); report.assertions.push('Generated component indexed');
+  assert.ok(index.entries[prefix + 'default'], 'Stable CSF ID missing; inspect retained story-index.json'); report.assertions.push('Generated component indexed');
   assert.ok(Object.values(index.entries).some(item => item.title.startsWith('Pages/'))); report.assertions.push('Generated pages indexed');
   async function open(id, query = '') {
     await page.goto(base + '/iframe.html?id=' + id + '&viewMode=story' + query);
@@ -44,13 +45,17 @@ try {
   await open(prefix + 'empty'); assert.equal(await page.locator('[data-design-state]').first().getAttribute('data-design-state'), 'empty');
   report.assertions.push('Empty state rendered');
   const scenario = Object.values(index.entries).find(item => item.id.startsWith(prefix + 'scenario'));
-  assert.ok(scenario); await open(scenario.id);
+  assert.ok(scenario); assert.equal(scenario.name, 'Narrow empty preview'); await open(scenario.id);
+  assert.equal(await page.locator('[data-design-state]').first().getAttribute('data-design-state'), 'empty');
   assert.equal(await page.locator('[data-story-host]').evaluate(el => getComputedStyle(el).maxWidth), '360px');
   report.assertions.push('Authored narrow scenario rendered');
   await open(prefix + 'default', '&globals=theme:dark');
   await page.locator('[data-story-host].theme-dark').waitFor(); report.assertions.push('Theme selection applied');
   assert.deepEqual(report.errors, []); assert.deepEqual(report.externalRequests, []);
+  await page.screenshot({ path: join(output, 'component-dark.png') });
   report.status = 'passed';
+} catch (error) {
+  report.failure = { name: error.name, message: error.message }; throw error;
 } finally {
   await writeFile(join(output, 'browser.json'), JSON.stringify(report, null, 2) + '\n');
   try { await browser?.close(); } finally { await new Promise(resolve => server.close(resolve)); }

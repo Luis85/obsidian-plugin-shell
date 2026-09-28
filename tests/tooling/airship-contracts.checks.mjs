@@ -154,7 +154,11 @@ test('new/setup opt-in flags and Airship commands are discoverable; unknown laun
 
 test('generated preview entry points are analyzed and inert tooling stays inside the authoring boundary', async () => {
   const config = JSON.parse(await readFile(join(root, '.fallowrc.json'), 'utf8'));
-  for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) assert.ok(config.entry.includes(entry));
+  const tools = config.framework.find(item => item.name === 'airship-source-preview-tools');
+  assert.equal(tools.entryPointRole, 'support', 'preview/build tools are not plugin production roots');
+  for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) {
+    assert.ok(tools.entryPoints.includes(entry)); assert.equal(config.entry.includes(entry), false);
+  }
   const zone = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract');
   for (const file of ['scripts/companion/tooling-contract.mjs', 'scripts/companion/tooling-options.ts']) assert.ok(zone.patterns.includes(file));
   assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name]);

@@ -1,7 +1,7 @@
 import type { ComponentDefinition, PageDefinition, PropDefinition } from '../visual/visual-ir.mjs';
 import type { Artifact } from '../../compiler/domain/contracts.ts';
 import { visualDefinitions, visualComponentPath, visualPagePath } from './visual-model.ts';
-import { literal, json, type Model } from './model.ts';
+import { literal, type Model } from './model.ts';
 import { componentFile, relativeImport } from './file-code.ts';
 interface StorySubject {
   id: string; title: string; path: string; source: string; pointer: string; surface?: string;
@@ -16,19 +16,25 @@ function defaults(props: PropDefinition[]): Record<string, unknown> {
 function exportId(prefix: string, id: string): string {
   return prefix + Array.from(new TextEncoder().encode(id), byte => byte.toString(16).padStart(2, '0')).join('');
 }
+/** Storybook statically indexes identifier keys; JSON-quoted CSF metadata is not equivalent to CSF source. */
+function csfFields(value: Record<string, unknown>): string {
+  return Object.entries(value).filter(([, value]) => value !== undefined).map(([key, value]) =>
+    `${/^[A-Za-z_$][\w$]*$/.test(key) ? key : literal(key)}: ${literal(value)}`).join(',\n  ');
+}
+function csfStory(value: Record<string, unknown>): string { return `{\n  ${csfFields(value)}\n}`; }
 function storyFile(subject: StorySubject, projectId: string): { file: Artifact; inventory: StoryInventory } {
   const definition = subject.definition;
   const component = definition && 'props' in definition ? definition : undefined;
   const props = component?.props ?? [];
   const states = definition ? ['default', 'loading', 'empty', 'error', 'disabled'] : ['default'];
   const stories: { name: string; content: string }[] = states.map(state => ({
-    name: state[0]!.toUpperCase() + state.slice(1), content: json({ ...(definition ? { args: { designState: state } } : {}) }).trim(),
+    name: state[0]!.toUpperCase() + state.slice(1), content: csfStory({ ...(definition ? { args: { designState: state } } : {}) }),
   }));
   for (const variant of component?.variants ?? []) stories.push({ name: exportId('Variant', variant.id),
-    content: json({ name: variant.name, args: { ...variant.values, designState: 'default', designScenario: undefined } }).trim() });
+    content: csfStory({ name: variant.name, args: { ...variant.values, designState: 'default', designScenario: undefined } }) });
   for (const scenario of definition?.scenarios ?? []) stories.push({ name: exportId('Scenario', scenario.id),
     // No explicit designState: the authored scenario controls its state and fixtures.
-    content: json({ name: scenario.name, args: { designScenario: scenario.id }, parameters: { shell: { width: scenario.width } } }).trim() });
+    content: csfStory({ name: scenario.name, args: { designScenario: scenario.id }, parameters: { shell: { width: scenario.width } } }) });
   const args = defaults(props);
   const syntheticProps = props.filter(p => p.required && !Object.hasOwn(p, 'default')).map(p => p.name);
   const argTypes: Record<string, unknown> = Object.fromEntries(props.map(p => [p.name, { control: p.type === 'string' ? 'text' : p.type,
@@ -50,7 +56,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite';
 ${slotRender ? "import { h } from 'vue';\n" : ''}${events.length ? "import { action } from 'storybook/actions';\n" : ''}import Subject from ${literal(relativeImport(subject.path, subject.source))};
 import { withProject } from '../with-project.ts';
 const meta = {
-  ${literal(metadata).slice(1, -1)},
+  ${csfFields(metadata)},
   component: Subject,
   decorators: [withProject],
   args: { ...${literal(args)}${eventArgs.length ? ', ' + eventArgs.join(', ') : ''} },${slotRender}

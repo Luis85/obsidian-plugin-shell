@@ -60,7 +60,7 @@ test('all eight option combinations compile deterministically without changing r
     for (const path of ['package.json', 'package-lock.json']) assert.equal(get(result, path), get(baseline, path));
     assert.equal(Boolean(get(result, 'storybook/package.json')), enabled);
     assert.equal(Boolean(get(result, 'storybook/generated/with-project.ts')), generateStories);
-    assert.equal(Boolean(get(result, '.airship.yml')), false, 'Airship configuration uses its own explicit enable plan');
+    assert.equal(Boolean(get(result, 'airship.config.json')), airship);
     assert.deepEqual(JSON.parse(get(result, 'design/project.json')).tooling, document.tooling);
   }
 });
@@ -77,4 +77,18 @@ test('superseded design.storybook input fails visibly instead of being silently 
   const result = await compileProject({ source: JSON.stringify(document), template });
   assert.equal(result.status, 'failed'); assert.deepEqual(result.artifacts, []);
   assert.equal(result.diagnostics[0].code, 'COMPILER_SCHEMA_INVALID');
+});
+
+test('CSF source exposes statically indexable identifiers for titles, stable IDs, tags and scenario labels', async () => {
+  const document = migrateAuthoringDocument(structuredClone(source)).document;
+  document.design.visualDesigns.components[0].scenarios.push({ id: 'vs-100', name: 'Narrow empty preview', state: 'empty', width: 'narrow', values: {}, bindings: [] });
+  document.design.visualDesigns.nextId = Math.max(document.design.visualDesigns.nextId, 101);
+  const result = await compileProject({ source: JSON.stringify(document), template, storybook: { generateStories: true } });
+  assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
+  const code = get(result, 'storybook/generated/components/project-json-review.stories.ts');
+  assert.match(code, /^  id: "generated-component-project-json-review"/m);
+  assert.match(code, /^  title: "Components\//m);
+  assert.match(code, /^  tags: \["autodocs"\]/m);
+  assert.match(code, /^  name: "Narrow empty preview"/m);
+  assert.doesNotMatch(code, /^  "(?:id|title|tags|name)":/m);
 });

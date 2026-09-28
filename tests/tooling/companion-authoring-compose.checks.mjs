@@ -44,7 +44,12 @@ test('composition leaves the legacy artifact unchanged and escapes embedded scri
 test('current companion transfer preserves both optional tooling switches without enabling either', async () => {
   const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle));
   const input = migrateAuthoringDocument(JSON.parse(await readFile(new URL('docs/concepts/companion/starters/quick-capture.companion.json', root), 'utf8'))).document;
-  const context = vm.createContext({ COMPANION_FORMAT: input.kind, CompanionJourney: { validateAuthoringDocument, migrateAuthoringDocument },
+  // The browser bundle validates within one realm. Re-home this VM fixture's plain data before
+  // crossing into the real host-realm contract; production prototype/accessor checks stay strict.
+  const context = vm.createContext({ COMPANION_FORMAT: input.kind, CompanionJourney: {
+    validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)),
+    migrateAuthoringDocument: value => migrateAuthoringDocument(structuredClone(value)),
+  },
     designCopy: value => JSON.parse(JSON.stringify(value)), structuralDesign: () => true, importCounter: () => 0,
     newPlanningProject: identity => ({ ...identity, design: {} }), validSavedDesign: () => true,
     ensureProductModel: value => value, companionDesignExport: value => value,
@@ -56,4 +61,6 @@ test('current companion transfer preserves both optional tooling switches withou
     const project = transfer.review(JSON.stringify(input)).project;
     assert.deepEqual(JSON.parse(JSON.stringify(transfer.document(project).tooling)), input.tooling);
   }
+  input.tooling = { storybook: { enabled: 'true' } };
+  assert.throws(() => transfer.review(JSON.stringify(input)), /boolean/);
 });
