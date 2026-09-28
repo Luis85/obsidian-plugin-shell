@@ -11,6 +11,8 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
     const answer = (await prompt('New project directory (outside this checkout, e.g. ../my-plugin): ')).trim();
     requireThat(answer, 'TARGET_REQUIRED', 'Supply the new project directory.'); args[0] = invocationDirectory(answer);
   }
+  if (options.airship === undefined && options['no-airship'] === undefined &&
+      /^y(?:es)?$/i.test((await prompt('Enable optional Airship development tooling? No install or launch [y/N]: ')).trim())) options.airship = true;
   // An exported project carries its own identity; --id/--name/--author remain explicit overrides.
   if (typeof options.from === 'string') return { ...request, args, options };
   if (typeof options.starter !== 'string') {

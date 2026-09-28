@@ -47,6 +47,21 @@
   },
   "suites": [
     {
+      "name": "airship",
+      "purpose": "Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "tests/tooling/airship-*.checks.mjs"
+      ],
+      "verify": "tooling",
+      "npmScript": "test:airship",
+      "workflows": [
+        "airship-compatibility"
+      ]
+    },
+    {
       "name": "compiler",
       "purpose": "Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts.",
       "runner": {

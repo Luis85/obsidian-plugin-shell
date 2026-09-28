@@ -21,7 +21,7 @@ export async function npmEntry(): Promise<string> {
   throw new OperationError('NPM_MISSING', 'No npm installation found.', 'Install the qualified Node/npm toolchain or explicitly set QUALIFIED_NPM to npm-cli.js.');
 }
 /** Executes an argument array without a command shell; output cannot enter the result channel. */
-export async function runNode(context: Context, entry: string, args: readonly string[], timeout = 600_000, environment: Record<string, string> = {}) {
+export async function runNode(context: Context, entry: string, args: readonly string[], timeout = 600_000, environment: Record<string, string | undefined> = {}) {
   requireThat(Number.isSafeInteger(timeout) && timeout > 0 && timeout <= 3_600_000, 'INVALID_TIMEOUT', 'Timeout must be 1..3600000 milliseconds.');
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled before execution.');
   const file = resolve(context.root, entry);

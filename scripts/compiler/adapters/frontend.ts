@@ -11,7 +11,7 @@ import type { Phase } from '../domain/contracts.ts';
 export function contractCall<T>(phase: Phase, sourceName: string, work: () => T): T {
   try { return work(); } catch (error) {
     if (error instanceof CompilerError) throw error;
-    if (error instanceof Error && (error instanceof SitemapError || /^(?:COMPANION_INVALID|GENERATOR_INVALID|VISUAL_INVALID|DESIGN_SYSTEM_INVALID|COMPOSITION_INVALID|STORYMAP_INVALID|DETAIL_INVALID):/.test(error.message))) {
+    if (error instanceof Error && (error instanceof SitemapError || /^(?:COMPANION_TOOLING_INVALID|COMPANION_INVALID|GENERATOR_INVALID|VISUAL_INVALID|DESIGN_SYSTEM_INVALID|COMPOSITION_INVALID|STORYMAP_INVALID|DETAIL_INVALID):/.test(error.message))) {
       throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID',phase,error.message.slice(0,2000),
         {file:sourceName,jsonPointer:'',document:phase === 'migrate' ? 'input' : 'normalized'}),{cause:error});
     }

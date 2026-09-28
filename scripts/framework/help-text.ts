@@ -17,6 +17,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -36,6 +37,11 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  airship: { description: 'Opt into Airship tooling in a generated project; no automatic installation or launch.' },
+  'no-airship': { description: 'Explicitly disable Airship in an imported or new project.' },
+  agent: { description: 'Airship agent backend.', values: ['claude', 'codex', 'opencode'], default: 'claude' },
+  'target-port': { description: 'Local source preview TCP port (1024..65535).', default: '5173' },
+  port: { description: 'Distinct local Airship proxy TCP port (1024..65535).', default: '5174' },
   stage: { description: 'Compiler inspection stage.', values: ['ir', 'artifacts'], default: 'ir' },
   'output-kind': { description: 'Compiler output; --target remains a folder.', values: ['obsidian-plugin', 'clickdummy'], default: 'obsidian-plugin' },
   'report-dir': { description: 'Explicit new report directory beneath reports/compiler; omitted means no reports are written.' },
