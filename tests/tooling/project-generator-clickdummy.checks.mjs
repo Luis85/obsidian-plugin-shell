@@ -17,7 +17,8 @@ test('clickdummy emits a browser composition using the same generated panels, se
   const files = emitted(), entry = files.get('harness/prototype/clickdummy.ts').content;
   assert.match(entry,/bootstrap\/panels.ts/); assert.match(entry,/bootstrap\/visual-context.ts/);
   assert.match(entry,/provideVisualContext\(app, createVisualContext/);
-  assert.match(entry,/disposePinia/); assert.match(entry,/dialog.showModal\(\)/);
+  assert.match(entry,/disposePinia/); assert.match(entry,/createDialogHost/);
+  assert.match(files.get('harness/prototype/clickdummy-host.ts').content,/dialog.showModal\(\)/);
   assert.match(entry,/surface=/); assert.match(entry,/exportProject/);
   assert.doesNotMatch(entry, /from ['"](?:node:|obsidian['"])/);
   assert.doesNotMatch(entry,/createServices|nativeAdapters|fetch\(/);
@@ -80,4 +81,17 @@ test('preview selects have explicit labels independent of their option text', ()
     assert.ok(component.includes(`<select id="${id}"`));
   }
   assert.doesNotMatch(component, /<label>[^<]*<select/);
+});
+
+test('preview owns bfcache restoration, readiness and reset focus without discarding browser history', () => {
+  const files=emitted(), entry=files.get('harness/prototype/clickdummy.ts').content;
+  assert.match(entry,/createPreviewLifecycle/); assert.match(entry,/lifecycle.reset\(\)/);
+  assert.match(entry,/history.replaceState/); assert.doesNotMatch(entry,/location.hash = ''/);
+  assert.match(entry,/finally \{ disposePinia/);
+  assert.match(entry,/delete document.documentElement.dataset.prototypeReady/);
+  assert.match(entry,/getElementById\('clickdummy-reset'\)\?\.focus/);
+  const component=files.get(`${model.sourceRoot}/presentation/components/ClickdummyPreview.vue`).content;
+  assert.match(component,/<h1>\{\{ model.name \}\}<\/h1>/);
+  const css=files.get('harness/prototype/clickdummy.css').content;
+  assert.match(css,/:focus-visible/); assert.match(css,/@media \(max-width:480px\)/);
 });

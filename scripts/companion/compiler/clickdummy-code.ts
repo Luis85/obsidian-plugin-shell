@@ -1,10 +1,12 @@
 import { literal, symbol, type Model } from './model.ts';
 import { sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';
+import { clickdummyHostCode } from './clickdummy-host-code.ts';
 
 /** Browser composition of the same generated pages, services, local effects and navigation as the plugin.
  * Only explicit synthetic read ports are supplied. No native adapter or unspecified business write is loaded. */
 export function clickdummyCode(m: Model, add: Add): void {
+  clickdummyHostCode(add);
   const root = m.sourceRoot, entry = 'harness/prototype/clickdummy.ts';
   const from = (path: string) => literal(relativeImport(entry, `${root}/${path}`));
   const imports = m.sources.map(s => `import { create${symbol(s.slug)}Service } from '../application/${s.slug}/service.ts';`).join('\n');
@@ -36,10 +38,10 @@ const model = useClickdummy();
 <template>
 <UApp><div class="clickdummy-preview">
 <header class="clickdummy-toolbar">
-  <div><strong>{{ model.name }}</strong><p>Clickdummy · synthetic read data · business writes unavailable</p></div>
+  <div><h1>{{ model.name }}</h1><p>Clickdummy · synthetic read data · business writes unavailable</p></div>
   <div class="clickdummy-control"><label for="clickdummy-surface">Browse surfaces</label><select id="clickdummy-surface" :value="model.current()" @change="model.open(($event.target as HTMLSelectElement).value)"><option v-for="surface in model.surfaces" :key="surface.id" :value="surface.id">{{ surface.label }}</option></select></div>
   <div class="clickdummy-control"><label for="clickdummy-state">Preview state</label><select id="clickdummy-state" v-model="model.state.value"><option value="default">Default</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="disabled">Disabled</option></select></div>
-  <button type="button" @click="model.reset">Reset preview</button><button type="button" @click="model.exportProject">Project JSON</button>
+  <button id="clickdummy-reset" type="button" @click="model.reset">Reset preview</button><button type="button" @click="model.exportProject">Project JSON</button>
 </header>
 <p class="clickdummy-route">{{ model.route() || 'No authored route for this surface' }}</p>
 <p v-if="model.error.value" class="clickdummy-error" role="alert">{{ model.error.value }}</p>
@@ -61,6 +63,7 @@ import { provideVisualContext } from ${from('presentation/composables/use-visual
 import { useNavigation } from ${from('presentation/stores/navigation.ts')};
 import { screens } from ${from('domain/screens.ts')};
 import type { VisualState } from ${from('domain/visual-runtime.ts')};
+import { createDialogHost, createPreviewLifecycle } from './clickdummy-host.ts';
 import './clickdummy.css';
 import '../../src/styles/app.css';
 import ${from('styles/project.css')};
@@ -70,7 +73,10 @@ if (!root) throw new Error('CLICKDUMMY_ROOT');
 const owner = ${literal(m.project.id)}, name = ${literal(m.project.name)};
 const routes: ReadonlyArray<{id: string; surface: string; path: string}> = ${literal((m.document.design as {sitemap?: {routes?: unknown[]}}).sitemap?.routes ?? [])};
 const state = ref<VisualState>('default'), error = ref('');
-const dialogs: Array<() => void> = []; let stopMain: (() => void) | undefined;
+const dialogs = createDialogHost({ document, owner,
+  label: id => screens.find(s => s.id === id && s.kind === 'modal')?.label,
+  mount: (target, id) => mountFrame(target, id), error: message => { error.value = message; } });
+function openModal(id: string) { dialogs.open(id); }
 document.body.classList.add('theme-dark');
 function fail() { error.value = 'This surface contains an unimplemented capability. It is not accepted functionality.'; }
 function exportProject() {
@@ -80,17 +86,6 @@ function exportProject() {
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/json' }));
   const link = document.createElement('a'); link.href = url; link.download = owner + '.companion.json'; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-function openModal(id: string) {
-  if (dialogs.length >= 12 || !screens.some(s => s.id === id && s.kind === 'modal')) { fail(); return; }
-  const dialog = document.createElement('dialog'); dialog.className = 'clickdummy-dialog ps--' + owner; dialog.dataset.pluginUi = owner;
-  dialog.setAttribute('aria-label', screens.find(s => s.id === id)!.label);
-  const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close dialog';
-  const content = document.createElement('div'); dialog.append(close, content); document.body.append(dialog);
-  let disposeFrame: (() => void) | undefined;
-  const dispose = () => { const at = dialogs.indexOf(dispose); if (at < 0) return; dialogs.splice(at, 1); disposeFrame?.(); dialog.close(); dialog.remove(); };
-  dialogs.push(dispose); close.addEventListener('click', dispose); dialog.addEventListener('cancel', e => { e.preventDefault(); dispose(); });
-  disposeFrame = mountFrame(content, id); dialog.showModal(); close.focus();
 }
 function mountFrame(target: HTMLElement, modal?: string): () => void {
   const pinia = createPinia(), sources = createClickdummySources(), navigation = useNavigation(pinia);
@@ -117,20 +112,36 @@ function mountFrame(target: HTMLElement, modal?: string): () => void {
     window.addEventListener('hashchange', incoming); stops.push(() => window.removeEventListener('hashchange', incoming));
     stops.push(watch(() => navigation.current, id => { const hash = '#surface=' + encodeURIComponent(id); if (location.hash !== hash) location.hash = hash; }));
   }
-  app.config.errorHandler = fail; app.mount(target);
-  return () => { stops.forEach(stop => stop()); app.unmount(); disposePinia(pinia); };
+  let released = false;
+  const dispose = () => {
+    if (released) return; released = true;
+    try { stops.forEach(stop => stop()); app.unmount(); }
+    finally { disposePinia(pinia); if (!modal) delete document.documentElement.dataset.prototypeReady; }
+  };
+  app.config.errorHandler = fail;
+  try { app.mount(target); if (!modal && target.querySelector('.clickdummy-preview')) document.documentElement.dataset.prototypeReady = 'true'; }
+  catch (cause) { dispose(); throw cause; }
+  return dispose;
 }
-function reset() { dialogs.slice().reverse().forEach(close => close()); stopMain?.(); state.value = 'default'; error.value = ''; location.hash = ''; stopMain = mountFrame(root!); }
-stopMain = mountFrame(root);
-window.addEventListener('pagehide', () => { dialogs.slice().reverse().forEach(close => close()); stopMain?.(); }, { once: true });
+function reset() {
+  state.value = 'default'; error.value = ''; history.replaceState(null, '', location.pathname + location.search);
+  lifecycle.reset(); document.getElementById('clickdummy-reset')?.focus({ preventScroll: true });
+}
+const lifecycle = createPreviewLifecycle(window, { mount: () => mountFrame(root!), closeDialogs: dialogs.closeAll,
+  error: message => { error.value = message; } });
 `);
   add('harness/prototype/clickdummy.css', `/* Original standalone browser host simulation; never imported by the native plugin. */
 @import '../styles/simulated.css';
 body { margin:0; font-family:var(--font-interface,system-ui,sans-serif); background:var(--background-primary); color:var(--text-normal); }
 .clickdummy-toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-bottom:1px solid var(--background-modifier-border); }
+.clickdummy-toolbar h1 { margin:0; font-size:1.15rem; overflow-wrap:anywhere; }
 .clickdummy-toolbar div { flex:1 1 250px; } .clickdummy-toolbar p { margin:4px 0; } .clickdummy-toolbar .clickdummy-control { flex:0 1 250px; display:grid; gap:4px; }
-.clickdummy-toolbar select { max-width:250px; } .clickdummy-route,.clickdummy-error { padding-inline:16px; overflow-wrap:anywhere; }
+.clickdummy-toolbar select { width:100%; max-width:250px; min-width:0; }
+.clickdummy-toolbar button,.clickdummy-toolbar select,.clickdummy-dialog > button { min-height:36px; padding:6px 10px; font:inherit; }
+.clickdummy-toolbar :focus-visible,.clickdummy-dialog > button:focus-visible { outline:2px solid var(--interactive-accent); outline-offset:3px; }
+.clickdummy-toolbar > div { min-width:0; } .clickdummy-route,.clickdummy-error { padding-inline:16px; overflow-wrap:anywhere; }
 .clickdummy-dialog { color:var(--text-normal); background:var(--background-primary); max-width:min(960px,90vw); max-height:90vh; overflow:auto; border:1px solid var(--background-modifier-border); border-radius:12px; }
 .clickdummy-dialog::backdrop { background:rgba(0,0,0,.55); }
+@media (max-width:480px) { .clickdummy-toolbar { gap:12px; padding:12px; } .clickdummy-toolbar .clickdummy-control { flex-basis:100%; } .clickdummy-toolbar select { max-width:none; } .clickdummy-dialog { box-sizing:border-box; width:calc(100vw - 24px); max-width:none; padding:12px; } }
 `);
 }
