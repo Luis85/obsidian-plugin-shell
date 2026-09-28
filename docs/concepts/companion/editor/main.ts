@@ -16,9 +16,9 @@ export function mount(root:HTMLElement,host:EditorHost) {
   const app=createApp({render:()=>h(UApp,{toaster:null,portal:root},()=>h(SitemapEditor,{store}))});
   app.use(pinia);app.mount(root);void store.load();
   const shortcut=(event:KeyboardEvent)=>{
-    if(!root.contains(event.target instanceof Node?event.target:null)||event.defaultPrevented)return;
+    if(!root.contains(event.target instanceof Node?event.target:null)||event.defaultPrevented||event.isComposing)return;
     const target=event.target;
-    if(target instanceof HTMLElement&&['INPUT','TEXTAREA','SELECT'].includes(target.tagName))return;
+    if(target instanceof HTMLElement&&(target.closest('input,textarea,select,[contenteditable="true"],[contenteditable=""]')||target.isContentEditable))return;
     if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'){
       event.preventDefault();event.stopPropagation();void(event.shiftKey?store.redo():store.undo());
     }

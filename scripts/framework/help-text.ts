@@ -15,11 +15,11 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
-  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
+  { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
-  { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
+  { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'support report', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
   { id: 'vault', title: 'Test vault and data', commands: ['vault prepare', 'plugin install', 'data plan', 'data apply', 'data reset-plan', 'data reset'] },
   { id: 'discovery', title: 'Discovery (agents)', commands: ['help', 'capabilities', 'schema'] },
   { id: 'maintain', title: 'Maintainers', commands: ['verify', 'framework status', 'framework pack', 'framework upgrade', 'release prepare', 'release check', 'release rehearse', 'release operate'] },
@@ -36,6 +36,7 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   stage: { description: 'Compiler inspection stage.', values: ['ir', 'artifacts'], default: 'ir' },
   scope: { description: 'Generation selection: all, feature:<id>, page:<surface-or-design-id>, component:<library-or-design-id>. Shared registries remain complete; excluded artifacts must already exist unchanged in the generated definition.', default: 'all' },
   'output-kind': { description: 'Compiler output; --target remains a folder.', values: ['obsidian-plugin', 'clickdummy'], default: 'obsidian-plugin' },
@@ -92,6 +93,8 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'support report': ['node shell.mjs support report --json'],
+  'project measure': ['node shell.mjs project measure --input project.json --samples 10 --json'],
   'compiler check': ['node shell.mjs compiler check --input project.json --json'],
   'compiler inspect': ['node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json'],
   'compiler explain': ['node shell.mjs compiler explain COMPILER_REFERENCE_MISSING'],
@@ -138,7 +141,7 @@ function commonFor(entry: Command): string[] {
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
   if (entry.effect === 'process') return ['dry-run', ...(entry.id === 'setup resume' ? ['apply'] : []), ...(['install', 'framework pack', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
-  if (entry.effect === 'release') return ['dry-run', ...shared];
+  if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
 }
 /** A fresh copy on every call: callers can never mutate shared help or execution policy. */

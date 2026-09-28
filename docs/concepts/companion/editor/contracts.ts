@@ -13,6 +13,7 @@ export interface EditorHost extends SitemapHost<SitemapDesign> {
 }
 export interface FlowNode { id: string; position: {x: number; y: number}; data?: unknown }
 export interface FlowApi {
+  setNodes(nodes: FlowNode[]): void;
   applyNodeChanges(changes: unknown[]): void;
   $destroy(): void;
   fitView(options?: Record<string, unknown>): Promise<unknown>;

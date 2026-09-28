@@ -7,6 +7,7 @@ import ts from 'typescript';
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
 import * as commands from '../../scripts/companion/sitemap/commands.ts';
 import * as projection from '../../scripts/companion/sitemap/projection.ts';
+import * as arrangement from '../../scripts/companion/sitemap/arrangement.ts';
 import * as create from '../../scripts/companion/sitemap/create.ts';
 import * as validate from '../../scripts/companion/sitemap/validate.ts';
 import { canonicalKey, assertJson } from '../../scripts/companion/sitemap/safety.ts';
@@ -16,7 +17,7 @@ const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');
 const Pinia = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/pinia.iife.prod.js', root), 'utf8') + ';Pinia;');
 const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'commands.ts': commands,
-  'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
+  'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
 const source = readFileSync(new URL('docs/concepts/companion/editor/composables/use-editor.ts', root), 'utf8');
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
 const exports = {};
@@ -79,4 +80,35 @@ test('failed durable save keeps dirty input and saved project visible for correc
   store.draftName = 'Still a draft'; store.dirty = true; await store.saveName();
   assert.equal(store.dirty, true); assert.equal(store.draftName, 'Still a draft'); assert.equal(store.canUndo, false);
   assert.deepEqual(document(), original); assert.match(store.error, /refused/);
+});
+
+test('arrangement review is zero-write until confirmation and undo restores exact geometry',async t=>{
+  const {store,writes,document}=await fixture(t),before=structuredClone(document().design);
+  store.open('arrange');assert.equal(writes(),0);store.cancel();assert.deepEqual(document().design,before);
+  store.open('arrange');await store.applyForm();assert.equal(writes(),1);
+  assert.deepEqual(document().design.nodes,before.nodes);assert.deepEqual(document().design.sitemap,before.sitemap);
+  assert.deepEqual(document().design.canvas.positions,arrangement.arrangeSitemap(before,'all'));
+  await store.undo();assert.deepEqual(document().design.canvas,before.canvas);
+  await store.redo();assert.equal(writes(),3);
+});
+test('position form is an exact non-drag command and rejects invalid or empty input without saving',async t=>{
+  const {store,writes,document}=await fixture(t);const id=store.selectedId,before=structuredClone(document().design.nodes);
+  store.open('position');store.form.x='';await store.applyForm();assert.equal(writes(),0);assert.match(store.error,/both/);
+  store.form.x='Infinity';await store.applyForm();assert.equal(writes(),0);
+  store.form.x='-120.5';store.form.y='0';await store.applyForm();assert.equal(writes(),1);
+  assert.deepEqual(document().design.canvas.positions[id],{x:-120.5,y:0});assert.deepEqual(document().design.nodes,before);
+});
+test('focused canvas restores the prior panels without writes and cannot conceal a dirty edit',async t=>{
+  const {store,writes}=await fixture(t);store.treeOpen=true;store.inspectorOpen=true;
+  store.toggleFocus();assert.equal(store.focused,true);assert.equal(store.treeOpen,false);assert.equal(store.inspectorOpen,false);
+  store.select(store.snapshot.nodes[1].id);assert.equal(store.inspectorOpen,false);
+  store.toggleFocus();assert.equal(store.treeOpen,true);assert.equal(store.inspectorOpen,true);assert.equal(writes(),0);
+  store.dirty=true;store.toggleFocus();assert.equal(store.focused,false);assert.equal(store.saveStatus,'Name not saved');
+});
+
+test('opening a hidden panel leaves focus mode and reveals the requested panel in one action',async t=>{
+  const {store,writes}=await fixture(t);store.treeOpen=false;store.inspectorOpen=false;store.toggleFocus();
+  store.showPanel('outline');assert.equal(store.focused,false);assert.equal(store.treeOpen,true);
+  store.toggleFocus();store.showPanel('details');assert.equal(store.focused,false);assert.equal(store.inspectorOpen,true);
+  assert.equal(writes(),0);
 });

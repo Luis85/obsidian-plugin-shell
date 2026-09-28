@@ -8,6 +8,8 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },
   { id: 'project validate', summary: 'Validate/migrate complete project JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'compiler check', summary: 'Analyze project JSON without generation or writes; --report-dir explicitly retains diagnostics.', options: { ...values('input', 'output-kind', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },

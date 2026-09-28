@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, writeFile, mkdtemp, rm, readdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdtemp, rm, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +74,7 @@ test('features include owned surfaces and declared prerequisite features once, w
   assert.throws(() => generationSelection(model, [], 'page:absent'), /GENERATION_SCOPE_UNKNOWN/);
 });
 async function workspace(work) {
-  const vault = await mkdtemp(join(tmpdir(), 'generation-scope-'));
+  const vault = await realpath(await mkdtemp(join(tmpdir(), 'generation-scope-')));
   const input = { vault, target: join(vault, 'plugin'), content: Buffer.from(JSON.stringify(blank)) };
   const m = projectModel(blank);
   const files = [

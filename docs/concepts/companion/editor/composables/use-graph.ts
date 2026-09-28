@@ -1,18 +1,15 @@
 import { computed, markRaw, nextTick, onMounted, onBeforeUnmount, ref, watch, type Component } from 'vue';
 import type { EditorStore } from './use-editor.ts';
 import type { FlowNode } from '../contracts.ts';
+import { arrangeSitemap } from '../../../../../scripts/companion/sitemap/arrangement.ts';
 
 export function useGraph(s:EditorStore, nodeComponent:Component) {
-  const id='journey-canvas',api=window.VueFlowCore.useVueFlow(id), nodeTypes={surface:markRaw(nodeComponent)};
+  const id='journey-canvas-'+s.$id,api=window.VueFlowCore.useVueFlow(id), nodeTypes={surface:markRaw(nodeComponent)};
   const zoom=ref(1), dragBefore=ref<string|null>(null);
+  const positions=computed(()=>s.snapshot?arrangeSitemap(s.snapshot):{});
   const nodes=computed(()=>{
-    const rows=new Map<number,number>(),byId=new Map(s.projection.nodes.map(n=>[n.id,n]));
-    return s.projection.nodes.map(node=>{
-      let depth=0,parent=node.parent;while(parent){depth++;parent=byId.get(parent)?.parent??null;}
-      const index=rows.get(depth)??0;rows.set(depth,index+1);
-      return {id:node.id,type:'surface',selected:node.id===s.selectedId,
-        position:node.position??{x:(index%4)*256+depth*30,y:depth*180+Math.floor(index/4)*156},data:node};
-    });
+    return s.projection.nodes.map(node=>({id:node.id,type:'surface',selected:node.id===s.selectedId,
+      position:positions.value[node.id]??{x:0,y:0},data:node}));
   });
   const edges=computed(()=>s.projection.edges.map(e=>({id:e.id,source:e.source,target:e.target,type:'smoothstep',label:e.label,
     selectable:false,style:{stroke:e.kind==='journey'?'var(--jm-accent)':'var(--jm-line)',strokeWidth:e.kind==='journey'?2:1.2},
@@ -22,9 +19,9 @@ export function useGraph(s:EditorStore, nodeComponent:Component) {
   const nodeChanges=(changes:Array<{type:string}>)=>api.applyNodeChanges(changes.filter(c=>['position','dimensions','select'].includes(c.type)));
   const dragStart=()=>{dragBefore.value=s.snapshot?JSON.stringify(s.snapshot):null;};
   const dragStop=async({node}:{node:FlowNode})=>{
-    if(!s.canLeave())return;
-    if(dragBefore.value!==JSON.stringify(s.snapshot)){s.error='The project changed while dragging. Position was not saved.';return;}
-    await s.commit({type:'arrange',positions:{[node.id]:{x:node.position.x,y:node.position.y}}});
+    if(!s.canLeave()){api.setNodes(nodes.value);return;}
+    if(dragBefore.value!==JSON.stringify(s.snapshot)){s.error='The project changed while dragging. Position was not saved.';api.setNodes(nodes.value);return;}
+    if(!await s.commit({type:'arrange',positions:{[node.id]:{x:node.position.x,y:node.position.y}}}))api.setNodes(nodes.value);
   };
   const connect=({source,target}:{source:string|null;target:string|null})=>{if(source&&target)s.proposeMove(target,source);};
   watch(()=>s.snapshot,()=>nextTick(()=>{if(nodes.value.length&&zoom.value===1){void fit();zoom.value=0;}}));
