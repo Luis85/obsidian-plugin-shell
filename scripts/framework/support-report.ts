@@ -50,11 +50,13 @@ export async function supportReport(context: Context) {
     requireThat(!context.signal?.aborted,'CANCELLED','Report cancelled.');
     return result('support report',{...report,framework:{version,distribution:kit?'compiled-kit':'source',selectedNode:selected}});
   }
-  catch {
-    // Even an OS error can contain a private path. This endpoint never delegates raw causes to generic CLI rendering.
-    return { ...result('support report', null, context.signal?.aborted ? 'cancelled' : 'blocked'), diagnostics: [{
-      code: context.signal?.aborted ? 'CANCELLED' : 'SUPPORT_UNAVAILABLE',
-      message: 'The report could not be collected. Inspect the local project without sharing raw logs; no files were changed.',
-    }] };
-  }
+  catch { return unavailableSupport(context.signal?.aborted === true); }
+}
+
+/** Also used before collection starts, when CLI parsing or root discovery fails. */
+export function unavailableSupport(cancelled = false): Result {
+  return { ...result('support report', null, cancelled ? 'cancelled' : 'blocked'), diagnostics: [{
+    code: cancelled ? 'CANCELLED' : 'SUPPORT_UNAVAILABLE',
+    message: 'The report could not be collected. Inspect the local project without sharing raw logs; no files were changed.',
+  }] };
 }

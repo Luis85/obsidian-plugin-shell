@@ -1,3 +1,4 @@
+import { unavailableSupport } from './support-report.ts';
 import { guidedSetup, continueSetup } from './setup-terminal.ts';
 import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
 import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
@@ -42,6 +43,7 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     try { const { generatorCli } = await import('../companion/compiler/cli.ts'); await generatorCli(argv.slice(1)); return Number(process.exitCode ?? 0); }
     catch (error) { stderr.write((error instanceof Error ? error.message : 'Generation failed.') + '\n'); return 1; }
   }
+  const supportRequested = argv.some((value, index) => value === 'support' && argv[index + 1] === 'report');
   const machine = argv.includes('--json'); const controller = new AbortController();
   const stop = () => controller.abort(); process.once('SIGINT', stop); process.once('SIGTERM', stop);
   let command = 'unknown';
@@ -64,6 +66,6 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     }
     render(outcome, machine);
     return outcome.status === 'failed' || outcome.status === 'blocked' ? 1 : outcome.status === 'cancelled' ? 130 : 0;
-  } catch (error) { const outcome = failure(command, error); render(outcome, machine); return outcome.status === 'cancelled' ? 130 : 1; }
+  } catch (error) { const outcome = supportRequested ? unavailableSupport(controller.signal.aborted) : failure(command, error); render(outcome, machine); return outcome.status === 'cancelled' ? 130 : 1; }
   finally { process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop); }
 }

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, writeFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { supportSnapshot, supportReport } from '../../scripts/framework/support-report.ts';
@@ -46,4 +47,15 @@ test('read failures and cancellation cannot expose private filesystem errors',as
   const response=await supportReport({root:cwd,frameworkRoot:root});assert.equal(response.status,'blocked');assert.equal(response.data,null);
   assert.equal(response.diagnostics[0].code,'SUPPORT_UNAVAILABLE');assert.ok(!JSON.stringify(response).includes('private'));
   const controller=new AbortController();controller.abort();assert.equal((await supportReport({root:cwd,frameworkRoot:root,signal:controller.signal})).status,'cancelled');
+});
+
+// Exercise the actual launcher, including root discovery before the support handler.
+test('CLI root-discovery errors and invalid support arguments never disclose private paths',()=>{
+  for(const leading of [false,true])for(const args of [['--root','/private-client-canary-does-not-exist'],['--private-client-canary-option']]){
+    const run=spawnSync(process.execPath,[join(root,'shell.mjs'),...(leading?['--json']:[]),'support','report',...args,...(leading?[]:['--json'])],{encoding:'utf8',env:{...process.env,NODE_NO_WARNINGS:'1'}});
+    assert.equal(run.status,1);assert.equal(run.stderr,'');
+    const response=JSON.parse(run.stdout);assert.equal(response.command,'support report');
+    assert.equal(response.status,'blocked');assert.equal(response.diagnostics[0].code,'SUPPORT_UNAVAILABLE');
+    assert.ok(!run.stdout.includes('private-client-canary'));
+  }
 });
