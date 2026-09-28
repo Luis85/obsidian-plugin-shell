@@ -80,3 +80,17 @@ test('disposing an already destroyed output still observes its scheduled error w
   assert.equal(owned, true); assert.deepEqual(f.raw, [true, false]);
   assert.equal(f.output.listenerCount('error'), 1); f.output.off('error', observer); f.close();
 });
+
+test('shared discovery accepts the real launcher and TypeScript sources but rejects unsafe source paths', async () => {
+  const { capabilityCatalog, validateCatalog } = await import('../../scripts/operations/catalog.mjs');
+  const catalog = capabilityCatalog(), maker = catalog.operations.find(item => item.id === 'source.make');
+  assert.equal(maker.cli.command, 'node shell.mjs make');
+  assert.ok(maker.cli.sourceFiles.includes('shell.mjs'));
+  assert.ok(maker.cli.sourceFiles.includes('scripts/framework/cli.ts'));
+  assert.equal(validateCatalog(catalog), true);
+  for (const path of ['../shell.mjs', '/shell.mjs', 'shell.ts', 'scripts/../shell.mjs', 'scripts//cli.ts', 'scripts/cli.js', 'node_modules/tool.mjs', 'scripts\\cli.ts']) {
+    const invalid = structuredClone(catalog);
+    invalid.operations.find(item => item.id === 'source.make').cli.sourceFiles = [path];
+    assert.throws(() => validateCatalog(invalid), /CATALOG_CLI/, path);
+  }
+});
