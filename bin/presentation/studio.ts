@@ -9,7 +9,7 @@ import { interview } from './guide.ts';
 import { editPage } from './page-editor.ts';
 import { choose, input, confirm, reportError, Back, type Prompts } from './prompts.ts';
 export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal }
-export async function review(ui: Prompts, value: Prepared, signal?: AbortSignal): Promise<boolean> {
+async function review(ui: Prompts, value: Prepared, signal?: AbortSignal): Promise<boolean> {
   const changed = value.plan.changes.filter(item => item.status !== 'unchanged');
   ui.write(`\nReview ${changed.length} file changes\n` + changed.slice(0, 15).map(item => `  ${item.status} ${item.path}`).join('\n') + '\n');
   if (changed.length > 15) ui.write(`  … ${changed.length - 15} more files; use --json for the complete manifest.\n`);

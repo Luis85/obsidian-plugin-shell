@@ -1,9 +1,12 @@
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError, hasControls } from '../domain/errors.ts';
 export interface Prompts { ask: (question: string) => Promise<string>; write: (text: string) => void }
 export interface Choice { id: string; label: string }
 export class Back extends Error { constructor() { super('Back'); this.name = 'Back'; } }
 /** Strip terminal control sequences from all imported labels and diagnostics. */
-export function safe(value: string): string { return value.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/gu, ''); }
+const ansi = new RegExp(String.fromCharCode(27) + '\\[[0-?]*[ -/]*[@-~]', 'g');
+export function safe(value: string): string {
+  return [...value.replace(ansi, '')].filter(character => !hasControls(character, true)).join('');
+}
 export async function input(ui: Prompts, label: string, fallback = ''): Promise<string> {
   const answer = (await ui.ask(`${safe(label)}${fallback ? ` [${safe(fallback)}]` : ''}: `)).trim();
   if (answer === ':back') throw new Back();

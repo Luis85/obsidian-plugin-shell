@@ -190,7 +190,8 @@
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
     "scripts/concepts/mvp-bridge.js",
-    "bin/shell.ts"
+    "bin/shell.ts",
+    "scripts/makers/cli.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

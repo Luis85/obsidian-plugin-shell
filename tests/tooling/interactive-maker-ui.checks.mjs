@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { Readable, Writable, PassThrough } from 'node:stream';
@@ -21,7 +21,7 @@ function scripted(answers) {
   return { transcript, ask: async prompt => { assert.ok(cursor < answers.length, `Missing answer for ${prompt}`); return answers[cursor++]; },
     write: line => transcript.push(line), done: () => assert.equal(cursor, answers.length) };
 }
-async function scratch(run) { const root = await mkdtemp(join(tmpdir(), 'maker-ui-')); try { await run(root); } finally { await rm(root, { recursive: true, force: true }); } }
+async function scratch(run) { const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-ui-')); try { await run(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function guideAnswers(guide) {
   return guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => {
     if (field.id === 'title') return '';

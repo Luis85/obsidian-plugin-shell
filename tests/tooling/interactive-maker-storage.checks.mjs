@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Readable, Writable } from 'node:stream';
@@ -10,7 +10,7 @@ import { packagePlan, outputBoundary } from '../../bin/adapters/package-plan.ts'
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { main } from '../../bin/shell.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
-async function scratch(work) { const root = await mkdtemp(join(tmpdir(), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }
+async function scratch(work) { const root = await mkdtemp(join(await realpath(tmpdir()), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }
 const context = root => ({ root, frameworkRoot, input: Readable.from([]) });
 test('read-only plans, explicit approval, stale writes and idempotent saves', async () => scratch(async root => {
   const snapshot = await readSnapshot(root, 'design/project.json'); assert.equal(snapshot.document, null);
@@ -44,7 +44,7 @@ test('package ownership protects edits, removed files, unsafe paths and foreign 
 }));
 test('symlink inputs and malformed receipts are refused', async () => scratch(async root => {
   const path = join(root, 'real.json'); await writeFile(path, JSON.stringify(newDocument('P')));
-  await symlink(path, join(root, 'linked.json')); await assert.rejects(() => readSnapshot(root, 'linked.json'));
+  await symlink(path, join(root, 'linked.json')); await assert.rejects(() => readSnapshot(root, 'linked.json'), /PLAN_SYMLINK: linked.json/);
   await mkdir(join(root, 'out/.maker'), { recursive: true });
   await writeFile(join(root, 'out/.maker/receipt.json'), '{"schemaVersion":99,"files":[]}');
   await assert.rejects(() => packagePlan(root, 'out', [{ path: 'x', content: 'x' }], {}));

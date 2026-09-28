@@ -45,13 +45,17 @@ jobs:
       - name: Independent full-production and core coverage
         if: ${{ !cancelled() }}
         run: node "$QUALIFIED_NPM" run test:coverage:maker
-      - name: Source inventory and architecture/maintainability gates
+      - name: Source inventory gate
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |
           node scripts/testing/suites.mjs --check
           node "$QUALIFIED_NPM" run check:source
-          node "$QUALIFIED_NPM" run check:analyzer
-          node "$QUALIFIED_NPM" run check:maintainability
+      - name: Repository analyzer and architecture gates
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: node "$QUALIFIED_NPM" run check:analyzer
+      - name: Production maintainability gate
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: node "$QUALIFIED_NPM" run check:maintainability
       - name: Retain exact qualification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

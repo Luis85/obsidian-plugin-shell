@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
@@ -24,7 +24,7 @@ async function contents(root, path = '') {
   return found.sort(([a], [b]) => a.localeCompare(b));
 }
 test('complete interactive and agent sessions produce byte-identical sketch and prototype packages', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'maker-parity-'));
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-parity-'));
   try {
     const human = join(root, 'human'), agent = join(root, 'agent');
     await mkdir(human); await mkdir(agent);
@@ -52,7 +52,7 @@ test('complete interactive and agent sessions produce byte-identical sketch and 
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 test('full and fast daily gates include maker types and tests when the CLI is present', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'maker-gates-'));
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-gates-'));
   try {
     await mkdir(join(root, 'bin'));
     await writeFile(join(root, 'bin/shell.ts'), 'export {};');

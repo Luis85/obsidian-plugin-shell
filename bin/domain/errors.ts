@@ -8,9 +8,17 @@ export class SketchError extends Error {
 export function requireSketch(condition: unknown, code: string, message: string): asserts condition {
   if (!condition) throw new SketchError(code, message);
 }
+/** C0/C1 control detection, with only text whitespace optionally permitted. */
+export function hasControls(value: string, multiline = false): boolean {
+  return [...value].some(character => {
+    const code = character.codePointAt(0)!;
+    if (multiline && (code === 9 || code === 10 || code === 13)) return false;
+    return code < 32 || (code >= 127 && code <= 159);
+  });
+}
 export function title(value: string, limit = 120): string {
   const text = value.trim();
-  requireSketch(text.length > 0 && text.length <= limit && !/[\u0000-\u001f\u007f-\u009f]/u.test(text),
+  requireSketch(text.length > 0 && text.length <= limit && !hasControls(text),
     'SKETCH_TITLE', `Enter a single-line title between 1 and ${limit} characters.`);
   return text;
 }

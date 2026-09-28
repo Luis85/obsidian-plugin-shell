@@ -6,7 +6,7 @@ import { pageContent, pageNodes, surfaceFor } from './pages.ts';
 export function interactions(document: SketchDocument, surface: string) {
   return pageNodes(document, surface).flatMap(node => 'events' in node ? node.events.map(interaction => ({ node, interaction })) : []);
 }
-export function interactionFor(document: SketchDocument, surface: string, id: string): Interaction {
+function interactionFor(document: SketchDocument, surface: string, id: string): Interaction {
   const selected = interactions(document, surface).find(item => item.interaction.id === id);
   requireSketch(selected, 'SKETCH_INTERACTION_MISSING', 'Select an existing page interaction.');
   return selected.interaction;

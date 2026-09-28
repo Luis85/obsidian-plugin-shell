@@ -4,7 +4,7 @@ import { requireSketch, slug, title } from './errors.ts';
 import { pageContent, pageFor, pageNodes, surfaceFor } from './pages.ts';
 
 export type ComponentChoice = { kind: 'new'; title: string } | { kind: 'existing'; id: string };
-export function componentFor(document: SketchDocument, id: string): ComponentDefinition {
+function componentFor(document: SketchDocument, id: string): ComponentDefinition {
   const component = document.design.visualDesigns.components.find(item => item.id === id);
   requireSketch(component, 'SKETCH_COMPONENT_MISSING', 'Select an existing designed component.');
   return component;

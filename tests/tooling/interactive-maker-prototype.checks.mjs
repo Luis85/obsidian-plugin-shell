@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
@@ -9,7 +9,7 @@ import { openDocument } from '../../bin/domain/document.ts';
 import { compile } from '../../bin/adapters/compiler.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 test('prototype maker creates real compiler boilerplate, docs and a fully expanded prompt', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'maker-prototype-'));
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-prototype-'));
   try {
     const guide = await loadGuide();
     const input = { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { title: 'Issue desk', pages: ['Issues', 'Details'], components: ['Issue card'], approved: true } };
