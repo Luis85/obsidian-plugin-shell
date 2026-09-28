@@ -8,6 +8,12 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'airship status', summary: 'Read optional Airship configuration and local install state.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'airship enable', summary: 'Review enabling local safe Airship tooling; never installs or launches.', options: values('agent', 'target-port', 'port'), maxArgs: 0, effect: 'plan' },
+  { id: 'airship disable', summary: 'Review disabling future Airship launches; preserve installed tooling and edits.', options: {}, maxArgs: 0, effect: 'plan' },
+  { id: 'airship install', summary: 'Explicitly install the pinned CLI in an isolated project-local prefix (--yes).', options: {}, maxArgs: 0, effect: 'process' },
+  { id: 'airship start', summary: 'Explicitly start the local safe editor against the source preview (--yes).', options: {}, maxArgs: 0, effect: 'process' },
+  { id: 'airship doctor', summary: 'Run third-party Airship diagnostics only with --yes.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'compiler check', summary: 'Analyze project JSON without generation or writes; --report-dir explicitly retains diagnostics.', options: { ...values('storybook', 'storybook-stories', 'input', 'output-kind', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
   { id: 'compiler inspect', summary: 'Inspect normalized IR or an in-memory artifact inventory; never applies a workspace plan.', options: { ...values('storybook', 'storybook-stories', 'input', 'output-kind', 'stage', 'report-dir'), debug: 'flag' }, maxArgs: 0, effect: 'read' },
   { id: 'compiler explain', summary: 'Explain a stable compiler diagnostic code.', options: {}, maxArgs: 1, effect: 'read' },
@@ -23,13 +29,13 @@ export const commands: readonly Command[] = [
   { id: 'config explain', summary: 'Explain persisted configuration and identity authority.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'config validate', summary: 'Validate configuration without changes.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'config set', summary: 'Plan a validated configuration update from JSON.', options: values('input'), maxArgs: 0, effect: 'plan' },
-  { id: 'setup', summary: 'Configure this project; optional JSON intake. No implicit install.', options: { ...values('id', 'name', 'author', 'version', 'description', 'source', 'tests', 'test-vault', 'config-dir', 'input', 'resolve'), blank: 'flag' }, maxArgs: 0, effect: 'plan' },
+  { id: 'setup', summary: 'Configure this project; optional JSON intake. No implicit install.', options: { ...values('id', 'name', 'author', 'version', 'description', 'source', 'tests', 'test-vault', 'config-dir', 'input', 'resolve'), blank: 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 0, effect: 'plan' },
   { id: 'concept schema', summary: 'Discover the data-only concept manifest contract.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'concept inspect', summary: 'Inspect a docs/concepts JSON/HTML input, or return the current project base hash.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'concept import', summary: 'Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'project inspect', summary: 'Validate a companion export and report compiler obligations.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
-  { id: 'new', summary: 'Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions'), list: 'flag', install: 'flag', 'inside-vault': 'flag' }, maxArgs: 1, effect: 'plan' },
+  { id: 'new', summary: 'Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions'), list: 'flag', install: 'flag', 'inside-vault': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
   { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('storybook', 'storybook-stories', 'input', 'vault', 'target', 'output-kind'), maxArgs: 0, effect: 'plan' },
   { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
@@ -65,7 +71,7 @@ for (const entry of commands) { Object.freeze(entry.options); Object.freeze(entr
 Object.freeze(commands);
 /** Accepted --profile values; help renders these same lists. */
 export const profiles: Readonly<Record<string, readonly string[]>> = Object.freeze({
-  test: Object.freeze(['unit', 'project', 'browser', 'native', 'obsidian']), verify: Object.freeze(['full', 'project']), dev: Object.freeze(['watch', 'ui', 'obsidian']),
+  test: Object.freeze(['unit', 'project', 'browser', 'native', 'obsidian']), verify: Object.freeze(['full', 'project']), dev: Object.freeze(['watch', 'ui', 'preview', 'obsidian']),
 });
 export function parameterKinds(entry: Command): Record<string, 'value' | 'flag'> {
   return { ...common, ...entry.options };

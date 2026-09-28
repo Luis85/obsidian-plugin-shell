@@ -158,3 +158,7 @@ npm 11.19.1) while other workloads ran, so times are indicative only:
   `project:ui-effects` have no files in this checkout (they exist in generated
   projects). `obsidian` (four `*.obsidian.ts` cases) passed through
   `npm run test:obsidian` in about 30 s after the native dev loop was merged.
+
+## Optional Airship contracts
+
+`npm run test:airship` uses the `airship` suite for data validation, generator opt-in, source-location metadata, approved launch behavior and ownership preservation. The `Airship generated-project compatibility` workflow adds independent generated-project install/build and live upstream proxy/browser qualification. It does not submit AI-provider prompts. See [Airship integration](../tooling/AIRSHIP.md).

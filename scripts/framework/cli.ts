@@ -31,6 +31,8 @@ async function guidedIdentity(request: Request, signal?: AbortSignal): Promise<R
   if (!options.input) for (const key of ['id', 'name', 'author']) {
     if (!options[key]) options[key] = (await ask(stdin, stderr, `Plugin ${key}: `, signal)).trim();
   }
+  if ((options.input || options.blank) && options.airship === undefined && options['no-airship'] === undefined &&
+      await confirm('Enable optional Airship development tooling? No installation or launch is performed.', signal)) options.airship = true;
   return { ...request, options };
 }
 async function confirm(message: string, signal?: AbortSignal): Promise<boolean> {

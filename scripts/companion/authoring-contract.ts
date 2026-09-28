@@ -41,6 +41,7 @@ function assertAuthoringDocument(input: unknown): asserts input is AuthoringDocu
       'COMPANION_VERSION', 'Transfer and design schema versions must match.');
     // Only explicitly validated additions are removed for legacy-field validation. Unknown fields still fail.
     requireSitemap(record(legacy.design), 'COMPANION_INVALID', 'Expected a saved design.');
+    delete legacy.tooling;
     delete legacy.design.sitemap; delete legacy.design.features;
     legacy.schemaVersion = 5; legacy.design.schema = 5;
     validateCompanionDocument(legacy);

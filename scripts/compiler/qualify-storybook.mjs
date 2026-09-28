@@ -1,5 +1,5 @@
 /** Explicit opt-in integration; never part of default install/build/verify. Uses only disposable generated projects. */
-import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm, realpath, cp } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -32,14 +32,21 @@ try {
   await command('project-install', [resolve(npm), 'ci', '--no-fund'], target);
   await command('optional-install', [shell, 'storybook', 'install', '--yes', '--json'], target);
   await command('optional-ci-replay', [shell, 'storybook', 'install', '--yes', '--json'], target);
-  await command('optional-build', [shell, 'storybook', 'build', '--json'], target);
   await command('optional-typescript', [shell, 'storybook', 'check', '--json'], target);
+  await command('optional-build', [shell, 'storybook', 'build', '--json'], target);
   await command('optional-browser', [join(root, 'scripts/compiler/verify-storybook.mjs'), target, output], root);
   if (await hash('package-lock.json') !== rootLockBefore) throw Error('ROOT_LOCK_CHANGED');
   await writeFile(join(output, 'optional-package-lock.json'), await readFile(join(target, 'storybook/package-lock.json')));
   report.steps.push({ label: 'root-lock-unchanged', exit: 0 });
   report.status = 'passed';
 } finally {
+  // Keep only generated source/configuration for diagnosis, never installed packages or font binaries.
+  const target = join(vault, 'project');
+  for (const folder of ['storybook', 'design']) {
+    await cp(join(target, folder), join(output, 'generated', folder), { recursive: true,
+      filter: path => !/(?:^|[/\\])(?:node_modules|storybook-static)(?:[/\\]|$)|\.(?:ttf|otf|woff2?)$/i.test(path),
+    }).catch(error => { if (error.code !== 'ENOENT') throw error; });
+  }
   await writeFile(join(output, 'summary.json'), JSON.stringify(report, null, 2) + '\n');
   await rm(vault, { recursive: true, force: true });
 }

@@ -30,6 +30,8 @@ export const withProject: Decorator = (story, context) => {
       if (!mount.value) return;
       const pinia = createPinia(), sources = createClickdummySources();
       const app = createApp({ render: () => h(UApp, null, { default: () => h(Story) }) });
+      cleanup = () => { app.unmount(); disposePinia(pinia); };
+      try {
       app.use(pinia);
       const describeNavigation = (id: string) => { message.value = 'Preview navigation: ' + (screens.find(s => s.id === id)?.label ?? id) + '. Open that page in the story list.'; };
       const navigation = useNavigation(pinia);
@@ -41,8 +43,8 @@ export const withProject: Decorator = (story, context) => {
         provideVisualContext(app, { ...visual, navigate: describeNavigation });
       });
       app.config.errorHandler = error => { console.error(error); message.value = 'Implementation required: this story encountered an unfinished adapter or capability. This is not accepted functionality.'; };
-      cleanup = () => { app.unmount(); disposePinia(pinia); };
-      try { app.mount(mount.value); } catch (error) { cleanup(); cleanup = undefined; throw error; }
+      app.mount(mount.value);
+      } catch (error) { cleanup(); cleanup = undefined; throw error; }
     });
     onBeforeUnmount(() => cleanup?.());
     return () => h('section', { 'data-plugin-ui': owner, 'data-story-host': '',

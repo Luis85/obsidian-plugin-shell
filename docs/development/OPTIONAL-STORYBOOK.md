@@ -29,7 +29,7 @@ Neither setting installs packages, starts a server or grants execution authority
 The terminal, shared operation API, compiler inspection, `new`, and legacy generator support independent `--storybook-stories on|off` and `--storybook on|off` overrides:
 
 ```sh
-node shell.mjs new ../my-plugin --from project.json --storybook-stories on --storybook on --yes
+node shell.mjs new ../folio-tools --from project.json --storybook-stories on --storybook on --yes
 node shell.mjs compiler inspect --input project.json --stage artifacts --storybook-stories on --json
 # In an extracted/generated kit with imported project JSON:
 node shell.mjs generate --storybook-stories on --storybook on --plan-out storybook.plan.json
@@ -48,8 +48,8 @@ After opting in and generating, install the normal root dependencies separately.
 node shell.mjs storybook status --json
 node shell.mjs storybook install --dry-run
 node shell.mjs storybook install --yes
-node shell.mjs storybook build
 node shell.mjs storybook check
+node shell.mjs storybook build
 node shell.mjs storybook dev
 ```
 
@@ -57,7 +57,7 @@ The first explicitly approved optional install runs npm install in `storybook/` 
 
 Storybook 10.6.0, its Vue 3/Vite framework and Docs addon have exact matching direct pins. Vue, Vite, Vue plugin, Node declarations, TypeScript **6.0.3** and vue-tsc follow the qualified framework pins. No TypeScript 5 substitution, floating latest version or fabricated lockfile is supplied.
 
-Build/dev/check invoke **local installed** tools with the project root as cwd; no npx auto-install or global Storybook discovery. Build once to produce Vite/Nuxt UI's generated type inputs before checking a freshly installed workspace. The shared Vite adapter retains the shell's guarded Nuxt UI integration, scoped styles and local icons. Development binds to 127.0.0.1:6006 with no browser auto-open. The launcher sets `STORYBOOK_DISABLE_TELEMETRY=true` before startup, and generated config also disables telemetry and crash reports. Static output stays under `storybook/storybook-static`; publication is not performed.
+Build/dev/check invoke **local installed** tools with the project root as cwd; no npx auto-install or global Storybook discovery. The shared Vite adapter retains the shell's guarded Nuxt UI integration, scoped styles and local icons. Development binds to 127.0.0.1:6006 with no browser auto-open. The launcher sets `STORYBOOK_DISABLE_TELEMETRY=true` before startup, and generated config also disables telemetry and crash reports. Static output stays under `storybook/storybook-static`; publication is not performed.
 
 ## Story fidelity and boundaries
 
@@ -83,3 +83,30 @@ Authoritative format/config references (checked 2026-09-28):
 - https://github.com/storybookjs/storybook/releases/tag/v10.6.0
 
 Execution status and limitations are recorded in [the verification record](../testing/OPTIONAL-STORYBOOK.md).
+
+## PR41 / PR42 consolidation
+
+PR41 is the canonical implementation. PR42 was an alternative implementation, not a
+second layer to install. Keep `tooling.storybook` and the isolated `storybook/`
+workspace; do not merge PR42's root-dependency installer or `design.storybook`
+namespace. Existing experimental PR42 JSON must move that object to
+`tooling.storybook`; its bare flags become `--storybook on` and
+`--storybook-stories on`. No incompatible option is silently enabled.
+
+The consolidated negative tests retain PR42's data-only, inherited-value,
+false/zero/empty-default, deterministic-generation and ownership concerns. The
+existing PR41 contract/lifecycle suite covers all four Storybook combinations,
+custom-source paths, edited managed files, retained custom files and retirement.
+An additional eight-case matrix proves coexistence with Airship and immutable
+root dependency files. Neither integration authorizes the other.
+
+The shared development-tooling schema now validates both integrations before
+legacy migration and current authoring. The ESM builder uses the package
+specifier rather than importing a directory, with an explicit matching direct
+pin. Vite configuration retains the shared resolver/server options. Setup
+failures dispose the per-story app and store; qualification preserves generated
+source and hidden configuration for diagnosis and typechecks before building.
+
+References: Storybook's Vite builder configuration
+(https://storybook.js.org/docs/builders/vite) and Node ESM's mandatory file and
+package resolution rules (https://nodejs.org/api/esm.html).

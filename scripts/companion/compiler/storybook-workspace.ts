@@ -7,7 +7,7 @@ export function storybookWorkspace(template: TemplateSnapshot, paths: string[]):
   const pinned = { ...pkg.dependencies, ...pkg.devDependencies };
   const shared = ['vue', 'vite', '@vitejs/plugin-vue', '@types/node', 'typescript', 'vue-tsc'];
   for (const name of shared) requireValue(typeof pinned[name] === 'string', 'Storybook workspace requires the framework pin for ' + name);
-  const dependencies = { storybook: storybookVersion, '@storybook/vue3-vite': storybookVersion, '@storybook/addon-docs': storybookVersion,
+  const dependencies = { storybook: storybookVersion, '@storybook/vue3-vite': storybookVersion, '@storybook/addon-docs': storybookVersion, '@storybook/builder-vite': storybookVersion,
     ...Object.fromEntries(shared.map(name => [name, pinned[name]])) };
   const add = (path: string, content: string, ownership: Artifact['ownership'] = 'managed'): Artifact => ({ path: 'storybook/' + path, content, ownership, producer: 'storybook' });
   return [
@@ -34,7 +34,7 @@ const config: StorybookConfig = {
   stories: [...(project.tooling?.storybook?.generateStories === true ? generated : []), '../custom/**/*.stories.@(js|ts)'],
   addons: [packageRoot('@storybook/addon-docs')],
   core: { disableTelemetry: true, enableCrashReports: false, builder: {
-    name: packageRoot('@storybook/builder-vite'), options: { viteConfigPath: fileURLToPath(new URL('../vite.config.mjs', import.meta.url)) },
+    name: '@storybook/builder-vite', options: { viteConfigPath: fileURLToPath(new URL('../vite.config.mjs', import.meta.url)) },
   } },
 };
 export default config;
@@ -52,7 +52,7 @@ export default preview;
 import { sharedConfig } from '../scripts/bundling/vite-shared.mjs';
 export default () => {
   const config = sharedConfig();
-  return { ...config, resolve: { dedupe: ['vue', 'pinia'] }, server: { host: '127.0.0.1' } };
+  return { ...config, resolve: { ...config.resolve, dedupe: ['vue', 'pinia'] }, server: { ...config.server, host: '127.0.0.1' } };
 };
 `, 'extension'),
     add('custom/Welcome.stories.ts', `import type { Meta, StoryObj } from '@storybook/vue3-vite';
