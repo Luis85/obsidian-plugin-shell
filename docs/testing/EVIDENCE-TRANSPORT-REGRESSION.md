@@ -42,3 +42,28 @@ This increment closes a demonstrated IP-11 transport defect, not the whole produ
 plan. Full native companion, manual accessibility, real optional-provider/desktop
 acceptance and publication remain open. No release, tag, merge, personal-vault
 operation or real-provider call was performed.
+
+## Linked-launcher follow-up
+
+The new early macOS job `108747912609` in run `36364432181` (head `10acc5c`,
+test merge `3ffebb95e80c163b750a08ccf42e63118a160ccc`) exposed a separate existing
+launcher defect: the main-module guard compared an already canonical module URL
+with an unresolved `/var` argument, so child invocations did nothing and exited
+zero with empty stdout. The Windows real-reporter step `108747912635` passed at
+this head. That does not make the complete workflow or the following fix passing.
+
+A real linked-parent launcher regression reproduced the empty success locally.
+After correcting entry-point identity, extending the same test with explicit
+`--root <linked-folder>` reproduced `EVIDENCE_CASE_FILE`: framework-reported paths
+used the physical directory, whereas root-relative validation used the alias.
+The CLI now resolves both the actual entry-point files and the selected workspace.
+Fixture roots use their canonical spelling for direct adapter calls; the new
+regression deliberately preserves an explicit directory link to test the public
+launcher. Source-child/report link rejection and candidate/asset checks are unchanged.
+Importing the CLI remains inert. No tests or quality floors were bypassed.
+
+The final local transport/failure/actual-child-CLI run passes 20 tests with no skips,
+including help, invalid-command failure, actual production/check through the alias
+and import-without-execution. This supersedes, rather than adds to, the earlier
+19-test count. Both observed failing reproductions are retained. Current-head
+Windows/macOS/Linux real-framework and full workflow verification remains required.

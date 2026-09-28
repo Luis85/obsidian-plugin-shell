@@ -1,10 +1,10 @@
-import { mkdtemp, mkdir, cp, writeFile, rm, readFile, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, cp, writeFile, rm, readFile, symlink, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 export async function evidenceFixture(t, body = 'test("actual child assertion", () => assert.equal(2 + 2, 4));') {
-  const root = await mkdtemp(join(tmpdir(), 'evidence-fixture-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'evidence-fixture-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const directory of ['src', 'harness', 'tests/tooling', 'docs/design', 'docs/testing', '.github/workflows']) await mkdir(join(root, directory), { recursive: true });
   await cp(resolve('scripts'), join(root, 'scripts'), { recursive: true });

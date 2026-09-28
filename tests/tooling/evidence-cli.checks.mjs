@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFile, readFile, rm, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, rm, mkdir, symlink, realpath } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { evidenceFixture, evidenceCli, producedPacket } from './evidence-fixture.mjs';
 import { runEvidence } from '../../scripts/testing/evidence-runner.mjs';
@@ -112,4 +112,30 @@ test('whole-session CLI rejects real repeated case-inventory drift while identic
   const report = JSON.parse(drift.stdout);
   assert.deepEqual(report.execution.errors, [{ id: different.packet.id, producer: 'tooling', error: 'EVIDENCE_REPEAT_OUTCOME_DRIFT' }]);
   assert.ok(report.acceptance.every(row => row.state === 'not-run'));
+});
+
+
+test('actual evidence launcher runs through a linked parent path and remains inert when imported', async t => {
+  const root = await evidenceFixture(t);
+  const canonical = await realpath(root);
+  const alias = root + '-linked';
+  await symlink(canonical, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  t.after(() => rm(alias, { recursive: true, force: true }));
+  const help = evidenceCli(alias, '--help');
+  assert.equal(help.status, 0, help.stderr); assert.match(help.stdout, /^Evidence: run /);
+  const invalid = evidenceCli(alias, 'unknown', 'operation');
+  assert.equal(invalid.status, 2, invalid.stdout + invalid.stderr);
+  assert.match(invalid.stderr, /EVIDENCE_ARGUMENT/);
+  const produced = evidenceCli(alias, 'run', 'tooling', '--root', alias);
+  assert.equal(produced.status, 0, produced.stdout + produced.stderr);
+  const output = JSON.parse(produced.stdout);
+  assert.equal(output.status, 'passed');
+  const checked = evidenceCli(alias, 'check', output.path, '--root', alias);
+  assert.equal(checked.status, 0, checked.stdout + checked.stderr);
+  const { spawnSync } = await import('node:child_process');
+  const { pathToFileURL } = await import('node:url');
+  const imported = spawnSync(process.execPath, ['--input-type=module', '-e',
+    `await import(${JSON.stringify(pathToFileURL(join(alias, 'scripts/testing/evidence-cli.mjs')).href)}); console.log("imported-only")`],
+    { cwd: canonical, encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: '' } });
+  assert.equal(imported.status, 0, imported.stderr); assert.equal(imported.stdout.trim(), 'imported-only');
 });
