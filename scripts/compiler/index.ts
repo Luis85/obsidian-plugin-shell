@@ -1,5 +1,6 @@
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
+import { withStorybookOptions } from '../companion/tooling-contract.ts';
 import { lowerTarget } from './adapters/target-lowering.ts';
 import { runCompiler } from './application/pipeline.ts';
 import type { CompileRequest } from './application/ports.ts';
@@ -13,7 +14,7 @@ import { json, type Model } from '../companion/compiler/model.ts';
 export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';
 export { compilerVersion, compilerPhases } from './application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from './domain/diagnostics.ts';
-export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind } from './domain/contracts.ts';
+export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from './domain/contracts.ts';
 
 async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string):Promise<Artifact[]> {
   let files:Artifact[];
@@ -29,8 +30,10 @@ async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['o
 }
 export async function compileProject(request:CompileRequest,control:Control={}) {
   const sourceName=request.sourceName ?? 'project.json';
+  const frontend = companionFrontend(sourceName);
   return runCompiler(request,{
-    ...companionFrontend(sourceName),
+    ...frontend,
+    migrate: value => contractCall('migrate', sourceName, () => frontend.migrate(withStorybookOptions(value, request.storybook))),
     lower: (model,template,kind) => lowerTarget(model,template,kind,sourceName),
     emit:(model,template,kind)=>emit(model,template,kind,sourceName),
     dependencies:dependencyReadiness,

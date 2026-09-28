@@ -1,3 +1,4 @@
+import { storybookCode } from '../../companion/compiler/storybook-code.ts';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
@@ -94,6 +95,7 @@ it('does not issue a duplicate pending write', async () => { const scope = effec
   await emit('devkit', () => devkitFiles(templateRoot,m,add));
   const values = {name:String(m.project.name),sourceRoot:m.sourceRoot,testRoot:m.testRoot,dependencies:dependencySection(m)};
   add('PROJECT-IMPLEMENTATION.md',renderTemplate(await templateRoot.text(['scripts/companion/devkit/PROJECT-IMPLEMENTATION.md.tmpl'].join('/')),values),'managed');
+  for (const file of storybookCode(templateRoot, m)) collector.add(file);
   return collector.values();
 }
 /** Declared third-party packages with purpose and the real path of every extension-owned adapter; installing the

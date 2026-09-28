@@ -17,6 +17,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'project inspect', 'project import', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -36,6 +37,8 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
+  'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   stage: { description: 'Compiler inspection stage.', values: ['ir', 'artifacts'], default: 'ir' },
   'output-kind': { description: 'Compiler output; --target remains a folder.', values: ['obsidian-plugin', 'clickdummy'], default: 'obsidian-plugin' },
   'report-dir': { description: 'Explicit new report directory beneath reports/compiler; omitted means no reports are written.' },
@@ -89,6 +92,11 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'storybook status': ['node shell.mjs storybook status --json'],
+  'storybook install': ['node shell.mjs storybook install --dry-run', 'node shell.mjs storybook install --yes'],
+  'storybook check': ['node shell.mjs storybook check'],
+  'storybook dev': ['node shell.mjs storybook dev'],
+  'storybook build': ['node shell.mjs storybook build'],
   'compiler check': ['node shell.mjs compiler check --input project.json --json'],
   'compiler inspect': ['node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json'],
   'compiler explain': ['node shell.mjs compiler explain COMPILER_REFERENCE_MISSING'],
@@ -129,7 +137,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(['install', 'framework pack'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['install', 'storybook install', 'framework pack'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release') return ['dry-run', ...shared];
   return shared;
@@ -146,7 +154,7 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
-  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && entry.id === 'dev' ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
+  for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && ['dev', 'storybook dev'].includes(entry.id) ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
   const argument = entry.maxArgs ? ' [arguments]' : '';
   return { group, usage: usage[entry.id] ?? `node shell.mjs ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`, examples: [...(examples[entry.id] ?? [])], optionHelp };
 }

@@ -1,3 +1,4 @@
+import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed built-in starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
@@ -87,7 +88,7 @@ export async function starterProjectPlan(request: Request, context: Context) {
   try {
     const input = join(scratch, 'project.json');
     await writeFile(input, JSON.stringify(created.document, null, 2) + '\n', { flag: 'wx' });
-    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template });
+    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template, storybook: storybookFlags(request.options) });
     const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
       acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings] };

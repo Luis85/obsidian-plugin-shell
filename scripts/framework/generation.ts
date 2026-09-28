@@ -1,6 +1,9 @@
+import { createFilePlan } from '../shared/file-plan.mjs';
+import { serializeJson as json } from '../contracts/serialization.ts';
+import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
 import { planProject } from '../companion/compiler/plan.ts';
-import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
+import { readConfiguration, readBounded, hash, exists } from './files.ts';
 import { designFile, object } from './configuration.ts';
 import { inspectDesign } from './changes.ts';
 import { verifyKit } from './kit-integrity.ts';
@@ -9,7 +12,7 @@ export async function generationPlan(request: Request, context: Context) {
   const input = resolve(context.root, stringOption(request.options, 'input') ?? designFile);
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');
-  const compilation = {outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal};
+  const compilation = {storybook:storybookFlags(request.options),outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal};
   const target = stringOption(request.options, 'target');
   if (target !== undefined) return planProject({ ...compilation, input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
@@ -20,10 +23,19 @@ export async function generationPlan(request: Request, context: Context) {
   const { model } = await inspectDesign(context, input);
   requireThat(Object.entries(config.project).every(([key, value]) => model.project[key] === value) && model.sourceRoot === config.paths.codebaseFolder + '/generated' && model.testRoot === config.paths.testsFolder + '/project', 'IMPORT_CONFIG_DRIFT', 'Re-import and resolve the design/configuration differences before generation.');
   const templateRoot = join(context.root, '.framework/template');
-  const intake = object(await readJson(join(context.root, '.framework/intake.json')));
+  const intakePath = '.framework/intake.json';
+  const intakeBytes = await readBounded(join(context.root, intakePath));
+  const intake = object(JSON.parse(intakeBytes.toString('utf8')));
   const inputHash = hash(await readBounded(join(context.root, designFile), 4_000_000));
   requireThat(intake.schemaVersion === 1 && object(intake.files)[designFile] === inputHash, 'IMPORT_OWNERSHIP', 'The imported design changed outside the reviewed intake operation.');
   const bootstrap = [...kit.bootstrap, { path: designFile, hash: inputHash }];
   const planned = await planProject({ ...compilation, input, vault: context.root, target: '.', templateRoot, bootstrap });
-  return planned;
+  const generatedDesign = planned.plan.changes.find(change => change.path === designFile);
+  if (!generatedDesign || generatedDesign.afterHash === inputHash) return planned;
+  const entries = planned.plan.changes.map(({ path, content, encoding }) => ({ path, content, ...(encoding ? { encoding } : {}) }));
+  entries.push({ path: intakePath, content: json({ ...intake, files: { ...object(intake.files), [designFile]: generatedDesign.afterHash } }) });
+  const plan = await createFilePlan(context.root, entries);
+  requireThat(plan.changes.at(-1)!.beforeHash === hash(intakeBytes) && planned.plan.changes.every((change, i) => change.beforeHash === plan.changes[i]!.beforeHash),
+    'PLAN_STALE', 'Input ownership changed while planning the generation override.');
+  return { ...planned, plan, hash: hash(json({ generation: planned.hash, changes: plan.changes.map(({ path, beforeHash, afterHash }) => ({ path, beforeHash, afterHash })) })) };
 }

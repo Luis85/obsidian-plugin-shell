@@ -55,6 +55,21 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   output = cli(dir, ['project', 'import', '--input', 'input.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
   assert.equal(JSON.parse(await readFile(join(dir, 'design/project.json'), 'utf8')).design.goal, design.design.goal);
+  const rootLock = await readFile(join(dir, 'package-lock.json'), 'utf8');
+  for (const [enabled, stories] of [['off', 'on'], ['on', 'on'], ['off', 'off']]) {
+    output = cli(dir, ['generate', '--storybook', enabled, '--storybook-stories', stories, '--yes', '--json']);
+    assert.equal(output.status, 0, output.stderr + output.stdout);
+    const generated = JSON.parse(await readFile(join(dir, 'design/project.json'), 'utf8'));
+    assert.deepEqual(generated.tooling.storybook, { enabled: enabled === 'on', generateStories: stories === 'on' });
+    // A reviewed override must update intake and generation ownership together; replay must not reject its own output.
+    output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+    assert.equal(JSON.parse(output.stdout).status, 'unchanged');
+  }
+  assert.equal(await readFile(join(dir, 'package-lock.json'), 'utf8'), rootLock);
+  output = cli(dir, ['storybook', 'install', '--yes', '--json']); assert.notEqual(output.status, 0);
+  assert.match(output.stdout, /STORYBOOK_DISABLED/);
+  output = cli(dir, ['project', 'import', '--input', 'input.json', '--yes', '--json']); assert.equal(output.status, 0, output.stdout);
+  output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stdout);
   const source = join(dir, 'app/source/generated/infrastructure/sources/authoring-vault.ts'); await writeFile(source, (await readFile(source, 'utf8')) + '\n// developer edit\n');
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.match(await readFile(source, 'utf8'), /developer edit/);
   output = cli(dir, ['status', '--json']); assert.equal(output.status, 0, output.stderr); assert.ok(JSON.parse(output.stdout).diagnostics.some(item => item.code === 'ACCEPTANCE_PENDING'));

@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import ts from 'typescript';
 import { composeMvp } from '../../scripts/concepts/mvp-compose.mjs';
+import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { COMPANION_VERSION, validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
 const root = new URL('../../', import.meta.url);
 const base = await readFile(new URL('docs/concepts/companion/index.html', root), 'utf8');
@@ -38,4 +39,21 @@ test('composition leaves the legacy artifact unchanged and escapes embedded scri
   const html = composeMvp(base, 'var test="</script>";', '', bridge, graphStyle);
   assert.match(html, /var test="<\\\/script>"/);
   assert.equal(program(base).includes('const COMPANION_VERSION = 5;'), true);
+});
+
+test('current companion transfer preserves both optional tooling switches without enabling either', async () => {
+  const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle));
+  const input = migrateAuthoringDocument(JSON.parse(await readFile(new URL('docs/concepts/companion/starters/quick-capture.companion.json', root), 'utf8'))).document;
+  const context = vm.createContext({ COMPANION_FORMAT: input.kind, CompanionJourney: { validateAuthoringDocument, migrateAuthoringDocument },
+    designCopy: value => JSON.parse(JSON.stringify(value)), structuralDesign: () => true, importCounter: () => 0,
+    newPlanningProject: identity => ({ ...identity, design: {} }), validSavedDesign: () => true,
+    ensureProductModel: value => value, companionDesignExport: value => value,
+    companionFolders: p => p.folders, parseCompanionDocument: text => JSON.parse(text) });
+  const text = ['validateCompanionDocument', 'migrateCompanionDocument', 'companionReview', 'companionProjectDocument'].map(name => declaration(composed, name)).join('\n');
+  const transfer = vm.runInContext(text + '\n({review:companionReview,document:companionProjectDocument})', context);
+  for (const [enabled, generateStories] of [[false, false], [false, true], [true, false], [true, true]]) {
+    input.tooling = { storybook: { enabled, generateStories } };
+    const project = transfer.review(JSON.stringify(input)).project;
+    assert.deepEqual(JSON.parse(JSON.stringify(transfer.document(project).tooling)), input.tooling);
+  }
 });
