@@ -1,0 +1,70 @@
+name: Shell CLI manual
+on:
+  pull_request:
+    paths:
+      - 'shell.mjs'
+      - 'package.json'
+      - '.nvmrc'
+      - 'scripts/framework/**'
+      - 'scripts/compiler/domain/**'
+      - 'scripts/documentation/**'
+      - 'tooling/documentation/**'
+      - 'docs/user-manual/shell-cli/**'
+      - '.github/workflows/shell-cli-manual.yml'
+  push:
+    branches: ['docs/shell-cli-source-driven-manual']
+permissions:
+  contents: read
+concurrency:
+  group: shell-cli-manual-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Dependency-free contract and filesystem safety tests
+        run: node --test scripts/documentation/manual.test.mjs
+      - name: Generate from the actual command catalog
+        run: node --experimental-strip-types scripts/documentation/manual.mjs
+      - name: Verify deterministic regeneration
+        run: node --experimental-strip-types scripts/documentation/manual.mjs --check
+      - name: Check authored examples and local links without executing commands
+        run: node --experimental-strip-types scripts/documentation/audit.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shell-cli-manual-markdown-${{ matrix.os }}
+          path: docs/user-manual/shell-cli/
+          if-no-files-found: error
+  site:
+    needs: contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install isolated renderer without lifecycle scripts
+        working-directory: tooling/documentation
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Build source comments and handbook into HTML
+        run: npm --prefix tooling/documentation run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shell-cli-manual-site
+          path: |
+            reports/shell-cli-manual/
+            tooling/documentation/package-lock.json
+          if-no-files-found: error
