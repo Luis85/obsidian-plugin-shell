@@ -80,3 +80,38 @@ test('failed durable save keeps dirty input and saved project visible for correc
   assert.equal(store.dirty, true); assert.equal(store.draftName, 'Still a draft'); assert.equal(store.canUndo, false);
   assert.deepEqual(document(), original); assert.match(store.error, /refused/);
 });
+
+test('remount restores UI context without writing or duplicating project data', async t => {
+  const { store, host, document, writes } = await fixture(t);
+  store.select(store.snapshot.nodes.find(n => n.kind === 'page').id);
+  store.lens = 'navigation'; store.query = 'page'; store.treeOpen = true;
+  store.inspectorOpen = false; store.tab = 'related';
+  const saved = structuredClone(document()), context = store.viewState(), pinia = Pinia.createPinia();
+  const restored = exports.editorStore({ ...host, selected: store.selectedId, viewState: context })(pinia);
+  t.after(() => { restored.dispose(); Pinia.disposePinia(pinia); });
+  await restored.load();
+  assert.deepEqual(restored.viewState(), context); assert.equal(restored.selectedId, store.selectedId);
+  assert.equal(writes(), 0); assert.deepEqual(document(), saved);
+});
+test('navigation connector reviews a link and never silently reparents the target', async t => {
+  const { store, document, writes } = await fixture(t), before = structuredClone(document());
+  const pages = store.snapshot.nodes.filter(n => n.kind === 'page');
+  const from = pages[0], to = pages.find(n => n.id !== from.id && !store.snapshot.links.some(e => e.from === from.id && e.to === n.id));
+  assert.ok(to); store.lens = 'navigation'; store.proposeConnection(from.id, to.id);
+  assert.equal(store.panel, 'link'); assert.equal(store.selectedId, from.id); assert.equal(store.form.target, to.id);
+  assert.equal(writes(), 0); await store.applyForm();
+  assert.equal(store.panel, ''); assert.equal(writes(), 1);
+  assert.deepEqual(document().design.nodes, before.design.nodes);
+  assert.deepEqual(document().design.sitemap, before.design.sitemap);
+  assert.equal(document().design.links.length, before.design.links.length + 1);
+});
+test('hierarchy connector requires confirmation; journey connections cannot reparent', async t => {
+  const { store, writes, document } = await fixture(t), before = structuredClone(document());
+  const pages = store.snapshot.nodes.filter(n => n.kind === 'page');
+  store.proposeConnection(pages[0].id, pages[1].id);
+  assert.equal(store.panel, 'move'); assert.equal(store.selectedId, pages[1].id);
+  assert.equal(store.form.parent, pages[0].id); store.cancel();
+  store.lens = 'journey'; store.proposeConnection(pages[0].id, pages[1].id);
+  assert.equal(store.panel, ''); assert.match(store.error, /journey steps/);
+  assert.equal(writes(), 0); assert.deepEqual(document(), before);
+});
