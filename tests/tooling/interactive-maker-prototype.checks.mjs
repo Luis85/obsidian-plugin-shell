@@ -6,6 +6,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { loadGuide, prototypePlan } from '../../bin/adapters/prototype.ts';
 import { applyPrepared, readData } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
+import { checkSteps } from '../../scripts/framework/check.ts';
 import { compile } from '../../bin/adapters/compiler.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 test('prototype maker creates real compiler boilerplate, docs and a fully expanded prompt', async () => {
@@ -24,6 +25,12 @@ test('prototype maker creates real compiler boilerplate, docs and a fully expand
     await applyPrepared(plan, plan.planHash);
     const document = openDocument(await readData(join(root, 'prepared/companion.project.json')));
     assert.equal(document.design.nodes.length, 2);
+    const receipt = await readData(join(root, 'prepared/source/.companion/generation.json'));
+    assert.equal(receipt.projectId, document.project.id);
+    assert.ok(receipt.files.some(file => file.path === 'bin/shell.ts' && file.ownership === 'framework'));
+    const gate = await checkSteps(join(root, 'prepared/source'), false);
+    assert.equal(gate.scope, 'generated-project');
+    assert.ok(gate.steps.some(step => step.id === 'maker-tests'));
     assert.equal(document.design.visualDesigns.components.length, 1);
     assert.equal((await readData(join(root, 'prepared/prototype.manifest.json'))).artifact.sha256, null);
     assert.equal((await readData(join(root, 'prepared/prototype.manifest.json'))).status, 'incomplete');

@@ -44,7 +44,7 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   const { answers, pending } = guideInput(guide, options.input);
   requireSketch(pending.length === 0, 'PROTOTYPE_AGREEMENT', pending.join(' '));
   const document = prototypeDocument(answers, baseline);
-  const { compilation, template } = await compile(document, frameworkRoot, 'clickdummy', signal);
+  const { compilation, template, artifacts } = await compile(document, frameworkRoot, 'clickdummy', signal);
   const projectJson = documentText(document), guideHash = hash(JSON.stringify(guide));
   const brief = guideBrief(guide, answers), pkg = object(JSON.parse(template.text('package.json')));
   const context = { repository: 'Luis85/obsidian-plugin-shell', commit: revision(frameworkRoot), frameworkFingerprint: template.fingerprint,
@@ -60,7 +60,7 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   for (const [key, value] of Object.entries(answers)) if (!(key in values)) values[key] = Array.isArray(value) ? value.join('\n') : String(value);
   const entries = guide.artifacts.map(item => ({ path: renderTemplate(item.path, values), content: renderTemplate(item.template, values) }));
   entries.push({ path: 'prototype-guide.json', content: JSON.stringify(guide, null, 2) + '\n' });
-  entries.push(...compilation.artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
+  entries.push(...artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
   if (baseline) entries.push({ path: 'baseline.project.json', content: documentText(baseline) });
   return packagePlan(root, out, entries, { ...context, prompt: entries.find(item => item.path === 'execution-prompt.md')?.content,
     start: 'Read execution-prompt.md; source/ contains the independently buildable clickdummy scaffold.', readiness: compilation.readiness });

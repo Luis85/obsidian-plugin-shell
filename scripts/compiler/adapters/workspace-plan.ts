@@ -11,6 +11,10 @@ export interface WorkspaceOptions { target:string;templateRoot:string;bootstrap?
 interface InputSnapshot { content:Buffer;vault:string;target:string;migration?:{interactionIds?:Record<string,string>} | null }
 
 const generationVersion = 1;
+/** Shared receipt contract for compiler output, including prototype preparation packages. */
+export function generationReceipt(projectId: string, source: string, files: ReadonlyArray<{path:string;hash:string;ownership:string}>) {
+  return { version: generationVersion, projectId, inputHash: digest(source), files };
+}
 /** Plans are rebuilt from local data and trusted templates, not deserialized executable plans. */
 export async function planArtifacts(options: WorkspaceOptions, input: InputSnapshot, model: Model, output: Entry[]) {
   const templateRoot = resolve(options.templateRoot);
@@ -54,7 +58,7 @@ export async function planArtifacts(options: WorkspaceOptions, input: InputSnaps
   }
   // Retired files remain tracked, but are never implicitly removed.
   for (const [path,value] of previous) if (!ownership.some(e => e.path === path)) ownership.push({path,hash:value.hash,ownership:value.ownership});
-  const receipt = {version:generationVersion,projectId:model.project.id,inputHash:digest(input.content.toString('utf8')),files:ownership};
+  const receipt = generationReceipt(model.project.id, input.content.toString('utf8'), ownership);
   entries.push({path:receiptPath,content:json(receipt)});
   const plan = await createFilePlan(input.vault,entries);
   requireValue(plan.changes.at(-1)!.beforeHash === receiptBefore,'Receipt changed during planning.');
