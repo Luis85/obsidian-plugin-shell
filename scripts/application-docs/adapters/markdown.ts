@@ -1,5 +1,5 @@
 import { parseDocument, stringify, isMap, isAlias, isNode } from 'yaml';
-import { DOC_TYPES, object, insist, jsonData, validateEntity, normalizePayload, fieldNames, equal, type Entity, type ObjectData, type DocType } from '../domain/contracts.ts';
+import { DOC_TYPES, docsObject as object, insist, jsonData, validateEntity, normalizePayload, fieldNames, equal, type Entity, type ObjectData, type DocType } from '../domain/contracts.ts';
 interface Span { start: number; end: number }
 interface Regions { data: Span | null; generated: Span | null }
 export interface MarkdownDocument {
@@ -99,7 +99,16 @@ function headerText(document: MarkdownDocument, entity: Entity, newline: string)
   const edits: Array<Span & { value: string }> = [], seen = new Set<string>();
   for (const pair of doc.contents.items) {
     const key = String(pair.key);
-    if (!Object.hasOwn(fields, key)) continue;
+    if (!Object.hasOwn(fields, key)) {
+      if (fieldNames[entity.type].includes(key)) {
+        insist(isNode(pair.key) && pair.key.range && isNode(pair.value) && pair.value.range,
+          'DOCS_FRONTMATTER', 'Cannot locate an obsolete managed property.');
+        const start = source.lastIndexOf('\n', pair.key.range[0] - 1) + 1;
+        const end = source.indexOf('\n', pair.value.range[1]);
+        edits.push({ start, end: end < 0 ? source.length : end + 1, value: '' });
+      }
+      continue;
+    }
     seen.add(key);
     if (key === 'title' && entity.type === 'route' && document.properties.title !== document.entity.title) continue;
     if (equal(document.properties[key], fields[key])) continue;

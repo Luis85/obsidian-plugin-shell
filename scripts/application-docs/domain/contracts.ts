@@ -10,14 +10,14 @@ export interface Binding { path: string; baseline: Entity; generatedHash: string
 export interface DocsIndex { schemaVersion: 1; project: string; entries: Record<string, Binding>; navigation?: Record<string, string> }
 export interface Conflict { entity: string; field: string; reason: string }
 export type Resolutions = Record<string, 'markdown' | 'project'>;
-export class DocsError extends Error {
+class DocsError extends Error {
   readonly code: string;
   constructor(code: string, message: string) { super(`${code}: ${message}`); this.name = 'DocsError'; this.code = code; }
 }
 export function insist(ok: unknown, code: string, message: string): asserts ok {
   if (!ok) throw new DocsError(code, message);
 }
-export function object(value: unknown): ObjectData {
+export function docsObject(value: unknown): ObjectData {
   insist(value !== null && typeof value === 'object' && !Array.isArray(value) &&
     [Object.prototype, null].includes(Object.getPrototypeOf(value)), 'DOCS_SHAPE', 'Expected a plain object.');
   return value as ObjectData;
@@ -33,7 +33,7 @@ export function jsonData(value: unknown, depth = 0, budget = { count: 0 }): void
   insist(depth <= 40 && ++budget.count <= 180000, 'DOCS_LIMIT', 'Data exceeds its depth/value budget.');
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return;
   if (typeof value === 'number') { insist(Number.isFinite(value), 'DOCS_NUMBER', 'Use finite JSON numbers.'); return; }
-  const entries = Array.isArray(value) ? Object.entries(value) : Object.entries(object(value));
+  const entries = Array.isArray(value) ? Object.entries(value) : Object.entries(docsObject(value));
   for (const [key, child] of entries) {
     insist(!['__proto__', 'prototype', 'constructor'].includes(key), 'DOCS_KEY', 'Unsafe object key.');
     jsonData(child, depth + 1, budget);
@@ -42,7 +42,7 @@ export function jsonData(value: unknown, depth = 0, budget = { count: 0 }): void
 export function stable(value: unknown): string {
   if (value === undefined) return 'undefined';
   if (Array.isArray(value)) return '[' + value.map(stable).join(',') + ']';
-  if (value !== null && typeof value === 'object') return '{' + Object.keys(object(value)).sort().map(key => JSON.stringify(key) + ':' + stable(object(value)[key])).join(',') + '}';
+  if (value !== null && typeof value === 'object') return '{' + Object.keys(docsObject(value)).sort().map(key => JSON.stringify(key) + ':' + stable(docsObject(value)[key])).join(',') + '}';
   return JSON.stringify(value);
 }
 export const equal = (left: unknown, right: unknown): boolean => stable(left) === stable(right);
@@ -58,7 +58,7 @@ export const fieldNames: Record<DocType, readonly string[]> = {
 export function validateEntity(entity: Entity): void {
   insist(DOC_TYPES.includes(entity.type), 'DOCS_TYPE', 'Unknown document type.');
   text(entity.id, 'id'); text(entity.project, 'project'); text(entity.title, 'title');
-  jsonData(entity); object(entity.fields); object(entity.data);
+  jsonData(entity); docsObject(entity.fields); docsObject(entity.data);
   insist(Object.keys(entity.fields).every(name => fieldNames[entity.type].includes(name)), 'DOCS_FIELD', 'Unknown managed field.');
   for (const [name, value] of Object.entries(entity.fields)) {
     if (name === 'position') insist(Number.isSafeInteger(value) && Number(value) >= 0, 'DOCS_FIELD', 'position must be a nonnegative integer.');
@@ -72,7 +72,7 @@ export function normalizePayload(entity: Entity): Entity {
   const value = structuredClone(entity), data = value.data;
   if (value.type === 'component' && !Object.hasOwn(data, 'visual') && !Object.hasOwn(data, 'library')) value.data = { visual: data };
   if (value.type === 'project') {
-    const identity = data.identity === undefined ? {} : object(data.identity);
+    const identity = data.identity === undefined ? {} : docsObject(data.identity);
     for (const key of ['author', 'version', 'description']) if (Object.hasOwn(data, key)) { identity[key] = data[key]; delete data[key]; }
     if (Object.keys(identity).length) data.identity = identity;
   }
@@ -85,11 +85,11 @@ export function normalizePayload(entity: Entity): Entity {
   const keys = allowed[value.type];
   insist(!keys || Object.keys(value.data).every(key => keys.includes(key)), 'DOCS_PAYLOAD', 'Unknown structured field on ' + value.type + '.');
   if (value.type === 'page' && value.data.visual) {
-    const visual = object(value.data.visual);
+    const visual = docsObject(value.data.visual);
     insist(!['id', 'ownerId'].some(key => Object.hasOwn(visual, key)), 'DOCS_PAYLOAD', 'Visual identity belongs in frontmatter.');
   }
-  if (value.type === 'page' && value.data.surface) insist(!['id', 'label', 'kind'].some(key => Object.hasOwn(object(value.data.surface), key)), 'DOCS_PAYLOAD', 'Surface identity belongs in frontmatter.');
-  if (value.type === 'component' && value.data.library) insist(!['id', 'name'].some(key => Object.hasOwn(object(value.data.library), key)), 'DOCS_PAYLOAD', 'Library identity belongs in frontmatter.');
-  if (value.type === 'component' && value.data.visual) insist(!['id', 'libraryId', 'exportName'].some(key => Object.hasOwn(object(value.data.visual), key)), 'DOCS_PAYLOAD', 'Component identity belongs in frontmatter.');
+  if (value.type === 'page' && value.data.surface) insist(!['id', 'label', 'kind'].some(key => Object.hasOwn(docsObject(value.data.surface), key)), 'DOCS_PAYLOAD', 'Surface identity belongs in frontmatter.');
+  if (value.type === 'component' && value.data.library) insist(!['id', 'name'].some(key => Object.hasOwn(docsObject(value.data.library), key)), 'DOCS_PAYLOAD', 'Library identity belongs in frontmatter.');
+  if (value.type === 'component' && value.data.visual) insist(!['id', 'libraryId', 'exportName'].some(key => Object.hasOwn(docsObject(value.data.visual), key)), 'DOCS_PAYLOAD', 'Component identity belongs in frontmatter.');
   return value;
 }

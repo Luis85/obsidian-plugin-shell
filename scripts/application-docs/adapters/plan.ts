@@ -83,6 +83,7 @@ export async function documentationPlan(root: string, args: string[], direction:
     const content = renderMarkdown(entity, original);
     entries.push({ path, content });
     const written = parseMarkdown(content, path)!;
+    insist(equal(written.entity, entity), 'DOCS_RENDER_COVERAGE', 'Rendered Markdown would lose managed fields: ' + path);
     index.entries[key] = { path, baseline: entity, generatedHash: generatedSource(written) === null ? null : digest(generatedSource(written)!) };
   }
   // Copy selected external notes/assets without following links or fetching remote references.
@@ -128,6 +129,7 @@ export async function documentationStatus(root: string, args: string[], validate
   const workspace = await readWorkspace(root, args), entities = projectEntities(workspace.project);
   const review = reconcile(entities, workspace.documents.map(input => input.document.entity), workspace.index, 'import');
   if (validate && !review.conflicts.length) applyEntities(workspace.project, review.entities);
+  insist(equal(applyEntities(workspace.project, entities), workspace.project), 'DOCS_COVERAGE', 'The project cannot be losslessly projected.');
   const keys = new Set(workspace.documents.map(input => keyOf(input.document.entity)));
   const missing = Object.entries(workspace.index.entries).filter(([key]) => !keys.has(key)).map(([entity, binding]) => ({ entity, path: binding.path }));
   return { coverage: coverage(entities), states: review.states, conflicts: review.conflicts, missing: args.length ? [] : missing, skipped: workspace.skipped };

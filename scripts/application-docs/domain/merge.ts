@@ -1,7 +1,7 @@
-import { equal, object, keyOf, type Entity, type Conflict, type Resolutions } from './contracts.ts';
+import { equal, docsObject as object, keyOf, type Entity, type Conflict, type Resolutions } from './contracts.ts';
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 /** Omitted fields preserve the existing semantic value; arrays are ordered conflict units. */
-export function overlay(current: unknown, patch: unknown): unknown {
+function overlay(current: unknown, patch: unknown): unknown {
   if (!isRecord(current) || !isRecord(patch)) return structuredClone(patch);
   const result = structuredClone(current);
   for (const [key, value] of Object.entries(patch)) result[key] = Object.hasOwn(current, key) ? overlay(current[key], value) : structuredClone(value);

@@ -196,7 +196,7 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   const journal = new URL('../../scripts/application-docs/adapters/recovery.ts', import.meta.url).href;
   const code = `import {createFilePlan,applyFilePlan} from ${JSON.stringify(writer)}; import {journalHook} from ${JSON.stringify(journal)};
     const plan=await createFilePlan(${JSON.stringify(root)},${JSON.stringify(entries)}), record=journalHook(plan);
-    await applyFilePlan(plan,{async beforeWrite(change,index){await record();if(index===boundary})process.kill(process.pid,'SIGKILL');}});`;
+    await applyFilePlan(plan,{async beforeWrite(change,index){await record();if(index===${boundary})process.kill(process.pid,'SIGKILL');}});`;
   const child = spawnSync(process.execPath, ['--experimental-strip-types','--input-type=module','--eval',code], {encoding:'utf8',timeout:30000});
   assert.ifError(child.error); assert.notEqual(child.status, 0, 'The worker must terminate before completing the batch.');
   assert.ok((await readdir(join(root,'.codex-authoring.lock'))).includes('docs-journal.json'));

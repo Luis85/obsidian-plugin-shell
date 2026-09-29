@@ -75,3 +75,14 @@ test('route documents may retain an explanatory title without inventing a runtim
   const parsed=parseMarkdown(source);assert.equal(parsed.entity.title,'/before');const next={...parsed.entity,title:'/after',fields:{...parsed.entity.fields,path:'/after'}};
   const output=renderMarkdown(next,parsed);assert.ok(output.includes('title: Human route description'));assert.equal(parseMarkdown(output).entity.fields.path,'/after');
 });
+
+test('obsolete managed fields are removed without deleting adjacent custom properties or prose', () => {
+  const entity = page(), original = renderMarkdown(entity).replace('doc_status: draft', 'custom: keep\ndoc_status: draft');
+  const parsed = parseMarkdown(original), next = structuredClone(entity);
+  delete next.fields.visual_id; delete next.data.visual;
+  const output = renderMarkdown(next, parsed);
+  assert.deepEqual(parseMarkdown(output).entity, next);
+  assert.ok(output.includes('custom: keep\n'));
+  assert.ok(!/^visual_id:/m.test(output));
+  assert.ok(output.includes('## Acceptance criteria'));
+});

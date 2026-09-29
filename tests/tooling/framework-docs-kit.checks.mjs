@@ -8,9 +8,11 @@ import { spawnSync } from 'node:child_process';
 import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { verifyKit } from '../../scripts/framework/kit-integrity.ts';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { digest } from '../../scripts/application-docs/adapters/filesystem.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 test('packaged CLI ships the pinned parser and supports docs import then existing generation without root dependencies', { timeout: 300000 }, async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Kit packaging requires the reviewed framework sources, not an example-removed consumer.'); return; }
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'docs-kit-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
   for (const file of files) { await mkdir(dirname(join(dir, file.path)), { recursive: true }); await writeFile(join(dir, file.path), file.bytes); }

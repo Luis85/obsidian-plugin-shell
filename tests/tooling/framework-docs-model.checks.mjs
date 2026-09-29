@@ -109,3 +109,10 @@ test('retained published component revisions cannot be overwritten',async()=>{
   const entities=projectEntities(project), revision=entities.find(entity=>entity.type==='component-revision');assert.ok(revision);revision.data.notes='Attempted revision rewrite';
   assert.throws(()=>applyEntities(project,entities),/DOCS_REVISION_IMMUTABLE/);
 });
+
+test('the complete retained companion self-project round-trips every managed element and context field', async () => {
+  const input = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json', import.meta.url), 'utf8'));
+  const project = migrateAuthoringDocument(input).document, entities = projectEntities(project);
+  assert.ok(entities.length > 100, 'Exercise the real multi-subsystem self-project, not the minimal fixture.');
+  assert.deepEqual(applyEntities(project, entities), project);
+});

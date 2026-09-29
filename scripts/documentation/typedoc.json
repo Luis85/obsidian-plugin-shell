@@ -13,6 +13,7 @@
     "../../docs/user-manual/shell-cli/optional-integrations.md",
     "../../docs/user-manual/shell-cli/troubleshooting.md",
     "../../docs/user-manual/shell-cli/documentation-authoring.md",
+    "../../docs/user-manual/shell-cli/application-documentation.md",
     "../../docs/user-manual/shell-cli/generated/*.md"
   ],
   "out": "../../reports/shell-cli-manual",

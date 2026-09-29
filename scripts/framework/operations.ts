@@ -18,7 +18,7 @@ import { operationSchemas } from './schemas.ts';
 import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
 import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
+import { planOperation, applyOperation, saveOperationPlan, loadPlan } from './planning.ts';
 import { status, releaseCheck } from './inspection.ts';
 import { inspectDesign } from './changes.ts';
 import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
@@ -41,7 +41,7 @@ async function fileOperation(request: Request, context: Context): Promise<Result
     ...result(request.command, planned.review, 'blocked'),
     diagnostics: planned.conflicts.slice(0, 50).map(message => ({ code: 'DOCS_CONFLICT', message, next: 'Inspect --json for conflict keys; resolve fields with docs import --resolutions <file>.' })),
   };
-  const saved = output ? await savePlan(context, planned, output) : null;
+  const saved = output ? await saveOperationPlan(context, planned, output) : null;
   const apply = request.command !== 'plan inspect' && !request.options['dry-run'] && (request.options.apply !== undefined || request.options.yes === true);
   if (!apply) return { ...result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned'), diagnostics };
   const expected = stringOption(request.options, 'apply') ?? planned.planHash;

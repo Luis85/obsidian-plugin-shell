@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
 import { createFilePlan } from '../../shared/file-plan.mjs';
-import { object, array, insist, stable } from '../domain/contracts.ts';
+import { docsObject as object, array, insist, stable } from '../domain/contracts.ts';
 import { readBytes, decode, digest, portable } from './filesystem.ts';
 interface Change { path: string; beforeHash: string | null; afterHash: string | null; status: string }
 interface Plan { root: string; changes: readonly Change[] }

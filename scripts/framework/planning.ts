@@ -93,7 +93,7 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
     await journal?.();
   } });
 }
-export async function savePlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
+export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');
   requireThat(planned.request.options['trust-custom'] !== true, 'CUSTOM_PLAN_NOT_PORTABLE', 'Custom maker trust cannot be serialized as approval.');
   const path = resolve(context.root, output);

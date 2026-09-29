@@ -1,7 +1,7 @@
 import { validateAuthoringDocument, type AuthoringDocument } from '../../companion/authoring-contract.ts';
 import { newSitemapSurface } from '../../companion/sitemap/create.ts';
 import { emptyVisualDesigns, visualNodes, type UiNode, type Interaction } from '../../companion/visual/visual-ir.mjs';
-import { object, array, insist, text, equal, type Entity, type ObjectData } from '../domain/contracts.ts';
+import { docsObject as object, array, insist, text, equal, type Entity, type ObjectData } from '../domain/contracts.ts';
 const list = (value: unknown): ObjectData[] => value === undefined ? [] : array(value).map(object);
 const clone = (value: ObjectData): ObjectData => structuredClone(value);
 const without = (value: ObjectData, keys: string[]): ObjectData => Object.fromEntries(Object.entries(value).filter(([key]) => !keys.includes(key)));

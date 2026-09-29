@@ -1,10 +1,10 @@
 import { join } from 'node:path';
-import { DOC_TYPES, object, array, insist, type DocType } from '../domain/contracts.ts';
+import { DOC_TYPES, docsObject as object, array, insist, type DocType } from '../domain/contracts.ts';
 import { portable, readBytes, decode } from './filesystem.ts';
 export const SETTINGS_FILE = 'configs/user-settings.json';
 export const folders: Record<DocType, string> = { project: '', page: 'pages', component: 'components', interaction: 'interactions', journey: 'journeys', route: 'routes', transition: 'transitions', layout: 'layouts', 'component-revision': 'component-revisions', 'library-component': 'library-components', feature: 'features', prd: 'prds' };
 export interface DocsSettings { root: string; indexFile: string; paths: Record<string, string>; recursive: boolean; include: string[]; exclude: string[]; linkFormat: 'markdown' | 'wikilink' }
-export function defaults(root = 'docs/application'): DocsSettings {
+function defaults(root = 'docs/application'): DocsSettings {
   return { root, indexFile: 'design/docs-index.json', paths: Object.fromEntries(DOC_TYPES.filter(type => type !== 'project').map(type => [folders[type], root + '/' + folders[type]])),
     recursive: true, include: ['**/*.md'], exclude: ['**/generated/**'], linkFormat: 'markdown' };
 }
