@@ -11,7 +11,7 @@ if (args[0] === 'make' && args[1] === 'project') args = ['new', ...args.slice(2)
 if (args[0] === 'make' && args[1] === 'prototype') args = ['prototype', ...args.slice(2)];
 // Keep `help new` on the original catalog; `new --help` describes the preset maker.
 if (args[0] === 'help' && ['sketch', 'prototype', 'studio'].includes(args[1])) args = [args[1], '--help', ...args.slice(2)];
-const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout'];
+const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes'];
 const legacyNew = args[0] === 'new' && ((args[1] && !args[1].startsWith('--') && !['presets', 'guide', 'validate'].includes(args[1])) || args.slice(1).some(arg => legacyFlags.includes(arg)));
 const maker = !args.length || (args[0] === 'new' && !legacyNew) || ['studio', 'sketch', 'prototype', '--ui', '--no-color'].includes(args[0]);
 if (maker) compiled = join(root, '.framework/compiled/bin/shell.js');

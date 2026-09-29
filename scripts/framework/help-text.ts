@@ -49,6 +49,12 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  values: { description: 'Project-relative JSON file containing declared starter input values.' },
+  answers: { description: 'Inline JSON input values; cannot be combined with --values.' },
+  run: { description: 'Comma-separated declared processes to run after creation, with fresh --trust-processes.' },
+  'trust-processes': { description: 'Explicitly trust the reviewed project code and declared process steps; never portable approval.' },
+  process: { description: 'One or more comma-separated process IDs from the generated starter receipt.' },
+  project: { description: 'Generated project directory containing .workbench/starter.json.' },
   samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
@@ -113,6 +119,14 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'starters list': ['node shell.mjs starters list --json'],
+  'starters show': ['node shell.mjs starters show webapp --json'],
+  'starters validate': ['node shell.mjs starters validate --json'],
+  'starters schema': ['node shell.mjs starters schema --json'],
+  'starters add': ['node shell.mjs starters add --input my-starter.json --dry-run'],
+  'starters edit': ['node shell.mjs starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json'],
+  'starters pack': ['node shell.mjs starters pack --out ./workbench-starters.zip --yes'],
+  'starters run': ['node shell.mjs starters run --project ../my-app --process verify,build --dry-run', 'node shell.mjs starters run --project ../my-app --process build --yes --trust-processes'],
   'airship status': ['node shell.mjs airship status --json'],
   'airship enable': ['node shell.mjs airship enable --agent codex --dry-run', 'node shell.mjs airship enable --yes'],
   'airship disable': ['node shell.mjs airship disable --dry-run', 'node shell.mjs airship disable --yes'],
@@ -170,7 +184,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(entry.id === 'setup resume' ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'starters run'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'starters pack', 'starters run', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
