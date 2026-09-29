@@ -124,3 +124,24 @@ Local continuation results (Node **22.16.0**, pinned TS/YAML unchanged):
 
 New hosted results must be read from the safety commit's workflow. Broad runtime,
 release and native acceptance retain their existing separate evidence boundaries.
+
+## HTML handbook qualification repair — 2026-09-29
+
+Candidate `f8cdf92b52aa21dc0a1f72423a3a00a40cbb349e` passed the dedicated
+Ubuntu and Windows documentation workflow **36615427754**. The Ubuntu artifact
+records merge `162fe44fdbac92c0ebf729fc0079798d55561f41`, with **79/79 documentation
+tests** and **77/77 CLI/setup regressions**, no skips, on Node **24.21.0**.
+
+The separate manual workflow **36615427723** passed both contract jobs but failed
+its HTML site job **109567587503**: the new fenced `markdown` example was not in
+TypeDoc's configured highlight languages. The renderer produced zero errors and
+one warning, correctly failing under `treatWarningsAsErrors`.
+
+The configuration now explicitly preserves TypeDoc's standard highlighting set
+and adds Markdown. Warning severity and link/path validation remain unchanged;
+no language is silently ignored and no dependency version changes. An added
+contract test reads the actual registered application guide and renderer options.
+It failed before the configuration change and passed afterward: **18/18 manual
+contract tests**, none skipped. Local command-reference generation, deterministic
+check and authored-example/link audit also passed without output changes. Actual
+HTML rendering is qualified separately by the hosted site job for this repair.
