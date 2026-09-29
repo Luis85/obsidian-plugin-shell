@@ -1,0 +1,48 @@
+name: Reconcile Companion data-source update
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/reconcile-starter-source-updates.yml]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Merge the exact incoming source without choosing an entire side
+        env:
+          BASE: 818300063cc904fc687ab95d89cd14e65241e969
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 3188cd4ab732b7f3b506f33a088445b75aa5c7ae
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-commit --no-ff "$BASE" || test "$?" = 1
+          python3 - <<'PY'
+          import subprocess
+          conflicts=subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).splitlines()
+          assert conflicts == ['docs/concepts/companion/index.html'], conflicts
+          PY
+          python3 scripts/concepts/build-companion.py
+          git add docs/concepts/companion/index.html
+          test -z "$(git diff --name-only --diff-filter=U)"
+          git diff --check
+          git diff --cached --check
+      - name: Verify rebuilt classic program and merged CLI routing
+        run: |
+          python3 scripts/concepts/build-companion.py --check
+          node --test tests/tooling/starter-classic-assembly.checks.mjs tests/tooling/starter-merge-routing.checks.mjs
+      - name: Fast-forward only the existing feature branch
+        run: |
+          git commit -m 'merge: preserve updated data sources and regenerate Companion classic artifact' -m 'Merge PR5 8183000 into the JSON-starter branch. Preserve the source changes and shared PRD-limit assembly fix; resolve only generated HTML by deterministic rebuild. Eleven executable assembly/routing regressions passed. No force update, release or PR5 branch write.'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
+          git rev-parse HEAD >> "$GITHUB_STEP_SUMMARY"
