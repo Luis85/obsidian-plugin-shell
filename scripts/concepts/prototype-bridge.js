@@ -50,7 +50,7 @@ async function pmExportWorkspace(format){
 function pmImport(text,expected){const value=pmApi().validate(JSON.parse(text));pmApi().replacement(project().prototypes??null,value);pmSave(value,expected);}
 function pmGenerationProject(){const p=project();if(!p?.prototypes)return p;try{return companionReview(pmApi().json(pmApi().active(pmApi().validate(p.prototypes)).variant.document)).project;}catch{return null;}}
 function pmGenerationLabel(){const value=project()?.prototypes;if(!value)return 'Current working project (no managed prototype workspace).';const active=pmApi().active(value);return active.prototype.name+' / '+active.version.label+' / '+active.variant.name+' · snapshot '+active.variant.revision;}
-function pmWorkspaceView(){return '<div id="pm-root"></div>';}
+function pmWorkspaceView(){return '<section class="ps--plugin-shell" data-plugin-ui="plugin-shell"><div id="pm-root"></div></section>';}
 function pmUnmount(){pmEditor?.unmount();pmEditor=null;}
 function pmMount(){const root=document.getElementById('pm-root');if(!root||pmEditor||!project())return;
  const owner=project(),owned=fn=>(...args)=>{if(project()!==owner)throw Error('The current project was replaced. Reopen Manage prototypes.');return fn(...args);};

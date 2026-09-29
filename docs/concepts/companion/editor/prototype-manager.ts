@@ -6,30 +6,46 @@ import type { PrototypeForm, PrototypeHost } from './prototype-host.ts';
 export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
   let selection: PrototypeSelection | null = null, mode: PrototypeForm = '', message = '', error = false, busy = false, closed = false;
   let renderedKey = '';
+  let draft: Record<string, string> = {};
+  function discardForm() {
+    if (mode && !host.confirm('Discard the unsubmitted prototype form?')) return false;
+    mode = ''; draft = {}; root.querySelector('.pm-form')?.remove(); return true;
+  }
   const read = () => host.read();
   function draw() {
     if (closed) return;
     const snapshot = read(); renderedKey = api.key(snapshot.workspace);
     if (selection) { try { api.selected(snapshot.workspace,selection); } catch { selection = null; } }
+    if (!selection && snapshot.opened) {
+      try { api.selected(snapshot.workspace,snapshot.opened); selection = {...snapshot.opened}; } catch { /* Retain a safe explicit fallback. */ }
+    }
+    const previous = root.querySelector<HTMLFormElement>('.pm-form');
+    if (previous?.dataset.pmForm === mode) draft = Object.fromEntries([...new FormData(previous)].map(([key,value]) => [key,String(value)]));
     if (!selection) {
       const p = snapshot.workspace.prototypes[0], v = p?.versions[0], x = v?.variants[0];
       if (p && v && x) selection = { prototypeId:p.id,versionId:v.id,variantId:x.id };
     }
     root.innerHTML = prototypeView(snapshot,selection,mode,message,error,busy);
+    for (const input of root.querySelectorAll<HTMLInputElement>('.pm-form input[name]')) {
+      if (Object.hasOwn(draft,input.name)) input.value = draft[input.name]!;
+    }
   }
   function change(action: PrototypeAction) {
     const snapshot = read();
     if (api.key(snapshot.workspace) !== renderedKey) throw Error('The project changed. Review the refreshed workspace before saving.');
     if (!snapshot.writable) throw Error('Editing is paused. Resolve the current operation or storage conflict first.');
     host.save(api.change(snapshot.workspace,action),renderedKey);
-    mode = ''; message = 'Saved to this browser project. Export the workspace to persist it through the shell.';
+    mode = ''; draft = {}; message = 'Saved to this browser project. Export the workspace to persist it through the shell.';
   }
   async function run(operation: () => void | Promise<void>) {
     if (busy || closed) return;
     error = false;
     try { busy = true; root.setAttribute('aria-busy','true'); await operation(); }
     catch (cause) { message = cause instanceof Error ? cause.message : 'The operation failed. No success is assumed.'; error = true; }
-    finally { busy = false; root.removeAttribute('aria-busy'); if (!closed) { draw(); root.querySelector<HTMLElement>(error ? '[role="alert"]' : '.pm-message')?.setAttribute('tabindex','-1'); } }
+    finally {
+      busy = false; root.removeAttribute('aria-busy');
+      if (!closed) { draw(); const notice = root.querySelector<HTMLElement>('.pm-message'); notice?.setAttribute('tabindex','-1'); if (error) notice?.focus(); }
+    }
   }
   const click = (event: MouseEvent) => {
     if (busy || !(event.target instanceof Element)) return;
@@ -37,6 +53,8 @@ export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
     if (!button || !root.contains(button) || button.disabled) return;
     event.preventDefault(); event.stopPropagation();
     const action = button.dataset.pm;
+    // Recovery exports may redraw, but must never discard the form the user is entering.
+    if (mode && !['export','directory','generate'].includes(action ?? '') && !discardForm()) return;
     if (['create','fork','version','details'].includes(action ?? '')) {
       mode = action as PrototypeForm; draw(); root.querySelector<HTMLInputElement>('.pm-form input')?.focus(); return;
     }
@@ -95,7 +113,7 @@ export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
   };
   root.addEventListener('click',click); root.addEventListener('submit',submit); root.addEventListener('change',importFile);
   root.classList.add('pm-workspace'); draw();
-  return { canLeave: () => !busy && (!mode || host.confirm('Discard the unsubmitted prototype form?')), unmount() {
+  return { canLeave: () => !busy && discardForm(), unmount() {
     closed = true; root.removeEventListener('click',click); root.removeEventListener('submit',submit); root.removeEventListener('change',importFile); root.replaceChildren();
   } };
 }
