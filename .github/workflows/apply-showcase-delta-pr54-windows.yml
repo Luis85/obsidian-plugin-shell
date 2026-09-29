@@ -1,0 +1,111 @@
+name: Fast Windows golden showcase apply
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/apply-showcase-delta-pr54-windows.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Apply candidate on current branch
+        env:
+          BASELINE: 172e8ac164bf98fca8935a6435d722f17731139a
+          PAYLOAD_SHA256: 0ec663e336bcbc52adae0b20dbf670590a56b840e2d45ea00dc5917ddaf43292
+        run: |
+          set -euo pipefail
+          START_HEAD=$(git rev-parse HEAD)
+          echo "$START_HEAD" > "$RUNNER_TEMP/start-head"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch --no-tags origin docs/companion-plugin-prd:refs/remotes/origin/docs/companion-plugin-prd
+          git merge --no-edit refs/remotes/origin/docs/companion-plugin-prd
+          git merge-base --is-ancestor "$BASELINE" HEAD
+          git fetch --no-tags origin chore/companion-starter-build-inputs
+          git show origin/chore/companion-starter-build-inputs:.github/pr54-showcase-payload/payload.b64 > "$RUNNER_TEMP/payload.b64"
+          base64 -d "$RUNNER_TEMP/payload.b64" > "$RUNNER_TEMP/payload.tar.xz"
+          ACTUAL=$(sha256sum "$RUNNER_TEMP/payload.tar.xz" | cut -d' ' -f1)
+          test "$ACTUAL" = "$PAYLOAD_SHA256"
+          rm -rf "$RUNNER_TEMP/candidate" && mkdir -p "$RUNNER_TEMP/candidate"
+          tar -xf "$RUNNER_TEMP/payload.tar.xz" -C "$RUNNER_TEMP/candidate"
+
+          python - <<'PY'
+          from pathlib import Path
+          import os, subprocess, shutil, sys
+          root=Path.cwd()
+          candidate=Path(os.environ['RUNNER_TEMP'])/'candidate'
+          baseline=os.environ['BASELINE']
+          conflicts=[]
+          special={'scripts/framework/help-text.ts'}
+          def git_bytes(*args):
+              p=subprocess.run(['git',*args],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+              if p.returncode: raise RuntimeError('git '+' '.join(args))
+              return p.stdout
+          for source in sorted(p for p in candidate.rglob('*') if p.is_file()):
+              rel=source.relative_to(candidate).as_posix(); target=root/rel
+              if rel in special: continue
+              exists=subprocess.run(['git','cat-file','-e',f'{baseline}:{rel}'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
+              if not exists:
+                  if target.exists() and target.read_bytes()!=source.read_bytes(): conflicts.append(rel+' (add/add)'); continue
+                  target.parent.mkdir(parents=True,exist_ok=True); shutil.copyfile(source,target); continue
+              if not target.exists(): conflicts.append(rel+' (modify/delete)'); continue
+              base=Path(os.environ['RUNNER_TEMP'])/'merge-base'; current=Path(os.environ['RUNNER_TEMP'])/'merge-current'
+              base.write_bytes(git_bytes('show',f'{baseline}:{rel}')); current.write_bytes(target.read_bytes())
+              merged=subprocess.run(['git','merge-file','-p',str(current),str(base),str(source)],stdout=subprocess.PIPE)
+              if merged.returncode: conflicts.append(rel); continue
+              target.write_bytes(merged.stdout)
+          hp=root/'scripts/framework/help-text.ts'; text=hp.read_text()
+          if "'starters coverage'" not in text:
+              marker="'starters pack']"; assert marker in text; text=text.replace(marker,"'starters pack', 'starters coverage']",1)
+          if "'require-model-coverage':" not in text:
+              marker="  project: { description: 'Generated project directory containing .workbench/starter.json.' },\n"; assert marker in text
+              text=text.replace(marker,marker+"  'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },\n",1)
+          if "'starters coverage': [" not in text:
+              marker="const examples: Record<string, string[]> = {\n"; assert marker in text
+              text=text.replace(marker,marker+"  'starters coverage': ['node shell.mjs starters coverage feature-showcase --json', 'node shell.mjs starters coverage feature-showcase --require-model-coverage --json'],\n",1)
+          hp.write_text(text)
+          for rel in [
+            'scripts/concepts/starter-bridge.js','scripts/concepts/starter-workspace.mjs',
+            'scripts/starters/companion.mjs','scripts/starters/limits.ts',
+            'tests/concepts/companion-starters.browser.mjs',
+            'tests/tooling/starter-authoring.checks.mjs','tests/tooling/starter-manual.checks.mjs']:
+              target=root/rel
+              if not target.exists(): continue
+              base=git_bytes('show',f'{baseline}:{rel}')
+              if target.read_bytes()!=base: conflicts.append(rel+' (delete/modify)')
+              else: target.unlink()
+          if conflicts:
+              print('Conflicts:',*conflicts,sep='\n - ',file=sys.stderr); raise SystemExit(2)
+          PY
+
+          git add -A
+          git diff --cached --check
+      - name: Fast contracts
+        run: |
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs --check
+          python -B scripts/concepts/build-companion.py --check
+          git add -A
+          git diff --cached --check
+      - name: Commit and push safely
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then echo "No delta"; exit 0; fi
+          git commit -m 'feat(starters): add Companion golden template and full visual showcase' -m 'Apply the reviewed external Companion starter, empty-start workflow, complete visual showcase, runtime coverage and local offline assets while preserving concurrent PR5 work through three-way merging.'
+          git fetch --no-tags origin feat/json-starters-on-pr5:refs/remotes/origin/feat/json-starters-on-pr5
+          test "$(git rev-parse refs/remotes/origin/feat/json-starters-on-pr5)" = "$(cat "$RUNNER_TEMP/start-head")"
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
