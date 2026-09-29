@@ -7,6 +7,8 @@ import { ask } from '../scripts/framework/input.ts';
 import { failure } from '../scripts/framework/contracts.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, makerHelp, type Arguments, type CommandContext } from './adapters/commands.ts';
+import { readSnapshot } from './adapters/storage.ts';
+import { projectWizard } from './presentation/project-create.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
@@ -33,7 +35,8 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   let completion: string | undefined;
   try {
     terminal?.start();
-    if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
+    if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) completion = await projectWizard(ui, options);
+    else if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
     else await studio(ui, options);
   } finally { terminal?.dispose(); }
   if (terminal && completion) io.error.write(safe(completion));
