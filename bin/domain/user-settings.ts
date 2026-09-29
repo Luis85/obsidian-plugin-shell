@@ -26,7 +26,7 @@ export function projectPath(value: unknown): string {
 }
 const overlap = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
 function validateLocations(paths: UserSettings['paths'], hostDirectory: string): void {
-  const locations = [...Object.values(paths), settingsPath, setupStatePath, 'project.config.json', hostDirectory].map(path => path.toLowerCase());
+  const locations = [...Object.values(paths), settingsPath, setupStatePath, 'configs/project-setup-draft.json', 'project.config.json', hostDirectory].map(path => path.toLowerCase());
   for (let i = 0; i < locations.length; i++) for (const other of locations.slice(i + 1))
     requireSketch(!overlap(locations[i]!, other), 'SETTINGS_OVERLAP', 'Input, output and configuration paths must not overlap.');
 }

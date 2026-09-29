@@ -117,7 +117,7 @@ test('brick editor uses real operations and preserves a replayable transaction f
 });
 test('plain setup supports a fully skipped optional flow and default-No review', async () => scratch(async root => {
   await vault(root); const answers = ['', '', '', '', '', 'Alice', 'plain', 'no', 'Plain product', 'Project description', 'Product outcome', 'scan', 'n', 'n', 'n', ''];
-  const ui = { write: () => {}, ask: async label => { assert.ok(answers.length, label); return answers.shift(); } };
+  const ui = { write: () => {}, ask: async label => { if (label.startsWith('Save setup progress')) return 'n'; assert.ok(answers.length, label); return answers.shift(); } };
   assert.equal(await projectSetupWizard(ui, { root, frameworkRoot }), undefined);
   assert.equal(answers.length, 0); await assert.rejects(() => readFile(join(root, 'configs/user-settings.json')));
 }));
@@ -130,4 +130,20 @@ test('approved boilerplate offers first run afterward and Skip leaves a source-o
   assert.ok(firstRun > approval);
   assert.ok(await readFile(join(root,'apps/product/package.json')));
   await assert.rejects(() => readFile(join(root,'reports/first-run.json')));
+}));
+
+// Resume invokes the real wizard and service, not a mocked setup writer.
+test('wizard resumes saved answers and prior brick operations without authorizing a first run', async () => scratch(async root => {
+  await vault(root);
+  const { setupCheckpointPlan } = await import('../../bin/adapters/setup-checkpoint.ts');
+  const { applyPrepared } = await import('../../bin/adapters/storage.ts');
+  const plan = await setupCheckpointPlan(root, { schemaVersion: 1, project: { name: 'Resumed product', description: 'Saved context.', product: 'Saved outcome.' },
+    prds: { mode: 'scan' }, prototypeInterview: null, operations: [{ op: 'page.add', title: 'Saved page' }], boilerplate: false });
+  await applyPrepared(plan, plan.planHash);
+  const f = human(); await projectSetupWizard(f.ui, { root, frameworkRoot });
+  const document = JSON.parse(await readFile(join(root, 'design/project.json'), 'utf8'));
+  assert.equal(document.project.name, 'Resumed product');
+  assert.ok(document.design.nodes.some(node => node.label === 'Saved page'));
+  assert.ok(!f.events.some(event => event[1] === 'Project name'));
+  await assert.rejects(readFile(join(root, 'reports/first-run.json')));
 }));

@@ -1,3 +1,4 @@
+import { loadSetupCheckpoint, setupCheckpointPlan, resumeSetupCheckpoint, discardSetupCheckpointPlan } from './setup-checkpoint.ts';
 import { settingsMigrationPlan } from './settings-migration.ts';
 import { settingsSchema, defaultSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -10,15 +11,13 @@ import type { CommandContext } from './commands.ts';
 export async function setupCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
   requireSketch(!['project', 'out', 'guide', 'kind', 'preset', 'framework', 'targets'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; the target is Angular webapp.');
   const action = args.action;
+  if (args.command === 'project-setup' && ['checkpoint', 'resume', 'checkpoint-status', 'discard-checkpoint'].includes(action)) return checkpointCommand(args, context, input);
   if (args.command === 'settings') return settingsCommand(args, context, input);
-  if (action === 'schema') return { schema: setupSchema, example: setupExample };
-  if (action === 'guide') return angularSetupGuide();
-  if (action === 'status') return setupStatus(context.root);
-  if (action === 'scan') {
-    const { settings } = await loadSettings(context.root);
-    const intake = await intakePrds(context.root, settings, { mode: 'scan' });
-    return { prds: intake.prds, ignoredMarkdown: intake.ignored };
-  }
+  const readers: Record<string, () => Promise<Record<string, unknown>> | Record<string, unknown>> = {
+    schema: () => ({ schema: setupSchema, example: setupExample, checkpointSchema: { ...setupSchema, title: 'Partial setup answers', required: ['schemaVersion'] } }),
+    guide: angularSetupGuide, status: () => setupStatus(context.root), scan: () => scanPrds(context.root),
+  };
+  if (Object.hasOwn(readers, action)) return readers[action]!();
   requireSketch(!action || action === 'validate', 'SETUP_COMMAND', 'Use project-setup, schema, guide, status, scan or validate.');
   requireSketch(action !== 'validate' || !args.flags.apply, 'SETUP_OPTION', 'Validation never applies a plan.');
   const plan = await projectSetupPlan(context, await input());
@@ -49,4 +48,21 @@ function configuredOutput(args: Arguments): 'app' | 'prototypes' | undefined {
   if (args.command === 'prototype') return 'prototypes';
   if (args.command === 'studio') return 'app';
   if (args.command === 'sketch' && ['', 'generate'].includes(args.action)) return 'app';
+}
+
+async function checkpointCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
+  if (args.action === 'checkpoint') return applyPrepared(await setupCheckpointPlan(context.root, await input()), option(args, 'apply') || undefined, context.signal);
+  if (args.action === 'discard-checkpoint') {
+    requireSketch(!args.flags.input, 'CHECKPOINT_OPTION', 'Discard uses the saved checkpoint, not --input.');
+    return applyPrepared(await discardSetupCheckpointPlan(context.root), option(args, 'apply') || undefined, context.signal);
+  }
+  requireSketch(!args.flags.apply && !args.flags.input, 'CHECKPOINT_OPTION', 'Checkpoint inspection/resume is read-only and uses the saved file.');
+  if (args.action === 'checkpoint-status') return { checkpoint: (await loadSetupCheckpoint(context.root)).checkpoint };
+  return { request: await resumeSetupCheckpoint(context.root), approved: false, next: 'Review the request, then project-setup --input <request>. Prototype design agreement must be renewed.' };
+}
+
+async function scanPrds(root: string) {
+  const { settings } = await loadSettings(root);
+  const intake = await intakePrds(root, settings, { mode: 'scan' });
+  return { prds: intake.prds, ignoredMarkdown: intake.ignored };
 }
