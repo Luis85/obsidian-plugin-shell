@@ -1,0 +1,28 @@
+name: Snapshot current PR5 for PR54 continuation
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/current-pr5-for-pr54.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9a730e672f58b640b289d6ea49b68850e2f5df18
+          persist-credentials: false
+      - name: Archive exact PR5 source
+        run: |
+          mkdir -p "$RUNNER_TEMP/pr5"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/pr5/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/pr5/sha.txt"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/pr5/tree.txt"
+          cd "$RUNNER_TEMP/pr5" && sha256sum source.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: current-pr5-for-pr54
+          path: ${{ runner.temp }}/pr5/
+          retention-days: 1
