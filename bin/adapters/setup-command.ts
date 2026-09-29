@@ -1,3 +1,4 @@
+import { settingsMigrationPlan } from './settings-migration.ts';
 import { settingsSchema, defaultSettings } from '../domain/user-settings.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
@@ -9,12 +10,7 @@ import type { CommandContext } from './commands.ts';
 export async function setupCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
   requireSketch(!['project', 'out', 'guide', 'kind', 'preset', 'framework', 'targets'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; the target is Angular webapp.');
   const action = args.action;
-  if (args.command === 'settings') {
-    if (action === 'schema') return { schema: settingsSchema, defaults: defaultSettings };
-    if (action === 'show') { const loaded = await loadSettings(context.root); return { settings: loaded.settings, persisted: loaded.content !== null }; }
-    requireSketch(!action, 'SETTINGS_COMMAND', 'Use settings, settings show or settings schema.');
-    return applyPrepared(await settingsPlan(context.root, await input()), option(args, 'apply') || undefined, context.signal);
-  }
+  if (args.command === 'settings') return settingsCommand(args, context, input);
   if (action === 'schema') return { schema: setupSchema, example: setupExample };
   if (action === 'guide') return angularSetupGuide();
   if (action === 'status') return setupStatus(context.root);
@@ -29,14 +25,28 @@ export async function setupCommand(args: Arguments, context: CommandContext, inp
   if (action === 'validate') return { valid: true, ...(await applyPrepared(plan)), status: 'validated' };
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
+async function settingsCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
+  const action = args.action;
+    if (action === 'schema') return { schema: settingsSchema, defaults: defaultSettings };
+    if (action === 'migrate') return applyPrepared(await settingsMigrationPlan(context.root, await input()), option(args, 'apply') || undefined, context.signal);
+    if (action === 'show') { const loaded = await loadSettings(context.root); return { settings: loaded.settings, persisted: loaded.content !== null }; }
+    requireSketch(!action, 'SETTINGS_COMMAND', 'Use settings, settings show or settings schema.');
+    return applyPrepared(await settingsPlan(context.root, await input()), option(args, 'apply') || undefined, context.signal);
+
+}
 /** Invocation flags override saved defaults without persisting those overrides. */
 export async function configuredArguments(args: Arguments, root: string): Promise<Arguments> {
-  if (!['sketch', 'prototype', 'studio'].includes(args.command) || args.flags.help || args.action === 'schema' || args.action === 'guide') return args;
+  if (!['sketch', 'prototype', 'studio'].includes(args.command)) return args;
+  if (args.flags.help || ['schema', 'guide'].includes(args.action)) return args;
   const loaded = await loadSettings(root);
   if (loaded.content === null) return args;
-  const flags = { ...args.flags };
-  flags.project ??= loaded.settings.paths.project;
-  if (args.command === 'prototype') flags.out ??= loaded.settings.paths.prototypes;
-  if (args.command === 'studio' || (args.command === 'sketch' && (args.action === 'generate' || !args.action))) flags.out ??= loaded.settings.paths.app;
+  const flags: Arguments['flags'] = { project: loaded.settings.paths.project, ...args.flags };
+  const folder = configuredOutput(args);
+  if (folder) flags.out ??= loaded.settings.paths[folder];
   return { ...args, flags };
+}
+function configuredOutput(args: Arguments): 'app' | 'prototypes' | undefined {
+  if (args.command === 'prototype') return 'prototypes';
+  if (args.command === 'studio') return 'app';
+  if (args.command === 'sketch' && ['', 'generate'].includes(args.action)) return 'app';
 }

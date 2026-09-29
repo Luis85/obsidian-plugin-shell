@@ -1,3 +1,4 @@
+import { defaultVaultConfigDirectory } from '../domain/host-paths.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
@@ -18,7 +19,7 @@ export async function firstRunInventory(root: string, app: string): Promise<{ pa
       if (depth === 0 && generated.has(item.name)) {
         requireSketch(stat.isDirectory(), 'FIRST_RUN_OUTPUT', 'Build/dependency output roots must be directories.'); continue;
       }
-      requireSketch(item.name !== '.git' && item.name !== '.obsidian', 'FIRST_RUN_NESTED_HOST', 'A generated application cannot contain nested Git or Obsidian data.');
+      requireSketch(item.name !== '.git' && item.name !== defaultVaultConfigDirectory, 'FIRST_RUN_NESTED_HOST', 'A generated application cannot contain nested Git or Obsidian data.');
       if (stat.isDirectory()) await walk(path, depth + 1);
       else {
         requireSketch(stat.isFile(), 'FIRST_RUN_INPUT', 'Only regular application files are accepted.');

@@ -1,3 +1,4 @@
+import { preserveResolvedLock } from './resolved-lock.ts';
 import { join, resolve, relative, isAbsolute } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
@@ -36,6 +37,7 @@ export async function packagePlan(root: string, out: string, entries: Entry[], d
     requireSketch(hash(bytes) === previousHash, 'MAKER_STALE', 'Package receipt changed while reading.');
     previous = receipt(parseJsonData(bytes.toString('utf8')));
   }
+  entries = await preserveResolvedLock(root, out, entries, previous);
   const candidates = await createFilePlan(root, entries.map(entry => ({ ...entry, path: `${out}/${entry.path}` })));
   for (const [index, change] of candidates.changes.entries()) {
     const old = previous.get(entries[index]!.path);

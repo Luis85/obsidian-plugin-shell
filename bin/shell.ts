@@ -28,7 +28,7 @@ function canInteract(args: Arguments, io: IO): boolean {
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;
   const loaded = await loadSettings(context.root);
-  args = await configuredArguments(args, context.root);
+  const configured = await configuredArguments(args, context.root);
   const mode = option(args, 'ui', env.SHELL_UI ?? loaded.settings.preferences.ui);
   const terminal = useTerminal(mode, io.input, io.error, env)
     ? new TerminalSession({ input: io.input, output: io.error, signal: controller.signal, cancel: () => controller.abort(), color: useColor(args.flags['no-color'] === true, env) }) : undefined;
@@ -37,8 +37,8 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
     ask: (question: string) => ask(io.input, io.error, question, context.signal, false),
     write: (text: string) => { if (terminal) terminal.write(text); else io.error.write(safe(text)); },
   };
-  const options = { ...context, project: option(args, 'project', 'design/project.json'),
-    guide: option(args, 'guide') || undefined, out: option(args, 'out') || undefined, kind: option(args, 'kind') || undefined };
+  const options = { ...context, project: option(configured, 'project', 'design/project.json'),
+    guide: option(args, 'guide') || undefined, out: option(configured, 'out') || undefined, kind: option(args, 'kind') || undefined };
   let completion: string | undefined;
   try {
     terminal?.start();
@@ -52,13 +52,19 @@ async function runInteractiveCommand(args: Arguments, context: CommandContext, u
   if (args.command === 'first-run') return firstRunWizard(ui, context);
   if (args.command === 'project-setup') return projectSetupWizard(ui, context);
   if (args.command === 'settings') { await settingsWizard(ui, context); return; }
-  if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
+  if (await shouldCreate(args, context, options)) return createInteractive(args, context, ui, options);
+  if (args.command === 'prototype') return await prototypeWizard(ui, options);
+  else await studio(ui, options);
+}
+async function shouldCreate(args: Arguments, context: CommandContext, options: StudioOptions): Promise<boolean> {
+  if (args.command === 'new') return true;
+  return args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document;
+}
+async function createInteractive(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
     if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
     return await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
     framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
-  }
-  else if (args.command === 'prototype') return await prototypeWizard(ui, options);
-  else await studio(ui, options);
+
 }
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;

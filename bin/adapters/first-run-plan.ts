@@ -1,8 +1,9 @@
+import { readFirstRunReport } from '../domain/first-run-report.ts';
 import { dirname, join, resolve } from 'node:path';
 import { npmEntry } from '../../scripts/framework/process.ts';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
-import { object, text, keys } from '../domain/data.ts';
+import { object, text } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { installCommand, readFirstRunRequest, type FirstRunRequest } from '../domain/first-run.ts';
 import { guardedText, loadSettings, jsonText } from './user-settings.ts';
@@ -26,26 +27,33 @@ export async function firstRunTool(): Promise<FirstRunTool> {
 }
 export async function firstRunReport(root: string, path: string) {
   const snapshot = await guardedText(root, path);
-  if (snapshot.content === null) return { ...snapshot, report: null };
-  const report = object(parseJsonData(snapshot.content));
-  requireSketch(report.schemaVersion === 1 && report.producer === 'shell-first-run', 'FIRST_RUN_REPORT', 'Preserve the unknown/corrupt first-run report; choose another configured report path.');
-  keys(report, ['schemaVersion', 'producer', 'planHash', 'app', 'status', 'startedAt', 'finishedAt', 'stages', 'preview', 'installed', 'built', 'lockAfter', 'manualAcceptance', 'externalEffects', 'automaticRetry']);
-  requireSketch(typeof report.planHash === 'string' && /^[a-f0-9]{64}$/.test(report.planHash) && typeof report.app === 'string' &&
-    ['running', 'passed', 'failed', 'cancelled'].includes(String(report.status)) && typeof report.startedAt === 'string' &&
-    (report.finishedAt === null || typeof report.finishedAt === 'string') && typeof report.installed === 'boolean' && typeof report.built === 'boolean' &&
-    report.manualAcceptance === 'not-verified' && report.externalEffects === 'preserved-not-rolled-back' && report.automaticRetry === false &&
-    (report.lockAfter === null || typeof report.lockAfter === 'string' && /^[a-f0-9]{64}$/.test(report.lockAfter)), 'FIRST_RUN_REPORT', 'Invalid first-run result; original bytes are preserved.');
-  requireSketch(Array.isArray(report.stages) && report.stages.length >= 4 && report.stages.length <= 5, 'FIRST_RUN_REPORT', 'Invalid stage inventory.');
-  for (const value of report.stages) {
-    const stage = object(value); keys(stage, ['id', 'status', 'durationMs', 'diagnostic']);
-    requireSketch(['install', 'typecheck', 'test', 'build', 'showcase'].includes(String(stage.id)) && ['not-run', 'running', 'passed', 'failed', 'cancelled'].includes(String(stage.status)), 'FIRST_RUN_REPORT', 'Invalid recorded stage.');
-  }
-  if (report.preview !== null) {
-    const preview = object(report.preview); keys(preview, ['url', 'ready', 'httpStatus', 'browser', 'stopped']);
-    requireSketch(typeof preview.url === 'string' && /^http:\/\/127\.0\.0\.1:\d+\/$/.test(preview.url) && typeof preview.ready === 'boolean' && typeof preview.stopped === 'boolean' &&
-      (preview.httpStatus === null || preview.httpStatus === 200) && ['not-requested', 'requested', 'failed'].includes(String(preview.browser)), 'FIRST_RUN_REPORT', 'Invalid recorded showcase.');
-  }
-  return { ...snapshot, report };
+  return { ...snapshot, report: snapshot.content === null ? null : readFirstRunReport(parseJsonData(snapshot.content)) };
+}
+async function readApplication(root: string, app: string) {
+  const snapshots = await Promise.all(['package.json', 'package-lock.json', 'npm-shrinkwrap.json', '.nvmrc', '.maker/receipt.json'].map(path => guardedText(root, app + '/' + path)));
+  const [manifest, lock, shrinkwrap, nodeVersion, receipt] = snapshots;
+  requireSketch(manifest?.content && nodeVersion?.content && receipt?.content, 'FIRST_RUN_PROJECT', 'First run requires a generated application, its .nvmrc and maker receipt.');
+  requireSketch(shrinkwrap?.content === null, 'FIRST_RUN_LOCK', 'npm-shrinkwrap.json is not supported by this generated-project first run.');
+  const owner = object(parseJsonData(receipt.content));
+  requireSketch(owner.schemaVersion === 1 && Array.isArray(owner.files), 'FIRST_RUN_PROJECT', 'Invalid generated-project ownership receipt.');
+  return { manifest, lock, nodeVersion: nodeVersion.content };
+}
+async function applicationPlan(root: string, app: string, options: FirstRunRequest, tool: FirstRunTool) {
+  const { manifest, lock, nodeVersion } = await readApplication(root, app);
+  const pkg = object(parseJsonData(manifest.content)), scripts = object(pkg.scripts);
+  requireSketch(pkg.workspaces === undefined, 'FIRST_RUN_WORKSPACES', 'First run is scoped to one generated app, not an npm workspace.');
+  for (const id of ['typecheck', 'test', 'build']) text(scripts[id], id + ' script', 2000);
+  const expectedNode = nodeVersion.trim(), manager = text(pkg.packageManager, 'packageManager');
+  requireSketch(/^\d+\.\d+\.\d+$/.test(expectedNode) && /^npm@\d+\.\d+\.\d+$/.test(manager), 'FIRST_RUN_TOOLCHAIN', 'Use exact .nvmrc and npm packageManager versions.');
+  const expected = { node: expectedNode, npm: manager.slice(4) };
+  const blockers = [tool.node === expected.node ? '' : `Use Node ${expected.node}; found ${tool.node}.`, tool.version === expected.npm ? '' : `Use npm ${expected.npm}; found ${tool.version}.`].filter(Boolean);
+  const install = installCommand(options.install, lock?.content ? parseJsonData(lock.content) : null);
+  const prefix = ['--prefix', join(root, app), '--workspaces=false'];
+  const steps: FirstRunStep[] = [
+    { id: 'install', args: [install, ...prefix, '--include=dev', '--no-fund'] },
+    ...(['typecheck', 'test', 'build'] as const).map(id => ({ id, args: ['run', id, ...prefix] })),
+  ];
+  return { expected, blockers, steps, pkg, install };
 }
 /** Read-only execution proposal. A file-generation approval never authorizes this plan. */
 export async function firstRunPlan(root: string, input: unknown, selectedTool?: FirstRunTool): Promise<FirstRunPlan> {
@@ -56,25 +64,7 @@ export async function firstRunPlan(root: string, input: unknown, selectedTool?: 
   const app = settings.paths.app, selection = await savedProjectSelection(join(root, app));
   const target = selection?.targets.find(value => value === 'webapp' || value === 'website');
   requireSketch(target === 'webapp' || target === 'website', 'FIRST_RUN_TARGET', 'Generate a browser application before requesting its first run.');
-  const snapshots = await Promise.all(['package.json', 'package-lock.json', 'npm-shrinkwrap.json', '.nvmrc', '.maker/receipt.json'].map(path => guardedText(root, app + '/' + path)));
-  const [manifest, lock, shrinkwrap, nodeVersion, receipt] = snapshots;
-  requireSketch(manifest?.content && nodeVersion?.content && receipt?.content, 'FIRST_RUN_PROJECT', 'First run requires a generated application, its .nvmrc and maker receipt.');
-  requireSketch(shrinkwrap?.content === null, 'FIRST_RUN_LOCK', 'npm-shrinkwrap.json is not supported by this generated-project first run.');
-  const owner = object(parseJsonData(receipt.content));
-  requireSketch(owner.schemaVersion === 1 && Array.isArray(owner.files), 'FIRST_RUN_PROJECT', 'Invalid generated-project ownership receipt.');
-  const pkg = object(parseJsonData(manifest.content)), scripts = object(pkg.scripts);
-  requireSketch(pkg.workspaces === undefined, 'FIRST_RUN_WORKSPACES', 'First run is scoped to one generated app, not an npm workspace.');
-  for (const id of ['typecheck', 'test', 'build']) text(scripts[id], id + ' script', 2000);
-  const expectedNode = nodeVersion.content.trim(), manager = text(pkg.packageManager, 'packageManager');
-  requireSketch(/^\d+\.\d+\.\d+$/.test(expectedNode) && /^npm@\d+\.\d+\.\d+$/.test(manager), 'FIRST_RUN_TOOLCHAIN', 'Use exact .nvmrc and npm packageManager versions.');
-  const expected = { node: expectedNode, npm: manager.slice(4) };
-  const blockers = [tool.node === expected.node ? '' : `Use Node ${expected.node}; found ${tool.node}.`, tool.version === expected.npm ? '' : `Use npm ${expected.npm}; found ${tool.version}.`].filter(Boolean);
-  const install = installCommand(options.install, lock?.content ? parseJsonData(lock.content) : null);
-  const prefix = ['--prefix', join(root, app), '--workspaces=false'];
-  const steps: FirstRunStep[] = [
-    { id: 'install', args: [install, ...prefix, '--include=dev', '--no-fund'] },
-    ...(['typecheck', 'test', 'build'] as const).map(id => ({ id, args: ['run', id, ...prefix] })),
-  ];
+  const { expected, blockers, steps, pkg, install } = await applicationPlan(root, app, options, tool);
   const inventory = await firstRunInventory(root, app);
   const report = await firstRunReport(root, settings.paths.firstRunReport);
   const guards = await Promise.all(['configs/user-settings.json', 'configs/project-setup.json', 'project.config.json', '.npmrc'].map(async path => ({ path, beforeHash: (await guardedText(root, path)).beforeHash })));

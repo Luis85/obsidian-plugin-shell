@@ -1,4 +1,18 @@
-# Obsidian Plugin Shell
+# Workbench
+
+**Focus on your idea. Save time. Not quality.**
+
+Workbench is a developer-focused tool to create and manage declarative user interfaces for **webapps and Obsidian plugins**. Its product direction connects interface definitions, previews, generated source and documentation so developers can focus on product-specific behavior instead of repeating setup and translating the same decisions between tools.
+
+The three promises are **saving time without sacrificing quality**, **documenting along the way**, and **putting developer experience first**. Creation is only the beginning: reuse, understandable changes and safe regeneration matter too.
+
+Start with the [product vision](docs/product/PRODUCT-VISION.md), [product principles](docs/product/PRODUCT-PRINCIPLES.md) and [documentation map](docs/product/README.md). The [product and delivery overview](SHELL-FIRST-OVERVIEW.md) connects the available entry points; the [2026-09-29 vision review](docs/product/PR5-VISION-REVIEW.md) distinguishes inspected implementation from intended direction.
+
+**Implementation boundary:** Workbench builds on the reusable shell, CLI, compiler and authoring concept in PR #5. A generated scaffold is not a finished application, and the browser authoring concept is not the fully accepted native product. Existing `shell.mjs` commands, package/manifest IDs, schema names and `companion` paths remain unchanged. Generated projects retain the user's chosen identity.
+
+## Reusable Obsidian foundation
+
+The guide below retains the existing framework checkout workflow and its milestone history. It is not the complete cross-target Workbench specification. Evidence remains tied to the dates and candidates in its linked records.
 
 **Framework lifecycle and recovery increment, version 0.4.0.**
 
@@ -248,6 +262,9 @@ release promotion require separate evidence and authorization.
 
 | Document | Purpose |
 | --- | --- |
+| [Workbench product vision](docs/product/PRODUCT-VISION.md) | Product name, intended users, value, scope and success measures. |
+| [Workbench product principles](docs/product/PRODUCT-PRINCIPLES.md) | Declarative authoring, documentation, developer experience and quality decisions. |
+| [Product documentation map](docs/product/README.md) | Relationship between vision, scoped requirements, implementation and dated evidence. |
 | [Iteration-four plan](docs/development/ITERATION-FOUR-PLAN.md) | Baseline gaps, coordinated ownership and acceptance order. |
 | [Iteration-four review](docs/development/ITERATION-FOUR-REVIEW.md) | Independent findings, fixes and remaining limitations. |
 | [Iteration-three guide](docs/development/ITERATION-THREE.md) | Executable entity/repository API, compatibility, safety and remaining scope. |
@@ -256,7 +273,7 @@ release promotion require separate evidence and authorization.
 | [Iteration-two review](docs/development/ITERATION-TWO-REVIEW.md) | Evidence, fixes, regressions and remaining risks. |
 | [Iteration-one guide](docs/development/ITERATION-ONE.md) | Historical installation and architecture context; the iteration-three guide supplies current capabilities. |
 | [Current test record](docs/testing/ITERATION-FOUR.md) | Actual tests, coverage denominators, native/served evidence and remaining gaps. |
-| [PRD](docs/product/PRD.md) | Complete product requirements and retained baseline. |
+| [Framework PRD](docs/product/PRD.md) | Reusable Obsidian foundation requirements and retained baseline; Workbench product direction is defined above. |
 | [Nuxt UI implementation plan](docs/development/NUXT-UI-IMPLEMENTATION-PLAN.md) | Full integration roadmap; this milestone qualifies only the selected subset. |
 | [Test strategy](docs/testing/TEST-STRATEGY.md) / [test concept](docs/testing/TEST-CONCEPT.md) | Required evidence model and verification architecture. |
 | [TypeScript quality-tool research](docs/research/2026-09-23-typescript-quality-tools.md) | Repository-specific assessment, compatibility caveats and primary sources. |

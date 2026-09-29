@@ -1,22 +1,33 @@
-# PRD: Plugin Shell companion developer workbench
+# Workbench — authoring and native-plugin requirements
 
 > **Revision:** 0.4.0 documentation contract · **Date:** 2026-09-24 · **Owner:** Luis85
+> **Product alignment:** 2026-09-29; naming and product context only. Existing requirement IDs and acceptance obligations remain unchanged.
 > **Status:** Evolving concept and proposed native product. Not feature-complete, not a native implementation, not release-qualified.
-> **Working name:** Shell Workbench; public name and ID remain subject to later review.
+> **Product name:** Workbench. The former “Shell Workbench” working name is superseded; technical IDs and publication metadata still require separately scoped review.
+
+## Product context
+
+**Workbench is a developer-focused tool to create and manage declarative user interfaces for webapps and Obsidian plugins. Focus on your idea. Save time. Not quality.**
+
+The [product vision](PRODUCT-VISION.md) is canonical for the name, intended users and value. The [product principles](PRODUCT-PRINCIPLES.md) make documentation along the way, developer experience, declarative contracts and safe evolution explicit. Use the [documentation map](README.md) to distinguish product direction, scoped requirements and dated implementation evidence.
+
+This PRD governs the authoring capability and its native Obsidian conversion. It is not a restriction of the whole product to Obsidian-plugin output, nor a claim that every webapp/framework combination is complete. The authoring host, the user's output target and the selected frontend are different concerns. “Companion” remains a technical/historical term in existing paths, tasks and contracts, not a second public product name.
+
+The shell, CLI, compiler and visual authoring are complementary Workbench capabilities. Their separate readiness and shipment decisions remain. This document does not rename executables, packages, manifest/storage identities, JSON schemas or generated consumer projects.
 
 ## Current product decision
 
-The repository delivers a proper reusable **Plugin Shell first**. The companion is a demanding consumer of that foundation, not a shortcut around unfinished shell capabilities. After SH-022 technical readiness, SH-034 separately authorized framework shipment and reviewed CX-007 conversion scope, integrate the concept into a real Obsidian plugin using the same maintained shell runtime, feature APIs, styles and tooling. Qualify that plugin before publication.
+The repository delivers a proper reusable **shell foundation first**. The authoring product is a demanding consumer of that foundation, not a shortcut around unfinished shell capabilities. After SH-022 technical readiness, SH-034 separately authorized framework shipment and reviewed CX-007 conversion scope, integrate the concept into a real Obsidian plugin using the same maintained shell runtime, feature APIs, styles and tooling. Qualify that plugin before publication.
 
 The [delivery strategy](DELIVERY-STRATEGY.md) and [improvement plan](COMPANION-IMPROVEMENT-PLAN.md) supersede the earlier milestone ordering. They do not withdraw the retained requirements, safety rules or scope distinctions. The full previous PRD is preserved byte-for-byte as [requirements baseline 0.3](COMPANION-REQUIREMENTS-0.3.md); its FR identifiers and detailed contracts remain references. Where its historical milestone order or priority labels conflict with the current strategy, the current strategy governs scheduling. A former P0 companion requirement does not outrank shell prerequisites.
 
 ## Two sequences, deliberately different
 
-**Repository delivery:** qualify and ship the standalone shell + TypeScript CLI + JSON generator developer kit → native companion on that shipped framework with a reviewed conversion scope → native qualification → authorized companion publication. Concept refinement remains secondary/parallel. See the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
+**Repository delivery:** qualify and ship the standalone shell + TypeScript CLI + JSON generator developer kit → native Workbench authoring on that shipped framework with a reviewed conversion scope → native qualification → authorized publication. Concept refinement remains secondary/parallel. See the [CLI/generator plan](../development/FRAMEWORK-CLI-GENERATOR-PLAN.md).
 
-**Eventual developer journey:** install companion → define/design one project → optionally add Plugin Shell → review generated source → build/test in an isolated vault → keep developing with or without the companion.
+**Eventual developer journey, native authoring path:** install Workbench → define/design one project → optionally add the reusable shell → review generated source → build/test in an isolated vault → keep developing with or without Workbench authoring. This is the retained Obsidian workflow, not the complete cross-target journey defined by the vision.
 
-Design-only use remains legitimate. It must not require external Node/npm/Git, a template download or an account. Plugin Shell remains independently usable without the companion. One current authoring vault contains one project and becomes its source root; another project is another vault. See [single-vault contract](../concepts/companion/SINGLE-VAULT.md).
+Design-only use remains legitimate. It must not require external Node/npm/Git, a template download or an account. The shell remains independently usable without the authoring interface. One current authoring vault contains one project and becomes its source root; another project is another vault. See [single-vault contract](../concepts/companion/SINGLE-VAULT.md).
 
 ## Feature development remains open
 
@@ -52,7 +63,7 @@ Concept assertions, mocked host tests, compiled consumers, real native runs and 
 
 ## Publication boundary
 
-Distribution topology, public metadata and execution-policy acceptance must be resolved before publication, not by renaming the root manifest during concept development. A user-run CLI handoff remains a viable implementation boundary. No policy exemption or marketplace acceptance is asserted here. Recheck current primary-source rules in the publication tasks.
+The product name is Workbench. Distribution topology, technical/publication metadata and execution-policy acceptance must still be resolved before publication, not by renaming the root manifest during concept development. A user-run CLI handoff remains a viable implementation boundary. No policy exemption or marketplace acceptance is asserted here. Recheck current primary-source rules in the publication tasks.
 
 No tags, releases, directory submission, automatic activation, permissions changes or global package installation are authorized by this document.
 

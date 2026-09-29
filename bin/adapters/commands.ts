@@ -83,8 +83,8 @@ function parseFlags(tokens: string[]): Record<string, string | boolean> {
 export function parseArguments(argv: string[]): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio' || first === 'new' || first === 'settings' || first === 'project-setup' || first === 'first-run', 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
-  const command = first ?? 'studio';
+  requireSketch(first === undefined || ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run'].includes(first), 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
+  const command = (first ?? 'studio') as Arguments['command'];
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens);
   requireSketch(flags.ui === undefined || ['auto', 'tui', 'plain'].includes(String(flags.ui)), 'MAKER_UI', 'Use --ui auto, tui or plain.');
@@ -147,16 +147,18 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document, selection });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
-export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  if (args.flags.help || args.command === 'studio') {
+function helpResult(args: Arguments): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
     return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'],
       ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
-  }
+
+}
+export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
+  requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
+  if (args.flags.help || args.command === 'studio') return helpResult(args);
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
-  if (args.command === 'settings' || args.command === 'project-setup') return setupCommand(args, context, () => inputData(args, context));
+  if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   args = await configuredArguments(args, context.root);
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
   return args.command === 'sketch' ? sketch(args, context) : prototype(args, context);

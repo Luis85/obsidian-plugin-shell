@@ -25,9 +25,10 @@ export async function angularSetupGuide() {
   return { selection, guide: await projectGuide(selection, catalog) };
 }
 /** A vault directory is verifiable; an open Obsidian session is not inferred. */
-export async function setupPrerequisites(root: string) {
+export async function setupPrerequisites(root: string, hostDirectory?: string) {
   await createFilePlan(root, []);
-  for (const name of ['.git', '.obsidian']) {
+  const configDir = hostDirectory ?? (await loadSettings(root)).settings.preferences.vaultConfigDirectory;
+  for (const name of ['.git', configDir]) {
     let info;
     try { info = await lstat(join(root, name)); }
     catch { requireSketch(false, 'SETUP_PREREQUISITE', `Open this project as an Obsidian vault and initialize Git first (missing ${name}).`); }
@@ -61,19 +62,32 @@ function entriesFrom(value: Prepared): Entry[] {
     return { path: change.path, content: change.content, ...(change.encoding ? { encoding: change.encoding } : {}) };
   });
 }
+function assertReplay(content: string | null, paths: unknown, requestHash: string): void {
+  if (content === null) return;
+  const state = object(parseJsonData(content));
+  requireSketch(jsonText(state.paths) === jsonText(paths), 'SETUP_PATH_MIGRATION', 'Setup paths changed. Move/reconcile files explicitly before changing the saved path configuration.');
+  requireSketch(state.schemaVersion === 1 && state.requestHash === requestHash, 'SETUP_EXISTS', 'Setup already exists. Use sketch to continue editing or project-setup status; changed setup requests do not replace existing projects.');
+}
+function verifyOwned(plan: Prepared['plan'], existing: boolean): void {
+  for (const change of plan.changes) requireSketch(change.beforeHash === null || (existing && change.status === 'unchanged'), 'SETUP_FILE_CONFLICT', 'Setup preserves existing project/brief files: ' + change.path);
+}
+function verifyPreimages(plan: Prepared['plan'], guards: Entry[], previous: Prepared['plan'][], settingsHash: string | null, stateHash: string | null): void {
+  for (const guard of guards) requireSketch(plan.changes.find(change => change.path === guard.path)?.beforeHash === hash(guard.content), 'MAKER_STALE', 'A PRD source changed during planning.');
+  for (const prior of previous) for (const before of prior.changes)
+    requireSketch(plan.changes.find(change => change.path === before.path)?.beforeHash === before.beforeHash, 'MAKER_STALE', 'Files changed while composing setup.');
+  requireSketch(plan.changes.find(change => change.path === settingsPath)?.beforeHash === settingsHash, 'MAKER_STALE', 'Settings changed during planning.');
+  requireSketch(plan.changes.find(change => change.path === setupStatePath)?.beforeHash === stateHash, 'MAKER_STALE', 'Setup state changed during planning.');
+}
 /** Optional prototype, bricks and final compilation compose one reviewed plan, not a second generator. */
 export async function projectSetupPlan(context: SetupContext, input: unknown): Promise<Prepared> {
   const { root, frameworkRoot, signal } = context;
   requireSketch(!signal?.aborted, 'CANCELLED', 'Setup cancelled.');
-  const prerequisites = await setupPrerequisites(root), data = request(input);
+  const data = request(input);
   const current = await loadSettings(root), settings = data.settings === undefined ? current.settings : readSettings(data.settings, current.settings);
+  const prerequisites = await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
   const existingState = await guardedText(root, setupStatePath);
   const requestHash = hash(jsonText(data));
-  if (existingState.content !== null) {
-    const state = object(parseJsonData(existingState.content));
-    requireSketch(jsonText(readSettings({ schemaVersion: 1, paths: state.paths }).paths) === jsonText(settings.paths), 'SETUP_PATH_MIGRATION', 'Setup paths changed. Move/reconcile files explicitly before changing the saved path configuration.');
-    requireSketch(state.schemaVersion === 1 && state.requestHash === requestHash, 'SETUP_EXISTS', 'Setup already exists. Use sketch to continue editing or project-setup status; changed setup requests do not replace existing projects.');
-  }
+  assertReplay(existingState.content, settings.paths, requestHash);
   const intake = await intakePrds(root, settings, data.prds), intakeHash = intakeIdentity(intake);
   const { selection, guide } = await angularSetupGuide();
   let document = newDocument(data.project.name);
@@ -97,7 +111,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
     { path: settings.paths.brief, content: brief },
   ];
   const ownerPlan = await createFilePlan(root, owned);
-  for (const change of ownerPlan.changes) requireSketch(change.beforeHash === null || (existingState.content !== null && change.status === 'unchanged'), 'SETUP_FILE_CONFLICT', 'Setup preserves existing project/brief files: ' + change.path);
+  verifyOwned(ownerPlan, existingState.content !== null);
   const imports = await createFilePlan(root, intake.imports);
   for (const change of imports.changes) requireSketch(change.status === 'create' || change.status === 'unchanged', 'PRD_FILE_CONFLICT', 'Import will not replace an existing PRD: ' + change.path);
   const state = { schemaVersion: 1, requestHash, phase: 'prepared', selection, paths: settings.paths,
@@ -106,17 +120,14 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
   const entries = [...intake.guards, ...intake.imports, ...owned,
     { path: settingsPath, content: jsonText(settings) }, { path: setupStatePath, content: jsonText(state) }, ...packages.flatMap(entriesFrom)];
   const plan = await createFilePlan(root, entries);
-  for (const guard of intake.guards) requireSketch(plan.changes.find(change => change.path === guard.path)?.beforeHash === hash(guard.content), 'MAKER_STALE', 'A PRD source changed during planning.');
-  for (const previous of [ownerPlan, imports, ...packages.map(pkg => pkg.plan)]) for (const before of previous.changes)
-    requireSketch(plan.changes.find(change => change.path === before.path)?.beforeHash === before.beforeHash, 'MAKER_STALE', 'Files changed while composing setup.');
-  requireSketch(plan.changes.find(change => change.path === settingsPath)?.beforeHash === current.beforeHash && plan.changes.find(change => change.path === setupStatePath)?.beforeHash === existingState.beforeHash, 'MAKER_STALE', 'Settings or setup state changed during planning.');
+  verifyPreimages(plan, intake.guards, [ownerPlan, imports, ...packages.map(pkg => pkg.plan)], current.beforeHash, existingState.beforeHash);
   const result = prepared(plan, { settings, prerequisites, selection, document, outline: outline(document), prds: state.prds,
-    ignoredMarkdown: intake.ignored, phase: 'prepared', prototypePrepared: state.prototypePrepared, boilerplatePrepared: state.boilerplatePrepared,
+    ignoredMarkdown: intake.ignored, phase: state.phase, prototypePrepared: state.prototypePrepared, boilerplatePrepared: state.boilerplatePrepared,
     installed: false, built: false, runtimeAccepted: false, businessImplemented: false,
     start: data.boilerplate ? { cwd: settings.paths.app, commands: [['npm', 'install'], ['npm', 'run', 'typecheck'], ['npm', 'test'], ['npm', 'start']] } : null,
     next: 'Use shell.mjs sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
   return { ...result, validate: async () => {
-    await setupPrerequisites(root);
+    await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
     requireSketch(intakeIdentity(await intakePrds(root, settings, data.prds)) === intakeHash, 'SETUP_STALE_PRDS', 'PRD inventory changed after preview; review setup again.');
   } };
 }

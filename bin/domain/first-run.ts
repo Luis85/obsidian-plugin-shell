@@ -48,5 +48,5 @@ export const firstRunSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema', title: 'Reviewed first run', type: 'object', additionalProperties: false,
   required: ['schemaVersion', 'mode'], properties: {
     schemaVersion: { const: 1 }, mode: { enum: ['verify', 'showcase'] }, ...firstRunPreferenceSchema.properties,
-  }, allOf: [{ if: { properties: { mode: { const: 'verify' } } }, then: { properties: { openBrowser: { const: false } } } }],
+  }, anyOf: [{ properties: { mode: { const: 'showcase' } } }, { properties: { mode: { const: 'verify' }, openBrowser: { const: false } } }],
 };

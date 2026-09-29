@@ -1,3 +1,4 @@
+import * as timers from 'node:timers';
 import { createServer, get } from 'node:http';
 import { lstat, readdir } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -35,9 +36,9 @@ export async function openShowcaseBrowser(url: string): Promise<boolean> {
   const args = process.platform === 'win32' ? ['url.dll,FileProtocolHandler', url] : [url];
   return new Promise(resolve => {
     const child = spawn(command, args, { shell: false, windowsHide: true, stdio: 'ignore' });
-    const timer = setTimeout(() => { child.kill(); resolve(false); }, 5000);
-    child.once('error', () => { clearTimeout(timer); resolve(false); });
-    child.once('close', code => { clearTimeout(timer); resolve(code === 0); });
+    const timer = timers.setTimeout(() => { child.kill(); resolve(false); }, 5000);
+    child.once('error', () => { timers.clearTimeout(timer); resolve(false); });
+    child.once('close', code => { timers.clearTimeout(timer); resolve(code === 0); });
   });
 }
 function probe(port: number, token: string, timeout: number): Promise<number> {
@@ -78,12 +79,12 @@ export async function showcase(root: string, options: FirstRunRequest, hooks: Pr
     await hooks.ready?.(result);
     await new Promise<void>(resolve => {
       abort = resolve; hooks.signal?.addEventListener('abort', abort, { once: true });
-      timer = setTimeout(resolve, options.showcaseDurationMs);
+      timer = timers.setTimeout(resolve, options.showcaseDurationMs);
       if (hooks.signal?.aborted) resolve();
     });
     return result;
   } finally {
-    if (timer) clearTimeout(timer); if (abort) hooks.signal?.removeEventListener('abort', abort);
+    if (timer) timers.clearTimeout(timer); if (abort) hooks.signal?.removeEventListener('abort', abort);
     await new Promise<void>(resolve => { server.close(() => resolve()); server.closeAllConnections(); });
     result.stopped = true;
   }

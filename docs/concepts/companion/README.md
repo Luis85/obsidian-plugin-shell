@@ -1,8 +1,14 @@
-# Shell Workbench Companion — Journey Lens
+# Workbench authoring concept — Journey Lens
 
-## Open the current Companion concept
+**Focus on your idea. Save time. Not quality.**
 
-**Journey Lens is the sitemap editor inside the current Companion workbench.**
+Workbench is a tool to create and manage declarative user interfaces for webapps and Obsidian plugins, with documentation along the way and developer experience at its core. Read the [product vision](../../product/PRODUCT-VISION.md), [product principles](../../product/PRODUCT-PRINCIPLES.md) and [documentation map](../../product/README.md).
+
+This guide describes the **browser authoring concept**, not a complete production or natively accepted Workbench. The `companion` directory, build commands, JSON names and generated artifact paths remain technical compatibility identifiers; the product name is Workbench. Existing UI labels may still use the former name until a separately scoped runtime branding change.
+
+## Open the current authoring concept
+
+**Journey Lens is the sitemap editor inside Workbench's current authoring concept.**
 It replaces the old sitemap surface; the surrounding workbench and existing page,
 component, requirements, storymap and data editors remain in place.
 
@@ -59,8 +65,10 @@ hand-edited generated output; build the current authoring artifact as above.
 The complete previous README is retained without rewriting its dated evidence in
 [Legacy concept guide](LEGACY-CONCEPT-GUIDE.md). Earlier increment reviews and
 verification reports keep their original artifact/version boundaries. The
-[PR #5 review](../../product/PR5-PRODUCT-REVIEW.md) and
-[improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap.
+[2026-09-27 PR #5 review](../../product/PR5-PRODUCT-REVIEW.md) and
+[improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap;
+the [2026-09-29 vision review](../../product/PR5-VISION-REVIEW.md) aligns product
+identity without requalifying those earlier results.
 
 ## Source and acceptance boundaries
 
@@ -71,5 +79,5 @@ names the Node and browser regression checks.
 
 No real vault access, plugin activation, deployment or publication occurs in the
 concept. The source-backed authoring milestone does not establish complete native
-Companion behavior, native accessibility acceptance or completion of the broader
-PR #5 improvement plan. No merge or release is included in this integration.
+Workbench behavior, native accessibility acceptance or completion of the broader
+PR #5 improvement plan. No merge or release is included in this documentation update.

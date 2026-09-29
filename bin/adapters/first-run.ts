@@ -7,7 +7,7 @@ import { claimFirstRun } from './first-run-lock.ts';
 import { firstRunPlan, firstRunReport, validateFirstRunInputs, type FirstRunPlan, type FirstRunStep } from './first-run-plan.ts';
 import { showcase, type PreviewResult } from './first-run-preview.ts';
 import { guardedText, jsonText } from './user-settings.ts';
-export interface FirstRunStage { id: string; status: 'not-run' | 'running' | 'passed' | 'failed' | 'cancelled'; durationMs?: number; diagnostic?: string }
+interface FirstRunStage { id: string; status: 'not-run' | 'running' | 'passed' | 'failed' | 'cancelled'; durationMs?: number; diagnostic?: string }
 interface FirstRunResult {
   schemaVersion: 1; producer: 'shell-first-run'; planHash: string; app: string;
   status: 'running' | 'passed' | 'failed' | 'cancelled'; startedAt: string; finishedAt: string | null;
@@ -27,6 +27,10 @@ function cancelled(error: unknown) { return error instanceof Error && 'code' in 
 function code(error: unknown): string {
   if (error instanceof Error && 'code' in error && typeof error.code === 'string' && /^[A-Z][A-Z0-9_]+$/.test(error.code)) return error.code;
   return 'FIRST_RUN_FAILED';
+}
+async function saveFailureReport(started: boolean, save: () => Promise<void>): Promise<boolean> {
+  if (!started) return true;
+  try { await save(); return true; } catch { return false; }
 }
 /** Default is a proposal. Approved external processes are sequential, bounded, fail-fast and never replayed automatically. */
 export async function executeFirstRun(value: FirstRunPlan, approval?: string, context: Context = { root: value.root, frameworkRoot: value.root }, driver = runtime): Promise<Record<string, unknown>> {
@@ -89,8 +93,7 @@ export async function executeFirstRun(value: FirstRunPlan, approval?: string, co
     return { status: 'ok', executed: true, report, reportPath: plan.reportPath, next: 'Edit with shell.mjs sketch. Review and commit the resolved lockfile. Manual browser acceptance remains separate.' };
   } catch (error) {
     report.status = cancelled(error) ? 'cancelled' : 'failed'; report.finishedAt = new Date().toISOString();
-    let reportSaved = !started;
-    if (started) { try { await save(); reportSaved = true; } catch { reportSaved = false; } }
+    const reportSaved = await saveFailureReport(started, save);
     const failure = new OperationError(code(error), error instanceof Error ? error.message : 'First run failed.', 'Generated source and completed external effects are preserved. Inspect stderr/report; retry only with a newly reviewed first-run plan.');
     failure.details = { report: started ? report : null, reportPath: plan.reportPath, reportSaved, automaticRetry: false };
     throw failure;

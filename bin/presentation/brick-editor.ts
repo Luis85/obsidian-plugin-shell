@@ -43,6 +43,9 @@ async function operation(ui: Prompts, workspace: Workspace, kind: string): Promi
     const choice = await choose(ui, 'Component to attach', [{ id: 'new', label: 'Create new component' }, ...components.map(item => ({ id: item.id, label: item.title }))]);
     return [{ op: kind, page: id, components: [choice === 'new' ? { title: await titleInput(ui, 'Component title') } : { id: choice }] }];
   }
+  return extendedOperation(ui, workspace, kind);
+}
+async function extendedOperation(ui: Prompts, workspace: Workspace, kind: string): Promise<Edit[]> {
   if (kind === 'data-source.add') return [{ op: kind, title: await titleInput(ui, 'Data-source title'), kind: await choose(ui, 'Data-source kind (specification only)', ['vault', 'api', 'database'].map(id => ({ id, label: id }))) }];
   if (kind === 'entity.properties') return [{ op: kind, id: await entity(ui, workspace), properties: await properties(ui) }];
   if (kind === 'brick.rename') {
