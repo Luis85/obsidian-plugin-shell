@@ -18,6 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           cp .github/stack-reconcile.py "$RUNNER_TEMP/stack-reconcile.py"
+          python -c 'from pathlib import Path; import os; p = Path(os.environ["RUNNER_TEMP"]) / "stack-reconcile.py"; p.write_text(p.read_text().replace("+m[2],s,flags=re.S)", "+m[2]+chr(10),s,flags=re.S)"))'
           git config user.name 'Luis Mendez'
           git config user.email '3923861+Luis85@users.noreply.github.com'
           python "$RUNNER_TEMP/stack-reconcile.py"
