@@ -1,0 +1,38 @@
+name: Stage exact PR5 CI repair
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/stack-publish-ci-repair.yml]
+permissions:
+  contents: write
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Reproduce source-only tree and push isolated candidate, never main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, os
+          encoded = ''.join(Path(f'.github/pr5-ci-repair.{i}.b64').read_text().strip() for i in range(2))
+          source = gzip.decompress(base64.b64decode(encoded, validate=True))
+          assert hashlib.sha256(source).hexdigest() == 'a83520b9e2d765dfadd39ab6ef1ac0402234deca0d267c0c8a4f1d7e9288e5b3'
+          (Path(os.environ['RUNNER_TEMP']) / 'repair.py').write_bytes(source)
+          PY
+          git checkout -b staged-ci-repair d84ce5656712cd3efe4843088f78fd4984720a22
+          python "$RUNNER_TEMP/repair.py"
+          git add -A
+          test "$(git write-tree)" = a7dd3dd0bfbd90bff272d56703b0769655ff23ae
+          git diff --cached --check
+          git config user.name 'Luis Mendez'
+          git config user.email '3923861+Luis85@users.noreply.github.com'
+          git commit -m 'fix: qualify integrated maker, generated presets and Journey Lens workflows'
+          git push origin HEAD:refs/heads/fix/pr5-ci-repair-candidate
+          echo "CANDIDATE=$(git rev-parse HEAD)"
+          echo "TREE=$(git rev-parse HEAD^{tree})"
