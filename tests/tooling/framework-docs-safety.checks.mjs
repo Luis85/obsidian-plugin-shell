@@ -9,7 +9,7 @@ import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { parseMarkdown, renderMarkdown } from '../../scripts/application-docs/adapters/markdown.ts';
-import { digest } from '../../scripts/application-docs/adapters/filesystem.ts';
+import { documentationDigest as digest } from '../../scripts/application-docs/adapters/filesystem.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 const run = (context, args) => executeOperation(parseCliArguments(args), context);
 async function directory(t) {

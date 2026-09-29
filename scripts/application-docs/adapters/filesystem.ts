@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { insist } from '../domain/contracts.ts';
-export const digest = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
+export const documentationDigest = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
 const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i;
 export function portable(path: string): string {
   insist(typeof path === 'string' && path.length <= 1024 && !isAbsolute(path) && !path.includes('\\'), 'DOCS_PATH', 'Use a portable project-relative path.');
@@ -41,7 +41,7 @@ export async function readBytes(path: string, maximum = 4_000_000): Promise<Buff
   } finally { await file.close(); }
 }
 export const decode = (bytes: Buffer): string => new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
-export interface Source { path: string; relative: string; boundary: string; bytes: Buffer }
+export interface DocumentationSource { path: string; relative: string; boundary: string; bytes: Buffer }
 function glob(pattern: string): RegExp {
   let result = '^';
   for (let index = 0; index < pattern.length; index++) {
@@ -54,8 +54,8 @@ function glob(pattern: string): RegExp {
   return new RegExp(result + '$', 'i');
 }
 const ignored = new Set(['.git', '.obsidian', '.framework', '.companion', 'node_modules', '.codex-authoring.lock']);
-export async function discover(roots: string[], options: { recursive: boolean; include: string[]; exclude: string[] }): Promise<Source[]> {
-  const found = new Map<string, Source>(), includes = options.include.map(glob), excludes = options.exclude.map(glob);
+export async function discover(roots: string[], options: { recursive: boolean; include: string[]; exclude: string[] }): Promise<DocumentationSource[]> {
+  const found = new Map<string, DocumentationSource>(), includes = options.include.map(glob), excludes = options.exclude.map(glob);
   let total = 0, visited = 0;
   async function visit(path: string, boundary: string, depth: number, explicit = false): Promise<void> {
     insist(depth <= 40 && ++visited <= 20000, 'DOCS_LIMIT', 'Discovery exceeds the directory budget.');

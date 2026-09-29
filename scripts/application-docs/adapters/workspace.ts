@@ -3,7 +3,7 @@ import { parseAuthoringDocument, migrateAuthoringDocument } from '../../companio
 import { configuration } from '../../framework/configuration.ts';
 import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Entity, type Resolutions } from '../domain/contracts.ts';
 import { readSettings, validateSettings } from './settings.ts';
-import { readBytes, decode, discover, localPath, portable, type Source } from './filesystem.ts';
+import { readBytes, decode, discover, localPath, portable, type DocumentationSource as Source } from './filesystem.ts';
 import { parseMarkdown, type MarkdownDocument } from './markdown.ts';
 export interface InputDocument { source: Source; document: MarkdownDocument }
 export async function readWorkspace(root: string, args: string[], output?: string, resolutionFile?: string) {

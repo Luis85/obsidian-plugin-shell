@@ -7,7 +7,7 @@ import { keyOf, equal, stable, insist, type DocsIndex, type Entity, type Conflic
 import { reconcile } from '../application/reconcile.ts';
 import { projectEntities, applyEntities, coverage } from './model.ts';
 import { renderMarkdown, generatedSource, parseMarkdown, type MarkdownDocument } from './markdown.ts';
-import { readBytes, portable, localPath, digest, decode } from './filesystem.ts';
+import { readBytes, portable, localPath, documentationDigest as digest, decode } from './filesystem.ts';
 import { folders, SETTINGS_FILE } from './settings.ts';
 import { readWorkspace, type Workspace, type InputDocument } from './workspace.ts';
 interface Entry { path: string; content: string; encoding?: 'base64' }

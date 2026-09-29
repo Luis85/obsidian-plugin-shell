@@ -5,7 +5,7 @@ import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
-  ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md'].map(name => [name, `docs/framework/${name}`]));
+  ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
 const maintainerWorkflows = '.github/workflows/';
 /** Where a copied framework file lives in a generated project. Maintainer workflows never run there. */
 export function relocatedPath(path: string): string {

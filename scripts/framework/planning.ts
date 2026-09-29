@@ -1,5 +1,6 @@
 import { docsPlan } from './docs.ts';
 import { airshipPlan } from './airship-plan.ts';
+import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
@@ -56,6 +57,7 @@ export async function planOperation(request: Request, context: Context) {
   let planned: Planned;
   switch (request.command) {
     case 'docs import': case 'docs export': planned = await docsPlan(request, context); break;
+    case 'handout generate': case 'handout refresh': planned = await handoutPlan(request, context); break;
     case 'airship enable': case 'airship disable': planned = await airshipPlan(request, context); break;
     case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
     case 'generate': planned = await generationPlan(request, context); break;

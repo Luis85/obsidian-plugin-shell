@@ -1,4 +1,5 @@
 import { setupSource } from './setup-source.ts';
+import { prepareHandout } from './handout-workspace.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
@@ -86,6 +87,11 @@ export async function configurationPlan(request: Request, context: Context) {
       ownedDesigns[0]!.hash = hash(tracked.find(entry => entry.path === designFile)!.content);
       entries.push({ path: generation, content: json(previousGeneration) });
     }
+  }
+  // A created handout becomes human-owned; keep it outside the intake ownership receipt.
+  if (request.command === 'setup') {
+    const handout = await prepareHandout(context.root, { virtualFiles: { [configFile]: json(selected) } });
+    entries.push(...handout.entries);
   }
   const plan = await createFilePlan(context.root, entries);
   return { plan, summary: { configuration: selected, imported: Boolean(input) && intake.origin === null, starter: intake.origin, blank: options.blank === true, next: 'generate', installation: 'not-run' }, conflicts: [] as string[] };
