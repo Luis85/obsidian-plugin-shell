@@ -1,6 +1,6 @@
 import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash } from '../../scripts/framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
@@ -26,7 +26,7 @@ export async function angularSetupGuide() {
 }
 /** A vault directory is verifiable; an open Obsidian session is not inferred. */
 export async function setupPrerequisites(root: string, hostDirectory?: string) {
-  await createFilePlan(root, []);
+  const checked = await createFilePlan(root, []);
   const configDir = hostDirectory ?? (await loadSettings(root)).settings.preferences.vaultConfigDirectory;
   for (const name of ['.git', configDir]) {
     let info;
@@ -35,7 +35,10 @@ export async function setupPrerequisites(root: string, hostDirectory?: string) {
     requireSketch(!info.isSymbolicLink() && (info.isDirectory() || (name === '.git' && info.isFile())), 'SETUP_PREREQUISITE', 'Git/vault roots cannot be symbolic links.');
   }
   const git = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 3000, windowsHide: true });
-  requireSketch(git.status === 0 && resolve(git.stdout.trim()) === resolve(root), 'SETUP_GIT_ROOT', 'The selected vault must itself be the Git working-tree root.');
+  requireSketch(git.status === 0 && git.stdout.trim(), 'SETUP_GIT_ROOT', 'The selected vault must itself be the Git working-tree root.');
+  // The safe writer rejects links before canonicalizing Windows case/8.3 aliases.
+  const worktree = await createFilePlan(git.stdout.trim(), []);
+  requireSketch(worktree.root === checked.root, 'SETUP_GIT_ROOT', 'The selected vault must itself be the Git working-tree root.');
   return { git: 'existing', vault: 'configured', obsidianSession: 'not-inspected' };
 }
 export async function setupStatus(root: string) {

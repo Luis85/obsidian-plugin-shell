@@ -1,7 +1,7 @@
 /** Actual compiled-kit -> setup -> npm -> build -> browser -> edit/regenerate journey.
  * Scratch workspaces only. --no-browser retains honest build-only evidence for restricted environments. */
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
@@ -14,7 +14,7 @@ const output = join(frameworkRoot, 'reports/angular-setup-acceptance');
 const flags = process.argv.slice(2);
 assert.ok(flags.every(flag => flag === '--no-browser'), 'Unsupported qualification argument.');
 const browserRequired = !flags.includes('--no-browser');
-const root = await mkdtemp(join(tmpdir(), 'workbench-angular-'));
+const root = await mkdtemp(join(await realpath(tmpdir()), 'workbench-angular-'));
 const evidence = { schemaVersion: 1, commit: process.env.GITHUB_SHA ?? null, node: process.versions.node,
   compiledKit: 'not-run', firstRun: 'not-run', regeneration: 'not-run', browser: 'not-run', status: 'running' };
 await mkdir(output, { recursive: true });
@@ -37,8 +37,8 @@ async function approve(args) {
   assert.ok(['applied', 'unchanged', 'ok'].includes(applied.status)); return applied.data;
 }
 async function browserChecks(app) {
-  const { chromium } = await import('@playwright/test');
-  const browser = await chromium.launch({ headless: true });
+  const { chromium, expect } = await import('@playwright/test');
+  const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) });
   const controller = new AbortController();
   try {
     await showcase(join(app, 'dist/webapp'), { ...firstRunDefaults, schemaVersion: 1, mode: 'showcase', port: 4197, openBrowser: false, showcaseDurationMs: 1000 }, {
@@ -46,9 +46,10 @@ async function browserChecks(app) {
         const page = await browser.newPage(); const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         await page.goto(url); await page.waitForFunction(() => document.documentElement.dataset.prototypeReady === 'true');
-        assert.equal(await page.getByRole('heading', { name: 'Hello world', exact: true }).count(), 1);
+        await expect(page.getByRole('heading', { name: 'Hello world', exact: true })).toBeVisible();
         await page.getByRole('button', { name: 'Updated orders', exact: true }).click();
-        assert.equal(await page.getByRole('heading', { name: 'Updated orders', exact: true }).count(), 1);
+        // A click schedules zoneless change detection; wait for the rendered outcome.
+        await expect(page.getByRole('heading', { name: 'Updated orders', exact: true })).toBeVisible();
         assert.deepEqual(errors, []);
         await page.screenshot({ path: join(output, 'angular-after-edit.png') });
         evidence.browser = 'passed'; controller.abort(); await page.close();
