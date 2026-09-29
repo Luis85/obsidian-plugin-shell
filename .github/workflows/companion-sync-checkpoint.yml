@@ -1,0 +1,26 @@
+name: Starter integration source checkpoint
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/companion-sync-checkpoint.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1a078d235043db2157efbcc702878e120264fc14
+          persist-credentials: false
+      - run: |
+          mkdir -p "$RUNNER_TEMP/source"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/source/pr5.tar.gz" HEAD
+          git ls-tree -r HEAD > "$RUNNER_TEMP/source/tree.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/source/sha.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: starter-integration-source
+          path: ${{ runner.temp }}/source/
+          retention-days: 1
