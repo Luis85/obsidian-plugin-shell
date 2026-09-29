@@ -145,3 +145,30 @@ It failed before the configuration change and passed afterward: **18/18 manual
 contract tests**, none skipped. Local command-reference generation, deterministic
 check and authored-example/link audit also passed without output changes. Actual
 HTML rendering is qualified separately by the hosted site job for this repair.
+
+## Current PR #5 documentation integration
+
+The generated-project workflow for `f8cdf92` independently passed production build,
+full analyzer (zero findings), repository checks and generator typechecking, then
+reported one broken-link test: `docs/product/README.md` linked to the newly added
+root `DESIGN-CONSTRAINTS.md`, which neither template inventory included. The link
+was introduced on PR #5 at `40799d9489e0bd436a47f819732292e8a35a4774`, not by the
+Markdown adapter. This integration preserves that current product documentation.
+
+The local integration source was reconstructed from the hosted archive, combined
+with the handbook repair, and its Git tree verified as
+`fba1d7e2d12855f45a86ee77390963c995895512` (the exact `ba5b7cc6` test merge of
+`47ccd30f` with PR #5's `40799d94`). The fix adds the constraint document to both
+source-template inventories and relocates it as inert framework reference at
+`docs/framework/DESIGN-CONSTRAINTS.md`. Existing link rebasing handles both inbound
+and outbound references; no authored rule or link-validation gate is removed.
+
+An added real generator test failed before the fix and passed afterward. The kit
+test additionally checks the exact retained constraint-document bytes. On local
+Node 22.16.0 with the pinned compiler/parser, **116/116 documentation, setup and
+manual tests passed**, none skipped (80 documentation, 18 setup, 18 manual).
+Framework typechecking passed. The original broad generator-devkit test could not
+run locally because its checker imports the unavailable locked PostCSS dependency;
+its hosted run remains required. The targeted replacement check uses the real
+project generator and asserts actual emitted files, ownership and rebased links;
+it is not reported as a run of that broader suite.
