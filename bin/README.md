@@ -18,6 +18,13 @@ plan. The same services are exposed as JSON commands. See
 [Angular setup, settings and agent contract](PROJECT-SETUP.md) and
 [the replayable example](examples/angular-setup.json).
 
+The generated app supports an [optional first run](FIRST-RUN.md) with separate
+execution approval. [Setup checkpoints](CHECKPOINTS.md) preserve reviewed answers
+without retaining approvals. [Angular bricks](ANGULAR-BRICKS.md) describes the actual
+generated templates, hash routes, scoped interactions and external-adapter boundaries.
+Advanced settings and typed Markdown share `configs/user-settings.json`; the setup
+guide includes reviewed path migration and configured canonical-project behavior.
+
 ## Create a project
 
 Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose a

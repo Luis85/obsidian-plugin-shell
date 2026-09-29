@@ -32,10 +32,15 @@ export const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs project-setup scan --json
   node shell.mjs project-setup --input setup.json --json
   node shell.mjs project-setup status --json
+  node shell.mjs project-setup checkpoint --input partial-setup.json --json
+  node shell.mjs project-setup resume --json
+  node shell.mjs project-setup checkpoint-status --json
+  node shell.mjs project-setup discard-checkpoint --json
   node shell.mjs settings              Edit configs/user-settings.json
   node shell.mjs settings show --json
   node shell.mjs settings schema --json
   node shell.mjs settings --input settings.json --json
+  node shell.mjs settings migrate --input paths.json --json
   node shell.mjs                       Open saved workspace or create a project (terminal only)
   node shell.mjs new                   Preset → framework → prototype guide
   node shell.mjs new presets --json    Discover project presets and compatible frameworks
