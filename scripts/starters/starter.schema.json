@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Workbench starter definition",
-  "description": "One installed JSON file per starter. Paths, unique IDs, process DAGs, variable resolution and Companion documents also receive semantic validation. Loading never authorizes execution. No external schema is fetched.",
+  "description": "Workbench starter definition v1. Companion generators support fully validated project v5 and v6 documents. No execution trust is imported.",
   "type": "object",
   "additionalProperties": false,
   "properties": {

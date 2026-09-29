@@ -1,6 +1,8 @@
 {
   "entry": [
     "scripts/handout.mjs",
+    "scripts/concepts/export-golden-project.mjs",
+    "scripts/concepts/starter-workspace.js",
     "scripts/compiler/index.ts",
     "scripts/compiler/build-clickdummy.mjs",
     "src/main.ts",

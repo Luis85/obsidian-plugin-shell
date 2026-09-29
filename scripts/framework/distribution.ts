@@ -4,9 +4,12 @@ import { object } from './configuration.ts';
 import { hash } from './files.ts';
 import { requireThat } from './contracts.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
-const excludedRoots = ['docs/concepts/companion/seeds/', 'configs/starters/', 'docs/concepts/companion/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/native-file-integration-handoff/', 'scripts/concepts/', 'tests/concepts/'];
-const excludedFiles = new Set(['docs/concepts/companion/companion-project.json', 'docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml', 'docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-handoff.checks.mjs']);
+const excludedRoots = ['configs/starters/', 'docs/concepts/companion/starters/', 'docs/concepts/companion/seeds/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/native-file-integration-handoff/', 'scripts/concepts/', 'tests/concepts/'];
+const excludedFiles = new Set(['docs/concepts/companion/companion-project.json','docs/concepts/native-file-integration-handoff', '.github/workflows/native-source-handoff.yml', 'docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-handoff.checks.mjs']);
+/** These reviewed runtime libraries are compiler dependencies, not starter content. */
+const runtimeAssets = new Set(['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt'].map(name => 'docs/concepts/companion/vendor/' + name));
 export function included(path: string): boolean {
+  if (runtimeAssets.has(path)) return true;
   return !excludedFiles.has(path) && !excludedRoots.some(prefix => path.startsWith(prefix));
 }
 function availableLink(path: string, target: string): boolean {

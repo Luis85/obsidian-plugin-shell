@@ -22,7 +22,7 @@ ${root}.browser-project { --background-primary: #fff; --background-primary-alt: 
 `;
 }
 function vueFiles(template: TemplateSnapshot): Record<string, string> {
-  const copied = ['scripts/bundling/vite-shared.mjs', 'scripts/bundling/journey-flow.mjs', 'scripts/bundling/css-ownership.mjs', 'scripts/bundling/css-identity.mjs',
+  const copied = ['scripts/bundling/vite-shared.mjs', 'scripts/bundling/local-icons.mjs', 'scripts/bundling/journey-flow.mjs', 'scripts/bundling/css-ownership.mjs', 'scripts/bundling/css-identity.mjs',
     'scripts/bundling/ui-adaptation.json', 'src/infrastructure/ui/static-plugin.ts', 'src/styles/tokens.css', 'src/styles/nuxt-bridge.css', 'docs/licenses/lucide.txt'];
   return { ...Object.fromEntries(copied.map(path => [path, template.text(path)])), 'src/ui/mount.ts': vueMount, 'src/ui/Starter.vue': vueComponent,
     'src/ui/nuxt.css': '@import "tailwindcss/theme.css" prefix(ps);\n@import "tailwindcss/utilities.css" prefix(ps) source(none);\n@import "@nuxt/ui";\n@import "../styles/tokens.css";\n@import "../styles/nuxt-bridge.css";\n@source ".";\n@source "../../node_modules/.nuxt-ui";\n' };

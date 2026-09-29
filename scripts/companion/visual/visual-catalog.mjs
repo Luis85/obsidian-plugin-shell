@@ -22,7 +22,7 @@ export const visualCatalog = Object.freeze([
   vcatEntry('u-avatar', 'Avatar', 'UAvatar', 'Data', 'User or entity identity', [vcatP('src', 'string'), vcatP('alt', 'string'), vcatP('text', 'string')], [], [], 'avatar'),
   vcatEntry('u-tabs', 'Tabs', 'UTabs', 'Navigation', 'Peer surface navigation', [vcatP('items', 'array'), vcatP('modelValue', 'string')], [], [['update:modelValue', 'string']], 'tabs'),
   vcatEntry('u-breadcrumb', 'Breadcrumb', 'UBreadcrumb', 'Navigation', 'Hierarchical location', [vcatP('items', 'array')], [], [], 'breadcrumb'),
-  vcatEntry('u-dropdown-menu', 'Dropdown Menu', 'UDropdownMenu', 'Navigation', 'Context actions', [vcatP('items', 'array')], ['default'], [], 'menu'),
+  vcatEntry('u-dropdown-menu', 'Dropdown Menu', 'UDropdownMenu', 'Navigation', 'Context actions; item:select emits inert {id, label, path} data', [vcatP('items', 'array')], ['default'], [['item:select', 'object']], 'menu'),
   vcatEntry('u-command-palette', 'Command Palette', 'UCommandPalette', 'Navigation', 'Keyboard-first command discovery', [vcatP('groups', 'array'), vcatP('placeholder', 'string')], [], [['update:modelValue', 'unknown']], 'menu'),
   vcatEntry('u-modal', 'Modal', 'UModal', 'Overlays', 'Focused modal workflow', [vcatP('open', 'boolean'), vcatP('title', 'string'), vcatP('description', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),
   vcatEntry('u-drawer', 'Drawer', 'UDrawer', 'Overlays', 'Contextual side or bottom workflow', [vcatP('open', 'boolean'), vcatP('title', 'string')], ['body', 'footer'], [['update:open', 'boolean']], 'overlay'),

@@ -71,6 +71,13 @@
       "type": "string",
       "required": true,
       "default": "tests"
+    },
+    {
+      "id": "extensions",
+      "label": "File extensions (comma-separated)",
+      "type": "string",
+      "required": true,
+      "default": "md"
     }
   ],
   "generator": {

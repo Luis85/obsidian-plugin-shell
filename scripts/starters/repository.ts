@@ -1,11 +1,11 @@
 import { dirname, join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
-import { parseStarterText } from './browser.ts';
-import { STARTER_MAX_BYTES } from './limits.ts';
+import { parseDesignData } from '../contracts/json-data.mjs';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
-import { portablePath, record } from './validation.ts';
+import { portablePath, record, validateDefinition } from './validation.ts';
 import type { LoadedStarter } from './types.ts';
+import { STARTER_MAX_BYTES } from './browser.ts';
 export const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
 export async function starterFolder(root: string): Promise<string> {
@@ -34,8 +34,7 @@ export async function checkDirectoryChain(path: string, missing = false): Promis
   }
 }
 export function parseDefinition(bytes: Buffer) {
-  requireThat(bytes.length <= STARTER_MAX_BYTES, 'STARTER_LIMIT', 'Starter definition exceeds the 4 MB design limit.');
-  return parseStarterText(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  return validateDefinition(parseDesignData(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
 }
 export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
   const folder = await starterFolder(root), path = resolve(root, folder);

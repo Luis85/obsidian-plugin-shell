@@ -2,11 +2,11 @@
   "$schema": "../../scripts/starters/starter.schema.json",
   "schemaVersion": 1,
   "id": "companion-plugin",
-  "name": "Workbench Companion",
+  "name": "Workbench Companion — Golden Template",
   "category": "Workbench",
   "level": "Advanced",
-  "summary": "Golden development template for the complete Workbench Companion authoring model.",
-  "outcome": "Generate the Companion model, supported UI behavior and explicit remaining implementation contracts from this definition.",
+  "summary": "Canonical editable Companion self-project: complete v6 design, source contracts, pages, reusable components and journeys.",
+  "outcome": "Generate the Workbench development baseline through the same external JSON starter pipeline used by every project.",
   "tags": [
     "workbench",
     "companion",
@@ -14,16 +14,14 @@
     "authoring"
   ],
   "includes": [
-    "Complete Companion authoring model",
-    "Page and component designs with pinned revisions",
-    "Sitemap routes and journeys",
-    "Requirements and storymaps",
-    "Entities, sources and test recipes",
-    "Design-system tokens and generated tests"
+    "28 declared Companion surfaces, 27 page designs and 54 reusable component definitions",
+    "Version 6 routes, journeys, feature groups and the Journey Lens editor binding",
+    "Requirements, semantic entities, source fixtures, design tokens and named component revisions"
   ],
   "implementation": [
-    "Complete native editor and business-action parity",
-    "Browser and native acceptance for each capability"
+    "Native authoring behavior not provided by a registered compiler editor remains an explicit development gap",
+    "Business/acceptance TODOs are retained; a generated build does not certify parity",
+    "Run starter coverage and generated-project tests before acceptance"
   ],
   "version": "1.0.0",
   "inputs": [
@@ -31,27 +29,29 @@
       "id": "id",
       "label": "Project ID",
       "type": "string",
-      "required": true
+      "required": true,
+      "default": "plugin-companion"
     },
     {
       "id": "name",
       "label": "Project name",
       "type": "string",
-      "required": true
+      "required": true,
+      "default": "Workbench"
     },
     {
       "id": "author",
       "label": "Author",
       "type": "string",
       "required": false,
-      "default": ""
+      "default": "Luis Mendez"
     },
     {
       "id": "description",
       "label": "Description",
       "type": "string",
       "required": false,
-      "default": "Design one Obsidian plugin in its vault, describe its contracts and export a reviewed project to the independent shell."
+      "default": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review."
     },
     {
       "id": "version",
@@ -82,11 +82,11 @@
       "schemaVersion": 6,
       "executable": false,
       "project": {
-        "id": "workbench-companion",
-        "name": "Workbench Companion",
+        "id": "plugin-companion",
+        "name": "Workbench",
         "author": "Luis Mendez",
         "version": "0.1.0",
-        "description": "Design one Obsidian plugin in its vault, describe its contracts and export a reviewed project to the independent shell."
+        "description": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review."
       },
       "settings": {
         "codebaseFolder": "src",
@@ -66220,12 +66220,17 @@
       ]
     }
   },
-  "files": [],
+  "files": [
+    {
+      "path": "GOLDEN-TEMPLATE.md",
+      "content": "# Workbench Companion development baseline\n\nThe canonical starter is `configs/starters/companion-plugin.json` in the Workbench source. This project is an independent configured copy. Generated `design/project.json` is a consumer output, not a second maintained golden template.\n\nRun `npm run verify:project` and `npm run build:clickdummy`; use `npm run dev:preview` for source-backed fixture review. These checks do not imply native authoring parity. Retain unimplemented requirements and interactions until their behavior is actually verified. Never replace them with generic success notifications to satisfy a coverage count.\n"
+    }
+  ],
   "processes": [
     {
       "id": "install",
       "label": "Install dependencies",
-      "description": "Install the exact project dependency graph; network and dependency lifecycle effects require trust.",
+      "description": "Explicitly install the generated lockfile; no global packages.",
       "dependsOn": [],
       "steps": [
         {
@@ -66242,7 +66247,7 @@
     {
       "id": "verify",
       "label": "Verify generated project",
-      "description": "Run the generated project verification without claiming native acceptance.",
+      "description": "Run generated build, types and tests. Native acceptance is separate.",
       "dependsOn": [],
       "steps": [
         {
@@ -66257,16 +66262,16 @@
       ]
     },
     {
-      "id": "build",
-      "label": "Build project",
-      "description": "Build generated project artifacts.",
+      "id": "build-preview",
+      "label": "Build offline UI preview",
+      "description": "Compile generated Vue source into the standalone clickdummy; not the authoring HTML.",
       "dependsOn": [],
       "steps": [
         {
           "runner": "npm",
           "args": [
             "run",
-            "build"
+            "build:clickdummy"
           ],
           "cwd": ".",
           "timeout": 600000
@@ -66275,15 +66280,15 @@
     },
     {
       "id": "showcase",
-      "label": "Preview project",
-      "description": "Run the local browser showcase in the foreground; stop it with Ctrl+C.",
+      "label": "Preview generated source",
+      "description": "Foreground, loopback-only fixture preview. Stop with Ctrl+C.",
       "dependsOn": [],
       "steps": [
         {
           "runner": "npm",
           "args": [
             "run",
-            "dev:ui"
+            "dev:preview"
           ],
           "cwd": ".",
           "timeout": 600000
@@ -66293,11 +66298,12 @@
   ],
   "firstRun": [
     "install",
-    "verify"
+    "verify",
+    "build-preview"
   ],
   "nextSteps": [
-    "npm ci",
     "npm run verify:project",
-    "npm run dev:ui"
+    "npm run build:clickdummy",
+    "npm run dev:preview"
   ]
 }

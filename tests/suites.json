@@ -16,6 +16,8 @@
   ],
   "helperRoots": ["tests/support", "tests/fixtures"],
   "prerequisites": {
+    "companion-current-build": {"file": "reports/companion-mvp/index.html", "hint": "Run npm run companion:build to build the current empty workspace."},
+    "showcase-current-build": {"file": "reports/feature-showcase/clickdummy.html", "hint": "Generate the feature-showcase starter outside this checkout, install/build it, and copy its clickdummy.html here; see COMPANION-STARTERS.md."},
     "handoff-python": {
       "probe": ["{python}", "-c", "import sys; assert sys.version_info >= (3, 12)"],
       "hint": "Use Python 3.12+ or set PYTHON; native-handoff is an explicit maintainer-only suite."
@@ -329,7 +331,7 @@
           ["{python}", "scripts/concepts/run-browser-checks.py", "--only", "visual-editors"]
         ]
       },
-      "include": ["tests/concepts/*.browser.mjs"],
+      "include": ["tests/concepts/companion-*.browser.mjs"],
       "inventory": {
         "source": "scripts/concepts/run-browser-checks.py",
         "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json', 'node'\\)",
@@ -338,6 +340,40 @@
       "prerequisites": ["python3", "chromium"],
       "verify": "opt-in",
       "workflows": ["companion-concept-verification"],
+      "optional": true
+    },
+    {
+      "name": "companion:starter-browser",
+      "purpose": "Empty current authoring startup, external starter round trip, and independently compiled visual-feature showcase behavior.",
+      "runner": {
+        "type": "command",
+        "commands": [
+          [
+            "{node}",
+            "tests/concepts/starter-workspace.browser.mjs"
+          ],
+          [
+            "{node}",
+            "tests/concepts/feature-showcase.browser.mjs",
+            "--html",
+            "reports/feature-showcase/clickdummy.html"
+          ]
+        ]
+      },
+      "include": [
+        "tests/concepts/starter-workspace.browser.mjs",
+        "tests/concepts/feature-showcase.browser.mjs"
+      ],
+      "prerequisites": [
+        "chromium",
+        "companion-current-build",
+        "showcase-current-build"
+      ],
+      "verify": "opt-in",
+      "workflows": [
+        "starter-distribution",
+        "companion-concept-verification"
+      ],
       "optional": true
     },
     {

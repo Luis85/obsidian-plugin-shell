@@ -7,7 +7,7 @@ import { reservedFileExtensions } from '../../src/domain/native-integrations.ts'
 import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
-import { customizeStarter } from '../../scripts/starters/companion.mjs';
+import { customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { planMaker } from '../../scripts/makers/plan.mjs';
 import { parseArguments } from '../../scripts/makers/arguments.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';

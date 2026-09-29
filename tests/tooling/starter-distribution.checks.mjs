@@ -27,16 +27,18 @@ async function compiler() {
   }
 }
 test('distribution boundaries exclude canonical and legacy definitions from shell and generated framework copies', () => {
-  for (const path of ['configs/starters/companion-plugin.json', 'docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/visual-self-project.json', 'configs/starters/webapp.json', 'docs/concepts/companion/starters/catalog.json', 'docs/concepts/companion/starters/blank.companion.json']) {
+  for (const path of ['configs/starters/webapp.json', 'docs/concepts/companion/companion-project.json', 'docs/concepts/companion/seeds/visual-self-project.json', 'docs/concepts/companion/starters/catalog.json', 'docs/concepts/companion/starters/blank.companion.json']) {
     assert.equal(included(path), false); assert.equal(maintainerOnly(path), true);
   }
   assert.equal(included('scripts/starters/starter.schema.json'), true);
+  assert.equal(included('docs/concepts/companion/vendor/vue-flow-core.iife.js'), true);
+  assert.equal(included('docs/concepts/companion/vendor/vue.runtime.global.prod.js'), false);
 });
 test('standalone starter ZIP is deterministic and loads after independent extraction', async t => {
   const directory = await temp(t), files = await assembleStarterPack({ root, frameworkRoot: root });
-  assert.equal(files.length, 13); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
+  assert.equal(files.length, 14); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
   const first = zip(files), second = zip(await assembleStarterPack({ root, frameworkRoot: root })); assert.deepEqual(first, second);
-  await extractArchive(first, directory); const loaded = await loadDefinitions(directory); assert.equal(loaded.length, 13);
+  await extractArchive(first, directory); const loaded = await loadDefinitions(directory); assert.equal(loaded.length, 14);
   for (const entry of loaded) assert.deepEqual(entry.bytes, files.find(file => file.path === entry.file).bytes);
 });
 test('pack preview is read-only and publishing/overwriting archives is never implicit', async t => {
@@ -52,16 +54,24 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   const directory = await temp(t), shellRoot = join(directory, 'shell'); await mkdir(shellRoot);
   const files = await assembleKit({ root, frameworkRoot: root }, await compiler());
   assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || file.path.includes('/companion/starters/')));
+  assert.ok(!files.some(file => file.path.endsWith('/companion/companion-project.json') || file.path.includes('/companion/seeds/')));
+  for (const asset of ['vue-flow-core.iife.js', 'vue-flow.scoped.css', 'packages.json', 'vue-flow-core-LICENSE.txt', 'd3-NOTICE.txt', 'vueuse-NOTICE.txt']) assert.ok(files.some(file => file.path === '.framework/template/docs/concepts/companion/vendor/' + asset), asset);
   const archive = zip(files); await extractArchive(archive, shellRoot);
   const cli = args => {
-    const result = spawnSync(process.execPath, [join(shellRoot, 'shell.mjs'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 30000, maxBuffer: 16_000_000 });
+    const result = spawnSync(process.execPath, [join(shellRoot, 'shell.mjs'), ...args, '--json'], { cwd: shellRoot, encoding: 'utf8', timeout: 90000, maxBuffer: 16_000_000 });
     assert.equal(result.stdout.trim().split('\n').length, 1, result.stderr); return { code: result.status, result: JSON.parse(result.stdout) };
   };
   const bare = cli(['starters', 'list']); assert.equal(bare.code, 0, JSON.stringify(bare)); assert.deepEqual(bare.result.data.starters, []);
   const emptyNew = cli(['new', '../missing-product', '--starter', 'blank']); assert.equal(emptyNew.code, 1); assert.equal(emptyNew.result.diagnostics[0].code, 'STARTER_UNKNOWN');
   await extractArchive(zip(await assembleStarterPack({ root, frameworkRoot: root })), shellRoot);
-  assert.equal(cli(['new', '--list']).result.data.starters.length, 13);
+  assert.equal(cli(['new', '--list']).result.data.starters.length, 14);
   assert.equal(cli(['starters', 'schema']).result.data.title, 'Workbench starter definition');
+  const model = cli(['starters', 'coverage', 'feature-showcase', '--require-model-coverage']);
+  assert.equal(model.code, 0, JSON.stringify(model)); assert.equal(model.result.data.modeled.complete, true);
+  const showcase = cli(['new', '../showcase', '--starter', 'feature-showcase', '--yes']);
+  assert.equal(showcase.code, 0, JSON.stringify(showcase));
+  assert.ok((await readFile(join(directory, 'showcase/src/generated/presentation/composables/use-visual.ts'), 'utf8')).includes('readJsonControl'));
+  assert.ok((await readFile(join(directory, 'showcase/docs/concepts/companion/vendor/vue-flow-core.iife.js'))).length > 1000);
   const created = cli(['new', '../product', '--starter', 'webapp', '--yes']); assert.equal(created.code, 0, JSON.stringify(created));
   assert.equal(JSON.parse(await readFile(join(directory, 'product/package.json'))).name, 'product');
   const executed = cli(['starters', 'run', '--project', '../product', '--process', 'verify,build', '--yes', '--trust-processes']);

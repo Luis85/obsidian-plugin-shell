@@ -9,6 +9,7 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'starters coverage', summary: 'Inspect source-derived visual model coverage and explicit interaction gaps; never a native acceptance claim.', options: { 'require-model-coverage': 'flag' }, maxArgs: 1, effect: 'read' },
   { id: 'starters list', summary: 'Discover project-local JSON starters; no bundled fallback.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'starters show', summary: 'Inspect one complete editable starter definition and its processes.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'starters validate', summary: 'Validate one or all installed definitions without writes or execution.', options: {}, maxArgs: 1, effect: 'read' },

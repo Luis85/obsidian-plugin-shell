@@ -4,6 +4,7 @@ export const VISUAL_SCHEMA = 3;
 export const VISUAL_CATALOG = Object.freeze({ id: 'nuxt-ui', version: 1 });
 export const VISUAL_TAGS = Object.freeze(['div', 'section', 'header', 'main', 'footer', 'nav', 'aside', 'button', 'input', 'label', 'p', 'h1', 'h2', 'h3', 'span', 'ul', 'li', 'img']);
 export const VISUAL_TEXT_ROLES = Object.freeze(['h1', 'h2', 'h3', 'p', 'span']);
+export const VISUAL_ACTION_KINDS = Object.freeze(['emit', 'navigate', 'set-state', 'toggle', 'focus', 'set-value', 'source']);
 export const VISUAL_STATES = Object.freeze(['default', 'loading', 'empty', 'error', 'disabled']);
 export const VISUAL_PROP_TYPES = Object.freeze(['string', 'number', 'boolean']);
 export const VISUAL_PAYLOAD_TYPES = Object.freeze(['void', 'string', 'number', 'boolean', 'unknown']);

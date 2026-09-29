@@ -1,5 +1,5 @@
 import { starterCatalog } from './starter-project.ts';
-import { customizeStarter } from '../starters/companion.mjs';
+import { customizeStarter } from '../companion/starter-contract.mjs';
 import { migrateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { serializeJson } from '../contracts/serialization.ts';
 import { requireThat, stringOption, type Request, type Context } from './contracts.ts';

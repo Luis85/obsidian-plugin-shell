@@ -1,9 +1,10 @@
-import { STARTER_MAX_BYTES } from './limits.ts';
+import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { hash, readBounded, exists } from '../framework/files.ts';
 import { zip } from '../framework/zip.ts';
 import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
+import { STARTER_MAX_BYTES } from './browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
@@ -21,7 +22,12 @@ export async function readStarterOperation(request: Request, context: Context) {
   const definitions = await loadDefinitions(context.root);
   const id = request.args[0], selected = definitions.filter(entry => !id || entry.definition.id === id);
   requireThat(!id || selected.length === 1, 'STARTER_UNKNOWN', 'Starter not installed; use starters list.');
-  requireThat(request.command !== 'starters show' || id, 'STARTER_REQUIRED', 'Supply the starter ID.');
+  requireThat(!['starters show', 'starters coverage'].includes(request.command) || id, 'STARTER_REQUIRED', 'Supply the starter ID.');
+  if (request.command === 'starters coverage') {
+    const report = starterCoverage(selected[0]!.definition);
+    requireThat(!request.options['require-model-coverage'] || report.modeled?.complete, 'STARTER_COVERAGE', 'The definition does not cover the complete visual model catalog. Inspect coverage without --require-model-coverage.');
+    return result(request.command, { ...report, sha256: selected[0]!.sha256 });
+  }
   return result(request.command, { valid: true, starters: selected.map(({ definition, sha256, file }) => ({ definition, sha256, file })) });
 }
 export async function editStarterPlan(request: Request, context: Context) {

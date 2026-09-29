@@ -37,6 +37,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   const errors = reactive<Record<string, string>>({}); const pending = ref(false); const message = ref('');
   const session = reactive<Session>(visualSession()), localState = ref<VisualState | null>(null), narrow = ref(false), host = ref<HTMLElement | null>(null), dark = ref(false);
   let observer: ResizeObserver | undefined, themeObserver: MutationObserver | undefined;
+  const fileReads = new Map<string, number>();
   const externals = new Map<string, ExternalMount>(); let disposed = false; let epoch = 0;
   const sources = new Set([...index.values()].flatMap(visualExpressions).flatMap(e => e.kind === 'source' ? [e.sourceId + '\u0000' + e.operationId] : []));
   const findPort = (source: string, operation: string) => context?.ports.find(p => p.sourceId === source && p.operationId === operation);
@@ -69,11 +70,15 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const fixture = session.bindings.find(b => b.sourceId === sourceId && b.operationId === operationId);
     return fixture ? fixture.value : findPort(sourceId, operationId)?.data;
   }
-  function value(expr: ValueExpression | undefined): unknown {
+  function value(expr: ValueExpression | undefined, seen = new Set<string>()): unknown {
     if (!expr) return undefined;
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'prop') return has(props, expr.name) ? props[expr.name] : undefined;
-    if (expr.kind === 'state') return has(values, expr.nodeId) ? values[expr.nodeId] : undefined;
+    if (expr.kind === 'state') {
+      if (has(values, expr.nodeId)) return values[expr.nodeId];
+      if (seen.has(expr.nodeId)) return undefined; // An uninitialized cycle has no value; never recurse indefinitely.
+      return value(control(index.get(expr.nodeId))?.props.modelValue, new Set([...seen, expr.nodeId]));
+    }
     return visualRead(sourceData(expr.sourceId, expr.operationId), expr.field);
   }
   function visible(id: string): boolean { return visualVisible(spec, current(), id); }
@@ -168,10 +173,60 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
     const node = index.get(id);
     return node?.kind === 'component' || node?.kind === 'external' ? Object.fromEntries(Object.entries(node.props).map(([name, expr]) => [name, value(expr)])) : {};
   }
+/** Only explicit state bindings own two-way overlay state. Literal/prop/source bindings remain read-only. */
+  function overlayBinding(node: UiNode | undefined): string | undefined {
+    return node?.kind === 'component' && node.ref.kind === 'nuxt-ui' && ['u-modal', 'u-drawer'].includes(node.ref.entryId)
+      && node.props.open?.kind === 'state' ? node.props.open.nodeId : undefined;
+  }
+  /** JSON stays inert: trusted runtime closures adapt an explicit item selection to the shared event contract. */
+  function menuItems(id: string, input: unknown, path: number[] = []): unknown {
+    if (!Array.isArray(input) || path.length > 12) return input;
+    return input.map((item: unknown, position) => {
+      const here = [...path, position];
+      if (Array.isArray(item)) return menuItems(id, item, here);
+      if (!item || typeof item !== 'object') return item;
+      const copy = copyDetailData(item);
+      if (!copy || Array.isArray(copy) || typeof copy !== 'object') return copy;
+      const data = { id: typeof copy.id === 'string' ? copy.id : here.join('.'), label: typeof copy.label === 'string' ? copy.label : '', path: here };
+      return { ...copy, ...(copy.children ? { children: menuItems(id, copy.children, here) } : {}), onSelect: () => {
+        if (!copy.disabled && !['label', 'separator'].includes(String(copy.type)) && !copy.children && enabled(id)) trigger(id, 'item:select', data);
+      } };
+    });
+  }
+  /** Bounded local file intake. A superseded read, state change or disposal cannot overwrite newer input. */
+  async function readJsonControl(id: string, event: unknown): Promise<void> {
+    const node = control(index.get(id)); if (!node || !enabled(id)) return;
+    const token = (fileReads.get(id) ?? 0) + 1, started = epoch; fileReads.set(id, token);
+    const stale = () => disposed || started !== epoch || token !== fileReads.get(id) || !enabled(id);
+    const target = event && typeof event === 'object' && 'target' in event ? event.target : null;
+    if (!(target instanceof HTMLInputElement) || !target.files?.length) return;
+    try {
+      const limit = node.control?.maxBytes ?? 1_000_000, file = target.files[0]!;
+      if (target.files.length !== 1 || file.size > limit) throw new Error('VISUAL_FILE_LIMIT');
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (stale()) return;
+      if (bytes.length > limit) throw new Error('VISUAL_FILE_LIMIT');
+      const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      if (setDraft(id, text)) void invoke(id, node.events.filter(item => ['update:modelValue', 'change'].includes(item.event)), values[id]);
+    } catch { if (!stale()) errors[id] = 'Select one valid UTF-8 JSON file within the size limit. Your previous valid value is retained.'; }
+    finally { if (!stale()) target.value = ''; }
+  }
   function nodeProps(id: string): Record<string, unknown> {
     const node = index.get(id), result = resolved(id);
     if (node?.kind !== 'component' || node.ref.kind !== 'nuxt-ui') return result;
     if (control(node)) Object.assign(result, { modelValue: model(id), 'onUpdate:modelValue': (input: unknown) => { if (setDraft(id, input)) trigger(id, 'update:modelValue', values[id]); } });
+    if (node.control?.kind === 'select') result.items = (node.control.options ?? []).map(option => ({ ...option }));
+    if (node.control && ['number', 'date', 'datetime-local'].includes(node.control.kind)) result.type = node.control.kind;
+    if (node.control?.kind === 'json-file' && node.ref.entryId === 'u-input') {
+      delete result.modelValue; delete result['onUpdate:modelValue'];
+      result.type = 'file'; result.accept = '.json,application/json'; result.multiple = false;
+      result.onChange = (event: unknown) => { void readJsonControl(id, event); };
+    }
+    if (node.ref.entryId === 'u-dropdown-menu') result.items = menuItems(id, result.items);
+    const openTarget = overlayBinding(node);
+    if (openTarget) result['onUpdate:open'] = (input: unknown) => {
+      if (typeof input === 'boolean' && enabled(id) && setDraft(openTarget, input)) trigger(id, 'update:open', input);
+    };
     if (node.ref.entryId === 'u-table' && !Object.hasOwn(node.props, 'loading')) result.loading = state.value === 'loading';
     if (VISUAL_RUNTIME_INTERACTIVE.includes(node.ref.entryId) && !Object.hasOwn(node.props, 'disabled')) result.disabled = ['loading', 'disabled'].includes(state.value);
     return result;
@@ -183,7 +238,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   }
   function on(id: string): Record<string, (payload?: unknown) => void> {
     const node = index.get(id); if (!node || (node.kind !== 'element' && node.kind !== 'component')) return {};
-    const events = node.events.filter(i => !(control(node) && i.event === 'update:modelValue')).map(i => i.event);
+    const events = node.events.filter(i => !(control(node) && (i.event === 'update:modelValue' || (node.kind === 'component' && node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-input' && node.control?.kind === 'json-file' && i.event === 'change'))) && !(overlayBinding(node) && i.event === 'update:open') && !(node.kind === 'component' && node.ref.kind === 'nuxt-ui' && node.ref.entryId === 'u-dropdown-menu' && i.event === 'item:select')).map(i => i.event);
     return Object.fromEntries([...new Set(events)].map(event => [event, (payload?: unknown) => { trigger(id, event, payload); }]));
   }
   function style(id: string): Record<string, string | number> {

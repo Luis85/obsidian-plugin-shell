@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { planProject } from '../companion/compiler/plan.ts';
-import { customizeStarter } from '../starters/companion.mjs';
+import { customizeStarter } from '../companion/starter-contract.mjs';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
@@ -55,7 +55,7 @@ export async function definitionProjectPlan(request: Request, context: Context, 
   let compilerHash = '';
   if (d.generator.kind === 'companion') {
     const customization: Record<string, string> = {};
-    for (const key of ['id', 'name', 'author', 'version', 'description', 'codebaseFolder', 'testsFolder']) if (values[key] !== undefined) customization[key] = String(values[key]);
+    for (const key of ['id', 'name', 'author', 'version', 'description', 'codebaseFolder', 'testsFolder', 'extension', 'extensions']) if (values[key] !== undefined) customization[key] = String(values[key]);
     for (const key of ['extension', 'extensions']) if (request.options[key] !== undefined) customization[key] = stringOption(request.options, key)!;
     const document = withAirshipOption(customizeStarter(companionCatalog([selected]), d.id, customization), request.options);
     const scratch = await mkdtemp(join(tmpdir(), 'workbench-starter-'));

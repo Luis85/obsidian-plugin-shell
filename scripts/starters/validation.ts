@@ -1,5 +1,5 @@
 import { requireThat } from '../framework/contracts.ts';
-import { assertJson } from '../companion/sitemap/safety.ts';
+import { assertDesignData } from '../contracts/json-data.mjs';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
 export function record(value: unknown): Record<string, unknown> {
@@ -91,7 +91,7 @@ export function readProcesses(value: unknown): StarterProcess[] {
   result.forEach(item => visit(item.id)); return result;
 }
 export function validateDefinition(value: unknown): StarterDefinition {
-  assertJson(value);
+  assertDesignData(value);
   const row = record(value);
   fields(row, ['$schema', 'schemaVersion', 'id', 'name', 'version', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'inputs', 'generator', 'files', 'processes', 'firstRun', 'nextSteps']);
   requireThat(row.schemaVersion === 1, 'STARTER_VERSION', 'Unsupported starter schemaVersion; expected 1.');
@@ -105,7 +105,7 @@ export function validateDefinition(value: unknown): StarterDefinition {
   let generator: StarterDefinition['generator'];
   if (rawGenerator.kind === 'companion') {
     const document = record(rawGenerator.document); validateAuthoringDocument(document);
-    requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require normalized project v5 or v6.');
+    requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require project v5 or v6.');
     generator = { kind: 'companion', document };
   } else { requireThat(rawGenerator.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); generator = { kind: 'files' }; }
   const files: StarterFile[] = array(row.files, 'files', 1000).map(raw => {

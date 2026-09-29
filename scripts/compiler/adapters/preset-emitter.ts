@@ -76,7 +76,7 @@ function uiFiles(selected: PresetOutput, template: TemplateSnapshot, templates: 
   if (selected.frontend === 'nuxt-ui') {
     files.push(entry('src/presentation/App.vue', templates['App.vue']!), entry('src/presentation/use-project.ts', templates['use-project.ts']!));
     if (selected.targets.includes('website')) files.push(entry('src/presentation/Website.vue', templates['Website.vue']!), entry('src/presentation/use-demonstration.ts', templates['use-demonstration.ts']!));
-    for (const path of ['scripts/bundling/vite-shared.mjs', 'scripts/bundling/journey-flow.mjs',
+    for (const path of ['scripts/bundling/vite-shared.mjs', 'scripts/bundling/local-icons.mjs', 'scripts/bundling/journey-flow.mjs',
       'scripts/bundling/ui-adaptation.json', 'src/infrastructure/ui/static-plugin.ts', 'src/styles/tokens.css', 'src/styles/nuxt-bridge.css']) {
       const content = template.text(path).replace("resolve(root, 'manifest.json')", "resolve(root, 'shell.project.json')");
       files.push(entry(path, path.endsWith('.css') ? content.replaceAll('plugin-shell', selected.id) : content));

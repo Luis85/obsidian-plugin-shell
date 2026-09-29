@@ -35,6 +35,11 @@ export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add:
   }
   for (const file of templateRoot.skillFiles) add(file.path, file.content, 'extension');
   add('vitest.project.config.mjs', projectVitestConfig(m), 'extension');
+  add(`${m.testRoot}/ui-bootstrap.mjs`, `// Install the actual locally bundled icons, not a mock or a remote provider.
+import { addIcon } from '@iconify/vue';
+import { init } from 'virtual:nuxt-ui-icons';
+init(addIcon);
+`, 'managed');
   // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
   if (m.testRoot !== 'tests/project') {
     const suites = await templateRoot.text(['tests/suites.json'].join('/'));
@@ -61,6 +66,7 @@ const testKit = { '@test/obsidian': fileURLToPath(new URL('./tests/support/obsid
 // \`npm run make\` writes the tests of the features it creates to ${makerTests}.
 export default defineConfig({ ...shared, resolve: { ...shared.resolve, alias: { ...shared.resolve?.alias, ...testKit } }, plugins: [...shared.plugins, hostBoundary], test: {
   include: [${literal(m.testRoot + '/**/*.test.{ts,mjs}')}, ${literal(makerTests + '/**/*.test.ts')}], environment: 'node', fileParallelism: false,
+  setupFiles: [${literal(m.testRoot + '/ui-bootstrap.mjs')}],
 } });
 `;
 }

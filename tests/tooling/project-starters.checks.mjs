@@ -6,18 +6,20 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
-import { validateStarterCatalog, customizeStarter } from '../../scripts/starters/companion.mjs';
+import { validateStarterCatalog, customizeStarter } from '../../scripts/companion/starter-contract.mjs';
 import { projectModel, symbol } from '../../scripts/companion/compiler/model.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
 import { COMPANION_VERSION } from '../../scripts/companion/project-contract.mjs';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
-const root=fileURLToPath(new URL('../../',import.meta.url)),catalog=await loadStarterCatalog(root);
+const root=fileURLToPath(new URL('../../',import.meta.url)),allCatalog=await loadStarterCatalog(root);
+// These retained migration assertions stay scoped to the original eleven v5 fixtures.
+const catalog={schemaVersion:1,starters:allCatalog.starters.filter(entry=>entry.document.schemaVersion===5)};
 // Page counts equal the page documents each starter held before the visual-design migration.
 const pageCounts={blank:0,'command-utility':3,'note-inspector':3,'quick-capture':4,'tasks-projects':4,'knowledge-collection':4,'daily-journal':4,'vault-dashboard':4,'import-integration':4,'custom-file-view':3,'context-menu':3};
 const choices={id:'my-new-plugin',name:'My New Plugin',author:'Test Author',description:'Independent project copy',version:'0.1.0',codebaseFolder:'src',testsFolder:'tests'};
 async function temporary(work){const folder=await mkdtemp(join(tmpdir(),'project-starters-'));try{return await work(folder);}finally{await rm(folder,{recursive:true,force:true});}}
 test('eleven original data-only starters include a genuinely domain-free minimal shell',()=>{
- assert.equal(catalog.starters.length,12);assert.equal(validateStarterCatalog(catalog),catalog);
+ assert.equal(catalog.starters.length,11);assert.equal(validateStarterCatalog(catalog),catalog);
  const blank=catalog.starters.find(s=>s.id==='blank').document.design;
  assert.equal(blank.nodes.length,2);assert.equal(blank.nodes[0].kind,'view');assert.equal(blank.nodes[1].kind,'settings');
  assert.equal(blank.semantic.entities.length,0);assert.equal(blank.dataSources.sources.length,0);assert.equal(blank.prds.length,0);assert.equal(blank.library.length,0);
@@ -80,7 +82,7 @@ for(const [label,mutate] of [
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
 test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
  const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
- assert.throws(()=>validateStarterCatalog(c),/normalized project v5 or v6/);
+ assert.throws(()=>validateStarterCatalog(c),/Starters require project v5 or v6/);
 });
 test('case-sensitive identity changes do not replace domain words or authored content',()=>{
  const source=catalog.starters.find(s=>s.id==='quick-capture').document;const document=customizeStarter(catalog,'quick-capture',{...choices,name:'<b>Not HTML</b>'});

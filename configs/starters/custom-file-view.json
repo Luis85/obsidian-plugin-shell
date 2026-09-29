@@ -71,6 +71,13 @@
       "type": "string",
       "required": true,
       "default": "tests"
+    },
+    {
+      "id": "extension",
+      "label": "Custom file extension",
+      "type": "string",
+      "required": true,
+      "default": "folio"
     }
   ],
   "generator": {

@@ -1,7 +1,8 @@
 import { composePrototypeSeams } from './prototype-seams.mjs';
+import { composeStarterWorkspace, removeEmbeddedStarterData } from './starter-compose.mjs';
 import ts from 'typescript';
 /** Replace named functions in a trusted assembled fixture, never execute authored project text. */
-export function composeMvp(base,bundle,css,bridge,graphStyle) {
+export function composeMvp(base,bundle,css,bridge,graphStyle,startup) {
   const markers=[...base.matchAll(/<script>([\s\S]*?)<\/script>/g)].filter(m=>m[1].includes('function render()'));
   if(markers.length!==1)throw Error('MVP_ASSEMBLY: Expected one legacy companion program.');
   const marker=markers[0];let program=marker[1];
@@ -27,10 +28,6 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   once('p.notes = designCopy(document.notes);','p.notes = designCopy(document.notes);if(document.tooling!==undefined)p.tooling=designCopy(document.tooling);');
   once('validCompanionProjectFolders(s.project.folders)&&','validCompanionProjectFolders(s.project.folders)&&jmValidTooling(s.project.tooling)&&');
   once('const COMPANION_VERSION = 5;','const COMPANION_VERSION = 6;');
-  // The immutable embedded catalog was hash-verified as v5 by the retained builder.
-  // Import migrates its configured copy through the v6 authoring validator.
-  once("entry.document.schemaVersion === COMPANION_VERSION, 'Built-ins require project v' + COMPANION_VERSION + '.'",
-    "entry.document.schemaVersion === 5, 'The retained catalog requires project v5.'");
   once("![1,2,3,4,5].includes(value.schema)","![1,2,3,4,5,6].includes(value.schema)");
   once('return veShape(value)&&smShape(value.storymaps)','return jmValidFields(value)&&veShape(value)&&smShape(value.storymaps)');
   once('...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})','...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{}),...(d.sitemap?{sitemap:d.sitemap}:{}),...(d.features?{features:d.features}:{}),...(d.editors?{editors:d.editors}:{})');
@@ -40,9 +37,10 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   once('function setView(view){','function setView(view){if(jmEditor&&!jmEditor.canLeave())return;');
   once('function render(){','function render(){if(jmEditor&&!jmEditor.canLeave())return;jmUnmount();');
   once('restoreUiFocus(uiFocus);','restoreUiFocus(uiFocus);jmMount();');
-  once("  return p;\n}\nfunction companionExampleRequirements", "  return jmSeed(p);\n}\nfunction companionExampleRequirements");
   // Functions are hoisted; state must be initialized before the preserved startup restore/render.
   program=bridge+'\n'+composePrototypeSeams(program);
+  if(typeof startup!=='string'||!startup.trim())throw Error('STARTER_ASSEMBLY: Current build requires the external-starter workspace.');
+  program=composeStarterWorkspace(program,startup);
   const safe=text=>text.replace(/<\/script/gi,'<\\/script');
   const script='<script data-journey-runtime>'+safe(bundle)+'</script>\n<script>'+safe(program)+'</script>';
   let html=base.slice(0,marker.index)+script+base.slice(marker.index+marker[0].length);
@@ -50,5 +48,5 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   if(typeof graphStyle!=='string'||!graphStyle.includes('#vf-root .vue-flow__container {'))throw Error('MVP_ASSEMBLY: Missing complete scoped Vue Flow stylesheet.');
   const graphCss=graphStyle.replaceAll('#vf-root','#jm-root');
   html=html.replace('</head>','<style data-journey-style>'+css+'\n'+graphCss+'</style></head>');
-  return html;
+  return removeEmbeddedStarterData(html);
 }

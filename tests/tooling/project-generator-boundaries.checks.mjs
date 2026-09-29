@@ -83,7 +83,7 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
  for(const part of ['<UCheckbox data-design-node="vn-996"','<UInput data-design-node="vn-995"','<USelect data-design-node="vn-997"','<UTextarea data-design-node="vn-1001"','<template #content>'])assert.ok(code.includes(part),part);
  for(const kind of ['number','checkbox','select','date','datetime-local','json-editor','json-file','markdown-editor','textarea'])assert.ok(spec.includes(`"control":{"kind":"${kind}"`),kind);
  assert.equal((code.match(/data-design-node="vn-1007"/g)||[]).length,1);
- assert.match(files.get(`product/specs/project/visual/definitions.test.ts`),/toHaveBeenCalledWith\(\{"requestId":"boundary-request-1","values":\{"title":"Boundary note","amount":0,"enabled":true,"category":"first","due":"2026-01-01","body":"fixture"\}\}\)/);
+ assert.match([...files].filter(([path]) => /^product\/specs\/project\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path)).map(([, text]) => text).join("\n"),/toHaveBeenCalledWith\(\{"requestId":"boundary-request-1","values":\{"title":"Boundary note","amount":0,"enabled":true,"category":"first","due":"2026-01-01","body":"fixture"\}\}\)/);
  assert.match(files.get('src/bootstrap/features.ts'),/GBoundaryRecord: register\(GBoundaryRecord\)/);
  assert.match(files.get('product/code/generated/infrastructure/sources/boundary-records.ts'),/noteOperations/);
  assert.ok(!files.get('product/code/generated/infrastructure/sources/boundary-records.ts').includes('NotImplementedError'));
