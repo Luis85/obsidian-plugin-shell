@@ -1,0 +1,52 @@
+name: Native source handoff
+on:
+  pull_request:
+    paths:
+      - 'docs/concepts/native-file-integration-handoff/**'
+      - 'scripts/framework/distribution.ts'
+      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'tests/tooling/project-generator-native-handoff.checks.mjs'
+      - '.github/workflows/native-source-handoff.yml'
+permissions:
+  contents: read
+concurrency:
+  group: native-source-handoff-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-reconstruction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Verify every delivered file and reconstruct outside the checkout
+        run: |
+          python3 docs/concepts/native-file-integration-handoff/restore.py --check
+          python3 docs/concepts/native-file-integration-handoff/restore.py --out "$RUNNER_TEMP/native-file-alternative"
+          cd "$RUNNER_TEMP/native-file-alternative"
+          python3 scripts/concepts/build-companion.py --check
+      - name: Verify generated projects and kits exclude alternate source
+        run: node --test tests/tooling/project-generator-native-handoff.checks.mjs
+      - name: Reject changed source and existing reconstruction destinations
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, subprocess, sys, tempfile, shutil
+          original = pathlib.Path('docs/concepts/native-file-integration-handoff')
+          with tempfile.TemporaryDirectory() as temp:
+              copy = pathlib.Path(temp) / 'handoff'
+              shutil.copytree(original, copy)
+              file = copy / 'source/src/domain/native-file.ts'
+              file.write_bytes(file.read_bytes() + b'\n// changed\n')
+              result = subprocess.run([sys.executable, str(copy / 'restore.py'), '--check'], capture_output=True, text=True)
+              assert result.returncode == 1 and 'Source digest mismatch' in result.stderr, result
+          result = subprocess.run([sys.executable, str(original / 'restore.py'), '--out', os.environ['RUNNER_TEMP'] + '/native-file-alternative'], capture_output=True, text=True)
+          assert result.returncode == 1 and 'must not already exist' in result.stderr, result
+          print('Tamper and existing-directory rejection passed.')
+          PY
+          git diff --exit-code
