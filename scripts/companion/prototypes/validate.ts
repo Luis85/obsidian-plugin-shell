@@ -1,5 +1,5 @@
 import { variantStatuses, selectionKey, type PrototypeWorkspace, type PrototypeSelection, type ValidateDocument } from './model.ts';
-import { prototypeJson, object, text, slug, revision, collection, unique, ensure } from './safety.ts';
+import { prototypeJson, prototypeObject as object, text, slug, revision, collection, unique, ensure } from './safety.ts';
 export function validateSelection(value: unknown): asserts value is PrototypeSelection {
   prototypeJson(value);
   object(value, ['prototypeId', 'versionId', 'variantId']); slug(value.prototypeId); slug(value.versionId); slug(value.variantId);

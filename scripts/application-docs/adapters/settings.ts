@@ -1,3 +1,4 @@
+import { projectPath } from '../../../bin/domain/user-settings.ts';
 import { join } from 'node:path';
 import { DOC_TYPES, docsObject as object, array, insist, type DocType } from '../domain/contracts.ts';
 import { portable, readBytes, decode } from './filesystem.ts';
@@ -31,11 +32,15 @@ export function validateSettings(input: unknown, protectedPaths: string[]): Docs
   return { root: value.root, indexFile: value.indexFile, paths: value.paths as Record<string, string>, recursive: value.recursive,
     include: patterns(value.include), exclude: patterns(value.exclude), linkFormat: value.linkFormat as DocsSettings['linkFormat'] };
 }
-export async function readSettings(root: string, protectedPaths: string[], output?: string) {
+export async function readDocumentationSettings(root: string, protectedPaths: string[], output?: string) {
   const bytes = await readBytes(join(root, SETTINGS_FILE));
   const user = bytes ? object(JSON.parse(decode(bytes))) : { schemaVersion: 1 };
   insist(user.schemaVersion === 1, 'DOCS_SETTINGS_VERSION', 'Unsupported user-settings version; original settings are preserved.');
+  const paths = user.paths === undefined ? {} : object(user.paths);
+  const canonicalProjectPath = projectPath(paths.project ?? 'design/project.json');
+  const locations = Object.values(paths).filter((value): value is string => typeof value === 'string');
   const raw = user.documentation === undefined ? {} : object(user.documentation);
-  const settings = validateSettings(output ? { ...raw, root: portable(output), paths: defaults(output).paths } : raw, protectedPaths);
-  return { settings, bytes, create: bytes ? null : JSON.stringify({ ...user, documentation: { ...settings, preserveAuthoredContent: true, conflictPolicy: 'review', deleteMissing: false } }, null, 2) + '\n' };
+  const settings = validateSettings(output ? { ...raw, root: portable(output), paths: defaults(output).paths } : raw, [...protectedPaths, ...locations]);
+  insist(settings.indexFile !== canonicalProjectPath, 'DOCS_SETTINGS_PATH', 'Documentation index overlaps the canonical project.');
+  return { settings, bytes, projectPath: canonicalProjectPath, protectedPaths: locations, create: bytes ? null : JSON.stringify({ ...user, documentation: { ...settings, preserveAuthoredContent: true, conflictPolicy: 'review', deleteMissing: false } }, null, 2) + '\n' };
 }

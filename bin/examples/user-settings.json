@@ -19,6 +19,7 @@
       "stepTimeoutMs": 600000,
       "readyTimeoutMs": 30000,
       "showcaseDurationMs": 300000
-    }
+    },
+    "vaultConfigDirectory": ".obsidian"
   }
 }

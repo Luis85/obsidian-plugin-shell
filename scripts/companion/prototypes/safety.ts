@@ -1,5 +1,5 @@
 import { PROTOTYPE_MAX_BYTES } from './model.ts';
-export class PrototypeError extends Error {
+class PrototypeError extends Error {
   readonly code: string;
   constructor(code: string, message: string) { super(`${code}: ${message}`); this.name = 'PrototypeError'; this.code = code; }
 }
@@ -35,7 +35,7 @@ export function prototypeJson(value: unknown): void {
   visit(value, 0);
   ensure(bytes <= PROTOTYPE_MAX_BYTES, 'PROTOTYPE_LIMIT', 'Workspace exceeds its 32 MB budget.');
 }
-export function object(value: unknown, keys: string[]): asserts value is Record<string, unknown> {
+export function prototypeObject(value: unknown, keys: string[]): asserts value is Record<string, unknown> {
   ensure(value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === keys.length && keys.every(k => Object.hasOwn(value, k)),
     'PROTOTYPE_SHAPE', 'Unexpected or missing fields.');
 }

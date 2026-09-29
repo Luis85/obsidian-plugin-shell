@@ -6,6 +6,8 @@ export const settingsPath = 'configs/user-settings.json';
 export const setupStatePath = 'configs/project-setup.json';
 export interface UserSettings {
   schemaVersion: 1;
+  /** The documentation feature owns semantic validation of this shared namespace. */
+  documentation?: Record<string, unknown>;
   paths: { prds: string; project: string; prototypes: string; app: string; brief: string; firstRunReport: string };
   preferences: { author: string; ui: 'auto' | 'tui' | 'plain'; vaultConfigDirectory: string; scanRecursive: boolean; firstRun: FirstRunPreferences };
 }
@@ -59,15 +61,31 @@ function readPreferences(input: unknown, baseline: UserSettings['preferences']):
   return result;
 }
 export function readSettings(value: unknown, baseline: UserSettings = defaultSettings): UserSettings {
-  const raw = object(value); keys(raw, ['schemaVersion', 'paths', 'preferences']);
+  const raw = object(value); keys(raw, ['schemaVersion', 'paths', 'preferences', 'documentation']);
   requireSketch(raw.schemaVersion === 1, 'SETTINGS_VERSION', 'Expected settings schemaVersion 1. Existing bytes have not been changed.');
   const preferences = readPreferences(raw.preferences ?? {}, baseline.preferences);
-  return { schemaVersion: 1, paths: readPaths(raw.paths ?? {}, baseline.paths, preferences.vaultConfigDirectory), preferences };
+  const documentation = mergeDocumentation(raw.documentation, baseline.documentation);
+  return { schemaVersion: 1, paths: readPaths(raw.paths ?? {}, baseline.paths, preferences.vaultConfigDirectory), preferences,
+    ...(documentation === undefined ? {} : { documentation }) };
+}
+/** Partial maker updates retain the documentation owner's complete data, including its safety policy. */
+function mergeDocumentation(input: unknown, baseline?: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (input === undefined) return baseline === undefined ? undefined : structuredClone(baseline);
+  const raw = object(input), previous = baseline ?? {};
+  const value = { ...structuredClone(previous), ...structuredClone(raw) };
+  if (raw.paths !== undefined) value.paths = { ...object(previous.paths ?? {}), ...object(raw.paths) };
+  return value;
 }
 export const settingsSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema', title: 'Shell user settings (partial update or complete file)',
   type: 'object', additionalProperties: false, required: ['schemaVersion'], properties: {
-    schemaVersion: { const: 1 }, paths: { type: 'object', additionalProperties: false,
+    schemaVersion: { const: 1 }, documentation: { type: 'object', additionalProperties: false, properties: {
+      root: { type: 'string' }, indexFile: { type: 'string' }, paths: { type: 'object', additionalProperties: { type: 'string' } },
+      recursive: { type: 'boolean' }, linkFormat: { enum: ['markdown', 'wikilink'] },
+      include: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 240 } },
+      exclude: { type: 'array', maxItems: 32, items: { type: 'string', maxLength: 240 } },
+      preserveAuthoredContent: { const: true }, conflictPolicy: { const: 'review' }, deleteMissing: { const: false },
+    } }, paths: { type: 'object', additionalProperties: false,
       properties: Object.fromEntries(Object.keys(defaultSettings.paths).map(name => [name, { type: 'string', minLength: 1, maxLength: 240 }])) },
     preferences: { type: 'object', additionalProperties: false, properties: {
       vaultConfigDirectory: { type: 'string', minLength: 1, maxLength: 100 },

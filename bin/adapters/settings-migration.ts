@@ -1,3 +1,4 @@
+import { validateDocumentationSettings } from './settings-documentation.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
 import { hash } from '../../scripts/framework/files.ts';
@@ -66,6 +67,7 @@ function verifySources(plan: Awaited<ReturnType<typeof createFilePlan>>, files: 
 /** Explicit migration is a reviewed file transaction, never a settings-only path rewrite. */
 export async function settingsMigrationPlan(root: string, input: unknown) {
   const loaded = await loadSettings(root), settings = readSettings(input, loaded.settings);
+  validateDocumentationSettings(settings);
   const moves = movesFor(loaded.settings, settings);
   requireSketch(moves.length, 'MIGRATION_EMPTY', 'No configured paths changed; use settings for preference updates.');
   verifyDestinations(moves, loaded.settings);

@@ -1,3 +1,4 @@
+import { validateDocumentationSettings } from './settings-documentation.ts';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
@@ -17,10 +18,13 @@ export async function guardedText(root: string, path: string): Promise<{ content
 }
 export async function loadSettings(root: string): Promise<{ settings: UserSettings; content: string | null; beforeHash: string | null }> {
   const read = await guardedText(root, settingsPath);
-  return { ...read, settings: read.content === null ? structuredClone(defaultSettings) : readSettings(parseJsonData(read.content)) };
+  const settings = read.content === null ? structuredClone(defaultSettings) : readSettings(parseJsonData(read.content));
+  validateDocumentationSettings(settings);
+  return { ...read, settings };
 }
 export async function settingsPlan(root: string, input: unknown) {
   const current = await loadSettings(root), settings = readSettings(input, current.settings);
+  validateDocumentationSettings(settings);
   const state = await guardedText(root, setupStatePath);
   requireSketch(state.content === null || JSON.stringify(settings.paths) === JSON.stringify(current.settings.paths), 'SETTINGS_MIGRATION_REQUIRED', 'This project is already set up. Moving paths needs an explicit file migration; settings do not move files. Preferences remain editable.');
   const entries: Entry[] = [{ path: settingsPath, content: jsonText(settings) }];

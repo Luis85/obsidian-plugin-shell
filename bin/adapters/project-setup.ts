@@ -1,3 +1,4 @@
+import { validateDocumentationSettings } from './settings-documentation.ts';
 import { lstat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -87,6 +88,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
   requireSketch(!signal?.aborted, 'CANCELLED', 'Setup cancelled.');
   const data = request(input);
   const current = await loadSettings(root), settings = data.settings === undefined ? current.settings : readSettings(data.settings, current.settings);
+  validateDocumentationSettings(settings);
   const prerequisites = await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
   const existingState = await guardedText(root, setupStatePath);
   const requestHash = hash(jsonText(data));

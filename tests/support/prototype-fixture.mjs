@@ -12,7 +12,7 @@ export function document(label = 'Sitemap A') {
 export const main = {prototypeId:'exploration',versionId:'v1',variantId:'main'};
 export const alternate = {...main,variantId:'sitemap-b'};
 export function workspace() { return api.change(api.empty('design-lab'),{type:'create',id:'exploration',name:'Product exploration',description:'Compare alternatives',document:document()}); }
-export function approve(source,selection=main) { return api.change(source,{type:'status',selection,status:'approved'}); }
+function approve(source,selection=main) { return api.change(source,{type:'status',selection,status:'approved'}); }
 export function activate(source,selection=main) { return api.change(approve(source,selection),{type:'activate',selection}); }
 export function fork(source) { return api.change(source,{type:'fork',selection:main,id:'sitemap-b',name:'Sitemap B',hypothesis:'Find capture faster'}); }
 export { api };

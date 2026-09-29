@@ -1,3 +1,4 @@
+import { validateDocumentationSettings } from './settings-documentation.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash } from '../../scripts/framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
@@ -46,6 +47,7 @@ export async function setupCheckpointPlan(root: string, input: unknown) {
   const state = await guardedText(root, setupStatePath);
   requireSketch(state.content === null, 'CHECKPOINT_COMPLETED', 'Continue an initialized project using sketch.');
   const request = readSetupDraft(input, loaded.settings);
+  if (request.settings) validateDocumentationSettings(request.settings);
   const canonical = await createFilePlan(root, []);
   const fingerprint = await sourceHash(root, request);
   const checkpoint: Checkpoint = { schemaVersion: 1, producer: 'shell-setup-checkpoint', rootHash: hash(canonical.root),

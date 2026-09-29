@@ -1,7 +1,7 @@
 /** Portable directory codec, shared by browser export and the shell. No filesystem access. */
 import { PROTOTYPE_REGISTRY, PROTOTYPE_MAX_BYTES, prototypeFolder, snapshotPath, type PrototypeWorkspace, type ValidateDocument } from './model.ts';
 import { validateWorkspace, validateSelection } from './validate.ts';
-import { prototypeJson, object, slug, text, collection, ensure } from './safety.ts';
+import { prototypeJson, prototypeObject as object, slug, text, collection, ensure } from './safety.ts';
 export interface PrototypeFile { path: string; content: string }
 export type Digest = (text: string) => string | Promise<string>;
 export const prototypeJsonText = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
