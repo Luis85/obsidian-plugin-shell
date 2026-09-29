@@ -1,29 +1,29 @@
 import { variantStatuses, selectionKey, type PrototypeWorkspace, type PrototypeSelection, type ValidateDocument } from './model.ts';
-import { prototypeJson, object, text, slug, revision, collection, unique, ensure } from './safety.ts';
+import { prototypeJson, prototypeObject, text, slug, revision, collection, unique, ensure } from './safety.ts';
 export function validateSelection(value: unknown): asserts value is PrototypeSelection {
   prototypeJson(value);
-  object(value, ['prototypeId', 'versionId', 'variantId']); slug(value.prototypeId); slug(value.versionId); slug(value.variantId);
+  prototypeObject(value, ['prototypeId', 'versionId', 'variantId']); slug(value.prototypeId); slug(value.versionId); slug(value.variantId);
 }
 function assertWorkspace(input: unknown, validateDocument: ValidateDocument): asserts input is PrototypeWorkspace {
   prototypeJson(input);
-  object(input, ['kind', 'schemaVersion', 'projectId', 'revision', 'active', 'prototypes']);
+  prototypeObject(input, ['kind', 'schemaVersion', 'projectId', 'revision', 'active', 'prototypes']);
   ensure(input.kind === 'workbench-prototype-workspace' && input.schemaVersion === 1, 'PROTOTYPE_VERSION', 'Unsupported prototype workspace format.');
   text(input.projectId); revision(input.revision); collection(input.prototypes, 40);
   if (input.active !== null) validateSelection(input.active);
   const activeSelection = input.active;
   const active: string[] = [], ids: string[] = []; let snapshots = 0;
   for (const p of input.prototypes) {
-    object(p, ['id', 'name', 'description', 'archived', 'versions']); slug(p.id); text(p.name); text(p.description, 2000, true);
+    prototypeObject(p, ['id', 'name', 'description', 'archived', 'versions']); slug(p.id); text(p.name); text(p.description, 2000, true);
     ensure(typeof p.archived === 'boolean', 'PROTOTYPE_SHAPE', 'Invalid archive state.'); ids.push(p.id);
     collection(p.versions, 40); ensure(p.versions.length > 0, 'PROTOTYPE_SHAPE', 'A prototype needs a version.');
     const versions: string[] = [];
     for (const v of p.versions) {
-      object(v, ['id', 'label', 'sealed', 'variants']); slug(v.id); text(v.label); versions.push(v.id);
+      prototypeObject(v, ['id', 'label', 'sealed', 'variants']); slug(v.id); text(v.label); versions.push(v.id);
       ensure(typeof v.sealed === 'boolean', 'PROTOTYPE_SHAPE', 'Invalid version seal.'); collection(v.variants, 40);
       ensure(v.variants.length > 0, 'PROTOTYPE_SHAPE', 'A version needs a variant.'); const variants: string[] = [];
       for (const item of v.variants) {
         ensure(++snapshots <= 200, 'PROTOTYPE_LIMIT', 'Workspace supports at most 200 saved variants.');
-        object(item, ['id', 'name', 'hypothesis', 'status', 'revision', 'document']); slug(item.id); text(item.name); text(item.hypothesis, 2000, true); revision(item.revision);
+        prototypeObject(item, ['id', 'name', 'hypothesis', 'status', 'revision', 'document']); slug(item.id); text(item.name); text(item.hypothesis, 2000, true); revision(item.revision);
         ensure(variantStatuses.some(s => s === item.status), 'PROTOTYPE_STATUS', 'Unknown variant status.'); variants.push(item.id);
         const document = validateDocument(item.document);
         ensure(document.project.id === input.projectId, 'PROTOTYPE_PROJECT', 'Every snapshot must belong to this project.');
