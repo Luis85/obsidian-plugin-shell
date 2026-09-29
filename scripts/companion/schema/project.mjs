@@ -1,3 +1,4 @@
+import { PRD_LIMITS } from '../prd-limits.mjs';
 import { toolingSchema } from '../tooling-contract.mjs';
 /** Public current transport schema. Semantic validation remains the shared authoring validator. */
 import { reference as ref, record, text, integer, list, json, jsonDefinition } from './primitives.mjs';
@@ -14,7 +15,7 @@ const identity = record({ id: { ...text(60, 1), pattern: '^[a-z][a-z0-9]*(?:-[a-
 const legacyRecord = record({ id: text(120, 1) }, ['id'], json);
 const opaque = description => ({ ...json, description });
 const design = record({ schema: { const: 6 }, blueprint: text(80, 1), goal: text(1000), platform: { enum: ['desktop', 'mobile-ready'] },
-  nextId: integer(1), nodes: list(ref('surface'), 60), links: list(ref('transition'), 120), library: list(legacyRecord, 200), prds: list(legacyRecord, 12),
+  nextId: integer(1), nodes: list(ref('surface'), 60), links: list(ref('transition'), 120), library: list(legacyRecord, 200), prds: list(legacyRecord, PRD_LIMITS.count),
   librarySchema: json, canvas: ref('canvas'), sitemap: ref('sitemap'), features: ref('features'), nativeIntegrations: nativeSchema,
   editors: record({ schema: { const: 1 }, bindings: list(record({ surface: text(120, 1), editor: { const: 'journey-lens' } }), 60) }),
   semantic: opaque('Retained semantic authoring namespace; compiler validation resolves entity/relationship contracts.'),
@@ -22,7 +23,7 @@ const design = record({ schema: { const: 6 }, blueprint: text(80, 1), goal: text
   designSystem: designSystemSchema,
   storymaps: storymapsSchema,
   visualDesigns: ref('visualDesigns'),
-}, ['schema', 'blueprint', 'goal', 'platform', 'nextId', 'nodes', 'links', 'library', 'prds']);
+}, ['schema', 'blueprint', 'goal', 'platform', 'nextId','nodes', 'links', 'library', 'prds']);
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   $id: 'urn:obsidian-plugin-shell:companion-project:6',

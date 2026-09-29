@@ -1,3 +1,6 @@
+import { PRD_LIMITS } from '../../scripts/companion/prd-limits.mjs';
+export { PRD_LIMITS } from '../../scripts/companion/prd-limits.mjs';
+import { object } from './data.ts';
 import { requireSketch, slug } from './errors.ts';
 import { text } from './data.ts';
 export interface PrdMarkdown { id: string; title: string; markdown: string; requirements: never[] }
@@ -30,13 +33,21 @@ function identityFields(frontmatter: string): Record<string, string> {
 }
 /** Identity-only scalar frontmatter intake. The complete original Markdown is retained.
  * Not a general YAML parser: identity aliases, tags, collections and blocks fail explicitly. */
-export function typedPrd(markdown: string, filename: string): PrdMarkdown | null {
-  requireSketch(new TextEncoder().encode(markdown).length <= 250_000 && !markdown.includes('\0'), 'PRD_LIMIT', 'PRDs must be UTF-8 text under 250 KB, without NUL.');
+export function prdFrontmatter(markdown: string, filename: string): string | null {
+  requireSketch(new TextEncoder().encode(markdown).length <= PRD_LIMITS.bytes && !markdown.includes('\0'), 'PRD_LIMIT', 'PRDs must be UTF-8 text under 250 KB, without NUL.');
   const normalized = markdown.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
   if (!normalized.startsWith('---\n')) return null;
   const close = /^---[ \t]*$/m.exec(normalized.slice(4));
   requireSketch(close, 'PRD_FRONTMATTER', 'Unclosed Markdown frontmatter: ' + filename);
-  const fields = identityFields(normalized.slice(4, 4 + close.index));
+  return normalized.slice(4,4+close.index);
+}
+/** Legacy callers retain scalar parsing; file intake supplies identities decoded by the pinned YAML adapter. */
+export function typedPrd(markdown: string, filename: string, metadata?: unknown): PrdMarkdown | null {
+  const frontmatter = prdFrontmatter(markdown,filename);
+  if (frontmatter === null) return null;
+  const raw = metadata === undefined ? identityFields(frontmatter) : object(metadata);
+  const fields: Record<string,string> = {};
+  for (const key of ['type','id','title']) if (raw[key] !== undefined) fields[key] = text(raw[key],key,key === 'title' ? 120 : 100);
   if (fields.type?.toLowerCase() !== 'prd') return null;
   const name = filename.split('/').at(-1)!.replace(/\.md$/i, '');
   const id = fields.id ?? slug(name, 'prd');
