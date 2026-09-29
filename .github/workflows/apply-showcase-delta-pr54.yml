@@ -1,0 +1,129 @@
+name: Apply tested showcase delta to PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/apply-showcase-delta-pr54.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Restore and three-way merge tested delta
+        shell: bash
+        env:
+          EXPECTED_HEAD: 8ab047ca77d110f8164972118e583914fe95d825
+          BASELINE: 172e8ac164bf98fca8935a6435d722f17731139a
+          PAYLOAD_SHA256: 0ec663e336bcbc52adae0b20dbf670590a56b840e2d45ea00dc5917ddaf43292
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git fetch --no-tags origin chore/companion-starter-build-inputs
+          git show origin/chore/companion-starter-build-inputs:.github/pr54-showcase-payload/payload.b64 > "$RUNNER_TEMP/payload.b64"
+          base64 -d "$RUNNER_TEMP/payload.b64" > "$RUNNER_TEMP/payload.tar.xz"
+          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/payload.tar.xz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/candidate"
+          tar -xJf "$RUNNER_TEMP/payload.tar.xz" -C "$RUNNER_TEMP/candidate"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, subprocess, shutil, sys
+
+          root = Path.cwd()
+          candidate = Path(os.environ['RUNNER_TEMP']) / 'candidate'
+          baseline = os.environ['BASELINE']
+          conflicts = []
+
+          def git_bytes(*args):
+              return subprocess.run(['git', *args], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
+
+          files = sorted(p for p in candidate.rglob('*') if p.is_file())
+          for source in files:
+              rel = source.relative_to(candidate).as_posix()
+              target = root / rel
+              base_probe = subprocess.run(['git','cat-file','-e',f'{baseline}:{rel}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+              if base_probe.returncode != 0:
+                  if target.exists() and target.read_bytes() != source.read_bytes():
+                      conflicts.append(rel + ' (add/add)')
+                      continue
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(source, target)
+                  continue
+
+              base = Path(os.environ['RUNNER_TEMP']) / 'base-file'
+              current = Path(os.environ['RUNNER_TEMP']) / 'current-file'
+              merged = Path(os.environ['RUNNER_TEMP']) / 'merged-file'
+              base.write_bytes(git_bytes('show', f'{baseline}:{rel}'))
+              if target.exists():
+                  current.write_bytes(target.read_bytes())
+              else:
+                  conflicts.append(rel + ' (modify/delete)')
+                  continue
+              result = subprocess.run(['git','merge-file','-p',str(current),str(base),str(source)], stdout=subprocess.PIPE)
+              if result.returncode > 0:
+                  conflicts.append(rel)
+                  continue
+              merged.write_bytes(result.stdout)
+              target.write_bytes(merged.read_bytes())
+
+          deletions = [
+              'scripts/concepts/starter-bridge.js',
+              'scripts/concepts/starter-workspace.mjs',
+              'scripts/starters/companion.mjs',
+              'scripts/starters/limits.ts',
+              'tests/concepts/companion-starters.browser.mjs',
+              'tests/tooling/starter-authoring.checks.mjs',
+              'tests/tooling/starter-manual.checks.mjs',
+          ]
+          for rel in deletions:
+              target = root / rel
+              if not target.exists():
+                  continue
+              base = git_bytes('show', f'{baseline}:{rel}')
+              if target.read_bytes() != base:
+                  conflicts.append(rel + ' (delete/modify)')
+              else:
+                  target.unlink()
+
+          if conflicts:
+              print('Unresolved three-way conflicts:', file=sys.stderr)
+              for item in conflicts:
+                  print(' - ' + item, file=sys.stderr)
+              sys.exit(2)
+          PY
+
+          git add -A
+          git diff --cached --check
+          test -z "$(git diff --cached --name-only | grep '^\.github/pr54-showcase-payload/' || true)"
+          git status --short
+      - name: Dependency-free starter checks
+        run: |
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs --check
+      - name: Install qualified dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck and build current authoring
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          node scripts/concepts/build-mvp.mjs
+      - name: Showcase and runtime acceptance
+        run: |
+          node --test --test-concurrency=1 tests/tooling/starter-golden.checks.mjs tests/tooling/starter-runtime-assets.checks.mjs tests/tooling/project-generator-boundaries.checks.mjs tests/tooling/project-generator-visual-files.checks.mjs
+          node tests/concepts/feature-showcase.browser.mjs
+          python3 tests/concepts/companion-mvp.browser.py
+      - name: Commit and push PR54
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat(starters): add Companion golden template and full visual showcase' -m 'Add the external Companion golden starter, empty-start authoring workflow, feature showcase, runtime coverage checks, local icon assets and reviewed license provenance. Three-way merged against current PR5 so concurrent Angular setup, first-run and prototype work is preserved.'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
