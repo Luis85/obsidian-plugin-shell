@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+import { configuredArguments } from './adapters/setup-command.ts';
+import { loadSettings } from './adapters/user-settings.ts';
+import { projectSetupWizard } from './presentation/project-setup-wizard.ts';
+import { settingsWizard } from './presentation/settings.ts';
 import { projectWizard } from './presentation/project-wizard.ts';
 import { readSnapshot } from './adapters/storage.ts';
 import { resolve } from 'node:path';
@@ -22,7 +26,9 @@ function canInteract(args: Arguments, io: IO): boolean {
 }
 async function interactive(args: Arguments, context: CommandContext, io: IO, controller: AbortController): Promise<void> {
   const env = io.env ?? process.env;
-  const mode = option(args, 'ui', env.SHELL_UI ?? 'auto');
+  const loaded = await loadSettings(context.root);
+  args = await configuredArguments(args, context.root);
+  const mode = option(args, 'ui', env.SHELL_UI ?? loaded.settings.preferences.ui);
   const terminal = useTerminal(mode, io.input, io.error, env)
     ? new TerminalSession({ input: io.input, output: io.error, signal: controller.signal, cancel: () => controller.abort(), color: useColor(args.flags['no-color'] === true, env) }) : undefined;
   const ui = {
@@ -42,6 +48,8 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
 
 interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
+  if (args.command === 'project-setup') return projectSetupWizard(ui, context);
+  if (args.command === 'settings') { await settingsWizard(ui, context); return; }
   if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
     if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
     return await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,

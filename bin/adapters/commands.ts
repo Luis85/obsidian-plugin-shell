@@ -1,3 +1,4 @@
+import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
 import { newProjectCommand } from './project-command.ts';
@@ -12,13 +13,24 @@ import { requireSketch } from '../domain/errors.ts';
 import { runOperations, operationCatalog } from '../application/operations.ts';
 import { outline } from '../application/summary.ts';
 import { sketchSchema } from '../application/schema.ts';
-import { loadGuide, guideInput, prototypePlan } from './prototype.ts';
+import { guideInput, prototypePlan } from './prototype.ts';
+import { prototypeContext } from './prototype-context.ts';
 import { readSnapshot, readData, savePlan, applyPrepared } from './storage.ts';
 import { boilerplatePlan } from './compiler.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal }
 export const makerHelp = `Shell maker — make first, generate when ready
+  node shell.mjs project-setup         Angular setup in an existing Git + Obsidian vault
+  node shell.mjs project-setup schema --json
+  node shell.mjs project-setup guide --json
+  node shell.mjs project-setup scan --json
+  node shell.mjs project-setup --input setup.json --json
+  node shell.mjs project-setup status --json
+  node shell.mjs settings              Edit configs/user-settings.json
+  node shell.mjs settings show --json
+  node shell.mjs settings schema --json
+  node shell.mjs settings --input settings.json --json
   node shell.mjs                       Open saved workspace or create a project (terminal only)
   node shell.mjs new                   Preset → framework → prototype guide
   node shell.mjs new presets --json    Discover project presets and compatible frameworks
@@ -65,7 +77,7 @@ function parseFlags(tokens: string[]): Record<string, string | boolean> {
 export function parseArguments(argv: string[]): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio' || first === 'new', 'MAKER_COMMAND', 'Use new, sketch, prototype or studio.');
+  requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio' || first === 'new' || first === 'settings' || first === 'project-setup', 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
   const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens);
@@ -120,24 +132,25 @@ async function sketch(args: Arguments, context: CommandContext): Promise<Record<
     : { document: snapshot.document, content: documentText(snapshot.document) };
 }
 async function prototype(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  const selected = option(args, 'guide');
-  const guide = await loadGuide(selected ? resolve(context.root, selected) : undefined);
-  if (args.action === 'guide') return { guide, input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default])) } };
+  const { guide, selection } = await prototypeContext(context.root, option(args, 'guide') || undefined);
+  if (args.action === 'guide') return { guide, selection, input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default])) } };
   const input = await inputData(args, context);
   if (args.action === 'validate') { const result = guideInput(guide, input); return { ...result, ready: !result.pending.length }; }
   requireSketch(!args.action, 'MAKER_COMMAND', 'Unknown prototype action.');
   const snapshot = await readSnapshot(context.root, option(args, 'project', 'design/project.json'));
-  const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document });
+  const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document, selection });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   if (args.flags.help || args.command === 'studio') {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype'],
-      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype'] } : {}), interactive: false };
+    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype', 'settings', 'project-setup'],
+      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup'] } : {}), interactive: false };
   }
   if (args.command === 'new') return newProjectCommand(args, context);
+  if (args.command === 'settings' || args.command === 'project-setup') return setupCommand(args, context, () => inputData(args, context));
+  args = await configuredArguments(args, context.root);
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
   return args.command === 'sketch' ? sketch(args, context) : prototype(args, context);
 }

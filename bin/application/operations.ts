@@ -1,3 +1,4 @@
+import { entityAdd, entityProperties, sourceAdd, brickRename, routeSet, pageParent, journeyAdd, groupAdd, navigationAdd } from '../domain/bricks.ts';
 import { editDocument, type SketchDocument } from '../domain/document.ts';
 import { addPage, renamePage, moveNode, setPageLayout } from '../domain/pages.ts';
 import { addComponent, attachComponents, renameComponent, removeNode, type ComponentChoice } from '../domain/components.ts';
@@ -38,6 +39,15 @@ function action(state: Transaction, op: Operation): void {
   requireSketch(false, 'MAKER_ACTION', 'Use todo, navigate or set-state. No executable expressions are accepted.');
 }
 const handlers: Record<string, Handler> = {
+  'entity.add': { fields: ['title'], run: (s, o) => entityAdd(s.document, o.title) },
+  'entity.properties': { fields: ['id', 'properties'], run: (s, o) => entityProperties(s.document, ref(s, o.id), o.properties) },
+  'data-source.add': { fields: ['title', 'kind'], run: (s, o) => sourceAdd(s.document, o.title, o.kind) },
+  'brick.rename': { fields: ['kind', 'id', 'title'], run: (s, o) => brickRename(s.document, o.kind, ref(s, o.id), o.title) },
+  'sitemap.route': { fields: ['page', 'path'], run: (s, o) => routeSet(s.document, ref(s, o.page), o.path) },
+  'sitemap.parent': { fields: ['page', 'parent'], run: (s, o) => pageParent(s.document, ref(s, o.page), o.parent === null ? null : ref(s, o.parent)) },
+  'sitemap.group': { fields: ['title'], run: (s, o) => groupAdd(s.document, o.title) },
+  'sitemap.link': { fields: ['from', 'to', 'title'], run: (s, o) => navigationAdd(s.document, ref(s, o.from), ref(s, o.to), o.title) },
+  'journey.add': { fields: ['title', 'pages'], run: (s, o) => journeyAdd(s.document, o.title, list(o.pages, 'pages', 120).map(id => ref(s, id))) },
   'page.add': { fields: ['title'], run: (s, o) => addPage(s.document, text(o.title, 'title')) },
   'page.rename': { fields: ['id', 'title'], run: (s, o) => renamePage(s.document, ref(s, o.id), text(o.title, 'title')) },
   'page.layout': { fields: ['id', 'layout'], run(s, o) {

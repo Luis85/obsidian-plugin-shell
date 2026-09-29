@@ -1,3 +1,4 @@
+import { serveSource } from './serve-source.ts';
 import { angularLinkerSource } from './angular-linker.ts';
 import { json, type Model } from '../../../companion/compiler/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
@@ -58,6 +59,7 @@ export function renderPresetProject(model: Model, template: TemplateSnapshot, in
     'prototype.acceptance.json': json({ stage: 'not-implemented', targets: selected.targets.map(target => ({ target, build: 'not-run', runtime: 'not-run', businessAcceptance: 'not-run' })),
       remaining: ['Implement agreed domain actions and visual components.', 'Test actual keyboard/focus, empty, failure and cancel journeys.', 'Measure built artifact and source hashes.', 'Qualify a disposable Obsidian host for plugin targets; do not infer from the browser preview.'] }),
   };
+  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource;
   if (visual) {
     files['scripts/licenses.mjs'] = licenseSource;
     files['src/targets/preview/main.ts'] = browserSource(selected, id);

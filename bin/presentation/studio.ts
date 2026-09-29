@@ -1,14 +1,16 @@
+import { editBricks } from './brick-editor.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
-import { resolve } from 'node:path';
 import { newDocument } from '../domain/document.ts';
 import { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
 import { readSnapshot, savePlan } from '../adapters/storage.ts';
 import { boilerplatePlan } from '../adapters/compiler.ts';
-import { loadGuide, prototypePlan } from '../adapters/prototype.ts';
+import { prototypePlan } from '../adapters/prototype.ts';
+import { prototypeContext } from '../adapters/prototype-context.ts';
+import { loadSettings } from '../adapters/user-settings.ts';
 import { interview } from './guide.ts';
 import { editPage } from './page-editor.ts';
 import { review } from './review.ts';
@@ -20,12 +22,13 @@ async function savedWorkspace(options: StudioOptions): Promise<Workspace | undef
   return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
 }
 export async function prototypeWizard(ui: Prompts, options: StudioOptions, workspace?: Workspace): Promise<string | undefined> {
-  const guide = await loadGuide(options.guide ? resolve(options.root, options.guide) : undefined);
+  const { guide, selection } = await prototypeContext(options.root, options.guide);
+  const configured = await loadSettings(options.root);
   workspace ??= await savedWorkspace(options);
   const answers = await interview(ui, guide, workspace ? { title: workspace.document.project.name, pages: outline(workspace.document).pages.map(item => item.title) } : {});
-  const out = await input(ui, 'Package output folder', options.out ?? 'prototypes/prepared-prototype');
+  const out = await input(ui, 'Package output folder', options.out ?? (configured.content ? configured.settings.paths.prototypes : 'prototypes/prepared-prototype'));
   ui.rich?.busy('Preparing prototype documents and source. No files written yet.');
-  const plan = await prototypePlan({ ...options, out, guide, baseline: workspace?.document ?? null,
+  const plan = await prototypePlan({ ...options, out, guide, selection, baseline: workspace?.document ?? null,
     input: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers } });
   if (!await review(ui, plan, options.signal)) return;
   const completion = `Start with ${out}/execution-prompt.md. The complete source scaffold is under ${out}/source/.\n`;
@@ -70,8 +73,9 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
       await editPage(ui, workspace, result.created[0]!);
     } },
     page: { label: 'Continue an existing page', run: () => selectPage(ui, workspace) },
+    bricks: { label: 'Edit sitemap, layout, entities, data sources and journeys', run: () => editBricks(ui, workspace) },
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
-    prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, options, workspace) },
+    prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, { ...options, out: undefined }, workspace) },
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
