@@ -30,6 +30,14 @@ The document contains ten BQ acceptance clauses, ten BQA test protocols, explici
 
 These documents define required outcomes and planned execution, not executed qualification. They supplement the retained contracts below without changing task states or authorizing publication. The native full-product obligation remains; an earlier framework shipment does not close the complete MVP.
 
+## Typed MVP backlog and progress
+
+The [requirements index](../requirements/README.md) decomposes the MVP into **54 use-case PBIs**, **8 JTBD epics**, **28 features** and **216 initial acceptance criteria**. Each requirement file has `type: PBI` and explicit lifecycle, ownership, dependency, source and evidence metadata.
+
+Use [PBI governance](../requirements/GOVERNANCE.md) for the IREB-aligned tailoring, metadata contract, review, readiness and completion rules; [traceability](../requirements/TRACEABILITY.md) for the retained MVP/WM/BQ/A/WVA/BQA mappings; and [progress](../requirements/PROGRESS.md) for evidence-backed acceptance by epic, feature, outcome and delivery increment. The read-only reporting commands and [validation record](../requirements/VALIDATION.md) are linked from the index.
+
+The initial records are `new` and unaccepted until existing implementation and current evidence are reconciled. Zero accepted PBIs in this new baseline does not mean zero implemented product functionality. Existing task frontmatter remains the execution-status authority; PBI acceptance and a local progress report do not grant publication approval.
+
 ## Requirements and delivery
 
 | Document | Scope |
