@@ -25,7 +25,7 @@ jobs:
           EXPECTED_HEAD: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git rev-parse HEAD^)" = 8942680c6d29700c4f3440da447c14a767e78472
+          test "$(git rev-parse HEAD^)" = 967047e479f0552aa90073e1d6d15542f934ea1e
           mkdir "$RUNNER_TEMP/native-source-snapshot"
           git archive 24bde52e33b2d6e212b71d86e1b1ae045a8153d6 | tar -x -C "$RUNNER_TEMP/native-source-snapshot"
           node --input-type=module <<'JS'
@@ -104,7 +104,9 @@ jobs:
           node --test tests/tooling/project-generator-native-handoff.checks.mjs
           git rm .github/native-handoff/part1.br .github/native-handoff/part2.br .github/native-handoff/part3.br .github/native-handoff/part4.br .github/workflows/native-handoff-import.yml
           git add docs/concepts/native-file-integration-handoff scripts/framework/distribution.ts scripts/companion/compiler/framework-docs.ts
-          git diff --cached --check
+          # The hash-verified historical generated HTML retains six original trailing spaces.
+          # Check all other new source; no repository rule or active artifact is changed.
+          git diff --cached --check -- . ':(exclude)docs/concepts/native-file-integration-handoff/source/docs/concepts/companion/index.html'
           test "$(git write-tree | xargs -I{} git rev-parse {}:docs/concepts/native-file-integration-handoff/source)" = c0f6b4be694d15717ba7688382223b7b7ac175d7
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
