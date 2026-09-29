@@ -1,8 +1,10 @@
 // Data-only source catalog. Rendering and source previews never open a connection.
-const DS_KINDS = Object.freeze({vault:'Obsidian vault',api:'External service / API',database:'Database'});
+const DS_KINDS = Object.freeze({vault:'Obsidian vault',collection:'Collection · Markdown records',api:'External service / API',database:'Database'});
 const DS_DIRECTIONS = Object.freeze({read:'Read · source → card',write:'Write · card → source',both:'Read & write · source ↔ card'});
 const DS_TYPES = ['string','number','integer','boolean','object','array','null'];
 const DS_LIMITS = Object.freeze({sources:24,operations:12,flows:120,fields:40,schemaBytes:12000});
+function dsVaultKind(kind){return kind==='vault'||kind==='collection';}
+function dsCollectionPathValid(path){return dsText(path,120)&&path.length>0&&validVaultRelativePath(path)&&!path.split('/').some(p=>p.startsWith('.'));}
 function emptyDataSources(){return {schema:1,nextId:1,sources:[],flows:[],positions:{}};}
 function dataSources(d=design()){if(!d.dataSources)d.dataSources=emptyDataSources();return d.dataSources;}
 function dsPlain(v){return v!==null&&typeof v==='object'&&!Array.isArray(v);}
@@ -42,7 +44,7 @@ function dsShapeValid(s){
  return s.schema===null&&s.many===false;
 }
 function dsLocatorValid(source){
- if(source.kind==='vault')return source.locator==='vault://active'&&source.auth==='none'&&source.credentialRef==='';
+ if(dsVaultKind(source.kind))return source.locator==='vault://active'&&source.auth==='none'&&source.credentialRef==='';
  if(source.kind==='database')return source.locator===''||dsKey(source.locator);
  if(!source.locator)return true;
  try{const u=new URL(source.locator);return u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash&&!/[\s\\\x00-\x1f]/.test(source.locator)&&!/%(?:0[0-9a-f]|1[0-9a-f]|7f)/i.test(source.locator);}catch{return false;}
@@ -50,7 +52,7 @@ function dsLocatorValid(source){
 function dsResourceValid(source,resource){
  if(!dsText(resource,240)||/[\\\x00-\x1f?#]/.test(resource)||resource.split('/').some(p=>['..','.','.obsidian','.git'].includes(p)))return false;
  if(source.kind==='api')return resource===''||/^\/[a-zA-Z0-9_\-/{},.]*$/.test(resource);
- if(source.kind==='vault')return resource===''||validVaultRelativePath(resource)&&!resource.split('/').some(p=>p.startsWith('.'));
+ if(dsVaultKind(source.kind))return resource===''||validVaultRelativePath(resource)&&!resource.split('/').some(p=>p.startsWith('.'))&&(source.kind!=='collection'||resource===source.collectionPath);
  return resource===''||/^[a-zA-Z][a-zA-Z0-9_.-]{0,119}$/.test(resource);
 }
 function dataSourcesShape(m){
@@ -58,10 +60,14 @@ function dataSourcesShape(m){
  if(!dsKeys(m,['schema','nextId','sources','flows','positions','testing'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
  const ids=[];
  for(const s of m.sources){
-  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
+  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations','collectionPath','entity'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
+  if(s.kind==='collection'){
+   if(!dsCollectionPathValid(s.collectionPath)||!/^er-entity-[1-9][0-9]*$/.test(s.entity)||s.operations.length!==4||
+     ['list','create','update','delete'].some(slug=>!s.operations.some(o=>o.slug===slug)))return false;
+  }else if(s.collectionPath!==undefined||s.entity!==undefined)return false;
   ids.push(s.id);
   for(const o of s.operations){
-   if(o.implementation!==undefined&&(!dsKeys(o.implementation,['kind','entity','operation'])||s.kind!=='vault'||o.implementation.kind!=='note'||!/^er-entity-[1-9][0-9]*$/.test(o.implementation.entity)||!['list','create','update','delete'].includes(o.implementation.operation)))return false;
+   if(o.implementation!==undefined&&(!dsKeys(o.implementation,['kind','entity','operation'])||!dsVaultKind(s.kind)||o.implementation.kind!=='note'||!/^er-entity-[1-9][0-9]*$/.test(o.implementation.entity)||!['list','create','update','delete'].includes(o.implementation.operation)))return false;
    if(!dsKeys(o,['id','slug','name','direction','method','resource','description','input','output','implementation'])||!dsId(o.id,'operation')||!dsSlug(o.slug)||!dsText(o.name,80)||!o.name.trim()||!Object.hasOwn(DS_DIRECTIONS,o.direction)||!['GET','POST','PUT','PATCH','DELETE','HEAD','adapter'].includes(o.method)||!dsResourceValid(s,o.resource)||!dsText(o.description,1000)||!dsShapeValid(o.input)||!dsShapeValid(o.output))return false;
    if(s.kind!=='api'&&o.method!=='adapter'||s.kind==='api'&&o.method==='adapter')return false;
    if(['GET','HEAD'].includes(o.method)&&o.direction!=='read')return false;
@@ -91,6 +97,13 @@ function dataSourceIssues(d,qualify=true){
  const usedIds=new Set([...d.nodes,...d.links].map(x=>x.id));
  for(const x of [...m.sources,...m.flows])if(usedIds.has(x.id))add('error','collision','Data-source and sitemap identities must be distinct.');
  for(const r of dsReferences(d))if(!d.semantic?.entities.some(e=>e.id===r.entity))add('error','entity','Data shape for '+r.source.name+' / '+r.operation.name+' references a missing entity.');
+ for(const source of m.sources.filter(s=>s.kind==='collection')){
+  const entity=d.semantic?.entities.find(e=>e.id===source.entity);
+  if(!entity)add('error','collection-entity',source.name+': choose an existing entity for this collection.');
+  else if(entity.folder!==source.collectionPath)add('error','collection-path',source.name+': collection path must match the entity note folder so generated Markdown CRUD has one canonical location.');
+  const expected=entity?dsCollectionCrud(source,d):[];
+  if(entity&&(source.operations.length!==expected.length||expected.some(e=>{const o=source.operations.find(x=>x.slug===e.slug);return !o||JSON.stringify({...o,id:null})!==JSON.stringify({...e,id:null});})))add('error','collection-contract',source.name+': refresh the managed CRUD contract after changing its entity schema or path.');
+ }
  for(const f of m.flows){
   const card=d.nodes.find(n=>n.id===f.card),source=m.sources.find(s=>s.id===f.source),op=source.operations.find(o=>o.id===f.operation);
   if(!card||card.kind==='group')add('error','card','Data flow '+f.label+' needs an existing view, screen, dialog, settings surface or action.');
@@ -125,4 +138,15 @@ function dsShapeLabel(s,d=design()){
  if(s.mode==='entity')return (d.semantic?.entities.find(e=>e.id===s.entity)?.name||'Missing entity')+(s.many?'[]':'');
  if(s.mode==='fields')return s.fields.length+(s.fields.length===1?' field':' fields')+(s.many?' · collection':'');
  return 'JSON Schema · '+s.schema?.type;
+}
+
+function dsCollectionCrud(source,d=design()){
+ const entity=d.semantic?.entities.find(e=>e.id===source.entity);if(!entity)return [];
+ const record=dsResolveShape({...dsNewShape('entity'),entity:entity.id},d);record.properties.type={type:'string',enum:[entity.slug]};
+ const valueProps=Object.fromEntries(Object.entries(record.properties||{}).filter(([key])=>!['id','type'].includes(key)));
+ const values={type:'object',properties:valueProps,required:(record.required||[]).filter(key=>!['id','type'].includes(key)),additionalProperties:false};
+ const object=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
+ const snapshot=object({record,revision:{type:'integer'}}),shape=schema=>schema===null?dsNewShape('none'):{...dsNewShape('schema'),schema};
+ const spec=[['list','List records','read',null,{type:'array',items:snapshot}],['create','Create record','write',object({values,requestId:{type:'string'}}),snapshot],['update','Update record','write',object({id:{type:'string'},revision:{type:'integer'},values}),snapshot],['delete','Delete record','write',object({id:{type:'string'},revision:{type:'integer'}}),null]];
+ return spec.map(([slug,name,direction,input,output])=>({id:null,slug,name,direction,method:'adapter',resource:source.collectionPath,description:'Managed Collection CRUD over Markdown notes in the active vault.',input:shape(input),output:shape(output),implementation:{kind:'note',entity:source.entity,operation:slug}}));
 }

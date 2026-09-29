@@ -12,19 +12,22 @@ function dsCommit(change){
  try{
   change(candidate.dataSources,candidate);
   const errors=dataSourceIssues(candidate,false).filter(i=>i.level==='error');if(errors.length)throw Error(errors[0].message);
-  if(JSON.stringify(candidate.dataSources)===JSON.stringify(m))return true;
-  const changed=JSON.stringify(dsGeneration(d))!==JSON.stringify(dsGeneration(candidate));recordDesign();d.dataSources=candidate.dataSources;
+  const semanticChanged=JSON.stringify(candidate.semantic)!==JSON.stringify(d.semantic);if(JSON.stringify(candidate.dataSources)===JSON.stringify(m)&&!semanticChanged)return true;
+  const changed=semanticChanged||JSON.stringify(dsGeneration(d))!==JSON.stringify(dsGeneration(candidate));recordDesign();d.dataSources=candidate.dataSources;if(semanticChanged)d.semantic=candidate.semantic;
   if(changed)designChanged();else save();return true;
  }catch(error){return dsFail(error.message);}
 }
 function dsFreshSource(kind='api'){
- const names={api:'External API',vault:'Active Obsidian vault',database:'Database'},base=semanticName(names[kind]);let slug=base,n=2;
+ const names={api:'External API',vault:'Active Obsidian vault',collection:'Collection',database:'Database'},base=semanticName(names[kind]);let slug=base,n=2;
  while(dataSources().sources.some(s=>s.slug===slug))slug=base+'-'+n++;
- return {id:null,name:n===2?names[kind]:names[kind]+' '+(n-1),slug,kind,status:'draft',description:'',locator:kind==='vault'?'vault://active':'',auth:'none',credentialRef:'',operations:[]};
+ const entity=kind==='collection'?design().semantic?.entities[0]:null;
+ return {id:null,name:n===2?names[kind]:names[kind]+' '+(n-1),slug,kind,status:'draft',description:'',locator:dsVaultKind(kind)?'vault://active':'',auth:'none',credentialRef:'',operations:[],...(kind==='collection'?{collectionPath:entity?.folder||'',entity:entity?.id||''}:{})};
 }
 function dsEditSource(id){const source=dataSources().sources.find(s=>s.id===id);if(id&&!source)return dsFail('This source no longer exists. Select a current source.');dsOpen('source',source||dsFreshSource());}
+function dsCollectionOperations(source,m,d,previous=[]){return dsCollectionCrud(source,d).map(def=>({...def,id:previous.find(o=>o.slug===def.slug)?.id||dsNext(m,'operation')}));}
 function dsEditOperation(value){
  const [sourceId,id]=value.split(':'),source=dataSources().sources.find(s=>s.id===sourceId);if(!source)return notify('Select an existing data source first.');
+ if(source.kind==='collection')return notify('Collection CRUD operations are managed from its path and entity. Edit the collection instead.');
  if(id&&!source.operations.some(o=>o.id===id))return dsFail('This operation no longer exists. Select a current operation.');
  const op=source.operations.find(o=>o.id===id)||{id:null,name:'Read records',slug:'read-records',direction:'read',method:source.kind==='api'?'GET':'adapter',resource:'',description:'',input:dsNewShape('none'),output:dsNewShape()};
  dsOpen('operation',{...op,sourceId,inputSchemaText:op.input.schema?JSON.stringify(op.input.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}',outputSchemaText:op.output.schema?JSON.stringify(op.output.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}'});
@@ -59,10 +62,12 @@ function dsSave(){
    const old=m.sources.find(s=>s.id===f.id);if(f.id&&!old)throw Error('The source no longer exists.');
    if(old&&old.slug!==f.slug.trim())throw Error('Source code names are stable.');
    if(old?.operations.length&&old.kind!==f.kind)throw Error('Keep the source kind while it has operations.');
-   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:f.kind==='vault'?'vault://active':f.locator.trim(),auth:f.kind==='vault'?'none':f.auth,credentialRef:f.kind==='vault'||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[]};
+   const collection=f.kind==='collection';
+   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:dsVaultKind(f.kind)?'vault://active':f.locator.trim(),auth:dsVaultKind(f.kind)?'none':f.auth,credentialRef:dsVaultKind(f.kind)||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[],...(collection?{collectionPath:f.collectionPath.trim(),entity:f.entity}:{})};
    if(!dsLocatorValid(s))throw Error(s.kind==='api'?'Use an HTTPS base URL without credentials, query parameters or fragments.':'Use a logical connection name, not a connection string or password.');
    if(!dsSlug(s.slug)||!s.name)throw Error('Enter a name and a portable, unique code name.');
    if(m.sources.some(x=>x.id!==s.id&&x.slug===s.slug))throw Error('That source code name already exists.');
+   if(collection){const entity=d.semantic?.entities.find(e=>e.id===s.entity);if(!entity)throw Error('Choose an existing entity for this collection.');if(!dsCollectionPathValid(s.collectionPath))throw Error('Use a non-hidden vault-relative collection path, for example Records/Tasks.');if(entity.folder&&entity.folder!==s.collectionPath)throw Error('This entity already uses '+entity.folder+'. Use that path or change the entity storage contract first.');if(!entity.folder)entity.folder=s.collectionPath;s.operations=dsCollectionOperations(s,m,d,old?.operations||[]);}
    if(old)m.sources[m.sources.indexOf(old)]=s;else m.sources.push(s);selected=s.id;
   }else if(f.formKind==='operation'){
    if(f.implementationText!==undefined)f.implementation=f.implementationText.trim()?JSON.parse(f.implementationText):undefined;
@@ -114,7 +119,7 @@ function handleDataSourceAction(action,value=''){
   case 'ds-flow':if(state.view==='sitemap'){selectSitemapItem('data-flow',value);paintMapSelection();}dsEditFlow(value);break;
   case 'ds-flow-reveal':if(!document.getElementById('modal').open||!askDiscardForm()){closeModal();dsRevealFlow(value);}break;
   case 'ds-remove-source':{if(requestInlineRemoval('remove-source',value))break;const s=dataSources().sources.find(s=>s.id===value);if(s)dsOpen('remove-source',s);break;}
-  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');if(requestInlineRemoval('remove-operation',id))break;const op=dataSources().sources.find(s=>s.id===sourceId)?.operations.find(o=>o.id===id);if(op)dsOpen('remove-operation',{id,sourceId});else dsFail('This operation no longer exists.');break;}
+  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');if(dataSources().sources.find(s=>s.id===sourceId)?.kind==='collection'){notify('Collection CRUD operations are managed. Remove or edit the collection instead.');break;}if(requestInlineRemoval('remove-operation',id))break;const op=dataSources().sources.find(s=>s.id===sourceId)?.operations.find(o=>o.id===id);if(op)dsOpen('remove-operation',{id,sourceId});else dsFail('This operation no longer exists.');break;}
   case 'ds-remove-flow':if(!requestInlineRemoval('remove-flow',value)){const f=dataSources().flows.find(f=>f.id===value);if(f)dsOpen('remove-flow',f);else dsFail('This data flow no longer exists.');}break;
   case 'ds-place':if(dsIsNode(value)&&dsCommit((m,d)=>dsPosition(value,m,d))){dsUi.show=true;selectSitemapItem('source',value);referenceUi.panel='inspector';designUi.mode='map';setView('sitemap');Vue.nextTick(()=>fitMap(true));}break;
   case 'ds-position':{const p=dataSources().positions[value];if(p)dsOpen('position',{id:value,x:String(p.x),y:String(p.y)});break;}
@@ -142,9 +147,10 @@ function editDataSourceField(el){
   return true;
  }
  if(key==='ds-implementation'){try{const value=el.value.trim();f.implementation=value?JSON.parse(value):undefined;}catch{dsUi.error='Native adapter metadata must be valid JSON.';} f.implementationText=el.value;return true;}
- const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
+ const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','collectionPath','entity','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
  if(name==='name'&&!f.id&&f.slug===semanticName(previous)){f.slug=semanticName(f.name);const control=document.getElementById('ds-slug');if(control)control.value=f.slug;}
- if(name==='kind'){f.locator=f.kind==='vault'?'vault://active':'';f.auth='none';f.credentialRef='';redrawModal();}
+ if(name==='kind'){f.locator=dsVaultKind(f.kind)?'vault://active':'';f.auth='none';f.credentialRef='';if(f.kind==='collection'){const e=design().semantic?.entities[0];f.entity=e?.id||'';f.collectionPath=e?.folder||'';}else{delete f.entity;delete f.collectionPath;}redrawModal();}
+ if(name==='entity'&&f.kind==='collection'){const e=design().semantic?.entities.find(x=>x.id===f.entity);if(e?.folder)f.collectionPath=e.folder;redrawModal();}
  if(name==='source'){const o=dataSources().sources.find(s=>s.id===f.source)?.operations[0];f.operation=o?.id||'';f.direction=o?.direction||'read';if(autoLabel)f.label=o?.name||'';redrawModal();}
  if(name==='operation'){const source=dataSources().sources.find(s=>s.id===f.source),o=source?.operations.find(o=>o.id===f.operation);if(o){if(autoLabel)f.label=o.name;f.direction=o.direction==='both'?f.direction:o.direction;}redrawModal();}
  if(name==='card')redrawModal();
