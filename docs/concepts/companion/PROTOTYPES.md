@@ -34,6 +34,20 @@ Activating an approved variant changes the previous active variant to approved. 
 
 **Seal version** freezes saved content and variant membership. Lifecycle statuses may still change; a seal is not an approval. **New version** deep-copies every variant from the selected version as new drafts, leaving the original checkpoint and active selection unchanged. Active prototypes cannot be archived until another variant is activated or the selection is deactivated. Archival retains files; there is deliberately no destructive delete action.
 
+## Compare, find and maintain saved solutions
+
+**Compare design** compares the selected complete snapshot with the current working copy or another saved prototype/version/variant. It includes all project fields, not just surface counts. Arrays are compared by position, so a reorder can appear as several changes. The preview shows at most 100 changed values or branches and 180 characters per value, with an explicit omitted count. Comparing never edits or activates a variant.
+
+Search the library by name, slug, version label, description or hypothesis; combine it with the status filter. A selection outside the results remains selected and is explicitly identified. Clear filters to reveal all variants. Filtering does not reorder persisted arrays or choose a different generator source.
+
+**Edit prototype details** changes its title/description. **Edit version label** changes an unsealed version's display label. Folder slugs and saved project contents do not change. Sealed version labels are also protected against replacement through import. Form input remains available after validation failure; leaving an unsubmitted form requires confirmation.
+
+## Restore a saved solution without losing the previous draft
+
+Select an editable target draft, choose **Compare design**, and select a different saved reference. **Restore reference into selected draft** first preserves the entire previous draft as a sealed `recovery-N` version, then replaces the target's saved project document. Review and confirm the action. The target's name and hypothesis remain; its snapshot revision advances. The current working editor and active generator selection stay unchanged.
+
+Open the restored draft explicitly to continue in the editors. To undo a restore, compare with its recovery checkpoint and restore that saved reference; this retains another checkpoint rather than destroying history. A sealed/archived target, active/non-draft target, duplicate recovery ID, identical source or exceeded limit rejects the complete change. Recovery must fit within the existing workspace limits.
+
 ## Files and interoperability
 
 ```text
@@ -47,7 +61,7 @@ docs/concepts/
 
 The registry and workspace use format version 1, independently of authoring project JSON v6. The single-file workspace bundle embeds all snapshots; its `active` property is either `null` or `{ "prototypeId": "exploration", "versionId": "v1", "variantId": "main" }`. Each variant records its ID, display name, hypothesis, status, snapshot revision and complete project document. The directory form replaces each embedded document with its derived `path` and SHA-256 digest. It does not introduce a second page/entity schema.
 
-The browser has no real vault access. It stores the library in the **existing project session**, exports workspace JSON for the shell, and offers **Export folders ZIP** with these exact paths. ZIP export requires Web Crypto. **Export active project** downloads only the pinned ordinary project JSON. The existing starter-generation handoff also uses the active saved snapshot; ordinary project backup still exports the working copy. A workspace import preserves the working copy; explicitly open a saved variant to replace it.
+The browser has no real vault access. It stores the library in the **existing project session**, exports workspace JSON for the shell, and offers **Export folders ZIP** with these exact paths. ZIP export requires Web Crypto. **Export active project** downloads only the pinned ordinary project JSON. Active-project filenames include the prototype/version/variant identifiers to distinguish exported alternatives. The existing starter-generation handoff also uses the active saved snapshot; ordinary project backup still exports the working copy. A workspace import preserves the working copy; explicitly open a saved variant to replace it.
 
 To persist a browser workspace safely, use `prototypes import`. Extracting its folder ZIP is a manual filesystem operation outside the shell's guarded plan workflow; do not overwrite an existing managed workspace by blindly extracting over it. Complete exported project JSON can also be consumed through the existing explicit `--input` compiler workflow.
 
@@ -88,6 +102,23 @@ For **in-place generation**, review `prototypes adopt` first. It imports the act
 
 Generated output receives `.companion/prototype-selection.json`, recording the selected prototype/version/variant, workspace and snapshot revisions, snapshot path and SHA-256. This is provenance, not verification evidence. Existing compiler ownership receipts and conflict checks remain intact. A reviewed generation plan is bound to the registry, manifests and saved snapshots: changing activation or source data makes it stale.
 
+### Comparison, metadata and recovery from the shell
+
+```sh
+# Read only: compare complete saved A/B documents.
+node shell.mjs prototypes compare exploration --version v1 --variant main --with-variant sitemap-b --json
+
+# Labels do not rename folders or activate a variant.
+node shell.mjs prototypes prototype-details exploration --name "Product alternatives" --description "Compare navigation approaches" --yes
+node shell.mjs prototypes version-details exploration --version v2 --label "Next iteration" --yes
+
+# Restore saved v1/main into editable v2/sitemap-b with a sealed recovery version.
+node shell.mjs prototypes restore-snapshot exploration --version v2 --variant sitemap-b --from-version v1 --from-variant main --recovery-version recovery-1 --plan-out restore.plan.json
+node shell.mjs plan apply restore.plan.json --yes
+```
+
+Comparison accepts optional `--with-prototype` and `--with-version`; omitted values use the selected prototype/version. Restore accepts optional `--from-prototype`; its source version/variant and new recovery version are explicit. This is different from `prototypes restore`, which only unarchives a whole prototype. All mutating commands retain reviewed-plan and stale-plan checks.
+
 ## Protection and limits
 
 All snapshots must belong to the same project ID. Saved prototypes pin the browser project's ID; changing its name/description remains possible. Importing an ordinary working project preserves the library; importing a different project into that vault is blocked rather than discarding it.
@@ -101,3 +132,5 @@ The transport supports at most 40 prototypes, 40 versions per prototype, 40 vari
 The shared typed domain lives in `scripts/companion/prototypes/`; shell adapters are `scripts/framework/prototype*.ts`. The maintained browser editor and trusted host bridge are composed into the current build, leaving v5 fixtures unchanged. Test recipes are registered in `tests/suites.json` and the existing companion workflow.
 
 See [verification record](PROTOTYPES-VERIFICATION.md) for executed checks and outstanding hosted evidence. This increment implements browser authoring plus shell persistence/generation. It does **not** convert the companion into a natively accepted Obsidian plugin, add real vault writes to the browser, merge variants automatically, or mark the broader PR #5 MVP complete.
+
+See [implementation comparison and polishing review](PROTOTYPES-REVIEW.md) for the alternate-package assessment and the changes made without a schema fork.

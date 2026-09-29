@@ -16,6 +16,9 @@ export type ValidateDocument = (input: unknown) => AuthoringDocument;
 export type PrototypeAction =
   | { type: 'create'; id: string; name: string; description: string; document: AuthoringDocument }
   | { type: 'version'; prototypeId: string; id: string; from: string }
+  | { type: 'prototype-details'; prototypeId: string; name: string; description: string }
+  | { type: 'version-details'; prototypeId: string; versionId: string; label: string }
+  | { type: 'restore-snapshot'; selection: PrototypeSelection; source: PrototypeSelection; recoveryId: string }
   | { type: 'fork'; selection: PrototypeSelection; id: string; name: string; hypothesis: string }
   | { type: 'save'; selection: PrototypeSelection; document: AuthoringDocument }
   | { type: 'details'; selection: PrototypeSelection; name: string; hypothesis: string }
