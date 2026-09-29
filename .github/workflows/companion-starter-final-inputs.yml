@@ -1,0 +1,30 @@
+name: Companion starter final inputs
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/companion-starter-final-inputs.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7efe9bfd4915720c045422be1234206b1af2cc98
+          persist-credentials: false
+      - name: Capture exact source only
+        run: |
+          mkdir -p "$RUNNER_TEMP/final-inputs"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/final-inputs/source.tar.gz" HEAD
+          git ls-tree -r HEAD > "$RUNNER_TEMP/final-inputs/source-tree.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/final-inputs/source-sha.txt"
+          cd "$RUNNER_TEMP/final-inputs"
+          sha256sum source.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-starter-final-inputs
+          path: ${{ runner.temp }}/final-inputs/
+          retention-days: 1
+          if-no-files-found: error
