@@ -10,6 +10,7 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 | --- | --- |
 | [Product vision](PRODUCT-VISION.md) | Canonical Workbench name, users, problem hypothesis, value, scope and success measures. |
 | [Product principles](PRODUCT-PRINCIPLES.md) | Decision rules for declarative authoring, documentation, ownership, configuration, starters, quality and developer experience. |
+| [Design constraints](../../DESIGN-CONSTRAINTS.md) | Cross-product constraint register with stable DC IDs, scoped owners, inherited/MVP/proposed rule distinctions, verification methods and acceptance mapping. |
 | [PR #5 vision review](PR5-VISION-REVIEW.md) | Source-grounded review at the 2026-09-29 baseline; separates inspected capabilities from intended direction. |
 | [Product and delivery overview](../../SHELL-FIRST-OVERVIEW.md) | Practical entry points and the relationship between Workbench, its reusable foundation and delivery gates. The filename is retained for compatibility. |
 
@@ -43,5 +44,7 @@ The [2026-09-27 integrated review](PR5-PRODUCT-REVIEW.md) and its [evidence reco
 ## Reading rule
 
 The vision governs product identity and intended value. Scoped requirements retain their detailed contracts and IDs. Delivery strategy governs sequencing. Execution records establish only the results they actually measured. None of these documents alone grants publication approval.
+
+Use the [design constraints](../../DESIGN-CONSTRAINTS.md) when designing or reviewing a change. They consolidate these authorities without replacing their detailed requirements; proposed additions require review and missing implementation evidence remains missing.
 
 The public product name is **Workbench**. Existing repository, executable, package, manifest, schema and storage identifiers are not renamed by this documentation update. Historical names remain where they identify retained artifacts or technical contracts.
