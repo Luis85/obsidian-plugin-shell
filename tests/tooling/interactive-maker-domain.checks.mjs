@@ -6,6 +6,8 @@ import { runOperations } from '../../bin/application/operations.ts';
 import { outline } from '../../bin/application/summary.ts';
 import { Workspace } from '../../bin/application/workspace.ts';
 import { sketchSchema } from '../../bin/application/schema.ts';
+import { projectModel } from '../../scripts/companion/compiler/model.ts';
+import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }
 test('titles are the only creation fields and identifiers remain stable after renaming', () => {
@@ -28,6 +30,26 @@ test('portable deterministic slugs handle collisions, unicode, digits and reserv
   for (const word of ['', '\n', 'hello\x1bworld', 'x'.repeat(121)]) assert.throws(() => title(word));
   assert.throws(() => openDocument({ schemaVersion: 999 }));
 });
+test('collections provision exact Markdown CRUD contracts for users and agent transactions', () => {
+  const result = runOperations(base(), [
+    { op: 'page.add', title: 'Home' },
+    { op: 'entity.add', title: 'Task', as: 'task' },
+    { op: 'entity.properties', id: '@task', properties: [{ key: 'title', type: 'text', required: true }, { key: 'done', type: 'checkbox', required: false }] },
+    { op: 'collection.add', title: 'Tasks', path: 'Records/Tasks', entity: '@task', as: 'tasks' },
+  ]);
+  const entity = result.document.design.semantic.entities[0], source = result.document.design.dataSources.sources[0];
+  assert.equal(source.id, result.aliases.tasks); assert.equal(source.kind, 'collection'); assert.equal(source.entity, result.aliases.task);
+  assert.equal(source.collectionPath, 'Records/Tasks'); assert.equal(entity.folder, 'Records/Tasks');
+  assert.deepEqual(source.operations.map(operation => operation.slug), ['list', 'create', 'update', 'delete']);
+  assert.ok(source.operations.every(operation => operation.resource === 'Records/Tasks' && operation.implementation.kind === 'note'));
+  const model = projectModel(result.document), compiled = model.sources[0];
+  for (const operation of compiled.operations) assert.equal(noteEntity(model, compiled.id, operation.id)?.id, entity.id);
+  const collectionSchema = sketchSchema.properties.operations.items.oneOf.find(item => item.properties.op.const === 'collection.add');
+  assert.deepEqual(collectionSchema.required, ['op', 'title', 'path', 'entity']);
+  assert.throws(() => runOperations(result.document, [{ op: 'collection.add', title: 'Bad', path: '../Secrets', entity: entity.id }]));
+  assert.throws(() => runOperations(result.document, [{ op: 'collection.add', title: 'Missing', path: 'Records/Missing', entity: 'missing' }]));
+});
+
 test('bulk reuse creates distinct instances without duplicating definitions', () => {
   const start = page();
   const created = runOperations(start.document, [{ op: 'component.add', title: 'Card', as: 'card' },
@@ -93,7 +115,7 @@ test('history is bounded, redo is invalidated and failed edits never enter histo
   for (let i = 0; i < 52; i++) workspace.edit([]);
   for (let i = 0; i < 50; i++) assert.equal(workspace.undo(), true);
   assert.equal(workspace.undo(), false);
-  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 21);
+  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 22);
 });
 
 test('nested removal retires only unused component references and preserves library definitions', () => {

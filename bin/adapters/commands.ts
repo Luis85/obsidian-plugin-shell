@@ -65,6 +65,7 @@ Options: --root <folder>, --project <relative.json> (design/project.json), --inp
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
+Use collection.add with title, a vault-relative path and an entity reference to provision managed Markdown List/Create/Update/Delete operations.
 First-run guide: bin/FIRST-RUN.md. Execution is separately approved; generated source is kept on failure.
 All existing shell setup/make/generate/check commands remain available.
 `;

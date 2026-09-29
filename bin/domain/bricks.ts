@@ -2,6 +2,7 @@ import { newSitemapSurface } from '../../scripts/companion/sitemap/create.ts';
 import type { SketchDocument } from './document.ts';
 import { object, keys, list, text } from './data.ts';
 import { requireSketch, slug } from './errors.ts';
+import { companionRelativeFolder } from '../../scripts/companion/project-contract.mjs';
 function collection(document: SketchDocument, store: 'semantic' | 'dataSources', field: 'entities' | 'sources'): Record<string, unknown>[] {
   document.design[store] ??= store === 'semantic' ? { entities: [], relationships: [] } : { sources: [], flows: [] };
   const data = object(document.design[store]);
@@ -30,6 +31,64 @@ export function entityProperties(document: SketchDocument, id: string, input: un
   requireSketch(new Set(properties.map(item => item.key)).size === properties.length, 'BRICK_PROPERTY', 'Duplicate entity properties.');
   entity.properties = properties;
 }
+function collectionRecordSchema(document: SketchDocument, entity: Record<string, unknown>): Record<string, unknown> {
+  const properties: Record<string, unknown> = { id: { type: 'string' }, type: { type: 'string', enum: [String(entity.slug)] } };
+  const required = ['id', 'type'];
+  for (const value of list(entity.properties ?? [], 'properties', 40)) {
+    const property = object(value), key = text(property.key, 'property key', 60), kind = String(property.type);
+    requireSketch(!Object.hasOwn(properties, key) && ['text', 'number', 'checkbox', 'date', 'datetime', 'tags', 'list'].includes(kind), 'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported or duplicate property.');
+    properties[key] = kind === 'text' ? { type: 'string' } : kind === 'number' ? { type: 'number' } : kind === 'checkbox' ? { type: 'boolean' } :
+      kind === 'date' ? { type: 'string', format: 'date' } : kind === 'datetime' ? { type: 'string', format: 'date-time' } :
+      kind === 'tags' ? { type: 'array', items: { type: 'string' } } : { type: 'array', items: { type: ['string', 'number'] } };
+    if (property.required === true) required.push(key);
+  }
+  const semantic = object(document.design.semantic);
+  for (const value of list(semantic.relationships ?? [], 'relationships', 120)) {
+    const relationship = object(value); if (relationship.source !== entity.id) continue;
+    const key = text(relationship.key, 'relationship key', 60), card = String(relationship.targetCard);
+    requireSketch(!Object.hasOwn(properties, key) && ['0..1', '1', '1..1', '0..*', '1..+'].includes(card), 'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported relationship.');
+    properties[key] = card.endsWith('*') ? { type: 'array', items: { type: 'string' } } : { type: 'string' };
+    if (card.startsWith('1')) required.push(key);
+  }
+  return { type: 'object', properties, required, additionalProperties: true };
+}
+function collectionOperations(sourceId: string, entityId: string, folder: string, record: Record<string, unknown>) {
+  const recordSchema = object(record), recordProperties = object(recordSchema.properties);
+  const values = { type: 'object', properties: Object.fromEntries(Object.entries(recordProperties).filter(([key]) => !['id', 'type'].includes(key))),
+    required: list(recordSchema.required, 'required').filter(key => !['id', 'type'].includes(String(key))), additionalProperties: false };
+  const objectSchema = (properties: Record<string, unknown>) => ({ type: 'object', properties, required: Object.keys(properties), additionalProperties: false });
+  const snapshot = objectSchema({ record, revision: { type: 'integer' } });
+  const shape = (schema: Record<string, unknown> | null) => schema === null
+    ? { mode: 'none', entity: null, many: false, fields: [], schema: null }
+    : { mode: 'schema', entity: null, many: false, fields: [], schema };
+  return [
+    ['list', 'List records', 'read', null, { type: 'array', items: snapshot }],
+    ['create', 'Create record', 'write', objectSchema({ values, requestId: { type: 'string' } }), snapshot],
+    ['update', 'Update record', 'write', objectSchema({ id: { type: 'string' }, revision: { type: 'integer' }, values }), snapshot],
+    ['delete', 'Delete record', 'write', objectSchema({ id: { type: 'string' }, revision: { type: 'integer' } }), null],
+  ].map(([operation, name, direction, input, output]) => ({
+    id: `${sourceId}-${operation}`, slug: operation, name, direction, method: 'adapter', resource: folder,
+    description: 'Managed Collection CRUD over Markdown notes in the active vault.',
+    input: shape(input as Record<string, unknown> | null), output: shape(output as Record<string, unknown> | null),
+    implementation: { kind: 'note', entity: entityId, operation },
+  }));
+}
+export function collectionAdd(document: SketchDocument, title: unknown, inputPath: unknown, entityId: string): string {
+  const entities = collection(document, 'semantic', 'entities'), entity = entities.find(item => item.id === entityId);
+  requireSketch(entity, 'BRICK_REFERENCE', 'Collection needs an existing entity.');
+  const folder = text(inputPath, 'collection path', 120);
+  requireSketch(companionRelativeFolder(folder), 'BRICK_COLLECTION_PATH', 'Use a safe vault-relative collection path outside protected folders.');
+  requireSketch(entity.folder === '' || entity.folder === folder, 'BRICK_COLLECTION_PATH', 'The selected entity already has a different note folder.');
+  entity.folder = folder;
+  const rows = collection(document, 'dataSources', 'sources');
+  requireSketch(rows.length < 24, 'BRICK_LIMIT', 'At most 24 data sources.');
+  const item = { ...identity(rows, text(title, 'title', 80), 'source'), kind: 'collection', status: 'active', description: '',
+    locator: 'vault://active', auth: 'none', credentialRef: '', collectionPath: folder, entity: entityId, operations: [] as unknown[] };
+  item.operations = collectionOperations(item.id, entityId, folder, collectionRecordSchema(document, entity));
+  object(document.design.dataSources).sources = [...rows, item];
+  return item.id;
+}
+
 export function sourceAdd(document: SketchDocument, title: unknown, kind: unknown): string {
   requireSketch(kind === 'vault' || kind === 'api' || kind === 'database', 'BRICK_SOURCE', 'Use vault, api or database. No connection is opened.');
   const rows = collection(document, 'dataSources', 'sources');

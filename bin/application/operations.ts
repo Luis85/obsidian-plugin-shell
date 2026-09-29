@@ -1,4 +1,4 @@
-import { entityAdd, entityProperties, sourceAdd, brickRename, routeSet, pageParent, journeyAdd, groupAdd, navigationAdd } from '../domain/bricks.ts';
+import { entityAdd, entityProperties, sourceAdd, collectionAdd, brickRename, routeSet, pageParent, journeyAdd, groupAdd, navigationAdd } from '../domain/bricks.ts';
 import { editDocument, type SketchDocument } from '../domain/document.ts';
 import { addPage, renamePage, moveNode, setPageLayout } from '../domain/pages.ts';
 import { addComponent, attachComponents, renameComponent, removeNode, type ComponentChoice } from '../domain/components.ts';
@@ -42,6 +42,7 @@ const handlers: Record<string, Handler> = {
   'entity.add': { fields: ['title'], run: (s, o) => entityAdd(s.document, o.title) },
   'entity.properties': { fields: ['id', 'properties'], run: (s, o) => entityProperties(s.document, ref(s, o.id), o.properties) },
   'data-source.add': { fields: ['title', 'kind'], run: (s, o) => sourceAdd(s.document, o.title, o.kind) },
+  'collection.add': { fields: ['title', 'path', 'entity'], run: (s, o) => collectionAdd(s.document, o.title, o.path, ref(s, o.entity)) },
   'brick.rename': { fields: ['kind', 'id', 'title'], run: (s, o) => brickRename(s.document, o.kind, ref(s, o.id), o.title) },
   'sitemap.route': { fields: ['page', 'path'], run: (s, o) => routeSet(s.document, ref(s, o.page), o.path) },
   'sitemap.parent': { fields: ['page', 'parent'], run: (s, o) => pageParent(s.document, ref(s, o.page), o.parent === null ? null : ref(s, o.parent)) },

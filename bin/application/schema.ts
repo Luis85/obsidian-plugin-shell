@@ -8,7 +8,7 @@ const choice = { oneOf: [
 const properties: Record<string, unknown> = {
   kind: { enum: ['vault', 'api', 'database', 'entity', 'data-source'] },
   path: { type: 'string', pattern: '^/(?:[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*)?$' },
-  parent: { oneOf: [reference, { type: 'null' }] }, from: reference, to: reference,
+  parent: { oneOf: [reference, { type: 'null' }] }, from: reference, to: reference, entity: reference,
   pages: { type: 'array', minItems: 1, maxItems: 120, items: reference },
   properties: { type: 'array', maxItems: 40, items: { type: 'object', additionalProperties: false,
     required: ['key', 'type', 'required'], properties: { key: { type: 'string', minLength: 1, maxLength: 60 },
@@ -28,7 +28,7 @@ export const sketchSchema = {
     type: 'array', maxItems: 500, items: { oneOf: operationCatalog.map(item => ({ type: 'object', additionalProperties: false,
       required: ['op', ...item.fields.filter(field => field !== 'source')], properties: {
         op: { const: item.op }, as: { type: 'string', pattern: '^[a-zA-Z][a-zA-Z0-9-]*$', description: 'Creation operations only.' },
-        ...Object.fromEntries(item.fields.map(field => [field, field === 'kind' ? { enum: item.op === 'brick.rename' ? ['entity', 'data-source'] : ['vault', 'api', 'database'] } : properties[field]])),
+        ...Object.fromEntries(item.fields.map(field => [field, field === 'kind' ? { enum: item.op === 'brick.rename' ? ['entity', 'data-source'] : ['vault', 'api', 'database'] } : field === 'path' && item.op === 'collection.add' ? { type: 'string', minLength: 1, maxLength: 120, description: 'Vault-relative collection folder.' } : properties[field]])),
       } })) },
   } },
 };
