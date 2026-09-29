@@ -1,0 +1,60 @@
+name: PR5 source convergence validation
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/pr5-stage-convergence.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Apply exact reviewed source patch to the consolidated head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, os
+          patch = gzip.decompress(base64.b64decode(Path('.github/pr5-convergence.patch.b64').read_text().strip(), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'd58a16f6f61f906626bae739b9da24f44f43271cfb446cf38f27bece5db8b309'
+          (Path(os.environ['RUNNER_TEMP']) / 'convergence.patch').write_bytes(patch)
+          PY
+          git checkout -b pr5-validated-convergence f0ede0744bc9a46bf827e12fd48a2bd27815871d
+          git apply --index "$RUNNER_TEMP/convergence.patch"
+          git diff --cached --check
+          git diff --cached --stat
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact locked tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Check repaired contracts and unchanged quality gates
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:maker
+          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json
+          node node_modules/eslint/bin/eslint.js bin --max-warnings 0
+          node scripts/quality/check-source.mjs
+          node scripts/quality/check-analyzer.mjs
+          node --test --test-concurrency=1 tests/tooling/compiler-compatibility.checks.mjs tests/tooling/companion-sitemap-workspace.checks.mjs tests/tooling/interactive-maker-project-presets.checks.mjs tests/tooling/interactive-maker-tui-distribution.checks.mjs
+          node --test --test-name-pattern='help for new|discovery advertises' tests/tooling/framework-cli-guidance.checks.mjs tests/tooling/framework-new-from-project.checks.mjs
+          node "$QUALIFIED_NPM" run test:compiler:coverage
+      - name: Publish only the validated source commit to the existing candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          git config user.name 'Luis Mendez'
+          git config user.email '3923861+Luis85@users.noreply.github.com'
+          git commit -m 'fix: converge CLI discovery, preset browser assertions and import focus' -m 'Preserve legacy new help alongside preset discovery; wait for actual reactive navigation; restore import focus after Vue removes approval controls; retain strict historical compiler goldens with guarded UI-bootstrap deltas; reject repacking modified example-removed consumers. No quality thresholds or production ownership guards are relaxed.'
+          git push origin HEAD:refs/heads/fix/pr5-ci-repair-candidate
+          echo "CANDIDATE=$(git rev-parse HEAD)"
+          echo "TREE=$(git rev-parse HEAD^{tree})"
