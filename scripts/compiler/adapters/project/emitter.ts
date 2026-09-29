@@ -1,13 +1,17 @@
+import { angularBrickFiles } from './angular-bricks.ts';
+import { serveSource } from './serve-source.ts';
 import { angularLinkerSource } from './angular-linker.ts';
 import { json, type Model } from '../../../companion/compiler/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
 import { readProjectCatalog, validateProjectSelection, type ProjectSelection } from '../../domain/project-presets.ts';
-import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount, angularComponent } from './sources.ts';
+import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount } from './sources.ts';
 import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
 function styles(id: string): string {
   const root = `[data-plugin-ui="${id}"]`;
   return `${root} { display: block; padding: 1rem; color: var(--text-normal, #20242a); background: var(--background-primary, #fff); font: 1rem/1.5 var(--font-interface, system-ui); }
+${root} .wb-slot { display: contents; }
+${root} [hidden] { display: none !important; }
 ${root} nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
 ${root} button { cursor: pointer; font: inherit; padding: .4rem .8rem; color: inherit; border: 1px solid var(--background-modifier-border, #aab1bc); border-radius: .4rem; }
 ${root} button[aria-current="page"] { font-weight: bold; text-decoration: underline; }
@@ -58,12 +62,13 @@ export function renderPresetProject(model: Model, template: TemplateSnapshot, in
     'prototype.acceptance.json': json({ stage: 'not-implemented', targets: selected.targets.map(target => ({ target, build: 'not-run', runtime: 'not-run', businessAcceptance: 'not-run' })),
       remaining: ['Implement agreed domain actions and visual components.', 'Test actual keyboard/focus, empty, failure and cancel journeys.', 'Measure built artifact and source hashes.', 'Qualify a disposable Obsidian host for plugin targets; do not infer from the browser preview.'] }),
   };
+  if (selected.targets.some(target => target === 'webapp' || target === 'website')) files['scripts/serve.mjs'] = serveSource;
   if (visual) {
     files['scripts/licenses.mjs'] = licenseSource;
     files['src/targets/preview/main.ts'] = browserSource(selected, id);
     files['src/ui/styles.css'] = styles(id);
     if (selected.framework === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
-    if (selected.framework === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; files['src/ui/Starter.ts'] = angularComponent; }
+    if (selected.framework === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; Object.assign(files, angularBrickFiles(model)); }
     if (selected.framework === 'nuxtui') {
       Object.assign(files, vueFiles(template)); files['src/ui/styles.css'] = '@import "./nuxt.css";\n' + styles(id);
     }

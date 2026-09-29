@@ -1,0 +1,47 @@
+name: Angular setup end-to-end acceptance
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: angular-setup-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  generated-app:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install pinned tooling without global writes
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Type-check the CLI and provision browser
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:maker
+          node node_modules/@playwright/test/cli.js install chromium
+      - name: Run compiled kit, first run, edit, regeneration and real browser acceptance
+        run: node scripts/testing/qualify-angular-setup.mjs
+      - name: Retain candidate-specific results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: angular-setup-acceptance-${{ matrix.os }}
+          path: reports/angular-setup-acceptance/
+          retention-days: 7
+          if-no-files-found: error

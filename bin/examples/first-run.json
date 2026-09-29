@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "mode": "showcase",
+  "install": "auto",
+  "openBrowser": false,
+  "port": 4173,
+  "stepTimeoutMs": 600000,
+  "readyTimeoutMs": 30000,
+  "showcaseDurationMs": 300000
+}

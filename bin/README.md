@@ -8,6 +8,23 @@ for the line-oriented presentation. Existing agent commands remain available.
 framework release kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
 
+## Set up an existing vault for Angular
+
+Run `node shell.mjs project-setup --root <existing-vault>` for the existing-Git,
+existing-Obsidian-vault workflow. It configures `configs/user-settings.json`,
+imports typed Markdown PRDs, optionally prepares an Angular prototype, edits
+application bricks, and optionally generates the product scaffold in one reviewed
+plan. The same services are exposed as JSON commands. See
+[Angular setup, settings and agent contract](PROJECT-SETUP.md) and
+[the replayable example](examples/angular-setup.json).
+
+The generated app supports an [optional first run](FIRST-RUN.md) with separate
+execution approval. [Setup checkpoints](CHECKPOINTS.md) preserve reviewed answers
+without retaining approvals. [Angular bricks](ANGULAR-BRICKS.md) describes the actual
+generated templates, hash routes, scoped interactions and external-adapter boundaries.
+Advanced settings and typed Markdown share `configs/user-settings.json`; the setup
+guide includes reviewed path migration and configured canonical-project behavior.
+
 ## Create a project
 
 Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose a
@@ -134,6 +151,11 @@ A minimal new-prototype answer envelope is:
   }
 }
 ```
+
+The example above is for an unselected project. When `project.config.json` exists,
+`prototype guide` and the interactive prototype maker retain that project selection
+and use its guide. Always discover the actual guide ID/version before submitting
+answers; an Angular project does not silently fall back to a plugin clickdummy.
 
 `approved: true` records agreement with the resolved brief, including accepted
 visible defaults. Discover and review those defaults first. A pending request for

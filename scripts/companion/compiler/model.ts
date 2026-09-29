@@ -1,3 +1,4 @@
+import { PRD_LIMITS } from '../prd-limits.mjs';
 import { matches, type Schema } from '../runtime/contract.ts';
 import { createHash } from 'node:crypto';
 import { companionRelativeFolder } from '../project-contract.mjs';
@@ -55,7 +56,7 @@ function entities(design: Row): Entity[] {
     }
     for (const r of relations.filter(r => r.source === e.id)) {
       const key = fieldName(r.key); requireValue(!Object.hasOwn(properties, key), 'Relationship/property collision.');
-      requireValue(['0..1','1','1..1','0..*','1..*'].includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
+      requireValue(['0..1','1','1..1','0..*','1..+'].includes(String(r.targetCard)), 'Unsupported relationship cardinality.');
       properties[key] = String(r.targetCard).endsWith('*') ? { type:'array', items:{type:'string'} } : {type:'string'};
       if (String(r.targetCard).startsWith('1')) required.push(key);
     }
@@ -101,7 +102,7 @@ export function projectModel(input: unknown): Model {
   });
   unique(sources,s => s.slug); unique(sources,s=>symbol(s.slug)); unique(sources,s => s.id); const flows = rows(ds.flows ?? [],120).map(f=>({...f,source:text(f.source,120),operation:text(f.operation,120),id:text(f.id,120),card:text(f.card,120),label:text(f.label ?? '',500),trigger:text(f.trigger,80),direction:text(f.direction,10)})); unique(flows,f=>f.id);
   requireValue(flows.every(f => screens.some(n => n.id === f.card) && sources.some(s => s.id === f.source && s.operations.some(o => o.id === f.operation && (o.direction === f.direction || o.direction === 'both')))), 'Dangling or incompatible source flow.');
-  const requirements = rows(design.prds,12).flatMap(p => rows(p.requirements ?? [],100).map(r => ({ id:text(r.id,120), key:'req-'+digest(text(p.id)+':'+text(r.id)).slice(0,12), title:text(r.title,500), acceptance:text(r.acceptance ?? '',10000), prd:text(p.id,120), nodes:names(r.nodes ?? []), components:names(r.components ?? []) })));
+  const requirements = rows(design.prds,PRD_LIMITS.count).flatMap(p => rows(p.requirements ?? [],100).map(r => ({ id:text(r.id,120), key:'req-'+digest(text(p.id)+':'+text(r.id)).slice(0,12), title:text(r.title,500), acceptance:text(r.acceptance ?? '',10000), prd:text(p.id,120), nodes:names(r.nodes ?? []), components:names(r.components ?? []) })));
   unique(requirements,r => r.key);
   requireValue(requirements.every(r => r.nodes.every(id => screens.some(n => n.id === id)) && r.components.every(id => components.some(c => c.id === id))), 'Dangling requirement reference.');
   return {document,project,sourceRoot,testRoot,entities:entityModels,sources,screens,links,components,requirements,flows,warnings:[

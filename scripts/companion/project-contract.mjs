@@ -1,3 +1,4 @@
+import { PRD_LIMITS } from './prd-limits.mjs';
 import { validateNativeIntegrations } from './native-contract.mjs';
 // Shared by the standalone concept and read-only shell entrypoint. No host I/O.
 import { validateDesignSystem } from './design-system-contract.mjs';
@@ -68,7 +69,7 @@ function validateCompanionDesign(value, pluginId) {
   companionRequire([1, 2, 3, 4, 5].includes(value.schema) && companionText(value.blueprint, 80, true) && companionText(value.goal, 1000) &&
     ['desktop', 'mobile-ready'].includes(value.platform), 'Unsupported design schema or platform.');
   companionRequire(Number.isSafeInteger(value.nextId) && value.nextId > 0 && value.nextId < Number.MAX_SAFE_INTEGER - 100000, 'Invalid design counter.');
-  for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', 12]]) {
+  for (const [key, limit] of [['nodes', 60], ['links', 120], ['library', 200], ['prds', PRD_LIMITS.count]]) {
     companionRequire(Array.isArray(value[key]) && value[key].length <= limit && value[key].every(item =>
       item !== null && typeof item === 'object' && !Array.isArray(item) && companionText(item.id, 120, true)), 'Invalid design collection: ' + key);
     companionRequire(new Set(value[key].map(item => item.id)).size === value[key].length, 'Duplicate IDs in ' + key + '.');

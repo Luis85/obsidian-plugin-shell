@@ -186,7 +186,7 @@ test('new help retains legacy creation metadata alongside discoverable preset gu
   assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
   assert.match(help.help, /new <dir>.*--from <project\.json>/);
   assert.match(help.help, /new presets --json/);
-  assert.deepEqual(help.makerCommands, ['new', 'sketch', 'prototype']);
+  assert.deepEqual(help.makerCommands, ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run']);
   legacy.options.from = 'flag';
   const again = await execute(parseArguments(['new', '--help']), context(root));
   assert.equal(again.commands[0].options.from, 'value', 'Help cannot mutate command policy');

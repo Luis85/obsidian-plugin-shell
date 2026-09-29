@@ -93,7 +93,7 @@ test('history is bounded, redo is invalidated and failed edits never enter histo
   for (let i = 0; i < 52; i++) workspace.edit([]);
   for (let i = 0; i < 50; i++) assert.equal(workspace.undo(), true);
   assert.equal(workspace.undo(), false);
-  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 12);
+  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 21);
 });
 
 test('nested removal retires only unused component references and preserves library definitions', () => {

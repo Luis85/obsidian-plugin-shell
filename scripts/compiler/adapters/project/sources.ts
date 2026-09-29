@@ -162,24 +162,6 @@ async function select(id: string) { current.value = id; await nextTick(); main.v
   </div>
 </template>
 `;
-export const angularComponent = `import { Component, signal, computed, viewChild, type ElementRef } from '@angular/core';
-import { project, scaffoldNotice, type Page } from '../core/project.ts';
-@Component({ selector: 'project-surface', standalone: true,
-  template: \`<h1>{{ project.title }}</h1><p role="status">{{ notice }}</p>
-    <nav aria-label="Project pages">@for (item of project.pages; track item.id) {
-      <button type="button" [attr.aria-current]="item.id === current() ? 'page' : null" (click)="select(item.id)">{{ item.title }}</button>
-    }</nav><main #main tabindex="-1">@if (page(); as selected) {
-      <h2>{{ selected.title }}</h2><p>{{ selected.goal || 'Describe this page during prototyping.' }}</p>
-      <ul>@for (id of selected.components; track id) { <li>{{ id }} — component implementation pending</li> }</ul>
-    } @else { <p>No pages yet.</p> }</main>\` })
-export class Starter {
-  readonly project = project; readonly notice = scaffoldNotice;
-  readonly current = signal<string>(project.pages[0]?.id ?? '');
-  readonly page = computed<Page | undefined>(() => project.pages.find(page => page.id === this.current()));
-  readonly main = viewChild<ElementRef<HTMLElement>>('main');
-  select(id: string): void { this.current.set(id); this.main()?.nativeElement.focus(); }
-}
-`;
 export const angularMount = `import { createApplication } from '@angular/platform-browser';
 import { createComponent } from '@angular/core';
 import { Starter } from './Starter.ts';

@@ -2,7 +2,7 @@ import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
 import { createFilePlan } from '../../shared/file-plan.mjs';
-import { configurationPlan } from '../../framework/changes.ts';
+import { documentationProjectIntake } from './project-intake.ts';
 import { keyOf, equal, stable, insist, type DocsIndex, type Entity, type Conflict } from '../domain/contracts.ts';
 import { reconcile } from '../application/reconcile.ts';
 import { projectEntities, applyEntities, coverage } from './model.ts';
@@ -29,7 +29,7 @@ function safeOutput(workspace: Workspace, path: string): void {
   portable(path);
   insist(!path.split('/').some(part => part.startsWith('.')), 'DOCS_OUTPUT_PROTECTED', 'Documentation paths must remain outside hidden directories: ' + path);
   const blocked = ['.git', '.obsidian', '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design',
-    ...(workspace.config ? [workspace.config.paths.codebaseFolder, workspace.config.paths.testsFolder, workspace.config.paths.testVaultFolder] : [])];
+    ...workspace.protectedPaths, ...(workspace.config ? [workspace.config.paths.codebaseFolder, workspace.config.paths.testsFolder, workspace.config.paths.testVaultFolder] : [])];
   insist(!path.split('/').some(part => part.startsWith('.') && blocked.includes(part.toLowerCase())) &&
     !blocked.some(folder => path.toLowerCase() === folder.toLowerCase() || path.toLowerCase().startsWith(folder.toLowerCase() + '/')), 'DOCS_OUTPUT_PROTECTED', 'Refusing documentation in a protected path: ' + path);
 }
@@ -110,20 +110,19 @@ export async function documentationPlan(root: string, args: string[], direction:
   }
   const intakePreimages: Array<{ path: string; beforeHash: string | null }> = [];
   if (direction === 'import') {
-    insist(workspace.config, 'DOCS_SETUP_REQUIRED', 'Import into a configured shell project; run setup first.');
+    insist(workspace.config || workspace.makerSetupBytes, 'DOCS_SETUP_REQUIRED', 'Import into an initialized shell or maker project; run setup first.');
     if (!equal(proposed, workspace.project)) {
       // The same intake boundary used by the CLI editors also updates generation ownership.
-      const intake = await configurationPlan({ command: 'project import', args: [], options: { input: '-', resolve: 'import' } },
-        { root, frameworkRoot: root, inputText: JSON.stringify(proposed, null, 2) + '\n' });
-      insist(intake.plan.changes.find(change => change.path === 'design/project.json')?.beforeHash === digest(workspace.projectBytes),
+      const intake = await documentationProjectIntake(workspace, proposed);
+      insist(intake.plan.changes.find(change => change.path === workspace.projectPath)?.beforeHash === digest(workspace.projectBytes),
         'DOCS_INPUT_CHANGED', 'The project changed while preparing reviewed intake.');
       for (const change of intake.plan.changes) { entries.push({ path: change.path, content: change.content }); intakePreimages.push(change); }
-    } else entries.push({ path: 'design/project.json', content: decode(workspace.projectBytes) });
+    } else entries.push({ path: workspace.projectPath, content: decode(workspace.projectBytes) });
   }
   if (workspace.create) entries.push({ path: SETTINGS_FILE, content: workspace.create });
   // Last write: a failed or interrupted batch must not be recorded as synchronized first.
   entries.push({ path: workspace.settings.indexFile, content: equal(index, workspace.index) && workspace.indexBytes ? decode(workspace.indexBytes) : JSON.stringify(index, null, 2) + '\n' });
-  const fingerprints = { adapter: await adapterFingerprint(), project: digest(workspace.projectBytes), settings: workspace.bytes ? digest(workspace.bytes) : null,
+  const fingerprints = { makerSetup: workspace.makerSetupBytes ? digest(workspace.makerSetupBytes) : null, adapter: await adapterFingerprint(), project: digest(workspace.projectBytes), settings: workspace.bytes ? digest(workspace.bytes) : null,
     index: workspace.indexBytes ? digest(workspace.indexBytes) : null, config: workspace.configBytes ? digest(workspace.configBytes) : null,
     resolutions: workspace.resolutionBytes ? digest(workspace.resolutionBytes) : null,
     sources: workspace.sources.map(source => [source.path, digest(source.bytes)]) };
