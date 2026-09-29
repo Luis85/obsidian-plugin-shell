@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "paths": {
+    "prds": "docs/prds",
+    "project": "design/project.json",
+    "prototypes": "prototypes/project",
+    "app": "apps/product",
+    "brief": "docs/project-brief.md"
+  },
+  "preferences": {
+    "author": "Your name",
+    "ui": "auto",
+    "scanRecursive": true
+  }
+}

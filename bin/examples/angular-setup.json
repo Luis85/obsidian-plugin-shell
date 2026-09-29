@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Issue desk",
+    "description": "A small Angular application for managing requests.",
+    "product": "Help a service team capture, browse and resolve requests."
+  },
+  "prds": {
+    "mode": "scan"
+  },
+  "prototypeInterview": null,
+  "operations": [
+    {
+      "op": "sitemap.group",
+      "title": "Requests",
+      "as": "requests"
+    },
+    {
+      "op": "page.add",
+      "title": "Issues",
+      "as": "issues"
+    },
+    {
+      "op": "page.add",
+      "title": "Issue details",
+      "as": "details"
+    },
+    {
+      "op": "sitemap.parent",
+      "page": "@issues",
+      "parent": "@requests"
+    },
+    {
+      "op": "sitemap.route",
+      "page": "@issues",
+      "path": "/issues"
+    },
+    {
+      "op": "page.layout",
+      "id": "@issues",
+      "layout": "grid"
+    },
+    {
+      "op": "component.add",
+      "title": "Issue card",
+      "as": "card"
+    },
+    {
+      "op": "page.attach",
+      "page": "@issues",
+      "components": [
+        {
+          "id": "@card"
+        }
+      ]
+    },
+    {
+      "op": "entity.add",
+      "title": "Issue",
+      "as": "issue"
+    },
+    {
+      "op": "entity.properties",
+      "id": "@issue",
+      "properties": [
+        {
+          "key": "subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "resolved",
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "op": "data-source.add",
+      "title": "Issue service",
+      "kind": "api",
+      "as": "service"
+    },
+    {
+      "op": "sitemap.link",
+      "from": "@issues",
+      "to": "@details",
+      "title": "Open issue"
+    },
+    {
+      "op": "journey.add",
+      "title": "Inspect an issue",
+      "pages": [
+        "@issues",
+        "@details"
+      ]
+    }
+  ],
+  "boilerplate": true
+}
