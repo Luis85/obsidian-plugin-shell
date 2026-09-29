@@ -191,6 +191,7 @@
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
     "scripts/concepts/mvp-bridge.js",
+    "scripts/concepts/prototype-bridge.js",
     "bin/shell.ts",
     "scripts/makers/cli.mjs",
     "scripts/compiler/qualify-presets.mjs"
@@ -240,6 +241,7 @@
           "scripts/companion/tooling-options.ts",
           "scripts/companion/concepts/**",
           "scripts/companion/sitemap/**",
+          "scripts/companion/prototypes/**",
           "scripts/companion/visual/**",
           "scripts/companion/project-contract.mjs",
           "scripts/companion/native-contract.mjs",

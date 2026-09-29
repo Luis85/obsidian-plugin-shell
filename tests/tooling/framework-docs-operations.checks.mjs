@@ -205,3 +205,54 @@ for (const boundary of [0, 1, 3]) test(`terminated writer recovers at destinatio
   assert.equal((await recoverDocuments(root,true,preview.data.recoveryHash)).status,'applied');
   assert.deepEqual(await snapshot(root), original);
 });
+
+test('merged command discovery retains documentation, handout and prototype handlers without duplicates', async t => {
+  const ctx = await fixture(t), response = await run(ctx, ['capabilities']);
+  assert.equal(response.status, 'ok');
+  const ids = response.data.commands.map(command => command.id);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const name of ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover',
+    'handout generate', 'handout refresh', 'handout validate', 'handout inspect',
+    'prototypes list', 'prototypes create', 'prototypes activate', 'prototypes adopt', 'prototypes generate']) {
+    assert.ok(ids.includes(name), `Missing merged command: ${name}`);
+    const help = await run(ctx, ['help', ...name.split(' ')]);
+    assert.equal(help.status, 'ok', JSON.stringify(help));
+    assert.equal(help.data.commands[0].id, name);
+    assert.ok(help.data.commands[0].examples.length, `Missing executable help example: ${name}`);
+  }
+  assert.equal((await run(ctx, ['docs', 'schema'])).status, 'ok');
+});
+
+test('Markdown intake preserves the active prototype and requires explicit variant promotion before generation', async t => {
+  const ctx = await fixture(t), selected = ['exploration', '--version', 'v1', '--variant', 'main'];
+  async function apply(args) {
+    const result = await run(ctx, [...args, '--yes']);
+    assert.ok(['applied', 'unchanged'].includes(result.status), JSON.stringify(result));
+    return result;
+  }
+  await apply(['prototypes', 'create', 'exploration']);
+  await apply(['prototypes', 'status', ...selected, '--status', 'approved']);
+  await apply(['prototypes', 'activate', ...selected]);
+  const saved = await snapshot(join(ctx.root, 'docs/concepts'));
+  const index = await exportDocs(ctx), [, entry] = pageEntry(index);
+  await editDoc(ctx, entry.path, entity => { entity.title = 'Markdown variant'; });
+  await apply(['docs', 'import', entry.path]);
+  assert.deepEqual(await snapshot(join(ctx.root, 'docs/concepts')), saved);
+  const blocked = await run(ctx, ['generate', '--dry-run']);
+  assert.equal(blocked.status, 'failed', JSON.stringify(blocked));
+  assert.equal(blocked.diagnostics[0].code, 'PROTOTYPE_IMPORT_REQUIRED');
+  const pinned = await run(ctx, ['prototypes', 'generate', '--target', 'pinned-preview', '--dry-run']);
+  assert.equal(pinned.status, 'planned', JSON.stringify(pinned));
+  assert.equal(pinned.data.summary.prototypeSelection.variantId, 'main');
+  assert.deepEqual(await snapshot(join(ctx.root, 'docs/concepts')), saved);
+  await apply(['prototypes', 'fork', ...selected, '--as', 'markdown-edit']);
+  const next = ['exploration', '--version', 'v1', '--variant', 'markdown-edit'];
+  await apply(['prototypes', 'save', ...next]);
+  await apply(['prototypes', 'status', ...next, '--status', 'approved']);
+  await apply(['prototypes', 'activate', ...next]);
+  const generation = await run(ctx, ['generate', '--target', 'markdown-preview', '--dry-run']);
+  assert.equal(generation.status, 'planned', JSON.stringify(generation));
+  assert.equal(generation.data.summary.prototypeSelection.variantId, 'markdown-edit');
+  const project = await readJson(join(ctx.root, 'design/project.json'));
+  assert.equal(project.design.nodes.find(node => node.id === entry.baseline.id).label, 'Markdown variant');
+});

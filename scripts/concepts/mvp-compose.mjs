@@ -1,3 +1,4 @@
+import { composePrototypeSeams } from './prototype-seams.mjs';
 import ts from 'typescript';
 /** Replace named functions in a trusted assembled fixture, never execute authored project text. */
 export function composeMvp(base,bundle,css,bridge,graphStyle) {
@@ -41,7 +42,7 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   once('restoreUiFocus(uiFocus);','restoreUiFocus(uiFocus);jmMount();');
   once("  return p;\n}\nfunction companionExampleRequirements", "  return jmSeed(p);\n}\nfunction companionExampleRequirements");
   // Functions are hoisted; state must be initialized before the preserved startup restore/render.
-  program=bridge+'\n'+program;
+  program=bridge+'\n'+composePrototypeSeams(program);
   const safe=text=>text.replace(/<\/script/gi,'<\\/script');
   const script='<script data-journey-runtime>'+safe(bundle)+'</script>\n<script>'+safe(program)+'</script>';
   let html=base.slice(0,marker.index)+script+base.slice(marker.index+marker[0].length);

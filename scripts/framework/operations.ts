@@ -1,4 +1,5 @@
 import { docsRead } from './docs.ts';
+import { prototypesRead } from './prototypes.ts';
 import { measureProject } from './project-measure.ts';
 import { handoutRead } from './handout-adapter.ts';
 import { supportReport } from './support-report.ts';
@@ -95,6 +96,7 @@ async function processOperation(request: Request, context: Context): Promise<Res
   return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
 }
 async function readOperation(request: Request, context: Context): Promise<Result> {
+  if (request.command === 'prototypes list') return result(request.command, await prototypesRead(context));
   if (request.command === 'handout validate' || request.command === 'handout inspect') return handoutRead(request, context);
   if (request.command === 'project measure') return measureProject(request, context);
   if (request.command === 'support report') return supportReport(context);

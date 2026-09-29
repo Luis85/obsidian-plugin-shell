@@ -1,3 +1,4 @@
+import { prototypeCommands } from './prototype-catalog.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
  * option documentation. Data only; execution policy stays in catalog.ts and the handlers.
@@ -26,6 +27,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
+  { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
@@ -52,6 +54,10 @@ const common: Record<string, OptionHelp> = {
 };
 const specific: Record<string, OptionHelp> = {
   resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
+  variant: { description: 'Saved variant slug inside the selected prototype version.' },
+  as: { description: 'Portable lowercase slug for the new variant.' },
+  hypothesis: { description: 'The solution idea or test hypothesis explored by this variant.' },
+  status: { description: 'Variant lifecycle status; use prototypes activate for generator selection.', values: ['draft', 'review', 'approved', 'archived'] },
   prds: { description: 'Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation.', default: 'configs/user-settings.json paths.prds, otherwise docs/prds' },
   samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
@@ -120,6 +126,22 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'prototypes list': ['node shell.mjs prototypes list --json'],
+  'prototypes create': ['node shell.mjs prototypes create exploration --input design/project.json --dry-run'],
+  'prototypes version': ['node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run'],
+  'prototypes fork': ['node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run'],
+  'prototypes save': ['node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run'],
+  'prototypes details': ['node shell.mjs prototypes details exploration --version v1 --variant sitemap-b --name "Sitemap B" --hypothesis "Alternative navigation" --dry-run'],
+  'prototypes status': ['node shell.mjs prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run'],
+  'prototypes activate': ['node shell.mjs prototypes activate exploration --version v1 --variant sitemap-b --dry-run'],
+  'prototypes deactivate': ['node shell.mjs prototypes deactivate --dry-run'],
+  'prototypes seal': ['node shell.mjs prototypes seal exploration --version v1 --dry-run'],
+  'prototypes archive': ['node shell.mjs prototypes archive exploration --dry-run'],
+  'prototypes restore': ['node shell.mjs prototypes restore exploration --dry-run'],
+  'prototypes import': ['node shell.mjs prototypes import --input prototype-workspace.json --dry-run'],
+  'prototypes export': ['node shell.mjs prototypes export --out prototype-workspace.json --dry-run'],
+  'prototypes adopt': ['node shell.mjs prototypes adopt --resolve import --dry-run'],
+  'prototypes generate': ['node shell.mjs prototypes generate --target generated-preview --dry-run'],
   'docs import': ['node shell.mjs docs import docs/application --dry-run', 'node shell.mjs docs import docs/application --apply <reviewed-hash> --yes'],
   'docs export': ['node shell.mjs docs export --dry-run', 'node shell.mjs docs export --out docs/application --yes'],
   'docs validate': ['node shell.mjs docs validate docs/application --json'],
@@ -204,6 +226,9 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
     if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
     if (entry.id === 'docs export' && name === 'out') { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }
+    if (entry.id.startsWith('prototypes ') && name === 'version') doc.description = 'Portable version slug, for example v1 or v2; distinct from the application release version.';
+    if (entry.id === 'prototypes version' && name === 'from') doc.description = 'Source version slug to copy into the new version.';
+    if (entry.id.startsWith('prototypes ') && name === 'name') doc.description = 'Prototype or variant display name; its folder slug stays unchanged.';
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }

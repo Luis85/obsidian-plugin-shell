@@ -1,0 +1,88 @@
+filters:
+  and:
+    - 'file.inFolder("docs/requirements")'
+    - 'note.type == "PBI"'
+    - 'note.product == "Workbench"'
+    - 'note.release == "MVP"'
+formulas:
+  accepted_status_claim: 'note.status == "done" || note.status == "shipped"'
+  has_blocker: '!!note.blocked_reason'
+properties:
+  note.id:
+    displayName: PBI
+  note.title:
+    displayName: Use case
+  note.rank:
+    displayName: Suggested order
+  formula.accepted_status_claim:
+    displayName: Accepted status claim - not evidence verified
+views:
+  - type: table
+    name: Backlog
+    order:
+      - file.name
+      - note.title
+      - note.status
+      - note.rank
+      - note.milestone
+      - note.owner
+      - note.estimate_points
+      - note.blocked_reason
+    sort:
+      - property: note.rank
+        direction: ASC
+    summaries:
+      note.estimate_points: Sum
+  - type: table
+    name: By milestone
+    groupBy:
+      property: note.milestone
+      direction: ASC
+    order:
+      - file.name
+      - note.title
+      - note.status
+      - note.epic
+      - note.feature
+      - note.owner
+      - formula.accepted_status_claim
+    summaries:
+      formula.accepted_status_claim: Checked
+  - type: table
+    name: Unassigned
+    filters: '!note.owner'
+    order:
+      - file.name
+      - note.title
+      - note.owner_role
+      - note.milestone
+      - note.rank
+  - type: table
+    name: Explicit blockers
+    filters: '!!note.blocked_reason'
+    order:
+      - file.name
+      - note.title
+      - note.status
+      - note.blocked_reason
+      - note.depends_on
+      - note.gate_prerequisites
+  - type: table
+    name: Awaiting acceptance
+    filters: 'note.status == "implemented" || note.status == "tested"'
+    order:
+      - file.name
+      - note.title
+      - note.owner
+      - note.verification_profiles
+      - note.verification_candidate
+      - note.acceptance_record
+  - type: table
+    name: Shipped records
+    filters: 'note.status == "shipped"'
+    order:
+      - file.name
+      - note.title
+      - note.shipped_on
+      - note.release_ref
+      - note.acceptance_record
