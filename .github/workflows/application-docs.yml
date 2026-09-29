@@ -54,8 +54,8 @@ jobs:
       - name: Require and execute every documentation contract suite
         run: |
           set -o pipefail
-          node -e 'for(const name of ["model","codec","operations","kit"])if(!require("node:fs").existsSync("tests/tooling/framework-docs-"+name+".checks.mjs"))throw Error("Missing documentation suite: "+name)'
-          node --experimental-strip-types --test tests/tooling/framework-docs-model.checks.mjs tests/tooling/framework-docs-codec.checks.mjs tests/tooling/framework-docs-operations.checks.mjs tests/tooling/framework-docs-kit.checks.mjs 2>&1 | tee reports/application-docs/tests.log
+          node -e 'for(const name of ["model","codec","operations","kit","safety"])if(!require("node:fs").existsSync("tests/tooling/framework-docs-"+name+".checks.mjs"))throw Error("Missing documentation suite: "+name)'
+          node --experimental-strip-types --test tests/tooling/framework-docs-model.checks.mjs tests/tooling/framework-docs-codec.checks.mjs tests/tooling/framework-docs-operations.checks.mjs tests/tooling/framework-docs-kit.checks.mjs tests/tooling/framework-docs-safety.checks.mjs 2>&1 | tee reports/application-docs/tests.log
       - name: Preserve existing CLI and setup contracts
         run: |
           set -o pipefail

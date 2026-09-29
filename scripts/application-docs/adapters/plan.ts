@@ -27,6 +27,7 @@ function destination(workspace: Workspace, entity: Entity, source?: InputDocumen
 }
 function safeOutput(workspace: Workspace, path: string): void {
   portable(path);
+  insist(!path.split('/').some(part => part.startsWith('.')), 'DOCS_OUTPUT_PROTECTED', 'Documentation paths must remain outside hidden directories: ' + path);
   const blocked = ['.git', '.obsidian', '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design',
     ...(workspace.config ? [workspace.config.paths.codebaseFolder, workspace.config.paths.testsFolder, workspace.config.paths.testVaultFolder] : [])];
   insist(!path.split('/').some(part => part.startsWith('.') && blocked.includes(part.toLowerCase())) &&
@@ -67,11 +68,18 @@ export async function documentationPlan(root: string, args: string[], direction:
   for (const entity of selected) {
     const key = keyOf(entity), input = documentByKey.get(key), path = destination(workspace, entity, input); safeOutput(workspace, path);
     const bound = workspace.index.entries[key];
+    if (bound && input && bound.path !== path && await readBytes(join(root, bound.path))) {
+      conflicts.push({ entity: key, field: '/', reason: 'The previous bound document still exists. Move it rather than copying its identity: ' + bound.path }); continue;
+    }
     const priorBytes = await readBytes(join(root, path));
     let original: MarkdownDocument | undefined = input?.document;
     if (!original && priorBytes) {
       original = parseMarkdown(decode(priorBytes), path) ?? undefined;
-      if (!original || keyOf(original.entity) !== key) { conflicts.push({ entity: key, field: '/', reason: 'Destination is an unrelated file: ' + path }); continue; }
+      if (!original || keyOf(original.entity) !== key || original.entity.project !== entity.project) { conflicts.push({ entity: key, field: '/', reason: 'Destination is an unrelated file: ' + path }); continue; }
+      // Include/exclude rules limit discovery, not overwrite authority. A destination
+      // that was not scanned must pass the same baseline-aware conflict review.
+      const destinationReview = reconcile([entity], [original.entity], workspace.index, 'export');
+      if (destinationReview.conflicts.length) { conflicts.push(...destinationReview.conflicts); continue; }
     }
     if (input && localPath(root, input.source.path) === null && priorBytes && (!bound || !priorBytes.equals(input.source.bytes))) {
       conflicts.push({ entity: key, field: '/', reason: 'External input collides with an existing project document: ' + path }); continue;

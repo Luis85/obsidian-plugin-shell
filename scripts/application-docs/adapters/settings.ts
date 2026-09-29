@@ -11,7 +11,7 @@ function defaults(root = 'docs/application'): DocsSettings {
 export function validateSettings(input: unknown, protectedPaths: string[]): DocsSettings {
   const raw = object(input), base = defaults(typeof raw.root === 'string' ? raw.root : undefined);
   insist(Object.keys(raw).every(key => ['root', 'indexFile', 'paths', 'recursive', 'include', 'exclude', 'linkFormat', 'preserveAuthoredContent', 'conflictPolicy', 'deleteMissing'].includes(key)), 'DOCS_SETTINGS', 'Unknown documentation setting.');
-  insist(raw.preserveAuthoredContent !== false && raw.deleteMissing !== true && (raw.conflictPolicy === undefined || raw.conflictPolicy === 'review'), 'DOCS_SETTINGS', 'Authored content preservation, no implicit deletion and conflict review cannot be disabled.');
+  insist((raw.preserveAuthoredContent === undefined || raw.preserveAuthoredContent === true) && (raw.deleteMissing === undefined || raw.deleteMissing === false) && (raw.conflictPolicy === undefined || raw.conflictPolicy === 'review'), 'DOCS_SETTINGS', 'Authored content preservation, no implicit deletion and conflict review cannot be disabled.');
   const value = { ...base, ...raw, paths: { ...base.paths, ...(raw.paths === undefined ? {} : object(raw.paths)) } };
   insist(typeof value.root === 'string' && typeof value.indexFile === 'string', 'DOCS_SETTINGS', 'Invalid documentation paths.');
   portable(value.root); portable(value.indexFile);
@@ -19,6 +19,7 @@ export function validateSettings(input: unknown, protectedPaths: string[]): Docs
   const blocked = ['.git', '.obsidian', '.framework', '.companion', '.codex-authoring.lock', 'node_modules', 'scripts', 'bin', 'src', 'tests', 'dist', 'configs', 'design', ...protectedPaths];
   const safe = (path: string) => {
     portable(path); const lower = path.toLowerCase();
+    insist(!path.split('/').some(part => part.startsWith('.')), 'DOCS_SETTINGS_PATH', 'Documentation paths must remain outside hidden directories: ' + path);
     insist(!blocked.some(folder => lower === folder.toLowerCase() || lower.startsWith(folder.toLowerCase() + '/') || folder.toLowerCase().startsWith(lower + '/')), 'DOCS_SETTINGS_PATH', 'Documentation overlaps a protected project path: ' + path);
   };
   safe(value.root);

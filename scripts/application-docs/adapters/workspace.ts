@@ -25,10 +25,13 @@ export async function readWorkspace(root: string, args: string[], output?: strin
         portable(path); insist(typeof value === 'string' && /^[a-f0-9]{64}$/.test(value), 'DOCS_INDEX', 'Invalid navigation digest.'); index.navigation[path] = value;
       }
     }
+    const boundPaths = new Set<string>();
     for (const [key, input] of Object.entries(object(record.entries))) {
       const item = object(input), baseline = object(item.baseline) as unknown as Entity; validateEntity(baseline);
       insist(keyOf(baseline) === key && baseline.project === index.project && typeof item.path === 'string', 'DOCS_INDEX', 'Invalid documentation binding.');
       portable(item.path);
+      insist(!boundPaths.has(item.path.toLowerCase()), 'DOCS_INDEX', 'Multiple identities are bound to the same documentation path.');
+      boundPaths.add(item.path.toLowerCase());
       insist(/\.md$/i.test(item.path) && !item.path.split('/').some(part => part.startsWith('.')), 'DOCS_INDEX', 'Bindings must point to Markdown outside hidden directories.');
       validateSettings({ root: item.path }, config ? Object.values(config.paths) : []);
       insist(item.generatedHash === null || typeof item.generatedHash === 'string' && /^[a-f0-9]{64}$/.test(item.generatedHash), 'DOCS_INDEX', 'Invalid generated-region digest.');

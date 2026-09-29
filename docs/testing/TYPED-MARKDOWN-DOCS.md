@@ -79,3 +79,48 @@ No merge, release, plugin activation or personal-vault operation is included.
 Recovery guarantees checked process-interruption rollback, not power-loss/fsync or
 filesystem-wide atomicity. There is no implicit deletion, watcher, legacy-note
 adoption, automatic ID remapping or Markdown prose execution.
+
+## Safety continuation — 2026-09-29
+
+The previous implementation candidate `04a61533237a0e2ee79d22e83590bdbb07debeb7`
+passed documentation workflow **36613865416** on both Windows and Ubuntu. The
+retrieved Windows artifact records checked-out merge
+`41b4f83cc2cf18a6d5d5f3ae6371a0d62ccabfca`, Node **24.21.0**, TypeScript **6.0.3**
+and YAML **2.9.1**, with **71/71 feature tests**, **77/77 existing CLI/setup tests**,
+and successful handbook generation/check/audit. This is evidence for that candidate,
+not automatic qualification of subsequent edits.
+
+Further executable review reproduced and fixed three gaps:
+
+- Hidden output paths could be written but were rejected by the next index read.
+  Settings and destination checks now reject them before creating any files.
+- Importing a single copied file could rebind an identity while its original file
+  remained. This now blocks with an explicit conflict; real file moves still work.
+- Excluding an existing destination from discovery could bypass reconciliation and
+  overwrite unsynchronized managed data. The destination now receives the same
+  project-identity and baseline-aware conflict review. Matching documents can still
+  be adopted without rewriting their authored text.
+
+The input reader also checks regular-file type before opening, with non-blocking
+flags where available, so a named pipe cannot hang the documentation command.
+Index loading rejects duplicate path bindings. Preservation/deletion switches
+reject string, numeric and null substitutes for the supported boolean values.
+
+Eight new safety tests are explicitly required by the documentation workflow.
+The named-pipe test uses a real FIFO on POSIX and a non-regular directory input on
+Windows; neither branch is counted as a skipped test. The existing framework suite
+registration includes the new suite without broadening analyzer exemptions.
+
+Local continuation results (Node **22.16.0**, pinned TS/YAML unchanged):
+
+- Feature and setup replay: **97/97 passed**, none skipped.
+- All focused docs/CLI/setup suites: **155/156 passed**, none skipped. The sole
+  failure remains the existing empty-stderr assertion receiving Node 22's
+  experimental type-stripping warning. No warning filter or test weakening was
+  introduced. Hosted Node 24 must qualify the new candidate.
+- Framework typecheck: passed. Suite inventory: **337 test files, 35 suites,
+  34 helpers**. Handbook generation/check/audit: passed, unchanged at 70 commands,
+  10 authored documents, 97 parsed examples and 13 relative links.
+
+New hosted results must be read from the safety commit's workflow. Broad runtime,
+release and native acceptance retain their existing separate evidence boundaries.

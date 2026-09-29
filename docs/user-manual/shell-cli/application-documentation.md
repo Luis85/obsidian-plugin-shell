@@ -57,7 +57,8 @@ docs/application/
 Open `generated/index.md` for navigation. New filenames combine the title, stable
 identity and a short collision-resistant suffix. Once registered, filenames do not
 change on title edits. Renaming or moving a file within the configured scan roots
-preserves its identity on the next import. Duplicate declarations are errors.
+preserves its identity on the next import. Duplicate declarations are errors, including
+single-file imports of a copy while the original registered document still exists.
 
 A complete export verifies that its projection can reconstruct the entire validated
 project. Subsystems without individual document adapters remain in the project's
@@ -152,6 +153,8 @@ project-only changes can export or be reconciled by import. Independent field ed
 can merge. Ordered arrays are conflict units. Different changes to the same field
 block writes. With no baseline, existing differences also require a decision.
 An export refuses to replace Markdown that is ahead of the project: import first.
+Include/exclude patterns limit discovery, not overwrite protection: an existing
+output document still receives identity and conflict checks even when excluded.
 
 The structured conflict report supplies an entity key and JSON-pointer field.
 Combine them as `entity#/field` in a resolution JSON file, for example:
@@ -204,12 +207,18 @@ Merge a `documentation` section into `configs/user-settings.json` with
 ```
 
 `linkFormat` can also be `wikilink`. Paths are project-relative, portable and outside
-protected source, test, dependency and host directories. Source/test configuration
+protected source, test, dependency and host directories. Hidden path segments are
+not supported for documentation; invalid locations fail before creating bindings.
+Safety switches must be booleans (`preserveAuthoredContent: true` and
+`deleteMissing: false`), not string equivalents. Source/test configuration
 must still use the existing project configuration workflow. Documentation import
 cannot silently relocate those roots. `docs export --out <folder>` chooses locations
 for new documents/navigation but does not move registered files or rewrite settings.
 
 ## Failure and recovery
+
+Only bounded regular files are read. Named pipes, devices, symlinks and other
+non-regular inputs are refused rather than opened as documentation.
 
 Preview performs no writes unless `--plan-out` explicitly requests a saved plan.
 Apply rebuilds the plan and checks source, settings, discovery, outputs and ownership

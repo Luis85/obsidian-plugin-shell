@@ -27,7 +27,9 @@ export async function safePath(path: string): Promise<boolean> {
 export async function readBytes(path: string, maximum = 4_000_000): Promise<Buffer | null> {
   if (!await safePath(path)) return null;
   const observed = await lstat(path);
-  const file = await open(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+  // Opening a FIFO before checking its type can block the CLI indefinitely.
+  insist(observed.isFile() && observed.size <= maximum, 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
+  const file = await open(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
   try {
     const before = await file.stat();
     insist(before.isFile() && before.size <= maximum && before.ino === observed.ino && before.dev === observed.dev, 'DOCS_LIMIT', 'Input must be a bounded regular file: ' + path);
