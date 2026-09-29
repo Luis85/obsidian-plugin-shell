@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useFlowRuntime } from '../flow-context.ts';
 import type { Component } from 'vue';
 import type { ProjectedSurface } from '../../../../../scripts/companion/sitemap/projection.ts';
 defineProps<{ id:string; data:ProjectedSurface; selected?:boolean }>();
-const Handle:Component=window.VueFlowCore.Handle;
-const Position=window.VueFlowCore.Position;
+const Handle:Component=useFlowRuntime().Handle;
+const Position=useFlowRuntime().Position;
 </script>
 <template>
   <article class="jm-node" :class="{selected,dim:!data.matched,journey:data.journeySteps.length}" :data-surface="id">

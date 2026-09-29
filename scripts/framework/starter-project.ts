@@ -1,3 +1,4 @@
+import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed built-in starter. It composes the
  * existing catalog loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
@@ -13,6 +14,7 @@ import { exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { withAirshipOption } from '../companion/tooling-options.ts';
 import { exportedProject } from './project-from.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
 interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
@@ -86,8 +88,8 @@ export async function starterProjectPlan(request: Request, context: Context) {
   const scratch = await mkdtemp(join(tmpdir(), 'shell-new-'));
   try {
     const input = join(scratch, 'project.json');
-    await writeFile(input, JSON.stringify(created.document, null, 2) + '\n', { flag: 'wx' });
-    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template });
+    await writeFile(input, JSON.stringify(withAirshipOption(created.document, request.options), null, 2) + '\n', { flag: 'wx' });
+    const planned = await planProject({ input, vault: place.vault, target: place.target, templateRoot: created.template, storybook: storybookFlags(request.options) });
     const summary = { ...created.origin, identity: created.document.project,
       directory: place.directory, vault: place.vault, target: place.target, files: planned.summary.files,
       acceptanceTodos: planned.summary.acceptanceTodos, warnings: [...(created.warnings ?? []), ...planned.summary.warnings] };

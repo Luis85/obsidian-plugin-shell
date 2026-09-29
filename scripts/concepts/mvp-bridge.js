@@ -1,3 +1,4 @@
+function jmValidTooling(value){try{CompanionJourney.validateProjectTooling(value);return true;}catch{return false;}}
 // Trusted composition bridge. The browser concept's existing project and persistence remain authoritative.
 let jmEditor=null,jmOwner=null;
 // UI state only, keyed by the actual project object. Replacing/importing a project cannot leak a prior lens or filter.
@@ -34,5 +35,6 @@ function jmSeed(p){
  }
  const groups=[['design','Product design',['overview','starters','requirements','storymaps','storymap-detail','sitemap','pages','page-editor','component-editor','components','blueprints','patterns','design-system']],['data','Data and contracts',['entities','sources','test-data']],['delivery','Development and delivery',['prepare','generate','develop','quality','capabilities','release','runs']]];
  d.features={schema:1,items:groups.map(([id,name,slugs])=>{const surfaces=slugs.map(s=>bySlug.get(s).id);return {id:'feature-'+id,name,surfaces,entryPoints:[surfaces[0]],components:[],requirements:d.prds.flatMap(prd=>prd.requirements).filter(r=>r.nodes.some(n=>surfaces.includes(n))).map(r=>r.id),dependsOn:[]};})};
+ d.editors={schema:1,bindings:[{surface:bySlug.get('sitemap').id,editor:'journey-lens'}]};
  d.schema=6;return p;
 }

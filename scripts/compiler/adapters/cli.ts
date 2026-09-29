@@ -1,3 +1,4 @@
+import { storybookFlags } from '../../framework/storybook-options.ts';
 import { basename, join, resolve } from 'node:path';
 import { readBounded, exists } from '../../framework/files.ts';
 import { requireThat, result, stringOption, type Context, type Request, type Result } from '../../framework/contracts.ts';
@@ -36,7 +37,7 @@ export async function compilerOperation(request: Request, context: Context): Pro
     const templateRoot = await exists(join(context.frameworkRoot, '.framework/kit.json')) ? join(context.frameworkRoot, '.framework/template') : context.frameworkRoot;
     template = await loadTemplateSnapshot(templateRoot, context.signal);
   }
-  const compiled = await compileProject({ source, sourceName, outputKind: outputKind as OutputKind, template }, {
+  const compiled = await compileProject({ source, sourceName, outputKind: outputKind as OutputKind, template, storybook: storybookFlags(request.options) }, {
     signal: context.signal, onEvent: recorder.onEvent, onFailure: recorder.onFailure,
   });
   const summary = { compilerVersion, status: compiled.status, outputKind: compiled.outputKind, fingerprint: compiled.fingerprint,

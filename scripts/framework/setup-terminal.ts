@@ -28,6 +28,8 @@ export async function guidedSetup(request: Request, context: Context, prompt: Pr
     options.name ??= (await prompt(`Plugin name [${name}]: `)).trim() || name;
     options.author ??= (await prompt('Author: ')).trim();
   }
+  if ((options.input || options.starter || options.blank) && options.airship === undefined && options['no-airship'] === undefined &&
+      /^y(?:es)?$/i.test((await prompt('Enable optional Airship development tooling? No installation or launch is performed. [y/N] ')).trim())) options.airship = true;
   write('GitHub is optional. Setup stays local and preserves every existing remote. Use your reviewed Git client to connect later.\n');
   return { ...request, options };
 }

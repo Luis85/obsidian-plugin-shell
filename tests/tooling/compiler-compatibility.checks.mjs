@@ -65,7 +65,17 @@ for(const expected of baseline.cases){
     const source=await readFile(join(root,expected.source),'utf8');assert.equal(digest(source),expected.inputSha256,'pinned baseline input bytes');const result=await compileProject({source,template});
     assert.equal(result.status,'ok',JSON.stringify(result.diagnostics));const model=result.model;
     const selected=result.artifacts.filter(file=>file.path.startsWith(model.sourceRoot+'/')||file.path.startsWith(model.testRoot+'/')||file.path.startsWith('harness/prototype/')||['src/main.ts','src/bootstrap/features.ts','design/project.json','design/traceability.json'].includes(file.path));
-    assert.equal(selected.length,expected.files+2);assert.equal(digest(JSON.stringify(historicalBytes(selected,model,expected.source))),expected.sha256);
+    // AIR-01 adds one browser entry. Verify its complete bytes separately; all historical
+    // product files must still match the independently captured baseline without rebasing it.
+    const previews=selected.filter(file=>file.path==='harness/prototype/index.html');
+    assert.equal(previews.length,1);
+    assert.equal(previews[0].content,`<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Source preview</title></head>
+<body class="theme-dark"><main id="prototype-app" class="ps--${model.project.id}" data-plugin-ui="${model.project.id}"></main>
+<script type="module" src="/harness/prototype/clickdummy.ts"></script></body></html>
+`);
+    const preserved=selected.filter(file=>file!==previews[0]);
+    assert.equal(selected.length,expected.files+3);assert.equal(digest(JSON.stringify(historicalBytes(preserved,model,expected.source))),expected.sha256);
   });
 }
 test('same frozen snapshot stays deterministic while telemetry changes',async()=>{

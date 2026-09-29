@@ -2,6 +2,8 @@ import { measureProject } from './project-measure.ts';
 import { supportReport } from './support-report.ts';
 import { setupProgress } from './setup-progress.ts';
 import { projectContractOperation } from './project-contract.ts';
+import { storybookOperation } from './storybook.ts';
+import { airshipOperation } from './airship.ts';
 import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
 import { readBounded } from './files.ts';
 import { compilerOperation } from '../compiler/adapters/cli.ts';
@@ -77,6 +79,7 @@ async function processOperation(request: Request, context: Context): Promise<Res
   } else if (request.command === 'dev') {
     acceptProfile(request.command, profile);
     entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
+    if (profile === 'preview') return result(request.command, { execution: await runNode(context, 'node_modules/vite/bin/vite.js', ['--config', 'vite.preview.config.mjs'], timeout), productAcceptance: 'not-inferred' });
     args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
   } else {
     const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');
@@ -134,10 +137,12 @@ export async function executeOperation(input: Request, context: Context): Promis
     }
     if (command === 'setup status' || command === 'setup resume') return await setupProgress(request, context, executeOperation);
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command.startsWith('storybook ')) return await storybookOperation(request, context);
     if (command.startsWith('compiler ')) return await compilerOperation(request, context);
     if (command === 'clickdummy build') return await buildClickdummy(request, context);
     if (command === 'check') return await checkOperation(request, context);
     if (command === 'check submission') return await submissionCheck(context, request.options['dry-run'] === true);
+    if (command.startsWith('airship ') && descriptor(command).effect !== 'plan') return await airshipOperation(request, context);
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {

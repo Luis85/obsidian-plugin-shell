@@ -3,17 +3,21 @@ import { defineStore } from 'pinia';
 import type { EditorHost, EditorViewState } from '../contracts.ts';
 import type { SitemapCommand, SitemapDesign, SurfaceKind } from '../../../../../scripts/companion/sitemap/model.ts';
 import { SitemapSession } from '../../../../../scripts/companion/sitemap/session.ts';
+import { planRecordRemoval } from '../../../../../scripts/companion/sitemap/maintenance.ts';
 import { planSurfaceRemoval } from '../../../../../scripts/companion/sitemap/commands.ts';
 import { sitemapContext, sitemapProjection } from '../../../../../scripts/companion/sitemap/projection.ts';
 import { newSitemapSurface } from '../../../../../scripts/companion/sitemap/create.ts';
 import { sitemapDisplayLayout } from '../../../../../scripts/companion/sitemap/layout.ts';
 import { arrangeSitemap } from '../../../../../scripts/companion/sitemap/arrangement.ts';
 import { beginJourneyDraft, editJourneyDraft, finishJourneyDraft, journeyStepTransitions, type JourneyDraft, type JourneyEdit } from '../../../../../scripts/companion/sitemap/journey-draft.ts';
-import { inspectSitemap } from '../../../../../scripts/companion/sitemap/validate.ts';
+import { canonicalKey, assertJson, record } from '../../../../../scripts/companion/sitemap/safety.ts';
+import { inspectSitemap, validateSitemapModel } from '../../../../../scripts/companion/sitemap/validate.ts';
 
 let serial = 0;
 export function editorStore(host: EditorHost) {
   const session = new SitemapSession(host);
+  const ownerId = host.ownerId ?? 'plugin-shell', ownerClass = 'ps--' + ownerId;
+  const domId = (id: string) => (host.idPrefix ?? '') + id;
   return defineStore('journey-editor-' + ++serial, () => {
     const snapshot = shallowRef<SitemapDesign | null>(null), selectedId = ref(host.selected ?? '');
     const busy = ref(false), available = ref(false), canUndo = ref(false), canRedo = ref(false);
@@ -24,8 +28,9 @@ export function editorStore(host: EditorHost) {
     function viewState(): EditorViewState { return { lens: lens.value, journeyId: journeyId.value, query: query.value, treeOpen: treeOpen.value, inspectorOpen: inspectorOpen.value, tab: tab.value, focused: focused.value, priorPanels: {...priorPanels} }; }
     const focused=ref(host.viewState?.focused??false);let priorPanels=host.viewState?.priorPanels??{tree:false,inspector:true};
     const draftName = ref(''), dirty = ref(false), panel = ref('');
-    const form = ref({name:'',parent:'',kind:'page' as SurfaceKind,target:'',journeyName:'',x:'',y:''});
+    const form = ref({name:'',parent:'',kind:'page' as SurfaceKind,target:'',journeyName:'',x:'',y:'',before:'',record:'',linkKind:'auto'});
     const journeyDraft = shallowRef<JourneyDraft | null>(null);
+    const recordRemoval=shallowRef<ReturnType<typeof planRecordRemoval>|null>(null);
     const removal = shallowRef<ReturnType<typeof planSurfaceRemoval> | null>(null);
     const selected = computed(() => snapshot.value?.nodes.find(n => n.id === selectedId.value) ?? null);
     const context = computed(() => snapshot.value && selected.value ? sitemapContext(snapshot.value, selected.value.id) : null);
@@ -52,7 +57,7 @@ export function editorStore(host: EditorHost) {
       resetDraft();
     }
     async function load() { if(!canLeave())return;error.value='';busy.value=true;const result=await session.load();busy.value=false;sync();
-      message.value=result.status==='loaded'?'Saved project · local authoring':'Project unavailable';
+      message.value=result.status==='loaded'?(host.storageLabel??'Saved project · local authoring'):'Project unavailable';
       if(result.status!=='loaded')error.value='Reload failed. The previous project remains unchanged.'; }
     function canLeave() { if(!dirty.value && !panel.value && !busy.value)return true;
       error.value='Save or cancel the current edit before leaving the sitemap.';return false; }
@@ -63,7 +68,7 @@ export function editorStore(host: EditorHost) {
         error.value=result.status==='conflict'?'Another view changed the project. Export recovery, then reload.':
           result.status==='uncertain'||result.requiresReload?'The save outcome needs recovery. Do not retry; reload after resolving storage.':'The edit was refused. Check its references and reload if the project changed.';
         const state=session.state();available.value=state.writable;return false;
-      } sync();message.value=result.evicted?'Saved · oldest undo entries released to stay within storage bounds':'Saved project · local authoring';return true;
+      } sync();message.value=result.evicted?'Saved · oldest undo entries released to stay within storage bounds':(host.storageLabel??'Saved project · local authoring');return true;
       }catch(e){error.value=e instanceof Error?e.message:'The edit could not be applied.';return false;}finally{busy.value=false;} }
     async function commit(command:SitemapCommand) {
       try{return await run(()=>session.apply(session.plan(command)));}catch(e){error.value=e instanceof Error?e.message:'Invalid edit';return false;}
@@ -72,15 +77,24 @@ export function editorStore(host: EditorHost) {
 
     function open(kind:string) {
       if(!canLeave()||!snapshot.value)return;
-      error.value='';form.value={name:'',parent:selected.value && ['view','page','group'].includes(selected.value.kind)?selected.value.id:'',kind:'page',target:'',journeyName:'',x:'',y:''};
+      error.value='';form.value={name:'',parent:selected.value && ['view','page','group'].includes(selected.value.kind)?selected.value.id:'',kind:'page',target:'',journeyName:'',x:'',y:'',before:'',record:'',linkKind:'auto'};
       if(kind==='journey'||kind==='journey-edit'){
         try { journeyDraft.value=beginJourneyDraft(snapshot.value,kind==='journey-edit'?journeyId.value:undefined);form.value.journeyName=journeyDraft.value.journey.name; }
         catch { error.value='The selected journey is unavailable. Reload the current project.';return; }
       }
       if(kind==='position'&&selected.value){const point=sitemapDisplayLayout(sitemapProjection(snapshot.value,{lens:'hierarchy'}).nodes)[selected.value.id]!;form.value.x=String(point.x);form.value.y=String(point.y);}
+      if(kind==='move')form.value.parent=selected.value?.parent??'';
       if(kind==='route')form.value.name=route.value?.path??'';
       if(kind==='remove'&&selected.value)removal.value=planSurfaceRemoval(snapshot.value,selected.value.id);
       panel.value=kind;
+    }
+    function openTransition(id:string){
+      if(!canLeave()||!snapshot.value)return;const link=snapshot.value.links.find(link=>link.id===id);if(!link)return;
+      select(link.from);open('link-edit');form.value.record=id;form.value.name=link.label;form.value.target=link.to;form.value.linkKind=link.kind;
+    }
+    function reviewRecord(kind:'transition'|'route'|'journey',id:string){
+      if(!canLeave()||!snapshot.value)return;
+      try{recordRemoval.value=planRecordRemoval(snapshot.value,kind,id);panel.value='record-remove';error.value='';}catch{error.value='The selected record is unavailable.';}
     }
     function proposeMove(child:string,parent:string) {
       if(!canLeave())return;selectedId.value=child;resetDraft();form.value={...form.value,parent};panel.value='move';
@@ -105,12 +119,16 @@ export function editorStore(host: EditorHost) {
         else if(panel.value==='create') change={type:'create',surface:newSitemapSurface(snapshot.value,form.value.name,form.value.kind,
           form.value.kind==='page'||form.value.kind==='group'?form.value.parent||null:null)};
         else if(panel.value==='route'&&selected.value)change={type:'route',route:{id:route.value?.id??'route-'+selected.value.id,surface:selected.value.id,path:form.value.name}};
-        else if(panel.value==='move'&&selected.value)change={type:'move',surface:selected.value.id,parent:form.value.parent||null,before:null};
+        else if(panel.value==='move'&&selected.value)change={type:'move',surface:selected.value.id,parent:form.value.parent||null,before:form.value.before||null};
         else if(panel.value==='remove'&&removal.value)change={type:'remove',surface:removal.value.surface,review:removal.value.review};
-        else if(panel.value==='link'&&selected.value){
+        else if(panel.value==='record-remove'&&recordRemoval.value){const r=recordRemoval.value;change={type:r.kind==='transition'?'transition-remove':r.kind==='route'?'route-remove':'journey-remove',id:r.id,review:r.review};}
+        else if((panel.value==='link'||panel.value==='link-edit')&&selected.value){
           const target=snapshot.value.nodes.find(n=>n.id===form.value.target);if(!target)throw Error('Choose a destination.');
           let n=Number(snapshot.value.nextId??1);while(snapshot.value.links.some(e=>e.id==='edge-'+n))n++;
-          change={type:'link',transition:{id:'edge-'+n,from:selected.value.id,to:target.id,label:form.value.name||'Open '+target.label,kind:target.kind==='modal'?'open':'navigate'}};
+          const kind=form.value.linkKind==='auto'?(target.kind==='modal'?'open':'navigate'):form.value.linkKind;
+          const old=panel.value==='link-edit'?snapshot.value.links.find(link=>link.id===form.value.record):undefined;
+          if(panel.value==='link-edit'&&!old)throw Error('The action no longer exists.');
+          change={type:old?'transition-edit':'link',transition:{...old,id:old?.id??'edge-'+n,from:selected.value.id,to:target.id,label:form.value.name||'Open '+target.label,kind}};
         }else if((panel.value==='journey'||panel.value==='journey-edit')&&journeyDraft.value){
           change={type:'journey',journey:finishJourneyDraft(snapshot.value,journeyDraft.value,form.value.journeyName)};
         }else return;
@@ -125,11 +143,45 @@ export function editorStore(host: EditorHost) {
       catch(e){error.value=e instanceof Error?e.message:'Invalid journey edit.';}
     }
     function transitionOptions(index:number){return snapshot.value&&journeyDraft.value?journeyStepTransitions(snapshot.value,journeyDraft.value.journey.steps,index):[];}
-    function go(kind:string){if(!canLeave())return;
+    function recovery() { return JSON.parse(JSON.stringify({ kind:'journey-lens-recovery',schema:1,design:snapshot.value,
+      draft:{selectedId:selectedId.value,draftName:draftName.value,dirty:dirty.value,panel:panel.value,form:form.value,journeyDraft:journeyDraft.value,record:recordRemoval.value?{kind:recordRemoval.value.kind,id:recordRemoval.value.id}:null} })); }
+    async function restoreDraft(value:unknown) {
+      if(busy.value || !snapshot.value)return false;
+      try {
+        assertJson(value,'review');
+        if(!record(value)||value.kind!=='journey-lens-recovery'||value.schema!==1||canonicalKey(value.design)!==canonicalKey(snapshot.value)||!record(value.draft))return false;
+        const d=value.draft;
+        if(typeof d.selectedId!=='string'||typeof d.draftName!=='string'||d.draftName.length>1000||typeof d.dirty!=='boolean'||typeof d.panel!=='string'||!record(d.form))return false;
+        if(d.panel&&!['create','route','move','position','arrange','journey','journey-edit','link','link-edit','remove','record-remove'].includes(d.panel))return false;
+        const f=d.form;
+        if(!['name','parent','kind','target','journeyName','x','y','before','record','linkKind'].every(k=>typeof f[k]==='string'&&f[k].length<=2000))return false;
+        if(!['page','view','group','modal','settings','action'].includes(String(f.kind))||!['auto','navigate','open','conditional'].includes(String(f.linkKind)))return false;
+        if(!snapshot.value.nodes.some(node=>node.id===d.selectedId))return false;
+        let restoredRecord:null|ReturnType<typeof planRecordRemoval>=null;
+        if(d.panel==='record-remove'){
+          if(!record(d.record)||!['transition','route','journey'].includes(String(d.record.kind))||typeof d.record.id!=='string')return false;
+          restoredRecord=planRecordRemoval(snapshot.value,d.record.kind as 'transition'|'route'|'journey',d.record.id);
+        }
+        const restoredRemoval=d.panel==='remove'?planSurfaceRemoval(snapshot.value,d.selectedId):null;
+        if(d.journeyDraft!==null){
+          if(!record(d.journeyDraft)||!record(d.journeyDraft.journey)||!Array.isArray(d.journeyDraft.journey.steps))return false;
+          // Reuse the normal journey validator, including stable IDs and all referenced steps.
+          const candidate={...snapshot.value,sitemap:{schema:1,routes:snapshot.value.sitemap?.routes??[],journeys:[{...d.journeyDraft.journey,name:d.journeyDraft.journey.name||'Recovered draft'}]}};
+          if(!Number.isSafeInteger(d.journeyDraft.nextStep)||Number(d.journeyDraft.nextStep)<1||Number(d.journeyDraft.nextStep)>=Number.MAX_SAFE_INTEGER)return false;
+          if(d.journeyDraft.journey.steps.some(step=>record(step)&&Number(/^step-([1-9][0-9]*)$/.exec(String(step.id))?.[1]??0)>=Number(d.journeyDraft.nextStep)))return false;
+          inspectSitemap(validateSitemapModel(candidate));
+        }
+        selectedId.value=d.selectedId;draftName.value=d.draftName;dirty.value=d.dirty;panel.value=d.panel;
+        form.value=JSON.parse(JSON.stringify(f));journeyDraft.value=JSON.parse(JSON.stringify(d.journeyDraft));
+        removal.value=restoredRemoval;recordRemoval.value=restoredRecord;
+        message.value='Recovered unsaved draft · review before applying';return true;
+      }catch{return false;}
+    }
+    function go(kind:string){if(kind==='recovery'){host.exportRecovery?.(recovery());return;}if(!canLeave())return;
       if(kind==='page'&&selected.value)host.openPage(selected.value.id);else if(kind==='components')host.openComponents();
       else if(kind==='sources')host.openSources();else if(kind==='import')host.importProject();else if(kind==='export')host.exportProject();}
-    return { snapshot,selectedId,selected,context,projection,findings,lens,journeyId,query,treeOpen,inspectorOpen,tab,
-      draftName,dirty,panel,form,removal,busy,available,canUndo,canRedo,message,error,route,
+    return { ownerId,ownerClass,domId,recovery,restoreDraft,snapshot,selectedId,selected,context,projection,findings,lens,journeyId,query,treeOpen,inspectorOpen,tab,
+      draftName,dirty,panel,form,removal,recordRemoval,openTransition,reviewRecord,busy,available,canUndo,canRedo,message,error,route,
       load,select,canLeave,commit,saveName,resetDraft,open,proposeMove,proposeConnection,applyForm,cancel,go,viewState,
       focused,toggleFocus,showPanel,saveStatus,journeyDraft,editJourney,transitionOptions,
       undo:()=>canLeave()?run(()=>session.undo()):Promise.resolve(false),redo:()=>canLeave()?run(()=>session.redo()):Promise.resolve(false),dispose:()=>session.dispose(),

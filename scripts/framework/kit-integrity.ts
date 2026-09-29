@@ -1,3 +1,4 @@
+import { mapBounded } from '../shared/bounded-map.mjs';
 import { portableFile } from './archive-path.ts';
 import { readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -41,11 +42,12 @@ export async function verifyKit(root: string): Promise<Kit> {
   const kit = kitManifest(await readJson(join(root, '.framework/kit.json')));
   const actual = [...await listFiles(root, '.framework/template'), ...await listFiles(root, '.framework/compiled')].sort();
   requireThat(JSON.stringify(actual) === JSON.stringify(kit.files.map(file => file.path).sort()), 'KIT_INVENTORY', 'Missing or unlisted kit files.');
-  let total = 0;
-  for (const file of kit.files) {
-    const content = await readBounded(join(root, file.path), 8_000_000); total += content.length;
-    requireThat(total <= 100_000_000 && content.length === file.bytes && hash(content) === file.hash, 'KIT_MODIFIED', `Kit fingerprint mismatch: ${file.path}.`);
-  }
+  requireThat(kit.files.reduce((total, file) => total + file.bytes, 0) <= 100_000_000, 'KIT_MODIFIED', 'Kit inventory exceeds its byte bound.');
+  await mapBounded(kit.files, 8, async file => {
+    // No retained metadata cache: every invocation reopens every file and all its ancestors.
+    const content = await readBounded(join(root, file.path), 8_000_000);
+    requireThat(content.length === file.bytes && hash(content) === file.hash, 'KIT_MODIFIED', `Kit fingerprint mismatch: ${file.path}.`);
+  });
   if (!await exists(join(root, '.companion/generation.json'))) for (const file of kit.bootstrap) {
     requireThat(hash(await readBounded(join(root, file.path), 8_000_000)) === file.hash, 'BOOTSTRAP_MODIFIED', `Bootstrap changed before generation: ${file.path}.`);
   }

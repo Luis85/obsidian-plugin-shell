@@ -211,6 +211,9 @@
         "name": "companion-authoring-contract",
         "patterns": [
           "scripts/companion/authoring-contract.ts",
+          "scripts/companion/tooling-contract.ts",
+          "scripts/companion/tooling-contract.mjs",
+          "scripts/companion/tooling-options.ts",
           "scripts/companion/concepts/**",
           "scripts/companion/sitemap/**",
           "scripts/companion/visual/**",
@@ -494,6 +497,18 @@
     "policy-violation": "off"
   },
   "framework": [
+    {
+      "name": "airship-source-preview-tools",
+      "entryPointRole": "support",
+      "entryPoints": ["scripts/airship/preview-config.mjs", "scripts/airship/qualify.mjs"],
+      "detection": { "type": "fileExists", "pattern": "scripts/airship/preview-config.mjs" }
+    },
+    {
+      "name": "optional-storybook-qualification",
+      "entryPointRole": "test",
+      "entryPoints": ["scripts/compiler/qualify-storybook.mjs", "scripts/compiler/verify-storybook.mjs"],
+      "detection": { "type": "fileExists", "pattern": "scripts/compiler/qualify-storybook.mjs" }
+    },
     {
       "name": "prototype-build-tools",
       "entryPointRole": "support",

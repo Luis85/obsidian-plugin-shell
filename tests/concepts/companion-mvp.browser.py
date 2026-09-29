@@ -228,6 +228,52 @@ def run_journey_maintenance(page):
     expect(page.locator('.jm-dialog')).to_have_count(0)
     check('Escape cancels journey edits without a project write', project(page) == after)
 
+def run_generated_journey(page, data, picker):
+    bindings = data['design'].get('editors', {}).get('bindings', [])
+    check('the self-project explicitly binds the maintained Journey Lens engine', len(bindings) == 1 and bindings[0]['editor'] == 'journey-lens')
+    binding = bindings[0]
+    picker.select_option(binding['surface'])
+    workspace = page.locator('.jl-workspace')
+    expect(workspace).to_have_attribute('data-journey-mode', 'preview')
+    expect(workspace.locator('.jl-file-status')).to_contain_text('Preview memory only')
+    expect(workspace.locator('.vue-flow__node').first).to_be_visible()
+    expect(page.get_by_label('Authored scenario', exact=True)).to_be_disabled()
+    inspector = workspace.get_by_role('complementary', name='Selected surface', exact=True)
+    name = inspector.get_by_label('Name', exact=True)
+    node_id = workspace.locator('.jm-node.selected').get_attribute('data-surface')
+    original_name = name.input_value()
+    name.fill('Unsubmitted journey draft')
+    alternative = next(n for n in data['design']['nodes'] if n['id'] != binding['surface'] and n['kind'] in ['view', 'page'])
+    picker.select_option(alternative['id'])
+    expect(picker).to_have_value(binding['surface'])
+    expect(name).to_have_value('Unsubmitted journey draft')
+    inspector.get_by_role('button', name='Cancel', exact=True).click()
+    expect(name).to_have_value(original_name)
+    name.fill('Saved through the generated editor')
+    inspector.get_by_role('button', name='Save name', exact=True).click()
+    expect(inspector.get_by_role('button', name='Save name', exact=True)).to_have_count(0)
+    expected = json.loads(json.dumps(data))
+    next(n for n in expected['design']['nodes'] if n['id'] == node_id)['label'] = 'Saved through the generated editor'
+    with page.expect_download() as pending:
+        workspace.get_by_role('button', name='Export JSON', exact=True).click()
+    export = OUT / 'generation/journey-project-export.json'
+    pending.value.save_as(export)
+    check('generated editor exports complete edited canonical project, not just a map', json.loads(export.read_text(encoding='utf8')) == expected)
+    workspace.get_by_role('button', name='Undo', exact=True).click()
+    expect(name).to_have_value(original_name)
+    workspace.get_by_role('button', name='Redo', exact=True).click()
+    expect(name).to_have_value('Saved through the generated editor')
+    picker.select_option(alternative['id'])
+    picker.select_option(binding['surface'])
+    expect(workspace.locator('.jl-file-status')).to_contain_text('Preview memory only')
+    expect(name).to_have_value('Saved through the generated editor')
+    check('generated editor preserves its memory document across screen navigation and exact undo/redo', True)
+    page.get_by_role('button', name='Reset preview', exact=True).click()
+    picker.select_option(binding['surface'])
+    expect(workspace.locator('.jl-file-status')).to_contain_text('Preview memory only')
+    expect(name).to_have_value(original_name)
+    check('preview reset recreates the seed and never claims native persistence', True)
+
 def run_clickdummy(page):
     data = json.loads((OUT / 'generation/generated-project.json').read_text(encoding='utf8'))
     page.goto(HTML.as_uri())
@@ -238,7 +284,10 @@ def run_clickdummy(page):
     for surface in surfaces:
         picker.select_option(surface['id'])
         expect(page.locator('.generated-screen > h2').first).to_have_text(surface['label'])
+        if page.locator('.jl-workspace').count():
+            expect(page.locator('.jl-workspace .jl-file-status')).to_contain_text('Preview memory only')
     check('all generated non-modal surfaces render their actual compiled page', len(surfaces) > 0)
+    run_generated_journey(page, data, picker)
     start = next(n for n in data['design']['nodes'] if n['slug'] == 'overview')
     picker.select_option(start['id'])
     for state in ['loading', 'empty', 'error', 'disabled', 'default']:

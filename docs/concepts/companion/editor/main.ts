@@ -1,9 +1,11 @@
+export { validateProjectTooling } from '../../../../scripts/companion/tooling-contract.ts';
 import { createApp, h } from 'vue';
 import { createPinia, disposePinia } from 'pinia';
 import UApp from '@nuxt/ui/components/App.vue';
 import SitemapEditor from './components/SitemapEditor.vue';
 import { editorStore } from './composables/use-editor.ts';
-import type { EditorHost } from './contracts.ts';
+import { flowKey } from './flow-context.ts';
+import type { EditorHost, FlowRuntime } from './contracts.ts';
 import { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument, authoringDesignKey } from '../../../../scripts/companion/authoring-contract.ts';
 import { validateSitemapModel } from '../../../../scripts/companion/sitemap/validate.ts';
 import { canonicalKey } from '../../../../scripts/companion/sitemap/safety.ts';
@@ -12,18 +14,22 @@ import './editor.css';
 import './integration.css';
 
 export { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument, authoringDesignKey, validateSitemapModel, canonicalKey };
-export function mount(root:HTMLElement,host:EditorHost) {
-  const pinia=createPinia(),store=editorStore(host)(pinia);
+export function mount(root:HTMLElement,host:EditorHost,flow:FlowRuntime = root.ownerDocument.defaultView!.VueFlowCore) {
+  const ownedHost={...host,exportRecovery:host.exportRecovery??((value:unknown)=>{const doc=root.ownerDocument,win=doc.defaultView!;const url=win.URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=doc.createElement('a');link.href=url;link.download='journey-lens-recovery.json';link.click();win.setTimeout(()=>win.URL.revokeObjectURL(url),1000);})};
+  const pinia=createPinia(),store=editorStore(ownedHost)(pinia);
   const app=createApp({render:()=>h(UApp,{toaster:null,portal:root},()=>h(SitemapEditor,{store}))});
-  app.use(pinia);app.mount(root);void store.load();
+  let closed=false;
+  app.use(pinia);app.provide(flowKey,flow);root.classList.add('journey-lens-root');
+  try{app.mount(root);}catch(cause){store.dispose();disposePinia(pinia);throw cause;}
+  const ready=store.load();
   const shortcut=(event:KeyboardEvent)=>{
-    if(!root.contains(event.target instanceof Node?event.target:null)||event.defaultPrevented||event.isComposing)return;
     const target=event.target;
-    if(target instanceof HTMLElement&&(target.closest('input,textarea,select,[contenteditable="true"],[contenteditable=""]')||target.isContentEditable))return;
+    if(!target||!('nodeType' in target)||!root.contains(target as Node)||event.defaultPrevented||event.isComposing)return;
+    if('closest' in target && typeof target.closest==='function' && (target.closest('input,textarea,select,[contenteditable="true"],[contenteditable=""]')))return;
     if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'){
       event.preventDefault();event.stopPropagation();void(event.shiftKey?store.redo():store.undo());
     }
   };
   root.addEventListener('keydown',shortcut);
-  return {canLeave:store.canLeave,viewState:store.viewState,unmount(){store.dispose();root.removeEventListener('keydown',shortcut);app.unmount();store.$dispose();disposePinia(pinia);}};
+  return {ready,canLeave:store.canLeave,viewState:store.viewState,recovery:store.recovery,restore:store.restoreDraft,invalidate(){store.available=false;},unmount(){if(closed)return;closed=true;store.dispose();root.removeEventListener('keydown',shortcut);try{app.unmount();}finally{store.$dispose();disposePinia(pinia);}}};
 }

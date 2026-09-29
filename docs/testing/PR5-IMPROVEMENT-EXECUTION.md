@@ -80,3 +80,14 @@ IP-05/IP-08/IP-11 work: exact per-surface authored samples, scoped mode inherita
 local reset and pending-request isolation, plus independent browser assertions.
 The [MVP closure map](MVP-CLOSURE-STATUS.md) retains complete native companion,
 manual acceptance and separately authorized shipment obligations.
+
+## Local continuation — generated native Journey Lens
+
+The [native integration record](JOURNEY-LENS-NATIVE-IMPLEMENTATION.md) documents the
+unpublished candidate based on PR35 `2ea6c19a` and PR5 `7c26f37`. It integrates the
+actual shared editor, guarded whole-project file persistence, complete record
+maintenance, recovery, regeneration and generated native/browser acceptance
+tests. Local runtime evidence is recorded without substituting for TypeScript 6,
+build, browser or real-host verification. The supplied exact-base patch is the
+delivery; GitHub write operations were unavailable, so no push/merge/issue closure
+or whole-plan completion is claimed.

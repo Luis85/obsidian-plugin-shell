@@ -14,6 +14,10 @@ export interface EditorViewState {
 }
 export interface EditorHost extends SitemapHost<SitemapDesign> {
   viewState?: EditorViewState;
+  idPrefix?: string;
+  ownerId?: string;
+  storageLabel?: string;
+  exportRecovery?(value: unknown): void;
   selected: string | null;
   select(id: string): void;
   openPage(id: string): void;
@@ -32,9 +36,11 @@ export interface FlowApi {
   zoomOut(): Promise<unknown>;
   setCenter(x: number, y: number, options?: Record<string, unknown>): Promise<unknown>;
 }
+export interface FlowRuntime { VueFlow: Component; Handle: Component; Position: { Top: string; Bottom: string }; useVueFlow(id: string): FlowApi }
+
 /** This runtime is already pinned/hash-verified by the companion assembly. It uses the same Vue global. */
 declare global {
   interface Window {
-    VueFlowCore: { VueFlow: Component; Handle: Component; Position: { Top: string; Bottom: string }; useVueFlow(id: string): FlowApi };
+    VueFlowCore: FlowRuntime;
   }
 }

@@ -1,10 +1,11 @@
 import { computed, markRaw, nextTick, onBeforeUnmount, ref, type Component } from 'vue';
+import { useFlowRuntime } from '../flow-context.ts';
 import type { EditorStore } from './use-editor.ts';
 import type { FlowNode } from '../contracts.ts';
 import { sitemapDisplayLayout } from '../../../../../scripts/companion/sitemap/layout.ts';
 
 export function useGraph(s:EditorStore, nodeComponent:Component) {
-  const id='journey-canvas-'+s.$id,api=window.VueFlowCore.useVueFlow(id), nodeTypes={surface:markRaw(nodeComponent)};
+  const id='journey-canvas-'+s.$id,api=useFlowRuntime().useVueFlow(id), nodeTypes={surface:markRaw(nodeComponent)};
   const fitted=ref(false), dragBefore=ref<string|null>(null);
   // Canonical-snapshot dependency avoids relayout when only search or lens changes.
   const positions=computed(()=>s.snapshot?sitemapDisplayLayout(s.snapshot.nodes.map(node=>({

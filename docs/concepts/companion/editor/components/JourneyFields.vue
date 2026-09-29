@@ -7,8 +7,8 @@ defineProps<{store:EditorStore}>();
 </script>
 <template>
   <fieldset class="jm-journey-fields" :disabled="store.busy||!store.available">
-    <label for="jm-journey-name">Journey name</label>
-    <UInput id="jm-journey-name" v-model="store.form.journeyName" autofocus maxlength="120" />
+    <label :for="store.domId('jm-journey-name')">Journey name</label>
+    <UInput :id="store.domId('jm-journey-name')" v-model="store.form.journeyName" autofocus maxlength="120" />
     <p class="jm-help">Choose existing surfaces in order. Where several actions connect the same surfaces, choose the intended action. Reordering never invents navigation; missing actions remain review findings.</p>
     <ol class="jm-steps jm-edit-steps">
       <li v-for="(step,index) in store.journeyDraft?.journey.steps" :key="step.id">
@@ -37,8 +37,8 @@ defineProps<{store:EditorStore}>();
         </div>
       </li>
     </ol>
-    <label for="jm-step">Next step</label>
-    <div class="jm-actions"><select id="jm-step" v-model="store.form.target"><option value="">Choose a surface</option><option v-for="node in store.snapshot?.nodes.filter(n=>n.kind!=='group')" :value="node.id" :key="node.id">{{ node.label }}</option></select><UButton color="neutral" variant="outline" :disabled="!store.form.target||(store.journeyDraft?.journey.steps.length??0)>=SITEMAP_LIMITS.steps" @click="store.editJourney({type:'append',surface:store.form.target})">Add step</UButton></div>
+    <label :for="store.domId('jm-step')">Next step</label>
+    <div class="jm-actions"><select :id="store.domId('jm-step')" v-model="store.form.target"><option value="">Choose a surface</option><option v-for="node in store.snapshot?.nodes.filter(n=>n.kind!=='group')" :value="node.id" :key="node.id">{{ node.label }}</option></select><UButton color="neutral" variant="outline" :disabled="!store.form.target||(store.journeyDraft?.journey.steps.length??0)>=SITEMAP_LIMITS.steps" @click="store.editJourney({type:'append',surface:store.form.target})">Add step</UButton></div>
     <p class="jm-help">{{ store.journeyDraft?.journey.steps.length??0 }} / {{ SITEMAP_LIMITS.steps }} steps. Apply saves this journey through the current project; Cancel discards only this draft.</p>
   </fieldset>
 </template>

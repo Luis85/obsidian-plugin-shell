@@ -1,3 +1,4 @@
+import * as maintenance from '../../scripts/companion/sitemap/maintenance.ts';
 /** Execute the actual composable with the pinned Vue/Pinia runtime. No browser host or stubbed store actions. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,13 +13,14 @@ import * as arrangement from '../../scripts/companion/sitemap/arrangement.ts';
 import * as create from '../../scripts/companion/sitemap/create.ts';
 import * as journeyDraft from '../../scripts/companion/sitemap/journey-draft.ts';
 import * as validate from '../../scripts/companion/sitemap/validate.ts';
+import * as safety from '../../scripts/companion/sitemap/safety.ts';
 import { canonicalKey, assertJson } from '../../scripts/companion/sitemap/safety.ts';
 import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 const root = new URL('../../', import.meta.url);
 // These are the same maintained runtime files used by the concept, not arbitrary imported project scripts.
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js', root), 'utf8') + ';Vue;');
 const Pinia = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/pinia.iife.prod.js', root), 'utf8') + ';Pinia;');
-const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'commands.ts': commands,
+const dependencies = { vue: Vue, pinia: Pinia, 'session.ts': { SitemapSession }, 'maintenance.ts': maintenance, 'safety.ts': safety, 'commands.ts': commands,
   'journey-draft.ts': journeyDraft, 'layout.ts': layout, 'arrangement.ts': arrangement, 'projection.ts': projection, 'create.ts': create, 'validate.ts': validate };
 const source = readFileSync(new URL('docs/concepts/companion/editor/composables/use-editor.ts', root), 'utf8');
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
@@ -234,4 +236,33 @@ test('pending journey save blocks draft mutations, duplicate submissions, cancel
   store.editJourney({type:'remove',step:'step-2'});store.cancel();await store.load();await store.applyForm();
   assert.equal(store.journeyDraft.journey.steps.length,2);assert.equal(store.panel,'journey');assert.equal(calls,1);assert.equal(reads,0);
   release();await pending;assert.equal(writes(),1);assert.equal(store.panel,'');
+});
+
+test('native editor recovery restores an exact unsaved name without writing or accepting a different design', async t => {
+  const f=await fixture(t),store=f.store;
+  store.draftName='Recovered pending name';store.dirty=true;
+  const captured=store.recovery();store.resetDraft();
+  assert.equal(await store.restoreDraft(captured),true);assert.equal(store.draftName,'Recovered pending name');
+  assert.equal(store.dirty,true);assert.equal(f.writes(),0);
+  const wrong=structuredClone(captured);wrong.design.nodes[0].label='Other revision';
+  assert.equal(await store.restoreDraft(wrong),false);assert.equal(f.writes(),0);
+  await store.saveName();assert.equal(f.writes(),1);
+});
+test('record maintenance uses the same saved session and exact undo/redo', async t => {
+  const f=await fixture(t),store=f.store;
+  store.open('create');store.form.name='Maintenance page';store.form.parent=f.document().design.nodes.find(n=>n.kind==='view').id;
+  await store.applyForm();const id=store.selectedId;assert.equal(store.selected.label,'Maintenance page');
+  store.open('route');store.form.name='/maintenance';await store.applyForm();
+  const routeId=store.route.id,before=structuredClone(f.document());
+  store.reviewRecord('route',routeId);assert.equal(store.recordRemoval.canRemove,true);await store.applyForm();
+  assert.equal(f.document().design.sitemap.routes.some(r=>r.id===routeId),false);
+  await store.undo();assert.deepEqual(f.document(),before);await store.redo();assert.equal(store.route,undefined);
+  store.open('move');assert.equal(store.form.parent,store.selected.parent);assert.notEqual(store.form.parent,id);
+  store.cancel();
+});
+test('restoring invalid removal recovery cannot partially replace the active draft', async t => {
+  const f=await fixture(t),store=f.store;
+  store.draftName='Keep me';store.dirty=true;const before=store.recovery(),invalid=structuredClone(before);
+  invalid.draft.selectedId='missing';invalid.draft.panel='remove';
+  assert.equal(await store.restoreDraft(invalid),false);assert.deepEqual(store.recovery(),before);assert.equal(f.writes(),0);
 });

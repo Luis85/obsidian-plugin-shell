@@ -76,7 +76,9 @@ try {
   const hook = nodes.find(node => node.kind === 'component' && node.events.some(event => event.event === 'click' && !event.actions.length));
   assert.ok(inputNode && hook);
   await scenarioPicker.selectOption(populated.id);
-  const input = detail.locator('[data-design-node="' + inputNode.id + '"] input');
+  // Nuxt Input may forward the design marker to its input root, not a wrapper.
+  const input = detail.locator('input[data-design-node="' + inputNode.id + '"], [data-design-node="' + inputNode.id + '"] input');
+  await expect(input).toHaveCount(1);
   await input.fill('Unsaved review draft');
   await detail.locator('[data-design-node="' + hook.id + '"]').click();
   await expect(detail).toContainText('The interaction could not be completed. Your input is retained.');

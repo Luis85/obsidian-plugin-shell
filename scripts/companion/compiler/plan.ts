@@ -8,11 +8,11 @@ import { generationSelection } from '../../compiler/adapters/selection.ts';
 import { parseSelection } from '../../compiler/domain/selection.ts';
 import { planArtifacts } from '../../compiler/adapters/workspace-plan.ts';
 import type { Entry } from './file-code.ts';
-import type { OutputKind } from '../../compiler/domain/contracts.ts';
+import type { OutputKind, StorybookOptions } from '../../compiler/domain/contracts.ts';
 export { applyProject, reviewProject } from '../../compiler/adapters/workspace-plan.ts';
 export interface GenerateOptions {
   input:string;target:string;vault?:string;templateRoot?:string;
-  bootstrap?:ReadonlyArray<{path:string;hash:string}>;output?:Entry[];outputKind?:OutputKind;scope?:string;signal?:AbortSignal;
+  bootstrap?:ReadonlyArray<{path:string;hash:string}>;output?:Entry[];outputKind?:OutputKind;scope?:string;storybook?:StorybookOptions;signal?:AbortSignal;
 }
 export async function planProject(options:GenerateOptions) {
   parseSelection(options.scope);
@@ -21,7 +21,7 @@ export async function planProject(options:GenerateOptions) {
   const templateRoot=resolve(options.templateRoot ?? fileURLToPath(new URL('../../../',import.meta.url)));
   const template=await loadTemplateSnapshot(templateRoot, options.signal);
   const compiled=await compileProject({source:new TextDecoder('utf-8',{fatal:true}).decode(input.content),
-    sourceName:basename(options.input),template,outputKind:options.outputKind},{signal:options.signal});
+    sourceName:basename(options.input),template,outputKind:options.outputKind,storybook:options.storybook},{signal:options.signal});
   if(compiled.status!=='ok' || !compiled.model)throw new CompilationFailure(compiled.diagnostics);
   const output=options.output ?? compiled.artifacts;
   const selection=generationSelection(compiled.model,output,options.scope);

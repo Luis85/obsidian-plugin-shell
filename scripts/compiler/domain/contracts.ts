@@ -1,5 +1,6 @@
 /** Versioned compiler data contracts. No host, filesystem, process or UI dependencies. */
 export type OutputKind = 'obsidian-plugin' | 'clickdummy';
+export interface StorybookOptions { enabled?: boolean; generateStories?: boolean }
 export type Phase = 'parse' | 'migrate' | 'validate' | 'resolve' | 'lower' | 'emit';
 export type Severity = 'error' | 'warning' | 'info';
 export interface SourceLocation {

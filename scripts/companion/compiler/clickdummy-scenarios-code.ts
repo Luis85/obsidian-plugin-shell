@@ -1,10 +1,14 @@
 import { literal, type Model } from './model.ts';
 import { visualSpecs } from './visual-model.ts';
+import { editorBindings } from '../sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../sitemap/model.ts';
 import type { Add } from './file-code.ts';
 
 /** Only scenario identity/presentation metadata is duplicated; values stay in the existing visual specs. */
 export function clickdummyScenariosCode(model: Model, add: Add): void {
-  const scenarios = visualSpecs(model).flatMap(spec => spec.kind === 'page' ? spec.scenarios.map(scenario => ({
+  // A rich editor owns its dataset. Static page scenarios must not masquerade as editor scenarios.
+  const editors = new Set(editorBindings(model.document.design as SitemapDesign).map(binding => binding.surface));
+  const scenarios = visualSpecs(model).flatMap(spec => spec.kind === 'page' && !editors.has(spec.ownerId) ? spec.scenarios.map(scenario => ({
     id: scenario.id, definition: spec.id, surface: spec.ownerId, name: scenario.name,
     state: scenario.state, width: scenario.width,
   })) : []);

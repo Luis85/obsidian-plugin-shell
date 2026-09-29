@@ -29,3 +29,5 @@
 .jm-edit-steps select,.jm-journey-fields .jm-actions select { max-width:100%; min-width:0; }
 .jm-edit-steps .jm-actions { margin-top:8px; flex-wrap:wrap; }
 .jm-edit-steps .jm-actions button { float:none; font-size:12px; }
+
+.jm-form-fields { display:grid; gap:8px; border:0; margin:0; padding:0; min-width:0; }

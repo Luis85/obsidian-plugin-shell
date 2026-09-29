@@ -1,3 +1,4 @@
+import { toolingSchema } from '../tooling-contract.mjs';
 /** Public current transport schema. Semantic validation remains the shared authoring validator. */
 import { reference as ref, record, text, integer, list, json, jsonDefinition } from './primitives.mjs';
 import { sitemapDefinitions } from './sitemap.mjs';
@@ -15,6 +16,7 @@ const opaque = description => ({ ...json, description });
 const design = record({ schema: { const: 6 }, blueprint: text(80, 1), goal: text(1000), platform: { enum: ['desktop', 'mobile-ready'] },
   nextId: integer(1), nodes: list(ref('surface'), 60), links: list(ref('transition'), 120), library: list(legacyRecord, 200), prds: list(legacyRecord, 12),
   librarySchema: json, canvas: ref('canvas'), sitemap: ref('sitemap'), features: ref('features'), nativeIntegrations: nativeSchema,
+  editors: record({ schema: { const: 1 }, bindings: list(record({ surface: text(120, 1), editor: { const: 'journey-lens' } }), 60) }),
   semantic: opaque('Retained semantic authoring namespace; compiler validation resolves entity/relationship contracts.'),
   dataSources: opaque('Retained source/fixture authoring namespace; compiler validates executable source contracts.'),
   designSystem: designSystemSchema,
@@ -27,7 +29,7 @@ const schema = {
   title: 'Companion project v6 — portable authoring transport',
   description: 'Inert authoring data. Schema validation is necessary but not sufficient: use project validate for the complete transport contract and compiler check for generation readiness. No JSON field authorizes effects.',
   ...record({ kind: { const: 'obsidian-companion-project' }, schemaVersion: { const: 6 }, executable: { const: false },
-    project: identity, settings: record({ codebaseFolder: folder, testsFolder: folder }), design, notes: list(text(100000), 100) }),
+    project: identity, settings: record({ codebaseFolder: folder, testsFolder: folder }), design, notes: list(text(100000), 100), tooling: toolingSchema() }, ['kind','schemaVersion','executable','project','settings','design','notes']),
   $defs: { json: jsonDefinition, ...sitemapDefinitions, ...visualDefinitions },
   'x-validation': { command: 'node shell.mjs project validate --input project.json --json',
     semanticValidator: 'scripts/companion/authoring-contract.ts#validateAuthoringDocument',

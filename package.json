@@ -7,13 +7,13 @@
     "@axe-core/playwright": "4.13.0",
     "@iconify-json/lucide": "1.2.136",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.3",
     "@vitejs/plugin-vue": "6.0.9",
-    "@vitest/coverage-v8": "5.0.1",
+    "@vitest/coverage-v8": "5.0.2",
     "@vue/test-utils": "2.5.1",
     "eslint": "10.11.0",
     "eslint-plugin-obsidianmd": "0.4.2",
-    "eslint-plugin-vue": "10.11.0",
+    "eslint-plugin-vue": "10.11.1",
     "fallow": "3.28.0",
     "fast-check": "4.10.2",
     "happy-dom": "20.14.5",
@@ -25,8 +25,8 @@
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
-    "vite": "8.3.0",
-    "vitest": "5.0.1",
+    "vite": "8.3.1",
+    "vitest": "5.0.2",
     "vue-tsc": "3.3.11"
   },
   "dependencies": {
@@ -137,7 +137,8 @@
     "qualify:compiler": "node scripts/compiler/qualify.mjs",
     "test:compiler:coverage": "node --experimental-test-coverage --test-coverage-lines=95 --test-coverage-branches=90 --test-coverage-functions=90 --test-coverage-include=scripts/compiler/domain/** --test-coverage-include=scripts/compiler/application/** --test --test-concurrency=1 tests/tooling/compiler-core.checks.mjs tests/tooling/compiler-cli.checks.mjs tests/tooling/compiler-compatibility.checks.mjs tests/tooling/compiler-targets.checks.mjs tests/tooling/compiler-properties.checks.mjs tests/tooling/compiler-selection.checks.mjs",
     "debug:compiler": "node --inspect-brk --experimental-strip-types scripts/compiler/debug-fixture.mjs",
-    "test:compiler:browser": "node scripts/compiler/verify-browser.mjs"
+    "test:compiler:browser": "node scripts/compiler/verify-browser.mjs",
+    "test:airship": "node scripts/testing/suites.mjs airship"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

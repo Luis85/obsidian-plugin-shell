@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { useFlowRuntime } from '../flow-context.ts';
 import UButton from '@nuxt/ui/components/Button.vue';
 import SurfaceNode from './SurfaceNode.vue';
 import type { EditorStore } from '../composables/use-editor.ts';
 import { useGraph } from '../composables/use-graph.ts';
 const props=defineProps<{store:EditorStore}>();
 const graph=useGraph(props.store,SurfaceNode);
-const VueFlow=window.VueFlowCore.VueFlow;
+const VueFlow=useFlowRuntime().VueFlow;
 </script>
 <template>
   <section class="jm-stage" aria-label="Sitemap canvas">

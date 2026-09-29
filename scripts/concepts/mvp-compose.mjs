@@ -20,6 +20,11 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
   if(Object.keys(replacements).length)throw Error('MVP_ASSEMBLY: Missing named composition seam.');
   for(const [start,end,text] of changes.reverse())program=program.slice(0,start)+text+program.slice(end);
   function once(from,to){if(program.split(from).length!==2)throw Error('MVP_ASSEMBLY: Ambiguous seam '+from.slice(0,100));program=program.replace(from,to);}
+  // Preserve the independently validated optional tooling through import/export and recovery.
+  once('project: identity, settings: companionFolders(p), design, notes: designCopy(p.notes || [])',
+    'project: identity, settings: companionFolders(p), design, notes: designCopy(p.notes || []),...(p.tooling===undefined?{}:{tooling:designCopy(p.tooling)})');
+  once('p.notes = designCopy(document.notes);','p.notes = designCopy(document.notes);if(document.tooling!==undefined)p.tooling=designCopy(document.tooling);');
+  once('validCompanionProjectFolders(s.project.folders)&&','validCompanionProjectFolders(s.project.folders)&&jmValidTooling(s.project.tooling)&&');
   once('const COMPANION_VERSION = 5;','const COMPANION_VERSION = 6;');
   // The immutable embedded catalog was hash-verified as v5 by the retained builder.
   // Import migrates its configured copy through the v6 authoring validator.
@@ -27,9 +32,9 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
     "entry.document.schemaVersion === 5, 'The retained catalog requires project v5.'");
   once("![1,2,3,4,5].includes(value.schema)","![1,2,3,4,5,6].includes(value.schema)");
   once('return veShape(value)&&smShape(value.storymaps)','return jmValidFields(value)&&veShape(value)&&smShape(value.storymaps)');
-  once('...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})','...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{}),...(d.sitemap?{sitemap:d.sitemap}:{}),...(d.features?{features:d.features}:{})');
-  once('Object.assign(d,snapshot);','Object.assign(d,snapshot);if(!snapshot.sitemap)delete d.sitemap;if(!snapshot.features)delete d.features;');
-  once('blueprint:clean.blueprint,goal:clean.goal','sitemap:clean.sitemap,features:clean.features,blueprint:clean.blueprint,goal:clean.goal');
+  once('...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{})','...(d.visualDesigns?{visualDesigns:d.visualDesigns}:{}),...(d.sitemap?{sitemap:d.sitemap}:{}),...(d.features?{features:d.features}:{}),...(d.editors?{editors:d.editors}:{})');
+  once('Object.assign(d,snapshot);','Object.assign(d,snapshot);if(!snapshot.sitemap)delete d.sitemap;if(!snapshot.features)delete d.features;if(!snapshot.editors)delete d.editors;');
+  once('blueprint:clean.blueprint,goal:clean.goal','sitemap:clean.sitemap,features:clean.features,editors:clean.editors,blueprint:clean.blueprint,goal:clean.goal');
   once('schema:clean.visualDesigns?COMPANION_VERSION:4','schema:COMPANION_VERSION');
   once('function setView(view){','function setView(view){if(jmEditor&&!jmEditor.canLeave())return;');
   once('function render(){','function render(){if(jmEditor&&!jmEditor.canLeave())return;jmUnmount();');
