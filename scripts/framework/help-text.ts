@@ -127,6 +127,7 @@ const usage: Record<string, string> = {
 };
 const examples: Record<string, string[]> = {
   'prototypes list': ['node shell.mjs prototypes list --json'],
+  'prototypes compare': ['node shell.mjs prototypes compare exploration --version v1 --variant main --other sitemap-b --json'],
   'prototypes create': ['node shell.mjs prototypes create exploration --input design/project.json --dry-run'],
   'prototypes version': ['node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run'],
   'prototypes fork': ['node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run'],
