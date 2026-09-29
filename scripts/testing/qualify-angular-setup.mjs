@@ -50,6 +50,13 @@ async function browserChecks(app) {
         await page.getByRole('button', { name: 'Updated orders', exact: true }).click();
         // A click schedules zoneless change detection; wait for the rendered outcome.
         await expect(page.getByRole('heading', { name: 'Updated orders', exact: true })).toBeVisible();
+        await expect(page.getByText('Order card', { exact: true })).toHaveCount(2);
+        await expect(page.locator('[data-wb-layout="grid"]')).toHaveCSS('display', 'grid');
+        await expect(page).toHaveURL(/#\/orders$/);
+        await page.getByRole('button', { name: 'Show empty state', exact: true }).click();
+        await expect(page.locator('main[data-preview-state]')).toHaveAttribute('data-preview-state', 'empty');
+        await page.reload();
+        await expect(page.getByRole('heading', { name: 'Updated orders', exact: true })).toBeVisible();
         assert.deepEqual(errors, []);
         await page.screenshot({ path: join(output, 'angular-after-edit.png') });
         evidence.browser = 'passed'; controller.abort(); await page.close();
@@ -67,7 +74,13 @@ try {
   const prd = '---\ntype: prd\nid: PRD-ACCEPTANCE\ntitle: Qualification\n---\nDescribe the first iteration.\n';
   await writeFile(join(root, 'docs/prds/first.md'), prd);
   const input = { schemaVersion: 1, project: { name: 'Acceptance product', description: 'Real generated Angular.', product: 'Develop a first iteration.' },
-    prds: { mode: 'scan' }, prototypeInterview: null, operations: [{ op: 'page.add', title: 'Orders' }], boilerplate: true };
+    prds: { mode: 'scan' }, prototypeInterview: null, operations: [
+      { op: 'page.add', title: 'Orders', as: 'orders' }, { op: 'component.add', title: 'Order card', as: 'card' },
+      { op: 'page.attach', page: '@orders', components: [{ id: '@card' }, { id: '@card' }] },
+      { op: 'page.layout', id: '@orders', layout: 'grid' },
+      { op: 'interaction.add', page: '@orders', title: 'Show empty state', as: 'empty' },
+      { op: 'interaction.action', page: '@orders', id: '@empty', action: { kind: 'set-state', state: 'empty' } },
+    ], boilerplate: true };
   await writeFile(join(root, 'setup.json'), JSON.stringify(input));
   const setup = await approve(['project-setup', '--input', 'setup.json']);
   evidence.compiledKit = 'passed';
