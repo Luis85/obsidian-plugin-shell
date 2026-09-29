@@ -45,3 +45,18 @@ test('a bundled Flow entry retains its own reviewed notices in the actual JS art
   }
   assert.ok(bundle.entry.code.endsWith('const entry = true;'));
 });
+
+
+test('Flow store teardown exercises the production diagnostic path without an ambient build variable', () => {
+  const plugin=journeyFlow(),javascript=plugin.load(plugin.resolveId('virtual:journey-flow'));
+  const Vue=vm.runInThisContext(source('docs/concepts/companion/vendor/vue.runtime.global.prod.js')+';Vue;');
+  const warnings=[],context=vm.createContext({Vue,console:{...console,warn:(...args)=>warnings.push(args)},setTimeout,clearTimeout,setInterval,clearInterval});
+  const body=javascript.replace("import * as Vue from 'vue';\n",'').replace('\nexport default VueFlowCore;\n','\nVueFlowCore;');
+  const Flow=vm.runInContext(body,context),scope=Vue.effectScope();
+  const store=scope.run(()=>Flow.useVueFlow({id:'production-lifecycle-regression'}));
+  assert.ok(store);store.$destroy();
+  // Destroying before owner disposal reaches Flow's missing-store diagnostic branch.
+  // Module evaluation alone does not call isDev and missed the original failure.
+  assert.doesNotThrow(()=>scope.stop());
+  assert.equal(context.production,undefined);assert.deepEqual(warnings,[]);
+});

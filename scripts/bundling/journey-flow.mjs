@@ -20,7 +20,12 @@ export function journeyFlow(root = process.cwd()) {
       const source = readFileSync(resolve(root, runtime), 'utf8');
       if (createHash('sha256').update(source).digest('hex') !== expected ||
         !source.startsWith('var VueFlowCore = function(exports, vue) {') || !source.trimEnd().endsWith('}({}, Vue);')) throw Error('JOURNEY_FLOW_RUNTIME_DRIFT');
-      return "import * as Vue from 'vue';\n" + source + '\nexport default VueFlowCore;\n';
+      // Match the existing offline assembler's reviewed environment substitution.
+      // This retained IIFE has one unquoted build-time token in its diagnostic guard.
+      const marker = 'productionEnvs.includes(production || "")';
+      if (source.split(marker).length !== 2) throw Error('JOURNEY_FLOW_ENVIRONMENT_DRIFT');
+      const adapted = source.replace(marker, 'productionEnvs.includes("production" || "")');
+      return "import * as Vue from 'vue';\n" + adapted + '\nexport default VueFlowCore;\n';
     },
   };
 }

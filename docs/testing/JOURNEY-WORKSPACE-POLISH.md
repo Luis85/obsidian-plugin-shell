@@ -104,3 +104,28 @@ and dedicated compiler passes do not qualify new source; its cancelled setup run
 is not a pass. Manual accessibility/device/multi-window qualification and remaining
 MVP obligations stay open in [the closure map](MVP-CLOSURE-STATUS.md). No release,
 tag, PR merge, personal-vault operation or blanket issue closure occurred.
+
+## Hosted follow-up at the published polishing commit
+
+The pass was pushed as `7433f7c5018d760b0c3aa33bb3b3a79aa6ad3d1d`.
+Its authoring typecheck and authoring build passed in job `109336549314`.
+Native job `109336549447` (run `36547268350`, retained artifact `11022943109`)
+then independently built and typechecked the generated consumer, including the
+corrected persistence test, but failed its mounted workbench test with
+`ReferenceError: production is not defined`. Native host execution did not start.
+
+The retained Flow IIFE contains one unquoted environment token. The existing
+Python offline assembler already replaces this exact diagnostic expression with
+a production string literal; the generated module adapter had omitted that
+adaptation. It now applies the identical single-occurrence substitution after
+verifying the unchanged vendor SHA-256. No new global, vendor-byte change,
+warning suppression or broader runtime replacement is introduced.
+
+A new executable control creates and destroys a real retained Flow store and
+stops its owning Vue effect scope. The old adapter fails in its diagnostic path;
+with the correction all five Flow adapter/stylesheet/notices/tamper tests pass.
+The combined compiler compatibility, editor generation and Flow run passes 32
+cases, including the prior 27 rather than an additional independent total.
+This exercises retained runtime ownership, not a full DOM or native host.
+Fresh combined-source hosted qualification is still required; the failed run is
+retained and is not relabelled successful.
