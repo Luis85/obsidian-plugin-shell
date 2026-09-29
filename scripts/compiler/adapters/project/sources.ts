@@ -30,7 +30,7 @@ try {
   else { release = cleanup; document.documentElement.dataset.prototypeReady = 'true'; }
 } catch (error) {
   window.removeEventListener('pagehide', stop);
-  if (!stopped) { root.textContent = 'Unable to open the ${selection.framework} scaffold. See the developer console; reload to retry.'; }
+  if (!stopped) { document.documentElement.dataset.prototypeReady = 'failed'; root.textContent = 'Unable to open the ${selection.framework} scaffold. See the developer console; reload to retry.'; }
   console.error(error);
 }
 }

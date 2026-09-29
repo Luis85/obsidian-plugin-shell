@@ -60,8 +60,8 @@ async function qualify() {
     }
     if (report.selection.framework !== 'none') {
       run('offline prototype build', source, [npm, 'run', 'build:prototype']);
-      await browserCheck(join(source, 'dist/prototype.html'), report);
       await copyFile(join(source, 'dist/prototype.html'), join(folder, 'prototype.html'));
+      await browserCheck(join(source, 'dist/prototype.html'), report);
     }
     await collect(join(source, 'dist'), report.artifacts, source);
     report.status = 'passed-source-build-and-target-smoke';
@@ -84,13 +84,16 @@ async function collect(folder, inventory, source) {
 async function browserCheck(path, report) {
   const { chromium } = await import('@playwright/test');
   const browser = await chromium.launch({ headless: true });
+  const errors = [], network = [];
+  report.browser = { status: 'running', source: 'exact Vite-built prototype.html', errors, network };
   try {
     const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
-    const errors = [], network = [];
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     page.on('pageerror', error => errors.push(String(error)));
     page.on('request', request => { if (!/^(file|data):/.test(request.url())) network.push(request.url()); });
     await page.goto(pathToFileURL(path).href);
-    await page.waitForFunction(() => document.documentElement.dataset.prototypeReady === 'true');
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.documentElement.dataset.prototypeReady));
+    if (await page.evaluate(() => document.documentElement.dataset.prototypeReady) !== 'true') throw new Error('Generated prototype startup failed: ' + JSON.stringify(errors));
     await page.getByRole('button', { name: 'Details', exact: true }).click();
     if (!await page.getByRole('heading', { name: 'Details', exact: true }).isVisible()) throw new Error('Generated navigation failed.');
     if (await page.locator('main').evaluate(main => main.ownerDocument.activeElement !== main)) throw new Error('Navigation did not restore focus.');
@@ -102,5 +105,8 @@ async function browserCheck(path, report) {
     if (!await page.getByRole('heading', { name: 'Overview', exact: true }).isVisible()) throw new Error('Keyboard navigation failed.');
     if (errors.length || network.length) throw new Error('Browser errors or network calls: ' + JSON.stringify({ errors, network }));
     report.browser = { status: 'passed', source: 'exact Vite-built prototype.html', network, errors, widths: [1100, 390] };
+  } catch (error) {
+    report.browser = { status: 'failed', source: 'exact Vite-built prototype.html', errors, network };
+    throw error;
   } finally { await browser.close(); }
 }

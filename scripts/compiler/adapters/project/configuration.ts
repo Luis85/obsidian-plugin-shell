@@ -1,3 +1,4 @@
+import { angularBabelVersion } from './angular-linker.ts';
 import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectCatalog, ProjectSelection } from '../../domain/project-presets.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
@@ -22,6 +23,7 @@ export function packageFiles(template: TemplateSnapshot, catalog: ProjectCatalog
     copy(['@vitejs/plugin-vue', '@iconify-json/lucide', 'postcss', 'postcss-selector-parser', 'tailwindcss', 'vue-tsc'], devDependencies);
   }
   if (selected.framework === 'angular') for (const [name, pin] of Object.entries(catalog.angularPins)) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
+  if (selected.framework === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
   const scripts: Record<string, string> = {
     build: 'node scripts/build.mjs',
     typecheck: selected.framework === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : selected.framework === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
@@ -43,14 +45,14 @@ export function typecheckFiles(selected: ProjectSelection) {
   const files: Record<string, string> = {
     'tsconfig.json': json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,
       noUncheckedIndexedAccess: true, noEmit: true, skipLibCheck: true, lib: ['ES2022', 'DOM', 'DOM.Iterable'],
-      allowImportingTsExtensions: true, rewriteRelativeImportExtensions: true, types: ['node'] }, include: ['src/**/*.ts', 'src/**/*.vue'] }),
+      allowImportingTsExtensions: true, types: ['node'] }, include: ['src/**/*.ts', 'src/**/*.vue'] }),
     'src/environment.d.ts': 'declare module "*.css";\n',
   };
   if (selected.framework === 'angular') files['tsconfig.angular.json'] = json({ extends: './tsconfig.json',
-    compilerOptions: { noEmit: false, rootDir: '.', outDir: '.compiled', experimentalDecorators: true },
+    compilerOptions: { noEmit: false, rewriteRelativeImportExtensions: true, rootDir: '.', outDir: '.compiled', experimentalDecorators: true },
     angularCompilerOptions: { compilationMode: 'full', strictTemplates: true, strictInjectionParameters: true }, include: ['src/**/*.ts'] });
   if (selected.targets.includes('cli')) files['tsconfig.cli.json'] = json({ extends: './tsconfig.json', compilerOptions: {
-    noEmit: false, rootDir: 'src', outDir: 'dist/cli', module: 'NodeNext', moduleResolution: 'NodeNext' }, include: ['src/core/**/*.ts', 'src/targets/cli/**/*.ts'] });
+    noEmit: false, rewriteRelativeImportExtensions: true, rootDir: 'src', outDir: 'dist/cli', module: 'NodeNext', moduleResolution: 'NodeNext' }, include: ['src/core/**/*.ts', 'src/targets/cli/**/*.ts'] });
   return files;
 }
 export function starterReadme(selected: ProjectSelection): string {

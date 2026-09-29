@@ -59,6 +59,7 @@ const model = useClickdummy();
 </template>
 `);
   add(entry, `import { createApp, ref, watch, type App } from 'vue';
+import ui from '@nuxt/ui/vue-plugin';
 import { createPinia, disposePinia } from 'pinia';
 import Preview from ${from('presentation/components/ClickdummyPreview.vue')};
 import Workbench from ${from('presentation/components/ProjectWorkbench.vue')};
@@ -108,7 +109,7 @@ function mountFrame(target: HTMLElement, modal?: string, inheritedReadOnly = fal
   let initial: string | undefined;
   try { if (!modal && location.hash.startsWith('#surface=')) initial = decodeURIComponent(location.hash.slice(9)); } catch { error.value = 'Invalid preview address.'; }
   if (initial && screens.some(s => s.id === initial && !['group','action','modal'].includes(s.kind))) navigation.open(initial);
-  const app: App = createApp(modal ? Workbench : Preview); app.use(pinia);
+  const app: App = createApp(modal ? Workbench : Preview); app.use(pinia); app.use(ui);
   const stops: Array<() => void> = [];${journey ? '\n  const journey = createJourneyPreview(); provideJourney(app,pinia,journey); stops.push(() => journey.dispose());' : ''}
   app.runWithContext(() => {
     app.provide(projectKey, { panels, flows: bindFlows(sources,pinia), isolated: !!modal, openModal: frameOpenModal, designState: () => state.value });

@@ -27,16 +27,17 @@ async function buildVisual(target, directory) {
   const { build } = await import('vite');
   let shared = {};
   if (config.framework === 'nuxtui') shared = (await import('./bundling/vite-shared.mjs')).sharedConfig();
+  const linker = config.framework === 'angular' ? [(await import('./angular-linker.mjs')).angularLinker()] : [];
   const { projectLicenses } = await import('./licenses.mjs');
   const plugin = target === 'plugin';
   const entry = config.framework === 'angular' ? '.compiled/src/targets/' + target + '/main.js' : 'src/targets/' + target + '/main.ts';
   await build({ ...shared, configFile: false, root,
     define: { ...(shared.define ?? {}), ...(config.framework === 'angular' ? { ngDevMode: false, ngJitMode: false } : {}) },
-    plugins: [...(shared.plugins ?? []), projectLicenses()],
+    plugins: [...linker, ...(shared.plugins ?? []), projectLicenses()],
     build: { ...(shared.build ?? {}), target: 'es2022', outDir: directory, emptyOutDir: true, sourcemap: false,
       assetsInlineLimit: Number.MAX_SAFE_INTEGER, cssCodeSplit: false,
       lib: { entry: resolve(entry), name: 'ProjectStarter', formats: [plugin ? 'cjs' : 'iife'], fileName: () => 'main.js', cssFileName: 'styles' },
-      rolldownOptions: { external: plugin ? ['obsidian'] : [], output: { exports: plugin ? 'default' : 'named', codeSplitting: false } } } });
+      rolldownOptions: { external: plugin ? ['obsidian'] : [], output: { exports: plugin ? 'default' : 'none', codeSplitting: false } } } });
   if (!await exists(join(directory, 'styles.css'))) await writeFile(join(directory, 'styles.css'), '');
   if (plugin) await copyFile('manifest.json', join(directory, 'manifest.json'));
   else await writeFile(join(directory, 'index.html'), html('', '', false));

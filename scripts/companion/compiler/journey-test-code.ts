@@ -52,7 +52,9 @@ test('native Journey Lens creates only after review, saves and reopens the compl
 test('native Journey Lens leaves keep independent drafts and refuse stale overwrite', async ({ obsidian }) => {
   await obsidian.eval(async ({ app }, content) => { await app.vault.create('project.companion.json', content); }, seed);
   const type = obsidian.pluginId + suffix;
-  const first = (await obsidian.openView(type)).locator('.jl-workspace');
+  await obsidian.openView(type);
+  // openView returns a live last() locator: pin the first leaf before opening another.
+  const first = obsidian.page.locator('.workspace-leaf-content[data-type="' + type + '"]').first().locator('.jl-workspace');
   await browserExpect(first.locator('.jl-file-status')).toContainText('Apply saves each reviewed change to the active vault file.');
   const firstName = first.getByRole('complementary', { name: 'Selected surface', exact: true }).getByLabel('Name', { exact: true });
   await firstName.fill('Unsubmitted first leaf draft');
@@ -66,7 +68,7 @@ test('native Journey Lens leaves keep independent drafts and refuse stale overwr
   await second.getByRole('button', { name: 'Save name', exact: true }).click();
   await browserExpect(second.getByRole('button', { name: 'Save name', exact: true })).toHaveCount(0);
   await obsidian.eval(async ({ app }, viewType) => { const leaf = app.workspace.getLeavesOfType(viewType)[0]; if (!leaf) throw Error('LEAF_MISSING'); await app.workspace.revealLeaf(leaf); }, type);
-  await browserExpect(first.locator('.jl-file-status')).toContainText('Another view changed this project');
+  await browserExpect(first.locator('.jl-file-status')).toContainText('Another view or an external edit changed this project');
   await browserExpect(firstName).toHaveValue('Unsubmitted first leaf draft');
   await browserExpect(first.getByRole('button', { name: 'Save name', exact: true })).toBeDisabled();
   const bytes = await obsidian.eval(async ({ app }) => { const file = app.vault.getFileByPath('project.companion.json'); if (!file) throw Error('PROJECT_MISSING'); return app.vault.read(file); });

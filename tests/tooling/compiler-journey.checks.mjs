@@ -41,6 +41,12 @@ for(const custom of [false,true])test('closed binding emits the actual editor wi
   assert.ok(files.has('design/journey-lens.json'));assert.ok(files.has('JOURNEY-LENS.md'));
   const nativeTest=files.get('tests/obsidian/journey-lens.obsidian.ts').content;
   assert.doesNotThrow(()=>stripTypeScriptTypes(nativeTest,{mode:'strip'}));
+  assert.match(nativeTest,/Another view or an external edit changed this project/);
+  assert.match(nativeTest,/\.first\(\)\.locator\('\.jl-workspace'\)/);
+  for (const path of ['harness/prototype/clickdummy.ts', sourceRoot+'/bootstrap/mount.ts']) {
+    assert.match(files.get(path).content, /import ui from '@nuxt\/ui\/vue-plugin'/);
+    assert.match(files.get(path).content, /app\.use\(ui\)/);
+  }
   assert.match(nativeTest,/obsidian\.reloadPlugin/);assert.match(nativeTest,/independent drafts/);
   assert.match(files.get('harness/prototype/clickdummy.ts').content,/createJourneyPreview/);
   const scenario=files.get('harness/prototype/clickdummy-scenarios.ts').content;

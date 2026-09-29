@@ -1,3 +1,4 @@
+import { angularBabelVersion, angularLinkerSource } from './project/angular-linker.ts';
 import { literal, json, text, type Model } from '../../companion/compiler/model.ts';
 import { validateArtifacts } from '../domain/artifacts.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
@@ -22,7 +23,7 @@ function pins(template: TemplateSnapshot, selected: PresetOutput): Record<string
   }
   if (selected.frontend === 'angular') {
     for (const name of ['core', 'common', 'compiler', 'platform-browser']) dependencies['@angular/' + name] = '22.0.0';
-    dependencies.rxjs = '7.8.2'; dependencies.tslib = '2.8.1'; devDependencies['@angular/compiler-cli'] = '22.0.0';
+    dependencies.rxjs = '7.8.2'; dependencies.tslib = '2.8.1'; devDependencies['@angular/compiler-cli'] = '22.0.0'; devDependencies['@babel/core'] = angularBabelVersion;
   }
   const checker = selected.frontend === 'nuxt-ui' ? 'node node_modules/vue-tsc/bin/vue-tsc.js' : selected.frontend === 'angular'
     ? 'node node_modules/@angular/compiler-cli/bundles/src/bin/ngc.js' : 'node node_modules/typescript/bin/tsc';
@@ -82,7 +83,7 @@ function uiFiles(selected: PresetOutput, template: TemplateSnapshot, templates: 
     }
     styles = '@import "tailwindcss/theme.css" prefix(ps);\n@import "tailwindcss/utilities.css" prefix(ps) source(none);\n@import "@nuxt/ui";\n@import "./tokens.css";\n@import "./nuxt-bridge.css";\n' + styles + '@source "../presentation";\n@source "../../node_modules/.nuxt-ui";\n';
   }
-  if (selected.frontend === 'angular') files.push(entry('src/presentation/project.component.ts', templates['project.component.ts']!));
+  if (selected.frontend === 'angular') files.push(entry('scripts/angular-linker.mjs', angularLinkerSource), entry('src/presentation/project.component.ts', templates['project.component.ts']!));
   files.push(entry('src/styles/app.css', styles), entry('src/env.d.ts', '/// <reference types="vite/client" />\n'));
   return files;
 }

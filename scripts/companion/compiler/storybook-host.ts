@@ -5,6 +5,7 @@ export function storybookHost(model: Model): string {
   const path = 'storybook/generated/with-project.ts';
   const from = (file: string) => literal(relativeImport(path, model.sourceRoot + '/' + file));
   return `import { createApp, defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue';
+import ui from '@nuxt/ui/vue-plugin';
 import { createPinia, disposePinia } from 'pinia';
 import type { Decorator } from '@storybook/vue3-vite';
 import UApp from '@nuxt/ui/components/App.vue';
@@ -32,7 +33,7 @@ export const withProject: Decorator = (story, context) => {
       const app = createApp({ render: () => h(UApp, null, { default: () => h(Story) }) });
       cleanup = () => { app.unmount(); disposePinia(pinia); };
       try {
-      app.use(pinia);
+      app.use(pinia); app.use(ui);
       const describeNavigation = (id: string) => { message.value = 'Preview navigation: ' + (screens.find(s => s.id === id)?.label ?? id) + '. Open that page in the story list.'; };
       const navigation = useNavigation(pinia);
       const surface: unknown = context.parameters.shell?.surface;

@@ -1,3 +1,4 @@
+import { angularLinkerSource } from './angular-linker.ts';
 import { json, type Model } from '../../../companion/compiler/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
 import { readProjectCatalog, validateProjectSelection, type ProjectSelection } from '../../domain/project-presets.ts';
@@ -62,7 +63,7 @@ export function renderPresetProject(model: Model, template: TemplateSnapshot, in
     files['src/targets/preview/main.ts'] = browserSource(selected, id);
     files['src/ui/styles.css'] = styles(id);
     if (selected.framework === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
-    if (selected.framework === 'angular') { files['src/ui/mount.ts'] = angularMount; files['src/ui/Starter.ts'] = angularComponent; }
+    if (selected.framework === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; files['src/ui/Starter.ts'] = angularComponent; }
     if (selected.framework === 'nuxtui') {
       Object.assign(files, vueFiles(template)); files['src/ui/styles.css'] = '@import "./nuxt.css";\n' + styles(id);
     }

@@ -1,5 +1,6 @@
+import { angularLinkerSource } from '../../scripts/compiler/adapters/project/angular-linker.ts';
 import assert from 'node:assert/strict';
-import { mkdtemp, realpath, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, mkdir, writeFile, readFile, symlink } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -10,7 +11,10 @@ import { coreSource, pluginSource, cliSource, cliEntry, browserSource } from '..
 import { buildSource, licenseSource } from '../../scripts/compiler/adapters/project/build-source.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
-import { analyzeProject } from '../../scripts/compiler/index.ts';
+import { Window } from 'happy-dom';
+import { loadProjectCatalog } from '../../bin/adapters/projects.ts';
+import { resolveProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
+import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../scripts/compiler/index.ts';
 async function scratch(fn) { const root = await mkdtemp(join(await realpath(tmpdir()), 'project-runtime-')); try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function host(mount) {
   const surfaces = [], notices = [];
@@ -123,3 +127,60 @@ test('every generated browser framework passes strict TypeScript, including the 
   await writeFile(entry, unsafe);
   assert.ok(diagnostics().some(diagnostic => [18047, 2345].includes(diagnostic.code)), 'the pre-fix nullable closure must fail the same compiler');
 }));
+
+
+test('the real Vite-built offline artifact starts without Node globals and retains navigation focus', async () => scratch(async root => {
+  const frameworkRoot = resolve(import.meta.dirname, '../..');
+  const projectSelection = resolveProjectSelection(await loadProjectCatalog(), { schemaVersion: 1, catalogVersion: 1, preset: 'webapp-vanilla' });
+  const source = runOperations(newDocument('Bundle regression'), [{ op: 'page.add', title: 'Overview' }, { op: 'page.add', title: 'Details' }]).document;
+  const result = await compileProject({ source: documentText(source), outputKind: 'project', projectSelection, template: await loadTemplateSnapshot(frameworkRoot) });
+  assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
+  for (const file of result.artifacts) { await mkdir(dirname(join(root, file.path)), { recursive: true }); await writeFile(join(root, file.path), file.content); }
+  // Reuse the pinned test toolchain only; independent install and real Chromium remain separate CI gates.
+  await symlink(join(frameworkRoot, 'node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  const build = spawnSync(process.execPath, ['scripts/build.mjs', '--prototype'], { cwd: root, encoding: 'utf8', timeout: 30000 });
+  assert.equal(build.status, 0, build.stderr + build.stdout);
+  const html = await readFile(join(root, 'dist/prototype.html'), 'utf8');
+  const window = new Window({ settings: { disableJavaScriptEvaluation: true } });
+  try {
+    window.document.write(html);
+    const executable = [...window.document.querySelectorAll('script:not([type])')].map(script => script.textContent).join('\n');
+    const environment = { document: window.document, window, console };
+    assert.throws(() => vm.runInNewContext('Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });' + executable, environment), /exports is not defined/);
+    vm.runInNewContext(executable, environment);
+    await new Promise(done => setImmediate(done));
+    assert.equal(window.document.documentElement.dataset.prototypeReady, 'true');
+    const details = [...window.document.querySelectorAll('button')].find(button => button.textContent === 'Details');
+    details.click();
+    assert.equal(window.document.querySelector('main h2').textContent, 'Details');
+    assert.equal(window.document.activeElement, window.document.querySelector('main'));
+    assert.equal(JSON.parse(window.document.querySelector('#companion-project').textContent).schemaVersion, 6);
+  } finally { await window.happyDOM.close(); }
+}));
+
+
+test('Angular linker transforms partial declarations before bundling and rejects missing output', async () => {
+  const calls = [], linker = {}, source = angularLinkerSource.replace(/^import .*;\n/gm, '').replace('export function', 'function');
+  const factory = transformAsync => vm.runInNewContext(source + '\nangularLinker()', { linker, transformAsync });
+  const plugin = factory(async (code, options) => { calls.push({ code, options }); return { code: 'compiled', map: null }; });
+  assert.equal(plugin.enforce, 'pre');
+  assert.equal(await plugin.transform('const plain = 1;', '/modules/library.mjs'), null);
+  assert.equal(await plugin.transform('ɵɵngDeclareComponent({});', '/modules/source.ts'), null);
+  const result = await plugin.transform('ɵɵngDeclareComponent({});', '/modules/library.mjs?build');
+  assert.equal(result.code, 'compiled'); assert.equal(result.map, null);
+  assert.equal(calls[0].options.filename, '/modules/library.mjs');
+  assert.equal(calls[0].options.configFile, false); assert.equal(calls[0].options.babelrc, false);
+  assert.equal(calls[0].options.plugins[0], linker);
+  await assert.rejects(() => factory(async () => null).transform('ɵɵngDeclareFactory({});', '/dependency.js'), /ANGULAR_LINKER_OUTPUT/);
+});
+
+test('a failed browser mount reports failure instead of leaving readiness pending forever', async () => {
+  const root = { dataset: {}, classList: { add() {} } }, document = { querySelector: () => root, documentElement: { dataset: {} } };
+  const errors = [];
+  const source = stripTypeScriptTypes(browserSource({ framework: 'vanilla' }, 'probe')).replace(/^import .*;\n/gm, '');
+  vm.runInNewContext(source, { document, window: { addEventListener() {}, removeEventListener() {} },
+    mount: async () => { throw new Error('mount failed'); }, console: { error: error => errors.push(error) } });
+  await new Promise(done => setImmediate(done));
+  assert.equal(document.documentElement.dataset.prototypeReady, 'failed');
+  assert.equal(errors.length, 1); assert.match(root.textContent, /Unable to open/);
+});

@@ -105,6 +105,7 @@ export const configureSourceProviders: (shell: Services) => {ports: Partial<Sour
 `);
   const mount = `${root}/bootstrap/mount.ts`;
   add(mount,`import { createApp } from 'vue';
+import ui from '@nuxt/ui/vue-plugin';
 import { createPinia, disposePinia } from 'pinia';
 import type { Services } from ${literal(relativeImport(mount,'src/bootstrap/services.ts'))};
 import { bindHostTheme } from ${literal(relativeImport(mount,'src/infrastructure/ui/host-theme.ts'))};
@@ -121,7 +122,7 @@ export function mountProject(root: HTMLElement,shell: Services,sources: Sources,
   const close = () => { if (closed) return; closed = true; try { if (mounted) app.unmount(); } finally { disposePinia(pinia); theme(); } };
   try {
     root.classList.add(shell.identity.rootClass,shell.identity.scopeClass); root.dataset.pluginUi = shell.identity.id;
-    theme = bindHostTheme(root); app.use(pinia); provideVisualContext(app, createVisualContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
+    theme = bindHostTheme(root); app.use(pinia); app.use(ui); provideVisualContext(app, createVisualContext(sources, pinia, openModal)); app.provide(projectKey,{panels,flows:bindFlows(sources,pinia),initial,isolated,openModal});
     app.config.errorHandler = () => shell.diagnostics.report('generated.render','view.render');
     ${journey ? 'if (journey) provideJourney(app,pinia,journey);\n    ' : ''}mounted = true; app.mount(root); return close;
   } catch (error) { close(); throw error; }
