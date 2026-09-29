@@ -18,8 +18,16 @@ export function mountPrototypes(root: HTMLElement, host: PrototypeHost) {
     const snapshot = host.read(); renderedKey = api.key(snapshot.workspace);
     if (selection) { try { api.selected(snapshot.workspace,selection); } catch { selection = null; } }
     if (!selection) {
-      const p = snapshot.workspace.prototypes[0], v = p?.versions[0], x = v?.variants[0];
-      selection = snapshot.opened ?? snapshot.workspace.active ?? (p && v && x ? {prototypeId:p.id,versionId:v.id,variantId:x.id} : null);
+      // Editor context may outlive a replaced/imported workspace; validate it before restoring.
+      for (const candidate of [snapshot.opened, snapshot.workspace.active]) {
+        if (!candidate) continue;
+        try { api.selected(snapshot.workspace,candidate); selection = {...candidate}; break; }
+        catch { /* A stale remembered selection must not prevent opening this workspace. */ }
+      }
+      if (!selection) {
+        const p = snapshot.workspace.prototypes[0], v = p?.versions[0], x = v?.variants[0];
+        selection = p && v && x ? {prototypeId:p.id,versionId:v.id,variantId:x.id} : null;
+      }
     }
     root.innerHTML = prototypeView(snapshot,selection,mode,message,error,busy,browse,comparison);
     for (const input of root.querySelectorAll<HTMLInputElement>('.pm-form input')) if (Object.hasOwn(draft,input.name)) input.value = draft[input.name]!;
