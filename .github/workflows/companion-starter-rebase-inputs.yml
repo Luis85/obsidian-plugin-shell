@@ -1,0 +1,30 @@
+name: Companion starter rebase inputs
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/companion-starter-rebase-inputs.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1ef9e2b92363de3108630aada4756228d6feb262
+          persist-credentials: false
+      - name: Capture exact source only
+        run: |
+          mkdir -p "$RUNNER_TEMP/rebase-inputs"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/rebase-inputs/source.tar.gz" HEAD
+          git ls-tree -r HEAD > "$RUNNER_TEMP/rebase-inputs/source-tree.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/rebase-inputs/source-sha.txt"
+          cd "$RUNNER_TEMP/rebase-inputs"
+          sha256sum source.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-starter-rebase-inputs
+          path: ${{ runner.temp }}/rebase-inputs/
+          retention-days: 1
+          if-no-files-found: error
