@@ -1,3 +1,4 @@
+import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
@@ -24,7 +25,8 @@ export const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs new guide --preset plugin-angular --json
   node shell.mjs new validate --input request.json --json
   node shell.mjs new --input request.json --out projects/demo --json
-  node shell.mjs new --starter <id>    Existing legacy starter path (unchanged)
+  node shell.mjs new <dir> (--starter <id> | --from <project.json>)  Legacy creation
+  node shell.mjs help new              Legacy options and approval policy
   node shell.mjs sketch                Interactive page/component editor
   node shell.mjs sketch show --json    Inspect saved IDs and page composition
   node shell.mjs sketch schema --json  Discover the versioned transaction schema
@@ -130,7 +132,11 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  if (args.flags.help || args.command === 'studio') return { help: makerHelp, commands: ['new', 'sketch', 'prototype'], interactive: false };
+  if (args.flags.help || args.command === 'studio') {
+    const legacy = args.command === 'new' ? descriptor('new') : undefined;
+    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype'],
+      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype'] } : {}), interactive: false };
+  }
   if (args.command === 'new') return newProjectCommand(args, context);
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
   return args.command === 'sketch' ? sketch(args, context) : prototype(args, context);

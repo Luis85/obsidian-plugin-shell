@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 let compilerVersion;
 try { compilerVersion = JSON.parse(await readFile(join(frameworkRoot, 'node_modules/typescript/package.json'), 'utf8')).version; }
@@ -12,10 +13,16 @@ catch (error) { if (error.code !== 'ENOENT') throw error; }
 const qualified = compilerVersion === '6.0.3';
 if (process.env.CI && process.env.CI !== 'false') assert.equal(qualified, true, 'CI requires repository-local TypeScript 6.0.3.');
 const check = qualified ? test : test.skip;
-check('compiled maker kit discovers TUI and guide contracts before installing any dependencies', async () => {
+check('compiled maker kit discovers contracts without dependencies and refuses repacking an example-removed consumer', async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-compiled-'));
   try {
     const compiler = await installedCompiler(); assert.equal(compiler.version, '6.0.3');
+    if (await reviewedExamplesRemoved(frameworkRoot)) {
+      // Consumer verification has no pristine showcase to package. Enforce that boundary instead.
+      await assert.rejects(assembleKit({ root, frameworkRoot }, compiler), { code: 'KIT_OWNERSHIP' });
+      await assert.rejects(readFile(join(root, 'shell.mjs')), { code: 'ENOENT' });
+      return;
+    }
     const files = await assembleKit({ root, frameworkRoot }, compiler);
     // Extract exactly the release's executable files and launcher, without template dependencies.
     for (const file of files.filter(item => item.path.startsWith('.framework/compiled/') || item.path === 'shell.mjs')) {

@@ -183,8 +183,10 @@ test('revoking approval restores review focus only when its focused control was 
   const f=await fixture(t),m=f.model;let focused=0;
   const doc=m.root.value.ownerDocument,previous={isConnected:true};doc.body={};
   m.root.value.closest=()=>({querySelector:()=>({focus(){focused++;}})});
-  m.beginImport(true);await Vue.nextTick();m.reviewImport();doc.activeElement=previous;
-  m.invalidateReview();previous.isConnected=false;doc.activeElement=doc.body;
+  m.beginImport(true);await Vue.nextTick();m.reviewImport();await Vue.nextTick();doc.activeElement=previous;
+  // Real DOM removal occurs in Vue's scheduled render, not synchronously inside the event.
+  const stop=Vue.watch(()=>m.reviewed.value,reviewed=>{if(!reviewed&&Vue.toRaw(doc.activeElement)===previous){previous.isConnected=false;doc.activeElement=doc.body;}},{flush:'post'});
+  t.after(stop);m.invalidateReview();
   await Vue.nextTick();await Vue.nextTick();assert.equal(focused,2);assert.equal(m.importOpen.value,true);assert.equal(f.writes(),0);
   m.reviewImport();doc.activeElement={isConnected:true};m.invalidateReview();
   await Vue.nextTick();await Vue.nextTick();assert.equal(focused,2,'Do not steal focus from a surviving input');

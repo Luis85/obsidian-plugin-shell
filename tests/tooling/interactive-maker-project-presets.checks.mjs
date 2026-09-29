@@ -179,3 +179,15 @@ test('selection replay excludes the derived type and does not alias the saved ta
   assert.deepEqual(resolveProjectSelection(catalog, replay), original);
   replay.targets.pop(); assert.deepEqual(original.targets, ['plugin', 'cli']);
 });
+
+test('new help retains legacy creation metadata alongside discoverable preset guidance', async () => scratch(async root => {
+  const help = await execute(parseArguments(['new', '--help']), context(root));
+  const legacy = help.commands.find(command => command.id === 'new');
+  assert.equal(legacy.options.from, 'value'); assert.equal(legacy.options.starter, 'value');
+  assert.match(help.help, /new <dir>.*--from <project\.json>/);
+  assert.match(help.help, /new presets --json/);
+  assert.deepEqual(help.makerCommands, ['new', 'sketch', 'prototype']);
+  legacy.options.from = 'flag';
+  const again = await execute(parseArguments(['new', '--help']), context(root));
+  assert.equal(again.commands[0].options.from, 'value', 'Help cannot mutate command policy');
+}));

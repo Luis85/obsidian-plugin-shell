@@ -39,9 +39,22 @@ assert.deepEqual(scenarioDelta.shared.map(item=>item.path).sort(),[
 for(const item of scenarioDelta.cases) assert.deepEqual(item.files.map(file=>file.path).sort(),[
   'harness/prototype/clickdummy-scenarios.ts','harness/prototype/clickdummy.ts',
 ].sort());
-/** Check the exact new bytes, then reverse only the reviewed browser delta to the unchanged historical digest. */
+/** Reverse only the two reviewed Nuxt UI bootstrap insertions from f0ede074 in both native and preview mounts.
+ * Both insertions must occur exactly once; all remaining bytes still face the original goldens. */
+function beforeUiBootstrap(source) {
+  const changes = [
+    ["import ui from '@nuxt/ui/vue-plugin';\n", ''],
+    ['app.use(pinia); app.use(ui);', 'app.use(pinia);'],
+  ];
+  for (const [after, before] of changes) {
+    assert.equal(source.split(after).length, 2, 'reviewed UI bootstrap output');
+    source = source.replace(after, before);
+  }
+  return source;
+}
+/** Check the exact new bytes, then reverse only the reviewed browser deltas to the unchanged historical digest. */
 function historicalBytes(selected,model,source) {
-  const hashes=new Map(selected.map(file=>[file.path,digest(file.content)]));
+  const hashes=new Map(selected.map(file=>[file.path,digest(['harness/prototype/clickdummy.ts',model.sourceRoot+'/bootstrap/mount.ts'].includes(file.path)?beforeUiBootstrap(file.content):file.content)]));
   const scenario=scenarioDelta.cases.find(item=>item.source===source);assert.ok(scenario);
   for(const change of [...scenarioDelta.shared,...scenario.files]){
     const path=change.path.replace('{sourceRoot}',model.sourceRoot);
@@ -61,7 +74,7 @@ function historicalBytes(selected,model,source) {
   return [...hashes].sort(([a],[b])=>a<b?-1:a>b?1:0);
 }
 for(const expected of baseline.cases){
-  test('matches original PR5 bytes plus the exact reviewed preview-only delta: '+expected.source,async()=>{
+  test('matches original PR5 bytes plus the reviewed host bootstrap and preview deltas: '+expected.source,async()=>{
     const source=await readFile(join(root,expected.source),'utf8');assert.equal(digest(source),expected.inputSha256,'pinned baseline input bytes');const result=await compileProject({source,template});
     assert.equal(result.status,'ok',JSON.stringify(result.diagnostics));const model=result.model;
     const selected=result.artifacts.filter(file=>file.path.startsWith(model.sourceRoot+'/')||file.path.startsWith(model.testRoot+'/')||file.path.startsWith('harness/prototype/')||['src/main.ts','src/bootstrap/features.ts','design/project.json','design/traceability.json'].includes(file.path));
@@ -107,5 +120,14 @@ for(const path of ['harness/prototype/clickdummy-host.ts','harness/prototype/cli
     const target=path.replace('{sourceRoot}',result.model.sourceRoot);
     const changed=result.artifacts.map(file=>file.path===target?{...file,content:file.content+'// unexpected change\n'}:file);
     assert.throws(()=>historicalBytes(changed,result.model,expected.source),/reviewed scenario output/);
+  });
+}
+
+for(const target of ['harness/prototype/clickdummy.ts','{sourceRoot}/bootstrap/mount.ts']) for(const insertion of ["import ui from '@nuxt/ui/vue-plugin';\n", 'app.use(pinia); app.use(ui);']){
+  test('host bootstrap delta rejects changed initialization: '+target+' '+insertion.trim(),async()=>{
+    const expected=baseline.cases[0],source=await readFile(join(root,expected.source),'utf8');
+    const result=await compileProject({source,template});
+    const changed=result.artifacts.map(file=>file.path===target.replace('{sourceRoot}',result.model.sourceRoot)?{...file,content:file.content.replace(insertion,'/* missing UI bootstrap */')}:file);
+    assert.throws(()=>historicalBytes(changed,result.model,expected.source),/reviewed UI bootstrap output/);
   });
 }

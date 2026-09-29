@@ -63,8 +63,10 @@ export function useWorkspace() {
     });
   }
   function invalidateReview() {
-    if (reviewed.value) retainReviewFocus(root.value?.ownerDocument.activeElement ?? null);
+    const previous = reviewed.value ? root.value?.ownerDocument.activeElement ?? null : null;
     importRead++; readingImport.value = false; confirmed.value = false; reviewed.value = false; summary.value = ''; clearStaged();
+    // Schedule after the mutations queue Vue's DOM update, not before the control is removed.
+    if (previous) retainReviewFocus(previous);
   }
   async function attach(candidate: JourneyProjectDocument) {
     if (stopped) { candidate.dispose(); return; }

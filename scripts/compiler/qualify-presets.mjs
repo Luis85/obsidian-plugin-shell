@@ -82,7 +82,7 @@ async function collect(folder, inventory, source) {
   }
 }
 async function browserCheck(path, report) {
-  const { chromium } = await import('@playwright/test');
+  const { chromium, expect } = await import('@playwright/test');
   const browser = await chromium.launch({ headless: true });
   const errors = [], network = [];
   report.browser = { status: 'running', source: 'exact Vite-built prototype.html', errors, network };
@@ -95,14 +95,16 @@ async function browserCheck(path, report) {
     await page.waitForFunction(() => ['true', 'failed'].includes(document.documentElement.dataset.prototypeReady));
     if (await page.evaluate(() => document.documentElement.dataset.prototypeReady) !== 'true') throw new Error('Generated prototype startup failed: ' + JSON.stringify(errors));
     await page.getByRole('button', { name: 'Details', exact: true }).click();
-    if (!await page.getByRole('heading', { name: 'Details', exact: true }).isVisible()) throw new Error('Generated navigation failed.');
-    if (await page.locator('main').evaluate(main => main.ownerDocument.activeElement !== main)) throw new Error('Navigation did not restore focus.');
+    // Signals and Vue refs render asynchronously; assert the eventual user-visible result.
+    await expect(page.getByRole('heading', { name: 'Details', exact: true })).toBeVisible();
+    await expect(page.locator('main')).toBeFocused();
     const model = await page.locator('#companion-project').textContent();
     if (JSON.parse(model).schemaVersion !== 6) throw new Error('Complete v6 export is missing.');
     await page.setViewportSize({ width: 390, height: 844 });
-    if (!await page.getByRole('button', { name: 'Overview', exact: true }).isVisible()) throw new Error('Narrow navigation missing.');
+    await expect(page.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Overview', exact: true }).focus(); await page.keyboard.press('Enter');
-    if (!await page.getByRole('heading', { name: 'Overview', exact: true }).isVisible()) throw new Error('Keyboard navigation failed.');
+    await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
+    await expect(page.locator('main')).toBeFocused();
     if (errors.length || network.length) throw new Error('Browser errors or network calls: ' + JSON.stringify({ errors, network }));
     report.browser = { status: 'passed', source: 'exact Vite-built prototype.html', network, errors, widths: [1100, 390] };
   } catch (error) {

@@ -294,6 +294,7 @@ def run_workspace_review_polish(page, workspace, name, original_name):
     expect(approval).to_have_count(0)
     expect(workspace.get_by_role('button', name='Apply project import', exact=True)).to_be_disabled()
     check('selecting a new file invalidates the previous complete-write approval', True)
+    expect(workspace.get_by_role('heading', name='Review project import', exact=True)).to_be_focused()
     page.keyboard.press('Escape')
     expect(workspace.get_by_role('heading', name='Review project import', exact=True)).to_have_count(0)
     expect(trigger).to_be_focused()
