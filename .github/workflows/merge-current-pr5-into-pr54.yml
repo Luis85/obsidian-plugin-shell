@@ -1,0 +1,31 @@
+name: Merge current PR5 into PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/merge-current-pr5-into-pr54.yml]
+permissions:
+  contents: write
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - name: Merge exact current PR5 head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 172e8ac164bf98fca8935a6435d722f17731139a
+          git fetch --no-tags origin 9a730e672f58b640b289d6ea49b68850e2f5df18
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git merge --no-edit 9a730e672f58b640b289d6ea49b68850e2f5df18; then
+            echo 'Merge conflicts:' >&2
+            git diff --name-only --diff-filter=U >&2
+            exit 1
+          fi
+          git diff --check HEAD^ HEAD
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
