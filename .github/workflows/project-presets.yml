@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: project-presets-${{ github.ref }}
+  group: legacy-project-presets-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   consumers:
