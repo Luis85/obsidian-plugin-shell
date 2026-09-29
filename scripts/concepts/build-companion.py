@@ -156,8 +156,13 @@ def build(output: Path, check: bool = False):
  s=s.replace('</head>', '<!--\n'+notices+'\n-->\n</head>',1)
  encoded=s.encode('utf-8')
  if check:
-  if not output.exists() or output.read_bytes()!=encoded:
-   raise ValueError('Generated concept differs; rebuild before qualification')
+  actual=output.read_bytes() if output.exists() else b''
+  if actual!=encoded:
+   limit=min(len(actual),len(encoded));offset=next((i for i in range(limit) if actual[i]!=encoded[i]),limit)
+   expected_hash=hashlib.sha256(encoded).hexdigest();actual_hash=hashlib.sha256(actual).hexdigest()
+   expected_context=encoded[max(0,offset-80):offset+160].decode('utf-8','backslashreplace').replace('\\n','\\\\n')
+   actual_context=actual[max(0,offset-80):offset+160].decode('utf-8','backslashreplace').replace('\\n','\\\\n')
+   raise ValueError(f'Generated concept differs; rebuild before qualification (expected {len(encoded)} bytes {expected_hash}, actual {len(actual)} bytes {actual_hash}, first byte {offset}; expected={expected_context!r}; actual={actual_context!r})')
  else:
   output.parent.mkdir(parents=True,exist_ok=True)
   output.write_bytes(encoded)
