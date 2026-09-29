@@ -10,10 +10,10 @@ function pmPreflight(){if(!validState(state))throw Error('The candidate cannot b
 function pmSave(value,expected){
  pmCheck(expected);const candidate=pmApi().validate(value),p=project();
  if(candidate.projectId!==p.id)throw Error('The workspace belongs to another project.');
- const prior=p.prototypes;p.prototypes=designCopy(candidate);
+ const prior=p.prototypes,priorGeneratorPlan=state.generator.plan,priorDesignPlan=designUi.plan;
+ p.prototypes=designCopy(candidate);state.generator.plan=null;designUi.plan=null;
  try{pmPreflight();if(!saveConceptState())throw Error('Storage could not commit the workspace. Previous in-memory data is retained; export recovery before reloading.');}
- catch(error){if(prior===undefined)delete p.prototypes;else p.prototypes=prior;throw error;}
- state.generator.plan=null;designUi.plan=null;
+ catch(error){if(prior===undefined)delete p.prototypes;else p.prototypes=prior;state.generator.plan=priorGeneratorPlan;designUi.plan=priorDesignPlan;throw error;}
 }
 function pmGuardIdentity(id){if(project()?.prototypes&&project().prototypes.projectId!==id)throw Error('Saved prototypes pin this project ID. Create a separate vault for a different project; names and descriptions remain editable.');}
 function pmPreserveWorkspace(p){
@@ -38,7 +38,7 @@ function pmDownload(blob,filename){const url=URL.createObjectURL(blob),a=documen
 function pmExportActive(){
  const p=project();if(!p)throw Error('Define a project first.');
  const document=p.prototypes?pmApi().active(pmApi().validate(p.prototypes)).variant.document:companionProjectDocument(p);
- pmDownload(new Blob([pmApi().json(document)],{type:'application/json'}),document.project.id+'.companion.json');
+ pmDownload(new Blob([pmApi().json(document)],{type:'application/json'}),document.project.id+(p.prototypes?'-'+pmApi().selectionKey(p.prototypes.active).replaceAll('/','-'):'')+'.companion.json');
 }
 async function pmExportWorkspace(format){
  const value=designCopy(pmWorkspace());pmApi().validate(value);

@@ -10,6 +10,13 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'reports/companion-mvp'
 HTML = OUT / 'index.html'
 results, errors, requests = [], [], []
+dialog_replies = []
+
+def handle_dialog(dialog):
+    if dialog_replies and not dialog_replies.pop(0):
+        dialog.dismiss()
+    else:
+        dialog.accept()
 
 
 def check(name, condition):
@@ -24,7 +31,11 @@ def workspace(page):
 
 def action(page, name):
     page.locator('#pm-root [data-pm="' + name + '"]').first.click()
-    expect(page.locator('#pm-root')).not_to_have_attribute('aria-busy', 'true')
+    if name == 'open':
+        expect(page.locator('#pm-root')).to_have_count(0)
+        expect(page.locator('#jm-root')).to_be_visible()
+    else:
+        expect(page.locator('#pm-root')).not_to_have_attribute('aria-busy', 'true')
 
 
 def create_form(page, kind, values):
@@ -67,6 +78,22 @@ def run(page):
     a = workspace(page)['prototypes'][0]['versions'][0]['variants'][0]['document']
     check('new prototype captures the complete canonical working project', a == seed)
     check('new workspace never silently activates its first variant', workspace(page)['active'] is None)
+    # A rejected form must preserve user input and give keyboard focus to its error.
+    action(page, 'fork')
+    page.locator('.pm-form [name=id]').fill('main')
+    page.locator('.pm-form [name=name]').fill('Duplicate draft kept')
+    page.locator('.pm-form [name=hypothesis]').fill('This must survive validation')
+    before_error = workspace(page)
+    page.locator('.pm-form button[type=submit]').click()
+    expect(page.locator('.pm-message[role=alert]')).to_be_focused()
+    expect(page.locator('.pm-form [name=name]')).to_have_value('Duplicate draft kept')
+    expect(page.locator('.pm-form [name=hypothesis]')).to_have_value('This must survive validation')
+    check('rejected form preserves its values and never writes a partial variant', workspace(page) == before_error)
+    dialog_replies.append(False)
+    page.locator('[data-index="0,0,0"]').click()
+    expect(page.locator('.pm-form [name=name]')).to_have_value('Duplicate draft kept')
+    check('dismissing the navigation guard preserves the unsubmitted form', workspace(page) == before_error)
+    action(page, 'cancel')
     create_form(page, 'fork', {'id': 'sitemap-b', 'name': 'Sitemap B', 'hypothesis': 'A different first destination'})
     action(page, 'open')
     expect(page.locator('#jm-root')).to_be_visible()
@@ -88,6 +115,28 @@ def run(page):
     action(page, 'save')
     saved = workspace(page)
     check('explicit draft save isolates B from A and retains full mock data', saved['prototypes'][0]['versions'][0]['variants'][0]['document'] == a and saved['prototypes'][0]['versions'][0]['variants'][1]['document'] == b and b['design']['dataSources'] == a['design']['dataSources'])
+    before_compare = workspace(page)
+    action(page, 'compare')
+    page.locator('[data-pm-comparison]').select_option('exploration/v1/main')
+    expect(page.locator('.pm-comparison')).to_contain_text('/design/sitemap')
+    expect(page.locator('.pm-comparison')).to_contain_text('/variant-b-dashboard')
+    check('comparison reveals real sitemap differences without writes', workspace(page) == before_compare)
+    page.locator('[data-pm-query]').fill('Sitemap B')
+    page.locator('[data-pm-query]').press('Home')
+    page.locator('[data-pm-query]').press('ArrowRight')
+    page.locator('[data-pm-query]').press('x')
+    check('typing into the middle of a search preserves caret position', page.locator('[data-pm-query]').input_value() == 'Sxitemap B' and page.locator('[data-pm-query]').evaluate('(element)=>element.selectionStart') == 2)
+    page.locator('[data-pm-query]').fill('Sitemap B')
+    expect(page.locator('.pm-row')).to_have_count(1)
+    expect(page.locator('.pm-row')).to_have_attribute('data-key','exploration/v1/sitemap-b')
+    page.locator('[data-pm-status]').select_option('active')
+    expect(page.locator('.pm-list')).to_contain_text('No matching variants')
+    check('search and status filters preserve all saved data and the selected detail', workspace(page) == before_compare and 'Sitemap B' in page.locator('.pm-title h2').inner_text())
+    action(page, 'reset-filter')
+    action(page, 'compare')
+    create_form(page, 'prototype-details', {'name':'Product alternatives','description':'Compare the first destination'})
+    create_form(page, 'version-details', {'label':'Design exploration'})
+    check('display metadata updates retain portable IDs and snapshot contents', workspace(page)['prototypes'][0]['id'] == 'exploration' and workspace(page)['prototypes'][0]['versions'][0]['variants'][1]['document'] == b)
     select(page, '0,0,0')
     action(page, 'review')
     expect(page.locator('[data-pm=save]')).to_be_disabled()
@@ -124,6 +173,23 @@ def run(page):
     create_form(page, 'version', {'id': 'v2'})
     newer = workspace(page)
     check('new version retains sealed v1 and copies complete editable drafts', newer['prototypes'][0]['versions'][0]['sealed'] and all(v['status'] == 'draft' for v in newer['prototypes'][0]['versions'][1]['variants']) and newer['active']['versionId'] == 'v1')
+    select(page, '0,1,1')
+    action(page, 'compare')
+    page.locator('[data-pm-comparison]').select_option('exploration/v1/main')
+    before_restore = workspace(page)
+    working_before = page.evaluate('companionProjectDocument()')
+    action(page, 'restore-snapshot')
+    restored = workspace(page)
+    recovery = next(v for v in restored['prototypes'][0]['versions'] if v['id'] == 'recovery-1')
+    check('restore retains full previous draft in a sealed recovery version', recovery['sealed'] and recovery['variants'][0]['document'] == before_restore['prototypes'][0]['versions'][1]['variants'][1]['document'])
+    check('restore changes only saved draft, never working copy or active generator selection', restored['active'] == before_restore['active'] and page.evaluate('companionProjectDocument()') == working_before and restored['prototypes'][0]['versions'][1]['variants'][1]['document'] == a)
+    page.locator('[data-pm-comparison]').select_option('exploration/recovery-1/sitemap-b')
+    action(page, 'restore-snapshot')
+    check('recovery checkpoint can restore the previous draft without destroying history', workspace(page)['prototypes'][0]['versions'][1]['variants'][1]['document'] == b and len(workspace(page)['prototypes'][0]['versions']) == 4)
+    page.screenshot(path=str(OUT / 'prototypes-polish-dark.png'), full_page=True)
+    page.evaluate("document.documentElement.dataset.theme='light'")
+    page.screenshot(path=str(OUT / 'prototypes-polish-light.png'), full_page=True)
+    action(page, 'compare')
     create_form(page, 'create', {'id': 'onboarding', 'name': 'Onboarding exploration'})
     check('multiple prototypes coexist in the same project', len(workspace(page)['prototypes']) == 2)
     action(page, 'archive')
@@ -142,7 +208,7 @@ try:
     with sync_playwright() as pw:
         browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), args=['--no-sandbox'])
         page = browser.new_page(viewport={'width': 1600, 'height': 1000})
-        page.on('dialog', lambda dialog: dialog.accept())
+        page.on('dialog', handle_dialog)
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
         page.route('**/*', lambda route: route.continue_() if route.request.url.startswith('file:') else (requests.append(route.request.url), route.abort())[1])

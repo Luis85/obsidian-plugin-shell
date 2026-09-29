@@ -9,4 +9,4 @@ export interface PrototypeHost {
   exportActive(): void;
   importWorkspace(text: string, expectedKey: string): void;
 }
-export type PrototypeForm = '' | 'create' | 'fork' | 'version' | 'details';
+export type PrototypeForm = '' | 'create' | 'fork' | 'version' | 'details' | 'prototype-details' | 'version-details';
