@@ -1,0 +1,51 @@
+name: Reconcile starter PR conflicts
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/starter-conflict-reconciliation.yml]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - name: Verify parent and resolve only the reviewed conflicts
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = 358aaa651139fe3a83ae15afa428f4e9dfac2658
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-commit --no-ff 1a078d235043db2157efbcc702878e120264fc14 || test "$?" = 1
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess, hashlib
+          expected = ['scripts/framework/catalog.ts', 'scripts/framework/help-text.ts', 'scripts/framework/operations.ts']
+          actual = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=U'], text=True).splitlines()
+          assert sorted(actual) == expected, actual
+          hashes = ['68f54d3d99a335a0cece99c2981c40e171b905c8bedd6bce95c3dc729c80f6eb', '5776e3dfc905d94a110df730753fdc991e1e3da2dcf90bbc131138b3c85f7fab', 'd668845049135c52f31a85183b25107cacc896df137b397a082e23cf6f4ded70']
+          for name, digest in zip(expected, hashes):
+              path = Path(name)
+              def resolve(m):
+                  ours, theirs = m.group(1), m.group(2)
+                  if "if (entry.effect === 'process')" in ours:
+                      assert "'starters run'" in ours and "'docs recover'" in theirs
+                      return ours.replace("['setup resume', 'starters run']", "['setup resume', 'starters run', 'docs recover']").replace("'starters run', 'setup resume']", "'starters run', 'setup resume', 'docs recover']")
+                  return ours + theirs
+              text, count = re.subn(r'^<<<<<<< [^\n]+\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]+\n', resolve, path.read_text(), flags=re.M|re.S)
+              assert count > 0 and not re.search(r'^(<<<<<<<|=======|>>>>>>>)', text, re.M)
+              assert hashlib.sha256(text.encode()).hexdigest() == digest, name
+              path.write_text(text)
+          subprocess.run(['git', 'add', *expected], check=True)
+          PY
+          git diff --check
+          git diff --cached --check
+          test -z "$(git diff --name-only --diff-filter=U)"
+      - name: Commit the merge and fast-forward only PR54
+        run: |
+          git commit -m 'merge: reconcile current PR5 setup, documentation and prototypes with JSON starters' -m 'Preserve both parent histories and all unrelated changes. Three resolved files matched locally tested SHA-256 values. Framework typecheck, 65 starter tests and 37 handout tests passed locally with Node 24.21.0 and repository TypeScript 6.0.3. No release or native acceptance is implied.'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
