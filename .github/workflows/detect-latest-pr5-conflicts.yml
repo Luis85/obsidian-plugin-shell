@@ -1,0 +1,32 @@
+name: Detect latest PR5 conflicts on PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/detect-latest-pr5-conflicts.yml]
+permissions:
+  contents: read
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9edfcbb810592a8a47b591545d80ecd5241a470a
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Attempt merge and report conflicts
+        shell: bash
+        run: |
+          set +e
+          git fetch --no-tags origin 84c5f2082b303740aa17d6ddc70cf5d2e75f15c3
+          git merge --no-commit --no-ff 84c5f2082b303740aa17d6ddc70cf5d2e75f15c3
+          status=$?
+          echo "MERGE_STATUS=$status"
+          echo "CONFLICTS_BEGIN"
+          git diff --name-only --diff-filter=U
+          echo "CONFLICTS_END"
+          echo "STATUS_BEGIN"
+          git status --short
+          echo "STATUS_END"
+          exit 0
