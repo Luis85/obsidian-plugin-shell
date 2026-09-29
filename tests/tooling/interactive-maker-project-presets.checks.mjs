@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { loadProjectCatalog, projectGuide, projectRequest, projectPlan } from '../../bin/adapters/projects.ts';
-import { readProjectCatalog, resolveProjectSelection, validateProjectSelection, availableFrameworks } from '../../scripts/compiler/domain/project-presets.ts';
+import { projectSelectionRequest, readProjectCatalog, resolveProjectSelection, validateProjectSelection, availableFrameworks } from '../../scripts/compiler/domain/project-presets.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
@@ -86,6 +86,7 @@ test('all presets compile through shared v6 validation into actual target-specif
       assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.2'); assert.ok(!pkg.dependencies.nuxt);
       assert.match(files.get('scripts/bundling/vite-shared.mjs'), /Unqualified Nuxt UI module/);
       assert.ok(files.has('src/ui/Starter.vue'));
+      for (const [, imported] of files.get('scripts/bundling/vite-shared.mjs').matchAll(/from ['"](\.\/[^'"]+)['"]/g)) assert.ok(files.has('scripts/bundling/' + imported.slice(2)), imported);
     }
     assert.ok(result.diagnostics.some(item => item.code === 'COMPILER_ADAPTER_REQUIRED'));
   }
@@ -167,3 +168,11 @@ test('sketch regeneration respects a saved project selection rather than default
   assert.ok(plan.changes.some(item => item.path === 'code/src/targets/cli/main.ts'));
   assert.ok(!plan.changes.some(item => item.path === 'code/src/ui/Starter.vue'));
 }));
+
+test('selection replay excludes the derived type and does not alias the saved target list', () => {
+  const original = selection('hybrid', { framework: 'vanilla', targets: ['plugin', 'cli'] });
+  const replay = projectSelectionRequest(original);
+  assert.deepEqual(Object.keys(replay), ['schemaVersion', 'catalogVersion', 'preset', 'framework', 'targets']);
+  assert.deepEqual(resolveProjectSelection(catalog, replay), original);
+  replay.targets.pop(); assert.deepEqual(original.targets, ['plugin', 'cli']);
+});

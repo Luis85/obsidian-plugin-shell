@@ -14,9 +14,9 @@ test('documented read commands are accepted by the real CLI catalog',()=>{
   for(const args of [['compiler','check','--input','project.json','--json'],['compiler','inspect','--input','project.json','--stage','artifacts','--output-kind','clickdummy'],['compiler','explain','COMPILER_REFERENCE_MISSING'],['compiler','check','--input','project.json','--report-dir','reports/compiler','--debug']])assert.ok(parseCliArguments(args));
 });
 
-test('compiler coverage includes selection contracts without lowering any gate',async()=>{
+test('compiler coverage includes selection and preset contracts without lowering any gate',async()=>{
   const pkg=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
   const command=pkg.scripts['test:compiler:coverage'];
   for(const token of ['--test-coverage-lines=95','--test-coverage-branches=90','--test-coverage-functions=90',
-    'tests/tooling/compiler-selection.checks.mjs']) assert.ok(command.split(' ').includes(token),token);
+    'tests/tooling/compiler-selection.checks.mjs', 'tests/tooling/interactive-maker-project-presets.checks.mjs']) assert.ok(command.split(' ').includes(token),token);
 });

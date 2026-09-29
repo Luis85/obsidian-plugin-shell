@@ -100,3 +100,26 @@ test('browser readiness is established only after mount, and teardown clears rea
   assert.throws(() => handlers.get('pagehide')(), /cleanup/); assert.equal(document.documentElement.dataset.prototypeReady, undefined);
   handlers.get('pagehide')(); assert.equal(cleanup, 1);
 });
+
+
+test('every generated browser framework passes strict TypeScript, including the asynchronous mount closure', async () => scratch(async root => {
+  const { default: ts } = await import('typescript');
+  await mkdir(join(root, 'src/ui'), { recursive: true });
+  await mkdir(join(root, 'src/targets/preview'), { recursive: true });
+  await writeFile(join(root, 'src/ui/mount.ts'), 'export async function mount(root: HTMLElement): Promise<() => void> { return () => root.replaceChildren(); }');
+  await writeFile(join(root, 'styles.d.ts'), "declare module '*.css';");
+  const entry = join(root, 'src/targets/preview/main.ts');
+  const compilerOptions = { strict: true, noEmit: true, skipLibCheck: true, target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
+    allowImportingTsExtensions: true, noUncheckedSideEffectImports: true, types: [] };
+  const diagnostics = () => ts.getPreEmitDiagnostics(ts.createProgram([entry, join(root, 'styles.d.ts')], compilerOptions));
+  for (const framework of ['vanilla', 'angular', 'nuxtui']) {
+    await writeFile(entry, browserSource({ framework }, 'checked-browser'));
+    assert.deepEqual(diagnostics().map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')), [], framework);
+  }
+  const unsafe = browserSource({ framework: 'vanilla' }, 'checked-browser')
+    .replace("const candidate = document.querySelector<HTMLElement>('[data-project-root]');\nif (!candidate) throw new Error('PROJECT_ROOT_MISSING');\nconst root: HTMLElement = candidate;",
+      "const root = document.querySelector<HTMLElement>('[data-project-root]');\nif (!root) throw new Error('PROJECT_ROOT_MISSING');");
+  await writeFile(entry, unsafe);
+  assert.ok(diagnostics().some(diagnostic => [18047, 2345].includes(diagnostic.code)), 'the pre-fix nullable closure must fail the same compiler');
+}));

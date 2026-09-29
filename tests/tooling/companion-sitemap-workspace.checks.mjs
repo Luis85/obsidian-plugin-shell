@@ -177,3 +177,17 @@ test('review panels receive focus and Escape restores the trigger without writin
   m.escapeReview({defaultPrevented:false,preventDefault(){prevented++;},stopPropagation(){}});
   await Vue.nextTick();assert.equal(m.importOpen.value,false);assert.equal(triggerFocus,1);assert.equal(prevented,1);assert.equal(f.writes(),0);
 });
+
+
+test('revoking approval restores review focus only when its focused control was removed',async t=>{
+  const f=await fixture(t),m=f.model;let focused=0;
+  const doc=m.root.value.ownerDocument,previous={isConnected:true};doc.body={};
+  m.root.value.closest=()=>({querySelector:()=>({focus(){focused++;}})});
+  m.beginImport(true);await Vue.nextTick();m.reviewImport();doc.activeElement=previous;
+  m.invalidateReview();previous.isConnected=false;doc.activeElement=doc.body;
+  await Vue.nextTick();await Vue.nextTick();assert.equal(focused,2);assert.equal(m.importOpen.value,true);assert.equal(f.writes(),0);
+  m.reviewImport();doc.activeElement={isConnected:true};m.invalidateReview();
+  await Vue.nextTick();await Vue.nextTick();assert.equal(focused,2,'Do not steal focus from a surviving input');
+  m.reviewImport();doc.activeElement=previous;m.cancelImport();doc.activeElement=doc.body;
+  await Vue.nextTick();await Vue.nextTick();assert.equal(m.importOpen.value,false);assert.equal(f.writes(),0);
+});

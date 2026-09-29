@@ -73,7 +73,7 @@ export async function projectCreatePlan(options: { root: string; frameworkRoot: 
     start: `Read ${out}/execution-prompt.md; selected runtime sources are under ${out}/source/.` });
 }
 /** The sketch generator reuses the saved preset rather than silently reverting to Vue/Obsidian. */
-export async function savedProjectSelection(root: string, catalog: PresetCatalog): Promise<ProjectSelection | null> {
+export async function savedLegacyProjectSelection(root: string, catalog: PresetCatalog): Promise<ProjectSelection | null> {
   const path = join(root, 'shell.project.json');
   if (!await exists(path)) return null;
   const data = object(await readData(path));

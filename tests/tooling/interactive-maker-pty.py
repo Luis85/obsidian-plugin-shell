@@ -180,13 +180,13 @@ def cancel(node, repo, target, evidence, mode):
 def new_project(node, repo, target, agent, evidence):
     terminal = Terminal(node, repo, target, "new")
     try:
-        terminal.expect("Choose a project preset")
+        terminal.expect("What kind of project are you creating?")
         terminal.send("/cli\r", "Prototype title")
         terminal.send("PTY project\r", "Problem to explore")
-        labels = ["Who will use it?", "Observable outcome", "Screens, website pages",
-                  "Reusable building blocks", "Primary journeys", "Explicit non-goals",
+        labels = ["Who will use it?", "Observable outcome", "Pages or command journeys",
+                  "Components for the first page", "Primary journeys", "Explicit non-goals",
                   "Data and business rules", "Failure and recovery states",
-                  "Presentation and interaction", "Concept-board checkpoint",
+                  "Visual direction", "Concept-board checkpoint",
                   "Accessibility and responsive", "Observable acceptance cases",
                   "Unresolved blocking questions", "Review your prototype brief",
                   "Do you agree to this complete brief"]
@@ -198,7 +198,7 @@ def new_project(node, repo, target, agent, evidence):
         terminal.send("\x1b[B\r")
         result = terminal.finish(0)
         request = {"schemaVersion": 1, "catalogVersion": 1, "preset": "cli",
-                   "prototypeRequest": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
+                   "interview": {"schemaVersion": 1, "guideId": "project-prototype", "guideVersion": 1,
                                         "answers": {"title": "PTY project", "approved": True}}}
         command = [node, "--experimental-strip-types", str(repo / "shell.mjs"), "new", "--root", str(agent),
                    "--input", "-", "--json", "--no-interaction"]

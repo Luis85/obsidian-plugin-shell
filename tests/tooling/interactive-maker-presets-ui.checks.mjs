@@ -137,3 +137,16 @@ test('interactive new and the empty default workspace start at presets and resto
     assert.equal(code, 130); assert.equal(answered, true); assert.deepEqual(stdout, []); input.destroy();
   }
 }));
+
+test('legacy validation remains read-only and mixed request formats fail closed', async () => scratch(async root => {
+  const value = { schemaVersion: 1, catalogVersion: catalog.version, preset: 'cli', prototypeRequest: {
+    schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { title: 'Compatibility', approved: true } } };
+  const context = request => ({ root, frameworkRoot, input: Readable.from([JSON.stringify(request)]) });
+  for (const flags of [['--apply', 'unreviewed'], ['--out', 'unexpected']]) {
+    await assert.rejects(() => execute(parseArguments(['new', 'validate', '--input', '-', ...flags]), context(value)), { code: 'PROJECT_OPTION' });
+  }
+  for (const changed of [{ ...value, interview: value.prototypeRequest }, { ...value, framework: 'none' }, { ...value, prototypeRequest: null }]) {
+    await assert.rejects(() => execute(parseArguments(['new', '--input', '-']), context(changed)));
+  }
+  assert.deepEqual(await readdir(root), []);
+}));

@@ -75,7 +75,7 @@ function uiFiles(selected: PresetOutput, template: TemplateSnapshot, templates: 
   if (selected.frontend === 'nuxt-ui') {
     files.push(entry('src/presentation/App.vue', templates['App.vue']!), entry('src/presentation/use-project.ts', templates['use-project.ts']!));
     if (selected.targets.includes('website')) files.push(entry('src/presentation/Website.vue', templates['Website.vue']!), entry('src/presentation/use-demonstration.ts', templates['use-demonstration.ts']!));
-    for (const path of ['scripts/bundling/vite-shared.mjs',
+    for (const path of ['scripts/bundling/vite-shared.mjs', 'scripts/bundling/journey-flow.mjs',
       'scripts/bundling/ui-adaptation.json', 'src/infrastructure/ui/static-plugin.ts', 'src/styles/tokens.css', 'src/styles/nuxt-bridge.css']) {
       const content = template.text(path).replace("resolve(root, 'manifest.json')", "resolve(root, 'shell.project.json')");
       files.push(entry(path, path.endsWith('.css') ? content.replaceAll('plugin-shell', selected.id) : content));
@@ -99,7 +99,7 @@ export function emitPresetProject(model: Model, template: TemplateSnapshot, sele
     entry('.nvmrc', template.text('.nvmrc')), entry('.gitignore', 'node_modules/\ndist/\n.angular/\n.build-stage-*/\n.build-backup-*/\n.project-build-lock/\n'), entry('LICENSE', template.text('LICENSE')),
     entry('shell.project.json', json({ schemaVersion: 1, ...selected, websiteEntries })), entry('design/project.json', json(model.document)),
     entry('src/core/project.ts', templates['core.ts']!), entry('src/core/project-data.json', literal(seed) + '\n'),
-    entry('tests/core.test.mjs', templates['core.test.mjs']!), entry('scripts/build.mjs', templates['build.mjs']!),
+    entry('tests/core.test.mjs', templates['core.test.mjs']!), entry('scripts/build.mjs', templates['build.mjs']!), entry('scripts/build-worker.mjs', templates['build-worker.mjs']!),
     ...uiFiles(selected, template, templates), ...targetFiles(scopedModel, selected, templates)];
   if (selected.targets.includes('plugin')) {
     const manifest = JSON.parse(template.text('manifest.json')) as Record<string, unknown>;

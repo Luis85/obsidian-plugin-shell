@@ -33,7 +33,8 @@ async function checkSurface(browser, origin, target, frontend, javascript) {
   try {
     assert.equal((await page.goto(origin)).status(), 200);
     if (target === 'webapp') {
-      await page.waitForFunction(() => document.documentElement.dataset.prototypeReady === 'true');
+      await page.waitForFunction(() => ['true', 'failed'].includes(document.documentElement.dataset.prototypeReady));
+      assert.equal(await page.evaluate(() => document.documentElement.dataset.prototypeReady), 'true', failures.join('\n'));
       await page.getByRole('button', { name: 'Issues', exact: true }).click();
       await page.getByRole('heading', { name: 'Issues', exact: true }).waitFor();
       await page.getByRole('button', { name: 'Overview', exact: true }).click();
@@ -52,6 +53,8 @@ async function checkSurface(browser, origin, target, frontend, javascript) {
       }
     }
     assert.deepEqual(failures, []);
+  } catch (error) {
+    throw new Error(`${target}/${frontend}: ${error.message}; browser diagnostics: ${failures.join('; ') || 'none'}`, { cause: error });
   } finally { await context.close(); }
 }
 export async function verifyPresetBrowser(source, selection) {

@@ -12,7 +12,7 @@ import { parseArguments, execute, option, makerHelp, type Arguments, type Comman
 import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
-import { safe, Back } from './presentation/prompts.ts';
+import { safe, Back, type Prompts } from './presentation/prompts.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
@@ -35,15 +35,20 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
   let completion: string | undefined;
   try {
     terminal?.start();
-    if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
-      if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
-      completion = await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
-        framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
-    }
-    else if (args.command === 'prototype') completion = await prototypeWizard(ui, options);
-    else await studio(ui, options);
+    completion = await runInteractiveCommand(args, context, ui, options);
   } finally { terminal?.dispose(); }
   if (terminal && completion) io.error.write(safe(completion));
+}
+
+interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
+async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
+  if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
+    if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
+    return await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
+    framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
+  }
+  else if (args.command === 'prototype') return await prototypeWizard(ui, options);
+  else await studio(ui, options);
 }
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;

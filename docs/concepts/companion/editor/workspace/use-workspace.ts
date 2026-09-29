@@ -56,7 +56,14 @@ export function useWorkspace() {
     try { unsubscribe(); } finally { try { previousEditor?.unmount(); } finally { previousDocument?.dispose(); } }
   }
   function clearStaged() { if (staged && staged.target !== document) staged.target.dispose(); staged = undefined; }
+  function retainReviewFocus(previous: Element | null) {
+    void nextTick(() => {
+      const doc = root.value?.ownerDocument;
+      if (previous && !previous.isConnected && doc?.activeElement === doc?.body) focusReview(false);
+    });
+  }
   function invalidateReview() {
+    if (reviewed.value) retainReviewFocus(root.value?.ownerDocument.activeElement ?? null);
     importRead++; readingImport.value = false; confirmed.value = false; reviewed.value = false; summary.value = ''; clearStaged();
   }
   async function attach(candidate: JourneyProjectDocument) {

@@ -23,7 +23,7 @@ test('native Journey Lens creates only after review, saves and reopens the compl
   expect(await obsidian.eval(({ app }) => app.vault.getAbstractFileByPath('project.companion.json') === null)).toBe(true);
   await workspace.getByLabel('I approve this complete project write').check();
   await workspace.getByRole('button', { name: 'Apply project import', exact: true }).click();
-  await browserExpect(workspace.locator('.jl-file-status')).toContainText('Editing the selected vault file');
+  await browserExpect(workspace.locator('.jl-file-status')).toContainText('Apply saves each reviewed change to the active vault file.');
   await browserExpect(workspace.locator('.vue-flow__node').first()).toBeVisible();
   const inspector = workspace.getByRole('complementary', { name: 'Selected surface', exact: true });
   const originalName = await inspector.getByLabel('Name', { exact: true }).inputValue();
@@ -42,7 +42,7 @@ test('native Journey Lens creates only after review, saves and reopens the compl
   expect(restored).toEqual(original);
   await obsidian.reloadPlugin();
   const reopened = (await obsidian.openView(type)).locator('.jl-workspace');
-  await browserExpect(reopened.locator('.jl-file-status')).toContainText('Editing the selected vault file');
+  await browserExpect(reopened.locator('.jl-file-status')).toContainText('Apply saves each reviewed change to the active vault file.');
   await browserExpect(reopened.getByRole('complementary', { name: 'Selected surface', exact: true }).getByLabel('Name', { exact: true })).toHaveValue('Verified native sitemap edit');
   expect(await obsidian.eval(({ app }) => app.vault.getMarkdownFiles().map(file => file.path).sort())).toEqual(['Notes/Example.md', 'Welcome.md']);
   expect(obsidian.errors()).toEqual([]);
@@ -53,12 +53,12 @@ test('native Journey Lens leaves keep independent drafts and refuse stale overwr
   await obsidian.eval(async ({ app }, content) => { await app.vault.create('project.companion.json', content); }, seed);
   const type = obsidian.pluginId + suffix;
   const first = (await obsidian.openView(type)).locator('.jl-workspace');
-  await browserExpect(first.locator('.jl-file-status')).toContainText('Editing the selected vault file');
+  await browserExpect(first.locator('.jl-file-status')).toContainText('Apply saves each reviewed change to the active vault file.');
   const firstName = first.getByRole('complementary', { name: 'Selected surface', exact: true }).getByLabel('Name', { exact: true });
   await firstName.fill('Unsubmitted first leaf draft');
   const firstId = await firstName.getAttribute('id');
   const second = (await obsidian.openView(type)).locator('.jl-workspace');
-  await browserExpect(second.locator('.jl-file-status')).toContainText('Editing the selected vault file');
+  await browserExpect(second.locator('.jl-file-status')).toContainText('Apply saves each reviewed change to the active vault file.');
   const secondName = second.getByRole('complementary', { name: 'Selected surface', exact: true }).getByLabel('Name', { exact: true });
   expect(await secondName.getAttribute('id')).not.toBe(firstId);
   expect(await secondName.inputValue()).not.toBe('Unsubmitted first leaf draft');

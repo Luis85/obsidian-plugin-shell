@@ -1,4 +1,4 @@
-import type { ProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
+import { projectSelectionRequest, type ProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from '../../scripts/framework/files.ts';
 import { artifactOrigins } from '../../scripts/compiler/adapters/origins.ts';
@@ -54,20 +54,30 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
     projectSha256: hash(projectJson), stage: 'prepared-not-implemented', checks: 'not-run', ...(selection ? { selection } : {}) };
   const answersJson = JSON.stringify({ schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers }, null, 2) + '\n';
   const integration = { kind: 'prototype-integration-map', schemaVersion: 1, entries: artifactOrigins(compilation.model!, compilation.artifacts, 'companion.project.json').filter(item => item.origins.length).map(item => ({ designId: item.origins[0]!.entityId, sourceFiles: ['source/' + item.path], origins: item.origins, ownership: 'generated', testIds: [], nativeRemaining: ['Not qualified by preparation'] })) };
-  const manifest = { kind: selection ? 'project-prototype-package' : 'obsidian-prototype-package', schemaVersion: 1, slug: slug(String(answers.title), 'prototype'), mode: answers.mode ?? 'new-project', repository: { name: context.repository, commit: context.commit }, project: { path: 'companion.project.json', sha256: hash(projectJson) }, artifact: { path: selection?.framework === 'none' ? 'source/dist/cli/targets/cli/main.js' : selection ? 'source/dist/prototype.html' : 'prototype.html', sha256: null }, source: { path: 'source', packageManager: pkg.packageManager }, status: 'incomplete' };
+  const manifest = { kind: selection ? 'project-prototype-package' : 'obsidian-prototype-package', schemaVersion: 1, slug: slug(String(answers.title), 'prototype'), mode: answers.mode ?? 'new-project', repository: { name: context.repository, commit: context.commit }, project: { path: 'companion.project.json', sha256: hash(projectJson) }, artifact: { path: prototypeArtifactPath(selection), sha256: null }, source: { path: 'source', packageManager: pkg.packageManager }, status: 'incomplete' };
   const values: Record<string, string> = { title: String(answers.title), slug: slug(String(answers.title), 'prototype'), brief, projectJson,
     contextJson: JSON.stringify(context, null, 2), answersJson, skillPath: prototypeSkillRoot + '/SKILL.md',
     integrationJson: JSON.stringify(integration, null, 2), manifestJson: JSON.stringify(manifest, null, 2) };
-  for (const [key, value] of Object.entries(answers)) if (!(key in values)) values[key] = Array.isArray(value) ? value.join('\n') : String(value);
+  addAnswerValues(values, answers);
   const entries = guide.artifacts.map(item => ({ path: renderTemplate(item.path, values), content: renderTemplate(item.template, values) }));
   entries.push({ path: 'prototype-guide.json', content: JSON.stringify(guide, null, 2) + '\n' });
   entries.push(...artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
   if (selection) {
     entries.push({ path: 'project.config.json', content: JSON.stringify(selection, null, 2) + '\n' });
-    const { projectType: _type, ...request } = selection;
+    const request = projectSelectionRequest(selection);
     entries.push({ path: 'project-request.json', content: JSON.stringify({ ...request, interview: JSON.parse(answersJson) }, null, 2) + '\n' });
   }
   if (baseline) entries.push({ path: 'baseline.project.json', content: documentText(baseline) });
   return packagePlan(root, out, entries, { ...context, prompt: entries.find(item => item.path === 'execution-prompt.md')?.content,
     document, start: 'Read execution-prompt.md and source/README.md for the selected scaffold and build instructions.', readiness: compilation.readiness });
+}
+
+function prototypeArtifactPath(selection: ProjectSelection | undefined): string {
+  if (!selection) return 'prototype.html';
+  return selection.framework === 'none' ? 'source/dist/cli/targets/cli/main.js' : 'source/dist/prototype.html';
+}
+function addAnswerValues(values: Record<string, string>, answers: Answers): void {
+  for (const [key, value] of Object.entries(answers)) {
+    if (!(key in values)) values[key] = Array.isArray(value) ? value.join('\n') : String(value);
+  }
 }

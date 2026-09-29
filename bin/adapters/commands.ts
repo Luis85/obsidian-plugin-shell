@@ -1,4 +1,4 @@
-import { loadProjectCatalog as loadLegacyCatalog, savedProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
+import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';

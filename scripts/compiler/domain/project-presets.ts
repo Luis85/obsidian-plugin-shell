@@ -96,3 +96,9 @@ export function validateProjectSelection(catalog: ProjectCatalog, value: unknown
   check(projectType === selected.projectType, 'Project type conflicts with the selected preset.');
   return selected;
 }
+
+/** Replay only caller-owned selection fields; projectType is resolved from the catalog. */
+export function projectSelectionRequest(selection: ProjectSelection): Omit<ProjectSelection, 'projectType'> {
+  return { schemaVersion: selection.schemaVersion, catalogVersion: selection.catalogVersion, preset: selection.preset,
+    framework: selection.framework, targets: [...selection.targets] };
+}

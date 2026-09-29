@@ -1,5 +1,5 @@
 import { requireSketch } from '../domain/errors.ts';
-import { loadProjectCatalog as loadLegacyCatalog, savedProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
+import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
 import { resolve } from 'node:path';

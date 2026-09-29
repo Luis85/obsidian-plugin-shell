@@ -5,10 +5,11 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
-import { loadProjectCatalog, loadProjectGuide, projectCreatePlan, savedProjectSelection, presetBoilerplatePlan } from '../../bin/adapters/project-create.ts';
+import { loadProjectCatalog, loadProjectGuide, projectCreatePlan, savedLegacyProjectSelection, presetBoilerplatePlan } from '../../bin/adapters/project-create.ts';
 import { applyPrepared, readData } from '../../bin/adapters/storage.ts';
 import { openDocument } from '../../bin/domain/document.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
+import { studio } from '../../bin/presentation/studio.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const catalog = await loadProjectCatalog(), guide = await loadProjectGuide();
 const childEnv = { ...process.env }; delete childEnv.NODE_TEST_CONTEXT; delete childEnv.VITEST;
@@ -48,6 +49,8 @@ for (const [preset, frontend, targets] of [['plugin', 'nuxt-ui'], ['plugin', 'va
     if (frontend === 'nuxt-ui') {
       assert.match(await readFile(join(output, 'src/presentation/mount.ts'), 'utf8'), /app\.use\(ui\)/);
       assert.match(await readFile(join(output, 'scripts/bundling/vite-shared.mjs'), 'utf8'), /shell\.project\.json/);
+      const shared = await readFile(join(output, 'scripts/bundling/vite-shared.mjs'), 'utf8');
+      for (const [, imported] of shared.matchAll(/from ['"](\.\/[^'"]+)['"]/g)) await readFile(resolve(output, 'scripts/bundling', imported));
     }
     if (descriptor.targets.includes('website')) {
       const html = await readFile(join(output, 'src/targets/website/pages/issues/index.html'), 'utf8');
@@ -96,9 +99,9 @@ test('new package ownership, approvals, cancellation and path boundaries preserv
   if (process.platform !== 'win32') { await symlink(join(root, 'foreign'), join(root, 'linked')); await assert.rejects(() => candidate(root, request, 'linked')); }
 }));
 test('saved presets drive subsequent sketch generation and reject contradictory sidecar data', async () => scratch(async root => {
-  assert.equal(await savedProjectSelection(root, catalog), null);
+  assert.equal(await savedLegacyProjectSelection(root, catalog), null);
   const plan = await candidate(root, input('webapp', 'vanilla')); await applyPrepared(plan, plan.planHash);
-  const workspace = join(root, 'prepared/source'), selected = await savedProjectSelection(workspace, catalog);
+  const workspace = join(root, 'prepared/source'), selected = await savedLegacyProjectSelection(workspace, catalog);
   assert.equal(selected.preset, 'webapp'); assert.equal(selected.frontend, 'vanilla');
   const document = openDocument(await readData(join(workspace, 'design/project.json')));
   const direct = await presetBoilerplatePlan(workspace, frameworkRoot, 'generated/next', document, selected, catalog);
@@ -107,9 +110,61 @@ test('saved presets drive subsequent sketch generation and reject contradictory 
   assert.equal(direct.planHash, viaCommand.planHash); assert.equal(viaCommand.selection.frontend, 'vanilla');
   const path = join(workspace, 'shell.project.json'), original = await readData(path);
   for (const patch of [{ schemaVersion: 2 }, { framework: 'vue' }, { targets: ['plugin'] }, { frontend: 'none' }, { extra: true }]) {
-    await writeFile(path, JSON.stringify({ ...original, ...patch })); await assert.rejects(() => savedProjectSelection(workspace, catalog));
+    await writeFile(path, JSON.stringify({ ...original, ...patch })); await assert.rejects(() => savedLegacyProjectSelection(workspace, catalog));
   }
   await writeFile(path, JSON.stringify(original));
   const hybrid = await candidate(root, input('hybrid', 'vanilla', ['plugin', 'cli']), 'hybrid'); await applyPrepared(hybrid, hybrid.planHash);
-  assert.deepEqual((await savedProjectSelection(join(root, 'hybrid/source'), catalog)).targets, ['plugin', 'cli']);
+  assert.deepEqual((await savedLegacyProjectSelection(join(root, 'hybrid/source'), catalog)).targets, ['plugin', 'cli']);
+}));
+
+test('agent and studio refuse two valid but contradictory preset sidecars without generating files', async () => scratch(async root => {
+  const plan = await candidate(root, input('webapp', 'vanilla')); await applyPrepared(plan, plan.planHash);
+  const workspace = join(root, 'prepared/source');
+  const legacy = await readFile(join(workspace, 'shell.project.json'), 'utf8');
+  const canonical = JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] });
+  await writeFile(join(workspace, 'project.config.json'), canonical);
+  const before = (await readdir(workspace)).sort();
+  await assert.rejects(() => execute(parseArguments(['sketch', 'generate']), { root: workspace, frameworkRoot, input: Readable.from([]) }), { code: 'PROJECT_CONFIG_CONFLICT' });
+  const transcript = []; let actions = 0;
+  const ui = { write: text => transcript.push(text), ask: async prompt => {
+    if (prompt.startsWith('Choose number or ID')) return actions++ === 0 ? 'generate' : 'exit';
+    if (prompt.startsWith('Boilerplate output folder')) return 'generated/next';
+    throw new Error('Unexpected prompt: ' + prompt);
+  } };
+  await studio(ui, { root: workspace, frameworkRoot, project: 'design/project.json' });
+  assert.match(transcript.join(''), /PROJECT_CONFIG_CONFLICT/);
+  assert.equal(await readFile(join(workspace, 'shell.project.json'), 'utf8'), legacy);
+  assert.equal(await readFile(join(workspace, 'project.config.json'), 'utf8'), canonical);
+  assert.deepEqual((await readdir(workspace)).sort(), before);
+}));
+test('studio regeneration of a saved legacy project retains its runtime and defaults to no writes', async () => scratch(async root => {
+  const plan = await candidate(root, input('cli')); await applyPrepared(plan, plan.planHash);
+  const workspace = join(root, 'prepared/source'), transcript = []; let actions = 0;
+  const before = (await readdir(workspace)).sort();
+  const ui = { write: text => transcript.push(text), ask: async prompt => {
+    if (prompt.startsWith('Choose number or ID')) return actions++ === 0 ? 'generate' : 'exit';
+    if (prompt.startsWith('Boilerplate output folder')) return 'generated/next';
+    if (prompt.startsWith('Apply this reviewed plan?')) return '';
+    throw new Error('Unexpected prompt: ' + prompt);
+  } };
+  await studio(ui, { root: workspace, frameworkRoot, project: 'design/project.json' });
+  assert.match(transcript.join(''), /shell\.project\.json/);
+  assert.doesNotMatch(transcript.join(''), /PROJECT_CONFIG_CONFLICT/);
+  assert.deepEqual((await readdir(workspace)).sort(), before);
+}));
+
+test('generated build supervisor preserves last-good output and releases only its own lock after a worker crash', async () => scratch(async root => {
+  const plan = await candidate(root, input('cli')); await applyPrepared(plan, plan.planHash);
+  const cwd = join(root, 'prepared/source');
+  await mkdir(join(cwd, 'dist')); await writeFile(join(cwd, 'dist/last-good.txt'), 'previous output');
+  await writeFile(join(cwd, 'scripts/build-worker.mjs'), 'process.exit(17);\n');
+  const run = () => spawnSync(process.execPath, ['scripts/build.mjs'], { cwd, encoding: 'utf8', env: childEnv });
+  const crashed = run();
+  assert.notEqual(crashed.status, 0); assert.match(crashed.stderr, /PROJECT_BUILD_WORKER_FAILED/);
+  assert.equal(await readFile(join(cwd, 'dist/last-good.txt'), 'utf8'), 'previous output');
+  assert.ok(!(await readdir(cwd)).some(name => /^(\.project-build-lock|\.build-stage-|\.build-backup-)/.test(name)));
+  await mkdir(join(cwd, '.project-build-lock')); await writeFile(join(cwd, '.project-build-lock/owner.txt'), 'another build');
+  const refused = run(); assert.notEqual(refused.status, 0);
+  assert.equal(await readFile(join(cwd, '.project-build-lock/owner.txt'), 'utf8'), 'another build');
+  assert.equal(await readFile(join(cwd, 'dist/last-good.txt'), 'utf8'), 'previous output');
 }));

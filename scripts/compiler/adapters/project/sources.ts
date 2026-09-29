@@ -14,8 +14,9 @@ export const scaffoldNotice = 'Starting scaffold: navigation works; domain actio
 export function browserSource(selection: ProjectSelection, id: string): string {
   return `import { mount } from '../../ui/mount.ts';
 import '../../ui/styles.css';
-const root = document.querySelector<HTMLElement>('[data-project-root]');
-if (!root) throw new Error('PROJECT_ROOT_MISSING');
+const candidate = document.querySelector<HTMLElement>('[data-project-root]');
+if (!candidate) throw new Error('PROJECT_ROOT_MISSING');
+const root: HTMLElement = candidate;
 root.dataset.pluginUi = ${literal(id)};
 root.classList.add(${literal(id)}, ${literal('ps--' + id)});
 let stopped = false;
