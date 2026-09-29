@@ -8,6 +8,10 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
+  { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
+  { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },
+  { id: 'handout inspect', summary: 'Read structured handout answers, diagnostics and non-authorizing readiness.', options: values('prds'), maxArgs: 0, effect: 'read' },
   { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },

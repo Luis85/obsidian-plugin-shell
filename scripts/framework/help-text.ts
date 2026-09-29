@@ -26,6 +26,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
+  { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
@@ -49,6 +50,7 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  prds: { description: 'Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation.', default: 'configs/user-settings.json paths.prds, otherwise docs/prds' },
   samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
@@ -113,6 +115,10 @@ const usage: Record<string, string> = {
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'handout generate': ['node shell.mjs handout generate --dry-run --json', 'node shell.mjs handout generate --plan-out handout.plan.json --json'],
+  'handout refresh': ['node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json'],
+  'handout validate': ['node shell.mjs handout validate --json'],
+  'handout inspect': ['node shell.mjs handout inspect --json'],
   'airship status': ['node shell.mjs airship status --json'],
   'airship enable': ['node shell.mjs airship enable --agent codex --dry-run', 'node shell.mjs airship enable --yes'],
   'airship disable': ['node shell.mjs airship disable --dry-run', 'node shell.mjs airship disable --yes'],
