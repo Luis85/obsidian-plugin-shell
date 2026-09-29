@@ -1,3 +1,4 @@
+import { docsParserFiles } from './docs-vendor.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
@@ -60,6 +61,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   templatePackage.bytes = Buffer.from(json(rootPackage));
   const packageRecord = records.find(file => file.path === templatePackage.path)!;
   packageRecord.hash = hash(templatePackage.bytes); packageRecord.bytes = templatePackage.bytes.length;
+  for (const file of await docsParserFiles(context.frameworkRoot)) add(file.path, file.bytes);
   const kit: Kit = { schemaVersion: 1, version: String(pkg.version), compilerVersion: compiler.version,
     sourceHash: hash(json(sourceInventory)), files: records.sort((a, b) => a.path < b.path ? -1 : 1), bootstrap };
   files.push({ path: '.framework/kit.json', bytes: Buffer.from(json(kit)) });

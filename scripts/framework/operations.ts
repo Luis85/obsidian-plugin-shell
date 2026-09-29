@@ -1,3 +1,4 @@
+import { docsRead } from './docs.ts';
 import { measureProject } from './project-measure.ts';
 import { supportReport } from './support-report.ts';
 import { setupProgress } from './setup-progress.ts';
@@ -36,6 +37,10 @@ async function fileOperation(request: Request, context: Context): Promise<Result
   const planned = stored ? await loadPlan(context, request.args[0]!) : await planOperation(request, context);
   const output = stringOption(request.options, 'plan-out');
   const diagnostics = (planned.review as {compiler?: {diagnostics?: Result['diagnostics']}}).compiler?.diagnostics ?? [];
+  if (planned.request.command.startsWith('docs ') && planned.conflicts.length) return {
+    ...result(request.command, planned.review, 'blocked'),
+    diagnostics: planned.conflicts.slice(0, 50).map(message => ({ code: 'DOCS_CONFLICT', message, next: 'Inspect --json for conflict keys; resolve fields with docs import --resolutions <file>.' })),
+  };
   const saved = output ? await savePlan(context, planned, output) : null;
   const apply = request.command !== 'plan inspect' && !request.options['dry-run'] && (request.options.apply !== undefined || request.options.yes === true);
   if (!apply) return { ...result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned'), diagnostics };
@@ -128,6 +133,7 @@ export async function executeOperation(input: Request, context: Context): Promis
         makers: capabilityCatalog().makers, examples: ['node shell.mjs new ../my-plugin --starter blank --yes', 'node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
+    if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
       const catalog: Array<{ id: string }> = capabilityCatalog().makers;

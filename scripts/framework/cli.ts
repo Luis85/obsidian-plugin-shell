@@ -49,7 +49,7 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
   let command = 'unknown';
   try {
     let request = parseCliArguments(argv); command = request.command;
-    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
+    const discovery = request.options.help || ['help', 'capabilities', 'schema', 'version', 'compiler explain', 'project schema', 'docs schema'].includes(command) || (command === 'make' && (!request.args.length || ['list', 'describe'].includes(request.args[0]!)));
     const selected = typeof request.options.root === 'string' ? request.options.root : process.cwd();
     // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
     if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };

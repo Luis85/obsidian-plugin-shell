@@ -1,3 +1,4 @@
+import { setupDocumentation } from './docs-setup.ts';
 import { starterCatalog, derivedId, derivedName } from './starter-project.ts';
 import { readConfiguration } from './files.ts';
 import { requireThat, type Context, type Request, type Result } from './contracts.ts';
@@ -35,7 +36,8 @@ export async function guidedSetup(request: Request, context: Context, prompt: Pr
 }
 /** Each effect needs a separate approval. Returning early retains completed state for setup resume. */
 export async function continueSetup(context: Context, execute: Execute, prompt: Prompt, render: (value: Result) => void, configured: Result): Promise<Result> {
-  let outcome = configured;
+  let outcome = await setupDocumentation('import', configured, context, execute, prompt, render);
+  if (!['ok', 'applied', 'unchanged'].includes(outcome.status)) return outcome;
   for (const [stage, question] of [
     ['generate', 'Review and generate source for the accepted project?'],
     ['install', 'Install the exact lockfile? Registry access and approved dependency hooks may run.'],
@@ -43,7 +45,7 @@ export async function continueSetup(context: Context, execute: Execute, prompt: 
     ['preview', 'Build the offline clickdummy? This does not implement missing business actions.'],
   ]) {
     render(outcome);
-    if (!/^y(?:es)?$/i.test((await prompt(question + ' [y/N] ')).trim())) return outcome;
+    if (!/^y(?:es)?$/i.test((await prompt(question + ' [y/N] ')).trim())) return setupDocumentation('export', outcome, context, execute, prompt, render);
     let generationHash: string | undefined;
     if (stage === 'generate') {
       const plan = await execute({ command: 'generate', args: [], options: {} }, context); render(plan);
@@ -56,5 +58,5 @@ export async function continueSetup(context: Context, execute: Execute, prompt: 
     outcome = await execute({ command: 'setup resume', args: [], options: { stage: stage!, yes: true, 'resume-hash': data.resumeHash, ...(generationHash ? { apply: generationHash } : {}) } }, context);
     if (!['ok', 'applied', 'unchanged'].includes(outcome.status)) return outcome;
   }
-  return outcome;
+  return setupDocumentation('export', outcome, context, execute, prompt, render);
 }

@@ -8,6 +8,12 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'docs import', summary: 'Review typed Markdown files/folders into actual project elements without deleting absent data.', options: values('resolutions'), maxArgs: 32, effect: 'plan' },
+  { id: 'docs export', summary: 'Generate complete, lossless application Markdown documentation with conflict protection.', options: values('out'), maxArgs: 0, effect: 'plan' },
+  { id: 'docs validate', summary: 'Validate typed documentation and native model references without writing.', options: {}, maxArgs: 32, effect: 'read' },
+  { id: 'docs status', summary: 'Inspect documentation drift, missing bindings and export coverage without writing.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'docs schema', summary: 'Discover typed Markdown fields and ownership rules without reading a project.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'docs recover', summary: 'Review or explicitly roll back an interrupted documentation operation; never overwrite intervening edits.', options: {}, maxArgs: 0, effect: 'process' },
   { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },

@@ -28,6 +28,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
@@ -49,6 +50,7 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
   'storybook-stories': { description: 'Enable or disable CSF story emission. Independent of Storybook installation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
@@ -108,11 +110,20 @@ const specific: Record<string, OptionHelp> = {
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  'docs import': 'node shell.mjs docs import [file-or-folder ...] [options]',
+  'docs export': 'node shell.mjs docs export [--out <documentation-root>] [options]',
+  'docs validate': 'node shell.mjs docs validate [file-or-folder ...] [--json]',
   new: 'node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]', help: 'node shell.mjs help [command] [--all]',
   'plan inspect': 'node shell.mjs plan inspect <plan-file>', 'plan apply': 'node shell.mjs plan apply <plan-file> --yes',
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'docs import': ['node shell.mjs docs import docs/application --dry-run', 'node shell.mjs docs import docs/application --apply <reviewed-hash> --yes'],
+  'docs export': ['node shell.mjs docs export --dry-run', 'node shell.mjs docs export --out docs/application --yes'],
+  'docs validate': ['node shell.mjs docs validate docs/application --json'],
+  'docs status': ['node shell.mjs docs status --json'],
+  'docs schema': ['node shell.mjs docs schema --json'],
+  'docs recover': ['node shell.mjs docs recover --dry-run', 'node shell.mjs docs recover --apply <recovery-hash> --yes'],
   'airship status': ['node shell.mjs airship status --json'],
   'airship enable': ['node shell.mjs airship enable --agent codex --dry-run', 'node shell.mjs airship enable --yes'],
   'airship disable': ['node shell.mjs airship disable --dry-run', 'node shell.mjs airship disable --yes'],
@@ -170,7 +181,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(entry.id === 'setup resume' ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'docs recover'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume', 'docs recover'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
@@ -186,6 +197,7 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'project schema' && name === 'version') { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
     if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
+    if (entry.id === 'docs export' && name === 'out') { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
