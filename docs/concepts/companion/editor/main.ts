@@ -15,7 +15,7 @@ import './integration.css';
 
 export { validateAuthoringDocument, parseAuthoringDocument, migrateAuthoringDocument, authoringDesignKey, validateSitemapModel, canonicalKey };
 export function mount(root:HTMLElement,host:EditorHost,flow:FlowRuntime = root.ownerDocument.defaultView!.VueFlowCore) {
-  const ownedHost={...host,exportRecovery:host.exportRecovery??((value:unknown)=>{const doc=root.ownerDocument,win=doc.defaultView!;const url=win.URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=doc.createElement('a');link.href=url;link.download='journey-lens-recovery.json';link.click();win.setTimeout(()=>win.URL.revokeObjectURL(url),1000);})};
+  const ownedHost={...host,exportRecovery:host.exportRecovery??((value:unknown)=>{const doc=root.ownerDocument,win=doc.defaultView!;const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=doc.createElement('a');link.href=url;link.download='journey-lens-recovery.json';link.click();win.setTimeout(()=>URL.revokeObjectURL(url),1000);})};
   const pinia=createPinia(),store=editorStore(ownedHost)(pinia);
   const app=createApp({render:()=>h(UApp,{toaster:null,portal:root},()=>h(SitemapEditor,{store}))});
   let closed=false;

@@ -19,9 +19,9 @@ export function useWorkspace() {
   function download(value: string, name: string) {
     const doc = root.value?.ownerDocument; if (!doc) return;
     const win = doc.defaultView; if (!win) return;
-    const url = win.URL.createObjectURL(new Blob([value], { type: 'application/json' }));
+    const url = URL.createObjectURL(new Blob([value], { type: 'application/json' }));
     const link = doc.createElement('a'); link.href = url; link.download = name; link.click();
-    win.setTimeout(() => win.URL.revokeObjectURL(url), 1000);
+    win.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function exportSaved() { try { if (document) download(document.export(), 'project.companion.json'); } catch { error.value = 'Open a valid project before exporting.'; } }
   function exportRecovery() {

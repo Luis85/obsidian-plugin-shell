@@ -10,12 +10,12 @@ const root = new URL('../../', import.meta.url);
 const Vue = vm.runInThisContext(readFileSync(new URL('docs/concepts/companion/vendor/vue.runtime.global.prod.js',root),'utf8')+';Vue;');
 const source=readFileSync(new URL('docs/concepts/companion/editor/workspace/use-workspace.ts',root),'utf8');
 const seed=readFileSync(new URL('docs/concepts/companion/starters/quick-capture.companion.json',root),'utf8');
-async function load(env){
+async function load(env,urlApi){
   const dependencies={vue:Vue,'./contracts.ts':{useWorkspaceEnvironment:()=>env},'project-store.ts':storage};
   const javascript=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-  const exports={};vm.runInThisContext('(function(require,exports){'+javascript+'\n})')(name=>{
+  const exports={};vm.runInThisContext('(function(require,exports,URL){'+javascript+'\n})')(name=>{
     const dependency=dependencies[name]??dependencies[name.split('/').at(-1)];assert.ok(dependency,name);return dependency;
-  },exports);return exports;
+  },exports,urlApi);return exports;
 }
 const element=()=>({children:[],parent:null});
 const renderer=Vue.createRenderer({createElement:element,createText:element,createComment:element,
@@ -26,7 +26,7 @@ async function settled(model){
   assert.fail('Workspace operation did not settle');
 }
 async function fixture(t,{present=true,mode='native'}={}){
-  const files=new Map(present?[['project.companion.json',seed]]:[]),mounts=[],downloads=[];let writes=0,guard=null,path='project.companion.json';
+  const files=new Map(present?[['project.companion.json',seed]]:[]),mounts=[],downloads=[],timers=[],revoked=[],links=[];let writes=0,guard=null,path='project.companion.json';
   const ports={async read(path){if(!files.has(path))throw Error('missing');return files.get(path);},
     async create(path,content){if(files.has(path))return {status:'conflict'};writes++;files.set(path,content);return {status:'committed',content};},
     async replace(path,before,content){if(files.get(path)!==before)return {status:'conflict'};writes++;files.set(path,content);return {status:'committed',content};}};
@@ -39,13 +39,14 @@ async function fixture(t,{present=true,mode='native'}={}){
         recovery:()=>({kind:'controlled editor draft'}),async restore(value){return value.accept===true;},viewState:()=>({}),
         invalidate(){state.invalidations++;},unmount(){state.closed=true;session.dispose();}};
     }};
-  const {useWorkspace}=await load(env);let model;
+  const urlApi={createObjectURL(blob){downloads.push(blob);return 'blob:controlled-'+downloads.length;},revokeObjectURL(url){revoked.push(url);}};
+  const {useWorkspace}=await load(env,urlApi);let model;
   const view=renderer.createApp({setup(){model=useWorkspace();model.root.value={ownerDocument:{
-    defaultView:{URL:{createObjectURL(blob){downloads.push(blob);return 'blob:controlled';},revokeObjectURL(){}},setTimeout(){}},createElement:()=>({click(){}})}};
+    defaultView:{setTimeout(callback){timers.push(callback);}},createElement(tag){assert.equal(tag,'a');const link={click(){this.clicked=true;}};links.push(link);return link;}}};
     return()=>Vue.h('div');}});
   view.mount(element());await settled(model);
   t.after(()=>{view.unmount();owner.dispose();});
-  return {model,view,owner,files,ports,mounts,downloads,writes:()=>writes,guard:()=>guard,path:()=>path};
+  return {model,view,owner,files,ports,mounts,downloads,timers,revoked,links,writes:()=>writes,guard:()=>guard,path:()=>path};
 }
 test('native first open never creates missing data; reviewed approval creates then mounts the actual document session',async t=>{
   const f=await fixture(t,{present:false}),m=f.model;assert.equal(m.loaded.value,false);assert.equal(f.writes(),0);
@@ -93,4 +94,14 @@ test('cancelled late file reads cannot repopulate an import review',async t=>{
 test('destroying the view releases guard, subscriptions and editor without deleting saved data',async t=>{
   const f=await fixture(t),first=f.mounts[0];const before=f.files.get(f.path());f.view.unmount();
   assert.equal(first.closed,true);assert.equal(f.guard(),null);await f.owner.refresh(f.path());assert.equal(first.invalidations,0);assert.equal(f.files.get(f.path()),before);assert.equal(f.writes(),0);
+});
+
+test('export uses the owner document and releases its standard object URL after the click',async t=>{
+  const f=await fixture(t);f.model.exportSaved();
+  assert.equal(f.downloads.length,1);assert.equal(f.links.length,1);
+  assert.equal(f.links[0].clicked,true);assert.equal(f.links[0].href,'blob:controlled-1');
+  assert.equal(f.links[0].download,'project.companion.json');
+  assert.equal(f.timers.length,1);assert.deepEqual(f.revoked,[]);
+  f.timers[0]();assert.deepEqual(f.revoked,['blob:controlled-1']);
+  assert.equal(f.writes(),0);
 });
