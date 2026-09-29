@@ -1,3 +1,7 @@
+import { renderPresetProject } from './adapters/project/emitter.ts';
+import type { ProjectSelection } from './domain/project-presets.ts';
+import { readProjectCatalog, validateProjectSelection } from './domain/project-presets.ts';
+import { CompilerError, diagnostic } from './domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
 import { withStorybookOptions } from '../companion/tooling-contract.ts';
@@ -16,9 +20,9 @@ export { compilerVersion, compilerPhases } from './application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from './domain/diagnostics.ts';
 export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from './domain/contracts.ts';
 
-async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string):Promise<Artifact[]> {
+async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string,selection?:ProjectSelection):Promise<Artifact[]> {
   let files:Artifact[];
-  try { files=await renderProjectFiles(template,model); }
+  try { files=kind==='project' ? renderPresetProject(model,template,selection!) : await renderProjectFiles(template,model); }
   catch(error) { return contractCall('emit',sourceName,()=>{throw error;}); }
   if(kind==='clickdummy')files=clickdummyFiles(model,template,files);
   const dependencies=dependencyReadiness(files);
@@ -34,8 +38,16 @@ export async function compileProject(request:CompileRequest,control:Control={}) 
   return runCompiler(request,{
     ...frontend,
     migrate: value => contractCall('migrate', sourceName, () => frontend.migrate(withStorybookOptions(value, request.storybook))),
-    lower: (model,template,kind) => lowerTarget(model,template,kind,sourceName),
-    emit:(model,template,kind)=>emit(model,template,kind,sourceName),
+    lower: (model,template,kind) => {
+      if (kind !== 'project') {
+        if (request.projectSelection) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'A project selection requires outputKind project.'));
+        return lowerTarget(model,template,kind,sourceName);
+      }
+      if (model.sourceRoot !== 'src/generated' || model.testRoot !== 'tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project presets currently require src/ and tests/ roots.'));
+      validateProjectSelection(readProjectCatalog(JSON.parse(template.text('bin/guides/project-presets.json'))), request.projectSelection);
+      return [diagnostic('COMPILER_ADAPTER_REQUIRED', 'lower', 'Project preset output is a navigable starting scaffold. Visual component bodies and business actions require prototype implementation.')];
+    },
+    emit:(model,template,kind)=>emit(model,template,kind,sourceName,request.projectSelection),
     dependencies:dependencyReadiness,
     hash:(value,encoding)=>createHash('sha256').update(encoding?Buffer.from(value,encoding):value).digest('hex'),
   },control);

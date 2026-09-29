@@ -42,7 +42,7 @@ async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
   const parts = fields(tracked), entries: Array<[string, string]> = [];
   for (let index = 0; index + 1 < parts.length; index += 2) entries.push([parts[index]!, parts[index + 1]!]);
   for (const path of fields(untracked)) entries.push(['?', path]);
-  const roots = codeRoots(root), files = new Set<string>(), untraceable = new Set<string>();
+  const roots = [...codeRoots(root), 'bin'], files = new Set<string>(), untraceable = new Set<string>();
   for (const [status, path] of entries) {
     if (path.split('/').includes('node_modules')) continue;
     const inRoot = roots.some(base => isWithinRoot(path, base));
@@ -54,8 +54,16 @@ async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
   return { source: 'git', files: [...files].sort(), untraceable: listed,
     reason: `deleted, configuration or non-code files changed (${listed.slice(0, 5).join(', ')}${listed.length > 5 ? ', …' : ''}); running the full suite` };
 }
+async function makerSteps(root: string): Promise<CheckStep[]> {
+  if (!await exists(join(root, 'bin/shell.ts')) || !await exists(join(root, 'tsconfig.maker.json'))) return [];
+  return [
+    { id: 'maker-types', display: 'tsc --noEmit --project tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'tsconfig.maker.json'] },
+    { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] },
+  ];
+}
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
+  const makers = await makerSteps(root);
   const config = project ? ['--config', 'vitest.project.config.mjs'] : [];
   const typecheck: CheckStep = project
     ? { id: 'typecheck', display: 'vue-tsc --noEmit --project tsconfig.project.json', entry: vueTsc, args: ['--noEmit', '--project', 'tsconfig.project.json'] }
@@ -64,8 +72,8 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit)
   if (!fast) {
     const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
     // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
-    const targets = project ? lintRoots(root) : ['src'];
-    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: [...targets, '--max-warnings', '0'] }, fullTest] };
+    const targets = [...(project ? lintRoots(root) : ['src']), ...(makers.length ? ['bin'] : [])];
+    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: [...targets, '--max-warnings', '0'] }, fullTest, ...makers] };
   }
   const changes = await changedFiles(root, git);
   let test = fullTest;
@@ -73,7 +81,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit)
   else if (changes.source === 'git' && changes.files.length > maxRelated) changes.reason = `more than ${maxRelated} changed files; running the full suite`;
   else if (changes.source === 'git' && !changes.files.length) test = { ...fullTest, display: 'vitest related (no changed source files)', skip: 'No changed source files since HEAD.' };
   else if (changes.source === 'git') test = { id: 'test', display: `vitest related --run (${changes.files.length} changed file${changes.files.length === 1 ? '' : 's'})`, entry: vitest, args: ['related', '--run', '--passWithNoTests', ...config, ...changes.files] };
-  return { scope, steps: [typecheck, test], changes };
+  return { scope, steps: [typecheck, test, ...makers], changes };
 }
 /** ANSI escape sequences are removed from captured output. */
 const ansi = new RegExp(String.fromCharCode(27) + '\\[[0-9;?]*[ -/]*[@-~]', 'g');

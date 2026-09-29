@@ -189,7 +189,10 @@
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",
-    "scripts/concepts/mvp-bridge.js"
+    "scripts/concepts/mvp-bridge.js",
+    "bin/shell.ts",
+    "scripts/makers/cli.mjs",
+    "scripts/compiler/qualify-presets.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -207,6 +210,26 @@
       "requireAllFiles": true
     },
     "zones": [
+      {
+        "name": "maker-domain",
+        "patterns": [
+          "bin/domain/**"
+        ]
+      },
+      {
+        "name": "maker-application",
+        "patterns": [
+          "bin/application/**"
+        ]
+      },
+      {
+        "name": "maker-host",
+        "patterns": [
+          "bin/adapters/**",
+          "bin/presentation/**",
+          "bin/shell.ts"
+        ]
+      },
       {
         "name": "companion-authoring-contract",
         "patterns": [
@@ -389,7 +412,10 @@
           "companion-test-kit",
           "fixture-compiler",
           "companion-authoring-contract",
-          "prototype-skill"
+          "prototype-skill",
+          "maker-domain",
+          "maker-application",
+          "maker-host"
         ]
       },
       {
@@ -423,7 +449,10 @@
           "styles",
           "fixture-compiler",
           "companion-test-kit",
-          "companion-authoring-contract"
+          "companion-authoring-contract",
+          "maker-domain",
+          "maker-application",
+          "maker-host"
         ]
       },
       {
@@ -468,6 +497,31 @@
         "allow": [
           "prototype-skill"
         ]
+      },
+      {
+        "from": "maker-domain",
+        "allow": [
+          "maker-domain",
+          "companion-authoring-contract"
+        ]
+      },
+      {
+        "from": "maker-application",
+        "allow": [
+          "maker-application",
+          "maker-domain"
+        ]
+      },
+      {
+        "from": "maker-host",
+        "allow": [
+          "maker-host",
+          "maker-application",
+          "maker-domain",
+          "tooling",
+          "companion-authoring-contract",
+          "prototype-skill"
+        ]
       }
     ]
   },
@@ -481,7 +535,13 @@
   "usedClassMembers": [
     {
       "extends": "TextFileView",
-      "members": ["getIcon", "getViewData", "setViewData", "save", "disposeNativeView"]
+      "members": [
+        "getIcon",
+        "getViewData",
+        "setViewData",
+        "save",
+        "disposeNativeView"
+      ]
     },
     {
       "extends": "PluginSettingTab",
@@ -500,14 +560,26 @@
     {
       "name": "airship-source-preview-tools",
       "entryPointRole": "support",
-      "entryPoints": ["scripts/airship/preview-config.mjs", "scripts/airship/qualify.mjs"],
-      "detection": { "type": "fileExists", "pattern": "scripts/airship/preview-config.mjs" }
+      "entryPoints": [
+        "scripts/airship/preview-config.mjs",
+        "scripts/airship/qualify.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "scripts/airship/preview-config.mjs"
+      }
     },
     {
       "name": "optional-storybook-qualification",
       "entryPointRole": "test",
-      "entryPoints": ["scripts/compiler/qualify-storybook.mjs", "scripts/compiler/verify-storybook.mjs"],
-      "detection": { "type": "fileExists", "pattern": "scripts/compiler/qualify-storybook.mjs" }
+      "entryPoints": [
+        "scripts/compiler/qualify-storybook.mjs",
+        "scripts/compiler/verify-storybook.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "scripts/compiler/qualify-storybook.mjs"
+      }
     },
     {
       "name": "prototype-build-tools",

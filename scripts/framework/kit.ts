@@ -8,8 +8,8 @@ import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
-const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github'];
-const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs', 'vitest.obsidian.config.mjs'];
+const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin'];
+const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs', 'vitest.obsidian.config.mjs'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -35,7 +35,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     // Skill templates are literal authoring inputs; preserve their byte-exact inventory.
     const bytes = skill.get(path) ?? standaloneSource(path, original);
     add('.framework/template/' + path, bytes);
-    if (path.startsWith('scripts/') || path.startsWith('docs/concepts/companion/test-kit/')) {
+    if (path.startsWith('scripts/') || path.startsWith('bin/') || path.startsWith('docs/concepts/companion/test-kit/')) {
       if (path.endsWith('.ts') && !path.endsWith('.d.ts')) add('.framework/compiled/' + path.slice(0, -3) + '.js', Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
       else if (!path.endsWith('.ts')) add('.framework/compiled/' + path, bytes);
     }

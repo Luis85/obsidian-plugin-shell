@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "id": "project-prototype",
+  "version": 1,
+  "title": "Design the selected project prototype",
+  "steps": [
+    {
+      "title": "Product and intended outcome",
+      "fields": [
+        {
+          "id": "title",
+          "label": "Prototype title",
+          "help": "Prototype title. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "",
+          "required": true
+        },
+        {
+          "id": "problem",
+          "label": "Problem to explore",
+          "help": "Problem to explore. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Explore the sketched experience before committing to implementation."
+        },
+        {
+          "id": "audience",
+          "label": "Who will use it?",
+          "help": "Who will use it?. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "The intended users of the selected project."
+        },
+        {
+          "id": "outcome",
+          "label": "Observable outcome",
+          "help": "Observable outcome. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Complete the primary journey using local, resettable demonstration data."
+        }
+      ]
+    },
+    {
+      "title": "Scope and behavior",
+      "fields": [
+        {
+          "id": "pages",
+          "label": "Screens, website pages, or CLI commands",
+          "help": "One title per item. These become navigable surfaces or discoverable command IDs.",
+          "kind": "list",
+          "default": [
+            "Overview"
+          ]
+        },
+        {
+          "id": "components",
+          "label": "Reusable building blocks (optional)",
+          "help": "UI components or shared command concepts to sketch. Leave empty when not needed; business behavior is not generated.",
+          "kind": "list",
+          "default": []
+        },
+        {
+          "id": "journeys",
+          "label": "Primary journeys",
+          "help": "Primary journeys. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Open the entry screen, page, or command; perform the primary action; inspect its result; return or reset."
+          ]
+        },
+        {
+          "id": "nonGoals",
+          "label": "Explicit non-goals",
+          "help": "Explicit non-goals. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "No production data or network writes.",
+            "No real accounts, payments or AI-provider calls.",
+            "No additional app shell unless explicitly included in the brief."
+          ]
+        },
+        {
+          "id": "dataRules",
+          "label": "Data and business rules",
+          "help": "Data and business rules. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Synthetic fixtures only; label simulations and unfinished actions honestly."
+          ]
+        },
+        {
+          "id": "edgeStates",
+          "label": "Failure and recovery states",
+          "help": "Failure and recovery states. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Empty data",
+            "Loading",
+            "Invalid input",
+            "Failure with retry",
+            "Cancel without losing a saved draft"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Visual exploration and acceptance",
+      "fields": [
+        {
+          "id": "visualDirection",
+          "label": "Presentation and interaction conventions",
+          "help": "Visual direction. Press Enter to accept the displayed default.",
+          "kind": "text",
+          "default": "Respect the selected runtime and frontend. Use readable layouts, clear contextual actions, and native host conventions where applicable."
+        },
+        {
+          "id": "conceptBoards",
+          "label": "Concept-board checkpoint",
+          "help": "Choose requested to pause for image-based exploration, selected for a reviewed direction, unavailable for an accepted text fallback, or skipped to continue without images.",
+          "kind": "select",
+          "default": "skipped",
+          "choices": [
+            "skipped",
+            "requested",
+            "selected",
+            "unavailable"
+          ]
+        },
+        {
+          "id": "boardDecisions",
+          "label": "Selected board revisions and translated decisions",
+          "help": "Name the selected boards/revisions and describe their layout, interaction and responsive rules. Images are not generated or attached by this CLI.",
+          "kind": "text",
+          "default": "",
+          "required": true,
+          "when": {
+            "field": "conceptBoards",
+            "equals": "selected"
+          }
+        },
+        {
+          "id": "accessibility",
+          "label": "Accessibility and responsive rules",
+          "help": "Accessibility and responsive rules. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Full keyboard operation and visible focus.",
+            "Readable light/dark themes and reduced motion.",
+            "Wide and narrow layouts; no essential hover-only interaction."
+          ]
+        },
+        {
+          "id": "acceptance",
+          "label": "Observable acceptance cases",
+          "help": "Observable acceptance cases. Press Enter to accept the displayed default.",
+          "kind": "list",
+          "default": [
+            "Complete the agreed primary journey in every selected runtime with an observable local result.",
+            "Failed and cancelled actions preserve saved data and expose a recovery path.",
+            "Browser outputs work without external runtime requests; CLI output obeys the documented stdout, stderr and exit-code contract.",
+            "The complete Companion JSON remains importable; native activation is a separately provisioned check."
+          ]
+        },
+        {
+          "id": "openQuestions",
+          "label": "Unresolved blocking questions",
+          "help": "List unresolved decisions, or leave empty when there are none. A final execution prompt is blocked until these are resolved.",
+          "kind": "list",
+          "default": []
+        }
+      ]
+    },
+    {
+      "title": "Review and agreement",
+      "fields": [
+        {
+          "id": "approved",
+          "label": "Do you agree to this complete brief, including the displayed defaults?",
+          "help": "This confirms the design only. File writes still require a separate reviewed plan hash; no build, install, native activation or publication is authorized.",
+          "kind": "confirm",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "field": "conceptBoards",
+      "notEquals": "requested",
+      "message": "Complete or explicitly skip concept-board exploration before generating the final execution prompt."
+    },
+    {
+      "field": "openQuestions",
+      "equals": [],
+      "message": "Resolve the listed blocking questions before generating the final execution prompt."
+    },
+    {
+      "field": "approved",
+      "equals": true,
+      "message": "Explicitly agree to the reviewed brief (approved: true). Defaults alone are not approval."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "design-brief.md",
+      "template": "# {{title}} — agreed prototype brief\n\n## Selected project\n\n{{selectionJson}}\n\n{{brief}}\n"
+    },
+    {
+      "path": "execution-prompt.md",
+      "template": "# Implement {{title}}\n\nWork in source/. Read AGENTS.md, shell.project.json and the bundled canonical .claude/skills/companion-prototype-design/SKILL.md. This is the project-preset profile, not the legacy fixed Vue clickdummy profile. The Codex entrypoint references that same skill.\n\n## Selected runtime contract\n\n```json\n{{selectionJson}}\n```\n\nDo not replace the selected frontend, force a browser UI onto the CLI, add a Nuxt server to an Obsidian plugin, or introduce host imports into the shared core. A website must retain separately addressable static pages. Hybrid targets share source behavior, not automatically shared storage.\n\n## Agreed design\n\n{{brief}}\n\n## Provenance and readiness\n\n```json\n{{contextJson}}\n```\n\nGeneration is not completed implementation or acceptance. Implement all agreed actions, validation, cancellation, empty/error states and recovery. Keep synthetic behavior labeled and resettable. The starting surfaces and component placeholders are not business acceptance. Companion v6 JSON remains a separate closed design envelope; do not insert preset metadata into it.\n\nUse real subagents when available for non-overlapping work packages, otherwise work sequentially and report that accurately. No commit, publication, dependency installation, network access or personal-vault activation is authorized by this handoff alone. After explicit installation, run npm run typecheck, npm test and npm run build in source/. Inspect source/README.md for each runtime and the CLI machine protocol. Follow the selected-profile note in the canonical skill; legacy Obsidian/Vue-only build helpers do not apply to other targets.\n\nKeep source files below 400 code lines and tests below 450, excluding comments/blank lines. Preserve exact dependency pins and generated ownership receipts. Add real interaction tests, failure and disposal tests; validate browser accessibility/offline behavior for browser targets and stdin/stdout/exit-code behavior for CLI. Native activation remains a separately provisioned acceptance step.\n\nDeliver built outputs, replayable project-create.json, complete design JSON, independently buildable source, updated integration-map.json, dependency/license notices and exact commands/logs/hashes. Keep prototype.manifest.json incomplete until actual target artifacts and journeys have been verified. Never equate a successful bundle with product acceptance.\n"
+    },
+    {
+      "path": "README.md",
+      "template": "# {{title}} — project prototype package\n\nStart with execution-prompt.md. source/ contains the selected runtime boilerplate, shared core, build scripts, tests and exact direct dependency pins. Read source/README.md before installing. No dependencies have been installed, no generated build has run and no native plugin has been activated by preparation.\n\nReview project-create.json before replaying it with node shell.mjs new --input <file> --out <folder> --json. Apply requires the exact returned planHash; edited files are preserved. prototype-guide.json captures the guide used.\n"
+    },
+    {
+      "path": "prototype-answers.json",
+      "template": "{{answersJson}}\n"
+    },
+    {
+      "path": "prototype.preparation.json",
+      "template": "{{contextJson}}\n"
+    },
+    {
+      "path": "companion.project.json",
+      "template": "{{projectJson}}"
+    },
+    {
+      "path": "integration-map.json",
+      "template": "{{integrationJson}}\n"
+    },
+    {
+      "path": "prototype.manifest.json",
+      "template": "{{manifestJson}}\n"
+    },
+    {
+      "path": "INTEGRATION.md",
+      "template": "# Integration\n\ncompanion.project.json and source/design/project.json preserve the Companion v6 design envelope. source/shell.project.json carries the separate preset and runtime contract. source/src/core owns host-free behavior; src/presentation owns the selected renderer; src/targets owns runtime integration. The compiled seed preserves surface/component IDs. Source-owned business behavior does not automatically round-trip into design JSON.\n\nRegeneration protects edited/unowned files. Changing preset or frontend is not a migration: choose a new output directory and reconcile deliberately. Hybrid runtimes share source but not memory, authentication, storage or synchronization across processes. No service or backend is implied.\n"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.md",
+      "template": "# Third-party notices\n\nThe framework LICENSE is retained in source/. Resolve the exact direct pins after explicit installation, retain package-lock.json and generate the complete dependency license inventory before distributing a built product. Preparation is not a complete transitive license inventory.\n"
+    }
+  ]
+}

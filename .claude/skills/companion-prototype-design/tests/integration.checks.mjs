@@ -46,7 +46,7 @@ test('prototype build retains shared plugins/styles and rejects all native impor
   const config = prototypeBuildConfig({ shared: { plugins: [sharedPlugin], css, build: { target: 'es2022' } }, entry: '/source/main.ts', licenses: license });
   assert.equal(config.css, css); assert.equal(config.plugins[1], sharedPlugin); assert.equal(config.plugins.at(-1), license);
   assert.equal(config.configFile, false); assert.equal(config.build.write, false); assert.equal(config.build.target, 'es2022');
-  assert.deepEqual(config.build.lib.formats, ['iife']); assert.equal(config.build.rolldownOptions.output.inlineDynamicImports, true);
+  assert.deepEqual(config.build.lib.formats, ['iife']); assert.equal(config.build.rolldownOptions.output.codeSplitting, false);
   for (const name of ['obsidian', 'node:fs', 'fs', 'child_process']) assert.throws(() => config.plugins[0].resolveId(name), /HOST_IMPORT/);
   assert.equal(config.plugins[0].resolveId('vue'), undefined);
 });

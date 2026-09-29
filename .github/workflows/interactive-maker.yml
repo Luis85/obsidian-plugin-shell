@@ -1,0 +1,74 @@
+name: Interactive maker qualification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: interactive-maker-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  maker:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact qualified dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: TypeScript and both source linters
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:maker
+          node node_modules/eslint/bin/eslint.js bin --max-warnings 0
+          node node_modules/oxlint/bin/oxlint bin --no-ignore --deny-warnings
+      - name: Interactive, agent, compiler and safe-write contracts
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports/maker
+          set -o pipefail
+          node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
+      - name: Actual pseudo-terminal authoring and restoration
+        if: ${{ !cancelled() && runner.os != 'Windows' }}
+        run: node "$QUALIFIED_NPM" run test:maker:pty
+      - name: Independent full-production and core coverage
+        if: ${{ !cancelled() }}
+        run: node "$QUALIFIED_NPM" run test:coverage:maker
+      - name: Source inventory gate
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: |
+          node scripts/testing/suites.mjs --check
+          node "$QUALIFIED_NPM" run check:source
+      - name: Repository analyzer and architecture gates
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: node "$QUALIFIED_NPM" run check:analyzer
+      - name: Production maintainability gate
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: node "$QUALIFIED_NPM" run check:maintainability
+      - name: Retain exact qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: maker-qualification-${{ matrix.os }}
+          path: |
+            reports/maker
+            reports/maker-pty
+            reports/maker-coverage
+            reports/maintainability
+            reports/analyzer
+          if-no-files-found: ignore
+          retention-days: 7

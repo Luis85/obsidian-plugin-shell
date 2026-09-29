@@ -7,7 +7,7 @@ description: >-
   improvement before implementation; wants an importable companion prototype;
   wants image-based concept boards to explore UX/UI/interaction design;
   or asks to execute an approved prototype prompt. Produces a self-contained
-  HTML clickdummy, independently buildable TypeScript/Vue 3/Pinia/Nuxt UI sources,
+  HTML clickdummy or CLI transcript, independently buildable selected-stack sources,
   and the real companion project JSON when execution is authorized.
 compatibility: >-
   An agent with repository read access. Execution requires the checkout's pinned
@@ -15,7 +15,7 @@ compatibility: >-
   packaging. Subagents and image-generation tools are optional capabilities;
   unavailable image tools must be disclosed. No Nuxt framework or online runtime required.
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   repository: Luis85/obsidian-plugin-shell
   reference-pr: "5"
 ---
@@ -33,6 +33,33 @@ This directory is the single source of truth. The repository's
 reads this file and follows these same references and scripts. Do not fork the
 workflow, prompt templates, helper code or approval rules for an agent host.
 Use actual host capabilities; a Claude directory name never requires launching Claude.
+
+## Project-preset package routing
+
+For `node shell.mjs new` packages, read `project.config.json` and
+`references/project-presets.md` **before** following the legacy Vue-only flow below.
+Its target/framework contract governs source, build and artifact requirements.
+Do not convert a vanilla, Angular or CLI selection to Vue; no HTML is required for
+CLI-only projects. Preserve explicit agreement and the separate reviewed write plan.
+This section overrides legacy stack-specific instructions, not safety or acceptance.
+
+## Prepared maker handoff
+
+The TypeScript maker under `bin/` can prepare this workflow with
+`node shell.mjs prototype` or the equivalent versioned JSON request. Discover
+its data-driven interview using `prototype guide --json`; `sketch schema --json`
+describes page/component/interaction authoring. The guide is
+`bin/guides/prototype.json`, not a separate agent-host skill.
+
+For a prepared package, read `design-brief.md`, `prototype-answers.json`,
+`prototype.preparation.json` and `execution-prompt.md`. Verify the captured guide
+version/fingerprint, explicit design agreement, complete project and baseline.
+Reuse accepted answers rather than repeating the interview. Material changes
+reopen agreement. The generated `source/` is real compiler boilerplate, not a
+completed prototype; its pending checks and null artifact hash are intentional.
+Use the existing build/validation/packaging helpers to complete the deliverable.
+The guide's `approved` answer is not file-write approval: CLI writes still use a
+fresh reviewed `--apply <planHash>`. Neither grants publication or native access.
 
 ## Operating rules
 
