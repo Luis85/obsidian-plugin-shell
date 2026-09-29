@@ -38,11 +38,30 @@ Read operations use deterministic, schema-valid synthetic values. Unspecified bu
 
 Preview navigation uses surface-ID hashes (`#surface=...`) so a single file works without a server. Authored route records remain unchanged and are displayed separately. This is not a full dynamic-route matcher, authentication system, access-control enforcement or live source integration.
 
+## Authored scenarios
+
+The labelled **Authored scenario** selector exposes the current page's saved
+`visualDesigns.pages[].scenarios`. It uses their exact sample values, bindings,
+state and wide/narrow layout intent through the shared visual runtime. Pages
+without scenarios show only Synthetic reads (no scenario), with the selector
+disabled. A narrow scenario is not evidence of a supported device.
+
+Switching scenarios resets local edits. Surface navigation and Reset preview clear
+the selection; Project JSON still exports the unchanged canonical definition.
+Preview state remains a separate rendered-state override. In scenario mode,
+source actions and business hooks are refused, including in nested components
+and dialogs; local effects and navigation remain available. Modal scenarios do
+not yet have an independent selector. External adapters remain trusted consumer
+implementation points, not a sandbox for arbitrary code.
+
+See [scenario execution and limits](../testing/GENERATED-PREVIEW-SCENARIOS.md).
+
 ## Ownership and implementation
 
 | Source | Responsibility |
 | --- | --- |
 | `scripts/companion/compiler/clickdummy-code.ts` | Generate the browser entry, thin preview component, context and synthetic source factory |
+| `scripts/companion/compiler/clickdummy-scenarios-code.ts` | Emit surface-scoped scenario metadata without duplicating sample values |
 | Existing page/component/compiler modules | Generate the shared runtime UI, bindings, effects and contracts |
 | `scripts/framework/clickdummy.ts` | Validate generated-project context and invoke the fixed shipped build worker |
 | `.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs` | Reuse the pinned Vue/Nuxt UI build, CSS ownership, license notices and single-file assembler |
@@ -73,9 +92,19 @@ Qualification verifies the current HTML/JSON receipt before generation, writes i
 
 ## Remaining MVP boundaries
 
-This target does not make a generated editor-adapter stub into a working native companion. The integrated browser authoring app, an independently built generated clickdummy, native companion authoring/persistence, product requirement acceptance and release publication are different outcomes. Complete native authoring capabilities, public v6 schema discovery, selected feature/page/component generation with dependency closure and the full release/setup journey retain open work packages. Data-only concept intake is now implemented; see the dated integrated status below. Current evidence is bound to the integrated PR #5 source and exact artifacts, not inferred from a historical PR #28 record or an unconditional claim in generated documentation.
+The [current closure map](../testing/MVP-CLOSURE-STATUS.md) distinguishes implemented
+foundations from remaining acceptance. Public v6 schema discovery, scoped
+generation with dependency closure and reviewed extracted-kit setup/resume are
+implemented on PR35; they are no longer merely proposed capabilities. The full
+current-candidate onboarding, generated visual/interaction fidelity and manual
+qualification exits remain open.
 
-## Integrated status — 2026-09-27
+This target does not turn a generated adapter stub into a working native companion.
+The complete native editor/persistence workflow, browser authoring, generated
+preview and separately authorized release are different outcomes. Full native
+companion acceptance remains required for the complete MVP.
+
+## Historical integrated status — 2026-09-27
 
 The [current review](../product/PR5-PRODUCT-REVIEW.md) and [evidence record](../testing/PR5-REVIEW-EVIDENCE.md) supersede earlier open/failed-status observations for their named artifacts. Current hosted evidence at `ec70e2c` verifies independent install, project verification, build and nine file-origin browser assertions for clickdummy SHA-256 `20d207f58c0ec902f3b2c5730445732af4eb2adbbfa564c0e2dea92cbe60b638`. This does not establish complete business or native companion acceptance.
 

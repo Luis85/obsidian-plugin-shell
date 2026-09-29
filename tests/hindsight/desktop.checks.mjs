@@ -156,3 +156,24 @@ test('MCP discovery rejects invalid UTF-8 instead of accepting replacement chara
   const f = fixture(t, true); fakeNative(f, "process.stdout.write(Buffer.from([0xff,10]));");
   await assert.rejects(discoverTools(f.repo, f.p, 'codex'), e => e.code === 'MCP_DISCOVERY_FAILED');
 });
+
+for (const outcome of ['success', 'malformed', 'timeout']) {
+  test(`MCP ${outcome} settles only after its owned discovery process closes`, async t => {
+    const f = fixture(t, true); const pidFile = join(f.home, 'discovery.pid');
+    const prefix = `import {writeFileSync} from 'node:fs'; writeFileSync(${JSON.stringify(pidFile)}, String(process.pid));
+process.on('SIGTERM', () => {}); setInterval(() => {}, 1000);\n`;
+    fakeNative(f, prefix + (outcome === 'success' ? fakeServer : outcome === 'malformed' ? 'console.log("SENSITIVE INVALID OUTPUT");' : 'process.stdin.resume();'));
+    let pid;
+    try {
+      if (outcome === 'success') assert.equal((await discoverTools(f.repo, f.p, 'codex')).tools[0].name, 'fixture_recall');
+      else await assert.rejects(discoverTools(f.repo, f.p, 'codex', outcome === 'timeout' ? 1500 : 10000),
+        error => error.code === 'MCP_DISCOVERY_FAILED' && !error.message.includes('SENSITIVE'));
+      pid = Number(readFileSync(pidFile, 'utf8')); assert.ok(Number.isSafeInteger(pid) && pid > 0);
+      assert.throws(() => process.kill(pid, 0), error => error.code === 'ESRCH', 'Discovery returned while its child was still alive');
+    } finally {
+      // Failed-reproducer cleanup only: target the PID written by this owned fixture.
+      if (!pid && existsSync(pidFile)) pid = Number(readFileSync(pidFile, 'utf8'));
+      if (pid) { try { process.kill(pid, 'SIGKILL'); } catch (error) { if (error.code !== 'ESRCH') throw error; } }
+    }
+  });
+}

@@ -24,6 +24,10 @@
       "probe": ["{python}", "--version"],
       "hint": "Install Python 3.11+ or set PYTHON to an interpreter."
     },
+    "python-jsonschema": {
+      "probe": ["{python}", "-c", "import jsonschema"],
+      "hint": "Install jsonschema==4.26.0 in an isolated venv and set PYTHON. This is separate test tooling, not a runtime dependency."
+    },
     "python-playwright": {
       "probe": ["{python}", "-c", "import playwright"],
       "hint": "Create a scratch venv, pip install playwright==1.57.0, run `python -m playwright install chromium`, then set PYTHON to that venv interpreter (see companion-concept-verification.yml)."
@@ -221,6 +225,14 @@
       "verify": "tooling",
       "npmScript": "test:companion",
       "workflows": ["companion-concept-verification", "ci"]
+    },
+    {
+      "name": "companion:schema",
+      "purpose": "Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus.",
+      "runner": {"type": "command", "commands": [["{python}", "-B", "tests/concepts/companion-schema.test.py"]]},
+      "include": ["tests/concepts/companion-schema.test.py"],
+      "prerequisites": ["python3", "python-jsonschema"], "verify": "opt-in",
+      "workflows": ["companion-concept-verification"], "optional": true
     },
     {
       "name": "companion:assembly",

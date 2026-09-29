@@ -7,6 +7,7 @@ import { validateProjectTooling, type ProjectTooling } from './tooling-contract.
 import type { SitemapDesign } from './sitemap/model.ts';
 import { assertJson, record, requireSitemap, utf8Length } from './sitemap/safety.ts';
 import { validateSitemapModel } from './sitemap/validate.ts';
+import { editorBindings } from './sitemap/editor-bindings.ts';
 
 export { COMPANION_FORMAT, COMPANION_MAX_BYTES };
 export const AUTHORING_VERSION = 6;
@@ -42,10 +43,10 @@ function assertAuthoringDocument(input: unknown): asserts input is AuthoringDocu
     // Only explicitly validated additions are removed for legacy-field validation. Unknown fields still fail.
     requireSitemap(record(legacy.design), 'COMPANION_INVALID', 'Expected a saved design.');
     delete legacy.tooling;
-    delete legacy.design.sitemap; delete legacy.design.features;
+    delete legacy.design.sitemap; delete legacy.design.features; delete legacy.design.editors;
     legacy.schemaVersion = 5; legacy.design.schema = 5;
     validateCompanionDocument(legacy);
-    validateSitemapModel(input.design);
+    editorBindings(validateSitemapModel(input.design));
   }
 
 }
@@ -91,5 +92,5 @@ export const authoringReader = {
   },
 };
 export function authoringDesignKey(key: string): boolean {
-  return key === 'sitemap' || key === 'features' || companionDesignKey(key);
+  return key === 'sitemap' || key === 'features' || key === 'editors' || companionDesignKey(key);
 }

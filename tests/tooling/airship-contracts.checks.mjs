@@ -164,3 +164,11 @@ test('generated preview entry points are analyzed and inert tooling stays inside
   assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name]);
   assert.ok(!config.ignorePatterns.some(pattern => pattern.includes('airship')));
 });
+
+test('every optional Airship command has real parseable help examples for the source-driven manual',async()=>{
+  const {commands,parseCliArguments}=await import('../../scripts/framework/catalog.ts');
+  const {commandHelp}=await import('../../scripts/framework/help-text.ts');
+  const entries=commands.filter(entry=>entry.id.startsWith('airship '));assert.equal(entries.length,6);
+  for(const entry of entries){const help=commandHelp(entry);assert.ok(help.examples.length,entry.id);
+    for(const example of help.examples){const request=parseCliArguments(example.split(' ').slice(2));assert.equal(request.command,entry.id);}}
+});

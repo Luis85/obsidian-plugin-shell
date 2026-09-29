@@ -47,6 +47,22 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     const valid = check(); assert.equal(valid.status, 0, valid.stdout + valid.stderr);
     const diagnostic = async () => JSON.parse(await readFile(join(extracted, 'reports/analyzer/fallow.json'), 'utf8'));
     assert.deepEqual((await diagnostic()).workspace_diagnostics ?? [], []);
+    // The browser verifier is an exact test entry, not a whole-directory exemption.
+    const pluginPath = join(extracted, 'scripts/quality/fallow-node-tests.json');
+    const pluginBytes = await readFile(pluginPath, 'utf8');
+    const plugin = JSON.parse(pluginBytes), verifier = 'scripts/compiler/verify-preview-host.mjs';
+    assert.equal(plugin.entryPointRole, 'test');
+    assert.ok(plugin.entryPoints.includes(verifier));
+    plugin.entryPoints = plugin.entryPoints.filter(path => path !== verifier);
+    await writeFile(pluginPath, JSON.stringify(plugin));
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).unused_files.some(row => row.path === verifier));
+    await writeFile(pluginPath, pluginBytes);
+    const nearby = join(extracted, 'scripts/compiler/unreachable-preview-probe.mjs');
+    await writeFile(nearby, 'export const unexpectedPreviewProbe = 1;\n');
+    assert.notEqual(check().status, 0);
+    assert.ok((await diagnostic()).unused_files.some(row => row.path === 'scripts/compiler/unreachable-preview-probe.mjs'));
+    await rm(nearby);
     const maintained = join(extracted, 'src/unreachable-archive-probe.ts');
     await writeFile(maintained, 'export const unreachableArchiveProbe = 1;\n');
     assert.notEqual(check().status, 0);
@@ -114,4 +130,52 @@ test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rule
     assert.ok(rules.includes('vue/require-v-for-key'), run.stdout);
     assert.ok(!reports.some(file => file.fatalErrorCount), 'Parsers must run, not fail before checking rules');
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+// These cases execute the real orchestration with explicit command doubles.
+// The archive case above separately executes the real analyzer and its controls.
+async function verificationTrace(t, mode, failAt = 0) {
+  const root = await mkdtemp(join(tmpdir(), 'verify-preflight-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const directory of ['quality', 'shared', 'testing']) await mkdir(join(root, 'scripts', directory), { recursive: true });
+  await cp(new URL('../../scripts/quality/verify.mjs', import.meta.url), join(root, 'scripts/quality/verify.mjs'));
+  await writeFile(join(root, 'scripts/shared/process.mjs'), `let analyzers = 0;
+export async function runNode(path, args = []) {
+  console.log(JSON.stringify({ executed: path, args }));
+  if (path === 'scripts/quality/check-analyzer.mjs' && ++analyzers === Number(process.env.FAIL_ANALYZER_AT))
+    throw new Error('fixture analyzer failed');
+}
+`);
+  await writeFile(join(root, 'scripts/testing/suite-manifest.mjs'), `export async function toolingGroups() {
+    return [{ name: 'fixture', files: ['tests/tooling/fixture.checks.mjs'] }];
+  }`);
+  const run = spawnSync(process.execPath, ['scripts/quality/verify.mjs'], { cwd: root, encoding: 'utf8', timeout: 10000,
+    env: { ...process.env, SHELL_EVIDENCE_TOOLING: mode, FAIL_ANALYZER_AT: String(failAt) } });
+  assert.equal(run.error, undefined);
+  const trace = run.stdout.split('\n').filter(line => line.startsWith('{"executed":')).map(line => JSON.parse(line));
+  return { ...run, trace };
+}
+for (const mode of ['0', '1']) {
+  test(`[VERIFY-PREFLIGHT] analyzer runs after build and again after tooling in evidence mode ${mode}`, async t => {
+    const run = await verificationTrace(t, mode), paths = run.trace.map(item => item.executed);
+    assert.equal(run.status, 0, run.stderr);
+    const first = paths.indexOf('scripts/quality/check-analyzer.mjs'), last = paths.lastIndexOf('scripts/quality/check-analyzer.mjs');
+    assert.equal(first, paths.indexOf('scripts/bundling/build.mjs') + 1);
+    const tooling = paths.indexOf(mode === '1' ? 'scripts/testing/evidence-cli.mjs' : '--test');
+    assert.ok(first < tooling && tooling < last);
+    assert.equal(paths.filter(path => path === 'scripts/quality/check-analyzer.mjs').length, 2);
+    assert.ok(last < paths.indexOf('scripts/quality/check-maintainability.mjs'));
+    assert.ok(paths.includes('node_modules/vitest/vitest.mjs'));
+  });
+}
+test('[VERIFY-PREFLIGHT] early and late analyzer failures both retain nonzero outcomes without starting later stages', async t => {
+  for (const failAt of [1, 2]) {
+    const run = await verificationTrace(t, '0', failAt), paths = run.trace.map(item => item.executed);
+    assert.equal(run.status, 1); assert.match(run.stderr, /fixture analyzer failed/);
+    assert.equal(paths.at(-1), 'scripts/quality/check-analyzer.mjs');
+    assert.equal(paths.filter(path => path === 'scripts/quality/check-analyzer.mjs').length, failAt);
+    assert.equal(paths.includes('--test'), failAt === 2);
+    assert.ok(!paths.includes('scripts/quality/check-maintainability.mjs'));
+    assert.doesNotMatch(run.stdout, /verification passed/);
+  }
 });

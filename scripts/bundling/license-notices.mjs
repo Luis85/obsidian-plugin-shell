@@ -38,6 +38,12 @@ export function licenseNotices() {
         const text = name === '@iconify-json/lucide' ? readFileSync('docs/licenses/lucide.txt', 'utf8') : licenses.map(file => readFileSync(join(pkg.directory, file), 'utf8')).join('\n');
         notices.push(`${name}@${pkg.version} (${pkg.license ?? 'see license'})\n${text}`);
       }
+      if (Object.values(bundle).some(value => value.type === 'chunk' && Object.keys(value.modules).some(id => id === '\0virtual:journey-flow'))) {
+        const directory='docs/concepts/companion/vendor';
+        const entry=JSON.parse(readFileSync(join(directory,'packages.json'),'utf8')).find(pkg=>pkg.name==='@vue-flow/core');
+        if(!entry)throw new Error('Missing reviewed Vue Flow package receipt');
+        notices.push(entry.id+' (retained reviewed bundle)\n'+['vue-flow-core-LICENSE.txt','d3-NOTICE.txt','vueuse-NOTICE.txt'].map(file=>readFileSync(join(directory,file),'utf8')).join('\n'));
+      }
       if (!notices.length) throw new Error('Bundled dependency license inventory is empty');
       const banner = `/*!\nPlugin Shell — bundled dependency notices\n${notices.join('\n\n----------------------------------------\n\n').replaceAll('*/', '* /')}\n*/\n`;
       for (const value of Object.values(bundle)) if (value.type === 'chunk' && value.isEntry) value.code = shiftInlineMap(banner + value.code, banner);

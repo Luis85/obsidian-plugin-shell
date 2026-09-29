@@ -2,6 +2,7 @@ import { storybookCode } from '../../companion/compiler/storybook-code.ts';
 import { previewCode, previewScripts } from '../../companion/compiler/preview-code.ts';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { artifactCollector } from '../domain/artifacts.ts';
+import { journeyCode } from '../../companion/compiler/journey-code.ts';
 import { nativeCode } from '../../companion/compiler/native-code.ts';
 import { clickdummyCode } from '../../companion/compiler/clickdummy-code.ts';
 import { httpCode } from '../../companion/compiler/http-code.ts';
@@ -30,7 +31,8 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
     const old = collector.get(path);
     // Framework customization is explicit; visual lowering replaces only UI placeholders/registries.
     const replacement = old?.producer === 'framework' ? 'framework'
-      : producer === 'visual' && old?.producer === 'ui' ? 'ui' : undefined;
+      : producer === 'visual' && old?.producer === 'ui' ? 'ui'
+      : producer === 'journey' && (old?.producer === 'ui' || old?.producer === 'visual') ? old.producer : undefined;
     collector.add({path,content,ownership,producer},replacement);
   };
   async function emit(name: string, work: () => void | Promise<unknown>): Promise<void> {
@@ -63,7 +65,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
+  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true,...((m.document.design as {editors?:unknown}).editors ? {allowJs:true,checkJs:false} : {})},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');
@@ -80,6 +82,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   await emit('visual', () => visualCode(templateRoot,m,add));
   await emit('relationships', () => relationshipCode(templateRoot,m,add));
   await emit('http', () => httpCode(templateRoot,m,add));
+  await emit('journey', () => journeyCode(templateRoot,m,add));
   await emit('clickdummy', () => clickdummyCode(m,add));
   await emit('preview', () => previewCode(m,add));
   const opTest = `${m.testRoot}/operation-lifecycle.test.ts`;

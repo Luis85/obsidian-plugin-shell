@@ -5,6 +5,9 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
+      - 'scripts/compiler/**'
+      - 'scripts/bundling/**'
+      - 'tests/tooling/compiler-journey*.checks.mjs'
       - 'tests/tooling/companion-project.checks.mjs'
       - 'tests/tooling/companion-detail-contract.checks.mjs'
       - 'tests/tooling/companion-visual-*.checks.mjs'
@@ -80,6 +83,12 @@ jobs:
         run: |
           node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-detail-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
           npm run test:visual
+      - name: Validate the published project schema with an independent implementation
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/project-schema-env"
+          "$RUNNER_TEMP/project-schema-env/bin/python" -m pip install jsonschema==4.26.0
+          "$RUNNER_TEMP/project-schema-env/bin/python" -B tests/concepts/companion-schema.test.py
       - name: Package exact review source without Git metadata or credentials
         shell: bash
         run: |
@@ -183,10 +192,13 @@ jobs:
                   env.write('CHROMIUM_EXECUTABLE=' + pw.chromium.executable_path + '\n')
           PY
       - name: Typecheck shared contracts and actual Vue authoring components
+        shell: bash
         run: |
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
-          node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs
+          set -o pipefail
+          mkdir -p reports/companion-mvp
+          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
+          node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the integrated companion and export its complete v6 definition
         run: node scripts/concepts/build-mvp.mjs
       - name: Exercise real editor actions, full JSON round trip and offline assets
@@ -206,6 +218,66 @@ jobs:
           path: reports/companion-mvp/
           retention-days: 7
           if-no-files-found: warn
+
+  journey-native:
+    name: Generated Journey Lens / real Obsidian file lifecycle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Select locked tooling and install the framework
+        run: |
+          npm install --prefix "$RUNNER_TEMP/journey-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/journey-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/journey-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Provision the locked export browser and Electron system libraries
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Build the authored definition and independently generate the native consumer
+        # A short scratch root respects the existing Linux singleton-socket budget.
+        # Each test still launches only the generated consumer's contained .nq vault.
+        env:
+          COMPANION_QUALIFICATION_ROOT: /tmp
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports/journey-native
+          node scripts/concepts/build-mvp.mjs 2>&1 | tee reports/journey-native/definition-build.log
+          node scripts/companion/qualify-project.mjs --authoring-fixture 2>&1 | tee reports/journey-native/generated-project.log
+      - name: Exercise create, edit, reopen and independent leaves against the generated plugin
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          target=$(cat reports/companion-mvp/generation/target.txt)
+          case "$target" in /tmp/companion-qualification-*/companion) ;; *) echo "Unexpected generated target"; exit 1;; esac
+          test -f "$target/tests/obsidian/journey-lens.obsidian.ts"
+          cd "$target"
+          node "$QUALIFIED_NPM" run test:obsidian -- --allow-download journey-lens
+      - name: Collect exact generated/native evidence without dependencies or host downloads
+        if: always()
+        run: |
+          mkdir -p reports/journey-native
+          git rev-parse HEAD > reports/journey-native/source-commit.txt
+          if test -f reports/companion-mvp/generation/target.txt; then
+            target=$(cat reports/companion-mvp/generation/target.txt)
+            case "$target" in /tmp/companion-qualification-*/companion) ;; *) exit 1;; esac
+            if test -d "$target/reports/obsidian"; then cp -R "$target/reports/obsidian" reports/journey-native/; fi
+            if test -f "$target/design/journey-lens.json"; then cp "$target/design/journey-lens.json" reports/journey-native/; fi
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: generated-journey-native-evidence
+          path: |
+            reports/journey-native/
+            reports/companion-mvp/generation/
+          retention-days: 7
+          if-no-files-found: error
 
   jev-typescript6:
     name: Jev / locked TypeScript 6 build and regression checks

@@ -20,6 +20,7 @@ async function command(label,args,cwd){
   report.steps.push({label,exit:result.status});if(result.status!==0)throw new Error(label+' failed: '+(result.error?.message??result.status));
 }
 try{
+  await command('preview-host-browser',[join(root,'scripts/compiler/verify-preview-host.mjs')],root);
   const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
   const template=await loadTemplateSnapshot(root),start=performance.now();
   const compilation=await compileProject({source,template,outputKind:'clickdummy'});
@@ -33,7 +34,7 @@ try{
   await command('plugin-verification',[resolve(npm),'run','verify:project'],target);
   await command('browser-typecheck',[resolve(npm),'run','typecheck:clickdummy'],target);
   await command('browser-build',[resolve(npm),'run','build:clickdummy'],target);
-  await command('browser-behavior',[join(root,'scripts/compiler/verify-browser.mjs'),join(target,'clickdummy.html')],root);
+  await command('browser-behavior',[join(root,'scripts/compiler/verify-browser.mjs'),join(target,'clickdummy.html'),join(target,'design/project.json'),output],root);
   for(const path of ['dist/main.js','dist/styles.css','dist/manifest.json','clickdummy.html']){
     const bytes=await readFile(join(target,path));report.artifacts.push({path,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
     if(path==='clickdummy.html')await writeFile(join(output,'clickdummy.html'),bytes);
