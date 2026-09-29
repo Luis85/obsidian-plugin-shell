@@ -13,6 +13,16 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 | [PR #5 vision review](PR5-VISION-REVIEW.md) | Source-grounded review at the 2026-09-29 baseline; separates inspected capabilities from intended direction. |
 | [Product and delivery overview](../../SHELL-FIRST-OVERVIEW.md) | Practical entry points and the relationship between Workbench, its reusable foundation and delivery gates. The filename is retained for compatibility. |
 
+## Vision-aligned MVP execution
+
+| Document | Purpose |
+| --- | --- |
+| [MVP improvement plan](MVP-IMPROVEMENT-PLAN.md) | Nineteen work packages covering configuration, external starters, setup/first run, typed Markdown, actual UI generation, safe changes, quality, native Workbench and staged shipment. |
+| [MVP vision acceptance](MVP-VISION-ACCEPTANCE.md) | Twenty additional scenarios, evidence rules and mapping to every retained A01–A20 acceptance case. |
+| [MVP baseline and requirement crosswalk](MVP-VISION-BASELINE.md) | Source observations at `f3778ed`, reconciliation with IP-01–15 and coverage of MVP-01–24; distinguishes new work from existing implementation requiring qualification. |
+
+These are planning documents, not executed qualification. They supplement the retained contracts below without changing task states or authorizing publication. The native full-product obligation remains; an earlier framework shipment does not close the complete MVP.
+
 ## Requirements and delivery
 
 | Document | Scope |
@@ -21,7 +31,7 @@ Workbench is a developer-focused tool to create and manage declarative user inte
 | [Authoring and native-plugin requirements](COMPANION-PLUGIN-PRD.md) | Workbench authoring scope and native conversion, including retained companion requirements. The filename is retained. |
 | [JSON-to-clickdummy MVP](../prds/MVP-JSON-TO-CLICKDUMMY.md) | Bounded end-to-end MVP obligations; framework shipment alone does not complete them. |
 | [Delivery strategy](DELIVERY-STRATEGY.md) | Foundation readiness and approved shipment before the agreed native conversion and native acceptance; publication remains separately authorized. |
-| [Integrated improvement plan](PR5-IMPROVEMENT-PLAN.md) | Existing work-package structure; reconcile findings against the relevant source and task evidence before execution. |
+| [Integrated improvement plan](PR5-IMPROVEMENT-PLAN.md) | September 27 work-package structure retained; the vision-aligned plan above reconciles selected later source and adds vision-derived work. |
 | [Task index](../tasks/README.md) | Detailed execution and acceptance tracking. Product prose does not mark tasks complete. |
 
 ## Implementation and evidence
