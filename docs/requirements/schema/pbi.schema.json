@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:workbench:pbi:1",
+  "title": "Workbench typed PBI frontmatter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "schema_version",
+    "id",
+    "title",
+    "product",
+    "epic",
+    "feature",
+    "outcomes",
+    "release",
+    "milestone",
+    "lane",
+    "priority",
+    "rank",
+    "status",
+    "revision",
+    "created",
+    "updated",
+    "status_since",
+    "owner",
+    "owner_role",
+    "review_status",
+    "review_record",
+    "estimate_points",
+    "value_score",
+    "risk",
+    "depends_on",
+    "gate_prerequisites",
+    "contributes_to",
+    "requirements",
+    "work_packages",
+    "acceptance_refs",
+    "legacy_tasks",
+    "source_docs",
+    "baseline_commit",
+    "work_kind",
+    "blocked_reason",
+    "open_questions",
+    "verification_profiles",
+    "verification_plan",
+    "evidence_refs",
+    "verification_candidate",
+    "accepted_by",
+    "accepted_on",
+    "acceptance_record",
+    "started_on",
+    "done_on",
+    "shipped_on",
+    "release_ref"
+  ],
+  "properties": {
+    "type": {
+      "const": "PBI"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^WB-PBI-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product": {
+      "const": "Workbench"
+    },
+    "epic": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^WB-E[0-9]{2}$"
+    },
+    "feature": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^WB-F[0-9]{2}$"
+    },
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "release": {
+      "const": "MVP"
+    },
+    "milestone": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^I[0-6]$"
+    },
+    "lane": {
+      "enum": [
+        "foundation",
+        "concept",
+        "native",
+        "publication",
+        "learning"
+      ]
+    },
+    "priority": {
+      "enum": [
+        "must",
+        "should",
+        "could",
+        "wont"
+      ]
+    },
+    "rank": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": [
+        "new",
+        "designed",
+        "scoped",
+        "tech refined",
+        "estimated",
+        "ready",
+        "in progress",
+        "implemented",
+        "tested",
+        "done",
+        "shipped",
+        "deferred",
+        "sunset"
+      ]
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "created": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      ]
+    },
+    "updated": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      ]
+    },
+    "status_since": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      ]
+    },
+    "owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "owner_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_status": {
+      "enum": [
+        "pending",
+        "in-review",
+        "approved",
+        "changes-requested"
+      ]
+    },
+    "review_record": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "estimate_points": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "exclusiveMinimum": 0
+    },
+    "value_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 5
+    },
+    "risk": {
+      "enum": [
+        null,
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "gate_prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "contributes_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "work_packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "acceptance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "legacy_tasks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "source_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "baseline_commit": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "work_kind": {
+      "enum": [
+        "extend",
+        "add",
+        "qualify",
+        "implement"
+      ]
+    },
+    "blocked_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "verification_profiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "verification_plan": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "criterion",
+              "profile"
+            ],
+            "properties": {
+              "criterion": {
+                "type": "string",
+                "pattern": "^WB-PBI-[0-9]{3}-AC[0-9]{2}$"
+              },
+              "profile": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "verification_candidate": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      ]
+    },
+    "accepted_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accepted_on": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "acceptance_record": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "started_on": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "done_on": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shipped_on": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "release_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

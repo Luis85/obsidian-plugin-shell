@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "baseline_id": "WB-MVP-2026-09-29-v1",
+  "product": "Workbench",
+  "release": "MVP",
+  "source_commit": "22821c4d8b2764e014dc12569b470af9e05d86b0",
+  "baseline_pbis": [
+    "WB-PBI-001",
+    "WB-PBI-002",
+    "WB-PBI-003",
+    "WB-PBI-004",
+    "WB-PBI-005",
+    "WB-PBI-006",
+    "WB-PBI-007",
+    "WB-PBI-008",
+    "WB-PBI-009",
+    "WB-PBI-010",
+    "WB-PBI-011",
+    "WB-PBI-012",
+    "WB-PBI-013",
+    "WB-PBI-014",
+    "WB-PBI-015",
+    "WB-PBI-016",
+    "WB-PBI-017",
+    "WB-PBI-018",
+    "WB-PBI-019",
+    "WB-PBI-020",
+    "WB-PBI-021",
+    "WB-PBI-022",
+    "WB-PBI-023",
+    "WB-PBI-024",
+    "WB-PBI-025",
+    "WB-PBI-026",
+    "WB-PBI-027",
+    "WB-PBI-028",
+    "WB-PBI-029",
+    "WB-PBI-030",
+    "WB-PBI-031",
+    "WB-PBI-032",
+    "WB-PBI-033",
+    "WB-PBI-034",
+    "WB-PBI-035",
+    "WB-PBI-036",
+    "WB-PBI-037",
+    "WB-PBI-038",
+    "WB-PBI-039",
+    "WB-PBI-040",
+    "WB-PBI-041",
+    "WB-PBI-042",
+    "WB-PBI-043",
+    "WB-PBI-044",
+    "WB-PBI-045",
+    "WB-PBI-046",
+    "WB-PBI-047",
+    "WB-PBI-048",
+    "WB-PBI-049",
+    "WB-PBI-050",
+    "WB-PBI-051",
+    "WB-PBI-052",
+    "WB-PBI-053",
+    "WB-PBI-054"
+  ],
+  "scope_rule": "Baseline IDs remain in the denominator after deferral or sunset. Rebaseline only with an explicit reviewed change record; never silently delete, replace or double-count split items.",
+  "lifecycle": [
+    "new",
+    "designed",
+    "scoped",
+    "tech refined",
+    "estimated",
+    "ready",
+    "in progress",
+    "implemented",
+    "tested",
+    "done",
+    "shipped",
+    "deferred",
+    "sunset"
+  ],
+  "outcomes": {
+    "O-TIME": "Reduce time and rework for an equivalently accepted first UI and later change.",
+    "O-DOCS": "Keep meaningful documentation complete, current and preserved.",
+    "O-DX": "Enable understandable, safe and independent developer continuation.",
+    "O-QUALITY": "Deliver all designed interactions with fixtures and verified integration without weakening quality."
+  },
+  "epics": {
+    "WB-E01": {
+      "name": "Start a project safely",
+      "job": "When starting from an idea or existing repository, establish a working project without rebuilding setup or risking existing work."
+    },
+    "WB-E02": {
+      "name": "Keep documentation connected",
+      "job": "When describing or changing the UI, retain useful intent and relationships without reconstructing handover documentation."
+    },
+    "WB-E03": {
+      "name": "Create and evolve the interface",
+      "job": "When designing or revising the UI, make structure, reusable elements and impact understandable."
+    },
+    "WB-E04": {
+      "name": "Demonstrate every designed interaction",
+      "job": "When presenting a generated application, let reviewers experiment immediately with coherent, resettable synthetic behavior."
+    },
+    "WB-E05": {
+      "name": "Integrate an existing backend",
+      "job": "When adopting real services, replace the simulation without rewriting the UI or losing developer-owned code."
+    },
+    "WB-E06": {
+      "name": "Qualify and ship the foundation",
+      "job": "When delivering a reusable kit, prove quality and independent use on exact artifacts before an explicitly approved shipment."
+    },
+    "WB-E07": {
+      "name": "Use and deliver native Workbench",
+      "job": "When working inside Obsidian, author and persist the complete Workbench product on its own generated foundation."
+    },
+    "WB-E08": {
+      "name": "Continue independently and validate value",
+      "job": "When handing over or investing in Workbench, prove maintainability and reduced repeated effort without reducing quality."
+    }
+  },
+  "features": {
+    "WB-F01": {
+      "epic": "WB-E01",
+      "name": "Capability and contract discovery"
+    },
+    "WB-F02": {
+      "epic": "WB-E01",
+      "name": "Project settings and migration"
+    },
+    "WB-F03": {
+      "epic": "WB-E01",
+      "name": "External starters"
+    },
+    "WB-F04": {
+      "epic": "WB-E01",
+      "name": "Reviewed project initialization"
+    },
+    "WB-F05": {
+      "epic": "WB-E01",
+      "name": "First run, recovery and isolated installation"
+    },
+    "WB-F06": {
+      "epic": "WB-E02",
+      "name": "Typed document intake and reconciliation"
+    },
+    "WB-F07": {
+      "epic": "WB-E02",
+      "name": "Context and living documentation"
+    },
+    "WB-F08": {
+      "epic": "WB-E02",
+      "name": "Concept integration"
+    },
+    "WB-F09": {
+      "epic": "WB-E03",
+      "name": "Design-only project lifecycle"
+    },
+    "WB-F10": {
+      "epic": "WB-E03",
+      "name": "Page, component and design-system composition"
+    },
+    "WB-F11": {
+      "epic": "WB-E03",
+      "name": "Revision and dependency management"
+    },
+    "WB-F12": {
+      "epic": "WB-E03",
+      "name": "Sitemap and journey semantics"
+    },
+    "WB-F13": {
+      "epic": "WB-E04",
+      "name": "Interaction and fixture contracts"
+    },
+    "WB-F14": {
+      "epic": "WB-E04",
+      "name": "Operational target generation"
+    },
+    "WB-F15": {
+      "epic": "WB-E04",
+      "name": "Scoped regeneration"
+    },
+    "WB-F16": {
+      "epic": "WB-E04",
+      "name": "Stateful fixture scenarios"
+    },
+    "WB-F17": {
+      "epic": "WB-E04",
+      "name": "Offline demonstration and completeness"
+    },
+    "WB-F18": {
+      "epic": "WB-E05",
+      "name": "Wire contracts and adapter substitution"
+    },
+    "WB-F19": {
+      "epic": "WB-E05",
+      "name": "C# and Java reference integration"
+    },
+    "WB-F20": {
+      "epic": "WB-E05",
+      "name": "Hosting and owned integration extensions"
+    },
+    "WB-F21": {
+      "epic": "WB-E06",
+      "name": "Accessibility and performance qualification"
+    },
+    "WB-F22": {
+      "epic": "WB-E06",
+      "name": "Trust boundaries"
+    },
+    "WB-F23": {
+      "epic": "WB-E06",
+      "name": "Exact archives and consumer upgrades"
+    },
+    "WB-F24": {
+      "epic": "WB-E06",
+      "name": "Release preparation and approved framework shipment"
+    },
+    "WB-F25": {
+      "epic": "WB-E07",
+      "name": "Generated native composition and persistence"
+    },
+    "WB-F26": {
+      "epic": "WB-E07",
+      "name": "Complete native operation and acceptance"
+    },
+    "WB-F27": {
+      "epic": "WB-E07",
+      "name": "Approved native shipment"
+    },
+    "WB-F28": {
+      "epic": "WB-E08",
+      "name": "Developer handover and product-value evaluation"
+    }
+  },
+  "requirements": [
+    "MVP-01",
+    "MVP-02",
+    "MVP-03",
+    "MVP-04",
+    "MVP-05",
+    "MVP-06",
+    "MVP-07",
+    "MVP-08",
+    "MVP-09",
+    "MVP-10",
+    "MVP-11",
+    "MVP-12",
+    "MVP-13",
+    "MVP-14",
+    "MVP-15",
+    "MVP-16",
+    "MVP-17",
+    "MVP-18",
+    "MVP-19",
+    "MVP-20",
+    "MVP-21",
+    "MVP-22",
+    "MVP-23",
+    "MVP-24",
+    "MVP-QR-01",
+    "BQ-01",
+    "BQ-02",
+    "BQ-03",
+    "BQ-04",
+    "BQ-05",
+    "BQ-06",
+    "BQ-07",
+    "BQ-08",
+    "BQ-09",
+    "BQ-10"
+  ],
+  "work_packages": [
+    "WM-01",
+    "WM-02",
+    "WM-03",
+    "WM-04",
+    "WM-05",
+    "WM-06",
+    "WM-07",
+    "WM-08",
+    "WM-09",
+    "WM-10",
+    "WM-11",
+    "WM-12",
+    "WM-13",
+    "WM-14",
+    "WM-15",
+    "WM-16",
+    "WM-17",
+    "WM-18",
+    "WM-19"
+  ],
+  "acceptance_refs": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08",
+    "A09",
+    "A10",
+    "A11",
+    "A12",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "A17",
+    "A18",
+    "A19",
+    "A20",
+    "WVA-01",
+    "WVA-02",
+    "WVA-03",
+    "WVA-04",
+    "WVA-05",
+    "WVA-06",
+    "WVA-07",
+    "WVA-08",
+    "WVA-09",
+    "WVA-10",
+    "WVA-11",
+    "WVA-12",
+    "WVA-13",
+    "WVA-14",
+    "WVA-15",
+    "WVA-16",
+    "WVA-17",
+    "WVA-18",
+    "WVA-19",
+    "WVA-20",
+    "BQA-01",
+    "BQA-02",
+    "BQA-03",
+    "BQA-04",
+    "BQA-05",
+    "BQA-06",
+    "BQA-07",
+    "BQA-08",
+    "BQA-09",
+    "BQA-10"
+  ],
+  "gates": {
+    "SH-022": {
+      "lane": "foundation",
+      "prerequisites": []
+    },
+    "SH-034": {
+      "lane": "publication",
+      "prerequisites": [
+        "SH-022"
+      ]
+    },
+    "CX-007": {
+      "lane": "concept",
+      "prerequisites": []
+    },
+    "CP-010": {
+      "lane": "native",
+      "prerequisites": [
+        "SH-022",
+        "SH-034",
+        "CX-007"
+      ]
+    },
+    "PUB-004": {
+      "lane": "publication",
+      "prerequisites": [
+        "CP-010"
+      ]
+    },
+    "PUB-005": {
+      "lane": "publication",
+      "prerequisites": [
+        "PUB-004"
+      ]
+    }
+  },
+  "authority": "This registry groups PBI acceptance only. Existing task frontmatter, full inherited requirements and exact-candidate approvals still govern execution and release gates."
+}
