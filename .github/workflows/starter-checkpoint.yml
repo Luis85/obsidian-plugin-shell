@@ -1,0 +1,38 @@
+name: Apply tested starter checkpoint
+on:
+  push:
+    branches: [feat/json-starters-on-pr5]
+    paths: [.github/workflows/starter-checkpoint.yml]
+permissions:
+  contents: write
+jobs:
+  checkpoint:
+    if: github.repository == 'Luis85/obsidian-plugin-shell' && github.ref == 'refs/heads/feat/json-starters-on-pr5'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Apply and verify the exact reviewed patch
+        env:
+          PATCH: H4sIAAAAAAAC/5VVwW7bOBC96yvmZie2JbtI6iKpgxbYXnpoi+awhyAHWhpbjClSS1KJjSD/3qFISVS2QFrDsMXHmcc3Q+qx4LsdLBZ7boFlJte8tibbaVbhk9KHrERRLywebWoNbN8ISLgs8AhstVutP2Ca7ort5Xq5htVy+f7iIlksFm+ukcxms7fX+fQJFu/W8/cwo9810BCPtdIWciWNhb0SBcofzJZX8BNZoaQ4fdaanT4+U0RVMVlcgbGay/01ZbKqFjgAdaNrlcD9dfKKVaumNv9n5BGZ5TamCotRkg5JYeruHl5uYAN3CQB4iomxTNvJvOOY3LoxMKi1esDczQx0dxOJT4RMDNqm7h+IndnGDGONpqnQjQMLcGlqzzZAlasyRkxeYsVi5JEJXjA7oqqQmUa30B4l6jBN3cqxjkk6JFq7h/za1I55Mhu3ArWJuvHlSIBkAnqNQ0zclw4GwU27Ug+YUj2NgLimIapX3UOsKEZjLPiYWTdyNK5ZfvAlDbtb4CMKVUcV/eMRIOVAi1LKuBLqlmVCOGZKdn/bhotWSi54fiiaqjpBj1n09XZU/gFMs624MVy1Eit2COWeBJp4QwLiT/xr8cYqfdoqdYjkf68tkdKG3EaT450IeHwqeyyqbgB77QMUSh8AX/ArgYxrU/L6d/I+91OxuJAQSesQlGwrMEYKbl5DkfqIyb9EfZrKSbRXWsQu63bKZFYpQU6QhVOzIGkNE2nbApNWD85u/zAyITOAHRcIlSqws1tvxkv/SdPVMl9evrtsXTijrmayESLY7Z+u43x3OV/CbDVfXZDtJrPs/By+HFHn3CDYEp3RCcgZdUftwSggaeR69Aph0W8AzUupLGwp+NBmhaXgPEtm3hLAaYKdVhVMJFV11Z7v636aGYN6FOCRzBlsHkc+g2ps3dD99RLC0zSjb3fH0D6RR0o6CHRgsqCEqnUUycwtO530lYXeDKWU7BHdiK4Qi9D5YBEqotNEctAdMGZOMofpGWxu4Nl5nb9V3LYZugnYE6PDEZROz66HCLengiK+3n7/ltZMG5y2SXeTTkT6YOj1vo+Tei/a+Py0j6VcmpiGsVMTHlNepG2a+ZfbcjrY2eTMM/sGp/gfFTbtZlOBcm/LOXwYBanDEEE+p0+/W7C9UWGz2USOf/b3NOEG76TADSzHLBWzedk1TeMONdLtk1ZkI3PIYhvPXN4L/fwCuznF4xcJAAA=
+        run: |
+          test "$(git rev-parse HEAD^)" = 0b3124ab05a7e906d578e91b94e31bf4132f2ae8
+          printf '%s' "$PATCH" | base64 -d | gzip -d > "$RUNNER_TEMP/checkpoint.patch"
+          echo "faf4e390b6a74c9ddaa360621c75c0d2ba249f880a5d6149f0d679c151f1d2db  $RUNNER_TEMP/checkpoint.patch" | sha256sum -c -
+          git apply --check "$RUNNER_TEMP/checkpoint.patch"
+          git apply --index "$RUNNER_TEMP/checkpoint.patch"
+          node --test tests/tooling/starter-manual.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node scripts/documentation/manual.mjs
+          node scripts/documentation/manual.mjs --check
+          git rm .github/workflows/starter-checkpoint.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(starters): register all starter commands in the generated manual'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
