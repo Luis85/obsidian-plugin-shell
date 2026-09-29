@@ -8,10 +8,14 @@ import { workspaceFiles, readWorkspaceFiles, prototypeJsonText } from '../compan
 import { workspaceKey } from '../companion/prototypes/safety.ts';
 import { exists, readBounded, hash, readConfiguration } from './files.ts';
 import { requireThat, type Context } from './contracts.ts';
+import { assertNoOrphanedPrototypes } from './prototype-integrity.ts';
 export interface WorkspaceRead { workspace: PrototypeWorkspace | null; files: Map<string, string> }
 export async function loadPrototypeWorkspace(context: Context): Promise<WorkspaceRead> {
   const files = new Map<string, string>();
-  if (!await exists(join(context.root, PROTOTYPE_REGISTRY))) return { workspace: null, files };
+  if (!await exists(join(context.root, PROTOTYPE_REGISTRY))) {
+    await assertNoOrphanedPrototypes(context);
+    return { workspace: null, files };
+  }
   let bytes = 0;
   const read = async (path: string) => {
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
