@@ -1,0 +1,128 @@
+name: Independent Workbench distributions
+on:
+  pull_request:
+    paths:
+      - 'configs/starters/**'
+      - 'scripts/starters/**'
+      - 'scripts/framework/**'
+      - 'scripts/companion/starter-*.mjs'
+      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'tests/tooling/starter-*.checks.mjs'
+      - '.github/workflows/starter-distribution.yml'
+  workflow_dispatch:
+    inputs:
+      attach_to_existing_release:
+        description: Separately approved attachment to the existing version release; never creates or publishes a release
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: starter-distribution-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      source: ${{ steps.identity.outputs.source }}
+      version: ${{ steps.identity.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Select qualified npm locally
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install locked dependencies
+        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+      - name: Typecheck and test the independent definition contract
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:framework
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
+      - name: Bind assets to exact checked-out source
+        id: identity
+        run: |
+          SOURCE=$(git rev-parse HEAD)
+          VERSION=$(node -p 'JSON.parse(require("node:fs").readFileSync("package.json","utf8")).version')
+          [[ "$SOURCE" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+          echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Build separate release assets
+        env:
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+          SOURCE_COMMIT: ${{ steps.identity.outputs.source }}
+        run: |
+          mkdir -p reports/workbench-distributions
+          node shell.mjs framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
+          node shell.mjs starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          import { createHash } from 'node:crypto';
+          const version = process.env.RELEASE_VERSION, sourceCommit = process.env.SOURCE_COMMIT;
+          const root = 'reports/workbench-distributions/';
+          const assets = [];
+          for (const kind of ['shell', 'starters']) {
+            const name = `workbench-${kind}-${version}.zip`, bytes = await readFile(root + name);
+            assets.push({ kind, name, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') });
+          }
+          await writeFile(root + 'workbench-distributions.json', JSON.stringify({ schemaVersion: 1, version, sourceCommit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n');
+          await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
+          NODE
+      - name: Retain separate assets and their manifest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: workbench-distributions-${{ steps.identity.outputs.source }}
+          path: reports/workbench-distributions/
+          if-no-files-found: error
+  attach:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_existing_release == true }}
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: workbench-release
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_COMMIT: ${{ needs.package.outputs.source }}
+      RELEASE_VERSION: ${{ needs.package.outputs.version }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.package.outputs.source }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require an existing release for this exact approved source
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+          git merge-base --is-ancestor "$SOURCE_COMMIT" "origin/$DEFAULT_BRANCH"
+          test "$(git rev-parse "refs/tags/$RELEASE_VERSION^{commit}")" = "$SOURCE_COMMIT"
+          gh release view "$RELEASE_VERSION" --repo "$GH_REPO" >/dev/null
+      - name: Download this run's immutable assets and verify provenance
+        run: |
+          gh run download "$GITHUB_RUN_ID" --repo "$GH_REPO" --name "workbench-distributions-$SOURCE_COMMIT" --dir candidate
+          cd candidate
+          sha256sum --check workbench-SHA256SUMS
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const m = JSON.parse(readFileSync('workbench-distributions.json', 'utf8'));
+          if (m.sourceCommit !== process.env.SOURCE_COMMIT || m.version !== process.env.RELEASE_VERSION) throw new Error('Release provenance mismatch');
+          NODE
+      - name: Attach without creating a release or replacing existing assets
+        run: |
+          gh release upload "$RELEASE_VERSION" --repo "$GH_REPO" \
+            "candidate/workbench-shell-$RELEASE_VERSION.zip" \
+            "candidate/workbench-starters-$RELEASE_VERSION.zip" \
+            candidate/workbench-SHA256SUMS candidate/workbench-distributions.json
