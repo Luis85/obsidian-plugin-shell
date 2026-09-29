@@ -1,6 +1,6 @@
 import { requireThat } from '../framework/contracts.ts';
-import { assertJsonData } from '../contracts/json-data.mjs';
-import { validateCompanionDocument, COMPANION_VERSION } from '../companion/project-contract.mjs';
+import { assertJson } from '../companion/sitemap/safety.ts';
+import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
 export function record(value: unknown): Record<string, unknown> {
   requireThat(value !== null && typeof value === 'object' && !Array.isArray(value), 'STARTER_INVALID', 'Expected an object.');
@@ -91,7 +91,7 @@ export function readProcesses(value: unknown): StarterProcess[] {
   result.forEach(item => visit(item.id)); return result;
 }
 export function validateDefinition(value: unknown): StarterDefinition {
-  assertJsonData(value);
+  assertJson(value);
   const row = record(value);
   fields(row, ['$schema', 'schemaVersion', 'id', 'name', 'version', 'category', 'level', 'summary', 'outcome', 'includes', 'implementation', 'tags', 'inputs', 'generator', 'files', 'processes', 'firstRun', 'nextSteps']);
   requireThat(row.schemaVersion === 1, 'STARTER_VERSION', 'Unsupported starter schemaVersion; expected 1.');
@@ -104,8 +104,8 @@ export function validateDefinition(value: unknown): StarterDefinition {
   fields(rawGenerator, rawGenerator.kind === 'companion' ? ['kind', 'document'] : ['kind']);
   let generator: StarterDefinition['generator'];
   if (rawGenerator.kind === 'companion') {
-    const document = record(rawGenerator.document); validateCompanionDocument(document);
-    requireThat(document.schemaVersion === COMPANION_VERSION, 'STARTER_VERSION', `Companion starters require project v${COMPANION_VERSION}.`);
+    const document = record(rawGenerator.document); validateAuthoringDocument(document);
+    requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require normalized project v5 or v6.');
     generator = { kind: 'companion', document };
   } else { requireThat(rawGenerator.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); generator = { kind: 'files' }; }
   const files: StarterFile[] = array(row.files, 'files', 1000).map(raw => {

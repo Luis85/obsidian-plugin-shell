@@ -1,9 +1,10 @@
 import { dirname, join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
-import { parseJsonData } from '../contracts/json-data.mjs';
+import { parseStarterText } from './browser.ts';
+import { STARTER_MAX_BYTES } from './limits.ts';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
-import { portablePath, record, validateDefinition } from './validation.ts';
+import { portablePath, record } from './validation.ts';
 import type { LoadedStarter } from './types.ts';
 export const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
@@ -33,7 +34,8 @@ export async function checkDirectoryChain(path: string, missing = false): Promis
   }
 }
 export function parseDefinition(bytes: Buffer) {
-  return validateDefinition(parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
+  requireThat(bytes.length <= STARTER_MAX_BYTES, 'STARTER_LIMIT', 'Starter definition exceeds the 4 MB design limit.');
+  return parseStarterText(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
 }
 export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
   const folder = await starterFolder(root), path = resolve(root, folder);
@@ -45,7 +47,7 @@ export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
   for (const entry of entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
     if (!entry.name.toLowerCase().endsWith('.json')) continue;
     requireThat(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.json$/.test(entry.name) && entry.isFile() && !entry.isSymbolicLink(), 'STARTER_SOURCE', 'Definitions must be regular lower-case $starterName.json files.');
-    const file = folder + '/' + entry.name, bytes = await readBounded(join(root, file)); size += bytes.length;
+    const file = folder + '/' + entry.name, bytes = await readBounded(join(root, file), STARTER_MAX_BYTES); size += bytes.length;
     requireThat(size <= 16_000_000, 'STARTER_LIMIT', 'Starter folder exceeds 16 MB.');
     const definition = parseDefinition(bytes);
     requireThat(definition.id + '.json' === entry.name && !results.some(row => row.definition.id === definition.id), 'STARTER_ID', 'Starter ID must match its filename and be unique.');

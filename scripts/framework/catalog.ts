@@ -1,3 +1,4 @@
+import { prototypeCommands } from './prototype-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '../contracts/json-data.mjs';
 import { suggestions, didYouMean } from './suggest.ts';
@@ -16,6 +17,17 @@ export const commands: readonly Command[] = [
   { id: 'starters edit', summary: 'Plan replacing one definition from validated JSON.', options: values('input'), maxArgs: 1, effect: 'plan' },
   { id: 'starters pack', summary: 'Create the standalone starter-definition ZIP, separate from the shell.', options: values('out'), maxArgs: 0, effect: 'process' },
   { id: 'starters run', summary: 'Review/explicitly execute processes from a generated project receipt.', options: { ...values('project', 'process'), 'trust-processes': 'flag' }, maxArgs: 0, effect: 'process' },
+  { id: 'docs import', summary: 'Review typed Markdown files/folders into actual project elements without deleting absent data.', options: values('resolutions'), maxArgs: 32, effect: 'plan' },
+  { id: 'docs export', summary: 'Generate complete, lossless application Markdown documentation with conflict protection.', options: values('out'), maxArgs: 0, effect: 'plan' },
+  { id: 'docs validate', summary: 'Validate typed documentation and native model references without writing.', options: {}, maxArgs: 32, effect: 'read' },
+  { id: 'docs status', summary: 'Inspect documentation drift, missing bindings and export coverage without writing.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'docs schema', summary: 'Discover typed Markdown fields and ownership rules without reading a project.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'docs recover', summary: 'Review or explicitly roll back an interrupted documentation operation; never overwrite intervening edits.', options: {}, maxArgs: 0, effect: 'process' },
+  ...prototypeCommands,
+  { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
+  { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
+  { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },
+  { id: 'handout inspect', summary: 'Read structured handout answers, diagnostics and non-authorizing readiness.', options: values('prds'), maxArgs: 0, effect: 'read' },
   { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },

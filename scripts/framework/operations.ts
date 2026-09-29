@@ -1,6 +1,9 @@
 import { packStarterOperation, readStarterOperation } from '../starters/operations.ts';
 import { processOperation as starterProcessOperation } from '../starters/processes.ts';
+import { docsRead } from './docs.ts';
+import { prototypesRead } from './prototypes.ts';
 import { measureProject } from './project-measure.ts';
+import { handoutRead } from './handout-adapter.ts';
 import { supportReport } from './support-report.ts';
 import { setupProgress } from './setup-progress.ts';
 import { projectContractOperation } from './project-contract.ts';
@@ -19,7 +22,7 @@ import { operationSchemas } from './schemas.ts';
 import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
 import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { planOperation, applyOperation, savePlan, loadPlan } from './planning.ts';
+import { planOperation, applyOperation, saveOperationPlan, loadPlan } from './planning.ts';
 import { status, releaseCheck } from './inspection.ts';
 import { inspectDesign } from './changes.ts';
 import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
@@ -38,7 +41,11 @@ async function fileOperation(request: Request, context: Context): Promise<Result
   const planned = stored ? await loadPlan(context, request.args[0]!) : await planOperation(request, context);
   const output = stringOption(request.options, 'plan-out');
   const diagnostics = (planned.review as {compiler?: {diagnostics?: Result['diagnostics']}}).compiler?.diagnostics ?? [];
-  const saved = output ? await savePlan(context, planned, output) : null;
+  if (planned.request.command.startsWith('docs ') && planned.conflicts.length) return {
+    ...result(request.command, planned.review, 'blocked'),
+    diagnostics: planned.conflicts.slice(0, 50).map(message => ({ code: 'DOCS_CONFLICT', message, next: 'Inspect --json for conflict keys; resolve fields with docs import --resolutions <file>.' })),
+  };
+  const saved = output ? await saveOperationPlan(context, planned, output) : null;
   const apply = request.command !== 'plan inspect' && !request.options['dry-run'] && (request.options.apply !== undefined || request.options.yes === true);
   if (!apply) return { ...result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned'), diagnostics };
   const expected = stringOption(request.options, 'apply') ?? planned.planHash;
@@ -91,6 +98,8 @@ async function processOperation(request: Request, context: Context): Promise<Res
   return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
 }
 async function readOperation(request: Request, context: Context): Promise<Result> {
+  if (request.command === 'prototypes list') return result(request.command, await prototypesRead(context));
+  if (request.command === 'handout validate' || request.command === 'handout inspect') return handoutRead(request, context);
   if (request.command === 'project measure') return measureProject(request, context);
   if (request.command === 'support report') return supportReport(context);
   if (['project schema', 'project validate'].includes(request.command)) return projectContractOperation(request, context);
@@ -133,6 +142,7 @@ export async function executeOperation(input: Request, context: Context): Promis
     if (command === 'starters pack') return await packStarterOperation(request, context);
     if (command === 'starters run') return await starterProcessOperation(request, context);
     if (command.startsWith('starters ') && descriptor(command).effect === 'read') return await readStarterOperation(request, context);
+    if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
       const catalog: Array<{ id: string }> = capabilityCatalog().makers;

@@ -5,7 +5,7 @@ import { posix } from 'node:path';
 import type { Entry } from './file-code.ts';
 
 const frameworkDocuments: ReadonlyMap<string, string> = new Map(
-  ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md'].map(name => [name, `docs/framework/${name}`]));
+  ['README.md', 'AGENTS.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md'].map(name => [name, `docs/framework/${name}`]));
 const maintainerWorkflows = '.github/workflows/';
 /** Where a copied framework file lives in a generated project. Maintainer workflows never run there. */
 export function relocatedPath(path: string): string {
@@ -14,7 +14,8 @@ export function relocatedPath(path: string): string {
 /** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
  * standalone design prototypes (their own apps and retained evidence) are not copied. */
 export function maintainerOnly(path: string): boolean {
-  return path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
+  return path === 'docs/concepts/companion/companion-project.json' || path.startsWith('docs/concepts/companion/seeds/')
+    || path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
     || path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
     || path.startsWith('docs/concepts/sitemap-editor/')
     || path === 'docs/concepts/native-file-integration-handoff' || path === '.github/workflows/native-source-handoff.yml'

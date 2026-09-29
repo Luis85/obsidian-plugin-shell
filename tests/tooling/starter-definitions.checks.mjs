@@ -18,8 +18,8 @@ async function seed(dir, definition = reference, name = definition.id) {
   await mkdir(join(dir, 'configs/starters'), { recursive: true });
   await writeFile(join(dir, 'configs/starters', name + '.json'), JSON.stringify(definition));
 }
-test('all twelve standalone definitions validate and carry their metadata, source and process contracts', async () => {
-  const entries = await loadDefinitions(root); assert.equal(entries.length, 12);
+test('all installed standalone definitions validate and carry their metadata, source and process contracts', async () => {
+  const entries = await loadDefinitions(root); assert.equal(entries.length, 13);
   assert.deepEqual(entries.map(entry => entry.definition.id), entries.map(entry => entry.definition.id).sort());
   for (const { definition, file, sha256 } of entries) { assert.equal(file, `configs/starters/${definition.id}.json`); assert.match(sha256, /^[a-f\d]{64}$/); assert.ok(definition.processes.length); }
   const old = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/catalog.json')));
@@ -88,7 +88,7 @@ test('file and ancestor symlinks are refused', async t => {
   await rm(join(dir, 'configs'), { recursive: true }); await symlink(join(root, 'configs'), join(dir, 'configs'), 'junction'); await assert.rejects(loadDefinitions(dir));
 });
 test('oversized files fail without parsing or execution', async t => {
-  const dir = await workspace(t); await seed(dir); await writeFile(join(dir, 'configs/starters/webapp.json'), ' '.repeat(1_048_577)); await assert.rejects(loadDefinitions(dir), /bounded|limit/i);
+  const dir = await workspace(t); await seed(dir); await writeFile(join(dir, 'configs/starters/webapp.json'), ' '.repeat(4_000_001)); await assert.rejects(loadDefinitions(dir), /bounded|limit/i);
 });
 test('rendering structured JSON escapes values while HTML escaping is explicit', () => {
   const d = validateDefinition(reference), values = resolveValues(d, { id: 'test-app', name: 'A "quoted" <App>', description: '<script>bad()</script>' });

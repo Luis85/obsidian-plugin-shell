@@ -1,3 +1,4 @@
+import { docsParserFiles } from './docs-vendor.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
@@ -9,7 +10,7 @@ import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
 const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin'];
-const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'shell.mjs', 'vitest.obsidian.config.mjs'];
+const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'shell.mjs', 'vitest.obsidian.config.mjs'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -61,6 +62,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   templatePackage.bytes = Buffer.from(json(rootPackage));
   const packageRecord = records.find(file => file.path === templatePackage.path)!;
   packageRecord.hash = hash(templatePackage.bytes); packageRecord.bytes = templatePackage.bytes.length;
+  for (const file of await docsParserFiles(context.frameworkRoot)) add(file.path, file.bytes);
   const kit: Kit = { schemaVersion: 1, version: String(pkg.version), compilerVersion: compiler.version,
     sourceHash: hash(json(sourceInventory)), files: records.sort((a, b) => a.path < b.path ? -1 : 1), bootstrap };
   files.push({ path: '.framework/kit.json', bytes: Buffer.from(json(kit)) });

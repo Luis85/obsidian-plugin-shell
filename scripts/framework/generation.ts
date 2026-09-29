@@ -8,7 +8,11 @@ import { designFile, object } from './configuration.ts';
 import { inspectDesign } from './changes.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
+import { managedGenerationPlan } from './prototype-generation.ts';
 export async function generationPlan(request: Request, context: Context) {
+  return managedGenerationPlan(request, context, generateSourcePlan);
+}
+export async function generateSourcePlan(request: Request, context: Context) {
   const input = resolve(context.root, stringOption(request.options, 'input') ?? designFile);
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');

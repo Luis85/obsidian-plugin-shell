@@ -5,6 +5,8 @@ import { spawnSync } from 'node:child_process';
 import { build } from 'vite';
 import { sharedConfig } from '../bundling/vite-shared.mjs';
 import { composeMvp } from './mvp-compose.mjs';
+import { composeStarterWorkspace } from './starter-workspace.mjs';
+import { parseDefinition } from '../starters/repository.ts';
 
 const root=process.cwd(),out=resolve(root,'reports/companion-mvp');
 await mkdir(out,{recursive:true});
@@ -20,17 +22,22 @@ const [base,bundle,css,bridge,graphStyle]=await Promise.all([
   readFile('docs/concepts/companion/index.html','utf8'),readFile(join(out,'bundle/journey.js'),'utf8'),
   readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),
 ]);
-const html=composeMvp(base,bundle,css,bridge,graphStyle);
+const prototypeBridge=await readFile('scripts/concepts/prototype-bridge.js','utf8');
+const starterBridge = await readFile('scripts/concepts/starter-bridge.js', 'utf8');
+const html=composeStarterWorkspace(composeMvp(base,bundle,css,bridge+'\n'+prototypeBridge,graphStyle), starterBridge);
 await writeFile(join(out,'index.html'),html);
-const exportResult=spawnSync(process.env.PYTHON??'python3',['-B','scripts/concepts/export-companion-project.py','--html',join(out,'index.html'),'--output',join(out,'companion-project.json')],{stdio:'inherit'});
-if(exportResult.status!==0)throw Error('MVP_EXPORT: Current self-project failed export.');
-// Named review entries distinguish the current replacement from the retained v5 compatibility fixture.
-const project=await readFile(join(out,'companion-project.json'));
+// The maintained self-project is now a starter. Compatibility exports are derived, never edited masters.
+const starterSource = 'configs/starters/companion-plugin.json';
+const starterBytes = await readFile(starterSource);
+const golden = parseDefinition(starterBytes);
+if (golden.generator.kind !== 'companion') throw Error('MVP_STARTER: Golden template must contain an authoring model.');
+const project = JSON.stringify(golden.generator.document, null, 2) + '\n';
+await writeFile(join(out, 'companion-project.json'), project);
 await Promise.all([
   writeFile(join(out,'companion-journey-lens.html'),html),
   writeFile(join(out,'companion-project-v6.json'),project),
 ]);
 const hash=v=>createHash('sha256').update(v).digest('hex');
 await writeFile(join(out,'build.json'),JSON.stringify({schema:1,scope:'Companion browser authoring, not native acceptance',
-  entry:'companion-journey-lens.html',projectEntry:'companion-project-v6.json',baseline:hash(base),html:hash(html),bundle:hash(bundle),stylesheet:hash(css),project:hash(project)},null,2)+'\n');
-console.log('Built integrated companion and full v6 self-project in reports/companion-mvp');
+  entry:'companion-journey-lens.html', startup:'empty-or-restored', starterSource, starterSha256:hash(starterBytes), projectRole:'derived-compatibility-only', projectEntry:'companion-project-v6.json',baseline:hash(base),html:hash(html),bundle:hash(bundle),stylesheet:hash(css),project:hash(project)},null,2)+'\n');
+console.log('Built empty-start Companion and derived golden-starter compatibility export in reports/companion-mvp');

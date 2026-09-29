@@ -1,3 +1,4 @@
+import { STARTER_MAX_BYTES } from './limits.ts';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { hash, readBounded, exists } from '../framework/files.ts';
@@ -25,7 +26,7 @@ export async function readStarterOperation(request: Request, context: Context) {
 }
 export async function editStarterPlan(request: Request, context: Context) {
   const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <definition.json>.');
-  const bytes = await readBounded(resolve(context.root, input)), definition = parseDefinition(bytes);
+  const bytes = await readBounded(resolve(context.root, input), STARTER_MAX_BYTES), definition = parseDefinition(bytes);
   const folder = await starterFolder(context.root), path = folder + '/' + definition.id + '.json';
   if (request.command === 'starters edit') {
     requireThat(request.args[0] === definition.id, 'STARTER_ID', 'Editing cannot change the ID; add a separate definition instead.');

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { planProject } from '../companion/compiler/plan.ts';
-import { customizeStarter } from '../companion/starter-contract.mjs';
+import { customizeStarter } from '../starters/companion.mjs';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
