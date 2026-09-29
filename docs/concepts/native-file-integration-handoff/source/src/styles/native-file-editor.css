@@ -1,0 +1,11 @@
+/* Host integration: scoped, theme-inherited, keyboard-first file editing. */
+[data-plugin-ui="plugin-shell"].native-file-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-3);
+  padding: var(--size-4-4);
+}
+[data-plugin-ui="plugin-shell"].native-file-editor label { display: flex; flex-direction: column; gap: var(--size-4-2); }
+[data-plugin-ui="plugin-shell"].native-file-editor textarea { width: 100%; min-height: 18rem; resize: vertical; font-family: var(--font-monospace); }
+[data-plugin-ui="plugin-shell"].native-file-editor button { margin-inline-end: var(--size-4-2); margin-block-end: var(--size-4-2); }
+[data-plugin-ui="plugin-shell"].native-file-editor textarea[aria-invalid="true"] { border-color: var(--text-error); }
