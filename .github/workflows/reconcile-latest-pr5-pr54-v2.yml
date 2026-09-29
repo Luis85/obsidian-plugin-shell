@@ -1,0 +1,55 @@
+name: Reconcile latest PR5 into PR54 v2
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/reconcile-latest-pr5-pr54-v2.yml]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Merge current PR5
+        shell: bash
+        env:
+          EXPECTED_FEATURE: 9edfcbb810592a8a47b591545d80ecd5241a470a
+          PR5: 84c5f2082b303740aa17d6ddc70cf5d2e75f15c3
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_FEATURE"
+          git fetch --no-tags origin "$PR5"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          set +e
+          git merge --no-commit --no-ff "$PR5"
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            printf 'Conflicts:\n%s\n' "$conflicts"
+            test "$conflicts" = "shell.mjs"
+            git checkout --theirs -- shell.mjs
+            python3 -c "from pathlib import Path; p=Path('shell.mjs'); s=p.read_text(); old=\"const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout'];\"; new=\"const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout', '--values', '--answers', '--run', '--trust-processes'];\"; assert s.count(old)==1; p.write_text(s.replace(old,new))"
+            git add shell.mjs
+          fi
+          test -z "$(git diff --name-only --diff-filter=U)"
+          git diff --check
+          git diff --cached --check
+      - name: Run merged starter/manual regressions
+        run: |
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs --check
+      - name: Commit and push merge checkpoint
+        run: |
+          git commit -m 'merge: reconcile latest PR5 Angular setup with JSON starters' -m 'Preserve PR5 first-run, Angular setup and interactive-maker changes while retaining external starter routing. shell.mjs combines the new maker routes with starter-specific legacy flags. Starter/manual regressions pass before this fast-forward push.'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
