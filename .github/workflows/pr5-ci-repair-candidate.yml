@@ -1,0 +1,69 @@
+name: PR5 CI repair candidate
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/pr5-ci-repair-candidate.yml]
+permissions:
+  contents: write
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Reconstruct only the reviewed files and verify exact source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/pr5-ci-repair-payload.b64 "$RUNNER_TEMP/ci-repair.b64"
+          git checkout -b repair-candidate d84ce5656712cd3efe4843088f78fd4984720a22
+          python - <<'PY'
+          import os, json, base64, gzip, hashlib, subprocess
+          from pathlib import Path
+          raw = gzip.decompress(base64.b64decode((Path(os.environ['RUNNER_TEMP']) / 'ci-repair.b64').read_text()))
+          assert hashlib.sha256(raw).hexdigest() == 'ef4ac129fd2a23ea8cc05662260bba4586f9cf37cb86ce9932bc677108d04e26'
+          data = json.loads(raw)
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == data['base']
+          assert len(data['files']) == 22
+          for item in data['files']:
+              path = Path(item['path'])
+              assert not path.is_absolute() and '..' not in path.parts and path.parts[0] in ['bin', 'scripts', 'tests', 'docs', 'package.json']
+              assert not path.is_symlink()
+              if item['before'] is None:
+                  assert not path.exists()
+                  content = ''
+              else:
+                  original = path.read_bytes()
+                  assert hashlib.sha256(original).hexdigest() == item['before'], item['path']
+                  content = original.decode('utf-8')
+              end = len(content)
+              for first, last, replacement in reversed(item['edits']):
+                  assert 0 <= first <= last <= end
+                  content = content[:first] + replacement + content[last:]
+                  end = first
+              output = content.encode('utf-8')
+              assert hashlib.sha256(output).hexdigest() == item['after'], item['path']
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(output)
+          subprocess.run(['git', 'add', '-A'], check=True)
+          subprocess.run(['git', 'diff', '--cached', '--check'], check=True)
+          tree = subprocess.check_output(['git', 'write-tree'], text=True).strip()
+          assert tree == data['tree'], tree
+          print('Reviewed tree:', tree)
+          PY
+          git config user.name 'Luis Mendez'
+          git config user.email '3923861+Luis85@users.noreply.github.com'
+          git commit -m 'fix: qualify consolidated maker, generated runtimes and offline Journey Lens' -m 'Preserve both preset contracts and all existing quality thresholds. Repair build-support closure, strict source checks, AOT library linking, owned failed-build cleanup, offline icon providers, semantic native readiness and legacy CLI discovery. Add abrupt-worker and foreign-lock regression tests. Source tree: 78a29046ce76a0a5faf5bda7f448b48ec51224e3.'
+          git push origin HEAD:refs/heads/fix/pr5-ci-repair-candidate
+          mkdir -p "$RUNNER_TEMP/ci-repair-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/ci-repair-evidence/source-commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/ci-repair-evidence/source-tree.txt"
+          git diff HEAD^ HEAD --stat > "$RUNNER_TEMP/ci-repair-evidence/change-summary.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr5-ci-repair-source
+          path: ${{ runner.temp }}/ci-repair-evidence/
+          retention-days: 1
+          if-no-files-found: error
