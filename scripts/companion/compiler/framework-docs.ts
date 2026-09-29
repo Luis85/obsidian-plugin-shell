@@ -16,6 +16,7 @@ export function relocatedPath(path: string): string {
 export function maintainerOnly(path: string): boolean {
   return path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
     || path.startsWith('docs/concepts/sitemap-editor/')
+    || path === 'docs/concepts/native-file-integration-handoff' || path === '.github/workflows/native-source-handoff.yml'
     || path.startsWith('docs/concepts/native-file-integration-handoff/') || path === 'tests/tooling/project-generator-native-handoff.checks.mjs'
     || path.startsWith('docs/concepts/jev-prompt-editor/') || path === 'tests/tooling/jev-concept-distribution.checks.mjs';
 }
