@@ -1,27 +1,152 @@
+# Legacy PR43 request and project compatibility
+
+This is the retained five-family reference. Default `new presets` and `new guide` now expose the eight-preset contract in [PROJECT-PRESETS.md](PROJECT-PRESETS.md); existing `prototypeRequest` inputs and `shell.project.json` projects remain supported.
+
 # Interactive Shell Maker
 
 The interactive workspace now has a full-screen keyboard-driven TUI. See
 [TUI controls, accessibility modes and terminal tests](TUI.md). Use `--ui plain`
-for the line-oriented presentation. Existing agent commands remain available.
+for the original line-oriented presentation; agent commands are unchanged.
 
 `bin/` is the TypeScript application for make-first authoring. It is included in
 framework release kits and compiler-generated projects. Use the qualified toolchain
 from the repository's `AGENTS.md` and exact lockfile; this feature adds no dependency.
 
-## Create a project
+## New project: preset, frontend, then prototype
 
-Run `node shell.mjs new` (or `node shell.mjs` without a saved project) to choose a
-project preset, select a compatible frontend, and start the prototype interview.
-Plugin, webapp, website, CLI and hybrid targets generate matching source adapters;
-design agreement and file-write approval remain separate. See the
-[project preset and agent guide](PROJECT-PRESETS.md) for the eight presets,
-noninteractive requests, generated artifacts and build-qualification boundaries.
+```sh
+node shell.mjs new
+# Alias: node shell.mjs make project
+node shell.mjs new presets --json
+node shell.mjs new guide --json
+```
+
+A fresh interactive `node shell.mjs` starts this flow. Existing workspaces keep the
+page/component studio. `node shell.mjs sketch` explicitly opens that studio even
+in a fresh directory. No existing project is converted or overwritten implicitly.
+
+| Project preset | Next frontend choice | Generated runtime |
+| --- | --- | --- |
+| Obsidian plugin | Nuxt UI (Vue), vanilla Obsidian, Angular | Native plugin entrypoint and view |
+| Web application | Nuxt UI (Vue), vanilla | Browser application |
+| Website | Vanilla, Nuxt UI enhancement | Static, linked HTML pages; content works without JavaScript |
+| Command-line application | No frontend step | Node CLI with human and JSON output |
+| Hybrid | Choose at least two runtimes, then a compatible frontend | Separate runtime outputs sharing one framework-free core |
+
+Angular hybrid can include plugin, webapp and CLI, but not website: there is no
+Angular prerender adapter. Unsupported pairs fail rather than silently selecting
+a different stack. Nuxt UI means Vue/Vite, **not a Nuxt server application**.
+
+Next comes the data-driven project prototype interview: goals, users, workflows,
+pages or commands, component placeholders, states, acceptance and design decisions.
+Unresolved questions or requested concept boards block final preparation. The
+complete brief needs explicit agreement, and the complete write plan needs a
+separate approval. Back, cancellation, help and accessible plain mode remain
+available. Choosing a stack is not approval of the product design.
+
+The resulting package contains the agreed brief, execution prompt, replayable
+`project-create.json`, catalog/guide snapshots, integration map, incomplete
+artifact manifest, Companion v6 JSON, and generated **`source/`**. The separate
+`source/shell.project.json` records runtime/frontend choices; the closed Companion
+schema is not extended with framework fields. The canonical Claude skill and its
+Codex adapter are copied, with a project-preset profile that preserves the selected
+stack instead of forcing every result back to Vue/Pinia or one HTML file.
+
+### Agent equivalence and review
+
+Discover the current catalog and guide defaults before agreeing to them. Example:
+
+```json
+{
+  "schemaVersion": 1,
+  "catalogVersion": 1,
+  "preset": "plugin",
+  "frontend": "angular",
+  "prototypeRequest": {
+    "schemaVersion": 1,
+    "guideId": "project-prototype",
+    "guideVersion": 1,
+    "answers": {
+      "title": "Issue desk",
+      "pages": ["Overview", "Issues"],
+      "components": ["Card"],
+      "approved": true
+    }
+  }
+}
+```
+
+`prototypeRequest` is intentional: the shared JSON safety boundary rejects the
+reserved key `prototype`. Hybrid adds `"targets": ["plugin", "webapp", "cli"]`.
+CLI accepts omitted frontend and resolves it to `none`.
+
+```sh
+node shell.mjs new validate --input project-create.json --json
+node shell.mjs new --input project-create.json --out projects/issue-desk --json
+# Inspect the full prompt, document and change manifest; repeat unchanged:
+node shell.mjs new --input project-create.json --out projects/issue-desk --json --apply <reviewed-planHash>
+```
+
+The TUI, plain prompts and agent mode use the same validated request, compiler
+model and safe-plan writer. Neither selection nor preparation installs packages,
+executes an AI provider, builds a finished prototype, activates a native plugin,
+creates a remote repository or publishes anything.
+
+### Use and qualify generated sources
+
+Start with the package's `execution-prompt.md`. In `source/`, use Node 24.21.0 and
+npm 11.19.1, review the generated dependency pins, then explicitly run:
+
+```sh
+npm install
+# Review and commit the resolved package-lock.json; subsequent clean installs:
+npm ci
+npm run typecheck
+npm test
+npm run build
+```
+
+Each requested target is emitted under `dist/plugin`, `dist/webapp`,
+`dist/website` or `dist/cli`. `npm run build:<target>` updates only that target and
+retains sibling outputs. Builds use an exclusive lock and staging; a failed build
+must retain the last complete output. Do not delete a stale lock without first
+checking for a live build/recovery state. Native activation requires separate
+explicit, isolated-vault qualification. Hybrid shares source/domain contracts,
+not an implied cross-runtime storage or synchronization service.
+
+The generated UI implements navigation and honest component placeholders, not the
+agreed business interactions automatically. Website Nuxt UI adds a labeled demo
+interaction without replacing static content. CLI generated commands expose the
+page/command model with structured success/failure output. The complete original
+Companion document remains available for subsequent implementation.
+
+After editing pages/components with the original shell installation and
+`--root <generated-source>`, `sketch generate` without `--kind` reuses the recorded
+preset. Generate to a separate output folder: regeneration is not a code merge
+engine. An explicit legacy `--kind` remains available. The lean generated project
+does not embed a second copy of the entire shell CLI.
+
+Catalog definitions live in `bin/guides/project-presets.json`, the new interview
+in `bin/guides/project-prototype.json`, and registered source templates in
+`scripts/compiler/presets/templates.json`. Catalog data may select existing
+emitters and narrow capabilities; adding a new framework needs an implemented,
+tested emitter, not an executable module path in user JSON. Version changes are
+explicit; old requests are not silently reinterpreted. The original
+`companion-prototype` guide remains backward compatible.
+
+`.github/workflows/project-presets.yml` separately qualifies ten fresh generated
+consumer combinations on the pinned toolchain: resolved locks and `npm ci`, source
+typechecking, core tests, bundles, actual browser/CLI interactions, CSS ownership
+and preservation after an intentionally failed build. Its logs and consumer
+lockfiles are evidence; merely generating sources is not proof these checks ran.
+Manual Obsidian activation, mobile, accessibility and business acceptance remain
+separate. No quality or coverage thresholds are reduced by this extension.
 
 ## Make a page
 
 ```sh
 node shell.mjs sketch
-# A saved project also opens its editor through: node shell.mjs
+# Existing workspace: node shell.mjs
 ```
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page
@@ -197,7 +322,3 @@ must meet 95% lines/statements/functions and 90% branches; complete maker produc
 must meet 90%/85%. Missing coverage inputs fail closed. Tests retain 450 code lines.
 Full `verify`, normal/fast `shell check`, compiled kits and generated workspaces all
 include maker checks. The dedicated CI job uses the exact pinned toolchain.
-
-## Integrated preset compatibility
-
-`new` now discovers the eight named presets documented in [PROJECT-PRESETS.md](PROJECT-PRESETS.md). The earlier five-family `prototypeRequest`/`frontend` request format is still accepted by `new --input` and `new validate`; its historical reference is [LEGACY-PROJECT-PRESETS.md](LEGACY-PROJECT-PRESETS.md). Existing `shell.project.json` projects retain their original emitter during sketch regeneration. New projects use the strict `project.config.json` sidecar. A workspace containing both sidecars is rejected rather than silently choosing one. Both formats retain plan hashes and default-No writes.

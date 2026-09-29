@@ -4,7 +4,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { readPresetCatalog, resolveProjectSelection, projectTargets, compatibleFrontends } from '../../bin/domain/project-presets.ts';
 import { loadProjectCatalog, loadProjectGuide, projectInput } from '../../bin/adapters/project-create.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
-const raw = JSON.parse(await readFile(new URL('../../bin/guides/project-presets.json', import.meta.url), 'utf8'));
+const raw = JSON.parse(await readFile(new URL('../../bin/guides/legacy-project-presets.json', import.meta.url), 'utf8'));
 const catalog = await loadProjectCatalog(), guide = await loadProjectGuide();
 const request = (selection = {}) => ({ schemaVersion: 1, catalogVersion: catalog.version, preset: 'cli', ...selection,
   prototypeRequest: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { title: 'Desk', approved: true } } });

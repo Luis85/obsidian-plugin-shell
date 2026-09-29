@@ -1,3 +1,4 @@
+import type { ProjectSelection } from '../domain/project-presets.ts';
 import type { Artifact, CompilerDiagnostic, OutputKind, StorybookOptions, TemplateSnapshot } from '../domain/contracts.ts';
 
 /** Host mechanisms are supplied by composition. The compiler cannot discover files or run tools. */
@@ -16,4 +17,5 @@ export interface CompileRequest {
   outputKind?: OutputKind;
   template?: TemplateSnapshot;
   storybook?: StorybookOptions;
+  projectSelection?: ProjectSelection;
 }

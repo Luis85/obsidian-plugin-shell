@@ -60,14 +60,14 @@ test('invalid or future stored data remains untouched and cannot restore write a
 });
 test('create and replace imports are explicit, full-validated and preserve the current file on conflicts', async t => {
   const f = fixture(t), a = await session(f); const next = importJourneyProject(seed); next.project.name = 'Imported';
-  assert.equal((await a.document.import(JSON.stringify(next), 'create')).status, 'conflict');
-  assert.equal((await a.document.import(JSON.stringify(next), 'replace')).status, 'committed');
-  assert.deepEqual(JSON.parse(f.raw()), next); await assert.rejects(a.document.import('{}', 'replace')); assert.equal(f.writes(), 1);
+  assert.equal((await a.document.importProject(JSON.stringify(next), 'create')).status, 'conflict');
+  assert.equal((await a.document.importProject(JSON.stringify(next), 'replace')).status, 'committed');
+  assert.deepEqual(JSON.parse(f.raw()), next); await assert.rejects(a.document.importProject('{}', 'replace')); assert.equal(f.writes(), 1);
 });
 test('a missing file is only created through explicit initialization, never through failed opening', async t => {
   const f = fixture(t); f.external(null); const document = f.owner.connect('project.companion.json');
   await assert.rejects(document.read()); assert.equal(f.writes(), 0);
-  assert.equal((await document.import(seed, 'create')).status, 'committed'); assert.equal(f.writes(), 1);
+  assert.equal((await document.importProject(seed, 'create')).status, 'committed'); assert.equal(f.writes(), 1);
 });
 test('closing a leaf while saving retains the committed fact and does not publish into another owner', async t => {
   const f = fixture(t), a = await session(f); let events = 0; const stop = a.document.subscribe(() => events++);

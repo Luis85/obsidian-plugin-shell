@@ -110,8 +110,8 @@ test('agent discovery, validation and failures use one JSON response without ope
     stdout.length = 0;
     assert.equal(await main(['new', action, '--json', '--root', root], frameworkRoot, io('')), 0);
     const data = JSON.parse(stdout.join('')).data;
-    if (action === 'guide') { assert.equal(data.input.prototypeRequest.answers.approved, false); assert.equal(data.input.frontend, 'nuxt-ui'); }
-    else assert.deepEqual(data.stages, ['preset', 'frontend', 'prototype', 'review', 'apply']);
+    if (action === 'guide') { assert.equal(data.input.interview.answers.approved, false); assert.equal(data.input.preset, 'plugin-nuxtui'); }
+    else assert.deepEqual(data.flow, ['preset', 'framework', 'hybrid-targets-if-needed', 'prototype', 'agreement', 'plan-review', 'apply']);
   }
   const input = { schemaVersion: 1, catalogVersion: catalog.version, preset: 'cli', prototypeRequest: {
     schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { title: 'Desk', approved: false } } };

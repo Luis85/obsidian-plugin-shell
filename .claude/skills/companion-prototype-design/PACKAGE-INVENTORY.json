@@ -9,8 +9,8 @@
     },
     {
       "path": "SKILL.md",
-      "bytes": 16397,
-      "sha256": "f53cbe2ff8f42e97763e676c6986ad42835c56037d17a702f0a8a5c85b89cdca"
+      "bytes": 16300,
+      "sha256": "2f74fd38e1f4d0c18c2fd7c4f41509d0a5b10fe69ac59a83b2410b14ba061be1"
     },
     {
       "path": "VERIFICATION.md",
@@ -99,8 +99,8 @@
     },
     {
       "path": "references/project-presets.md",
-      "bytes": 5453,
-      "sha256": "ff9a6856bf56f0bda293398ca645d5efe261af2ed6f1023b152fbd0e8bae3b77"
+      "bytes": 3429,
+      "sha256": "7bf1b8812d37e1726a68f180fa43733a372be652b997db93278cf9355feffcf6"
     },
     {
       "path": "references/repository-contract.md",
@@ -164,8 +164,8 @@
     },
     {
       "path": "scripts/lib/build-worker.mjs",
-      "bytes": 4572,
-      "sha256": "b049d433a3bc9a5f5060b74cd84613687526edc321a033434d89cf3055cd862f"
+      "bytes": 4566,
+      "sha256": "90995330a0b5d34d1567a4eaa7d1de27c0b205d551dcf3255eaf558f8bcbb50e"
     },
     {
       "path": "scripts/lib/framework.mjs",
@@ -219,8 +219,8 @@
     },
     {
       "path": "tests/integration.checks.mjs",
-      "bytes": 5655,
-      "sha256": "af78dea73b00b31ab5c82d2871c7eb44c5ac7748a26fcb0eaf61b3970efbc54b"
+      "bytes": 5649,
+      "sha256": "9071a80c115a8b848e1d6e069b458bdf1e4582525e8cbfc3681c90913519be42"
     },
     {
       "path": "tests/test_pack_concept.py",

@@ -1,93 +1,51 @@
-# Project-preset prototype profile
+# Project-preset preparation packages
 
-This reference belongs to the canonical companion-prototype-design skill. Codex
-uses the same reference through its existing thin entrypoint. It is selected by
-`source/shell.project.json` in a `node shell.mjs new` preparation package.
+The new-project flow is preset → frontend framework → explicit hybrid targets when
+applicable → data-driven prototype interview → agreement → complete plan review →
+separate default-No apply. Presets suggest defaults; the resolved framework is authoritative.
+The catalog is `bin/guides/project-presets.json`; the interview is
+`bin/guides/project-prototype.json`. Agent and terminal paths share them and the compiler.
 
-## Sequence and authority
+A prepared package carries `project.config.json`, `project-request.json`,
+`prototype-guide.json`, `prototype-answers.json`, the complete Companion document,
+`design-brief.md`, `execution-prompt.md`, integration metadata and `source/`.
+Read the agreed brief without repeating accepted questions. Selection changes reopen
+agreement. The source copy of `project.config.json` must match the parent selection.
+Never put target metadata into the closed Companion v6 envelope.
 
-Choose a project preset first, then a compatible frontend, then conduct the
-prototype interview. Hybrid requires at least two runtime targets before frontend
-selection. A CLI-only project has frontend `none` and does not ask that question.
-Changing the chosen runtime or frontend reopens the affected brief and agreement.
-The maker never installs dependencies, executes an agent, activates a plugin or
-publishes a project as a side effect of preparation.
+## Execute the selected target contract
 
-Read the package's `project-create.json`, `design-brief.md`, `execution-prompt.md`,
-`prototype.preparation.json`, and the generated `source/README.md` and `AGENTS.md`.
-`project-create.json` stores a versioned `prototypeRequest`, not a `prototype` key:
-the latter is forbidden by the shared safe-JSON boundary. Reuse the accepted
-answers and recorded catalog/guide provenance; do not interview from scratch.
-The manifest intentionally reports incomplete acceptance and unverified outputs.
+Read `source/AGENTS.md`, `source/README.md` and `source/prototype.acceptance.json`.
+Use `source/scripts/build.mjs` through the declared npm scripts. Do not invoke the
+legacy Vue-only init/build/package helpers on a project-preset package: their
+artifact/manifest assumptions are different. They remain correct for legacy
+`node shell.mjs prototype` packages. Never change the selected stack to fit a helper.
 
-## Runtime contract
+Use the pinned Node/npm. The generated root-only package-lock is explicitly
+unresolved: review and run `npm install` only when authorized, inspect the resolved
+lock, then prove a clean `npm ci`, typecheck, tests and build. No toolchain substitution.
 
-| Preset | Frontend choices | Output |
-| --- | --- | --- |
-| plugin | Nuxt UI / native DOM / Angular | Obsidian main.js, styles.css, manifest.json |
-| webapp | Nuxt UI / vanilla DOM | Browser application |
-| website | Vanilla static HTML / Nuxt UI enhancement | Individually addressable HTML pages |
-| cli | None | Node command-line program with machine protocol |
-| hybrid | Intersection supported by every selected target | Several adapters sharing one source core |
+- Plugin: independently review `dist/plugin/main.js`, `styles.css`, `manifest.json`.
+  Qualify a disposable Obsidian host only with native permission. Browser success
+  does not qualify host lifecycle. Angular uses AOT and per-view application cleanup;
+  Nuxt UI retains the pinned static-head/color guards and owned CSS; vanilla has no
+  frontend framework dependency.
+- Webapp/website: static-hostable client-rendered source and `dist/<target>/index.html`.
+  No server rendering, guaranteed SEO or remote backend is implied. Build an offline
+  `dist/prototype.html` with `npm run build:prototype`; existing output requires an
+  explicit reviewed `--replace`. Validate exact artifact no-network behavior.
+- CLI: source commands and real transcripts are the prototype. No fabricated HTML,
+  frontend library or browser acceptance. Build then test `npm run start:cli -- pages
+  --json`, invalid input, help, stdout/stderr separation and exit codes.
+- Hybrid: at least two declared targets share `src/core`, with independent host
+  entrypoints. Every target needs acceptance. No remote synchronization or desktop
+  wrapper is assumed by selecting hybrid.
 
-Nuxt UI uses Vue/Vite, not a Nuxt server. Keep the copied CSS ownership pipeline,
-local icon configuration and vendor-source hash guards. No preflight, global host
-reset or unowned teleport may escape the plugin surface. Native DOM uses Obsidian
-host tokens without a frontend framework. Angular uses scoped standalone views,
-AOT compilation, and disposal of each application/view when its host closes.
-A website is not relabeled SPA output: static content and links must remain usable
-without JavaScript. Angular is not offered for website-containing hybrids because
-this starter does not supply Angular prerendering. A hybrid shares code, not an
-automatically synchronized storage service; design persistence explicitly.
-
-## Source and generator integration
-
-`src/core/` is host- and framework-free. `src/presentation/` supplies the selected
-renderer. `src/targets/<runtime>/` owns native, browser or Node boundaries.
-`design/project.json` is the unchanged closed Companion v6 envelope; preset
-metadata stays in the separate sidecar. Navigation and placeholders are working
-scaffolds, not completed business actions. Implement the agreed interactions and
-edge cases before calling the result a prototype accepted by its users.
-
-Use the shell installation that created the package to continue authoring:
-
-```sh
-node /path/to/shell.mjs sketch --root /path/to/package/source
-node /path/to/shell.mjs sketch generate --root /path/to/package/source --out generated/next --json
-```
-
-The saved preset is used unless an explicit legacy `--kind` is requested.
-Regeneration writes to a reviewed output package; it is not a source merge engine.
-It must not overwrite consumer edits or claim that arbitrary authored interaction
-models have been implemented. The full Companion JSON is retained for follow-on
-implementation. Reconcile source edits separately; source-owned code is canonical
-for behavior not represented by the starter.
-
-The old `prototype:tools build`/browser-entry helper assumes the complete legacy
-Vue shell and must not be run against these lean sources. Use the generated
-package scripts instead. No parallel agent-host skill or hidden build dependency
-is introduced.
-
-## Build, qualify, deliver
-
-After explicit installation authority, use the pinned Node/npm toolchain. Run
-`npm install`, review/retain the generated package-lock.json, then use `npm ci` for
-subsequent clean installs. Direct pins are not a substitute for a resolved lock.
-Run `npm run typecheck`, `npm test`, and `npm run build` in `source/`.
-The build stages all requested artifacts before replacing the last complete dist.
-A failed build must leave the previous distribution intact. Retain license notices
-and document transitive dependencies before distribution.
-
-Serve dist/webapp or dist/website locally to test navigation, focus, accessibility,
-local/offline behavior and errors. Exercise CLI help/list, each command, invalid
-arguments, empty/non-TTY input, JSON output, cancellation and exit codes. Provision
-an isolated approved vault for native tests; never activate in a personal vault.
-A CLI build is not native/browser qualification, nor is a source test a bundle test.
-
-Deliver source, built artifacts for each selected target, replay request, full
-Companion JSON, integration map, license notices and actual verification evidence.
-If the agreed browser deliverable is a single offline HTML file, additionally
-bundle/assemble and test that file from the same selected-framework sources; the
-starter's ordinary dist directory alone does not meet that extra criterion.
-Report passed, failed, blocked and not-run checks with tool versions and hashes.
-Only mark manifest outputs verified after measuring the actual produced bytes.
+The scaffold projects the authored page list; arbitrary visual trees, component
+bodies and business actions remain implementation work. Preserve full design JSON,
+stable IDs and unrelated data. Never count scaffold tests as full product acceptance.
+Implement agreed actions, error recovery, keyboard/focus, cancellation and teardown.
+Add actual tests and evidence. Do not replace null hashes/incomplete manifest status
+until the deliverables are built and verified. Keep the full source handoff, exact
+lockfile, licenses, model, brief and integration map; do not package node_modules,
+secrets, personal data or fabricated QA evidence.

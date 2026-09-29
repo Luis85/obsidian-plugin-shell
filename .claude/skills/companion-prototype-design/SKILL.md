@@ -7,7 +7,7 @@ description: >-
   improvement before implementation; wants an importable companion prototype;
   wants image-based concept boards to explore UX/UI/interaction design;
   or asks to execute an approved prototype prompt. Produces a self-contained
-  HTML clickdummy or selected project-runtime prototype, with independently buildable sources,
+  HTML clickdummy or CLI transcript, independently buildable selected-stack sources,
   and the real companion project JSON when execution is authorized.
 compatibility: >-
   An agent with repository read access. Execution requires the checkout's pinned
@@ -34,15 +34,14 @@ reads this file and follows these same references and scripts. Do not fork the
 workflow, prompt templates, helper code or approval rules for an agent host.
 Use actual host capabilities; a Claude directory name never requires launching Claude.
 
-## Project-preset profile
+## Project-preset package routing
 
-For `node shell.mjs new` handoffs, read `references/project-presets.md` first.
-A versioned `shell.project.json` selects plugin, webapp, website, CLI or hybrid
-runtimes independently of the frontend. That profile overrides the legacy
-Vue/Pinia-only build and single-HTML delivery instructions below, not the common
-discovery, agreement, source-integrity, write-approval or verification rules.
-Never replace a selected vanilla or Angular implementation with Vue, or force a
-browser UI on a CLI. Without that sidecar, retain the existing plugin defaults.
+For `node shell.mjs new` packages, read `project.config.json` and
+`references/project-presets.md` **before** following the legacy Vue-only flow below.
+Its target/framework contract governs source, build and artifact requirements.
+Do not convert a vanilla, Angular or CLI selection to Vue; no HTML is required for
+CLI-only projects. Preserve explicit agreement and the separate reviewed write plan.
+This section overrides legacy stack-specific instructions, not safety or acceptance.
 
 ## Prepared maker handoff
 
@@ -186,7 +185,7 @@ Include the exact approved brief, source location/revision and drift policy, bas
 requirements, architecture, artifact paths, import contract, scoped write authority,
 subagent work packages, quality gates, failure reporting and final delivery behavior.
 Describe both machine-representable features and source-owned extension seams. Require
-real selected-framework components (Vue by default), not framework-like CSS names. Include concrete acceptance
+real Vue components, not HTML with Vue-like class names. Include concrete acceptance
 journeys and negative scenarios, not just “follow best practices.”
 
 Carry accepted concept-board decisions inline, with board IDs/revisions, image access

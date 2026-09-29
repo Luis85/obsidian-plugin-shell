@@ -1,4 +1,4 @@
-name: Project preset qualification
+name: Legacy project preset compatibility
 on:
   pull_request:
     paths: ['bin/**', 'scripts/compiler/**', 'scripts/bundling/**', '.claude/skills/companion-prototype-design/**', 'package*.json', '.github/workflows/project-presets.yml']
@@ -35,7 +35,7 @@ jobs:
         if: matrix.frontend != 'none'
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - name: Generate, resolve locks, clean-install, check, build and exercise consumers
-        run: node scripts/compiler/qualify-presets.mjs '${{ matrix.frontend }}'
+        run: node scripts/compiler/qualify-legacy-presets.mjs '${{ matrix.frontend }}'
       - name: Retain exact consumer qualification and resolved lockfiles
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

@@ -1,3 +1,4 @@
+import type { ProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from '../../scripts/framework/files.ts';
 import { artifactOrigins } from '../../scripts/compiler/adapters/origins.ts';
@@ -22,7 +23,7 @@ export function guideInput(guide: Guide, input: unknown) {
 function titles(value: unknown): string[] { return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []; }
 function prototypeDocument(answers: Answers, baseline: SketchDocument | null): SketchDocument {
   requireSketch(typeof answers.title === 'string', 'GUIDE_TITLE', 'A prototype needs a title.');
-  if (answers.mode !== 'new-plugin') requireSketch(baseline, 'PROTOTYPE_BASELINE', 'Feature/improvement mode needs --project with a complete baseline export.');
+  if (answers.mode !== undefined && !['new-plugin', 'new-project'].includes(String(answers.mode))) requireSketch(baseline, 'PROTOTYPE_BASELINE', 'Feature/improvement mode needs --project with a complete baseline export.');
   let document = baseline ?? newDocument(answers.title);
   for (const title of titles(answers.pages)) {
     if (!document.design.nodes.some(page => page.label === title)) document = runOperations(document, [{ op: 'page.add', title }]).document;
@@ -38,22 +39,22 @@ function revision(root: string): string {
   const sha = result.stdout?.trim();
   return result.status === 0 && sha && /^[a-f0-9]{40}$/.test(sha) ? sha : 'unavailable; use the exact framework snapshot fingerprint';
 }
-export async function prototypePlan(options: { root: string; frameworkRoot: string; out: string; guide: Guide; input: unknown; baseline: SketchDocument | null; signal?: AbortSignal }) {
-  const { root, frameworkRoot, out, guide, baseline, signal } = options;
+export async function prototypePlan(options: { root: string; frameworkRoot: string; out: string; guide: Guide; input: unknown; baseline: SketchDocument | null; signal?: AbortSignal; selection?: ProjectSelection }) {
+  const { root, frameworkRoot, out, guide, baseline, signal, selection } = options;
   outputBoundary(root, frameworkRoot, out);
   const { answers, pending } = guideInput(guide, options.input);
   requireSketch(pending.length === 0, 'PROTOTYPE_AGREEMENT', pending.join(' '));
   const document = prototypeDocument(answers, baseline);
-  const { compilation, template, artifacts } = await compile(document, frameworkRoot, 'clickdummy', signal);
+  const { compilation, template, artifacts } = await compile(document, frameworkRoot, selection ? 'project' : 'clickdummy', signal, selection);
   const projectJson = documentText(document), guideHash = hash(JSON.stringify(guide));
-  const brief = guideBrief(guide, answers), pkg = object(JSON.parse(template.text('package.json')));
+  const brief = guideBrief(guide, answers), pkg = object(JSON.parse(selection ? artifacts.find(item => item.path === 'package.json')!.content : template.text('package.json')));
   const context = { repository: 'Luis85/obsidian-plugin-shell', commit: revision(frameworkRoot), frameworkFingerprint: template.fingerprint,
     compilerFingerprint: compilation.fingerprint, guideId: guide.id, guideVersion: guide.version, guideHash,
     dependencyPins: { ...object(pkg.dependencies), ...object(pkg.devDependencies) }, baselineSha256: baseline ? hash(documentText(baseline)) : null,
-    projectSha256: hash(projectJson), stage: 'prepared-not-implemented', checks: 'not-run' };
+    projectSha256: hash(projectJson), stage: 'prepared-not-implemented', checks: 'not-run', ...(selection ? { selection } : {}) };
   const answersJson = JSON.stringify({ schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers }, null, 2) + '\n';
   const integration = { kind: 'prototype-integration-map', schemaVersion: 1, entries: artifactOrigins(compilation.model!, compilation.artifacts, 'companion.project.json').filter(item => item.origins.length).map(item => ({ designId: item.origins[0]!.entityId, sourceFiles: ['source/' + item.path], origins: item.origins, ownership: 'generated', testIds: [], nativeRemaining: ['Not qualified by preparation'] })) };
-  const manifest = { kind: 'obsidian-prototype-package', schemaVersion: 1, slug: slug(String(answers.title), 'prototype'), mode: answers.mode, repository: { name: context.repository, commit: context.commit }, project: { path: 'companion.project.json', sha256: hash(projectJson) }, artifact: { path: 'prototype.html', sha256: null }, source: { path: 'source', packageManager: pkg.packageManager }, status: 'incomplete' };
+  const manifest = { kind: selection ? 'project-prototype-package' : 'obsidian-prototype-package', schemaVersion: 1, slug: slug(String(answers.title), 'prototype'), mode: answers.mode ?? 'new-project', repository: { name: context.repository, commit: context.commit }, project: { path: 'companion.project.json', sha256: hash(projectJson) }, artifact: { path: selection?.framework === 'none' ? 'source/dist/cli/targets/cli/main.js' : selection ? 'source/dist/prototype.html' : 'prototype.html', sha256: null }, source: { path: 'source', packageManager: pkg.packageManager }, status: 'incomplete' };
   const values: Record<string, string> = { title: String(answers.title), slug: slug(String(answers.title), 'prototype'), brief, projectJson,
     contextJson: JSON.stringify(context, null, 2), answersJson, skillPath: prototypeSkillRoot + '/SKILL.md',
     integrationJson: JSON.stringify(integration, null, 2), manifestJson: JSON.stringify(manifest, null, 2) };
@@ -61,7 +62,12 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   const entries = guide.artifacts.map(item => ({ path: renderTemplate(item.path, values), content: renderTemplate(item.template, values) }));
   entries.push({ path: 'prototype-guide.json', content: JSON.stringify(guide, null, 2) + '\n' });
   entries.push(...artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
+  if (selection) {
+    entries.push({ path: 'project.config.json', content: JSON.stringify(selection, null, 2) + '\n' });
+    const { projectType: _type, ...request } = selection;
+    entries.push({ path: 'project-request.json', content: JSON.stringify({ ...request, interview: JSON.parse(answersJson) }, null, 2) + '\n' });
+  }
   if (baseline) entries.push({ path: 'baseline.project.json', content: documentText(baseline) });
   return packagePlan(root, out, entries, { ...context, prompt: entries.find(item => item.path === 'execution-prompt.md')?.content,
-    start: 'Read execution-prompt.md; source/ contains the independently buildable clickdummy scaffold.', readiness: compilation.readiness });
+    document, start: 'Read execution-prompt.md and source/README.md for the selected scaffold and build instructions.', readiness: compilation.readiness });
 }

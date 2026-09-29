@@ -131,7 +131,7 @@ export function useWorkspace() {
     if (staged.text !== importText.value || staged.path !== path.value || staged.mode !== importMode.value) { invalidateReview(); error.value = 'Import inputs changed. Review them again.'; return; }
     const request = staged; busy.value = true; confirmed.value = false; reviewed.value = false; error.value = '';
     try {
-      const result = await request.target.import(request.text, request.mode);
+      const result = await request.target.importProject(request.text, request.mode);
       if (stopped) return;
       if (result.status !== 'committed') {
         failedPath = request.path;

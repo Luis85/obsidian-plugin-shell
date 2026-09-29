@@ -1,3 +1,6 @@
+import { loadProjectCatalog as loadLegacyCatalog, savedProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
+import { newProjectCommand } from './project-command.ts';
+import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
 import { readInput } from '../../scripts/framework/input.ts';
@@ -10,16 +13,18 @@ import { outline } from '../application/summary.ts';
 import { sketchSchema } from '../application/schema.ts';
 import { loadGuide, guideInput, prototypePlan } from './prototype.ts';
 import { readSnapshot, readData, savePlan, applyPrepared } from './storage.ts';
-import { loadProjectCatalog, loadProjectGuide, projectInput, projectCreatePlan, savedProjectSelection, presetBoilerplatePlan } from './project-create.ts';
 import { boilerplatePlan } from './compiler.ts';
-export interface Arguments { command: 'sketch' | 'prototype' | 'studio' | 'new'; action: string; flags: Record<string, string | boolean> }
+export { option, type Arguments } from '../domain/command-options.ts';
+import { option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal }
 export const makerHelp = `Shell maker — make first, generate when ready
-  node shell.mjs                       New project or existing workspace (terminal only)
-  node shell.mjs new                   Preset → frontend → prototype guide
-  node shell.mjs new presets --json    Discover project presets and compatible frontends
-  node shell.mjs new guide --json      Discover the project prototype interview
-  node shell.mjs new --input project-create.json --out projects/my-project --json
+  node shell.mjs                       Open saved workspace or create a project (terminal only)
+  node shell.mjs new                   Preset → framework → prototype guide
+  node shell.mjs new presets --json    Discover project presets and compatible frameworks
+  node shell.mjs new guide --preset plugin-angular --json
+  node shell.mjs new validate --input request.json --json
+  node shell.mjs new --input request.json --out projects/demo --json
+  node shell.mjs new --starter <id>    Existing legacy starter path (unchanged)
   node shell.mjs sketch                Interactive page/component editor
   node shell.mjs sketch show --json    Inspect saved IDs and page composition
   node shell.mjs sketch schema --json  Discover the versioned transaction schema
@@ -31,7 +36,8 @@ export const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs prototype --input answers.json --out prototypes/my-prototype --json
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
---out <relative folder>, --kind <obsidian-plugin|clickdummy>, --guide <guide.json>,
+--out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
+--preset <id>, --framework <nuxtui|vanilla|angular|none>, --targets <comma-separated> (new guide/TUI),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -40,7 +46,7 @@ All existing shell setup/make/generate/check commands remain available.
 function parseFlags(tokens: string[]): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
   const booleans = ['json', 'no-interaction', 'help', 'no-color'];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui'];
+  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'preset', 'framework', 'targets'];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -62,30 +68,29 @@ export function parseArguments(argv: string[]): Arguments {
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens);
   requireSketch(flags.ui === undefined || ['auto', 'tui', 'plain'].includes(String(flags.ui)), 'MAKER_UI', 'Use --ui auto, tui or plain.');
-  if (command === 'new') requireSketch(!['kind', 'guide', 'project'].some(key => flags[key] !== undefined), 'PRESET_OPTION', 'new uses its versioned project guide and preset selection, not --kind, --guide or --project.');
   return { command, action, flags };
-}
-export function option(args: Arguments, name: string, fallback = ''): string {
-  const value = args.flags[name]; return typeof value === 'string' ? value : fallback;
 }
 async function inputData(args: Arguments, context: CommandContext): Promise<unknown> {
   const input = option(args, 'input');
-  requireSketch(input, 'MAKER_INPUT_REQUIRED', 'Use --input <file|-> for non-interactive authoring. Discover inputs with new guide, sketch schema or prototype guide.');
+  requireSketch(input, 'MAKER_INPUT_REQUIRED', 'Use --input <file|-> for non-interactive authoring. Discover inputs with sketch schema or prototype guide.');
   return input === '-' ? parseJsonData(await readInput(context.input, context.signal)) : readData(resolve(context.root, input));
 }
 async function generate(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   const path = option(args, 'project', 'design/project.json');
   const snapshot = await readSnapshot(context.root, path);
   requireSketch(snapshot.document, 'MAKER_PROJECT_MISSING', 'Save a sketch before generating.');
-  const catalog = await loadProjectCatalog(), selected = await savedProjectSelection(context.root, catalog);
-  if (selected && !args.flags.kind) {
-    const plan = await presetBoilerplatePlan(context.root, context.frameworkRoot, option(args, 'out', `generated/${snapshot.document.project.id}`), snapshot.document, selected, catalog, context.signal);
+  const selected = await savedProjectSelection(context.root);
+  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(context.root, catalog);
+  requireSketch(!selected || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
+  if (legacy && !args.flags.kind) {
+    const plan = await presetBoilerplatePlan(context.root, context.frameworkRoot, option(args, 'out', `generated/${snapshot.document.project.id}`), snapshot.document, legacy, catalog, context.signal);
     return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
   }
-  const kind = option(args, 'kind', 'obsidian-plugin');
-  requireSketch(kind === 'obsidian-plugin' || kind === 'clickdummy', 'MAKER_KIND', 'Use obsidian-plugin or clickdummy.');
+  const kind = option(args, 'kind', selected ? 'project' : 'obsidian-plugin');
+  requireSketch(['obsidian-plugin', 'clickdummy', 'project'].includes(kind), 'MAKER_KIND', 'Use project, obsidian-plugin or clickdummy.');
+  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json.');
   const out = option(args, 'out', `generated/${snapshot.document.project.id}`);
-  const plan = await boilerplatePlan(context.root, context.frameworkRoot, out, snapshot.document, kind, context.signal);
+  const plan = await boilerplatePlan(context.root, context.frameworkRoot, out, snapshot.document, kind as 'project' | 'obsidian-plugin' | 'clickdummy', context.signal, kind === 'project' ? selected : undefined);
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
 async function editSketch(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
@@ -123,23 +128,10 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
-async function createProject(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  requireSketch(['', 'presets', 'guide', 'validate'].includes(args.action), 'MAKER_COMMAND', 'Use new presets, guide, validate, or --input.');
-  const catalog = await loadProjectCatalog();
-  if (args.action === 'presets') return { catalog, stages: ['preset', 'frontend', 'prototype', 'review', 'apply'] };
-  const guide = await loadProjectGuide();
-  if (args.action === 'guide') return { guide, input: { schemaVersion: 1, catalogVersion: catalog.version, preset: 'plugin', frontend: 'nuxt-ui',
-    prototypeRequest: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version,
-      answers: Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default])) } } };
-  const input = await inputData(args, context);
-  if (args.action === 'validate') return projectInput(catalog, guide, input);
-  requireSketch(!args.action, 'MAKER_COMMAND', 'Use new presets, guide, validate, or --input.');
-  const plan = await projectCreatePlan({ ...context, catalog, guide, input, out: option(args, 'out', 'projects/prepared-project') });
-  return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
-}
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   if (args.flags.help || args.command === 'studio') return { help: makerHelp, commands: ['new', 'sketch', 'prototype'], interactive: false };
-  if (args.command === 'new') return createProject(args, context);
+  if (args.command === 'new') return newProjectCommand(args, context);
+  requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
   return args.command === 'sketch' ? sketch(args, context) : prototype(args, context);
 }

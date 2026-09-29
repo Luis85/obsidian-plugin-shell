@@ -33,11 +33,12 @@ export async function confirm(ui: Prompts, label: string): Promise<boolean> {
     ui.write('Enter yes or no.\n');
   }
 }
-export async function selectMany(ui: Prompts, label: string, choices: Choice[]): Promise<string[]> {
+export async function selectMany(ui: Prompts, label: string, choices: Choice[], selected: string[] = []): Promise<string[]> {
   requireSketch(choices.length > 0, 'MAKER_EMPTY_LIBRARY', 'Create a component first.');
-  if (ui.rich) return ui.rich.multi(label, choices);
+  if (ui.rich) return ui.rich.multi(label, choices, selected);
   ui.write(`\n${safe(label)}\n` + choices.map((item, index) => `  ${index + 1}. ${safe(item.label)}`).join('\n') + '\n');
-  const raw = await input(ui, 'Numbers separated by commas (:back cancels)');
+  const initial = choices.map((choice, index) => selected.includes(choice.id) ? String(index + 1) : '').filter(Boolean).join(',');
+  const raw = await input(ui, 'Numbers separated by commas (:back cancels)', initial);
   const indices = raw.split(',').map(value => Number(value.trim()) - 1);
   requireSketch(indices.length <= 60 && indices.every(index => Number.isInteger(index) && choices[index]), 'MAKER_SELECTION', 'Choose valid component numbers.');
   return [...new Set(indices)].map(index => choices[index]!.id);

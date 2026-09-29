@@ -35,7 +35,7 @@ test('process composition opens both TUI entrypoints and restores them on cancel
     for (const command of ['studio', 'new', 'sketch', 'prototype']) {
       let triggered = false;
       const f = streams((screen, input) => {
-        if (!triggered && (screen.includes('Choose a project preset') || screen.includes('Project title') || screen.includes('Prototype title'))) {
+        if (!triggered && (screen.includes('What kind of project') || screen.includes('Project title') || screen.includes('Prototype title'))) {
           triggered = true; queueMicrotask(() => input.write('\x03'));
         }
       });
@@ -51,7 +51,7 @@ test('plain and accessibility modes retain a line-oriented exit with no ANSI scr
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-plain-'));
   try {
     for (const config of [{ args: ['--ui', 'plain'], env: {} }, { args: [], env: { SHELL_ACCESSIBLE: '1' } }]) {
-      const f = streams((screen, input) => { if (screen.includes('1. Choose a project preset')) queueMicrotask(() => input.write(':back\n')); });
+      const f = streams((screen, input) => { if (screen.includes('Choose number or ID')) queueMicrotask(() => input.write(':back\n')); });
       try {
         assert.equal(await main(['studio', '--root', root, ...config.args], frameworkRoot, { ...f.io, env: config.env }), 130);
         assert.deepEqual(f.raw, []); assert.ok(!f.screen.join('').includes('\x1b'));

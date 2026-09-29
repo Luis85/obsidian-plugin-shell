@@ -6,14 +6,14 @@ export interface TextRequest {
   kind: 'text'; title: string; initial: string; multiline?: boolean; help?: string;
   validate?: (value: string) => string | undefined;
 }
-export interface SelectRequest { kind: 'select' | 'multi'; title: string; items: Item[]; initial?: string; help?: string }
+export interface SelectRequest { kind: 'select' | 'multi'; title: string; items: Item[]; initial?: string; selected?: string[]; help?: string }
 export interface ReviewRequest { kind: 'review'; title: string; sections: Section[] }
 export type Request = TextRequest | SelectRequest | ReviewRequest;
 export type Reply = { kind: 'answer'; value: string | string[] } | { kind: 'back' } | { kind: 'cancel' };
 export interface RichPrompts {
   text(request: Omit<TextRequest, 'kind'>): Promise<string>;
   select(title: string, items: Item[], initial?: string): Promise<string>;
-  multi(title: string, items: Item[]): Promise<string[]>;
+  multi(title: string, items: Item[], selected?: string[]): Promise<string[]>;
   review(title: string, sections: Section[]): Promise<void>;
   context(value: Context): void;
   busy(label: string): void;

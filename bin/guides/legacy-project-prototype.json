@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "project-prototype",
   "version": 1,
-  "title": "Prototype your selected project",
+  "title": "Design the selected project prototype",
   "steps": [
     {
-      "title": "Product and baseline",
+      "title": "Product and intended outcome",
       "fields": [
         {
           "id": "title",
@@ -27,7 +27,7 @@
           "label": "Who will use it?",
           "help": "Who will use it?. Press Enter to accept the displayed default.",
           "kind": "text",
-          "default": "A person using the selected project targets."
+          "default": "The intended users of the selected project."
         },
         {
           "id": "outcome",
@@ -43,8 +43,8 @@
       "fields": [
         {
           "id": "pages",
-          "label": "Pages or command journeys",
-          "help": "Enter titles, one per line in the TUI or separated by semicolons in plain mode. CLI journeys become shared domain pages, not a fabricated frontend.",
+          "label": "Screens, website pages, or CLI commands",
+          "help": "One title per item. These become navigable surfaces or discoverable command IDs.",
           "kind": "list",
           "default": [
             "Overview"
@@ -52,8 +52,8 @@
         },
         {
           "id": "components",
-          "label": "Components for the first page",
-          "help": "Reusable component concepts. Rendering/behavior remains explicit prototype work; CLI targets do not get UI dependencies.",
+          "label": "Reusable building blocks (optional)",
+          "help": "UI components or shared command concepts to sketch. Leave empty when not needed; business behavior is not generated.",
           "kind": "list",
           "default": []
         },
@@ -63,7 +63,7 @@
           "help": "Primary journeys. Press Enter to accept the displayed default.",
           "kind": "list",
           "default": [
-            "Open the entry page; perform the primary action; inspect the result; return or reset."
+            "Open the entry screen, page, or command; perform the primary action; inspect its result; return or reset."
           ]
         },
         {
@@ -72,9 +72,9 @@
           "help": "Explicit non-goals. Press Enter to accept the displayed default.",
           "kind": "list",
           "default": [
-            "No production data writes, native activation or deployment.",
-            "No real accounts, payments, providers or remote services.",
-            "No additional shell or platform beyond the selected targets."
+            "No production data or network writes.",
+            "No real accounts, payments or AI-provider calls.",
+            "No additional app shell unless explicitly included in the brief."
           ]
         },
         {
@@ -106,10 +106,10 @@
       "fields": [
         {
           "id": "visualDirection",
-          "label": "Visual direction",
+          "label": "Presentation and interaction conventions",
           "help": "Visual direction. Press Enter to accept the displayed default.",
           "kind": "text",
-          "default": "Readable, keyboard-operable, contextual interactions appropriate to the selected project and framework."
+          "default": "Respect the selected runtime and frontend. Use readable layouts, clear contextual actions, and native host conventions where applicable."
         },
         {
           "id": "conceptBoards",
@@ -153,10 +153,10 @@
           "help": "Observable acceptance cases. Press Enter to accept the displayed default.",
           "kind": "list",
           "default": [
-            "Given a defined starting state, completing the primary journey produces the expected local result.",
-            "Failure, invalid input and cancellation show honest recovery.",
-            "Browser prototypes open offline with no network requests; CLI prototypes exercise real commands and exit codes.",
-            "The complete Companion v6 model remains importable; target metadata stays in its sidecar."
+            "Complete the agreed primary journey in every selected runtime with an observable local result.",
+            "Failed and cancelled actions preserve saved data and expose a recovery path.",
+            "Browser outputs work without external runtime requests; CLI output obeys the documented stdout, stderr and exit-code contract.",
+            "The complete Companion JSON remains importable; native activation is a separately provisioned check."
           ]
         },
         {
@@ -201,31 +201,27 @@
   "artifacts": [
     {
       "path": "design-brief.md",
-      "template": "# {{title}} \u2014 agreed project brief\n\nSelection, defaults and answers below require explicit design agreement. They are accepted assumptions, not researched facts. File writes require separate approval.\n\n{{brief}}\n"
+      "template": "# {{title}} — agreed prototype brief\n\n## Selected project\n\n{{selectionJson}}\n\n{{brief}}\n"
     },
     {
       "path": "execution-prompt.md",
-      "template": "# Implement the {{title}} prototype\n\nWork in this package's source/ directory. Read source/AGENTS.md, project.config.json and source/{{skillPath}} first; the Codex adapter points to that same canonical skill. The project-preset package section takes precedence over the legacy Vue-only path.\n\n## Agreed project and prototype\n\n{{brief}}\n\n## Exact preparation context\n\n```json\n{{contextJson}}\n```\n\n## Implementation contract\n\nThis is a starting scaffold, NOT a completed prototype. Preserve shared src/core data and IDs, target-specific entrypoints, and the full Companion model in source/design/project.json and companion.project.json. The generated page-list projection is not a full rendering of visual definitions. Implement every agreed component, command, interaction, empty/failure/cancel state and recovery. Do not substitute Vue for vanilla or Angular, Nuxt server for Nuxt UI, or HTML for a CLI. Hybrid targets share code, not implicit remote state. Native host code must not leak into the shared core.\n\nUse the selected adapters and generated source/scripts/build.mjs. Nuxt UI retains the repository version guards and owned CSS; Angular uses AOT, zoneless per-view application creation and cleanup; vanilla has no framework; CLI has real commands, structured stdout, stderr diagnostics and meaningful exit codes. No native activation, vault writes, deployment, push or provider access is authorized. Do not remove safeguards to make a build pass.\n\n## Build and verification\n\nUse the pinned Node/npm and declared dependencies. The root-only lockfile needs explicit npm install and review before clean npm ci is meaningful. Run npm run typecheck, npm test and npm run build. For browser/plugin previews use npm run build:prototype to produce source/dist/prototype.html with bundled libraries, scoped CSS, license notices and complete embedded model; no CDN, remote imports, external fonts or fabricated readiness. For CLI use npm run start:cli and test real transcripts, failure exit codes and JSON-only stdout; there is no HTML deliverable. Hybrid needs acceptance on every selected target.\n\nRun real artifact browser/offline tests for visual targets, keyboard/focus and narrow/wide layouts, invalid data and cleanup. Native Obsidian acceptance requires a separately authorized disposable vault. Add business acceptance tests; the starting scaffold checks do not prove business behavior. Keep source below 400 and tests below 450 code lines, excluding blanks/comments. Retain existing quality thresholds where applicable.\n\nRecord exact commands, logs and not-run boundaries. Deliver the agreed prototype artifacts, source, complete Companion JSON, brief and integration map. Replace null hashes and incomplete status only after measuring real built artifacts and verifying the journeys. Retain default-No overwrite/review semantics. Use real subagents when available; otherwise report sequential work honestly.\n"
+      "template": "# Implement {{title}}\n\nWork in source/. Read AGENTS.md, shell.project.json and the bundled canonical .claude/skills/companion-prototype-design/SKILL.md. This is the project-preset profile, not the legacy fixed Vue clickdummy profile. The Codex entrypoint references that same skill.\n\n## Selected runtime contract\n\n```json\n{{selectionJson}}\n```\n\nDo not replace the selected frontend, force a browser UI onto the CLI, add a Nuxt server to an Obsidian plugin, or introduce host imports into the shared core. A website must retain separately addressable static pages. Hybrid targets share source behavior, not automatically shared storage.\n\n## Agreed design\n\n{{brief}}\n\n## Provenance and readiness\n\n```json\n{{contextJson}}\n```\n\nGeneration is not completed implementation or acceptance. Implement all agreed actions, validation, cancellation, empty/error states and recovery. Keep synthetic behavior labeled and resettable. The starting surfaces and component placeholders are not business acceptance. Companion v6 JSON remains a separate closed design envelope; do not insert preset metadata into it.\n\nUse real subagents when available for non-overlapping work packages, otherwise work sequentially and report that accurately. No commit, publication, dependency installation, network access or personal-vault activation is authorized by this handoff alone. After explicit installation, run npm run typecheck, npm test and npm run build in source/. Inspect source/README.md for each runtime and the CLI machine protocol. Follow the selected-profile note in the canonical skill; legacy Obsidian/Vue-only build helpers do not apply to other targets.\n\nKeep source files below 400 code lines and tests below 450, excluding comments/blank lines. Preserve exact dependency pins and generated ownership receipts. Add real interaction tests, failure and disposal tests; validate browser accessibility/offline behavior for browser targets and stdin/stdout/exit-code behavior for CLI. Native activation remains a separately provisioned acceptance step.\n\nDeliver built outputs, replayable project-create.json, complete design JSON, independently buildable source, updated integration-map.json, dependency/license notices and exact commands/logs/hashes. Keep prototype.manifest.json incomplete until actual target artifacts and journeys have been verified. Never equate a successful bundle with product acceptance.\n"
     },
     {
       "path": "README.md",
-      "template": "# {{title}} \u2014 project prototype preparation\n\nThis package contains the agreed selection/brief, execution-prompt.md, a complete Companion v6 document and independently buildable source. It is NOT a completed prototype. Start with execution-prompt.md.\n\nproject.config.json records the target/framework outside the Companion envelope. source/project.config.json is the same selection. project-request.json is the exact replay request for `node shell.mjs new --input <request> --out <folder> --json`; review its plan before --apply. The exact guide is retained in prototype-guide.json.\n\nSee source/README.md for target-specific dependency resolution/build commands. Dependencies, builds, business acceptance and native activation were not performed by preparation.\n"
-    },
-    {
-      "path": "INTEGRATION.md",
-      "template": "# Integration boundaries\n\nThe complete importable model is companion.project.json, mirrored in source/design/project.json. Stable IDs originate from the shared compiler. project.config.json is a separate versioned selection, never additional envelope fields.\n\nThe target adapter creates a navigable page-list scaffold and host lifecycle, not arbitrary visual/component/business execution. Source-owned implementation and component behavior must be documented in integration-map.json; do not claim arbitrary source round-trips into JSON. Read source/design/compiler-readiness.json and prototype.acceptance.json for incomplete work.\n"
-    },
-    {
-      "path": "companion.project.json",
-      "template": "{{projectJson}}"
+      "template": "# {{title}} — project prototype package\n\nStart with execution-prompt.md. source/ contains the selected runtime boilerplate, shared core, build scripts, tests and exact direct dependency pins. Read source/README.md before installing. No dependencies have been installed, no generated build has run and no native plugin has been activated by preparation.\n\nReview project-create.json before replaying it with node shell.mjs new --input <file> --out <folder> --json. Apply requires the exact returned planHash; edited files are preserved. prototype-guide.json captures the guide used.\n"
     },
     {
       "path": "prototype-answers.json",
-      "template": "{{answersJson}}"
+      "template": "{{answersJson}}\n"
     },
     {
       "path": "prototype.preparation.json",
       "template": "{{contextJson}}\n"
+    },
+    {
+      "path": "companion.project.json",
+      "template": "{{projectJson}}"
     },
     {
       "path": "integration-map.json",
@@ -234,6 +230,14 @@
     {
       "path": "prototype.manifest.json",
       "template": "{{manifestJson}}\n"
+    },
+    {
+      "path": "INTEGRATION.md",
+      "template": "# Integration\n\ncompanion.project.json and source/design/project.json preserve the Companion v6 design envelope. source/shell.project.json carries the separate preset and runtime contract. source/src/core owns host-free behavior; src/presentation owns the selected renderer; src/targets owns runtime integration. The compiled seed preserves surface/component IDs. Source-owned business behavior does not automatically round-trip into design JSON.\n\nRegeneration protects edited/unowned files. Changing preset or frontend is not a migration: choose a new output directory and reconcile deliberately. Hybrid runtimes share source but not memory, authentication, storage or synchronization across processes. No service or backend is implied.\n"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.md",
+      "template": "# Third-party notices\n\nThe framework LICENSE is retained in source/. Resolve the exact direct pins after explicit installation, retain package-lock.json and generate the complete dependency license inventory before distributing a built product. Preparation is not a complete transitive license inventory.\n"
     }
   ]
 }

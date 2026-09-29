@@ -22,14 +22,13 @@ check('compiled maker kit discovers TUI and guide contracts before installing an
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
     await assert.rejects(() => readFile(join(root, 'node_modules/typescript/package.json')));
-    for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['new', 'presets', '--json'], ['new', 'guide', '--json']]) {
+    for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['new', 'presets', '--json'], ['new', 'guide', '--preset', 'cli', '--json']]) {
       const run = spawnSync(process.execPath, ['shell.mjs', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
       assert.equal(run.status, 0, run.stderr + run.stdout);
       const result = JSON.parse(run.stdout); assert.equal(result.status, 'ok');
       if (args[0] === 'studio') assert.match(result.data.help, /--ui <auto\|tui\|plain>/);
+      if (args[0] === 'new') assert.ok(args[1] === 'presets' ? result.data.catalog.presets.length === 8 : result.data.selection.framework === 'none');
       if (args[0] === 'prototype') assert.equal(result.data.guide.id, 'companion-prototype');
-      if (args[0] === 'new' && args[1] === 'presets') assert.equal(result.data.catalog.presets.length, 5);
-      if (args[0] === 'new' && args[1] === 'guide') assert.equal(result.data.guide.id, 'project-prototype');
     }
     const screen = await readFile(join(root, '.framework/compiled/bin/presentation/tui/session.js'), 'utf8');
     assert.match(screen, /node:readline/); assert.ok(!screen.includes("from './state.ts'"));

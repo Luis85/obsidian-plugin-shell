@@ -13,9 +13,9 @@ import { loadGuide, guideInput } from './prototype.ts';
 import { readData } from './storage.ts';
 import { outputBoundary, packagePlan } from './package-plan.ts';
 export async function loadProjectCatalog(): Promise<PresetCatalog> {
-  return readPresetCatalog(await readData((await import('node:url')).fileURLToPath(new URL('../guides/project-presets.json', import.meta.url))));
+  return readPresetCatalog(await readData((await import('node:url')).fileURLToPath(new URL('../guides/legacy-project-presets.json', import.meta.url))));
 }
-export function loadProjectGuide(): Promise<Guide> { return loadGuide(new URL('../guides/project-prototype.json', import.meta.url)); }
+export function loadProjectGuide(): Promise<Guide> { return loadGuide(new URL('../guides/legacy-project-prototype.json', import.meta.url)); }
 export function projectInput(catalog: PresetCatalog, guide: Guide, input: unknown) {
   const data = object(input); keys(data, ['schemaVersion', 'catalogVersion', 'preset', 'frontend', 'targets', 'prototypeRequest']);
   requireSketch(data.schemaVersion === 1 && data.catalogVersion === catalog.version, 'PRESET_INPUT_VERSION', 'Use the current schemaVersion/catalogVersion from new presets.');
