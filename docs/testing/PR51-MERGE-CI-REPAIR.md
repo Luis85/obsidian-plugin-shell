@@ -59,3 +59,26 @@ provide that qualification. The PR conversation records the resulting run IDs
 and current statuses without relabeling pending, failed or cancelled jobs.
 
 No PR merge, release, activation or personal-vault operation is part of this repair.
+
+## Candidate-specific analyzer follow-through
+
+Hosted workflow **36624015684** at `560c05ed0941bbd498041c2e8e063182ceaa8fd0`
+confirmed the two duplicate exports were eliminated. Its new full-analyzer gate
+also identified five previously unqualified items from the incoming handout:
+`HANDOUT_VERSION`, `questionIndex`, `inspectLocalPath` and `readHandout` were
+exported despite having only same-module callers; `scripts/handout.mjs` is a
+documented, exercised standalone executable but was absent from the analyzer's
+explicit entry list.
+
+The four implementation details are now module-private. The single standalone
+entry is explicitly registered in `.fallowrc.json`, just like other supported
+executables. It and all reachable code remain analyzed; no ignore/suppression,
+directory exemption, removed functionality or rule change is used. The compiled
+kit regression checks that this entry stays registered.
+
+After these corrections, framework typechecking and the same **159/159** local
+tests passed. The updated candidate's hosted full analyzer, architecture,
+feature and broad workflows must provide their own results; the failed earlier
+run is not relabeled green. The previous local generated-document check also
+resolved **1,331 links across 338 documents**, using the unchanged isolated
+Markdown-link helper rather than claiming the full CSS-dependent repository gate.
