@@ -92,9 +92,9 @@ test('CLI human help, human failures and terminal cancellation do not pollute ma
   assert.ok(errors.length > 0);
   const input = new PassThrough(); input.isTTY = true;
   const terminal = new Writable({ write(chunk, _encoding, done) {
-    if (String(chunk).includes('Choose number or ID')) queueMicrotask(() => input.write(':back\n'));
+    if (String(chunk).includes('Project title')) queueMicrotask(() => input.end());
     done();
   } }); terminal.isTTY = true;
-  assert.equal(await main(['studio', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
+  assert.equal(await main(['sketch', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
   input.destroy();
 }));

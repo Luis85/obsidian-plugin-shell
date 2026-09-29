@@ -18,6 +18,9 @@ const commands = [
   // The qualified build creates Nuxt's generated type inputs before type-aware
   // lint probes inspect a fresh checkout. Verification never invents those types.
   ['scripts/bundling/build.mjs'],
+  // Catch integration inventory defects before expensive compiler/install suites.
+  // The later analyzer pass is retained to catch drift left by those suites.
+  ['scripts/quality/check-analyzer.mjs'],
   // Tooling suites launch real compilers/installers; serialize them to avoid
   // oversubscribed cold-start processes and cross-suite source-probe races.
   process.env.SHELL_EVIDENCE_TOOLING === '1'

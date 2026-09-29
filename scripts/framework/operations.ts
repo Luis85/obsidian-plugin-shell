@@ -1,3 +1,7 @@
+import { measureProject } from './project-measure.ts';
+import { supportReport } from './support-report.ts';
+import { setupProgress } from './setup-progress.ts';
+import { projectContractOperation } from './project-contract.ts';
 import { storybookOperation } from './storybook.ts';
 import { airshipOperation } from './airship.ts';
 import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
@@ -85,6 +89,9 @@ async function processOperation(request: Request, context: Context): Promise<Res
   return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
 }
 async function readOperation(request: Request, context: Context): Promise<Result> {
+  if (request.command === 'project measure') return measureProject(request, context);
+  if (request.command === 'support report') return supportReport(context);
+  if (['project schema', 'project validate'].includes(request.command)) return projectContractOperation(request, context);
   if (request.command === 'concept schema') return result(request.command, conceptSchema());
   if (request.command === 'concept inspect') return result(request.command, await inspectConcept(request, context));
   if (request.command === 'version') {
@@ -128,6 +135,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       requireThat(makers.length > 0, 'MAKER_UNKNOWN', `Supply an existing recipe ID; use make list.${didYouMean(suggestions(request.args[1] ?? '', catalog.map(item => item.id)), value => `"${value}"`)}`);
       return result(command, { makers });
     }
+    if (command === 'setup status' || command === 'setup resume') return await setupProgress(request, context, executeOperation);
     if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
     if (command.startsWith('storybook ')) return await storybookOperation(request, context);
     if (command.startsWith('compiler ')) return await compilerOperation(request, context);

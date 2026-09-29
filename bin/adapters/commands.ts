@@ -1,3 +1,4 @@
+import { loadProjectCatalog as loadLegacyCatalog, savedProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';
@@ -79,6 +80,12 @@ async function generate(args: Arguments, context: CommandContext): Promise<Recor
   const snapshot = await readSnapshot(context.root, path);
   requireSketch(snapshot.document, 'MAKER_PROJECT_MISSING', 'Save a sketch before generating.');
   const selected = await savedProjectSelection(context.root);
+  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(context.root, catalog);
+  requireSketch(!selected || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
+  if (legacy && !args.flags.kind) {
+    const plan = await presetBoilerplatePlan(context.root, context.frameworkRoot, option(args, 'out', `generated/${snapshot.document.project.id}`), snapshot.document, legacy, catalog, context.signal);
+    return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
+  }
   const kind = option(args, 'kind', selected ? 'project' : 'obsidian-plugin');
   requireSketch(['obsidian-plugin', 'clickdummy', 'project'].includes(kind), 'MAKER_KIND', 'Use project, obsidian-plugin or clickdummy.');
   requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json.');

@@ -1,3 +1,4 @@
+import { legacyProjectCommand } from './legacy-project-command.ts';
 import { resolve } from 'node:path';
 import { readInput } from '../../scripts/framework/input.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
@@ -30,6 +31,7 @@ export async function newProjectCommand(args: Arguments, context: CommandContext
   const input = option(args, 'input');
   requireSketch(input, 'MAKER_INPUT_REQUIRED', 'Use new guide --preset <id> --json to discover the request, then new --input <file|-> --json.');
   const data = input === '-' ? parseJsonData(await readInput(context.input, context.signal)) : await readData(resolve(context.root, input));
+  if (data !== null && typeof data === 'object' && Object.hasOwn(data, 'prototypeRequest')) return legacyProjectCommand(args, context, data);
   if (args.action === 'validate') {
     requireSketch(!args.flags.apply && !args.flags.out, 'PROJECT_OPTION', 'Validation never writes; omit --apply and --out.');
     const request = await projectRequest(data);

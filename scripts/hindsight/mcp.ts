@@ -29,16 +29,31 @@ export function discoverTools(repo: Identity, p: Paths, agent: string, timeout =
     const child = spawn(process.execPath, [script], { cwd: repo.root, stdio: ['pipe', 'pipe', 'pipe'], shell: false,
       env: { ...process.env, HINDSIGHT_CONFIG: p.config, HINDSIGHT_MCP_HARNESS: agent, HINDSIGHT_MCP_PROJECT_CWD: repo.root } });
     const decoder = new TextDecoder('utf-8', { fatal: true });
-    let buffer = ''; let bytes = 0; let settled = false;
+    let buffer = ''; let bytes = 0; let stopping = false; let settled = false;
+    let failed = true; let discovered: unknown[] = [];
+    let forceTimer: ReturnType<typeof setTimeout> | undefined;
+    let closeTimer: ReturnType<typeof setTimeout> | undefined;
+    const settle = (cleanupFailed = false) => {
+      if (settled) return; settled = true; clearTimeout(timer); clearTimeout(forceTimer); clearTimeout(closeTimer);
+      if (failed || cleanupFailed) reject(new MemoryError('MCP_DISCOVERY_FAILED', 'The official MCP server did not complete initialize/tools-list and process shutdown. Check registration, restart the client and rerun memory doctor.'));
+      else resolve({ ok: true, code: 'MCP_DISCOVERED', agent, tools: discovered, daemonStarted: false, inferenceVerified: false });
+    };
     const finish = (error: boolean, tools: unknown[] = []) => {
-      if (settled) return; settled = true; clearTimeout(timer); child.kill();
-      if (error) reject(new MemoryError('MCP_DISCOVERY_FAILED', 'The official MCP server did not complete initialize/tools-list. Check registration, restart the client and rerun memory doctor.'));
-      else resolve({ ok: true, code: 'MCP_DISCOVERED', agent, tools, daemonStarted: false, inferenceVerified: false });
+      if (stopping || settled) return; stopping = true; failed = error; discovered = tools; clearTimeout(timer);
+      // A kill request is not process closure. Keep ownership until close, including
+      // error/timeout paths; never make filesystem cleanup race a still-running child.
+      child.stdin.end(); child.kill();
+      forceTimer = setTimeout(() => child.kill('SIGKILL'), 250);
+      closeTimer = setTimeout(() => {
+        settle(true); child.stdin.destroy(); child.stdout.destroy(); child.stderr.destroy(); child.unref();
+      }, 2000);
     };
     const timer = setTimeout(() => finish(true), timeout);
-    const send = (value: unknown) => child.stdin.write(JSON.stringify(value) + '\n');
-    child.stdin.on('error', () => finish(true)); child.stderr.resume(); child.on('error', () => finish(true)); child.on('exit', () => finish(true));
+    const send = (value: unknown) => { if (!stopping && !settled) child.stdin.write(JSON.stringify(value) + '\n'); };
+    child.stdin.on('error', () => finish(true)); child.stderr.resume(); child.on('error', () => finish(true));
+    child.once('close', () => settle());
     child.stdout.on('data', (chunk: Buffer) => {
+      if (stopping || settled) return;
       bytes += chunk.length; if (bytes > 1024 * 1024) { finish(true); return; }
       try { buffer += decoder.decode(chunk, { stream: true }); } catch { finish(true); return; }
       let newline: number;

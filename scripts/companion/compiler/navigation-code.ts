@@ -1,19 +1,22 @@
 import { literal, type Model } from './model.ts';
 import { relativeImport, type Add } from './file-code.ts';
+import { editorBindings } from '../sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '../sitemap/model.ts';
 export function navigationCode(m: Model, add: Add): void {
+  const journey = editorBindings(m.document.design as SitemapDesign).length > 0;
   const root = m.sourceRoot; const test = `${m.testRoot}/navigation.test.ts`;
   add(`${root}/domain/screens.ts`,`export interface Screen { id: string; slug: string; label: string; kind: string; parent: string | null; nav: boolean; entry: boolean; command: boolean; ribbon: boolean; goal: string; components: string[] }\nexport interface Interaction { id: string; from: string; to: string; label: string; kind: string }\nexport const screens: Screen[] = ${literal(m.screens)};\nexport const interactions: Interaction[] = ${literal(m.links)};\n`,'managed');
   add(`${root}/presentation/stores/navigation.ts`,`import { defineStore } from 'pinia';
 import { screens, interactions } from '../../domain/screens.ts';
 export const useNavigation = defineStore(${literal(String(m.project.id)+':navigation')}, {
-  state: () => ({ current: screens.find(s => s.nav && !['group','action','modal'].includes(s.kind))?.id ?? screens.find(s => !['group','action','modal'].includes(s.kind))!.id, history: [] as string[] }),
+  state: () => ({ current: screens.find(s => s.nav && !['group','action','modal'].includes(s.kind))?.id ?? screens.find(s => !['group','action','modal'].includes(s.kind))!.id, history: [] as string[]${journey ? ', leaveGuard: null as (() => boolean) | null' : ''} }),
   actions: {
     open(id: string) {
       const screen = screens.find(s => s.id === id);
       if (!screen || ['action','group'].includes(screen.kind)) throw new Error('SCREEN_NOT_NAVIGABLE');
-      if (this.current !== id) { this.history.push(this.current); this.current = id; }
+      ${journey ? "if (this.current !== id && this.leaveGuard && !this.leaveGuard()) return;\n      " : ''}if (this.current !== id) { this.history.push(this.current); this.current = id; }
     },
-    back() { const id = this.history.pop(); if (id) this.current = id; },
+    back() { ${journey ? 'if (this.leaveGuard && !this.leaveGuard()) return; ' : ''}const id = this.history.pop(); if (id) this.current = id; },
     follow(id: string) {
       const edge = interactions.find(e => e.id === id && e.from === this.current);
       if (!edge) throw new Error('INTERACTION_NOT_AVAILABLE');

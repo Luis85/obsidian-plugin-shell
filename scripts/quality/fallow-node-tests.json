@@ -6,6 +6,7 @@
   },
   "entryPointRole": "test",
   "entryPoints": [
+    "scripts/compiler/verify-preview-host.mjs",
     "tests/runtime/types.ts",
     "tests/tooling/*.checks.mjs",
     "tests/tooling/*.test.mjs",

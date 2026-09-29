@@ -191,7 +191,8 @@
     "scripts/framework/cli.ts",
     "scripts/concepts/mvp-bridge.js",
     "bin/shell.ts",
-    "scripts/makers/cli.mjs"
+    "scripts/makers/cli.mjs",
+    "scripts/compiler/qualify-presets.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

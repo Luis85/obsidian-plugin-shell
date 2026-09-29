@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
 let compiled = join(root, '.framework/compiled/scripts/framework/cli.js');
 let args = process.argv.slice(2);
+if (args[0] === 'make' && args[1] === 'project') args = ['new', ...args.slice(2)];
 if (args[0] === 'make' && args[1] === 'prototype') args = ['prototype', ...args.slice(2)];
 if (args[0] === 'help' && ['new', 'sketch', 'prototype', 'studio'].includes(args[1])) args = [args[1], '--help', ...args.slice(2)];
 const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout'];
