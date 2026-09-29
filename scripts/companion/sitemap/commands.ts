@@ -1,3 +1,4 @@
+import { removeSitemapRecord, editSitemapTransition } from './maintenance.ts';
 import type { RemovalImpact, SitemapCommand, SitemapDesign, Surface } from './model.ts';
 import { SITEMAP_LIMITS } from './model.ts';
 import { canonicalKey, assertJson, id, sitemapObject as object, record, requireSitemap, sitemapText as text } from './safety.ts';
@@ -9,6 +10,7 @@ function assertCommand(value: unknown): asserts value is SitemapCommand {
   requireSitemap(record(value), 'SITEMAP_SHAPE', 'Expected an editor command.');
   switch (value.type) {
     case 'create': object(value, ['type', 'surface']); requireSitemap(record(value.surface), 'SITEMAP_SHAPE', 'Expected a new surface.'); break;
+    case 'transition-edit':
     case 'link': object(value, ['type', 'transition']); requireSitemap(record(value.transition), 'SITEMAP_SHAPE', 'Expected a transition.'); break;
     case 'move':
       object(value, ['type', 'surface', 'parent', 'before']); id(value.surface);
@@ -20,6 +22,8 @@ function assertCommand(value: unknown): asserts value is SitemapCommand {
     case 'route': object(value, ['type', 'route']); requireSitemap(record(value.route), 'SITEMAP_SHAPE', 'Expected a route.'); break;
     case 'journey': object(value, ['type', 'journey']); requireSitemap(record(value.journey), 'SITEMAP_SHAPE', 'Expected a journey.'); break;
     case 'feature': object(value, ['type', 'feature']); requireSitemap(record(value.feature), 'SITEMAP_SHAPE', 'Expected a feature.'); break;
+    case 'transition-remove': case 'route-remove': case 'journey-remove':
+      object(value, ['type','id','review']); id(value.id); text(value.review,SITEMAP_LIMITS.reviewBytes); break;
     case 'remove': object(value, ['type', 'surface', 'review']); id(value.surface); text(value.review, SITEMAP_LIMITS.reviewBytes); break;
     default: requireSitemap(false, 'SITEMAP_COMMAND', 'Unknown sitemap command.');
   }
@@ -135,6 +139,10 @@ export function applySitemapCommand<T extends SitemapDesign>(design: T, command:
     case 'link':
       next.links.push(structuredClone(command.transition));
       advanceCounter(next, command.transition.id); break;
+    case 'transition-edit': editSitemapTransition(next, command.transition); break;
+    case 'transition-remove': removeSitemapRecord(next,'transition',command.id,command.review); break;
+    case 'route-remove': removeSitemapRecord(next,'route',command.id,command.review); break;
+    case 'journey-remove': removeSitemapRecord(next,'journey',command.id,command.review); break;
     case 'move': move(next, command); break;
     case 'rename': surface(next, command.surface).label = command.label; break;
     case 'arrange':

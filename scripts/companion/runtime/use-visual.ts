@@ -13,6 +13,10 @@ export interface VisualPort {
 }
 export interface VisualContext {
   ports: VisualPort[];
+  /** Optional per-definition scenario selection supplied by a preview owner, never a source provider. */
+  scenario?(definitionId: string): string | undefined;
+  /** Inherited by nested definitions and dialogs even when they have no selected scenario. */
+  scenarioReadOnly?(): boolean;
   navigate(target: string): void;
   handle(request: VisualRequest): Promise<unknown>;
 }
@@ -27,6 +31,8 @@ const requiredImplementation = (error: unknown) => error instanceof Error && (er
 export function useVisual(spec: VisualSpec, props: { designState?: VisualState; designScenario?: string } & Record<string, unknown>,
   emitInteraction: (request: VisualRequest) => void, emitDeclared?: (event: string, payload: unknown) => void) {
   const context = inject(visualKey, undefined); const index = visualIndex(spec);
+  const scenarioId = () => props.designScenario ?? context?.scenario?.(spec.id);
+  const scenarioReadOnly = () => Boolean(scenarioId() || context?.scenarioReadOnly?.());
   const values = shallowReactive<Record<string, DetailData>>({}); const drafts = shallowReactive<Record<string, unknown>>({});
   const errors = reactive<Record<string, string>>({}); const pending = ref(false); const message = ref('');
   const session = reactive<Session>(visualSession()), localState = ref<VisualState | null>(null), narrow = ref(false), host = ref<HTMLElement | null>(null), dark = ref(false);
@@ -40,7 +46,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   function derive(ownPending: boolean): VisualState {
     if (localState.value) return localState.value;
     if (props.designState) return props.designState;
-    if (props.designScenario) return session.state;
+    if (scenarioId()) return session.state;
     if ((ownPending && pending.value) || ports().some(p => p.pending)) return 'loading';
     if (message.value || ports().some(p => p.error)) return 'error';
     if (ports().some(p => Array.isArray(p.data) && p.data.length === 0)) return 'empty';
@@ -52,12 +58,12 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   /** Unproxied copy for visualTransition, which structured-clones its input. */
   const frozen = (): Session => ({ ...toRaw(session), values: { ...toRaw(values) }, state: derive(false), width: width() });
   onScopeDispose(() => { disposed = true; for (const mount of externals.values()) teardown(mount); observer?.disconnect(); themeObserver?.disconnect(); host.value = null; });
-  watch(() => props.designScenario, id => {
+  watch(scenarioId, id => {
     const next = visualSession(spec.scenarios.find(s => s.id === id)); epoch++;
     for (const target of [values, drafts, errors, session.hidden]) for (const key of Object.keys(target)) delete target[key];
     for (const [key, value] of Object.entries(next.values)) values[key] = copyDetailData(value);
     session.bindings = next.bindings; session.state = next.state; session.width = next.width; session.focused = null; session.emitted = [];
-    localState.value = null; narrow.value = next.width === 'narrow'; message.value = '';
+    localState.value = null; narrow.value = next.width === 'narrow'; message.value = ''; pending.value = false;
   }, { immediate: true });
   function sourceData(sourceId: string, operationId: string): unknown {
     const fixture = session.bindings.find(b => b.sourceId === sourceId && b.operationId === operationId);
@@ -119,7 +125,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
       if (spec.kind === 'page') return; // pages record emits in the session only
       if (!emitDeclared) throw new Error('VISUAL_EMITTER_MISSING'); emitDeclared(action.event, input); return;
     }
-    if (props.designScenario) throw new Error('VISUAL_SCENARIO_READ_ONLY');
+    if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY');
     const port = findPort(action.sourceId, action.operationId); if (!port) throw new Error('VISUAL_PORT_MISSING: ' + nodeId);
     const outcome = await port.run(input);
     if (!outcome || typeof outcome !== 'object' || !('ok' in outcome) || outcome.ok !== true) throw new Error('VISUAL_SOURCE_FAILED');
@@ -139,7 +145,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
         const request: VisualRequest = { definitionId: spec.id, nodeId, interactionId: interaction.id, event: interaction.event, values: captured, payload };
         emitInteraction(request);
         if (stale()) return;
-        if (!actions.length) { if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); if (stale()) return; continue; }
+        if (!actions.length) { if (scenarioReadOnly()) throw new Error('VISUAL_SCENARIO_READ_ONLY'); if (!context) throw new Error('VISUAL_CONTEXT_MISSING'); await context.handle(request); if (stale()) return; continue; }
         visualTransition(spec, frozen(), nodeId, interaction.id); // refuses a disabled source or hidden focus target before any effect
         for (const action of actions) {
           if (!VISUAL_RUNTIME_LOCAL.includes(action.kind)) { await perform(nodeId, action, { ...validated, ...snapshot(false) }, payload); if (stale()) return; }
@@ -149,7 +155,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
       }
     } catch (error) {
       if (!stale()) message.value = requiredImplementation(error) ? 'Interaction implementation required.' : 'The interaction could not be completed. Your input is retained.';
-    } finally { if (!disposed) pending.value = false; }
+    } finally { if (!stale()) pending.value = false; }
   }
   function trigger(nodeId: string, event: string, payload: unknown): void {
     const node = index.get(nodeId);
@@ -222,7 +228,7 @@ export function useVisual(spec: VisualSpec, props: { designState?: VisualState; 
   function attach(value: unknown): void {
     if (!isElement(value) || host.value === value) return;
     host.value = value; observer?.disconnect();
-    if (typeof ResizeObserver !== 'undefined') { observer = new ResizeObserver(entries => { const size = entries[0]?.contentRect.width; if (size && !props.designScenario) narrow.value = size <= 640; }); observer.observe(value); }
+    if (typeof ResizeObserver !== 'undefined') { observer = new ResizeObserver(entries => { const size = entries[0]?.contentRect.width; if (size && !scenarioId()) narrow.value = size <= 640; }); observer.observe(value); }
     const body = value.ownerDocument.body, root = value.ownerDocument.documentElement;
     const readTheme = () => { dark.value = body.classList.contains('theme-dark') || root.dataset.theme === 'dark'; }; readTheme();
     if (typeof MutationObserver !== 'undefined') { themeObserver?.disconnect(); themeObserver = new MutationObserver(readTheme); themeObserver.observe(body, { attributes: true, attributeFilter: ['class'] }); themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme'] }); }

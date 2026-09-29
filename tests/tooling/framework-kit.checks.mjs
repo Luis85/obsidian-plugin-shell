@@ -59,6 +59,16 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   const source = join(dir, 'app/source/generated/infrastructure/sources/authoring-vault.ts'); await writeFile(source, (await readFile(source, 'utf8')) + '\n// developer edit\n');
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.match(await readFile(source, 'utf8'), /developer edit/);
   output = cli(dir, ['status', '--json']); assert.equal(output.status, 0, output.stderr); assert.ok(JSON.parse(output.stdout).diagnostics.some(item => item.code === 'ACCEPTANCE_PENDING'));
+  // The extracted CLI must bind inherited framework source even with app/source + spec.
+  output = cli(dir, ['setup', 'status', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
+  const approval = JSON.parse(output.stdout).data;
+  const inherited = join(dir, 'src/main.ts');
+  await writeFile(inherited, (await readFile(inherited, 'utf8')) + '\n// independent inherited-source edit\n');
+  output = cli(dir, ['setup', 'resume', '--stage', 'verify', '--resume-hash', approval.resumeHash, '--yes', '--json']);
+  assert.equal(output.status, 1, output.stderr + output.stdout);
+  assert.equal(JSON.parse(output.stdout).diagnostics[0].code, 'SETUP_INPUT_CHANGED');
+  assert.ok(!(await readdir(join(dir, '.framework'))).includes('setup-progress.json'), 'stale approval cannot write stage intent');
+  assert.ok(!(await readdir(dir)).includes('node_modules'), 'stale approval cannot launch dependency tooling');
   const compiled = join(dir, '.framework/compiled/scripts/framework/catalog.js'); await writeFile(compiled, (await readFile(compiled, 'utf8')) + '\n// drift\n');
   await assert.rejects(verifyKit(dir), /fingerprint mismatch/);
 });

@@ -11,13 +11,22 @@
     {"path": "tests/e2e"},
     {"path": "tests/obsidian", "optional": true},
     {"path": "tests/project", "optional": true},
-    {"path": "tests/hindsight", "optional": true}
+    {"path": "tests/hindsight", "optional": true},
+    {"path": "docs/concepts/native-file-integration-handoff/tests", "optional": true}
   ],
   "helperRoots": ["tests/support", "tests/fixtures"],
   "prerequisites": {
+    "handoff-python": {
+      "probe": ["{python}", "-c", "import sys; assert sys.version_info >= (3, 12)"],
+      "hint": "Use Python 3.12+ or set PYTHON; native-handoff is an explicit maintainer-only suite."
+    },
     "python3": {
       "probe": ["{python}", "--version"],
       "hint": "Install Python 3.11+ or set PYTHON to an interpreter."
+    },
+    "python-jsonschema": {
+      "probe": ["{python}", "-c", "import jsonschema"],
+      "hint": "Install jsonschema==4.26.0 in an isolated venv and set PYTHON. This is separate test tooling, not a runtime dependency."
     },
     "python-playwright": {
       "probe": ["{python}", "-c", "import playwright"],
@@ -87,6 +96,17 @@
       "workflows": [
         "interactive-maker"
       ]
+    },
+    {
+      "name": "native-handoff",
+      "purpose": "Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics.",
+      "runner": {"type": "command", "commands": [["{python}", "-B", "-m", "unittest", "discover", "-s", "docs/concepts/native-file-integration-handoff/tests", "-v"]]},
+      "include": ["docs/concepts/native-file-integration-handoff/tests/test_*.py"],
+      "prerequisites": ["handoff-python"],
+      "optional": true,
+      "verify": "opt-in",
+      "workflows": ["native-source-handoff"]
+
     },
     {
       "name": "airship",
@@ -248,6 +268,14 @@
       "verify": "tooling",
       "npmScript": "test:companion",
       "workflows": ["companion-concept-verification", "ci"]
+    },
+    {
+      "name": "companion:schema",
+      "purpose": "Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus.",
+      "runner": {"type": "command", "commands": [["{python}", "-B", "tests/concepts/companion-schema.test.py"]]},
+      "include": ["tests/concepts/companion-schema.test.py"],
+      "prerequisites": ["python3", "python-jsonschema"], "verify": "opt-in",
+      "workflows": ["companion-concept-verification"], "optional": true
     },
     {
       "name": "companion:assembly",
@@ -487,6 +515,7 @@
   ],
   "aliases": {"tooling": "Every suite that verify runs in its serialized node --test tooling step."},
   "helpers": [
+    {"purpose": "Native handoff isolated source and Git test fixtures", "include": ["docs/concepts/native-file-integration-handoff/tests/fixtures.py"]},
     {
       "purpose": "Synthetic vault copied for each real-Obsidian case",
       "include": ["tests/obsidian/vault/**"]

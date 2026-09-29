@@ -109,7 +109,8 @@ version 1 packet. Version 2 requires the exact new raw inventory and cannot sile
 fall back to version 1. Changed policy/source identities still invalidate old
 packets for current-candidate qualification; preserving a historical parser is not
 promoting old evidence. The legacy acceptance plan/crosswalk versions are unchanged.
-See the [PR5 CI repair record](PR5-CI-REPAIR.md) for executed scope.
+See the [transport regression record](EVIDENCE-TRANSPORT-REGRESSION.md) and the
+[PR5 CI repair record](PR5-CI-REPAIR.md) for their separately executed scopes.
 
 Session directories use the complete input digest, including crosswalk/native
 policy bytes. A run is appended to `runs.jsonl` **before** starting the child.

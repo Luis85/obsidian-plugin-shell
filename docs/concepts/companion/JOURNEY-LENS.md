@@ -79,3 +79,19 @@ The raw workflow results and exact source-commit receipt determine passed scope.
 This remains an offline browser authoring concept. Native Obsidian integration,
 vault writes, complete generated Companion behavior and native acceptance are not
 established by these tests. No merge, activation, release or publication is included.
+
+## Maintain and repair journeys
+
+In **Journeys**, select a saved journey and choose **Edit journey**. Change its
+name, reorder steps with Up/Down, remove or append steps, and choose their
+surfaces and incoming actions. Multiple actions between the same surfaces are
+explicit alternatives; a conditional action is labelled as intent only.
+Changing adjacency clears invalid action references instead of choosing another
+branch. Resolve retained missing references by choosing a surface; **Use this
+surface** explicitly confirms a retained surface whose action was removed.
+
+Apply updates the same saved journey and preserves surviving step IDs. Cancel
+or Escape discards only the draft. Undo/Redo restore exact committed states.
+Unsaved edits block Reload as well as navigation; cancel the draft deliberately
+before reloading a newer project. Failed saves never become successful writes.
+See the [execution and verification boundaries](../../testing/MVP-JOURNEY-MAINTENANCE.md).

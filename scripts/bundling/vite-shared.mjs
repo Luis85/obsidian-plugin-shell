@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import vue from '@vitejs/plugin-vue';
 import ui from '@nuxt/ui/vite';
+import { journeyFlow } from './journey-flow.mjs';
 import { cssOwnership } from './css-ownership.mjs';
 const root = process.cwd();
 const profile = JSON.parse(readFileSync(resolve(root, 'scripts/bundling/ui-adaptation.json'), 'utf8'));
@@ -24,7 +25,7 @@ function staticVendor() {
 export function sharedConfig() {
   const identity = JSON.parse(readFileSync(resolve(root, 'manifest.json'), 'utf8'));
   return {
-    plugins: [staticVendor(), vue(), ui({ root, router: false, colorMode: false, autoImport: false, components: false,
+    plugins: [journeyFlow(root), staticVendor(), vue(), ui({ root, router: false, colorMode: false, autoImport: false, components: false,
       experimental: { componentDetection: true },
       theme: { prefix: 'ps', colors: ['primary', 'secondary', 'success', 'info', 'warning', 'error'] },
       icon: { mode: 'svg', clientBundle: { icons: ['lucide:layout-dashboard', 'lucide:file-plus-2', 'lucide:radio', 'lucide:sliders-horizontal', 'lucide:panel-top', 'lucide:scan-text', 'lucide:file-check-2', 'lucide:arrow-up-right', 'lucide:bell', 'lucide:message-square-warning', 'lucide:x', 'lucide:check', 'lucide:loader-circle', 'lucide:ellipsis-vertical'] } },

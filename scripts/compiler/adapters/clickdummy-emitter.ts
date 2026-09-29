@@ -32,6 +32,10 @@ window.addEventListener('pagehide', () => { delete document.documentElement.data
 
 This target uses the same generated Vue pages, services, navigation and browser composition as the plugin project. Synthetic read adapters return independent schema-valid values; business writes and missing handlers fail explicitly. Preview states, surface navigation, dialogs, reset and complete project JSON export are retained. No Obsidian host or vault is opened.
 
+Use the labelled Authored scenario selector to preview a page's saved sample bindings, values, state and wide/narrow layout intent. Choices belong to the current canonical surface; navigation and Reset preview clear them. Switching scenarios resets unsaved local interactions. Empty choices are not invented for pages without authored scenarios.
+
+In an authored scenario, local edits, navigation and modal opening remain simulations; source actions and implementation hooks are refused without claiming a saved result. Synthetic reads (no scenario) restores the existing browser-only adapter behavior. The separate Preview state control can override the displayed state. Scenario selection never changes the exported project JSON. Modal scenarios are not independently selectable in this increment; narrow layout intent is not device qualification.
+
 Review dependency readiness in design/compiler-readiness.json. Install explicitly, then run npm run typecheck:clickdummy and npm run build:clickdummy. The shipped offline builder embeds the libraries and blocks external requests. Existing output is preserved; use node scripts/compiler/build-clickdummy.mjs --replace for a deliberate replacement.
 
 Bundling is not browser or business acceptance. External component adapters remain explicit implementation points.

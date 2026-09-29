@@ -12,7 +12,7 @@ export async function generationPlan(request: Request, context: Context) {
   const input = resolve(context.root, stringOption(request.options, 'input') ?? designFile);
   const outputKind = stringOption(request.options, 'output-kind');
   requireThat(outputKind === undefined || ['obsidian-plugin','clickdummy'].includes(outputKind),'INVALID_OUTPUT_KIND','Use obsidian-plugin or clickdummy.');
-  const compilation = {storybook:storybookFlags(request.options),outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal};
+  const compilation = {storybook:storybookFlags(request.options),outputKind:outputKind as 'obsidian-plugin'|'clickdummy'|undefined,signal:context.signal,scope:stringOption(request.options, 'scope')};
   const target = stringOption(request.options, 'target');
   if (target !== undefined) return planProject({ ...compilation, input, target, vault: resolve(context.root, stringOption(request.options, 'vault') ?? '.'), templateRoot: context.frameworkRoot });
   requireThat(request.options.vault === undefined, 'TARGET_REQUIRED', '--vault requires an explicit legacy --target.');
