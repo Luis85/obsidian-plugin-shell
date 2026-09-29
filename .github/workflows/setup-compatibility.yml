@@ -30,9 +30,10 @@ jobs:
   setup:
     name: ${{ matrix.os }} / Node ${{ matrix.node }} / npm ${{ matrix.npm }}
     runs-on: ${{ matrix.os }}
-    # Fresh setup runs the complete verify gates once (scripts/setup/execute.mjs);
-    # a second identical standalone verify only doubled the Windows runtime.
-    timeout-minutes: 30
+    # Fresh setup runs every verify gate once. The integrated Windows tooling
+    # suites alone approach 30 minutes; retain time for coverage and npm controls.
+    # This is a job budget, not a test deadline or product performance threshold.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
     strategy:
       fail-fast: false
       matrix:
