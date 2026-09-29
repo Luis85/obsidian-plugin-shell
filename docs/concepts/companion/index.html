@@ -20036,7 +20036,7 @@ function companionExampleRequirements(d, surfaces) {
       ['Select blueprints and patterns', 'blueprints', 'Use a reviewed starter and shared action patterns without overwriting an existing design silently.'],
     ]],
     ['Data & visual contracts', 'Developers need explicit data and visual contracts before implementation can be safely generated.', [
-      ['Describe every source port', 'sources', 'Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.'],
+      ['Describe every source port', 'sources', 'Vault, Collection, API and database declarations include operations and explicit input/output shapes; Collections pair one vault-relative path with one entity and managed Markdown CRUD; credentials remain symbolic.'],
       ['Reuse source operations', 'sitemap', 'A screen references a declared source operation through a named directional data flow, not a duplicate source definition.'],
       ['Generate deterministic test data', 'test-data', 'Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.'],
       ['Exercise isolated operations', 'test-data', 'Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.'],
@@ -20110,6 +20110,12 @@ function companionExampleEntities(d, surfaces) {
   const source = { id: dsNext(sources, 'source'), slug: 'authoring-vault', name: 'Companion authoring vault', kind: 'vault', status: 'active',
     description: 'Proposed native adapter over project authoring notes. The HTML only declares this port.', locator: 'vault://active', auth: 'none', credentialRef: '', operations: [] };
   sources.sources.push(source); sources.positions[source.id] = { x: 900, y: 80 };
+  const collectionEntity=entities['test-recipe'];
+  const collection={id:dsNext(sources,'source'),slug:'test-recipes',name:'Test recipe collection',kind:'collection',status:'active',
+    description:'Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.',locator:'vault://active',auth:'none',credentialRef:'',
+    collectionPath:collectionEntity.folder,entity:collectionEntity.id,operations:[]};
+  collection.operations=dsCollectionCrud(collection,d).map(op=>({...op,id:dsNext(sources,'operation')}));
+  sources.sources.push(collection); sources.positions[collection.id] = { x: 900, y: 430 };
   sources.testing = { ...tdDefaults(), count: 5 };
   for (const [key, entity] of [['requirements', 'requirement'], ['sitemap', 'screen'], ['components', 'component']]) {
     const op = { id: dsNext(sources, 'operation'), slug: 'list-' + key, name: 'List ' + key, direction: 'read', method: 'adapter',
