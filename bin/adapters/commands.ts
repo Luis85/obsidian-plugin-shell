@@ -1,3 +1,4 @@
+import { firstRunCommand } from './first-run-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
@@ -19,8 +20,12 @@ import { readSnapshot, readData, savePlan, applyPrepared } from './storage.ts';
 import { boilerplatePlan } from './compiler.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
-export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal }
+export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void }
 export const makerHelp = `Shell maker — make first, generate when ready
+  node shell.mjs first-run             Optional install → typecheck → test → build → showcase
+  node shell.mjs first-run schema --json
+  node shell.mjs first-run --input first-run.json --json
+  node shell.mjs first-run status --json
   node shell.mjs project-setup         Angular setup in an existing Git + Obsidian vault
   node shell.mjs project-setup schema --json
   node shell.mjs project-setup guide --json
@@ -55,6 +60,7 @@ Options: --root <folder>, --project <relative.json> (design/project.json), --inp
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
+First-run guide: bin/FIRST-RUN.md. Execution is separately approved; generated source is kept on failure.
 All existing shell setup/make/generate/check commands remain available.
 `;
 function parseFlags(tokens: string[]): Record<string, string | boolean> {
@@ -77,7 +83,7 @@ function parseFlags(tokens: string[]): Record<string, string | boolean> {
 export function parseArguments(argv: string[]): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio' || first === 'new' || first === 'settings' || first === 'project-setup', 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
+  requireSketch(first === undefined || first === 'sketch' || first === 'prototype' || first === 'studio' || first === 'new' || first === 'settings' || first === 'project-setup' || first === 'first-run', 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
   const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens);
@@ -145,10 +151,11 @@ export async function execute(args: Arguments, context: CommandContext): Promise
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   if (args.flags.help || args.command === 'studio') {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype', 'settings', 'project-setup'],
-      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup'] } : {}), interactive: false };
+    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'],
+      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
   }
   if (args.command === 'new') return newProjectCommand(args, context);
+  if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (args.command === 'settings' || args.command === 'project-setup') return setupCommand(args, context, () => inputData(args, context));
   args = await configuredArguments(args, context.root);
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');

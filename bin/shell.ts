@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { firstRunWizard } from './presentation/first-run.ts';
 import { configuredArguments } from './adapters/setup-command.ts';
 import { loadSettings } from './adapters/user-settings.ts';
 import { projectSetupWizard } from './presentation/project-setup-wizard.ts';
@@ -48,6 +49,7 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
 
 interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
+  if (args.command === 'first-run') return firstRunWizard(ui, context);
   if (args.command === 'project-setup') return projectSetupWizard(ui, context);
   if (args.command === 'settings') { await settingsWizard(ui, context); return; }
   if (args.command === 'new' || (args.command === 'studio' && !(await readSnapshot(context.root, options.project)).document)) {
@@ -71,7 +73,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
   const machine = argv.includes('--json'); let command = 'maker';
   try {
     const args = parseArguments(argv); command = args.command;
-    const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal };
+    const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal, progress: (message: string) => { io.error.write(safe(message)); } };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
     const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };

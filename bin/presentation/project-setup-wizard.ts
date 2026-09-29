@@ -1,3 +1,4 @@
+import { firstRunWizard } from './first-run.ts';
 import { loadSettings } from '../adapters/user-settings.ts';
 import { intakePrds } from '../adapters/prd-intake.ts';
 import { angularSetupGuide, projectSetupPlan, setupPrerequisites } from '../adapters/project-setup.ts';
@@ -36,5 +37,7 @@ export async function projectSetupWizard(ui: Prompts, context: { root: string; f
   const completion = request.boilerplate
     ? `Project prepared. In ${settings.paths.app}, run npm install, npm run typecheck, npm test, then npm start. Continue editing with shell.mjs sketch.\n`
     : 'Project specifications saved. Continue with shell.mjs sketch; generate the application with shell.mjs sketch generate.\n';
-  ui.write(completion); return completion;
+  ui.write(completion);
+  if (request.boilerplate) return await firstRunWizard(ui, context) ?? completion;
+  return completion;
 }

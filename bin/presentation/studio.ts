@@ -1,3 +1,4 @@
+import { firstRunWizard } from './first-run.ts';
 import { editBricks } from './brick-editor.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
@@ -77,6 +78,7 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
     prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, { ...options, out: undefined }, workspace) },
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
+    'first-run': { label: 'Install, build and showcase the generated application', run: () => firstRunWizard(ui, options) },
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },

@@ -1,3 +1,4 @@
+import { assertNoFirstRun } from './first-run-lock.ts';
 import { join } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { configurationPlan } from '../../scripts/framework/changes.ts';
@@ -38,9 +39,11 @@ export async function applyPrepared(value: Prepared, approval?: string, signal?:
   const base = { ...value.data, planHash: value.planHash, changes: value.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })) };
   if (approval === undefined) return { ...base, status: 'planned' };
   requireSketch(approval === value.planHash, 'MAKER_APPROVAL', 'The plan changed. Review the current planHash before applying.');
+  await assertNoFirstRun(value.plan.root);
   await value.validate?.();
   let validated = false;
   const report = await applyFilePlan(value.plan, { async beforeWrite() {
+    await assertNoFirstRun(value.plan.root);
     if (!validated) { await value.validate?.(); validated = true; }
     requireSketch(!signal?.aborted, 'CANCELLED', 'CANCELLED: Cancelled during apply; completed writes are rolled back by the shared writer.'); } });
   return { ...base, status: report.written.length ? 'applied' : 'unchanged', report };

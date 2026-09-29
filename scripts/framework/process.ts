@@ -1,3 +1,4 @@
+import { terminateProcessTree } from './process-tree.ts';
 import { StringDecoder } from 'node:string_decoder';
 import { spawn } from 'node:child_process';
 import { delimiter, dirname, join, resolve } from 'node:path';
@@ -40,10 +41,7 @@ export async function runNode(context: Context, entry: string, args: readonly st
     };
     child.stdout.on('data', (chunk: Buffer) => { if (size + chunk.length <= 1_048_576) captured += decoder.write(chunk); output(chunk); });
     child.stderr.on('data', output);
-    const terminate = (signal: NodeJS.Signals) => {
-      try { if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal); else child.kill(signal); }
-      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') child.kill(signal); }
-    };
+    const terminate = (signal: NodeJS.Signals) => terminateProcessTree(child, signal);
     const stop = (code: string) => { if (reason) return; reason = code; terminate('SIGTERM'); killTimer = setTimeout(() => terminate('SIGKILL'), 3000); killTimer.unref(); };
     const abort = () => stop('CANCELLED');
     const timer = setTimeout(() => stop('TIMEOUT'), timeout); timer.unref();

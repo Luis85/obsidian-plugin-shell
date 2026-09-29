@@ -5,11 +5,20 @@
     "project": "design/project.json",
     "prototypes": "prototypes/project",
     "app": "apps/product",
-    "brief": "docs/project-brief.md"
+    "brief": "docs/project-brief.md",
+    "firstRunReport": "reports/first-run.json"
   },
   "preferences": {
     "author": "Your name",
     "ui": "auto",
-    "scanRecursive": true
+    "scanRecursive": true,
+    "firstRun": {
+      "install": "auto",
+      "port": 4173,
+      "openBrowser": false,
+      "stepTimeoutMs": 600000,
+      "readyTimeoutMs": 30000,
+      "showcaseDurationMs": 300000
+    }
   }
 }

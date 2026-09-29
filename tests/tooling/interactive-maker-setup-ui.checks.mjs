@@ -121,3 +121,13 @@ test('plain setup supports a fully skipped optional flow and default-No review',
   assert.equal(await projectSetupWizard(ui, { root, frameworkRoot }), undefined);
   assert.equal(answers.length, 0); await assert.rejects(() => readFile(join(root, 'configs/user-settings.json')));
 }));
+test('approved boilerplate offers first run afterward and Skip leaves a source-only app', async () => scratch(async root => {
+  await vault(root); const f = human({ boilerplate: true });
+  const completion = await projectSetupWizard(f.ui, { root, frameworkRoot });
+  assert.match(completion, /Project prepared/);
+  const approval = f.events.findIndex(event => event[1] === 'Apply this reviewed plan?');
+  const firstRun = f.events.findIndex(event => event[1] === 'First run of the new application');
+  assert.ok(firstRun > approval);
+  assert.ok(await readFile(join(root,'apps/product/package.json')));
+  await assert.rejects(() => readFile(join(root,'reports/first-run.json')));
+}));

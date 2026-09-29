@@ -71,7 +71,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
   const requestHash = hash(jsonText(data));
   if (existingState.content !== null) {
     const state = object(parseJsonData(existingState.content));
-    requireSketch(jsonText(state.paths) === jsonText(settings.paths), 'SETUP_PATH_MIGRATION', 'Setup paths changed. Move/reconcile files explicitly before changing the saved path configuration.');
+    requireSketch(jsonText(readSettings({ schemaVersion: 1, paths: state.paths }).paths) === jsonText(settings.paths), 'SETUP_PATH_MIGRATION', 'Setup paths changed. Move/reconcile files explicitly before changing the saved path configuration.');
     requireSketch(state.schemaVersion === 1 && state.requestHash === requestHash, 'SETUP_EXISTS', 'Setup already exists. Use sketch to continue editing or project-setup status; changed setup requests do not replace existing projects.');
   }
   const intake = await intakePrds(root, settings, data.prds), intakeHash = intakeIdentity(intake);
