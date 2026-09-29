@@ -48,6 +48,7 @@ The other authoring guides remain applicable within their stated scope:
 
 - [Visual page and component editors](VISUAL-EDITORS.md), [component composition](COMPOSITION.md), and [Design System](DESIGN-SYSTEM.md).
 - [Requirements-linked storymaps](STORYMAPS.md), [entity semantics](SEMANTIC-LAYER.md), [Data Sources](DATA-SOURCES.md), and [Test Data](TEST-DATA.md).
+- [Manage prototypes, versions and active variants](PROTOTYPES.md), with [scoped verification](PROTOTYPES-VERIFICATION.md).
 - [Project starters](PROJECT-STARTERS.md), [project JSON](PROJECT-JSON.md), and [one-vault project model](SINGLE-VAULT.md).
 
 A [generated clickdummy](../../development/COMPANION-CLICKDUMMY.md) is a separate

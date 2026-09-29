@@ -1,3 +1,4 @@
+import { prototypesPlan } from './prototypes.ts';
 import { airshipPlan } from './airship-plan.ts';
 import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
@@ -70,7 +71,9 @@ export async function planOperation(request: Request, context: Context) {
       const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
       planned = await upgradePlan(context, from); break;
     }
-    default: throw new Error('Operation has no file plan.');
+    default:
+      if (request.command.startsWith('prototypes ')) { planned = await prototypesPlan(request, context); break; }
+      throw new Error('Operation has no file plan.');
   }
   const requestData = canonicalRequest(request);
   const configurationHash = await exists(join(context.root, configFile)) ? hash(await readBounded(join(context.root, configFile))) : null;

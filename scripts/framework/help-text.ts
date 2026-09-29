@@ -1,3 +1,4 @@
+import { prototypeCommands } from './prototype-catalog.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
  * option documentation. Data only; execution policy stays in catalog.ts and the handlers.
@@ -26,6 +27,7 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
   { command: 'make', example: 'node shell.mjs make list', purpose: 'Add features, entities, views and more through reviewed plans.' },
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
+  { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
@@ -50,6 +52,10 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  variant: { description: 'Saved variant slug inside the selected prototype version.' },
+  as: { description: 'Portable lowercase slug for the new variant.' },
+  hypothesis: { description: 'The solution idea or test hypothesis explored by this variant.' },
+  status: { description: 'Variant lifecycle status; use prototypes activate for generator selection.', values: ['draft', 'review', 'approved', 'archived'] },
   prds: { description: 'Project-relative PRD folder override; fingerprinted and retained by handout refresh/validation.', default: 'configs/user-settings.json paths.prds, otherwise docs/prds' },
   samples: { description: 'Measured samples per operation, after one cold sample and three retained warmups (3..30).', default: '10' },
   storybook: { description: 'Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation.', values: ['on', 'off'], default: 'project JSON, otherwise off' },
@@ -192,6 +198,9 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'project schema' && name === 'version') { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
     if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
+    if (entry.id.startsWith('prototypes ') && name === 'version') doc.description = 'Portable version slug, for example v1 or v2; distinct from the application release version.';
+    if (entry.id === 'prototypes version' && name === 'from') doc.description = 'Source version slug to copy into the new version.';
+    if (entry.id.startsWith('prototypes ') && name === 'name') doc.description = 'Prototype or variant display name; its folder slug stays unchanged.';
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
