@@ -36,6 +36,8 @@ The [requirements index](../requirements/README.md) decomposes the MVP into **54
 
 Use [PBI governance](../requirements/GOVERNANCE.md) for the IREB-aligned tailoring, metadata contract, review, readiness and completion rules; [traceability](../requirements/TRACEABILITY.md) for the retained MVP/WM/BQ/A/WVA/BQA mappings; and [progress](../requirements/PROGRESS.md) for evidence-backed acceptance by epic, feature, outcome and delivery increment. The read-only reporting commands and [validation record](../requirements/VALIDATION.md) are linked from the index.
 
+For a native Obsidian management view, open [MVP.base](../requirements/MVP.base). Its [six-view guide](../requirements/VIEWS.md) explains backlog, milestone, unassigned, blocker, acceptance and shipment views. These display note metadata; evidence-backed progress still comes from the existing Node reporter and acceptance review, not a status formula.
+
 The initial records are `new` and unaccepted until existing implementation and current evidence are reconciled. Zero accepted PBIs in this new baseline does not mean zero implemented product functionality. Existing task frontmatter remains the execution-status authority; PBI acceptance and a local progress report do not grant publication approval.
 
 ## Requirements and delivery
