@@ -1,0 +1,32 @@
+name: Inspect current PR54 conflicts
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/inspect-pr54-conflicts.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9edfcbb810592a8a47b591545d80ecd5241a470a
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Merge without commit and capture conflicts
+        shell: bash
+        run: |
+          set -u
+          git fetch --no-tags origin 84c5f2082b303740aa17d6ddc70cf5d2e75f15c3
+          git merge --no-commit --no-ff 84c5f2082b303740aa17d6ddc70cf5d2e75f15c3 || true
+          mkdir -p "$RUNNER_TEMP/conflicts"
+          git diff --name-only --diff-filter=U | tee "$RUNNER_TEMP/conflicts/files.txt"
+          git diff --cc > "$RUNNER_TEMP/conflicts/conflicts.diff"
+          git status --short > "$RUNNER_TEMP/conflicts/status.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr54-current-conflicts
+          path: ${{ runner.temp }}/conflicts/
+          retention-days: 1
