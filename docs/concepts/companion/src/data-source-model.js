@@ -143,6 +143,7 @@ function dsShapeLabel(s,d=design()){
 function dsCollectionCrud(source,d=design()){
  const entity=d.semantic?.entities.find(e=>e.id===source.entity);if(!entity)return [];
  const record=dsResolveShape({...dsNewShape('entity'),entity:entity.id},d);record.properties.type={type:'string',enum:[entity.slug]};
+ for(const p of entity.properties||[])if(p.type==='date'||p.type==='datetime')record.properties[p.key].format=p.type==='date'?'date':'date-time';
  const valueProps=Object.fromEntries(Object.entries(record.properties||{}).filter(([key])=>!['id','type'].includes(key)));
  const values={type:'object',properties:valueProps,required:(record.required||[]).filter(key=>!['id','type'].includes(key)),additionalProperties:false};
  const object=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
