@@ -1,0 +1,66 @@
+name: Stack reconciliation qualification
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/stack-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Reproduce reviewed trees and publish isolated candidate refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/stack-reconcile.py "$RUNNER_TEMP/stack-reconcile.py"
+          git config user.name 'Luis Mendez'
+          git config user.email '3923861+Luis85@users.noreply.github.com'
+          python "$RUNNER_TEMP/stack-reconcile.py"
+          git push origin reconcile43:refs/heads/fix/pr43-reconciled-candidate HEAD:refs/heads/fix/pr5-consolidated-candidate
+          git rev-parse HEAD
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install exact tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
+      - name: Run independent gates and retain every failure
+        shell: bash
+        run: |
+          mkdir -p reports/stack
+          failed=0
+          check() { name="$1"; shift; "$@" > "reports/stack/$name.log" 2>&1; status=$?; echo "$name: $status" | tee -a reports/stack/summary.txt; if [ "$status" != 0 ]; then tail -60 "reports/stack/$name.log"; failed=1; fi; }
+          set +e
+          check types node "$QUALIFIED_NPM" run typecheck:maker
+          check eslint node node_modules/eslint/bin/eslint.js bin --max-warnings 0
+          check oxlint node node_modules/oxlint/bin/oxlint bin --no-ignore --deny-warnings
+          check maker node "$QUALIFIED_NPM" run test:maker
+          check pty node "$QUALIFIED_NPM" run test:maker:pty
+          check coverage node "$QUALIFIED_NPM" run test:coverage:maker
+          check suites node scripts/testing/suites.mjs --check
+          check source node "$QUALIFIED_NPM" run check:source
+          check analyzer node "$QUALIFIED_NPM" run check:analyzer
+          check maintainability node "$QUALIFIED_NPM" run check:maintainability
+          git rev-parse HEAD > reports/stack/source-commit.txt
+          exit "$failed"
+      - name: Retain diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: stack-qualification
+          path: |
+            reports/stack/
+            reports/analyzer/
+            reports/maintainability/
+            reports/maker-coverage/
+            reports/maker-pty/
+          if-no-files-found: warn
+          retention-days: 1
