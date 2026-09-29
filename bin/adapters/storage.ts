@@ -1,3 +1,4 @@
+import { assertNoFirstRun } from './first-run-lock.ts';
 import { join } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { configurationPlan } from '../../scripts/framework/changes.ts';
@@ -8,7 +9,7 @@ import { requireSketch } from '../domain/errors.ts';
 export interface Snapshot { document: SketchDocument | null; beforeHash: string | null }
 export interface Entry { path: string; content: string; encoding?: 'base64' }
 export type FilePlan = Awaited<ReturnType<typeof createFilePlan>>;
-export interface Prepared { plan: FilePlan; planHash: string; data: Record<string, unknown> }
+export interface Prepared { plan: FilePlan; planHash: string; data: Record<string, unknown>; validate?: () => Promise<void> }
 export async function readData(path: string): Promise<unknown> {
   return parseJsonData(new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(path, 4_000_000)));
 }
@@ -38,6 +39,12 @@ export async function applyPrepared(value: Prepared, approval?: string, signal?:
   const base = { ...value.data, planHash: value.planHash, changes: value.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })) };
   if (approval === undefined) return { ...base, status: 'planned' };
   requireSketch(approval === value.planHash, 'MAKER_APPROVAL', 'The plan changed. Review the current planHash before applying.');
-  const report = await applyFilePlan(value.plan, { beforeWrite() { requireSketch(!signal?.aborted, 'CANCELLED', 'CANCELLED: Cancelled during apply; completed writes are rolled back by the shared writer.'); } });
+  await assertNoFirstRun(value.plan.root);
+  await value.validate?.();
+  let validated = false;
+  const report = await applyFilePlan(value.plan, { async beforeWrite() {
+    await assertNoFirstRun(value.plan.root);
+    if (!validated) { await value.validate?.(); validated = true; }
+    requireSketch(!signal?.aborted, 'CANCELLED', 'CANCELLED: Cancelled during apply; completed writes are rolled back by the shared writer.'); } });
   return { ...base, status: report.written.length ? 'applied' : 'unchanged', report };
 }

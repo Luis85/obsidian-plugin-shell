@@ -29,7 +29,7 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
     await assert.rejects(() => readFile(join(root, 'node_modules/typescript/package.json')));
-    for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['new', 'presets', '--json'], ['new', 'guide', '--preset', 'cli', '--json']]) {
+    for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['project-setup', 'schema', '--json'], ['project-setup', 'guide', '--json'], ['first-run', 'schema', '--json'], ['first-run', 'status', '--json'], ['settings', 'schema', '--json'], ['settings', 'show', '--json'], ['new', 'presets', '--json'], ['new', 'guide', '--preset', 'cli', '--json']]) {
       const run = spawnSync(process.execPath, ['shell.mjs', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
       assert.equal(run.status, 0, run.stderr + run.stdout);
       const result = JSON.parse(run.stdout); assert.equal(result.status, 'ok');

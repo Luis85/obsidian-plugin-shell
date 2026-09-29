@@ -2,17 +2,18 @@ import { join, resolve } from 'node:path';
 import { parseAuthoringDocument, migrateAuthoringDocument } from '../../companion/authoring-contract.ts';
 import { configuration } from '../../framework/configuration.ts';
 import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Entity, type Resolutions } from '../domain/contracts.ts';
-import { readSettings, validateSettings } from './settings.ts';
+import { readDocumentationSettings, validateSettings } from './settings.ts';
 import { readBytes, decode, discover, localPath, portable, type DocumentationSource as Source } from './filesystem.ts';
 import { parseMarkdown, type MarkdownDocument } from './markdown.ts';
 export interface InputDocument { source: Source; document: MarkdownDocument }
 export async function readWorkspace(root: string, args: string[], output?: string, resolutionFile?: string) {
-  const projectBytes = await readBytes(join(root, 'design/project.json')); insist(projectBytes, 'DOCS_PROJECT_REQUIRED', 'Run setup or project import first.');
-  const project = migrateAuthoringDocument(parseAuthoringDocument(decode(projectBytes))).document;
   const configBytes = await readBytes(join(root, 'shell.config.json'));
   const config = configBytes ? configuration(JSON.parse(decode(configBytes))) : null;
-  const settingsRead = await readSettings(root, config ? [config.paths.codebaseFolder, config.paths.testsFolder, config.paths.testVaultFolder] : [] , output);
-  const { settings } = settingsRead;
+  const settingsRead = await readDocumentationSettings(root, config ? [config.paths.codebaseFolder, config.paths.testsFolder, config.paths.testVaultFolder] : [] , output);
+  const { settings, projectPath } = settingsRead;
+  const projectBytes = await readBytes(join(root, projectPath)); insist(projectBytes, 'DOCS_PROJECT_REQUIRED', 'Run setup or project import first.');
+  const project = migrateAuthoringDocument(parseAuthoringDocument(decode(projectBytes))).document;
+  const makerSetupBytes = config ? null : await readBytes(join(root, 'configs/project-setup.json'));
   const indexBytes = await readBytes(join(root, settings.indexFile), 16_000_000);
   let index: DocsIndex = { schemaVersion: 1, project: project.project.id, entries: {} };
   if (indexBytes) {
@@ -54,7 +55,7 @@ export async function readWorkspace(root: string, args: string[], output?: strin
   if (resolutionBytes) for (const [key, value] of Object.entries(object(JSON.parse(decode(resolutionBytes))))) {
     insist(value === 'markdown' || value === 'project', 'DOCS_RESOLUTIONS', 'Resolution values must be markdown or project.'); resolutions[key] = value;
   }
-  return { root, project, projectBytes, config, configBytes, ...settingsRead, index, indexBytes, sources, documents, skipped, resolutions, resolutionBytes };
+  return { root, project, projectBytes, makerSetupBytes, config, configBytes, ...settingsRead, index, indexBytes, sources, documents, skipped, resolutions, resolutionBytes };
 }
 async function readBytesOrDirectory(path: string): Promise<boolean> {
   const { safePath } = await import('./filesystem.ts'); return safePath(path);

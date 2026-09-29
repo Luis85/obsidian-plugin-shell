@@ -28,9 +28,9 @@ export const goldenPath: ReadonlyArray<{ command: string; example: string; purpo
 ];
 export const groups: ReadonlyArray<{ id: string; title: string; commands: readonly string[] }> = [
   { id: 'prototypes', title: 'Prototype versions and variants', commands: prototypeCommands.map(command => command.id) },
+  { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack'] },
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
-  { id: 'starters', title: 'External project starters', commands: ['starters list', 'starters show', 'starters validate', 'starters schema', 'starters add', 'starters edit', 'starters run', 'starters pack'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
   { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
@@ -54,14 +54,22 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   values: { description: 'Project-relative JSON file containing declared starter input values.' },
   answers: { description: 'Inline JSON input values; cannot be combined with --values.' },
   run: { description: 'Comma-separated declared processes to run after creation, with fresh --trust-processes.' },
   'trust-processes': { description: 'Explicitly trust the reviewed project code and declared process steps; never portable approval.' },
   process: { description: 'One or more comma-separated process IDs from the generated starter receipt.' },
   project: { description: 'Generated project directory containing .workbench/starter.json.' },
-  resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   variant: { description: 'Saved variant slug inside the selected prototype version.' },
+  'with-prototype': { description: 'Prototype slug of the comparison reference snapshot.' },
+  'with-version': { description: 'Version slug of the comparison reference snapshot.' },
+  'with-variant': { description: 'Variant slug of the comparison reference snapshot.' },
+  label: { description: 'Human-readable label for a prototype version.' },
+  'from-prototype': { description: 'Prototype slug of the saved snapshot to restore.' },
+  'from-version': { description: 'Version slug of the saved snapshot to restore.' },
+  'from-variant': { description: 'Variant slug of the saved snapshot to restore.' },
+  'recovery-version': { description: 'New version slug used to preserve the current destination before restoring another snapshot.' },
   as: { description: 'Portable lowercase slug for the new variant.' },
   hypothesis: { description: 'The solution idea or test hypothesis explored by this variant.' },
   status: { description: 'Variant lifecycle status; use prototypes activate for generator selection.', values: ['draft', 'review', 'approved', 'archived'] },
@@ -125,6 +133,10 @@ const specific: Record<string, OptionHelp> = {
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  'prototypes compare': 'node shell.mjs prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]',
+  'prototypes prototype-details': 'node shell.mjs prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]',
+  'prototypes version-details': 'node shell.mjs prototypes version-details <prototype> --version <version> --label <label> [options]',
+  'prototypes restore-snapshot': 'node shell.mjs prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]',
   'docs import': 'node shell.mjs docs import [file-or-folder ...] [options]',
   'docs export': 'node shell.mjs docs export [--out <documentation-root>] [options]',
   'docs validate': 'node shell.mjs docs validate [file-or-folder ...] [--json]',
@@ -142,6 +154,10 @@ const examples: Record<string, string[]> = {
   'starters pack': ['node shell.mjs starters pack --out ./workbench-starters.zip --yes'],
   'starters run': ['node shell.mjs starters run --project ../my-app --process verify,build --dry-run', 'node shell.mjs starters run --project ../my-app --process build --yes --trust-processes'],
   'prototypes list': ['node shell.mjs prototypes list --json'],
+  'prototypes compare': ['node shell.mjs prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json'],
+  'prototypes prototype-details': ['node shell.mjs prototypes prototype-details exploration --name "Product exploration" --description "Compare navigation variants" --dry-run'],
+  'prototypes version-details': ['node shell.mjs prototypes version-details exploration --version v1 --label "Iteration 1" --dry-run'],
+  'prototypes restore-snapshot': ['node shell.mjs prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run'],
   'prototypes create': ['node shell.mjs prototypes create exploration --input design/project.json --dry-run'],
   'prototypes version': ['node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run'],
   'prototypes fork': ['node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run'],
@@ -244,6 +260,7 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id.startsWith('prototypes ') && name === 'version') doc.description = 'Portable version slug, for example v1 or v2; distinct from the application release version.';
     if (entry.id === 'prototypes version' && name === 'from') doc.description = 'Source version slug to copy into the new version.';
     if (entry.id.startsWith('prototypes ') && name === 'name') doc.description = 'Prototype or variant display name; its folder slug stays unchanged.';
+    if (entry.id === 'prototypes prototype-details' && name === 'description') doc.description = 'Prototype description; changing it does not change folder slugs or saved designs.';
     if (entry.id === 'new' && name === 'from') doc.description = 'Project JSON exported by the companion (instead of --starter).';
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
