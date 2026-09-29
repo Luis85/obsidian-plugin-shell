@@ -1,0 +1,30 @@
+name: Stack source snapshot
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/stack-source-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Capture repository sources, without working-tree credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main docs/companion-plugin-prd feat/interactive-maker-cli feat/project-presets-prototype
+          mkdir -p "$RUNNER_TEMP/stack-source"
+          git bundle create "$RUNNER_TEMP/stack-source/source.bundle" --all
+          git show-ref > "$RUNNER_TEMP/stack-source/refs.txt"
+          sha256sum "$RUNNER_TEMP/stack-source/source.bundle" > "$RUNNER_TEMP/stack-source/SHA256SUMS"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: stack-source-${{ github.sha }}
+          path: ${{ runner.temp }}/stack-source/
+          retention-days: 1
+          if-no-files-found: error
