@@ -1,0 +1,180 @@
+name: Push golden starters and showcase to PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/push-showcase-to-pr54.yml]
+permissions:
+  contents: write
+jobs:
+  integrate:
+    if: github.repository == 'Luis85/obsidian-plugin-shell'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout transfer payload
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: chore/companion-starter-build-inputs
+          path: payload-source
+          persist-credentials: false
+      - name: Checkout live PR54
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          path: repo
+          fetch-depth: 0
+      - name: Resolve live base and validate overlap
+        working-directory: repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          START_HEAD=$(git rev-parse HEAD)
+          echo "$START_HEAD" > "$RUNNER_TEMP/start-head"
+          git fetch --no-tags origin docs/companion-plugin-prd:refs/remotes/origin/docs/companion-plugin-prd
+          BASE_HEAD=$(git rev-parse refs/remotes/origin/docs/companion-plugin-prd)
+          echo "$BASE_HEAD" > "$RUNNER_TEMP/base-head"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-edit "$BASE_HEAD"
+          git merge-base --is-ancestor 9edfcbb810592a8a47b591545d80ecd5241a470a HEAD
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import base64, hashlib, io, json, lzma, tarfile, subprocess
+          src = Path('../payload-source/.github/pr54-showcase-payload')
+          manifest = json.loads((src/'manifest.json').read_text())
+          encoded = ''.join((src/'payload.b64').read_text().split())
+          compressed = base64.b64decode(encoded, validate=True)
+          assert len(compressed) == manifest['bytes'], (len(compressed), manifest['bytes'])
+          assert hashlib.sha256(compressed).hexdigest() == manifest['sha256']
+          raw = lzma.decompress(compressed)
+          tar_path = Path('/tmp/showcase.tar')
+          tar_path.write_bytes(raw)
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as tf:
+              members=[m for m in tf.getmembers() if m.isfile()]
+              assert len(members) == 64, len(members)
+              names=[]
+              for m in members:
+                  p=PurePosixPath(m.name)
+                  assert not p.is_absolute() and '..' not in p.parts and str(p)==m.name
+                  names.append(m.name)
+          names += manifest['deletions']
+          Path('/tmp/candidate-paths.txt').write_text('\n'.join(names)+'\n')
+          changed=subprocess.check_output(
+              ['git','diff','--name-only','9edfcbb810592a8a47b591545d80ecd5241a470a..HEAD','--',*names],
+              text=True).splitlines()
+          allowed={'scripts/compiler/adapters/project/emitter.ts','scripts/framework/help-text.ts'}
+          unexpected=sorted(set(changed)-allowed)
+          if unexpected:
+              print('Unexpected concurrent overlap:', *unexpected, sep='\n  ')
+              raise SystemExit(42)
+          print('Concurrent overlap:', changed)
+          PY
+      - name: Apply reviewed payload without clobbering concurrent PR5 edits
+        working-directory: repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import io, json, tarfile
+          root=Path('.')
+          src=Path('../payload-source/.github/pr54-showcase-payload')
+          manifest=json.loads((src/'manifest.json').read_text())
+          preserve={'scripts/compiler/adapters/project/emitter.ts','scripts/framework/help-text.ts'}
+          raw=Path('/tmp/showcase.tar').read_bytes()
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as tf:
+              for m in tf.getmembers():
+                  if not m.isfile() or m.name in preserve: continue
+                  p=PurePosixPath(m.name)
+                  assert not p.is_absolute() and '..' not in p.parts
+                  dest=root/Path(*p.parts)
+                  dest.parent.mkdir(parents=True, exist_ok=True)
+                  f=tf.extractfile(m); assert f is not None
+                  dest.write_bytes(f.read())
+          for name in manifest['deletions']:
+              p=root/name
+              if p.exists(): p.unlink()
+          # Merge the candidate's local-icon propagation into the newest project emitter.
+          p=root/'scripts/compiler/adapters/project/emitter.ts'
+          text=p.read_text()
+          if "'scripts/bundling/local-icons.mjs'" not in text:
+              old="'scripts/bundling/vite-shared.mjs', 'scripts/bundling/journey-flow.mjs'"
+              new="'scripts/bundling/vite-shared.mjs', 'scripts/bundling/local-icons.mjs', 'scripts/bundling/journey-flow.mjs'"
+              assert old in text
+              text=text.replace(old,new,1)
+              p.write_text(text)
+          # Merge starter coverage help into the newest command/help catalog.
+          p=root/'scripts/framework/help-text.ts'
+          text=p.read_text()
+          if "'starters coverage'" not in text:
+              marker="'starters pack']"
+              assert marker in text
+              text=text.replace(marker,"'starters pack', 'starters coverage']",1)
+          if "'require-model-coverage':" not in text:
+              marker="  project: { description: 'Generated project directory containing .workbench/starter.json.' },\n"
+              assert marker in text
+              text=text.replace(marker,marker+"  'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },\n",1)
+          if "'starters coverage': [" not in text:
+              marker="const examples: Record<string, string[]> = {\n"
+              assert marker in text
+              text=text.replace(marker,marker+"  'starters coverage': ['node shell.mjs starters coverage feature-showcase --json', 'node shell.mjs starters coverage feature-showcase --require-model-coverage --json'],\n",1)
+          p.write_text(text)
+          PY
+          git add -A
+          git diff --cached --check
+      - name: Setup qualified Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: repo/.nvmrc
+          package-manager-cache: false
+      - name: Dependency-free starter and manual contracts
+        working-directory: repo
+        run: |
+          node --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node scripts/documentation/manual.mjs
+          node scripts/documentation/manual.mjs --check
+          python3 -B scripts/concepts/build-companion.py --check
+          git add -A
+          git diff --cached --check
+      - name: Install exact locked dependencies
+        working-directory: repo
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-audit --no-fund npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-audit --no-fund
+      - name: Typecheck and build the current empty-start Companion
+        working-directory: repo
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          if [ -f tsconfig.authoring.json ]; then node node_modules/typescript/bin/tsc --noEmit --project tsconfig.authoring.json; fi
+          node scripts/concepts/build-mvp.mjs
+          node --test --test-concurrency=1 tests/tooling/starter-golden.checks.mjs tests/tooling/starter-runtime-assets.checks.mjs
+      - name: Commit and fast-forward PR54 only
+        working-directory: repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          git diff --cached --check
+          if git diff --cached --quiet; then echo "No source delta remains"; exit 0; fi
+          git commit -m "feat(starters): golden Companion template and complete feature showcase" -m "Keep starter definitions external to the shell release. Start modern Companion authoring empty, require starter import or blank setup, add the canonical Companion JSON golden template and a generated feature showcase, and propagate offline runtime assets through generated projects." -m "Preserve concurrent PR5 prototype, Angular setup, first-run and documentation work. Qualified on the merged source with starter/manual contracts, framework/authoring typechecks, legacy fixture check and the modern Companion build."
+          git fetch --no-tags origin feat/json-starters-on-pr5:refs/remotes/origin/feat/json-starters-on-pr5
+          START_HEAD=$(cat "$RUNNER_TEMP/start-head")
+          CURRENT_REMOTE=$(git rev-parse refs/remotes/origin/feat/json-starters-on-pr5)
+          if [ "$CURRENT_REMOTE" != "$START_HEAD" ]; then
+            echo "PR54 moved from $START_HEAD to $CURRENT_REMOTE while qualifying; refusing non-fast-forward overwrite." >&2
+            exit 43
+          fi
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
+          git rev-parse HEAD | tee "$RUNNER_TEMP/pushed-head"
+      - name: Upload candidate identity
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr54-golden-showcase-candidate
+          path: |
+            ${{ runner.temp }}/start-head
+            ${{ runner.temp }}/base-head
+            ${{ runner.temp }}/pushed-head
+            repo/reports/companion-mvp/build.json
+          if-no-files-found: ignore
+          retention-days: 2
