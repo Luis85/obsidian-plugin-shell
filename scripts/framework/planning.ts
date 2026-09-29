@@ -1,4 +1,7 @@
+import { docsPlan } from './docs.ts';
+import { prototypesPlan } from './prototypes.ts';
 import { airshipPlan } from './airship-plan.ts';
+import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
@@ -54,6 +57,8 @@ export async function planOperation(request: Request, context: Context) {
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   let planned: Planned;
   switch (request.command) {
+    case 'docs import': case 'docs export': planned = await docsPlan(request, context); break;
+    case 'handout generate': case 'handout refresh': planned = await handoutPlan(request, context); break;
     case 'airship enable': case 'airship disable': planned = await airshipPlan(request, context); break;
     case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
     case 'generate': planned = await generationPlan(request, context); break;
@@ -68,7 +73,9 @@ export async function planOperation(request: Request, context: Context) {
       const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
       planned = await upgradePlan(context, from); break;
     }
-    default: throw new Error('Operation has no file plan.');
+    default:
+      if (request.command.startsWith('prototypes ')) { planned = await prototypesPlan(request, context); break; }
+      throw new Error('Operation has no file plan.');
   }
   const requestData = canonicalRequest(request);
   const configurationHash = await exists(join(context.root, configFile)) ? hash(await readBounded(join(context.root, configFile))) : null;
@@ -84,9 +91,14 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   // Recompute through the same handler: config/input/kit changes invalidate API-held plans too.
   const fresh = await planOperation(planned.request, context);
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
-  return applyFilePlan(fresh.plan, { beforeWrite() { requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.'); } });
+  const journal = fresh.request.command.startsWith('docs ')
+    ? (await import('../application-docs/adapters/recovery.ts')).journalHook(fresh.plan) : null;
+  return applyFilePlan(fresh.plan, { async beforeWrite() {
+    requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
+    await journal?.();
+  } });
 }
-export async function savePlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
+export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');
   requireThat(planned.request.options['trust-custom'] !== true, 'CUSTOM_PLAN_NOT_PORTABLE', 'Custom maker trust cannot be serialized as approval.');
   const path = resolve(context.root, output);

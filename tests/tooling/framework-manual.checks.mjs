@@ -108,3 +108,17 @@ test('unsupported CLI arguments fail before importing framework modules', async 
   await assert.rejects(main(['--unknown']), /MANUAL_ARGUMENT/);
   await assert.rejects(main(['--check', '--check']), /MANUAL_ARGUMENT/);
 });
+
+test('manual renderer highlights the typed Markdown example without relaxing validation', async () => {
+  const config = JSON.parse(await readFile(new URL('../../scripts/documentation/typedoc.json', import.meta.url), 'utf8'));
+  const guide = '../../docs/user-manual/shell-cli/application-documentation.md';
+  assert.ok(config.projectDocuments.includes(guide), 'Keep the application documentation guide in the rendered handbook.');
+  const source = await readFile(new URL(guide, new URL('../../scripts/documentation/', import.meta.url)), 'utf8');
+  assert.match(source, /^```markdown$/m, 'Exercise the actual fenced Markdown example.');
+  for (const language of ['bash', 'console', 'css', 'html', 'javascript', 'json', 'jsonc', 'json5', 'tsx', 'typescript', 'markdown']) {
+    assert.ok(config.highlightLanguages?.includes(language), `Load the ${language} grammar, rather than ignoring its warning.`);
+  }
+  assert.equal(config.treatWarningsAsErrors, true);
+  assert.deepEqual(config.validation, { invalidLink: true, invalidPath: true, notExported: true });
+  assert.ok(!config.ignoredHighlightLanguages?.includes('markdown'));
+});

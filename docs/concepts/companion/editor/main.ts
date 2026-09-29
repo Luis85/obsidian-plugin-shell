@@ -1,3 +1,6 @@
+export { prototypeApi } from '../../../../scripts/companion/prototypes/api.ts';
+export { mountPrototypes } from './prototype-manager.ts';
+import './prototypes.css';
 export { validateProjectTooling } from '../../../../scripts/companion/tooling-contract.ts';
 import { createApp, h } from 'vue';
 import { createPinia, disposePinia } from 'pinia';

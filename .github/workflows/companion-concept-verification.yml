@@ -5,6 +5,9 @@ on:
       - 'docs/concepts/companion/**'
       - 'scripts/concepts/**'
       - 'scripts/companion/**'
+      - 'scripts/framework/**'
+      - 'tests/tooling/*prototypes*.checks.mjs'
+      - 'tests/support/prototype-fixture.mjs'
       - 'scripts/compiler/**'
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-journey*.checks.mjs'
@@ -83,6 +86,8 @@ jobs:
         run: |
           node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-detail-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
           npm run test:visual
+      - name: Exercise prototype lifecycle, safe persistence and pinned generation
+        run: node --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs
       - name: Validate the published project schema with an independent implementation
         shell: bash
         run: |
@@ -204,6 +209,7 @@ jobs:
       - name: Exercise real editor actions, full JSON round trip and offline assets
         run: |
           "$PYTHON" -B tests/concepts/companion-mvp.browser.py
+          "$PYTHON" -B tests/concepts/companion-prototypes.browser.py
           node shell.mjs project inspect --input reports/companion-mvp/companion-project.json --json > reports/companion-mvp/inspection.json
           git rev-parse HEAD > reports/companion-mvp/source-commit.txt
       - name: Generate and independently build the exact v6 self-project and offline clickdummy

@@ -1,0 +1,234 @@
+TAP version 13
+# (node:678) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: every section has a description and required plus optional checklist items
+ok 1 - every section has a description and required plus optional checklist items
+  ---
+  duration_ms: 2.549621
+  type: 'test'
+  ...
+# Subtest: rendering is deterministic and never auto-checks observed facts or suggested defaults
+ok 2 - rendering is deterministic and never auto-checks observed facts or suggested defaults
+  ---
+  duration_ms: 1.677171
+  type: 'test'
+  ...
+# Subtest: the generated template is blocked until required decisions are reviewed
+ok 3 - the generated template is blocked until required decisions are reviewed
+  ---
+  duration_ms: 5.035278
+  type: 'test'
+  ...
+# Subtest: reviewed required answers can be structurally ready while optional items remain unchecked
+ok 4 - reviewed required answers can be structurally ready while optional items remain unchecked
+  ---
+  duration_ms: 6.712358
+  type: 'test'
+  ...
+# Subtest: checked placeholders never count as completed requirements
+ok 5 - checked placeholders never count as completed requirements
+  ---
+  duration_ms: 6.652287
+  type: 'test'
+  ...
+# Subtest: blank answers, evidence and bare N/A do not pass
+ok 6 - blank answers, evidence and bare N/A do not pass
+  ---
+  duration_ms: 13.953746
+  type: 'test'
+  ...
+# Subtest: required classification cannot be downgraded by editing the Markdown
+ok 7 - required classification cannot be downgraded by editing the Markdown
+  ---
+  duration_ms: 1.028891
+  type: 'test'
+  ...
+# Subtest: missing, unknown and duplicate IDs fail validation
+ok 8 - missing, unknown and duplicate IDs fail validation
+  ---
+  duration_ms: 5.290324
+  type: 'test'
+  ...
+# Subtest: repeated fields are rejected even when the first field is empty
+ok 9 - repeated fields are rejected even when the first field is empty
+  ---
+  duration_ms: 2.620521
+  type: 'test'
+  ...
+# Subtest: multiline answers and exact Markdown references can be consumed by an agent
+ok 10 - multiline answers and exact Markdown references can be consumed by an agent
+  ---
+  duration_ms: 1.817807
+  type: 'test'
+  ...
+# Subtest: fenced examples cannot impersonate answered checklist items
+ok 11 - fenced examples cannot impersonate answered checklist items
+  ---
+  duration_ms: 6.770742
+  type: 'test'
+  ...
+# Subtest: source changes, additions and deletions invalidate readiness
+ok 12 - source changes, additions and deletions invalidate readiness
+  ---
+  duration_ms: 8.426634
+  type: 'test'
+  ...
+# Subtest: no PRDs cannot produce a ready handout
+ok 13 - no PRDs cannot produce a ready handout
+  ---
+  duration_ms: 0.878134
+  type: 'test'
+  ...
+# Subtest: metadata corruption, duplicate metadata and unsupported versions are rejected
+ok 14 - metadata corruption, duplicate metadata and unsupported versions are rejected
+  ---
+  duration_ms: 0.929498
+  type: 'test'
+  ...
+# Subtest: showcase introduces a conditional review requirement and no execution authorization
+ok 15 - showcase introduces a conditional review requirement and no execution authorization
+  ---
+  duration_ms: 5.061348
+  type: 'test'
+  ...
+# Subtest: an invalid first-run value is rejected
+ok 16 - an invalid first-run value is rejected
+  ---
+  duration_ms: 3.166147
+  type: 'test'
+  ...
+# Subtest: source refresh preserves every answer and free-form note, resetting review only when inputs changed
+ok 17 - source refresh preserves every answer and free-form note, resetting review only when inputs changed
+  ---
+  duration_ms: 4.962457
+  type: 'test'
+  ...
+# Subtest: refresh preserves CRLF line endings and refuses damaged structure
+ok 18 - refresh preserves CRLF line endings and refuses damaged structure
+  ---
+  duration_ms: 5.832607
+  type: 'test'
+  ...
+# Subtest: prefilled values cannot inject checklist lines or executable HTML
+ok 19 - prefilled values cannot inject checklist lines or executable HTML
+  ---
+  duration_ms: 0.51752
+  type: 'test'
+  ...
+# Subtest: workspace collection is read-only, deterministic and never embeds PRD bodies
+ok 20 - workspace collection is read-only, deterministic and never embeds PRD bodies
+  ---
+  duration_ms: 54.943384
+  type: 'test'
+  ...
+# Subtest: existing handwritten or edited handouts are preserved exactly
+ok 21 - existing handwritten or edited handouts are preserved exactly
+  ---
+  duration_ms: 8.152619
+  type: 'test'
+  ...
+# Subtest: user settings can configure PRD paths and first-run suggestions without authorization
+ok 22 - user settings can configure PRD paths and first-run suggestions without authorization
+  ---
+  duration_ms: 10.468863
+  type: 'test'
+  ...
+# Subtest: a CLI PRD override wins over settings
+ok 23 - a CLI PRD override wins over settings
+  ---
+  duration_ms: 29.454784
+  type: 'test'
+  ...
+# Subtest: virtual setup configuration fingerprints match the files that the setup plan will write
+ok 24 - virtual setup configuration fingerprints match the files that the setup plan will write
+  ---
+  duration_ms: 170.664276
+  type: 'test'
+  ...
+# Subtest: adding or changing settings and PRDs after creation is detected
+ok 25 - adding or changing settings and PRDs after creation is detected
+  ---
+  duration_ms: 32.099696
+  type: 'test'
+  ...
+# Subtest: absolute, traversing, Windows and protected PRD paths are rejected
+ok 26 - absolute, traversing, Windows and protected PRD paths are rejected
+  ---
+  duration_ms: 1.313641
+  type: 'test'
+  ...
+# Subtest: symlink input and output paths are refused
+ok 27 - symlink input and output paths are refused
+  ---
+  duration_ms: 9.08698
+  type: 'test'
+  ...
+# Subtest: malformed settings and invalid preference values fail without writing
+ok 28 - malformed settings and invalid preference values fail without writing
+  ---
+  duration_ms: 9.545565
+  type: 'test'
+  ...
+# Subtest: oversized and binary inputs fail closed
+ok 29 - oversized and binary inputs fail closed
+  ---
+  duration_ms: 9.955328
+  type: 'test'
+  ...
+# Subtest: standalone CLI previews without writing, creates only explicitly and preserves edits
+ok 30 - standalone CLI previews without writing, creates only explicitly and preserves edits
+  ---
+  duration_ms: 718.84163
+  type: 'test'
+  ...
+# Subtest: standalone CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects
+ok 31 - standalone CLI returns a nonzero blocked status for an incomplete handout and rejects mixed effects
+  ---
+  duration_ms: 1324.359266
+  type: 'test'
+  ...
+# Subtest: refresh follows a changed configured PRD folder rather than silently retaining the old one
+ok 32 - refresh follows a changed configured PRD folder rather than silently retaining the old one
+  ---
+  duration_ms: 14.568091
+  type: 'test'
+  ...
+# Subtest: an explicit PRD override is preserved during validation and refresh
+ok 33 - an explicit PRD override is preserved during validation and refresh
+  ---
+  duration_ms: 11.821467
+  type: 'test'
+  ...
+# Subtest: fingerprints detect BOM-only source changes and settings JSON supports UTF-8 BOM
+ok 34 - fingerprints detect BOM-only source changes and settings JSON supports UTF-8 BOM
+  ---
+  duration_ms: 7.031662
+  type: 'test'
+  ...
+# Subtest: selected optional items need complete answers, while unchecked optional items do not block
+ok 35 - selected optional items need complete answers, while unchecked optional items do not block
+  ---
+  duration_ms: 1.374122
+  type: 'test'
+  ...
+# Subtest: checked but rejected or missing trio approvals cannot produce readiness
+ok 36 - checked but rejected or missing trio approvals cannot produce readiness
+  ---
+  duration_ms: 3.070774
+  type: 'test'
+  ...
+# Subtest: an impossible approval date is rejected
+ok 37 - an impossible approval date is rejected
+  ---
+  duration_ms: 1.367187
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2823.130367
