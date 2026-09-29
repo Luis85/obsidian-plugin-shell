@@ -2,7 +2,7 @@ import { mkdir, rmdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { requireSketch } from '../domain/errors.ts';
-export const firstRunLock = '.shell-first-run.lock';
+const firstRunLock = '.shell-first-run.lock';
 async function absent(root: string, name: string): Promise<boolean> {
   try { await lstat(join(root, name)); return false; }
   catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return true; throw error; }

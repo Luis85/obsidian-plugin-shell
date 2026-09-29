@@ -8,14 +8,14 @@ import { firstRunPlan, firstRunReport, validateFirstRunInputs, type FirstRunPlan
 import { showcase, type PreviewResult } from './first-run-preview.ts';
 import { guardedText, jsonText } from './user-settings.ts';
 export interface FirstRunStage { id: string; status: 'not-run' | 'running' | 'passed' | 'failed' | 'cancelled'; durationMs?: number; diagnostic?: string }
-export interface FirstRunResult {
+interface FirstRunResult {
   schemaVersion: 1; producer: 'shell-first-run'; planHash: string; app: string;
   status: 'running' | 'passed' | 'failed' | 'cancelled'; startedAt: string; finishedAt: string | null;
   stages: FirstRunStage[]; preview: PreviewResult | null;
   installed: boolean; built: boolean; lockAfter: string | null;
   manualAcceptance: 'not-verified'; externalEffects: 'preserved-not-rolled-back'; automaticRetry: false;
 }
-export interface FirstRunRuntime {
+interface FirstRunRuntime {
   run(plan: FirstRunPlan, step: FirstRunStep, context: Context): Promise<unknown>;
   preview(plan: FirstRunPlan, context: Context, ready: (preview: PreviewResult) => Promise<void>): Promise<PreviewResult>;
 }

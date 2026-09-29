@@ -5,7 +5,7 @@ import { review } from './review.ts';
 export async function settingsForm(ui: Prompts, initial: UserSettings): Promise<UserSettings> {
   const settings = structuredClone(initial);
   const labels = { prds: 'Typed PRD folder', project: 'Companion project JSON', prototypes: 'Prototype package folder', app: 'Angular application folder', brief: 'Project brief Markdown' };
-  for (const name of Object.keys(labels) as (keyof UserSettings['paths'])[]) settings.paths[name] = await input(ui, labels[name], settings.paths[name]);
+  for (const name of Object.keys(labels) as (keyof typeof labels)[]) settings.paths[name] = await input(ui, labels[name], settings.paths[name]);
   settings.preferences.author = await input(ui, 'Author', settings.preferences.author);
   const mode = await choose(ui, 'Preferred terminal interface', ['auto', 'tui', 'plain'].map(id => ({ id, label: id })), settings.preferences.ui);
   settings.preferences.ui = mode === 'tui' || mode === 'plain' ? mode : 'auto';
