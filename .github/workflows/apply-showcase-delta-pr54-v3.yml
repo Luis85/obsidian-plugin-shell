@@ -1,0 +1,222 @@
+name: Apply golden showcase to moving PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/apply-showcase-delta-pr54-v3.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Merge current PR5 and apply tested candidate
+        shell: bash
+        env:
+          BASELINE: 172e8ac164bf98fca8935a6435d722f17731139a
+          PAYLOAD_SHA256: 0ec663e336bcbc52adae0b20dbf670590a56b840e2d45ea00dc5917ddaf43292
+        run: |
+          set -euo pipefail
+          START_HEAD=$(git rev-parse HEAD)
+          echo "$START_HEAD" > "$RUNNER_TEMP/start-head"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch --no-tags origin docs/companion-plugin-prd:refs/remotes/origin/docs/companion-plugin-prd
+          BASE_HEAD=$(git rev-parse refs/remotes/origin/docs/companion-plugin-prd)
+          echo "$BASE_HEAD" > "$RUNNER_TEMP/base-head"
+          git merge --no-edit "$BASE_HEAD"
+          git merge-base --is-ancestor "$BASELINE" HEAD
+
+          git fetch --no-tags origin chore/companion-starter-build-inputs
+          git show origin/chore/companion-starter-build-inputs:.github/pr54-showcase-payload/payload.b64 > "$RUNNER_TEMP/payload.b64"
+          base64 -d "$RUNNER_TEMP/payload.b64" > "$RUNNER_TEMP/payload.tar.xz"
+          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/payload.tar.xz" | sha256sum -c -
+          rm -rf "$RUNNER_TEMP/candidate"
+          mkdir -p "$RUNNER_TEMP/candidate"
+          tar -xJf "$RUNNER_TEMP/payload.tar.xz" -C "$RUNNER_TEMP/candidate"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, subprocess, shutil, sys
+
+          root = Path.cwd()
+          candidate = Path(os.environ['RUNNER_TEMP']) / 'candidate'
+          baseline = os.environ['BASELINE']
+          conflicts = []
+          special = {'scripts/framework/help-text.ts'}
+
+          def git_bytes(*args):
+              p = subprocess.run(['git', *args], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+              if p.returncode:
+                  raise RuntimeError('git ' + ' '.join(args))
+              return p.stdout
+
+          for source in sorted(p for p in candidate.rglob('*') if p.is_file()):
+              rel = source.relative_to(candidate).as_posix()
+              target = root / rel
+              if rel in special:
+                  continue
+              exists_in_base = subprocess.run(
+                  ['git','cat-file','-e',f'{baseline}:{rel}'],
+                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+              ).returncode == 0
+
+              if not exists_in_base:
+                  if target.exists() and target.read_bytes() != source.read_bytes():
+                      conflicts.append(rel + ' (add/add)')
+                      continue
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(source, target)
+                  continue
+
+              if not target.exists():
+                  conflicts.append(rel + ' (modify/delete)')
+                  continue
+
+              base = Path(os.environ['RUNNER_TEMP']) / 'merge-base-file'
+              current = Path(os.environ['RUNNER_TEMP']) / 'merge-current-file'
+              base.write_bytes(git_bytes('show', f'{baseline}:{rel}'))
+              current.write_bytes(target.read_bytes())
+              merged = subprocess.run(
+                  ['git','merge-file','-p',str(current),str(base),str(source)],
+                  stdout=subprocess.PIPE
+              )
+              if merged.returncode:
+                  conflicts.append(rel)
+                  continue
+              target.write_bytes(merged.stdout)
+
+          # help-text.ts has concurrent prototype/first-run additions. Keep the live file
+          # and add only the three reviewed starter-coverage facts from the candidate.
+          help_path = root / 'scripts/framework/help-text.ts'
+          text = help_path.read_text()
+          if "'starters coverage'" not in text:
+              marker="'starters pack']"
+              if marker not in text:
+                  conflicts.append('scripts/framework/help-text.ts (starters group seam)')
+              else:
+                  text=text.replace(marker,"'starters pack', 'starters coverage']",1)
+          if "'require-model-coverage':" not in text:
+              marker="  project: { description: 'Generated project directory containing .workbench/starter.json.' },\n"
+              if marker not in text:
+                  conflicts.append('scripts/framework/help-text.ts (option seam)')
+              else:
+                  text=text.replace(marker,marker+"  'require-model-coverage': { description: 'Fail unless every shipped visual primitive, action, control kind, state and layout is represented by the selected Companion starter model.' },\n",1)
+          if "'starters coverage': [" not in text:
+              marker="const examples: Record<string, string[]> = {\n"
+              if marker not in text:
+                  conflicts.append('scripts/framework/help-text.ts (examples seam)')
+              else:
+                  text=text.replace(marker,marker+"  'starters coverage': ['node shell.mjs starters coverage feature-showcase --json', 'node shell.mjs starters coverage feature-showcase --require-model-coverage --json'],\n",1)
+          help_path.write_text(text)
+
+          deletions = [
+              'scripts/concepts/starter-bridge.js',
+              'scripts/concepts/starter-workspace.mjs',
+              'scripts/starters/companion.mjs',
+              'scripts/starters/limits.ts',
+              'tests/concepts/companion-starters.browser.mjs',
+              'tests/tooling/starter-authoring.checks.mjs',
+              'tests/tooling/starter-manual.checks.mjs',
+          ]
+          for rel in deletions:
+              target = root / rel
+              if not target.exists():
+                  continue
+              base_probe = subprocess.run(['git','cat-file','-e',f'{baseline}:{rel}'],
+                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+              if base_probe.returncode:
+                  conflicts.append(rel + ' (delete/no-baseline)')
+                  continue
+              base = git_bytes('show', f'{baseline}:{rel}')
+              if target.read_bytes() != base:
+                  conflicts.append(rel + ' (delete/modify)')
+              else:
+                  target.unlink()
+
+          if conflicts:
+              print('Unresolved candidate conflicts:', file=sys.stderr)
+              for item in conflicts:
+                  print(' - ' + item, file=sys.stderr)
+              sys.exit(2)
+          PY
+
+          git add -A
+          git diff --cached --check
+          git status --short
+      - name: Dependency-free contracts
+        run: |
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/framework-manual.checks.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs
+          node --experimental-strip-types scripts/documentation/manual.mjs --check
+          python3 -B scripts/concepts/build-companion.py --check
+          git add -A
+          git diff --cached --check
+      - name: Install qualified dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-audit --no-fund npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck and build
+        run: |
+          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json
+          if [ -f tsconfig.authoring.json ]; then node node_modules/typescript/bin/tsc --noEmit --project tsconfig.authoring.json; fi
+          node scripts/concepts/build-mvp.mjs
+          node scripts/concepts/export-golden-project.mjs
+          node scripts/concepts/export-golden-project.mjs --check
+      - name: Generate and qualify the feature showcase
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHOWCASE="$RUNNER_TEMP/visual-feature-demo"
+          rm -rf "$SHOWCASE"
+          node --experimental-strip-types shell.mjs new "$SHOWCASE" --starter feature-showcase --yes
+          cd "$SHOWCASE"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck:project
+          npm test
+          npm run test:ui-effects
+          npm run testdata:check
+          npm run build
+          npm run build:clickdummy
+          test -f clickdummy.html
+      - name: Browser acceptance
+        shell: bash
+        run: |
+          node node_modules/playwright/cli.js install --with-deps chromium
+          node tests/concepts/starter-workspace.browser.mjs
+          node tests/concepts/feature-showcase.browser.mjs --html "$RUNNER_TEMP/visual-feature-demo/clickdummy.html"
+      - name: Commit and push PR54
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          git diff --cached --check
+          git commit -m 'feat(starters): add Companion golden template and full visual showcase' -m 'Add the external Companion golden starter, empty-start authoring workflow, complete visual feature showcase, runtime coverage checks, local icon assets and reviewed license provenance. Preserve concurrent PR5 prototype, Angular setup, first-run and documentation changes with a three-way merge.'
+          git fetch --no-tags origin feat/json-starters-on-pr5:refs/remotes/origin/feat/json-starters-on-pr5
+          START_HEAD=$(cat "$RUNNER_TEMP/start-head")
+          CURRENT_REMOTE=$(git rev-parse refs/remotes/origin/feat/json-starters-on-pr5)
+          if [ "$CURRENT_REMOTE" != "$START_HEAD" ]; then
+            echo "PR54 moved from $START_HEAD to $CURRENT_REMOTE while qualifying; refusing overwrite." >&2
+            exit 43
+          fi
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
+          git rev-parse HEAD | tee "$RUNNER_TEMP/pushed-head"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: pr54-golden-showcase-v3
+          path: |
+            ${{ runner.temp }}/start-head
+            ${{ runner.temp }}/base-head
+            ${{ runner.temp }}/pushed-head
+            reports/companion-mvp/build.json
+          retention-days: 2
+          if-no-files-found: ignore
