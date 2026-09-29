@@ -1,0 +1,28 @@
+name: Companion starter base reconciliation
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/companion-sync-source.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: bde086c4440de300f31dc550ae10e9cb9836b219
+          persist-credentials: false
+      - name: Archive exact source without dependencies
+        run: |
+          mkdir -p "$RUNNER_TEMP/source"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/source/pr5.tar.gz" HEAD
+          git ls-tree -r HEAD > "$RUNNER_TEMP/source/tree.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/source/sha.txt"
+          sha256sum "$RUNNER_TEMP/source/pr5.tar.gz" > "$RUNNER_TEMP/source/SHA256SUMS"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-pr5-sync-source
+          path: ${{ runner.temp }}/source/
+          retention-days: 1
