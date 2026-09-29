@@ -46,3 +46,51 @@ jobs:
           path: ${{ runner.temp }}/qualification-inputs/
           retention-days: 3
           if-no-files-found: error
+  angular-inputs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Resolve only the reviewed Angular project dependency set
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANGULAR_INPUT_ROOT="$RUNNER_TEMP/angular-project-inputs"
+          mkdir -p "$ANGULAR_INPUT_ROOT"
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const base = JSON.parse(readFileSync('package.json', 'utf8'));
+          const catalog = JSON.parse(readFileSync('bin/guides/project-presets.json', 'utf8'));
+          const dependencies = { ...catalog.angularPins, '@angular/router': catalog.angularPins['@angular/core'] };
+          const devDependencies = Object.fromEntries(['typescript', '@types/node', 'vite'].map(name => [name, base.devDependencies[name]]));
+          devDependencies['@angular/compiler-cli'] = dependencies['@angular/compiler-cli']; delete dependencies['@angular/compiler-cli'];
+          devDependencies['@babel/core'] = '7.29.0';
+          writeFileSync(join(process.env.ANGULAR_INPUT_ROOT, 'package.json'), JSON.stringify({ name: 'angular-qualification-inputs', version: '0.1.0', private: true, type: 'module', dependencies, devDependencies }, null, 2));
+          NODE
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" install --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --ignore-scripts --no-audit --no-fund
+          node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --offline --ignore-scripts --no-audit --no-fund
+      - name: Retain input hashes without credentials, logs or font binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/angular-offline-inputs"
+          mkdir -p "$out"
+          cp "$RUNNER_TEMP/angular-project-inputs/package.json" "$RUNNER_TEMP/angular-project-inputs/package-lock.json" "$out/"
+          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$out/dependencies.tar.gz" -C "$RUNNER_TEMP/angular-project-inputs" node_modules
+          tar -czf "$out/npm-cache.tar.gz" -C "$RUNNER_TEMP/angular-npm-cache" _cacache
+          node -e 'console.log(JSON.stringify({schemaVersion:1,commit:process.env.GITHUB_SHA,node:process.versions.node,npm:"11.19.1",platform:process.platform,arch:process.arch,scope:"Angular input provisioning; not application acceptance"},null,2))' > "$out/provenance.json"
+          (cd "$out" && sha256sum *.json *.tar.gz > SHA256SUMS)
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: angular-offline-inputs
+          path: ${{ runner.temp }}/angular-offline-inputs/
+          retention-days: 3
+          if-no-files-found: error
