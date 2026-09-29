@@ -1,7 +1,7 @@
 /** Portable directory codec, shared by browser export and the shell. No filesystem access. */
 import { PROTOTYPE_REGISTRY, PROTOTYPE_MAX_BYTES, prototypeFolder, snapshotPath, type PrototypeWorkspace, type ValidateDocument } from './model.ts';
 import { validateWorkspace, validateSelection } from './validate.ts';
-import { prototypeJson, prototypeObject as object, slug, text, revision, unique, collection, ensure } from './safety.ts';
+import { prototypeJson, prototypeObject, slug, text, revision, unique, collection, ensure } from './safety.ts';
 export interface PrototypeFile { path: string; content: string }
 export type Digest = (text: string) => string | Promise<string>;
 export const prototypeJsonText = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
@@ -42,7 +42,7 @@ export async function readWorkspaceFiles(read: (path: string) => Promise<string>
     return source;
   };
   const registry = parse(await boundedRead(PROTOTYPE_REGISTRY));
-  object(registry, ['kind', 'schemaVersion', 'projectId', 'revision', 'active', 'prototypes']);
+  prototypeObject(registry, ['kind', 'schemaVersion', 'projectId', 'revision', 'active', 'prototypes']);
   ensure(registry.kind === 'workbench-prototype-workspace' && registry.schemaVersion === 1, 'PROTOTYPE_VERSION', 'Unsupported prototype registry.');
   text(registry.projectId); revision(registry.revision); if (registry.active !== null) validateSelection(registry.active);
   collection(registry.prototypes, 40);
@@ -51,17 +51,17 @@ export async function readWorkspaceFiles(read: (path: string) => Promise<string>
   for (const id of registry.prototypes) {
     slug(id);
     const manifest = parse(await boundedRead(prototypeFolder(id) + '/prototype.json'));
-    object(manifest, ['kind', 'schemaVersion', 'projectId', 'item']);
+    prototypeObject(manifest, ['kind', 'schemaVersion', 'projectId', 'item']);
     ensure(manifest.kind === 'workbench-prototype' && manifest.schemaVersion === 1 && manifest.projectId === registry.projectId,
       'PROTOTYPE_VERSION', 'Incompatible prototype manifest.');
-    const p = manifest.item; object(p, ['id', 'name', 'description', 'archived', 'versions']);
+    const p = manifest.item; prototypeObject(p, ['id', 'name', 'description', 'archived', 'versions']);
     ensure(p.id === id, 'PROTOTYPE_IDENTITY', 'Prototype manifest identity does not match its directory.'); collection(p.versions, 40);
     for (const v of p.versions) {
-      object(v, ['id', 'label', 'sealed', 'variants']); slug(v.id); collection(v.variants, 40);
+      prototypeObject(v, ['id', 'label', 'sealed', 'variants']); slug(v.id); collection(v.variants, 40);
       for (const item of v.variants) {
         ensure(++snapshots <= 200, 'PROTOTYPE_LIMIT', 'Workspace supports at most 200 saved variants.');
-        object(item, ['id', 'name', 'hypothesis', 'status', 'revision', 'document']); slug(item.id);
-        object(item.document, ['path', 'sha256']);
+        prototypeObject(item, ['id', 'name', 'hypothesis', 'status', 'revision', 'document']); slug(item.id);
+        prototypeObject(item.document, ['path', 'sha256']);
         const path = snapshotPath({ prototypeId: id, versionId: v.id, variantId: item.id });
         ensure(item.document.path === path, 'PROTOTYPE_PATH', 'Snapshot path differs from its derived location.');
         ensure(typeof item.document.sha256 === 'string' && /^[a-f0-9]{64}$/.test(item.document.sha256), 'PROTOTYPE_HASH', 'Invalid snapshot SHA-256 digest.');
