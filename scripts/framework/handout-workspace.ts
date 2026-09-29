@@ -20,7 +20,7 @@ async function localRoot(root: string): Promise<string> {
   // Resolve ancestors as well; root is explicitly selected, but descendants may never escape it.
   return realpath(absolute);
 }
-export async function inspectLocalPath(root: string, path: string) {
+async function inspectLocalPath(root: string, path: string) {
   portablePath(path);
   let parent = root;
   for (const [index, part] of path.split('/').entries()) {
@@ -131,7 +131,7 @@ export async function loadHandoutWorkspace(root: string, options: WorkspaceOptio
   }
   return { root: local, snapshot: makeSnapshot(prdsRoot, files, options.prds !== undefined), suggestions, prdCount };
 }
-export async function readHandout(root: string): Promise<string | null> {
+async function readHandout(root: string): Promise<string | null> {
   return readLocal(await localRoot(root), HANDOUT_PATH, HANDOUT_LIMIT);
 }
 /** Pure preparation: returned entries participate in the caller's reviewed file plan. */

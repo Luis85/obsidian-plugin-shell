@@ -31,6 +31,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'handout', title: 'Product-trio handout', commands: ['handout generate', 'handout refresh', 'handout validate', 'handout inspect'] },
   { id: 'start', title: 'Start a project', commands: ['new', 'setup', 'setup status', 'setup resume', 'project inspect', 'project import', 'project schema', 'project validate', 'project measure', 'generate', 'concept schema', 'concept inspect', 'concept import'] },
   { id: 'develop', title: 'Develop and check', commands: ['install', 'dev', 'build', 'clickdummy build', 'test', 'check', 'check submission', 'make', 'styles inspect', 'styles export'] },
+  { id: 'documentation', title: 'Application documentation', commands: ['docs import', 'docs export', 'docs validate', 'docs status', 'docs schema', 'docs recover'] },
   { id: 'storybook', title: 'Optional Storybook', commands: ['storybook status', 'storybook install', 'storybook check', 'storybook dev', 'storybook build'] },
   { id: 'airship', title: 'Optional Airship', commands: ['airship status', 'airship enable', 'airship disable', 'airship install', 'airship start', 'airship doctor'] },
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
@@ -52,6 +53,7 @@ const common: Record<string, OptionHelp> = {
   help: { description: 'Describe this command instead of running it.' },
 };
 const specific: Record<string, OptionHelp> = {
+  resolutions: { description: 'JSON mapping of exact entity#/field conflict keys to markdown or project. Stale or unused resolutions are rejected.' },
   variant: { description: 'Saved variant slug inside the selected prototype version.' },
   as: { description: 'Portable lowercase slug for the new variant.' },
   hypothesis: { description: 'The solution idea or test hypothesis explored by this variant.' },
@@ -116,11 +118,36 @@ const specific: Record<string, OptionHelp> = {
 };
 const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
+  'docs import': 'node shell.mjs docs import [file-or-folder ...] [options]',
+  'docs export': 'node shell.mjs docs export [--out <documentation-root>] [options]',
+  'docs validate': 'node shell.mjs docs validate [file-or-folder ...] [--json]',
   new: 'node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]', help: 'node shell.mjs help [command] [--all]',
   'plan inspect': 'node shell.mjs plan inspect <plan-file>', 'plan apply': 'node shell.mjs plan apply <plan-file> --yes',
   make: 'node shell.mjs make <recipe> <name> [options] | make list | make describe <recipe>',
 };
 const examples: Record<string, string[]> = {
+  'prototypes list': ['node shell.mjs prototypes list --json'],
+  'prototypes create': ['node shell.mjs prototypes create exploration --input design/project.json --dry-run'],
+  'prototypes version': ['node shell.mjs prototypes version exploration --version v2 --from v1 --dry-run'],
+  'prototypes fork': ['node shell.mjs prototypes fork exploration --version v1 --variant main --as sitemap-b --dry-run'],
+  'prototypes save': ['node shell.mjs prototypes save exploration --version v1 --variant sitemap-b --input design/project.json --dry-run'],
+  'prototypes details': ['node shell.mjs prototypes details exploration --version v1 --variant sitemap-b --name "Sitemap B" --hypothesis "Alternative navigation" --dry-run'],
+  'prototypes status': ['node shell.mjs prototypes status exploration --version v1 --variant sitemap-b --status approved --dry-run'],
+  'prototypes activate': ['node shell.mjs prototypes activate exploration --version v1 --variant sitemap-b --dry-run'],
+  'prototypes deactivate': ['node shell.mjs prototypes deactivate --dry-run'],
+  'prototypes seal': ['node shell.mjs prototypes seal exploration --version v1 --dry-run'],
+  'prototypes archive': ['node shell.mjs prototypes archive exploration --dry-run'],
+  'prototypes restore': ['node shell.mjs prototypes restore exploration --dry-run'],
+  'prototypes import': ['node shell.mjs prototypes import --input prototype-workspace.json --dry-run'],
+  'prototypes export': ['node shell.mjs prototypes export --out prototype-workspace.json --dry-run'],
+  'prototypes adopt': ['node shell.mjs prototypes adopt --resolve import --dry-run'],
+  'prototypes generate': ['node shell.mjs prototypes generate --target generated-preview --dry-run'],
+  'docs import': ['node shell.mjs docs import docs/application --dry-run', 'node shell.mjs docs import docs/application --apply <reviewed-hash> --yes'],
+  'docs export': ['node shell.mjs docs export --dry-run', 'node shell.mjs docs export --out docs/application --yes'],
+  'docs validate': ['node shell.mjs docs validate docs/application --json'],
+  'docs status': ['node shell.mjs docs status --json'],
+  'docs schema': ['node shell.mjs docs schema --json'],
+  'docs recover': ['node shell.mjs docs recover --dry-run', 'node shell.mjs docs recover --apply <recovery-hash> --yes'],
   'handout generate': ['node shell.mjs handout generate --dry-run --json', 'node shell.mjs handout generate --plan-out handout.plan.json --json'],
   'handout refresh': ['node shell.mjs handout refresh --plan-out handout-refresh.plan.json --json'],
   'handout validate': ['node shell.mjs handout validate --json'],
@@ -182,7 +209,7 @@ const examples: Record<string, string[]> = {
 function commonFor(entry: Command): string[] {
   const shared = ['json', 'root', 'no-interaction', 'help'];
   if (entry.effect === 'plan') return ['dry-run', 'yes', 'apply', 'plan-out', ...shared];
-  if (entry.effect === 'process') return ['dry-run', ...(entry.id === 'setup resume' ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
+  if (entry.effect === 'process') return ['dry-run', ...(['setup resume', 'docs recover'].includes(entry.id) ? ['apply'] : []), ...(['install', 'storybook install', 'airship install', 'airship start', 'airship doctor', 'framework pack', 'setup resume', 'docs recover'].includes(entry.id) ? ['yes'] : []), 'timeout', ...shared];
   if (entry.effect === 'fixtures') return ['apply', ...shared];
   if (entry.effect === 'release' || entry.id === 'project measure') return ['dry-run', ...shared];
   return shared;
@@ -198,6 +225,7 @@ export function commandHelp(entry: Command): CommandHelp {
     if (entry.id === 'project schema' && name === 'version') { doc.description = 'Published project schema version. Legacy documents use project validate.'; doc.values = ['6']; doc.default = '6'; }
     if (entry.id === 'release prepare' && name === 'version') doc.description = 'Release version x.y.z.';
     if (entry.id === 'make' && name === 'format') { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }
+    if (entry.id === 'docs export' && name === 'out') { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }
     if (entry.id.startsWith('prototypes ') && name === 'version') doc.description = 'Portable version slug, for example v1 or v2; distinct from the application release version.';
     if (entry.id === 'prototypes version' && name === 'from') doc.description = 'Source version slug to copy into the new version.';
     if (entry.id.startsWith('prototypes ') && name === 'name') doc.description = 'Prototype or variant display name; its folder slug stays unchanged.';

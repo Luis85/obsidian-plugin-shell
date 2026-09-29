@@ -13,6 +13,7 @@ The Shell CLI turns an approved plugin design into a working project, helps you 
 | Maintain the framework, upgrade or prepare a release | [Maintenance and release](maintenance-and-release.md) |
 | Use optional memory tooling and understand separate entry points | [Optional integrations](optional-integrations.md) |
 | Resolve errors without losing work | [Troubleshooting](troubleshooting.md) |
+| Maintain application pages, components, interactions and journeys as typed Markdown | [Application documentation](application-documentation.md) |
 | Maintain this manual from code comments or Markdown | [Documentation authoring](documentation-authoring.md) |
 
 ## Exact reference, generated from source

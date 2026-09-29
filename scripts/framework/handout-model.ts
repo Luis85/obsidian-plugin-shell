@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 import { handoutSections } from './handout-questions.ts';
 
 export const HANDOUT_PATH = 'PROJECT-SETUP-HANDOUT.md';
-export const HANDOUT_VERSION = 1;
+const HANDOUT_VERSION = 1;
 export const HANDOUT_LIMIT = 2_000_000;
-export const questionIndex = new Map(handoutSections.flatMap(section => section.questions.map(question => [question.id, question] as const)));
+const questionIndex = new Map(handoutSections.flatMap(section => section.questions.map(question => [question.id, question] as const)));
 export const digest = (value: string | Buffer): string => createHash('sha256').update(value).digest('hex');
 const templateHash = digest(JSON.stringify(handoutSections));
 const metadataPattern = /^<!-- workbench-handout-snapshot: (.+) -->$/m;

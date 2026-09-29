@@ -1,3 +1,4 @@
+import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { airshipPlan } from './airship-plan.ts';
 import { handoutPlan } from './handout-adapter.ts';
@@ -56,6 +57,7 @@ export async function planOperation(request: Request, context: Context) {
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
   let planned: Planned;
   switch (request.command) {
+    case 'docs import': case 'docs export': planned = await docsPlan(request, context); break;
     case 'handout generate': case 'handout refresh': planned = await handoutPlan(request, context); break;
     case 'airship enable': case 'airship disable': planned = await airshipPlan(request, context); break;
     case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
@@ -89,9 +91,14 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
   // Recompute through the same handler: config/input/kit changes invalidate API-held plans too.
   const fresh = await planOperation(planned.request, context);
   requireThat(fresh.planHash === expected && fresh.conflicts.length === 0, 'PLAN_STALE', 'Inputs changed after review; inspect a new plan.');
-  return applyFilePlan(fresh.plan, { beforeWrite() { requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.'); } });
+  const journal = fresh.request.command.startsWith('docs ')
+    ? (await import('../application-docs/adapters/recovery.ts')).journalHook(fresh.plan) : null;
+  return applyFilePlan(fresh.plan, { async beforeWrite() {
+    requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
+    await journal?.();
+  } });
 }
-export async function savePlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
+export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');
   requireThat(planned.request.options['trust-custom'] !== true, 'CUSTOM_PLAN_NOT_PORTABLE', 'Custom maker trust cannot be serialized as approval.');
   const path = resolve(context.root, output);
