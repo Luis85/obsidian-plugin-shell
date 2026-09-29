@@ -1,0 +1,32 @@
+name: Starter recovery snapshot
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/starter-recovery-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 358aaa651139fe3a83ae15afa428f4e9dfac2658
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Capture both parents and common ancestor
+        run: |
+          mkdir -p "$RUNNER_TEMP/recovery"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/recovery/pr54.tar.gz" 358aaa651139fe3a83ae15afa428f4e9dfac2658
+          git archive --format=tar.gz -o "$RUNNER_TEMP/recovery/pr5.tar.gz" 1a078d235043db2157efbcc702878e120264fc14
+          git archive --format=tar.gz -o "$RUNNER_TEMP/recovery/base.tar.gz" 40799d9489e0bd436a47f819732292e8a35a4774
+          git ls-tree -r 358aaa651139fe3a83ae15afa428f4e9dfac2658 > "$RUNNER_TEMP/recovery/pr54-tree.txt"
+          git ls-tree -r 1a078d235043db2157efbcc702878e120264fc14 > "$RUNNER_TEMP/recovery/pr5-tree.txt"
+          git show -s --format='%H %T %P' 358aaa651139fe3a83ae15afa428f4e9dfac2658 1a078d235043db2157efbcc702878e120264fc14 > "$RUNNER_TEMP/recovery/parents.txt"
+          cd "$RUNNER_TEMP/recovery" && sha256sum *.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: starter-recovery-snapshot
+          path: ${{ runner.temp }}/recovery/
+          retention-days: 1
