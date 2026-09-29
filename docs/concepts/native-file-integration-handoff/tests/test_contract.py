@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from unittest import mock
+from types import SimpleNamespace
 import unittest
 from fixtures import SourceFixture, HOME, core, restore
 
@@ -131,6 +132,39 @@ class ContractTests(SourceFixture):
             self.assertEqual(restore.main(['--check', '--json']), 1)
         self.assertEqual(json.loads(capture.getvalue())['error']['code'], 'HANDOFF_MANIFEST_MISMATCH')
         self.assertEqual(errors.getvalue(), '')
+
+    def stat_copy(self, info, ctime):
+        return SimpleNamespace(st_dev=info.st_dev, st_ino=info.st_ino, st_size=info.st_size,
+                               st_mtime_ns=info.st_mtime_ns, st_ctime_ns=ctime)
+
+    def test_stable_ctime_is_compared_within_each_stat_api_not_across_apis(self):
+        path = self.temp / 'different-ctime'; path.write_bytes(b'unchanged')
+        original = core.os.fstat
+        def by_handle(fd):
+            info = original(fd)
+            return self.stat_copy(info, info.st_ctime_ns + 100)
+        with mock.patch.object(core.os, 'fstat', by_handle):
+            self.assertEqual(core.read_regular(path), b'unchanged')
+
+    def test_changed_handle_ctime_still_rejects_a_read(self):
+        path = self.temp / 'handle-ctime'; path.write_bytes(b'unchanged')
+        original = core.os.fstat; calls = 0
+        def by_handle(fd):
+            nonlocal calls
+            calls += 1
+            return self.stat_copy(original(fd), calls)
+        with mock.patch.object(core.os, 'fstat', by_handle):
+            self.assert_error('HANDOFF_SOURCE_CHANGED', core.read_regular, path)
+
+    def test_changed_path_ctime_still_rejects_a_read(self):
+        path = self.temp / 'path-ctime'; path.write_bytes(b'unchanged')
+        original = core.regular_info; calls = 0
+        def by_path(value):
+            nonlocal calls
+            calls += 1
+            return self.stat_copy(original(value), calls)
+        with mock.patch.object(core, 'regular_info', by_path):
+            self.assert_error('HANDOFF_SOURCE_CHANGED', core.read_regular, path)
 
 
 if __name__ == '__main__':

@@ -98,3 +98,26 @@ The active native starters retain their separate real-host/device acceptance sco
 A future adoption should select one canonical native contract, preserve existing
 user files/drafts, migrate deliberately, and qualify the resulting runtime rather
 than treating this immutable source handoff as a production implementation upgrade.
+
+
+## Cross-platform qualification correction
+
+The initial polishing commit `dd1d537f24efb08d7f7834e52640a92137136b0a`
+passed the complete hosted handoff job on Linux and macOS. Each ran all 40 Python
+cases and eight Node checks, then recovered 1,380 historical files / 22,164,059
+bytes with reconstructed tree `cebb05b5121b2be81141e0e6175d0a60cf612174` and the
+unchanged HTML hash above. The retained artifact digests were verified locally.
+
+The Windows job in run `36539144369` failed before historical reconstruction:
+Python 3.12.10 returned differing `st_ctime_ns` semantics for path and handle stats.
+This matches the documented upstream [CPython issue #157671](https://github.com/python/cpython/issues/157671).
+The correction compares ctime before/after **within each API**, while file identity,
+size and mtime must still agree across both APIs. It does not drop metadata-change
+checks, content hashes, output readback or any no-overwrite guard.
+
+Three new controls exercise stable cross-API ctime differences, a changing handle
+ctime and a changing path ctime. The corrected local suite passed **43 tests**;
+Linux/macOS successes from the first commit remain historical until the fresh
+cross-platform run completes. The failed Windows run is retained, not relabeled.
+The FIFO test is POSIX-only and explicitly skips on Windows; symbolic-link cases
+skip only when Windows denies the necessary creation privilege.

@@ -79,8 +79,11 @@ def read_regular(path: Path, limit: int = MAX_FILE) -> bytes:
         data = source.read(limit + 1)
         after = os.fstat(source.fileno())
     current = regular_info(path)
-    stamps = lambda info: (identity(info), info.st_size, info.st_mtime_ns, info.st_ctime_ns)
-    require(stamps(before) == stamps(opened) == stamps(after) == stamps(current),
+    # Windows stat and fstat may assign different semantics to ctime (CPython #157671).
+    # Compare ctime within each API, while identity/size/mtime must agree across both.
+    stamps = lambda info: (identity(info), info.st_size, info.st_mtime_ns)
+    require(stamps(before) == stamps(opened) == stamps(after) == stamps(current)
+            and before.st_ctime_ns == current.st_ctime_ns and opened.st_ctime_ns == after.st_ctime_ns,
             'HANDOFF_SOURCE_CHANGED', 'Source changed during verification.')
     require(len(data) <= limit and len(data) == before.st_size,
             'HANDOFF_SIZE_LIMIT', 'Source byte length changed or exceeds its bound.')
