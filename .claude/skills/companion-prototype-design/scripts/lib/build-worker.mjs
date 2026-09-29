@@ -17,7 +17,7 @@ export function prototypeBuildConfig({ shared, entry, licenses }) {
     build: { ...shared.build, write: false, sourcemap: false, cssCodeSplit: false,
       assetsInlineLimit: Number.MAX_SAFE_INTEGER,
       lib: { entry, name: 'CompanionPrototype', formats: ['iife'], fileName: () => 'prototype.js' },
-      rolldownOptions: { output: { inlineDynamicImports: true } } },
+      rolldownOptions: { output: { codeSplitting: false } } },
   };
 }
 async function compile(options) {

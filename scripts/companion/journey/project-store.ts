@@ -128,7 +128,7 @@ export class JourneyProjectDocument implements SitemapHost<SitemapDesign> {
     return this.persist(content, this.saved.raw);
   }
   /** Explicit user confirmation chooses create-only or replacement of this session's exact read preimage. */
-  async import(text: string, mode: 'create' | 'replace'): Promise<SitemapSaveResult<SitemapDesign>> {
+  async importProject(text: string, mode: 'create' | 'replace'): Promise<SitemapSaveResult<SitemapDesign>> {
     requireSitemap(mode === 'create' || mode === 'replace', 'PROJECT_MODE', 'Choose create or replace.');
     const candidate = serialize(importJourneyProject(text));
     requireSitemap(mode === 'create' || this.saved, 'PROJECT_UNLOADED', 'Open the existing project before replacing it.');

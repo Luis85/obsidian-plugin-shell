@@ -164,8 +164,8 @@
     },
     {
       "path": "scripts/lib/build-worker.mjs",
-      "bytes": 4572,
-      "sha256": "b049d433a3bc9a5f5060b74cd84613687526edc321a033434d89cf3055cd862f"
+      "bytes": 4566,
+      "sha256": "90995330a0b5d34d1567a4eaa7d1de27c0b205d551dcf3255eaf558f8bcbb50e"
     },
     {
       "path": "scripts/lib/framework.mjs",
@@ -219,8 +219,8 @@
     },
     {
       "path": "tests/integration.checks.mjs",
-      "bytes": 5655,
-      "sha256": "af78dea73b00b31ab5c82d2871c7eb44c5ac7748a26fcb0eaf61b3970efbc54b"
+      "bytes": 5649,
+      "sha256": "9071a80c115a8b848e1d6e069b458bdf1e4582525e8cbfc3681c90913519be42"
     },
     {
       "path": "tests/test_pack_concept.py",
