@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "expectedPr54": "9edfcbb810592a8a47b591545d80ecd5241a470a",
+  "expectedPr5": "9a730e672f58b640b289d6ea49b68850e2f5df18",
+  "sha256": "2b81abc27b94ae77553925fdf05140fbc8ee3ba5d4324076c6dff1afde8035c8",
+  "bytes": 636588,
+  "chunks": 10,
+  "deletions": [
+    "scripts/concepts/starter-bridge.js",
+    "scripts/concepts/starter-workspace.mjs",
+    "scripts/starters/companion.mjs",
+    "scripts/starters/limits.ts",
+    "tests/concepts/companion-starters.browser.mjs",
+    "tests/tooling/starter-authoring.checks.mjs",
+    "tests/tooling/starter-manual.checks.mjs"
+  ]
+}
