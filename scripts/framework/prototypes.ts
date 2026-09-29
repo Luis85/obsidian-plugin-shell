@@ -1,9 +1,10 @@
 import { validateWorkspaceReplacement } from '../companion/prototypes/replacement.ts';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
-import { activeVariant, emptyWorkspace, changeWorkspace, workspaceSummary } from '../companion/prototypes/commands.ts';
+import { activeVariant, emptyWorkspace, changeWorkspace, workspaceSummary, selectedVariant } from '../companion/prototypes/commands.ts';
 import { snapshotPath, variantStatuses, type PrototypeAction, type PrototypeSelection } from '../companion/prototypes/model.ts';
 import { prototypeJsonText } from '../companion/prototypes/files.ts';
 import { validateSelection } from '../companion/prototypes/validate.ts';
+import { comparePrototypeDocuments } from '../companion/prototypes/compare.ts';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { configurationPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
@@ -20,6 +21,17 @@ function required(request: Request, key: string): string {
 export async function prototypesRead(context: Context) {
   const { workspace } = await loadPrototypeWorkspace(context);
   return workspace ? workspaceSummary(workspace) : { active: null, prototypes: [], directory: 'docs/concepts/<prototype-name>/' };
+}
+export async function prototypesCompare(request: Request, context: Context) {
+  const { workspace } = await loadPrototypeWorkspace(context);
+  requireThat(workspace, 'PROTOTYPE_REQUIRED', 'Create or import a prototype workspace first.');
+  const before = selection(request), after = {
+    prototypeId: stringOption(request.options,'with-prototype') ?? before.prototypeId,
+    versionId: stringOption(request.options,'with-version') ?? before.versionId,
+    variantId: required(request,'with-variant'),
+  };
+  validateSelection(after);
+  return { before, after, comparison: comparePrototypeDocuments(selectedVariant(workspace,before).variant.document,selectedVariant(workspace,after).variant.document) };
 }
 export async function prototypesPlan(request: Request, context: Context) {
   const current = await loadPrototypeWorkspace(context), command = request.command.slice('prototypes '.length);
@@ -54,6 +66,12 @@ export async function prototypesPlan(request: Request, context: Context) {
   if (command === 'create') {
     const id = request.args[0]; requireThat(id && document, 'PROTOTYPE_REQUIRED', 'Supply a prototype slug and project JSON.');
     action = { type: 'create', id, name: stringOption(request.options, 'name') ?? id, description: stringOption(request.options, 'description') ?? '', document };
+  } else if (command === 'prototype-details') action = { type:'prototype-details', prototypeId:request.args[0] ?? '', name:required(request,'name'), description:stringOption(request.options,'description') ?? '' };
+  else if (command === 'version-details') action = { type:'version-details', prototypeId:request.args[0] ?? '', versionId:required(request,'version'), label:required(request,'label') };
+  else if (command === 'restore-snapshot') {
+    const target = selection(request);
+    action = { type:'restore-snapshot', selection:target, source:{prototypeId:stringOption(request.options,'from-prototype') ?? target.prototypeId,
+      versionId:required(request,'from-version'),variantId:required(request,'from-variant')}, recoveryId:required(request,'recovery-version') };
   } else if (command === 'deactivate') action = { type: 'deactivate' };
   else if (command === 'version') action = { type: 'version', prototypeId: request.args[0] ?? '', id: required(request, 'version'), from: required(request, 'from') };
   else if (command === 'seal') action = { type: 'seal', prototypeId: request.args[0] ?? '', versionId: required(request, 'version') };

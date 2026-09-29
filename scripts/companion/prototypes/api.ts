@@ -6,10 +6,11 @@ import { workspaceFiles, prototypeJsonText, type Digest } from './files.ts';
 import { workspaceKey } from './safety.ts';
 import { snapshotPath, selectionKey, type PrototypeWorkspace, type PrototypeAction } from './model.ts';
 import { validateWorkspaceReplacement } from './replacement.ts';
+import { comparePrototypeDocuments } from './compare.ts';
 export const prototypeApi = {
   validate: (value: unknown) => validateWorkspace(value, validateAuthoringDocument),
   change: (source: PrototypeWorkspace, action: PrototypeAction) => changeWorkspace(source, action, validateAuthoringDocument),
   files: (source: PrototypeWorkspace, digest: Digest) => workspaceFiles(source, validateAuthoringDocument, digest),
-  empty: emptyWorkspace, selected: selectedVariant, active: activeVariant, summary: workspaceSummary,
+  empty: emptyWorkspace, selected: selectedVariant, active: activeVariant, summary: workspaceSummary, compare: comparePrototypeDocuments,
   key: workspaceKey, snapshotPath, selectionKey, json: prototypeJsonText, replacement: validateWorkspaceReplacement,
 };

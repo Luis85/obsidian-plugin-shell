@@ -1,12 +1,13 @@
 import { join, relative } from 'node:path';
 import { activeVariant } from '../companion/prototypes/commands.ts';
 import { snapshotPath } from '../companion/prototypes/model.ts';
-import { workspaceKey } from '../companion/prototypes/safety.ts';
+import { validateSelection } from '../companion/prototypes/validate.ts';
+import { workspaceKey, object, revision } from '../companion/prototypes/safety.ts';
 import { prototypeJsonText } from '../companion/prototypes/files.ts';
 import { parseAuthoringDocument } from '../companion/authoring-contract.ts';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { designFile } from './configuration.ts';
-import { hash, readBounded } from './files.ts';
+import { hash, readBounded, exists } from './files.ts';
 import { stringOption, requireThat, type Request, type Context } from './contracts.ts';
 import { loadPrototypeWorkspace, bindPrototypePlan } from './prototype-workspace.ts';
 import type { generateSourcePlan } from './generation.ts';
@@ -20,6 +21,7 @@ export async function managedGenerationPlan(request: Request, context: Context, 
     workspaceRevision: current.workspace.revision, snapshotPath: path, snapshotHash: hash(current.files.get(path)!) };
   const target = stringOption(request.options, 'target');
   if (target === undefined) {
+    requireThat(await exists(join(context.root, designFile)), 'PROTOTYPE_IMPORT_REQUIRED', 'Review prototypes adopt before in-place generation; no canonical design is imported.');
     const imported = parseAuthoringDocument((await readBounded(join(context.root, designFile), 4_000_000)).toString('utf8'));
     requireThat(workspaceKey(imported) === workspaceKey(selected.variant.document), 'PROTOTYPE_IMPORT_REQUIRED',
       'The canonical design does not match the active variant. Review prototypes adopt before in-place generation.');
@@ -39,9 +41,12 @@ export async function managedGenerationPlan(request: Request, context: Context, 
   if (change.beforeHash !== null) {
     const raw = await readBounded(join(context.root, receipt));
     const old: unknown = JSON.parse(raw.toString('utf8'));
-    requireThat(old !== null && typeof old === 'object' && 'schemaVersion' in old && old.schemaVersion === 1 &&
-      'projectId' in old && old.projectId === current.workspace.projectId && hash(raw) === change.beforeHash,
-      'PROTOTYPE_RECEIPT_CONFLICT', 'Existing prototype receipt is not owned by this project.');
+    object(old, ['schemaVersion', 'projectId', 'prototypeId', 'versionId', 'variantId', 'variantRevision', 'workspaceRevision', 'snapshotPath', 'snapshotHash']);
+    const selection = { prototypeId: old.prototypeId, versionId: old.versionId, variantId: old.variantId };
+    validateSelection(selection); revision(old.variantRevision); revision(old.workspaceRevision);
+    requireThat(old.schemaVersion === 1 && old.projectId === current.workspace.projectId && hash(raw) === change.beforeHash &&
+      old.snapshotPath === snapshotPath(selection) && typeof old.snapshotHash === 'string' && /^[a-f0-9]{64}$/.test(old.snapshotHash),
+      'PROTOTYPE_RECEIPT_CONFLICT', 'Existing prototype receipt is incompatible with this project or changed during planning.');
   }
   return bindPrototypePlan(context, { ...planned, plan, summary: { ...planned.summary, prototypeSelection: provenance } }, current);
 }
