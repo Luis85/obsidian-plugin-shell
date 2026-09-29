@@ -1,0 +1,27 @@
+name: Snapshot exact live PR54
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/live-pr54-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9e870f8ef441d76a753538eea84cca2b4cc872a1
+          persist-credentials: false
+      - name: Archive exact live PR54
+        run: |
+          mkdir -p "$RUNNER_TEMP/pr54"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/pr54/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/pr54/sha.txt"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/pr54/tree.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: live-pr54-source
+          path: ${{ runner.temp }}/pr54/
+          retention-days: 1
