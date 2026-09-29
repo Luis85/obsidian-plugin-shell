@@ -9,7 +9,9 @@ import { fileURLToPath } from 'node:url';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 const frameworkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 async function context(t) {
-  // macOS exposes its temp directory through the system /var -> /private/var alias.\n  // The file-plan contract intentionally rejects symlinked root ancestry, so exercise it with the canonical directory.\n  const root = await realpath(await mkdtemp(join(tmpdir(), 'workbench-handout-framework-')));
+  // macOS exposes its temp directory through the system /var -> /private/var alias.
+  // The file-plan contract intentionally rejects symlinked root ancestry, so exercise it with the canonical directory.
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'workbench-handout-framework-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'docs/prds'), { recursive: true });
   await writeFile(join(root, 'docs/prds/example.md'), '# Example PRD\nA prototype journey.\n');
