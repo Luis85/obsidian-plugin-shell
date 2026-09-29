@@ -88,7 +88,7 @@ it('saves the complete generated project and reopens an independent editor sessi
     if(bytes!==before)return {status:'conflict'};bytes=next;return {status:'committed',content:bytes};
   }});
   const first=store.connect('project.companion.json'),session=new SitemapSession(first);
-  await session.load();const snapshot=await first.read(),node=snapshot.design.nodes.find(n=>n.kind!=='group')!;
+  await session.load();const snapshot=session.snapshot()!,node=snapshot.design.nodes.find(n=>n.kind!=='group')!;
   const plan=session.plan({type:'rename',surface:node.id,label:'Native journey test'});const outcome=await session.apply(plan);
   expect(outcome.status).toBe('committed');const second=store.connect('project.companion.json');await second.read();
   expect(JSON.parse(second.export()).design.nodes.find((n:{id:string})=>n.id===node.id).label).toBe('Native journey test');

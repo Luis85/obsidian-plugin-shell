@@ -163,12 +163,13 @@ export function editorStore(host: EditorHost) {
           restoredRecord=planRecordRemoval(snapshot.value,d.record.kind as 'transition'|'route'|'journey',d.record.id);
         }
         const restoredRemoval=d.panel==='remove'?planSurfaceRemoval(snapshot.value,d.selectedId):null;
-        if(d.journeyDraft!==null){
-          if(!record(d.journeyDraft)||!record(d.journeyDraft.journey)||!Array.isArray(d.journeyDraft.journey.steps))return false;
+        const recoveredJourney=d.journeyDraft;
+        if(recoveredJourney!==null){
+          if(!record(recoveredJourney)||!record(recoveredJourney.journey)||!Array.isArray(recoveredJourney.journey.steps))return false;
           // Reuse the normal journey validator, including stable IDs and all referenced steps.
-          const candidate={...snapshot.value,sitemap:{schema:1,routes:snapshot.value.sitemap?.routes??[],journeys:[{...d.journeyDraft.journey,name:d.journeyDraft.journey.name||'Recovered draft'}]}};
-          if(!Number.isSafeInteger(d.journeyDraft.nextStep)||Number(d.journeyDraft.nextStep)<1||Number(d.journeyDraft.nextStep)>=Number.MAX_SAFE_INTEGER)return false;
-          if(d.journeyDraft.journey.steps.some(step=>record(step)&&Number(/^step-([1-9][0-9]*)$/.exec(String(step.id))?.[1]??0)>=Number(d.journeyDraft.nextStep)))return false;
+          const candidate={...snapshot.value,sitemap:{schema:1,routes:snapshot.value.sitemap?.routes??[],journeys:[{...recoveredJourney.journey,name:recoveredJourney.journey.name||'Recovered draft'}]}};
+          if(!Number.isSafeInteger(recoveredJourney.nextStep)||Number(recoveredJourney.nextStep)<1||Number(recoveredJourney.nextStep)>=Number.MAX_SAFE_INTEGER)return false;
+          if(recoveredJourney.journey.steps.some(step=>record(step)&&Number(/^step-([1-9][0-9]*)$/.exec(String(step.id))?.[1]??0)>=Number(recoveredJourney.nextStep)))return false;
           inspectSitemap(validateSitemapModel(candidate));
         }
         selectedId.value=d.selectedId;draftName.value=d.draftName;dirty.value=d.dirty;panel.value=d.panel;

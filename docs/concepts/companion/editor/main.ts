@@ -31,5 +31,5 @@ export function mount(root:HTMLElement,host:EditorHost,flow:FlowRuntime = root.o
     }
   };
   root.addEventListener('keydown',shortcut);
-  return {ready,canLeave:store.canLeave,viewState:store.viewState,recovery:store.recovery,restore:store.restoreDraft,invalidate(){store.available=false;},unmount(){if(closed)return;closed=true;store.dispose();root.removeEventListener('keydown',shortcut);try{app.unmount();}finally{store.$dispose();disposePinia(pinia);}}};
+  return {ready,isBusy:()=>store.busy,canLeave:store.canLeave,viewState:store.viewState,recovery:store.recovery,restore:store.restoreDraft,invalidate(){store.available=false;},unmount(){if(closed)return;closed=true;store.dispose();root.removeEventListener('keydown',shortcut);try{app.unmount();}finally{store.$dispose();disposePinia(pinia);}}};
 }

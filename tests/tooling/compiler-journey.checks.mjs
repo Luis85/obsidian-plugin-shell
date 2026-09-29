@@ -109,3 +109,36 @@ test('merged tooling and scoped generation preserve the bound editor without mut
   assert.equal(request.options.scope,'page:'+d.design.editors.bindings[0].surface);
   assert.equal(request.options.storybook,'off');assert.equal(request.options['storybook-stories'],'on');
 });
+
+test('emitted persistence acceptance executes with the real document and session revision owners', async () => {
+  const {result,files}=await compile();
+  const source=files.get(result.model.testRoot+'/journey-generated.test.ts').content;
+  // Execute the emitted case, not a copy of its persistence sequence. This tiny assertion
+  // adapter is explicit; the independently installed generated project still runs Vitest.
+  const script=`import vm from 'node:vm';import assert from 'node:assert/strict';
+import {stripTypeScriptTypes} from 'node:module';import {pathToFileURL} from 'node:url';import {join} from 'node:path';
+let input='';for await(const chunk of process.stdin)input+=chunk;
+const {root,source,seed}=JSON.parse(input),cases=[];
+const dependencies={vitest:{it:(name,run)=>cases.push({name,run}),expect:value=>({toBe:expected=>assert.equal(value,expected),toEqual:expected=>assert.deepEqual(value,expected)})},
+ 'project-store.ts':await import(pathToFileURL(join(root,'scripts/companion/journey/project-store.ts')).href),
+ 'session.ts':await import(pathToFileURL(join(root,'scripts/companion/sitemap/session.ts')).href),'journey-seed.ts':{seed}};
+const module=new vm.SourceTextModule(stripTypeScriptTypes(source,{mode:'strip'}));
+await module.link(async name=>{const dependency=dependencies[name]??dependencies[name.split('/').at(-1)];assert.ok(dependency,name);
+ return new vm.SyntheticModule(Object.keys(dependency),function(){for(const [key,value] of Object.entries(dependency))this.setExport(key,value);});});
+await module.evaluate();assert.equal(cases.length,1);
+for(const item of cases)await item.run();console.log(JSON.stringify({executed:cases.map(item=>item.name)}));`;
+  const child=spawnSync(process.execPath,['--experimental-strip-types','--experimental-vm-modules','--input-type=module','-e',script],{
+    input:JSON.stringify({root,source,seed:JSON.stringify(result.model.document)}),encoding:'utf8',timeout:30000,maxBuffer:2_000_000,
+  });
+  assert.equal(child.status,0,child.stderr);
+  assert.deepEqual(JSON.parse(child.stdout).executed,['saves the complete generated project and reopens an independent editor session']);
+});
+
+test('native qualification declares the same explicit short scratch root that its driver reads',async()=>{
+  const workflow=await readFile(join(root,'.github/workflows/companion-concept-verification.yml'),'utf8');
+  const native=workflow.slice(workflow.indexOf('  journey-native:'),workflow.indexOf('  jev-typescript6:'));
+  assert.match(native,/COMPANION_QUALIFICATION_ROOT: \/tmp/);assert.doesNotMatch(native,/RUNNER_TEMP: \/tmp/);
+  assert.match(native,/set -o pipefail/);assert.match(native,/install --with-deps chromium/);
+  const driver=await readFile(join(root,'scripts/companion/qualify-project.mjs'),'utf8');
+  assert.match(driver,/process\.env\.COMPANION_QUALIFICATION_ROOT \?\? process\.env\.RUNNER_TEMP \?\? tmpdir\(\)/);
+});

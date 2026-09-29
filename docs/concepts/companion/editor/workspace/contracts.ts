@@ -2,7 +2,7 @@ import { inject, type InjectionKey } from 'vue';
 import type { JourneyProjectStore } from '../../../../../scripts/companion/journey/project-store.ts';
 import type { EditorHost, EditorViewState } from '../contracts.ts';
 export interface EditorMount {
-  ready: Promise<void>; canLeave(): boolean; recovery(): unknown; restore(value: unknown): Promise<boolean>;
+  ready: Promise<void>; isBusy(): boolean; canLeave(): boolean; recovery(): unknown; restore(value: unknown): Promise<boolean>;
   viewState(): EditorViewState; invalidate(): void; unmount(): void;
 }
 export interface JourneyWorkspaceEnvironment {

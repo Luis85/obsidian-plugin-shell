@@ -242,7 +242,7 @@ jobs:
         # A short scratch root respects the existing Linux singleton-socket budget.
         # Each test still launches only the generated consumer's contained .nq vault.
         env:
-          RUNNER_TEMP: /tmp
+          COMPANION_QUALIFICATION_ROOT: /tmp
         shell: bash
         run: |
           set -o pipefail

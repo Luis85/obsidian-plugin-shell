@@ -34,19 +34,19 @@ async function fixture(t,{present=true,mode='native'}={}){
   const env={store:owner,seed,mode,ownerId:'fixture',initialPath:path,rememberPath(p){path=p;},navigate(){},
     guard(check){guard=check;return()=>{if(guard===check)guard=null;};},
     mount(_root,host){
-      const session=new SitemapSession(host),state={host,dirty:false,closed:false,invalidations:0,session};mounts.push(state);
-      return {ready:session.load().then(result=>assert.equal(result.status,'loaded')),canLeave:()=>!state.dirty,
+      const session=new SitemapSession(host),state={host,dirty:false,closed:false,pending:false,invalidations:0,session};mounts.push(state);
+      return {ready:session.load().then(result=>assert.equal(result.status,'loaded')),canLeave:()=>!state.dirty&&!state.pending,isBusy:()=>state.pending,
         recovery:()=>({kind:'controlled editor draft'}),async restore(value){return value.accept===true;},viewState:()=>({}),
         invalidate(){state.invalidations++;},unmount(){state.closed=true;session.dispose();}};
     }};
   const urlApi={createObjectURL(blob){downloads.push(blob);return 'blob:controlled-'+downloads.length;},revokeObjectURL(url){revoked.push(url);}};
   const {useWorkspace}=await load(env,urlApi);let model;
-  const view=renderer.createApp({setup(){model=useWorkspace();model.root.value={ownerDocument:{
+  const view=renderer.createApp({setup(){model=useWorkspace();model.root.value={closest:()=>null,ownerDocument:{
     defaultView:{setTimeout(callback){timers.push(callback);}},createElement(tag){assert.equal(tag,'a');const link={click(){this.clicked=true;}};links.push(link);return link;}}};
     return()=>Vue.h('div');}});
   view.mount(element());await settled(model);
   t.after(()=>{view.unmount();owner.dispose();});
-  return {model,view,owner,files,ports,mounts,downloads,timers,revoked,links,writes:()=>writes,guard:()=>guard,path:()=>path};
+  return {model,view,owner,files,ports,env,mounts,downloads,timers,revoked,links,writes:()=>writes,guard:()=>guard,path:()=>path};
 }
 test('native first open never creates missing data; reviewed approval creates then mounts the actual document session',async t=>{
   const f=await fixture(t,{present:false}),m=f.model;assert.equal(m.loaded.value,false);assert.equal(f.writes(),0);
@@ -104,4 +104,76 @@ test('export uses the owner document and releases its standard object URL after 
   assert.equal(f.timers.length,1);assert.deepEqual(f.revoked,[]);
   f.timers[0]();assert.deepEqual(f.revoked,['blob:controlled-1']);
   assert.equal(f.writes(),0);
+});
+
+
+test('selecting an unreadable or oversized import immediately invalidates prior approval',async t=>{
+  const f=await fixture(t),m=f.model;m.beginImport(true);m.reviewImport();m.confirmed.value=true;
+  await m.readImport({size:4_000_001,text:async()=>seed});
+  assert.equal(m.reviewed.value,false);assert.equal(m.confirmed.value,false);await m.applyImport();assert.equal(f.writes(),0);
+  m.reviewImport();m.confirmed.value=true;await m.readImport({size:10,text:async()=>{throw Error('private file');}});
+  assert.equal(m.reviewed.value,false);assert.equal(m.confirmed.value,false);assert.doesNotMatch(m.error.value,/private file/);
+});
+test('typing while a file read is pending wins; late bytes cannot replace the authored import',async t=>{
+  const f=await fixture(t),m=f.model;let finish;m.beginImport(false);
+  const pending=m.readImport({size:seed.length,text:()=>new Promise(resolve=>{finish=resolve;})});
+  assert.equal(m.readingImport.value,true);m.reviewImport();assert.equal(m.reviewed.value,false);
+  m.importText.value='new typed draft';m.invalidateReview();finish(seed);await pending;
+  assert.equal(m.importText.value,'new typed draft');assert.equal(m.readingImport.value,false);assert.equal(f.writes(),0);
+});
+test('refused imports consume approval and never silently retry a destination',async t=>{
+  const f=await fixture(t),m=f.model;let attempts=0;f.ports.create=async()=>{attempts++;return {status:'conflict'};};
+  m.beginImport(true);m.reviewImport();m.confirmed.value=true;await m.applyImport();await m.applyImport();
+  assert.equal(attempts,1);assert.equal(m.reviewed.value,false);assert.equal(m.confirmed.value,false);assert.equal(f.writes(),0);
+});
+test('the active file identity does not follow an unsubmitted path or failed open',async t=>{
+  const f=await fixture(t),m=f.model;assert.equal(m.activePath.value,'project.companion.json');
+  m.path.value='another.companion.json';await m.openFile();
+  assert.equal(m.activePath.value,'project.companion.json');assert.equal(m.canReplace.value,false);
+  m.exportSaved();assert.equal(JSON.parse(await f.downloads[0].text()).project.id,JSON.parse(seed).project.id);
+});
+test('recovery reload cannot close an editor with a pending save even after confirmation',async t=>{
+  const f=await fixture(t),m=f.model,first=f.mounts[0];m.beginRecovery();m.recoveryConfirmed.value=true;first.pending=true;
+  await m.reloadStored();assert.equal(first.closed,false);assert.equal(f.mounts.length,1);assert.equal(m.recoveryOpen.value,true);
+  first.pending=false;await m.reloadStored();assert.equal(first.closed,true);assert.equal(f.mounts.length,2);
+});
+test('an uncertain import into another path recovers that reviewed destination, not the previously opened file',async t=>{
+  const f=await fixture(t),m=f.model,original=f.files.get(f.path());m.path.value='second.companion.json';
+  f.ports.create=async(path,content)=>{f.files.set(path,content);return {status:'failed',certainty:'unknown'};};
+  m.beginImport(true);m.reviewImport();m.confirmed.value=true;await m.applyImport();
+  m.beginRecovery();assert.equal(m.recoveryPath.value,'second.companion.json');m.recoveryConfirmed.value=true;await m.reloadStored();
+  assert.equal(m.activePath.value,'second.companion.json');assert.equal(f.owner.writable('second.companion.json'),true);
+  assert.equal(f.files.get('project.companion.json'),original);
+});
+test('closing while mount readiness is pending never installs a late subscription or remembered path',async t=>{
+  const f=await fixture(t),m=f.model;let ready,remembered=0,invalidations=0;f.env.rememberPath=()=>{remembered++;};
+  f.env.mount=()=>({ready:new Promise(resolve=>{ready=resolve;}),isBusy:()=>false,canLeave:()=>true,
+    recovery:()=>({}),restore:async()=>true,viewState:()=>({}),invalidate:()=>{invalidations++;},unmount(){}});
+  const pending=m.openFile();while(!ready)await new Promise(resolve=>setImmediate(resolve));
+  f.view.unmount();ready();await pending;const doc=JSON.parse(seed);doc.project.name='After close';f.files.set(f.path(),JSON.stringify(doc));
+  await f.owner.refresh(f.path());assert.equal(remembered,0);assert.equal(invalidations,0);assert.equal(m.loaded.value,false);
+});
+test('external change cancels a replacement approval while preserving its import draft',async t=>{
+  const f=await fixture(t),m=f.model;m.beginImport(true);m.importMode.value='replace';m.reviewImport();m.confirmed.value=true;
+  const draft=m.importText.value,doc=JSON.parse(seed);doc.project.name='Other leaf';f.files.set(f.path(),JSON.stringify(doc));await f.owner.refresh(f.path());
+  assert.equal(m.reviewed.value,false);assert.equal(m.confirmed.value,false);assert.equal(m.importText.value,draft);await m.applyImport();assert.equal(f.writes(),0);
+});
+test('recovery is a single review panel; cancellation returns to the retained unapproved import',async t=>{
+  const f=await fixture(t),m=f.model;m.beginImport(true);m.beginRecovery();
+  assert.equal(m.importOpen.value,false);assert.equal(m.recoveryOpen.value,true);m.cancelRecovery();
+  assert.equal(m.importOpen.value,true);assert.equal(m.recoveryOpen.value,false);assert.equal(m.importText.value,seed);assert.equal(m.confirmed.value,false);
+});
+test('workspace unmount releases outstanding download URLs exactly once',async t=>{
+  const f=await fixture(t);f.model.exportSaved();f.view.unmount();assert.deepEqual(f.revoked,['blob:controlled-1']);
+  f.timers[0]();assert.deepEqual(f.revoked,['blob:controlled-1']);
+});
+
+
+test('review panels receive focus and Escape restores the trigger without writing',async t=>{
+  const f=await fixture(t),m=f.model;let titleFocus=0,triggerFocus=0,prevented=0;
+  m.root.value.closest=()=>({querySelector:()=>({focus(){titleFocus++;}})});
+  m.root.value.ownerDocument.activeElement={isConnected:true,focus(){triggerFocus++;}};
+  m.beginImport(true);await Vue.nextTick();assert.equal(titleFocus,1);
+  m.escapeReview({defaultPrevented:false,preventDefault(){prevented++;},stopPropagation(){}});
+  await Vue.nextTick();assert.equal(m.importOpen.value,false);assert.equal(triggerFocus,1);assert.equal(prevented,1);assert.equal(f.writes(),0);
 });
