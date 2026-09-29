@@ -1,0 +1,32 @@
+name: Starter branch-history reconciliation
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/starter-history-reconciliation.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9edfcbb810592a8a47b591545d80ecd5241a470a
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export exact histories without credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/history"
+          git branch snapshot-starters 9edfcbb810592a8a47b591545d80ecd5241a470a
+          git branch snapshot-pr5 9d94a07592f89d701a916f13d51680cdaf68ebed
+          git bundle create "$RUNNER_TEMP/history/source.bundle" snapshot-starters snapshot-pr5
+          git bundle verify "$RUNNER_TEMP/history/source.bundle"
+          git show -s --format='%H %T %P' snapshot-starters snapshot-pr5 > "$RUNNER_TEMP/history/parents.txt"
+          cd "$RUNNER_TEMP/history" && sha256sum source.bundle > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: starter-branch-history
+          path: ${{ runner.temp }}/history/
+          retention-days: 1
+          if-no-files-found: error
