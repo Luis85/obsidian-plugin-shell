@@ -2,7 +2,7 @@ import { PRD_LIMITS } from '../../scripts/companion/prd-limits.mjs';
 import { parsePrdMarkdown } from './prd-yaml.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { object, keys, makerList as list } from '../domain/data.ts';
+import { object, keys, list } from '../domain/data.ts';
 import { projectPath, type UserSettings } from '../domain/user-settings.ts';
 import { type PrdMarkdown } from '../domain/prd-markdown.ts';
 import { requireSketch } from '../domain/errors.ts';
