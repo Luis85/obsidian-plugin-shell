@@ -1,0 +1,35 @@
+name: PR5 isolated browser tooling
+on:
+  push:
+    branches: [fix/pr5-stack-integration]
+    paths: [.github/workflows/pr5-browser-tooling.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: f0ede0744bc9a46bf827e12fd48a2bd27815871d
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Provision repository-locked browser without user data
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pr5-browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pr5-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          node "$RUNNER_TEMP/pr5-npm/node_modules/npm/bin/npm-cli.js" ci --ignore-scripts --no-fund
+          node node_modules/@playwright/test/cli.js install chromium --only-shell
+          tar -czf "$RUNNER_TEMP/pr5-browser.tar.gz" --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -C "$RUNNER_TEMP" pr5-browser
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr5-isolated-browser
+          path: ${{ runner.temp }}/pr5-browser.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
