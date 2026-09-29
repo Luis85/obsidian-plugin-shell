@@ -46,7 +46,9 @@ jobs:
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Guided setup runs the complete verify gates once before the served showcase.
-    timeout-minutes: 30
+    # The integrated Windows suites exceed 30 minutes before coverage finishes.
+    # Match setup-compatibility's job budget; keep every test and threshold intact.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 60 || 30 }}
     strategy:
       fail-fast: false
       matrix:
