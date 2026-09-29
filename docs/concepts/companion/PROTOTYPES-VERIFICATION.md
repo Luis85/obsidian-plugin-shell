@@ -19,6 +19,36 @@ Chromium navigation to both the generated local-file artifact and a local HTTP t
 
 Hosted checks must be read for the actual feature commit. Baseline companion verification was green, while several broader PR #5 workflows were already failing. Neither fact determines the outcome for this change. Full native Obsidian acceptance, plugin installation, dependency/build execution in a user's project, live services, publication and merge are **not performed**.
 
+
+## Review and polishing pass — 2026-09-29
+
+This section adds evidence; it does not rewrite the preceding baseline record. The reviewed implementation is `7efe9bfd`, and integration preserves the concurrent PR #51 merge at `1a078d2`. The other downloadable implementation was inspected, not applied wholesale. Its independent counts are not added to these totals.
+
+### Executed checks
+
+| Check | Result and scope |
+| --- | --- |
+| `node --experimental-strip-types --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs` | **49 passed, 0 failed**: 15 original domain, 12 new domain/codec/presentation, 8 bridge and 14 shell/adapter cases. Real filesystem operations and the existing independent A/B compiler cases remain. The new malformed-receipt negative control injects a compiler port and tests the real receipt adapter; it is not another full compiled-project build. |
+| `python -B scripts/concepts/build-companion.py --check` | Passed; retained v5 HTML remains 3,423,529 bytes, SHA-256 `1c988bc6603ad215eafc590af89068d681728bb7918223b87af8f481403bcd77`. |
+| `python -B tests/concepts/companion-assembly.test.py` | **19 passed**. |
+| `node scripts/testing/suites.mjs --check` | Passed. Existing prototype test discovery and hosted browser registration retained. |
+| `node --check scripts/concepts/prototype-bridge.js` and Python browser-test syntax | Passed; syntax is not runtime qualification. |
+| Updated browser actions through supplemental DOM replay | **24 assertions passed** using real Chromium, the exact new source islands composed onto the hosted baseline HTML, and explicitly controlled in-memory Storage. Actual Journey Lens edits, comparison, filtering/caret, form errors/dismissal, activation, exports, recovery and restore-back executed. No uncaught browser errors or external requests recorded. |
+
+### Browser and toolchain limits
+
+File-origin and loopback-origin navigation remain administratively blocked locally before application load. The supplemental replay uses `set_content` and a controlled Storage port; its reload transfers that controlled state. It does not qualify actual browser-origin durability or native vault persistence. Its report is explicitly labelled `prototypes-memory-browser.json`. Real Web Crypto directory-ZIP assertions were not counted in this replay. The maintained hosted browser script retains the original real-origin reload and ZIP checks and adds the new behavior assertions.
+
+The original hosted run `36627663666` passed repository-local TypeScript 6 checks, the Vite build, 179 authoring contract tests and 48 existing authoring browser assertions, then failed the newly added prototype test because it looked for the unmounted manager after Open in editors. That assertion is corrected to expect the manager's removal and the real editor's presence. These historical upstream passes are **not** qualification of this changed source.
+
+Local dependency installation was attempted with lifecycle scripts disabled, but did not finish within the execution window; the local Node/npm versions also differ from the qualified versions. No TypeScript 5 substitute was used. Qualified TypeScript 6/Vite and real-origin browser acceptance for the new commit remain hosted checks, not inferred passes.
+
+The focused Node run used the source-review checkout at `7efe9bfd` with this feature patch. The final CLI routing change is also applied to the exact `1a078d2` operations source, retaining its documentation dispatch and `saveOperationPlan` integration; concurrent helpers are not replaced. Full mixed-head qualification belongs to the candidate's hosted run. No gate, lockfile, CI threshold or retained fixture is relaxed.
+
+### Remaining acceptance boundaries
+
+This is browser authoring plus shell prototype management, not complete native companion acceptance. Screen-reader/manual accessibility, large-library performance on target hardware, cross-process durability and the broader PR #5 release journey were not qualified here. No merge, release, real user-vault write or plugin activation was performed.
+
 ## Continuation and reconciliation — 2026-09-29
 
 The resumed work found that PR #5 had advanced to `7efe9bfd4915720c045422be1234206b1af2cc98` while implementation was in progress. That commit already contains the shared prototype model, browser island and shell integration. This continuation preserves that implementation, its schema and its `prototype/version/variant` hierarchy. It does not install a second workspace model or overwrite the concurrent requirements work.
@@ -47,3 +77,44 @@ The inline browser run used Chromium 144.0.7559.96, simulated browser storage an
 This is not a fresh Vite build, TypeScript check, or real-origin persistence acceptance. The optional `--inline` mode explicitly reports simulated storage and does not run directory ZIP export because its insecure context lacks Web Crypto. **The default CI invocation is unchanged:** it uses the actual rebuilt file-origin application, real storage, real Web Crypto and all three directory/path/hash assertions, for 25 expected browser assertions. It does not opt into the fallback.
 
 Current scoped qualification must run on the pushed continuation commit. Broader baseline workflows also had failures; this record does not assert all CI is green. No native companion installation, user's vault operation, merge, release or publication has been performed.
+
+## PR #55 merge-conflict resolution — 2026-09-29
+
+Integrated target `f7050739192f5e9c0a7642dcb27b9effc42d557b` into PR #55 head
+`73a1334ee3b6d370727afb091c92f5bf54e2ddd0`, with common ancestor
+`1a078d235043db2157efbcc702878e120264fc14`. The recovered source trees were
+verified byte-for-byte against GitHub tree IDs `bb0d4ffd`, `4a9c1aa1` and
+`b1ba8800` before resolution. The actual content conflicts were in this
+verification record, the prototype manager and its browser suite; the other
+three PR files merged cleanly and were reviewed for integration behavior.
+
+Retained PR #55's scoped stylesheet ancestor, host border tokens, escaped empty
+path, form recovery, opened-selection behavior and optional explicitly labelled
+inline replay. Retained the target branch's comparison, filtering, metadata,
+sealed recovery, durable-plan invalidation and registry-loss safeguards. Opened
+selection is validated before reuse, with an active/first-item fallback when
+old editor context references an absent variant. No workspace schema, lockfile,
+workflow gate or unrelated source was changed. Both dated evidence sections
+above retain their original scopes rather than being relabelled as current.
+
+Executed against the combined source with Node 22.16.0 runtime type stripping:
+**49 prototype tests plus 14 shell/adapter tests passed (63 total, zero failures
+or skips)**. The total includes six new merge regressions for valid/stale opened
+selection, the empty workspace, escaped markup and style/persistence integration.
+Two initial combined invocations exceeded their local process timeout; the
+complete prototype and shell suites were then rerun separately to completion.
+
+**19 retained assembly tests passed**; the exact v5 artifact hash is unchanged.
+The suite manifest passed with 346 test files, 35 suites and 34 helpers. Source
+limits/locale parity passed for 1,199 inputs and 202 translated keys. JavaScript
+bridge syntax, Python browser-test syntax, changed-file conflict-marker scanning
+and `git diff --check` passed. Outside the six reconciled PR paths, the only
+additional source is the new merge-regression test file.
+
+The merged browser suite retains real file-origin storage and ZIP/hash checks
+by default, alongside both branches' interaction checks. Its explicit inline
+mode remains separately labelled and is not selected by CI. The locked Node 24 /
+TypeScript 6 / Vite build and real-browser suite were not executed locally for
+this resolution; evaluate the merge commit's hosted results separately. This
+commit updates PR #55's branch with both parents; it does not merge PR #55 into
+its target, change PR #5's branch, publish or operate on a personal vault.

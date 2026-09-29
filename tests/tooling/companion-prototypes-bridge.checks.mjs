@@ -12,7 +12,7 @@ function host({remember=true,commit=true,valid=true,conflict=false}={}) {
     const project=()=>state.project,document={addEventListener(){}},designCopy=structuredClone;
     const companionProjectDocument=()=>env.working,companionProjectToken=()=>'';
     const companionCanReplace=()=>{if(env.conflict||storageWarning)throw Error('storage conflict');};
-    const validState=()=>env.valid,saveConceptState=()=>{env.writes++;if(!env.commit)storageWarning='uncertain';return env.commit;};
+    const validState=()=>env.valid,saveConceptState=()=>{env.writes++;env.persisted=JSON.parse(JSON.stringify(state));if(!env.commit)storageWarning='uncertain';return env.commit;};
     const companionReview=text=>({project:JSON.parse(text)});
     ${bridge}
     return {read:pmRead,save:pmSave,import:pmImport,preserve:pmPreserveWorkspace,identity:pmGuardIdentity,
@@ -56,4 +56,11 @@ test('workspace import refuses protected edits and wrong identities without losi
   changed.revision++;changed.prototypes[0].versions[0].variants[0].document.design.goal='Tampered';changed.prototypes[0].versions[0].variants[0].revision++;
   assert.throws(()=>adapter.import(api.json(changed),api.key(before)),/PROTOTYPE_SNAPSHOT_PROTECTED/);assert.deepEqual(env.state.project.prototypes,before);assert.equal(env.writes,0);
   assert.equal(adapter.valid(before,'another'),false);assert.equal(adapter.valid({...before,schemaVersion:9},'design-lab'),false);
+});
+
+test('prototype changes invalidate the generation plan in the exact state sent to persistence',()=>{
+  const {env,adapter}=host(), before=env.state.project.prototypes;
+  adapter.save(activate(before),api.key(before));
+  assert.equal(env.persisted.generator.plan,null);
+  assert.deepEqual(env.persisted.project.prototypes,env.state.project.prototypes);
 });

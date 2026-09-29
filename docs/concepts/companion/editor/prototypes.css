@@ -37,3 +37,19 @@
 .pm-form input { color: inherit; background: transparent; border: 1px solid var(--line, #d8dce5); padding: 10px; border-radius: 7px; width: 100%; }
 @media (max-width: 1000px) { .pm-active { flex-wrap: wrap; } .pm-layout { grid-template-columns: 210px minmax(0,1fr); } .pm-detail { padding: 16px; } .pm-metrics { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 720px) { .pm-layout { grid-template-columns: 1fr; } .pm-list { max-height: 230px; } .pm-title { flex-wrap: wrap; } }
+
+.pm-workspace { --border:var(--line); --accent:var(--accent-strong, #7866d8); }
+.pm-workspace select:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.pm-filters label,.pm-comparison label { display:grid; gap:7px; font-size:12px; margin:10px 0; }
+.pm-filters input,.pm-filters select,.pm-comparison select { width:100%; min-width:0; color:inherit; background:var(--panel); border:1px solid var(--line); border-radius:7px; padding:10px; }
+.pm-comparison { border-top:1px solid var(--line); margin-top:12px; padding:20px 24px; }
+.pm-comparison h3 { margin:0 0 14px; }
+.pm-diff-scroll { overflow:auto; max-height:440px; margin:14px 0; }
+.pm-diff-scroll table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.pm-diff-scroll th,.pm-diff-scroll td { text-align:left; vertical-align:top; padding:10px; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+.pm-diff-scroll caption { text-align:left; padding:8px 0; font-size:12px; color:var(--muted); }
+.pm-diff-scroll code { white-space:pre-wrap; }
+.pm-diff-scroll th:nth-child(2) { width:80px; }
+@media (max-width:720px) { .pm-comparison { padding:16px; } .pm-diff-scroll table { min-width:560px; } }
+
+@media (min-width:1001px) { .pm-active { position:sticky; top:0; z-index:3; background:var(--surface); } }

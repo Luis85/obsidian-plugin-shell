@@ -1,7 +1,7 @@
 import type { AuthoringDocument } from '../authoring-contract.ts';
 import { selectionKey, type PrototypeWorkspace, type PrototypeSelection, type PrototypeAction, type ValidateDocument } from './model.ts';
 import { validateWorkspace, validateSelection } from './validate.ts';
-import { ensure, prototypeJson, slug } from './safety.ts';
+import { ensure, prototypeJson, slug, workspaceKey } from './safety.ts';
 export function emptyWorkspace(projectId: string): PrototypeWorkspace {
   return { kind: 'workbench-prototype-workspace', schemaVersion: 1, projectId, revision: 1, active: null, prototypes: [] };
 }
@@ -36,6 +36,25 @@ export function changeWorkspace(source: PrototypeWorkspace, action: PrototypeAct
     next.prototypes.push({ id: action.id, name: action.name, description: action.description, archived: false,
       versions: [{ id: 'v1', label: 'Version 1', sealed: false, variants: [{ id: 'main', name: 'Main', hypothesis: '', status: 'draft', revision: 1,
         document: documentCopy(action.document, next.projectId, validate) }] }] });
+  } else if (action.type === 'prototype-details' || action.type === 'version-details') {
+    const p = next.prototypes.find(p => p.id === action.prototypeId);
+    ensure(p && !p.archived, 'PROTOTYPE_READ_ONLY', 'Select an unarchived prototype before editing its details.');
+    if (action.type === 'prototype-details') { p.name = action.name; p.description = action.description; }
+    else {
+      const v = p.versions.find(v => v.id === action.versionId);
+      ensure(v && !v.sealed, 'PROTOTYPE_READ_ONLY', 'A sealed version label cannot be changed. Create a new version.');
+      v.label = action.label;
+    }
+  } else if (action.type === 'restore-snapshot') {
+    const target = selectedVariant(next, action.selection), origin = selectedVariant(next, action.source);
+    writable(target); slug(action.recoveryId);
+    ensure(selectionKey(action.selection) !== selectionKey(action.source), 'PROTOTYPE_RESTORE_SOURCE', 'Choose a different saved snapshot to restore.');
+    ensure(workspaceKey(target.variant.document) !== workspaceKey(origin.variant.document), 'PROTOTYPE_RESTORE_UNCHANGED', 'The snapshots are identical; no recovery or write is needed.');
+    ensure(!target.prototype.versions.some(v => v.id === action.recoveryId), 'PROTOTYPE_DUPLICATE', 'Recovery version slug already exists.');
+    // Preserve the complete previous target as a sealed checkpoint in this same transaction.
+    target.prototype.versions.push({ id: action.recoveryId, label: 'Before restore · ' + action.recoveryId, sealed: true, variants: [structuredClone(target.variant)] });
+    target.variant.document = documentCopy(origin.variant.document, next.projectId, validate);
+    target.variant.revision++;
   } else if (action.type === 'deactivate') {
     if (next.active) selectedVariant(next, next.active).variant.status = 'approved'; next.active = null;
   } else if (action.type === 'version' || action.type === 'seal' || action.type === 'archive') {

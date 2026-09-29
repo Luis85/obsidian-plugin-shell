@@ -92,3 +92,44 @@ test('workspace import does not overwrite a sealed or active saved document',asy
   await writeFile(join(ctx.root,'bad.json'),JSON.stringify(w));const response=await run(ctx,['import','--input','bad.json','--yes']);assert.equal(response.status,'failed');
   assert.equal(api.active(await snapshot(ctx)).variant.document.design.goal,'Sitemap A');
 });
+
+test('compare is a read-only real CLI operation and metadata edits retain the saved active source',async t=>{
+  const ctx=await activated(t);await apply(ctx,['fork',...pick,'--as','sitemap-b']);
+  await writeFile(join(ctx.root,'b.json'),JSON.stringify(document('Sitemap B')));
+  const b=['exploration','--version','v1','--variant','sitemap-b'];await apply(ctx,['save',...b,'--input','b.json']);
+  const before=await snapshot(ctx), compared=await run(ctx,['compare',...pick,'--with-variant','sitemap-b']);
+  assert.equal(compared.status,'ok',JSON.stringify(compared));assert.equal(compared.data.comparison.equal,false);
+  assert.ok(compared.data.comparison.changes.some(c=>c.path==='/design/sitemap/routes/0/path'));
+  assert.deepEqual(await snapshot(ctx),before);
+  await apply(ctx,['prototype-details','exploration','--name','Alternative solutions','--description','A/B']);
+  await apply(ctx,['version-details','exploration','--version','v1','--label','Baseline']);
+  assert.deepEqual(api.active(await snapshot(ctx)).variant.document,api.active(before).variant.document);
+});
+test('restore shell plan retains a sealed checkpoint and invalidates a reviewed generation plan',async t=>{
+  const ctx=await activated(t);await apply(ctx,['fork',...pick,'--as','sitemap-b']);await writeFile(join(ctx.root,'b.json'),JSON.stringify(document('Sitemap B')));
+  const b=['exploration','--version','v1','--variant','sitemap-b'];await apply(ctx,['save',...b,'--input','b.json']);
+  const prior=await snapshot(ctx), generation=await planOperation(parseCliArguments(['prototypes','generate','--target','out']),ctx);
+  const args=['restore-snapshot',...b,'--from-version','v1','--from-variant','main','--recovery-version','recovery-one'];
+  const preview=await run(ctx,args);assert.equal(preview.status,'planned');assert.deepEqual(await snapshot(ctx),prior);
+  await apply(ctx,args);const after=await snapshot(ctx), backup={...alternate,versionId:'recovery-one'};
+  assert.equal(api.selected(after,backup).version.sealed,true);
+  assert.deepEqual(api.selected(after,backup).variant.document,document('Sitemap B'));
+  assert.deepEqual(api.selected(after,alternate).variant.document,document());assert.deepEqual(after.active,main);
+  await assert.rejects(applyOperation(generation,ctx,generation.planHash),/PLAN_STALE|Inputs changed/);
+  const rejected=await run(ctx,[...args,'--yes']);assert.equal(rejected.status,'failed');assert.deepEqual(await snapshot(ctx),after);
+});
+test('in-place managed generation names adoption when canonical design is absent',async t=>{
+  const ctx=await activated(t),result=await run(ctx,['generate']);
+  assert.equal(result.status,'failed');assert.match(result.diagnostics[0].message,/adopt/);
+});
+test('managed-generation adapter rejects a lookalike provenance receipt before any writes',async t=>{
+  const {managedGenerationPlan}=await import('../../scripts/framework/prototype-generation.ts');
+  const {createFilePlan}=await import('../../scripts/shared/file-plan.mjs');
+  const ctx=await activated(t),target=join(ctx.root,'generated'),receipt=join(target,'.companion/prototype-selection.json');
+  await mkdir(dirname(receipt),{recursive:true});
+  const foreign=JSON.stringify({schemaVersion:1,projectId:'design-lab',foreign:true});await writeFile(receipt,foreign);
+  // Compiler port supplies no files: the real adapter must still validate its separately owned receipt.
+  const compile=async()=>({summary:{target},plan:await createFilePlan(ctx.root,[])});
+  await assert.rejects(managedGenerationPlan(parseCliArguments(['generate','--target','generated']),ctx,compile),/PROTOTYPE_SHAPE/);
+  assert.equal(await readFile(receipt,'utf8'),foreign);
+});

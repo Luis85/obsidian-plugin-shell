@@ -12,6 +12,7 @@ export function validateWorkspaceReplacement(before: PrototypeWorkspace | null, 
     for (const v of p.versions) {
       const version = replacement.versions.find(item => item.id === v.id);
       ensure(version && (!v.sealed || version.sealed), 'PROTOTYPE_SEALED', 'Import cannot remove or unseal a saved version.');
+      ensure(!v.sealed || version.label === v.label, 'PROTOTYPE_SEALED', 'Import cannot rename a sealed version.');
       for (const x of v.variants) {
         const variant = version.variants.find(item => item.id === x.id);
         ensure(variant, 'PROTOTYPE_REMOVAL', 'Import cannot remove a variant. Archive it instead.');

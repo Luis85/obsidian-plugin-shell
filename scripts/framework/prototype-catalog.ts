@@ -3,7 +3,11 @@ const values = (...keys: string[]): Record<string, 'value'> => Object.fromEntrie
 const selected = ['version', 'variant'];
 export const prototypeCommands: readonly Command[] = [
   { id: 'prototypes list', summary: 'Read prototypes, versions, variants and the single pinned generator selection.', maxArgs: 0, options: {}, effect: 'read' },
+  { id: 'prototypes compare', summary: 'Read complete snapshot differences without changing saved content or activation.', maxArgs: 1, options: values(...selected,'with-prototype','with-version','with-variant'), effect: 'read' },
   ...([
+    ['prototype-details', 1, ['name','description'], 'Edit prototype display details without changing folder slugs or saved designs.'],
+    ['version-details', 1, ['version','label'], 'Edit the label of an unsealed version without changing saved designs.'],
+    ['restore-snapshot', 1, [...selected,'from-prototype','from-version','from-variant','recovery-version'], 'Restore a saved reference into an editable draft, retaining its previous content in a sealed recovery version.'],
     ['create', 1, ['input','name','description'], 'Capture a complete project as docs/concepts/<slug>/, version v1, draft variant main.'],
     ['version', 1, ['version','from'], 'Copy a saved version into a new editable version; all copied variants start as drafts.'],
     ['fork', 1, [...selected,'as','name','hypothesis'], 'Fork the selected saved variant; edits never change the original.'],
