@@ -1,4 +1,5 @@
 """Real authoring UI: isolated A/B snapshots, activation, checkpoints and portable exports."""
+import argparse
 import hashlib
 import json
 import os
@@ -7,12 +8,18 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'reports/companion-mvp'
-HTML = OUT / 'index.html'
-results, errors, requests = [], [], []
+parser = argparse.ArgumentParser()
+parser.add_argument('--html', type=Path, default=ROOT / 'reports/companion-mvp/index.html')
+parser.add_argument('--output', type=Path, default=ROOT / 'reports/companion-mvp')
+parser.add_argument('--inline', action='store_true', help='Restricted-browser replay with simulated storage, not real-origin evidence.')
+args = parser.parse_args()
+OUT, HTML = args.output, args.html.resolve()
+html = HTML.read_text()
+results, errors, requests, dialogs = [], [], [], []
 dialog_replies = []
 
 def handle_dialog(dialog):
+    dialogs.append(dialog.message)
     if dialog_replies and not dialog_replies.pop(0):
         dialog.dismiss()
     else:
@@ -23,6 +30,7 @@ def check(name, condition):
     if not condition:
         raise AssertionError(name)
     results.append(name)
+    print('PASS: ' + name, flush=True)
 
 
 def workspace(page):
@@ -63,8 +71,26 @@ def export(page, kind, filename):
     return path
 
 
+def load_page(page, restored=False):
+    if not args.inline:
+        page.goto(HTML.as_uri())
+        return
+    records = 'JSON.parse(window.name||"{}")' if restored else '{}'
+    storage = '<script>window.pmTestRecords=' + records + ';window.pmTestStorage={getItem:k=>pmTestRecords[k]??null,setItem:(k,v)=>{pmTestRecords[k]=v},removeItem:k=>delete pmTestRecords[k]};Object.defineProperty(window,"localStorage",{configurable:true,value:pmTestStorage});</script>'
+    page.set_content(storage + html)
+
+
+def reload_page(page):
+    if args.inline:
+        page.evaluate('window.name=JSON.stringify(window.pmTestRecords);void 0')
+        page.goto('about:blank')
+        load_page(page, True)
+    else:
+        page.reload()
+
+
 def run(page):
-    page.goto(HTML.as_uri())
+    load_page(page)
     # Import a real built-in through the actual existing import UI, not a substituted project store.
     page.locator('[data-action="project-import"]').first.click()
     page.locator('#project-import-file').set_input_files(ROOT / 'docs/concepts/companion/starters/quick-capture.companion.json')
@@ -74,6 +100,8 @@ def run(page):
     seed = page.evaluate('companionProjectDocument()')
     manage(page)
     expect(page.locator('[data-pm=generate]')).to_be_disabled()
+    expect(page.locator('.pm-active code')).to_have_text('docs/concepts/<prototype-name>/')
+    check('prototype layout receives the scoped stylesheet without a global reset', page.locator('.pm-layout').evaluate("e=>getComputedStyle(e).display") == 'grid')
     create_form(page, 'create', {'id': 'exploration', 'name': 'Product exploration', 'description': 'Sitemap A versus B'})
     a = workspace(page)['prototypes'][0]['versions'][0]['variants'][0]['document']
     check('new prototype captures the complete canonical working project', a == seed)
@@ -89,11 +117,19 @@ def run(page):
     expect(page.locator('.pm-form [name=name]')).to_have_value('Duplicate draft kept')
     expect(page.locator('.pm-form [name=hypothesis]')).to_have_value('This must survive validation')
     check('rejected form preserves its values and never writes a partial variant', workspace(page) == before_error)
+    export(page, 'export', 'prototypes-recovery-with-form.json')
+    expect(page.locator('.pm-form [name=name]')).to_have_value('Duplicate draft kept')
+    expect(page.locator('.pm-form [name=hypothesis]')).to_have_value('This must survive validation')
+    check('recovery export retains unfinished form values and saved snapshots', workspace(page) == before_error)
     dialog_replies.append(False)
     page.locator('[data-index="0,0,0"]').click()
     expect(page.locator('.pm-form [name=name]')).to_have_value('Duplicate draft kept')
     check('dismissing the navigation guard preserves the unsubmitted form', workspace(page) == before_error)
-    action(page, 'cancel')
+    prompts_before = len(dialogs)
+    page.locator('#sidebar [data-value="overview"]').click()
+    expect(page.locator('#pm-root')).to_have_count(0)
+    check('confirmed navigation asks to discard a form only once', len(dialogs) == prompts_before + 1)
+    manage(page)
     create_form(page, 'fork', {'id': 'sitemap-b', 'name': 'Sitemap B', 'hypothesis': 'A different first destination'})
     action(page, 'open')
     expect(page.locator('#jm-root')).to_be_visible()
@@ -110,6 +146,8 @@ def run(page):
     expect(page.locator('.jm-dialog')).to_have_count(0)
     b = page.evaluate('companionProjectDocument()')
     manage(page)
+    expect(page.locator('.pm-row.selected')).to_have_attribute('data-key', 'exploration/v1/sitemap-b')
+    check('returning from editors selects the opened variant', page.locator('.pm-row.selected').get_attribute('data-key') == 'exploration/v1/sitemap-b')
     select(page, '0,0,1')
     check('opening and editing B leaves both saved snapshots and activation unchanged', workspace(page)['active'] is None and all(v['document'] == a for v in workspace(page)['prototypes'][0]['versions'][0]['variants']))
     action(page, 'save')
@@ -152,21 +190,22 @@ def run(page):
     current = workspace(page)
     statuses = [v['status'] for v in current['prototypes'][0]['versions'][0]['variants']]
     check('activation explicitly switches to B and demotes A', statuses == ['approved', 'active'] and current['active']['variantId'] == 'sitemap-b')
-    page.reload()
+    reload_page(page)
     manage(page)
-    check('actual browser persistence retains all versions, variants and activation', workspace(page) == current)
+    check(('simulated storage replay' if args.inline else 'actual browser persistence') + ' retains all versions, variants and activation', workspace(page) == current)
     bundle = export(page, 'export', 'prototypes-workspace.json')
     check('workspace JSON export is lossless', json.loads(bundle.read_text()) == current)
     action(page, 'import')
     page.locator('.pm-import').set_input_files(bundle)
     expect(page.locator('.pm-message')).to_contain_text('Workspace imported')
     check('real workspace import round trip preserves the active source', workspace(page) == current)
-    folders = export(page, 'directory', 'prototypes-folders.zip')
-    with zipfile.ZipFile(folders) as archive:
-        check('folder export uses the required prototype root', set(archive.namelist()) == {'docs/concepts/prototypes.json', 'docs/concepts/exploration/prototype.json', 'docs/concepts/exploration/versions/v1/variants/main/project.json', 'docs/concepts/exploration/versions/v1/variants/sitemap-b/project.json'})
-        manifest = json.loads(archive.read('docs/concepts/exploration/prototype.json'))
-        for v in manifest['item']['versions'][0]['variants']:
-            check('manifest pins exact ' + v['id'] + ' snapshot bytes', hashlib.sha256(archive.read(v['document']['path'])).hexdigest() == v['document']['sha256'])
+    if not args.inline:
+        folders = export(page, 'directory', 'prototypes-folders.zip')
+        with zipfile.ZipFile(folders) as archive:
+            check('folder export uses the required prototype root', set(archive.namelist()) == {'docs/concepts/prototypes.json', 'docs/concepts/exploration/prototype.json', 'docs/concepts/exploration/versions/v1/variants/main/project.json', 'docs/concepts/exploration/versions/v1/variants/sitemap-b/project.json'})
+            manifest = json.loads(archive.read('docs/concepts/exploration/prototype.json'))
+            for v in manifest['item']['versions'][0]['variants']:
+                check('manifest pins exact ' + v['id'] + ' snapshot bytes', hashlib.sha256(archive.read(v['document']['path'])).hexdigest() == v['document']['sha256'])
     select(page, '0,0,1')
     action(page, 'seal')
     expect(page.locator('[data-pm=fork]')).to_be_disabled()
@@ -195,6 +234,11 @@ def run(page):
     action(page, 'archive')
     check('archival retains all prototype data', workspace(page)['prototypes'][1]['archived'] and len(workspace(page)['prototypes'][1]['versions']) == 1)
     action(page, 'archive')
+    page.set_viewport_size({'width': 1100, 'height': 900})
+    check('prototype layout does not overflow the work area at 1100px', page.locator('#pm-root').evaluate('e=>e.scrollWidth<=e.clientWidth+1'))
+    page.locator('.pm-header').scroll_into_view_if_needed()
+    page.screenshot(path=str(OUT / 'prototypes-active-narrow.png'), full_page=True)
+    page.set_viewport_size({'width': 1600, 'height': 1000})
     action(page, 'deactivate')
     expect(page.locator('[data-pm=generate]')).to_be_disabled()
     check('deactivation blocks managed export without deleting snapshots', workspace(page)['active'] is None and len(workspace(page)['prototypes']) == 2)
@@ -215,5 +259,5 @@ try:
         run(page)
         browser.close()
 finally:
-    (OUT / 'prototypes-browser.json').write_text(json.dumps({'htmlSha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'assertions': results, 'errors': errors, 'externalRequests': requests}, indent=2) + '\n')
+    (OUT / 'prototypes-browser.json').write_text(json.dumps({'htmlSha256': hashlib.sha256(HTML.read_bytes()).hexdigest(), 'mode': 'inline-simulated-storage' if args.inline else 'file-origin', 'directoryExport': 'not-run-insecure-inline-context' if args.inline else 'required', 'assertions': results, 'errors': errors, 'externalRequests': requests}, indent=2) + '\n')
 print(f'Passed {len(results)} prototype management browser assertions')
