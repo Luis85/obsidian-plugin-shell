@@ -1,0 +1,28 @@
+name: Snapshot current PR54 head
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/current-pr54-head.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 9edfcbb810592a8a47b591545d80ecd5241a470a
+          persist-credentials: false
+      - name: Archive exact current PR54 head
+        run: |
+          mkdir -p "$RUNNER_TEMP/pr54"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/pr54/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/pr54/sha.txt"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/pr54/tree.txt"
+          cd "$RUNNER_TEMP/pr54" && sha256sum source.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: current-pr54-head
+          path: ${{ runner.temp }}/pr54/
+          retention-days: 1
