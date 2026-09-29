@@ -27,7 +27,7 @@ export type PrototypeAction =
   | { type: 'deactivate' }
   | { type: 'seal'; prototypeId: string; versionId: string }
   | { type: 'archive'; prototypeId: string; archived: boolean };
-const PROTOTYPE_ROOT = 'docs/concepts';
+export const PROTOTYPE_ROOT = 'docs/concepts';
 export const PROTOTYPE_REGISTRY = PROTOTYPE_ROOT + '/prototypes.json';
 export const PROTOTYPE_MAX_BYTES = 32_000_000;
 export const variantStatuses: readonly VariantStatus[] = ['draft', 'review', 'approved', 'active', 'archived'];

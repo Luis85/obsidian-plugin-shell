@@ -2,7 +2,7 @@ import { join, relative } from 'node:path';
 import { activeVariant } from '../companion/prototypes/commands.ts';
 import { snapshotPath } from '../companion/prototypes/model.ts';
 import { validateSelection } from '../companion/prototypes/validate.ts';
-import { workspaceKey, object, revision } from '../companion/prototypes/safety.ts';
+import { workspaceKey, prototypeObject as object, revision } from '../companion/prototypes/safety.ts';
 import { prototypeJsonText } from '../companion/prototypes/files.ts';
 import { parseAuthoringDocument } from '../companion/authoring-contract.ts';
 import { createFilePlan } from '../shared/file-plan.mjs';
