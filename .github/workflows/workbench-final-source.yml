@@ -1,0 +1,30 @@
+name: Workbench final source reconciliation
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/workbench-final-source.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1a078d235043db2157efbcc702878e120264fc14
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Archive both exact source trees
+        run: |
+          mkdir -p "$RUNNER_TEMP/source"
+          git archive --format=tar.gz -o "$RUNNER_TEMP/source/pr5.tar.gz" 1a078d235043db2157efbcc702878e120264fc14
+          git archive --format=tar.gz -o "$RUNNER_TEMP/source/pr54.tar.gz" 358aaa651139fe3a83ae15afa428f4e9dfac2658
+          git ls-tree -r 1a078d235043db2157efbcc702878e120264fc14 > "$RUNNER_TEMP/source/pr5-tree.txt"
+          git ls-tree -r 358aaa651139fe3a83ae15afa428f4e9dfac2658 > "$RUNNER_TEMP/source/pr54-tree.txt"
+          cd "$RUNNER_TEMP/source" && sha256sum *.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: workbench-final-source
+          path: ${{ runner.temp }}/source/
+          retention-days: 1
