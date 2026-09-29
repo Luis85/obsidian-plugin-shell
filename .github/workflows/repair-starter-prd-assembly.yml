@@ -1,0 +1,59 @@
+name: Repair starter PRD classic assembly
+on:
+  push:
+    branches: [chore/companion-starter-build-inputs]
+    paths: [.github/workflows/repair-starter-prd-assembly.yml]
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/json-starters-on-pr5
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Apply only the reviewed source edit
+        run: |
+          test "$(git rev-parse HEAD)" = 5b41fb9f717c469fd854d5cc669de5fc84f9cfa6
+          git fetch --no-tags origin 2e2bd14f6482f3cc4b4b04a036f216cb6747cf95
+          test ! -e tests/tooling/starter-classic-assembly.checks.mjs
+          git show 2e2bd14f6482f3cc4b4b04a036f216cb6747cf95:tests/tooling/starter-classic-assembly.checks.mjs > tests/tooling/starter-classic-assembly.checks.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('scripts/concepts/build-companion.py')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='c5aeacb92c2ee5995236c41777c60dd202e979ae812d73a352900cf07eb9e04b'
+          text=p.read_text()
+          old=" shared=(ds_shared+'\\n'+composition_contract.read_text(encoding='utf-8')"
+          new=" prd_limits=(ROOT.parents[2]/'scripts/companion/prd-limits.mjs').read_text(encoding='utf-8')\n shared=(prd_limits+'\\n'+ds_shared+'\\n'+composition_contract.read_text(encoding='utf-8')"
+          assert text.count(old)==1
+          text=text.replace(old,new)
+          old="contract.read_text(encoding='utf-8').replace(\"import { validateNativeIntegrations } from './native-contract.mjs';\\n\",'')"
+          new="contract.read_text(encoding='utf-8').replace(\"import { PRD_LIMITS } from './prd-limits.mjs';\\n\",'').replace(\"import { validateNativeIntegrations } from './native-contract.mjs';\\n\",'')"
+          assert text.count(old)==1
+          text=text.replace(old,new)
+          assert hashlib.sha256(text.encode()).hexdigest()=='d5fa35993bc38d26a3f669047e914dc9d75ff8a21d10d417de86ca0712cd87c7'
+          p.write_text(text)
+          PY
+      - name: Regenerate and verify the exact tested classic artifact
+        run: |
+          python3 scripts/concepts/build-companion.py
+          echo '1ef0ef773d9bd854d482a66eee20d2987598d211e431830adb52a47c885a464c  docs/concepts/companion/index.html' | sha256sum -c -
+          python3 scripts/concepts/build-companion.py --check
+          node --test tests/tooling/starter-classic-assembly.checks.mjs tests/tooling/starter-merge-routing.checks.mjs
+          git diff --check
+      - name: Fast-forward the feature branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/concepts/build-companion.py docs/concepts/companion/index.html tests/tooling/starter-classic-assembly.checks.mjs
+          git diff --cached --check
+          git commit -m 'fix(companion): compose shared PRD limits into the standalone classic runtime' -m 'Preserve canonical limits without leaving an ES module import in classic HTML. Exact regenerated artifact hash and 11 routing/assembly tests verified. No baseline, production threshold or release permission was relaxed.'
+          git push origin HEAD:refs/heads/feat/json-starters-on-pr5
+          git rev-parse HEAD >> "$GITHUB_STEP_SUMMARY"
