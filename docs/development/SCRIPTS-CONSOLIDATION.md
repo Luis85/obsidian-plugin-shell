@@ -59,7 +59,7 @@ are paths that generated projects depend on. Treat them as contracts.
 | JSON result envelope | `framework/contracts.ts` plus hand-built copies in `bin/app.ts`, `app.mjs`, `handout.mjs`; ad-hoc `{status,error}` shapes in legacy CLIs | `framework/contracts.ts` `result`/`failure` |
 | Process spawning | `framework/process.ts` `runNode`, `shared/process.mjs` `runNode`, direct `spawnSync('git', …)` in 7 files | One `runNode` + one git helper |
 | fs / JSON / path containment | `exists` ×5, JSON readers ×4, containment checks in ~17 files | Typed fs/plan adapter |
-| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in 3 legacy CLIs | `framework/input.ts` / presentation prompts |
+| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in legacy CLIs | Shared yes/no policy in `scripts/shared/confirmation.mjs`; presentation layers own rendering |
 
 ## Progress on PR #60
 
@@ -68,6 +68,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B2:** Framework and handout sha256 functions delegate to the existing shared hash helper; added binary and Unicode parity regression.
 - **B3:** Documentation, setup and two qualification scripts reuse the same SHA-256 implementation; added exact-byte documentation regression.
 - **B4:** Framework discovery, setup journal and handout workspace reuse the same `lstat` presence helper; missing and broken-symlink regressions added.
+- **B5:** Framework, maker TUI and legacy maker entry share one yes/no decision parser; prompt rendering remains presentation-specific.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages

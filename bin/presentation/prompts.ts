@@ -1,5 +1,6 @@
 import type { RichPrompts } from './tui/contracts.ts';
 import { requireSketch, SketchError, hasControls, title } from '../domain/errors.ts';
+import { parseConfirmation } from '../../scripts/shared/confirmation.mjs';
 export interface Prompts { rich?: RichPrompts; ask: (question: string) => Promise<string>; write: (text: string) => void }
 export interface Choice { id: string; label: string }
 export class Back extends Error { constructor() { super('Back'); this.name = 'Back'; } }
@@ -27,9 +28,8 @@ export async function choose(ui: Prompts, label: string, choices: Choice[], fall
 export async function confirm(ui: Prompts, label: string): Promise<boolean> {
   if (ui.rich) return await ui.rich.select(label, [{ id: 'no', label: 'No — go back without applying' }, { id: 'yes', label: 'Yes — proceed' }], 'no') === 'yes';
   while (true) {
-    const raw = (await input(ui, label + ' (y/N)')).toLowerCase();
-    if (!raw || raw === 'n' || raw === 'no') return false;
-    if (raw === 'y' || raw === 'yes') return true;
+    const decision = parseConfirmation(await input(ui, label + ' (y/N)'));
+    if (decision !== null) return decision;
     ui.write('Enter yes or no.\n');
   }
 }

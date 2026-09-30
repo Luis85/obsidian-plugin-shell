@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { applyFilePlan } from '../shared/file-plan.mjs';
 import { runNode } from '../shared/process.mjs';
+import { parseConfirmation } from '../shared/confirmation.mjs';
 
 let request;
 async function main() {
@@ -37,7 +38,7 @@ async function main() {
     if (!stdin.isTTY || request.options['--no-interaction']) throw new Error('Review --dry-run, then pass --yes for a noninteractive apply.');
     stderr.write(`${JSON.stringify(publicPlan, null, 2)}\n`);
     const prompt = createInterface({ input: stdin, output: stderr });
-    try { if (!/^y(es)?$/i.test((await prompt.question('Apply this source plan? [y/N] ')).trim())) { console.log(JSON.stringify({ status: 'cancelled' })); return; } }
+    try { if (parseConfirmation(await prompt.question('Apply this source plan? [y/N] ')) !== true) { console.log(JSON.stringify({ status: 'cancelled' })); return; } }
     finally { prompt.close(); }
   }
   const applied = await applyFilePlan(planned.plan);
