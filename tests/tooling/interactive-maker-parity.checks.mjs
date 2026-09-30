@@ -23,7 +23,8 @@ async function contents(root, path = '') {
   }
   return found.sort(([a], [b]) => a.localeCompare(b));
 }
-test('complete interactive and agent sessions produce byte-identical sketch and prototype packages', async () => {
+// Two complete sessions plus package compilation exceed the 60 s default under v8 coverage on Windows runners.
+test('complete interactive and agent sessions produce byte-identical sketch and prototype packages', { timeout: 180000 }, async () => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-parity-'));
   try {
     const human = join(root, 'human'), agent = join(root, 'agent');
