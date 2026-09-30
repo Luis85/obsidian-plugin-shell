@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["scripts/hindsight/*.ts"]
+  "include": ["../../scripts/hindsight/*.ts"]
 }

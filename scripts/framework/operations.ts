@@ -87,7 +87,7 @@ async function processOperation(request: Request, context: Context): Promise<Res
     acceptProfile(request.command, profile);
     entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
     if (profile === 'preview') return result(request.command, { execution: await runNode(context, 'node_modules/vite/bin/vite.js', ['--config', 'vite.preview.config.mjs'], timeout), productAcceptance: 'not-inferred' });
-    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
+    args = profile === 'ui' ? ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
   } else {
     const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');
     requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');

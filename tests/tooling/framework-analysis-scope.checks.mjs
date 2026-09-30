@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile, access } from 'node:fs/promises';
 const root=new URL('../../',import.meta.url);
-const config=JSON.parse(await readFile(new URL('.fallowrc.json',root),'utf8'));
+const config=JSON.parse(await readFile(new URL('configs/quality/fallow.json',root),'utf8'));
 // Configuration consistency only. The unchanged full analyzer gate separately executes the pinned Fallow binary.
 test('build and prototype helpers have activating detection and support/test roles, not invented runtime roots', async ()=> {
   for(const [name,role] of [['prototype-build-tools','support'],['prototype-build-tests','test']]) {

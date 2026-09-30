@@ -59,7 +59,7 @@ describe('Real tooling boundaries', () => {
       await mkdir(join(dir, 'src/application'), { recursive: true }); await mkdir(join(dir, 'src/infrastructure'), { recursive: true });
       await mkdir(join(dir, 'src/features'), { recursive: true });
       await mkdir(join(dir, 'tests'), { recursive: true });
-      await cp(join(root, '.fallowrc.json'), join(dir, '.fallowrc.json'));
+      await cp(join(root, 'configs/quality/fallow.json'), join(dir, '.fallowrc.json'));
       await mkdir(join(dir, 'scripts/quality'), { recursive: true });
       await cp(join(root, 'scripts/quality/fallow-node-tests.json'), join(dir, 'scripts/quality/fallow-node-tests.json'));
       await writeFile(join(dir, 'package.json'), '{"name":"boundary-fixture","type":"module"}');

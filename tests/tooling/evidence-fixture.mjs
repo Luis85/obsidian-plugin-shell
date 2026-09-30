@@ -9,7 +9,7 @@ export async function evidenceFixture(t, body = 'test("actual child assertion", 
   for (const directory of ['src', 'harness', 'tests/tooling', 'docs/design', 'docs/testing', '.github/workflows']) await mkdir(join(root, directory), { recursive: true });
   await cp(resolve('scripts'), join(root, 'scripts'), { recursive: true });
   await cp(resolve('configs'), join(root, 'configs'), { recursive: true });
-  for (const file of ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', 'docs/testing/acceptance-crosswalk.json', 'docs/testing/native-evidence-checks.json']) await cp(resolve(file), join(root, file));
+  for (const file of ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', 'docs/testing/acceptance-crosswalk.json', 'docs/testing/native-evidence-checks.json']) await cp(resolve(file), join(root, file));
   await writeFile(join(root, 'src/input.ts'), 'export const input = 1;\n');
   await writeFile(join(root, 'tests/tooling/probe.checks.mjs'), `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\n${body}\n`);
   return root;
@@ -30,7 +30,7 @@ export async function runtimeEvidenceFixture(t, body) {
   const root = await evidenceFixture(t);
   await mkdir(join(root, 'tests/runtime'));
   await symlink(resolve('node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  await writeFile(join(root, 'vitest.config.mjs'), 'export default { test: { include: ["tests/runtime/*.test.ts"], environment: "node", fileParallelism: false } };');
+  await writeFile(join(root, 'configs/testing/vitest.config.mjs'), 'export default { test: { include: ["tests/runtime/*.test.ts"], environment: "node", fileParallelism: false } };');
   await writeFile(join(root, 'tests/runtime/probe.test.ts'), `import { test, expect } from 'vitest';\n${body}`);
   return root;
 }
@@ -39,7 +39,7 @@ export async function browserEvidenceFixture(t, body) {
   await mkdir(join(root, 'tests/e2e')); await mkdir(join(root, 'dist'));
   await symlink(resolve('node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   for (const file of ['main.js', 'styles.css', 'manifest.json']) await writeFile(join(root, 'dist', file), 'fixture bytes, not a qualified plugin');
-  await writeFile(join(root, 'playwright.config.ts'), 'export default { testDir: "./tests/e2e", workers: 1, retries: 0 };');
+  await writeFile(join(root, 'configs/testing/playwright.config.ts'), 'export default { testDir: "./tests/e2e", workers: 1, retries: 0 };');
   await writeFile(join(root, 'tests/e2e/probe.spec.ts'), `import { test, expect } from '@playwright/test';\n${body}`);
   return root;
 }

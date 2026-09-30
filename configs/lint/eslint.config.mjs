@@ -1,10 +1,13 @@
 import ts from 'typescript-eslint';
 import vue from 'eslint-plugin-vue';
 import obsidian from 'eslint-plugin-obsidianmd';
-import { sourceRoots } from './scripts/shared/project-roots.mjs';
+import { fileURLToPath } from 'node:url';
+import { sourceRoots } from '../../scripts/shared/project-roots.mjs';
+// This file lives in configs/lint; every path and tsconfig resolves from the project root.
+const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
  * tsconfig.project.json); that code gets the same rules, type-checked through that project file. */
-const productRoots = sourceRoots(import.meta.dirname).filter(path => path !== 'src');
+const productRoots = sourceRoots(root).filter(path => path !== 'src');
 const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfigs.recommendedTypeChecked,
   '@typescript-eslint/no-floating-promises': 'error', '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
 };
@@ -13,20 +16,20 @@ export default ts.config(
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
   { files: ['src/domain/**/*.ts', 'src/application/**/*.ts', 'src/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
-  { files: ['src/**/*.{ts,vue}'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: import.meta.dirname } },
+  { files: ['src/**/*.{ts,vue}'], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
-  { files: ['bin/**/*.ts'], languageOptions: { parserOptions: { project: ['./tsconfig.maker.json'], tsconfigRootDir: import.meta.dirname } },
+  { files: ['bin/**/*.ts'], languageOptions: { parserOptions: { project: ['./configs/types/tsconfig.maker.json'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
   // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
   { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
-  ...productRoots.map(root => ({ files: [`${root}/**/*.{ts,vue}`],
-    languageOptions: { parserOptions: { parser: ts.parser, project: ['./tsconfig.project.json'], extraFileExtensions: ['.vue'], tsconfigRootDir: import.meta.dirname } },
+  ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
+    languageOptions: { parserOptions: { parser: ts.parser, project: ['./tsconfig.project.json'], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules })),
   { files: ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
-    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
+    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

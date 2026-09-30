@@ -22,7 +22,8 @@ class AssemblyContract(unittest.TestCase):
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
         shutil.copytree(ROOT / 'scripts/companion', self.root / 'scripts/companion')
-        shutil.copy(ROOT / '.fallowrc.json', self.root / '.fallowrc.json')
+        (self.root / 'configs/quality').mkdir(parents=True, exist_ok=True)
+        shutil.copy(ROOT / 'configs/quality/fallow.json', self.root / 'configs/quality/fallow.json')
         spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'scripts/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.builder)
@@ -47,7 +48,7 @@ class AssemblyContract(unittest.TestCase):
         self.assertEqual(html.count('const PRD_LIMITS = Object.freeze('), 1)
         self.assertNotIn("import { PRD_LIMITS } from './prd-limits.mjs'", html)
         self.assertLess(html.index('const PRD_LIMITS'), html.index('const COMPANION_FORMAT'))
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
         value['entry'].remove('scripts/companion/prd-limits.mjs')
         config.write_text(json.dumps(value))
@@ -85,7 +86,7 @@ class AssemblyContract(unittest.TestCase):
         self.assertEqual(text.count('id="companion-visual-seed"'), 1)
 
     def test_starter_contract_requires_explicit_inventory(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
         value['entry'].remove('scripts/companion/starter-contract.mjs')
         config.write_text(json.dumps(value))
@@ -93,7 +94,7 @@ class AssemblyContract(unittest.TestCase):
             self.build()
 
     def test_design_system_shared_modules_require_explicit_inventory(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
         for name in ['design-system-roles.mjs', 'design-system-contract.mjs', 'design-system-css.mjs']:
             with self.subTest(name=name):
@@ -105,7 +106,7 @@ class AssemblyContract(unittest.TestCase):
         config.write_text(original)
 
     def test_visual_contract_modules_require_explicit_inventory(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
         for name in ['visual-ir.mjs', 'visual-validate.mjs', 'visual-migrate.mjs']:
             with self.subTest(name=name):
@@ -146,7 +147,7 @@ class AssemblyContract(unittest.TestCase):
             self.build()
 
     def test_missing_analyzer_entry_is_rejected(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
         value['entry'].remove('docs/concepts/companion/src/state-safety.js')
         config.write_text(json.dumps(value))
@@ -160,7 +161,7 @@ class AssemblyContract(unittest.TestCase):
             self.build()
 
     def test_missing_asset_entries_are_rejected(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         original = config.read_text()
         for entry in ['src/surface.css', 'vendor/vue-flow.css', 'vendor/vue.runtime.global.prod.js']:
             with self.subTest(entry=entry):
@@ -200,7 +201,7 @@ class AssemblyContract(unittest.TestCase):
             self.build()
 
     def test_duplicate_analyzer_entries_are_rejected(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
         value['entry'].append('docs/concepts/companion/src/state-safety.js')
         config.write_text(json.dumps(value))
@@ -217,7 +218,7 @@ class AssemblyContract(unittest.TestCase):
         self.assertIn(b'exact shared contract change', self.output.read_bytes())
 
     def test_shared_project_contract_requires_analyzer_entry(self):
-        config = self.root / '.fallowrc.json'
+        config = self.root / 'configs/quality/fallow.json'
         value = json.loads(config.read_text())
         value['entry'].remove('scripts/companion/project-contract.mjs')
         config.write_text(json.dumps(value))

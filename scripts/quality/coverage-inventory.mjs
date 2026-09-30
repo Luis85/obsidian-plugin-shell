@@ -63,7 +63,7 @@ export function assertSelectedCoreGate(summary, files, thresholds) {
   return { status: 'passed', selectedCoreInputs: inputs.length, totals };
 }
 async function selectedCoreScope() {
-  const { default: config } = await import(pathToFileURL(resolve('vitest.config.mjs')).href);
+  const { default: config } = await import(pathToFileURL(resolve('configs/testing/vitest.config.mjs')).href);
   const { include, thresholds } = config.test.coverage;
   return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
 }

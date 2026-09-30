@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('compiler public exports are recognized without exempting private compiler implementations', async () => {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   assert.ok(config.entry.includes('scripts/compiler/index.ts'));
   assert.ok(config.entry.includes('scripts/compiler/build-clickdummy.mjs'));
   await archiveCommandFixture(async ({ scratch, command }) => {

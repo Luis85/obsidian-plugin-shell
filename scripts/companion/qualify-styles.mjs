@@ -11,7 +11,7 @@ const path = relative(join(target,'harness/app'),styles).replaceAll('\\','/');
 await appendFile(main,`\nimport ${JSON.stringify(path)};\n`);
 const checks = [];
 for (const [name,args] of [
-  ['harness-build',['node_modules/vite/bin/vite.js','build','--config','vite.harness.config.mjs']],
+  ['harness-build',['node_modules/vite/bin/vite.js','build','--config','configs/bundling/vite.harness.config.mjs']],
   ['nuxt-styles',['node_modules/@playwright/test/cli.js','test','tests/e2e/design-system.spec.ts']],
 ]) {
   const run=spawnSync(process.execPath,args,{cwd:target,encoding:'utf8',timeout:180000,maxBuffer:16*1024*1024,env:{...process.env,GENERATED_STYLES:'1'}});

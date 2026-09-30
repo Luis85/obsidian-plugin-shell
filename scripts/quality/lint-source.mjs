@@ -18,7 +18,7 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   files.sort();
   if (!files.length) throw new Error('LINT_SOURCE_EMPTY');
   for (let offset = 0; offset < files.length; offset += 100) {
-    await runNode(tool, [...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
+    await runNode(tool, ['-c', 'configs/lint/oxlintrc.json', ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
   }
   return { status: 'passed', files: files.length, scope: 'every owned src/bin JS/TS/Vue input, explicit paths' };
 }

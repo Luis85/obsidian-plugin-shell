@@ -78,7 +78,7 @@ test('[COV-04-02] the CLI applies the selected-core config only when requested a
     mkdirSync(join(root, 'src/domain'), { recursive: true }); mkdirSync(join(root, 'src/presentation'), { recursive: true }); mkdirSync(join(root, 'reports/production-coverage'), { recursive: true });
     const domain = join(root, 'src/domain/value.ts'); const view = join(root, 'src/presentation/view.vue');
     writeFileSync(domain, 'export const value = 1;'); writeFileSync(view, '<template>View</template>');
-    writeFileSync(join(root, 'vitest.config.mjs'), "export default { test: { coverage: { include: ['src/domain/**/*.ts'], thresholds: { lines: 99, statements: 90, functions: 90, branches: 90 } } } };");
+    writeFileSync(join(root, 'configs/testing/vitest.config.mjs'), "export default { test: { coverage: { include: ['src/domain/**/*.ts'], thresholds: { lines: 99, statements: 90, functions: 90, branches: 90 } } } };");
     const report = join(root, 'reports/production-coverage/coverage-summary.json');
     const run = (...args) => spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', timeout: 10000 });
     // Production (90%) and business (95%) floors pass at 97%; only the selected-core 99% line floor fails.

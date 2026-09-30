@@ -7,7 +7,7 @@ import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 import { codeLines } from './code-lines.mjs';
 import { loadThresholds } from '../quality/thresholds.mjs';
 
-const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs/quality/thresholds.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
+const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs'];
 export function physicalLines(text) {
   if (!text) return 0;
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -43,8 +43,7 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Optional installed capabilities and their actual reference input must travel
   // with source-only archives and invalidate receipts when their bytes change.
-  for (const extra of ['app.mjs', 'shell.mjs', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.generator.json', 'tsconfig.framework.json', 'vitest.obsidian.config.mjs',
-    'docs/concepts/companion/companion-project.json', '.agents/skills/companion-prototype-design/SKILL.md']) {
+  for (const extra of ['app.mjs', 'shell.mjs', 'docs/concepts/companion/companion-project.json', '.agents/skills/companion-prototype-design/SKILL.md']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
   for (const directory of ['bin', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', 'docs/concepts/companion/starters', '.claude/skills/companion-prototype-design']) {

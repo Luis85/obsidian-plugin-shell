@@ -8,7 +8,7 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",
-    "vitest.obsidian.config.mjs",
+    "configs/testing/vitest.obsidian.config.mjs",
     "scripts/testing/evidence-vitest-reporter.mjs",
     "scripts/styles/export-host-css.mjs",
     "scripts/testing/check-browser-specimen.mjs",
@@ -321,7 +321,7 @@
         "name": "tooling",
         "patterns": [
           "scripts/**",
-          "*.config.*",
+          "configs/**",
           "app.mjs",
           "shell.mjs"
         ]
@@ -571,6 +571,23 @@
     "policy-violation": "off"
   },
   "framework": [
+    {
+      "name": "project-tool-configs",
+      "entryPointRole": "support",
+      "entryPoints": [
+        "configs/bundling/vite.config.mjs",
+        "configs/bundling/vite.harness.config.mjs",
+        "configs/testing/vitest.config.mjs",
+        "configs/testing/vitest.production.config.mjs",
+        "configs/testing/vitest.maker.config.mjs",
+        "configs/testing/playwright.config.ts",
+        "configs/lint/eslint.config.mjs"
+      ],
+      "detection": {
+        "type": "fileExists",
+        "pattern": "configs/bundling/vite.config.mjs"
+      }
+    },
     {
       "name": "airship-source-preview-tools",
       "entryPointRole": "support",

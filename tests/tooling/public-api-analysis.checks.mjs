@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples while unrelated source and private exports remain checked', async () => {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   await archiveCommandFixture(async ({ scratch, command }) => {
     const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
     await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });

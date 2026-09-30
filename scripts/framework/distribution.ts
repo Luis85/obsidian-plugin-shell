@@ -30,7 +30,7 @@ export function standaloneSource(path: string, bytes: Buffer): Buffer {
     const intro = path === 'README.md' ? '# Framework developer kit\n\nStart in this extracted folder with `node bin/app setup` or `npm run setup`. The compiled CLI runs before dependency installation. Choose a project JSON or an explicit blank design, review generation, then approve dependency installation separately.\n\nFor automation use `node bin/app help --json` and `node bin/app schema --json`. Run `node bin/app build`, `test`, and `verify --profile project` after generation and installation. Actual native qualification and public-release approval remain separate.\n\nSee [CLI workflow](docs/development/FRAMEWORK-CLI.md) for invocation, safe plan/apply, fixtures, maintenance and release boundaries.\n\n## Retained framework reference\n\n' : '';
     return Buffer.from(intro + documentation(path, bytes.toString('utf8')));
   }
-  if (path === '.fallowrc.json') {
+  if (path === 'configs/quality/fallow.json') {
     const config = object(JSON.parse(bytes.toString('utf8')));
     requireThat(Array.isArray(config.entry), 'KIT_ANALYZER', 'Missing reviewed analyzer entries.');
     config.entry = config.entry.filter(value => typeof value === 'string' && included(value));

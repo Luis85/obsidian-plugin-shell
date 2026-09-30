@@ -78,7 +78,7 @@ test('real Playwright JSON records passing assertions, first-failure retries and
     const root = await browserEvidenceFixture(t, body);
     // Deterministically reproduce setup/configuration diagnostics before the reporter starts.
     // These are retained diagnostic streams, not assertion results or browser UI evidence.
-    const config = join(root, 'playwright.config.ts');
+    const config = join(root, 'configs/testing/playwright.config.ts');
     await writeFile(config, 'console.log("GitCommitInfo transport regression canary");\nconsole.error("configuration warning canary");\n' + await readFile(config, 'utf8'));
     const run = evidenceCli(root, 'run', 'browser'); const output = JSON.parse(run.stdout);
     assert.equal(run.status === 0, passing, run.stdout + run.stderr);

@@ -67,7 +67,8 @@ export async function maintainabilityInventory(root) {
   for (const path of ['src', 'scripts', 'tests', 'harness']) await visit(path);
   if ((await readdir(root)).includes('bin')) await visit('bin');
   for (const name of (await readdir(root)).sort()) if (executable.test(name)) await visit(name);
-  for (const name of ['package.json', 'package-lock.json', '.fallowrc.json']) await visit(name);
+  for (const name of ['package.json', 'package-lock.json']) await visit(name);
+  if ((await readdir(root)).includes('configs')) await visit('configs');
   files.sort((a, b) => a.path.localeCompare(b.path));
   if (!files.some(file => file.view === 'production')) throw new Error('METRIC_EMPTY_PRODUCTION');
   return { files, digest: sha256(JSON.stringify(files)) };

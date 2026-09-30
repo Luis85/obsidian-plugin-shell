@@ -92,7 +92,7 @@ test('[GATE-02-01] full analyzer fails for real unused files and exports', async
 test('[GATE-02-03] the repository analyzer ignores the docs working directory but not other unused code', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shell-analysis-docs-'));
   try {
-    const { ignorePatterns } = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+    const { ignorePatterns } = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
     await writeFile(join(root, '.fallowrc.json'), JSON.stringify({ entry: ['entry.ts'], ignorePatterns, rules: { 'policy-violation': 'off' } }));
     await writeFile(join(root, 'package.json'), '{"name":"analyzer-docs-probe","type":"module"}');
     await writeFile(join(root, 'entry.ts'), 'console.log(1);');

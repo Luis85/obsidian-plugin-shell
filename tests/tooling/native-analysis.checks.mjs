@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
 test('native view callback recognition is heritage-scoped and still rejects unconsumed members', async () => {
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   const rule = config.usedClassMembers.find(item => item.extends === 'TextFileView');
   assert.deepEqual(rule.members, ['getIcon', 'getViewData', 'setViewData', 'save', 'disposeNativeView']);
   await archiveCommandFixture(async ({ scratch, command }) => {

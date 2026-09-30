@@ -20,6 +20,7 @@ type Git = (root: string, args: string[]) => Promise<string | null>;
 const code = /\.(?:[cm]?[jt]sx?|vue)$/;
 const maxRelated = 200;
 const vueTsc = 'node_modules/vue-tsc/bin/vue-tsc.js', eslint = 'node_modules/eslint/bin/eslint.js', vitest = 'node_modules/vitest/vitest.mjs';
+const eslintConfig = 'configs/lint/eslint.config.mjs';
 /** A generated project carries its ownership receipt and a project-scoped TypeScript config. */
 async function checkScope(root: string): Promise<'generated-project' | 'shell-repository'> {
   return await exists(join(root, '.companion/generation.json')) && await exists(join(root, 'tsconfig.project.json')) ? 'generated-project' : 'shell-repository';
@@ -55,9 +56,9 @@ async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
     reason: `deleted, configuration or non-code files changed (${listed.slice(0, 5).join(', ')}${listed.length > 5 ? ', …' : ''}); running the full suite` };
 }
 async function makerSteps(root: string): Promise<CheckStep[]> {
-  if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'tsconfig.maker.json'))) return [];
+  if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
   return [
-    { id: 'maker-types', display: 'tsc --noEmit --project tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'tsconfig.maker.json'] },
+    { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
     { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] },
   ];
 }
@@ -73,7 +74,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit)
     const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
     // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
     const targets = [...(project ? lintRoots(root) : ['src']), ...(makers.length ? ['bin'] : [])];
-    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: [...targets, '--max-warnings', '0'] }, fullTest, ...makers] };
+    return { scope, steps: [typecheck, ...lint, { id: 'eslint', display: `eslint -c ${eslintConfig} ${targets.join(' ')} --max-warnings 0`, entry: eslint, args: ['-c', eslintConfig, ...targets, '--max-warnings', '0'] }, fullTest, ...makers] };
   }
   const changes = await changedFiles(root, git);
   let test = fullTest;

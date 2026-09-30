@@ -77,8 +77,8 @@ test('v6 authoring routes survive compiler analysis, emission and both output ta
     assert.deepEqual(result.model.document, document);
     assert.deepEqual(JSON.parse(result.artifacts.find(file => file.path === 'design/project.json').content), document);
     assert.match(result.artifacts.find(file => file.path === 'harness/prototype/clickdummy.ts').content, /capture\/:recordId/);
-    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.sitemap.json'));
-    assert.ok(result.artifacts.some(file => file.path === 'tsconfig.authoring.json'));
+    assert.ok(result.artifacts.some(file => file.path === 'configs/types/tsconfig.sitemap.json'));
+    assert.ok(result.artifacts.some(file => file.path === 'configs/types/tsconfig.authoring.json'));
   }
   assert.equal(JSON.stringify(document), text);
 });

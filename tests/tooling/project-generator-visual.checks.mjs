@@ -9,7 +9,7 @@ import { Window } from 'happy-dom';
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
 test('visual runtime type-checks under the generator configuration', () => {
-  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'tsconfig.generator.json'], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [tsc, '--noEmit', '--project', 'configs/types/tsconfig.generator.json'], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
 test('runtime exposes the IR surface used by generated SFCs', async () => {

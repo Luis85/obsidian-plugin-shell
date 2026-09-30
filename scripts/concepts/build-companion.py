@@ -84,7 +84,7 @@ def build(output: Path, check: bool = False):
  source_inputs=modules+['style-guide-model.js','test-data-model.js','data-source-model.js','semantic-model.js','component-variants.js','vault-project.js','brick-catalog.js','catalog.js','canvas-catalog.js','flow-catalog.js']+styles
  tools=['engine.mjs','adapters.mjs','storage.mjs','server.mjs','cli.mjs','faker-provider.mjs','client.mjs']
  inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}|{'test-kit/'+name for name in tools}
- config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text(encoding='utf-8'))
+ config=json.loads((ROOT.parents[2]/'configs/quality/fallow.json').read_text(encoding='utf-8'))
  prefix='docs/concepts/companion/'
  owned_roots=('src/','vendor/','test-kit/')
  registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix) and entry[len(prefix):].startswith(owned_roots)]

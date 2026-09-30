@@ -22,7 +22,7 @@ on:
       - 'tests/tooling/jev-concept-distribution.checks.mjs'
       - 'tests/concepts/**'
       - 'tests/tooling/test-data-*'
-      - '.fallowrc.json'
+      - 'configs/quality/fallow.json'
       - 'scripts/quality/maintainability-inventory.mjs'
       - 'tests/tooling/maintainability.checks.mjs'
       - '.github/workflows/companion-concept-verification.yml'
@@ -201,8 +201,8 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports/companion-mvp
-          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
-          node node_modules/typescript/bin/tsc --noEmit --project tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
+          node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.authoring.json 2>&1 | tee reports/companion-mvp/authoring-typecheck.log
+          node node_modules/typescript/bin/tsc --noEmit --project configs/types/tsconfig.framework.json 2>&1 | tee reports/companion-mvp/framework-typecheck.log
           node --test tests/tooling/companion-authoring-*.checks.mjs tests/tooling/companion-sitemap-*.checks.mjs 2>&1 | tee reports/companion-mvp/authoring-contracts.log
       - name: Build the integrated companion and export its complete v6 definition
         run: node scripts/concepts/build-mvp.mjs

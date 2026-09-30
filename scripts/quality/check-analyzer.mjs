@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 const output = 'reports/analyzer'; mkdirSync(output, { recursive: true });
-const run = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code'], { encoding: 'utf8', maxBuffer: 12 * 1024 * 1024, timeout: 60000 });
+const run = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', '--config', 'configs/quality/fallow.json'], { encoding: 'utf8', maxBuffer: 12 * 1024 * 1024, timeout: 60000 });
 writeFileSync(`${output}/fallow.json`, run.stdout ?? ''); writeFileSync(`${output}/stderr.txt`, run.stderr ?? '');
 if (run.error) throw run.error;
 let report; try { report = JSON.parse(run.stdout); } catch { throw new Error('ANALYZER_REPORT_INVALID'); }

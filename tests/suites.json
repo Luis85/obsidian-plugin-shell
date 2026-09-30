@@ -211,10 +211,10 @@
     {
       "name": "runtime",
       "purpose": "Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit.",
-      "runner": {"type": "vitest", "config": "vitest.config.mjs"},
+      "runner": {"type": "vitest", "config": "configs/testing/vitest.config.mjs"},
       "include": ["tests/runtime/**/*.test.ts"],
       "verify": "own-step",
-      "verifyStep": "production coverage run (vitest.production.config.mjs) executes every runtime test",
+      "verifyStep": "production coverage run (configs/testing/vitest.production.config.mjs) executes every runtime test",
       "npmScript": "test:runtime",
       "workflows": ["ci", "setup-compatibility", "candidate-qualification"]
     },

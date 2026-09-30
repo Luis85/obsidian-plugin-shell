@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import config from '../../vite.harness.config.mjs';
+import config from '../../configs/bundling/vite.harness.config.mjs';
 
 test('harness preview serves emitted artifacts without invoking source-generation plugins', async () => {
   const preview = await config({ command: 'serve', mode: 'production', isPreview: true });

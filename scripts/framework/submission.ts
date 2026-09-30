@@ -1,6 +1,6 @@
 /**
  * `check submission`: a local mirror of documented Obsidian community review rules. It writes nothing,
- * but its ESLint rule loads the project's eslint.config.mjs and plugins: trusted project code.
+ * but its ESLint rule loads the project's configs/lint/eslint.config.mjs and plugins: trusted project code.
  * Every rule cites its source. The Community directory scan also runs policy, vulnerability and
  * malware checks that are not reproduced here, so a pass is not a review outcome.
  */
@@ -101,7 +101,7 @@ export function lintRule(report: LintFile[] | null, root: string, problem?: stri
   return rule('eslint-obsidianmd', 'lint', sources.eslint, total ? `${total} ESLint problems (${obsidian} from obsidianmd rules): ${top.join('; ')}.` : null, `ESLint (with eslint-plugin-obsidianmd) reports no problems in ${report.length} files.`, remediation);
 }
 async function lint(context: Context): Promise<RuleResult> {
-  const args = [...lintRoots(context.root), '--format', 'json', '--max-warnings', '0'];
+  const args = ['-c', 'configs/lint/eslint.config.mjs', ...lintRoots(context.root), '--format', 'json', '--max-warnings', '0'];
   let stdout: string;
   try { stdout = (await runNode({ ...context, progress: undefined }, 'node_modules/eslint/bin/eslint.js', args)).stdout; }
   catch (error) {

@@ -17,7 +17,7 @@ test('the framework thresholds file equals the reviewed framework floors', async
 
 test('every gate reads its values from the thresholds file', async () => {
   const t = current();
-  const configs = await Promise.all(['vitest.config.mjs', 'vitest.production.config.mjs', 'vitest.maker.config.mjs']
+  const configs = await Promise.all(['configs/testing/vitest.config.mjs', 'configs/testing/vitest.production.config.mjs', 'configs/testing/vitest.maker.config.mjs']
     .map(async name => (await import(new URL(`../../${name}`, import.meta.url).href)).default.test.coverage.thresholds));
   assert.deepEqual(configs, [t.coverage.selectedCore, t.coverage.production, t.coverage.maker]);
   const { lineLimit } = await import('../../scripts/testing/source-inputs.mjs');

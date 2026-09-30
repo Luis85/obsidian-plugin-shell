@@ -128,7 +128,7 @@ test('a generated project lints and watches its configured product roots, not on
   await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'] }));
   await mkdir(join(dir, 'tests')); await writeFile(join(dir, 'tests/suites.json'), JSON.stringify({ roots: [{ path: 'verification/specs/project' }] }));
   const full = await checkSteps(dir, false);
-  assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['src', 'product/code/generated', '--max-warnings', '0']);
+  assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'product/code/generated', '--max-warnings', '0']);
   assert.deepEqual(sourceRoots(dir), ['src', 'product/code/generated'], 'the dev watchers use the same product roots; test roots are excluded');
   assert.deepEqual(codeRoots(dir), ['src', 'tests', 'product/code/generated', 'verification/specs/project']);
   await writeFile(join(dir, 'product/code/generated/data.ts'), 'export {};');

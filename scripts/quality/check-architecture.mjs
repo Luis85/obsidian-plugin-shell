@@ -1,7 +1,7 @@
 import { checkCompilerArchitecture } from '../compiler/check-architecture.mjs';
 await checkCompilerArchitecture(process.cwd());
 import { spawnSync } from 'node:child_process';
-const result = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', '--boundary-violations'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30000 });
+const result = spawnSync(process.execPath, ['node_modules/fallow/bin/fallow', '--format', 'json', 'dead-code', '--boundary-violations', '--config', 'configs/quality/fallow.json'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30000 });
 if (result.error) throw result.error;
 let report; try { report = JSON.parse(result.stdout); } catch { throw new Error(`FALLOW_REPORT_INVALID: ${result.stderr}`); }
 if (report.schema_version !== 9 || report.kind !== 'dead-code' || !Number.isInteger(report.summary?.boundary_violations)) throw new Error('FALLOW_REPORT_SCHEMA');

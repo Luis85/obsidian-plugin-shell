@@ -111,7 +111,7 @@ test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the proj
   const example = text('tests/project/plugin-host.test.ts');
   assert.match(example, /vi\.mock\('obsidian', \(\) => import\('@test\/obsidian'\)\)/); assert.match(example, /from "\.\.\/\.\.\/src\/main\.ts"/);
   assert.match(example, /join\(import\.meta\.dirname, "\.\.\/obsidian\/vault"\)/);
-  assert.ok(files.has('vitest.obsidian.config.mjs')); assert.ok(files.has('tests/obsidian/plugin-load.obsidian.ts'));
+  assert.ok(files.has('configs/testing/vitest.obsidian.config.mjs')); assert.ok(files.has('tests/obsidian/plugin-load.obsidian.ts'));
   const scripts = JSON.parse(text('package.json')).scripts;
   for (const name of ['check', 'check:fast', 'test', 'test:watch', 'test:tdd', 'test:obsidian', 'dev:obsidian', 'dev:ui', 'typecheck:project', 'verify:project', 'doctor']) assert.ok(scripts[name], name);
   assert.match(text('src/generated/bootstrap/install.ts'), /createDebugCommands/);

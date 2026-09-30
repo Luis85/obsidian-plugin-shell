@@ -34,8 +34,8 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js bin --max-warnings 0
-          node node_modules/oxlint/bin/oxlint bin --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs bin --max-warnings 0
+          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json bin --no-ignore --deny-warnings
       - name: Interactive, agent, compiler and safe-write contracts
         if: ${{ !cancelled() }}
         run: |

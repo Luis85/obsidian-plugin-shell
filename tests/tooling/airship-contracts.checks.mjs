@@ -153,7 +153,7 @@ test('new/setup opt-in flags and Airship commands are discoverable; unknown laun
 });
 
 test('generated preview entry points are analyzed and inert tooling stays inside the authoring boundary', async () => {
-  const config = JSON.parse(await readFile(join(root, '.fallowrc.json'), 'utf8'));
+  const config = JSON.parse(await readFile(join(root, 'configs/quality/fallow.json'), 'utf8'));
   const tools = config.framework.find(item => item.name === 'airship-source-preview-tools');
   assert.equal(tools.entryPointRole, 'support', 'preview/build tools are not plugin production roots');
   for (const entry of ['scripts/airship/preview-config.mjs', 'scripts/airship/qualify.mjs']) {

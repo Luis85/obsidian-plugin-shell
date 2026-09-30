@@ -21,12 +21,12 @@ test('unimplemented adapter errors preserve explicit source and operation identi
 
 test('root CLI and compiler policy are fingerprinted and covered as tooling', async () => {
   const inventory = await sourceInputs(process.cwd());
-  for (const path of ['app.mjs', 'bin/app', 'shell.mjs', 'tsconfig.generator.json', 'docs/concepts/companion/companion-project.json']) {
+  for (const path of ['app.mjs', 'bin/app', 'shell.mjs', 'configs/types/tsconfig.generator.json', 'docs/concepts/companion/companion-project.json']) {
     const entries = inventory.files.filter(file => file.path === path);
     assert.equal(entries.length, 1);
     assert.equal(entries[0].sha256, sha256(await readFile(path)));
   }
-  const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
+  const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
   assert.equal(config.boundaries.coverage.requireAllFiles, true);
   assert.ok(config.boundaries.zones.find(zone => zone.name === 'tooling').patterns.includes('app.mjs'));
 });
