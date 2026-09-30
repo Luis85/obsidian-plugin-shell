@@ -6,6 +6,35 @@ A companion project JSON describes the intended project. Import accepts an appro
 
 Do not replace a full current project export with an older compatibility fixture. The reviewed branch accepts current v6 authoring exports while retaining older fixtures for compatibility tests. Use the diagnostics and current authoring build to determine what the installed compiler accepts. `node shell.mjs schema --json` describes operation requests/results; it is **not** a promise of a complete project-design JSON schema.
 
+## Managed Markdown Collections in the shell and agent API
+
+A **Collection** is an active-vault data source with a vault-relative folder and one declared entity. The `collection.add` operation provisions four managed Markdown note operations: `list`, `create`, `update`, and `delete`. These reuse the generated plugin's native note repository and revision-aware update/delete contracts. The authoring shell never reads or writes actual collection records.
+
+Discover the machine contract with `node shell.mjs sketch schema --json`. An agent or developer can submit this transaction using `node shell.mjs sketch --input collection.json --json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "title": "Tasks example",
+  "operations": [
+    { "op": "page.add", "title": "Tasks", "as": "page" },
+    { "op": "entity.add", "title": "Task", "as": "task" },
+    { "op": "entity.properties", "id": "@task", "properties": [
+      { "key": "title", "type": "text", "required": true }
+    ] },
+    { "op": "collection.add", "title": "Tasks", "path": "Records/Tasks", "entity": "@task", "as": "tasks" },
+    { "op": "page.collection-table", "page": "@page", "source": "@tasks", "title": "Task records" },
+    { "op": "interaction.add", "page": "@page", "title": "Create task", "as": "create" },
+    { "op": "interaction.action", "page": "@page", "id": "@create", "action": {
+      "kind": "source", "source": "@tasks", "operation": "create",
+      "input": { "kind": "value", "value": { "values": { "title": "Example" }, "requestId": "create-task-1" } }
+    } }
+  ]
+}
+```
+
+Review the returned ownership-aware plan and apply the reviewed `--apply <planHash>` request; `--json` output is machine-readable. `page.collection-table` inserts a table with the Collection List operation already bound to its `data` prop. Use `page.bind` to bind another page component prop to a declared read operation, or bind a text element's `@value` to a field such as `0.record.title`. Source actions accept bounded inert event, draft, literal, or object mappings; generated input/output validation and the native repository enforce runtime boundaries. The terminal page editor exposes table creation, source binding and source calls through the corresponding menus.
+
 ## Create a new project from JSON
 
 From a framework checkout, inspect the export and preview a separate destination:
