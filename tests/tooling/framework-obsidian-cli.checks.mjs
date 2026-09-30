@@ -57,6 +57,12 @@ test('prepare reads only configured Markdown candidates and proposes existing re
   assert.deepEqual(value.data.scan.typedPaths,['docs/application/project.md']);
   assert.equal(value.data.import.writesVault,false); assert.equal(value.data.import.reviewedPlanRequired,true);
   assert.equal(value.data.import.batches.length,1); assert.ok(value.data.import.batches[0].includes('docs'));
+  const proposed=value.data.import.batches[0];
+  assert.deepEqual(proposed.slice(0,4),['node','bin/app','docs','import']);
+  const parsed=parseCliArguments(proposed.slice(2));
+  assert.equal(parsed.command,'docs import'); assert.deepEqual(parsed.args,[join(vault,'docs','application','project.md')]);
+  assert.equal(parsed.options['dry-run'],true); assert.equal(parsed.options.json,true);
+  assert.ok(parsed.args.length<=32);
   const invoked=new Set(fake.calls.map(args=>args[1] ?? args[0]));
   for(const denied of ['eval','dev:cdp','create','append','prepend','move','rename','delete','plugin:install','plugin:enable']) assert.equal(invoked.has(denied),false);
 });
