@@ -17,7 +17,7 @@ export default ts.config(
     plugins: { obsidianmd: obsidian },
     rules: pluginRules,
   },
-  { files: ['bin/**/*.ts'], languageOptions: { parserOptions: { project: ['./tsconfig.maker.json'], tsconfigRootDir: import.meta.dirname } },
+  { files: ['bin/**/*.ts', 'plugins/**/*.ts'], languageOptions: { parserOptions: { project: ['./tsconfig.maker.json'], tsconfigRootDir: import.meta.dirname } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   ...productRoots.map(root => ({ files: [`${root}/**/*.{ts,vue}`],

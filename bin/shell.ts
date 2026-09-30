@@ -19,9 +19,11 @@ import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
 import { safe, Back, type Prompts } from './presentation/prompts.ts';
+import { createPluginRuntime, pluginCliCommands, type WorkbenchPluginRuntime } from '../plugins/runtime.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
+  if (!['studio', 'new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', 'brainstorm'].includes(args.command)) return false;
   if (env.CI && env.CI !== 'false') return false;
   const blocked = ['json', 'no-interaction', 'help', 'input'].some(flag => Boolean(args.flags[flag]));
   return Boolean(io.input.isTTY && io.error.isTTY && !blocked && !args.action);
@@ -76,11 +78,16 @@ function errorResult(command: string, error: unknown) {
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const controller = new AbortController(), stop = () => controller.abort();
+  let plugins: WorkbenchPluginRuntime | undefined;
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
   try {
-    const args = parseArguments(argv); command = args.command;
-    const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal, progress: (message: string) => { io.error.write(safe(message)); } };
+    const args = parseArguments(argv, pluginCliCommands()); command = args.command;
+    const root = resolve(option(args, 'root', process.cwd()));
+    const progress = (message: string) => { io.error.write(safe(message)); };
+    plugins = await createPluginRuntime({ root, frameworkRoot, input: io.input, signal: controller.signal, progress,
+      onError: code => progress(code + '\n') });
+    const context = { root, frameworkRoot, input: io.input, signal: controller.signal, progress, plugins };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
     const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };
@@ -93,7 +100,11 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     if (machine) io.output.write(JSON.stringify(result) + '\n');
     else io.error.write(result.diagnostics.map(item => `${item.code}: ${safe(item.message)}`).join('\n') + '\n');
     return result.status === 'cancelled' ? 130 : 1;
-  } finally { process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop); }
+  } finally {
+    try { plugins?.dispose(); } finally {
+      process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
+    }
+  }
 }
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   process.exitCode = await main(process.argv.slice(2), fileURLToPath(new URL('../', import.meta.url)));

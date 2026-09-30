@@ -16,7 +16,8 @@ import { editPage } from './page-editor.ts';
 import { review } from './review.ts';
 import { workspaceContext } from './context.ts';
 import { choose, input, titleInput, confirm, reportError, type Prompts } from './prompts.ts';
-export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal }
+import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
+export interface StudioOptions { root: string; frameworkRoot: string; project: string; guide?: string; out?: string; kind?: string; signal?: AbortSignal; plugins?: WorkbenchPluginRuntime }
 async function savedWorkspace(options: StudioOptions): Promise<Workspace | undefined> {
   const snapshot = await readSnapshot(options.root, options.project);
   return snapshot.document ? new Workspace(snapshot.document, snapshot.beforeHash) : undefined;
@@ -61,8 +62,8 @@ async function generate(ui: Prompts, options: StudioOptions, workspace: Workspac
   await review(ui, plan, options.signal);
 }
 interface StudioAction { label: string; run: () => unknown }
-function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
-  return {
+export function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
+  const actions: Record<string, StudioAction> = {
     new: { label: 'Sketch a new page', run: async () => {
       const result = workspace.edit([{ op: 'page.add', title: await titleInput(ui, 'Page title') }]);
       await editPage(ui, workspace, result.created[0]!);
@@ -86,6 +87,12 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
     'new-project': { label: 'Create another project from a project starter', run: () => projectWizard(ui, options) },
   };
+  for (const contribution of options.plugins?.tuiActions ?? []) {
+    actions['plugin-' + contribution.id] = { label: contribution.label, run: () => contribution.run({
+      ...options.plugins!.commandContext, project: options.project, ui, workspace,
+    }) };
+  }
+  return actions;
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {
   const snapshot = await readSnapshot(options.root, options.project);

@@ -73,7 +73,7 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
 
 function prototypeArtifactPath(selection: ProjectSelection | undefined): string {
   if (!selection) return 'prototype.html';
-  return selection.framework === 'none' ? 'source/dist/cli/targets/cli/main.js' : 'source/dist/prototype.html';
+  return selection.framework === 'none' ? 'source/dist/cli/src/targets/cli/main.js' : 'source/dist/prototype.html';
 }
 function addAnswerValues(values: Record<string, string>, answers: Answers): void {
   for (const [key, value] of Object.entries(answers)) {
