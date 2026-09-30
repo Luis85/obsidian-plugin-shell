@@ -9,10 +9,10 @@ import { projectModel, schema, literal } from '../../scripts/companion/compiler/
 import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.ts';
 import { matches } from '../../scripts/companion/runtime/contract.ts';
 import { planProject, applyProject, reviewProject } from '../../scripts/companion/compiler/plan.ts';
-import { selfProjectWithCollection } from '../support/starter-documents.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-// The current self-project plus one managed Markdown Collection (full CRUD ports).
-const fixture = selfProjectWithCollection();
+// The current self-project, including its managed Markdown Collection (full CRUD ports).
+const fixture = selfProject();
 const clone = () => structuredClone(fixture);
 async function sandbox(work) {
   const vault = await mkdtemp(join(tmpdir(),'companion-generator-')); const input = join(vault,'project.json');
@@ -26,7 +26,7 @@ test('self-project preserves all declared artifacts and exposes honest readiness
   const m = projectModel(fixture);
   assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[28,54,11,2,31]);
   assert.equal(m.sources[0].operations.length,3); assert.equal(m.flows.length,3);
-  // The self-project keeps its vault reads and adds one Markdown Collection with the full CRUD port set.
+  // The self-project declares its vault reads and one Markdown Collection with the full CRUD port set.
   assert.deepEqual(m.sources.map(source=>[source.kind,source.operations.map(operation=>operation.slug)]),
     [['vault',['list-requirements','list-sitemap','list-components']],['collection',['list','create','update','delete']]]);
   assert.equal(m.document,fixture); assert.ok(m.warnings.some(w=>w.includes('require implementation')));

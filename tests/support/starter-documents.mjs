@@ -28,11 +28,3 @@ export const selfProject = () => starterDocument('companion-plugin');
 export function exampleStarterIds() {
   return companionStarterIds().filter(id => !['companion-plugin', 'feature-showcase'].includes(id));
 }
-/** The self-project plus one managed Markdown Collection source with the full CRUD port set (generator coverage). */
-export function selfProjectWithCollection() {
-  const document = selfProject(), sources = document.design.dataSources;
-  const { source, position } = JSON.parse(readFileSync(new URL('tests/fixtures/companion/test-recipe-collection.json', root), 'utf8'));
-  sources.sources.push(source); sources.positions[source.id] = position;
-  sources.nextId = Math.max(sources.nextId, ...source.operations.map(operation => Number(operation.id.split('-').at(-1)) + 1));
-  return document;
-}
