@@ -1,10 +1,9 @@
-import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction, type Mapping, type Mapping } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction, type Mapping } from '../../scripts/companion/visual/visual-ir.mjs';
 import type { SketchDocument } from './document.ts';
 import { requireSketch, title } from './errors.ts';
 import { sourceOperation } from './bricks.ts';
 import { validateVisualMapping } from '../../scripts/companion/visual/visual-mapping.mjs';
 import { object, list } from './data.ts';
-import { validateVisualMapping } from '../../scripts/companion/visual/visual-mapping.mjs';
 import { pageContent, pageNodes, surfaceFor } from './pages.ts';
 
 export function interactions(document: SketchDocument, surface: string) {
