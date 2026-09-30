@@ -61,7 +61,7 @@ test('project generator rejects unknown fields, adapters, target sets and Angula
   const valid = { kind: 'project', projectType: 'hybrid', framework: 'vanilla', targets: ['plugin', 'cli'] };
   assert.deepEqual(readProjectGenerator(valid), valid);
   assert.deepEqual(readProjectGenerator({ kind: 'project', projectType: 'plugin', framework: 'angular', targets: ['plugin'], angularPins: pins }).angularPins, pins);
-  const invalid = [null, [], 4, { ...valid, extra: true }, { ...valid, kind: 'files' }, { ...valid, projectType: 'desktop' }, { ...valid, framework: 'svelte' },
+  const invalid = [null, [], 4, { ...valid, extra: true }, { ...valid, kind: 'files' }, { ...valid, projectType: 'desktop' }, { ...valid, framework: 'Svelte UI' },
     { ...valid, targets: [] }, { ...valid, targets: 'plugin' }, { ...valid, targets: ['plugin', 'plugin'] }, { ...valid, targets: ['cli', 'plugin'] },
     { ...valid, targets: ['plugin', '../cli'] }, { ...valid, targets: ['plugin', 'webapp', 'website', 'cli', 'cli'] }, { ...valid, targets: ['plugin'] },
     { kind: 'project', projectType: 'website', framework: 'vanilla', targets: ['webapp'] }, { kind: 'project', projectType: 'website', framework: 'vanilla', targets: ['website', 'webapp'] },

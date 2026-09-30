@@ -6,7 +6,7 @@ const builtins: readonly FrameworkAdapter[] = Object.freeze([
   defineFrameworkAdapter({ id: 'angular', engine: 'angular', label: 'Angular — standalone Angular components, AOT compilation and zoneless, per-view lifecycle.' }),
   defineFrameworkAdapter({ id: 'none', engine: 'none', label: 'No frontend, command-line application — Node.js commands, structured output and explicit exit codes.' }),
 ]);
-export function frameworkAdapters(contributed: readonly FrameworkAdapter[] = []): readonly FrameworkAdapter[] {
+function frameworkAdapters(contributed: readonly FrameworkAdapter[] = []): readonly FrameworkAdapter[] {
   const result = [...builtins, ...contributed.map(defineFrameworkAdapter)];
   const ids = new Set<string>();
   for (const adapter of result) {

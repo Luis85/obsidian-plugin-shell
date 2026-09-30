@@ -204,7 +204,8 @@
     "bin/shell.ts",
     "scripts/makers/cli.mjs",
     "scripts/compiler/qualify-project-starters.mjs",
-    "scripts/companion/prd-limits.mjs"
+    "scripts/companion/prd-limits.mjs",
+    "plugins/*/src/index.ts"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"

@@ -18,13 +18,15 @@ import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/
 
 const enabled = { ...PluginObject, config: { ...PluginObject.config, enabled: true } };
 
-if (false) {
+// Compile-time contract only; never invoked.
+function dynamicEventNamesAreRejected(): void {
   const dynamicEventName: string = 'example-extension.dynamic';
   // @ts-expect-error plugin event names must remain literal so payload types stay correlated.
   definePluginEvent(dynamicEventName, (value): value is string => typeof value === 'string');
 }
+void dynamicEventNamesAreRejected;
 
-test('plugin owns manifest/config and can contribute a framework, starter, CLI and TUI', () => {
+void test('plugin owns manifest/config and can contribute a framework, starter, CLI and TUI', () => {
   assert.equal(PluginObject.manifest.id, 'example-extension');
   assert.equal(PluginObject.config.enabled, false);
   assert.deepEqual(pluginFrameworkAdapters([PluginObject]), []);
@@ -33,10 +35,10 @@ test('plugin owns manifest/config and can contribute a framework, starter, CLI a
   assert.equal(pluginStarterDefinitions([enabled])[0], reactStarter);
   assert.equal(reactStarter.generator.framework, 'react');
   assert.equal(reactAdapter.engine, 'vanilla');
-  assert.match(reactAdapter.files?.({} as never)['src/ui/mount.ts'] ?? '', /react-dom\/client/);
+  assert.match(reactAdapter.files()['src/ui/mount.ts'] ?? '', /react-dom\/client/);
 });
 
-test('framework adapters reject ambiguous dependency ownership', () => {
+void test('framework adapters reject ambiguous dependency ownership', () => {
   assert.throws(() => defineFrameworkAdapter({
     id: 'scope-conflict', label: 'Scope conflict', engine: 'vanilla',
     dependencies: { react: '19.3.0' }, devDependencies: { react: '19.3.0' },
@@ -57,7 +59,7 @@ test('framework adapters reject ambiguous dependency ownership', () => {
   assert.throws(() => packageFiles(template as never, selection, 'react-app', wrongVersion), /dependency conflicts/);
 });
 
-test('plugin starter discovery and framework package emission use the normal project contracts', async () => {
+void test('plugin starter discovery and framework package emission use the normal project contracts', async () => {
   const entries = await loadDefinitions(process.cwd(), [reactStarter]);
   const discovered = entries.find(entry => entry.definition.id === 'webapp-react');
   assert.equal(discovered?.file, 'plugin:webapp-react');
@@ -76,7 +78,7 @@ test('plugin starter discovery and framework package emission use the normal pro
 });
 
 
-test('plugin framework adapter compiles a real React project through the pure compiler extension port', async () => {
+void test('plugin framework adapter compiles a real React project through the pure compiler extension port', async () => {
   const document = runOperations(newDocument('React extension'), [{ op: 'page.add', title: 'Overview' }]).document;
   const selection = projectSelection({ id: reactStarter.id, version: reactStarter.version, sha256: 'b'.repeat(64) }, reactStarter.generator);
   const result = await compileProject({
@@ -95,7 +97,7 @@ test('plugin framework adapter compiles a real React project through the pure co
   assert.equal(JSON.parse(files.get('project.config.json') ?? '{}').framework, 'react');
 });
 
-test('plugin framework adapter drives the real project emitter', () => {
+void test('plugin framework adapter drives the real project emitter', () => {
   const selection = projectSelection({ id: reactStarter.id, version: reactStarter.version, sha256: 'b'.repeat(64) }, reactStarter.generator);
   const model = {
     project: { id: 'react-app', name: 'React App', version: '0.1.0', description: 'React proof', author: 'Workbench' },
@@ -121,7 +123,7 @@ test('plugin framework adapter drives the real project emitter', () => {
   assert.throws(() => renderStarterProject(model as never, template as never, selection, { ...reactAdapter, id: 'other' }), /SELECTION_MISMATCH/);
 });
 
-test('one invocation shares the event bus across activation, CLI and TUI contributions', async () => {
+void test('one invocation shares the event bus across activation, CLI and TUI contributions', async () => {
   const errors: string[] = [], progress: string[] = [], received: Array<{ message: string }> = [];
   const input = Readable.from([]);
   const runtime = await createPluginRuntime({
@@ -167,7 +169,7 @@ test('one invocation shares the event bus across activation, CLI and TUI contrib
   runtime.dispose();
 });
 
-test('plugin command parsing rejects reserved Workbench command roots', async () => {
+void test('plugin command parsing rejects reserved Workbench command roots', async () => {
   const makerCollision = [{ id: 'new', summary: 'bad', execute: () => ({}) }];
   assert.throws(() => parseArguments(['new'], makerCollision), /conflicts with a built-in/);
   const frameworkCollision = { ...enabled, cli: [{ id: 'build', summary: 'bad', execute: () => ({}) }] };
@@ -180,7 +182,7 @@ test('plugin command parsing rejects reserved Workbench command roots', async ()
   }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
 });
 
-test('plugin events must stay in the owning manifest namespace', async () => {
+void test('plugin events must stay in the owning manifest namespace', async () => {
   const foreign = definePluginEvent('other-plugin.changed', (value): value is string => typeof value === 'string');
   const plugin = { ...enabled, events: [foreign], cli: [], tui: [], frameworks: [], starters: [] };
   await assert.rejects(() => createPluginRuntime({
@@ -188,7 +190,7 @@ test('plugin events must stay in the owning manifest namespace', async () => {
   }), /WORKBENCH_PLUGIN_EVENT_OWNER/);
 });
 
-test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
+void test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
   const recursive = definePluginEvent('recursive-plugin.tick',
     (value): value is { value: number } => Boolean(value && typeof value === 'object'
       && Number.isInteger((value as { value?: unknown }).value)));

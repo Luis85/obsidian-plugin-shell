@@ -108,7 +108,7 @@ import { PluginObject, ${eventLocal} } from '../src/index.ts';
 
 const enabled = { ...PluginObject, config: { ...PluginObject.config, enabled: true } };
 
-test('${name} plugin exposes event, CLI and TUI contributions through one runtime', async () => {
+void test('${name} plugin exposes event, CLI and TUI contributions through one runtime', async () => {
   const received: string[] = [];
   const runtime = await createPluginRuntime({
     root: process.cwd(), frameworkRoot: process.cwd(), input: Readable.from([]), registry: [enabled],
