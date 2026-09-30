@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { readInput, ask } from '../../scripts/framework/input.ts';
-import { parseConfirmation } from '../../scripts/shared/confirmation.mjs';
+import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments, validateRequest, descriptor } from '../../scripts/framework/catalog.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { exportDesignSystem } from '../../scripts/framework/style-export.ts';

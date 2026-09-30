@@ -337,6 +337,12 @@
         ]
       },
       {
+        "name": "cli-confirmation-contract",
+        "patterns": [
+          "scripts/shared/confirmation.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
           "scripts/shared/project-path.mjs"
@@ -458,7 +464,8 @@
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
-          "cli-process-contract"
+          "cli-process-contract",
+          "cli-confirmation-contract"
         ]
       },
       {
@@ -499,7 +506,8 @@
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
-          "cli-process-contract"
+          "cli-process-contract",
+          "cli-confirmation-contract"
         ]
       },
       {
@@ -573,7 +581,8 @@
           "prototype-skill",
           "project-path-contract",
           "cli-data-contract",
-          "cli-result-contract"
+          "cli-result-contract",
+          "cli-confirmation-contract"
         ]
       },
       {
@@ -592,6 +601,12 @@
         "from": "cli-process-contract",
         "allow": [
           "cli-process-contract"
+        ]
+      },
+      {
+        "from": "cli-confirmation-contract",
+        "allow": [
+          "cli-confirmation-contract"
         ]
       },
       {
