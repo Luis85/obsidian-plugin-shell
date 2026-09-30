@@ -42,6 +42,19 @@ async function editElement(ui: Prompts, workspace: Workspace, page: string): Pro
   if (op === 'bind') { await bindPageNode(ui, workspace, page, id); return; }
   workspace.edit([op === 'remove' ? { op: 'page.remove', page, id } : { op: 'page.move', page, id, direction: op }]);
 }
+async function sourceAction(ui: Prompts, workspace: Workspace): Promise<Record<string, unknown>> {
+  const sources = availableSources(workspace).filter(source => source.operations.length > 0);
+  requireSketch(sources.length, 'SOURCE_ACTION', 'Declare a source with operations before connecting an interaction.');
+  const source = await choose(ui, 'Call source', sources.map(item => ({ id: item.id, label: item.name })));
+  const selectedSource = sources.find(item => item.id === source)!;
+  const operation = await choose(ui, 'Call operation', selectedSource.operations.map(op => ({ id: op.id, label: op.name + ' · ' + op.direction })));
+  const port = selectedSource.operations.find(op => op.id === operation)!;
+  if (port.input?.mode === 'none') return { kind: 'source', source, operation, input: { kind: 'none' } };
+  const kind = await choose(ui, 'Input mapping', [{ id: 'event', label: 'Pass event payload (validate in generated service)' },
+    { id: 'value', label: 'Enter a fixed JSON payload' }]);
+  const mapping = kind === 'event' ? { kind: 'event' } : { kind: 'value', value: JSON.parse(await input(ui, 'Fixed JSON input (values, requestId/revision as required)', '{}')) };
+  return { kind: 'source', source, operation, input: mapping };
+}
 async function editInteraction(ui: Prompts, workspace: Workspace, page: string): Promise<void> {
   const selected = await choose(ui, 'Choose interaction', [...interactions(workspace.document, page).map(({ interaction }) => ({ id: interaction.id, label: interaction.label })), { id: 'back', label: 'Back' }]);
   if (selected === 'back') return;
@@ -49,21 +62,7 @@ async function editInteraction(ui: Prompts, workspace: Workspace, page: string):
   if (action === 'back') return;
   if (action === 'rename') { workspace.edit([{ op: 'interaction.rename', page, id: selected, title: await titleInput(ui, 'Interaction title') }]); return; }
   if (action === 'remove') { workspace.edit([{ op: 'interaction.remove', page, id: selected }]); return; }
-  if (action === 'source') {
-    const sources = availableSources(workspace).filter(source => source.operations.length > 0);
-    requireSketch(sources.length, 'SOURCE_ACTION', 'Declare a source with operations before connecting an interaction.');
-    const source = await choose(ui, 'Call source', sources.map(item => ({ id: item.id, label: item.name })));
-    const selectedSource = sources.find(item => item.id === source)!;
-    const operation = await choose(ui, 'Call operation', selectedSource.operations.map(op => ({ id: op.id, label: op.name + ' · ' + op.direction })));
-    const port = selectedSource.operations.find(op => op.id === operation)!;
-    let mapping: Record<string, unknown> = { kind: 'none' };
-    if (port.input?.mode !== 'none') {
-      const kind = await choose(ui, 'Input mapping', [{ id: 'event', label: 'Pass event payload (validate in generated service)' },
-        { id: 'value', label: 'Enter a fixed JSON payload' }]);
-      mapping = kind === 'event' ? { kind: 'event' } : { kind: 'value', value: JSON.parse(await input(ui, 'Fixed JSON input (values, requestId/revision as required)', '{}')) };
-    }
-    workspace.edit([{ op: 'interaction.action', page, id: selected, action: { kind: 'source', source, operation, input: mapping } }]); return;
-  }
+  if (action === 'source') { workspace.edit([{ op: 'interaction.action', page, id: selected, action: await sourceAction(ui, workspace) }]); return; }
   const change: Record<string, unknown> = { kind: action };
   if (action === 'navigate') change.target = await choose(ui, 'Destination page', outline(workspace.document).pages.map(item => ({ id: item.id, label: item.title })));
   if (action === 'set-state') change.state = await choose(ui, 'Preview state', ['default', 'loading', 'empty', 'error', 'disabled'].map(id => ({ id, label: id })));
