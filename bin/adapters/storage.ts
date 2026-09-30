@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { configurationPlan } from '../../scripts/framework/changes.ts';
 import { hash, readBounded, exists } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { openDocument, documentText, type SketchDocument } from '../domain/document.ts';
 import { requireSketch } from '../domain/errors.ts';
 export interface Snapshot { document: SketchDocument | null; beforeHash: string | null }

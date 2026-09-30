@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runNode, npmEntry } from '../../scripts/framework/process.ts';
+import { runNode as typedSharedRunNode } from '../../scripts/shared/process.ts';
+import { runNode as legacySharedRunNode } from '../../scripts/shared/process.mjs';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { failure } from '../../scripts/framework/contracts.ts';
@@ -81,4 +83,16 @@ test('dry-run dominates public execution flags and never launches a release adap
   assert.equal(response.status, 'planned');
   assert.equal(response.data.execution, 'not-run');
   assert.ok(!(await readdir(ctx.root)).includes('release-adapter-started'));
+});
+
+test('typed shared process runner remains the canonical compatibility implementation', async t => {
+  assert.equal(legacySharedRunNode, typedSharedRunNode);
+  const ctx = await fixture(t, `process.exitCode = Number(process.argv[2] ?? 0);`);
+  const entry = join(ctx.root, 'child.mjs');
+  await typedSharedRunNode(entry, ['0'], { cwd: ctx.root, stdio: 'ignore' });
+  await assert.rejects(legacySharedRunNode(entry, ['7'], { cwd: ctx.root, stdio: 'ignore' }), error => {
+    assert.equal(error.exitCode, 7);
+    assert.equal(error.signal, null);
+    return true;
+  });
 });

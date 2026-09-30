@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
 import { readInput } from '../../scripts/framework/input.ts';
 import { runNode } from '../../scripts/framework/process.ts';

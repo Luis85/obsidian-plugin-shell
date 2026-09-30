@@ -1,6 +1,6 @@
 import { prototypeCommands } from './prototype-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
-import { assertJsonData } from '../contracts/json-data.mjs';
+import { assertJsonData } from '../contracts/json-data.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {
   id: string; summary: string; options: Record<string, 'value' | 'flag'>;
