@@ -58,7 +58,7 @@ test('source-only archive includes and fingerprints the actual imported project 
   const catalogBytes = await readFile(join(root, catalogPath));
   assert.equal(inventory.files.find(item => item.path === catalogPath)?.sha256, hash(catalogBytes));
   const catalog = JSON.parse(catalogBytes.toString('utf8'));
-  assert.equal(catalog.starters.length, 11, 'retain all eleven reviewed starters');
+  assert.equal(catalog.starters.length, 12, 'retain all twelve reviewed starters');
   for (const starter of catalog.starters) {
     const path = `docs/concepts/companion/starters/${starter.file}`;
     const actualHash = hash(await readFile(join(root, path)));

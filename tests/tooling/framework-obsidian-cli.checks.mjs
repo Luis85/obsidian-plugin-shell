@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { obsidianRead } from '../../scripts/framework/obsidian-cli.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'shell-obsidian-cli-')); t.after(() => rm(root,{recursive:true,force:true}));
+  // realpath: macOS tmpdir is under the /var symlink, which the documentation reader rightly refuses.
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'shell-obsidian-cli-'))); t.after(() => rm(root,{recursive:true,force:true}));
   await mkdir(join(root,'design'),{recursive:true});
   await writeFile(join(root,'design/project.json'),'{}');
   return root;
