@@ -90,3 +90,20 @@ test('human definition and machine definition share the exact canonical plan', a
     assert.equal((await brainstormFeaturePlan(definition.feature, options)).plan.changes
       .every(change => change.status === 'unchanged'), true);
   }));
+test('verification refuses unowned source and ownership-receipt tampering before process planning', async () =>
+  scratch(async (options, document) => {
+    const payload = readFeatureBrainstorm({ ...request, output: 'prototype', verification: 'test',
+      projectId: document.project.id, baseSha256: hash(documentText(document)) });
+    const plan = await brainstormFeaturePlan(payload, options);
+    await applyPrepared(plan, plan.planHash);
+    const out = 'brainstorms/capture-inbox', source = join(options.root, out, 'source');
+    const definition = JSON.parse(await readFile(join(options.root, out, 'feature.definition.json'), 'utf8'));
+    assert.match(definition.generatedSource.receiptSha256, /^[a-f0-9]{64}$/);
+    const rogue = join(source, 'rogue.test.mjs');
+    await writeFile(rogue, 'throw new Error("unowned test executed");\n');
+    await assert.rejects(() => brainstormVerifyPlan(options, out), error => error?.code === 'BRAINSTORM_SOURCE_CHANGED');
+    await rm(rogue, { force: true });
+    const receipt = join(source, '.maker/receipt.json'), original = await readFile(receipt, 'utf8');
+    await writeFile(receipt, original + ' ');
+    await assert.rejects(() => brainstormVerifyPlan(options, out), error => error?.code === 'BRAINSTORM_SOURCE_CHANGED');
+  }));
