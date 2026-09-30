@@ -31,6 +31,13 @@ async function registeredPluginCommandIds() {
   return new Set((module?.pluginCliCommands?.() ?? []).map(command => command.id));
 }
 try {
+  if (!memory && args[0] === 'help' && args[1]) {
+    const pluginCommands = await registeredPluginCommandIds();
+    if (pluginCommands.has(args[1])) {
+      args = [args[1], '--help', ...args.slice(2)];
+      maker = true;
+    }
+  }
   if (!memory && !maker && args[0]) {
     const frameworkRoots = await frameworkCommandRoots();
     if (!frameworkRoots.has(args[0])) maker = (await registeredPluginCommandIds()).has(args[0]);
