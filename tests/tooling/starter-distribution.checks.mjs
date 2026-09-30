@@ -11,6 +11,7 @@ import { included } from '../../scripts/framework/distribution.ts';
 import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
 import { zip } from '../../scripts/framework/zip.ts';
 import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
+import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 import { loadDefinitions } from '../../scripts/starters/repository.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
@@ -52,6 +53,7 @@ test('pack preview is read-only and publishing/overwriting archives is never imp
   assert.equal(refused.diagnostics[0].code, 'STARTER_ARCHIVE_EXISTS'); assert.equal(await readFile(join(directory, 'starters.zip'), 'utf8'), 'user archive');
 });
 test('extracted compiled shell contains no starter data; a separate pack enables discovery and generation', async t => {
+  if (await reviewedExamplesRemoved(root)) { t.skip('Examples removed; kit packing requires the reviewed framework source preimages.'); return; }
   const directory = await temp(t), shellRoot = join(directory, 'shell'); await mkdir(shellRoot);
   const files = await assembleKit({ root, frameworkRoot: root }, await compiler());
   assert.ok(!files.some(file => /(?:^|\/)configs\/starters\//.test(file.path) || file.path.includes('/companion/starters/')));
