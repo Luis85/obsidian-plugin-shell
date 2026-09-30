@@ -6,6 +6,7 @@ import { studioActions } from '../../../bin/presentation/studio.ts';
 import { Workspace } from '../../../bin/application/workspace.ts';
 import { newDocument } from '../../../bin/domain/document.ts';
 import { packageFiles } from '../../../scripts/compiler/adapters/project/configuration.ts';
+import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
 import { loadDefinitions } from '../../../scripts/starters/repository.ts';
 import { definePluginEvent } from '../../api.ts';
@@ -48,6 +49,32 @@ test('plugin starter discovery and framework package emission use the normal pro
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
   assert.equal(pkg.devDependencies['@types/react'], '19.3.0');
   assert.equal(pkg.scripts.typecheck, 'tsc --noEmit --project tsconfig.json');
+});
+
+test('plugin framework adapter drives the real project emitter', () => {
+  const selection = projectSelection({ id: reactStarter.id, version: reactStarter.version, sha256: 'b'.repeat(64) }, reactStarter.generator);
+  const model = {
+    project: { id: 'react-app', name: 'React App', version: '0.1.0', description: 'React proof', author: 'Workbench' },
+    screens: [{ id: 'overview', kind: 'page', label: 'Overview', goal: 'Show the React shell', components: [] }],
+    document: { schemaVersion: 6, project: { id: 'react-app', name: 'React App' }, settings: {}, design: {} },
+  };
+  const template = {
+    skillFiles: [],
+    text(path: string) {
+      if (path !== 'package.json') throw new Error('Unexpected template read: ' + path);
+      return JSON.stringify({ dependencies: {}, devDependencies: { typescript: '6.0.3', '@types/node': '26.6.3', vite: '8.3.1' } });
+    },
+  };
+  const artifacts = renderStarterProject(model as never, template as never, selection, reactAdapter);
+  const files = new Map(artifacts.map(item => [item.path, item.content]));
+  const pkg = JSON.parse(files.get('package.json')!);
+  assert.equal(JSON.parse(files.get('project.config.json')!).framework, 'react');
+  assert.equal(pkg.dependencies.react, '19.3.0');
+  assert.equal(pkg.dependencies['react-dom'], '19.3.0');
+  assert.match(files.get('src/ui/mount.ts')!, /react-dom\/client/);
+  assert.ok(files.has('src/targets/webapp/main.ts'));
+  assert.ok(!files.has('src/ui/Starter.vue'));
+  assert.throws(() => renderStarterProject(model as never, template as never, selection, { ...reactAdapter, id: 'other' }), /SELECTION_MISMATCH/);
 });
 
 test('one invocation shares the event bus across activation, CLI and TUI contributions', async () => {

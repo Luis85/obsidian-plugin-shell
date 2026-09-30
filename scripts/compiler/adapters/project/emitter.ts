@@ -9,6 +9,7 @@ import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
 import { pluginExtensionFiles } from './plugin-extension.ts';
 import { requireFrameworkAdapter } from './framework-registry.ts';
+import type { FrameworkAdapter } from './framework-adapter.ts';
 function styles(id: string): string {
   const root = `[data-plugin-ui="${id}"]`;
   return `${root} { display: block; padding: 1rem; color: var(--text-normal, #20242a); background: var(--background-primary, #fff); font: 1rem/1.5 var(--font-interface, system-ui); }
@@ -55,9 +56,10 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
 });\n` : ''}`;
 }
 /** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
-export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
+export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection, adapterOverride?: FrameworkAdapter): Artifact[] {
   const selected = validateProjectSelection(input);
-  const adapter = requireFrameworkAdapter(selected.framework), engine = adapter.engine;
+  const adapter = adapterOverride ?? requireFrameworkAdapter(selected.framework), engine = adapter.engine;
+  if (adapter.id !== selected.framework) throw new Error('FRAMEWORK_ADAPTER_SELECTION_MISMATCH:' + selected.framework);
   if (adapter.id !== adapter.engine && engine !== 'vanilla') throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
   const id = String(model.project.id), name = String(model.project.name);
   const visual = selected.targets.some(target => target !== 'cli');
