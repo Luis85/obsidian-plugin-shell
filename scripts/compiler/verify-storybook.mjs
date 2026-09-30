@@ -1,7 +1,7 @@
 /** Real browser smoke for a generated static Storybook. No external network or native host access. */
 import { createServer } from 'node:http';
 import { readFile, writeFile, realpath, stat } from 'node:fs/promises';
-import { join, resolve, sep } from 'node:path';
+import { basename, join, resolve, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import { chromium } from '@playwright/test';
 const target = await realpath(process.argv[2]), output = await realpath(process.argv[3]);
@@ -32,8 +32,11 @@ try {
   const index = JSON.parse(await readFile(join(root, 'index.json'), 'utf8'));
   await writeFile(join(output, 'story-index.json'), JSON.stringify(index, null, 2) + '\n');
   const inventory = JSON.parse(await readFile(join(target, 'design/storybook.json'), 'utf8'));
-  const subject = inventory.stories.find(item => item.entityId === 'vc-1'); assert.ok(subject);
-  const prefix = 'generated-component-project-json-review--';
+  // The qualification input adds one authored narrow scenario to a reusable component; that component is the subject.
+  const project = JSON.parse(await readFile(join(target, 'design/project.json'), 'utf8'));
+  const subjectId = project.design.visualDesigns.components.find(item => item.scenarios.some(scenario => scenario.name === 'Narrow empty preview'))?.id;
+  const subject = inventory.stories.find(item => item.entityId === subjectId); assert.ok(subject, 'Qualified subject component has no generated story');
+  const prefix = 'generated-component-' + basename(subject.path, '.stories.ts') + '--';
   assert.ok(index.entries[prefix + 'default'], 'Stable CSF ID missing; inspect retained story-index.json'); report.assertions.push('Generated component indexed');
   assert.ok(Object.values(index.entries).some(item => item.title.startsWith('Pages/'))); report.assertions.push('Generated pages indexed');
   async function open(id, query = '') {
@@ -57,8 +60,8 @@ try {
   assert.ok(luminance(light.background) > 0.5, 'Light preview must resolve a light surface');
   await open(prefix + 'empty'); assert.equal(await page.locator('[data-design-state]').first().getAttribute('data-design-state'), 'empty');
   report.assertions.push('Empty state rendered');
-  const scenario = Object.values(index.entries).find(item => item.id.startsWith(prefix + 'scenario'));
-  assert.ok(scenario); assert.equal(scenario.name, 'Narrow empty preview'); await open(scenario.id);
+  const scenario = Object.values(index.entries).find(item => item.id.startsWith(prefix + 'scenario') && item.name === 'Narrow empty preview');
+  assert.ok(scenario, 'Authored narrow scenario story missing'); await open(scenario.id);
   assert.equal(await page.locator('[data-design-state]').first().getAttribute('data-design-state'), 'empty');
   assert.equal(await page.locator('[data-story-host]').evaluate(el => getComputedStyle(el).maxWidth), '360px');
   report.assertions.push('Authored narrow scenario rendered');
