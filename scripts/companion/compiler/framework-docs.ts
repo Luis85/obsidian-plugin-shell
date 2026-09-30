@@ -18,8 +18,7 @@ export function maintainerOnly(path: string): boolean {
     || path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
     || path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
     || path.startsWith('docs/concepts/sitemap-editor/')
-    || path === 'docs/concepts/native-file-integration-handoff' || path === '.github/workflows/native-source-handoff.yml'
-    || path.startsWith('docs/concepts/native-file-integration-handoff/') || path === 'tests/tooling/project-generator-native-handoff.checks.mjs'
+    || path === 'tests/tooling/project-generator-native-starters.checks.mjs'
     || path.startsWith('docs/concepts/jev-prompt-editor/') || path === 'tests/tooling/jev-concept-distribution.checks.mjs';
 }
 const external = /^(?:[a-z][a-z\d+.-]*:|#|\/\/|\/)/i;
