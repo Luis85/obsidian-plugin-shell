@@ -205,7 +205,7 @@
     {
       "name": "companion:mvp",
       "purpose": "Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips.",
-      "runner": {"type": "command", "commands": [["{node}", "scripts/concepts/build-mvp.mjs"], ["{python}", "-B", "tests/concepts/companion-mvp.browser.py"], ["{python}", "-B", "tests/concepts/companion-prototypes.browser.py"]]},
+      "runner": {"type": "command", "commands": [["{node}", "scripts/concepts/build-mvp.mjs"], ["{node}", "scripts/concepts/export-golden-project.mjs"], ["{python}", "-B", "tests/concepts/companion-mvp.browser.py"], ["{python}", "-B", "tests/concepts/companion-prototypes.browser.py"]]},
       "include": ["tests/concepts/companion-mvp.browser.py", "tests/concepts/companion-prototypes.browser.py"],
       "prerequisites": ["python-playwright", "concept-chromium"],
       "verify": "opt-in", "workflows": ["companion-concept-verification"], "optional": true

@@ -74,8 +74,9 @@ export function pageBindSource(document: SketchDocument, surfaceId: string, node
   if (node.kind === 'text' && prop === '@value') { node.value = expr; return; }
   requireSketch(node.kind === 'component' || node.kind === 'external', 'SOURCE_BIND_PROP', 'Select a component prop or use @value for text.');
   if (node.kind === 'component') {
-    const available = node.ref.kind === 'nuxt-ui' ? visualCatalogEntry(node.ref.entryId)?.props :
-      document.design.visualDesigns.components.find(component => component.id === node.ref.componentId)?.props;
+    const ref = node.ref;
+    const available: readonly { name: string }[] | undefined = ref.kind === 'nuxt-ui' ? visualCatalogEntry(ref.entryId)?.props :
+      document.design.visualDesigns.components.find(component => component.id === ref.componentId)?.props;
     requireSketch(available?.some(candidate => candidate.name === prop), 'SOURCE_BIND_PROP', 'That component has no such declared prop.');
   } else requireSketch(/^[a-z][a-zA-Z0-9]{0,59}$/.test(prop), 'SOURCE_BIND_PROP', 'External adapter prop must be portable.');
   node.props[prop] = expr;
