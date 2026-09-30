@@ -30,6 +30,11 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   let output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
   assert.deepEqual(files.filter(file => file.path.startsWith('.framework/compiled/') && file.path.endsWith('.js')).map(file => file.path), ['.framework/compiled/app.js']);
+  const templateOwnership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json');
+  const manifestRecord = JSON.parse(files.find(file => file.path === '.framework/kit.json').bytes)
+    .files.find(file => file.path === templateOwnership.path);
+  assert.equal(manifestRecord.hash, hash(templateOwnership.bytes), 'adapted template ownership must match kit integrity metadata');
+  assert.ok(!files.some(file => file.path === '.framework/compiled/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
   assert.ok((await readFile(join(dir, '.framework/compiled/app.js'), 'utf8')).length > 1000);
   for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json']) {
     assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');

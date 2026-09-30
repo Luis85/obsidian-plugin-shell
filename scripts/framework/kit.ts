@@ -42,10 +42,11 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   const ownership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('.framework/template/')).map(file => [file.path.slice('.framework/template/'.length), file.bytes]));
   ownership.bytes = updateOwnership(originals, shipped, ownership.bytes);
-  for (const path of [ownership.path, '.framework/compiled/scripts/examples/ownership.json']) {
-    const file = files.find(entry => entry.path === path)!; file.bytes = ownership.bytes;
-    const record = records.find(entry => entry.path === path)!; record.hash = hash(file.bytes); record.bytes = file.bytes.length;
-  }
+  // The runtime is now a single bundle. Only the editable template copy of
+  // ownership.json ships; no per-module compiled ownership file exists.
+  const ownershipRecord = records.find(entry => entry.path === ownership.path)!;
+  ownershipRecord.hash = hash(ownership.bytes);
+  ownershipRecord.bytes = ownership.bytes.length;
   add('.framework/compiled/package.json', Buffer.from('{"type":"module"}\n'));
   add('.framework/compiled/app.js', await bundleReleaseCli(context.frameworkRoot));
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
