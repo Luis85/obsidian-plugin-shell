@@ -41,7 +41,7 @@
       "optional": true
     },
     {
-      "path": "plugins/example-extension/tests"
+      "path": "plugins"
     }
   ],
   "helperRoots": [
@@ -156,12 +156,28 @@
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/interactive-maker-*.checks.mjs",
-        "plugins/*/tests/*.test.ts"
+        "tests/tooling/interactive-maker-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:maker",
       "workflows": [
+        "interactive-maker"
+      ]
+    },
+    {
+      "name": "workbench-plugins",
+      "purpose": "Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions.",
+      "runner": {
+        "type": "node-test"
+      },
+      "include": [
+        "plugins/*/tests/*.test.ts"
+      ],
+      "verify": "own-step",
+      "verifyStep": "verify runs the Workbench plugin suite explicitly",
+      "npmScript": "test:plugins",
+      "workflows": [
+        "ci",
         "interactive-maker"
       ]
     },
@@ -1028,6 +1044,15 @@
       "exclude": [
         "tests/project/**/*.test.ts",
         "tests/project/**/*.test.mjs"
+      ]
+    },
+    {
+      "purpose": "Workbench plugin source and configuration adjacent to plugin-local tests",
+      "include": [
+        "plugins/**"
+      ],
+      "exclude": [
+        "plugins/*/tests/*.test.ts"
       ]
     }
   ]

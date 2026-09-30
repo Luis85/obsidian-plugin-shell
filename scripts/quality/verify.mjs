@@ -26,6 +26,7 @@ const commands = [
   process.env.SHELL_EVIDENCE_TOOLING === '1'
     ? ['scripts/testing/evidence-cli.mjs', 'run', 'tooling']
     : toolingStep,
+  ['scripts/testing/suites.mjs', 'workbench-plugins'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
   ['node_modules/eslint/bin/eslint.js', 'src', 'bin', 'plugins', '--max-warnings', '0'],

@@ -61,7 +61,7 @@ export interface PluginTuiAction {
   readonly label: string;
   run(context: PluginTuiContext): void | Promise<void>;
 }
-export interface WorkbenchPluginContext extends PluginCommandContext {}
+export type WorkbenchPluginContext = PluginCommandContext;
 export interface WorkbenchPluginObject {
   readonly manifest: PluginManifest;
   readonly config: PluginConfig;
