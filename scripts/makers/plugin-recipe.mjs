@@ -48,6 +48,13 @@ async function extendRegistry(source, name) {
 }
 
 export async function pluginRecipe(context, name) {
+  for (const path of ['plugins/api.ts', 'plugins/runtime.ts', 'plugins/registry.ts']) {
+    try { await context.read(path); }
+    catch (error) {
+      if (error?.code === 'ENOENT') throw new Error('PLUGIN_SDK_REQUIRED: make plugin runs only from a Workbench source checkout with plugins/api.ts, plugins/runtime.ts and plugins/registry.ts.');
+      throw error;
+    }
+  }
   const display = title(name);
   const eventLocal = symbol(name) + 'Ready';
   const cliId = name + '-info';
