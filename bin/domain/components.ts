@@ -60,26 +60,34 @@ export function pageCollectionTable(document: SketchDocument, surfaceId: string,
   pageContent(document, surfaceId).push(table);
   return table.id;
 }
+const SOURCE_FIELD = /^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)(?:\.(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*))*$/;
+function requireSourceField(field: string): void {
+  requireSketch(typeof field === 'string' && field.length <= 120 && (field === '' || SOURCE_FIELD.test(field)),
+    'SOURCE_BIND_FIELD', 'Use a declared dotted output path or an empty path for the entire result.');
+}
+function requireBindableProp(document: SketchDocument, node: UiNode, prop: string): void {
+  requireSketch(node.kind === 'component' || node.kind === 'external', 'SOURCE_BIND_PROP', 'Select a component prop or use @value for text.');
+  if (node.kind !== 'component') {
+    requireSketch(/^[a-z][a-zA-Z0-9]{0,59}$/.test(prop), 'SOURCE_BIND_PROP', 'External adapter prop must be portable.');
+    return;
+  }
+  const ref = node.ref;
+  const available: readonly { name: string }[] | undefined = ref.kind === 'nuxt-ui' ? visualCatalogEntry(ref.entryId)?.props :
+    document.design.visualDesigns.components.find(component => component.id === ref.componentId)?.props;
+  requireSketch(available?.some(candidate => candidate.name === prop), 'SOURCE_BIND_PROP', 'That component has no such declared prop.');
+}
 /** Bind a page component prop (or the value of a text element) to a reusable source read port. */
 export function pageBindSource(document: SketchDocument, surfaceId: string, nodeId: string, prop: string,
   sourceId: string, operationRef: string, field: string): void {
   const { source, operation } = sourceOperation(document, sourceId, operationRef);
   requireSketch(['read', 'both'].includes(String(operation.direction)), 'SOURCE_BIND_DIRECTION', 'A display binding requires a read operation.');
-  requireSketch(typeof field === 'string' && field.length <= 120 &&
-    (field === '' || /^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)(?:\.(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*))*$/.test(field)),
-    'SOURCE_BIND_FIELD', 'Use a declared dotted output path or an empty path for the entire result.');
+  requireSourceField(field);
   const node = visualLocate(pageFor(document, surfaceId).root, nodeId)?.node;
   requireSketch(node, 'SOURCE_BIND_NODE', 'Choose an existing page component or text element.');
   const expr: ValueExpression = { kind: 'source', sourceId: String(source.id), operationId: String(operation.id), field };
   if (node.kind === 'text' && prop === '@value') { node.value = expr; return; }
-  requireSketch(node.kind === 'component' || node.kind === 'external', 'SOURCE_BIND_PROP', 'Select a component prop or use @value for text.');
-  if (node.kind === 'component') {
-    const ref = node.ref;
-    const available: readonly { name: string }[] | undefined = ref.kind === 'nuxt-ui' ? visualCatalogEntry(ref.entryId)?.props :
-      document.design.visualDesigns.components.find(component => component.id === ref.componentId)?.props;
-    requireSketch(available?.some(candidate => candidate.name === prop), 'SOURCE_BIND_PROP', 'That component has no such declared prop.');
-  } else requireSketch(/^[a-z][a-zA-Z0-9]{0,59}$/.test(prop), 'SOURCE_BIND_PROP', 'External adapter prop must be portable.');
-  node.props[prop] = expr;
+  requireBindableProp(document, node, prop);
+  if (node.kind === 'component' || node.kind === 'external') node.props[prop] = expr;
 }
 export function renameComponent(document: SketchDocument, id: string, name: string): void {
   const label = title(name), component = componentFor(document, id);
