@@ -6,7 +6,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { parseArguments, execute } from '../../bin/adapters/commands.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { brainstormScratch, captureRequest, fakeNpm, resign, readJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, captureRequest, fakeNpm, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const out = 'brainstorms/capture-inbox', source = out + '/source';
 async function generated(options, patch) {
@@ -96,7 +96,7 @@ test('verification binds to the reviewed definition, ownership receipt, scripts 
       original[path] = await readFile(join(options.root, path));
     }
     const restore = async () => { for (const [path, bytes] of Object.entries(original)) await writeFile(join(options.root, path), bytes); };
-    const definition = await readJson(options.root, definitionPath);
+    const definition = await readScratchJson(options.root, definitionPath);
     try {
       const baseline = await brainstormVerifyPlan(options, out);
       assert.deepEqual(baseline.steps.map(step => step.label), ['install', 'test']);
@@ -119,7 +119,7 @@ test('verification binds to the reviewed definition, ownership receipt, scripts 
       await resign(options.root, out, receipt => { receipt.files = receipt.files.filter(item => item.path !== 'README.md'); });
       await expectPlanFailure(options, 'BRAINSTORM_SOURCE_CHANGED', 'an owned file dropped from the receipt becomes unowned');
       await restore();
-      const pkg = await readJson(options.root, source + '/package.json');
+      const pkg = await readScratchJson(options.root, source + '/package.json');
       await resign(options.root, out, async () => {
         await writeJson(options.root, source + '/package.json', { ...pkg, scripts: { ...pkg.scripts, test: undefined } });
         return ['package.json'];

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
-import { brainstormScratch, scriptedRich, scriptedPlain, quickNote, fakeNpm, readJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, scriptedRich, scriptedPlain, quickNote, fakeNpm, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const sourceCompletion = 'Brainstorm saved to brainstorms/quick-note. Concept: docs/concepts/brainstorms/quick-note.json. ' +
   'The canonical project was not changed; import remains a separate reviewed action. Generated source is under brainstorms/quick-note/source/.\n';
@@ -22,7 +22,7 @@ test('generated prototype source offers a separately reviewed run that starts on
       assert.match(execution.sections[1].body, /npm ci downloads and executes dependency lifecycle scripts/);
       assert.deepEqual(JSON.parse(execution.sections[2].body), { expected: { node: process.versions.node, npm: '11.19.1' },
         actual: { node: process.versions.node, npm: '11.19.1' } });
-      const definition = await readJson(options.root, 'brainstorms/quick-note/feature.definition.json');
+      const definition = await readScratchJson(options.root, 'brainstorms/quick-note/feature.definition.json');
       assert.deepEqual([definition.feature.output, definition.feature.verification, definition.generatedSource.path],
         ['prototype', 'test', 'brainstorms/quick-note/source']);
       assert.equal(declined.contexts.at(-1).details[0], '8 / 8');
@@ -49,7 +49,7 @@ test('a mismatched toolchain blocks the reviewed run before asking for process a
       assert.match(output, /\nGenerated-source execution plan\nnpm ci --no-fund\nnpm run test\nnpm run build\nPlan hash: [a-f0-9]{64}\n\nBLOCKED:\nSelect npm 11\.19\.1; found 10\.0\.0\n/);
       assert.ok(output.includes('No process started. Switch to the generated project toolchain and run brainstorm verify again.\n'));
       assert.deepEqual(await npm.calls(), []);
-      const definition = await readJson(options.root, 'brainstorms/quick-note/feature.definition.json');
+      const definition = await readScratchJson(options.root, 'brainstorms/quick-note/feature.definition.json');
       assert.deepEqual([definition.feature.output, definition.feature.verification], ['boilerplate', 'test-build']);
     } finally { npm.restore(); }
   }));

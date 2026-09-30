@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { parseArguments, execute } from '../../bin/adapters/commands.ts';
 import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
-import { brainstormScratch, captureRequest, readText, readJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, captureRequest, readText, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const cli = (options, argv, stdin = '') => execute(parseArguments(argv), { ...options, input: Readable.from([stdin]) });
 async function snapshot(root) {
@@ -78,7 +78,7 @@ test('file input, project binding and custom output produce the exact reviewed h
     '## Execution (separate approval; no implicit npm or browser processes)', '- No automated verification requested.',
     '- Project/native acceptance and publication remain separate from compilation and local test/build results.', ''].join('\n'),
     'omitted optional lines leave no stray blank line and the file ends with exactly one newline');
-  const definition = await readJson(options.root, 'plans/capture/feature.definition.json');
+  const definition = await readScratchJson(options.root, 'plans/capture/feature.definition.json');
   assert.deepEqual([definition.status, definition.acceptance, definition.execution, definition.generatedSource],
     ['draft', 'not-verified', 'not-run', null]);
   assert.deepEqual(definition.feature, bound);

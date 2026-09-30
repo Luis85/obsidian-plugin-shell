@@ -42,7 +42,7 @@ export async function brainstormScratch(fn, { configured = false, project = true
   } finally { await rm(root, { recursive: true, force: true }); }
 }
 export const readText = (root, path) => readFile(join(root, path), 'utf8');
-export const readJson = async (root, path) => JSON.parse(await readText(root, path));
+export const readScratchJson = async (root, path) => JSON.parse(await readText(root, path));
 export async function writeJson(root, path, value) {
   await writeFile(join(root, path), JSON.stringify(value, null, 2) + '\n');
 }
@@ -85,7 +85,7 @@ ${suffix}`);
  */
 export async function resign(root, out, mutate) {
   const receiptPath = out + '/source/.maker/receipt.json';
-  const receipt = await readJson(root, receiptPath);
+  const receipt = await readScratchJson(root, receiptPath);
   const changed = await mutate(receipt);
   for (const path of changed ?? []) {
     const row = receipt.files.find(item => item.path === path);
@@ -93,7 +93,7 @@ export async function resign(root, out, mutate) {
   }
   const text = JSON.stringify(receipt, null, 2) + '\n';
   await writeFile(join(root, receiptPath), text);
-  const definition = await readJson(root, out + '/feature.definition.json');
+  const definition = await readScratchJson(root, out + '/feature.definition.json');
   definition.generatedSource.receiptSha256 = hash(text);
   await writeJson(root, out + '/feature.definition.json', definition);
 }

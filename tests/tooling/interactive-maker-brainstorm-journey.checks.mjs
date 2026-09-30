@@ -7,7 +7,7 @@ import { main } from '../../bin/shell.ts';
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
 import { terminalFixture } from './interactive-maker-tui-fixture.mjs';
-import { brainstormScratch, frameworkRoot, scriptedPlain, readText, readJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, frameworkRoot, scriptedPlain, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 async function respond(f, current, keys, next) {
   await f.until(current); const from = f.chunks.length; f.send(keys);
@@ -43,7 +43,7 @@ test('real keyboard terminal brainstorm reaches the reviewed package, with Escap
       const completion = await task;
       assert.match(completion, /^Brainstorm saved to brainstorms\/quick-note\. /);
       const expected = quickNote(document, hash(before));
-      assert.deepEqual((await readJson(options.root, 'brainstorms/quick-note/feature.definition.json')).feature, expected);
+      assert.deepEqual((await readScratchJson(options.root, 'brainstorms/quick-note/feature.definition.json')).feature, expected);
       assert.ok((await brainstormFeaturePlan(expected, options)).plan.changes.every(change => change.status === 'unchanged'));
       assert.equal(await readText(options.root, 'design/project.json'), before);
     } finally { f.close(); }
@@ -69,7 +69,7 @@ test('line mode keeps previous answers across :back and reports an unconfigured 
     assert.match(output, /\nReview 4 file changes\nPlan hash: [a-f0-9]{64}\ncreate {5}brainstorms\/quick-note\/feature\.definition\.json\n/);
     assert.ok(output.endsWith('Files saved. Dependencies and builds were not run.\n' +
       '\nPreserve edited or foreign design file: design/project.json. Export/reconcile it before importing.\n'));
-    assert.deepEqual((await readJson(options.root, 'brainstorms/quick-note/feature.definition.json')).feature, expected);
+    assert.deepEqual((await readScratchJson(options.root, 'brainstorms/quick-note/feature.definition.json')).feature, expected);
     assert.equal(await readText(options.root, 'design/project.json'), before, 'a failed import writes nothing');
     assert.ok(!(await readdir(options.root)).includes('.framework'));
   }));

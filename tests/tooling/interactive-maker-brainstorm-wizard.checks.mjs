@@ -4,7 +4,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { hash } from '../../scripts/framework/files.ts';
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
-import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { BACK, brainstormScratch, scriptedRich, quickNote, readText, readScratchJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const completionFor = (slug, imported) => 'Brainstorm saved to brainstorms/' + slug + '. Concept: docs/concepts/brainstorms/' + slug +
   '.json. ' + (imported ? 'The feature is imported in the canonical project. ' :
@@ -51,8 +51,8 @@ test('guided screens, navigation, Back and review produce the same package as th
     const screens = f.events.filter(event => event[1] === 'Feature screens').map(event => event[2]);
     assert.deepEqual(screens[0], ['done', 'page', 'modal', 'edit-0'], 'the feature view cannot be removed');
     assert.deepEqual(screens[4], ['done', 'page', 'modal', 'edit-0', 'edit-1', 'edit-2', 'remove-1', 'remove-2']);
-    assert.equal((await readJson(options.root, 'brainstorms/capture-inbox/feature.definition.json')).feature.pages.length, 3);
-    assert.deepEqual((await readJson(options.root, 'brainstorms/capture-inbox/feature.definition.json')).feature, expected);
+    assert.equal((await readScratchJson(options.root, 'brainstorms/capture-inbox/feature.definition.json')).feature.pages.length, 3);
+    assert.deepEqual((await readScratchJson(options.root, 'brainstorms/capture-inbox/feature.definition.json')).feature, expected);
     assert.deepEqual(f.writes, ['Files saved. Dependencies and builds were not run.\n', completion]);
     assert.equal(await readText(options.root, 'design/project.json'), before, 'no implicit import');
     const agent = await brainstormFeaturePlan(expected, options);
@@ -91,7 +91,7 @@ test('an optional import is a separate reviewed plan and a declined import keeps
     assert.equal(JSON.parse(importReview.sections[1].body).mode, 'feature');
     assert.ok(f.events.some(event => event[0] === 'busy' && event[1] === 'Importing the reviewed additive feature concept.'));
     assert.ok(f.writes.includes('Feature imported into the canonical project.\n'));
-    const imported = await readJson(options.root, 'design/project.json');
+    const imported = await readScratchJson(options.root, 'design/project.json');
     assert.deepEqual(imported.design.features.items.map(item => item.id), ['quick-note']);
     const after = await readText(options.root, 'design/project.json');
     const declined = scriptedRich(quickNote({ 'What is the name of the new feature?': ['Second note'],
