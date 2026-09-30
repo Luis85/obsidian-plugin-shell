@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D3 on PR #60. The continuation uses separately pushed
+Status: Stage D implementation through D3 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -98,6 +98,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C23:** The machine-result envelope now has one bootstrap-safe runtime constructor in `contracts/result-runtime.mjs`. The typed `result.ts` API delegates to it, and both the pre-TypeScript root launcher and legacy handout shim use the same constructor for failures instead of hand-building protocol objects.
 - **C24:** Stage C closure: legacy JSON/process/confirmation/hash/presence/project-path/concurrency/file-plan `.mjs` entries are regression-locked as compatibility-only shims over typed owners. Typed result/error/input/file-plan/filesystem/process boundaries and maker coverage are explicit, so Stage D can move routing without reopening core contracts.
 - **C25:** Merge repair: the bounded-map primitive now belongs to one Fallow zone (`cli-bounded-map-contract`) instead of two overlapping zones. The file-plan contract depends on that single boundary and the architecture regression uses the same name.
+- **C26:** Maker production coverage now measures the executable shared core behind the typed facades—operation errors, bootstrap result runtime, Node-process lifecycle, file-plan runtime and bounded concurrency—at the unchanged 90/90/90/85 thresholds. Targeted maker-suite regressions cover representative result/error, concurrency, create/update/delete/base64/stale/rollback, process exit/timeout/abort/progress and output-limit paths.
 - **D1:** Command-surface routing and legacy aliases moved from `app.mjs` into the typed `bin/adapters/router.ts`. `app.mjs` now only selects compiled/source `bin/app` (or re-execs Node with type stripping); `bin/app.ts` delegates framework and memory surfaces to their existing owners. The routing table has direct maker coverage.
 - **D2:** The framework CLI composition root is split before relocation: result rendering/diagnostics live in `cli-output.ts`, reviewed interactive plan application lives in `cli-interactive.ts`, and `cli.ts` is reduced to root discovery, setup/new guidance and command orchestration. Behavior remains behind the existing framework CLI tests.
 - **D3:** `operations.ts` is split by effect before relocation: reviewed file-plan execution, trusted project-process execution and read-only inspection now live in `operation-files.ts`, `operation-process.ts` and `operation-read.ts`. The public dispatcher retains command classification, discovery, special adapters and release authorization.
