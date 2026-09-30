@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 const inlineMap = /(\/\/# sourceMappingURL=data:application\/json;(?:charset=utf-8;)?base64,)([A-Za-z0-9+/=]+)(\s*)$/;
@@ -34,8 +35,11 @@ export function licenseNotices() {
       const notices = [];
       for (const [name, pkg] of [...packages].sort(([a], [b]) => a.localeCompare(b))) {
         const licenses = readdirSync(pkg.directory).filter(file => /^(license|licence|copying)(\.|$)/i.test(file));
-        if (!licenses.length && name !== '@iconify-json/lucide') throw new Error(`Missing bundled dependency license: ${name}`);
-        const text = name === '@iconify-json/lucide' ? readFileSync('docs/licenses/lucide.txt', 'utf8') : licenses.map(file => readFileSync(join(pkg.directory, file), 'utf8')).join('\n');
+        const retained = name === 'vaul-vue' && pkg.version === '0.4.1';
+        if (!licenses.length && name !== '@iconify-json/lucide' && !retained) throw new Error(`Missing bundled dependency license: ${name}`);
+        const retainedText = retained ? readFileSync('docs/licenses/vaul-vue-0.4.1.txt', 'utf8') : '';
+        if (retained && createHash('sha256').update(retainedText).digest('hex') !== 'ba02930e278b4ed6b564150a261b50319b5cef2a965b7470ae13498ece835944') throw new Error('Retained vaul-vue license integrity mismatch');
+        const text = retained ? retainedText : name === '@iconify-json/lucide' ? readFileSync('docs/licenses/lucide.txt', 'utf8') : licenses.map(file => readFileSync(join(pkg.directory, file), 'utf8')).join('\n');
         notices.push(`${name}@${pkg.version} (${pkg.license ?? 'see license'})\n${text}`);
       }
       if (Object.values(bundle).some(value => value.type === 'chunk' && Object.keys(value.modules).some(id => id === '\0virtual:journey-flow'))) {

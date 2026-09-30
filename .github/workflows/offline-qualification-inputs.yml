@@ -4,6 +4,7 @@ on:
     paths:
       - 'bin/**'
       - 'scripts/compiler/**'
+      - 'configs/starters/**'
       - '.github/workflows/offline-qualification-inputs.yml'
   workflow_dispatch:
 permissions:
@@ -67,8 +68,10 @@ jobs:
           import { readFileSync, writeFileSync } from 'node:fs';
           import { join } from 'node:path';
           const base = JSON.parse(readFileSync('package.json', 'utf8'));
-          const catalog = JSON.parse(readFileSync('bin/guides/project-presets.json', 'utf8'));
-          const dependencies = { ...catalog.angularPins, '@angular/router': catalog.angularPins['@angular/core'] };
+          const starter = JSON.parse(readFileSync('configs/starters/webapp-angular.json', 'utf8'));
+          if (starter.generator?.kind !== 'project' || starter.generator.framework !== 'angular') throw new Error('webapp-angular must be the Angular project starter.');
+          const pins = starter.generator.angularPins;
+          const dependencies = { ...pins, '@angular/router': pins['@angular/core'] };
           const devDependencies = Object.fromEntries(['typescript', '@types/node', 'vite'].map(name => [name, base.devDependencies[name]]));
           devDependencies['@angular/compiler-cli'] = dependencies['@angular/compiler-cli']; delete dependencies['@angular/compiler-cli'];
           devDependencies['@babel/core'] = '7.29.0';

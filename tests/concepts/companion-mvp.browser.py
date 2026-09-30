@@ -27,10 +27,16 @@ def wait_saved(page):
 
 def run(page):
     page.goto(HTML.as_uri())
-    page.locator('[data-action="project-example"]').first.click()
+    check('empty startup has no hidden project or definitions', page.evaluate('project()===null && starterCatalog.starters.length===0 && typeof companionExampleProject==="undefined"'))
+    page.locator('[data-action="nav"][data-value="starters"]').first.click()
+    page.locator('#starter-definition-files').set_input_files(str(ROOT / 'configs/starters/companion-plugin.json'))
+    page.locator('[data-action="starter-open"][data-value="companion-plugin"]').click()
+    page.locator('[data-action="starter-review"]').click()
     expect(page.locator('#project-import-summary')).to_be_visible()
     page.locator('#project-import-confirm').check()
     page.locator('[data-action="project-import-apply"]').click()
+    check('starter confirmation starts untrusted setup', page.evaluate('modalType==="wizard" && state.wizard && !state.wizard.trusted'))
+    page.locator('#modal [data-action="close"]').first.click()
     page.locator('#sidebar [data-value="sitemap"]').click()
     wait_saved(page)
     expect(page.locator('#jm-root .vue-flow')).to_be_visible()

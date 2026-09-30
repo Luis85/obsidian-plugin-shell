@@ -12,8 +12,7 @@ import { buildSource, licenseSource } from '../../scripts/compiler/adapters/proj
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { Window } from 'happy-dom';
-import { loadProjectCatalog } from '../../bin/adapters/projects.ts';
-import { resolveProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
+import { projectStarter } from '../../bin/adapters/projects.ts';
 import { compileProject, loadTemplateSnapshot, analyzeProject } from '../../scripts/compiler/index.ts';
 async function scratch(fn) { const root = await mkdtemp(join(await realpath(tmpdir()), 'project-runtime-')); try { await fn(root); } finally { await rm(root, { recursive: true, force: true }); } }
 function host(mount) {
@@ -131,7 +130,7 @@ test('every generated browser framework passes strict TypeScript, including the 
 
 test('the real Vite-built offline artifact starts without Node globals and retains navigation focus', async () => scratch(async root => {
   const frameworkRoot = resolve(import.meta.dirname, '../..');
-  const projectSelection = resolveProjectSelection(await loadProjectCatalog(), { schemaVersion: 1, catalogVersion: 1, preset: 'webapp-vanilla' });
+  const { selection: projectSelection } = await projectStarter(frameworkRoot, 'webapp-vanilla');
   const source = runOperations(newDocument('Bundle regression'), [{ op: 'page.add', title: 'Overview' }, { op: 'page.add', title: 'Details' }]).document;
   const result = await compileProject({ source: documentText(source), outputKind: 'project', projectSelection, template: await loadTemplateSnapshot(frameworkRoot) });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));

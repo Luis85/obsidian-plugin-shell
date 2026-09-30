@@ -89,6 +89,79 @@ it('runs mixed actions in authored order and stops at the first failing action',
     } finally { wrapper.unmount(); }
   }
 });
+it('dispatches menu item data once and ignores disabled, non-action and disposed entries', async () => {
+  const original = [[{ id: 'open', label: 'Open' }, { id: 'disabled', label: 'Disabled', disabled: true }, { type: 'separator' }]];
+  const menu: UiNode = { id: 'menu', kind: 'component', ref: { kind: 'nuxt-ui', entryId: 'u-dropdown-menu' }, props: { items: { kind: 'literal', value: original } }, slots: {},
+    events: [{ id: 'select', event: 'item:select', label: 'Select item', notes: '', acceptance: '', actions: [{ kind: 'navigate', surfaceId: 'next' }] }] };
+  const navigate = vi.fn(), wrapper = subject({ ports: [], navigate, handle: wrong }, page([menu]));
+  const items = wrapper.vm.model.props('menu').items;
+  if (!Array.isArray(items) || !Array.isArray(items[0])) throw new Error('MENU_FIXTURE');
+  const [active, disabled, separator] = items[0];
+  if (![active, disabled, separator].every(item => item && typeof item.onSelect === 'function')) throw new Error('MENU_ADAPTER');
+  try { disabled.onSelect(); separator.onSelect(); expect(navigate).not.toHaveBeenCalled();
+    active.onSelect(); await flushPromises(); expect(navigate).toHaveBeenCalledExactlyOnceWith('next');
+    expect(Object.hasOwn(original[0]![0]!, 'onSelect')).toBe(false); expect(wrapper.vm.model.on('menu')['item:select']).toBeUndefined();
+  } finally { wrapper.unmount(); }
+  active.onSelect(); expect(navigate).toHaveBeenCalledTimes(1);
+});
+it('uses typed initial state bindings without recursing on uninitialized cycles', () => {
+  const a = control('a', 'text'), b = control('b', 'text'), initial = control('initial', 'checkbox', 'u-checkbox');
+  if (a.kind !== 'component' || b.kind !== 'component' || initial.kind !== 'component') throw new Error('FIXTURE');
+  a.props.modelValue = { kind: 'state', nodeId: 'b' }; b.props.modelValue = { kind: 'state', nodeId: 'a' };
+  initial.props.modelValue = { kind: 'literal', value: false };
+  const wrapper = subject({ ports: [], navigate: () => {}, handle: wrong }, page([a, b, initial, shown('initial-text', 'initial')]));
+  try { expect(wrapper.vm.model.props('a').modelValue).toBeUndefined(); expect(wrapper.vm.model.text('initial-text')).toBe('false'); }
+  finally { wrapper.unmount(); }
+});
+for (const entryId of ['u-modal', 'u-drawer']) it(entryId + ' preserves explicit two-way open state and lifecycle boundaries', async () => {
+  const checked = control('open', 'checkbox', 'u-checkbox');
+  if (checked.kind !== 'component') throw new Error('FIXTURE'); checked.props.modelValue = { kind: 'literal', value: false };
+  const overlay: UiNode = { id: 'overlay', kind: 'component', ref: { kind: 'nuxt-ui', entryId }, props: { open: { kind: 'state', nodeId: 'open' } }, slots: {}, events: [] };
+  const wrapper = subject({ ports: [], navigate: () => {}, handle: wrong }, page([checked, overlay, button('show', [{ kind: 'set-value', nodeId: 'open', value: true }])]));
+  const model = wrapper.vm.model, change = model.props('overlay')['onUpdate:open'];
+  if (typeof change !== 'function') throw new Error('NO_OPEN_BINDING');
+  try {
+    expect(model.props('overlay').open).toBe(false); model.on('show').click!(); await flushPromises();
+    change(true); expect(model.props('overlay').open).toBe(true);
+    change('false'); expect(model.props('overlay').open).toBe(true);
+    change(false); expect(model.props('overlay').open).toBe(false);
+    expect(model.message.value).toBe('');
+  } finally { wrapper.unmount(); }
+  change(true); expect(model.props('overlay').open).toBe(false);
+  const disabled = subject({ ports: [], navigate: () => {}, handle: wrong }, page([checked, overlay]), { designState: 'disabled' });
+  try { const ignored = disabled.vm.model.props('overlay')['onUpdate:open']; if (typeof ignored === 'function') ignored(true);
+    expect(disabled.vm.model.props('overlay').open).toBe(false);
+  } finally { disabled.unmount(); }
+});
+it('typed controls expose native input types and independent select options', () => {
+  const select = { ...control('select', 'select', 'u-select'), control: { kind: 'select', options: [{ label: 'Alpha', value: 'alpha' }, { label: 'Beta', value: 'beta' }] } };
+  const wrapper = subject({ ports: [], navigate: () => {}, handle: wrong }, page([control('number', 'number'), control('date', 'date'), control('date-time', 'datetime-local'), select]));
+  try { const model = wrapper.vm.model;
+    expect(model.props('number').type).toBe('number'); expect(model.props('date').type).toBe('date'); expect(model.props('date-time').type).toBe('datetime-local');
+    expect(model.props('select').items).toEqual(select.control.options); expect(model.props('select').items).not.toBe(select.control.options);
+    update(model, 'select', 'beta'); expect(model.errors.select).toBeUndefined();
+    update(model, 'select', 'other'); expect(model.errors.select).toMatch(/valid select/);
+  } finally { wrapper.unmount(); }
+});
+it('JSON file input parses bounded UTF-8 data, preserves valid values, and ignores stale reads', async () => {
+  const wrapper = subject({ ports: [], navigate: () => {}, handle: wrong }, page([control('json', 'json-file', 'u-input', 100), shown('read', 'json')]));
+  const model = wrapper.vm.model, input = document.createElement('input'); input.type = 'file';
+  const change = model.props('json').onChange;
+  if (typeof change !== 'function') throw new Error('NO_FILE_HANDLER');
+  const choose = (file: File) => { Object.defineProperty(input, 'files', { configurable: true, value: [file] }); change({ target: input }); };
+  try {
+    expect(model.props('json').type).toBe('file'); expect(model.props('json').accept).toBe('.json,application/json'); expect(model.props('json').modelValue).toBeUndefined();
+    choose(new File(['{"ok":true}'], 'good.json')); await flushPromises(); expect(model.text('read')).toContain('true');
+    choose(new File(['bad'], 'bad.json')); await flushPromises(); expect(model.errors.json).toMatch(/valid json-file/); expect(model.text('read')).toContain('true');
+    choose(new File([' '.repeat(101)], 'large.json')); await flushPromises(); expect(model.errors.json).toMatch(/size limit/); expect(model.text('read')).toContain('true');
+    const pending = new File(['{}'], 'pending.json'); let finish!: (value: ArrayBuffer) => void;
+    Object.defineProperty(pending, 'arrayBuffer', { value: () => new Promise<ArrayBuffer>(resolve => { finish = resolve; }) });
+    choose(pending); choose(new File(['{"new":true}'], 'new.json')); await flushPromises(); finish(new TextEncoder().encode('{"old":true}').buffer); await flushPromises();
+    expect(model.text('read')).toContain('new'); expect(model.text('read')).not.toContain('old'); expect(model.errors.json).toBeUndefined();
+    choose(new File([new Uint8Array([255])], 'bad-utf8.json')); await flushPromises(); expect(model.errors.json).toMatch(/UTF-8/);
+    choose(pending); wrapper.unmount(); finish(new TextEncoder().encode('{"late":true}').buffer); await flushPromises(); expect(model.text('read')).not.toContain('late');
+  } finally { wrapper.unmount(); }
+});
 it('maps source pending, error and empty states without starting a source operation', async () => {
   const run = vi.fn(async (_input?: unknown) => undefined);
   const source = reactive({ ...port(run, 'read'), direction: 'read', requiresInput: false, data: undefined as unknown, pending: false, error: null as string | null });

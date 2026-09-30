@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, realpath, mkdir, writeFile, rm, symlink } from 'node:fs/promises';
+import { readFile, readdir, mkdtemp, realpath, mkdir, writeFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,6 +54,11 @@ test('source-only archive includes and fingerprints the actual imported project 
   const file = inventory.files.find(item => item.path === projectFixture);
   assert.ok(file, 'fixture required by generator tests must be transported, not suppressed');
   assert.equal(file.sha256, hash(await readFile(join(root, projectFixture))));
+  for (const name of await readdir(join(root, 'configs/starters'))) {
+    const path = 'configs/starters/' + name;
+    assert.equal(inventory.files.find(item => item.path === path)?.sha256, hash(await readFile(join(root, path))), 'source qualification must fingerprint independent definitions');
+  }
+  // Historical fixtures remain source-only inputs, never shell release contents.
   const catalogPath = 'docs/concepts/companion/starters/catalog.json';
   const catalogBytes = await readFile(join(root, catalogPath));
   assert.equal(inventory.files.find(item => item.path === catalogPath)?.sha256, hash(catalogBytes));

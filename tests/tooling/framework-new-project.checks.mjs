@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, realpath, cp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -13,6 +13,7 @@ const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-new-project-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
+  await cp(join(root, 'configs'), join(dir, 'configs'), { recursive: true });
   return dir;
 }
 /** The real terminal entry point, never a TTY: it must not prompt or hang. */
@@ -28,9 +29,9 @@ const json = async path => JSON.parse(await readFile(path, 'utf8'));
 test('--list reports the integrity-checked starter catalog for humans and agents', async t => {
   const cwd = await scratch(t);
   const { exit, result } = machine(['--list'], cwd);
-  assert.equal(exit, 0); assert.equal(result.status, 'ok'); assert.equal(result.data.integrity, 'catalog-sha256-verified');
-  const catalog = await json(join(root, 'docs/concepts/companion/starters/catalog.json'));
-  assert.deepEqual(result.data.starters.map(entry => entry.id), catalog.starters.map(entry => entry.id));
+  assert.equal(exit, 0); assert.equal(result.status, 'ok'); assert.equal(result.data.integrity, 'local-content-sha256; not a signature');
+  const definitions = (await readdir(join(root, 'configs/starters'))).filter(name => name.endsWith('.json')).map(name => name.slice(0, -5)).sort();
+  assert.deepEqual(result.data.starters.map(entry => entry.id), definitions);
   for (const entry of result.data.starters) for (const key of ['title', 'category', 'difficulty', 'description']) assert.ok(entry[key], key);
   const human = cli(['--list'], cwd);
   assert.equal(human.status, 0); assert.match(human.stdout, /^ {2}quick-capture +Everyday +Capture +Quick Capture:/m); assert.match(human.stdout, /^ {2}blank /m);
@@ -44,17 +45,17 @@ test('non-interactive preview is the default and writes nothing', async t => {
   assert.deepEqual(result.data.summary.identity, { ...result.data.summary.identity, id: 'field-notes', name: 'Field Notes' });
   assert.ok(result.data.changes.length > 100 && result.data.changes.every(change => change.status === 'create'));
   const human = cli(['nested/field-notes', '--starter', 'blank'], cwd);
-  assert.equal(human.status, 0, human.stderr); assert.match(human.stdout, /Nothing has been written/); assert.match(human.stdout, new RegExp(result.data.planHash));
-  assert.deepEqual(await readdir(cwd), []);
+  assert.equal(human.status, 0, human.stderr); assert.match(human.stdout, /No files or processes changed/); assert.match(human.stdout, new RegExp(result.data.planHash));
+  assert.deepEqual(await readdir(cwd), ['configs']);
   // --install requests a later process step only; it never changes the reviewed file plan.
   assert.equal(machine(['nested/field-notes', '--starter', 'blank', '--install'], cwd).result.data.planHash, result.data.planHash);
-  assert.deepEqual(await readdir(cwd), []);
+  assert.deepEqual(await readdir(cwd), ['configs']);
 });
 test('--yes creates a blank project with the chosen identity and refuses a second run', async t => {
   const cwd = await scratch(t), target = join(cwd, 'field-notes');
   const created = machine(['field-notes', '--starter', 'blank', '--id', 'field-kit', '--name', 'Field Kit', '--author', 'Example Author', '--yes'], cwd);
   assert.equal(created.exit, 0, JSON.stringify(created.result.diagnostics)); assert.equal(created.result.status, 'applied'); assert.equal(created.result.data.written, true);
-  assert.deepEqual(created.result.data.nextSteps, [`cd ${JSON.stringify(target)}`, 'npm ci', 'npm run check', 'npm run dev:obsidian', 'npm run test:watch']);
+  assert.deepEqual(created.result.data.nextSteps, (await json(join(cwd, 'configs/starters/blank.json'))).nextSteps);
   const manifest = await json(join(target, 'manifest.json')), pkg = await json(join(target, 'package.json')), design = await json(join(target, 'design/project.json'));
   assert.equal(manifest.id, 'field-kit'); assert.equal(manifest.name, 'Field Kit'); assert.equal(manifest.author, 'Example Author');
   assert.equal(pkg.name, 'field-kit'); assert.ok(pkg.scripts['verify:project'] && pkg.scripts['test:watch']);
@@ -62,7 +63,7 @@ test('--yes creates a blank project with the chosen identity and refuses a secon
   const starter = await json(join(root, 'docs/concepts/companion/starters/blank.companion.json'));
   // Generation reads through the transfer migration, so the recorded design is the starter's current-schema (v5) form.
   assert.deepEqual(design.design, migrateCompanionDocument(starter).document.design, 'identity only, never label rewrites');
-  assert.match(design.notes.at(-1), /Built-in: blank @ 1\.0\.0/);
+  assert.match(design.notes.at(-1), /Definition: blank @ 1\.0\.0/);
   assert.equal((await json(join(target, '.companion/generation.json'))).projectId, 'field-kit');
   assert.ok(!existsSync(join(cwd, '.codex-authoring.lock')));
   const before = await readFile(join(target, 'manifest.json'));
@@ -104,7 +105,7 @@ test('refuses unsafe targets and invalid identities without writing', async t =>
     const human = cli(args, cwd);
     assert.equal(human.status, 1, code); assert.match(human.stderr, new RegExp(code));
   }
-  assert.deepEqual((await readdir(cwd)).sort(), ['occupied']); assert.deepEqual(await readdir(join(cwd, 'occupied')), ['notes.md']);
+  assert.deepEqual((await readdir(cwd)).sort(), ['configs', 'occupied']); assert.deepEqual(await readdir(join(cwd, 'occupied')), ['notes.md']);
   assert.ok(!existsSync(join(root, 'new-project-inside-checkout')));
 });
 test('a directory named like my-plugin derives a submittable ID; an explicit reserved ID is refused with a suggestion', async t => {
@@ -114,7 +115,7 @@ test('a directory named like my-plugin derives a submittable ID; an explicit res
   const refused = machine(['my-plugin', '--starter', 'quick-capture', '--id', 'my-plugin'], cwd);
   assert.equal(refused.exit, 1); assert.equal(refused.result.diagnostics[0].code, 'INVALID_PLUGIN_ID');
   assert.match(refused.result.diagnostics[0].message, /must not end with "plugin"\. For example: --id my-project/);
-  assert.deepEqual(await readdir(cwd), []);
+  assert.deepEqual(await readdir(cwd), ['configs']);
 });
 test('a target inside an Obsidian vault is refused unless --inside-vault is explicit', async t => {
   const cwd = await scratch(t);

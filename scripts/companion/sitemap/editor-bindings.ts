@@ -2,6 +2,7 @@ import type { SitemapDesign } from './model.ts';
 import { id, list, record, requireSitemap, sitemapObject } from './safety.ts';
 
 /** A closed registry of shipped editors, not code, package names or filesystem permissions. */
+export const SHIPPED_EDITORS = Object.freeze(['journey-lens'] as const);
 export interface EditorBinding { surface: string; editor: 'journey-lens' }
 export function editorBindings(design: SitemapDesign): EditorBinding[] {
   if (design.editors === undefined) return [];

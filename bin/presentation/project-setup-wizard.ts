@@ -31,8 +31,8 @@ async function readPrds(ui: Prompts, root: string, draft: SetupDraft, settings: 
   ui.write(`Found ${intake.prds.length} PRDs; ignored ${intake.ignored.length} non-PRD Markdown files. Requirements remain unmapped.\n`);
   draft.prds = prds; return prds;
 }
-async function prototypeAnswers(ui: Prompts, draft: SetupDraft, project: NonNullable<SetupDraft['project']>) {
-  const { guide } = await angularSetupGuide();
+async function prototypeAnswers(ui: Prompts, frameworkRoot: string, draft: SetupDraft, project: NonNullable<SetupDraft['project']>) {
+  const { guide } = await angularSetupGuide(frameworkRoot);
   const initial = draft.prototypeInterview ? guideInput(guide, draft.prototypeInterview).answers
     : { title: project.name, problem: project.product, pages: ['Hello world'] };
   const wantsPrototype = draft.prototypeInterview !== undefined ? draft.prototypeInterview !== null : await confirm(ui, 'Prepare a prototype?');
@@ -46,7 +46,7 @@ export async function projectSetupWizard(ui: Prompts, context: SetupContext): Pr
   if (await pauseSetup(ui, context.root, draft, context.signal)) return;
   const prds = await readPrds(ui, context.root, draft, settings);
   if (await pauseSetup(ui, context.root, draft, context.signal)) return;
-  const prototypeInterview = await prototypeAnswers(ui, draft, project);
+  const prototypeInterview = await prototypeAnswers(ui, context.frameworkRoot, draft, project);
   const request = { schemaVersion: 1 as const, settings, project, prds, prototypeInterview, operations: draft.operations, boilerplate: false };
   if (await pauseSetup(ui, context.root, request, context.signal)) return;
   if (await confirm(ui, 'Add application bricks?')) {

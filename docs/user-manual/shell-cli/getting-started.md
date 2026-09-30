@@ -46,6 +46,16 @@ node shell.mjs new ../folio-tools --starter custom-file-view --extension folio -
 
 Custom extensions are lowercase, dotless and must not take over a protected core Obsidian extension. Other starters are discoverable through `new --list`; their presence in your installed kit is authoritative.
 
+Plugin, webapp, website, CLI and hybrid projects with a selected frontend (Vue + Nuxt UI, vanilla, Angular or none) come from **project starters** such as `plugin-angular` or `webapp-vanilla`. They run without a directory and start a prototype interview before any reviewed write:
+
+```sh
+node shell.mjs new --starter plugin-angular
+node shell.mjs new starters --json
+node shell.mjs new guide --starter plugin-angular --json
+```
+
+See [project starters](../../../bin/PROJECT-STARTERS.md) for the agent request format and generated package.
+
 ## 2B. Start from an extracted developer kit
 
 Obtain an actually published developer-kit archive for the intended release, verify its provenance and any supplied checksums, and extract into a new project folder. Do not substitute an arbitrary source ZIP and assume it contains compiled kit modules. Checksum agreement detects changed bytes; it does not independently authenticate the publisher.

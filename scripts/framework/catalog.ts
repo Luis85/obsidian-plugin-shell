@@ -9,6 +9,15 @@ export interface Command {
 const values = (...names: string[]): Record<string, 'value'> => Object.fromEntries(names.map(name => [name, 'value']));
 const common = { ...values('root', 'apply', 'plan-out', 'timeout'), json: 'flag', 'no-interaction': 'flag', yes: 'flag', 'dry-run': 'flag', help: 'flag' } as const;
 export const commands: readonly Command[] = [
+  { id: 'starters coverage', summary: 'Inspect source-derived visual model coverage and explicit interaction gaps; never a native acceptance claim.', options: { 'require-model-coverage': 'flag' }, maxArgs: 1, effect: 'read' },
+  { id: 'starters list', summary: 'Discover project-local JSON starters; no bundled fallback.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'starters show', summary: 'Inspect one complete editable starter definition and its processes.', options: {}, maxArgs: 1, effect: 'read' },
+  { id: 'starters validate', summary: 'Validate one or all installed definitions without writes or execution.', options: {}, maxArgs: 1, effect: 'read' },
+  { id: 'starters schema', summary: 'Print the versioned starter-definition JSON Schema.', options: {}, maxArgs: 0, effect: 'read' },
+  { id: 'starters add', summary: 'Plan adding one JSON definition; never executes processes.', options: values('input'), maxArgs: 0, effect: 'plan' },
+  { id: 'starters edit', summary: 'Plan replacing one definition from validated JSON.', options: values('input'), maxArgs: 1, effect: 'plan' },
+  { id: 'starters pack', summary: 'Create the standalone starter-definition ZIP, separate from the shell.', options: values('out'), maxArgs: 0, effect: 'process' },
+  { id: 'starters run', summary: 'Review/explicitly execute processes from a generated project receipt.', options: { ...values('project', 'process'), 'trust-processes': 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'docs import', summary: 'Review typed Markdown files/folders into actual project elements without deleting absent data.', options: values('resolutions'), maxArgs: 32, effect: 'plan' },
   { id: 'docs export', summary: 'Generate complete, lossless application Markdown documentation with conflict protection.', options: values('out'), maxArgs: 0, effect: 'plan' },
   { id: 'docs validate', summary: 'Validate typed documentation and native model references without writing.', options: {}, maxArgs: 32, effect: 'read' },
@@ -53,7 +62,7 @@ export const commands: readonly Command[] = [
   { id: 'concept import', summary: 'Plan reviewed project, new-feature or base-bound improvement intake. Never executes HTML/source.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'project inspect', summary: 'Validate a companion export and report compiler obligations.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
-  { id: 'new', summary: 'Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions'), list: 'flag', install: 'flag', 'inside-vault': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
+  { id: 'new', summary: 'Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions', 'values', 'answers', 'run'), 'trust-processes': 'flag', list: 'flag', install: 'flag', 'inside-vault': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
   { id: 'generate', summary: 'Plan the existing project compiler; --vault/--target retain compatibility.', options: values('storybook', 'storybook-stories', 'input', 'vault', 'target', 'output-kind', 'scope'), maxArgs: 0, effect: 'plan' },
   { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
@@ -151,6 +160,6 @@ export function validateRequest(value: unknown): Request {
 }
 export function canonicalRequest(request: Request): Request {
   // --install requests a later process step; it never becomes part of a file plan or saved approval.
-  const omitted = new Set(['root', 'json', 'no-interaction', 'yes', 'dry-run', 'apply', 'plan-out', 'help', 'install']);
+  const omitted = new Set(['root', 'json', 'no-interaction', 'yes', 'dry-run', 'apply', 'plan-out', 'help', 'install', 'trust-processes']);
   return { command: request.command, args: [...request.args], options: Object.fromEntries(Object.entries(request.options).filter(([key]) => !omitted.has(key)).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) };
 }
