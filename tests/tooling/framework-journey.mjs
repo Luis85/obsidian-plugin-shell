@@ -82,6 +82,16 @@ for (const group of ['dependencies', 'devDependencies', 'optionalDependencies'])
 }
 assert.equal((await (await import('node:fs/promises')).readdir(starterConsumer)).includes('node_modules'), false,
   'starter must not install dependencies before explicit npm approval');
+const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'scripts/security/dependency-pins.mjs')], {
+  cwd: starterConsumer, encoding: 'utf8', timeout: 30000, maxBuffer: 4_000_000,
+});
+checks.push({ name: 'blank-starter-dependency-pins', exitCode: pinCheck.status, error: pinCheck.error?.message, scope: 'offline release dependency gate before install' });
+await writeFile(join(evidence, 'blank-starter-dependency-pins.log'), (pinCheck.stdout ?? '') + (pinCheck.stderr ?? ''));
+await writeFile(join(evidence, 'checks.json'), JSON.stringify(checks, null, 2));
+assert.ifError(pinCheck.error); assert.equal(pinCheck.status, 0, pinCheck.stderr);
+const pinReceipt = JSON.parse(pinCheck.stdout);
+assert.equal(pinReceipt.policy, 'exact-npm-pins-v1'); assert.equal(pinReceipt.manifests[0].path, 'package.json');
+assert.equal(pinReceipt.lockfile.hash, (await import('node:crypto')).createHash('sha256').update(starterLockBytes).digest('hex'));
 async function qualifiedNpm(stage, args, scope) {
   const output = spawnSync(process.execPath, [npm, ...args], {
     cwd: starterConsumer, encoding: 'utf8', timeout: 900000, maxBuffer: 16_000_000,
