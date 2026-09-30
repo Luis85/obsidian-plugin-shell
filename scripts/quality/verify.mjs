@@ -28,7 +28,7 @@ const commands = [
     : toolingStep,
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
-  ['node_modules/eslint/bin/eslint.js', 'src', 'bin', '--max-warnings', '0'],
+  ['node_modules/eslint/bin/eslint.js', 'src', 'bin', 'plugins', '--max-warnings', '0'],
   ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'tsconfig.maker.json'],
   ['node_modules/vitest/vitest.mjs', 'run', '--coverage', '--config', 'vitest.maker.config.mjs'],
   ['scripts/quality/maker-coverage.mjs'],
