@@ -8,6 +8,15 @@ Infrastructure lives at the root:
 - `runtime.ts` — invocation-scoped activation, event bus and contribution collection.
 - `registry.ts` — explicit composition root.
 
+Create one through the reviewed maker:
+
+```sh
+npm run make -- plugin my-extension --dry-run
+npm run make -- plugin my-extension --yes
+```
+
+The generated plugin is explicitly registered and starts disabled until its source/configuration is reviewed.
+
 Every actual plugin lives completely under `plugins/<plugin-name>/`:
 
 ```text
