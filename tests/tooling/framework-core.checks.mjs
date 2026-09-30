@@ -16,6 +16,8 @@ import { readBounded } from '../../scripts/framework/files.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.mjs';
+import { mapBounded as typedMapBounded } from '../../scripts/shared/bounded-map.ts';
+import { mapBounded as legacyMapBounded } from '../../scripts/shared/bounded-map.mjs';
 import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
 import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
 import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.mjs';
@@ -260,4 +262,23 @@ test('typed filesystem helpers preserve compatibility and exact-byte hashing', a
   await writeFile(present, 'present');
   assert.equal((await typedStatIfPresent(present))?.isFile(), true);
   assert.equal(await legacyExists(present), true);
+});
+
+test('typed bounded-map preserves compatibility, order and stop-on-failure scheduling', async () => {
+  assert.equal(legacyMapBounded, typedMapBounded);
+  const completed = [];
+  const values = await typedMapBounded([3, 1, 2], 2, async (value, index) => {
+    completed.push(index);
+    return value * 2;
+  });
+  assert.deepEqual(values, [6, 2, 4]);
+  assert.deepEqual(completed.slice().sort((a, b) => a - b), [0, 1, 2]);
+  await assert.rejects(typedMapBounded([1], 0, async value => value), /INVALID_CONCURRENCY/);
+  let started = 0;
+  await assert.rejects(typedMapBounded([1, 2, 3, 4], 1, async value => {
+    started++;
+    if (value === 2) throw new Error('stop');
+    return value;
+  }), /stop/);
+  assert.equal(started, 2);
 });
