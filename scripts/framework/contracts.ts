@@ -1,7 +1,7 @@
 import { CompilerError, CompilationFailure } from '../compiler/domain/diagnostics.ts';
 import { result, type Result } from '../contracts/result.ts';
 export { result } from '../contracts/result.ts';
-export type { Diagnostic, Result, ResultStatus } from '../contracts/result.ts';
+export type { Diagnostic, Result } from '../contracts/result.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
 export interface Request { command: string; args: string[]; options: Values }

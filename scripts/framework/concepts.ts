@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.ts';
+import { createFilePlan, type FilePlanEntry } from '../shared/file-plan.ts';
 import { serializeJson } from '../contracts/serialization.ts';
 import { applyConcept } from '../companion/concepts/apply.ts';
 import { conceptRequire } from '../companion/concepts/contract.ts';
@@ -83,7 +83,7 @@ export async function conceptImportPlan(request: Request, context: Context) {
   const policy = stringOption(request.options, 'resolve');
   conceptRequire(concept.mode === 'project' || policy === undefined, 'CONCEPT_RESOLUTION', 'Scoped changes preserve current identity and paths; resolution flags only apply to project replacement.');
   // A no-op source entry checks exact input bytes under the same apply lock; it never rewrites the concept.
-  const sourceEntry = { path: source.path, encoding: 'base64', content: source.bytes.toString('base64') };
+  const sourceEntry: FilePlanEntry = { path: source.path, encoding: 'base64', content: source.bytes.toString('base64') };
   if (prepared.replay) {
     conceptRequire(current, 'CONCEPT_BASE_REQUIRED', 'Missing replay target.');
     const plan = await createFilePlan(context.root, [sourceEntry, { path: designFile, content: current.bytes.toString('base64'), encoding: 'base64' },
@@ -94,7 +94,7 @@ export async function conceptImportPlan(request: Request, context: Context) {
   const imported = await configurationPlan({ command: 'project import', args: [], options: { input: '-', ...(policy ? { resolve: policy } : {}) } },
     { ...context, inputText: serializeJson(candidate) });
   const saved = imported.plan.changes.find(change => change.path === designFile);
-  conceptRequire(saved && saved.beforeHash === (current?.sha256 ?? null), 'CONCEPT_BASE_STALE', 'The canonical project changed while preparing intake. Inspect a new base.');
+  conceptRequire(saved && saved.content !== null && saved.beforeHash === (current?.sha256 ?? null), 'CONCEPT_BASE_STALE', 'The canonical project changed while preparing intake. Inspect a new base.');
   const actual = parseAuthoringDocument(saved.content);
   const receipt = { kind: 'concept-intake-receipt', schemaVersion: 1, source: source.path, sourceSha256: source.sha256,
     payloadSha256: source.decoded.status === 'data' ? source.decoded.payloadSha256 : '', mode: concept.mode, conceptId: concept.id,

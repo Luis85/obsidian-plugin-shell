@@ -10,7 +10,8 @@ import { renderMarkdown, generatedSource, parseMarkdown, type MarkdownDocument }
 import { readBytes, portable, localPath, documentationDigest as digest, decode } from './filesystem.ts';
 import { folders, SETTINGS_FILE } from './settings.ts';
 import { readWorkspace, type Workspace, type InputDocument } from './workspace.ts';
-interface Entry { path: string; content: string; encoding?: 'base64' }
+// Content is null only when a reviewed intake change deletes a file; the file-plan engine owns that case.
+interface Entry { path: string; content: string | null; encoding?: 'base64' }
 const encodePath = (path: string): string => path.split('/').map(encodeURIComponent).join('/');
 function filename(entity: Entity): string {
   const title = entity.title.normalize('NFKD').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase().replace(/^-|-$/g, '').slice(0, 60) || 'document';
