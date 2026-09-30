@@ -8,6 +8,7 @@ export async function evidenceFixture(t, body = 'test("actual child assertion", 
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const directory of ['src', 'harness', 'tests/tooling', 'docs/design', 'docs/testing', '.github/workflows']) await mkdir(join(root, directory), { recursive: true });
   await cp(resolve('scripts'), join(root, 'scripts'), { recursive: true });
+  await cp(resolve('configs'), join(root, 'configs'), { recursive: true });
   for (const file of ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', 'docs/testing/acceptance-crosswalk.json', 'docs/testing/native-evidence-checks.json']) await cp(resolve(file), join(root, file));
   await writeFile(join(root, 'src/input.ts'), 'export const input = 1;\n');
   await writeFile(join(root, 'tests/tooling/probe.checks.mjs'), `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\n${body}\n`);
