@@ -565,8 +565,10 @@
       ]
     }
   ],
+  "failOnParseError": true,
   "rules": {
-    "policy-violation": "off"
+    "policy-violation": "off",
+    "deprecated-exports-in-use": "error"
   },
   "framework": [
     {
