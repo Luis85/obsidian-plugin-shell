@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage C typed-core consolidation complete through C24 on PR #60; Stage D is next. The continuation uses separately pushed
+Status: Stage C typed-core consolidation complete; C25 repaired the merged architecture boundary; Stage D is next. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -97,6 +97,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C22:** File-plan validation, containment, locking, stale-preimage checks, staging and rollback now execute from strict `file-plan-runtime.ts`; `file-plan.mjs` is compatibility-only. The file-plan boundary explicitly depends only on typed bounded-concurrency and filesystem contracts, while existing stale-plan and apply regressions remain the behavioral guardrails.
 - **C23:** The machine-result envelope now has one bootstrap-safe runtime constructor in `contracts/result-runtime.mjs`. The typed `result.ts` API delegates to it, and both the pre-TypeScript root launcher and legacy handout shim use the same constructor for failures instead of hand-building protocol objects.
 - **C24:** Stage C closure: legacy JSON/process/confirmation/hash/presence/project-path/concurrency/file-plan `.mjs` entries are regression-locked as compatibility-only shims over typed owners. Typed result/error/input/file-plan/filesystem/process boundaries and maker coverage are explicit, so Stage D can move routing without reopening core contracts.
+- **C25:** Merge repair: the bounded-map primitive now belongs to one Fallow zone (`cli-bounded-map-contract`) instead of two overlapping zones. The file-plan contract depends on that single boundary and the architecture regression uses the same name.
 - **Remaining D–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages

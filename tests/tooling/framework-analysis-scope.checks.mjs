@@ -53,13 +53,13 @@ test('shared Node process primitive is isolated behind the tooling adapter', () 
 });
 
 test('typed file-plan runtime is isolated behind bounded concurrency and filesystem contracts', () => {
-  const concurrency = config.boundaries.zones.find(item => item.name === 'cli-concurrency-contract');
+  const concurrency = config.boundaries.zones.find(item => item.name === 'cli-bounded-map-contract');
   assert.deepEqual(concurrency?.patterns, ['scripts/shared/bounded-map.ts']);
-  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-concurrency-contract')?.allow, ['cli-concurrency-contract']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-bounded-map-contract')?.allow, ['cli-bounded-map-contract']);
   const zone = config.boundaries.zones.find(item => item.name === 'cli-file-plan-contract');
   assert.deepEqual(zone?.patterns, ['scripts/shared/file-plan-types.ts', 'scripts/shared/file-plan.ts', 'scripts/shared/file-plan-runtime.ts']);
   assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-file-plan-contract')?.allow,
-    ['cli-file-plan-contract', 'cli-concurrency-contract', 'cli-files-contract']);
+    ['cli-file-plan-contract', 'cli-bounded-map-contract', 'cli-files-contract']);
   for (const source of ['test', 'tooling', 'maker-host']) {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-file-plan-contract'), source);
   }
