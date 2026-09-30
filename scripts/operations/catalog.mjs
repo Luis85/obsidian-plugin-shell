@@ -65,6 +65,11 @@ export function validateCatalog(catalog) {
   for (const item of catalog.operations) operation(item);
   return true;
 }
+/**
+ * Parsed JSON is untyped until validateCatalog proves every maker and operation descriptor, including its string id.
+ * @returns {{ schemaVersion: 1, protocolVersion: 1, capabilityVersion: string, id: string, compatibility: string, customRecipes: string,
+ *   makers: Array<{ id: string } & Record<string, unknown>>, operations: Array<{ id: string } & Record<string, unknown>> }}
+ */
 export function capabilityCatalog() {
   const catalog = {
     schemaVersion: 1, protocolVersion: 1, capabilityVersion: '1.0.0',
