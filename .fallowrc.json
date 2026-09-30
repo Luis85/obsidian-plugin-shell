@@ -326,7 +326,8 @@
       {
         "name": "cli-result-contract",
         "patterns": [
-          "scripts/contracts/result.ts"
+          "scripts/contracts/result.ts",
+          "scripts/contracts/errors.ts"
         ]
       },
       {

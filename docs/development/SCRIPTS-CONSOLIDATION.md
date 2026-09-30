@@ -89,7 +89,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C12:** `contracts/result.ts` now owns the typed protocol envelope and result constructor. Framework failures adapt into that envelope, while maker success and SketchError paths construct through the same helper; a dedicated `cli-result-contract` boundary prevents implementation dependencies from leaking back into the contract.
 - **C13:** Maker production coverage now includes the typed JSON contract, result envelope and file-plan facade used by `bin/`. The coverage inventory requires those files explicitly, and maker tests exercise contract success plus representative bounded-JSON refusal paths.
 - **C14:** `shared/process.ts` now owns the single Node-script spawn lifecycle. `framework/process.ts` remains the policy adapter for tool discovery, process-tree termination and public diagnostics but delegates spawning, bounded capture, timeout and abort mechanics to the shared typed primitive. The primitive has its own Fallow boundary.
-- **Remaining C15–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C15:** Generic `OperationError` and `requireThat` primitives moved from `framework/contracts.ts` into `contracts/errors.ts`. Framework callers keep the same re-exported API/identity, while shared core modules can now depend on the contract layer without a reverse `shared → framework` dependency.
+- **Remaining C16–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

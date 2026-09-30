@@ -6,8 +6,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
-import { result as frameworkResult } from '../../scripts/framework/contracts.ts';
+import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
 import { result as canonicalResult } from '../../scripts/contracts/result.ts';
+import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
@@ -229,4 +230,15 @@ test('framework result helper reuses the canonical typed envelope', () => {
     protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
   });
   assert.equal(canonicalResult('setup', null, 'blocked').status, 'blocked');
+});
+
+test('framework operation errors reuse the canonical contract primitives', () => {
+  assert.equal(frameworkOperationError, canonicalOperationError);
+  assert.equal(frameworkRequireThat, canonicalRequireThat);
+  assert.throws(() => canonicalRequireThat(false, 'CONTRACT_TEST', 'contract refusal'), error => {
+    assert.ok(error instanceof canonicalOperationError);
+    assert.equal(error.code, 'CONTRACT_TEST');
+    assert.equal(error.message, 'contract refusal');
+    return true;
+  });
 });
