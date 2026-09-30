@@ -78,7 +78,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C1:** `contracts/json-data` now has a strict TypeScript implementation; the legacy `.mjs` path is a compatibility re-export while importers migrate incrementally. Framework typecheck includes the typed contracts and direct parity/safety coverage.
 - **C2:** `shared/process` now has a typed implementation with the legacy `.mjs` path reduced to a compatibility re-export; exit-code/signal parity is covered and shared TypeScript is part of the framework typecheck.
 - **C3:** All TypeScript framework consumers of the bounded JSON contract import `contracts/json-data.ts` directly; the compatibility `.mjs` entry is now limited to remaining JavaScript/legacy consumers.
-- **Remaining C4–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C4:** Typed `bin/` adapters now import the JSON contract directly from `json-data.ts`; the compatibility wrapper is no longer on the maker application's typed path.
+- **Remaining C5–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
