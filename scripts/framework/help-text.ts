@@ -102,7 +102,7 @@ const specific: Record<string, OptionHelp> = {
   'config-dir': { description: 'Host configuration directory name inside the test vault.', default: '.obsidian' },
   resolve: { description: 'Which side wins a configured/imported identity conflict.', values: ['project', 'import'] },
   blank: { description: 'Create an inert minimal design instead of importing one.' },
-  starter: { description: 'Starter ID (see new --list).' },
+  starter: { description: 'Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>.' },
   list: { description: 'List the available entries instead of creating one.' },
   install: { description: 'After writing, run npm ci and project verification in the new folder.' },
   recover: { description: 'After inspecting an interrupted attempt, explicitly acknowledge uncertain previous effects. No automatic retry.' },

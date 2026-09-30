@@ -1,4 +1,5 @@
-import { requireThat } from '../framework/contracts.ts';
+import { OperationError, requireThat } from '../framework/contracts.ts';
+import { readProjectGenerator } from '../compiler/domain/project-starter.ts';
 import { assertDesignData } from '../contracts/json-data.mjs';
 import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import type { InputValue, StarterDefinition, StarterInput, StarterProcess, StarterStep, StarterFile, Json } from './types.ts';
@@ -112,6 +113,17 @@ export function readProcesses(value: unknown): StarterProcess[] {
   }
   result.forEach(item => visit(item.id)); return result;
 }
+function readGenerator(value: unknown): StarterDefinition['generator'] {
+  const raw = record(value);
+  if (raw.kind === 'project') {
+    try { return readProjectGenerator(raw); } catch (error) { throw new OperationError('STARTER_INVALID', error instanceof Error ? error.message : 'Invalid project generator.'); }
+  }
+  fields(raw, raw.kind === 'companion' ? ['kind', 'document'] : ['kind']);
+  if (raw.kind !== 'companion') { requireThat(raw.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); return { kind: 'files' }; }
+  const document = record(raw.document); validateAuthoringDocument(document);
+  requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require project v5 or v6.');
+  return { kind: 'companion', document };
+}
 export function validateDefinition(value: unknown): StarterDefinition {
   assertDesignData(value);
   const row = record(value);
@@ -121,15 +133,12 @@ export function validateDefinition(value: unknown): StarterDefinition {
   requireThat(/^\d+\.\d+\.\d+$/.test(version), 'STARTER_INVALID', 'Use major.minor.patch starter versions.');
   requireThat(['Foundation', 'Everyday', 'Advanced'].includes(String(row.level)), 'STARTER_INVALID', 'Unknown difficulty.');
   const inputs = array(row.inputs, 'inputs').map(readInput); unique(inputs.map(item => item.id));
-  requireThat(['id', 'name'].every(id => inputs.some(item => item.id === id && item.type === 'string' && item.required)), 'STARTER_INVALID', 'Declare required string inputs id and name.');
-  const rawGenerator = record(row.generator);
-  fields(rawGenerator, rawGenerator.kind === 'companion' ? ['kind', 'document'] : ['kind']);
-  let generator: StarterDefinition['generator'];
-  if (rawGenerator.kind === 'companion') {
-    const document = record(rawGenerator.document); validateAuthoringDocument(document);
-    requireThat([5, 6].includes(Number(document.schemaVersion)), 'STARTER_VERSION', 'Companion starters require project v5 or v6.');
-    generator = { kind: 'companion', document };
-  } else { requireThat(rawGenerator.kind === 'files', 'STARTER_INVALID', 'Unknown generator primitive.'); generator = { kind: 'files' }; }
+  const generator = readGenerator(row.generator);
+  if (generator.kind === 'project') {
+    // Identity and design come from the prototype interview; the project compiler owns every emitted file.
+    requireThat(['inputs', 'files', 'processes', 'firstRun'].every(key => array(row[key], key, 1000).length === 0), 'STARTER_INVALID',
+      'A project starter declares no inputs, files, processes or firstRun; the prototype interview and project compiler supply them.');
+  } else requireThat(['id', 'name'].every(id => inputs.some(item => item.id === id && item.type === 'string' && item.required)), 'STARTER_INVALID', 'Declare required string inputs id and name.');
   const files: StarterFile[] = array(row.files, 'files', 1000).map(raw => {
     const file = record(raw); fields(file, ['path', 'content', 'json']);
     requireThat(Object.hasOwn(file, 'content') !== Object.hasOwn(file, 'json'), 'STARTER_INVALID', 'Each file needs exactly one of content or json.');

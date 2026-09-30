@@ -1,4 +1,5 @@
 /** Versioned, data-only recipes. Hosts implement these primitives, never starter IDs. */
+import type { ProjectGenerator } from '../compiler/domain/project-starter.ts';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type InputValue = string | boolean | number;
 export interface StarterInput {
@@ -13,8 +14,8 @@ export interface StarterDefinition {
   category: string; level: 'Foundation' | 'Everyday' | 'Advanced'; summary: string;
   outcome: string; includes: string[]; implementation: string[]; tags: string[];
   inputs: StarterInput[];
-  // The companion compiler is a generic primitive, not an ID-to-template registry.
-  generator: { kind: 'files' } | { kind: 'companion'; document: Record<string, unknown> };
+  // The companion and project compilers are generic primitives, not an ID-to-template registry.
+  generator: { kind: 'files' } | { kind: 'companion'; document: Record<string, unknown> } | ProjectGenerator;
   files: StarterFile[]; processes: StarterProcess[]; firstRun: string[]; nextSteps: string[];
 }
 export interface LoadedStarter { definition: StarterDefinition; file: string; sha256: string; bytes: Buffer }

@@ -4079,7 +4079,7 @@
         {
           "name": "starter",
           "kind": "value",
-          "description": "Starter ID (see new --list)."
+          "description": "Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>."
         },
         {
           "name": "extension",
@@ -4431,7 +4431,7 @@
     },
     {
       "id": "new",
-      "summary": "Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.",
+      "summary": "Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.",
       "effect": "plan",
       "maxArgs": 1,
       "group": "start",
@@ -4467,7 +4467,7 @@
         {
           "name": "starter",
           "kind": "value",
-          "description": "Starter ID (see new --list)."
+          "description": "Starter ID (see new --list). A project starter (generator project) runs without <dir> via new --starter <id> or new guide --starter <id>."
         },
         {
           "name": "from",

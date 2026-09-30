@@ -11,6 +11,8 @@ function inventory(expected: readonly string[], used: Set<string>) {
 }
 export function starterCoverage(input: unknown) {
   const definition = validateDefinition(input);
+  if (definition.generator.kind === 'project') return { starter: definition.id, scope: 'project-selection', modeled: null,
+    behaviorAcceptance: 'not-run', nativeAcceptance: 'not-run', note: 'A project starter selects compiler targets; its visual model comes from the prototype interview.' };
   if (definition.generator.kind !== 'companion') return { starter: definition.id, scope: 'file-blueprint', modeled: null,
     behaviorAcceptance: 'not-run', nativeAcceptance: 'not-run', note: 'File payloads are not a declarative visual model.' };
   const doc = validateAuthoringDocument(definition.generator.document), d = doc.design;

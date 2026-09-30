@@ -3,7 +3,7 @@ import { serveSource } from './serve-source.ts';
 import { angularLinkerSource } from './angular-linker.ts';
 import { json, type Model } from '../../../companion/compiler/model.ts';
 import type { Artifact, TemplateSnapshot } from '../../domain/contracts.ts';
-import { readProjectCatalog, validateProjectSelection, type ProjectSelection } from '../../domain/project-presets.ts';
+import { validateProjectSelection, type ProjectSelection } from '../../domain/project-starter.ts';
 import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMount, vueMount, vueComponent, angularMount } from './sources.ts';
 import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
@@ -47,13 +47,12 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
 });\n` : ''}`;
 }
 /** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
-export function renderPresetProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
-  const catalog = readProjectCatalog(JSON.parse(template.text('bin/guides/project-presets.json')));
-  const selected = validateProjectSelection(catalog, input);
+export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
+  const selected = validateProjectSelection(input);
   const id = String(model.project.id), name = String(model.project.name);
   const visual = selected.targets.some(target => target !== 'cli');
   const files: Record<string, string> = {
-    ...packageFiles(template, catalog, selected, id), ...typecheckFiles(selected),
+    ...packageFiles(template, selected, id), ...typecheckFiles(selected),
     'project.config.json': json(selected), 'design/project.json': json(model.document),
     'src/core/project.ts': coreSource(model), 'scripts/build.mjs': buildSource,
     'manifest.json': json({ id, name, version: String(model.project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(model.project.description ?? 'Project prototype'), author: String(model.project.author ?? 'Your name'), isDesktopOnly: false }),
@@ -78,7 +77,7 @@ export function renderPresetProject(model: Model, template: TemplateSnapshot, in
     else if (target === 'cli') { files['src/targets/cli/commands.ts'] = cliSource(); files['src/targets/cli/main.ts'] = '#!/usr/bin/env node\n' + cliEntry; }
     else files[`src/targets/${target}/main.ts`] = browserSource(selected, id);
   }
-  const artifacts: Artifact[] = Object.entries(files).map(([path, content]) => ({ path, content, ownership: 'managed', producer: 'project-preset',
+  const artifacts: Artifact[] = Object.entries(files).map(([path, content]) => ({ path, content, ownership: 'managed', producer: 'project-starter',
     ...(path === 'src/core/project.ts' ? { origins: model.screens.map(page => ({ file: 'companion.project.json', entityId: page.id,
       jsonPointer: '/design/nodes', document: 'normalized' as const })) } : {}) }));
   return [...artifacts, ...template.skillFiles];

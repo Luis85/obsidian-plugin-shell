@@ -9,6 +9,7 @@ import { STARTER_MAX_BYTES } from '../../scripts/starters/browser.ts';
 import { loadDefinitions, parseDefinition } from '../../scripts/starters/repository.ts';
 import { validateDefinition, readProcesses } from '../../scripts/starters/validation.ts';
 import { resolveValues, renderFiles, renderProcesses } from '../../scripts/starters/render.ts';
+import { angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const reference = JSON.parse(await readFile(join(root, 'configs/starters/webapp.json'), 'utf8'));
 async function workspace(t) {
@@ -19,10 +20,16 @@ async function seed(dir, definition = reference, name = definition.id) {
   await mkdir(join(dir, 'configs/starters'), { recursive: true });
   await writeFile(join(dir, 'configs/starters', name + '.json'), JSON.stringify(definition));
 }
-test('all fourteen standalone definitions validate and carry their metadata, source and process contracts', async () => {
-  const entries = await loadDefinitions(root); assert.equal(entries.length, 14);
+test('all twenty-five standalone definitions validate and carry their metadata, source and process contracts', async () => {
+  const entries = await loadDefinitions(root); assert.equal(entries.length, 25);
   assert.deepEqual(entries.map(entry => entry.definition.id), entries.map(entry => entry.definition.id).sort());
-  for (const { definition, file, sha256 } of entries) { assert.equal(file, `configs/starters/${definition.id}.json`); assert.match(sha256, /^[a-f\d]{64}$/); assert.ok(definition.processes.length); }
+  assert.equal(entries.filter(entry => entry.definition.generator.kind === 'project').length, 11, 'eight former presets, two hybrid frameworks and the Angular setup');
+  for (const { definition, file, sha256 } of entries) {
+    assert.equal(file, `configs/starters/${definition.id}.json`); assert.match(sha256, /^[a-f\d]{64}$/);
+    // Project starters hand their process work to the generated package scripts after the prototype interview.
+    if (definition.generator.kind === 'project') assert.deepEqual([definition.inputs, definition.files, definition.processes, definition.firstRun], [[], [], [], []]);
+    else assert.ok(definition.processes.length);
+  }
   const old = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters/catalog.json')));
   for (const item of old.starters) assert.deepEqual(entries.find(entry => entry.definition.id === item.id).definition.generator.document,
     JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', item.file))), item.id + ' loses no authored design');
@@ -63,6 +70,33 @@ for (const [label, change] of [
   ['unknown dependency', d => { d.processes[0].dependsOn = ['missing']; }], ['cycle', d => { d.processes[0].dependsOn = [d.processes[0].id]; }],
   ['unknown first run', d => { d.firstRun = ['missing']; }], ['duplicate process', d => { d.processes.push(d.processes[0]); }],
 ]) test('rejects ' + label, () => { const d = structuredClone(reference); change(d); assert.throws(() => validateDefinition(d)); });
+const project = JSON.parse(await readFile(join(root, 'configs/starters/plugin-angular.json'), 'utf8'));
+test('project generator kind is strict data: no identity inputs, payloads or processes, and compatible targets', () => {
+  assert.equal(validateDefinition(structuredClone(project)).generator.framework, 'angular');
+  const valid = structuredClone(project); valid.generator = { kind: 'project', projectType: 'hybrid', framework: 'vanilla', targets: ['webapp', 'cli'] };
+  assert.deepEqual(validateDefinition(valid).generator.targets, ['webapp', 'cli']);
+  for (const [label, change] of [
+    ['identity inputs', d => { d.inputs = structuredClone(reference.inputs); }], ['file payloads', d => { d.files = [{ path: 'extra.txt', content: 'x' }]; }],
+    ['processes', d => { d.processes = structuredClone(reference.processes); }], ['first run', d => { d.processes = structuredClone(reference.processes); d.firstRun = [reference.processes[0].id]; }],
+    ['unknown generator field', d => { d.generator.document = {}; }], ['module path', d => { d.generator.module = './evil.js'; }],
+    ['unknown framework', d => { d.generator.framework = 'react'; }], ['unknown target', d => { d.generator.targets = ['desktop']; }],
+    ['mismatched target', d => { d.generator.targets = ['webapp']; }], ['single hybrid target', d => { d.generator.projectType = 'hybrid'; }],
+    ['missing Angular pins', d => { delete d.generator.angularPins; }], ['floating Angular pin', d => { d.generator.angularPins.rxjs = '^7.8.2'; }],
+    ['pins without Angular', d => { d.generator.framework = 'vanilla'; }], ['CLI with a frontend', d => { d.generator = { kind: 'project', projectType: 'cli', framework: 'vanilla', targets: ['cli'] }; }],
+  ]) {
+    const d = structuredClone(project); change(d);
+    assert.throws(() => validateDefinition(d), error => error.code === 'STARTER_INVALID', label);
+  }
+});
+test('the editor schema declares the same project generator vocabulary as the runtime validator', async () => {
+  const schema = JSON.parse(await readFile(join(root, 'scripts/starters/starter.schema.json'), 'utf8'));
+  const variant = schema.properties.generator.oneOf.find(item => item.properties.kind.const === 'project');
+  assert.equal(variant.additionalProperties, false); assert.deepEqual(variant.required, ['kind', 'projectType', 'framework', 'targets']);
+  assert.deepEqual(variant.properties.framework.enum, ['nuxtui', 'vanilla', 'angular', 'none']);
+  assert.deepEqual(variant.properties.targets.items.enum, ['plugin', 'webapp', 'website', 'cli']);
+  assert.deepEqual(schema.$defs.angularPins.required, angularPackages); assert.equal(schema.$defs.angularPins.additionalProperties, false);
+  assert.deepEqual(schema.allOf[0].then.properties, { inputs: { maxItems: 0 }, files: { maxItems: 0 }, processes: { maxItems: 0 }, firstRun: { maxItems: 0 } });
+});
 for (const args of [['publish'], ['install', '-g'], ['ci', '--prefix=../outside'], ['run', '--eval'], ['install', '--globalconfig=/tmp/x']]) test('npm primitive refuses ' + args.join(' '), () => {
   const d = structuredClone(reference); d.processes[0].steps = [{ runner: 'npm', args, cwd: '.', timeout: 1000 }]; assert.throws(() => validateDefinition(d));
 });
@@ -143,4 +177,12 @@ test('validation placeholder syntax matches rendering exactly, so a valid defini
   }
   const keys = structuredClone(reference); keys.files.push({ path: 'keys.json', json: { '{{typo}}': 'literal key' } });
   assert.equal(JSON.parse(renderFiles(validateDefinition(keys), resolveValues(validateDefinition(keys), { id: 'app', name: 'App' })).at(-1).content)['{{typo}}'], 'literal key');
+});
+test('CI qualifies exactly the shipped project starters and reads Angular pins from the setup starter', async () => {
+  const ids = (await loadDefinitions(root)).filter(entry => entry.definition.generator.kind === 'project').map(entry => entry.definition.id);
+  const workflow = await readFile(join(root, '.github/workflows/project-starter-qualification.yml'), 'utf8');
+  assert.deepEqual(workflow.match(/^\s+starter: \[([^\]]+)\]$/m)[1].split(',').map(id => id.trim()).sort(), ids);
+  assert.match(workflow, /qualify-project-starters\.mjs --starter '\$\{\{ matrix\.starter \}\}' --execute/);
+  const offline = await readFile(join(root, '.github/workflows/offline-qualification-inputs.yml'), 'utf8');
+  assert.match(offline, /configs\/starters\/webapp-angular\.json/); assert.doesNotMatch(offline, /project-presets/);
 });

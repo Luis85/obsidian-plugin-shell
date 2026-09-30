@@ -10,7 +10,7 @@ import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({
-    id: d.id, title: d.name, category: d.category, difficulty: d.level, description: d.summary, version: d.version, generator: d.generator.kind, file, sha256,
+    id: d.id, title: d.name, category: d.category, difficulty: d.level, description: d.summary, version: d.version, generator: d.generator.kind, ...(d.generator.kind === 'project' ? { project: { projectType: d.generator.projectType, framework: d.generator.framework, targets: d.generator.targets } } : {}), file, sha256,
     inputs: d.inputs, processes: d.processes.map(process => ({ id: process.id, label: process.label, description: process.description, dependsOn: process.dependsOn })) })),
     ...(definitions.length ? {} : { next: `No starters installed. Extract the separate Workbench starters ZIP into this project (${folder}/), or use starters add --input <definition.json>. The shell contains no fallback definitions.` }) });
 }

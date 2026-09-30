@@ -1,23 +1,27 @@
-# Project-preset preparation packages
+# Project-starter preparation packages
 
-The new-project flow is preset → frontend framework → explicit hybrid targets when
-applicable → data-driven prototype interview → agreement → complete plan review →
-separate default-No apply. Presets suggest defaults; the resolved framework is authoritative.
-The catalog is `bin/guides/project-presets.json`; the interview is
-`bin/guides/project-prototype.json`. Agent and terminal paths share them and the compiler.
+Creating a project always runs an installed **project starter**: a JSON definition
+under `configs/starters/<id>.json` beside `shell.mjs` whose `generator.kind` is
+`project`. It fixes the project type, frontend framework, targets and, for Angular,
+exact dependency pins. The flow is starter → data-driven prototype interview →
+agreement → complete plan review → separate default-No apply. Frameworks and targets
+are never overridden at creation; choose (or author) a different starter instead.
+The interview is `bin/guides/project-prototype.json`. Agent and terminal paths share
+the installed starters, the interview and the compiler.
 
-A prepared package carries `project.config.json`, `project-request.json`,
-`prototype-guide.json`, `prototype-answers.json`, the complete Companion document,
-`design-brief.md`, `execution-prompt.md`, integration metadata and `source/`.
-Read the agreed brief without repeating accepted questions. Selection changes reopen
-agreement. The source copy of `project.config.json` must match the parent selection.
+A prepared package carries `project.config.json` (the chosen starter's ID, version and
+SHA-256 plus its complete selection), `project-request.json`, `prototype-guide.json`,
+`prototype-answers.json`, the complete Companion document, `design-brief.md`,
+`execution-prompt.md`, integration metadata and `source/`. Read the agreed brief
+without repeating accepted questions. Choosing another starter reopens agreement.
+The source copy of `project.config.json` must match the parent selection.
 Never put target metadata into the closed Companion v6 envelope.
 
 ## Execute the selected target contract
 
 Read `source/AGENTS.md`, `source/README.md` and `source/prototype.acceptance.json`.
 Use `source/scripts/build.mjs` through the declared npm scripts. Do not invoke the
-legacy Vue-only init/build/package helpers on a project-preset package: their
+legacy Vue-only init/build/package helpers on a project-starter package: their
 artifact/manifest assumptions are different. They remain correct for legacy
 `node shell.mjs prototype` packages. Never change the selected stack to fit a helper.
 
@@ -37,9 +41,9 @@ lock, then prove a clean `npm ci`, typecheck, tests and build. No toolchain subs
 - CLI: source commands and real transcripts are the prototype. No fabricated HTML,
   frontend library or browser acceptance. Build then test `npm run start:cli -- pages
   --json`, invalid input, help, stdout/stderr separation and exit codes.
-- Hybrid: at least two declared targets share `src/core`, with independent host
+- Hybrid: the starter's two or more declared targets share `src/core`, with independent host
   entrypoints. Every target needs acceptance. No remote synchronization or desktop
-  wrapper is assumed by selecting hybrid.
+  wrapper is assumed by choosing a hybrid starter.
 
 The scaffold projects the authored page list; arbitrary visual trees, component
 bodies and business actions remain implementation work. Preserve full design JSON,

@@ -2,7 +2,6 @@ import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
-import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from './project-create.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';
@@ -43,13 +42,14 @@ export const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs settings --input settings.json --json
   node shell.mjs settings migrate --input paths.json --json
   node shell.mjs                       Open saved workspace or create a project (terminal only)
-  node shell.mjs new                   Preset → framework → prototype guide
-  node shell.mjs new presets --json    Discover project presets and compatible frameworks
-  node shell.mjs new guide --preset plugin-angular --json
+  node shell.mjs new                   Project starter → prototype guide → reviewed package
+  node shell.mjs new --starter plugin-angular   Preselect an installed project starter
+  node shell.mjs new starters --json   Discover installed project starters (configs/starters beside shell.mjs)
+  node shell.mjs new guide --starter plugin-angular --json
   node shell.mjs new validate --input request.json --json
   node shell.mjs new --input request.json --out projects/demo --json
-  node shell.mjs new <dir> (--starter <id> | --from <project.json>)  Legacy creation
-  node shell.mjs help new              Legacy options and approval policy
+  node shell.mjs new <dir> (--starter <id> | --from <project.json>)  File/Companion starters and exports
+  node shell.mjs help new              Directory-creation options and approval policy
   node shell.mjs brainstorm            Guided feature definition, optional prototype/boilerplate and reviewed verification
   node shell.mjs brainstorm guide --json      Discover questions and the two sub-use-case roadmap
   node shell.mjs brainstorm schema --json     Machine-readable request schema
@@ -71,7 +71,7 @@ export const makerHelp = `Shell maker — make first, generate when ready
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,
---preset <id>, --framework <nuxtui|vanilla|angular|none>, --targets <comma-separated> (new guide/TUI),
+--starter <project-starter-id> (new, new guide),
 --json, --no-interaction, --ui <auto|tui|plain>, --no-color, --help. Stdin/CI never prompts. Ctrl-C exits 130; :back cancels a step.
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
@@ -83,7 +83,7 @@ All existing shell setup/make/generate/check commands remain available.
 function parseFlags(tokens: string[]): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
   const booleans = ['json', 'no-interaction', 'help', 'no-color'];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'preset', 'framework', 'targets'];
+  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter'];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -117,15 +117,9 @@ async function generate(args: Arguments, context: CommandContext): Promise<Recor
   const snapshot = await readSnapshot(context.root, path);
   requireSketch(snapshot.document, 'MAKER_PROJECT_MISSING', 'Save a sketch before generating.');
   const selected = await savedProjectSelection(context.root);
-  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(context.root, catalog);
-  requireSketch(!selected || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
-  if (legacy && !args.flags.kind) {
-    const plan = await presetBoilerplatePlan(context.root, context.frameworkRoot, option(args, 'out', `generated/${snapshot.document.project.id}`), snapshot.document, legacy, catalog, context.signal);
-    return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
-  }
   const kind = option(args, 'kind', selected ? 'project' : 'obsidian-plugin');
   requireSketch(['obsidian-plugin', 'clickdummy', 'project'].includes(kind), 'MAKER_KIND', 'Use project, obsidian-plugin or clickdummy.');
-  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json.');
+  requireSketch(kind !== 'project' || selected, 'MAKER_KIND', 'Project output needs a validated project.config.json from a project starter (run new).');
   const out = option(args, 'out', `generated/${snapshot.document.project.id}`);
   const plan = await boilerplatePlan(context.root, context.frameworkRoot, out, snapshot.document, kind as 'project' | 'obsidian-plugin' | 'clickdummy', context.signal, kind === 'project' ? selected : undefined);
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
@@ -177,6 +171,6 @@ export async function execute(args: Arguments, context: CommandContext): Promise
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   args = await configuredArguments(args, context.root);
-  requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
+  requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }

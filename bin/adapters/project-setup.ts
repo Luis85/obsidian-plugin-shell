@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash } from '../../scripts/framework/files.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
-import { resolveProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
 import { newDocument, openDocument, documentText } from '../domain/document.ts';
 import { object, keys, text, list } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
@@ -14,16 +13,18 @@ import { runOperations } from '../application/operations.ts';
 import { outline } from '../application/summary.ts';
 import { prepared, type Prepared, type Entry } from './storage.ts';
 import { loadSettings, guardedText, jsonText } from './user-settings.ts';
-import { loadProjectCatalog, projectGuide } from './projects.ts';
+import { projectStarter, projectGuide } from './projects.ts';
 import { prototypePlan } from './prototype.ts';
 import { boilerplatePlan } from './compiler.ts';
 import { intakePrds, type Intake } from './prd-intake.ts';
 export { setupSchema, setupExample } from '../application/setup-schema.ts';
 interface SetupContext { root: string; frameworkRoot: string; signal?: AbortSignal }
-export async function angularSetupGuide() {
-  const catalog = await loadProjectCatalog();
-  const selection = resolveProjectSelection(catalog, { schemaVersion: 1, catalogVersion: catalog.version, preset: 'webapp-vanilla', framework: 'angular' });
-  return { selection, guide: await projectGuide(selection, catalog) };
+/** Project setup runs the installed Angular webapp starter, read beside shell.mjs like every project starter. */
+const setupStarter = 'webapp-angular';
+export async function angularSetupGuide(frameworkRoot: string) {
+  const { selection } = await projectStarter(frameworkRoot, setupStarter);
+  requireSketch(selection.framework === 'angular' && selection.targets.includes('webapp'), 'SETUP_STARTER', `Project setup needs the ${setupStarter} starter to select Angular with a webapp target.`);
+  return { selection, guide: await projectGuide(selection) };
 }
 /** A vault directory is verifiable; an open Obsidian session is not inferred. */
 export async function setupPrerequisites(root: string, hostDirectory?: string) {
@@ -94,7 +95,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
   const requestHash = hash(jsonText(data));
   assertReplay(existingState.content, settings.paths, requestHash);
   const intake = await intakePrds(root, settings, data.prds), intakeHash = intakeIdentity(intake);
-  const { selection, guide } = await angularSetupGuide();
+  const { selection, guide } = await angularSetupGuide(frameworkRoot);
   let document = newDocument(data.project.name);
   document.project.description = data.project.description;
   document.project.author = settings.preferences.author;
