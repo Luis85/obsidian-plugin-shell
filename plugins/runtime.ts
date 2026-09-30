@@ -72,9 +72,6 @@ function validateTui(actions: readonly PluginTuiAction[]): readonly PluginTuiAct
 export function pluginCliCommands(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly PluginCliCommand[] {
   return validateCli(enabledPlugins(registry).flatMap(plugin => plugin.cli ?? []));
 }
-export function pluginTuiActions(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly PluginTuiAction[] {
-  return validateTui(enabledPlugins(registry).flatMap(plugin => plugin.tui ?? []));
-}
 export function pluginFrameworkAdapters(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly FrameworkAdapter[] {
   const adapters = enabledPlugins(registry).flatMap(plugin => plugin.frameworks ?? []).map(defineFrameworkAdapter);
   const ids = new Set<string>();
@@ -137,7 +134,7 @@ class EventBus implements PluginEventBus {
     } catch { this.report('WORKBENCH_PLUGIN_EVENT_PAYLOAD'); return; }
     this.depth += 1;
     try {
-      for (const entry of [...(this.listeners.get(definition.id) ?? [])]) {
+      for (const entry of Array.from(this.listeners.get(definition.id) ?? [])) {
         if (!entry.active) continue;
         try {
           const result = entry.invoke(payload);

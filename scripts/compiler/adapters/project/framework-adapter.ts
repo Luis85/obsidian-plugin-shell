@@ -34,5 +34,8 @@ export function defineFrameworkAdapter<const T extends FrameworkAdapter>(adapter
     throw new Error('FRAMEWORK_ADAPTER_INVALID');
   pins(adapter.dependencies, 'DEPENDENCY');
   pins(adapter.devDependencies, 'DEV_DEPENDENCY');
+  for (const name of Object.keys(adapter.dependencies ?? {})) {
+    if (adapter.devDependencies?.[name] !== undefined) throw new Error('FRAMEWORK_ADAPTER_DEPENDENCY_SCOPE_CONFLICT:' + name);
+  }
   return Object.freeze(adapter);
 }

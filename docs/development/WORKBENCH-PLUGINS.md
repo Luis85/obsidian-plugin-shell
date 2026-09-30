@@ -31,7 +31,7 @@ npm run make -- plugin my-extension --dry-run
 npm run make -- plugin my-extension --yes
 ```
 
-The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed.
+The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed. This authoring command targets the Workbench source checkout itself; generated applications and extracted immutable developer kits use their own extension boundaries and do not mutate the reviewed Workbench plugin registry.
 
 Run:
 

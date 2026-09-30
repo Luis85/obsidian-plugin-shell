@@ -23,7 +23,7 @@ import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
-export const makerHelp = `Shell maker — make first, generate when ready
+const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs first-run             Optional install → typecheck → test → build → showcase
   node shell.mjs first-run schema --json
   node shell.mjs first-run --input first-run.json --json
@@ -164,26 +164,37 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document, selection });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
-function helpResult(args: Arguments): Record<string, unknown> {
+function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    const extensions = pluginCliCommands();
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    const pluginHelp = extensions.length
+      ? '\nPlugin commands:\n' + extensions.map(item => `  node shell.mjs ${item.id} — ${item.summary}`).join('\n') + '\n'
+      : '';
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
-export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  const extension = context.plugins?.cliCommands.find(item => item.id === args.command);
-  if (extension) {
-    if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
-    return extension.execute({ action: args.action, flags: args.flags }, context.plugins!.commandContext);
-  }
-  if (args.flags.help || args.command === 'studio') return helpResult(args);
+/** A registered plugin root owns its own help and execution; undefined means a built-in command. */
+function pluginExecution(args: Arguments, plugins: CommandContext['plugins']): Record<string, unknown> | Promise<Record<string, unknown>> | undefined {
+  const extension = plugins?.cliCommands.find(item => item.id === args.command);
+  if (!plugins || !extension) return undefined;
+  if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
+  return extension.execute({ action: args.action, flags: args.flags }, plugins.commandContext);
+}
+/** Commands that never read a saved project's configured arguments; undefined means a saved-project command. */
+function directCommand(args: Arguments, context: CommandContext): Record<string, unknown> | Promise<Record<string, unknown>> | undefined {
+  if (args.flags.help || args.command === 'studio') return helpResult(args, context.plugins?.cliCommands ?? pluginCliCommands());
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
-  args = await configuredArguments(args, context.root);
+  return undefined;
+}
+async function savedProjectCommand(input: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
+  const args = await configuredArguments(input, context.root);
   requireSketch(!args.flags.starter, 'PROJECT_OPTION', 'Starter selection is only available on new; saved projects keep project.config.json.');
   return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
+}
+export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
+  requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
+  return pluginExecution(args, context.plugins) ?? directCommand(args, context) ?? savedProjectCommand(args, context);
 }

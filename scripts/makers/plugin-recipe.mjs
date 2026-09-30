@@ -48,6 +48,13 @@ async function extendRegistry(source, name) {
 }
 
 export async function pluginRecipe(context, name) {
+  for (const path of ['plugins/api.ts', 'plugins/runtime.ts', 'plugins/registry.ts']) {
+    try { await context.read(path); }
+    catch (error) {
+      if (error?.code === 'ENOENT') throw new Error('PLUGIN_SDK_REQUIRED: make plugin runs only from a Workbench source checkout with plugins/api.ts, plugins/runtime.ts and plugins/registry.ts.');
+      throw error;
+    }
+  }
   const display = title(name);
   const eventLocal = symbol(name) + 'Ready';
   const cliId = name + '-info';
@@ -101,7 +108,7 @@ import { PluginObject, ${eventLocal} } from '../src/index.ts';
 
 const enabled = { ...PluginObject, config: { ...PluginObject.config, enabled: true } };
 
-test('${name} plugin exposes event, CLI and TUI contributions through one runtime', async () => {
+void test('${name} plugin exposes event, CLI and TUI contributions through one runtime', async () => {
   const received: string[] = [];
   const runtime = await createPluginRuntime({
     root: process.cwd(), frameworkRoot: process.cwd(), input: Readable.from([]), registry: [enabled],
