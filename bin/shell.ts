@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { brainstormWizard } from './presentation/brainstorm.ts';
 import { firstRunWizard } from './presentation/first-run.ts';
 import { configuredArguments } from './adapters/setup-command.ts';
 import { loadSettings } from './adapters/user-settings.ts';
@@ -50,6 +51,7 @@ async function interactive(args: Arguments, context: CommandContext, io: IO, con
 interface StudioOptions extends CommandContext { project: string; guide?: string; out?: string; kind?: string }
 async function runInteractiveCommand(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
   if (args.command === 'first-run') return firstRunWizard(ui, context);
+  if (args.command === 'brainstorm') return brainstormWizard(ui, { ...options, offerImport: true });
   if (args.command === 'project-setup') return projectSetupWizard(ui, context);
   if (args.command === 'settings') { await settingsWizard(ui, context); return; }
   if (await shouldCreate(args, context, options)) return createInteractive(args, context, ui, options);
