@@ -78,7 +78,7 @@ export const PluginObject = {
 } satisfies WorkbenchPluginObject;
 ```
 
-The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners. Synchronous recursive dispatch is bounded at 32 nested publications and reports `WORKBENCH_PLUGIN_EVENT_RECURSION` instead of exhausting the stack.
+The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Event IDs must be namespaced under the owning manifest ID (for example `my-plugin.item-changed`). Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners. Synchronous recursive dispatch is bounded at 32 nested publications and reports `WORKBENCH_PLUGIN_EVENT_RECURSION` instead of exhausting the stack.
 
 ## Extending the CLI
 

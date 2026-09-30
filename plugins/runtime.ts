@@ -165,7 +165,10 @@ export async function createPluginRuntime(options: RuntimeOptions): Promise<Work
   const plugins = enabledPlugins(options.registry);
   const cliCommands = validateCli(plugins.flatMap(plugin => plugin.cli ?? []));
   const tuiActions = validateTui(plugins.flatMap(plugin => plugin.tui ?? []));
-  const events = plugins.flatMap(plugin => plugin.events ?? []);
+  const events = plugins.flatMap(plugin => (plugin.events ?? []).map(event => {
+    if (!event.id.startsWith(plugin.manifest.id + '.')) throw new Error('WORKBENCH_PLUGIN_EVENT_OWNER:' + event.id);
+    return event;
+  }));
   const bus = new EventBus(events, code => options.onError?.(code));
   const commandContext: PluginCommandContext = Object.freeze({
     root: options.root, frameworkRoot: options.frameworkRoot, input: options.input,

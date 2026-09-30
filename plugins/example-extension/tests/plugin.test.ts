@@ -152,6 +152,14 @@ test('plugin command parsing rejects reserved Workbench command roots', async ()
   }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
 });
 
+test('plugin events must stay in the owning manifest namespace', async () => {
+  const foreign = definePluginEvent('other-plugin.changed', (value): value is string => typeof value === 'string');
+  const plugin = { ...enabled, events: [foreign], cli: [], tui: [], frameworks: [], starters: [] };
+  await assert.rejects(() => createPluginRuntime({
+    root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [plugin],
+  }), /WORKBENCH_PLUGIN_EVENT_OWNER/);
+});
+
 test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
   const recursive = definePluginEvent('recursive.tick',
     (value): value is { value: number } => Boolean(value && typeof value === 'object'
