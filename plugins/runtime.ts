@@ -1,6 +1,7 @@
 import { pluginRegistry } from './registry.ts';
 import { defineFrameworkAdapter, type FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
 import type { StarterDefinition } from '../scripts/starters/types.ts';
+import { commands as frameworkCommands } from '../scripts/framework/catalog.ts';
 import type {
   PluginCliCommand,
   PluginCommandContext,
@@ -24,6 +25,10 @@ const identifier = (value: unknown): value is string =>
   typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
 const optionName = (value: unknown): value is string =>
   typeof value === 'string' && value.length <= 64 && /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value);
+const reservedCliIds = new Set([
+  'studio', 'sketch', 'prototype', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm',
+  ...frameworkCommands.map(command => command.id.split(' ')[0]!),
+]);
 function freeze(value: unknown): void {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return;
   Object.freeze(value);
@@ -44,6 +49,7 @@ function validateCli(commands: readonly PluginCliCommand[]): readonly PluginCliC
   const ids = new Set<string>();
   for (const command of commands) {
     if (!identifier(command.id) || !command.summary || typeof command.execute !== 'function') throw new Error('WORKBENCH_PLUGIN_CLI_INVALID');
+    if (reservedCliIds.has(command.id)) throw new Error('WORKBENCH_PLUGIN_CLI_RESERVED:' + command.id);
     if (ids.has(command.id)) throw new Error('WORKBENCH_PLUGIN_CLI_DUPLICATE:' + command.id);
     ids.add(command.id);
     const booleans = command.options?.booleans ?? [], values = command.options?.values ?? [];
@@ -90,6 +96,7 @@ class EventBus implements PluginEventBus {
   private readonly definitions = new Map<string, PluginEventDefinition>();
   private readonly listeners = new Map<string, Set<Listener>>();
   private disposed = false;
+  private depth = 0;
   constructor(definitions: readonly PluginEventDefinition[], private readonly report: (code: string) => void) {
     for (const definition of definitions) {
       if (!/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(definition.id) || typeof definition.valid !== 'function')
@@ -117,19 +124,23 @@ class EventBus implements PluginEventBus {
   dispatch<N extends string, P>(definition: PluginEventDefinition<N, P>, input: P): void {
     this.registered(definition);
     if (this.disposed) return;
+    if (this.depth >= 32) { this.report('WORKBENCH_PLUGIN_EVENT_RECURSION'); return; }
     let payload: unknown;
     try {
       payload = structuredClone(input);
       if (!definition.valid(payload)) throw new Error('invalid');
       freeze(payload);
     } catch { this.report('WORKBENCH_PLUGIN_EVENT_PAYLOAD'); return; }
-    for (const entry of [...(this.listeners.get(definition.id) ?? [])]) {
-      if (!entry.active) continue;
-      try {
-        const result = entry.invoke(payload);
-        if (result) void Promise.resolve(result).catch(() => this.report('WORKBENCH_PLUGIN_EVENT_LISTENER'));
-      } catch { this.report('WORKBENCH_PLUGIN_EVENT_LISTENER'); }
-    }
+    this.depth += 1;
+    try {
+      for (const entry of [...(this.listeners.get(definition.id) ?? [])]) {
+        if (!entry.active) continue;
+        try {
+          const result = entry.invoke(payload);
+          if (result) void Promise.resolve(result).catch(() => this.report('WORKBENCH_PLUGIN_EVENT_LISTENER'));
+        } catch { this.report('WORKBENCH_PLUGIN_EVENT_LISTENER'); }
+      }
+    } finally { this.depth -= 1; }
   }
   dispose(): void {
     if (this.disposed) return;

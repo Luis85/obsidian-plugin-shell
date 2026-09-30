@@ -20,7 +20,7 @@ plugins/
       plugin.test.ts
 ```
 
-`src/index.ts` exports a named `PluginObject` satisfying `WorkbenchPluginObject`. The manifest ID must equal the directory name. `config.json` is plugin-owned configuration and may set `enabled: false`. Disabled plugins contribute nothing and are not activated.
+`src/index.ts` exports a named `PluginObject` satisfying `WorkbenchPluginObject`. The manifest ID must equal the directory name; `npm run check:plugins` verifies the directory, manifest/config, source/test layout and explicit registry entry. `config.json` is plugin-owned configuration and may set `enabled: false`. Disabled plugins contribute nothing and are not activated.
 
 Register the plugin explicitly in `plugins/registry.ts`. Workbench does not scan folders and execute whatever it finds. Plugin code is trusted application/tooling code, not a sandbox.
 
@@ -69,7 +69,7 @@ export const PluginObject = {
 } satisfies WorkbenchPluginObject;
 ```
 
-The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners.
+The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners. Synchronous recursive dispatch is bounded at 32 nested publications and reports `WORKBENCH_PLUGIN_EVENT_RECURSION` instead of exhausting the stack.
 
 ## Extending the CLI
 
@@ -86,7 +86,7 @@ cli: [{
 }],
 ```
 
-Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in command IDs cannot be shadowed. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
+Workbench keeps common flags such as `--json`, `--root`, `--help` and `--no-interaction`. A plugin can add its own declared flags. Built-in maker commands and framework command roots cannot be shadowed. The top-level `shell.mjs` launcher resolves registered plugin command IDs before dispatch, so `node shell.mjs <plugin-command> ...` reaches the plugin in both source and compiled developer-kit modes. Machine mode remains noninteractive and the returned object is serialized through the normal shell response path.
 
 ## Extending Studio / the TUI
 
@@ -97,7 +97,7 @@ tui: [{
   id: 'inventory',
   label: 'Plugin inventory',
   async run({ ui, workspace, eventBus }) {
-    ui.write(`Current project: ${workspace.snapshot.document.project.name}\n`);
+    ui.write(`Current project: ${workspace.document.project.name}\n`);
   },
 }],
 ```

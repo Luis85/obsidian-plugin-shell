@@ -84,7 +84,37 @@ test('one invocation shares the event bus across activation, CLI and TUI contrib
   runtime.dispose();
 });
 
-test('plugin command parsing rejects a collision with a built-in maker command', () => {
-  const collision = [{ id: 'new', summary: 'bad', execute: () => ({}) }];
-  assert.throws(() => parseArguments(['new'], collision), /conflicts with a built-in/);
+test('plugin command parsing rejects reserved Workbench command roots', () => {
+  const makerCollision = [{ id: 'new', summary: 'bad', execute: () => ({}) }];
+  assert.throws(() => parseArguments(['new'], makerCollision), /conflicts with a built-in/);
+  const frameworkCollision = { ...enabled, cli: [{ id: 'build', summary: 'bad', execute: () => ({}) }] };
+  assert.throws(() => pluginFrameworkAdapters([frameworkCollision]) && createPluginRuntime({
+    root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [frameworkCollision],
+  }), /WORKBENCH_PLUGIN_CLI_RESERVED/);
+});
+
+test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
+  const recursive = definePluginEvent('recursive.tick',
+    (value): value is { value: number } => Boolean(value && typeof value === 'object'
+      && Number.isInteger((value as { value?: unknown }).value)));
+  const errors: string[] = [];
+  const recursivePlugin = {
+    ...enabled,
+    manifest: { ...enabled.manifest, id: 'recursive-plugin' },
+    events: [recursive],
+    cli: [],
+    tui: [],
+    frameworks: [],
+    starters: [],
+    activate({ eventBus }) {
+      return eventBus.on(recursive, payload => eventBus.dispatch(recursive, { value: payload.value + 1 }));
+    },
+  };
+  const runtime = await createPluginRuntime({
+    root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [recursivePlugin],
+    onError: code => errors.push(code),
+  });
+  runtime.eventBus.dispatch(recursive, { value: 0 });
+  assert.ok(errors.includes('WORKBENCH_PLUGIN_EVENT_RECURSION'));
+  runtime.dispose();
 });
