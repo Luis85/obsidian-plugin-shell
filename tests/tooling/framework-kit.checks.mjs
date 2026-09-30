@@ -47,7 +47,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.equal(pluginResult.data.selection.framework, 'react');
   assert.deepEqual(pluginResult.data.selection.targets, ['webapp']);
   await writeFile(pluginConfigPath, pluginConfig);
-  assert.deepEqual(await verifyKit(dir), await verifyKit(dir), 'restored plugin config keeps the extracted kit valid');
+  assert.ok((await verifyKit(dir)).files.length > 100, 'restored plugin config keeps the extracted kit valid');
   output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
   assert.ok(files.some(file => file.path === '.framework/compiled/scripts/framework/cli.js'));
