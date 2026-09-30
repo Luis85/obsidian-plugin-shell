@@ -116,7 +116,7 @@ jobs:
   renamed-feature:
     name: Template authoring / renamed feature
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - *checkout
       - *setup-node
