@@ -14,6 +14,12 @@ import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/
 
 const enabled = { ...PluginObject, config: { ...PluginObject.config, enabled: true } };
 
+if (false) {
+  const dynamicEventName: string = 'example-extension.dynamic';
+  // @ts-expect-error plugin event names must remain literal so payload types stay correlated.
+  definePluginEvent(dynamicEventName, (value): value is string => typeof value === 'string');
+}
+
 test('plugin owns manifest/config and can contribute a framework, starter, CLI and TUI', () => {
   assert.equal(PluginObject.manifest.id, 'example-extension');
   assert.equal(PluginObject.config.enabled, false);
