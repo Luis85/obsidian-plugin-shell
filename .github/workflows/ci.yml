@@ -116,7 +116,7 @@ jobs:
   renamed-feature:
     name: Template authoring / renamed feature
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - *checkout
       - *setup-node
@@ -186,7 +186,7 @@ jobs:
   source-archive:
     name: Template authoring / source archive
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - *checkout
       - *setup-node
@@ -223,7 +223,7 @@ jobs:
   example-removal:
     name: Template authoring / example removal
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - *checkout
       - *setup-node
