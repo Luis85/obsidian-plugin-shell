@@ -3761,7 +3761,7 @@
             "priority": "must",
             "status": "designed",
             "kind": "functional",
-            "acceptance": "Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.",
+            "acceptance": "Vault, Collection, API and database declarations include operations and explicit input/output shapes; Collections pair one vault-relative path with one entity and managed Markdown CRUD; credentials remain symbolic.",
             "nodes": [
               "node-23"
             ],
@@ -4688,7 +4688,7 @@
     },
     "dataSources": {
       "schema": 1,
-      "nextId": 8,
+      "nextId": 13,
       "sources": [
         {
           "id": "ds-source-1",
@@ -4771,6 +4771,353 @@
               }
             }
           ]
+        },
+        {
+          "id": "ds-source-8",
+          "slug": "test-recipes",
+          "name": "Test recipe collection",
+          "kind": "collection",
+          "status": "active",
+          "description": "Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.",
+          "locator": "vault://active",
+          "auth": "none",
+          "credentialRef": "",
+          "collectionPath": "Companion/TestRecipe",
+          "entity": "er-entity-37",
+          "operations": [
+            {
+              "id": "ds-operation-9",
+              "slug": "list",
+              "name": "List records",
+              "direction": "read",
+              "method": "adapter",
+              "resource": "Companion/TestRecipe",
+              "description": "Managed Collection CRUD over Markdown notes in the active vault.",
+              "input": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "output": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "record": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "test-recipe"
+                            ]
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "scenario": {
+                            "type": "string"
+                          },
+                          "dataset": {
+                            "type": "string"
+                          },
+                          "operation_ref": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "title"
+                        ],
+                        "additionalProperties": true
+                      },
+                      "revision": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "record",
+                      "revision"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "implementation": {
+                "kind": "note",
+                "entity": "er-entity-37",
+                "operation": "list"
+              }
+            },
+            {
+              "id": "ds-operation-10",
+              "slug": "create",
+              "name": "Create record",
+              "direction": "write",
+              "method": "adapter",
+              "resource": "Companion/TestRecipe",
+              "description": "Managed Collection CRUD over Markdown notes in the active vault.",
+              "input": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "values": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "scenario": {
+                          "type": "string"
+                        },
+                        "dataset": {
+                          "type": "string"
+                        },
+                        "operation_ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "title"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "values",
+                    "requestId"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "output": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "record": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "test-recipe"
+                          ]
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "scenario": {
+                          "type": "string"
+                        },
+                        "dataset": {
+                          "type": "string"
+                        },
+                        "operation_ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "title"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "revision": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "record",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "implementation": {
+                "kind": "note",
+                "entity": "er-entity-37",
+                "operation": "create"
+              }
+            },
+            {
+              "id": "ds-operation-11",
+              "slug": "update",
+              "name": "Update record",
+              "direction": "write",
+              "method": "adapter",
+              "resource": "Companion/TestRecipe",
+              "description": "Managed Collection CRUD over Markdown notes in the active vault.",
+              "input": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "values": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "scenario": {
+                          "type": "string"
+                        },
+                        "dataset": {
+                          "type": "string"
+                        },
+                        "operation_ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "title"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision",
+                    "values"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "output": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "record": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "test-recipe"
+                          ]
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "scenario": {
+                          "type": "string"
+                        },
+                        "dataset": {
+                          "type": "string"
+                        },
+                        "operation_ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "title"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "revision": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "record",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "implementation": {
+                "kind": "note",
+                "entity": "er-entity-37",
+                "operation": "update"
+              }
+            },
+            {
+              "id": "ds-operation-12",
+              "slug": "delete",
+              "name": "Delete record",
+              "direction": "write",
+              "method": "adapter",
+              "resource": "Companion/TestRecipe",
+              "description": "Managed Collection CRUD over Markdown notes in the active vault.",
+              "input": {
+                "mode": "schema",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "output": {
+                "mode": "none",
+                "entity": null,
+                "many": false,
+                "fields": [],
+                "schema": null
+              },
+              "implementation": {
+                "kind": "note",
+                "entity": "er-entity-37",
+                "operation": "delete"
+              }
+            }
+          ]
         }
       ],
       "flows": [
@@ -4809,6 +5156,10 @@
         "ds-source-1": {
           "x": 900,
           "y": 80
+        },
+        "ds-source-8": {
+          "x": 900,
+          "y": 430
         }
       },
       "testing": {
