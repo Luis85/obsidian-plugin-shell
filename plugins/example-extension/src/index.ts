@@ -22,7 +22,7 @@ export const reactAdapter = defineFrameworkAdapter({
         "import { project, scaffoldNotice } from '../core/project.ts';",
         "import { activatePlugins, visualHost } from '../core/plugin-runtime.ts';",
         "function Starter() {",
-        "  const [current, setCurrent] = useState(project.pages[0]?.id ?? '');",
+        "  const [current, setCurrent] = useState<string>(project.pages[0]?.id ?? '');",
         "  const main = useRef<HTMLElement | null>(null);",
         "  const focus = useRef(false);",
         "  const page = project.pages.find(item => item.id === current);",
