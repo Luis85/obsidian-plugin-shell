@@ -27,9 +27,10 @@ export default ts.config(
   // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
   { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
+  // The click-dummy harness runs in a plain browser outside Obsidian, so the host-API rules do not apply to it.
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
-    plugins: { obsidianmd: obsidian }, rules: pluginRules })),
+    ...(folder === 'harness' || folder.startsWith('harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
   { files: ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',
