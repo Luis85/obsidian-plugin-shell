@@ -3,13 +3,14 @@ import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isDeepStrictEqual, parseArgs } from 'node:util';
-import { paths, readConfig, saveConfig, locked, repository, backend, run, npmCommand, noSymlink, type Paths } from './io.ts';
+import { paths, readConfig, readText, saveConfig, locked, repository, backend, run, npmCommand, noSymlink, type Paths } from './io.ts';
 import { checkExisting, configuredEndpoint, consent, disabled, MemoryError, requireEnabled, requireThat, seedPlan, type Identity, type JsonObject } from './policy.ts';
 import { installationPlan, install } from './install.ts';
 import { committedDocuments, pullRequestContext } from './sources.ts';
 import { PROVIDERS, providerPlan, providerSettings, type ProviderSettings } from './provider.ts';
 import { applyConnection, connection, connectionStatus, desktopClient } from './desktop.ts';
 import { discoverTools, launchMcp, nativeServer } from './mcp.ts';
+import { hindsightOptions } from '../companion/tooling-contract.mjs';
 
 const HELP = `Optional project memory — node bin/app memory <command>
 The equivalent npm entry is npm run memory -- <command>. All receipts are JSON.
@@ -39,7 +40,8 @@ Using memory:
 
 Setup installs AND connects the selected Claude Code/Codex desktop clients.
 Install choices: --git none|message|full (default message), --sessions (default off),
---python PATH. No global npm install or implicit install-all. Keyless does not mean
+--python PATH. An agent-ready project may supply reviewed agent/privacy defaults, but setup still previews first
+and apply still requires --accept-data-processing. No global npm install or implicit install-all. Keyless does not mean
 no inference, no account limits or offline. None mode cannot reflect or synthesize pages.
 Connect permits future autostart only inside an explicitly opted-in repository.
 Use local desktop sessions; cloud sessions cannot access this machine's service.
@@ -58,6 +60,17 @@ const ALLOWED: Record<string, string[]> = { setup: installOptions, install: inst
   start: [], stop: [], disable: [], seed: ['file', 'plan'], 'pr-context': ['pr'], mcp: ['agent'],
   recall: ['query'], reflect: ['query'] };
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
+function projectDefaults(root: string) {
+  const source = readText(join(root, 'design/project.json'));
+  if (source === null) return null;
+  try {
+    const input = JSON.parse(source) as { tooling?: unknown };
+    const defaults = hindsightOptions(input.tooling);
+    return defaults.enabled ? defaults : null;
+  } catch {
+    throw new MemoryError('PROJECT_MEMORY_CONFIG_INVALID', 'Project Hindsight defaults are invalid; no user configuration was changed.');
+  }
+}
 function storedProvider(p: Paths): ProviderSettings | null {
   const stored = readConfig(join(p.state, 'provider.json'));
   return stored.original === null ? null : providerSettings(stored.data);
@@ -133,9 +146,12 @@ async function dispatch(args: string[]): Promise<number> {
         persistProvider(p, chosen); return { ok: true, code: 'CONFIGURED', ...providerPlan(chosen) };
       })); return 0;
     }
-    const choice = consent(values.agents ?? '', values.git ?? 'message', Boolean(values.sessions));
+    const defaults = projectDefaults(repo.root);
+    const choice = consent(values.agents ?? defaults?.agents.join(',') ?? '', values.git ?? defaults?.git ?? 'message',
+      values.sessions === undefined ? Boolean(defaults?.sessions) : Boolean(values.sessions));
     if (!values.apply) {
-      print({ ...installationPlan(repo, p, choice), provider: chosen ? providerPlan(chosen) : 'Choose --provider; no API key is required for keyless modes.',
+      print({ ...installationPlan(repo, p, choice), projectDefaults: defaults ? { source: 'design/project.json', ...defaults } : null,
+        provider: chosen ? providerPlan(chosen) : 'Choose --provider; no API key is required for keyless modes.',
         desktopConnections: command === 'setup' ? choice.agents.filter(a => ['claude-code', 'codex'].includes(a)) : [],
         next: 'Review provider prerequisites, then repeat with --apply --accept-data-processing.' }); return 0;
     }
