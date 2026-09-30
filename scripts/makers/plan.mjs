@@ -96,7 +96,7 @@ export async function planMaker(root, { maker, name, options }, { beforeFinalize
         ? [
             {
               command: 'node',
-              args: ['node_modules/vitest/vitest.mjs', 'run', ...runtimeTests],
+              args: ['node_modules/vitest/vitest.mjs', 'run', '--config', 'configs/testing/vitest.config.mjs', ...runtimeTests],
             },
           ]
         : []),

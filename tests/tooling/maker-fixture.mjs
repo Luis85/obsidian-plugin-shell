@@ -121,6 +121,7 @@ export const ${name}Feature = defineNoteFeature({ defaultFolder: 'Fixture', docu
     join(root, 'node_modules'),
     process.platform === 'win32' ? 'junction' : 'dir',
   );
+  await mkdir(join(root, 'configs/testing'), { recursive: true });
   await writeFile(
     join(root, 'configs/testing/vitest.config.mjs'),
     "import vue from '@vitejs/plugin-vue';\nexport default { plugins: [vue()], test: { include: ['tests/runtime/generated/**/*.test.ts'], environment: 'node', fileParallelism: false } };\n",

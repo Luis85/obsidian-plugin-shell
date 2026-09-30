@@ -40,6 +40,7 @@ test('[MAKER-CATALOG] every integrated recipe generates executable source, real 
   await mkdir(join(root, 'src/locales'), { recursive: true });
   await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
   await cp(join(makerSourceRoot, 'tsconfig.json'), join(root, 'tsconfig.json'));
+  await cp(join(makerSourceRoot, 'configs/types/tsconfig.base.json'), join(root, 'configs/types/tsconfig.base.json'));
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
   const requests = [
     ['entity', 'reference', '--feature', 'bookmarks', '--preset', 'project'],
@@ -70,7 +71,7 @@ test('[MAKER-CATALOG] every integrated recipe generates executable source, real 
     return run;
   };
   check([join(makerSourceRoot, 'node_modules/vue-tsc/bin/vue-tsc.js'), '--noEmit']);
-  const runtime = check([join(makerSourceRoot, 'node_modules/vitest/vitest.mjs'), 'run']);
+  const runtime = check([join(makerSourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs']);
   assert.match(runtime.stdout, /24 passed/);
   check(['--test', 'tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']);
   const catalog = await loadCatalog(root);

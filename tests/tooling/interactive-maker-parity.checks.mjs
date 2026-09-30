@@ -57,7 +57,7 @@ test('full and fast daily gates include maker types and tests when the CLI is pr
   try {
     await mkdir(join(root, 'bin'));
     await writeFile(join(root, 'bin/app.ts'), 'export {};');
-    await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
+    await mkdir(join(root, 'configs/types'), { recursive: true }); await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
     const full = await checkSteps(root, false), fast = await checkSteps(root, true, async () => null);
     for (const plan of [full, fast]) {
       assert.ok(plan.steps.some(step => step.id === 'maker-types'));

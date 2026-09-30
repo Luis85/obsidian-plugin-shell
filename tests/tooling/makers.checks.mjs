@@ -86,7 +86,7 @@ test('[MAKE-03-05] generated independent feature and second entity execute their
   // Remove the original schemas and registry entries: generated tests/catalog
   // must use the reusable foundation, not reach through the worked examples.
   await removeMakerExamples(root);
-  const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
+  const run = spawnSync(process.execPath, [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
   assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
   assert.match(run.stdout, /10 passed/);
   const report = await loadCatalog(root);
@@ -107,7 +107,7 @@ test('[MAKE-EVENT-01] isolated event and listener compile and run on the real bu
   }, include: ['src/**/*.ts', 'tests/runtime/**/*.ts'] }));
   for (const args of [
     [join(sourceRoot, 'node_modules/typescript/bin/tsc'), '--noEmit'],
-    [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run'],
+    [join(sourceRoot, 'node_modules/vitest/vitest.mjs'), 'run', '--config', 'configs/testing/vitest.config.mjs'],
   ]) {
     const run = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
     assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);
