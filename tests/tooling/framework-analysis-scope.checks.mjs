@@ -71,3 +71,13 @@ test('shared input transport is isolated and depends only on CLI error contracts
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-input-contract'), false);
 });
+
+test('typed filesystem primitives are isolated from application layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-files-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/hash.ts', 'scripts/shared/fs-presence.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-files-contract')?.allow, ['cli-files-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-files-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-files-contract'), false);
+});
