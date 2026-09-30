@@ -4,7 +4,9 @@ import { Readable } from 'node:stream';
 import { execute, parseArguments } from '../../../bin/adapters/commands.ts';
 import { studioActions } from '../../../bin/presentation/studio.ts';
 import { Workspace } from '../../../bin/application/workspace.ts';
-import { newDocument } from '../../../bin/domain/document.ts';
+import { newDocument, documentText } from '../../../bin/domain/document.ts';
+import { runOperations } from '../../../bin/application/operations.ts';
+import { compileProject, loadTemplateSnapshot } from '../../../scripts/compiler/index.ts';
 import { packageFiles } from '../../../scripts/compiler/adapters/project/configuration.ts';
 import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
@@ -49,6 +51,26 @@ test('plugin starter discovery and framework package emission use the normal pro
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
   assert.equal(pkg.devDependencies['@types/react'], '19.3.0');
   assert.equal(pkg.scripts.typecheck, 'tsc --noEmit --project tsconfig.json');
+});
+
+
+test('plugin framework adapter compiles a real React project through the pure compiler extension port', async () => {
+  const document = runOperations(newDocument('React extension'), [{ op: 'page.add', title: 'Overview' }]).document;
+  const selection = projectSelection({ id: reactStarter.id, version: reactStarter.version, sha256: 'b'.repeat(64) }, reactStarter.generator);
+  const result = await compileProject({
+    source: documentText(document),
+    sourceName: 'react-extension.project.json',
+    outputKind: 'project',
+    projectSelection: selection,
+    template: await loadTemplateSnapshot(process.cwd()),
+  }, {}, { frameworkAdapters: [reactAdapter] });
+  assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
+  const files = new Map(result.artifacts.map(artifact => [artifact.path, artifact.content]));
+  assert.match(files.get('src/ui/mount.ts') ?? '', /react-dom\/client/);
+  const pkg = JSON.parse(files.get('package.json') ?? '{}');
+  assert.equal(pkg.dependencies.react, '19.3.0');
+  assert.equal(pkg.dependencies['react-dom'], '19.3.0');
+  assert.equal(JSON.parse(files.get('project.config.json') ?? '{}').framework, 'react');
 });
 
 test('plugin framework adapter drives the real project emitter', () => {
