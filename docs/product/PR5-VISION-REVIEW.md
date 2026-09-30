@@ -39,7 +39,7 @@ The following sources were inspected at the pinned head through GitHub. Referenc
 | [Authoring entry guide](../concepts/companion/README.md) | Current build command and v6 artifact paths; v5 compatibility fixtures are not the current review entry. |
 | [Compiler guide](../development/compiler/README.md) | Immutable inputs, separate generation and installation, provenance, ownership-aware plans and explicit qualification boundaries. |
 | [Compiler implementation](../../scripts/compiler/index.ts) | Project-preset dispatch, selection validation, explicit adapter-required diagnostic and emitted readiness states. |
-| [Preset catalog](../../bin/guides/project-presets.json) | Declared output/framework choices; not evidence of uniform compiler fidelity or completed business behavior. |
+| [Project starters](../../bin/PROJECT-STARTERS.md) (formerly the preset catalog) | Declared output/framework choices; not evidence of uniform compiler fidelity or completed business behavior. |
 | [2026-09-27 review](PR5-PRODUCT-REVIEW.md), strategy and implementation findings | Prior product analysis and known distinctions; its test counts and workflow statuses were not requalified by this review. |
 
 PR metadata and repository tree metadata were also inspected to identify the branch, head and existing documentation. Recent commit metadata confirms that the branch has moved beyond the September 27 review; commit messages alone are not runtime evidence.
