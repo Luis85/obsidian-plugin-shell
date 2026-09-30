@@ -13,8 +13,8 @@ test('compiler public exports are recognized without exempting private compiler 
     await mkdir(join(scratch, 'scripts/quality'), { recursive: true });
     await writeFile(join(scratch, 'package.json'), '{"name":"compiler-analysis","private":true,"type":"module"}');
     await writeFile(join(scratch, '.fallowrc.json'), JSON.stringify({ ...config, plugins: [],
-      entry: ['scripts/compiler/index.ts', 'scripts/quality/check-analyzer.mjs'] }));
-    await copyFile('scripts/quality/check-analyzer.mjs', join(scratch, 'scripts/quality/check-analyzer.mjs'));
+      entry: ['scripts/compiler/index.ts', 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'] }));
+    for (const name of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(join('scripts/quality', name), join(scratch, 'scripts/quality', name));
     await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     await writeFile(join(scratch, 'scripts/compiler/index.ts'),
       'export { compile } from "./application/internal";\nexport type { CompilerDiagnostic } from "./application/internal";\n');
