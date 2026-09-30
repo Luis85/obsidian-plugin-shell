@@ -195,7 +195,6 @@
     "docs/concepts/companion/src/project-handoff.js",
     "docs/concepts/companion/src/project-starter-views.js",
     "docs/concepts/companion/src/project-starters.css",
-    "scripts/companion/starter-files.mjs",
     "scripts/companion/qualify-starter.mjs",
     "scripts/framework/operations.ts",
     "scripts/framework/cli.ts",

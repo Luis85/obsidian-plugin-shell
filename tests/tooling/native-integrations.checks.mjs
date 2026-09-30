@@ -6,8 +6,8 @@ import { validateNativeIntegrations, nativeReservedExtensions } from '../../scri
 import { reservedFileExtensions } from '../../src/domain/native-integrations.ts';
 import { nativeCode } from '../../scripts/companion/compiler/native-code.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
-import { loadStarterCatalog } from '../../scripts/companion/starter-files.mjs';
-import { customizeStarter } from '../../scripts/companion/starter-contract.mjs';
+import { companionStarters, loadDefinitions } from '../../scripts/starters/repository.ts';
+import { customizeStarter as customizeLoaded } from '../../scripts/starters/customize.ts';
 import { planMaker } from '../../scripts/makers/plan.mjs';
 import { parseArguments } from '../../scripts/makers/arguments.mjs';
 import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
@@ -20,7 +20,8 @@ const file = {
   initialContent: '{"title":"Untitled"}\n',
 };
 const namespace = () => ({ schemaVersion: 1, fileTypes: [structuredClone(file)], contextMenus: [] });
-const catalog = await loadStarterCatalog(makerSourceRoot);
+const catalog = companionStarters(await loadDefinitions(makerSourceRoot));
+const customizeStarter = (starters, id, fields) => customizeLoaded(starters.find(entry => entry.definition.id === id), fields);
 const args = (name = 'board', extension = 'board') =>
   parseArguments(['file-extension', name, '--feature', 'documents', '--extension', extension]);
 async function fixture(work) {

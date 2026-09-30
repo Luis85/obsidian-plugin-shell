@@ -91,9 +91,13 @@ def reload_page(page):
 
 def run(page):
     load_page(page)
-    # Import a real built-in through the actual existing import UI, not a substituted project store.
+    # Import a real current (project v6) starter document through the actual existing import UI, not a substituted project store.
+    starter = json.loads((ROOT / 'configs/starters/quick-capture.json').read_text(encoding='utf-8'))['generator']['document']
+    OUT.mkdir(parents=True, exist_ok=True)
+    source = OUT / 'quick-capture.companion.json'
+    source.write_text(json.dumps(starter, indent=2) + '\n', encoding='utf-8')
     page.locator('[data-action="project-import"]').first.click()
-    page.locator('#project-import-file').set_input_files(ROOT / 'docs/concepts/companion/starters/quick-capture.companion.json')
+    page.locator('#project-import-file').set_input_files(source)
     expect(page.locator('#project-import-summary')).to_be_visible()
     page.locator('#project-import-confirm').check()
     page.locator('[data-action="project-import-apply"]').click()

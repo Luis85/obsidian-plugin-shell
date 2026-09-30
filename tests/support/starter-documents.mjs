@@ -2,7 +2,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const root = new URL('../../', import.meta.url);
-export const startersFolder = 'configs/starters';
+const startersFolder = 'configs/starters';
 export const starterPath = id => `${startersFolder}/${id}.json`;
 function definition(id) {
   return JSON.parse(readFileSync(new URL(starterPath(id), root), 'utf8'));

@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { compileProject, compilerVersion, loadTemplateSnapshot } from './index.ts';
 
-export const GOLDEN_FILE = 'tests/fixtures/compiler/starter-golden.json';
+const GOLDEN_FILE = 'tests/fixtures/compiler/starter-golden.json';
 const STARTERS = 'configs/starters';
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 /** Product scope: what the compiler derives from the project. Shell files it carries along verbatim or rewrites are
