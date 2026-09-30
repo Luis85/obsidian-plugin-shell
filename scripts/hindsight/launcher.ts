@@ -6,7 +6,7 @@ import { digest, requireThat } from './policy.ts';
 import { noSymlink, readText, type Paths } from './io.ts';
 // Paths relative to scripts/: the snapshot keeps that layout so the launcher's relative imports resolve inside it.
 const FILES = [...['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts'].map(name => 'hindsight/' + name),
-  'companion/tooling-contract.mjs', 'shared/hash.mjs'];
+  'companion/tooling-contract.mjs', 'shared/hash.ts'];
 export const launcherEntry = 'hindsight/cli.ts';
 const PACKAGE = '{"type":"module","private":true}\n';
 export interface LauncherPlan { source: string; directory: string; digest: string; files: { name: string; sha256: string }[] }
