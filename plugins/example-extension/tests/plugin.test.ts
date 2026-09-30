@@ -84,11 +84,11 @@ test('one invocation shares the event bus across activation, CLI and TUI contrib
   runtime.dispose();
 });
 
-test('plugin command parsing rejects reserved Workbench command roots', () => {
+test('plugin command parsing rejects reserved Workbench command roots', async () => {
   const makerCollision = [{ id: 'new', summary: 'bad', execute: () => ({}) }];
   assert.throws(() => parseArguments(['new'], makerCollision), /conflicts with a built-in/);
   const frameworkCollision = { ...enabled, cli: [{ id: 'build', summary: 'bad', execute: () => ({}) }] };
-  assert.throws(() => pluginFrameworkAdapters([frameworkCollision]) && createPluginRuntime({
+  await assert.rejects(() => createPluginRuntime({
     root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [frameworkCollision],
   }), /WORKBENCH_PLUGIN_CLI_RESERVED/);
 });
