@@ -17,9 +17,10 @@ test('[MAKE-03-01] deterministic dry-run performs no writes and prints an exact 
   assert.deepEqual(a, b); assert.ok(a.plan.changes.length >= 15);
   assert.deepEqual(await readdir(join(root, 'src')), ['bootstrap']);
   assert.equal(await readFile(join(root, 'src/bootstrap/features.ts'), 'utf8'), before);
-  const run = spawnSync(process.execPath, [resolve(sourceRoot, 'scripts/makers/cli.mjs'), 'feature', 'bookmarks', '--entity', 'bookmark', '--dry-run', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
+  const run = spawnSync(process.execPath, [resolve(sourceRoot, 'bin/app'), 'make', 'feature', 'bookmarks', '--entity', 'bookmark', '--root', root, '--dry-run', '--json'], { cwd: root, encoding: 'utf8', timeout: 20000 });
   assert.equal(run.status, 0, run.stderr); const report = JSON.parse(run.stdout);
-  assert.equal(report.status, 'planned'); assert.ok(report.plan.changes.every(change => !Object.hasOwn(change, 'content')));
+  assert.equal(report.status, 'planned'); assert.equal(report.command, 'make');
+  assert.ok(report.data.changes.every(change => !Object.hasOwn(change, 'content')));
   assert.deepEqual(await readdir(root), ['src']);
 }));
 test('[MAKE-03-02] applied registration occurs once; identical repeats no-op and edited source conflicts', () => fixture(async root => {

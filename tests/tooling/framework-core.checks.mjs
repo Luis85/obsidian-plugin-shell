@@ -10,6 +10,9 @@ import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
 import { readBounded } from '../../scripts/framework/files.ts';
+import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { sha256 } from '../../scripts/shared/hash.mjs';
+import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 // The last v4 self-project, retained as a migration input.
@@ -168,4 +171,13 @@ test('in-place generation refuses an unimported --input before any kit or plan w
   assert.equal(refused.status, 'failed'); assert.ok(refused.diagnostics.some(item => item.code === 'INPUT_REQUIRES_IMPORT'), JSON.stringify(refused));
   const kitless = await run(ctx, ['generate']);
   assert.equal(kitless.status, 'failed'); assert.ok(kitless.diagnostics.some(item => item.code === 'KIT_REQUIRED'), JSON.stringify(kitless));
+});
+
+test('file plans and capability discovery use the canonical shared digest', async t => {
+  const ctx = await fixture(t), content = 'exact plan bytes — café\n';
+  const plan = await createFilePlan(ctx.root, [{ path: 'planned.txt', content }]);
+  assert.equal(plan.changes[0].beforeHash, null);
+  assert.equal(plan.changes[0].afterHash, sha256(content));
+  const catalog = capabilityCatalog();
+  assert.equal(catalogDigest(catalog), sha256(JSON.stringify(catalog)));
 });

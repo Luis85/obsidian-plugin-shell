@@ -16,7 +16,7 @@ export async function measureCorpus(tool, stage, inputs, output, execute) {
   for (const input of inputs) {
     await writeFile(join(stage, input.staged), captured.get(input.staged));
     const run = await execute(tool, stage, duplicateArguments, join(output, input.staged));
-    const measured = duplicationReport(run.report, [input]);
+    const measured = duplicationReport(run.report, [input], run.exit);
     records.push({ path: input.path, staged: input.staged, exit: run.exit, sha256: run.rawHash,
       files: measured.total_files, lines: measured.total_lines, tokens: measured.total_tokens });
     await rm(join(stage, input.staged));
@@ -43,7 +43,7 @@ export async function checkCorpus(output, records, inputs, duplication) {
     const input = inputs[index]; const record = records[index];
     const raw = await readFile(join(output, `${input.staged}.json`), 'utf8');
     if (sha256(raw) !== record.sha256) throw new Error('METRIC_CORPUS_HASH');
-    const result = duplicationReport(JSON.parse(raw), [input]);
+    const result = duplicationReport(JSON.parse(raw), [input], record.exit);
     if (record.files !== result.total_files || record.lines !== result.total_lines || record.tokens !== result.total_tokens) throw new Error('METRIC_CORPUS_REPORT');
   }
 }

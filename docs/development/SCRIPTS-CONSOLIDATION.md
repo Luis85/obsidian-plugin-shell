@@ -1,8 +1,9 @@
 # `scripts/` consolidation plan
 
-Status: review and staged plan. This document records where `scripts/` stands after the
-`app.mjs` / `bin/app` launcher rename and how to reduce it to real scripts without weakening
-any gate. It authorizes no moves by itself; each stage below is its own reviewed PR.
+Status: staged implementation. Stage A (launcher migration) is on PR #60. Its continuation
+uses separately pushed and validated milestones on the same PR; later restructuring remains
+subject to explicit gate checks. The inventory and sequencing below are planning inputs,
+not permission to weaken any quality gate.
 
 ## Target shape
 
@@ -23,10 +24,9 @@ source under `bin/`.
   `bin/` is its interactive maker/TUI half.
 - `bin/` already imports `scripts/`: 79 relative imports, split as framework 26, companion 16, compiler 14,
   shared 12 (all `file-plan.mjs`), contracts 10 and application-docs 1.
-- Three `scripts/` files import `bin/`, which is the wrong direction:
-  - `application-docs/adapters/settings.ts`
-  - `testing/qualify-angular-setup.mjs`
-  - `compiler/qualify-legacy-presets.mjs`
+- No `scripts/` module imports executable `bin/` modules now. Angular setup and legacy preset qualification exercise the public CLI boundary instead.
+- Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
+- `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
 - Cycles: compiler ↔ companion, and framework ↔ compiler.
 - Untyped `.mjs` libraries sit under typed TypeScript callers: `shared/file-plan.mjs`, `shared/process.mjs`,
   `contracts/json-data.mjs`, the `makers/*.mjs` engine and `operations/catalog.mjs`.
@@ -38,7 +38,7 @@ source under `bin/`.
 | companion `compiler/`, `schema/`, contracts | Generator + project contracts | → `bin/` (stage E). `qualify-*` stay |
 | companion `runtime/`, `devkit/`; examples `templates/` | Copied into generated projects | Templates, move only with a rewrite migration |
 | application-docs | `docs *` command behaviour | → `bin/docs` (stage E) |
-| makers | Maker engine + legacy standalone CLI | Engine → `bin/` (E); retire `cli.mjs` in favour of `bin/app make` (B) |
+| makers | Maker engine; the standalone CLI has been retired behind `bin/app make` | Engine → `bin/` (E) |
 | operations | Capability catalog | Catalog → `bin/` (E); `cli.mjs` stays as a script |
 | shared, contracts | Libraries | Typed core module set (C) |
 | hindsight | Optional memory app | Stays separate (optional), or `bin/memory` later |
@@ -58,11 +58,28 @@ are paths that generated projects depend on. Treat them as contracts.
 | JSON result envelope | `framework/contracts.ts` plus hand-built copies in `bin/app.ts`, `app.mjs`, `handout.mjs`; ad-hoc `{status,error}` shapes in legacy CLIs | `framework/contracts.ts` `result`/`failure` |
 | Process spawning | `framework/process.ts` `runNode`, `shared/process.mjs` `runNode`, direct `spawnSync('git', …)` in 7 files | One `runNode` + one git helper |
 | fs / JSON / path containment | `exists` ×5, JSON readers ×4, containment checks in ~17 files | Typed fs/plan adapter |
-| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in 3 legacy CLIs | `framework/input.ts` / presentation prompts |
+| Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in legacy CLIs | Shared yes/no policy in `scripts/shared/confirmation.mjs`; presentation layers own rendering |
+
+## Progress on PR #60
+
+- **A:** Launcher migration, compatibility shim and kit support pushed.
+- **B1:** Legacy standalone handout command delegates to the central reviewed plan and validation CLI; added parity regression.
+- **B2:** Framework and handout sha256 functions delegate to the existing shared hash helper; added binary and Unicode parity regression.
+- **B3:** Documentation, setup and two qualification scripts reuse the same SHA-256 implementation; added exact-byte documentation regression.
+- **B4:** Framework discovery, setup journal and handout workspace reuse the same `lstat` presence helper; missing and broken-symlink regressions added.
+- **B5:** Framework, maker TUI and legacy maker entry share one yes/no decision parser; prompt rendering remains presentation-specific.
+- **B6:** The file-plan safety boundary and capability-catalog digest use the shared SHA-256 implementation; exact digest parity is covered.
+- **B7:** The duplicate `scripts/makers/cli.mjs` entry is retired; maker discovery and reviewed plan/apply now exercise `bin/app make`, and capability metadata names only its real sources.
+- **B8:** Application-doc settings no longer import maker domain code; both use a neutral shared project-path policy, leaving two qualification-only reverse imports.
+- **B9:** Angular setup qualification no longer imports maker first-run internals; it launches the compiled kit's public `first-run` showcase and drives the browser against that reviewed boundary.
+- **B10:** Legacy preset qualification no longer imports maker adapters/storage; it reviews and applies `bin/app new` plans. Executable `scripts → bin` module imports are now zero.
+- **B11:** Optional Hindsight/memory policy fingerprints now reuse the shared SHA-256 helper; identity/document/plan semantics remain covered by their policy suite.
+- **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
-Each stage is a separate PR stacked on the previous one. Every stage runs the relevant suites plus
+Each stage is an independently reviewed milestone; the current continuation pushes milestones
+on PR #60. Every stage runs the relevant suites plus
 `check:maintainability`, `check:analyzer`, `check:architecture`, lint and typecheck with no threshold changes.
 
 1. **A: launcher rename (this PR).**

@@ -283,3 +283,44 @@ test('checked but rejected or missing trio approvals cannot produce readiness', 
 test('an impossible approval date is rejected', () => {
   assert.ok(validateHandout(full().replace('date=2026-09-29', 'date=2026-02-30'), base).diagnostics.some(item => item.code === 'HANDOUT_APPROVAL_OPEN'));
 });
+
+test('legacy handout entry delegates to the integrated reviewed-plan protocol', async t => {
+  const root = await workspace(t);
+  const run = (entry, args) => spawnSync(process.execPath, ['--experimental-strip-types', resolve(entry), ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const legacy = run('scripts/handout.mjs', ['generate', '--dry-run']);
+  const integrated = run('bin/app', ['handout', 'generate', '--dry-run']);
+  assert.equal(legacy.status, 0, legacy.stderr + legacy.stdout);
+  assert.equal(integrated.status, 0, integrated.stderr + integrated.stdout);
+  assert.deepEqual(JSON.parse(legacy.stdout), JSON.parse(integrated.stdout));
+  await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
+  const created = run('scripts/handout.mjs', ['generate', '--write']);
+  assert.equal(created.status, 0, created.stderr + created.stdout);
+  const outcome = JSON.parse(created.stdout);
+  assert.equal(outcome.status, 'applied');
+  assert.equal(outcome.command, 'handout generate');
+  assert.ok(outcome.data.applied.written.includes(HANDOUT_PATH));
+});
+
+test('canonical sha256 helper preserves framework and handout byte fingerprints', async () => {
+  const { sha256 } = await import('../../scripts/shared/hash.mjs');
+  const { hash } = await import('../../scripts/framework/files.ts');
+  assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  for (const bytes of ['Unicode ⛄', Buffer.from([0, 255, 1, 0])]) {
+    assert.equal(hash(bytes), sha256(bytes));
+    assert.equal(digest(bytes), sha256(bytes));
+  }
+});
+
+test('shared filesystem presence preserves broken symlinks and missing-path semantics', async t => {
+  const { exists, statIfPresent } = await import('../../scripts/shared/fs-presence.mjs');
+  const root = await workspace(t);
+  const missing = join(root, 'missing.md');
+  assert.equal(await exists(missing), false);
+  assert.equal(await statIfPresent(missing), null);
+  const path = join(root, 'docs/prds/PRD-1.md');
+  assert.equal(await exists(path), true);
+  const link = join(root, 'broken-link.md');
+  await symlink(missing, link);
+  assert.equal(await exists(link), true);
+  assert.equal((await statIfPresent(link)).isSymbolicLink(), true);
+});

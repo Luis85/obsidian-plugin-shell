@@ -70,12 +70,16 @@ test('maintainability CLI rejects meaningful production clones with a measured p
     const contradictory = JSON.stringify(raw); await writeFile(rawPath, contradictory);
     report.views.production.execution.dupes.sha256 = sha256(contradictory);
     await writeFile(join(packet(bad).output, 'report.json'), JSON.stringify(report));
+    assert.match(run(root, ['--check', packet(bad).output]).stderr, /METRIC_REPORT_EXIT_VERDICT/);
+    report.views.production.execution.dupes.exit = 0;
+    await writeFile(join(packet(bad).output, 'report.json'), JSON.stringify(report));
     assert.match(run(root, ['--check', packet(bad).output]).stderr, /METRIC_REPORT_CLONE_TOTALS/);
     raw.stats.duplicated_lines = 1; raw.stats.duplication_percentage = 100 / raw.stats.total_lines;
     raw.gate_outcomes['duplication-threshold'].observed = raw.stats.duplication_percentage;
     raw.gate_outcomes['duplication-threshold'].status = raw.stats.duplication_percentage > 3 ? 'fail' : 'pass';
     const understated = JSON.stringify(raw); await writeFile(rawPath, understated);
     report.views.production.execution.dupes.sha256 = sha256(understated);
+    report.views.production.execution.dupes.exit = raw.gate_outcomes['duplication-threshold'].status === 'fail' ? 1 : 0;
     await writeFile(join(packet(bad).output, 'report.json'), JSON.stringify(report));
     assert.match(run(root, ['--check', packet(bad).output]).stderr, /METRIC_REPORT_CLONE_TOTALS/);
   });
@@ -221,5 +225,32 @@ test('shared composition declarations retain exact measured bytes without ambien
     assert.match(invalid.stderr, /METRIC_REPORT_INCOMPLETE/);
     await writeFile(join(root, path), source);
     assert.equal(run(root, ['--check', output]).status, 0);
+  });
+});
+
+test('maintainability CLI keeps estimated CRAP visible as warn and cross-checks Fallow severity, gate and exit verdicts', async () => {
+  await fixture(async root => {
+    const branches = count => Array.from({ length: count }, (_, index) => `  if (value === ${index}) return ${index};`).join('\n');
+    await writeFile(join(root, 'src/main.ts'), `export function ceiling(value: number) {\n${branches(9)}\n  return -1;\n}\n`);
+    const ceiling = run(root); assert.equal(ceiling.status, 0, ceiling.stderr);
+    const visible = JSON.parse(await readFile(join(packet(ceiling).output, 'production-health.json'), 'utf8'));
+    assert.deepEqual(visible.findings.map(finding => [finding.name, finding.exceeded, finding.effective_severity]), [['ceiling', 'crap', 'warn']]);
+    assert.equal(visible.gate_outcomes['health-findings'].status, 'pass');
+    await writeFile(join(root, 'src/main.ts'), `export function excessive(value: number) {\n${branches(11)}\n  return -1;\n}\n`);
+    const bad = run(root); assert.equal(bad.status, 1, bad.stderr);
+    const output = packet(bad).output; const rawPath = join(output, 'production-health.json');
+    const original = await readFile(rawPath, 'utf8'); const report = await readFile(join(output, 'report.json'), 'utf8');
+    for (const [tamper, expected] of [
+      [raw => { raw.findings[0].effective_severity = 'warn'; }, /METRIC_REPORT_HEALTH_SEVERITY/],
+      [raw => { raw.gate_outcomes['health-findings'].status = 'pass'; }, /METRIC_REPORT_EXIT_VERDICT|METRIC_REPORT_HEALTH_GATE/],
+      [raw => { delete raw.gate_outcomes['parse-error']; }, /METRIC_REPORT_GATE_parse-error/],
+      [(raw, amended) => { amended.views.production.execution.health.exit = 0; }, /METRIC_REPORT_EXIT_VERDICT/],
+    ]) {
+      const raw = JSON.parse(original); const amended = JSON.parse(report); tamper(raw, amended);
+      const changed = JSON.stringify(raw); await writeFile(rawPath, changed);
+      amended.views.production.execution.health.sha256 = sha256(changed);
+      await writeFile(join(output, 'report.json'), JSON.stringify(amended));
+      assert.match(run(root, ['--check', output]).stderr, expected);
+    }
   });
 });

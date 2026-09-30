@@ -10,6 +10,7 @@ import { settingsMigrationPlan } from '../../bin/adapters/settings-migration.ts'
 import { setupCheckpointPlan, resumeSetupCheckpoint } from '../../bin/adapters/setup-checkpoint.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { defaultSettings, readSettings, settingsSchema } from '../../bin/domain/user-settings.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.mjs';
 import { settingsForm } from '../../bin/presentation/settings.ts';
 async function scratch(work) {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-settings-integration-'));
@@ -119,3 +120,19 @@ test('typed documentation follows the configured maker project path for export a
   await rm(join(root, 'configs/project-setup.json'));
   await assert.rejects(() => documentationPlan(root, [], 'import'), /run setup first/);
 }));
+
+test('shared project-path policy keeps maker and documentation boundaries aligned', async () => {
+  for (const path of ['design/project.json', 'nested/Project 1.json']) {
+    assert.equal(hasPortableProjectSegments(path), true);
+    assert.equal(hasProtectedProjectRoot(path), false);
+    assert.equal(readSettings({ schemaVersion: 1, paths: { project: path } }).paths.project, path);
+  }
+  for (const path of ['../outside.json', 'a\\b.json', 'a//b.json', 'CON/file.json', 'name./file.json']) {
+    assert.equal(hasPortableProjectSegments(path), false, path);
+    assert.throws(() => readSettings({ schemaVersion: 1, paths: { project: path } }), undefined, path);
+  }
+  for (const path of ['.git/project.json', '.obsidian/project.json', 'node_modules/project.json']) {
+    assert.equal(hasProtectedProjectRoot(path), true, path);
+    assert.throws(() => readSettings({ schemaVersion: 1, paths: { project: path } }), undefined, path);
+  }
+});

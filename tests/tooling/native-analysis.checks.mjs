@@ -14,8 +14,9 @@ test('native view callback recognition is heritage-scoped and still rejects unco
     await writeFile(join(scratch, 'package.json'), '{"name":"native-analysis","private":true,"type":"module"}');
     await mkdir(join(scratch, 'configs/quality'), { recursive: true });
     await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config, plugins: [],
-      entry: ['src/main.ts', 'scripts/quality/check-analyzer.mjs'] }));
-    await copyFile('scripts/quality/check-analyzer.mjs', join(scratch, 'scripts/quality/check-analyzer.mjs'));
+      entry: ['src/main.ts', 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'] }));
+    for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs'])
+      await copyFile(`scripts/quality/${script}`, join(scratch, 'scripts/quality', script));
     await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     const methods = rule.members.map(name => `${name}() { return 1; }`).join('\n');
     const source = extra => `class TextFileView {}\nexport class View extends TextFileView {\n${methods}\n${extra}\nclear() { return 0; }\n}\n`;

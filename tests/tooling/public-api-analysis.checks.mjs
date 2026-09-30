@@ -4,22 +4,28 @@ import { mkdir, readFile, writeFile, copyFile, symlink } from 'node:fs/promises'
 import { join, resolve } from 'node:path';
 import { archiveCommandFixture } from './archive-command-fixture.mjs';
 
-test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples while unrelated source and private exports remain checked', async () => {
+const implementation = 'export interface PublicContract { readonly title: string }\nexport const retained = () => 1;\n';
+async function analyzerProject(scratch, configure = config => config) {
   const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
+  const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
+  await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });
+  await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
+  await mkdir(join(scratch, 'configs/quality'), { recursive: true });
+  await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify(configure({ ...config,
+    entry: [...config.entry.filter(path => ['src/main.ts', 'src/features/api.ts'].includes(path)), 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'], plugins: [],
+  })));
+  for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(`scripts/quality/${script}`, join(scripts, script));
+  await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  await writeFile(join(source, 'main.ts'), 'import { retained } from "./application/internal"; console.log(retained());\n');
+  await writeFile(join(source, 'application/internal.ts'), implementation);
+  await writeFile(join(source, 'features/api.ts'), 'export type { PublicContract } from "../application/internal";\n');
+  return source;
+}
+const report = async scratch => JSON.parse(await readFile(join(scratch, 'reports/analyzer/fallow.json'), 'utf8'));
+
+test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples while unrelated source and private exports remain checked', async () => {
   await archiveCommandFixture(async ({ scratch, command }) => {
-    const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
-    await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });
-    await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
-    await mkdir(join(scratch, 'configs/quality'), { recursive: true });
-    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config,
-      entry: [...config.entry.filter(path => ['src/main.ts', 'src/features/api.ts'].includes(path)), 'scripts/quality/check-analyzer.mjs'], plugins: [],
-    }));
-    await copyFile('scripts/quality/check-analyzer.mjs', join(scripts, 'check-analyzer.mjs'));
-    await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-    await writeFile(join(source, 'main.ts'), 'import { retained } from "./application/internal"; console.log(retained());\n');
-    const implementation = 'export interface PublicContract { readonly title: string }\nexport const retained = () => 1;\n';
-    await writeFile(join(source, 'application/internal.ts'), implementation);
-    await writeFile(join(source, 'features/api.ts'), 'export type { PublicContract } from "../application/internal";\n');
+    const source = await analyzerProject(scratch);
     const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch,
       { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
     const clean = check();
@@ -30,11 +36,31 @@ test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples
       + 'export const unusedImplementation = 2;\nexport interface PrivateUnused { readonly hidden: boolean }\n');
     const rejected = check();
     assert.equal(rejected.status, 1, rejected.stdout + rejected.stderr);
-    const report = JSON.parse(await readFile(join(scratch, 'reports/analyzer/fallow.json'), 'utf8'));
-    assert.ok(report.unused_files.some(item => item.path === 'src/features/orphan.ts'));
-    assert.ok(report.unused_exports.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'unusedImplementation'));
-    assert.ok(report.unused_types.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'PrivateUnused'));
-    assert.ok(!report.unused_types.some(item => item.export_name === 'PublicContract'));
+    const found = await report(scratch);
+    assert.ok(found.unused_files.some(item => item.path === 'src/features/orphan.ts'));
+    assert.ok(found.unused_exports.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'unusedImplementation'));
+    assert.ok(found.unused_types.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'PrivateUnused'));
+    assert.ok(!found.unused_types.some(item => item.export_name === 'PublicContract'));
     assert.match(rejected.stderr, /ANALYZER_FAILED: 3/);
   }, { outputRoot: resolve('reports/analyzer-public-api') });
+});
+
+test('[ANALYZER-CONTRACT] consumed deprecated exports, degraded parsing and a missing parse gate fail the real analyzer', async () => {
+  for (const [label, configure, change, expected] of [
+    ['deprecated', config => config, async source => {
+      await writeFile(join(source, 'application/internal.ts'), `${implementation}/** @deprecated use retained */\nexport const legacy = () => 0;\n`);
+      await writeFile(join(source, 'main.ts'), 'import { legacy, retained } from "./application/internal"; console.log(retained(), legacy());\n');
+    }, /ANALYZER_FAILED: 1/],
+    ['parse', config => config, source => writeFile(join(source, 'application/internal.ts'), `${implementation}export function broken( {\n`), /ANALYZER_PARSE_ERROR/],
+    ['ungated', ({ failOnParseError, ...config }) => { assert.equal(failOnParseError, true); return config; }, async () => {}, /ANALYZER_GATE_parse-error/],
+  ]) {
+    await archiveCommandFixture(async ({ scratch, command }) => {
+      const source = await analyzerProject(scratch, configure);
+      await change(source);
+      const rejected = command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch, { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
+      assert.equal(rejected.status, 1, `${label}: ${rejected.stdout}${rejected.stderr}`);
+      assert.match(rejected.stderr, expected, label);
+      if (label === 'deprecated') assert.deepEqual((await report(scratch)).deprecated_exports_in_use.map(item => [item.export_name, item.consumer_count]), [['legacy', 1]]);
+    }, { outputRoot: resolve('reports/analyzer-contract') });
+  }
 });

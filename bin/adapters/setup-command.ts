@@ -35,7 +35,7 @@ async function settingsCommand(args: Arguments, context: CommandContext, input: 
 }
 /** Invocation flags override saved defaults without persisting those overrides. */
 export async function configuredArguments(args: Arguments, root: string): Promise<Arguments> {
-  if (!['sketch', 'prototype', 'studio'].includes(args.command)) return args;
+  if (!['sketch', 'prototype', 'studio', 'brainstorm'].includes(args.command)) return args;
   if (args.flags.help || ['schema', 'guide'].includes(args.action)) return args;
   const loaded = await loadSettings(root);
   if (loaded.content === null) return args;

@@ -1,3 +1,4 @@
+import { brainstormCommand } from './brainstorm.ts';
 import { firstRunCommand } from './first-run-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from '../../scripts/framework/catalog.ts';
@@ -49,6 +50,15 @@ export const makerHelp = `Shell maker — make first, generate when ready
   node bin/app new --input request.json --out projects/demo --json
   node bin/app new <dir> (--starter <id> | --from <project.json>)  Legacy creation
   node bin/app help new              Legacy options and approval policy
+  node bin/app brainstorm            Guided feature definition, optional prototype/boilerplate and reviewed verification
+  node bin/app brainstorm guide --json      Discover questions and the two sub-use-case roadmap
+  node bin/app brainstorm schema --json     Machine-readable request schema
+  node bin/app brainstorm context --json    Current project identity, saved base hash and existing surfaces
+  node bin/app brainstorm validate --input feature.json --json
+  node bin/app brainstorm feature --input feature.json --out brainstorms/my-feature --json
+  node bin/app brainstorm feature --input feature.json --out brainstorms/my-feature --apply <planHash> --json
+  node bin/app brainstorm verify --out brainstorms/my-feature --json
+  node bin/app brainstorm verify --out brainstorms/my-feature --apply <verificationPlanHash> --json
   node bin/app sketch                Interactive page/component editor
   node bin/app sketch show --json    Inspect saved IDs and page composition
   node bin/app sketch schema --json  Discover the versioned transaction schema
@@ -90,7 +100,7 @@ function parseFlags(tokens: string[]): Record<string, string | boolean> {
 export function parseArguments(argv: string[]): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  requireSketch(first === undefined || ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run'].includes(first), 'MAKER_COMMAND', 'Use new, sketch, prototype, studio, settings or project-setup.');
+  requireSketch(first === undefined || ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm'].includes(first), 'MAKER_COMMAND', 'Use new, sketch, brainstorm, prototype, studio, settings or project-setup.');
   const command = (first ?? 'studio') as Arguments['command'];
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
   const flags = parseFlags(tokens);
@@ -156,8 +166,8 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
 }
 function helpResult(args: Arguments): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'],
-      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
+    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run'],
+      ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
@@ -168,5 +178,5 @@ export async function execute(args: Arguments, context: CommandContext): Promise
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));
   args = await configuredArguments(args, context.root);
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_OPTION', 'Project selection flags are only available on new.');
-  return args.command === 'sketch' ? sketch(args, context) : prototype(args, context);
+  return args.command === 'sketch' ? sketch(args, context) : args.command === 'brainstorm' ? brainstormCommand(args, context) : prototype(args, context);
 }

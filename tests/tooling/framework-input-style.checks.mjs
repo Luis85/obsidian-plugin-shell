@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { readInput, ask } from '../../scripts/framework/input.ts';
+import { parseConfirmation } from '../../scripts/shared/confirmation.mjs';
 import { parseCliArguments, validateRequest, descriptor } from '../../scripts/framework/catalog.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { exportDesignSystem } from '../../scripts/framework/style-export.ts';
@@ -128,4 +129,10 @@ test('larger design-data profile does not relax small operation input or hostile
   assert.equal(parseDesignData(large).description.length, 1_100_000);
   assert.throws(() => parseDesignData(JSON.stringify({description: 'x'.repeat(4_000_000)})), /JSON_DATA_INVALID/);
   assert.throws(() => parseDesignData('{"constructor":{}}'), /JSON_DATA_INVALID/);
+});
+
+test('shared confirmation policy keeps yes/no semantics explicit and case-insensitive', () => {
+  for (const value of ['y', 'Y', 'yes', ' YES ']) assert.equal(parseConfirmation(value), true);
+  for (const value of ['', ' ', 'n', 'N', 'no', ' NO ']) assert.equal(parseConfirmation(value), false);
+  for (const value of ['maybe', '1', 'yep']) assert.equal(parseConfirmation(value), null);
 });

@@ -3,6 +3,7 @@ import { guidedSetup, continueSetup } from './setup-terminal.ts';
 import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
 import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 import { ask, readInput } from './input.ts';
+import { parseConfirmation } from '../shared/confirmation.mjs';
 import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';
 import { parseCliArguments, descriptor } from './catalog.ts';
@@ -25,7 +26,7 @@ function render(value: Result, machine: boolean): void {
   }
 }
 async function confirm(message: string, signal?: AbortSignal): Promise<boolean> {
-  return /^y(?:es)?$/i.test((await ask(stdin, stderr, message + ' [y/N] ', signal)).trim());
+  return parseConfirmation(await ask(stdin, stderr, message + ' [y/N] ', signal)) === true;
 }
 async function interactiveRun(request: Request, context: Context): Promise<Result> {
   let outcome = await executeOperation(request, context);

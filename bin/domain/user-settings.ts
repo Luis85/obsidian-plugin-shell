@@ -1,4 +1,5 @@
-import { defaultVaultConfigDirectory, protectedProjectRoots } from './host-paths.ts';
+import { defaultVaultConfigDirectory } from './host-paths.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.mjs';
 import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, type FirstRunPreferences } from './first-run.ts';
 import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';
@@ -16,14 +17,12 @@ export const defaultSettings: UserSettings = {
   paths: { prds: 'docs/prds', project: 'design/project.json', prototypes: 'prototypes/project', app: 'apps/product', brief: 'docs/project-brief.md', firstRunReport: 'reports/first-run.json' },
   preferences: { author: 'Your name', ui: 'auto', vaultConfigDirectory: defaultVaultConfigDirectory, scanRecursive: true, firstRun: firstRunDefaults },
 };
-const hasControl = (value: string) => [...value].some(character => { const code = character.charCodeAt(0); return code < 32 || code >= 127 && code <= 159; });
 /** Portable, vault-relative paths only. Host configuration and Git are never output locations. */
 export function projectPath(value: unknown): string {
   const path = text(value, 'relative path', 240);
   requireSketch(path === value, 'SETTINGS_PATH', 'Paths must not have leading or trailing whitespace.');
-  requireSketch(!path.includes('\\') && !path.split('/').some(part => !part || part === '.' || part === '..' ||
-    /[<>:"|?*]/.test(part) || hasControl(part) || /[ .]$/.test(part) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part)), 'SETTINGS_PATH', 'Use a portable vault-relative path without dot segments.');
-  requireSketch(!protectedProjectRoots.includes(path.split('/')[0]!.toLowerCase()), 'SETTINGS_PATH', 'Host, framework, dependency and Git directories are protected.');
+  requireSketch(hasPortableProjectSegments(path), 'SETTINGS_PATH', 'Use a portable vault-relative path without dot segments.');
+  requireSketch(!hasProtectedProjectRoot(path), 'SETTINGS_PATH', 'Host, framework, dependency and Git directories are protected.');
   return path;
 }
 const overlap = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
