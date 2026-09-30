@@ -88,7 +88,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C11:** The fully typed bounded-JSON implementation is now a dedicated `cli-data-contract` Fallow zone. Tests, tooling, maker-host and the compiler/companion tooling boundaries explicitly consume it; maker-domain remains isolated from it.
 - **C12:** `contracts/result.ts` now owns the typed protocol envelope and result constructor. Framework failures adapt into that envelope, while maker success and SketchError paths construct through the same helper; a dedicated `cli-result-contract` boundary prevents implementation dependencies from leaking back into the contract.
 - **C13:** Maker production coverage now includes the typed JSON contract, result envelope and file-plan facade used by `bin/`. The coverage inventory requires those files explicitly, and maker tests exercise contract success plus representative bounded-JSON refusal paths.
-- **Remaining C14–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C14:** `shared/process.ts` now owns the single Node-script spawn lifecycle. `framework/process.ts` remains the policy adapter for tool discovery, process-tree termination and public diagnostics but delegates spawning, bounded capture, timeout and abort mechanics to the shared typed primitive. The primitive has its own Fallow boundary.
+- **Remaining C15–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

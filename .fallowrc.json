@@ -330,6 +330,12 @@
         ]
       },
       {
+        "name": "cli-process-contract",
+        "patterns": [
+          "scripts/shared/process.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
           "scripts/shared/project-path.mjs"
@@ -450,7 +456,8 @@
           "maker-host",
           "project-path-contract",
           "cli-data-contract",
-          "cli-result-contract"
+          "cli-result-contract",
+          "cli-process-contract"
         ]
       },
       {
@@ -490,7 +497,8 @@
           "maker-host",
           "project-path-contract",
           "cli-data-contract",
-          "cli-result-contract"
+          "cli-result-contract",
+          "cli-process-contract"
         ]
       },
       {
@@ -577,6 +585,12 @@
         "from": "cli-result-contract",
         "allow": [
           "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-process-contract",
+        "allow": [
+          "cli-process-contract"
         ]
       },
       {

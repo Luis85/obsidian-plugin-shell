@@ -41,3 +41,13 @@ test('canonical CLI result envelope is isolated from implementation layers', () 
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-result-contract'), false);
 });
+
+test('shared Node process primitive is isolated behind the tooling adapter', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-process-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/process.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-process-contract')?.allow, ['cli-process-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-process-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-process-contract'), false);
+});
