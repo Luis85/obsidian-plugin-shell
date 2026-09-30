@@ -3,7 +3,7 @@ import type { Model } from '../../companion/compiler/model.ts';
 import type { Entry } from '../../companion/compiler/file-code.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../shared/file-plan.ts';
 import { digest, json, row, rows, text, requireValue } from '../../companion/compiler/model.ts';
 import { visualDefinitions } from '../../companion/compiler/visual-model.ts';
 import { visualVerification, visualAcceptanceTodo } from '../../companion/compiler/visual-files.ts';

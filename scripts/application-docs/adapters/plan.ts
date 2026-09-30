@@ -1,7 +1,7 @@
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
-import { createFilePlan } from '../../shared/file-plan.mjs';
+import { createFilePlan } from '../../shared/file-plan.ts';
 import { documentationProjectIntake } from './project-intake.ts';
 import { keyOf, equal, stable, insist, type DocsIndex, type Entity, type Conflict } from '../domain/contracts.ts';
 import { reconcile } from '../application/reconcile.ts';
