@@ -27,6 +27,7 @@ const commands = [
     ? ['scripts/testing/evidence-cli.mjs', 'run', 'tooling']
     : toolingStep,
   ['scripts/testing/suites.mjs', 'workbench-plugins'],
+  ['scripts/quality/check-workbench-plugins.mjs'],
   ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'],
   ['scripts/quality/lint-source.mjs'],
   ['node_modules/eslint/bin/eslint.js', 'src', 'bin', 'plugins', '--max-warnings', '0'],

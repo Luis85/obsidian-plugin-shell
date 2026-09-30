@@ -294,3 +294,9 @@ The archive smoke test permits Node's built-in type stripper only when that comp
 is unavailable locally, marks it `not-qualified`, and never calls that fallback a
 typecheck. Hosted qualification must use the locked compiler. Local results and
 remaining environment limitations are recorded in the accompanying handover evidence.
+
+## Workbench plugin starters and framework adapters
+
+Starter JSON no longer owns a closed frontend enum. A `project` starter names a framework adapter ID. The built-in IDs remain `nuxtui`, `vanilla`, `angular` and `none`; an enabled Workbench plugin can contribute another adapter and starter through its typed `PluginObject`.
+
+Plugin-provided starters are validated and hashed by the same loader as files under `configs/starters/`. ID collisions fail closed. The starter remains data-only; the trusted plugin supplies the adapter implementation. See [Workbench plugin development](./WORKBENCH-PLUGINS.md).

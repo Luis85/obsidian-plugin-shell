@@ -45,7 +45,7 @@ The stable IDs above map to the product-level starter families without renaming 
 
 The internal target names `plugin` and `cli` remain compatibility contracts; product surfaces should describe them as **Obsidian plugin** and **Terminal application**.
 
-Every project starter also emits the same typed local plugin system. Application extensions live under `plugins/<plugin-name>/`, own `src/`, `tests/`, `manifest.json` and `config.json`, and export a named `PluginObject`. See [generated project plugins](../docs/development/GENERATED-PROJECT-PLUGINS.md).
+Every project starter also emits the same typed local plugin system. Application extensions live under `plugins/<plugin-name>/`, own `src/`, `tests/`, `manifest.json` and `config.json`, and export a named `PluginObject`. See [generated project plugins](../docs/development/GENERATED-PROJECT-PLUGINS.md). Workbench itself has a separate [plugin SDK](../docs/development/WORKBENCH-PLUGINS.md) that can add framework adapters, project starters, events, CLI commands and Studio/TUI actions.
 
 A starter fixes its project type, frontend and targets; there is no creation-time
 override. To use another compatible combination, add a starter definition, for
@@ -76,8 +76,8 @@ A project starter uses the common definition contract from
 }
 ```
 
-`projectType` is `plugin`, `webapp`, `website`, `cli` or `hybrid`; `framework` is
-`nuxtui`, `vanilla`, `angular` or `none`. Targets are listed once in plugin, webapp,
+`projectType` is `plugin`, `webapp`, `website`, `cli` or `hybrid`; `framework` is a registered adapter ID. Built-ins are
+`nuxtui`, `vanilla`, `angular` and `none`, while Workbench plugins may add IDs such as `react`. Targets are listed once in plugin, webapp,
 website, cli order: exactly the project type's own target, or two or more for hybrid.
 CLI-only requires `none`; visual targets require a frontend. `angularPins` is
 required for Angular (exact versions, one `@angular` version) and forbidden otherwise.
