@@ -34,14 +34,16 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js bin --max-warnings 0
-          node node_modules/oxlint/bin/oxlint bin --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js bin plugins --max-warnings 0
+          node node_modules/oxlint/bin/oxlint bin plugins --no-ignore --deny-warnings
+          node "$QUALIFIED_NPM" run check:plugins
       - name: Interactive, agent, compiler and safe-write contracts
         if: ${{ !cancelled() }}
         run: |
           mkdir -p reports/maker
           set -o pipefail
           node "$QUALIFIED_NPM" run test:maker 2>&1 | tee reports/maker/tests.log
+          node "$QUALIFIED_NPM" run test:plugins 2>&1 | tee reports/maker/plugins.log
       - name: Actual pseudo-terminal authoring and restoration
         if: ${{ !cancelled() && runner.os != 'Windows' }}
         run: node "$QUALIFIED_NPM" run test:maker:pty
