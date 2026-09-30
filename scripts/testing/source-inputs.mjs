@@ -44,7 +44,7 @@ async function defaultRoots(root) {
     'docs/concepts/companion/companion-project.json', '.agents/skills/companion-prototype-design/SKILL.md']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
-  for (const directory of ['bin', 'docs/concepts/companion/test-kit', 'docs/concepts/companion/starters', '.claude/skills/companion-prototype-design']) {
+  for (const directory of ['bin', 'docs/concepts/companion/editor', 'docs/concepts/companion/test-kit', 'docs/concepts/companion/starters', '.claude/skills/companion-prototype-design']) {
     if (await optionalInput(root, directory, true)) roots.push(directory);
   }
   return roots;
