@@ -30,7 +30,7 @@ const runGit: Git = (root, args) => new Promise(accept => {
     (error, stdout) => accept(error ? null : stdout));
 });
 /** Changes vitest related cannot trace: build/test configuration next to the code. */
-const configuration = /^(?:package(?:-lock)?\.json|tsconfig[^/]*\.json|vite[^/]*\.config\.[cm]?[jt]s|vitest[^/]*\.config\.[cm]?[jt]s|tests\/suites\.json)$/;
+const configuration = /^(?:package(?:-lock)?\.json|tsconfig[^/]*\.json|configs\/.+|vite[^/]*\.config\.[cm]?[jt]s|vitest[^/]*\.config\.[cm]?[jt]s|tests\/suites\.json)$/;
 /** NUL-separated git output keeps non-ASCII and special paths verbatim (no core.quotePath quoting). */
 const fields = (text: string) => text.split('\0').filter(Boolean);
 /** Tracked changes against HEAD plus untracked files, relative to the project root. A deleted file, a
@@ -65,11 +65,11 @@ async function makerSteps(root: string): Promise<CheckStep[]> {
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root);
-  const config = project ? ['--config', 'vitest.project.config.mjs'] : [];
+  const config = ['--config', project ? 'vitest.project.config.mjs' : 'configs/testing/vitest.config.mjs'];
   const typecheck: CheckStep = project
     ? { id: 'typecheck', display: 'vue-tsc --noEmit --project tsconfig.project.json', entry: vueTsc, args: ['--noEmit', '--project', 'tsconfig.project.json'] }
     : { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
-  const fullTest: CheckStep = { id: 'test', display: `vitest run${project ? ' --config vitest.project.config.mjs' : ''}`, entry: vitest, args: ['run', ...config] };
+  const fullTest: CheckStep = { id: 'test', display: `vitest run ${config.join(' ')}`, entry: vitest, args: ['run', ...config] };
   if (!fast) {
     const lint: CheckStep[] = project ? [] : [{ id: 'lint', display: 'node scripts/quality/lint-source.mjs', entry: 'scripts/quality/lint-source.mjs', args: [] }];
     // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).

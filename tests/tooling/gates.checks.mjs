@@ -121,7 +121,7 @@ test('[GATE-02-02] ESLint 10 executes the real TypeScript, Obsidian and Vue rule
     // loading alone took 50–51s in both. Isolation reduced parsing 24.9s -> 2.1s.
     // The finite 180s startup allowance is not a lint/performance threshold or retry.
     const started = performance.now();
-    const run = spawnSync(process.execPath, ['node_modules/eslint/bin/eslint.js', ts, vue, '--format', 'json'], { encoding: 'utf8', timeout: 180000, windowsHide: true });
+    const run = spawnSync(process.execPath, ['node_modules/eslint/bin/eslint.js', '-c', 'configs/lint/eslint.config.mjs', ts, vue, '--format', 'json'], { encoding: 'utf8', timeout: 180000, windowsHide: true });
     assert.equal(run.error, undefined, `ESLint probe process failed after ${Math.round(performance.now() - started)}ms: ${run.error?.code ?? run.signal ?? 'unknown'}; ${run.stderr}`);
     assert.equal(run.status, 1, run.stderr);
     const reports = JSON.parse(run.stdout); const rules = reports.flatMap(file => file.messages.map(message => message.ruleId));

@@ -10,7 +10,8 @@ test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples
     const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
     await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });
     await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
-    await writeFile(join(scratch, '.fallowrc.json'), JSON.stringify({ ...config,
+    await mkdir(join(scratch, 'configs/quality'), { recursive: true });
+    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config,
       entry: [...config.entry.filter(path => ['src/main.ts', 'src/features/api.ts'].includes(path)), 'scripts/quality/check-analyzer.mjs'], plugins: [],
     }));
     await copyFile('scripts/quality/check-analyzer.mjs', join(scripts, 'check-analyzer.mjs'));

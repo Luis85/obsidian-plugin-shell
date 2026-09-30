@@ -49,7 +49,7 @@ function suiteCommands(root, suite, extra = []) {
   switch (runner.type) {
     case 'node-test': return [[process.execPath, '--test', '--test-concurrency=1', ...extra, ...suite.files]];
     case 'vitest': return [[process.execPath, 'node_modules/vitest/vitest.mjs', 'run', '--config', runner.config, ...extra]];
-    case 'playwright': return [[process.execPath, 'node_modules/@playwright/test/cli.js', 'test', ...extra]];
+    case 'playwright': return [[process.execPath, 'node_modules/@playwright/test/cli.js', 'test', '--config', 'configs/testing/playwright.config.ts', ...extra]];
     case 'npm-script': return [[process.execPath, process.env.npm_execpath ?? 'npm-cli.js', 'run', runner.script, ...(extra.length ? ['--', ...extra] : [])]];
     case 'manual': return [];
     default: return runner.commands.flatMap(command => Array.isArray(command) ? [expand(command)]

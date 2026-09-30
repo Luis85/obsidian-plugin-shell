@@ -39,7 +39,7 @@ export async function browserEvidenceFixture(t, body) {
   await mkdir(join(root, 'tests/e2e')); await mkdir(join(root, 'dist'));
   await symlink(resolve('node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   for (const file of ['main.js', 'styles.css', 'manifest.json']) await writeFile(join(root, 'dist', file), 'fixture bytes, not a qualified plugin');
-  await writeFile(join(root, 'configs/testing/playwright.config.ts'), 'export default { testDir: "./tests/e2e", workers: 1, retries: 0 };');
+  await writeFile(join(root, 'configs/testing/playwright.config.ts'), 'export default { testDir: "../../tests/e2e", workers: 1, retries: 0 };');
   await writeFile(join(root, 'tests/e2e/probe.spec.ts'), `import { test, expect } from '@playwright/test';\n${body}`);
   return root;
 }

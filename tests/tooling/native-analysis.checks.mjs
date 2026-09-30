@@ -12,7 +12,8 @@ test('native view callback recognition is heritage-scoped and still rejects unco
     await mkdir(join(scratch, 'src/infrastructure'), { recursive: true });
     await mkdir(join(scratch, 'scripts/quality'), { recursive: true });
     await writeFile(join(scratch, 'package.json'), '{"name":"native-analysis","private":true,"type":"module"}');
-    await writeFile(join(scratch, '.fallowrc.json'), JSON.stringify({ ...config, plugins: [],
+    await mkdir(join(scratch, 'configs/quality'), { recursive: true });
+    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config, plugins: [],
       entry: ['src/main.ts', 'scripts/quality/check-analyzer.mjs'] }));
     await copyFile('scripts/quality/check-analyzer.mjs', join(scratch, 'scripts/quality/check-analyzer.mjs'));
     await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');

@@ -77,8 +77,8 @@ async function processOperation(request: Request, context: Context): Promise<Res
     if (profile === 'native') entry = 'scripts/testing/check-native.mjs';
     // Real-Obsidian Vitest suite in contained vaults; downloads only with OBSIDIAN_ALLOW_DOWNLOAD=1.
     else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
-    else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test']; }
-    else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); }
+    else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test', '--config', 'configs/testing/playwright.config.ts']; }
+    else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); else args.push('--config', 'configs/testing/vitest.config.mjs'); }
   } else if (request.command === 'verify') {
     acceptProfile(request.command, profile);
     if (profile === 'project') { entry = await npmEntry(); args = ['run', 'verify:project']; }

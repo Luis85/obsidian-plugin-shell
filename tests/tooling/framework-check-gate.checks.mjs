@@ -64,12 +64,12 @@ test('scope detection selects project-suite steps in a generated project', async
   const shell = await checkSteps(dir, false);
   assert.deepEqual(shell.steps.map(step => [step.id, step.entry, step.args.join(' ')]), [
     ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'], ['lint', 'scripts/quality/lint-source.mjs', ''],
-    ['eslint', 'node_modules/eslint/bin/eslint.js', 'src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run']]);
+    ['eslint', 'node_modules/eslint/bin/eslint.js', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run --config configs/testing/vitest.config.mjs']]);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}'); await writeFile(join(dir, 'tsconfig.project.json'), '{}');
   const project = await checkSteps(dir, false);
   assert.equal(project.scope, 'generated-project');
   assert.deepEqual(project.steps.map(step => [step.id, step.args.join(' ')]), [
-    ['typecheck', '--noEmit --project tsconfig.project.json'], ['eslint', 'src --max-warnings 0'], ['test', 'run --config vitest.project.config.mjs']]);
+    ['typecheck', '--noEmit --project tsconfig.project.json'], ['eslint', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'run --config vitest.project.config.mjs']]);
   const { exit, result } = cli(['check', '--root', dir, '--dry-run']);
   assert.equal(exit, 0); assert.equal(result.status, 'planned'); assert.equal(result.data.execution, 'not-run');
   assert.deepEqual(result.data.steps.map(step => step.status), ['not-run', 'not-run', 'not-run']);
@@ -91,7 +91,7 @@ test('fast mode runs tests related to changed and untracked source files only', 
   // Non-ASCII paths arrive verbatim (git -z), not as core.quotePath-quoted strings that would be dropped.
   assert.deepEqual(changed.changes, { source: 'git', files: ['src/View.vue', 'src/a.ts', 'src/nouvelle-vue été.ts', 'src/Ünïcode note.ts'].sort() });
   assert.deepEqual(changed.steps.map(step => step.id), ['typecheck', 'test']);
-  assert.deepEqual(changed.steps[1].args, ['related', '--run', '--passWithNoTests', ...changed.changes.files]);
+  assert.deepEqual(changed.steps[1].args, ['related', '--run', '--passWithNoTests', '--config', 'configs/testing/vitest.config.mjs', ...changed.changes.files]);
   const nested = await checkSteps(join(dir, 'src'), true);
   assert.deepEqual(nested.changes.files, ['View.vue', 'a.ts', 'nouvelle-vue été.ts', 'Ünïcode note.ts'].sort(), 'paths are relative to the checked root');
 });
@@ -101,7 +101,7 @@ test('fast mode runs the full suite when deleted, configuration or non-code test
   await writeFile(join(dir, 'src/a.ts'), 'a'); await writeFile(join(dir, 'src/gone.ts'), 'x'); await writeFile(join(dir, 'tests/fixtures/data.json'), '{}');
   await writeFile(join(dir, 'package.json'), '{}'); await writeFile(join(dir, 'README.md'), 'readme');
   git(dir, 'init', '-q'); git(dir, 'add', '.'); git(dir, 'commit', '-q', '-m', 'initial');
-  const full = ['run'];
+  const full = ['run', '--config', 'configs/testing/vitest.config.mjs'];
   await unlink(join(dir, 'src/gone.ts'));
   const deleted = await checkSteps(dir, true);
   assert.deepEqual(deleted.changes.untraceable, ['src/gone.ts']); assert.match(deleted.changes.reason, /deleted, configuration or non-code files changed \(src\/gone\.ts\); running the full suite/);
@@ -140,16 +140,16 @@ test('fast mode falls back to the full suite without git or with too many change
   const dir = await scratch(t);
   const missing = await checkSteps(dir, true, async () => null);
   assert.equal(missing.changes.source, 'unavailable'); assert.match(missing.changes.reason, /full suite/);
-  assert.deepEqual(missing.steps[1].args, ['run']);
+  assert.deepEqual(missing.steps[1].args, ['run', '--config', 'configs/testing/vitest.config.mjs']);
   const names = Array.from({ length: 201 }, (_, index) => `f${index}.ts`);
   for (const name of names) await writeFile(join(dir, name), '');
   const many = await checkSteps(dir, true, async (_, args) => args[0] === 'diff' ? names.map(name => `M\0${name}\0`).join('') : '');
   assert.equal(many.changes.files.length, 201); assert.match(many.changes.reason, /more than 200/);
-  assert.deepEqual(many.steps[1].args, ['run']);
+  assert.deepEqual(many.steps[1].args, ['run', '--config', 'configs/testing/vitest.config.mjs']);
   const nodeOnly = { ...process.env, PATH: dirname(process.execPath) };
   const { exit, result } = cli(['check', '--fast', '--dry-run', '--root', dir], nodeOnly);
   assert.equal(exit, 0); assert.equal(result.data.mode, 'fast');
-  assert.equal(result.data.changes.source, 'unavailable'); assert.equal(result.data.steps[1].command, 'vitest run');
+  assert.equal(result.data.changes.source, 'unavailable'); assert.equal(result.data.steps[1].command, 'vitest run --config configs/testing/vitest.config.mjs');
 });
 test('cancellation skips remaining steps and reports cancelled', async t => {
   const dir = await scratch(t);

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,8 +18,11 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
   if ((await readdir(root)).includes('bin')) await visit(resolve(root, 'bin'));
   files.sort();
   if (!files.length) throw new Error('LINT_SOURCE_EMPTY');
+  // The project's own rules win; a bare source tree (archive probe) uses this framework's reviewed rules.
+  const config = [join(root, 'configs/lint/oxlintrc.json'), fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url))].find(path => existsSync(path));
+  if (!config) throw new Error('LINT_SOURCE_CONFIG_MISSING');
   for (let offset = 0; offset < files.length; offset += 100) {
-    await runNode(tool, ['-c', 'configs/lint/oxlintrc.json', ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
+    await runNode(tool, ['-c', config, ...files.slice(offset, offset + 100), '--no-ignore', '--deny-warnings'], { cwd: root });
   }
   return { status: 'passed', files: files.length, scope: 'every owned src/bin JS/TS/Vue input, explicit paths' };
 }
