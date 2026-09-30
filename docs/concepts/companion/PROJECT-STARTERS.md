@@ -50,9 +50,9 @@ Focused starters provide original PRD acceptance TODOs and detailed compositions
 
 ## Files and contracts
 
-`starters/catalog.json` has catalog schema 1 and bounded metadata: stable ID, version, category, difficulty, description, outcome, includes, remaining implementation, tags, local filename and SHA-256. Each `<id>.companion.json` is a complete ordinary **project-v5** document of the retired format. There is no starter-specific project schema or executable payload.
+Starters are the external definitions in `configs/starters/*.json` (see `scripts/starters/starter.schema.json`); a Companion starter embeds one complete ordinary **project schema 6** document. There is no starter-specific project schema or executable payload, and the concept HTML embeds no starter.
 
-The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy inside the concept. The shell and compiler read only the external v6 definitions (`scripts/starters/`). The generator consumes the normal exported project document, not catalog metadata.
+The concept loads selected definition files into its session catalog, hashes their exact bytes, and validates and configures them with the same bundled contract the shell uses (`scripts/companion/concept-contract.ts`: `scripts/starters/browser.ts` and `scripts/companion/starter-contract.mjs`). The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 
@@ -70,15 +70,14 @@ These are browser safeguards. Native Markdown transactions and real multi-window
 
 Create the full definition through the existing companion authoring model and export it. Keep the project small, original, bounded, offline and meaningful. Describe one differentiating use case; avoid multiplying label-only clones. Include realistic remaining work and designed acceptance rather than assertions of implementation.
 
-Place the file under `starters/`, update its exact SHA-256 in `catalog.json`, and maintain a unique portable ID. Bump the starter's version when changing its template contract. Preserve meaningful internal references; never silently migrate an already created project.
+Place the definition under `configs/starters/` with a unique portable ID, then review the generated-output baseline with `node scripts/compiler/golden.mjs --write` and `--check`. Bump the starter's version when changing its template contract. Preserve meaningful internal references; never silently migrate an already created project.
 
-The folder has an exact inventory. Unlisted files, missing files, duplicate sources, traversal, symlinks and altered bytes, including a CRLF checkout, are rejected. The repository `.gitattributes` pins LF on every platform so a Windows `autocrlf` checkout cannot turn a reviewed SHA-256 into a false integrity failure. No remote URLs can stand in for a source filename. Adding a runtime source or style also requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
+The concept's own assembly inputs keep an exact inventory: adding a runtime source or style requires the existing exact assembly/analyzer entry. Do not exempt a new source from maintainability gates.
 
 Run:
 
 ```sh
 python3 scripts/concepts/build-companion.py
-python3 scripts/concepts/export-companion-project.py
 python3 -B tests/concepts/companion-assembly.test.py
 node --test tests/tooling/project-starters.checks.mjs
 python3 tests/concepts/companion-project-starters.browser.py

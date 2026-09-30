@@ -73,7 +73,7 @@ No code or URLs in the JSON are evaluated, imported as executable modules, fetch
 
 ## Browser round trip
 
-Use **Load companion project**, or author another project, then **Export project JSON**. Import is available on the welcome screen, overview and in Preferences. Choose a file (recommended for large pretty-printed exports) or paste JSON, review its identity/counts/folders, and explicitly confirm replacement. Export the current project before replacing it when it needs to be kept.
+Load the golden self-project from **Project starters** (select `configs/starters/companion-plugin.json`), or author another project, then **Export project JSON**. Import is available on the welcome screen, overview and in Preferences. Choose a file (recommended for large pretty-printed exports) or paste JSON, review its identity/counts/folders, and explicitly confirm replacement. Export the current project before replacing it when it needs to be kept.
 
 One vault still owns one project. Import does not append a second project or merge identities. It resets execution trust, approvals, preparation, generated-file ownership, simulation sessions and quality/run receipts. Local host files remain unchanged; the simulated owned Project.md is replaced only while still unchanged and owned. Existing generated files are not deleted or assumed to belong to the imported project. Source preparation remains additive and must review any collisions.
 

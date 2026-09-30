@@ -5,7 +5,7 @@ Related: issue #19, PR #5's full project JSON contract. This is shell tooling, n
 ## User journey
 
 1. Download/extract the framework. Use its qualified Node/npm versions. `node shell.mjs setup` forwards to the existing guided setup; `node shell.mjs make` forwards to the existing maker. Both also retain their npm entrypoints.
-2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The bundled `docs/concepts/companion/companion-project.json` is the companion's own design and is the qualification fixture.
+2. Finish and save the design in the companion HTML prototype, then export **Project JSON**. The golden starter `configs/starters/companion-plugin.json` embeds the companion's own schema 6 design and is the qualification fixture.
 3. **Recommended:** create the project in one reviewable command. It validates the export with the shared contract, keeps its identity unless `--id/--name/--author` override it, previews the plan and hash, and writes only with `--yes` or `--apply <planHash>` into an absent or empty folder outside the checkout:
 
 ```sh

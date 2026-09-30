@@ -8,14 +8,16 @@ From the repository root, after installing its qualified locked dependencies:
 npm run companion:build
 ```
 
-Open `reports/companion-mvp/companion-journey-lens.html`. Its companion export is
-`reports/companion-mvp/companion-project-v6.json`. Both are byte-identical aliases
-of the checked authoring outputs `index.html` and `companion-project.json` in that
-**reports** directory, not the checked-in v5 build base.
+Open `reports/companion-mvp/companion-journey-lens.html`, a byte-identical alias of
+`reports/companion-mvp/index.html`. The qualification export of the golden self-project
+is `reports/companion-mvp/companion-project-v6.json` (alias `companion-project.json`),
+written from `configs/starters/companion-plugin.json`. The checked-in schema 6 concept
+`docs/concepts/companion/index.html` is only the build base.
 The existing Companion workflow includes these files in `companion-mvp-authoring`.
 The HTML embeds its runtime, CSS and icons; it needs no server or runtime CDN.
 
-Use **Load companion project**, confirm the import, then **Design → Sitemap & views**.
+In **Project starters**, select `configs/starters/companion-plugin.json`, review and confirm,
+then **Design → Sitemap & views**.
 Journey Lens replaces the old sitemap inside the existing Companion workbench.
 The page editor, component library, data sources, requirements and other workspaces
 remain in that shell. This is not a second application or a generated clickdummy.
