@@ -4,8 +4,8 @@ import { object } from './configuration.ts';
 import { hash } from './files.ts';
 import { requireThat } from './contracts.ts';
 /** Prototype implementation and its assembly checks are maintainer-only, not consumer dependencies. */
-const excludedRoots = ['configs/starters/', 'docs/concepts/companion/starters/', 'docs/concepts/companion/seeds/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
-const excludedFiles = new Set(['docs/concepts/companion/companion-project.json','docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
+const excludedRoots = ['configs/starters/', 'docs/concepts/companion/src/', 'docs/concepts/companion/vendor/', 'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'scripts/concepts/', 'tests/concepts/'];
+const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', 'tests/tooling/companion-boundaries.checks.mjs', 'tests/tooling/concept-metrics.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs',
   // Starter-pack qualification reads canonical definitions and concept builders that only the maintainer checkout carries.
   '.github/workflows/starter-distribution.yml', ...['golden', 'definitions', 'lifecycle', 'classic-assembly', 'distribution'].map(name => `tests/tooling/starter-${name}.checks.mjs`)]);
 /** These reviewed runtime libraries are compiler dependencies, not starter content. */
