@@ -5,7 +5,7 @@ import { args, need, readBytes, readJson, readText, sha256, noLinks, isMain, cli
 
 const FILES = [
   'AGENTS.md', 'package.json', 'package-lock.json', '.nvmrc', 'shell.mjs',
-  'scripts/companion/project-contract.mjs', 'scripts/companion/read-project.mjs',
+  'scripts/companion/authoring-contract.ts', 'scripts/companion/read-project.mjs',
   'scripts/companion/generate.mjs', 'scripts/companion/visual/visual-validate.mjs',
   'docs/development/COMPANION-PROJECT-JSON.md', 'docs/development/COMPANION-GENERATOR.md',
   'docs/concepts/companion/VISUAL-EDITORS.md',
@@ -21,7 +21,7 @@ export function inspectRepository(directory) {
   if (!fs.statSync(repo).isDirectory()) throw new Error('Repository must be a directory');
   const pkg = readJson(path.join(repo, 'package.json'));
   const lock = readJson(path.join(repo, 'package-lock.json'));
-  const source = readText(path.join(repo, 'scripts/companion/project-contract.mjs'));
+  const source = readText(path.join(repo, 'scripts/companion/authoring-contract.ts'));
   const dependencies = { ...pkg.dependencies, ...pkg.devDependencies };
   const files = FILES.map(file => {
     try { return { path: file, sha256: sha256(readBytes(path.join(repo, file))) }; }
@@ -42,7 +42,7 @@ export function inspectRepository(directory) {
       dirty: git(repo, ['status', '--porcelain']) },
     toolchain: { node: fs.existsSync(path.join(repo, '.nvmrc')) ? readText(path.join(repo, '.nvmrc')).trim() : null,
       packageManager: pkg.packageManager ?? null, engines: pkg.engines ?? null },
-    pins, contract: { version: numberConstant('COMPANION_VERSION'), maxBytes: numberConstant('COMPANION_MAX_BYTES') },
+    pins, contract: { version: numberConstant('AUTHORING_VERSION'), maxBytes: numberConstant('COMPANION_MAX_BYTES') },
     commands: Object.fromEntries(Object.entries(pkg.scripts ?? {}).filter(([key]) =>
       ['companion:generate', 'companion:scaffold', 'check', 'verify', 'typecheck', 'build', 'test'].includes(key))),
     files,

@@ -4,9 +4,9 @@ Observed through authenticated repository reads on 2026-09-27:
 - Repository: `Luis85/obsidian-plugin-shell`, PR #5.
 - PR head: `6178b1025336941ad6fb10eae4e26930622363f9`.
 - Branch: `docs/companion-plugin-prd`; PR was open and unmerged.
-- The PR description still references v4 in places. Source documents and the executable
-  `project-contract.mjs` use transfer v5. Resolve conflicts in favor of executable code
-  plus its tests, not this snapshot or the PR body.
+- That snapshot used transfer v5. The shell now reads only project schema 6 through the
+  executable `authoring-contract.ts`. Resolve conflicts in favor of executable code plus
+  its tests, not this snapshot or a PR body.
 
 ## Inspect before every prompt and again before execution
 
@@ -16,7 +16,7 @@ Read at minimum:
 AGENTS.md
 package.json, package-lock.json, .nvmrc
 README.md, TEMPLATE-GUIDE.md
-scripts/companion/project-contract.mjs
+scripts/companion/authoring-contract.ts
 scripts/companion/read-project.mjs
 scripts/companion/generate.mjs
 scripts/companion/visual/visual-validate.mjs
@@ -30,7 +30,7 @@ docs/development/FRAMEWORK-CLI.md
 docs/development/COMPANION-HANDOFF.md
 docs/development/DESIGN-SYSTEM-STYLES.md
 docs/concepts/companion/VISUAL-EDITORS.md
-docs/concepts/companion/starters/ (choose an actual full current starter)
+configs/starters/ (choose an actual full current starter; each embeds project schema 6)
 harness/, src/bootstrap/, scripts/styles/, scripts/bundling/
 ```
 
@@ -58,15 +58,15 @@ add `latest`, or confuse Node's TS stripping with type checking.
 
 ## Actual transfer format
 
-Current transport: `kind: "obsidian-companion-project"`, `schemaVersion: 5`,
+Current transport: `kind: "obsidian-companion-project"`, `schemaVersion: 6`,
 `executable: false`. Complete top-level members are `kind`, `schemaVersion`,
 `executable`, `project`, `settings`, `design`, `notes`. Project identity includes
 `id`, `name`, `author`, `version`, `description`. Settings include portable,
 non-overlapping `codebaseFolder` and `testsFolder`.
 
 `design.schema` must match the transport. `design.visualDesigns` currently uses
-subsystem schema 3, catalog `{id: "nuxt-ui", version: 1}`. V5 may not include
-`detailDesigns`. V1–V4 compatibility is migration support, not an invitation to author
+subsystem schema 3, catalog `{id: "nuxt-ui", version: 1}`. A document may not include
+`detailDesigns`. Schema 1–5 documents are rejected, never migrated; never author
 obsolete payloads. The byte limit is 4,000,000, including UTF-8 input whitespace.
 Read the real contracts for all nested fields and limits; a minimal envelope is not
 a complete prototype design. Use the current export/starter and real builders.

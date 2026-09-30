@@ -49,8 +49,8 @@ browser-check runner, change reporting, safe ZIP packaging; helper regression te
 See `scripts/README.md` for commands and `VERIFICATION.md` for tested/untested scope.
 
 The observed PR #5 head is 6178b1025336941ad6fb10eae4e26930622363f9. This skill explicitly
-rechecks it each time. At inspection the real contract was v5, not the v4 text still
-present in parts of the PR description.
+rechecks it each time. The real contract is now project schema 6 only
+(`scripts/companion/authoring-contract.ts`); schema 1–5 input is rejected, never migrated.
 
 ## Important boundaries
 

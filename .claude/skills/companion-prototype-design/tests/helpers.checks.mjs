@@ -117,10 +117,10 @@ test('repository inspection reports declared/locked mismatch without executing s
   fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ dependencies: { vue: '3.5.43' }, packageManager: 'npm@11.19.1' }));
   fs.writeFileSync(path.join(root, 'package-lock.json'), JSON.stringify({ packages: { 'node_modules/vue': { version: '3.5.42' } } }));
   fs.writeFileSync(path.join(root, '.nvmrc'), '24.21.0\n');
-  fs.writeFileSync(path.join(root, 'scripts/companion/project-contract.mjs'),
-    'export const COMPANION_VERSION = 5;\nexport const COMPANION_MAX_BYTES = 4_000_000;\nthrow new Error("must not execute");');
+  fs.writeFileSync(path.join(root, 'scripts/companion/authoring-contract.ts'),
+    'export const AUTHORING_VERSION = 6;\nexport const COMPANION_MAX_BYTES = 4_000_000;\nthrow new Error("must not execute");');
   const report = inspectRepository(root);
-  assert.equal(report.contract.version, 5);
+  assert.equal(report.contract.version, 6);
   assert.equal(report.contract.maxBytes, 4000000);
   assert.equal(report.pins.vue.declared, '3.5.43');
   assert.equal(report.pins.vue.locked, '3.5.42');
