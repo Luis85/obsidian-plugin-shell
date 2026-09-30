@@ -167,7 +167,7 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
 function helpResult(args: Arguments): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
     return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run'],
-      ...(legacy ? { makerCommands: ['new', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
+      ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {

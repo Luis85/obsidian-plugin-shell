@@ -2,7 +2,7 @@
 
 The default interactive maker now uses a persistent keyboard-driven work surface
 when stdin/stderr are terminals with raw-input support. Run `node shell.mjs`,
-`node shell.mjs sketch` or `node shell.mjs prototype`. The same TypeScript code
+`node shell.mjs sketch`, `node shell.mjs brainstorm` or `node shell.mjs prototype`. The same TypeScript code
 ships in the pre-install compiled kit; no additional package or runtime is needed.
 The library comparison and design rationale are in
 [CLI TUI research](../docs/research/CLI-TUI-RESEARCH.md).
@@ -11,6 +11,7 @@ The library comparison and design rationale are in
 node shell.mjs studio --ui tui
 node shell.mjs studio --ui plain
 node shell.mjs prototype --no-color
+node shell.mjs brainstorm --ui tui
 ```
 
 `--ui auto|tui|plain` selects the presentation. `SHELL_UI` supplies its default;

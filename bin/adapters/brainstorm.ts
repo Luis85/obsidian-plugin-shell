@@ -1,5 +1,4 @@
 import { join } from 'node:path';
-import type { Readable } from 'node:stream';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
 import { readInput } from '../../scripts/framework/input.ts';
@@ -75,7 +74,8 @@ export async function brainstormFeaturePlan(input: unknown, options: BrainstormO
   if (request.output !== 'definition') {
     const selection = await savedProjectSelection(options.root);
     const kind = request.output === 'prototype' ? 'clickdummy' : selection ? 'project' : 'obsidian-plugin';
-    const emitted = await compile(result.candidate, options.frameworkRoot, kind, options.signal, selection);
+    const emitted = await compile(result.candidate, options.frameworkRoot, kind, options.signal,
+      kind === 'project' ? selection : undefined);
     compiler = { outputKind: kind, fingerprint: emitted.compilation.fingerprint,
       readiness: emitted.compilation.readiness, artifacts: emitted.artifacts.length };
     const owned = emitted.artifacts.map(item => ({
