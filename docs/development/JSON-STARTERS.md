@@ -29,6 +29,10 @@ catalog: `plugin-nuxtui`, `plugin-vanilla`, `plugin-angular`, `webapp-nuxtui`,
 `webapp-vanilla`, `webapp-angular` (also used by `project-setup`), `website`, `cli`,
 `hybrid-nuxtui`, `hybrid-vanilla` and `hybrid-angular`.
 
+Those stable IDs form four primary product families: Obsidian plugin (`plugin-*`), web application (`webapp-*`), terminal application (`cli`) and website (`website`). Obsidian plugins and web applications each ship Nuxt UI, vanilla TypeScript and Angular variants. The stable target/ID vocabulary remains unchanged for saved requests and project sidecars.
+
+All `project` starters emit the shared TypeScript [generated project plugin system](./GENERATED-PROJECT-PLUGINS.md). Plugin-specific source and tests stay under `plugins/<plugin-name>/`, beside that plugin's `manifest.json` and `config.json`; each plugin exports a typed `PluginObject` and is activated through explicit static registration.
+
 Running a starter is the only way to create a project. `new --from <project.json>`
 remains the separate import of an existing exported Companion project.
 

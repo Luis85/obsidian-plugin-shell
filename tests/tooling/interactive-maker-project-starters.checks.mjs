@@ -16,6 +16,12 @@ import { main } from '../../bin/shell.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const starters = await projectStarters(frameworkRoot);
 const expectedIds = ['cli', 'hybrid-angular', 'hybrid-nuxtui', 'hybrid-vanilla', 'plugin-angular', 'plugin-nuxtui', 'plugin-vanilla', 'webapp-angular', 'webapp-nuxtui', 'webapp-vanilla', 'website'];
+const useCaseMatrix = Object.freeze({
+  'obsidian-plugin': ['plugin-angular', 'plugin-nuxtui', 'plugin-vanilla'],
+  webapp: ['webapp-angular', 'webapp-nuxtui', 'webapp-vanilla'],
+  'terminal-app': ['cli'],
+  website: ['website'],
+});
 const selection = id => starters.find(item => item.id === id).selection;
 const identity = { id: 'custom-project', version: '1.0.0', sha256: 'a'.repeat(64) };
 const pins = Object.fromEntries(angularPackages.map(name => [name, name.startsWith('@angular/') ? '22.0.0' : name === 'rxjs' ? '7.8.2' : '2.8.1']));
@@ -42,6 +48,14 @@ test('installed project starters replace the preset catalog; each records its ow
   const angular = starters.filter(item => item.selection.framework === 'angular');
   assert.deepEqual(angular.map(item => item.id), ['hybrid-angular', 'plugin-angular', 'webapp-angular']);
   for (const item of angular) assert.deepEqual(item.selection.angularPins, pins, 'Offline inputs provision one reviewed Angular pin set.');
+});
+test('primary project use-cases have complete starter coverage and expected variants', () => {
+  for (const [useCase, ids] of Object.entries(useCaseMatrix)) for (const id of ids)
+    assert.ok(selection(id), useCase + ' is missing ' + id);
+  assert.deepEqual(useCaseMatrix['obsidian-plugin'].map(id => selection(id).framework).sort(), ['angular', 'nuxtui', 'vanilla']);
+  assert.deepEqual(useCaseMatrix.webapp.map(id => selection(id).framework).sort(), ['angular', 'nuxtui', 'vanilla']);
+  assert.deepEqual(selection('cli').targets, ['cli']);
+  assert.deepEqual(selection('website').targets, ['website']);
 });
 test('project generator rejects unknown fields, adapters, target sets and Angular pin drift', () => {
   const valid = { kind: 'project', projectType: 'hybrid', framework: 'vanilla', targets: ['plugin', 'cli'] };
@@ -81,8 +95,23 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.ok(!files.get('src/core/project.ts').includes('</script>'));
     assert.match(files.get('README.md'), /NOT a resolved dependency graph/); assert.match(files.get('README.md'), new RegExp('Starter: ' + selected.starter.id));
     const pkg = JSON.parse(files.get('package.json'));
-    assert.equal(JSON.parse(files.get('tsconfig.json')).compilerOptions.rewriteRelativeImportExtensions, undefined, 'no-emit SFC validation must not rewrite virtual .vue imports');
+    const tsconfig = JSON.parse(files.get('tsconfig.json'));
+    assert.equal(tsconfig.compilerOptions.rewriteRelativeImportExtensions, undefined, 'no-emit SFC validation must not rewrite virtual .vue imports');
+    assert.equal(tsconfig.compilerOptions.resolveJsonModule, true);
+    assert.ok(tsconfig.include.includes('plugins/**/*.ts'));
+    assert.match(pkg.scripts.test, /plugins\/\*\/tests\/\*\.test\.ts/);
+    for (const path of ['src/core/plugin-api.ts', 'src/core/plugin-runtime.ts', 'plugins/registry.ts', 'plugins/starter-extension/manifest.json',
+      'plugins/starter-extension/config.json', 'plugins/starter-extension/src/index.ts', 'plugins/starter-extension/tests/plugin.test.ts', 'plugins/README.md'])
+      assert.ok(files.has(path), path);
+    assert.match(files.get('src/core/plugin-api.ts'), /interface PluginObject/);
+    assert.match(files.get('plugins/starter-extension/src/index.ts'), /export const PluginObject/);
+    assert.equal(JSON.parse(files.get('plugins/starter-extension/manifest.json')).id, 'starter-extension');
+    assert.equal(JSON.parse(files.get('plugins/starter-extension/config.json')).enabled, true);
     for (const path of ['tsconfig.angular.json', 'tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
+    if (selected.targets.includes('cli')) {
+      assert.equal(JSON.parse(files.get('tsconfig.cli.json')).compilerOptions.rootDir, '.');
+      assert.equal(pkg.scripts['start:cli'], 'node dist/cli/src/targets/cli/main.js');
+    }
     for (const target of selected.targets) assert.ok(files.has(`src/targets/${target}/main.ts`));
     if (selected.framework === 'none') { assert.ok(!files.has('src/ui/mount.ts')); assert.ok(!pkg.devDependencies.vite); assert.ok(!pkg.scripts['build:prototype']); }
     if (selected.framework === 'vanilla') { assert.deepEqual(pkg.dependencies, {}); assert.match(files.get('src/ui/mount.ts'), /createElement/); }
