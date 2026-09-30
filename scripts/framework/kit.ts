@@ -90,7 +90,7 @@ export async function upgradePlan(context: Context, from: string) {
   for (const file of next.files) entries.push({ path: file.path, content: (await readBounded(join(nextRoot, file.path), 8_000_000)).toString('base64'), encoding: 'base64' });
   // Verified old runtime files can be removed only when replaced by the reviewed single-bundle layout.
   const removed = current.files.filter(file => !nextPaths.has(file.path));
-  const previousRuntime = /^\\.framework\\/compiled\\/(?:scripts\\/|bin\\/|docs\\/concepts\\/companion\\/test-kit\\/|node_modules\\/yaml\\/)/;
+  const previousRuntime = /^\.framework\/compiled\/(?:scripts\/|bin\/|docs\/concepts\/companion\/test-kit\/|node_modules\/yaml\/)/;
   requireThat(removed.every(file => previousRuntime.test(file.path)) && (!removed.length || nextPaths.has('.framework/compiled/app.js')),
     'KIT_REMOVAL_REQUIRES_MIGRATION', 'Only previously verified compiled runtime copies may be removed by the app.js upgrade.');
   for (const file of removed) entries.push({ path: file.path, content: null });
