@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-29. **Compatible backlog:** `WB-MVP-2026-09-29-v1`, introduced by commit `1ef9e2b92363de3108630aada4756228d6feb262`.
 
-Open [MVP.base](MVP.base) in the repository-as-vault to browse and edit the existing PBI properties. The view uses the same frontmatter as the [54-item requirements index](README.md), not an imported database or another set of requirements. The fixed scope remains in [backlog.json](backlog.json); [governance](GOVERNANCE.md), [evidence conventions](evidence/README.md) and the existing [Node progress reporter](tooling/progress.mjs) retain their authority.
+Open [MVP.base](MVP.base) in the repository-as-vault to browse and edit the existing PBI properties. The view uses the same frontmatter as the [requirements index](README.md), not an imported database or another set of requirements. The fixed scope remains in [backlog.json](backlog.json); [governance](GOVERNANCE.md), [evidence conventions](evidence/README.md) and the existing [Node progress reporter](tooling/progress.mjs) retain their authority.
 
 ## Six views
 
