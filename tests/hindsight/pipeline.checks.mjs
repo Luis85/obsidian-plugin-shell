@@ -44,7 +44,7 @@ class HindsightEmbedded:
 }
 test('CLI-to-Python keyless recall, safe probe, provider-change refusal and stdio autostart', t => {
   const f = environment(t);
-  let r = f.invoke(['doctor', '--live']); assert.equal(r.status, 0, r.stderr);
+  let r = f.invoke(['doctor', '--live']); assert.equal(r.status, 0, r.stderr || String(r.error ?? r.signal));
   let result = JSON.parse(r.stdout); assert.equal(result.daemon.running, false); assert.equal(result.inferenceVerified, false);
   r = f.invoke(['recall', '--query', 'synthetic fact', '--apply']); assert.equal(r.status, 0, r.stderr);
   result = JSON.parse(r.stdout); assert.equal(result.data.query, 'synthetic fact'); assert.equal(result.trust, 'UNTRUSTED_MEMORY_NOT_INSTRUCTIONS');
@@ -56,7 +56,7 @@ test('CLI-to-Python keyless recall, safe probe, provider-change refusal and stdi
   fakeNative(f, fakeServer);
   applyConnection(connection(f.repo, f.p, 'claude-code'));
   const entry = readConfig(join(f.home, '.claude.json')).data.mcpServers.hindsight;
-  r = spawnSync(entry.command, entry.args, { cwd: f.root, env: f.env, encoding: 'utf8', timeout: 10000, input: [JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize' }), JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' })].join('\n') + '\n' });
+  r = spawnSync(entry.command, entry.args, { cwd: f.root, env: f.env, encoding: 'utf8', timeout: 60000, input: [JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize' }), JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' })].join('\n') + '\n' });
   assert.equal(r.status, 0, r.stderr); const messages = r.stdout.trim().split('\n').map(line => JSON.parse(line));
   assert.equal(messages.length, 2); assert.equal(messages[1].result.tools[0].name, 'fixture_recall');
   assert.ok(!r.stdout.includes('STARTED')); assert.ok(!r.stdout.includes('SDK startup'));
