@@ -1,6 +1,8 @@
-import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction, type Mapping } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction, type Mapping, type Mapping } from '../../scripts/companion/visual/visual-ir.mjs';
 import type { SketchDocument } from './document.ts';
 import { requireSketch, title } from './errors.ts';
+import { sourceOperation } from './bricks.ts';
+import { validateVisualMapping } from '../../scripts/companion/visual/visual-mapping.mjs';
 import { object, list } from './data.ts';
 import { validateVisualMapping } from '../../scripts/companion/visual/visual-mapping.mjs';
 import { pageContent, pageNodes, surfaceFor } from './pages.ts';
@@ -50,6 +52,18 @@ export function setCollectionInteractionAction(document: SketchDocument, surface
   setInteractionAction(document, surface, id, { kind: 'source', sourceId, operationId, input: input as Mapping });
 }
 
+/** Connect an interaction to the existing typed visual source-call contract. */
+export function setSourceInteractionAction(document: SketchDocument, surface: string, id: string,
+  sourceId: string, operationRef: string, input: unknown): void {
+  const { source, operation } = sourceOperation(document, sourceId, operationRef);
+  const mapping = validateVisualMapping(input) as Mapping;
+  const requiresInput = (operation.input as { mode?: string } | undefined)?.mode !== 'none';
+  requireSketch(requiresInput !== (mapping.kind === 'none'), 'SOURCE_ACTION_INPUT',
+    requiresInput ? 'Map an explicit payload for this operation.' : 'This operation takes no payload.');
+  setInteractionAction(document, surface, id, {
+    kind: 'source', sourceId: String(source.id), operationId: String(operation.id), input: mapping,
+  });
+}
 export function renameInteraction(document: SketchDocument, surface: string, id: string, name: string): void {
   interactionFor(document, surface, id).label = title(name);
 }
