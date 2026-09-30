@@ -30,7 +30,25 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.ok(!extracted.some(path => path.endsWith('docs/concepts/companion/index.html')));
   assert.ok(!(await readdir(dir)).includes('node_modules')); assert.ok(!(await readdir(dir)).includes('.git'));
   assert.ok((await verifyKit(dir)).files.length > 100);
-  let output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
+  const pluginConfigPath = join(dir, '.framework/compiled/plugins/example-extension/config.json');
+  const pluginConfig = await readFile(pluginConfigPath, 'utf8');
+  assert.ok(files.some(file => file.path === '.framework/compiled/plugins/runtime.js'));
+  assert.ok(files.some(file => file.path === '.framework/compiled/plugins/example-extension/src/index.js'));
+  await writeFile(pluginConfigPath, JSON.stringify({ ...JSON.parse(pluginConfig), enabled: true }, null, 2) + '\n');
+  let output = cli(dir, ['example', 'send', '--message', 'Compiled extension', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout);
+  let pluginResult = JSON.parse(output.stdout);
+  assert.equal(pluginResult.command, 'example');
+  assert.deepEqual(pluginResult.data, { plugin: 'example-extension', message: 'Compiled extension' });
+  assert.match(output.stderr, /Compiled extension/);
+  output = cli(dir, ['new', 'guide', '--starter', 'webapp-react', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout);
+  pluginResult = JSON.parse(output.stdout);
+  assert.equal(pluginResult.data.selection.framework, 'react');
+  assert.deepEqual(pluginResult.data.selection.targets, ['webapp']);
+  await writeFile(pluginConfigPath, pluginConfig);
+  assert.deepEqual(await verifyKit(dir), await verifyKit(dir), 'restored plugin config keeps the extracted kit valid');
+  output = cli(dir, ['capabilities', '--json']); assert.equal(output.status, 0, output.stderr);
   assert.equal(JSON.parse(output.stdout).status, 'ok'); assert.ok(!output.stderr.includes('ExperimentalWarning'), output.stderr);
   assert.ok(files.some(file => file.path === '.framework/compiled/scripts/framework/cli.js'));
   for (const name of ['tsconfig.sitemap.json', 'tsconfig.authoring.json']) {
