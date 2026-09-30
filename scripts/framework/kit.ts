@@ -85,10 +85,15 @@ export async function upgradePlan(context: Context, from: string) {
   const { compareVersions } = await import('../release/prepare.mjs');
   requireThat(compareVersions(next.version, current.version) >= 0, 'KIT_DOWNGRADE', 'Downgrades require separate migration review.');
   requireThat(next.version !== current.version || (next.sourceHash === current.sourceHash && JSON.stringify(next.files) === JSON.stringify(current.files)), 'KIT_VERSION_REUSED', 'A different kit must have a new version.');
-  const entries: Array<{path: string; content: string; encoding?: 'base64'}> = [];
+  const entries: Array<{path: string; content: string | null; encoding?: 'base64'}> = [];
   const nextPaths = new Set(next.files.map(file => file.path));
   for (const file of next.files) entries.push({ path: file.path, content: (await readBounded(join(nextRoot, file.path), 8_000_000)).toString('base64'), encoding: 'base64' });
-  requireThat(current.files.every(file => nextPaths.has(file.path)), 'KIT_REMOVAL_REQUIRES_MIGRATION', 'This kit removes files; an explicit removal migration is required.');
+  // Verified old runtime files can be removed only when replaced by the reviewed single-bundle layout.
+  const removed = current.files.filter(file => !nextPaths.has(file.path));
+  const previousRuntime = /^\\.framework\\/compiled\\/(?:scripts\\/|bin\\/|docs\\/concepts\\/companion\\/test-kit\\/|node_modules\\/yaml\\/)/;
+  requireThat(removed.every(file => previousRuntime.test(file.path)) && (!removed.length || nextPaths.has('.framework/compiled/app.js')),
+    'KIT_REMOVAL_REQUIRES_MIGRATION', 'Only previously verified compiled runtime copies may be removed by the app.js upgrade.');
+  for (const file of removed) entries.push({ path: file.path, content: null });
   // Legacy kits own only shell.mjs; upgrading adds app.mjs and bin/app and turns shell.mjs into a forwarding shim.
   for (const launcher of current.bootstrap.filter(file => launcherFiles.includes(file.path))) {
     requireThat(hash(await readBounded(join(context.root, launcher.path))) === launcher.hash, 'LAUNCHER_EDITED', 'Preserve the edited launcher and review its migration.');

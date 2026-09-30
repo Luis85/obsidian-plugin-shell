@@ -1,15 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, rm, readdir, realpath, mkdir, symlink } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
+import { assembleKit, installedCompiler, upgradePlan } from '../../scripts/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../scripts/framework/zip.ts';
 import { hash } from '../../scripts/framework/files.ts';
+import { applyFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
@@ -146,4 +147,57 @@ test('kit verification reopens bytes on every call and rejects source links and 
   await writeFile(target, 'short'); await assert.rejects(verifyKit(root), /fingerprint mismatch/);
   await rm(target); await symlink(join(root, files[1].path), target, 'file');
   await assert.rejects(verifyKit(root), /links/);
+});
+
+test('upgrading a verified modular kit replaces only compiled runtime files and fails closed on edits or source removals', async t => {
+  const old = await realpath(await mkdtemp(join(tmpdir(), 'kit-old-')));
+  const next = await realpath(await mkdtemp(join(tmpdir(), 'kit-new-')));
+  const unsafe = await realpath(await mkdtemp(join(tmpdir(), 'kit-unsafe-')));
+  t.after(async () => { await Promise.all([old, next, unsafe].map(path => rm(path, { recursive: true, force: true }))); });
+  const bootstrapOld = { 'shell.mjs': 'legacy', 'package.json': '{}', 'README.md': 'README', LICENSE: 'license' };
+  const bootstrapNext = { ...bootstrapOld, 'app.mjs': 'entry', 'bin/app': 'shim', 'shell.mjs': 'forward' };
+  const legacy = {
+    '.framework/template/LICENSE': 'template',
+    '.framework/compiled/package.json': '{"type":"module"}',
+    '.framework/compiled/scripts/framework/cli.js': 'old compiled JS',
+    '.framework/compiled/node_modules/yaml/LICENSE': 'old YAML license',
+  };
+  const bundled = {
+    '.framework/template/LICENSE': 'template',
+    '.framework/compiled/package.json': '{"type":"module"}',
+    '.framework/compiled/app.js': 'bundled app',
+    '.framework/compiled/licenses/yaml.LICENSE': 'old YAML license',
+  };
+  async function fixture(root, version, files, bootstrap) {
+    const entries = [];
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(dirname(join(root, path)), { recursive: true });
+      await writeFile(join(root, path), content);
+      entries.push({ path, hash: hash(content), bytes: Buffer.byteLength(content) });
+    }
+    const initial = [];
+    for (const [path, content] of Object.entries(bootstrap)) {
+      await mkdir(dirname(join(root, path)), { recursive: true });
+      await writeFile(join(root, path), content);
+      initial.push({ path, hash: hash(content) });
+    }
+    const manifest = { schemaVersion: 1, version, compilerVersion: 'fixture',
+      sourceHash: hash(version), files: entries, bootstrap: initial };
+    await writeFile(join(root, '.framework/kit.json'), JSON.stringify(manifest));
+    assert.deepEqual(await verifyKit(root), manifest);
+    return manifest;
+  }
+  await fixture(old, '0.4.0', legacy, bootstrapOld);
+  const final = await fixture(next, '0.4.1', bundled, bootstrapNext);
+  await fixture(unsafe, '0.4.0', { ...legacy, '.framework/template/obsolete.md': 'do not silently delete' }, bootstrapOld);
+  await assert.rejects(upgradePlan({ root: unsafe, frameworkRoot: unsafe }, next), /KIT_REMOVAL_REQUIRES_MIGRATION/);
+  const { plan } = await upgradePlan({ root: old, frameworkRoot: old }, next);
+  const obsolete = plan.changes.filter(change => change.status === 'delete').map(change => change.path).sort();
+  assert.deepEqual(obsolete, ['.framework/compiled/node_modules/yaml/LICENSE', '.framework/compiled/scripts/framework/cli.js']);
+  await writeFile(join(old, '.framework/compiled/scripts/framework/cli.js'), 'concurrent edit');
+  await assert.rejects(applyFilePlan(plan), /PLAN_STALE/);
+  assert.equal(await readFile(join(old, '.framework/compiled/app.js'), 'utf8').catch(() => null), null);
+  await writeFile(join(old, '.framework/compiled/scripts/framework/cli.js'), legacy['.framework/compiled/scripts/framework/cli.js']);
+  await applyFilePlan(plan);
+  assert.deepEqual(await verifyKit(old), final);
 });
