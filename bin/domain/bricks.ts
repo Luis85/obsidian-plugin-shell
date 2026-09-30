@@ -110,6 +110,15 @@ export function collectionAdd(document: SketchDocument, title: unknown, inputPat
   return item.id;
 }
 
+/** Resolve one shared source operation; no second collection-binding format. */
+export function sourceOperation(document: SketchDocument, sourceId: string, operationRef: string) {
+  const source = collection(document, 'dataSources', 'sources').find(row => row.id === sourceId);
+  requireSketch(source, 'BRICK_SOURCE', 'Select an existing source.');
+  const operation = list(source.operations ?? [], 'operations', 12).map(object).find(row => row.id === operationRef || row.slug === operationRef);
+  requireSketch(operation, 'BRICK_SOURCE_OPERATION', 'Select an existing operation on that source.');
+  requireSketch(source.status !== 'deprecated', 'BRICK_SOURCE_DEPRECATED', 'Deprecated sources cannot gain new bindings.');
+  return { source, operation };
+}
 export function sourceAdd(document: SketchDocument, title: unknown, kind: unknown): string {
   requireSketch(kind === 'vault' || kind === 'api' || kind === 'database', 'BRICK_SOURCE', 'Use vault, api or database. No connection is opened.');
   const rows = collection(document, 'dataSources', 'sources');
