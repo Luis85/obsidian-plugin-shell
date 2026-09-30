@@ -234,7 +234,8 @@
         "patterns": [
           "bin/adapters/**",
           "bin/presentation/**",
-          "bin/shell.ts"
+          "bin/shell.ts",
+          "plugins/**"
         ]
       },
       {

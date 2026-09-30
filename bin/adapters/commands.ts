@@ -18,9 +18,11 @@ import { guideInput, prototypePlan } from './prototype.ts';
 import { prototypeContext } from './prototype-context.ts';
 import { readSnapshot, readData, savePlan, applyPrepared } from './storage.ts';
 import { boilerplatePlan } from './compiler.ts';
+import { pluginCliCommands, type WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
+import type { PluginCliCommand } from '../../plugins/api.ts';
 export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
-export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void }
+export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void; plugins?: WorkbenchPluginRuntime }
 export const makerHelp = `Shell maker — make first, generate when ready
   node shell.mjs first-run             Optional install → typecheck → test → build → showcase
   node shell.mjs first-run schema --json
@@ -79,11 +81,12 @@ Use collection.add with title, a vault-relative path and an entity reference to 
 Use page.collection-table to insert a Collection-backed UTable, page.bind for typed source bindings and interaction.action kind=source for CRUD calls.
 First-run guide: bin/FIRST-RUN.md. Execution is separately approved; generated source is kept on failure.
 All existing shell setup/make/generate/check commands remain available.
+Workbench plugins registered in plugins/registry.ts may add top-level CLI commands and Studio/TUI actions.
 `;
-function parseFlags(tokens: string[]): Record<string, string | boolean> {
+function parseFlags(tokens: string[], extension?: PluginCliCommand): Record<string, string | boolean> {
   const flags: Record<string, string | boolean> = Object.create(null);
-  const booleans = ['json', 'no-interaction', 'help', 'no-color'];
-  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter'];
+  const booleans = ['json', 'no-interaction', 'help', 'no-color', ...(extension?.options?.booleans ?? [])];
+  const values = ['root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter', ...(extension?.options?.values ?? [])];
   while (tokens.length) {
     const flag = tokens.shift()!;
     requireSketch(flag.startsWith('--'), 'MAKER_ARGUMENT', `Unexpected argument ${flag}.`);
@@ -97,13 +100,16 @@ function parseFlags(tokens: string[]): Record<string, string | boolean> {
   }
   return flags;
 }
-export function parseArguments(argv: string[]): Arguments {
+export function parseArguments(argv: string[], extensions: readonly PluginCliCommand[] = pluginCliCommands()): Arguments {
   const tokens = [...argv];
   const first = tokens[0]?.startsWith('-') ? undefined : tokens.shift();
-  requireSketch(first === undefined || ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm'].includes(first), 'MAKER_COMMAND', 'Use new, sketch, brainstorm, prototype, studio, settings or project-setup.');
-  const command = (first ?? 'studio') as Arguments['command'];
+  const builtins = ['sketch', 'prototype', 'studio', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm'];
+  requireSketch(extensions.every(item => !builtins.includes(item.id)), 'PLUGIN_COMMAND_CONFLICT', 'A plugin CLI command conflicts with a built-in maker command.');
+  const extension = first ? extensions.find(item => item.id === first) : undefined;
+  requireSketch(first === undefined || builtins.includes(first) || extension, 'MAKER_COMMAND', 'Use a built-in maker command or a registered plugin command.');
+  const command = first ?? 'studio';
   const action = tokens[0] && !tokens[0].startsWith('-') ? tokens.shift()! : '';
-  const flags = parseFlags(tokens);
+  const flags = parseFlags(tokens, extension);
   requireSketch(flags.ui === undefined || ['auto', 'tui', 'plain'].includes(String(flags.ui)), 'MAKER_UI', 'Use --ui auto, tui or plain.');
   return { command, action, flags };
 }
@@ -160,12 +166,19 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
 }
 function helpResult(args: Arguments): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run'],
+    const extensions = pluginCliCommands();
+    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+      pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
 }
 export async function execute(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
   requireSketch(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
+  const extension = context.plugins?.cliCommands.find(item => item.id === args.command);
+  if (extension) {
+    if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
+    return extension.execute({ action: args.action, flags: args.flags }, context.plugins!.commandContext);
+  }
   if (args.flags.help || args.command === 'studio') return helpResult(args);
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));

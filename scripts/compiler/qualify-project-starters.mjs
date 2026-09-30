@@ -50,7 +50,7 @@ async function qualify() {
     run('clean exact-lock install', source, [npm, 'ci', '--ignore-scripts', '--no-audit', '--no-fund']);
     for (const name of ['typecheck', 'test', 'build']) run(name, source, [npm, 'run', name]);
     if (report.selection.targets.includes('cli')) {
-      const command = 'dist/cli/targets/cli/main.js';
+      const command = 'dist/cli/src/targets/cli/main.js';
       const pages = JSON.parse(run('CLI pages JSON', source, [command, 'pages', '--json']));
       if (pages.pages.length !== 2) throw new Error('CLI page fixture mismatch.');
       const invalid = JSON.parse(run('CLI invalid JSON', source, [command, 'unknown-command', '--json'], 2));

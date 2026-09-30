@@ -3,9 +3,11 @@ import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectSelection } from '../../domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
 import { json } from '../../../companion/compiler/model.ts';
+import type { FrameworkAdapter } from './framework-adapter.ts';
 /** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
-export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string) {
+export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string, adapter: FrameworkAdapter) {
   const original = JSON.parse(template.text('package.json'));
+  const engine = adapter.engine;
   const dependencies: Record<string, string> = {}, devDependencies: Record<string, string> = {};
   function copy(names: string[], group: Record<string, string>) {
     for (const name of names) {
@@ -18,20 +20,28 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
   if (selected.targets.includes('plugin')) copy(['obsidian'], devDependencies);
   const visual = selected.targets.some(target => target !== 'cli');
   if (visual) copy(['vite'], devDependencies);
-  if (selected.framework === 'nuxtui') {
+  if (engine === 'nuxtui') {
     copy(['vue', 'pinia', '@nuxt/ui'], dependencies);
     copy(['@vitejs/plugin-vue', '@iconify-json/lucide', 'postcss', 'postcss-selector-parser', 'tailwindcss', 'vue-tsc'], devDependencies);
   }
-  if (selected.framework === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
-  if (selected.framework === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
+  if (engine === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
+  if (engine === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
+  const merge = (source: Readonly<Record<string, string>> | undefined, target: Record<string, string>) => {
+    for (const [name, pin] of Object.entries(source ?? {})) {
+      if (target[name] !== undefined && target[name] !== pin) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter dependency conflicts with the selected engine: ' + name));
+      target[name] = pin;
+    }
+  };
+  merge(adapter.dependencies, dependencies);
+  merge(adapter.devDependencies, devDependencies);
   const scripts: Record<string, string> = {
     build: 'node scripts/build.mjs',
-    typecheck: selected.framework === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : selected.framework === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
-    test: 'node --experimental-strip-types --test tests/*.test.mjs',
+    typecheck: engine === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : engine === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
+    test: 'node --experimental-strip-types --test tests/*.test.mjs plugins/*/tests/*.test.ts',
   };
   if (selected.targets.some(target => target === 'webapp' || target === 'website')) scripts.start = 'npm run build && node scripts/serve.mjs';
   if (visual) scripts['build:prototype'] = 'node scripts/build.mjs --prototype';
-  if (selected.targets.includes('cli')) scripts['start:cli'] = 'node dist/cli/targets/cli/main.js';
+  if (selected.targets.includes('cli')) scripts['start:cli'] = 'node dist/cli/src/targets/cli/main.js';
   const pkg = { name: id, version: '0.1.0', private: true, type: 'module', engines: { node: '>=24.21.0 <25', npm: '>=11.19.1 <12' },
     packageManager: 'npm@11.19.1', scripts, dependencies, devDependencies };
   return {
@@ -42,20 +52,21 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
     '.gitignore': 'node_modules/\ndist/\n.compiled/\n.prototype-build/\n',
   };
 }
-export function typecheckFiles(selected: ProjectSelection) {
+export function typecheckFiles(selected: ProjectSelection, adapter: FrameworkAdapter) {
+  const engine = adapter.engine;
   const files: Record<string, string> = {
     'tsconfig.json': json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,
       noUncheckedIndexedAccess: true, noEmit: true, skipLibCheck: true, lib: ['ES2022', 'DOM', 'DOM.Iterable'],
-      allowImportingTsExtensions: true, types: ['node'] }, include: ['src/**/*.ts', 'src/**/*.vue'] }),
+      allowImportingTsExtensions: true, resolveJsonModule: true, types: ['node'] }, include: ['src/**/*.ts', 'src/**/*.vue', 'plugins/**/*.ts'] }),
     'src/environment.d.ts': 'declare module "*.css";\n',
   };
-  if (selected.framework === 'angular') files['tsconfig.angular.json'] = json({ extends: './tsconfig.json',
+  if (engine === 'angular') files['tsconfig.angular.json'] = json({ extends: './tsconfig.json',
     compilerOptions: { noEmit: false, rewriteRelativeImportExtensions: true, rootDir: '.', outDir: '.compiled', experimentalDecorators: true },
-    angularCompilerOptions: { compilationMode: 'full', strictTemplates: true, strictInjectionParameters: true }, include: ['src/**/*.ts'] });
+    angularCompilerOptions: { compilationMode: 'full', strictTemplates: true, strictInjectionParameters: true }, include: ['src/**/*.ts', 'plugins/registry.ts', 'plugins/*/src/**/*.ts'] });
   if (selected.targets.includes('cli')) files['tsconfig.cli.json'] = json({ extends: './tsconfig.json', compilerOptions: {
-    noEmit: false, rewriteRelativeImportExtensions: true, rootDir: 'src', outDir: 'dist/cli', module: 'NodeNext', moduleResolution: 'NodeNext' }, include: ['src/core/**/*.ts', 'src/targets/cli/**/*.ts'] });
+    noEmit: false, rewriteRelativeImportExtensions: true, rootDir: '.', outDir: 'dist/cli', module: 'NodeNext', moduleResolution: 'NodeNext' }, include: ['src/core/**/*.ts', 'src/targets/cli/**/*.ts', 'plugins/registry.ts', 'plugins/*/src/**/*.ts'] });
   return files;
 }
 export function starterReadme(selected: ProjectSelection): string {
-  return `# Project starter\n\nStarter: ${selected.starter.id} ${selected.starter.version}. Framework: ${selected.framework}. Targets: ${selected.targets.join(', ')}.\n\nThis is a prototype starting scaffold, not a completed product. Shared source is src/core; host entrypoints live under src/targets; UI belongs to src/ui. Full Companion data is preserved in design/project.json; Angular projects compile supported canonical visual bricks into AOT components and browser hash routes; design/angular-capabilities.json identifies required adapters. Other frameworks retain their page projection. No target implies complete business behavior. project.config.json stays outside the closed Companion v6 envelope.\n\n## Explicit dependency resolution\n\nUse Node 24.21.0 and npm 11.19.1. The generated package-lock.json has only the root manifest: it is NOT a resolved dependency graph. Review package.json, explicitly run npm install, inspect and commit the resolved lock, then use npm ci on clean extractions. Generation never installs or accesses the network.\n\nRun npm run typecheck, npm test and npm run build. Outputs are in dist/<target>. Browser targets provide npm start (build, then local preview on 127.0.0.1:4173; PORT overrides the port). Restart to rebuild after editing source; this is not a hot-reload server. ${selected.targets.includes('cli') ? 'Run npm run start:cli -- pages --json. CLI failures use exit code 2; JSON mode never prompts.' : ''}\n\n${selected.framework === 'none' ? 'The CLI transcript is the prototype. No HTML or frontend is fabricated.' : 'npm run build:prototype produces one offline dist/prototype.html, including the complete Companion JSON and bundled dependency notices. Existing output is refused; after review use npm run build:prototype -- --replace. The browser preview does not activate Obsidian.'}\n\nFor a plugin, manually review dist/plugin/main.js, styles.css and manifest.json before copying to a disposable test vault. No install/activation is authorized by generation. Nuxt UI uses the repository scoped CSS and version-hash guards, not global preflight or a Nuxt server. Angular uses AOT and a per-view zoneless application; no zone.js and no document-global bootstrap.\n\nThe website target is a static-hostable client-rendered site, not server rendering or guaranteed SEO. Hybrid means multiple build targets sharing local code/data; it does not imply cloud sync or a desktop wrapper.\n\n## Further authoring\n\nUse the originating shell CLI with --root pointing here and --project design/project.json. sketch generate detects project.config.json and preserves its target selection. Regenerate into a new output directory after source-owned changes: never overwrite edited source to conceal a conflict. Prototype business actions, tests and native/browser qualification remain explicit work.\n`;
+  return `# Project starter\n\nStarter: ${selected.starter.id} ${selected.starter.version}. Framework: ${selected.framework}. Targets: ${selected.targets.join(', ')}.\n\nThis is a prototype starting scaffold, not a completed product. Shared source is src/core; host entrypoints live under src/targets; UI belongs to src/ui. Full Companion data is preserved in design/project.json; Angular projects compile supported canonical visual bricks into AOT components and browser hash routes; design/angular-capabilities.json identifies required adapters. Other frameworks retain their page projection. No target implies complete business behavior. project.config.json stays outside the closed Companion v6 envelope.\n\n## Explicit dependency resolution\n\nUse Node 24.21.0 and npm 11.19.1. The generated package-lock.json has only the root manifest: it is NOT a resolved dependency graph. Review package.json, explicitly run npm install, inspect and commit the resolved lock, then use npm ci on clean extractions. Generation never installs or accesses the network.\n\nRun npm run typecheck, npm test and npm run build. Outputs are in dist/<target>. Browser targets provide npm start (build, then local preview on 127.0.0.1:4173; PORT overrides the port). Restart to rebuild after editing source; this is not a hot-reload server. ${selected.targets.includes('cli') ? 'Run npm run start:cli -- pages --json. CLI failures use exit code 2; JSON mode never prompts.' : ''}\n\n${selected.framework === 'none' ? 'The CLI transcript is the prototype. No HTML or frontend is fabricated.' : 'npm run build:prototype produces one offline dist/prototype.html, including the complete Companion JSON and bundled dependency notices. Existing output is refused; after review use npm run build:prototype -- --replace. The browser preview does not activate Obsidian.'}\n\nFor a plugin, manually review dist/plugin/main.js, styles.css and manifest.json before copying to a disposable test vault. No install/activation is authorized by generation. Nuxt UI uses the repository scoped CSS and version-hash guards, not global preflight or a Nuxt server. Angular uses AOT and a per-view zoneless application; no zone.js and no document-global bootstrap.\n\nThe website target is a static-hostable client-rendered site, not server rendering or guaranteed SEO. Hybrid means multiple build targets sharing local code/data; it does not imply cloud sync or a desktop wrapper.\n\n## Project plugins\n\nAll generated targets share a typed local extension contract under plugins/<plugin-name>/. Each plugin owns manifest.json, config.json, src/ and tests/, exports a named PluginObject, and is explicitly registered in plugins/registry.ts. Config can disable a plugin without deleting it. Registration is static so the same source bundles deterministically for Obsidian, browsers and terminal apps. npm test includes plugins/*/tests/*.test.ts. See plugins/README.md. Plugin code is trusted project code, not a sandbox.\n\n## Further authoring\n\nUse the originating shell CLI with --root pointing here and --project design/project.json. sketch generate detects project.config.json and preserves its target selection. Regenerate into a new output directory after source-owned changes: never overwrite edited source to conceal a conflict. Prototype business actions, tests and native/browser qualification remain explicit work.\n`;
 }

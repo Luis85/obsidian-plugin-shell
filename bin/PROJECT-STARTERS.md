@@ -32,6 +32,21 @@ Creation proceeds through **starter → prototype interview → explicit design 
 | `hybrid-vanilla` | Hybrid | No framework | plugin, webapp, website, cli |
 | `hybrid-angular` | Hybrid | Angular | plugin, webapp, website, cli |
 
+### Primary use-case coverage
+
+The stable IDs above map to the product-level starter families without renaming saved selections:
+
+| Product use-case | Stable starter IDs | Variants |
+| --- | --- | --- |
+| Obsidian plugin | `plugin-nuxtui`, `plugin-vanilla`, `plugin-angular` | Vue 3 + Nuxt UI, vanilla TypeScript, Angular |
+| Web application | `webapp-nuxtui`, `webapp-vanilla`, `webapp-angular` | Vue 3 + Nuxt UI, vanilla TypeScript, Angular |
+| Terminal application | `cli` | Headless Node.js with human/JSON output |
+| Website | `website` | Static-hostable vanilla TypeScript |
+
+The internal target names `plugin` and `cli` remain compatibility contracts; product surfaces should describe them as **Obsidian plugin** and **Terminal application**.
+
+Every project starter also emits the same typed local plugin system. Application extensions live under `plugins/<plugin-name>/`, own `src/`, `tests/`, `manifest.json` and `config.json`, and export a named `PluginObject`. See [generated project plugins](../docs/development/GENERATED-PROJECT-PLUGINS.md). Workbench itself has a separate [plugin SDK](../docs/development/WORKBENCH-PLUGINS.md) that can add framework adapters, project starters, events, CLI commands and Studio/TUI actions.
+
 A starter fixes its project type, frontend and targets; there is no creation-time
 override. To use another compatible combination, add a starter definition, for
 example a copy of `hybrid-vanilla.json` under a new `id` and filename with
@@ -61,8 +76,8 @@ A project starter uses the common definition contract from
 }
 ```
 
-`projectType` is `plugin`, `webapp`, `website`, `cli` or `hybrid`; `framework` is
-`nuxtui`, `vanilla`, `angular` or `none`. Targets are listed once in plugin, webapp,
+`projectType` is `plugin`, `webapp`, `website`, `cli` or `hybrid`; `framework` is a registered adapter ID. Built-ins are
+`nuxtui`, `vanilla`, `angular` and `none`, while Workbench plugins may add IDs such as `react`. Targets are listed once in plugin, webapp,
 website, cli order: exactly the project type's own target, or two or more for hybrid.
 CLI-only requires `none`; visual targets require a frontend. `angularPins` is
 required for Angular (exact versions, one `@angular` version) and forbidden otherwise.
@@ -124,13 +139,13 @@ This is an intentionally honest **starting scaffold**: a navigable page-list pro
 
 Generated dependencies use exact direct pins. The new target lockfile initially contains only the root manifest and readiness is **resolution-required**, not locked. Review and explicitly `npm install`; retain the resolved lock and prove a clean `npm ci` before claiming reproducibility. Generation never installs or runs code.
 
-Use Node 24.21.0 and npm 11.19.1. In `source/`, run typecheck, test and build. Visual targets provide `npm run build:prototype` for an offline `dist/prototype.html`; existing output requires explicit `-- --replace`. Plugin builds produce `dist/plugin/main.js`, `styles.css` and `manifest.json`, without touching a vault. CLI produces `dist/cli/targets/cli/main.js`; use `npm run start:cli -- pages --json`. CLI-only projects do not fabricate an HTML prototype.
+Use Node 24.21.0 and npm 11.19.1. In `source/`, run typecheck, test and build. Visual targets provide `npm run build:prototype` for an offline `dist/prototype.html`; existing output requires explicit `-- --replace`. Plugin builds produce `dist/plugin/main.js`, `styles.css` and `manifest.json`, without touching a vault. CLI produces `dist/cli/src/targets/cli/main.js`; use `npm run start:cli -- pages --json`. CLI-only projects do not fabricate an HTML prototype.
 
 `prototype.manifest.json` stays incomplete with a null artifact hash until real artifact measurements and acceptance. Bundling is not business or native acceptance. Website output is client-rendered static hosting, not server rendering or an SEO guarantee.
 
 ## Extension and qualification
 
-Project starters are data: a new combination of existing target/framework adapters needs only a new definition. `project-prototype.json` is the data-driven interview and artifact template set. New runtimes require a real compiler adapter, compatibility rules and qualification—not an additional menu label.
+Project starters are data: a new combination of existing target/framework adapters needs only a new definition. Generated project plugins are a separate application extension seam: adding a plugin changes the generated project's explicit `plugins/registry.ts`, not the Workbench starter catalog. `project-prototype.json` is the data-driven interview and artifact template set. New runtimes require a real compiler adapter, compatibility rules and qualification—not an additional menu label.
 
 Tests live in `interactive-maker-project-*.checks.mjs` and `interactive-maker-starters-ui.checks.mjs` and remain included in the existing maker suite/coverage; `starter-definitions.checks.mjs` covers the `project` generator contract. The compiler architecture traversal includes the pure emitter. `project-starter-qualification.yml` uses the existing exact toolchain and qualifies every shipped project starter (the eight former presets, the two additional hybrid frameworks and `webapp-angular`) with explicit dependency resolution, clean install, typecheck, tests, builds and exact-artifact browser/CLI smoke checks. It does not activate Obsidian. Run its disposable driver explicitly:
 

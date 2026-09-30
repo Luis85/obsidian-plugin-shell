@@ -31,6 +31,10 @@ catalog: `plugin-nuxtui`, `plugin-vanilla`, `plugin-angular`, `webapp-nuxtui`,
 `webapp-vanilla`, `webapp-angular` (also used by `project-setup`), `website`, `cli`,
 `hybrid-nuxtui`, `hybrid-vanilla` and `hybrid-angular`.
 
+Those stable IDs form four primary product families: Obsidian plugin (`plugin-*`), web application (`webapp-*`), terminal application (`cli`) and website (`website`). Obsidian plugins and web applications each ship Nuxt UI, vanilla TypeScript and Angular variants. The stable target/ID vocabulary remains unchanged for saved requests and project sidecars.
+
+All `project` starters emit the shared TypeScript [generated project plugin system](./GENERATED-PROJECT-PLUGINS.md). Plugin-specific source and tests stay under `plugins/<plugin-name>/`, beside that plugin's `manifest.json` and `config.json`; each plugin exports a typed `PluginObject` and is activated through explicit static registration.
+
 Running a starter is the only way to create a project. `new --from <project.json>`
 remains the separate import of an existing exported Companion project.
 
@@ -292,3 +296,9 @@ The archive smoke test permits Node's built-in type stripper only when that comp
 is unavailable locally, marks it `not-qualified`, and never calls that fallback a
 typecheck. Hosted qualification must use the locked compiler. Local results and
 remaining environment limitations are recorded in the accompanying handover evidence.
+
+## Workbench plugin starters and framework adapters
+
+Starter JSON no longer owns a closed frontend enum. A `project` starter names a framework adapter ID. The built-in IDs remain `nuxtui`, `vanilla`, `angular` and `none`; an enabled Workbench plugin can contribute another adapter and starter through its typed `PluginObject`.
+
+Plugin-provided starters are validated and hashed by the same loader as files under `configs/starters/`. ID collisions fail closed. The starter remains data-only; the trusted plugin supplies the adapter implementation. See [Workbench plugin development](./WORKBENCH-PLUGINS.md).
