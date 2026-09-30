@@ -7,8 +7,6 @@ import { sha256 } from '../shared/hash.mjs';
 import { spawnSync } from 'node:child_process';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { loadProjectCatalog, loadProjectGuide, projectCreatePlan } from '../../bin/adapters/project-create.ts';
-import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { assertCssOwnership } from '../bundling/css-identity.mjs';
 import { verifyPresetBrowser } from './verify-preset-browser.mjs';
 const root = resolve(import.meta.dirname, '../..'), npm = process.env.QUALIFIED_NPM;
@@ -18,7 +16,9 @@ assert.equal(spawnSync(process.execPath, [npm, '--version'], { encoding: 'utf8' 
 const fixtures = JSON.parse(await readFile(new URL('./presets/qualification.json', import.meta.url), 'utf8'));
 const selected = fixtures.filter(item => !process.argv[2] || item.frontend === process.argv[2]);
 assert.ok(selected.length > 0, 'Choose a registered frontend qualification group.');
-const catalog = await loadProjectCatalog(), guide = await loadProjectGuide(), results = [];
+const catalog = JSON.parse(await readFile(new URL('../../bin/guides/legacy-project-presets.json', import.meta.url), 'utf8'));
+const guide = JSON.parse(await readFile(new URL('../../bin/guides/legacy-project-prototype.json', import.meta.url), 'utf8'));
+const results = [];
 const childEnv = { ...process.env }; delete childEnv.NODE_TEST_CONTEXT; delete childEnv.VITEST;
 const reports = join(root, 'reports/project-presets'); await mkdir(reports, { recursive: true });
 function command(cwd, args, log, failure = false) {
@@ -75,8 +75,12 @@ for (const fixture of selected) {
     const request = { schemaVersion: 1, catalogVersion: catalog.version, ...selection,
       prototypeRequest: { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version,
         answers: { title: 'Issue desk', pages: ['Overview', 'Issues'], components: ['Card'], approved: true } } };
-    const plan = await projectCreatePlan({ root: scratch, frameworkRoot: root, out: 'prepared', input: request, catalog, guide });
-    await applyPrepared(plan, plan.planHash);
+    await writeFile(join(scratch, 'project-create.json'), JSON.stringify(request));
+    const create = [join(root, 'bin/app'), 'new', '--input', 'project-create.json', '--out', 'prepared', '--root', scratch];
+    const preview = JSON.parse(command(scratch, [...create, '--json'], log).stdout);
+    assert.equal(preview.status, 'planned'); assert.match(preview.data.planHash, /^[a-f0-9]{64}$/);
+    const applied = JSON.parse(command(scratch, [...create, '--apply', preview.data.planHash, '--json'], log).stdout);
+    assert.ok(['applied', 'unchanged'].includes(applied.status), JSON.stringify(applied));
     const source = join(scratch, 'prepared/source');
     command(source, [npm, 'install', '--ignore-scripts', '--no-fund', '--no-audit'], log);
     await cp(join(source, 'package-lock.json'), join(reports, fixture.id + '-package-lock.json'));

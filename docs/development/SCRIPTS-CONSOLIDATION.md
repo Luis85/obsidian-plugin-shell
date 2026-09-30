@@ -24,9 +24,8 @@ source under `bin/`.
   `bin/` is its interactive maker/TUI half.
 - `bin/` already imports `scripts/`: 79 relative imports, split as framework 26, companion 16, compiler 14,
   shared 12 (all `file-plan.mjs`), contracts 10 and application-docs 1.
-- One qualification script still imports `bin/`, which is the wrong direction:
-  - `compiler/qualify-legacy-presets.mjs`
-- Angular setup qualification now exercises the compiled kit through its public CLI instead of importing `bin/` internals.
+- No `scripts/` module imports executable `bin/` modules now. Angular setup and legacy preset qualification exercise the public CLI boundary instead.
+- Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
 - `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
 - Cycles: compiler ↔ companion, and framework ↔ compiler.
 - Untyped `.mjs` libraries sit under typed TypeScript callers: `shared/file-plan.mjs`, `shared/process.mjs`,
@@ -73,6 +72,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B7:** The duplicate `scripts/makers/cli.mjs` entry is retired; maker discovery and reviewed plan/apply now exercise `bin/app make`, and capability metadata names only its real sources.
 - **B8:** Application-doc settings no longer import maker domain code; both use a neutral shared project-path policy, leaving two qualification-only reverse imports.
 - **B9:** Angular setup qualification no longer imports maker first-run internals; it launches the compiled kit's public `first-run` showcase and drives the browser against that reviewed boundary.
+- **B10:** Legacy preset qualification no longer imports maker adapters/storage; it reviews and applies `bin/app new` plans. Executable `scripts → bin` module imports are now zero.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
