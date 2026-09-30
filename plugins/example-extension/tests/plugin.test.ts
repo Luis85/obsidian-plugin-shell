@@ -161,7 +161,7 @@ test('plugin events must stay in the owning manifest namespace', async () => {
 });
 
 test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
-  const recursive = definePluginEvent('recursive.tick',
+  const recursive = definePluginEvent('recursive-plugin.tick',
     (value): value is { value: number } => Boolean(value && typeof value === 'object'
       && Number.isInteger((value as { value?: unknown }).value)));
   const errors: string[] = [];
