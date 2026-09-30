@@ -6,12 +6,13 @@ interface CanonicalNotes<I,S extends NoteLease> {
   update(snapshot:S,values:I,permit:{active():boolean}): Promise<NoteResult<S>>;
   delete(snapshot:S,permit:{active():boolean}): Promise<NoteResult<void>>;
 }
-/** Runtime-only snapshot leases. A revision number does not authorize unknown notes. */
+/** Runtime-only leases identify the note and its revision: unrelated records often share a revision. */
 export function noteOperations<I, S extends NoteLease>(repository: CanonicalNotes<I, S>, entity: string, parse: (input: unknown) => I) {
-  const snapshots = new Map<number, S>();
+  const snapshots = new Map<string, S>();
+  const leaseKey = (id: string, revision: number) => JSON.stringify([id, revision]);
   function present(snapshot: S) {
     if (snapshots.size >= 1000) snapshots.clear();
-    snapshots.set(snapshot.revision, snapshot);
+    snapshots.set(leaseKey(snapshot.id, snapshot.revision), snapshot);
     return {record: { ...snapshot.values, id:snapshot.id, type:entity }, revision:snapshot.revision};
   }
   function input(value: unknown): Record<string, unknown> {
@@ -20,7 +21,8 @@ export function noteOperations<I, S extends NoteLease>(repository: CanonicalNote
     return value as Record<string, unknown>;
   }
   function lease(record: Record<string, unknown>): S {
-    const snapshot = typeof record.revision === 'number' ? snapshots.get(record.revision) : undefined;
+    const snapshot = typeof record.id === 'string' && typeof record.revision === 'number'
+      ? snapshots.get(leaseKey(record.id, record.revision)) : undefined;
     if (!snapshot || snapshot.id !== record.id) throw new Error('NOTE_REVISION_STALE'); return snapshot;
   }
   return {
@@ -39,12 +41,12 @@ export function noteOperations<I, S extends NoteLease>(repository: CanonicalNote
       const record=input(value); const snapshot=lease(record); const values=parse(input(record.values));
       if(signal?.aborted) throw new Error('OPERATION_ABORTED');
       const result=await repository.update(snapshot,values,{active:()=>!signal?.aborted});
-      if(!result.ok) throw new Error('NOTE_UPDATE_FAILED: '+result.error.code); snapshots.delete(snapshot.revision); return present(result.value);
+      if(!result.ok) throw new Error('NOTE_UPDATE_FAILED: '+result.error.code); snapshots.delete(leaseKey(snapshot.id, snapshot.revision)); return present(result.value);
     },
     async delete(value: unknown, signal?: AbortSignal) {
       const snapshot=lease(input(value)); if(signal?.aborted) throw new Error('OPERATION_ABORTED');
       const result=await repository.delete(snapshot,{active:()=>!signal?.aborted});
-      if(!result.ok) throw new Error('NOTE_DELETE_FAILED: '+result.error.code); snapshots.delete(snapshot.revision);
+      if(!result.ok) throw new Error('NOTE_DELETE_FAILED: '+result.error.code); snapshots.delete(leaseKey(snapshot.id, snapshot.revision));
     },
   };
 }

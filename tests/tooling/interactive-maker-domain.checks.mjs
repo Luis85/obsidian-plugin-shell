@@ -8,6 +8,7 @@ import { Workspace } from '../../bin/application/workspace.ts';
 import { sketchSchema } from '../../bin/application/schema.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
+import { noteOperations } from '../../scripts/companion/runtime/note-operations.ts';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }
 test('titles are the only creation fields and identifiers remain stable after renaming', () => {
@@ -50,6 +51,25 @@ test('collections provision exact Markdown CRUD contracts for users and agent tr
   assert.throws(() => runOperations(result.document, [{ op: 'collection.add', title: 'Missing', path: 'Records/Missing', entity: 'missing' }]));
 });
 
+test('collection leases distinguish multiple Markdown records at the same revision', async () => {
+  const records = new Map([['a', { id: 'a', revision: 1, values: { title: 'Alpha' } }], ['b', { id: 'b', revision: 1, values: { title: 'Beta' } }]]);
+  const updated = [], deleted = [];
+  const repository = {
+    list: async () => ({ ok: true, value: [...records.values()] }),
+    create: async () => { throw new Error('not used'); },
+    update: async (snapshot, values) => { updated.push(snapshot.id); const next = { id: snapshot.id, revision: snapshot.revision + 1, values }; records.set(snapshot.id, next); return { ok: true, value: next }; },
+    delete: async snapshot => { deleted.push(snapshot.id); records.delete(snapshot.id); return { ok: true, value: undefined }; },
+  };
+  const operations = noteOperations(repository, 'task', value => value);
+  const [first, second] = await operations.list();
+  assert.deepEqual([first.revision, second.revision], [1, 1]);
+  const changed = await operations.update({ id: first.record.id, revision: first.revision, values: { title: 'Changed' } });
+  assert.equal(changed.record.title, 'Changed');
+  await operations.delete({ id: second.record.id, revision: second.revision });
+  assert.deepEqual(updated, ['a']); assert.deepEqual(deleted, ['b']);
+  await assert.rejects(operations.update({ id: first.record.id, revision: first.revision, values: { title: 'Stale' } }), /NOTE_REVISION_STALE/);
+  assert.deepEqual([...records.keys()], ['a']);
+});
 test('bulk reuse creates distinct instances without duplicating definitions', () => {
   const start = page();
   const created = runOperations(start.document, [{ op: 'component.add', title: 'Card', as: 'card' },
