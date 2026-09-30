@@ -8,6 +8,7 @@ import { newDocument, documentText } from '../../../bin/domain/document.ts';
 import { runOperations } from '../../../bin/application/operations.ts';
 import { compileProject, loadTemplateSnapshot } from '../../../scripts/compiler/index.ts';
 import { packageFiles } from '../../../scripts/compiler/adapters/project/configuration.ts';
+import { defineFrameworkAdapter } from '../../../scripts/compiler/adapters/project/framework-adapter.ts';
 import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
 import { loadDefinitions } from '../../../scripts/starters/repository.ts';
@@ -33,6 +34,22 @@ test('plugin owns manifest/config and can contribute a framework, starter, CLI a
   assert.equal(reactStarter.generator.framework, 'react');
   assert.equal(reactAdapter.engine, 'vanilla');
   assert.match(reactAdapter.files?.({} as never)['src/ui/mount.ts'] ?? '', /react-dom\/client/);
+});
+
+test('framework adapters reject ambiguous dependency ownership', () => {
+  assert.throws(() => defineFrameworkAdapter({
+    id: 'scope-conflict', label: 'Scope conflict', engine: 'vanilla',
+    dependencies: { react: '19.3.0' }, devDependencies: { react: '19.3.0' },
+  }), /DEPENDENCY_SCOPE_CONFLICT/);
+  const selection = projectSelection({ id: reactStarter.id, version: reactStarter.version, sha256: 'c'.repeat(64) }, reactStarter.generator);
+  const template = { text() {
+    return JSON.stringify({ dependencies: {}, devDependencies: { typescript: '6.0.3', '@types/node': '26.6.3', vite: '8.3.1' } });
+  } };
+  const bad = defineFrameworkAdapter({
+    id: 'react', label: 'React conflict', engine: 'vanilla',
+    devDependencies: { vite: '9.0.0' },
+  });
+  assert.throws(() => packageFiles(template as never, selection, 'react-app', bad), /dependency scope/);
 });
 
 test('plugin starter discovery and framework package emission use the normal project contracts', async () => {

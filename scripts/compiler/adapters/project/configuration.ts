@@ -26,14 +26,15 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
   }
   if (engine === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
   if (engine === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
-  const merge = (source: Readonly<Record<string, string>> | undefined, target: Record<string, string>) => {
+  const merge = (source: Readonly<Record<string, string>> | undefined, target: Record<string, string>, other: Record<string, string>) => {
     for (const [name, pin] of Object.entries(source ?? {})) {
+      if (other[name] !== undefined) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter changes dependency scope already owned by the selected engine: ' + name));
       if (target[name] !== undefined && target[name] !== pin) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter dependency conflicts with the selected engine: ' + name));
       target[name] = pin;
     }
   };
-  merge(adapter.dependencies, dependencies);
-  merge(adapter.devDependencies, devDependencies);
+  merge(adapter.dependencies, dependencies, devDependencies);
+  merge(adapter.devDependencies, devDependencies, dependencies);
   const scripts: Record<string, string> = {
     build: 'node scripts/build.mjs',
     typecheck: engine === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : engine === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
