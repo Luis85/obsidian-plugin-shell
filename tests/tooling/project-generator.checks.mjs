@@ -23,8 +23,11 @@ function cli(options,extra = [], entry = join(root,'shell.mjs')) {
 }
 test('self-project preserves all declared artifacts and exposes honest readiness',()=>{
   const m = projectModel(fixture);
-  assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[28,54,11,1,31]);
+  assert.deepEqual([m.screens.length,m.components.length,m.entities.length,m.sources.length,m.requirements.length],[28,54,11,2,31]);
   assert.equal(m.sources[0].operations.length,3); assert.equal(m.flows.length,3);
+  // The self-project keeps its vault reads and adds one Markdown Collection with the full CRUD port set.
+  assert.deepEqual(m.sources.map(source=>[source.kind,source.operations.map(operation=>operation.slug)]),
+    [['vault',['list-requirements','list-sitemap','list-components']],['collection',['list','create','update','delete']]]);
   assert.equal(m.document,fixture); assert.ok(m.warnings.some(w=>w.includes('require implementation')));
 });
 for (const [label,change,expected] of [

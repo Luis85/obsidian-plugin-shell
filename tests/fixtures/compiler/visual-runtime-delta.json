@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "reviewedFrom": "c969f28fea7e5e8cb425d50e580b4d0bcf4da3d5",
-  "scope": "Reviewed visual interaction runtime delta layered on the unchanged scenario, preview and product goldens: shared visual action kinds, generated runtime tests for menu selection, two-way overlay state, typed and JSON-file controls, the local icon test setup and bounded definition-suite parts that retain every generated case. The matching use-visual.ts runtime bytes are reviewed in scenario-preview-delta.json (after ab289cf3a047c077fd6b6ab8f22e19779d0bb7ae82403ed198e2af594e63a0a8 -> d49f53dd).",
+  "scope": "Reviewed visual interaction runtime delta layered on the unchanged scenario, preview and product goldens: shared visual action kinds, generated runtime tests for menu selection, two-way overlay state, typed and JSON-file controls, the local icon test setup and bounded definition-suite parts that retain every generated case. The matching use-visual.ts runtime bytes are reviewed in scenario-preview-delta.json (after ab289cf3a047c077fd6b6ab8f22e19779d0bb7ae82403ed198e2af594e63a0a8 -> d49f53dd). The companion-project.json entries are layered above self-project-collection-delta.json: they start from that layer's reviewed output for input e3e9ee82 and are reversed before it.",
   "shared": [
     {
       "path": "{sourceRoot}/domain/visual/visual-ir.d.mts",
@@ -165,97 +165,97 @@
         {
           "path": "{testRoot}/visual/definitions-10.test.ts",
           "before": null,
-          "after": "398686949c26e23161305664798dd7ed8b1056c77fbd37c2302622d8497accb8"
+          "after": "5cdec86c514f92071dba523133bc30e8bb975773f846b3224a769a2434a69230"
         },
         {
           "path": "{testRoot}/visual/definitions-11.test.ts",
           "before": null,
-          "after": "2b0658a36f59012f642b0ff8f1187e094dc0cf052e12a954432636fcf1bd82c9"
+          "after": "a4686172d6339e182ddf3840a949c7306919a7632f80b134cf3e4c4ffb559283"
         },
         {
           "path": "{testRoot}/visual/definitions-12.test.ts",
           "before": null,
-          "after": "2e7f4f06bc5655673a25a291e24cd10570bf1e4efff38085f3b2959bd1b40a09"
+          "after": "0fd0fe966290fb6cb3366ecc36625b41b975950cd10bcfdb6f109827455f685b"
         },
         {
           "path": "{testRoot}/visual/definitions-13.test.ts",
           "before": null,
-          "after": "f5e3df5eecd061d1faf792f113f61923bd507765e157bc0ff9d4d026ab090de2"
+          "after": "f7d9cced19f8d0af7a6a0d46717e0776c3828078b710f9fb840b389e61090f84"
         },
         {
           "path": "{testRoot}/visual/definitions-14.test.ts",
           "before": null,
-          "after": "14e93145f5a84f5cff684b7eead934b0e76042aab06dde11cb348083841c9423"
+          "after": "139c24785b1df7a360651133b7ebb8ac233a7643efeacbe67889b3110cf4035c"
         },
         {
           "path": "{testRoot}/visual/definitions-15.test.ts",
           "before": null,
-          "after": "3157146fea493eb689162a819fac815c47c7e35efd6cd4db6c22c42b6881fab4"
+          "after": "41df03121ecc4f9029a4174213bb28a2e284fa5305b2575306a1422ed0afd245"
         },
         {
           "path": "{testRoot}/visual/definitions-16.test.ts",
           "before": null,
-          "after": "e8cd1aca73462d99705f93bd8cde11f0d1a1bbf69593eaf9003caeee9d91d9fa"
+          "after": "a14c33a3dbc8a4c3b0735fe851c2097403bce775290db7de3d8c083a9ade7047"
         },
         {
           "path": "{testRoot}/visual/definitions-17.test.ts",
           "before": null,
-          "after": "7462af63710b1d24b1a3b915f8c0261d4581016e9c046aa44d4d6944c7e72ae2"
+          "after": "0631f29bdde034e08e56d9ef84f09a45eacce63bfecab60a855408660840f7ff"
         },
         {
           "path": "{testRoot}/visual/definitions-18.test.ts",
           "before": null,
-          "after": "645f957471a3c139f0fd8d33d25388a0e631953ecbe5c18e6a691278d4c16c2b"
+          "after": "7f60ad0c865c2b8ea5c48bb8a779c14fd9983de3d5b5aed415112470e31b2507"
         },
         {
           "path": "{testRoot}/visual/definitions-19.test.ts",
           "before": null,
-          "after": "85daec5bae68f265ab5671ffe8acfd282f674879b182268c8063002b04624460"
+          "after": "3f54f24d9337e352eda5eb6e9b3edbdbb9f53f545baca6f86f034f5060123099"
         },
         {
           "path": "{testRoot}/visual/definitions-2.test.ts",
           "before": null,
-          "after": "68f3a0c2126935e75b3765d2517ff69c171dc92924b23f1d6c18785b705d6e76"
+          "after": "45dbe4bf8f9837afec01b50a7b30ba94df5448b8df31f5c3287a003dd812d514"
         },
         {
           "path": "{testRoot}/visual/definitions-3.test.ts",
           "before": null,
-          "after": "3f714f3296519a20c6d4d2d38760e79230a72cfdd61628c80272181bdd73c0b2"
+          "after": "46fd0069677aa9ab739ed86e4a1341d091d748fae611351cd7e6a7cf6df2b100"
         },
         {
           "path": "{testRoot}/visual/definitions-4.test.ts",
           "before": null,
-          "after": "b7353306eae93c904076251ed2af1e7d8e1fe513df6db45c87cfd590300ff7b6"
+          "after": "887ed30732e45d0bfa9d4248cdc6874cb37a3a315b75eb99fc995a64968cf751"
         },
         {
           "path": "{testRoot}/visual/definitions-5.test.ts",
           "before": null,
-          "after": "8b73ec4a9bf164161f26ea34ba10468831cc0c3b62c55c7fe40e9e6e35c47224"
+          "after": "67b6b718b438307efa974d878521ba4716bc81e60fd6b5aabd410b188ac47c0e"
         },
         {
           "path": "{testRoot}/visual/definitions-6.test.ts",
           "before": null,
-          "after": "e07dd8138c98a71a60c7ecc335088dd3b7cf42837a0a7fed5751b2cd29826335"
+          "after": "004b0a98345e799bf10f471996bea4aa1432448880ffddca3672be4163368daf"
         },
         {
           "path": "{testRoot}/visual/definitions-7.test.ts",
           "before": null,
-          "after": "7d1be74aa13ec90bc80bec6dea5d27e8b0ef31f34557486b68df8edff25074c9"
+          "after": "e64b6a327677fbdc1d775e97822ee576f810e2ce5f2521bb1b1d8ba9313d63b8"
         },
         {
           "path": "{testRoot}/visual/definitions-8.test.ts",
           "before": null,
-          "after": "4f891f56ebb0b9cee6f400d0fc6c1520ec3e204beb9cdf243b21c900f77885b7"
+          "after": "55f3c9948e519305513eb7ee4ae516e85af0262748a220b5a5031f65bdaf3cce"
         },
         {
           "path": "{testRoot}/visual/definitions-9.test.ts",
           "before": null,
-          "after": "e31c4f5eb1a94e3072010291d4281c9c9c60f1c230a8a358cba9691209b2b28f"
+          "after": "0bb7dc3b7336e4daadd16b1adc198a57e794849998abf0936ddea686fe6113e1"
         },
         {
           "path": "{testRoot}/visual/definitions.test.ts",
-          "before": "5f945ea874fab9b2af8346f8dc0fb25b55ad889da0493851fc14d1e0d76cb313",
-          "after": "2ac29705cdb3b6d7799ee8b6cf09ec37340ea0653305a817c543604f1019ed57"
+          "before": "eb9724f2c197570084aea80775229a10ff52a9589dbd37bdd3bce92295226efc",
+          "after": "97d4b919d93f964cdf2d8f47025ec3a4f3ad1ae77552c7257f7daef497f1cb31"
         }
       ]
     }

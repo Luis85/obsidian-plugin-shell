@@ -10,6 +10,7 @@ const baseline=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/post
 const previewDelta=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/preview-host-delta.json'),'utf8'));
 const scenarioDelta=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/scenario-preview-delta.json'),'utf8'));
 const visualDelta=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/visual-runtime-delta.json'),'utf8'));
+const collectionDelta=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/self-project-collection-delta.json'),'utf8'));
 const liveTemplate=await loadTemplateSnapshot(root);
 const baselineInputs=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/template-inputs.json'),'utf8'));
 const digest=value=>createHash('sha256').update(value).digest('hex');
@@ -61,6 +62,39 @@ for(const item of visualDelta.cases) for(const change of item.files){
   assert.equal(change.before===null,change.path!=='{testRoot}/visual/definitions.test.ts',change.path);
 }
 const visualAdded=source=>[...visualDelta.shared,...visualDelta.cases.find(item=>item.source===source).files].filter(change=>change.before===null).length;
+// Owner-approved self-project Test recipe collection (d10a96e): ONE case gets a reviewed replacement
+// input pin and exact new output hashes; every other case keeps its original input pin unchanged.
+const collectionCase=baseline.cases.filter(item=>item.source===collectionDelta.source);
+assert.equal(collectionDelta.schemaVersion,1);assert.equal(collectionCase.length,1);
+assert.equal(collectionDelta.input.before,collectionCase[0].inputSha256);assert.notEqual(collectionDelta.input.after,collectionDelta.input.before);
+const collectionPaths=collectionDelta.files.map(file=>file.path);
+assert.equal(new Set(collectionPaths).size,collectionPaths.length);
+assert.ok(collectionDelta.files.every(file=>file.before!==file.after&&/^[0-9a-f]{64}$/.test(file.after)));
+const layeredPaths=[...previewDelta.shared,...scenarioDelta.shared].map(item=>item.path).concat(['harness/prototype/clickdummy.ts','harness/prototype/clickdummy-scenarios.ts','{sourceRoot}/bootstrap/mount.ts','{sourceRoot}/application/note-operations.ts']);
+assert.ok(collectionPaths.every(path=>!layeredPaths.includes(path)),'collection delta stays disjoint from earlier layers');
+const collectionAdded=source=>source===collectionDelta.source?collectionDelta.files.filter(file=>file.before===null).length:0;
+const reviewedInputSha256=expected=>expected.source===collectionDelta.source?collectionDelta.input.after:expected.inputSha256;
+/** Check the exact reviewed collection bytes, then reverse them to the pre-collection output of the original input. */
+function beforeCollection(hashes,model,source) {
+  if(source!==collectionDelta.source) return;
+  for(const change of collectionDelta.files){
+    const path=change.path.replace('{sourceRoot}',model.sourceRoot).replace('{testRoot}',model.testRoot);
+    assert.equal(hashes.get(path),change.after,'reviewed self-project collection output: '+path);
+    if(change.before===null) hashes.delete(path); else hashes.set(path,change.before);
+  }
+}
+/** The visual layer is reversed first, so on a shared path its `before` must be the collection layer's
+ * reviewed `after`. A collection-added path may later change (it is counted once, as a collection
+ * addition); a visual addition must be absent from the collection layer's output entirely. */
+function assertVisualOverCollection(visual,collection) {
+  const prior=new Map(collection.files.map(file=>[file.path,file]));
+  for(const change of [...visual.shared,...visual.cases.find(item=>item.source===collection.source).files]){
+    if(!prior.has(change.path)) continue;
+    assert.notEqual(change.before,null,'visual addition collides with the collection layer: '+change.path);
+    assert.equal(change.before,prior.get(change.path).after,'visual layer chains onto the collection output: '+change.path);
+  }
+}
+assertVisualOverCollection(visualDelta,collectionDelta);
 /** Reverse only the two reviewed Nuxt UI bootstrap insertions from f0ede074 in both native and preview mounts.
  * Both insertions must occur exactly once; all remaining bytes still face the original goldens. */
 function beforeUiBootstrap(source) {
@@ -77,6 +111,7 @@ function beforeUiBootstrap(source) {
 /** Check the exact new bytes, then reverse only the reviewed browser deltas to the unchanged historical digest. */
 function historicalBytes(selected,model,source) {
   const hashes=new Map(selected.map(file=>[file.path,digest(['harness/prototype/clickdummy.ts',model.sourceRoot+'/bootstrap/mount.ts'].includes(file.path)?beforeUiBootstrap(file.content):file.content)]));
+  // Reverse newest first: visual (PR54) -> collection (PR5) -> scenario -> preview -> note lease.
   const visual=visualDelta.cases.find(item=>item.source===source);assert.ok(visual);
   for(const change of [...visualDelta.shared,...visual.files]){
     const path=change.path.replace('{sourceRoot}',model.sourceRoot).replace('{testRoot}',model.testRoot);
@@ -84,6 +119,7 @@ function historicalBytes(selected,model,source) {
     if(change.before===null){assert.match(change.path,visualAddition);hashes.delete(path);}
     else hashes.set(path,change.before);
   }
+  beforeCollection(hashes,model,source);
   const scenario=scenarioDelta.cases.find(item=>item.source===source);assert.ok(scenario);
   for(const change of [...scenarioDelta.shared,...scenario.files]){
     const path=change.path.replace('{sourceRoot}',model.sourceRoot);
@@ -112,7 +148,7 @@ function historicalBytes(selected,model,source) {
 }
 for(const expected of baseline.cases){
   test('matches original PR5 bytes plus the reviewed host bootstrap and preview deltas: '+expected.source,async()=>{
-    const source=await readFile(join(root,expected.source),'utf8');assert.equal(digest(source),expected.inputSha256,'pinned baseline input bytes');const result=await compileProject({source,template});
+    const source=await readFile(join(root,expected.source),'utf8');assert.equal(digest(source),reviewedInputSha256(expected),'pinned baseline input bytes');const result=await compileProject({source,template});
     assert.equal(result.status,'ok',JSON.stringify(result.diagnostics));const model=result.model;
     const selected=result.artifacts.filter(file=>file.path.startsWith(model.sourceRoot+'/')||file.path.startsWith(model.testRoot+'/')||file.path.startsWith('harness/prototype/')||['src/main.ts','src/bootstrap/features.ts','design/project.json','design/traceability.json'].includes(file.path));
     // AIR-01 adds one browser entry. Verify its complete bytes separately; all historical
@@ -125,7 +161,8 @@ for(const expected of baseline.cases){
 <script type="module" src="/harness/prototype/clickdummy.ts"></script></body></html>
 `);
     const preserved=selected.filter(file=>file!==previews[0]);
-    assert.equal(selected.length,expected.files+3+visualAdded(expected.source));assert.equal(digest(JSON.stringify(historicalBytes(preserved,model,expected.source))),expected.sha256);
+    assert.equal(selected.length,expected.files+3+visualAdded(expected.source)+collectionAdded(expected.source));
+    assert.equal(digest(JSON.stringify(historicalBytes(preserved,model,expected.source))),expected.sha256);
   });
 }
 test('note lease compatibility delta refuses unreviewed generated runtime changes',async()=>{
@@ -206,5 +243,57 @@ for(const target of ['harness/prototype/clickdummy.ts','{sourceRoot}/bootstrap/m
     const result=await compileProject({source,template});
     const changed=result.artifacts.map(file=>file.path===target.replace('{sourceRoot}',result.model.sourceRoot)?{...file,content:file.content.replace(insertion,'/* missing UI bootstrap */')}:file);
     assert.throws(()=>historicalBytes(changed,result.model,expected.source),/reviewed UI bootstrap output/);
+  });
+}
+
+test('collection delta replaces only the reviewed self-project input pin',()=>{
+  for(const expected of baseline.cases) assert.equal(reviewedInputSha256(expected),
+    expected.source===collectionDelta.source?collectionDelta.input.after:expected.inputSha256);
+  assert.equal(baseline.cases.filter(item=>reviewedInputSha256(item)!==item.inputSha256).length,1);
+});
+
+const collectionCompile=(async()=>{
+  const source=await readFile(join(root,collectionDelta.source),'utf8');
+  const result=await compileProject({source,template});assert.equal(result.status,'ok');
+  const model=result.model,files=result.artifacts.filter(file=>file.path.startsWith(model.sourceRoot+'/')||
+    file.path.startsWith(model.testRoot+'/')||file.path.startsWith('harness/prototype/')||
+    ['src/main.ts','src/bootstrap/features.ts','design/project.json','design/traceability.json'].includes(file.path))
+    .filter(file=>file.path!=='harness/prototype/index.html');
+  return {model,files,target:path=>path.replace('{sourceRoot}',model.sourceRoot).replace('{testRoot}',model.testRoot)};
+})();
+for(const path of ['src/bootstrap/features.ts','design/project.json','{sourceRoot}/infrastructure/sources/test-recipes.ts']){
+  test('collection delta rejects unreviewed bytes: '+path,async()=>{
+    const {model,files,target}=await collectionCompile;
+    const changed=files.map(file=>file.path===target(path)?{...file,content:file.content+'// unreviewed change\n'}:file);
+    assert.throws(()=>historicalBytes(changed,model,collectionDelta.source),/reviewed self-project collection output/);
+  });
+  test('collection delta rejects a missing reviewed file: '+path,async()=>{
+    const {model,files,target}=await collectionCompile;
+    const missing=files.filter(file=>file.path!==target(path));assert.equal(missing.length,files.length-1);
+    assert.throws(()=>historicalBytes(missing,model,collectionDelta.source),/reviewed self-project collection output/);
+  });
+}
+test('collection delta does not absorb an undeclared extra generated file',async()=>{
+  const {model,files}=await collectionCompile;
+  assert.equal(digest(JSON.stringify(historicalBytes(files,model,collectionDelta.source))),collectionCase[0].sha256);
+  const extra=[...files,{path:model.sourceRoot+'/application/test-recipes/unreviewed.ts',content:'export {};\n'}];
+  assert.notEqual(digest(JSON.stringify(historicalBytes(extra,model,collectionDelta.source))),collectionCase[0].sha256);
+});
+test('visual layer must chain onto the reviewed collection output',()=>{
+  const selfCase=delta=>delta.cases.find(item=>item.source===collectionDelta.source);
+  const stale=structuredClone(visualDelta),suite=selfCase(stale).files.find(file=>file.path==='{testRoot}/visual/definitions.test.ts');
+  suite.before=collectionDelta.files.find(file=>file.path===suite.path).before;
+  assert.throws(()=>assertVisualOverCollection(stale,collectionDelta),/visual layer chains onto the collection output/);
+  const readded=structuredClone(visualDelta);
+  selfCase(readded).files.push({path:'{sourceRoot}/application/test-recipes/service.ts',before:null,after:'0'.repeat(64)});
+  assert.throws(()=>assertVisualOverCollection(readded,collectionDelta),/visual addition collides with the collection layer/);
+});
+for(const path of ['{testRoot}/visual/definitions.test.ts','{testRoot}/visual/definitions-19.test.ts']){
+  test('self-project visual layer rejects changed or missing reviewed bytes: '+path,async()=>{
+    const {model,files,target}=await collectionCompile;
+    assert.equal(files.filter(file=>file.path===target(path)).length,1,'fixture must emit '+target(path));
+    const changed=files.map(file=>file.path===target(path)?{...file,content:file.content+'// unreviewed change\n'}:file);
+    assert.throws(()=>historicalBytes(changed,model,collectionDelta.source),/reviewed visual runtime output/);
+    assert.throws(()=>historicalBytes(files.filter(file=>file.path!==target(path)),model,collectionDelta.source),/reviewed visual runtime output/);
   });
 }

@@ -67,7 +67,12 @@ test('[CONCEPT-OUTBOUND] concept implementation cannot become a runtime adapter'
 
 test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still rejects extra files', async () => {
   const config = JSON.parse(await readFile('.fallowrc.json', 'utf8'));
-  const entry = config.entry.filter(path => path.startsWith('docs/concepts/companion/'));
+  // Same owned assembly roots as build-companion.py; editor TypeScript is a separately registered test-import entry.
+  const owned = ['src/', 'vendor/', 'test-kit/'].map(root => 'docs/concepts/companion/' + root);
+  const entry = config.entry.filter(path => owned.some(root => path.startsWith(root)));
+  const editor = config.entry.filter(path => path.startsWith('docs/concepts/companion/editor/'));
+  assert.deepEqual(config.entry.filter(path => path.startsWith('docs/concepts/companion/')).sort(), [...entry, ...editor].sort(), 'Only assembly roots and editor sources are registered');
+  assert.ok(editor.includes('docs/concepts/companion/editor/prototype-manager.ts') && editor.includes('docs/concepts/companion/editor/prototypes.css'), 'Prototype editor sources imported by checks stay registered');
   const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
   assert.equal(entry.length, 140, 'Exact authored, vendor and test-kit assembly inventory');
   assert.ok(entry.includes('docs/concepts/companion/src/project-handoff.js'), 'Companion terminal/agent handoff must remain inventoried');
