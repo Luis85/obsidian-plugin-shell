@@ -419,7 +419,7 @@
     },
     {
       "path": "tests/e2e/design-system.spec.ts",
-      "sha256": "d7115f46282af0025a39633ab3075581f891e61e06dff7b483b236eb2f153aad"
+      "sha256": "bc14a79325b8b00504d408db4215cdc403fdc5ceaabfd0a345ecf4d4c1976e99"
     },
     {
       "path": "scripts/testing/native-recovery-handles.mjs",
