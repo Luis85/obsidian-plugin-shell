@@ -1,3 +1,4 @@
+import { resultEnvelope } from './result-runtime.mjs';
 /** Canonical machine-readable CLI result envelope shared by framework and maker surfaces. */
 export type ResultStatus = 'ok' | 'planned' | 'applied' | 'unchanged' | 'blocked' | 'cancelled' | 'failed';
 
@@ -22,5 +23,5 @@ export interface Result<Data = unknown> {
 }
 
 export function result<Data>(command: string, data: Data, status: ResultStatus = 'ok'): Result<Data> {
-  return { protocolVersion: 1, command, status, data, diagnostics: [] };
+  return resultEnvelope(command, data, status) as Result<Data>;
 }

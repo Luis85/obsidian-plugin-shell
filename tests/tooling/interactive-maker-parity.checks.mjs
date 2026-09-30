@@ -11,6 +11,7 @@ import { checkSteps } from '../../scripts/framework/check.ts';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { result as operationResult } from '../../scripts/contracts/result.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
+import { routeArguments } from '../../bin/adapters/router.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -114,4 +115,27 @@ test('maker shared input transport preserves bounded and prompt semantics', asyn
   const answer = ask(promptInput, promptOutput, 'Name: ', undefined, false);
   promptInput.end('Workbench\n');
   assert.equal(await answer, 'Workbench');
+});
+
+test('single bin router preserves launcher surface ownership and aliases', () => {
+  const cases = [
+    [[], 'maker', []],
+    [['studio'], 'maker', ['studio']],
+    [['--ui', 'tui'], 'maker', ['--ui', 'tui']],
+    [['new', 'presets'], 'maker', ['new', 'presets']],
+    [['new', 'guide'], 'maker', ['new', 'guide']],
+    [['new', 'validate'], 'maker', ['new', 'validate']],
+    [['new', '--preset', 'cli'], 'maker', ['new', '--preset', 'cli']],
+    [['new', '--help'], 'maker', ['new', '--help']],
+    [['new', '../legacy'], 'framework', ['new', '../legacy']],
+    [['new', '--list'], 'framework', ['new', '--list']],
+    [['status'], 'framework', ['status']],
+    [['help', 'new'], 'framework', ['help', 'new']],
+    [['make', 'project', '../legacy'], 'framework', ['new', '../legacy']],
+    [['make', 'prototype', '--help'], 'maker', ['prototype', '--help']],
+    [['help', 'sketch', '--json'], 'maker', ['sketch', '--help', '--json']],
+    [['memory', 'status', '--json'], 'memory', ['status', '--json']],
+    [['help', 'memory', '--json'], 'memory', ['--help', '--json']],
+  ];
+  for (const [argv, surface, args] of cases) assert.deepEqual(routeArguments(argv), { surface, args }, argv.join(' '));
 });

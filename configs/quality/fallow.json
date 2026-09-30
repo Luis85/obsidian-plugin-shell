@@ -327,6 +327,7 @@
       {
         "name": "cli-result-contract",
         "patterns": [
+          "scripts/contracts/result-runtime.mjs",
           "scripts/contracts/result.ts",
           "scripts/contracts/errors.ts"
         ]
@@ -335,12 +336,6 @@
         "name": "cli-process-contract",
         "patterns": [
           "scripts/shared/process.ts"
-        ]
-      },
-      {
-        "name": "cli-concurrency-contract",
-        "patterns": [
-          "scripts/shared/bounded-map.ts"
         ]
       },
       {
@@ -503,8 +498,7 @@
           "cli-file-plan-contract",
           "cli-input-contract",
           "cli-files-contract",
-          "cli-bounded-map-contract",
-          "cli-concurrency-contract"
+          "cli-bounded-map-contract"
         ]
       },
       {
@@ -550,8 +544,7 @@
           "cli-file-plan-contract",
           "cli-input-contract",
           "cli-files-contract",
-          "cli-bounded-map-contract",
-          "cli-concurrency-contract"
+          "cli-bounded-map-contract"
         ]
       },
       {
@@ -650,16 +643,10 @@
         ]
       },
       {
-        "from": "cli-concurrency-contract",
-        "allow": [
-          "cli-concurrency-contract"
-        ]
-      },
-      {
         "from": "cli-file-plan-contract",
         "allow": [
           "cli-file-plan-contract",
-          "cli-concurrency-contract",
+          "cli-bounded-map-contract",
           "cli-files-contract"
         ]
       },
