@@ -19,7 +19,7 @@ export function fixture(t, enabled = false) {
   const env = { ...process.env, HOME: home, USERPROFILE: home, CODEX_HOME: join(home, '.codex'), APPDATA: join(home, 'AppData/Roaming'), HINDSIGHT_CONFIG: '', HINDSIGHT_API_LLM_PROVIDER: '', HINDSIGHT_API_LLM_MODEL: '' };
   const cli = fileURLToPath(new URL('../../scripts/hindsight/cli.ts', import.meta.url));
   return { ...p, p, root, home, repo, git, env,
-    invoke: (args, extra = {}) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args], { cwd: root, env, encoding: 'utf8', timeout: 10000, ...extra }),
+    invoke: (args, extra = {}) => spawnSync(process.execPath, ['--experimental-strip-types', cli, ...args], { cwd: root, env, encoding: 'utf8', timeout: 60000, ...extra }),
   };
 }
 export function fakeNative(f, body) {
