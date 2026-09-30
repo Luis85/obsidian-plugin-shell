@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation through C21 on PR #60. The continuation uses separately pushed
+Status: staged implementation through C22 on PR #60. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -28,8 +28,7 @@ source under `bin/`.
 - Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
 - `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
 - Cycles: compiler ↔ companion, and framework ↔ compiler.
-- Untyped `.mjs` libraries sit under typed TypeScript callers: `shared/file-plan.mjs`, `shared/process.mjs`,
-  `contracts/json-data.mjs`, the `makers/*.mjs` engine and `operations/catalog.mjs`.
+- Compatibility `.mjs` entries for JSON data, process, input, confirmation, hash, project-path, bounded mapping and file plans delegate to typed core modules. Remaining untyped engines are concentrated in `makers/*.mjs`, `operations/catalog.mjs` and real tooling scripts.
 
 | Folder | Role today | Direction |
 | --- | --- | --- |
@@ -96,7 +95,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C19:** Canonical SHA-256 and lstat-presence helpers now have typed implementations with compatibility-only `.mjs` entries. Framework files/handout and memory-policy TypeScript callers import the typed helpers directly; the helpers have explicit architecture and maker-coverage ownership.
 - **C20:** The shared portable project-path policy now has a canonical TypeScript implementation with compatibility-only `.mjs` entry. Maker domain and application-doc settings use it directly, maker coverage owns it, and the existing `project-path-contract` boundary now points at the typed implementation with an explicit regression.
 - **C21:** Bounded asynchronous mapping now has a canonical TypeScript implementation with a compatibility-only `.mjs` entry. Direct regressions preserve input-order results, invalid-concurrency refusal and stop-scheduling-on-first-failure semantics.
-- **Remaining C22–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C22:** File-plan validation, containment, locking, stale-preimage checks, staging and rollback now execute from strict `file-plan-runtime.ts`; `file-plan.mjs` is compatibility-only. The file-plan boundary explicitly depends only on typed bounded-concurrency and filesystem contracts, while existing stale-plan and apply regressions remain the behavioral guardrails.
+- **Remaining C23–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
