@@ -3,11 +3,9 @@ import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectSelection } from '../../domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
 import { json } from '../../../companion/compiler/model.ts';
-import { requireFrameworkAdapter } from './framework-registry.ts';
 import type { FrameworkAdapter } from './framework-adapter.ts';
 /** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
-export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string,
-  adapter: FrameworkAdapter = requireFrameworkAdapter(selected.framework)) {
+export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string, adapter: FrameworkAdapter) {
   const original = JSON.parse(template.text('package.json'));
   const engine = adapter.engine;
   const dependencies: Record<string, string> = {}, devDependencies: Record<string, string> = {};
@@ -54,7 +52,7 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
     '.gitignore': 'node_modules/\ndist/\n.compiled/\n.prototype-build/\n',
   };
 }
-export function typecheckFiles(selected: ProjectSelection, adapter: FrameworkAdapter = requireFrameworkAdapter(selected.framework)) {
+export function typecheckFiles(selected: ProjectSelection, adapter: FrameworkAdapter) {
   const engine = adapter.engine;
   const files: Record<string, string> = {
     'tsconfig.json': json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,

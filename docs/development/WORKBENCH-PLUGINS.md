@@ -24,6 +24,15 @@ plugins/
 
 Register the plugin explicitly in `plugins/registry.ts`. Workbench does not scan folders and execute whatever it finds. Plugin code is trusted application/tooling code, not a sandbox.
 
+Create a plugin through the reviewed maker instead of hand-creating the package:
+
+```sh
+npm run make -- plugin my-extension --dry-run
+npm run make -- plugin my-extension --yes
+```
+
+The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed.
+
 Run:
 
 ```sh
@@ -69,7 +78,7 @@ export const PluginObject = {
 } satisfies WorkbenchPluginObject;
 ```
 
-The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners. Synchronous recursive dispatch is bounded at 32 nested publications and reports `WORKBENCH_PLUGIN_EVENT_RECURSION` instead of exhausting the stack.
+The same `eventBus` is available to `activate`, CLI commands and TUI actions. Plugins can `on`, `once` and `dispatch` events they registered. Event IDs must be namespaced under the owning manifest ID (for example `my-plugin.item-changed`). Duplicate event IDs, unregistered definitions and invalid payloads fail closed or are reported by the runtime; one listener failure does not stop unrelated listeners. Synchronous recursive dispatch is bounded at 32 nested publications and reports `WORKBENCH_PLUGIN_EVENT_RECURSION` instead of exhausting the stack.
 
 ## Extending the CLI
 

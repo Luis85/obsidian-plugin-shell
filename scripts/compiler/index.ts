@@ -14,14 +14,20 @@ import { clickdummyFiles } from './adapters/clickdummy-emitter.ts';
 import { dependencyReadiness } from './adapters/dependencies.ts';
 import { artifactOrigins } from './adapters/origins.ts';
 import { json, type Model } from '../companion/compiler/model.ts';
+import { requireFrameworkAdapter } from './adapters/project/framework-registry.ts';
+import type { FrameworkAdapter } from './adapters/project/framework-adapter.ts';
 export { loadTemplateSnapshot } from './adapters/template-snapshot.ts';
 export { compilerVersion, compilerPhases } from './application/pipeline.ts';
 export { diagnosticCatalog, CompilerError } from './domain/diagnostics.ts';
 export type { Compilation, CompilerDiagnostic, TemplateSnapshot, OutputKind, StorybookOptions } from './domain/contracts.ts';
+export interface CompilerExtensions { readonly frameworkAdapters?: readonly FrameworkAdapter[] }
 
-async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string,selection?:ProjectSelection):Promise<Artifact[]> {
+async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['outputKind'],sourceName:string,selection?:ProjectSelection,extensions:CompilerExtensions={}):Promise<Artifact[]> {
   let files:Artifact[];
-  try { files=kind==='project' ? renderStarterProject(model,template,selection!) : await renderProjectFiles(template,model); }
+  try {
+    const adapter = kind === 'project' ? requireFrameworkAdapter(selection!.framework, extensions.frameworkAdapters) : undefined;
+    files=kind==='project' ? renderStarterProject(model,template,selection!,adapter) : await renderProjectFiles(template,model);
+  }
   catch(error) { return contractCall('emit',sourceName,()=>{throw error;}); }
   if(kind==='clickdummy')files=clickdummyFiles(model,template,files);
   const dependencies=dependencyReadiness(files);
@@ -31,7 +37,7 @@ async function emit(model:Model,template:TemplateSnapshot,kind:CompileRequest['o
   files.push({path:'design/compiler-origins.json',content:json({schemaVersion:1,artifacts:artifactOrigins(model,files,sourceName)}),ownership:'managed',producer:'compiler'});
   return files.sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
 }
-export async function compileProject(request:CompileRequest,control:Control={}) {
+export async function compileProject(request:CompileRequest,control:Control={},extensions:CompilerExtensions={}) {
   const sourceName=request.sourceName ?? 'project.json';
   const frontend = companionFrontend(sourceName);
   return runCompiler(request,{
@@ -43,10 +49,12 @@ export async function compileProject(request:CompileRequest,control:Control={}) 
         return lowerTarget(model,template,kind,sourceName);
       }
       if (model.sourceRoot !== 'src/generated' || model.testRoot !== 'tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starters currently require src/ and tests/ roots.'));
-      validateProjectSelection(request.projectSelection);
+      const selection = validateProjectSelection(request.projectSelection);
+      try { requireFrameworkAdapter(selection.framework, extensions.frameworkAdapters); }
+      catch { throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starter needs an installed framework adapter for ' + selection.framework + '.')); }
       return [diagnostic('COMPILER_ADAPTER_REQUIRED', 'lower', 'Project starter output is a navigable starting scaffold. Visual component bodies and business actions require prototype implementation.')];
     },
-    emit:(model,template,kind)=>emit(model,template,kind,sourceName,request.projectSelection),
+    emit:(model,template,kind)=>emit(model,template,kind,sourceName,request.projectSelection,extensions),
     dependencies:dependencyReadiness,
     hash:(value,encoding)=>createHash('sha256').update(encoding?Buffer.from(value,encoding):value).digest('hex'),
   },control);

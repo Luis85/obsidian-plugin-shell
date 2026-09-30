@@ -1,4 +1,3 @@
-import { pluginFrameworkAdapters } from '../../../../plugins/runtime.ts';
 import { defineFrameworkAdapter, type FrameworkAdapter } from './framework-adapter.ts';
 
 const builtins: readonly FrameworkAdapter[] = Object.freeze([
@@ -7,8 +6,8 @@ const builtins: readonly FrameworkAdapter[] = Object.freeze([
   defineFrameworkAdapter({ id: 'angular', engine: 'angular', label: 'Angular — standalone Angular components, AOT compilation and zoneless, per-view lifecycle.' }),
   defineFrameworkAdapter({ id: 'none', engine: 'none', label: 'No frontend, command-line application — Node.js commands, structured output and explicit exit codes.' }),
 ]);
-export function frameworkAdapters(): readonly FrameworkAdapter[] {
-  const result = [...builtins, ...pluginFrameworkAdapters()];
+export function frameworkAdapters(contributed: readonly FrameworkAdapter[] = []): readonly FrameworkAdapter[] {
+  const result = [...builtins, ...contributed.map(defineFrameworkAdapter)];
   const ids = new Set<string>();
   for (const adapter of result) {
     if (ids.has(adapter.id)) throw new Error('FRAMEWORK_ADAPTER_DUPLICATE:' + adapter.id);
@@ -16,11 +15,11 @@ export function frameworkAdapters(): readonly FrameworkAdapter[] {
   }
   return Object.freeze(result);
 }
-export function frameworkAdapter(id: string): FrameworkAdapter | undefined {
-  return frameworkAdapters().find(adapter => adapter.id === id);
+export function frameworkAdapter(id: string, contributed: readonly FrameworkAdapter[] = []): FrameworkAdapter | undefined {
+  return frameworkAdapters(contributed).find(adapter => adapter.id === id);
 }
-export function requireFrameworkAdapter(id: string): FrameworkAdapter {
-  const adapter = frameworkAdapter(id);
+export function requireFrameworkAdapter(id: string, contributed: readonly FrameworkAdapter[] = []): FrameworkAdapter {
+  const adapter = frameworkAdapter(id, contributed);
   if (!adapter) throw new Error('FRAMEWORK_ADAPTER_MISSING:' + id);
   return adapter;
 }

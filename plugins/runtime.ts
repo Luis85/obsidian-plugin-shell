@@ -29,6 +29,7 @@ const reservedCliIds = new Set([
   'studio', 'sketch', 'prototype', 'new', 'settings', 'project-setup', 'first-run', 'brainstorm',
   ...frameworkCommands.map(command => command.id.split(' ')[0]!),
 ]);
+const reservedCliOptions = new Set(['json', 'no-interaction', 'help', 'no-color', 'root', 'project', 'input', 'out', 'kind', 'guide', 'apply', 'ui', 'starter']);
 function freeze(value: unknown): void {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return;
   Object.freeze(value);
@@ -53,7 +54,8 @@ function validateCli(commands: readonly PluginCliCommand[]): readonly PluginCliC
     if (ids.has(command.id)) throw new Error('WORKBENCH_PLUGIN_CLI_DUPLICATE:' + command.id);
     ids.add(command.id);
     const booleans = command.options?.booleans ?? [], values = command.options?.values ?? [];
-    if (![...booleans, ...values].every(optionName) || new Set([...booleans, ...values]).size !== booleans.length + values.length)
+    if (![...booleans, ...values].every(optionName) || new Set([...booleans, ...values]).size !== booleans.length + values.length
+      || [...booleans, ...values].some(option => reservedCliOptions.has(option)))
       throw new Error('WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID:' + command.id);
   }
   return Object.freeze([...commands]);
@@ -163,7 +165,10 @@ export async function createPluginRuntime(options: RuntimeOptions): Promise<Work
   const plugins = enabledPlugins(options.registry);
   const cliCommands = validateCli(plugins.flatMap(plugin => plugin.cli ?? []));
   const tuiActions = validateTui(plugins.flatMap(plugin => plugin.tui ?? []));
-  const events = plugins.flatMap(plugin => plugin.events ?? []);
+  const events = plugins.flatMap(plugin => (plugin.events ?? []).map(event => {
+    if (!event.id.startsWith(plugin.manifest.id + '.')) throw new Error('WORKBENCH_PLUGIN_EVENT_OWNER:' + event.id);
+    return event;
+  }));
   const bus = new EventBus(events, code => options.onError?.(code));
   const commandContext: PluginCommandContext = Object.freeze({
     root: options.root, frameworkRoot: options.frameworkRoot, input: options.input,
