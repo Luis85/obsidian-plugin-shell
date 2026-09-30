@@ -1,7 +1,7 @@
 import { legacyProjectCommand } from './legacy-project-command.ts';
 import { resolve } from 'node:path';
 import { readInput } from '../../scripts/framework/input.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { projectSelectionRequest, resolveProjectSelection, type ProjectCatalog } from '../../scripts/compiler/domain/project-presets.ts';
 import type { Arguments, CommandContext } from './commands.ts';
 import { option } from '../domain/command-options.ts';
