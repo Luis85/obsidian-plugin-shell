@@ -163,7 +163,7 @@ test('generated preview entry points are analyzed and inert tooling stays inside
   }
   const zone = config.boundaries.zones.find(zone => zone.name === 'companion-authoring-contract');
   for (const file of ['scripts/companion/tooling-contract.mjs', 'scripts/companion/tooling-options.ts']) assert.ok(zone.patterns.includes(file));
-  assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name]);
+  assert.deepEqual(config.boundaries.rules.find(rule => rule.from === zone.name).allow, [zone.name, 'cli-data-contract']);
   assert.ok(!config.ignorePatterns.some(pattern => pattern.includes('airship')));
 });
 
