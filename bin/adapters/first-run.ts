@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../../scripts/shared/file-plan.ts';
 import { runNode } from '../../scripts/framework/process.ts';
 import { OperationError, type Context } from '../../scripts/framework/contracts.ts';
 import { requireSketch } from '../domain/errors.ts';

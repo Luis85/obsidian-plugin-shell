@@ -83,7 +83,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C6:** Framework create/inspect-only consumers now import the typed file-plan facade directly. Apply/rollback callers remain isolated for the next milestone.
 - **C7:** Framework apply/rollback callers now use the typed file-plan facade too. The plugin-install artifact list is explicitly typed so only the reviewed `base64` encoding enters the plan boundary.
 - **C8:** Maker/bin create/inspect-only adapters now import the typed file-plan facade directly; the two apply callers remain isolated for the next milestone.
-- **Remaining C9–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C9:** Maker/bin apply callers (`first-run` report persistence and shared prepared-plan storage) now use the typed file-plan facade, so the maker application's typed path no longer imports `file-plan.mjs`.
+- **Remaining C10–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
