@@ -16,8 +16,8 @@ import { requireSketch, slug } from '../domain/errors.ts';
 import { documentText } from '../domain/document.ts';
 import { brainstormGuide, brainstormSchema, featureConcept, readFeatureBrainstorm, type FeatureBrainstorm } from '../domain/brainstorm.ts';
 import { projectPath } from '../domain/user-settings.ts';
-import type { Arguments } from './commands.ts';
-import { option, type CommandContext } from './commands.ts';
+import { option, type Arguments } from '../domain/command-options.ts';
+import type { CommandContext } from './commands.ts';
 
 export interface BrainstormOptions extends CommandContext { project: string; out?: string }
 export interface BrainstormVerificationPlan {
@@ -66,7 +66,7 @@ export async function brainstormFeaturePlan(input: unknown, options: BrainstormO
   const result = featureConcept(request, current), out = outputFolder(request, options.out);
   outputBoundary(options.root, options.frameworkRoot, out);
   const conceptPath = 'docs/concepts/brainstorms/' + String(result.definition.featureId) + '.json';
-  const entries: { path: string; content: string }[] = [
+  const entries: { path: string; content: string; encoding?: 'base64' }[] = [
     { path: out + '/feature.definition.json', content: JSON.stringify(result.definition, null, 2) + '\n' },
     { path: out + '/candidate.project.json', content: documentText(result.candidate) },
     { path: conceptPath, content: JSON.stringify(result.concept, null, 2) + '\n' },
@@ -74,7 +74,7 @@ export async function brainstormFeaturePlan(input: unknown, options: BrainstormO
   let compiler: Record<string, unknown> | null = null;
   if (request.output !== 'definition') {
     const selection = await savedProjectSelection(options.root);
-    const kind = selection ? 'project' : request.output === 'prototype' ? 'clickdummy' : 'obsidian-plugin';
+    const kind = request.output === 'prototype' ? 'clickdummy' : selection ? 'project' : 'obsidian-plugin';
     const emitted = await compile(result.candidate, options.frameworkRoot, kind, options.signal, selection);
     compiler = { outputKind: kind, fingerprint: emitted.compilation.fingerprint,
       readiness: emitted.compilation.readiness, artifacts: emitted.artifacts.length };
@@ -82,12 +82,10 @@ export async function brainstormFeaturePlan(input: unknown, options: BrainstormO
       path: item.path, sha256: hash(Buffer.from(item.content, item.encoding ?? 'utf8')),
     }));
     entries.push(...emitted.artifacts.map(item => {
-      // Preserve compiler-produced binary bytes exactly in the shared safe writer.
-      // All currently generated compiler assets are text; reject unexpected binary
-      // artifacts rather than decoding or silently corrupting their contents.
-      requireSketch(!item.encoding || item.encoding === 'utf8', 'BRAINSTORM_ENCODING',
-        'Brainstorm currently supports compiler text artifacts only.');
-      return { path: sourcePath(out) + '/' + item.path, content: item.content };
+      requireSketch(!item.encoding || item.encoding === 'utf8' || item.encoding === 'base64',
+        'BRAINSTORM_ENCODING', 'Unsupported compiler artifact encoding.');
+      return { path: sourcePath(out) + '/' + item.path, content: item.content,
+        ...(item.encoding === 'base64' ? { encoding: 'base64' as const } : {}) };
     }));
     entries.push({ path: sourcePath(out) + '/.maker/receipt.json',
       content: JSON.stringify({ schemaVersion: 1, files: owned }, null, 2) + '\n' });
@@ -153,8 +151,6 @@ async function inputData(args: Arguments, context: CommandContext): Promise<unkn
   return source === '-' ? parseJsonData(await readInput(context.input, context.signal)) : readData(absoluteInput(context, source));
 }
 export async function brainstormCommand(args: Arguments, context: CommandContext): Promise<Record<string, unknown>> {
-  requireSketch(['root', 'project', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui']
-    .every(() => true), 'BRAINSTORM_INTERNAL', 'Invalid CLI option registry.');
   const allowed = ['root', 'project', 'input', 'out', 'apply', 'json', 'no-interaction', 'help', 'no-color', 'ui'];
   requireSketch(Object.keys(args.flags).every(key => allowed.includes(key)),
     'BRAINSTORM_OPTION', 'Unsupported brainstorm option.');

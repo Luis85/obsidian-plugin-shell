@@ -57,17 +57,24 @@ async function navigation(ui: Prompts, pages: BrainstormPage[]): Promise<Brainst
   const result = structuredClone(pages);
   for (const current of result) {
     current.interactions = [];
-    if (result.length < 2) continue;
     while (true) {
-      const choice = await choose(ui, 'Navigation from ' + current.title, [
-        { id: 'done', label: current.interactions.length ? 'Done with this screen' : 'No navigation from this screen' },
-        { id: 'add', label: 'Add navigation / open-dialog interaction' },
+      const choice = await choose(ui, 'Interactions on ' + current.title, [
+        { id: 'done', label: current.interactions.length ? 'Done with this screen' : 'No interactions on this screen' },
+        ...(result.length > 1 ? [{ id: 'navigate', label: 'Add navigation / open-dialog interaction' }] : []),
+        { id: 'action', label: 'Describe a planned action and its expected outcome' },
       ], 'done');
       if (choice === 'done') break;
-      const targets = result.filter(item => item.title !== current.title);
-      const target = await choose(ui, 'Where does the user go?', targets.map(item => ({ id: item.title, label: item.title + ' — ' + item.purpose })));
-      const label = await titleInput(ui, 'Interaction label', 'Open ' + target, 120);
-      current.interactions.push({ label, target });
+      if (choice === 'action') {
+        const label = await titleInput(ui, 'Action label', '', 120);
+        const outcome = await longText(ui, 'What should happen when users choose "' + label + '"?');
+        current.interactions.push({ kind: 'action', label, outcome });
+      } else {
+        const targets = result.filter(item => item.title !== current.title);
+        const target = await choose(ui, 'Where does the user go?',
+          targets.map(item => ({ id: item.title, label: item.title + ' — ' + item.purpose })));
+        const label = await titleInput(ui, 'Interaction label', 'Open ' + target, 120);
+        current.interactions.push({ kind: 'navigate', label, target });
+      }
     }
   }
   return result;
@@ -101,7 +108,7 @@ async function capture(ui: Prompts, options: BrainstormWizardOptions): Promise<F
         setContext(ui, draft.name, 'Screens', ['4 / 8', 'Main view → pages/dialogs']);
         draft.pages = await pages(ui, draft.pages);
       } else if (stage === 4) {
-        setContext(ui, draft.name, 'Interactions', ['5 / 8', 'Navigation between the sketched screens']);
+        setContext(ui, draft.name, 'Interactions', ['5 / 8', 'Navigation and planned user actions']);
         draft.pages = await navigation(ui, draft.pages);
       } else if (stage === 5) {
         setContext(ui, draft.name, 'Acceptance', ['6 / 8', 'Useful/correct outcomes']);
@@ -132,7 +139,7 @@ async function capture(ui: Prompts, options: BrainstormWizardOptions): Promise<F
     { title: 'Definition request', body: JSON.stringify(value, null, 2) },
     { title: 'Boundaries', body: [
       'The first screen becomes the feature view; pages live under it and dialogs remain top-level overlays.',
-      'Navigation becomes canonical sitemap transitions. Actors, entities and acceptance remain planning information until refined in their canonical editors.',
+      'Navigation becomes canonical sitemap transitions. Planned actions, actors, entities and acceptance remain design information until explicitly implemented.',
       'Prototype/boilerplate generation is a file plan. Tests/builds are an independent process plan with a different approval hash.',
       'Nothing here authorizes publication or native Companion acceptance.',
     ].join('\n') },

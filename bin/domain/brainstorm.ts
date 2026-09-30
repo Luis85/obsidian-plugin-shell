@@ -8,7 +8,7 @@ import type { SketchDocument } from './document.ts';
 
 export type BrainstormOutput = 'definition' | 'prototype' | 'boilerplate';
 export type BrainstormVerification = 'none' | 'test' | 'test-build';
-export interface BrainstormInteraction { label: string; target: string }
+export type BrainstormInteraction = { kind?: 'navigate'; label: string; target: string } | { kind: 'action'; label: string; outcome: string };
 export interface BrainstormPage {
   title: string; purpose: string; kind: 'view' | 'page' | 'modal';
   interactions: BrainstormInteraction[];
@@ -51,11 +51,21 @@ export function readFeatureBrainstorm(input: unknown): FeatureBrainstorm {
       (index === 0 || kind !== 'view'), 'BRAINSTORM_PAGE_KIND',
     'The first surface must be the feature view; subsequent surfaces are pages or modals.');
     const interactions = list(page.interactions ?? [], 'interactions', 12).map(item => {
-      const interaction = object(item); keys(interaction, ['label', 'target']);
-      return { label: bounded(interaction.label, 'Interaction label', 120),
-        target: bounded(interaction.target, 'Interaction target', 80) };
+      const interaction = object(item); keys(interaction, ['label', 'kind', 'target', 'outcome']);
+      const label = bounded(interaction.label, 'Interaction label', 120);
+      const kind = interaction.kind ?? (interaction.outcome === undefined ? 'navigate' : 'action');
+      requireSketch(kind === 'navigate' || kind === 'action', 'BRAINSTORM_INTERACTION',
+        'Interactions are navigation or planned actions.');
+      if (kind === 'action') {
+        requireSketch(interaction.target === undefined, 'BRAINSTORM_INTERACTION',
+          'A planned action has an outcome, not a navigation target.');
+        return { kind: 'action' as const, label, outcome: text(interaction.outcome, 'Expected outcome', 1000) };
+      }
+      requireSketch(interaction.outcome === undefined, 'BRAINSTORM_INTERACTION',
+        'Navigation has a target, not an action outcome.');
+      return { kind: 'navigate' as const, label, target: bounded(interaction.target, 'Interaction target', 80) };
     });
-    requireSketch(new Set(interactions.map(item => item.label.toLowerCase() + '/' + item.target.toLowerCase())).size === interactions.length,
+    requireSketch(new Set(interactions.map(item => item.kind + '/' + item.label.toLowerCase())).size === interactions.length,
       'BRAINSTORM_DUPLICATE', 'Repeated interaction on ' + title + '.');
     return { title, purpose: text(page.purpose, 'Page purpose', 2000), kind: kind as BrainstormPage['kind'], interactions };
   });
@@ -63,8 +73,8 @@ export function readFeatureBrainstorm(input: unknown): FeatureBrainstorm {
   const names = new Set(pages.map(page => page.title.toLowerCase()));
   requireSketch(names.size === pages.length, 'BRAINSTORM_DUPLICATE', 'Page titles must be unique.');
   for (const page of pages) for (const interaction of page.interactions)
-    requireSketch(names.has(interaction.target.toLowerCase()), 'BRAINSTORM_TARGET',
-      'Interaction target must name a page or modal in this feature: ' + interaction.target + '.');
+    if (interaction.kind !== 'action') requireSketch(names.has(interaction.target.toLowerCase()), 'BRAINSTORM_TARGET',
+      'Navigation target must name a page or modal in this feature: ' + interaction.target + '.');
   const output = raw.output ?? 'definition', verification = raw.verification ?? 'none';
   requireSketch(outputKinds.includes(output as BrainstormOutput), 'BRAINSTORM_OUTPUT', 'Choose definition, prototype or boilerplate.');
   requireSketch(verificationKinds.includes(verification as BrainstormVerification) &&
@@ -88,7 +98,7 @@ export const brainstormGuide = Object.freeze({
     { field: 'entities', prompt: 'Which business or domain entities are involved? (Planning only.)' },
     { field: 'pages', prompt: 'Which screens and dialogs are needed? Start with the main feature view.' },
     { field: 'pages[].purpose', prompt: 'What does the user accomplish on each screen?' },
-    { field: 'pages[].interactions', prompt: 'Which actions navigate between these screens or open dialogs?' },
+    { field: 'pages[].interactions', prompt: 'Which interactions navigate to screens, or describe planned user actions and outcomes?' },
     { field: 'acceptance', prompt: 'How will you recognize the feature as useful and correct?' },
     { field: 'output', prompt: 'Save a definition only, compile a prototype, or compile boilerplate?' },
     { field: 'verification', prompt: 'Skip execution, test, or test and build? Requires separate execution approval.' },
@@ -108,8 +118,12 @@ export function brainstormSchema() {
       pages: { type: 'array', minItems: 1, maxItems: 12, items: { type: 'object', additionalProperties: false,
         required: ['title', 'purpose'], properties: { title: line(80), purpose: line(2000),
           kind: { enum: ['view', 'page', 'modal'] },
-          interactions: { type: 'array', maxItems: 12, items: { type: 'object', additionalProperties: false,
-            required: ['label', 'target'], properties: { label: line(), target: line(80) } } },
+          interactions: { type: 'array', maxItems: 12, items: { oneOf: [
+            { type: 'object', additionalProperties: false, required: ['label', 'target'],
+              properties: { kind: { const: 'navigate' }, label: line(), target: line(80) } },
+            { type: 'object', additionalProperties: false, required: ['kind', 'label', 'outcome'],
+              properties: { kind: { const: 'action' }, label: line(), outcome: line(1000) } },
+          ] } },
         } } },
       output: { enum: outputKinds, default: 'definition' },
       verification: { enum: verificationKinds, default: 'none' },
@@ -172,8 +186,9 @@ export function featureConcept(request: FeatureBrainstorm, current: { document: 
     const visual = design.visualDesigns;
     const heading = visualText(visualAllocate(visual, 'vn'), page.title, 'h1');
     const explanation = visualText(visualAllocate(visual, 'vn'), page.purpose, 'p');
-    const notes = page.interactions.length ? 'Planned navigation: ' +
-      page.interactions.map(item => item.label + ' → ' + item.target).join('; ') : 'No navigation declared yet.';
+    const notes = page.interactions.length ? 'Planned interactions (not implemented): ' +
+      page.interactions.map(item => item.kind === 'action' ? item.label + ' => ' + item.outcome :
+        item.label + ' → ' + item.target).join('; ') : 'No interactions declared yet.';
     const pageDesign = { id: visualAllocate(visual, 'vp'), ownerId: surface.id, name: page.title,
       root: [heading, explanation], scenarios: [], notes: notes.slice(0, 2000) };
     visual.pages.push(pageDesign);
@@ -182,6 +197,7 @@ export function featureConcept(request: FeatureBrainstorm, current: { document: 
   }
   for (const page of request.pages) {
     for (const interaction of page.interactions) {
+      if (interaction.kind === 'action') continue;
       const from = added.get(page.title.toLowerCase())!, to = added.get(interaction.target.toLowerCase())!;
       const allocated = freshNumber(used, 'edge', serial); serial = allocated[1];
       const transition = { id: allocated[0], from: from.id, to: to.id,
@@ -205,6 +221,6 @@ export function featureConcept(request: FeatureBrainstorm, current: { document: 
       projectId: current.document.project.id, baseSha256: current.sha256, featureId,
       feature: request, mapping, acceptance: 'not-verified', execution: 'not-run',
       limits: ['Descriptive entities and actors are not schema implementations.',
-        'Transitions define navigation, not completed event handlers.',
+        'Navigation and planned action outcomes are not completed event handlers.',
         'Generated code does not imply native Companion feature acceptance.'] } };
 }
