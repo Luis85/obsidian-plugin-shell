@@ -10,6 +10,7 @@ import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { included } from '../../scripts/framework/distribution.ts';
 import { maintainerOnly } from '../../scripts/companion/compiler/framework-docs.ts';
 import { zip } from '../../scripts/framework/zip.ts';
+import { inspectWorkflow } from '../../scripts/quality/check-repository.mjs';
 import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 import { loadDefinitions } from '../../scripts/starters/repository.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
@@ -78,17 +79,15 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   assert.equal(executed.code, 0, JSON.stringify(executed)); assert.ok((await readdir(join(directory, 'product/dist'))).includes('index.html'));
 });
 
-test('release attachments are opt-in and cannot create releases or overwrite existing assets', async () => {
+test('distribution workflow is read-only: it builds separate assets and never publishes', async () => {
   const workflow = await readFile(join(root, '.github/workflows/starter-distribution.yml'), 'utf8');
-  assert.match(workflow, /attach_to_existing_release:[\s\S]*?default: false/);
-  assert.match(workflow, /github.event_name == 'workflow_dispatch' && inputs.attach_to_existing_release == true/);
-  assert.match(workflow, /environment: workbench-release/);
-  assert.match(workflow, /git merge-base --is-ancestor/);
-  assert.match(workflow, /refs\/tags\/\$RELEASE_VERSION\^\{commit\}/);
+  assert.doesNotThrow(() => inspectWorkflow(workflow));
+  assert.doesNotMatch(workflow, /contents:\s*write|gh release|--clobber|pull_request_target|environment:/);
   assert.match(workflow, /workbench-shell-\$RELEASE_VERSION\.zip/);
   assert.match(workflow, /workbench-starters-\$RELEASE_VERSION\.zip/);
-  assert.match(workflow, /sha256sum --check/);
-  assert.match(workflow, /gh release upload/);
-  assert.doesNotMatch(workflow, /gh release (?:create|edit)|--clobber|pull_request_target/);
+  assert.match(workflow, /workbench-SHA256SUMS/);
+  assert.match(workflow, /publication: 'separate-explicit-approval'/);
   for (const pin of workflow.matchAll(/uses: actions\/[^@]+@([^\s]+)/g)) assert.match(pin[1], /^[a-f0-9]{40}$/);
+  // The gate that enforces this also rejects a write-scoped job, so re-adding an attach job fails twice.
+  assert.throws(() => inspectWorkflow(workflow + '  attach:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write\n    steps:\n      - run: echo\n'), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
 });
