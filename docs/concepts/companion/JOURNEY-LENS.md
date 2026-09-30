@@ -11,7 +11,7 @@ npm run companion:build
 Open `reports/companion-mvp/companion-journey-lens.html`. Its companion export is
 `reports/companion-mvp/companion-project-v6.json`. Both are byte-identical aliases
 of the checked authoring outputs `index.html` and `companion-project.json` in that
-**reports** directory, not the old checked-in v5 compatibility files.
+**reports** directory, not the checked-in v5 build base.
 The existing Companion workflow includes these files in `companion-mvp-authoring`.
 The HTML embeds its runtime, CSS and icons; it needs no server or runtime CDN.
 
@@ -57,9 +57,10 @@ remain authoritative. Full project v6 import/export retains page designs, compon
 revisions, requirements, storymaps and source bindings. No schema bump or second
 Journey Lens document is introduced by this integration pass.
 
-The checked-in v5 HTML/JSON pair is intentionally retained as a byte-exact
-compatibility fixture for existing assembly and migration checks. Do not use it
-to review the replacement. No old qualification result is relabeled as new evidence.
+The checked-in v5 HTML/JSON pair is only the build base this build composes from
+until the authoring build is v6-native; project schema 1–5 imports are rejected,
+never migrated. Do not use it to review the replacement. No old qualification
+result is relabeled as new evidence.
 
 ## Verification
 

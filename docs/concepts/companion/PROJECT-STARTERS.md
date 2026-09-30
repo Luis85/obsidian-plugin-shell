@@ -1,5 +1,7 @@
 # Project Starters
 
+> **Retired built-in catalog.** This page describes the embedded `starters/` catalog of the checked-in v5 concept, which is kept only as an input of the current authoring build until that build is v6-native. Current starters are the external project v6 definitions in `configs/starters/`; see [Companion starters](../../development/COMPANION-STARTERS.md) and [JSON starters](../../development/JSON-STARTERS.md). The shell rejects the retired v5 starter documents; they are never migrated.
+
 Project Starters is an offline, curated way to create an **independent full companion project** from ordinary project JSON. It builds on the existing one-vault/one-project workflow. It is not a remote marketplace, plugin installer, alternate generator or finished collection of native plugins.
 
 ## Use
@@ -48,9 +50,9 @@ Focused starters provide original PRD acceptance TODOs and detailed compositions
 
 ## Files and contracts
 
-`starters/catalog.json` has catalog schema 1 and bounded metadata: stable ID, version, category, difficulty, description, outcome, includes, remaining implementation, tags, local filename and SHA-256. Each `<id>.companion.json` is a complete ordinary **project-v4** document. There is no starter-specific project schema or executable payload.
+`starters/catalog.json` has catalog schema 1 and bounded metadata: stable ID, version, category, difficulty, description, outcome, includes, remaining implementation, tags, local filename and SHA-256. Each `<id>.companion.json` is a complete ordinary **project-v5** document of the retired format. There is no starter-specific project schema or executable payload.
 
-The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy. `starter-files.mjs` validates local file identity, integrity, regular-file status and inventory for tooling. The generator consumes the normal exported project document, not catalog metadata.
+The builder embeds these exact JSON files into the self-contained HTML, escaping `<` before insertion into a data-only script block. `scripts/companion/starter-contract.mjs` validates the same embedded catalog and customizes a deep copy inside the concept. The shell and compiler read only the external v6 definitions (`scripts/starters/`). The generator consumes the normal exported project document, not catalog metadata.
 
 A provenance note records starter ID/version/source hash. It is informational Markdown and grants no execution authority. The source hash identifies the built-in template bytes, not the later customized project. Renaming plugin identity does not rewrite domain labels, entity slugs, internal IDs or design tokens.
 

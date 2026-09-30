@@ -37,7 +37,7 @@ This optional top-level fragment belongs in a full **v6** project document:
 }
 ```
 
-Omission means disabled. Frozen v1-v5 inputs remain unchanged unless explicitly opted in, which migrates to v6. The current Companion authoring composition preserves tooling on import/export; the retained v5 HTML/JSON is unchanged. `node shell.mjs schema` exposes `projectTooling`. Ports are integers from 1024 to 65535 and must differ. Unknown settings, command strings, hosts, permission flags and agent paths are rejected rather than ignored.
+Omission means disabled. Only project schema 6 inputs are read; an explicit opt-in never migrates an earlier format. The current Companion authoring composition preserves tooling on import/export. `node shell.mjs schema` exposes `projectTooling`. Ports are integers from 1024 to 65535 and must differ. Unknown settings, command strings, hosts, permission flags and agent paths are rejected rather than ignored.
 
 The pinned CLI is `@airshiplabs/cli@0.3.0`, installed only in ignored `.airship-tooling/`, outside application dependencies/lockfiles. Upstream source was inspected at [1063ba0](https://github.com/0xnyn/airship/tree/1063ba0002e33b2e19de586f2330b4356e51e8f5). Compatibility is version-qualified, not a guarantee about future upstream changes. The first explicit install resolves the CLI's transitive dependencies into its isolated lockfile.
 

@@ -31,8 +31,8 @@ installation or executable configuration discovery occurs.
 ## Formats and modes
 
 A complete ordinary `obsidian-companion-project` JSON is a **project** import.
-Supported legacy versions migrate through the shared v6 authoring contract, with
-its migration report retained. Existing project configuration and generated identity
+Only project schema 6 is accepted; earlier versions are rejected by the shared
+authoring contract and never migrated. Existing project configuration and generated identity
 still require the normal explicit `--resolve project|import` reconciliation. This
 flag does not rename internal design IDs and is unavailable for scoped imports.
 

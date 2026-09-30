@@ -56,16 +56,23 @@ output compiled from generated Vue source, not a wrapper around this authoring
 HTML. Browser authoring, generated-source verification and native acceptance are
 separate milestones.
 
-## Compatibility fixtures and historical records
+## Project format and the build base
+
+The current project format is **Companion project schema 6 only**. Schema 1–5
+documents are rejected with a `COMPANION_VERSION` diagnostic; they are never
+migrated. The history of the retired formats lives in Git.
 
 The checked-in `index.html` and `companion-project.json` in **this directory** are
-retained v5 compatibility fixtures for exact assembly and migration checks.
-**They are not the current Journey Lens review entry.** Do not replace them with
-hand-edited generated output; build the current authoring artifact as above.
+only the **build base** that `npm run companion:build` composes the current v6
+authoring HTML from, together with the inputs they are assembled from (`src/`,
+`starters/`, `seeds/` and the shared contracts named in
+`scripts/concepts/build-companion.py`). They keep their earlier (v5) form until the
+authoring build is made v6-native; they are not a supported import format or the
+current Journey Lens review entry. Do not replace them with hand-edited generated
+output; build the current authoring artifact as above.
 
-The complete previous README is retained without rewriting its dated evidence in
-[Legacy concept guide](LEGACY-CONCEPT-GUIDE.md). Earlier increment reviews and
-verification reports keep their original artifact/version boundaries. The
+Earlier increment reviews and verification reports keep their original
+artifact/version boundaries as dated records. The
 [2026-09-27 PR #5 review](../../product/PR5-PRODUCT-REVIEW.md) and
 [improvement plan](../../product/PR5-IMPROVEMENT-PLAN.md) explain the wider roadmap;
 the [2026-09-29 vision review](../../product/PR5-VISION-REVIEW.md) aligns product

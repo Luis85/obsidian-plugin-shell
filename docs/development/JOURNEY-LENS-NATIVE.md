@@ -26,8 +26,8 @@ This is a fragment, not a complete project. Use an existing page/view ID and kee
 all other project fields. The schema accepts only the named built-in editor, not
 URLs, script bodies, arbitrary packages or filesystem entrypoints. Ordinary
 projects without a binding retain the previous generator behavior. The modern
-Companion self-project declares the binding automatically; the historical v5
-fixture remains unchanged.
+Companion self-project declares the binding automatically. Only project schema 6
+is read; earlier formats are rejected, never migrated.
 
 Generate using the normal reviewed command:
 

@@ -18,6 +18,8 @@ The generated toolbar gains a project h1, visible focus indicators, minimum 36px
 
 ## Compatibility is checked, not discarded
 
+> Historical record. These v5-keyed compatibility digests and their reversal chain were later retired with the retired project formats; generated output is now pinned by the reviewed project v6 golden baseline described in [compiler testing](../development/compiler/TESTING.md).
+
 `post-mvp-base-code.json` and `template-inputs.json` are unchanged. All twelve original product snapshots were verified before editing. `preview-host-delta.json` records only four intentional generated-file changes per fixture: the new browser-host module, its entry, the preview toolbar component and its stylesheet.
 
 The compatibility test checks every new file hash first, reverses only that explicit delta, then requires the exact original aggregate digest. All other product bytes remain covered by the original snapshot. A negative control changes the new host output and proves rejection. This is a reviewed source-byte transition, not automatic acceptance of screenshot baselines or a directory exclusion.

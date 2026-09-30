@@ -5,10 +5,12 @@ Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI 
 ## Start a new plugin from a starter
 
 `node shell.mjs new` (alias `npm run new --`) is the one-command front door to the
-existing project compiler. It loads `docs/concepts/companion/starters/catalog.json`
-through the same SHA-256-checked loader as the concept, applies the same
-identity-only customization (`id`, `name`, optional `author`; no label rewrites and a
-provenance note in `design/project.json`), then plans with the unchanged generator.
+existing project compiler. It loads the external `configs/starters/*.json`
+definitions (each hashed as read), applies identity-only customization (`id`,
+`name`, optional `author`; no label rewrites and a provenance note in
+`design/project.json`) to the embedded project schema 6 document, then plans with
+the unchanged generator. Only project schema 6 is read; earlier formats are
+rejected and never migrated.
 
 ```sh
 node shell.mjs new --list [--json]
@@ -233,7 +235,7 @@ The generator is the existing PR #20 TypeScript compiler, not a new renderer. Da
 
 Custom `codebaseFolder` and `testsFolder` relocate generated product code/tests and their build/test configuration. Framework internals remain in their existing `src` and `tests` directories. General maker recipes still follow the framework's existing feature conventions. This remaining distinction must not be described as a complete arbitrary-directory framework migration.
 
-Legacy `companion:generate` remains dependency-free, exact-byte, read-only JSON output. `generate --vault ... --target ...` retains the existing separate-target workspace compiler and its raw JSON compatibility mode. New in-place generation requires an extracted verified kit; a source checkout is not automatically rewritten into a consumer. In-place `generate` compiles only the imported `design/project.json`; `--input` with another file is refused with `INPUT_REQUIRES_IMPORT` so the reviewed intake record and the managed design file cannot drift apart. Adopt a different design through `project import`.
+`companion:generate` remains dependency-free, exact-byte, read-only JSON output for project schema 6 input; earlier project versions fail with `COMPANION_VERSION`. `generate --vault ... --target ...` retains the existing separate-target workspace compiler and its raw JSON compatibility mode. New in-place generation requires an extracted verified kit; a source checkout is not automatically rewritten into a consumer. In-place `generate` compiles only the imported `design/project.json`; `--input` with another file is refused with `INPUT_REQUIRES_IMPORT` so the reviewed intake record and the managed design file cannot drift apart. Adopt a different design through `project import`.
 
 ## Test vault and fixtures
 

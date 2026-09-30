@@ -5,7 +5,7 @@ The compiler turns Companion JSON into artifact data. It does not install depend
 ## Commands
 
 ```sh
-node shell.mjs compiler check --input docs/concepts/companion/starters/blank.companion.json
+node shell.mjs compiler check --input my-plugin.companion.json
 node shell.mjs compiler check --input project.json --json
 node shell.mjs compiler inspect --input project.json --stage ir --json
 node shell.mjs compiler inspect --input project.json --stage artifacts --output-kind clickdummy --json
@@ -34,7 +34,7 @@ In a click-dummy workspace run `npm run typecheck:clickdummy`, then `npm run bui
 
 ## Compatibility and guarantees
 
-The shared authoring reader accepts current Companion v6, including routes and journeys, while retaining v1–v5 normalization and the documented historical migration loss. The checked-in v5 concept/export remains a compatibility fixture, not the latest authoring artifact. See [post-MVP integration](POST-MVP-INTEGRATION.md), the [integrated review](../../product/PR5-PRODUCT-REVIEW.md) and [current evidence](../../testing/PR5-REVIEW-EVIDENCE.md). The existing visual IR is reused, not duplicated. Operation request/result schemas are not the complete public project-v6 schema; that discovery/parity gap remains tracked in the improvement plan. Independent reference errors carry original JSON pointers; errors detected only after migration identify the normalized document and may name its root instead of inventing a source location.
+The shared authoring contract accepts only Companion project schema 6, including routes and journeys; schema 1–5 input fails with a schema diagnostic and is never migrated. The checked-in v5 concept/export is only the build base of the current authoring build, not an accepted input. See [post-MVP integration](POST-MVP-INTEGRATION.md), the [integrated review](../../product/PR5-PRODUCT-REVIEW.md) and [current evidence](../../testing/PR5-REVIEW-EVIDENCE.md). The existing visual IR is reused, not duplicated. Operation request/result schemas are not the complete public project-v6 schema; that discovery/parity gap remains tracked in the improvement plan. Independent reference errors carry original JSON pointers; errors detected by the contract validator identify the input document and may name its root instead of inventing a source location.
 
 Compilation uses immutable snapshot data. Fingerprints bind compiler version, input bytes, template fingerprint, output kind, paths, ownership and artifact content. Telemetry clocks/run IDs are excluded. These fingerprints are not approvals or signatures. The workspace plan separately binds existing target bytes and the local ownership receipt. Apply reconstructs/checks the reviewed state through the existing file-plan engine.
 

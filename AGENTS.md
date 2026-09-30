@@ -76,6 +76,13 @@ behavior in TypeScript composables, per-view state in stores, and injection/type
 in context. Presentation TypeScript does not import Vue components; bootstrap
 assembles the component tree. `check:presentation` enforces this concern boundary.
 
+Companion project JSON is **schema 6 only**. Reject schema 1–5 with a clear
+diagnostic; never add migration or compatibility readers (the retired formats'
+history is in Git). The checked-in `docs/concepts/companion/index.html`,
+`companion-project.json` and their assembly inputs are only the v5 build base of
+`npm run companion:build` until that build is v6-native: not a supported format or
+a general test fixture. Use `configs/starters` documents instead.
+
 Validate unknown stored data, serialize preference writes, preserve corrupt/future data, and keep preview free of writes. Never overwrite conflicting notes, retry uncertain writes blindly, or turn failed opening into another create operation.
 
 Plugin-data entities opt in through definePluginDataFeature. One PluginDataStore

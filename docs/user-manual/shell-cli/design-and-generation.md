@@ -4,7 +4,7 @@
 
 A companion project JSON describes the intended project. Import accepts an approved design snapshot; generation produces source and supporting files from that snapshot. Building a clickdummy then compiles generated Vue source into an offline interaction artifact. The authoring companion, its exported JSON, generated source and generated clickdummy are different artifacts.
 
-Do not replace a full current project export with an older compatibility fixture. The reviewed branch accepts current v6 authoring exports while retaining older fixtures for compatibility tests. Use the diagnostics and current authoring build to determine what the installed compiler accepts. `node shell.mjs schema --json` describes operation requests/results; it is **not** a promise of a complete project-design JSON schema.
+Do not replace a full current project export with an older file. Only project schema 6 exports are accepted; schema 1–5 files fail with `COMPANION_VERSION` and are never migrated. Use the diagnostics and current authoring build to determine what the installed compiler accepts. `node shell.mjs schema --json` describes operation requests/results; it is **not** a promise of a complete project-design JSON schema.
 
 ## Managed Markdown Collections in the shell and agent API
 

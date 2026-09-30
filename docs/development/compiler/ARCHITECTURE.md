@@ -2,7 +2,7 @@
 
 ## Dependency direction
 
-`domain/` defines source locations, diagnostics, artifacts and independent semantic checks. `application/` orchestrates the parse/migrate/validate/resolve/lower/emit pipeline using explicit ports. These layers import only inward and never access filesystem, network, processes, clocks, random IDs, Vue or Obsidian.
+`domain/` defines source locations, diagnostics, artifacts and independent semantic checks. `application/` orchestrates the parse/validate/resolve/lower/emit pipeline using explicit ports. These layers import only inward and never access filesystem, network, processes, clocks, random IDs, Vue or Obsidian.
 
 `adapters/` contains the Companion frontend, the plugin/click-dummy emitters, template loading, workspace planning and reporting. `index.ts` is the Node composition root. Existing `scripts/companion/compiler/plan.ts`, `project-files.ts` and the fixture entry retain compatibility while delegating to the new subsystem.
 

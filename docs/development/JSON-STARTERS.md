@@ -17,11 +17,13 @@ definitions.** Starter definitions are a separate, independently downloadable
 release asset. A newly extracted shell has an empty starter list until the user
 installs definitions. This includes Blank; there is no hidden fallback starter.
 
-The repository retains eleven historical `.companion.json` documents under
-`docs/concepts/companion/starters/` as compatibility fixtures. They are not runtime
+The canonical installed definitions live under `configs/starters/`. Every
+Companion definition embeds a **project schema 6** document; a definition that
+embeds schema 1–5 fails with `STARTER_VERSION` and is never migrated. The retired
+v5 `.companion.json` copies under `docs/concepts/companion/starters/` are only an
+input of the v5 authoring build base until that build is v6-native; they are not
 discovery inputs and are excluded from shell distributions and copied framework
-content. The canonical installed definitions live under `configs/starters/`.
-Eleven preserve those original authored Companion models; `webapp.json` provides a
+content. Eleven definitions carry the focused Companion examples; `webapp.json` provides a
 complete dependency-free browser example using the file-generation primitive, and
 further Companion/file definitions cover the Workbench showcases. Eleven **project
 starters** (`generator.kind: "project"`) replace the former eight-preset maker

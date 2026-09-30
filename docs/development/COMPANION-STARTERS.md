@@ -12,17 +12,20 @@ The shell and current authoring build share the external starter contract.
 | `configs/starters/feature-showcase.json` | Executable examples of every currently catalogued visual primitive, control kind, action kind, state and layout. |
 | `reports/companion-mvp/index.html` | Current empty authoring build, created by `npm run companion:build`. |
 | `reports/companion-mvp/companion-project*.json` | Explicit, derived qualification inputs only; not maintained project authorities or starter distribution assets. |
-| `docs/concepts/companion/index.html`, its project JSON and visual seed | Retained **v5 compatibility fixtures**. They are not the current empty entry point or the golden development template. |
+| `docs/concepts/companion/index.html`, its project JSON, starters and visual seed | The **v5 build base** that `npm run companion:build` composes from until the authoring build is v6-native. Not a supported import format, the current empty entry point or the golden development template. |
 
 The canonical starter holds the full design, not a screenshot or an HTML wrapper.
 It contains 28 surfaces, 27 visual pages, 54 components and 54 pinned component
 revisions, 23 routes and three journeys. These counts describe the model, not
-completed business behavior. Keep historical fixtures independently qualified;
-do not edit them to advance the current golden model.
+completed business behavior. Do not edit the build base to advance the current
+golden model.
 
-The current starter pack has 14 independent JSON files. The eleven original v5
-starter models remain compatible, alongside the file-based webapp, the v6 golden
-Companion and the v6 visual-feature showcase. No central catalog file is required.
+The current project format is **Companion project schema 6 only**. Every Companion
+starter (the eleven focused examples, the golden Companion and the visual-feature
+showcase) embeds a project v6 document; a definition embedding schema 1–5 is
+rejected with `STARTER_VERSION`, and earlier formats are never migrated. The eleven
+examples were converted once from their v5 models (only the two version fields
+changed). No central catalog file is required.
 
 ## Empty startup and project setup
 
@@ -200,9 +203,9 @@ compatibility. Do not relabel their reports as hosted/native acceptance.
 
 `companion:starter-browser` in the suite manifest requires the current authoring
 build and a copied compiled artifact at `reports/feature-showcase/clickdummy.html`.
-The retained v5 browser suites remain separate and retain all their assertions.
+The concept browser suites of the v5 build base remain separate and retain all their assertions.
 
-Shell packaging excludes current definitions, legacy starter data, the legacy
+Shell packaging excludes current definitions and the build base's starter data,
 self-project JSON and visual seeds. Only a closed list of reviewed Vue Flow
 runtime assets and notices remains: the generated Journey Lens needs this engine
 code, not a starter. The standalone starter ZIP contains definitions only.

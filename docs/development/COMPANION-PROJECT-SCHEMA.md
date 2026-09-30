@@ -8,9 +8,9 @@ node shell.mjs project validate --input project.json --json
 node shell.mjs project validate --input - --json < project.json
 ```
 
-`project schema` returns the Draft 2020-12 schema in the versioned operation result's `data` field. It works without project dependencies, configuration, Git, or a prepared output folder. Version 6 is the only published current schema; legacy v1–v5 inputs go through `project validate`. Schema responses are independent copies and carry no execution authority.
+`project schema` returns the Draft 2020-12 schema in the versioned operation result's `data` field. It works without project dependencies, configuration, Git, or a prepared output folder. Version 6 is the only schema; earlier project versions are rejected by `project validate` and never migrated. Schema responses are independent copies and carry no execution authority.
 
-`project validate` uses the same complete authoring validator/migration as the compiler. It checks the exact bounded UTF-8 input without writing, returns its SHA-256 and migration report, and reports structural counts and journey findings. It never returns the full authored project or claims completed business acceptance. `compiler check` is the distinct generation-readiness operation. Neither operation installs dependencies or launches project code.
+`project validate` uses the same complete authoring validator as the compiler. It checks the exact bounded UTF-8 input without writing, returns its SHA-256 and `schemaVersion: 6`, and reports structural counts and journey findings. A schema 1–5 document fails with `COMPANION_VERSION`; there is no migration report. It never returns the full authored project or claims completed business acceptance. `compiler check` is the distinct generation-readiness operation. Neither operation installs dependencies or launches project code.
 
 ## Division of responsibility
 
@@ -18,13 +18,13 @@ The schema describes the top-level identity, settings and design fields; sitemap
 
 The frozen legacy library, requirement, semantic and source namespaces intentionally retain bounded safe JSON where their existing transport contract is permissive. Tightening these under the same version would invalidate existing authoring documents. Their executable contracts are checked by the compiler. The public schema does not claim those planning namespaces are executable definitions.
 
-JSON Schema alone cannot prove reference integrity, distinct IDs across collections, ownership, source-field compatibility, revision pins, graph cycles, equivalent parameterized-route collisions, total nested-item limits, exact UTF-8 bytes or JavaScript UTF-16 length rules. Complete runtime validation remains mandatory. The schema's `x-validation` describes those additional checks, including the historical legacy-layout loss report. A structural pass is never a substitute for `project validate` or compiler analysis.
+JSON Schema alone cannot prove reference integrity, distinct IDs across collections, ownership, source-field compatibility, revision pins, graph cycles, equivalent parameterized-route collisions, total nested-item limits, exact UTF-8 bytes or JavaScript UTF-16 length rules. Complete runtime validation remains mandatory. The schema's `x-validation` describes those additional checks. A structural pass is never a substitute for `project validate` or compiler analysis.
 
-The current checked-in companion HTML/JSON is the v5 compatibility fixture. `npm run companion:build` emits the modern v6 authoring pair under `reports/companion-mvp`; no migration overwrites that retained historical fixture.
+The checked-in companion HTML/JSON is only the v5 build base of the current authoring build. `npm run companion:build` emits the v6 authoring pair under `reports/companion-mvp`; the build base is not a supported import format.
 
 ## Regression evidence
 
-The shared corpus normalizes the self-project and all eleven starters. Node tests exercise the actual read-only CLI, migration, safe diagnostics, copy isolation, hostile inputs and semantic rejection. The independent Python test uses `jsonschema==4.26.0` and distinguishes structural negatives from documents which pass JSON Schema but deliberately fail the authoritative reference checks:
+The shared corpus is every Companion starter in `configs/starters/` (the self-project, the showcase and the eleven examples), all project v6. Node tests exercise the actual read-only CLI, retired-version rejection, safe diagnostics, copy isolation, hostile inputs and semantic rejection. The independent Python test uses `jsonschema==4.26.0` and distinguishes structural negatives from documents which pass JSON Schema but deliberately fail the authoritative reference checks:
 
 ```sh
 node --test tests/tooling/companion-schema.checks.mjs
