@@ -40,7 +40,7 @@ test('standalone starter ZIP is deterministic and loads after independent extrac
   const directory = await temp(t), files = await assembleStarterPack({ root, frameworkRoot: root });
   assert.equal(files.length, 25); assert.ok(files.every(file => /^configs\/starters\/[a-z-]+\.json$/.test(file.path)));
   const first = zip(files), second = zip(await assembleStarterPack({ root, frameworkRoot: root })); assert.deepEqual(first, second);
-  await extractArchive(first, directory); const loaded = await loadDefinitions(directory); assert.equal(loaded.length, 25);
+  await extractArchive(first, directory); const loaded = await loadDefinitions(directory, []); assert.equal(loaded.length, 25);
   for (const entry of loaded) assert.deepEqual(entry.bytes, files.find(file => file.path === entry.file).bytes);
 });
 test('pack preview is read-only and publishing/overwriting archives is never implicit', async t => {
