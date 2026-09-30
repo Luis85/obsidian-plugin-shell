@@ -24,10 +24,10 @@ source under `bin/`.
   `bin/` is its interactive maker/TUI half.
 - `bin/` already imports `scripts/`: 79 relative imports, split as framework 26, companion 16, compiler 14,
   shared 12 (all `file-plan.mjs`), contracts 10 and application-docs 1.
-- Three `scripts/` files import `bin/`, which is the wrong direction:
-  - `application-docs/adapters/settings.ts`
+- Two qualification scripts still import `bin/`, which is the wrong direction:
   - `testing/qualify-angular-setup.mjs`
   - `compiler/qualify-legacy-presets.mjs`
+- `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
 - Cycles: compiler ↔ companion, and framework ↔ compiler.
 - Untyped `.mjs` libraries sit under typed TypeScript callers: `shared/file-plan.mjs`, `shared/process.mjs`,
   `contracts/json-data.mjs`, the `makers/*.mjs` engine and `operations/catalog.mjs`.
@@ -71,6 +71,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B5:** Framework, maker TUI and legacy maker entry share one yes/no decision parser; prompt rendering remains presentation-specific.
 - **B6:** The file-plan safety boundary and capability-catalog digest use the shared SHA-256 implementation; exact digest parity is covered.
 - **B7:** The duplicate `scripts/makers/cli.mjs` entry is retired; maker discovery and reviewed plan/apply now exercise `bin/app make`, and capability metadata names only its real sources.
+- **B8:** Application-doc settings no longer import maker domain code; both use a neutral shared project-path policy, leaving two qualification-only reverse imports.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
