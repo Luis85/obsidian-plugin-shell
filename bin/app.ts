@@ -20,6 +20,7 @@ import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
 import { safe, Back, type Prompts } from './presentation/prompts.ts';
+import { routeArguments } from './adapters/router.ts';
 interface IO { env?: Record<string, string | undefined>; input: Readable & { isTTY?: boolean }; output: Writable; error: Writable & { isTTY?: boolean } }
 function canInteract(args: Arguments, io: IO): boolean {
   const env = io.env ?? process.env;
@@ -77,6 +78,16 @@ function errorResult(command: string, error: unknown) {
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
+  const routed = routeArguments(argv);
+  if (routed.surface === 'framework') {
+    const { main: frameworkMain } = await import('../scripts/framework/cli.ts');
+    return frameworkMain(routed.args, frameworkRoot);
+  }
+  if (routed.surface === 'memory') {
+    const { main: memoryMain } = await import('../scripts/hindsight/cli.ts');
+    return memoryMain(routed.args);
+  }
+  argv = routed.args;
   const controller = new AbortController(), stop = () => controller.abort();
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
