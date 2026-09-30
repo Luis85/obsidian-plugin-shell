@@ -1,6 +1,6 @@
 import { relative, resolve, isAbsolute, sep } from 'node:path';
 import { parseAuthoringDocument as parseCompanionDocument } from '../companion/authoring-contract.ts';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { exportDesignSystem } from './style-export.ts';
 import { readBounded, readConfiguration, hash } from './files.ts';
 import { object, designFile } from './configuration.ts';

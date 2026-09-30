@@ -3,7 +3,7 @@ import { guidedSetup, continueSetup } from './setup-terminal.ts';
 import { formatDiagnostics } from '../compiler/adapters/reporting.ts';
 import type { CompilerDiagnostic } from '../compiler/domain/contracts.ts';
 import { ask, readInput } from './input.ts';
-import { parseConfirmation } from '../shared/confirmation.mjs';
+import { parseConfirmation } from '../shared/confirmation.ts';
 import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';
 import { parseCliArguments, descriptor } from './catalog.ts';

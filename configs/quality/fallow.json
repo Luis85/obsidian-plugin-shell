@@ -319,9 +319,53 @@
         ]
       },
       {
+        "name": "cli-data-contract",
+        "patterns": [
+          "scripts/contracts/json-data.ts"
+        ]
+      },
+      {
+        "name": "cli-result-contract",
+        "patterns": [
+          "scripts/contracts/result.ts",
+          "scripts/contracts/errors.ts"
+        ]
+      },
+      {
+        "name": "cli-process-contract",
+        "patterns": [
+          "scripts/shared/process.ts"
+        ]
+      },
+      {
+        "name": "cli-file-plan-contract",
+        "patterns": [
+          "scripts/shared/file-plan.ts"
+        ]
+      },
+      {
+        "name": "cli-confirmation-contract",
+        "patterns": [
+          "scripts/shared/confirmation.ts"
+        ]
+      },
+      {
+        "name": "cli-input-contract",
+        "patterns": [
+          "scripts/shared/input.ts"
+        ]
+      },
+      {
+        "name": "cli-files-contract",
+        "patterns": [
+          "scripts/shared/hash.ts",
+          "scripts/shared/fs-presence.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
-          "scripts/shared/project-path.mjs"
+          "scripts/shared/project-path.ts"
         ]
       },
       {
@@ -437,7 +481,14 @@
           "maker-domain",
           "maker-application",
           "maker-host",
-          "project-path-contract"
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-files-contract"
         ]
       },
       {
@@ -475,7 +526,14 @@
           "maker-domain",
           "maker-application",
           "maker-host",
-          "project-path-contract"
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-process-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract",
+          "cli-files-contract"
         ]
       },
       {
@@ -499,13 +557,15 @@
         "allow": [
           "tooling",
           "companion-test-kit",
-          "companion-authoring-contract"
+          "companion-authoring-contract",
+          "cli-data-contract"
         ]
       },
       {
         "from": "companion-authoring-contract",
         "allow": [
-          "companion-authoring-contract"
+          "companion-authoring-contract",
+          "cli-data-contract"
         ]
       },
       {
@@ -545,7 +605,55 @@
           "tooling",
           "companion-authoring-contract",
           "prototype-skill",
-          "project-path-contract"
+          "project-path-contract",
+          "cli-data-contract",
+          "cli-result-contract",
+          "cli-confirmation-contract",
+          "cli-file-plan-contract",
+          "cli-input-contract"
+        ]
+      },
+      {
+        "from": "cli-data-contract",
+        "allow": [
+          "cli-data-contract"
+        ]
+      },
+      {
+        "from": "cli-result-contract",
+        "allow": [
+          "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-process-contract",
+        "allow": [
+          "cli-process-contract"
+        ]
+      },
+      {
+        "from": "cli-file-plan-contract",
+        "allow": [
+          "cli-file-plan-contract"
+        ]
+      },
+      {
+        "from": "cli-confirmation-contract",
+        "allow": [
+          "cli-confirmation-contract"
+        ]
+      },
+      {
+        "from": "cli-input-contract",
+        "allow": [
+          "cli-input-contract",
+          "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-files-contract",
+        "allow": [
+          "cli-files-contract"
         ]
       },
       {
@@ -664,6 +772,15 @@
         "type": "fileExists",
         "pattern": ".claude/skills/companion-prototype-design/scripts/prototype.mjs"
       }
+    }
+  ],
+  "ignoreExports": [
+    {
+      "file": "scripts/shared/file-plan.ts",
+      "exports": [
+        "createFilePlan",
+        "applyFilePlan"
+      ]
     }
   ]
 }

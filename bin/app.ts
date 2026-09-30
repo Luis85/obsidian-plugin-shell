@@ -11,8 +11,9 @@ import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
-import { ask } from '../scripts/framework/input.ts';
+import { ask } from '../scripts/shared/input.ts';
 import { failure } from '../scripts/framework/contracts.ts';
+import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
 import { parseArguments, execute, option, makerHelp, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
@@ -71,8 +72,8 @@ async function createInteractive(args: Arguments, context: CommandContext, ui: P
 function errorResult(command: string, error: unknown) {
   const issue = error instanceof Back ? new SketchError('CANCELLED', 'Guide cancelled.') : error;
   if (!(issue instanceof SketchError)) return failure(command, issue);
-  return { protocolVersion: 1, command, status: issue.code === 'CANCELLED' ? 'cancelled' : 'failed',
-    data: null, diagnostics: [{ code: issue.code, message: issue.message }] };
+  return { ...operationResult(command, null, issue.code === 'CANCELLED' ? 'cancelled' : 'failed'),
+    diagnostics: [{ code: issue.code, message: issue.message }] };
 }
 /** Composition root. Machine responses are one JSON document on stdout; prompts/progress use stderr. */
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
@@ -84,7 +85,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     const context = { root: resolve(option(args, 'root', process.cwd())), frameworkRoot, input: io.input, signal: controller.signal, progress: (message: string) => { io.error.write(safe(message)); } };
     if (canInteract(args, io)) { await interactive(args, context, io, controller); return 0; }
     const data = await execute(args, context);
-    const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };
+    const result = operationResult(command, data, (data.status ?? 'ok') as ResultStatus);
     if (machine) io.output.write(JSON.stringify(result) + '\n');
     else if (data.help) io.output.write(makerHelp);
     else io.output.write(safe(JSON.stringify(result, null, 2)) + '\n');

@@ -7,7 +7,7 @@ import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { resolve } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
-import { readInput } from '../../scripts/framework/input.ts';
+import { readInput } from '../../scripts/shared/input.ts';
 import type { Readable } from 'node:stream';
 import { newDocument, documentText } from '../domain/document.ts';
 import { object, keys } from '../domain/data.ts';

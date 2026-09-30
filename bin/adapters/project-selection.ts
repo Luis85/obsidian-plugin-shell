@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { validateProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
 import { readData } from './storage.ts';
 import { loadProjectCatalog } from './projects.ts';

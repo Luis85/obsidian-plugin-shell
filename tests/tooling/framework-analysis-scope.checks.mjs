@@ -20,3 +20,74 @@ test('runtime and dependency gates remain enabled without ignoring the CSS compi
   assert.notEqual(config.rules['unused-file'],'off');
   assert.equal(config.boundaries.coverage.requireAllFiles,true);
 });
+
+test('typed JSON data contract is an explicit narrow architecture boundary', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-data-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/contracts/json-data.ts']);
+  const own = config.boundaries.rules.find(item => item.from === 'cli-data-contract');
+  assert.deepEqual(own?.allow, ['cli-data-contract']);
+  for (const source of ['test', 'tooling', 'maker-host', 'companion-authoring-contract', 'fixture-compiler']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-data-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-data-contract'), false);
+});
+
+test('canonical CLI result envelope is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-result-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/contracts/result.ts', 'scripts/contracts/errors.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-result-contract')?.allow, ['cli-result-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-result-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-result-contract'), false);
+});
+
+test('shared Node process primitive is isolated behind the tooling adapter', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-process-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/process.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-process-contract')?.allow, ['cli-process-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-process-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-process-contract'), false);
+});
+
+test('typed file-plan facade is isolated as a core boundary', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-file-plan-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/file-plan.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-file-plan-contract')?.allow, ['cli-file-plan-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-file-plan-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-file-plan-contract'), false);
+});
+
+test('shared input transport is isolated and depends only on CLI error contracts', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-input-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/input.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-input-contract')?.allow, ['cli-input-contract', 'cli-result-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-input-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-input-contract'), false);
+});
+
+test('typed filesystem primitives are isolated from application layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-files-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/hash.ts', 'scripts/shared/fs-presence.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-files-contract')?.allow, ['cli-files-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-files-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-files-contract'), false);
+});
+
+
+test('typed project-path policy is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'project-path-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/project-path.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'project-path-contract')?.allow, ['project-path-contract']);
+  for (const source of ['test', 'tooling', 'maker-domain', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('project-path-contract'), source);
+  }
+});

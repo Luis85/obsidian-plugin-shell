@@ -4,7 +4,7 @@ import { airshipPlan } from './airship-plan.ts';
 import { handoutPlan } from './handout-adapter.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../shared/file-plan.ts';
 import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.mjs';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
@@ -16,7 +16,6 @@ import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
 import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
-type FilePlan = Awaited<ReturnType<typeof createFilePlan>>;
 interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string }
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const [recipe, name] = request.args;
@@ -41,7 +40,7 @@ async function pluginPlan(context: Context): Promise<Planned> {
   const prefix = `${config.paths.testVaultFolder}/${config.paths.configDirectory}/plugins/${config.project.id}/`;
   const installed = join(context.root, prefix, 'manifest.json');
   if (await exists(installed)) requireThat(object(await readJson(installed)).id === config.project.id, 'INSTALLED_IDENTITY', 'Existing installation belongs to another plugin.');
-  const entries = [];
+  const entries: FilePlanEntry[] = [];
   for (const name of ['main.js', 'manifest.json', 'styles.css']) {
     if (name === 'styles.css' && !await exists(join(context.root, 'dist', name))) {
       requireThat(!await exists(join(context.root, prefix, name)), 'STALE_STYLE', 'The build no longer emits styles.css; review removal of the old installed stylesheet separately.');

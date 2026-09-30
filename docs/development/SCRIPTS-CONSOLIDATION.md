@@ -1,8 +1,8 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation. Stage A (launcher migration) is on PR #60. Its continuation
-uses separately pushed and validated milestones on the same PR; later restructuring remains
-subject to explicit gate checks. The inventory and sequencing below are planning inputs,
+Status: staged implementation through C21 on PR #60. The continuation uses separately pushed
+milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
+gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
 
 ## Target shape
@@ -79,7 +79,24 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C2:** `shared/process` now has a typed implementation with the legacy `.mjs` path reduced to a compatibility re-export; exit-code/signal parity is covered and shared TypeScript is part of the framework typecheck.
 - **C3:** All TypeScript framework consumers of the bounded JSON contract import `contracts/json-data.ts` directly; the compatibility `.mjs` entry is now limited to remaining JavaScript/legacy consumers.
 - **C4:** Typed `bin/` adapters now import the JSON contract directly from `json-data.ts`; the compatibility wrapper is no longer on the maker application's typed path.
-- **Remaining C5–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C5:** `shared/file-plan.ts` now provides strict plan/change/apply contracts over the unchanged reviewed runtime. Typed callers can migrate without changing path validation, locking, stale-preimage checks or rollback semantics in the same milestone.
+- **C6:** Framework create/inspect-only consumers now import the typed file-plan facade directly. Apply/rollback callers remain isolated for the next milestone.
+- **C7:** Framework apply/rollback callers now use the typed file-plan facade too. The plugin-install artifact list is explicitly typed so only the reviewed `base64` encoding enters the plan boundary.
+- **C8:** Maker/bin create/inspect-only adapters now import the typed file-plan facade directly; the two apply callers remain isolated for the next milestone.
+- **C9:** Maker/bin apply callers (`first-run` report persistence and shared prepared-plan storage) now use the typed file-plan facade, so the maker application's typed path no longer imports `file-plan.mjs`.
+- **C10:** The remaining typed application-docs and compiler adapters now import the typed file-plan facade. An audit of all 197 TypeScript files under `scripts/` found no remaining typed imports of `file-plan.mjs`, `json-data.mjs`, or `shared/process.mjs`.
+- **C11:** The fully typed bounded-JSON implementation is now a dedicated `cli-data-contract` Fallow zone. Tests, tooling, maker-host and the compiler/companion tooling boundaries explicitly consume it; maker-domain remains isolated from it.
+- **C12:** `contracts/result.ts` now owns the typed protocol envelope and result constructor. Framework failures adapt into that envelope, while maker success and SketchError paths construct through the same helper; a dedicated `cli-result-contract` boundary prevents implementation dependencies from leaking back into the contract.
+- **C13:** Maker production coverage now includes the typed JSON contract, result envelope and file-plan facade used by `bin/`. The coverage inventory requires those files explicitly, and maker tests exercise contract success plus representative bounded-JSON refusal paths.
+- **C14:** `shared/process.ts` now owns the single Node-script spawn lifecycle. `framework/process.ts` remains the policy adapter for tool discovery, process-tree termination and public diagnostics but delegates spawning, bounded capture, timeout and abort mechanics to the shared typed primitive. The primitive has its own Fallow boundary.
+- **C15:** Generic `OperationError` and `requireThat` primitives moved from `framework/contracts.ts` into `contracts/errors.ts`. Framework callers keep the same re-exported API/identity, while shared core modules can now depend on the contract layer without a reverse `shared → framework` dependency.
+- **C16:** Yes/no confirmation policy now lives in `shared/confirmation.ts`; framework and maker TypeScript presentation paths import it directly, the legacy `.mjs` entry is compatibility-only, and the contract has dedicated Fallow and maker-coverage ownership.
+- **C17:** The typed file-plan facade is now a dedicated `cli-file-plan-contract` boundary. Tests, tooling and maker-host may consume it explicitly; maker domain remains isolated, preparing the safety-critical runtime migration without broad tooling dependencies.
+- **C18:** Stdin reading and readline prompt lifecycle now live in `shared/input.ts`. `framework/input.ts` is a compatibility re-export, maker/bin callers import the shared typed transport directly, and input is explicitly owned by maker coverage plus a narrow `cli-input-contract` architecture boundary.
+- **C19:** Canonical SHA-256 and lstat-presence helpers now have typed implementations with compatibility-only `.mjs` entries. Framework files/handout and memory-policy TypeScript callers import the typed helpers directly; the helpers have explicit architecture and maker-coverage ownership.
+- **C20:** The shared portable project-path policy now has a canonical TypeScript implementation with compatibility-only `.mjs` entry. Maker domain and application-doc settings use it directly, maker coverage owns it, and the existing `project-path-contract` boundary now points at the typed implementation with an explicit regression.
+- **C21:** Bounded asynchronous mapping now has a canonical TypeScript implementation with a compatibility-only `.mjs` entry. Direct regressions preserve input-order results, invalid-concurrency refusal and stop-scheduling-on-first-failure semantics.
+- **Remaining C22–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

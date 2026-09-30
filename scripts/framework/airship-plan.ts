@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { parseAuthoringDocument, validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { airshipConfig, airshipOptions } from '../companion/tooling-contract.mjs';

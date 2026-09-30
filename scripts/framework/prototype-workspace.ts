@@ -1,6 +1,6 @@
 /** Native-file adapter for the shared, inert prototype workspace. Uses the existing guarded writer. */
 import { resolve, join } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { validateAuthoringDocument, parseAuthoringDocument } from '../companion/authoring-contract.ts';
 import { PROTOTYPE_REGISTRY, PROTOTYPE_MAX_BYTES, type PrototypeWorkspace } from '../companion/prototypes/model.ts';
 import { validateWorkspace } from '../companion/prototypes/validate.ts';

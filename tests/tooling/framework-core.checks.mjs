@@ -6,12 +6,21 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
+import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
+import { result as canonicalResult } from '../../scripts/contracts/result.ts';
+import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
 import { readBounded } from '../../scripts/framework/files.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.mjs';
+import { mapBounded as typedMapBounded } from '../../scripts/shared/bounded-map.ts';
+import { mapBounded as legacyMapBounded } from '../../scripts/shared/bounded-map.mjs';
+import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
+import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
+import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.mjs';
 import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
 import * as legacyJsonData from '../../scripts/contracts/json-data.mjs';
@@ -196,4 +205,80 @@ test('typed JSON data contract remains the canonical compatibility implementatio
   Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });
   assert.throws(() => typedJsonData.assertJsonData(poisoned), /JSON_DATA_INVALID/);
   assert.equal(invoked, 0);
+});
+
+test('typed file-plan facade preserves the reviewed runtime plan/apply boundary', async t => {
+  const ctx = await fixture(t);
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
+  assert.equal(plan.version, 1);
+  assert.equal(plan.changes[0].status, 'create');
+  assert.equal(plan.changes[0].beforeHash, null);
+  const applied = await applyTypedFilePlan(plan);
+  assert.deepEqual(applied.written, ['typed-facade.txt']);
+  assert.equal(await readFile(join(ctx.root, 'typed-facade.txt'), 'utf8'), 'typed facade\n');
+});
+
+test('typed file-plan facade refuses stale preimages and preserves the intervening edit', async t => {
+  const ctx = await fixture(t);
+  const path = join(ctx.root, 'typed-stale.txt');
+  await writeFile(path, 'before\n');
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-stale.txt', content: 'planned\n' }]);
+  await writeFile(path, 'external edit\n');
+  await assert.rejects(applyTypedFilePlan(plan), /PLAN_STALE/);
+  assert.equal(await readFile(path, 'utf8'), 'external edit\n');
+  assert.ok(!(await readdir(ctx.root)).includes('.codex-authoring.lock'));
+});
+
+test('framework result helper reuses the canonical typed envelope', () => {
+  assert.equal(frameworkResult, canonicalResult);
+  assert.deepEqual(canonicalResult('status', { ready: true }), {
+    protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
+  });
+  assert.equal(canonicalResult('setup', null, 'blocked').status, 'blocked');
+});
+
+test('framework operation errors reuse the canonical contract primitives', () => {
+  assert.equal(frameworkOperationError, canonicalOperationError);
+  assert.equal(frameworkRequireThat, canonicalRequireThat);
+  assert.throws(() => canonicalRequireThat(false, 'CONTRACT_TEST', 'contract refusal'), error => {
+    assert.ok(error instanceof canonicalOperationError);
+    assert.equal(error.code, 'CONTRACT_TEST');
+    assert.equal(error.message, 'contract refusal');
+    return true;
+  });
+});
+
+test('typed filesystem helpers preserve compatibility and exact-byte hashing', async t => {
+  assert.equal(sha256, typedSha256);
+  assert.equal(legacyExists, typedExists);
+  assert.equal(legacyStatIfPresent, typedStatIfPresent);
+  assert.equal(typedSha256('Grüße'), sha256('Grüße'));
+
+  const ctx = await fixture(t);
+  const missing = join(ctx.root, 'missing.txt');
+  assert.equal(await typedStatIfPresent(missing), null);
+  assert.equal(await typedExists(missing), false);
+  const present = join(ctx.root, 'present.txt');
+  await writeFile(present, 'present');
+  assert.equal((await typedStatIfPresent(present))?.isFile(), true);
+  assert.equal(await legacyExists(present), true);
+});
+
+test('typed bounded-map preserves compatibility, order and stop-on-failure scheduling', async () => {
+  assert.equal(legacyMapBounded, typedMapBounded);
+  const completed = [];
+  const values = await typedMapBounded([3, 1, 2], 2, async (value, index) => {
+    completed.push(index);
+    return value * 2;
+  });
+  assert.deepEqual(values, [6, 2, 4]);
+  assert.deepEqual(completed.slice().sort((a, b) => a - b), [0, 1, 2]);
+  await assert.rejects(typedMapBounded([1], 0, async value => value), /INVALID_CONCURRENCY/);
+  let started = 0;
+  await assert.rejects(typedMapBounded([1, 2, 3, 4], 1, async value => {
+    started++;
+    if (value === 2) throw new Error('stop');
+    return value;
+  }), /stop/);
+  assert.equal(started, 2);
 });
