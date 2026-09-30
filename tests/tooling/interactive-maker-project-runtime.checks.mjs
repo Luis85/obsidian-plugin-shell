@@ -9,6 +9,7 @@ import vm from 'node:vm';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { coreSource, pluginSource, cliSource, cliEntry, browserSource } from '../../scripts/compiler/adapters/project/sources.ts';
 import { buildSource, licenseSource } from '../../scripts/compiler/adapters/project/build-source.ts';
+import { pluginExtensionFiles } from '../../scripts/compiler/adapters/project/plugin-extension.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { Window } from 'happy-dom';
@@ -62,7 +63,7 @@ test('overlapping native opens release only stale application instances and unlo
 test('generated CLI source executes real human/JSON commands without any frontend or dependencies', async () => scratch(async root => {
   const document = runOperations(newDocument('Safe ${notExecuted}'), [{ op: 'page.add', title: '</script><script>throw 1</script>' }]).document;
   const result = await analyzeProject(documentText(document)); assert.equal(result.status, 'ok');
-  const files = { 'package.json': '{"type":"module"}', 'src/core/project.ts': coreSource(result.model),
+  const files = { ...pluginExtensionFiles(), 'package.json': '{"type":"module"}', 'src/core/project.ts': coreSource(result.model),
     'src/targets/cli/commands.ts': cliSource(), 'src/targets/cli/main.ts': '#!/usr/bin/env node\n' + cliEntry };
   for (const [path, source] of Object.entries(files)) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), source); }
   function run(args) { return spawnSync(process.execPath, ['--experimental-strip-types', 'src/targets/cli/main.ts', ...args], { cwd: root, encoding: 'utf8', timeout: 5000, env: { ...process.env, NODE_NO_WARNINGS: '1' } }); }
@@ -95,9 +96,9 @@ test('browser readiness is established only after mount, and teardown clears rea
   const pending = deferred(), handlers = new Map(), root = { dataset: {}, classList: { add() {} } };
   const document = { querySelector: () => root, documentElement: { dataset: {} } };
   let cleanup = 0;
-  const source = stripTypeScriptTypes(browserSource({ framework: 'vanilla' }, 'probe')).replace(/^import .*;\n/gm, '');
+  const source = stripTypeScriptTypes(browserSource({ framework: 'vanilla' }, 'probe', 'webapp')).replace(/^import .*;\n/gm, '');
   vm.runInNewContext(source, { document, window: { addEventListener: (event, fn) => handlers.set(event, fn), removeEventListener: event => handlers.delete(event) }, mount: () => pending.promise, console });
-  assert.equal(document.documentElement.dataset.prototypeReady, undefined);
+  assert.equal(document.documentElement.dataset.prototypeReady, undefined); assert.equal(root.dataset.appHost, 'webapp');
   pending.resolve(() => { cleanup++; throw new Error('cleanup'); }); await new Promise(done => setImmediate(done));
   assert.equal(document.documentElement.dataset.prototypeReady, 'true');
   assert.throws(() => handlers.get('pagehide')(), /cleanup/); assert.equal(document.documentElement.dataset.prototypeReady, undefined);
@@ -117,10 +118,10 @@ test('every generated browser framework passes strict TypeScript, including the 
     allowImportingTsExtensions: true, noUncheckedSideEffectImports: true, types: [] };
   const diagnostics = () => ts.getPreEmitDiagnostics(ts.createProgram([entry, join(root, 'styles.d.ts')], compilerOptions));
   for (const framework of ['vanilla', 'angular', 'nuxtui']) {
-    await writeFile(entry, browserSource({ framework }, 'checked-browser'));
+    await writeFile(entry, browserSource({ framework }, 'checked-browser', 'preview'));
     assert.deepEqual(diagnostics().map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')), [], framework);
   }
-  const unsafe = browserSource({ framework: 'vanilla' }, 'checked-browser')
+  const unsafe = browserSource({ framework: 'vanilla' }, 'checked-browser', 'preview')
     .replace("const candidate = document.querySelector<HTMLElement>('[data-project-root]');\nif (!candidate) throw new Error('PROJECT_ROOT_MISSING');\nconst root: HTMLElement = candidate;",
       "const root = document.querySelector<HTMLElement>('[data-project-root]');\nif (!root) throw new Error('PROJECT_ROOT_MISSING');");
   await writeFile(entry, unsafe);
@@ -176,7 +177,7 @@ test('Angular linker transforms partial declarations before bundling and rejects
 test('a failed browser mount reports failure instead of leaving readiness pending forever', async () => {
   const root = { dataset: {}, classList: { add() {} } }, document = { querySelector: () => root, documentElement: { dataset: {} } };
   const errors = [];
-  const source = stripTypeScriptTypes(browserSource({ framework: 'vanilla' }, 'probe')).replace(/^import .*;\n/gm, '');
+  const source = stripTypeScriptTypes(browserSource({ framework: 'vanilla' }, 'probe', 'webapp')).replace(/^import .*;\n/gm, '');
   vm.runInNewContext(source, { document, window: { addEventListener() {}, removeEventListener() {} },
     mount: async () => { throw new Error('mount failed'); }, console: { error: error => errors.push(error) } });
   await new Promise(done => setImmediate(done));
