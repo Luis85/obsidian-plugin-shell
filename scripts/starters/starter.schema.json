@@ -142,12 +142,9 @@
               ]
             },
             "framework": {
-              "enum": [
-                "nuxtui",
-                "vanilla",
-                "angular",
-                "none"
-              ]
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
             },
             "targets": {
               "type": "array",
