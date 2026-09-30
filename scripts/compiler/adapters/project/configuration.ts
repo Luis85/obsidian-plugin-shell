@@ -3,9 +3,11 @@ import type { TemplateSnapshot } from '../../domain/contracts.ts';
 import type { ProjectSelection } from '../../domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
 import { json } from '../../../companion/compiler/model.ts';
+import { requireFrameworkAdapter } from './framework-registry.ts';
 /** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
 export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string) {
   const original = JSON.parse(template.text('package.json'));
+  const adapter = requireFrameworkAdapter(selected.framework), engine = adapter.engine;
   const dependencies: Record<string, string> = {}, devDependencies: Record<string, string> = {};
   function copy(names: string[], group: Record<string, string>) {
     for (const name of names) {
@@ -18,15 +20,23 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
   if (selected.targets.includes('plugin')) copy(['obsidian'], devDependencies);
   const visual = selected.targets.some(target => target !== 'cli');
   if (visual) copy(['vite'], devDependencies);
-  if (selected.framework === 'nuxtui') {
+  if (engine === 'nuxtui') {
     copy(['vue', 'pinia', '@nuxt/ui'], dependencies);
     copy(['@vitejs/plugin-vue', '@iconify-json/lucide', 'postcss', 'postcss-selector-parser', 'tailwindcss', 'vue-tsc'], devDependencies);
   }
-  if (selected.framework === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
-  if (selected.framework === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
+  if (engine === 'angular') for (const [name, pin] of Object.entries(selected.angularPins ?? {})) (name === '@angular/compiler-cli' ? devDependencies : dependencies)[name] = pin;
+  if (engine === 'angular') devDependencies['@babel/core'] = angularBabelVersion;
+  const merge = (source: Readonly<Record<string, string>> | undefined, target: Record<string, string>) => {
+    for (const [name, pin] of Object.entries(source ?? {})) {
+      if (target[name] !== undefined && target[name] !== pin) throw new CompilerError(diagnostic('COMPILER_TEMPLATE_INVALID', 'emit', 'Framework adapter dependency conflicts with the selected engine: ' + name));
+      target[name] = pin;
+    }
+  };
+  merge(adapter.dependencies, dependencies);
+  merge(adapter.devDependencies, devDependencies);
   const scripts: Record<string, string> = {
     build: 'node scripts/build.mjs',
-    typecheck: selected.framework === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : selected.framework === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
+    typecheck: engine === 'nuxtui' ? 'vue-tsc --noEmit --project tsconfig.json' : engine === 'angular' ? 'ngc --noEmit --project tsconfig.angular.json' : 'tsc --noEmit --project tsconfig.json',
     test: 'node --experimental-strip-types --test tests/*.test.mjs plugins/*/tests/*.test.ts',
   };
   if (selected.targets.some(target => target === 'webapp' || target === 'website')) scripts.start = 'npm run build && node scripts/serve.mjs';
@@ -43,13 +53,14 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
   };
 }
 export function typecheckFiles(selected: ProjectSelection) {
+  const engine = requireFrameworkAdapter(selected.framework).engine;
   const files: Record<string, string> = {
     'tsconfig.json': json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,
       noUncheckedIndexedAccess: true, noEmit: true, skipLibCheck: true, lib: ['ES2022', 'DOM', 'DOM.Iterable'],
       allowImportingTsExtensions: true, resolveJsonModule: true, types: ['node'] }, include: ['src/**/*.ts', 'src/**/*.vue', 'plugins/**/*.ts'] }),
     'src/environment.d.ts': 'declare module "*.css";\n',
   };
-  if (selected.framework === 'angular') files['tsconfig.angular.json'] = json({ extends: './tsconfig.json',
+  if (engine === 'angular') files['tsconfig.angular.json'] = json({ extends: './tsconfig.json',
     compilerOptions: { noEmit: false, rewriteRelativeImportExtensions: true, rootDir: '.', outDir: '.compiled', experimentalDecorators: true },
     angularCompilerOptions: { compilationMode: 'full', strictTemplates: true, strictInjectionParameters: true }, include: ['src/**/*.ts', 'plugins/registry.ts', 'plugins/*/src/**/*.ts'] });
   if (selected.targets.includes('cli')) files['tsconfig.cli.json'] = json({ extends: './tsconfig.json', compilerOptions: {

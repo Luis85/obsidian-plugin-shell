@@ -8,6 +8,7 @@ import { coreSource, browserSource, pluginSource, cliSource, cliEntry, vanillaMo
 import { buildSource, licenseSource } from './build-source.ts';
 import { packageFiles, typecheckFiles, starterReadme } from './configuration.ts';
 import { pluginExtensionFiles } from './plugin-extension.ts';
+import { requireFrameworkAdapter } from './framework-registry.ts';
 function styles(id: string): string {
   const root = `[data-plugin-ui="${id}"]`;
   return `${root} { display: block; padding: 1rem; color: var(--text-normal, #20242a); background: var(--background-primary, #fff); font: 1rem/1.5 var(--font-interface, system-ui); }
@@ -56,6 +57,8 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
 /** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
 export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
   const selected = validateProjectSelection(input);
+  const adapter = requireFrameworkAdapter(selected.framework), engine = adapter.engine;
+  if (adapter.id !== adapter.engine && !['vanilla', 'none'].includes(engine)) throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
   const id = String(model.project.id), name = String(model.project.name);
   const visual = selected.targets.some(target => target !== 'cli');
   const files: Record<string, string> = {
@@ -73,10 +76,15 @@ export function renderStarterProject(model: Model, template: TemplateSnapshot, i
     files['scripts/licenses.mjs'] = licenseSource;
     files['src/targets/preview/main.ts'] = browserSource(selected, id, 'preview');
     files['src/ui/styles.css'] = styles(id);
-    if (selected.framework === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
-    if (selected.framework === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; Object.assign(files, angularBrickFiles(model)); }
-    if (selected.framework === 'nuxtui') {
+    if (engine === 'vanilla') files['src/ui/mount.ts'] = vanillaMount;
+    if (engine === 'angular') { files['scripts/angular-linker.mjs'] = angularLinkerSource; files['src/ui/mount.ts'] = angularMount; Object.assign(files, angularBrickFiles(model)); }
+    if (engine === 'nuxtui') {
       Object.assign(files, vueFiles(template)); files['src/ui/styles.css'] = '@import "./nuxt.css";\n' + styles(id);
+    }
+    const contributed = adapter.files?.({ model, template, selection: selected, projectId: id, projectName: name }) ?? {};
+    for (const [path, content] of Object.entries(contributed)) {
+      if (!/^src\/ui\/[a-zA-Z0-9_.\/-]+$/.test(path) || path.includes('..') || typeof content !== 'string') throw new Error('FRAMEWORK_ADAPTER_FILE_INVALID:' + adapter.id);
+      files[path] = content;
     }
   }
   for (const target of selected.targets) {
