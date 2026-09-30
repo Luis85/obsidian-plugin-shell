@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { newDocument, documentText, openDocument } from '../../bin/domain/document.ts';
 import { hash } from '../../scripts/framework/files.ts';
 import { readFeatureBrainstorm, featureConcept, brainstormSchema } from '../../bin/domain/brainstorm.ts';

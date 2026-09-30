@@ -32,61 +32,78 @@ function optionalList(value: unknown, label: string, maxItems = 20): string[] {
     'BRAINSTORM_DUPLICATE', 'Duplicate ' + label + '.');
   return result;
 }
+function readInteraction(value: unknown): BrainstormInteraction {
+  const interaction = object(value); keys(interaction, ['label', 'kind', 'target', 'outcome']);
+  const label = bounded(interaction.label, 'Interaction label', 120);
+  const kind = interaction.kind ?? 'navigate';
+  requireSketch(kind === 'navigate' || kind === 'action', 'BRAINSTORM_INTERACTION',
+    'Interactions are navigation or planned actions.');
+  if (kind === 'action') {
+    requireSketch(interaction.target === undefined, 'BRAINSTORM_INTERACTION',
+      'A planned action has an outcome, not a navigation target.');
+    return { kind, label, outcome: text(interaction.outcome, 'Expected outcome', 1000) };
+  }
+  requireSketch(interaction.outcome === undefined, 'BRAINSTORM_INTERACTION',
+    'Navigation has a target, not an action outcome.');
+  return { kind, label, target: bounded(interaction.target, 'Interaction target', 80) };
+}
+function readPage(value: unknown, index: number): BrainstormPage {
+  const page = object(value); keys(page, ['title', 'purpose', 'kind', 'interactions']);
+  const title = bounded(page.title, 'Page title', 80);
+  const kind = page.kind ?? (index === 0 ? 'view' : 'page');
+  const valid = ['view', 'page', 'modal'].includes(String(kind)) &&
+    (index === 0 ? kind === 'view' : kind !== 'view');
+  requireSketch(valid, 'BRAINSTORM_PAGE_KIND',
+    'The first surface must be the feature view; subsequent surfaces are pages or modals.');
+  const interactions = list(page.interactions ?? [], 'interactions', 12).map(readInteraction);
+  const identities = interactions.map(item => item.kind + '/' + item.label.toLowerCase());
+  requireSketch(new Set(identities).size === interactions.length,
+    'BRAINSTORM_DUPLICATE', 'Repeated interaction on ' + title + '.');
+  return { title, purpose: text(page.purpose, 'Page purpose', 2000),
+    kind: kind as BrainstormPage['kind'], interactions };
+}
+function validatePageReferences(pages: BrainstormPage[]): void {
+  requireSketch(pages.length > 0, 'BRAINSTORM_PAGES', 'Describe at least one feature view.');
+  const names = new Set(pages.map(page => page.title.toLowerCase()));
+  requireSketch(names.size === pages.length, 'BRAINSTORM_DUPLICATE', 'Page titles must be unique.');
+  for (const page of pages) {
+    for (const interaction of page.interactions) {
+      if (interaction.kind === 'action') continue;
+      requireSketch(names.has(interaction.target.toLowerCase()), 'BRAINSTORM_TARGET',
+        'Navigation target must name a page or modal in this feature: ' + interaction.target + '.');
+    }
+  }
+}
+function delivery(raw: Record<string, unknown>): { output: BrainstormOutput; verification: BrainstormVerification } {
+  const output = raw.output ?? 'definition', verification = raw.verification ?? 'none';
+  requireSketch(outputKinds.includes(output as BrainstormOutput), 'BRAINSTORM_OUTPUT',
+    'Choose definition, prototype or boilerplate.');
+  requireSketch(verificationKinds.includes(verification as BrainstormVerification) &&
+    (output !== 'definition' || verification === 'none'), 'BRAINSTORM_VERIFICATION',
+  'Verification needs generated source; choose prototype or boilerplate first.');
+  return { output: output as BrainstormOutput, verification: verification as BrainstormVerification };
+}
+function optionalBinding(raw: Record<string, unknown>) {
+  const projectId = raw.projectId === undefined ? undefined : bounded(raw.projectId, 'Project ID', 60);
+  if (raw.baseSha256 !== undefined) requireSketch(typeof raw.baseSha256 === 'string' &&
+    /^[a-f0-9]{64}$/.test(raw.baseSha256), 'BRAINSTORM_BASE',
+  'baseSha256 must be the inspected saved project hash.');
+  return { ...(projectId === undefined ? {} : { projectId }),
+    ...(raw.baseSha256 === undefined ? {} : { baseSha256: raw.baseSha256 as string }) };
+}
 /** One bounded, inert request contract is shared by machine clients and the terminal wizard. */
 export function readFeatureBrainstorm(input: unknown): FeatureBrainstorm {
   const raw = object(input);
   keys(raw, ['schemaVersion', 'name', 'purpose', 'actors', 'entities', 'pages', 'acceptance', 'output',
     'verification', 'projectId', 'baseSha256']);
   requireSketch(raw.schemaVersion === 1, 'BRAINSTORM_VERSION', 'Expected feature brainstorm schemaVersion 1.');
-  const name = bounded(raw.name, 'Feature name', 80);
-  const purpose = text(raw.purpose, 'Feature purpose', 2000);
-  const actors = optionalList(raw.actors, 'actors');
-  const entities = optionalList(raw.entities, 'entities');
-  const acceptance = optionalList(raw.acceptance, 'acceptance criteria', 30);
-  const pages = list(raw.pages, 'pages', 12).map((item, index) => {
-    const page = object(item); keys(page, ['title', 'purpose', 'kind', 'interactions']);
-    const title = bounded(page.title, 'Page title', 80);
-    const kind = page.kind ?? (index === 0 ? 'view' : 'page');
-    requireSketch(['view', 'page', 'modal'].includes(String(kind)) && (index !== 0 || kind === 'view') &&
-      (index === 0 || kind !== 'view'), 'BRAINSTORM_PAGE_KIND',
-    'The first surface must be the feature view; subsequent surfaces are pages or modals.');
-    const interactions = list(page.interactions ?? [], 'interactions', 12).map(item => {
-      const interaction = object(item); keys(interaction, ['label', 'kind', 'target', 'outcome']);
-      const label = bounded(interaction.label, 'Interaction label', 120);
-      const kind = interaction.kind ?? 'navigate';
-      requireSketch(kind === 'navigate' || kind === 'action', 'BRAINSTORM_INTERACTION',
-        'Interactions are navigation or planned actions.');
-      if (kind === 'action') {
-        requireSketch(interaction.target === undefined, 'BRAINSTORM_INTERACTION',
-          'A planned action has an outcome, not a navigation target.');
-        return { kind: 'action' as const, label, outcome: text(interaction.outcome, 'Expected outcome', 1000) };
-      }
-      requireSketch(interaction.outcome === undefined, 'BRAINSTORM_INTERACTION',
-        'Navigation has a target, not an action outcome.');
-      return { kind: 'navigate' as const, label, target: bounded(interaction.target, 'Interaction target', 80) };
-    });
-    requireSketch(new Set(interactions.map(item => item.kind + '/' + item.label.toLowerCase())).size === interactions.length,
-      'BRAINSTORM_DUPLICATE', 'Repeated interaction on ' + title + '.');
-    return { title, purpose: text(page.purpose, 'Page purpose', 2000), kind: kind as BrainstormPage['kind'], interactions };
-  });
-  requireSketch(pages.length > 0, 'BRAINSTORM_PAGES', 'Describe at least one feature view.');
-  const names = new Set(pages.map(page => page.title.toLowerCase()));
-  requireSketch(names.size === pages.length, 'BRAINSTORM_DUPLICATE', 'Page titles must be unique.');
-  for (const page of pages) for (const interaction of page.interactions)
-    if (interaction.kind !== 'action') requireSketch(names.has(interaction.target.toLowerCase()), 'BRAINSTORM_TARGET',
-      'Navigation target must name a page or modal in this feature: ' + interaction.target + '.');
-  const output = raw.output ?? 'definition', verification = raw.verification ?? 'none';
-  requireSketch(outputKinds.includes(output as BrainstormOutput), 'BRAINSTORM_OUTPUT', 'Choose definition, prototype or boilerplate.');
-  requireSketch(verificationKinds.includes(verification as BrainstormVerification) &&
-    (output !== 'definition' || verification === 'none'), 'BRAINSTORM_VERIFICATION',
-  'Verification needs generated source; choose prototype or boilerplate first.');
-  if (raw.projectId !== undefined) bounded(raw.projectId, 'Project ID', 60);
-  if (raw.baseSha256 !== undefined) requireSketch(typeof raw.baseSha256 === 'string' &&
-    /^[a-f0-9]{64}$/.test(raw.baseSha256), 'BRAINSTORM_BASE', 'baseSha256 must be the inspected saved project hash.');
-  return { schemaVersion: 1, name, purpose, actors, entities, pages, acceptance,
-    output: output as BrainstormOutput, verification: verification as BrainstormVerification,
-    ...(raw.projectId === undefined ? {} : { projectId: raw.projectId as string }),
-    ...(raw.baseSha256 === undefined ? {} : { baseSha256: raw.baseSha256 as string }) };
+  const pages = list(raw.pages, 'pages', 12).map(readPage);
+  validatePageReferences(pages);
+  return { schemaVersion: 1, name: bounded(raw.name, 'Feature name', 80),
+    purpose: text(raw.purpose, 'Feature purpose', 2000), actors: optionalList(raw.actors, 'actors'),
+    entities: optionalList(raw.entities, 'entities'), pages,
+    acceptance: optionalList(raw.acceptance, 'acceptance criteria', 30),
+    ...delivery(raw), ...optionalBinding(raw) };
 }
 
 export const brainstormGuide = Object.freeze({
@@ -143,84 +160,104 @@ export interface BrainstormResult {
   definition: Record<string, unknown>;
   mapping: { title: string; surfaceId: string; route: string | null }[];
 }
+type BrainstormChange = { collection: 'nodes' | 'links' | 'sitemap.routes' | 'visualDesigns.pages' | 'features.items';
+  op: 'add'; id: string; value: Record<string, unknown> };
+interface BuildState {
+  design: SketchDocument['design']; featureId: string; used: Set<string>; serial: number;
+  changes: BrainstormChange[];
+  added: Map<string, { id: string; kind: BrainstormPage['kind']; slug: string }>;
+  mapping: BrainstormResult['mapping']; existingRoutes: Set<string>;
+}
+function buildState(document: SketchDocument, request: FeatureBrainstorm): BuildState {
+  const design = document.design;
+  return { design, featureId: slug(request.name, 'feature', (design.features?.items ?? []).map(item => item.id)),
+    used: new Set([...design.nodes.map(item => item.id), ...design.links.map(item => item.id),
+      ...(design.sitemap?.routes ?? []).map(item => item.id)]), serial: design.nextId, changes: [],
+    added: new Map(), mapping: [], existingRoutes: new Set((design.sitemap?.routes ?? [])
+      .map(item => item.path.replace(/:[A-Za-z_][A-Za-z0-9_]*/g, ':param'))) };
+}
+function allocate(state: BuildState, prefix: string): string {
+  const allocated = freshNumber(state.used, prefix, state.serial);
+  state.serial = allocated[1]; state.design.nextId = state.serial;
+  return allocated[0];
+}
+function routeFor(state: BuildState, surface: Record<string, unknown>): string | null {
+  if (surface.kind === 'modal') return null;
+  const initial = '/' + state.featureId + '/' + String(surface.slug);
+  let path = initial, suffix = 2;
+  while (state.existingRoutes.has(path)) path = initial + '-' + suffix++;
+  state.existingRoutes.add(path);
+  const record = { id: allocate(state, 'route'), surface: String(surface.id), path };
+  state.design.sitemap ??= { schema: 1, routes: [], journeys: [] };
+  state.design.sitemap.routes.push(record);
+  state.changes.push({ collection: 'sitemap.routes', op: 'add', id: record.id, value: record });
+  return path;
+}
+function visualFor(state: BuildState, page: BrainstormPage, surfaceId: string): void {
+  const visual = state.design.visualDesigns;
+  const notes = page.interactions.length ? 'Planned interactions (not implemented): ' +
+    page.interactions.map(item => item.kind === 'action' ? item.label + ' => ' + item.outcome :
+      item.label + ' → ' + item.target).join('; ') : 'No interactions declared yet.';
+  const pageDesign = { id: visualAllocate(visual, 'vp'), ownerId: surfaceId, name: page.title,
+    root: [visualText(visualAllocate(visual, 'vn'), page.title, 'h1'),
+      visualText(visualAllocate(visual, 'vn'), page.purpose, 'p')],
+    scenarios: [], notes: notes.slice(0, 2000) };
+  visual.pages.push(pageDesign);
+  state.changes.push({ collection: 'visualDesigns.pages', op: 'add', id: pageDesign.id, value: pageDesign });
+}
+function addSurface(state: BuildState, page: BrainstormPage, index: number, firstTitle: string): void {
+  const parent = page.kind === 'page' ? state.added.get(firstTitle.toLowerCase())!.id : null;
+  const surface = newSitemapSurface(state.design, page.title, page.kind, parent);
+  surface.id = allocate(state, 'node'); surface.goal = page.purpose;
+  surface.entry = index === 0 && !state.design.nodes.some(node => node.entry);
+  state.design.nodes.push(surface);
+  state.added.set(page.title.toLowerCase(), { id: surface.id, kind: page.kind, slug: surface.slug! });
+  state.changes.push({ collection: 'nodes', op: 'add', id: surface.id, value: surface });
+  const path = routeFor(state, surface);
+  visualFor(state, page, surface.id);
+  state.mapping.push({ title: page.title, surfaceId: surface.id, route: path });
+}
+function addTransitions(state: BuildState, pages: BrainstormPage[]): void {
+  for (const page of pages) {
+    for (const interaction of page.interactions) {
+      if (interaction.kind === 'action') continue;
+      const from = state.added.get(page.title.toLowerCase())!, to = state.added.get(interaction.target.toLowerCase())!;
+      const transition = { id: allocate(state, 'edge'), from: from.id, to: to.id,
+        kind: to.kind === 'modal' ? 'open' : 'navigate', label: interaction.label };
+      state.design.links.push(transition);
+      state.changes.push({ collection: 'links', op: 'add', id: transition.id, value: transition });
+    }
+  }
+}
+function addFeatureOwner(state: BuildState, request: FeatureBrainstorm): void {
+  const owned = request.pages.map(page => state.added.get(page.title.toLowerCase())!.id);
+  const owner = { id: state.featureId, name: request.name, surfaces: owned, entryPoints: [owned[0]!],
+    components: [], requirements: [], dependsOn: [] };
+  state.changes.push({ collection: 'features.items', op: 'add', id: state.featureId, value: owner });
+}
+function definition(request: FeatureBrainstorm, current: { document: SketchDocument; sha256: string },
+  state: BuildState): Record<string, unknown> {
+  return { kind: 'shell-feature-definition', schemaVersion: 1, status: 'draft',
+    projectId: current.document.project.id, baseSha256: current.sha256, featureId: state.featureId,
+    feature: request, mapping: state.mapping, acceptance: 'not-verified', execution: 'not-run',
+    limits: ['Descriptive entities and actors are not schema implementations.',
+      'Navigation and planned action outcomes are not completed event handlers.',
+      'Generated code does not imply native Companion feature acceptance.'] };
+}
 /** Builds canonical v6 additive records only; applyConcept supplies ownership and reference validation. */
 export function featureConcept(request: FeatureBrainstorm, current: { document: SketchDocument; sha256: string }): BrainstormResult {
   requireSketch(!request.projectId || request.projectId === current.document.project.id,
     'BRAINSTORM_PROJECT', 'The brainstorm targets a different project.');
   requireSketch(!request.baseSha256 || request.baseSha256 === current.sha256,
     'BRAINSTORM_STALE', 'Project bytes changed; inspect a new base before continuing.');
-  const working = structuredClone(current.document), design = working.design;
-  const featureId = slug(request.name, 'feature', (design.features?.items ?? []).map(item => item.id));
-  const used = new Set([...design.nodes.map(item => item.id), ...design.links.map(item => item.id),
-    ...(design.sitemap?.routes ?? []).map(item => item.id)]);
-  let serial = design.nextId;
-  const changes: Array<{ collection: 'nodes' | 'links' | 'sitemap.routes' | 'visualDesigns.pages' | 'features.items';
-    op: 'add'; id: string; value: Record<string, unknown> }> = [];
-  const added = new Map<string, { id: string; kind: BrainstormPage['kind']; slug: string }>();
-  const mapping: BrainstormResult['mapping'] = [];
-  const existingRoutes = new Set((design.sitemap?.routes ?? []).map(item => item.path.replace(/:[A-Za-z_][A-Za-z0-9_]*/g, ':param')));
-  for (const [index, page] of request.pages.entries()) {
-    const kind = page.kind, parent = kind === 'page' ? added.get(request.pages[0]!.title.toLowerCase())!.id : null;
-    // Use the canonical sitemap factory for placement/host defaults and collision-safe slugs.
-    const surface = newSitemapSurface(design, page.title, kind, parent);
-    // Do not collide with link/route IDs even if imported designs used another allocation scheme.
-    const allocated = freshNumber(used, 'node', serial); surface.id = allocated[0]; serial = allocated[1];
-    surface.goal = page.purpose;
-    surface.entry = index === 0 && !design.nodes.some(node => node.entry);
-    design.nodes.push(surface);
-    design.nextId = serial;
-    added.set(page.title.toLowerCase(), { id: surface.id, kind, slug: surface.slug! });
-    changes.push({ collection: 'nodes', op: 'add', id: surface.id, value: surface });
-    let path: string | null = null;
-    if (kind !== 'modal') {
-      const initial = '/' + featureId + '/' + surface.slug;
-      path = initial; let suffix = 2;
-      while (existingRoutes.has(path)) path = initial + '-' + suffix++;
-      existingRoutes.add(path);
-      const route = freshNumber(used, 'route', serial); serial = route[1];
-      const record = { id: route[0], surface: surface.id, path };
-      design.sitemap ??= { schema: 1, routes: [], journeys: [] };
-      design.sitemap.routes.push(record);
-      changes.push({ collection: 'sitemap.routes', op: 'add', id: record.id, value: record });
-    }
-    const visual = design.visualDesigns;
-    const heading = visualText(visualAllocate(visual, 'vn'), page.title, 'h1');
-    const explanation = visualText(visualAllocate(visual, 'vn'), page.purpose, 'p');
-    const notes = page.interactions.length ? 'Planned interactions (not implemented): ' +
-      page.interactions.map(item => item.kind === 'action' ? item.label + ' => ' + item.outcome :
-        item.label + ' → ' + item.target).join('; ') : 'No interactions declared yet.';
-    const pageDesign = { id: visualAllocate(visual, 'vp'), ownerId: surface.id, name: page.title,
-      root: [heading, explanation], scenarios: [], notes: notes.slice(0, 2000) };
-    visual.pages.push(pageDesign);
-    changes.push({ collection: 'visualDesigns.pages', op: 'add', id: pageDesign.id, value: pageDesign });
-    mapping.push({ title: page.title, surfaceId: surface.id, route: path });
-  }
-  for (const page of request.pages) {
-    for (const interaction of page.interactions) {
-      if (interaction.kind === 'action') continue;
-      const from = added.get(page.title.toLowerCase())!, to = added.get(interaction.target.toLowerCase())!;
-      const allocated = freshNumber(used, 'edge', serial); serial = allocated[1];
-      const transition = { id: allocated[0], from: from.id, to: to.id,
-        kind: to.kind === 'modal' ? 'open' : 'navigate', label: interaction.label };
-      design.links.push(transition);
-      changes.push({ collection: 'links', op: 'add', id: transition.id, value: transition });
-    }
-  }
-  const owned = request.pages.map(page => added.get(page.title.toLowerCase())!.id);
-  const owner = { id: featureId, name: request.name, surfaces: owned, entryPoints: [owned[0]!],
-    components: [], requirements: [], dependsOn: [] };
-  changes.push({ collection: 'features.items', op: 'add', id: featureId, value: owner });
+  const working = structuredClone(current.document), state = buildState(working, request);
+  request.pages.forEach((page, index) => addSurface(state, page, index, request.pages[0]!.title));
+  addTransitions(state, request.pages); addFeatureOwner(state, request);
   const concept = parseConcept(JSON.stringify({
-    kind: 'obsidian-companion-concept', schemaVersion: 1, id: featureId + '-brainstorm',
+    kind: 'obsidian-companion-concept', schemaVersion: 1, id: state.featureId + '-brainstorm',
     mode: 'feature', projectId: current.document.project.id, baseSha256: current.sha256,
-    references: [], changes,
+    references: [], changes: state.changes,
   }));
   const candidate = applyConcept(concept, current).document as SketchDocument;
-  return { concept, candidate, mapping,
-    definition: { kind: 'shell-feature-definition', schemaVersion: 1, status: 'draft',
-      projectId: current.document.project.id, baseSha256: current.sha256, featureId,
-      feature: request, mapping, acceptance: 'not-verified', execution: 'not-run',
-      limits: ['Descriptive entities and actors are not schema implementations.',
-        'Navigation and planned action outcomes are not completed event handlers.',
-        'Generated code does not imply native Companion feature acceptance.'] } };
+  return { concept, candidate, mapping: state.mapping, definition: definition(request, current, state) };
 }

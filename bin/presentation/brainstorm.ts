@@ -13,6 +13,8 @@ interface Draft {
   pages: BrainstormPage[]; acceptance: string[];
   output: FeatureBrainstorm['output']; verification: FeatureBrainstorm['verification'];
 }
+type BrainstormContext = Awaited<ReturnType<typeof brainstormContext>>;
+type CaptureStage = (ui: Prompts, draft: Draft, context: BrainstormContext) => Promise<void>;
 
 async function longText(ui: Prompts, label: string, initial = ''): Promise<string> {
   if (!ui.rich) return input(ui, label, initial);
@@ -53,30 +55,34 @@ async function pages(ui: Prompts, initial: BrainstormPage[]): Promise<Brainstorm
     } else if (action.startsWith('remove-')) result.splice(Number(action.slice(7)), 1);
   }
 }
-async function navigation(ui: Prompts, pages: BrainstormPage[]): Promise<BrainstormPage[]> {
-  const result = structuredClone(pages);
-  for (const current of result) {
-    current.interactions = [];
-    while (true) {
-      const choice = await choose(ui, 'Interactions on ' + current.title, [
-        { id: 'done', label: current.interactions.length ? 'Done with this screen' : 'No interactions on this screen' },
-        ...(result.length > 1 ? [{ id: 'navigate', label: 'Add navigation / open-dialog interaction' }] : []),
-        { id: 'action', label: 'Describe a planned action and its expected outcome' },
-      ], 'done');
-      if (choice === 'done') break;
-      if (choice === 'action') {
-        const label = await titleInput(ui, 'Action label', '', 120);
-        const outcome = await longText(ui, 'What should happen when users choose "' + label + '"?');
-        current.interactions.push({ kind: 'action', label, outcome });
-      } else {
-        const targets = result.filter(item => item.title !== current.title);
-        const target = await choose(ui, 'Where does the user go?',
-          targets.map(item => ({ id: item.title, label: item.title + ' — ' + item.purpose })));
-        const label = await titleInput(ui, 'Interaction label', 'Open ' + target, 120);
-        current.interactions.push({ kind: 'navigate', label, target });
-      }
-    }
+async function plannedAction(ui: Prompts, current: BrainstormPage): Promise<void> {
+  const label = await titleInput(ui, 'Action label', '', 120);
+  const outcome = await longText(ui, 'What should happen when users choose "' + label + '"?');
+  current.interactions.push({ kind: 'action', label, outcome });
+}
+async function navigationAction(ui: Prompts, current: BrainstormPage, featurePages: BrainstormPage[]): Promise<void> {
+  const targets = featurePages.filter(item => item.title !== current.title);
+  const target = await choose(ui, 'Where does the user go?',
+    targets.map(item => ({ id: item.title, label: item.title + ' — ' + item.purpose })));
+  const label = await titleInput(ui, 'Interaction label', 'Open ' + target, 120);
+  current.interactions.push({ kind: 'navigate', label, target });
+}
+async function screenInteractions(ui: Prompts, current: BrainstormPage, featurePages: BrainstormPage[]): Promise<void> {
+  current.interactions = [];
+  while (true) {
+    const choice = await choose(ui, 'Interactions on ' + current.title, [
+      { id: 'done', label: current.interactions.length ? 'Done with this screen' : 'No interactions on this screen' },
+      ...(featurePages.length > 1 ? [{ id: 'navigate', label: 'Add navigation / open-dialog interaction' }] : []),
+      { id: 'action', label: 'Describe a planned action and its expected outcome' },
+    ], 'done');
+    if (choice === 'done') return;
+    if (choice === 'action') await plannedAction(ui, current);
+    else await navigationAction(ui, current, featurePages);
   }
+}
+async function navigation(ui: Prompts, featurePages: BrainstormPage[]): Promise<BrainstormPage[]> {
+  const result = structuredClone(featurePages);
+  for (const current of result) await screenInteractions(ui, current, result);
   return result;
 }
 function request(draft: Draft, projectId: string, baseSha256: string): FeatureBrainstorm {
@@ -85,56 +91,54 @@ function request(draft: Draft, projectId: string, baseSha256: string): FeatureBr
     output: draft.output, verification: draft.verification, projectId, baseSha256 };
 }
 function setContext(ui: Prompts, title: string, step: string, details: string[]): void {
-  ui.rich?.context({ title, location: 'Brainstorm / ' + step, details: [...details, '', 'Escape: previous section', 'F1: keyboard help'] });
+  ui.rich?.context({ title, location: 'Brainstorm / ' + step,
+    details: [...details, '', 'Escape: previous section', 'F1: keyboard help'] });
 }
-async function capture(ui: Prompts, options: BrainstormWizardOptions): Promise<FeatureBrainstorm> {
-  const context = await brainstormContext(options);
-  const draft: Draft = { name: '', purpose: '', actors: [], entities: [], pages: [], acceptance: [],
-    output: 'definition', verification: 'none' };
-  let stage = 0;
-  while (stage < 8) {
-    try {
-      if (stage === 0) {
-        setContext(ui, draft.name || 'New feature', 'Feature', ['1 / 8', context.project.name]);
-        draft.name = await titleInput(ui, 'What is the name of the new feature?', draft.name, 80);
-      } else if (stage === 1) {
-        setContext(ui, draft.name, 'Purpose', ['2 / 8', 'Problem and desired outcome']);
-        draft.purpose = await longText(ui, 'What problem does this feature solve, and what is its purpose?', draft.purpose);
-      } else if (stage === 2) {
-        setContext(ui, draft.name, 'Actors and entities', ['3 / 8', 'Planning context only']);
-        draft.actors = await lines(ui, 'Who will use or interact with it?', draft.actors);
-        draft.entities = await lines(ui, 'Which actors/entities or business objects are involved?', draft.entities);
-      } else if (stage === 3) {
-        setContext(ui, draft.name, 'Screens', ['4 / 8', 'Main view → pages/dialogs']);
-        draft.pages = await pages(ui, draft.pages);
-      } else if (stage === 4) {
-        setContext(ui, draft.name, 'Interactions', ['5 / 8', 'Navigation and planned user actions']);
-        draft.pages = await navigation(ui, draft.pages);
-      } else if (stage === 5) {
-        setContext(ui, draft.name, 'Acceptance', ['6 / 8', 'Useful/correct outcomes']);
-        draft.acceptance = await lines(ui, 'How will you recognize the feature as useful and correct?', draft.acceptance);
-      } else if (stage === 6) {
-        setContext(ui, draft.name, 'Output', ['7 / 8', 'Generation is reviewed separately']);
-        draft.output = await choose(ui, 'What should be prepared?', [
-          { id: 'definition', label: 'Feature definition + canonical concept only' },
-          { id: 'prototype', label: 'Definition + offline prototype source' },
-          { id: 'boilerplate', label: 'Definition + project/plugin boilerplate source' },
-        ], draft.output) as Draft['output'];
-      } else {
-        setContext(ui, draft.name, 'Build and test', ['8 / 8', 'Processes require another approval']);
-        draft.verification = draft.output === 'definition' ? 'none' : await choose(ui, 'After generation, what should be available as a separately approved run?', [
-          { id: 'none', label: 'Do not run anything' },
-          { id: 'test', label: 'Install dependencies and run tests' },
-          { id: 'test-build', label: 'Install dependencies, run tests and build' },
-        ], draft.verification) as Draft['verification'];
-      }
-      stage++;
-    } catch (error) {
-      if (!(error instanceof Back) || stage === 0) throw error;
-      stage--;
-    }
-  }
-  const value = request(draft, context.project.id, context.baseSha256);
+const captureStages: CaptureStage[] = [
+  async (ui, draft, context) => {
+    setContext(ui, draft.name || 'New feature', 'Feature', ['1 / 8', context.project.name]);
+    draft.name = await titleInput(ui, 'What is the name of the new feature?', draft.name, 80);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Purpose', ['2 / 8', 'Problem and desired outcome']);
+    draft.purpose = await longText(ui, 'What problem does this feature solve, and what is its purpose?', draft.purpose);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Actors and entities', ['3 / 8', 'Planning context only']);
+    draft.actors = await lines(ui, 'Who will use or interact with it?', draft.actors);
+    draft.entities = await lines(ui, 'Which actors/entities or business objects are involved?', draft.entities);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Screens', ['4 / 8', 'Main view → pages/dialogs']);
+    draft.pages = await pages(ui, draft.pages);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Interactions', ['5 / 8', 'Navigation and planned user actions']);
+    draft.pages = await navigation(ui, draft.pages);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Acceptance', ['6 / 8', 'Useful/correct outcomes']);
+    draft.acceptance = await lines(ui, 'How will you recognize the feature as useful and correct?', draft.acceptance);
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Output', ['7 / 8', 'Generation is reviewed separately']);
+    draft.output = await choose(ui, 'What should be prepared?', [
+      { id: 'definition', label: 'Feature definition + canonical concept only' },
+      { id: 'prototype', label: 'Definition + offline prototype source' },
+      { id: 'boilerplate', label: 'Definition + project/plugin boilerplate source' },
+    ], draft.output) as Draft['output'];
+  },
+  async (ui, draft) => {
+    setContext(ui, draft.name, 'Build and test', ['8 / 8', 'Processes require another approval']);
+    if (draft.output === 'definition') { draft.verification = 'none'; return; }
+    draft.verification = await choose(ui, 'After generation, what should be available as a separately approved run?', [
+      { id: 'none', label: 'Do not run anything' },
+      { id: 'test', label: 'Install dependencies and run tests' },
+      { id: 'test-build', label: 'Install dependencies, run tests and build' },
+    ], draft.verification) as Draft['verification'];
+  },
+];
+async function approveCapturedRequest(ui: Prompts, value: FeatureBrainstorm): Promise<void> {
   if (ui.rich) await ui.rich.review('Review feature brainstorm', [
     { title: 'Definition request', body: JSON.stringify(value, null, 2) },
     { title: 'Boundaries', body: [
@@ -146,6 +150,21 @@ async function capture(ui: Prompts, options: BrainstormWizardOptions): Promise<F
   ]);
   else ui.write('\nFeature brainstorm\n' + JSON.stringify(value, null, 2) + '\n');
   if (!await confirm(ui, 'Continue to the reviewed file plan?')) throw new Back();
+}
+async function capture(ui: Prompts, options: BrainstormWizardOptions): Promise<FeatureBrainstorm> {
+  const context = await brainstormContext(options);
+  const draft: Draft = { name: '', purpose: '', actors: [], entities: [], pages: [], acceptance: [],
+    output: 'definition', verification: 'none' };
+  let stage = 0;
+  while (stage < captureStages.length) {
+    try { await captureStages[stage]!(ui, draft, context); stage++; }
+    catch (error) {
+      if (!(error instanceof Back) || stage === 0) throw error;
+      stage--;
+    }
+  }
+  const value = request(draft, context.project.id, context.baseSha256);
+  await approveCapturedRequest(ui, value);
   return value;
 }
 async function reviewFrameworkPlan(ui: Prompts, planned: Awaited<ReturnType<typeof planOperation>>,
@@ -178,7 +197,8 @@ async function optionalVerification(ui: Prompts, options: BrainstormWizardOption
   if (ui.rich) await ui.rich.review('Review generated-source execution', [
     { title: 'Commands', body: commands + '\n\nExecution plan hash: ' + plan.planHash + blockers },
     { title: 'Effects and limits', body: plan.effects.join('\n') },
-    { title: 'Toolchain', body: JSON.stringify({ expected: plan.expected, actual: { node: plan.tool.node, npm: plan.tool.version } }, null, 2) },
+    { title: 'Toolchain', body: JSON.stringify({ expected: plan.expected,
+      actual: { node: plan.tool.node, npm: plan.tool.version } }, null, 2) },
   ]);
   else ui.write('\nGenerated-source execution plan\n' + commands + '\nPlan hash: ' + plan.planHash + blockers + '\n');
   if (plan.blockers.length) {
