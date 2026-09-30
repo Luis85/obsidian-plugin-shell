@@ -1,7 +1,7 @@
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
 import { join } from 'node:path';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { object, list } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import type { Entry } from './storage.ts';

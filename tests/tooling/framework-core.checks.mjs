@@ -13,6 +13,8 @@ import { readBounded } from '../../scripts/framework/files.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { sha256 } from '../../scripts/shared/hash.mjs';
 import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
+import * as typedJsonData from '../../scripts/contracts/json-data.ts';
+import * as legacyJsonData from '../../scripts/contracts/json-data.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 // The last v4 self-project, retained as a migration input.
@@ -180,4 +182,17 @@ test('file plans and capability discovery use the canonical shared digest', asyn
   assert.equal(plan.changes[0].afterHash, sha256(content));
   const catalog = capabilityCatalog();
   assert.equal(catalogDigest(catalog), sha256(JSON.stringify(catalog)));
+});
+
+test('typed JSON data contract remains the canonical compatibility implementation', () => {
+  assert.equal(legacyJsonData.assertJsonData, typedJsonData.assertJsonData);
+  assert.equal(legacyJsonData.parseJsonData, typedJsonData.parseJsonData);
+  const value = Object.assign(Object.create(null), { safe: ['café', 7, true, null] });
+  assert.equal(typedJsonData.assertJsonData(value), true);
+  assert.deepEqual(legacyJsonData.parseJsonData(JSON.stringify(value)), value);
+  let invoked = 0;
+  const poisoned = {};
+  Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });
+  assert.throws(() => typedJsonData.assertJsonData(poisoned), /JSON_DATA_INVALID/);
+  assert.equal(invoked, 0);
 });

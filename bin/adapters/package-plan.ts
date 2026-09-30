@@ -2,7 +2,7 @@ import { preserveResolvedLock } from './resolved-lock.ts';
 import { join, resolve, relative, isAbsolute } from 'node:path';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
-import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
+import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { object, list, text, keys } from '../domain/data.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { prepared, type Entry, type Prepared } from './storage.ts';
