@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { sha256 } from '../shared/hash.mjs';
 import { exists } from '../shared/fs-presence.mjs';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { parseJsonData } from '../contracts/json-data.ts';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';

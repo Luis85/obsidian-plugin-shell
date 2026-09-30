@@ -80,7 +80,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C3:** All TypeScript framework consumers of the bounded JSON contract import `contracts/json-data.ts` directly; the compatibility `.mjs` entry is now limited to remaining JavaScript/legacy consumers.
 - **C4:** Typed `bin/` adapters now import the JSON contract directly from `json-data.ts`; the compatibility wrapper is no longer on the maker application's typed path.
 - **C5:** `shared/file-plan.ts` now provides strict plan/change/apply contracts over the unchanged reviewed runtime. Typed callers can migrate without changing path validation, locking, stale-preimage checks or rollback semantics in the same milestone.
-- **Remaining C6–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C6:** Framework create/inspect-only consumers now import the typed file-plan facade directly. Apply/rollback callers remain isolated for the next milestone.
+- **Remaining C7–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

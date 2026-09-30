@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { serializeJson } from '../contracts/serialization.ts';
 import { applyConcept } from '../companion/concepts/apply.ts';
 import { conceptRequire } from '../companion/concepts/contract.ts';

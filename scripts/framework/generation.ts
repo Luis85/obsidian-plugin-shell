@@ -1,4 +1,4 @@
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';

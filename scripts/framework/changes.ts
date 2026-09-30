@@ -3,7 +3,7 @@ import { prepareHandout } from './handout-workspace.ts';
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { parseAuthoringDocument as parseCompanionDocument, authoringReader, AUTHORING_VERSION as COMPANION_VERSION } from '../companion/authoring-contract.ts';
 import { readCompanionProject } from '../companion/read-project.mjs';
 import { projectModel } from '../companion/compiler/model.ts';

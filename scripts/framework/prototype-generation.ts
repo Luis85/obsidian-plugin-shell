@@ -5,7 +5,7 @@ import { validateSelection } from '../companion/prototypes/validate.ts';
 import { workspaceKey, prototypeObject, revision } from '../companion/prototypes/safety.ts';
 import { prototypeJsonText } from '../companion/prototypes/files.ts';
 import { parseAuthoringDocument } from '../companion/authoring-contract.ts';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { designFile } from './configuration.ts';
 import { hash, readBounded, exists } from './files.ts';
 import { stringOption, requireThat, type Request, type Context } from './contracts.ts';

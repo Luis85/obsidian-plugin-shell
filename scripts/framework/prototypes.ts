@@ -5,7 +5,7 @@ import { snapshotPath, variantStatuses, type PrototypeAction, type PrototypeSele
 import { prototypeJsonText } from '../companion/prototypes/files.ts';
 import { validateSelection } from '../companion/prototypes/validate.ts';
 import { comparePrototypeDocuments } from '../companion/prototypes/compare.ts';
-import { createFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan } from '../shared/file-plan.ts';
 import { configurationPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { designFile } from './configuration.ts';
