@@ -36,6 +36,8 @@ jobs:
           node "$QUALIFIED_NPM" ci --no-fund
           node "$QUALIFIED_NPM" run typecheck:compiler
           node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
+      - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
+        run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
       - name: Qualify explicitly opted-in generated workspace
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
