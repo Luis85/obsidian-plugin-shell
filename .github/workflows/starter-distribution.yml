@@ -17,12 +17,6 @@ on:
       - 'tests/tooling/starter-*.checks.mjs'
       - '.github/workflows/starter-distribution.yml'
   workflow_dispatch:
-    inputs:
-      attach_to_existing_release:
-        description: Separately approved attachment to the existing version release; never creates or publishes a release
-        type: boolean
-        required: true
-        default: false
 permissions:
   contents: read
 concurrency:
@@ -126,47 +120,3 @@ jobs:
           name: workbench-distributions-${{ steps.identity.outputs.source }}
           path: reports/workbench-distributions/
           if-no-files-found: error
-  attach:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_existing_release == true }}
-    needs: package
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: workbench-release
-    permissions:
-      contents: write
-      actions: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      SOURCE_COMMIT: ${{ needs.package.outputs.source }}
-      RELEASE_VERSION: ${{ needs.package.outputs.version }}
-      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ needs.package.outputs.source }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Require an existing release for this exact approved source
-        run: |
-          [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]] || exit 1
-          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
-          git merge-base --is-ancestor "$SOURCE_COMMIT" "origin/$DEFAULT_BRANCH"
-          test "$(git rev-parse "refs/tags/$RELEASE_VERSION^{commit}")" = "$SOURCE_COMMIT"
-          gh release view "$RELEASE_VERSION" --repo "$GH_REPO" >/dev/null
-      - name: Download this run's immutable assets and verify provenance
-        run: |
-          gh run download "$GITHUB_RUN_ID" --repo "$GH_REPO" --name "workbench-distributions-$SOURCE_COMMIT" --dir candidate
-          cd candidate
-          sha256sum --check workbench-SHA256SUMS
-          node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs';
-          const m = JSON.parse(readFileSync('workbench-distributions.json', 'utf8'));
-          if (m.sourceCommit !== process.env.SOURCE_COMMIT || m.version !== process.env.RELEASE_VERSION) throw new Error('Release provenance mismatch');
-          NODE
-      - name: Attach without creating a release or replacing existing assets
-        run: |
-          gh release upload "$RELEASE_VERSION" --repo "$GH_REPO" \
-            "candidate/workbench-shell-$RELEASE_VERSION.zip" \
-            "candidate/workbench-starters-$RELEASE_VERSION.zip" \
-            candidate/workbench-SHA256SUMS candidate/workbench-distributions.json
