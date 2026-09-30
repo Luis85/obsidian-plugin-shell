@@ -54,6 +54,7 @@ with sync_playwright() as pw:
         check('Welcome exposes a starter entry without creating a project',page.locator('#content [data-action="nav"][data-value="starters"]').count()==1 and js('project()===null'))
         act('nav','starters','#sidebar')
         check('Gallery shows eleven built-in project starters',page.locator('.starter-card').count()==11)
+        check('Starters with development tooling are not offered by the retained v5 concept',js('starterCatalog.starters.length===12 && starterOffered().length===11 && !starterOffered().some(s=>s.document.tooling!==undefined)') and page.locator('[data-action="starter-open"][data-value="agent-ready"]').count()==0)
         check('Browsing does not initialize the project',js('project()===null'))
         check('Gallery calls out the runnable shell and remaining work','not a finished plugin' in page.locator('#content').inner_text())
         page.screenshot(path=str(OUT/'01-gallery-dark.png'))
@@ -110,7 +111,7 @@ with sync_playwright() as pw:
         check('Start Blank has no example domain, recipes, PRDs or page and component designs',js('project().design.semantic.entities.length===0 && project().design.dataSources.sources.length===0 && project().design.prds.length===0 && project().design.library.length===0 && veStore(project().design).pages.length===0 && veStore(project().design).components.length===0'))
         check('Confirmed replacement retains unrelated host files',js('state.vaultFiles["unrelated.md"]==="changed after review"'))
         # Every built-in goes through real configuration/review/confirm, not just JSON parsing.
-        for identifier in js('starterCatalog.starters.map(s=>s.id)'):
+        for identifier in js('starterOffered().map(s=>s.id)'):
             act('nav','starters','#sidebar');before=js('JSON.stringify(starterCatalog)');configure(identifier)
             if identifier=='custom-file-view':page.locator('#f-starter-extension').fill('board')
             if identifier=='context-menu':page.locator('#f-starter-extensions').fill('md,txt')

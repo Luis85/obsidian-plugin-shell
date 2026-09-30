@@ -10,6 +10,8 @@ export function composeMvp(base,bundle,css,bridge,graphStyle) {
     parseCompanionDocument:'function parseCompanionDocument(v){return CompanionJourney.parseAuthoringDocument(v);}',
     migrateCompanionDocument:'function migrateCompanionDocument(v){const r=CompanionJourney.migrateAuthoringDocument(v);return {document:r.document,report:r.report?.legacy??null};}',
     companionDesignKey:'function companionDesignKey(k){return CompanionJourney.authoringDesignKey(k);}',
+    // The authoring validator retains optional tooling, so every built-in starter is offered.
+    starterAvailable:'function starterAvailable(){return true;}',
     sitemapView:'function sitemapView(){return `<div id="jm-root" class="ps--plugin-shell" data-plugin-ui="plugin-shell"></div>`;}',
   };
   const source=ts.createSourceFile('companion.js',program,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS),changes=[];
