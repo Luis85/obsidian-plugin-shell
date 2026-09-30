@@ -68,8 +68,6 @@ test('scope detection selects project-suite steps in a generated project', async
     ['eslint', 'node_modules/eslint/bin/eslint.js', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run --config configs/testing/vitest.config.mjs']]);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
-  // The framework's maker config ships in every project's configs/, but its maker suite does not.
-  await writeFile(join(dir, 'configs/types/tsconfig.maker.json'), '{}'); await mkdir(join(dir, 'bin')); await writeFile(join(dir, 'bin/app.ts'), '');
   const project = await checkSteps(dir, false);
   assert.equal(project.scope, 'generated-project');
   assert.deepEqual(project.steps.map(step => [step.id, step.args.join(' ')]), [
@@ -77,7 +75,7 @@ test('scope detection selects project-suite steps in a generated project', async
   const { exit, result } = cli(['check', '--root', dir, '--dry-run']);
   assert.equal(exit, 0); assert.equal(result.status, 'planned'); assert.equal(result.data.execution, 'not-run');
   assert.deepEqual(result.data.steps.map(step => step.status), ['not-run', 'not-run', 'not-run']);
-  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'bin', 'configs']);
+  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'configs']);
 });
 test('fast mode runs tests related to changed and untracked source files only', async t => {
   const dir = await scratch(t);

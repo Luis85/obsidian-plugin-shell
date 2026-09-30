@@ -65,8 +65,7 @@ async function makerSteps(root: string): Promise<CheckStep[]> {
 }
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
-  // Maker checks qualify the framework's own maker; a generated project inherits its configs/ but not its test suite.
-  const makers = project ? [] : await makerSteps(root);
+  const makers = await makerSteps(root);
   const config = ['--config', project ? projectConfigPath(root, 'vitest') ?? projectConfigs.vitest.path : 'configs/testing/vitest.config.mjs'];
   const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
   const typecheck: CheckStep = project
