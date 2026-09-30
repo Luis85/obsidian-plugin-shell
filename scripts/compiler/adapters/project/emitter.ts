@@ -58,11 +58,11 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
 export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
   const selected = validateProjectSelection(input);
   const adapter = requireFrameworkAdapter(selected.framework), engine = adapter.engine;
-  if (adapter.id !== adapter.engine && !['vanilla', 'none'].includes(engine)) throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
+  if (adapter.id !== adapter.engine && engine !== 'vanilla') throw new Error('FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:' + adapter.id);
   const id = String(model.project.id), name = String(model.project.name);
   const visual = selected.targets.some(target => target !== 'cli');
   const files: Record<string, string> = {
-    ...packageFiles(template, selected, id), ...typecheckFiles(selected),
+    ...packageFiles(template, selected, id, adapter), ...typecheckFiles(selected, adapter),
     'project.config.json': json(selected), 'design/project.json': json(model.document),
     'src/core/project.ts': coreSource(model), ...pluginExtensionFiles(), 'scripts/build.mjs': buildSource,
     'manifest.json': json({ id, name, version: String(model.project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(model.project.description ?? 'Project prototype'), author: String(model.project.author ?? 'Your name'), isDesktopOnly: false }),
