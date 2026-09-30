@@ -24,6 +24,15 @@ plugins/
 
 Register the plugin explicitly in `plugins/registry.ts`. Workbench does not scan folders and execute whatever it finds. Plugin code is trusted application/tooling code, not a sandbox.
 
+Create a plugin through the reviewed maker instead of hand-creating the package:
+
+```sh
+npm run make -- plugin my-extension --dry-run
+npm run make -- plugin my-extension --yes
+```
+
+The generated plugin is registered automatically and starts disabled until its source/configuration is reviewed.
+
 Run:
 
 ```sh

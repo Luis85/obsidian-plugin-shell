@@ -41,6 +41,7 @@ npm run make -- file-extension <name> --feature bookmarks --extension folio [--f
 npm run make -- context-menu <name> --feature bookmarks [--extensions md,txt]
 npm run make -- locale <language>                 (complete pending translation skeleton)
 npm run make -- maker <recipe-name>               (trusted explicit local custom recipe)
+npm run make -- plugin <plugin-name>              (Workbench extension skeleton, disabled by default)
 npm run make -- <custom-recipe> <name> --feature bookmarks
 
 Options: --folder <vault-relative-folder>, --dry-run, --yes, --no-interaction, --json.
