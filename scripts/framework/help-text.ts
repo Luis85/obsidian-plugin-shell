@@ -154,7 +154,7 @@ const examples: Record<string, string[]> = {
   'starters add': ['node shell.mjs starters add --input my-starter.json --dry-run'],
   'starters edit': ['node shell.mjs starters edit webapp --input edited-webapp.json --plan-out starter-edit.plan.json'],
   'starters pack': ['node shell.mjs starters pack --out ./workbench-starters.zip --yes'],
-  'starters run': ['node shell.mjs starters run --project ../my-app --process verify,build --dry-run', 'node shell.mjs starters run --project ../my-app --process build --yes --trust-processes'],
+  'starters run': ['node shell.mjs starters run --project ../my-app --process verify,build --dry-run', 'node shell.mjs starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>'],
   'prototypes list': ['node shell.mjs prototypes list --json'],
   'prototypes compare': ['node shell.mjs prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json'],
   'prototypes prototype-details': ['node shell.mjs prototypes prototype-details exploration --name "Product exploration" --description "Compare navigation variants" --dry-run'],
@@ -267,6 +267,7 @@ export function commandHelp(entry: Command): CommandHelp {
     optionHelp[name] = { ...doc, ...(doc.values ? { values: [...doc.values] } : {}) };
   }
   for (const name of commonFor(entry)) optionHelp[name] = { ...common[name]!, ...(name === 'timeout' && ['dev', 'storybook dev'].includes(entry.id) ? { default: '3600000' } : {}), ...(name === 'timeout' && entry.id === 'check' ? { default: '600000 per step' } : {}) };
+  if (entry.id === 'starters run') optionHelp.apply!.description = 'Plan hash from the reviewed preview. Without it, --yes --trust-processes plans and runs in one step and cannot detect changes made since an earlier review.';
   const argument = entry.maxArgs ? ' [arguments]' : '';
   return { group, usage: usage[entry.id] ?? `node shell.mjs ${entry.id}${argument}${Object.keys(entry.options).length ? ' [options]' : ''}`, examples: [...(examples[entry.id] ?? [])], optionHelp };
 }

@@ -8,6 +8,10 @@
       "title": "Prototype versions and variants",
       "commands": [
         "prototypes list",
+        "prototypes compare",
+        "prototypes prototype-details",
+        "prototypes version-details",
+        "prototypes restore-snapshot",
         "prototypes create",
         "prototypes version",
         "prototypes fork",
@@ -23,6 +27,21 @@
         "prototypes export",
         "prototypes adopt",
         "prototypes generate"
+      ]
+    },
+    {
+      "id": "starters",
+      "title": "External project starters",
+      "commands": [
+        "starters list",
+        "starters show",
+        "starters validate",
+        "starters schema",
+        "starters add",
+        "starters edit",
+        "starters run",
+        "starters pack",
+        "starters coverage"
       ]
     },
     {
@@ -52,21 +71,6 @@
         "concept schema",
         "concept inspect",
         "concept import"
-      ]
-    },
-    {
-      "id": "starters",
-      "title": "External project starters",
-      "commands": [
-        "starters list",
-        "starters show",
-        "starters validate",
-        "starters schema",
-        "starters add",
-        "starters edit",
-        "starters run",
-        "starters pack",
-        "starters coverage"
       ]
     },
     {
@@ -591,7 +595,7 @@
       "usage": "node shell.mjs starters run [options]",
       "examples": [
         "node shell.mjs starters run --project ../my-app --process verify,build --dry-run",
-        "node shell.mjs starters run --project ../my-app --process build --yes --trust-processes"
+        "node shell.mjs starters run --project ../my-app --process build --yes --trust-processes --apply <planHash>"
       ],
       "options": [
         {
@@ -617,7 +621,7 @@
         {
           "name": "apply",
           "kind": "value",
-          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+          "description": "Plan hash from the reviewed preview. Without it, --yes --trust-processes plans and runs in one step and cannot detect changes made since an earlier review."
         },
         {
           "name": "yes",
@@ -1004,6 +1008,293 @@
         "plan-out",
         "timeout",
         "yes"
+      ]
+    },
+    {
+      "id": "prototypes compare",
+      "summary": "Read complete snapshot differences without changing saved content or activation.",
+      "effect": "read",
+      "maxArgs": 1,
+      "group": "prototypes",
+      "usage": "node shell.mjs prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]",
+      "examples": [
+        "node shell.mjs prototypes compare exploration --version v1 --variant main --with-prototype exploration --with-version v1 --with-variant sitemap-b --json"
+      ],
+      "options": [
+        {
+          "name": "version",
+          "kind": "value",
+          "description": "Portable version slug, for example v1 or v2; distinct from the application release version."
+        },
+        {
+          "name": "variant",
+          "kind": "value",
+          "description": "Saved variant slug inside the selected prototype version."
+        },
+        {
+          "name": "with-prototype",
+          "kind": "value",
+          "description": "Prototype slug of the comparison reference snapshot."
+        },
+        {
+          "name": "with-version",
+          "kind": "value",
+          "description": "Version slug of the comparison reference snapshot."
+        },
+        {
+          "name": "with-variant",
+          "kind": "value",
+          "description": "Variant slug of the comparison reference snapshot."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "prototypes prototype-details",
+      "summary": "Edit prototype display details without changing folder slugs or saved designs.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "prototypes",
+      "usage": "node shell.mjs prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]",
+      "examples": [
+        "node shell.mjs prototypes prototype-details exploration --name \"Product exploration\" --description \"Compare navigation variants\" --dry-run"
+      ],
+      "options": [
+        {
+          "name": "name",
+          "kind": "value",
+          "description": "Prototype or variant display name; its folder slug stays unchanged."
+        },
+        {
+          "name": "description",
+          "kind": "value",
+          "description": "Prototype description; changing it does not change folder slugs or saved designs."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "prototypes version-details",
+      "summary": "Edit the label of an unsealed version without changing saved designs.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "prototypes",
+      "usage": "node shell.mjs prototypes version-details <prototype> --version <version> --label <label> [options]",
+      "examples": [
+        "node shell.mjs prototypes version-details exploration --version v1 --label \"Iteration 1\" --dry-run"
+      ],
+      "options": [
+        {
+          "name": "version",
+          "kind": "value",
+          "description": "Portable version slug, for example v1 or v2; distinct from the application release version."
+        },
+        {
+          "name": "label",
+          "kind": "value",
+          "description": "Human-readable label for a prototype version."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "prototypes restore-snapshot",
+      "summary": "Restore a saved reference into an editable draft, retaining its previous content in a sealed recovery version.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "prototypes",
+      "usage": "node shell.mjs prototypes restore-snapshot <prototype> --version <version> --variant <variant> --from-prototype <prototype> --from-version <version> --from-variant <variant> --recovery-version <version> [options]",
+      "examples": [
+        "node shell.mjs prototypes restore-snapshot exploration --version v1 --variant sitemap-b --from-prototype exploration --from-version v1 --from-variant main --recovery-version v2 --dry-run"
+      ],
+      "options": [
+        {
+          "name": "version",
+          "kind": "value",
+          "description": "Portable version slug, for example v1 or v2; distinct from the application release version."
+        },
+        {
+          "name": "variant",
+          "kind": "value",
+          "description": "Saved variant slug inside the selected prototype version."
+        },
+        {
+          "name": "from-prototype",
+          "kind": "value",
+          "description": "Prototype slug of the saved snapshot to restore."
+        },
+        {
+          "name": "from-version",
+          "kind": "value",
+          "description": "Version slug of the saved snapshot to restore."
+        },
+        {
+          "name": "from-variant",
+          "kind": "value",
+          "description": "Variant slug of the saved snapshot to restore."
+        },
+        {
+          "name": "recovery-version",
+          "kind": "value",
+          "description": "New version slug used to preserve the current destination before restoring another snapshot."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or shell.mjs"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
       ]
     },
     {

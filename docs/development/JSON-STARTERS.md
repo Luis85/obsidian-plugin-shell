@@ -198,8 +198,10 @@ argv entries; no command shell expands substituted values.
 # Review a generated project's process graph and direct input fingerprints.
 node shell.mjs starters run --project ../my-app --process verify,build --json
 
-# Explicit execution; a reviewed --apply hash can also bind this request.
-node shell.mjs starters run --project ../my-app --process verify,build --yes --trust-processes
+# Execute exactly the reviewed plan; a changed process graph or input fingerprint fails as stale.
+node shell.mjs starters run --project ../my-app --process verify,build --yes --trust-processes --apply <planHash>
+
+# Without --apply, --yes plans and runs in one step; that run is not compared with an earlier review.
 
 # Create and explicitly request the starter's declared firstRun sequence.
 node shell.mjs new ../first-run-app --starter webapp --yes --install --trust-processes

@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { processPlan } from '../../scripts/starters/processes.ts';
+import { commandHelp } from '../../scripts/framework/help-text.ts';
+import { commands } from '../../scripts/framework/catalog.ts';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 const original = JSON.parse(await readFile(join(frameworkRoot, 'configs/starters/webapp.json'), 'utf8'));
 async function workspace(t) {
@@ -86,6 +88,7 @@ test('process review is read-only, dependencies are ordered once, and explicit e
   const denied = await run(context, 'starters run', [], { ...options, yes: true }); assert.equal(denied.diagnostics[0].code, 'STARTER_TRUST');
   const applied = await run(context, 'starters run', [], { ...options, yes: true, 'trust-processes': true, apply: preview.data.planHash });
   assert.equal(applied.status, 'applied'); assert.equal(await readFile(join(context.root, 'product/order.txt'), 'utf8'), 'first\nsecond\n');
+  assert.match(preview.data.requires, /--apply <planHash>; without --apply.*cannot detect changes/); assert.match(applied.data.review, /^bound to the --apply plan hash/);
 });
 test('changed script bytes make a reviewed process plan stale', async t => {
   const context = await workspace(t); await executeOperation(newRequest({ yes: true }), context);
@@ -122,19 +125,45 @@ test('wizard reads custom typed fields from JSON and rejects invalid answers rat
     { id: 'id', label: 'ID', type: 'string', required: true },
     { id: 'name', label: 'Name', type: 'string', required: true },
     { id: 'enabled', label: 'Enabled', type: 'boolean', required: true },
-    { id: 'count', label: 'Count', type: 'integer', required: true }
+    { id: 'count', label: 'Count', type: 'integer', required: true },
+    // The copied webapp files render {{description}}; validation requires a default for an optional referenced input.
+    { id: 'description', label: 'Description', type: 'string', required: false, default: 'Typed fixture' }
   ];
   await writeFile(context.path, JSON.stringify(context.definition));
   const request = newRequest({ id: 'product', name: 'Product' });
   for (const answers of [['maybe'], ['yes', ''], ['yes', '1.3']]) {
     let i = 0; await assert.rejects(guidedStarter(request, context, async () => answers[i++], () => {}), /yes or no|Supply count|whole number/);
   }
-  const answers = ['no', '3']; let i = 0;
+  const answers = ['no', '3', '']; let i = 0;
   const guided = await guidedStarter(request, context, async () => answers[i++], () => {});
-  assert.deepEqual(JSON.parse(guided.options.answers), { id: 'product', name: 'Product', enabled: false, count: 3 });
+  assert.deepEqual(JSON.parse(guided.options.answers), { id: 'product', name: 'Product', enabled: false, count: 3, description: 'Typed fixture' });
 });
 test('generation refuses simultaneous values-file and inline answers', async t => {
   const context = await workspace(t); await writeFile(join(context.root, 'values.json'), '{}');
   const result = await executeOperation(newRequest({ values: 'values.json', answers: '{}', yes: true }), context);
   assert.equal(result.diagnostics[0].code, 'STARTER_INPUT'); assert.ok(!(await readdir(context.root)).includes('product'));
+});
+test('--yes without --apply runs as one explicit step and reports that no earlier review was bound', async t => {
+  const context = await workspace(t); await executeOperation(newRequest({ yes: true }), context);
+  const result = await run(context, 'starters run', [], { project: 'product', process: 'first', yes: true, 'trust-processes': true });
+  assert.equal(result.status, 'applied'); assert.match(result.data.review, /^unbound: .*not compared with an earlier review/);
+  const help = commandHelp(commands.find(entry => entry.id === 'starters run'));
+  assert.ok(help.examples.every(example => !example.includes('--yes') || example.includes('--apply <planHash>')));
+  assert.match(help.optionHelp.apply.description, /Without it, --yes --trust-processes plans and runs in one step and cannot detect changes/);
+});
+test('edit repairs a broken target definition through a reviewed plan while other definitions stay validated', async t => {
+  const context = await workspace(t), input = join(context.root, 'fixed.json');
+  await writeFile(context.path, '{broken'); await writeFile(input, JSON.stringify({ ...context.definition, name: 'Repaired' }));
+  assert.equal((await run(context, 'starters list')).status, 'failed');
+  const preview = await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json' });
+  assert.equal(preview.status, 'planned', JSON.stringify(preview)); assert.equal(await readFile(context.path, 'utf8'), '{broken');
+  await writeFile(context.path, '{still broken'); const stale = await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json', apply: preview.data.planHash });
+  assert.equal(stale.diagnostics[0].code, 'PLAN_STALE'); assert.equal(await readFile(context.path, 'utf8'), '{still broken');
+  const reviewed = await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json' });
+  const applied = await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json', apply: reviewed.data.planHash });
+  assert.equal(applied.status, 'applied', JSON.stringify(applied)); assert.equal((await run(context, 'starters list')).data.starters[0].title, 'Repaired');
+  await writeFile(join(context.root, 'configs/starters/other.json'), '{broken');
+  const blocked = await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json' }); assert.equal(blocked.status, 'failed');
+  await writeFile(join(context.root, 'configs/starters/other.json'), JSON.stringify({ ...context.definition, id: 'custom-starter' }));
+  assert.equal((await run(context, 'starters edit', ['custom-starter'], { input: 'fixed.json' })).diagnostics[0].code, 'STARTER_ID');
 });

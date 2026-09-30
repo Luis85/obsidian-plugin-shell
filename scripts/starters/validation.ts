@@ -53,6 +53,28 @@ function readInput(value: unknown): StarterInput {
   if (row.default !== undefined) input.default = inputValue(row.default, input);
   return input;
 }
+/**
+ * Explicit safe list for npm options. Anything else that npm could parse as an option is refused,
+ * including short flags and clusters (-g, -C, -gC), long abbreviations npm expands (--pref), and `--`.
+ */
+const npmFlag = /^--(?:no-)?(?:fund|audit|save|save-exact|package-lock|progress|color|if-present|ignore-scripts|foreground-scripts|prefer-offline|prefer-online|offline|legacy-peer-deps|strict-peer-deps|dry-run)$/;
+const npmSetting = /^--(?:(?:omit|include)=(?:dev|optional|peer|prod)|loglevel=(?:silent|error|warn|notice|http|info|verbose|silly))$/;
+function npmArgument(arg: string): boolean { return !arg.startsWith('-') || npmFlag.test(arg) || npmSetting.test(arg); }
+/** The rendering syntax from render.ts: `{{name}}`, `{{name|json}}` and `{{name|html}}`. */
+const placeholder = /\{\{([a-z][a-zA-Z0-9]*)(?:\|(?:json|html))?\}\}/g;
+function placeholders(value: unknown, names: Set<string>): void {
+  if (typeof value === 'string') for (const match of value.matchAll(placeholder)) names.add(match[1]!);
+  else if (Array.isArray(value)) value.forEach(item => placeholders(item, names));
+  else if (value !== null && typeof value === 'object') Object.values(value).forEach(item => placeholders(item, names));
+}
+/** Every rendered variable must always have a value, so validation never admits a recipe that `new` cannot render. */
+function requireResolvable(inputs: StarterInput[], rendered: unknown[]): void {
+  const names = new Set<string>(); placeholders(rendered, names);
+  for (const name of names) {
+    const input = inputs.find(item => item.id === name);
+    requireThat(input && (input.required || input.default !== undefined), 'STARTER_VARIABLE', `Template variable ${name} needs a declared input that is required or has a default.`);
+  }
+}
 function readStep(value: unknown): StarterStep {
   const row = record(value); fields(row, ['runner', 'args', 'script', 'cwd', 'timeout']);
   requireThat(row.runner === 'npm' || row.runner === 'node', 'STARTER_INVALID', 'Only npm and project-local Node scripts are supported.');
@@ -67,7 +89,7 @@ function readStep(value: unknown): StarterStep {
   } else {
     requireThat(row.script === undefined, 'STARTER_INVALID', 'npm does not accept a script path.');
     requireThat(['ci', 'install', 'run'].includes(args[0] ?? ''), 'STARTER_INVALID', 'npm supports local install/ci/run only.');
-    requireThat(!args.some(arg => /^(?:-g|--global|--prefix|--userconfig|--globalconfig|--location|--script-shell)(?:=|$)/.test(arg)), 'STARTER_INVALID', 'npm global/path overrides are not supported.');
+    requireThat(args.every(npmArgument), 'STARTER_INVALID', 'npm accepts only reviewed local options; global/path overrides such as -g, -C, --prefix and --workspace are not supported.');
     requireThat(args[0] !== 'run' || /^[a-zA-Z0-9][a-zA-Z0-9:_.-]*$/.test(args[1] ?? ''), 'STARTER_INVALID', 'npm run needs a literal script name.');
   }
   return step;
@@ -122,7 +144,10 @@ export function validateDefinition(value: unknown): StarterDefinition {
   for (const key of ['includes', 'implementation', 'tags']) requireThat(array(row[key], key, 32).length > 0, 'STARTER_INVALID', 'Metadata lists must not be empty.');
   const processes = readProcesses(row.processes), firstRun = array(row.firstRun, 'firstRun', 32).map(identifier);
   unique(firstRun); requireThat(firstRun.every(id => processes.some(p => p.id === id)), 'STARTER_INVALID', 'Unknown firstRun process.');
+  const nextSteps = strings(row.nextSteps, 'nextSteps');
+  // Rendering interpolates file paths, content, JSON string values (not keys), process arguments and next steps.
+  requireResolvable(inputs, [files, processes.map(process => process.steps.map(step => step.args)), nextSteps]);
   return { schemaVersion: 1, ...(row.$schema === undefined ? {} : { $schema: text(row.$schema, '$schema', 500) }), id: identifier(row.id), name: text(row.name, 'name'), version,
     category: text(row.category, 'category'), level: row.level as StarterDefinition['level'], summary: text(row.summary, 'summary'), outcome: text(row.outcome, 'outcome'),
-    includes: strings(row.includes, 'includes'), implementation: strings(row.implementation, 'implementation'), tags: strings(row.tags, 'tags'), inputs, generator, files, processes, firstRun, nextSteps: strings(row.nextSteps, 'nextSteps') };
+    includes: strings(row.includes, 'includes'), implementation: strings(row.implementation, 'implementation'), tags: strings(row.tags, 'tags'), inputs, generator, files, processes, firstRun, nextSteps };
 }

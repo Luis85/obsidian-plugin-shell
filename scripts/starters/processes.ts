@@ -55,10 +55,12 @@ export async function processOperation(request: Request, context: Context): Prom
   const directory = resolve(context.root, stringOption(request.options, 'project') ?? '.');
   const process = stringOption(request.options, 'process'); requireThat(process, 'STARTER_PROCESS', 'Supply --process <id[,id]>; inspect the definition with starters show.');
   const plan = await processPlan(directory, process.split(','));
-  if (request.options['dry-run'] || request.options.yes !== true) return result(request.command, { ...plan, requires: '--yes --trust-processes; use --apply <planHash> to bind a previous review' }, 'planned');
+  if (request.options['dry-run'] || request.options.yes !== true) return result(request.command, { ...plan, requires: '--yes --trust-processes --apply <planHash>; without --apply, --yes trusts the state at run time and cannot detect changes since this review' }, 'planned');
   requireThat(request.options['trust-processes'] === true, 'STARTER_TRUST', 'Review the project and process steps, then explicitly pass --trust-processes.');
-  const expected = stringOption(request.options, 'apply') ?? plan.planHash;
-  return result(request.command, await runProcesses(context, directory, process.split(','), expected), 'applied');
+  // Like `new --yes`, `--yes` alone plans and runs in one step; only --apply binds an earlier review.
+  const reviewed = stringOption(request.options, 'apply');
+  const review = reviewed ? 'bound to the --apply plan hash' : 'unbound: planned and run in one step; changes before this run were not compared with an earlier review';
+  return result(request.command, { ...await runProcesses(context, directory, process.split(','), reviewed ?? plan.planHash), review }, 'applied');
 }
 export async function completeDefinition(outcome: Result, request: Request, context: Context): Promise<Result> {
   const data = outcome.data as { summary: { directory: string; recipe: { receiptSha256: string; nextSteps: string[]; run: string[] } } };

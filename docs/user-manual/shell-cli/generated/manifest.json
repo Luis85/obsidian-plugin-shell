@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "frameworkVersion": "0.4.0",
-  "commandCount": 99,
+  "commandCount": 103,
   "sources": [
     {
       "path": "package.json",
@@ -13,7 +13,7 @@
     },
     {
       "path": "scripts/framework/help-text.ts",
-      "sha256": "ff16058fb1a5ea8e08a208586fc9ff660dc98b2c29a95e02a43553cf367719ca"
+      "sha256": "77bb099883472607533042975a22e688acb65d491dc033f347b71e61fe18797d"
     },
     {
       "path": "scripts/compiler/domain/diagnostics.ts",
@@ -31,7 +31,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "9deb39e6aac8dc9bce11cdc08ba41640cdf9108194a04da27e264608e7456025"
+      "sha256": "9c60b0f45660fb37f204fba8d2de7a683a1b9c8753533f6cd890339dc7566b83"
     },
     {
       "path": "diagnostics.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "1d17b887b0cdfad966da8b2a0327916889a95ef80cace231c798f4701b36b3bc"
+      "sha256": "b5f2b91a0bfe14f95bae0563dd132ee25320a43fb87673bb1f3c89d35229bb06"
     }
   ]
 }

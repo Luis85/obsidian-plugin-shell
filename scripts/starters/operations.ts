@@ -1,5 +1,6 @@
 import { starterCoverage } from './coverage.ts';
 import { basename, dirname, join, resolve } from 'node:path';
+import { readdir } from 'node:fs/promises';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { hash, readBounded, exists } from '../framework/files.ts';
 import { zip } from '../framework/zip.ts';
@@ -30,6 +31,28 @@ export async function readStarterOperation(request: Request, context: Context) {
   }
   return result(request.command, { valid: true, starters: selected.map(({ definition, sha256, file }) => ({ definition, sha256, file })) });
 }
+/**
+ * Validates every installed definition except the target file, so edit can repair a broken target.
+ * The target stays bound by the file plan's before-hash; it must still be a regular file.
+ */
+async function otherDefinitionIds(root: string, folder: string, target: string): Promise<string[]> {
+  const path = resolve(root, folder), ids: string[] = [];
+  if (!await exists(path)) return ids;
+  const entries = await readdir(path, { withFileTypes: true });
+  requireThat(entries.length <= 256, 'STARTER_LIMIT', 'A starter folder supports at most 256 entries.');
+  let size = 0;
+  for (const entry of entries) {
+    if (!entry.name.toLowerCase().endsWith('.json')) continue;
+    requireThat(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.json$/.test(entry.name) && entry.isFile() && !entry.isSymbolicLink(), 'STARTER_SOURCE', 'Definitions must be regular lower-case $starterName.json files.');
+    if (entry.name === target + '.json') continue;
+    const bytes = await readBounded(join(path, entry.name), STARTER_MAX_BYTES); size += bytes.length;
+    requireThat(size <= 16_000_000, 'STARTER_LIMIT', 'Starter folder exceeds 16 MB.');
+    const definition = parseDefinition(bytes);
+    requireThat(definition.id + '.json' === entry.name, 'STARTER_ID', 'Starter ID must match its filename and be unique.');
+    ids.push(definition.id);
+  }
+  return ids;
+}
 export async function editStarterPlan(request: Request, context: Context) {
   const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <definition.json>.');
   const bytes = await readBounded(resolve(context.root, input), STARTER_MAX_BYTES), definition = parseDefinition(bytes);
@@ -38,8 +61,8 @@ export async function editStarterPlan(request: Request, context: Context) {
     requireThat(request.args[0] === definition.id, 'STARTER_ID', 'Editing cannot change the ID; add a separate definition instead.');
     requireThat(await exists(join(context.root, path)), 'STARTER_UNKNOWN', 'Starter not installed; use starters add.');
   } else requireThat(!await exists(join(context.root, path)), 'STARTER_EXISTS', 'Starter already exists; use starters edit with a reviewed plan.');
-  // Validate every installed definition as well; no registry or cached index needs updating.
-  await loadDefinitions(context.root);
+  // Validate every other installed definition as well; no registry or cached index needs updating.
+  requireThat(!(await otherDefinitionIds(context.root, folder, definition.id)).includes(definition.id), 'STARTER_ID', 'Starter IDs must be unique.');
   const plan = await createFilePlan(context.root, [{ path, content: bytes.toString('utf8') }]);
   return { plan, hash: hash(bytes), conflicts: [] as string[], summary: { id: definition.id, file: path, sha256: hash(bytes), processes: 'not-run' } };
 }

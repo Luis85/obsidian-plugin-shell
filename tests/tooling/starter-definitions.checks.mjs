@@ -109,3 +109,38 @@ test('substitution cannot bypass path containment or process-argument policy', (
   d.processes = [{ id: 'install', label: 'Install', description: 'test', dependsOn: [], steps: [{ runner: 'npm', args: ['install', '{{name}}'], cwd: '.', timeout: 1000 }] }];
   assert.throws(() => readProcesses(renderProcesses(d, { name: '--global' })), /overrides/);
 });
+const npmStep = args => [{ id: 'install', label: 'Install', description: 'test', dependsOn: [], steps: [{ runner: 'npm', args, cwd: '.', timeout: 1000 }] }];
+for (const args of [['ci', '-C', '/tmp/x'], ['ci', '-C/tmp/x'], ['install', '-gC'], ['install', '-Cg'], ['install', '-dg'], ['ci', '--prefix', '/tmp/x'],
+  ['ci', '--pref=/tmp/x'], ['ci', '--PREFIX=/tmp/x'], ['install', '--workspace=../outside'], ['install', '-w', '../outside'], ['install', '-L', 'global'],
+  ['run', 'build', '--', '--prefix=/tmp/x'], ['ci', '--cache=/tmp/x'], ['ci', '--omit=dev,peer']]) test('npm safe-argument list refuses ' + args.join(' '), () => {
+  assert.throws(() => readProcesses(npmStep(args)), /overrides/);
+  const d = structuredClone(reference); d.processes = npmStep(args); d.firstRun = []; assert.throws(() => validateDefinition(d), /overrides/);
+});
+test('npm safe-argument list keeps reviewed local options and positional values', () => {
+  for (const args of [['ci', '--no-fund'], ['ci', '--no-audit', '--ignore-scripts'], ['install', '--omit=dev'], ['install', 'lodash', '--save-exact'], ['run', 'build', '--if-present'], ['run', 'verify:project']])
+    assert.equal(readProcesses(npmStep(args))[0].steps[0].args.length, args.length);
+});
+const withVariable = (d, where, value) => {
+  if (where === 'content') d.files.push({ path: 'extra.txt', content: value });
+  if (where === 'json') d.files.push({ path: 'extra.json', json: { nested: [value] } });
+  if (where === 'path') d.files.push({ path: value + '.txt', content: 'x' });
+  if (where === 'argument') d.processes[0].steps = [{ runner: 'npm', args: ['install', value], cwd: '.', timeout: 1000 }];
+  if (where === 'nextSteps') d.nextSteps.push('Open ' + value);
+  return d;
+};
+for (const where of ['content', 'json', 'path', 'argument', 'nextSteps']) test('validation rejects an undeclared template variable in ' + where, () => {
+  assert.throws(() => validateDefinition(withVariable(structuredClone(reference), where, '{{typo}}')), /typo needs a declared input/);
+  const optional = withVariable(structuredClone(reference), where, '{{extra}}'); optional.inputs.push({ id: 'extra', label: 'Extra', type: 'string', required: false });
+  assert.throws(() => validateDefinition(optional), /extra needs a declared input/);
+  optional.inputs.at(-1).default = 'value'; assert.doesNotThrow(() => validateDefinition(optional));
+});
+test('validation placeholder syntax matches rendering exactly, so a valid definition always renders', () => {
+  for (const value of ['{{typo}}', '{{typo|json}}', '{{typo|html}}', '{{typo|other}}', '{{Typo}}', '{{ typo }}', '{typo}', '{{name}}', '{{description|html}}', '{{id|json}}']) {
+    const d = validateDefinition(reference), values = resolveValues(d, { id: 'app', name: 'App' }); d.files.push({ path: 'extra.txt', content: value });
+    const renders = (() => { try { renderFiles(d, values); return true; } catch (error) { assert.match(error.message, /No value/); return false; } })();
+    const validates = (() => { try { validateDefinition(withVariable(structuredClone(reference), 'content', value)); return true; } catch { return false; } })();
+    assert.equal(validates, renders, value);
+  }
+  const keys = structuredClone(reference); keys.files.push({ path: 'keys.json', json: { '{{typo}}': 'literal key' } });
+  assert.equal(JSON.parse(renderFiles(validateDefinition(keys), resolveValues(validateDefinition(keys), { id: 'app', name: 'App' })).at(-1).content)['{{typo}}'], 'literal key');
+});
