@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { consent, identity, loopback, object, configured, disabled, requireEnabled, document, seedPlan } from '../../scripts/hindsight/policy.ts';
+import { consent, identity, loopback, object, configured, disabled, requireEnabled, document, seedPlan, digest } from '../../scripts/hindsight/policy.ts';
+import { sha256 } from '../../scripts/shared/hash.mjs';
 import { install, installationPlan } from '../../scripts/hindsight/install.ts';
 import { paths } from '../../scripts/hindsight/io.ts';
 const repo = identity('/work/repo', '/work/repo/.git', 'git@github.com:Owner/Repo.git');
@@ -137,4 +138,8 @@ test('existing cloud configuration is rejected before any installation effects',
   const port = installerPort(); port.read = () => ({ data: { serverMode: 'cloud' }, original: '{}' });
   fails(() => install(repo, paths('/fake-home'), choice, 'python3', port), 'CONFIG_CONFLICT');
   assert.equal(port.calls.length, 0);
+});
+
+test('memory policy digest delegates to the canonical shared sha256 bytes', () => {
+  for (const value of ['github.com/owner/repo', 'memory — café\n']) assert.equal(digest(value), sha256(value));
 });

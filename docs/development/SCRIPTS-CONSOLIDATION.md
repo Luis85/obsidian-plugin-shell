@@ -73,6 +73,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B8:** Application-doc settings no longer import maker domain code; both use a neutral shared project-path policy, leaving two qualification-only reverse imports.
 - **B9:** Angular setup qualification no longer imports maker first-run internals; it launches the compiled kit's public `first-run` showcase and drives the browser against that reviewed boundary.
 - **B10:** Legacy preset qualification no longer imports maker adapters/storage; it reviews and applies `bin/app new` plans. Executable `scripts → bin` module imports are now zero.
+- **B11:** Optional Hindsight/memory policy fingerprints now reuse the shared SHA-256 helper; identity/document/plan semantics remain covered by their policy suite.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
