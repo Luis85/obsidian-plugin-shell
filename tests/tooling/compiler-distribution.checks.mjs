@@ -19,7 +19,7 @@ test('packed compiled CLI and source CLI return equivalent analysis and errors w
       const invoke=directory=>spawnSync(process.execPath,[join(directory,'app.mjs'),'compiler','check','--input','-','--json'],{cwd:directory,input:source,encoding:'utf8',timeout:30000});
       const a=invoke(root),b=invoke(destination);assert.equal(b.status,a.status,b.stderr);assert.deepEqual(JSON.parse(b.stdout),JSON.parse(a.stdout));
     }
-    assert.ok(files.some(file=>file.path==='.framework/compiled/scripts/compiler/index.js'));
+    assert.ok(files.some(file=>file.path==='.framework/compiled/app.js'));assert.ok(!files.some(file=>file.path.startsWith('.framework/compiled/scripts/')));
     assert.ok(files.some(file=>file.path==='.framework/template/scripts/compiler/check-architecture.mjs'));
   }finally{await rm(destination,{recursive:true,force:true});}
 });
