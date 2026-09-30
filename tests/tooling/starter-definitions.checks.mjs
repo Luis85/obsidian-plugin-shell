@@ -94,7 +94,8 @@ test('the editor schema declares the same project generator vocabulary as the ru
   const schema = JSON.parse(await readFile(join(root, 'scripts/starters/starter.schema.json'), 'utf8'));
   const variant = schema.properties.generator.oneOf.find(item => item.properties.kind.const === 'project');
   assert.equal(variant.additionalProperties, false); assert.deepEqual(variant.required, ['kind', 'projectType', 'framework', 'targets']);
-  assert.deepEqual(variant.properties.framework, { type: 'string', maxLength: 64, pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*, ['plugin', 'webapp', 'website', 'cli']);
+  assert.deepEqual(variant.properties.framework, { type: 'string', maxLength: 64, pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$' });
+  assert.deepEqual(variant.properties.targets.items.enum, ['plugin', 'webapp', 'website', 'cli']);
   assert.deepEqual(schema.$defs.angularPins.required, angularPackages); assert.equal(schema.$defs.angularPins.additionalProperties, false);
   assert.deepEqual(schema.allOf[0].then.properties, { inputs: { maxItems: 0 }, files: { maxItems: 0 }, processes: { maxItems: 0 }, firstRun: { maxItems: 0 } });
 });
