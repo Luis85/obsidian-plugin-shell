@@ -35,6 +35,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
     .files.find(file => file.path === templateOwnership.path);
   assert.equal(manifestRecord.hash, hash(templateOwnership.bytes), 'adapted template ownership must match kit integrity metadata');
   assert.ok(!files.some(file => file.path === '.framework/compiled/scripts/examples/ownership.json'), 'no stale per-file runtime metadata');
+  assert.ok(!files.some(file => file.path.startsWith('.framework/compiled/node_modules/')), 'vendor runtime is bundled, not copied');
   assert.ok((await readFile(join(dir, '.framework/compiled/app.js'), 'utf8')).length > 1000);
   for (const name of ['configs/types/tsconfig.sitemap.json', 'configs/types/tsconfig.authoring.json']) {
     assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
