@@ -1,11 +1,11 @@
 import { spawn, type SpawnOptions } from 'node:child_process';
 
-export type RunNodeError = Error & {
+type RunNodeError = Error & {
   exitCode: number | null;
   signal: NodeJS.Signals | null;
 };
 
-export function runNode(path: string, args: readonly string[] = [], options: SpawnOptions = {}): Promise<void> {
+export function runNodeScript(path: string, args: readonly string[] = [], options: SpawnOptions = {}): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [path, ...args], { cwd: process.cwd(), stdio: 'inherit', ...options });
     const stop = () => { child.kill('SIGTERM'); };

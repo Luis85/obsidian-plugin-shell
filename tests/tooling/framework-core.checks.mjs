@@ -189,7 +189,8 @@ test('typed JSON data contract remains the canonical compatibility implementatio
   assert.equal(legacyJsonData.parseJsonData, typedJsonData.parseJsonData);
   const value = Object.assign(Object.create(null), { safe: ['café', 7, true, null] });
   assert.equal(typedJsonData.assertJsonData(value), true);
-  assert.deepEqual(legacyJsonData.parseJsonData(JSON.stringify(value)), value);
+  // JSON.parse always yields plain objects; the null-prototype input is accepted, not reproduced.
+  assert.deepEqual(legacyJsonData.parseJsonData(JSON.stringify(value)), { ...value });
   let invoked = 0;
   const poisoned = {};
   Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });

@@ -2,7 +2,7 @@ import { readFile, mkdir, lstat, mkdtemp, copyFile, writeFile, rename, rm } from
 import { resolve, relative, join, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
-import { runNode } from '../shared/process.mjs';
+import { runNodeScript as runNode } from '../shared/process.mjs';
 const assets = ['main.js', 'styles.css', 'manifest.json'];
 async function absent(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 async function contained(root, target) {
