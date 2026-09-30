@@ -53,7 +53,7 @@ export function readFeatureBrainstorm(input: unknown): FeatureBrainstorm {
     const interactions = list(page.interactions ?? [], 'interactions', 12).map(item => {
       const interaction = object(item); keys(interaction, ['label', 'kind', 'target', 'outcome']);
       const label = bounded(interaction.label, 'Interaction label', 120);
-      const kind = interaction.kind ?? (interaction.outcome === undefined ? 'navigate' : 'action');
+      const kind = interaction.kind ?? 'navigate';
       requireSketch(kind === 'navigate' || kind === 'action', 'BRAINSTORM_INTERACTION',
         'Interactions are navigation or planned actions.');
       if (kind === 'action') {

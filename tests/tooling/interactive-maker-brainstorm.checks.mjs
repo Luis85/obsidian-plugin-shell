@@ -39,13 +39,13 @@ test('strict feature contract supports planned actions without inventing executa
   assert.match(result.candidate.design.visualDesigns.pages[0].notes, /Persist after validation/);
   assert.deepEqual(baseline.design.nodes, [], 'original project remains untouched');
   assert.ok(brainstormSchema().properties.pages);
-  assert.throws(() => readFeatureBrainstorm({ ...request, output: 'definition', verification: 'test' }), /BRAINSTORM_VERIFICATION/);
-  assert.throws(() => readFeatureBrainstorm({ ...request, unexpected: 'execute me' }), /MAKER_UNKNOWN_FIELD/);
+  assert.throws(() => readFeatureBrainstorm({ ...request, output: 'definition', verification: 'test' }), error => error?.code === 'BRAINSTORM_VERIFICATION');
+  assert.throws(() => readFeatureBrainstorm({ ...request, unexpected: 'execute me' }), error => error?.code === 'MAKER_UNKNOWN_FIELD');
   assert.throws(() => readFeatureBrainstorm({ ...request, pages: [
     { title: 'Inbox', purpose: 'Start', interactions: [{ label: 'Exit', target: 'Missing' }] },
-  ] }), /BRAINSTORM_TARGET/);
+  ] }), error => error?.code === 'BRAINSTORM_TARGET');
   assert.throws(() => featureConcept({ ...parsed, baseSha256: 'e'.repeat(64) },
-    { document: baseline, sha256 }), /BRAINSTORM_STALE/);
+    { document: baseline, sha256 }), error => error?.code === 'BRAINSTORM_STALE');
 });
 test('agent discovery, validation and saved definition require the same fresh file-plan approval', async () =>
   scratch(async (options, document) => {
@@ -64,7 +64,7 @@ test('agent discovery, validation and saved definition require the same fresh fi
     const preview = await cli(['brainstorm', 'feature', '--input', '-', '--json']);
     assert.equal(preview.status, 'planned');
     await assert.rejects(() => readFile(join(options.root, 'brainstorms/capture-inbox/feature.definition.json')));
-    await assert.rejects(() => cli(['brainstorm', 'feature', '--input', '-', '--apply', 'wrong', '--json']), /MAKER_APPROVAL/);
+    await assert.rejects(() => cli(['brainstorm', 'feature', '--input', '-', '--apply', 'wrong', '--json']), error => error?.code === 'MAKER_APPROVAL');
     const applied = await cli(['brainstorm', 'feature', '--input', '-', '--apply', preview.planHash, '--json']);
     assert.equal(applied.status, 'applied');
     assert.equal(await readFile(join(options.root, 'design/project.json'), 'utf8'), before,
