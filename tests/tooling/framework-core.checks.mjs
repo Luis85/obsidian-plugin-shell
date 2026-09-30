@@ -209,3 +209,14 @@ test('typed file-plan facade preserves the reviewed runtime plan/apply boundary'
   assert.deepEqual(applied.written, ['typed-facade.txt']);
   assert.equal(await readFile(join(ctx.root, 'typed-facade.txt'), 'utf8'), 'typed facade\n');
 });
+
+test('typed file-plan facade refuses stale preimages and preserves the intervening edit', async t => {
+  const ctx = await fixture(t);
+  const path = join(ctx.root, 'typed-stale.txt');
+  await writeFile(path, 'before\n');
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-stale.txt', content: 'planned\n' }]);
+  await writeFile(path, 'external edit\n');
+  await assert.rejects(applyTypedFilePlan(plan), /PLAN_STALE/);
+  assert.equal(await readFile(path, 'utf8'), 'external edit\n');
+  assert.ok(!(await readdir(ctx.root)).includes('.codex-authoring.lock'));
+});
