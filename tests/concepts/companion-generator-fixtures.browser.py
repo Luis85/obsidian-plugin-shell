@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 HTML = ROOT / 'docs/concepts/companion/index.html'
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
 OUT = ROOT / 'reports/concepts/generator-fixtures'
 OUT.mkdir(parents=True, exist_ok=True)
 checks, errors, requests = [], [], []
@@ -39,7 +40,10 @@ with sync_playwright() as pw:
     page.on('request', lambda request: requests.append(request.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        page.locator('[data-action="project-example"]').click()
+        # The self-project is the external golden starter's schema 6 document, reviewed through the real import dialog.
+        page.evaluate('openCompanionImport()')
+        page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+        page.locator('#modal [data-action="project-import-review"]').click()
         page.locator('#project-import-confirm').check()
         page.locator('[data-action="project-import-apply"]').click()
         page.locator('#content [data-action="project-export"]').first.click()
@@ -48,14 +52,7 @@ with sync_playwright() as pw:
         exported = OUT / 'project.companion.json'
         download.value.save_as(str(exported))
         check('Actual download retains the authored source recipes', json.loads(exported.read_text())['design']['dataSources']['testing']['recipes'])
-        # This v5 build base still exports schema 5 until it is rebuilt v6-natively. The shell reads only schema 6 and never
-        # migrates: the raw export is refused, and its only difference from schema 6 (the two version fields) is relabeled
-        # here, explicitly and only in this test, so generation from concept-authored data stays covered.
-        refused = subprocess.run(['node', str(ROOT / 'shell.mjs'), 'project', 'validate', '--input', str(exported), '--json'], cwd=ROOT, capture_output=True, text=True, timeout=45)
-        check('The shell refuses the retired schema 5 download', refused.returncode == 1 and json.loads(refused.stdout)['diagnostics'][0]['code'] == 'COMPANION_VERSION')
-        current = json.loads(exported.read_text()); current['schemaVersion'] = 6; current['design']['schema'] = 6
-        exported = OUT / 'project-v6.companion.json'
-        exported.write_text(json.dumps(current, indent=2) + '\n')
+        check('The concept exports project schema 6 directly', json.loads(exported.read_text())['schemaVersion'] == 6)
         page.locator('#modal [data-action="close"]').first.click()
         page.locator('#sidebar [data-action="nav"][data-value="testdata"]').click()
         page.locator('[data-action="td-preview"]').click()

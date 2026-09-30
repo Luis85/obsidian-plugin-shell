@@ -36,7 +36,7 @@ The branch's current [project contract](../development/COMPANION-PROJECT-JSON.md
 
 The self-project baseline declares 28 sitemap surfaces, 27 eligible page designs, 54 component designs and 54 published revisions. These counts are **a reconciliation baseline, not immutable design targets or proof of functionality**. Preserve every existing surface and reference, or document and approve its intentional replacement. The workbench view is a container, not another page.
 
-Sources: [generator](../development/COMPANION-GENERATOR.md), [CLI](../development/FRAMEWORK-CLI.md), [self-project seed](../concepts/companion/src/companion-project.js), [companion architecture](../architecture/COMPANION-ON-SHELL.md), [repository rules](../../AGENTS.md).
+Sources: [generator](../development/COMPANION-GENERATOR.md), [CLI](../development/FRAMEWORK-CLI.md), self-project starter `configs/starters/companion-plugin.json`, [companion architecture](../architecture/COMPANION-ON-SHELL.md), [repository rules](../../AGENTS.md).
 
 ## 3. Users, jobs and scope
 

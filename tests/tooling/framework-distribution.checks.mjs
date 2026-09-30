@@ -9,7 +9,7 @@ import { standaloneSource, updateOwnership } from '../../scripts/framework/distr
 import { hash } from '../../scripts/framework/files.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const projectFixture = 'docs/concepts/companion/companion-project.json';
+const optionalFixture = 'docs/concepts/companion/editor/inventory-probe.ts';
 // A synthetic reviewed README keeps these ownership checks independent of whether
 // this checkout still carries the showcase README or already removed examples.
 const reviewedReadme = Buffer.from('# Reviewed framework README\n\nSee the [CLI workflow](docs/development/FRAMEWORK-CLI.md) and [prototype](docs/concepts/companion/index.html).\n');
@@ -49,29 +49,16 @@ test('kit ownership refreshes every normalized example-owned file and refuses un
   assert.throws(() => updateOwnership(new Map([[record.path, Buffer.concat([mixed, Buffer.from('edited')])], ['README.md', readme]]), new Map([[record.path, shipped], ['README.md', standaloneSource('README.md', readme)]]), pinned), /reviewed preimage/);
   assert.throws(() => updateOwnership(new Map([['README.md', readme]]), new Map([['README.md', standaloneSource('README.md', readme)]]), Buffer.from(JSON.stringify({ ...ownership, files: ownership.files.filter(file => file.path !== 'README.md') }))), /not an example-owned file/);
 });
-test('source-only archive includes and fingerprints the actual imported project fixture', async () => {
+test('source-only archive fingerprints the canonical starter definitions the generator tests read', async () => {
   const inventory = await sourceInputs(root);
-  const file = inventory.files.find(item => item.path === projectFixture);
-  assert.ok(file, 'fixture required by generator tests must be transported, not suppressed');
-  assert.equal(file.sha256, hash(await readFile(join(root, projectFixture))));
   for (const name of await readdir(join(root, 'configs/starters'))) {
     const path = 'configs/starters/' + name;
     assert.equal(inventory.files.find(item => item.path === path)?.sha256, hash(await readFile(join(root, path))), 'source qualification must fingerprint independent definitions');
   }
-  // Historical fixtures remain source-only inputs, never shell release contents.
-  const catalogPath = 'docs/concepts/companion/starters/catalog.json';
-  const catalogBytes = await readFile(join(root, catalogPath));
-  assert.equal(inventory.files.find(item => item.path === catalogPath)?.sha256, hash(catalogBytes));
-  const catalog = JSON.parse(catalogBytes.toString('utf8'));
-  assert.equal(catalog.starters.length, 11, 'retain all eleven reviewed starters');
-  for (const starter of catalog.starters) {
-    const path = `docs/concepts/companion/starters/${starter.file}`;
-    const actualHash = hash(await readFile(join(root, path)));
-    assert.equal(actualHash, starter.sha256, path + ': catalog integrity');
-    assert.equal(inventory.files.find(item => item.path === path)?.sha256, actualHash, path);
-  }
+  // Retired schema 5 concept data is gone; current projects come only from the starter definitions above.
+  assert.ok(!inventory.files.some(item => item.path === 'docs/concepts/companion/companion-project.json' || item.path.startsWith('docs/concepts/companion/starters/') || item.path.startsWith('docs/concepts/companion/seeds/')));
 });
-test('optional project fixture contributes exact bytes and refuses parent redirects', async t => {
+test('optional concept editor input contributes exact bytes and refuses parent redirects', async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixture-inventory-')));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const inventory = await sourceInputs(root);
@@ -82,11 +69,11 @@ test('optional project fixture contributes exact bytes and refuses parent redire
     else { await mkdir(dirname(join(folder, path)), { recursive: true }); await writeFile(join(folder, path), ''); }
   }
   const before = await sourceInputs(folder);
-  await mkdir(dirname(join(folder, projectFixture)), { recursive: true });
-  await writeFile(join(folder, projectFixture), '{"fixture":1}');
+  await mkdir(dirname(join(folder, optionalFixture)), { recursive: true });
+  await writeFile(join(folder, optionalFixture), '{"fixture":1}');
   const first = await sourceInputs(folder);
   assert.notEqual(first.digest, before.digest);
-  await writeFile(join(folder, projectFixture), '{"fixture":2}');
+  await writeFile(join(folder, optionalFixture), '{"fixture":2}');
   assert.notEqual((await sourceInputs(folder)).digest, first.digest);
   await rm(join(folder, 'docs/concepts'), { recursive: true });
   const outside = join(folder, 'outside'); await mkdir(outside);

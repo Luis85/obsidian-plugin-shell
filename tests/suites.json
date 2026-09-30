@@ -239,7 +239,7 @@
     },
     {
       "name": "visual",
-      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, migration, session and generated model tests.",
+      "purpose": "Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests.",
       "runner": {"type": "node-test"},
       "include": ["tests/tooling/visual-*.checks.mjs"],
       "verify": "tooling",
@@ -248,7 +248,7 @@
     },
     {
       "name": "companion",
-      "purpose": "Companion concept contracts: project JSON, storymaps, legacy detail and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
+      "purpose": "Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics.",
       "runner": {"type": "node-test"},
       "include": ["tests/tooling/companion-*.checks.mjs", "tests/tooling/concept-*.checks.mjs"],
       "verify": "tooling",

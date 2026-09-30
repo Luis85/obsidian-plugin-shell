@@ -29,7 +29,7 @@ function vePagesView() {
   return `<section class="ve-pages"><header class="page-heading"><div><h1>Pages</h1><p>Design the inside of every sitemap surface with Nuxt UI patterns, reusable components and layouts.</p></div><div class="row">${badge(designed + ' of ' + all.length + ' designed')}${button('Open sitemap', 'nav', 'sitemap', 'small', 'grid')}</div></header>
     <div class="ve-pages-search"><input class="ve-search" type="search" data-field="ve-page-search" value="${esc(veUi.pageQuery)}" placeholder="Find a page, modal or settings surface" aria-label="Find a page, modal or settings surface" maxlength="160" autocomplete="off"></div>
     <div id="ve-pages-results">${vePageCards(d)}</div>
-    ${veOrphansCard(veOrphans(d))}${veLegacyCard(d)}</section>`;
+    ${veOrphansCard(veOrphans(d))}</section>`;
 }
 // Designs naming a missing surface stay reachable: each page opens (writes are refused while the reference dangles) and
 // one reviewed write removes them with navigation to missing surfaces. Restoring the surface reconnects them instead.
@@ -38,11 +38,6 @@ function veOrphansCard({ pages, links }) {
   const rows = pages.map(p => `<li>${esc(p.name + ' · ' + veCount(visualNodes(p.root).length, 'element'))} ${button('Open', 've-open-page', p.ownerId, 'small', 'grid', `aria-label="${esc('Open ' + p.name)}"`)}</li>`).join('');
   const nav = links.length ? `<p class="small muted">${esc(veCount(links.length, 'interaction') + ' navigate to a missing surface: ' + links.map(veNavigationWhere).join('; ') + '.')}</p>` : '';
   return `<section class="card mt16" aria-label="Designs with a missing surface"><h2>Designs with a missing surface</h2><p>These designs are kept. Restoring the sitemap surface reconnects them; until then page and component edits, export and generation are refused.</p>${rows ? `<ul class="ve-orphans">${rows}</ul>` : ''}${nav}${button('Remove designs and links to missing surfaces…', 've-orphans', '', 'small danger', 'trash')}</section>`;
-}
-// A design whose one-time upgrade failed keeps its legacy detail designs; its concrete recovery is the project export.
-function veLegacyCard(d) {
-  if (companionLegacyDetails(d) === undefined) return '';
-  return `<section class="card mt16" role="alert" aria-label="Legacy detail designs"><h2>Legacy detail designs kept unchanged</h2><p>This project could not be upgraded to the page and component editors, so its pages and components cannot be edited here. ${esc(VE_LEGACY_RECOVERY)}</p><div class="row wrap">${button('Export project JSON', 'project-export', '', 'small primary', 'download')}${button('Export recovery snapshot', 'storage-recovery', '', 'small', 'download')}</div></section>`;
 }
 // Readiness: the full validation (with references) and every review error; warnings do not block the generator.
 function veReadiness(page, findings = veReviewFindings(veStore(), { kind: 'page', id: page.id })) {

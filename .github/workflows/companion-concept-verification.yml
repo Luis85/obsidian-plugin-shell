@@ -14,7 +14,8 @@ on:
       - 'scripts/bundling/**'
       - 'tests/tooling/compiler-journey*.checks.mjs'
       - 'tests/tooling/companion-project.checks.mjs'
-      - 'tests/tooling/companion-detail-contract.checks.mjs'
+      - 'tests/tooling/companion-composition-contract.checks.mjs'
+      - 'tests/support/concept-realm.mjs'
       - 'tests/tooling/companion-visual-*.checks.mjs'
       - 'tests/tooling/visual-*.checks.mjs'
       - 'tests/fixtures/companion/**'
@@ -86,7 +87,7 @@ jobs:
         run: node --test tests/tooling/test-data-*.checks.mjs
       - name: Exercise full-project JSON and read-only shell handoff
         run: |
-          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-detail-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
+          node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs tests/tooling/companion-composition-contract.checks.mjs tests/tooling/companion-visual-state.checks.mjs tests/tooling/companion-visual-canvas.checks.mjs tests/tooling/companion-visual-page-editor.checks.mjs tests/tooling/companion-visual-inspector.checks.mjs tests/tooling/companion-visual-component-editor.checks.mjs tests/tooling/companion-visual-entry.checks.mjs
           npm run test:visual
       - name: Exercise prototype lifecycle, safe persistence and pinned generation
         run: node --test tests/tooling/companion-prototypes*.checks.mjs tests/tooling/framework-prototypes.checks.mjs

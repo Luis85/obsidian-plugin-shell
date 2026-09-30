@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFile } from 'node:fs/promises';
 import { validateAuthoringDocument, parseAuthoringDocument, authoringDesignKey, validateCompanionFolders, companionRelativeFolder } from '../../scripts/companion/authoring-contract.ts';
 import { selfProject, companionStarterIds, starterDocument } from '../support/starter-documents.mjs';
+import { retiredProjectText } from '../support/retired-projects.mjs';
 
 const original = selfProject();
 const copy = () => structuredClone(original);
@@ -31,10 +31,9 @@ test('schema versions 1 to 5 are rejected with an explicit no-migration diagnost
       error.message.includes('schemaVersion ' + version), 'version ' + version);
   }
 });
-test('the retained v3, v4 and v5 concept fixtures are rejected, never migrated', async () => {
-  for (const path of ['../fixtures/companion/detail-v3.json', '../fixtures/companion/detail-v4.json', '../../docs/concepts/companion/companion-project.json']) {
-    const text = await readFile(new URL(path, import.meta.url), 'utf8');
-    assert.throws(() => parseAuthoringDocument(text), error => error.code === 'COMPANION_VERSION' && retired.test(error.message), path);
+test('retired v1 to v5 project exports (including detail and visual stores) are rejected, never migrated', () => {
+  for (const version of [1, 2, 3, 4, 5]) {
+    assert.throws(() => parseAuthoringDocument(retiredProjectText(version)), error => error.code === 'COMPANION_VERSION' && retired.test(error.message), 'version ' + version);
   }
 });
 test('future, missing or mismatched versions and retired detail designs never pass', () => {

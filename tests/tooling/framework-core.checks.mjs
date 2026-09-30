@@ -11,10 +11,11 @@ import { planOperation, applyOperation } from '../../scripts/framework/planning.
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
 import { readBounded } from '../../scripts/framework/files.ts';
 import { selfProject } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const seed = selfProject();
-// The last v4 self-project (retained for the v5 concept build base), used here only as a rejected retired input.
-const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
+// A synthetic retired v4 project, used only as a rejected input.
+const legacy = retiredProject(4);
 const identity = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
 async function fixture(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-cli-')));

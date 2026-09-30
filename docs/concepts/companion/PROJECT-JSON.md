@@ -24,7 +24,7 @@ Open `index.html` and choose **Load companion project**. Review the proposed pro
 
 This is an authored concept model, **not an exhaustive reverse-engineering of every implementation function**. Requirements are design-mapped, not marked implemented. Source ports describe proposed native behavior; no live vault access occurs. The model does not fabricate passed builds, test execution, publication, trust or installation.
 
-The standalone [companion-project.json](companion-project.json) is generated from this same seed. Browser tests assert full-document equality so the built-in project and example file cannot drift unnoticed.
+The self-project is the golden starter `configs/starters/companion-plugin.json` (project schema 6). The concept embeds no copy of it: load it through **Project starters**, where the shell and the page validate it with the same contract.
 
 ## Export and import
 

@@ -74,11 +74,11 @@ test('[CONCEPT-ASSETS] full analyzer recognizes exact retained JS/CSS and still 
   assert.deepEqual(config.entry.filter(path => path.startsWith('docs/concepts/companion/')).sort(), [...entry, ...editor].sort(), 'Only assembly roots and editor sources are registered');
   assert.ok(editor.includes('docs/concepts/companion/editor/prototype-manager.ts') && editor.includes('docs/concepts/companion/editor/prototypes.css'), 'Prototype editor sources imported by checks stay registered');
   const sources = Object.fromEntries(await Promise.all(entry.map(async path => [path, await readFile(path, 'utf8')])));
-  assert.equal(entry.length, 140, 'Exact authored, vendor and test-kit assembly inventory');
-  assert.ok(entry.includes('docs/concepts/companion/src/project-handoff.js'), 'Companion terminal/agent handoff must remain inventoried');
-  assert.ok(config.entry.includes('scripts/companion/project-contract.mjs'), 'Shared project contract must remain an analyzer entry');
+  assert.equal(entry.length, 138, 'Exact authored, vendor and test-kit assembly inventory');
+  assert.ok(entry.includes('docs/concepts/companion/src/companion-contract.js'), 'Concept names for the bundled project contract must remain inventoried');
+  assert.ok(config.entry.includes('scripts/companion/concept-contract.ts') && config.entry.includes('scripts/concepts/contract-bundle.mjs'), 'Bundled schema 6 project contract must remain an analyzer entry');
   assert.ok(config.entry.includes('scripts/companion/storymap-contract.mjs'), 'Shared storymap validator must remain an analyzer entry');
-  assert.ok(config.entry.includes('scripts/companion/detail-contract.mjs'), 'Shared detail contract stays analyzed');
+  for (const retired of ['scripts/companion/project-contract.mjs', 'scripts/companion/detail-contract.mjs', 'scripts/companion/visual/visual-migrate.mjs']) assert.ok(!config.entry.includes(retired), 'Retired v5 contract stays removed: ' + retired);
   assert.ok(entry.includes('docs/concepts/companion/src/style-guide-frontend.js'), 'Concurrent Design System frontend must remain inventoried');
   const valid = await probe(sources, value => value, { full: true, entry });
   assert.equal(valid.status, 0, valid.diagnostic);

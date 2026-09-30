@@ -47,6 +47,16 @@ def create(kind, title, parent='', release=''):
     save()
 
 
+GOLDEN = ROOT / 'configs/starters/companion-plugin.json'
+
+
+def open_golden():
+    """Review the self-project, the external golden starter's schema 6 document, through the real import dialog."""
+    js('openCompanionImport()')
+    page.locator('#project-import-text').fill(json.dumps(json.loads(GOLDEN.read_text())['generator']['document']))
+    page.locator('#modal [data-action="project-import-review"]').click()
+
+
 with sync_playwright() as pw:
     browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
@@ -56,7 +66,7 @@ with sync_playwright() as pw:
     page.on('request', lambda r: requests.append(r.url))
     try:
         page.set_content(STORAGE + HTML.read_text())
-        act('project-example'); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
+        open_golden(); page.locator('#project-import-confirm').check(); act('project-import-apply', scope='#modal')
         check('Self-project imports a real editable storymap', js('smStore().maps.length===1 && validState(state)'))
         nav('storymaps')
         check('Navigation opens the project storymaps overview', page.locator('#content h1').inner_text() == 'Storymaps' and page.locator('.sm-map-link').count() == 1)
@@ -180,23 +190,19 @@ with sync_playwright() as pw:
         act('close', scope='#modal')
         with tempfile.TemporaryDirectory(prefix='storymap-cli-') as tmp:
             vault=Path(tmp)/'vault'; vault.mkdir(); keep=vault/'keep.md';keep.write_text('foreign record')
-            # This v5 build base still exports schema 5 until it is rebuilt v6-natively; the shell reads only schema 6 and never
-            # migrates. The raw export is refused; its only difference from schema 6 (the two version fields) is relabeled
-            # here, explicitly and only in this test, so the exact-byte handoff of concept-authored Storymaps stays covered.
             cli=lambda path: subprocess.run(['node',str(ROOT/'scripts/companion/generate.mjs'),'--input',str(path),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
-            refused=cli(OUT/'project.companion.json')
-            check('Read-only CLI refuses the retired schema 5 export without output',refused.returncode==1 and refused.stdout==b'' and refused.stderr.startswith(b'COMPANION_VERSION:'),'Actual CLI subprocess')
-            current=json.loads((OUT/'project.companion.json').read_text());current['schemaVersion']=6;current['design']['schema']=6
-            (OUT/'project-v6.companion.json').write_text(json.dumps(current,indent=2)+'\n')
-            run=cli(OUT/'project-v6.companion.json')
-            check('Read-only CLI returns the browser’s exact Storymaps export bytes',run.returncode==0 and run.stdout==(OUT/'project-v6.companion.json').read_bytes() and not run.stderr,'Actual CLI subprocess')
+            exported=json.loads((OUT/'project.companion.json').read_text())
+            check('The concept exports project schema 6 directly',exported['schemaVersion']==6 and exported['design']['schema']==6)
+            run=cli(OUT/'project.companion.json')
+            check('Read-only CLI returns the browser’s exact Storymaps export bytes',run.returncode==0 and run.stdout==(OUT/'project.companion.json').read_bytes() and not run.stderr,'Actual CLI subprocess')
             check('Storymap handoff writes no target or foreign file', list(vault.iterdir())==[keep] and keep.read_text()=='foreign record','Actual isolated filesystem')
         # Confirmation is rendered only after parsing; locator auto-wait preserves the strict CSP.
         nav('overview'); act('project-import'); page.locator('#project-import-file').set_input_files(str(OUT/'project.companion.json')); page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')
         check('Reviewed import preserves the full semantic document', json.loads(js('companionJson()')) == json.loads(document))
         check('Current stored project validates after import', js('validState(JSON.parse(__saved[STORAGE_KEY]))'))
-        legacy=json.loads(document);legacy['schemaVersion']=1;legacy['design']['schema']=1;del legacy['design']['storymaps']; legacy['design'].pop('visualDesigns', None)
-        check('Legacy version-one import starts with an empty storymap collection', js('text=>smStore(companionCandidate(text).design).maps.length===0',json.dumps(legacy)), 'Legacy migration contract fixture')
+        # A genuine retired-format document (the shared synthetic schema 1 sample), not a relabeled current export.
+        retired=subprocess.run(['node','--input-type=module','-e',"import {retiredProjectText} from './tests/support/retired-projects.mjs';process.stdout.write(retiredProjectText(1))"],cwd=ROOT,capture_output=True,text=True,timeout=15,check=True).stdout
+        check('A retired version-one import is refused, never migrated', js('text=>{try{companionCandidate(text);return false;}catch(error){return /only schema 6 is supported/.test(error.message);}}',retired), 'Retired format contract fixture')
         nav('storymaps');act('sm-open',original_id);act('sm-mode','map')
         for width,theme,mode in [(1440,'dark','map'),(1440,'light','map'),(960,'dark','map'),(390,'dark','outline')]:
             page.set_viewport_size({'width':width,'height':1000 if width>600 else 900})

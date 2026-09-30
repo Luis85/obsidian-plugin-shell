@@ -5,11 +5,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { conceptShared, visualModules } from '../support/concept-realm.mjs';
 
-const visualModules = ['ir', 'mapping', 'catalog', 'composition', 'validate', 'layout', 'commands', 'session', 'migrate'].map(n => 'visual/visual-' + n + '.mjs');
-const contracts = ['native-contract.mjs', 'composition-contract.mjs', 'detail-contract.mjs', ...visualModules, 'project-contract.mjs'];
-const shared = (await Promise.all(contracts.map(name => readFile('scripts/companion/' + name, 'utf8')))).join('\n').split('\n')
-  .filter(line => !line.startsWith('import ')).join('\n').replaceAll('export const ', 'const ').replaceAll('export function ', 'function ');
+const shared = await conceptShared(['native-contract.mjs', 'composition-contract.mjs', ...visualModules]);
 const base = (await readFile('docs/concepts/companion/src/base.html', 'utf8')).split('\n');
 const helpers = ['function esc(', 'function icon(', 'function button(', 'function badge(', 'function modalHeader(', 'function dialogBody('].map(prefix => {
   const lines = base.filter(line => line.startsWith(prefix));
@@ -50,7 +48,7 @@ function load() {
   const loading = ctx.visualElement('vn-10', 'div', { name: 'Loading panel', visibleIn: ['loading'], children: [ctx.visualText('vn-11', 'Loading…', 'p')] });
   const section = ctx.visualElement('vn-1', 'section', { name: 'Main', layout: ctx.visualLayoutRules('stack'), children: [button, ctx.visualElement('vn-4', 'img', { name: 'Hero image' }), n('vn-5', 'u-input', { placeholder: lit('Find') }, { name: 'Search' }), field, n('vn-8', 'u-table', {}, { name: 'Customer table' }), loading] });
   const page = { id: 'vp-9', ownerId: 'surface-a', name: 'Customers', root: [section, ctx.visualText('vn-12', 'Footer', 'p', { name: 'Footer' })], scenarios: [], notes: '' };
-  host.design = ctx.realm({ schema: 5, nodes: surfaces, library: [], dataSources: { sources }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 13, pages: [page] } });
+  host.design = ctx.realm({ schema: 6, nodes: surfaces, library: [], dataSources: { sources }, revision: 1, history: [], future: [], visualDesigns: { ...ctx.emptyVisualDesigns(), nextId: 13, pages: [page] } });
   ctx.validateVisualDesigns(host.design.visualDesigns, ctx.veContext(host.design));
   Object.assign(ctx.ui(), { owner: 'surface-a', ref: { kind: 'page', id: 'vp-9' }, selected: 'vn-2' });
   return ctx;

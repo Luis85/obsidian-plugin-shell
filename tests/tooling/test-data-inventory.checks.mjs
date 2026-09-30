@@ -8,7 +8,7 @@ import { sourceInputs } from '../../scripts/testing/source-inputs.mjs';
 import { fixtureManifest } from './test-data-fixture.mjs';
 
 const sidecar = 'docs/concepts/companion/test-kit';
-const projectFixture = 'docs/concepts/companion/companion-project.json';
+const starters = 'configs/starters';
 async function scratch(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'test-kit-inventory-')));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -68,14 +68,18 @@ test('[TD-CLI-DEFAULT] exported command locates generated manifest independently
 });
 
 
-test('[PROJECT-FIXTURE-INVENTORY] canonical design bytes are transported, fingerprinted and never followed through links', async t => {
-  const root = await minimal(t); const target = join(root, projectFixture);
-  const before = await sourceInputs(root); assert.ok(!before.roots.includes(projectFixture));
-  await mkdir(dirname(target), { recursive: true }); await writeFile(target, '{"design":"original"}');
-  const first = await sourceInputs(root); assert.equal(first.files.filter(f => f.path === projectFixture).length, 1);
+test('[PROJECT-FIXTURE-INVENTORY] canonical starter design bytes are transported, fingerprinted and never followed through links', async t => {
+  const root = await minimal(t), folder = join(root, starters), target = join(folder, 'probe.json');
+  await rm(folder, { recursive: true, force: true });
+  const before = await sourceInputs(root); assert.ok(!before.roots.includes(starters));
+  await mkdir(folder, { recursive: true }); await writeFile(target, '{"design":"original"}');
+  const first = await sourceInputs(root); assert.equal(first.files.filter(f => f.path === starters + '/probe.json').length, 1);
   await writeFile(target, '{"design":"changed"}'); assert.notEqual((await sourceInputs(root)).digest, first.digest);
-  await rm(target); await mkdir(target); await assert.rejects(sourceInputs(root), /SOURCE_NOT_REGULAR/);
-  await rm(target, { recursive: true });
-  const outside = await scratch(t); await symlink(outside, target, process.platform === 'win32' ? 'junction' : 'dir');
+  await rm(folder, { recursive: true }); await writeFile(folder, 'not a directory'); await assert.rejects(sourceInputs(root), /SOURCE_NOT_DIRECTORY/);
+  await rm(folder);
+  // An optional single-file input must stay a regular file.
+  const skill = join(root, '.agents/skills/companion-prototype-design/SKILL.md');
+  await rm(skill, { force: true }); await mkdir(skill, { recursive: true }); await assert.rejects(sourceInputs(root), /SOURCE_NOT_REGULAR/); await rm(skill, { recursive: true });
+  const outside = await scratch(t); await symlink(outside, folder, process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(sourceInputs(root), /SOURCE_SYMLINK/); assert.deepEqual(await readdir(outside), []);
 });

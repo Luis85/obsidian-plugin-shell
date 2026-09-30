@@ -14,6 +14,7 @@ import { planProject, applyProject } from '../../scripts/companion/compiler/plan
 import { AUTHORING_VERSION as COMPANION_VERSION } from '../../scripts/companion/authoring-contract.ts';
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { exampleStarterIds } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),examples=new Set(exampleStarterIds());
 // The eleven focused example starters, converted once from their v5 models to project v6.
 const starters=companionStarters(await loadDefinitions(root)).filter(entry=>examples.has(entry.definition.id));
@@ -87,9 +88,9 @@ for(const [label,fields,pattern] of [
 for(const [label,mutate] of [
  ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id='blank'],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
-test('catalog rejects a valid legacy v4 built-in: starters ship current visual designs',()=>{
- const c=structuredClone(catalog),d=c.starters[0].document;d.schemaVersion=4;d.design.schema=4;delete d.design.visualDesigns;d.design.detailDesigns={schema:2,nextId:1,documents:[],revisions:[]};
- assert.throws(()=>validateStarterCatalog(c),/Starters require project v5 or v6/);
+test('catalog rejects a retired v4 document: starters carry only project schema 6',()=>{
+ const c=structuredClone(catalog);c.starters[0].document=retiredProject(4);
+ assert.throws(()=>validateStarterCatalog(c),/Starters require project schema 6/);
 });
 test('case-sensitive identity changes do not replace domain words or authored content',()=>{
  const source=starter('quick-capture').document;const document=customizeStarter(starter('quick-capture'),{...choices,name:'<b>Not HTML</b>'});

@@ -10,6 +10,7 @@ import { sample, typeCode } from '../../scripts/companion/compiler/schema-code.t
 import { matches } from '../../scripts/companion/runtime/contract.ts';
 import { planProject, applyProject, reviewProject } from '../../scripts/companion/compiler/plan.ts';
 import { selfProject } from '../support/starter-documents.mjs';
+import { retiredProjectText } from '../support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // The current self-project, including its managed Markdown Collection (full CRUD ports).
 const fixture = selfProject();
@@ -148,7 +149,7 @@ test('public CLI has no implicit apply and rejects repeated/unknown flags',()=>s
   assert.deepEqual(await readdir(options.vault),['project.json']);
 }));
 test('a retired v3 input is refused before planning, with no writes and no legacy mapping',()=>sandbox(async options=>{
-  await writeFile(options.input,await readFile(join(root,'tests/fixtures/companion/detail-v3.json'),'utf8'));
+  await writeFile(options.input,retiredProjectText(3));
   await assert.rejects(planProject(options),error=>/only schema 6 is supported/.test(JSON.stringify(error.diagnostics ?? error.message)));
   assert.deepEqual(await readdir(options.vault),['project.json']);
   await writeFile(options.input,JSON.stringify(fixture)); assert.equal(Object.hasOwn(reviewProject(await planProject(options)),'legacyInteractionIds'),false);

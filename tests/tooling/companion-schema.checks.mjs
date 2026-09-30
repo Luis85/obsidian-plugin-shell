@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,7 @@ import { validateAuthoringDocument } from '../../scripts/companion/authoring-con
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { schemaCorpus } from './companion-schema-fixture.mjs';
 import { starterDocumentText } from '../support/starter-documents.mjs';
+import { retiredProjectText } from '../support/retired-projects.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const corpus = schemaCorpus();
 const sha = text => createHash('sha256').update(text).digest('hex');
@@ -74,8 +75,8 @@ test('project validate preserves input bytes, never leaks content or infers busi
   assert.equal(result.data.counts.surfaces, 28);
   assert.equal(cli(['project', 'validate', '--input', '-'], root, '{invalid').output.status, 1);
 });
-test('project validate rejects a retired v5 export with its version diagnostic and writes nothing', async () => {
-  const bytes = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
+test('project validate rejects a retired v5 export with its version diagnostic and writes nothing', () => {
+  const bytes = retiredProjectText(5);
   const { output, result } = cli(['project', 'validate', '--input', '-'], root, bytes);
   assert.equal(output.status, 1);
   assert.equal(result.diagnostics[0].code, 'COMPANION_VERSION');

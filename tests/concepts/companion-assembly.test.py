@@ -17,11 +17,12 @@ class AssemblyContract(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.concept = self.root / 'docs/concepts/companion'
         shutil.copytree(ROOT / 'docs/concepts/companion/src', self.concept / 'src')
-        shutil.copytree(ROOT / 'docs/concepts/companion/starters', self.concept / 'starters')
-        shutil.copytree(ROOT / 'docs/concepts/companion/seeds', self.concept / 'seeds')
         shutil.copytree(ROOT / 'docs/concepts/companion/vendor', self.concept / 'vendor')
         shutil.copytree(ROOT / 'docs/concepts/companion/test-kit', self.concept / 'test-kit')
-        shutil.copytree(ROOT / 'scripts/companion', self.root / 'scripts/companion')
+        # The schema 6 project contract is bundled from the copied sources with the pinned local toolchain.
+        shutil.copytree(ROOT / 'scripts', self.root / 'scripts', ignore=shutil.ignore_patterns('__pycache__'))
+        (self.root / 'node_modules').symlink_to(ROOT / 'node_modules', target_is_directory=True)
+        shutil.copy(ROOT / 'package.json', self.root / 'package.json')
         shutil.copy(ROOT / '.fallowrc.json', self.root / '.fallowrc.json')
         spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'scripts/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
@@ -46,7 +47,7 @@ class AssemblyContract(unittest.TestCase):
         html = self.output.read_text(encoding='utf-8')
         self.assertEqual(html.count('const PRD_LIMITS = Object.freeze('), 1)
         self.assertNotIn("import { PRD_LIMITS } from './prd-limits.mjs'", html)
-        self.assertLess(html.index('const PRD_LIMITS'), html.index('const COMPANION_FORMAT'))
+        self.assertLess(html.index('const PRD_LIMITS'), html.index('const COMPANION_FORMAT = CompanionContract.COMPANION_FORMAT'))
         config = self.root / '.fallowrc.json'
         value = json.loads(config.read_text())
         value['entry'].remove('scripts/companion/prd-limits.mjs')
@@ -54,43 +55,17 @@ class AssemblyContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Shared PRD limits missing from inventory'):
             self.build()
 
-    def test_starter_bytes_and_inventory_are_verified(self):
-        source = self.concept / 'starters/blank.companion.json'
-        original = source.read_bytes()
-        source.write_bytes(original + b' ')
-        with self.assertRaisesRegex(ValueError, 'Starter source integrity'):
-            self.build()
-        source.write_bytes(original)
-        orphan = self.concept / 'starters/orphan.json'
-        orphan.write_text('{}')
-        with self.assertRaisesRegex(ValueError, 'Starter source inventory'):
-            self.build()
-        orphan.unlink()
-        self.build()
-
-    def test_visual_seed_bytes_and_inventory_are_pinned(self):
-        seed = self.concept / 'seeds/visual-self-project.json'
-        original = seed.read_bytes()
-        seed.write_bytes(original + b' ')
-        with self.assertRaisesRegex(ValueError, 'Unreviewed visual seed'):
-            self.build()
-        seed.write_bytes(original)
-        orphan = self.concept / 'seeds/other.json'
-        orphan.write_text('{}')
-        with self.assertRaisesRegex(ValueError, 'Visual seed inventory differs'):
-            self.build()
-        orphan.unlink()
-        self.build()
-        text = self.output.read_text(encoding='utf-8')
-        self.assertEqual(text.count('id="companion-visual-seed"'), 1)
-
-    def test_starter_contract_requires_explicit_inventory(self):
+    def test_bundled_project_contract_requires_explicit_inventory(self):
         config = self.root / '.fallowrc.json'
-        value = json.loads(config.read_text())
-        value['entry'].remove('scripts/companion/starter-contract.mjs')
-        config.write_text(json.dumps(value))
-        with self.assertRaisesRegex(ValueError, 'Starter contract missing'):
-            self.build()
+        original = config.read_text()
+        for path in ['scripts/companion/concept-contract.ts', 'scripts/concepts/contract-bundle.mjs']:
+            with self.subTest(path=path):
+                value = json.loads(original)
+                value['entry'].remove(path)
+                config.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, 'Bundled project contract missing from analyzer inventory: ' + path):
+                    self.build()
+        config.write_text(original)
 
     def test_design_system_shared_modules_require_explicit_inventory(self):
         config = self.root / '.fallowrc.json'
@@ -107,7 +82,7 @@ class AssemblyContract(unittest.TestCase):
     def test_visual_contract_modules_require_explicit_inventory(self):
         config = self.root / '.fallowrc.json'
         original = config.read_text()
-        for name in ['visual-ir.mjs', 'visual-validate.mjs', 'visual-migrate.mjs']:
+        for name in ['visual-ir.mjs', 'visual-validate.mjs', 'visual-session.mjs']:
             with self.subTest(name=name):
                 value = json.loads(original)
                 value['entry'].remove('scripts/companion/visual/' + name)
@@ -116,18 +91,20 @@ class AssemblyContract(unittest.TestCase):
                     self.build()
         config.write_text(original)
 
-    def test_visual_contract_is_inlined_before_the_project_contract(self):
+    def test_visual_contract_is_inlined_and_the_schema_6_contract_is_bundled_once(self):
         self.build()
         text = self.output.read_text(encoding='utf-8')
-        for name in ['function emptyVisualDesigns(', 'function validateVisualDesigns(', 'function migrateDetailDesigns(', 'function visualSession(']:
+        for name in ['function emptyVisualDesigns(', 'function visualSession(', 'const COMPANION_VERSION = CompanionContract.AUTHORING_VERSION;', '<script data-contract="CompanionContract">']:
             self.assertEqual(text.count(name), 1, name)
-        self.assertLess(text.index('function migrateDetailDesigns('), text.index('function migrateCompanionDocument('))
+        self.assertLess(text.index('<script data-contract="CompanionContract">'), text.index('const COMPANION_VERSION = CompanionContract.AUTHORING_VERSION;'))
         self.assertNotIn("from './visual/", text)
-        self.assertIn('const COMPANION_VERSION = 5;', text)
+        # Retired formats are refused by the bundled contract; no migration or v5 contract is assembled.
+        for retired in ['function migrateDetailDesigns(', 'function migrateCompanionDocument(', 'function validateDetailDesigns(', 'const COMPANION_VERSION = 5;', 'id="companion-visual-seed"', 'id="project-starters-data"']:
+            self.assertNotIn(retired, text)
 
     def test_visual_editor_modules_are_assembled(self):
         html = (ROOT / 'docs/concepts/companion/index.html').read_text(encoding='utf-8')
-        markers = ['function veCommit(', 'function veMigrateSaved(', 'function validateVisualDesigns(']
+        markers = ['function veCommit(', 'function validateVisualDesigns(']
         markers += ['function veCanvasHtml(', '.ve-editor']
         markers += ['function vePagesView(', 'function vePageEditorView(', 'function veOutlineHtml(', 'function veInsertHtml(', 'function veLayoutsHtml(', 'role="tree"']
         markers += ['function vePageInspectorHtml(', 'function veInteractionForm(', 'function veFieldEdit(', 'function veReviewFindings(', 'function veHealthHtml(']
@@ -210,19 +187,23 @@ class AssemblyContract(unittest.TestCase):
     def test_shared_project_contract_changes_the_generated_artifact(self):
         self.build()
         before = self.output.read_bytes()
-        shared = self.root / 'scripts/companion/project-contract.mjs'
-        shared.write_text(shared.read_text() + '\n// exact shared contract change\n')
+        shared = self.root / 'scripts/companion/authoring-contract.ts'
+        original = shared.read_text()
+        marker = 'only schema 6 is supported.'
+        self.assertEqual(original.count(marker), 1)
+        shared.write_text(original.replace(marker, 'only schema 6 is supported (exact shared contract change).'))
         self.build()
         self.assertNotEqual(before, self.output.read_bytes())
         self.assertIn(b'exact shared contract change', self.output.read_bytes())
 
-    def test_shared_project_contract_requires_analyzer_entry(self):
-        config = self.root / '.fallowrc.json'
-        value = json.loads(config.read_text())
-        value['entry'].remove('scripts/companion/project-contract.mjs')
-        config.write_text(json.dumps(value))
-        with self.assertRaisesRegex(ValueError, 'Shared project contract'):
+    def test_unbundleable_project_contract_fails_closed(self):
+        self.build()
+        before = self.output.read_bytes()
+        shared = self.root / 'scripts/companion/authoring-contract.ts'
+        shared.write_text(shared.read_text() + '\nexport const broken = ;\n')
+        with self.assertRaisesRegex(ValueError, 'Project contract bundle failed'):
             self.build()
+        self.assertEqual(before, self.output.read_bytes())
 
     def test_stale_generated_output_is_rejected(self):
         self.build()

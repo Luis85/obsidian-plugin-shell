@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { projectFixture } from '../fixtures/application-docs/fixture.mjs';
 import { projectEntities, applyEntities } from '../../scripts/application-docs/adapters/model.ts';
 import { companionStarterIds, selfProject, starterDocument } from '../support/starter-documents.mjs';
+import { retiredProject } from '../support/retired-projects.mjs';
 import { newDocument } from '../../bin/domain/document.ts';
 import { mergeEntity } from '../../scripts/application-docs/domain/merge.ts';
 import { keyOf, normalizePayload } from '../../scripts/application-docs/domain/contracts.ts';
@@ -22,9 +22,8 @@ for (const id of companionStarterIds()) test('complete current starter ' + id + 
   const project = starterDocument(id);
   assert.deepEqual(applyEntities(project, projectEntities(project)), project);
 });
-for (const path of ['detail-v3.json', 'detail-v4.json']) test('retired ' + path + ' is refused by the projection, never migrated', async () => {
-  const original = JSON.parse(await readFile(new URL('../fixtures/companion/' + path, import.meta.url), 'utf8'));
-  assert.throws(() => projectEntities(original), /only schema 6 is supported/);
+for (const version of [3, 4, 5]) test('a retired v' + version + ' project is refused by the projection, never migrated', () => {
+  assert.throws(() => projectEntities(retiredProject(version)), /only schema 6 is supported/);
 });
 test('page title updates both related objects without changing identity', () => {
   const { project, overview } = projectFixture(), entities = projectEntities(project);

@@ -8,19 +8,19 @@ import { composeMvp } from './mvp-compose.mjs';
 
 const root=process.cwd(),out=resolve(root,'reports/companion-mvp');
 await mkdir(out,{recursive:true});
-// Keep the retained v5 artifact qualified; the modern build is derived from the exact same maintained source.
+// The checked-in schema 6 concept must be current; this build only mounts the editor islands into it.
 const baseCheck=spawnSync(process.env.PYTHON??'python3',['-B','scripts/concepts/build-companion.py','--check'],{stdio:'inherit'});
-if(baseCheck.status!==0)throw Error('MVP_ASSEMBLY: Legacy source fixture is not current.');
+if(baseCheck.status!==0)throw Error('MVP_ASSEMBLY: The checked-in concept is not current; rebuild it first.');
 const config=sharedConfig();
 await build({...config,configFile:false,build:{...config.build,outDir:join(out,'bundle'),emptyOutDir:true,
   lib:{entry:'docs/concepts/companion/editor/main.ts',name:'CompanionJourney',formats:['iife'],fileName:()=> 'journey.js',cssFileName:'journey'},
   rolldownOptions:{external:['vue','pinia'],output:{globals:{vue:'Vue',pinia:'Pinia'},codeSplitting:false}},
 }});
-const [base,bundle,css,bridge,graphStyle,startup,prototypeBridge]=await Promise.all([
+const [base,bundle,css,bridge,graphStyle,prototypeBridge]=await Promise.all([
   readFile('docs/concepts/companion/index.html','utf8'),readFile(join(out,'bundle/journey.js'),'utf8'),
-  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),readFile('scripts/concepts/starter-workspace.js','utf8'),readFile('scripts/concepts/prototype-bridge.js','utf8'),
+  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),readFile('scripts/concepts/prototype-bridge.js','utf8'),
 ]);
-const html=composeMvp(base,bundle,css,bridge+'\n'+prototypeBridge,graphStyle,startup);
+const html=composeMvp(base,bundle,css,bridge+'\n'+prototypeBridge,graphStyle);
 await writeFile(join(out,'index.html'),html);
 // Current output is an empty authoring workspace; project exports are explicit user/qualification operations.
 await writeFile(join(out,'companion-journey-lens.html'),html);
