@@ -85,7 +85,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C8:** Maker/bin create/inspect-only adapters now import the typed file-plan facade directly; the two apply callers remain isolated for the next milestone.
 - **C9:** Maker/bin apply callers (`first-run` report persistence and shared prepared-plan storage) now use the typed file-plan facade, so the maker application's typed path no longer imports `file-plan.mjs`.
 - **C10:** The remaining typed application-docs and compiler adapters now import the typed file-plan facade. An audit of all 197 TypeScript files under `scripts/` found no remaining typed imports of `file-plan.mjs`, `json-data.mjs`, or `shared/process.mjs`.
-- **Remaining C11–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C11:** The fully typed bounded-JSON implementation is now a dedicated `cli-data-contract` Fallow zone. Tests, tooling, maker-host and the compiler/companion tooling boundaries explicitly consume it; maker-domain remains isolated from it.
+- **Remaining C12–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
