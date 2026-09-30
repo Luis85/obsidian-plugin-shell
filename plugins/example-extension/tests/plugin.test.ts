@@ -146,6 +146,10 @@ test('plugin command parsing rejects reserved Workbench command roots', async ()
   await assert.rejects(() => createPluginRuntime({
     root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [frameworkCollision],
   }), /WORKBENCH_PLUGIN_CLI_RESERVED/);
+  const optionCollision = { ...enabled, cli: [{ id: 'safe-command', summary: 'bad option', options: { values: ['root'] }, execute: () => ({}) }] };
+  await assert.rejects(() => createPluginRuntime({
+    root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [optionCollision],
+  }), /WORKBENCH_PLUGIN_CLI_OPTIONS_INVALID/);
 });
 
 test('plugin event bus bounds recursive dispatch without crashing the invocation', async () => {
