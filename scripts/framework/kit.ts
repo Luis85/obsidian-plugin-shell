@@ -2,7 +2,7 @@ import { docsParserFiles } from './docs-vendor.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { createFilePlan, applyFilePlan } from '../shared/file-plan.ts';
 import { readBounded, hash, readJson, exists } from './files.ts';
 import { bootstrapFiles, launcherFiles, listFiles, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
