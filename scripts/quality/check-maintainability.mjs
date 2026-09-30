@@ -6,10 +6,14 @@ import { fileURLToPath } from 'node:url';
 import { maintainabilityInventory } from './maintainability-inventory.mjs';
 import { healthReport, duplicationReport, suppressionReport } from './maintainability-reports.mjs';
 import { sha256 } from '../testing/source-inputs.mjs';
+import { fallowVersion } from './fallow-contract.mjs';
 import { duplicateArguments, measureCorpus, assertCorpus, checkCorpus } from './maintainability-corpus.mjs';
 
-const policy = { version: 1, cyclomatic: 10, cognitive: 15, duplication: 3, minTokens: 50, minLines: 5,
-  mode: 'mild', ignoreImports: true, production: 'every src JS/TS/Vue file, including generated consumers' };
+const policy = { version: 2, cyclomatic: 10, cognitive: 15, duplication: 3, minTokens: 50, minLines: 5,
+  mode: 'mild', ignoreImports: true, production: 'every src JS/TS/Vue file, including generated consumers',
+  severities: { 'complexity-cyclomatic': 'error', 'complexity-cognitive': 'error', 'complexity-crap': 'warn' } };
+const stageConfig = { failOnParseError: true, duplicates: { ignoreDefaults: false },
+  rules: { 'boundary-violation': 'off', 'policy-violation': 'off', ...policy.severities } };
 async function execute(tool, stage, args, output) {
   const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('FALLOW_')));
   environment.FALLOW_TELEMETRY_DISABLED = '1';
@@ -32,8 +36,8 @@ function failureList(views) {
 async function toolIdentity(tool) {
   const packageRoot = dirname(dirname(tool));
   const manifest = await readFile(join(packageRoot, 'package.json'));
-  if (JSON.parse(manifest).version !== '3.28.0') throw new Error('METRIC_TOOL_VERSION');
-  return { name: 'fallow', version: '3.28.0', node: process.version,
+  if (JSON.parse(manifest).version !== fallowVersion) throw new Error('METRIC_TOOL_VERSION');
+  return { name: 'fallow', version: fallowVersion, node: process.version,
     packageSha256: sha256(manifest), launcherSha256: sha256(await readFile(tool)),
     outputContractSha256: sha256(await readFile(join(packageRoot, 'types/output-contract.d.ts'))) };
 }
@@ -52,7 +56,7 @@ export async function checkMaintainability(root, output) {
       const raw = await readFile(join(output, `${view}-${kind}.json`), 'utf8');
       const execution = result.execution?.[kind];
       if (sha256(raw) !== execution?.sha256 || ![0, 1].includes(execution?.exit)) throw new Error('METRIC_RAW_IDENTITY');
-      const measured = validate(JSON.parse(raw), expected);
+      const measured = validate(JSON.parse(raw), expected, execution.exit);
       if (JSON.stringify(measured) !== JSON.stringify(result[field])) throw new Error('METRIC_REPORT_DATA');
     }
     await checkCorpus(join(output, `${view}-inputs`), result.corpus, expected, result.duplication);
@@ -73,7 +77,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
     if (!inputs.length) { views[view] = { status: 'empty', inputs: [] }; continue; }
     const stage = await mkdtemp(join(tmpdir(), 'plugin-maintainability-'));
     try {
-      await writeFile(join(stage, '.fallowrc.json'), JSON.stringify({ duplicates: { ignoreDefaults: false }, rules: { 'boundary-violation': 'off', 'policy-violation': 'off' } }));
+      await writeFile(join(stage, '.fallowrc.json'), JSON.stringify(stageConfig));
       await symlink(dirname(dirname(dirname(tool))), join(stage, 'node_modules'), 'junction');
       for (const input of inputs) {
         const data = await readFile(join(root, input.path));
@@ -84,7 +88,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
       const suppressionInventory = suppressionReport(suppressions.report);
       const health = await execute(tool, stage, ['health', '--complexity', '--max-cyclomatic', '10', '--max-cognitive', '15'], join(output, `${view}-health`));
       const dupes = await execute(tool, stage, duplicateArguments, join(output, `${view}-dupes`));
-      views[view] = { inputs, suppressions: suppressionInventory, health: healthReport(health.report, inputs), duplication: duplicationReport(dupes.report, inputs),
+      views[view] = { inputs, suppressions: suppressionInventory, health: healthReport(health.report, inputs, health.exit), duplication: duplicationReport(dupes.report, inputs, dupes.exit),
         execution: { health: { exit: health.exit, command: health.command, sha256: health.rawHash }, dupes: { exit: dupes.exit, command: dupes.command, sha256: dupes.rawHash }, suppressions: { exit: suppressions.exit, command: suppressions.command, sha256: suppressions.rawHash } } };
       views[view].corpus = await measureCorpus(tool, stage, inputs, join(output, `${view}-inputs`), execute);
       assertCorpus(views[view].corpus, inputs, views[view].duplication);

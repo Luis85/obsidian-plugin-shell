@@ -15,6 +15,18 @@ source, an extra `dist` source file, and restored controls. The template maintai
 must review these exact names if the artifact layout changes; no maintained source
 directory or unknown analyzer diagnostic is suppressed.
 
+The analyzer and architecture checks share `scripts/quality/fallow-contract.mjs`,
+the one reviewed Fallow version and report-schema contract. Each run must be the
+qualified version and carry Fallow's enforced `error-severity-findings` and
+`parse-error` gate verdicts; every enforced verdict must agree with the process
+exit code. `.fallowrc.json` sets `failOnParseError`, so a source file the parser
+could not read fails instead of silently shrinking the reachability graph, and
+enables `deprecated-exports-in-use` as `error`, so an export marked `@deprecated`
+cannot keep reachable consumers. The `[ANALYZER-CONTRACT]` negative control runs
+the real analyzer against a consumed deprecated export, an unparsable file and a
+config without the parse gate. A dependency update that changes the version or a
+schema must revise this contract after reviewing the installed output contract.
+
 The Oxlint gate receives a complete explicit inventory of `src` JS/TS/Vue paths.
 This prevents an archive under an ignored parent from silently checking no files.
 Empty input and symlinks fail; actual ignored-parent positive/negative controls

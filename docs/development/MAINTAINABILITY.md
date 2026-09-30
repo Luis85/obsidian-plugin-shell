@@ -1,7 +1,7 @@
 # Maintainability measurement
 
 `npm run check:maintainability` measures the entire current source tree with the
-qualified Fallow 3.28.0 CLI. It never rewrites application source. Reports and the
+qualified Fallow 3.30.0 CLI. It never rewrites application source. Reports and the
 unaltered JSON/stderr of each tool invocation go to a new timestamped directory
 under `reports/maintainability`. Run
 `node scripts/quality/check-maintainability.mjs --check REPORT_DIRECTORY` to
@@ -19,15 +19,22 @@ at least two occurrences, and Fallow's `mild` mode. These retain the proposed
 QLT-05/12 targets instead of adjusting the numbers to the existing hotspots.
 
 The gate selects functions by the actual cyclomatic/cognitive values. Fallow also
-reports estimated CRAP and function length findings; those are preserved in raw
-output but are not this policy's complexity thresholds. The CLI can exit 1 for
-those additional findings, so a valid complete report and its actual numeric
-measurements determine this gate. A tool crash, unknown schema or invalid JSON
-never counts as a measurement. The independent zero-finding `check:analyzer`,
+reports estimated CRAP; it is preserved in raw output but is not this policy's
+complexity threshold. The isolated metric config therefore declares Fallow's
+`complexity-cyclomatic` and `complexity-cognitive` rules as `error` and
+`complexity-crap` as `warn` (policy version 2 records these severities). CRAP-only
+findings stay visible with `effective_severity: "warn"` instead of being hidden.
+Check mode requires every finding's `effective_severity` to match its measured
+values, Fallow's own `health-findings` verdict to fail exactly when an `error`
+finding exists, and every enforced gate verdict to agree with the recorded exit
+code. Vue `<template>` aggregates above the ceilings are `error` findings in that
+native verdict, so production health can exit 1 while this policy passes; the
+policy decision still comes from the actual numeric measurements below. A tool
+crash, unknown schema or invalid JSON never counts as a measurement. The independent zero-finding `check:analyzer`,
 architecture, source-line and coverage checks retain their own rules.
 
 The separate dead-code analyzer declares `src/features/api.ts` as one explicit
-public library entry. Fallow 3.28.0 treats entry exports as externally consumed;
+public library entry. Fallow treats entry exports as externally consumed;
 the installed `schema.json` documents this through `entry` and
 `includeEntryExports`. This preserves the reviewed authoring contracts after
 example removal without dummy consumers or ignored directories. It does not
@@ -79,7 +86,10 @@ explicitly turns off its unconfigured boundary/policy detectors; those independe
 checks still run against the real repository configuration.
 
 Health must report exactly the supplied input count, and any source-discovery or
-degraded-parse diagnostic fails. Duplication uses Fallow's actual token-bearing
+degraded-parse diagnostic fails. The metric config also sets `failOnParseError`,
+so health must carry an enforced, passing native `parse-error` gate. Fallow 3.30
+arms no parse-error gate for `dupes`; duplication relies on the diagnostics check
+and the exit/verdict agreement instead. Duplication uses Fallow's actual token-bearing
 corpus: import/re-export wiring is excluded by its explicit default. Inputs below
 the configured token eligibility minimum can contribute zero, including type-only
 and small implementation inputs. Every individual input is additionally run
@@ -107,7 +117,9 @@ source belong to its retained execution report, not this historical measurement.
 The tooling tests exercise the real CLI on valid composition, an excessive
 function, a Vue-script hotspot, duplicated production code, invalid parse data,
 changed source, omitted inventory, contradictory clone totals and unknown report
-schemas. They also prove the
+schemas. A real CRAP-only function must remain a visible `warn` finding without
+failing, and tampered severities, health verdicts, a removed parse gate or an exit
+code contradicting the verdicts are rejected. They also prove the
 immutable vendor input is inventoried and altered bytes are rejected. Raw outputs
 are kept; no report is synthesized as the only positive control.
 
