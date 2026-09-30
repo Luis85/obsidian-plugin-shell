@@ -164,10 +164,12 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document, selection });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
-function helpResult(args: Arguments): Record<string, unknown> {
+function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
     const legacy = args.command === 'new' ? descriptor('new') : undefined;
-    const extensions = pluginCliCommands();
-    return { help: makerHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
+    const pluginHelp = extensions.length
+      ? '\nPlugin commands:\n' + extensions.map(item => `  node shell.mjs ${item.id} — ${item.summary}`).join('\n') + '\n'
+      : '';
+    return { help: makerHelp + pluginHelp, commands: legacy ? [{ ...legacy, options: parameterKinds(legacy) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'settings', 'project-setup', 'first-run', ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(legacy ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 
@@ -179,7 +181,7 @@ export async function execute(args: Arguments, context: CommandContext): Promise
     if (args.flags.help) return { help: extension.summary, command: extension.id, options: extension.options ?? {}, interactive: false };
     return extension.execute({ action: args.action, flags: args.flags }, context.plugins!.commandContext);
   }
-  if (args.flags.help || args.command === 'studio') return helpResult(args);
+  if (args.flags.help || args.command === 'studio') return helpResult(args, context.plugins?.cliCommands ?? pluginCliCommands());
   if (args.command === 'new') return newProjectCommand(args, context);
   if (args.command === 'first-run') return firstRunCommand(args, context, () => inputData(args, context));
   if (['settings', 'project-setup'].includes(args.command)) return setupCommand(args, context, () => inputData(args, context));

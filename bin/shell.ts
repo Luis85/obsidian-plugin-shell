@@ -14,7 +14,7 @@ import type { Readable, Writable } from 'node:stream';
 import { ask } from '../scripts/framework/input.ts';
 import { failure } from '../scripts/framework/contracts.ts';
 import { SketchError } from './domain/errors.ts';
-import { parseArguments, execute, option, makerHelp, type Arguments, type CommandContext } from './adapters/commands.ts';
+import { parseArguments, execute, option, type Arguments, type CommandContext } from './adapters/commands.ts';
 import { studio, prototypeWizard } from './presentation/studio.ts';
 import { TerminalSession } from './presentation/tui/session.ts';
 import { useTerminal, useColor } from './presentation/tui/mode.ts';
@@ -92,7 +92,7 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     const data = await execute(args, context);
     const result = { protocolVersion: 1, command, status: data.status ?? 'ok', data, diagnostics: [] };
     if (machine) io.output.write(JSON.stringify(result) + '\n');
-    else if (data.help) io.output.write(makerHelp);
+    else if (data.help) io.output.write(safe(String(data.help)));
     else io.output.write(safe(JSON.stringify(result, null, 2)) + '\n');
     return 0;
   } catch (error) {
