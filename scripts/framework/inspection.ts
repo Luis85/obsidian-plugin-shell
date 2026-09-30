@@ -1,4 +1,4 @@
-import { parseDesignData } from '../contracts/json-data.mjs';
+import { parseDesignData } from '../contracts/json-data.ts';
 import { join, dirname, resolve } from 'node:path';
 import { exists, readJson, readConfiguration, readBounded, hash } from './files.ts';
 import { object } from './configuration.ts';

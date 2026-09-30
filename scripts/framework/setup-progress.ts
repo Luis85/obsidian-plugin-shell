@@ -1,7 +1,7 @@
 import { hostname } from 'node:os';
 import { join } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
-import { assertJsonData } from '../contracts/json-data.mjs';
+import { assertJsonData } from '../contracts/json-data.ts';
 import { serializeJson } from '../contracts/serialization.ts';
 import { exists, readBounded, hash } from './files.ts';
 import { setupSnapshot } from './setup-state.ts';

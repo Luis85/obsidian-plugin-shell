@@ -1,4 +1,4 @@
-import { assertJsonData } from '../contracts/json-data.mjs';
+import { assertJsonData } from '../contracts/json-data.ts';
 import { compileDesignSystem } from '../companion/design-system-css.mjs';
 import { requireThat } from './contracts.ts';
 /** Data-only renderer: same scoped compiler as project generation; never evaluates imported CSS or URLs. */

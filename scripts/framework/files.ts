@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path';
 import { sha256 } from '../shared/hash.mjs';
 import { exists } from '../shared/fs-presence.mjs';
 import { createFilePlan } from '../shared/file-plan.mjs';
-import { parseJsonData } from '../contracts/json-data.mjs';
+import { parseJsonData } from '../contracts/json-data.ts';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array): string => sha256(bytes);
