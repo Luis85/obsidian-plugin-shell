@@ -47,6 +47,26 @@ test('setup preview exposes full keyless provider and desktop flow without write
   assert.equal(plan.provider.provider, 'none'); assert.deepEqual(plan.desktopConnections, ['claude-code', 'codex']);
   assert.deepEqual(readdirSync(f.home), []);
 });
+test('agent-ready project defaults are preview-only and cannot bypass processing consent', t => {
+  const f = fixture(t); mkdirSync(join(f.root, 'design'));
+  writeFileSync(join(f.root, 'design/project.json'), JSON.stringify({ tooling: { hindsight: {
+    enabled: true, agents: ['claude-code', 'codex'], git: 'message', sessions: false,
+  } } }));
+  let r = f.invoke(['setup', '--provider', 'none']); assert.equal(r.status, 0, r.stderr);
+  const plan = JSON.parse(r.stdout); assert.deepEqual(plan.agents, ['claude-code', 'codex']);
+  assert.equal(plan.privacy.git, 'message'); assert.equal(plan.privacy.retainSessions, false);
+  assert.equal(plan.projectDefaults.source, 'design/project.json'); assert.deepEqual(readdirSync(f.home), []);
+  r = f.invoke(['setup', '--provider', 'none', '--apply']); assert.equal(r.status, 1);
+  assert.match(r.stderr, /CONSENT_REQUIRED/); assert.deepEqual(readdirSync(f.home), []);
+});
+test('invalid project Hindsight defaults fail closed without user-scope writes', t => {
+  const f = fixture(t); mkdirSync(join(f.root, 'design'));
+  writeFileSync(join(f.root, 'design/project.json'), JSON.stringify({ tooling: { hindsight: {
+    enabled: true, agents: ['all'], git: 'message', sessions: false,
+  } } }));
+  const r = f.invoke(['setup', '--provider', 'none']); assert.equal(r.status, 1);
+  assert.match(r.stderr, /PROJECT_MEMORY_CONFIG_INVALID/); assert.deepEqual(readdirSync(f.home), []);
+});
 test('new flags fail closed; no query processing or live discovery under dry-run', t => {
   const f = fixture(t);
   for (const args of [['setup', '--agents', 'codex', '--provider', 'none', '--apply'], ['doctor', '--live', '--dry-run'], ['tools', '--agent', 'codex', '--live', '--dry-run'], ['mcp', '--agent', 'codex', '--dry-run'], ['configure', '--provider', 'none', '--provider', 'ollama'], ['recall', '--query', ''], ['status', '--provider', 'none']]) {

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
+import { checkDependencyPins } from '../security/dependency-pins.mjs';
 
 export function stableVersion(value) {
   if (typeof value !== 'string' || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value) || value.split('.').some(part => !Number.isSafeInteger(Number(part)))) throw new Error('INVALID_STABLE_VERSION');
@@ -17,6 +18,7 @@ export function compareVersions(a, b) {
 export async function prepareVersion(root, version, notes, { beforeFinalize } = {}) {
   stableVersion(version);
   if (typeof notes !== 'string' || !notes.trim()) throw new Error('RELEASE_NOTES_REQUIRED');
+  const dependencyPins = await checkDependencyPins(root);
   const names = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'];
   const initial = await createFilePlan(root, names.map(path => ({ path, content: null })));
   const hashes = new Map(initial.changes.map(change => [change.path, change.beforeHash]));
@@ -42,7 +44,9 @@ export async function prepareVersion(root, version, notes, { beforeFinalize } = 
   await beforeFinalize?.();
   const plan = await createFilePlan(root, entries);
   for (const change of plan.changes) if (hashes.get(change.path) !== change.beforeHash) throw new Error(`RELEASE_STALE_INPUT: ${change.path}`);
-  return { plan, version, minAppVersion: manifest.minAppVersion, hostFloorChanged: false };
+  const finalPins = await checkDependencyPins(root);
+  if (JSON.stringify(finalPins) !== JSON.stringify(dependencyPins)) throw new Error('DEPENDENCY_PINS_STALE: Dependency manifests or lockfile changed while preparing the release.');
+  return { plan, version, minAppVersion: manifest.minAppVersion, hostFloorChanged: false, dependencyPins };
 }
 export function parsePrepareArguments(args) {
   const options = {}; const seen = new Set();

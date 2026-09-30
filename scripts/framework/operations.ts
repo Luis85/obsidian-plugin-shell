@@ -1,4 +1,5 @@
 import { docsRead } from './docs.ts';
+import { obsidianRead } from './obsidian-cli.ts';
 import { prototypesRead, prototypesCompare } from './prototypes.ts';
 import { measureProject } from './project-measure.ts';
 import { handoutRead } from './handout-adapter.ts';
@@ -138,6 +139,7 @@ export async function executeOperation(input: Request, context: Context): Promis
         makers: capabilityCatalog().makers, examples: ['node bin/app new ../my-plugin --starter blank --yes', 'node bin/app setup --input project.json --dry-run', 'node bin/app generate --plan-out generation.plan.json', 'node bin/app plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
+    if (command.startsWith('obsidian ')) return await obsidianRead(request, context);
     if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
