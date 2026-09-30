@@ -4,6 +4,7 @@ import { requireSketch } from '../domain/errors.ts';
 import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
+import { brainstormWizard } from './brainstorm.ts';
 import { newDocument } from '../domain/document.ts';
 import { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
@@ -76,6 +77,14 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     page: { label: 'Continue an existing page', run: () => selectPage(ui, workspace) },
     bricks: { label: 'Edit sitemap, layout, entities, data sources and journeys', run: () => editBricks(ui, workspace) },
     library: { label: 'Create or rename components', run: () => library(ui, workspace) },
+    brainstorm: { label: 'Brainstorm a new project or feature', run: async () => {
+      if (workspace.dirty) {
+        if (!await confirm(ui, 'Save current project before starting a feature brainstorm?')) return;
+        await save(ui, options, workspace);
+        if (workspace.dirty) { ui.write('Brainstorm requires the current project to be saved.\n'); return; }
+      }
+      await brainstormWizard(ui, { ...options, offerImport: true, out: undefined });
+    } },
     prototype: { label: 'Prepare a prototype with the guided maker', run: () => prototypeWizard(ui, { ...options, out: undefined }, workspace) },
     save: { label: 'Save Companion project JSON', run: () => save(ui, options, workspace) },
     'first-run': { label: 'Install, build and showcase the generated application', run: () => firstRunWizard(ui, options) },
