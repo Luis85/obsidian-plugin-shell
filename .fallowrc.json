@@ -362,6 +362,12 @@
         ]
       },
       {
+        "name": "cli-bounded-map-contract",
+        "patterns": [
+          "scripts/shared/bounded-map.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
           "scripts/shared/project-path.ts"
@@ -487,7 +493,8 @@
           "cli-confirmation-contract",
           "cli-file-plan-contract",
           "cli-input-contract",
-          "cli-files-contract"
+          "cli-files-contract",
+          "cli-bounded-map-contract"
         ]
       },
       {
@@ -532,7 +539,8 @@
           "cli-confirmation-contract",
           "cli-file-plan-contract",
           "cli-input-contract",
-          "cli-files-contract"
+          "cli-files-contract",
+          "cli-bounded-map-contract"
         ]
       },
       {
@@ -653,6 +661,12 @@
         "from": "cli-files-contract",
         "allow": [
           "cli-files-contract"
+        ]
+      },
+      {
+        "from": "cli-bounded-map-contract",
+        "allow": [
+          "cli-bounded-map-contract"
         ]
       },
       {

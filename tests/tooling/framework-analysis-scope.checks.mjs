@@ -91,3 +91,14 @@ test('typed project-path policy is isolated from implementation layers', () => {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('project-path-contract'), source);
   }
 });
+
+
+test('typed bounded concurrency helper is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-bounded-map-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/bounded-map.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-bounded-map-contract')?.allow, ['cli-bounded-map-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-bounded-map-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
+});
