@@ -38,11 +38,11 @@ async function qualify() {
     const flags = ['new', 'guide', '--preset', preset, '--json'];
     if (options.framework) flags.push('--framework', options.framework);
     if (preset === 'hybrid') flags.push('--targets', 'plugin,webapp,website,cli');
-    const discovery = JSON.parse(run('discover', root, ['shell.mjs', ...flags]));
+    const discovery = JSON.parse(run('discover', root, ['app.mjs', ...flags]));
     const input = discovery.data.input; report.selection = discovery.data.selection;
     Object.assign(input.interview.answers, { title: 'Qualified starter fixture', pages: ['Overview', 'Details'], components: [], approved: true });
     await writeFile(join(scratch, 'request.json'), JSON.stringify(input));
-    const planArgs = ['shell.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
+    const planArgs = ['app.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
     const plan = JSON.parse(run('plan', root, planArgs)); report.fingerprint = plan.data.compilerFingerprint;
     const applied = JSON.parse(run('apply', root, [...planArgs, '--apply', plan.data.planHash]));
     if (applied.status !== 'applied') throw new Error('Expected an applied source fixture.');

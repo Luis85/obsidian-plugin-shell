@@ -7,11 +7,11 @@ Use the Node and npm versions qualified by the checked-out release: inspect `.nv
 ```sh
 node --version
 npm --version
-node shell.mjs version --json
-node shell.mjs doctor
+node bin/app version --json
+node bin/app doctor
 ```
 
-Run from the folder containing the intended `shell.mjs`. Commands normally discover a project root from the working directory; use `--root` when you need to select it explicitly. Quote paths containing spaces. Avoid developing directly inside your personal Obsidian vault.
+Run from the folder containing the intended `app.mjs` (the project root; `node bin/app` is the extensionless entry and `shell.mjs` a compatibility shim). Commands normally discover a project root from the working directory; use `--root` when you need to select it explicitly. Quote paths containing spaces. Avoid developing directly inside your personal Obsidian vault.
 
 The extracted kit contains compiled CLI modules and can start before project dependency installation. The source launcher uses Node's TypeScript support, requesting type stripping where necessary. Starting the CLI is different from installing dependencies required to build or test a generated application.
 
@@ -20,18 +20,18 @@ The extracted kit contains compiled CLI modules and can start before project dep
 Discover the installed starter catalog instead of copying a list that can become stale:
 
 ```sh
-node shell.mjs new --list
-node shell.mjs help new
-node shell.mjs new ../folio-tools --starter blank --id folio-tools --name "Folio Tools" --author "Your Name" --dry-run
+node bin/app new --list
+node bin/app help new
+node bin/app new ../folio-tools --starter blank --id folio-tools --name "Folio Tools" --author "Your Name" --dry-run
 ```
 
 Read the preview. Then apply the requested creation deliberately:
 
 ```sh
-node shell.mjs new ../folio-tools --starter blank --id folio-tools --name "Folio Tools" --author "Your Name" --yes
+node bin/app new ../folio-tools --starter blank --id folio-tools --name "Folio Tools" --author "Your Name" --yes
 cd ../folio-tools
-node shell.mjs status
-node shell.mjs doctor
+node bin/app status
+node bin/app doctor
 ```
 
 `new` creates a separate project; `setup` configures the current project. A positional directory for `new` is relative to the invoking terminal. Do not point `new` at a populated unrelated project. The command protects against unintended vault-local creation; `--inside-vault` is an explicit exception, not the recommended everyday path.
@@ -41,7 +41,7 @@ Use a stable lowercase ID with letters, digits and hyphens. The reviewed validat
 For a custom-file viewer, first inspect the starter, then review a creation such as:
 
 ```sh
-node shell.mjs new ../folio-tools --starter custom-file-view --extension folio --dry-run
+node bin/app new ../folio-tools --starter custom-file-view --extension folio --dry-run
 ```
 
 Custom extensions are lowercase, dotless and must not take over a protected core Obsidian extension. Other starters are discoverable through `new --list`; their presence in your installed kit is authoritative.
@@ -53,8 +53,8 @@ Obtain an actually published developer-kit archive for the intended release, ver
 Open a terminal in that folder:
 
 ```sh
-node shell.mjs help
-node shell.mjs setup
+node bin/app help
+node bin/app setup
 ```
 
 In an interactive terminal, setup can ask for a project JSON path or an explicit blank design, then identity fields. Review the proposed changes before accepting. Where the kit offers generation and installation next, each is a separate confirmation. Declining installation leaves dependencies uninstalled; that is not an error.
@@ -62,9 +62,9 @@ In an interactive terminal, setup can ask for a project JSON path or an explicit
 For an explicit, noninteractive blank setup, preview and apply separately:
 
 ```sh
-node shell.mjs setup --blank --id folio-tools --name "Folio Tools" --author "Your Name" --dry-run --json
-node shell.mjs setup --blank --id folio-tools --name "Folio Tools" --author "Your Name" --yes --no-interaction
-node shell.mjs generate --dry-run
+node bin/app setup --blank --id folio-tools --name "Folio Tools" --author "Your Name" --dry-run --json
+node bin/app setup --blank --id folio-tools --name "Folio Tools" --author "Your Name" --yes --no-interaction
+node bin/app generate --dry-run
 ```
 
 Review generation, then apply it or save a reviewed plan as described in [design and generation](design-and-generation.md). Do not run setup over existing identity/configuration conflicts merely to get past a diagnostic.
@@ -74,8 +74,8 @@ Review generation, then apply it or save a reviewed plan as described in [design
 After creation or generation, inspect the generated package manifest, lockfile and any lifecycle policy. Installation is an explicit network/process operation:
 
 ```sh
-node shell.mjs install
-node shell.mjs install --yes
+node bin/app install
+node bin/app install --yes
 ```
 
 The first invocation reports the installation requirement without running the installation. The second requests exact-lock `npm ci`. Approved lifecycle scripts can run; do not install untrusted generated or third-party project code just because it has a lockfile.
@@ -85,9 +85,9 @@ A dependency-resolution diagnostic means the declared packages and lockfile need
 ## 4. Verify the first useful result
 
 ```sh
-node shell.mjs test
-node shell.mjs build
-node shell.mjs verify --profile project
+node bin/app test
+node bin/app build
+node bin/app verify --profile project
 ```
 
 Use the project verification profile in a generated consumer project. Framework-wide verification has a different scope and may require additional tools and evidence. When a command fails, inspect its diagnostic and retained result rather than treating a build artifact as proof of success.

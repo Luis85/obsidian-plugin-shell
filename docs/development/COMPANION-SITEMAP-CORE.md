@@ -7,7 +7,7 @@
 `scripts/companion/sitemap/` contains framework-free TypeScript over the existing `design.nodes`, `design.links` and `design.canvas`. It does not create a competing page database, browser storage writer or native persistence service. `project inspect` uses the same core for an additive `data.sitemap` summary after the existing project/compiler intake:
 
 ```sh
-node shell.mjs project inspect --input docs/concepts/companion/companion-project.json --json
+node bin/app project inspect --input docs/concepts/companion/companion-project.json --json
 ```
 
 The summary reports surface/native-view/page counts, hierarchy and navigation counts, explicitly declared routes/journeys/features and journey findings. `acceptance` is `structure-only-not-product-acceptance`. Inspection writes nothing and exports no private authoring preimages.

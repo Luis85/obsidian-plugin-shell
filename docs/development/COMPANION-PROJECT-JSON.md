@@ -105,7 +105,7 @@ The next writer increment must define a reviewed deterministic plan from this en
 
 ## Implementation workspace generation
 
-The read-only handoff command above remains separate from workspace generation. The shell now also provides `node shell.mjs generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
+The read-only handoff command above remains separate from workspace generation. The shell now also provides `node bin/app generate` / `npm run companion:scaffold` for explicit plan-and-apply compilation. See [Companion generator](COMPANION-GENERATOR.md) for output, TDD, ownership and qualification boundaries.
 
 ## Page and component designs (v5)
 

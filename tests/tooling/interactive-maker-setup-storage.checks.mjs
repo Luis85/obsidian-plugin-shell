@@ -12,7 +12,7 @@ import { projectSetupPlan, setupStatus, setupPrerequisites, angularSetupGuide } 
 import { setupExample } from '../../bin/application/setup-schema.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const markdown = (id = 'PRD-1') => `---\ntype: prd\nid: ${id}\ntitle: Product\n---\n# Original\nUntouched source.\n`;
 async function scratch(fn) {

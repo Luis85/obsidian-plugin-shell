@@ -11,18 +11,18 @@ Open **Design System → Nuxt UI styling** in the companion. Create or edit type
 Alternatively, export the complete Project JSON and use the independent shell generator:
 
 ```sh
-node shell.mjs generate --input /path/project.companion.json \
+node bin/app generate --input /path/project.companion.json \
   --vault /path/existing-vault --target projects/my-plugin
 
 # Review the returned inventory and use its actual planHash:
-node shell.mjs generate --input /path/project.companion.json \
+node bin/app generate --input /path/project.companion.json \
   --vault /path/existing-vault --target projects/my-plugin \
   --apply <reviewed-planHash>
 ```
 
 Then enter the generated project and explicitly run `npm ci` and `npm run verify:project`. Its ordinary build imports the generated stylesheet and emits `dist/styles.css` together with the existing Nuxt UI and owned shell styles. No manual copy/paste, app-config editing, CDN, Nuxt server or extra dependency is required.
 
-`companion:generate` remains the original byte-exact, write-free JSON handoff. `companion:scaffold` / `shell.mjs generate` is the reviewed compiler. Neither command publishes, enables a plugin or writes business data.
+`companion:generate` remains the original byte-exact, write-free JSON handoff. `companion:scaffold` / `node bin/app generate` is the reviewed compiler. Neither command publishes, enables a plugin or writes business data.
 
 ## Portable declaration
 

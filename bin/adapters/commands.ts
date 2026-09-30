@@ -22,42 +22,42 @@ export { option, type Arguments } from '../domain/command-options.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 export interface CommandContext { root: string; frameworkRoot: string; input: Readable; signal?: AbortSignal; progress?: (message: string) => void }
 export const makerHelp = `Shell maker — make first, generate when ready
-  node shell.mjs first-run             Optional install → typecheck → test → build → showcase
-  node shell.mjs first-run schema --json
-  node shell.mjs first-run --input first-run.json --json
-  node shell.mjs first-run status --json
-  node shell.mjs project-setup         Angular setup in an existing Git + Obsidian vault
-  node shell.mjs project-setup schema --json
-  node shell.mjs project-setup guide --json
-  node shell.mjs project-setup scan --json
-  node shell.mjs project-setup --input setup.json --json
-  node shell.mjs project-setup status --json
-  node shell.mjs project-setup checkpoint --input partial-setup.json --json
-  node shell.mjs project-setup resume --json
-  node shell.mjs project-setup checkpoint-status --json
-  node shell.mjs project-setup discard-checkpoint --json
-  node shell.mjs settings              Edit configs/user-settings.json
-  node shell.mjs settings show --json
-  node shell.mjs settings schema --json
-  node shell.mjs settings --input settings.json --json
-  node shell.mjs settings migrate --input paths.json --json
-  node shell.mjs                       Open saved workspace or create a project (terminal only)
-  node shell.mjs new                   Preset → framework → prototype guide
-  node shell.mjs new presets --json    Discover project presets and compatible frameworks
-  node shell.mjs new guide --preset plugin-angular --json
-  node shell.mjs new validate --input request.json --json
-  node shell.mjs new --input request.json --out projects/demo --json
-  node shell.mjs new <dir> (--starter <id> | --from <project.json>)  Legacy creation
-  node shell.mjs help new              Legacy options and approval policy
-  node shell.mjs sketch                Interactive page/component editor
-  node shell.mjs sketch show --json    Inspect saved IDs and page composition
-  node shell.mjs sketch schema --json  Discover the versioned transaction schema
-  node shell.mjs sketch --input request.json --json
-  node shell.mjs sketch generate --out generated/my-plugin --kind obsidian-plugin --json
-  node shell.mjs prototype             Data-driven prototype preparation guide
-  node shell.mjs prototype guide --json
-  node shell.mjs prototype validate --input answers.json --json
-  node shell.mjs prototype --input answers.json --out prototypes/my-prototype --json
+  node bin/app first-run             Optional install → typecheck → test → build → showcase
+  node bin/app first-run schema --json
+  node bin/app first-run --input first-run.json --json
+  node bin/app first-run status --json
+  node bin/app project-setup         Angular setup in an existing Git + Obsidian vault
+  node bin/app project-setup schema --json
+  node bin/app project-setup guide --json
+  node bin/app project-setup scan --json
+  node bin/app project-setup --input setup.json --json
+  node bin/app project-setup status --json
+  node bin/app project-setup checkpoint --input partial-setup.json --json
+  node bin/app project-setup resume --json
+  node bin/app project-setup checkpoint-status --json
+  node bin/app project-setup discard-checkpoint --json
+  node bin/app settings              Edit configs/user-settings.json
+  node bin/app settings show --json
+  node bin/app settings schema --json
+  node bin/app settings --input settings.json --json
+  node bin/app settings migrate --input paths.json --json
+  node bin/app                       Open saved workspace or create a project (terminal only)
+  node bin/app new                   Preset → framework → prototype guide
+  node bin/app new presets --json    Discover project presets and compatible frameworks
+  node bin/app new guide --preset plugin-angular --json
+  node bin/app new validate --input request.json --json
+  node bin/app new --input request.json --out projects/demo --json
+  node bin/app new <dir> (--starter <id> | --from <project.json>)  Legacy creation
+  node bin/app help new              Legacy options and approval policy
+  node bin/app sketch                Interactive page/component editor
+  node bin/app sketch show --json    Inspect saved IDs and page composition
+  node bin/app sketch schema --json  Discover the versioned transaction schema
+  node bin/app sketch --input request.json --json
+  node bin/app sketch generate --out generated/my-plugin --kind obsidian-plugin --json
+  node bin/app prototype             Data-driven prototype preparation guide
+  node bin/app prototype guide --json
+  node bin/app prototype validate --input answers.json --json
+  node bin/app prototype --input answers.json --out prototypes/my-prototype --json
 Add --apply <planHash> to the same command after reviewing its plan. No --yes shortcut.
 Options: --root <folder>, --project <relative.json> (design/project.json), --input <file|->,
 --out <relative folder>, --kind <obsidian-plugin|clickdummy|project>, --guide <guide.json>,

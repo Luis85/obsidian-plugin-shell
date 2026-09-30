@@ -6,6 +6,10 @@ import { exactKeys, object } from './configuration.ts';
 import { exists, hash, readBounded, readJson } from './files.ts';
 import { requireThat } from './contracts.ts';
 export interface KitFile { path: string; hash: string; bytes: number }
+/** Launchers copied to the kit root. Kits packed before the app.mjs rename carry only shell.mjs. */
+export const launcherFiles = ['app.mjs', 'bin/app', 'shell.mjs'];
+export const bootstrapFiles = [...launcherFiles, 'package.json', 'README.md', 'LICENSE'];
+const legacyBootstrap = ['shell.mjs', 'package.json', 'README.md', 'LICENSE'];
 export interface Kit { schemaVersion: 1; version: string; compilerVersion: string; sourceHash: string; files: KitFile[]; bootstrap: Array<{path: string; hash: string}> }
 export async function listFiles(root: string, folder: string): Promise<string[]> {
   const result: string[] = [];
@@ -32,10 +36,12 @@ export function kitManifest(value: unknown): Kit {
   });
   const bootstrap = input.bootstrap.map(value => {
     const file = object(value); exactKeys(file, ['path', 'hash']);
-    requireThat(typeof file.path === 'string' && ['shell.mjs', 'package.json', 'README.md', 'LICENSE'].includes(file.path) && typeof file.hash === 'string' && /^[a-f0-9]{64}$/.test(file.hash), 'KIT_BOOTSTRAP', 'Invalid bootstrap fingerprint.');
+    requireThat(typeof file.path === 'string' && bootstrapFiles.includes(file.path) && typeof file.hash === 'string' && /^[a-f0-9]{64}$/.test(file.hash), 'KIT_BOOTSTRAP', 'Invalid bootstrap fingerprint.');
     return { path: file.path, hash: file.hash };
   });
-  requireThat(bootstrap.length === 4 && new Set(bootstrap.map(file => file.path)).size === 4, 'KIT_BOOTSTRAP', 'Missing or duplicated bootstrap identity.');
+  const paths = new Set(bootstrap.map(file => file.path));
+  const complete = [bootstrapFiles, legacyBootstrap].some(expected => paths.size === bootstrap.length && bootstrap.length === expected.length && expected.every(path => paths.has(path)));
+  requireThat(complete, 'KIT_BOOTSTRAP', 'Missing or duplicated bootstrap identity.');
   return { schemaVersion: 1, version: input.version, compilerVersion: input.compilerVersion, sourceHash: input.sourceHash, files, bootstrap };
 }
 export async function verifyKit(root: string): Promise<Kit> {

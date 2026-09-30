@@ -33,7 +33,7 @@ test('explain and argument validation are machine discoverable',async()=>{
   }
 });
 test('JSON stdout contains one parseable document; human output names the location and remedy',()=>{
-  const base=[join(root,'shell.mjs'),'compiler','check','--input','-'];
+  const base=[join(root,'app.mjs'),'compiler','check','--input','-'];
   const machine=spawnSync(process.execPath,[...base,'--json'],{cwd:root,input:'{',encoding:'utf8'});
   assert.equal(machine.status,1);assert.equal(JSON.parse(machine.stdout).diagnostics[0].code,'COMPILER_JSON_INVALID');
   const human=spawnSync(process.execPath,base,{cwd:root,input:'{',encoding:'utf8'});assert.match(human.stderr,/stdin.json/);assert.match(human.stderr,/UTF-8/);

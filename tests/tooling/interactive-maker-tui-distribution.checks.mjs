@@ -20,17 +20,18 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
     if (await reviewedExamplesRemoved(frameworkRoot)) {
       // Consumer verification has no pristine showcase to package. Enforce that boundary instead.
       await assert.rejects(assembleKit({ root, frameworkRoot }, compiler), { code: 'KIT_OWNERSHIP' });
-      await assert.rejects(readFile(join(root, 'shell.mjs')), { code: 'ENOENT' });
+      await assert.rejects(readFile(join(root, 'app.mjs')), { code: 'ENOENT' });
       return;
     }
     const files = await assembleKit({ root, frameworkRoot }, compiler);
     // Extract exactly the release's executable files and launcher, without template dependencies.
-    for (const file of files.filter(item => item.path.startsWith('.framework/compiled/') || item.path === 'shell.mjs')) {
+    for (const file of files.filter(item => item.path.startsWith('.framework/compiled/') || ['app.mjs', 'bin/app', 'shell.mjs'].includes(item.path))) {
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
     await assert.rejects(() => readFile(join(root, 'node_modules/typescript/package.json')));
     for (const args of [['studio', '--help', '--json'], ['sketch', 'schema', '--json'], ['prototype', 'guide', '--json'], ['project-setup', 'schema', '--json'], ['project-setup', 'guide', '--json'], ['first-run', 'schema', '--json'], ['first-run', 'status', '--json'], ['settings', 'schema', '--json'], ['settings', 'show', '--json'], ['new', 'presets', '--json'], ['new', 'guide', '--preset', 'cli', '--json']]) {
-      const run = spawnSync(process.execPath, ['shell.mjs', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
+      // Alternate the extensionless entry and the legacy shim; both must reach the compiled maker.
+      const run = spawnSync(process.execPath, [args[0] === 'settings' ? 'shell.mjs' : 'bin/app', ...args], { cwd: root, encoding: 'utf8', timeout: 20000 });
       assert.equal(run.status, 0, run.stderr + run.stdout);
       const result = JSON.parse(run.stdout); assert.equal(result.status, 'ok');
       if (args[0] === 'studio') assert.match(result.data.help, /--ui <auto\|tui\|plain>/);

@@ -30,7 +30,7 @@ export function duration(ms: number): string {
 export function runnable(next: string): string {
   const words = next.trim().split(/\s+/);
   const known = commands.some(entry => entry.id.split(' ').every((word, index) => words[index] === word));
-  return known ? `node shell.mjs ${next.trim()}` : next;
+  return known ? `node bin/app ${next.trim()}` : next;
 }
 export function nextLine(style: Style, next: string | undefined | null): string {
   return next ? `${bold(style, 'Next:')} ${runnable(next)}\n` : '';

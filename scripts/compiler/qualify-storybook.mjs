@@ -26,7 +26,7 @@ try {
   visual.nextId = Math.max(visual.nextId, 101);
   const input = join(vault, 'project.json'); await writeFile(input, JSON.stringify(document));
   const plan = await planProject({ input, vault, target: 'project', templateRoot: root }); await applyProject(plan, plan.hash);
-  const target = join(vault, 'project'), shell = join(target, 'shell.mjs');
+  const target = join(vault, 'project'), shell = join(target, 'app.mjs');
   const hash = async path => createHash('sha256').update(await readFile(join(target, path))).digest('hex');
   const rootLockBefore = await hash('package-lock.json');
   await command('project-install', [resolve(npm), 'ci', '--no-fund'], target);

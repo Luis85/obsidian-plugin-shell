@@ -4,13 +4,13 @@ import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 import { readBounded, hash, readJson, exists } from './files.ts';
-import { listFiles, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
+import { bootstrapFiles, launcherFiles, listFiles, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
 import { object } from './configuration.ts';
 import { included, standaloneSource, updateOwnership } from './distribution.ts';
 import { requireThat, type Context } from './contracts.ts';
 const templateRoots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin'];
-const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'shell.mjs', 'vitest.obsidian.config.mjs'];
+const templateFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'tsconfig.generator.json', 'tsconfig.framework.json', 'tsconfig.maker.json', 'vitest.maker.config.mjs', 'tsconfig.sitemap.json', 'tsconfig.authoring.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', '.gitignore', '.nvmrc', 'AGENTS.md', 'LICENSE', 'README.md', 'TEMPLATE-GUIDE.md', 'SHELL-FIRST-OVERVIEW.md', 'DESIGN-CONSTRAINTS.md', 'PROJECT-SETUP-HANDOUT.md', 'app.mjs', 'shell.mjs', 'vitest.obsidian.config.mjs'];
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = await import('typescript');
@@ -50,9 +50,9 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   }
   add('.framework/compiled/package.json', Buffer.from('{"type":"module"}\n'));
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
-  const rootPackage = { ...pkg, bin: { 'obs-shell': 'shell.mjs' }, scripts: { ...object(pkg.scripts), setup: 'node shell.mjs setup', shell: 'node shell.mjs', make: 'node shell.mjs make' } };
+  const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: { ...object(pkg.scripts), setup: 'node app.mjs setup', shell: 'node app.mjs', app: 'node app.mjs', make: 'node app.mjs make' } };
   const bootstrap: Kit['bootstrap'] = [];
-  for (const path of ['shell.mjs', 'package.json', 'README.md', 'LICENSE']) {
+  for (const path of bootstrapFiles) {
     const bytes = path === 'package.json' ? Buffer.from(json(rootPackage)) : standaloneSource(path, await readBounded(join(context.frameworkRoot, path), 8_000_000));
     files.push({ path, bytes }); bootstrap.push({ path, hash: hash(bytes) });
   }
@@ -89,9 +89,13 @@ export async function upgradePlan(context: Context, from: string) {
   const nextPaths = new Set(next.files.map(file => file.path));
   for (const file of next.files) entries.push({ path: file.path, content: (await readBounded(join(nextRoot, file.path), 8_000_000)).toString('base64'), encoding: 'base64' });
   requireThat(current.files.every(file => nextPaths.has(file.path)), 'KIT_REMOVAL_REQUIRES_MIGRATION', 'This kit removes files; an explicit removal migration is required.');
-  const launcher = current.bootstrap.find(file => file.path === 'shell.mjs')!;
-  requireThat(hash(await readBounded(join(context.root, 'shell.mjs'))) === launcher.hash, 'LAUNCHER_EDITED', 'Preserve the edited launcher and review its migration.');
-  entries.push({ path: 'shell.mjs', content: (await readBounded(join(nextRoot, 'shell.mjs'))).toString('utf8') });
+  // Legacy kits own only shell.mjs; upgrading adds app.mjs and bin/app and turns shell.mjs into a forwarding shim.
+  for (const launcher of current.bootstrap.filter(file => launcherFiles.includes(file.path))) {
+    requireThat(hash(await readBounded(join(context.root, launcher.path))) === launcher.hash, 'LAUNCHER_EDITED', 'Preserve the edited launcher and review its migration.');
+  }
+  for (const launcher of next.bootstrap.filter(file => launcherFiles.includes(file.path))) {
+    entries.push({ path: launcher.path, content: (await readBounded(join(nextRoot, launcher.path))).toString('utf8') });
+  }
   entries.push({ path: '.framework/kit.json', content: json(next) });
   return { plan: await createFilePlan(context.root, entries), conflicts: [] as string[], summary: { from: current.version, to: next.version, sourceRegeneration: 'separate-reviewed-operation', dependencies: 'unchanged' } };
 }

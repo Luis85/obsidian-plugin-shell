@@ -1,9 +1,9 @@
 # Selected generation over a canonical project
 
 ```sh
-node shell.mjs generate --scope feature:workspace --json
-node shell.mjs generate --scope page:vp-2 --json
-node shell.mjs generate --scope component:vc-3 --json
+node bin/app generate --scope feature:workspace --json
+node bin/app generate --scope page:vp-2 --json
+node bin/app generate --scope component:vc-3 --json
 # Review the exact plan and repeat the same request with --apply <planHash>.
 ```
 

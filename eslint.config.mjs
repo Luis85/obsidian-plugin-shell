@@ -19,6 +19,8 @@ export default ts.config(
   },
   { files: ['bin/**/*.ts'], languageOptions: { parserOptions: { project: ['./tsconfig.maker.json'], tsconfigRootDir: import.meta.dirname } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules },
+  // Extensionless launcher: lint it as an ES module (the package "type" decides how Node loads it).
+  { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   ...productRoots.map(root => ({ files: [`${root}/**/*.{ts,vue}`],
     languageOptions: { parserOptions: { parser: ts.parser, project: ['./tsconfig.project.json'], extraFileExtensions: ['.vue'], tsconfigRootDir: import.meta.dirname } },

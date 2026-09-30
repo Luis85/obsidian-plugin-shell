@@ -3,9 +3,9 @@
 The current transport is `obsidian-companion-project` v6. Discover the **project** schema, not the operation request/result schema:
 
 ```sh
-node shell.mjs project schema --version 6 --json
-node shell.mjs project validate --input project.json --json
-node shell.mjs project validate --input - --json < project.json
+node bin/app project schema --version 6 --json
+node bin/app project validate --input project.json --json
+node bin/app project validate --input - --json < project.json
 ```
 
 `project schema` returns the Draft 2020-12 schema in the versioned operation result's `data` field. It works without project dependencies, configuration, Git, or a prepared output folder. Version 6 is the only published current schema; legacy v1–v5 inputs go through `project validate`. Schema responses are independent copies and carry no execution authority.

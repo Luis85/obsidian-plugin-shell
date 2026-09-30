@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { buildModel, renderReference, renderDiagnostics } from '../../scripts/documentation/render.mjs';
 import { synchronize, main } from '../../scripts/documentation/manual.mjs';
 const command = { id: 'sample inspect', summary: 'Inspect the sample.', options: { input: 'value' }, maxArgs: 0, effect: 'read' };
-const help = { group: 'inspect', usage: 'node shell.mjs sample inspect --input sample.json', examples: ['node shell.mjs sample inspect --input sample.json'], optionHelp: { input: { description: 'Source file.', default: 'sample.json' }, json: { description: 'Structured result.' } } };
+const help = { group: 'inspect', usage: 'node bin/app sample inspect --input sample.json', examples: ['node bin/app sample inspect --input sample.json'], optionHelp: { input: { description: 'Source file.', default: 'sample.json' }, json: { description: 'Structured result.' } } };
 const groups = [{ id: 'inspect', title: 'Inspection', commands: ['sample inspect'] }];
 function model({ commands = [structuredClone(command)], explain = () => structuredClone(help), grouping = structuredClone(groups), kinds = item => ({ ...item.options, json: 'flag', yes: 'flag' }) } = {}) {
   return buildModel(commands, explain, kinds, grouping, '0.4.0', { EXAMPLE_B: 'Second.', EXAMPLE_A: 'First.' });

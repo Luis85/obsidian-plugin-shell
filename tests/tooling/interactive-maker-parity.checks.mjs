@@ -56,7 +56,7 @@ test('full and fast daily gates include maker types and tests when the CLI is pr
   const root = await mkdtemp(join(await realpath(tmpdir()), 'maker-gates-'));
   try {
     await mkdir(join(root, 'bin'));
-    await writeFile(join(root, 'bin/shell.ts'), 'export {};');
+    await writeFile(join(root, 'bin/app.ts'), 'export {};');
     await writeFile(join(root, 'tsconfig.maker.json'), '{}');
     const full = await checkSteps(root, false), fast = await checkSteps(root, true, async () => null);
     for (const plan of [full, fast]) {

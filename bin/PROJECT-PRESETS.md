@@ -3,9 +3,9 @@
 ## Start here
 
 ```sh
-node shell.mjs new
-# No saved project? `node shell.mjs` opens the same new-project guide.
-node shell.mjs new presets --json
+node bin/app new
+# No saved project? `node bin/app` opens the same new-project guide.
+node bin/app new presets --json
 ```
 
 Creation proceeds through **preset → frontend framework → hybrid targets when applicable → prototype interview → explicit design agreement → file-plan review → default-No apply**. Escape goes back; Ctrl+C cancels and restores the terminal. Plain and accessibility modes follow the same catalog/interview. Selected hybrid targets survive a revisit; changing framework/preset invalidates agreement. A saved workspace retains its page editor, with an additional Create another project action.
@@ -26,8 +26,8 @@ Named stacks are suggested defaults, not distinct project-type schemas. The seco
 ## Agent interface
 
 ```sh
-node shell.mjs new guide --preset plugin-angular --framework angular --json
-node shell.mjs new guide --preset hybrid --framework vanilla --targets plugin,webapp,cli --json
+node bin/app new guide --preset plugin-angular --framework angular --json
+node bin/app new guide --preset hybrid --framework vanilla --targets plugin,webapp,cli --json
 ```
 
 Use the response's `data.input` as the request; it is deliberately not approved. The nested field is `interview`, not the reserved JSON property `prototype`. Existing anti-prototype-pollution validation is unchanged.
@@ -57,9 +57,9 @@ Use the response's `data.input` as the request; it is deliberately not approved.
 Review the complete defaults and answers with `new validate`; set `approved: true` only after explicit design agreement. Resolve open questions and requested concept-board exploration first. Image generation is not performed by the CLI.
 
 ```sh
-node shell.mjs new validate --input request.json --json
-node shell.mjs new --input request.json --out projects/issue-desk --json
-node shell.mjs new --input request.json --out projects/issue-desk --apply <reviewed-planHash> --json
+node bin/app new validate --input request.json --json
+node bin/app new --input request.json --out projects/issue-desk --json
+node bin/app new --input request.json --out projects/issue-desk --apply <reviewed-planHash> --json
 ```
 
 `--input -` reads bounded JSON from stdin. JSON, CI and noninteractive paths never take terminal ownership or prompt. Selection flags are for discovery and interactive creation, not silent overrides of a reviewed input file. Validation/discovery reject write flags. The plan hash covers the selected configuration, full model, source and documentation. No `--yes` bypass is added. Existing explicit legacy `new --starter`, `new --from`, `new --list` and `new <directory>` routes remain available.

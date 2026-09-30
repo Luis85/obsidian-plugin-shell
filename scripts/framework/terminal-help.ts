@@ -32,7 +32,7 @@ function goldenPath(style: Style, data: HelpData): string {
   text += `\n${bold(style, 'More commands')}\n`;
   const titleWidth = Math.max(...data.groups.map(group => group.title.length));
   for (const group of data.groups) text += `  ${group.title.padEnd(titleWidth)}  ${group.commands.join(', ')}\n`;
-  return text + '\nDetails: node shell.mjs help <command>   Everything: node shell.mjs help --all   Machines: add --json\n';
+  return text + '\nDetails: node bin/app help <command>   Everything: node bin/app help --all   Machines: add --json\n';
 }
 function everything(style: Style, data: HelpData): string {
   const width = Math.max(...data.commands.map(entry => entry.id.length));
@@ -42,7 +42,7 @@ function everything(style: Style, data: HelpData): string {
     for (const id of group.commands) { const entry = data.commands.find(item => item.id === id); if (entry) text += `  ${entry.id.padEnd(width)}  ${entry.summary}\n`; }
     text += '\n';
   }
-  return text + 'Details: node shell.mjs help <command>. Add --json for one machine-readable result; changes preview until --yes.\n';
+  return text + 'Details: node bin/app help <command>. Add --json for one machine-readable result; changes preview until --yes.\n';
 }
 export function helpText(style: Style, data: HelpData): string {
   if (data.scope === 'command' && data.commands.length === 1) return commandPage(style, data.commands[0]!);

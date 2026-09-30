@@ -7,21 +7,21 @@ The project compiler emits a browser composition alongside the normal plugin sou
 From an inspected framework checkout with its qualified toolchain:
 
 ```sh
-node shell.mjs new ../my-concept --from ./project.companion.json
+node bin/app new ../my-concept --from ./project.companion.json
 # Review the input, file inventory, warnings and plan hash before applying.
-node shell.mjs new ../my-concept --from ./project.companion.json --apply <reviewed-plan-hash>
+node bin/app new ../my-concept --from ./project.companion.json --apply <reviewed-plan-hash>
 cd ../my-concept
 npm ci
 npm run verify:project
 npm run build:clickdummy
 ```
 
-`npm run build:clickdummy` calls `node shell.mjs clickdummy build`. The fixed output is `clickdummy.html` in the generated project root. Open that file directly in a browser. Initial dependency installation needs the registry; the built HTML embeds its runtime, CSS, notices and complete project JSON and does not use runtime CDN imports.
+`npm run build:clickdummy` calls `node bin/app clickdummy build`. The fixed output is `clickdummy.html` in the generated project root. Open that file directly in a browser. Initial dependency installation needs the registry; the built HTML embeds its runtime, CSS, notices and complete project JSON and does not use runtime CDN imports.
 
 ```sh
-node shell.mjs clickdummy build --dry-run --json
-node shell.mjs clickdummy build --json
-node shell.mjs clickdummy build --replace --json
+node bin/app clickdummy build --dry-run --json
+node bin/app clickdummy build --json
+node bin/app clickdummy build --replace --json
 ```
 
 Dry run launches no process and writes nothing. The real build runs trusted project code with the existing bounded process adapter. `--replace` explicitly permits replacing a previous clickdummy, but the shipped worker preserves last-good output until compilation and static offline validation succeed. No new CLI output path, arbitrary source entry, shell command or dependency version is accepted from project JSON.

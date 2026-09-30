@@ -8,7 +8,7 @@ import { newDocument } from '../../bin/domain/document.ts';
 import { readSnapshot, savePlan, applyPrepared, readData } from '../../bin/adapters/storage.ts';
 import { packagePlan, outputBoundary } from '../../bin/adapters/package-plan.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 async function scratch(work) { const root = await mkdtemp(join(await realpath(tmpdir()), 'shell-maker-')); try { await work(root); } finally { await rm(root, { recursive: true, force: true }); } }
 const context = root => ({ root, frameworkRoot, input: Readable.from([]) });

@@ -2,6 +2,8 @@ name: Shell CLI manual
 on:
   pull_request:
     paths:
+      - 'app.mjs'
+      - 'bin/app'
       - 'shell.mjs'
       - 'package.json'
       - '.nvmrc'

@@ -157,6 +157,7 @@
     "docs/concepts/companion/editor/prototypes.css",
     "scripts/companion/native-contract.mjs",
     "scripts/companion/project-contract.mjs",
+    "app.mjs",
     "shell.mjs",
     "scripts/companion/runtime/operation.ts",
     "docs/concepts/companion/src/storymap-model.js",
@@ -199,7 +200,7 @@
     "scripts/framework/cli.ts",
     "scripts/concepts/mvp-bridge.js",
     "scripts/concepts/prototype-bridge.js",
-    "bin/shell.ts",
+    "bin/app.ts",
     "scripts/makers/cli.mjs",
     "scripts/compiler/qualify-presets.mjs",
     "scripts/companion/prd-limits.mjs"
@@ -237,7 +238,7 @@
         "patterns": [
           "bin/adapters/**",
           "bin/presentation/**",
-          "bin/shell.ts"
+          "bin/app.ts"
         ]
       },
       {
@@ -321,6 +322,7 @@
         "patterns": [
           "scripts/**",
           "*.config.*",
+          "app.mjs",
           "shell.mjs"
         ]
       },

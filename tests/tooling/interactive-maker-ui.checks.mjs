@@ -14,7 +14,7 @@ import { interview } from '../../bin/presentation/guide.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0; const transcript = [];

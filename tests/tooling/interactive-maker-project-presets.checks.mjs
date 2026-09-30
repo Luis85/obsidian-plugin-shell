@@ -12,7 +12,7 @@ import { newDocument, documentText, openDocument } from '../../bin/domain/docume
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const catalog = await loadProjectCatalog();
 function selection(preset, extra = {}) { return resolveProjectSelection(catalog, { schemaVersion: 1, catalogVersion: 1, preset, ...extra }); }
@@ -157,7 +157,7 @@ test('machine stdout stays one JSON response, including TTY/CI and failed valida
   io.input.isTTY = true; io.error.isTTY = true;
   assert.equal(await main(['new', '--input', '-', '--json', '--ui', 'tui', '--root', root, '--out', 'machine'], frameworkRoot, io), 0);
   assert.equal(output.length, 1); assert.equal(JSON.parse(output[0]).status, 'planned'); assert.equal(errors.length, 0);
-  const child = spawnSync(process.execPath, ['--experimental-strip-types', 'shell.mjs', 'new', '--list', '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 15000 });
+  const child = spawnSync(process.execPath, ['--experimental-strip-types', 'app.mjs', 'new', '--list', '--json'], { cwd: frameworkRoot, encoding: 'utf8', timeout: 15000 });
   assert.equal(child.status, 0, child.stderr + child.stdout);
   assert.ok(JSON.parse(child.stdout).data);
 }));

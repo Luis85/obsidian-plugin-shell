@@ -55,7 +55,7 @@ async function changedFiles(root: string, git: Git = runGit): Promise<Changes> {
     reason: `deleted, configuration or non-code files changed (${listed.slice(0, 5).join(', ')}${listed.length > 5 ? ', …' : ''}); running the full suite` };
 }
 async function makerSteps(root: string): Promise<CheckStep[]> {
-  if (!await exists(join(root, 'bin/shell.ts')) || !await exists(join(root, 'tsconfig.maker.json'))) return [];
+  if (!await exists(join(root, 'bin/app.ts')) || !await exists(join(root, 'tsconfig.maker.json'))) return [];
   return [
     { id: 'maker-types', display: 'tsc --noEmit --project tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'tsconfig.maker.json'] },
     { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'] },
@@ -112,8 +112,8 @@ export async function runCheckSteps(steps: readonly CheckStep[], context: Contex
   return outcomes;
 }
 function nextStep(failed: StepOutcome[], fast: boolean): string {
-  if (failed.length && failed.every(step => step.code === 'TOOL_MISSING')) return 'node shell.mjs install --yes';
-  return `Fix the failures above, then rerun: node shell.mjs check${fast ? ' --fast' : ''}`;
+  if (failed.length && failed.every(step => step.code === 'TOOL_MISSING')) return 'node bin/app install --yes';
+  return `Fix the failures above, then rerun: node bin/app check${fast ? ' --fast' : ''}`;
 }
 export async function checkOperation(request: Request, context: Context, run: Runner = runNode, git: Git = runGit): Promise<Result> {
   const fast = request.options.fast === true;

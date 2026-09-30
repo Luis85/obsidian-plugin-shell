@@ -20,7 +20,7 @@ This file belongs at the project root: `PROJECT-SETUP-HANDOUT.md`. It is a meeti
 
 **Source snapshot:** the machine-readable comment below stores only project-relative file paths and hashes, not PRD contents or credentials. Do not edit it to bypass freshness checks. After changing inputs, use the explicit refresh operation, which preserves answers and notes and resets review checkboxes.
 
-**Agent interface:** first discover the installed capabilities with `node shell.mjs capabilities --json`. With the handout capability installed, use `node shell.mjs handout validate --json` for readiness and `node shell.mjs handout inspect --json` for structured answers. A blocked result stops setup execution, not the trio discussion.
+**Agent interface:** first discover the installed capabilities with `node bin/app capabilities --json`. With the handout capability installed, use `node bin/app handout validate --json` for readiness and `node bin/app handout inspect --json` for structured answers. A blocked result stops setup execution, not the trio discussion.
 
 **Draft template:** no PRD files were available when this copy was generated. Add the given PRDs, refresh the source snapshot, and review the answers before using it as an agent execution brief.
 

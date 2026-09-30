@@ -89,7 +89,7 @@ interface LintFile { filePath: string; messages: Array<{ ruleId: string | null; 
 /** Reuses the project's ESLint configuration (eslint-plugin-obsidianmd recommended + type-checked). */
 export function lintRule(report: LintFile[] | null, root: string, problem?: string): RuleResult {
   const remediation = 'Run eslint src and fix each reported rule; see the eslint-plugin-obsidianmd rule docs.';
-  if (!report) return rule('eslint-obsidianmd', 'lint', sources.eslint, problem ?? 'ESLint did not produce a report.', '', problem?.includes('not installed') ? 'Install dependencies: node shell.mjs install --yes' : remediation);
+  if (!report) return rule('eslint-obsidianmd', 'lint', sources.eslint, problem ?? 'ESLint did not produce a report.', '', problem?.includes('not installed') ? 'Install dependencies: node bin/app install --yes' : remediation);
   const counts = new Map<string, { count: number; first: string }>();
   for (const file of report) for (const message of file.messages) {
     const id = message.ruleId ?? 'parse-error', entry = counts.get(id) ?? { count: 0, first: `${file.filePath.startsWith(root) ? file.filePath.slice(root.length + 1) : file.filePath}:${message.line ?? 0}` };
@@ -124,8 +124,8 @@ async function buildRule(root: string, manifestText: string | null): Promise<Rul
     } catch { identity = 'dist/manifest.json is not valid JSON.'; }
   }
   const styles = await exists(join(root, 'dist/styles.css'));
-  return [rule('build-artifacts', 'build', sources.submit, missing.length ? `Missing release assets: ${missing.join(', ')}.` : identity, 'dist/main.js and dist/manifest.json exist and match manifest.json.', 'Build the release assets: node shell.mjs build'),
-    rule('build-styles', 'build', sources.submit, null, styles ? 'dist/styles.css exists.' : '', 'Build again if the plugin ships styles: node shell.mjs build', styles ? null : 'dist/styles.css is absent (optional unless the plugin has styles).')];
+  return [rule('build-artifacts', 'build', sources.submit, missing.length ? `Missing release assets: ${missing.join(', ')}.` : identity, 'dist/main.js and dist/manifest.json exist and match manifest.json.', 'Build the release assets: node bin/app build'),
+    rule('build-styles', 'build', sources.submit, null, styles ? 'dist/styles.css exists.' : '', 'Build again if the plugin ships styles: node bin/app build', styles ? null : 'dist/styles.css is absent (optional unless the plugin has styles).')];
 }
 export async function submissionCheck(context: Context, dryRun = false): Promise<Result> {
   if (dryRun) return result('check submission', { execution: 'not-run', effects: 'runs the project ESLint configuration (trusted project code); writes nothing' }, 'planned');

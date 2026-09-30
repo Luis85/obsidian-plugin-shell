@@ -4,17 +4,17 @@ Implementation on PR #18, 2026-09-25. This is a developer-facing TypeScript CLI 
 
 ## Start a new plugin from a starter
 
-`node shell.mjs new` (alias `npm run new --`) is the one-command front door to the
+`node bin/app new` (alias `npm run new --`) is the one-command front door to the
 existing project compiler. It loads `docs/concepts/companion/starters/catalog.json`
 through the same SHA-256-checked loader as the concept, applies the same
 identity-only customization (`id`, `name`, optional `author`; no label rewrites and a
 provenance note in `design/project.json`), then plans with the unchanged generator.
 
 ```sh
-node shell.mjs new --list [--json]
-node shell.mjs new <dir> --starter <id> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--json]
-node shell.mjs new <dir> --starter <id> --yes [--install]
-node shell.mjs new <dir> --starter <id> --apply <planHash>
+node bin/app new --list [--json]
+node bin/app new <dir> --starter <id> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--json]
+node bin/app new <dir> --starter <id> --yes [--install]
+node bin/app new <dir> --starter <id> --apply <planHash>
 ```
 
 - `<dir>` is absolute or relative to the invoking shell (`INIT_CWD` under `npm run new`).
@@ -53,7 +53,7 @@ acceptance, native qualification or release readiness.
 ### From an exported companion project
 
 ```sh
-node shell.mjs new <dir> --from <project.companion.json> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--yes | --apply <planHash>] [--install] [--json]
+node bin/app new <dir> --from <project.companion.json> [--id <plugin-id>] [--name "<Plugin Name>"] [--author "<Author>"] [--yes | --apply <planHash>] [--install] [--json]
 ```
 
 `--from` accepts any complete project JSON exported by the companion, not only a
@@ -76,7 +76,7 @@ Editing the file after review makes its plan hash stale. See
 
 ## Golden path, help and the check gate
 
-`node shell.mjs help` starts with the golden path (`new` → `install` → `dev` → `test`
+`node bin/app help` starts with the golden path (`new` → `install` → `dev` → `test`
 → `check` → `make`), each with a runnable example, then lists the remaining
 commands by group. `help --all` lists every command with its summary, and
 `help <command>` (or `<command> --help`) shows usage, options with allowed values
@@ -96,13 +96,13 @@ the same single versioned envelope.
 Mistyped commands, options and maker recipes get "did you mean" suggestions from the
 catalog, including multi-word commands (`plan aply` → `plan apply`). They keep the
 documented exit code 1 for rejected requests; JSON results carry the candidates in
-`data.suggestions` and a `next` hint such as `node shell.mjs help status`.
+`data.suggestions` and a `next` hint such as `node bin/app help status`.
 
 ```sh
-node shell.mjs check                 # or npm run check
-node shell.mjs check --fast --json   # or npm run check:fast; for agent Stop hooks
-node shell.mjs check --dry-run       # list the steps without running them
-node shell.mjs check submission      # or npm run check:submission
+node bin/app check                 # or npm run check
+node bin/app check --fast --json   # or npm run check:fast; for agent Stop hooks
+node bin/app check --dry-run       # list the steps without running them
+node bin/app check submission      # or npm run check:submission
 ```
 
 `check` is the fast daily and agent gate. It runs every step even after a failure,
@@ -166,7 +166,7 @@ checkout itself fails the forbidden-word and description rules (`plugin-shell`,
 The build of the framework distribution is an explicit maintainer action:
 
 ```sh
-node shell.mjs framework pack --out ./plugin-framework.zip --yes --json
+node bin/app framework pack --out ./plugin-framework.zip --yes --json
 ```
 
 This uses the installed TypeScript compiler, compiles tooling into `.framework/compiled`, retains the matching template under `.framework/template`, and records file hashes, versions and source identity in `.framework/kit.json`. The ZIP has deterministic sorted entries and fixed timestamps. Packing does not upload, publish or install anything. A configured consumer cannot be repackaged as the framework by this command. Checksums detect corruption; they do not authenticate an untrusted distributor.
@@ -174,7 +174,7 @@ This uses the installed TypeScript compiler, compiles tooling into `.framework/c
 The user extracts that ZIP into a new directory and runs either:
 
 ```sh
-node shell.mjs setup
+node bin/app setup
 npm run setup
 ```
 
@@ -185,15 +185,15 @@ Interactive setup requests a project JSON path or a blank project identity. It r
 ## Explicit human and agent workflow
 
 ```sh
-node shell.mjs setup --input ./my-project.json --dry-run --json
-node shell.mjs setup --input ./my-project.json --yes --json
-node shell.mjs generate --plan-out generation.plan.json --json
-node shell.mjs plan inspect generation.plan.json --json
-node shell.mjs plan apply generation.plan.json --yes --json
-node shell.mjs install --yes --json
-node shell.mjs build --json
-node shell.mjs test --profile project --json
-node shell.mjs verify --profile project --json
+node bin/app setup --input ./my-project.json --dry-run --json
+node bin/app setup --input ./my-project.json --yes --json
+node bin/app generate --plan-out generation.plan.json --json
+node bin/app plan inspect generation.plan.json --json
+node bin/app plan apply generation.plan.json --yes --json
+node bin/app install --yes --json
+node bin/app build --json
+node bin/app test --profile project --json
+node bin/app verify --profile project --json
 ```
 
 A configured blank start uses `setup --id my-plugin --name "My Plugin" --author "Author" --blank --yes`. It creates an inert minimal design through the same intake validator, not a competing template generator. Supplying identity without `--blank` or `--input` only configures the project. Import can follow later.
@@ -206,15 +206,15 @@ A configured blank start uses `setup --id my-plugin --name "My Plugin" --author 
 
 ## Scoped help, input and design-system exports
 
-`node shell.mjs --version --json` reports the pinned framework/Node versions. `help styles export` or `styles export --help` describes that operation only; `make describe <recipe>` rejects unknown recipes. Returned command descriptors are isolated copies and cannot change execution policy. Structured API request fields are never reinterpreted as command-line options.
+`node bin/app --version --json` reports the pinned framework/Node versions. `help styles export` or `styles export --help` describes that operation only; `make describe <recipe>` rejects unknown recipes. Returned command descriptors are isolated copies and cannot change execution policy. Structured API request fields are never reinterpreted as command-line options.
 
 File and stdin intake are bounded and reject invalid UTF-8. Ctrl-C, termination, prompt EOF and input cancellation settle without waiting for an upstream EOF. Cancellation does not imply that earlier completed steps were undone. Saved plans must not occupy one of their own output paths or the configured test vault; custom-code approval is never serialized.
 
 ```sh
-node shell.mjs styles inspect --input design/project.json --json
-node shell.mjs styles export --input design/project.json --format css --dry-run --json
-node shell.mjs styles export --input design/project.json --format css --yes --json
-node shell.mjs styles export --input design/project.json --format html --yes --json
+node bin/app styles inspect --input design/project.json --json
+node bin/app styles export --input design/project.json --format css --dry-run --json
+node bin/app styles export --input design/project.json --format css --yes --json
+node bin/app styles export --input design/project.json --format html --yes --json
 ```
 
 CSS is byte-identical to the scoped compiler used during project generation. `json`, `markdown` and self-contained `html` exports are also supported. The default output is `exports/design-system.<extension>`; `--out` selects a safe project-relative file. Existing different bytes are preserved and reported as conflicts. No fonts, scripts or remote assets are fetched. Documentation escapes authored markup and is not evidence of accessibility acceptance.
@@ -238,13 +238,13 @@ Legacy `companion:generate` remains dependency-free, exact-byte, read-only JSON 
 ## Test vault and fixtures
 
 ```sh
-node shell.mjs vault prepare --yes
-node shell.mjs plugin install --dry-run --json
-node shell.mjs plugin install --yes --json
-node shell.mjs data plan --input test-data-manifest.json --json
-node shell.mjs data apply --input test-data-manifest.json --apply <approval-hash> --json
-node shell.mjs data reset-plan --input test-data-manifest.json --json
-node shell.mjs data reset --input test-data-manifest.json --apply <approval-hash> --json
+node bin/app vault prepare --yes
+node bin/app plugin install --dry-run --json
+node bin/app plugin install --yes --json
+node bin/app data plan --input test-data-manifest.json --json
+node bin/app data apply --input test-data-manifest.json --apply <approval-hash> --json
+node bin/app data reset-plan --input test-data-manifest.json --json
+node bin/app data reset --input test-data-manifest.json --apply <approval-hash> --json
 ```
 
 Installation uses the configured isolated-vault marker and only built plugin assets. It preserves `data.json`, unrelated notes/plugins and security settings, and never enables the plugin. `.test-vault` is the new default; existing protected `.dev-vault` workflows retain their legacy installer rather than being moved silently. Alternate host configuration-directory names are supported explicitly.

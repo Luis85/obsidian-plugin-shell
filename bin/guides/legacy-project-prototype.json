@@ -209,7 +209,7 @@
     },
     {
       "path": "README.md",
-      "template": "# {{title}} — project prototype package\n\nStart with execution-prompt.md. source/ contains the selected runtime boilerplate, shared core, build scripts, tests and exact direct dependency pins. Read source/README.md before installing. No dependencies have been installed, no generated build has run and no native plugin has been activated by preparation.\n\nReview project-create.json before replaying it with node shell.mjs new --input <file> --out <folder> --json. Apply requires the exact returned planHash; edited files are preserved. prototype-guide.json captures the guide used.\n"
+      "template": "# {{title}} — project prototype package\n\nStart with execution-prompt.md. source/ contains the selected runtime boilerplate, shared core, build scripts, tests and exact direct dependency pins. Read source/README.md before installing. No dependencies have been installed, no generated build has run and no native plugin has been activated by preparation.\n\nReview project-create.json before replaying it with node bin/app new --input <file> --out <folder> --json. Apply requires the exact returned planHash; edited files are preserved. prototype-guide.json captures the guide used.\n"
     },
     {
       "path": "prototype-answers.json",

@@ -53,7 +53,7 @@ test('custom source folders produce contained valid relative imports and escaped
 });
 test('full generator includes the public command, fixed browser entry and native-state forwarding', async () => {
   const files=new Map((await projectFiles(root,model)).map(f=>[f.path,f]));
-  assert.equal(JSON.parse(files.get('package.json').content).scripts['build:clickdummy'],'node shell.mjs clickdummy build');
+  assert.equal(JSON.parse(files.get('package.json').content).scripts['build:clickdummy'],'node bin/app clickdummy build');
   assert.ok(files.has('harness/prototype/clickdummy.ts'));
   assert.match(files.get(`${model.sourceRoot}/presentation/components/ProjectWorkbench.vue`).content,/design-state/);
   const page=[...files].find(([path])=>path.includes('/screens/')&&files.get(path).content.includes('import Detail'));

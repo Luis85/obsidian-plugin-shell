@@ -44,7 +44,7 @@ export async function projectRoot(start: string, explicit = false): Promise<stri
   let root = resolve(start);
   if (explicit) { root = await realpath(root); await createFilePlan(root, []); return root; }
   while (true) {
-    if (await exists(join(root, configFile)) || await exists(join(root, 'shell.mjs'))) {
+    if (await exists(join(root, configFile)) || await exists(join(root, 'app.mjs')) || await exists(join(root, 'shell.mjs'))) {
       root = await realpath(root); await createFilePlan(root, []); return root;
     }
     const parent = dirname(root);

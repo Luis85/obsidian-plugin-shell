@@ -66,7 +66,7 @@ After generation and `npm ci`, run `npm run build:clickdummy`. Open the resultin
 `clickdummy.html` directly. It embeds the shared generated Vue pages, styles and
 full project JSON. Read operations use synthetic fixtures; business writes remain
 explicitly unavailable. The preview state picker and reset never change the design.
-Use `node shell.mjs clickdummy build --replace` for a reviewed rebuild of existing
+Use `node bin/app clickdummy build --replace` for a reviewed rebuild of existing
 output. A built clickdummy does not establish native or business acceptance.
 See [JSON to clickdummy](docs/development/COMPANION-CLICKDUMMY.md).
 

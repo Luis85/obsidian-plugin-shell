@@ -55,7 +55,7 @@ function makersView(style: Style, makers: Data[]): string {
   }
   const width = Math.max(...makers.map(maker => String(maker.id).length));
   return makers.map(maker => `  ${String(maker.id).padEnd(width)}  ${String(maker.status).padEnd(11)}  ${String(maker.description)}\n`).join('')
-    + '\nDescribe one: node shell.mjs make describe <recipe>\n' + nextLine(style, 'make feature <name> --dry-run');
+    + '\nDescribe one: node bin/app make describe <recipe>\n' + nextLine(style, 'make feature <name> --dry-run');
 }
 const stepMark: Record<string, Mark> = { passed: 'pass', failed: 'fail', skipped: 'skip', 'not-run': 'info' };
 function checkView(style: Style, value: Result): string {

@@ -15,7 +15,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 /** The real entry point with piped (non-TTY) streams; NO_COLOR is controlled per call. */
 function cli(args, env = {}) {
   const base = Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NO_COLOR' && key !== 'FORCE_COLOR'));
-  return spawnSync(process.execPath, [join(root, 'shell.mjs'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
+  return spawnSync(process.execPath, [join(root, 'app.mjs'), ...args], { cwd: root, encoding: 'utf8', timeout: 60000, maxBuffer: 10_000_000, env: { ...base, ...env } });
 }
 function machine(args) {
   const output = cli([...args, '--json']);
@@ -86,7 +86,7 @@ test('mistyped commands suggest the closest catalog entries, including multi-wor
   assert.match(human.stderr, /^Next: node shell\.mjs help status$/m);
   const status = machine(['statu']);
   assert.equal(status.exit, 1); assert.deepEqual(status.result.data.suggestions, ['status']);
-  assert.equal(status.result.diagnostics[0].next, 'node shell.mjs help status');
+  assert.equal(status.result.diagnostics[0].next, 'node bin/app help status');
   assert.equal(machine(['plan', 'aply', 'saved.json']).result.data.suggestions[0], 'plan apply');
   assert.deepEqual(machine(['relase', 'check']).result.data.suggestions, ['release check']);
   assert.deepEqual(machine(['chek']).result.data.suggestions, ['check']);
@@ -103,7 +103,7 @@ test('mistyped options and maker recipes suggest corrections with exit 1', () =>
   assert.deepEqual(scoped.result.data.suggestions, ['--fast']);
   const unsupported = machine(['build', '--profile', 'x']);
   assert.match(unsupported.result.diagnostics[0].message, /--profile is not supported by build\./);
-  assert.equal(unsupported.result.diagnostics[0].next, 'node shell.mjs help build');
+  assert.equal(unsupported.result.diagnostics[0].next, 'node bin/app help build');
   const recipe = machine(['make', 'describe', 'fature']);
   assert.equal(recipe.result.diagnostics[0].code, 'MAKER_UNKNOWN'); assert.match(recipe.result.diagnostics[0].message, /Did you mean "feature"\?/);
 });
@@ -178,5 +178,5 @@ test('the obsidian profiles run the real-Obsidian test suite and dev loop script
   assert.match(tests.result.data.execution.stdout, /^real-obsidian tests ran with \[\]$/m);
   const dev = machine(['dev', '--profile', 'obsidian', '--root', dir]);
   assert.equal(dev.exit, 0); assert.match(dev.result.data.execution.stdout, /^real-obsidian dev loop ran with \[\]$/m);
-  assert.equal(goldenPath.find(step => step.command === 'dev').example, 'node shell.mjs dev --profile obsidian');
+  assert.equal(goldenPath.find(step => step.command === 'dev').example, 'node bin/app dev --profile obsidian');
 });

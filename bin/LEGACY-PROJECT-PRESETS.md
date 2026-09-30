@@ -15,14 +15,14 @@ from the repository's `AGENTS.md` and exact lockfile; this feature adds no depen
 ## New project: preset, frontend, then prototype
 
 ```sh
-node shell.mjs new
-# Alias: node shell.mjs make project
-node shell.mjs new presets --json
-node shell.mjs new guide --json
+node bin/app new
+# Alias: node bin/app make project
+node bin/app new presets --json
+node bin/app new guide --json
 ```
 
-A fresh interactive `node shell.mjs` starts this flow. Existing workspaces keep the
-page/component studio. `node shell.mjs sketch` explicitly opens that studio even
+A fresh interactive `node bin/app` starts this flow. Existing workspaces keep the
+page/component studio. `node bin/app sketch` explicitly opens that studio even
 in a fresh directory. No existing project is converted or overwritten implicitly.
 
 | Project preset | Next frontend choice | Generated runtime |
@@ -81,10 +81,10 @@ reserved key `prototype`. Hybrid adds `"targets": ["plugin", "webapp", "cli"]`.
 CLI accepts omitted frontend and resolves it to `none`.
 
 ```sh
-node shell.mjs new validate --input project-create.json --json
-node shell.mjs new --input project-create.json --out projects/issue-desk --json
+node bin/app new validate --input project-create.json --json
+node bin/app new --input project-create.json --out projects/issue-desk --json
 # Inspect the full prompt, document and change manifest; repeat unchanged:
-node shell.mjs new --input project-create.json --out projects/issue-desk --json --apply <reviewed-planHash>
+node bin/app new --input project-create.json --out projects/issue-desk --json --apply <reviewed-planHash>
 ```
 
 The TUI, plain prompts and agent mode use the same validated request, compiler
@@ -145,8 +145,8 @@ separate. No quality or coverage thresholds are reduced by this extension.
 ## Make a page
 
 ```sh
-node shell.mjs sketch
-# Existing workspace: node shell.mjs
+node bin/app sketch
+# Existing workspace: node bin/app
 ```
 
 Enter a project title, choose **Sketch a new page**, and enter its title. The page
@@ -183,10 +183,10 @@ prompts/progress are on stderr. Exit 0 means the requested operation completed
 `ready`/`pending` in prototype validation, not only its exit code.
 
 ```sh
-node shell.mjs sketch schema --json
-node shell.mjs sketch show --json
-node shell.mjs sketch export --json
-node shell.mjs sketch --input sketch-request.json --json --no-interaction
+node bin/app sketch schema --json
+node bin/app sketch show --json
+node bin/app sketch export --json
+node bin/app sketch --input sketch-request.json --json --no-interaction
 ```
 
 Example `sketch-request.json` (title is required only for a new project):
@@ -214,8 +214,8 @@ The first run only returns a plan. Inspect `data.document`, `changes` and `planH
 Repeat the **same command and unchanged input** with `--apply <planHash>` to write:
 
 ```sh
-node shell.mjs sketch --input sketch-request.json --json --apply <reviewed-planHash>
-node shell.mjs sketch generate --kind obsidian-plugin --out generated/issue-desk --json
+node bin/app sketch --input sketch-request.json --json --apply <reviewed-planHash>
+node bin/app sketch generate --kind obsidian-plugin --out generated/issue-desk --json
 # Review, then repeat with --apply <the-generation-planHash>.
 ```
 
@@ -236,11 +236,11 @@ filesystem transactions. Do not blindly retry an uncertain write; inspect recove
 ## Prepare a prototype
 
 ```sh
-node shell.mjs prototype
-# aliases: node shell.mjs make prototype; npm run make -- prototype
-node shell.mjs prototype guide --json
-node shell.mjs prototype validate --input prototype-answers.json --json
-node shell.mjs prototype --input prototype-answers.json --out prototypes/issue-desk --json
+node bin/app prototype
+# aliases: node bin/app make prototype; npm run make -- prototype
+node bin/app prototype guide --json
+node bin/app prototype validate --input prototype-answers.json --json
+node bin/app prototype --input prototype-answers.json --out prototypes/issue-desk --json
 # Review the prompt and full file manifest, then repeat with --apply <planHash>.
 ```
 
@@ -302,7 +302,7 @@ Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 `application/` owns transactions, discovery schema, outline and history.
 `adapters/` integrates bounded IO, the existing compiler, versioned input and safe
 plans. `presentation/` maps terminal choices into exactly those operations.
-`bin/shell.ts` is the process composition root. The legacy CLI remains available.
+`bin/app.ts` is the process composition root. The legacy CLI remains available.
 
 ```sh
 npm run typecheck:maker

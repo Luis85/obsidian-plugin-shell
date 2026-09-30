@@ -8,7 +8,7 @@ import { projectWizard } from '../../bin/presentation/project-create.ts';
 import { loadProjectCatalog, loadProjectGuide, projectCreatePlan } from '../../bin/adapters/project-create.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/shell.ts';
+import { main } from '../../bin/app.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const catalog = await loadProjectCatalog(), guide = await loadProjectGuide();

@@ -98,7 +98,7 @@ export function descriptor(id: string): Command {
   const command = commands.find(item => item.id === id);
   if (command) return command;
   const found = suggestions(id, commands.map(item => item.id));
-  const error = new OperationError('UNKNOWN_COMMAND', `Unknown command: ${id}.${didYouMean(found, value => `"${value}"`)} Use help.`, found.length === 1 ? `node shell.mjs help ${found[0]}` : 'node shell.mjs help');
+  const error = new OperationError('UNKNOWN_COMMAND', `Unknown command: ${id}.${didYouMean(found, value => `"${value}"`)} Use help.`, found.length === 1 ? `node bin/app help ${found[0]}` : 'node bin/app help');
   error.details = { suggestions: found }; throw error;
 }
 export function parseCliArguments(argv: string[]): Request {
@@ -135,7 +135,7 @@ function validateFields(entry: Command, args: string[], options: Values): Reques
 }
 function unknownOption(arg: string, available: string[], command?: string): OperationError {
   const found = suggestions(arg.replace(/^--/, ''), available).map(name => '--' + name);
-  const error = new OperationError('INVALID_OPTION', `${command ? `${arg} is not supported by ${command}.` : `Unknown option: ${arg}.`}${didYouMean(found)}`, command ? `node shell.mjs help ${command}` : 'node shell.mjs help');
+  const error = new OperationError('INVALID_OPTION', `${command ? `${arg} is not supported by ${command}.` : `Unknown option: ${arg}.`}${didYouMean(found)}`, command ? `node bin/app help ${command}` : 'node bin/app help');
   error.details = { suggestions: found }; return error;
 }
 export function validateRequest(value: unknown): Request {

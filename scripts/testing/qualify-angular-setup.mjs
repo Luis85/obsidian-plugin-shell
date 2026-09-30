@@ -30,7 +30,7 @@ async function run(executable, args, cwd = root) {
     child.once('close', code => { clearTimeout(timer); if (code === 0) accept(stdout); else reject(new Error(`Command exit ${code}: ${args.join(' ')}\n${stdout}\n${stderr}`)); });
   });
 }
-const cli = async args => JSON.parse(await run(process.execPath, [join(root, 'tools/shell-cli/shell.mjs'), ...args, '--json']));
+const cli = async args => JSON.parse(await run(process.execPath, [join(root, 'tools/shell-cli/app.mjs'), ...args, '--json']));
 async function approve(args) {
   const planned = await cli(args); assert.equal(planned.status, 'planned');
   const applied = await cli([...args, '--apply', planned.data.planHash]);

@@ -52,7 +52,7 @@ test('read failures and cancellation cannot expose private filesystem errors',as
 // Exercise the actual launcher, including root discovery before the support handler.
 test('CLI root-discovery errors and invalid support arguments never disclose private paths',()=>{
   for(const leading of [false,true])for(const args of [['--root','/private-client-canary-does-not-exist'],['--private-client-canary-option']]){
-    const run=spawnSync(process.execPath,[join(root,'shell.mjs'),...(leading?['--json']:[]),'support','report',...args,...(leading?[]:['--json'])],{encoding:'utf8',env:{...process.env,NODE_NO_WARNINGS:'1'}});
+    const run=spawnSync(process.execPath,[join(root,'app.mjs'),...(leading?['--json']:[]),'support','report',...args,...(leading?[]:['--json'])],{encoding:'utf8',env:{...process.env,NODE_NO_WARNINGS:'1'}});
     assert.equal(run.status,1);assert.equal(run.stderr,'');
     const response=JSON.parse(run.stdout);assert.equal(response.command,'support report');
     assert.equal(response.status,'blocked');assert.equal(response.diagnostics[0].code,'SUPPORT_UNAVAILABLE');

@@ -135,7 +135,7 @@ export async function executeOperation(input: Request, context: Context): Promis
       const entries = selected ? [descriptor(selected)] : commands;
       const scope = selected ? 'command' : command === 'capabilities' || request.options.all ? 'all' : 'golden-path';
       return result(command, { protocolVersion: 1, scope, ...helpIndex(), commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect, ...commandHelp(entry) })),
-        makers: capabilityCatalog().makers, examples: ['node shell.mjs new ../my-plugin --starter blank --yes', 'node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
+        makers: capabilityCatalog().makers, examples: ['node bin/app new ../my-plugin --starter blank --yes', 'node bin/app setup --input project.json --dry-run', 'node bin/app generate --plan-out generation.plan.json', 'node bin/app plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
     if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);

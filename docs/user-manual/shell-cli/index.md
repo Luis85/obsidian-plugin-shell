@@ -30,16 +30,26 @@ No documentation package installation is needed for that command. Rendering the 
 
 ## First orientation
 
-From the folder containing `shell.mjs`:
+From the folder containing `app.mjs`:
 
 ```sh
-node shell.mjs help
-node shell.mjs help --all
-node shell.mjs help new
-node shell.mjs version --json
+node bin/app help
+node bin/app help --all
+node bin/app help new
+node bin/app version --json
 ```
 
-The direct Node entry works without an npm alias. Where project package scripts are present, `npm run shell -- help` forwards to the same entry. Do not assume that an unqualified global `shell-cli` command or an npm registry package has been published.
+The direct Node entry works without an npm alias or file extension. These forms all reach the same CLI:
+
+| Form | Notes |
+| --- | --- |
+| `node bin/app help` | Extensionless entry; works on every platform. |
+| `./bin/app help` | macOS/Linux, when the file keeps its executable bit. |
+| `npx obs-shell help` | Inside the project only: the package `bin` maps `obs-shell` to `bin/app`, and flags pass through without `--`. Outside a project, npx would look for a registry package instead. |
+| `npm run app -- help` | Package script; npm consumes flags such as `--json` unless they follow `--`. `npm run shell -- help` is kept as an alias. |
+| `node app.mjs help` | The launcher itself. `node shell.mjs help` remains a compatibility shim for existing kits and generated projects. |
+
+Do not assume that an unqualified global `shell-cli` command or an npm registry package has been published.
 
 Commands in examples are separate steps, not a script to execute blindly. Replace filenames, project names and hashes with your own values. Inspection and preview come before approval. A successful command, generated scaffold or browser clickdummy does **not** establish completed business behavior, native Obsidian acceptance or permission to publish.
 

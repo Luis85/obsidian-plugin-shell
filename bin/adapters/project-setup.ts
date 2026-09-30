@@ -130,7 +130,7 @@ export async function projectSetupPlan(context: SetupContext, input: unknown): P
     ignoredMarkdown: intake.ignored, phase: state.phase, prototypePrepared: state.prototypePrepared, boilerplatePrepared: state.boilerplatePrepared,
     installed: false, built: false, runtimeAccepted: false, businessImplemented: false,
     start: data.boilerplate ? { cwd: settings.paths.app, commands: [['npm', 'install'], ['npm', 'run', 'typecheck'], ['npm', 'test'], ['npm', 'start']] } : null,
-    next: 'Use shell.mjs sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
+    next: 'Use node bin/app sketch to edit bricks. Dependencies, builds and application startup require explicit separate commands.' }, { requestHash, intakeHash });
   return { ...result, validate: async () => {
     await setupPrerequisites(root, settings.preferences.vaultConfigDirectory);
     requireSketch(intakeIdentity(await intakePrds(root, settings, data.prds)) === intakeHash, 'SETUP_STALE_PRDS', 'PRD inventory changed after preview; review setup again.');

@@ -4,16 +4,16 @@
 
 An optional capability must not silently install packages, start services, change desktop-client configuration or grant data-processing consent. Inspect the installed capability before opting in. This handbook does not invent commands for work that has not landed in the reviewed source.
 
-Storybook and Airship are independent opt-in development integrations. Their commands are listed by `node shell.mjs help --all`; neither is a mandatory dependency of generated plugins. Storybook generation is controlled separately from its tooling workspace, as described below. Consult `docs/tooling/AIRSHIP.md` for the separate Airship enable, install and launch workflow.
+Storybook and Airship are independent opt-in development integrations. Their commands are listed by `node bin/app help --all`; neither is a mandatory dependency of generated plugins. Storybook generation is controlled separately from its tooling workspace, as described below. Consult `docs/tooling/AIRSHIP.md` for the separate Airship enable, install and launch workflow.
 
 ## Hindsight project memory
 
 Memory uses a separate dispatcher and approval protocol. Start with its own help and provider discovery:
 
 ```sh
-node shell.mjs memory --help
-node shell.mjs memory providers
-node shell.mjs memory status
+node bin/app memory --help
+node bin/app memory providers
+node bin/app memory status
 ```
 
 The equivalent npm entry, when present, is `npm run memory -- <command>`. Its output is not the shared framework command-result envelope. Do not reuse framework `--apply HASH`, `--yes`, profile names or result-status parsing without checking the memory interface.
@@ -21,7 +21,7 @@ The equivalent npm entry, when present, is `npm run memory -- <command>`. Its ou
 A setup preview for a no-model configuration is:
 
 ```sh
-node shell.mjs memory setup --agents codex --provider none
+node bin/app memory setup --agents codex --provider none
 ```
 
 Read the package, hook, provider and desktop-connection changes. Setup application requires both `--apply` and `--accept-data-processing`. Setup installs and connects selected supported clients; `install` and `connect` are also separate operations. Do not run the application step merely to read this manual.
@@ -45,15 +45,15 @@ Consult the repository's `HINDSIGHT.md` for provider/platform prerequisites and 
 and components. Both default to false and neither enables Airship.
 
 ```sh
-node shell.mjs new ../folio-tools --from project.json --storybook on --storybook-stories on --yes
+node bin/app new ../folio-tools --from project.json --storybook on --storybook-stories on --yes
 cd ../folio-tools
 npm ci
-node shell.mjs storybook status --json
-node shell.mjs storybook install --dry-run
-node shell.mjs storybook install --yes
-node shell.mjs storybook check
-node shell.mjs storybook build
-node shell.mjs storybook dev
+node bin/app storybook status --json
+node bin/app storybook install --dry-run
+node bin/app storybook install --yes
+node bin/app storybook check
+node bin/app storybook build
+node bin/app storybook dev
 ```
 
 The first optional install creates `storybook/package-lock.json`; review and

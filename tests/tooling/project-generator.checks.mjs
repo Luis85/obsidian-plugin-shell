@@ -18,7 +18,7 @@ async function sandbox(work) {
   await writeFile(input,JSON.stringify(fixture));
   try { return await work({vault,input,target:'plugin'}); } finally { await rm(vault,{recursive:true,force:true}); }
 }
-function cli(options,extra = [], entry = join(root,'shell.mjs')) {
+function cli(options,extra = [], entry = join(root,'app.mjs')) {
   return spawnSync(process.execPath,[entry,'generate','--input',options.input,'--vault',options.vault,'--target',options.target,...extra],{encoding:'utf8',timeout:45000,maxBuffer:10_000_000});
 }
 test('self-project preserves all declared artifacts and exposes honest readiness',()=>{
@@ -94,7 +94,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.equal(JSON.parse(await readFile(join(target,'package-lock.json'),'utf8')).packages[''].name,pkg.name);
   const replay=await planProject(options); assert.deepEqual(replay.conflicts,[]); assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'));
   assert.deepEqual((await applyProject(replay,replay.hash)).written,[]);
-  const ownCli=spawnSync(process.execPath,[join(target,'shell.mjs'),'generate','--help'],{encoding:'utf8',timeout:10000}); assert.equal(ownCli.status,0,ownCli.stderr); assert.match(ownCli.stdout,/Usage:/);
+  const ownCli=spawnSync(process.execPath,[join(target,'app.mjs'),'generate','--help'],{encoding:'utf8',timeout:10000}); assert.equal(ownCli.status,0,ownCli.stderr); assert.match(ownCli.stdout,/Usage:/);
 }));
 test('regeneration preserves consumer business logic and refuses conflicting rewrites',()=>sandbox(async options=>{
   const first=await planProject(options); await applyProject(first,first.hash);
