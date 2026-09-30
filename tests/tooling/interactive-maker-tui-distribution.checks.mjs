@@ -24,8 +24,8 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
       return;
     }
     const files = await assembleKit({ root, frameworkRoot }, compiler);
-    // Extract exactly the release's executable files and launcher, without template dependencies.
-    for (const file of files.filter(item => item.path.startsWith('.framework/compiled/') || ['app.mjs', 'bin/app', 'shell.mjs'].includes(item.path))) {
+    // Extract the release kit as shipped: the bundled CLI reads its guides and schemas from .framework/template.
+    for (const file of files) {
       const target = join(root, file.path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, file.bytes);
     }
     await assert.rejects(() => readFile(join(root, 'node_modules/typescript/package.json')));
@@ -38,7 +38,7 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
       if (args[0] === 'new') assert.ok(args[1] === 'presets' ? result.data.catalog.presets.length === 8 : result.data.selection.framework === 'none');
       if (args[0] === 'prototype') assert.equal(result.data.guide.id, 'companion-prototype');
     }
-    const screen = await readFile(join(root, '.framework/compiled/bin/presentation/tui/session.js'), 'utf8');
-    assert.match(screen, /node:readline/); assert.ok(!screen.includes("from './state.ts'"));
+    const bundle = await readFile(join(root, '.framework/compiled/app.js'), 'utf8');
+    assert.match(bundle, /node:readline/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

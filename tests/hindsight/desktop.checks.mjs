@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { providerSettings, providerPlan } from '../../scripts/hindsight/provider.ts';
@@ -54,7 +54,7 @@ test('agent-ready project defaults are preview-only and cannot bypass processing
   } } }));
   let r = f.invoke(['setup', '--provider', 'none']); assert.equal(r.status, 0, r.stderr);
   const plan = JSON.parse(r.stdout); assert.deepEqual(plan.agents, ['claude-code', 'codex']);
-  assert.equal(plan.privacy.git, 'message'); assert.equal(plan.privacy.retainSessions, false);
+  assert.equal(plan.privacy.gitIngest, 'message'); assert.equal(plan.privacy.retainSessions, false);
   assert.equal(plan.projectDefaults.source, 'design/project.json'); assert.deepEqual(readdirSync(f.home), []);
   r = f.invoke(['setup', '--provider', 'none', '--apply']); assert.equal(r.status, 1);
   assert.match(r.stderr, /CONSENT_REQUIRED/); assert.deepEqual(readdirSync(f.home), []);
@@ -152,24 +152,34 @@ test('shell memory and help memory work without framework dependencies, Git or P
 
 function launcherFixture(f) {
   const source = join(f.root, 'tooling'); mkdirSync(source);
-  for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) writeFileSync(join(source, file.name), '// reviewed fixture\n');
+  for (const file of launcherPlan(f.p).files.filter(file => file.name !== 'package.json')) {
+    mkdirSync(dirname(join(source, file.name)), { recursive: true }); writeFileSync(join(source, file.name), '// reviewed fixture\n');
+  }
   return source;
 }
 test('launcher plan is pure and staged snapshots are reusable without checkout paths in registration', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
   assert.deepEqual(readdirSync(f.home), []); stageLauncher(f.p, plan);
-  assert.equal(readFileSync(join(plan.directory, 'cli.ts'), 'utf8'), '// reviewed fixture\n');
+  assert.equal(readFileSync(join(plan.directory, 'hindsight/cli.ts'), 'utf8'), '// reviewed fixture\n');
   stageLauncher(f.p, plan); assert.equal(readdirSync(dirname(plan.directory)).length, 1);
   const entry = mcpEntry(f.repo, 'claude-code', f.p); assert.ok(entry.args[1].startsWith(join(f.state, 'launchers')));
 });
 test('changed launcher source invalidates its plan before creating a snapshot', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source);
-  writeFileSync(join(source, 'cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
+  writeFileSync(join(source, 'hindsight/cli.ts'), '// changed\n'); fails(() => stageLauncher(f.p, plan), 'PLAN_CHANGED');
   assert.equal(existsSync(plan.directory), false); assert.deepEqual(readdirSync(f.home), []);
+});
+test('the staged launcher is self-contained: every relative import resolves to a staged file', t => {
+  const f = fixture(t); const plan = launcherPlan(f.p); const staged = new Set(plan.files.map(file => file.name));
+  for (const file of plan.files.filter(file => /\.(?:ts|mjs)$/.test(file.name))) {
+    const text = readFileSync(join(plan.source, file.name), 'utf8');
+    for (const [, specifier] of text.matchAll(/(?:from|import)\s*\(?\s*'(\.{1,2}\/[^']+)'/g))
+      assert.ok(staged.has(posix.normalize(posix.join(posix.dirname(file.name), specifier))), `${file.name} imports ${specifier}, which the launcher snapshot does not stage`);
+  }
 });
 test('modified existing snapshot is preserved and rejected instead of silently overwritten', t => {
   const f = fixture(t); const source = launcherFixture(f); const plan = launcherPlan(f.p, source); stageLauncher(f.p, plan);
-  const file = join(plan.directory, 'cli.ts'); writeFileSync(file, '// local edit\n');
+  const file = join(plan.directory, 'hindsight/cli.ts'); writeFileSync(file, '// local edit\n');
   fails(() => stageLauncher(f.p, plan), 'LAUNCHER_CHANGED'); assert.equal(readFileSync(file, 'utf8'), '// local edit\n');
 });
 test('MCP discovery rejects invalid UTF-8 instead of accepting replacement characters', async t => {

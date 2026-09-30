@@ -4,10 +4,13 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { digest, requireThat } from './policy.ts';
 import { noSymlink, readText, type Paths } from './io.ts';
-const FILES = ['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts'];
+// Paths relative to scripts/: the snapshot keeps that layout so the launcher's relative imports resolve inside it.
+const FILES = [...['cli.ts', 'desktop.ts', 'embedded.py', 'install.ts', 'io.ts', 'launcher.ts', 'mcp.ts', 'policy.ts', 'provider.ts', 'sources.ts'].map(name => 'hindsight/' + name),
+  'companion/tooling-contract.mjs', 'shared/hash.mjs'];
+export const launcherEntry = 'hindsight/cli.ts';
 const PACKAGE = '{"type":"module","private":true}\n';
 export interface LauncherPlan { source: string; directory: string; digest: string; files: { name: string; sha256: string }[] }
-export function launcherPlan(p: Paths, source = dirname(fileURLToPath(import.meta.url))): LauncherPlan {
+export function launcherPlan(p: Paths, source = dirname(dirname(fileURLToPath(import.meta.url)))): LauncherPlan {
   const files = FILES.map(name => {
     const text = readText(join(source, name));
     requireThat(text !== null, 'LAUNCHER_SOURCE_MISSING', 'The reviewed launcher source is incomplete. Restore the checkout before connecting.');
@@ -34,6 +37,7 @@ export function stageLauncher(p: Paths, plan: LauncherPlan): void {
     for (const file of current.files) {
       const text = file.name === 'package.json' ? PACKAGE : readText(join(current.source, file.name));
       requireThat(text !== null && digest(text) === file.sha256, 'PLAN_CHANGED', 'Launcher source changed during staging. No desktop configuration was written.');
+      mkdirSync(dirname(join(temporary, file.name)), { recursive: true, mode: 0o700 });
       writeFileSync(join(temporary, file.name), text, { flag: 'wx', mode: 0o600 });
     }
     renameSync(temporary, current.directory);

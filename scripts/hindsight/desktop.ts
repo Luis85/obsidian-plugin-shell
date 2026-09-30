@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve, relative } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { digest, object, requireThat, type Identity, type JsonObject } from './policy.ts';
-import { launcherPlan, stageLauncher, type LauncherPlan } from './launcher.ts';
+import { launcherEntry, launcherPlan, stageLauncher, type LauncherPlan } from './launcher.ts';
 import { readText, readConfig, saveText, run, type Paths } from './io.ts';
 const CLIENTS = ['claude-code', 'codex', 'claude-desktop'] as const;
 export type DesktopClient = typeof CLIENTS[number];
@@ -17,7 +17,7 @@ function configPath(p: Paths, client: DesktopClient, platform = process.platform
   return platform === 'darwin' ? join(p.home, 'Library/Application Support/Claude/claude_desktop_config.json') : join(process.env.APPDATA || join(p.home, 'AppData/Roaming'), 'Claude/claude_desktop_config.json');
 }
 export function mcpEntry(repo: Identity, client: DesktopClient, p: Paths): JsonObject {
-  const script = join(launcherPlan(p).directory, 'cli.ts');
+  const script = join(launcherPlan(p).directory, launcherEntry);
   const agent = client === 'codex' ? 'codex' : 'claude-code';
   return { command: process.execPath, args: ['--experimental-strip-types', script, 'mcp', '--agent', agent, ...(client === 'claude-desktop' ? ['--root', repo.root] : [])] };
 }
