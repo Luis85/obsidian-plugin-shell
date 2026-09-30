@@ -70,7 +70,10 @@ export async function editStarterPlan(request: Request, context: Context) {
   return { plan, hash: hash(bytes), conflicts: [] as string[], summary: { id: definition.id, file: path, sha256: hash(bytes), processes: 'not-run' } };
 }
 export async function assembleStarterPack(context: Context) {
-  const entries = await loadDefinitions(context.root);
+  // The standalone starter pack contains data-only file definitions only.
+  // Plugin-contributed starters travel with their registered plugin because their
+  // framework adapter or other trusted code may be required to use them.
+  const entries = await loadDefinitions(context.root, []);
   requireThat(entries.length > 0, 'STARTER_EMPTY', 'No installed starter definitions to package.');
   return entries.map(entry => ({ path: 'configs/starters/' + entry.definition.id + '.json', bytes: entry.bytes }));
 }
