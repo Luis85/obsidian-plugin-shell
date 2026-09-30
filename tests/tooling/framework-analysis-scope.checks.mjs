@@ -31,3 +31,13 @@ test('typed JSON data contract is an explicit narrow architecture boundary', () 
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-data-contract'), false);
 });
+
+test('canonical CLI result envelope is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-result-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/contracts/result.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-result-contract')?.allow, ['cli-result-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-result-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-result-contract'), false);
+});

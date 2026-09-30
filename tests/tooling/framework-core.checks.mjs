@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
+import { result as frameworkResult } from '../../scripts/framework/contracts.ts';
+import { result as canonicalResult } from '../../scripts/contracts/result.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
@@ -219,4 +221,12 @@ test('typed file-plan facade refuses stale preimages and preserves the interveni
   await assert.rejects(applyTypedFilePlan(plan), /PLAN_STALE/);
   assert.equal(await readFile(path, 'utf8'), 'external edit\n');
   assert.ok(!(await readdir(ctx.root)).includes('.codex-authoring.lock'));
+});
+
+test('framework result helper reuses the canonical typed envelope', () => {
+  assert.equal(frameworkResult, canonicalResult);
+  assert.deepEqual(canonicalResult('status', { ready: true }), {
+    protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
+  });
+  assert.equal(canonicalResult('setup', null, 'blocked').status, 'blocked');
 });

@@ -324,6 +324,12 @@
         ]
       },
       {
+        "name": "cli-result-contract",
+        "patterns": [
+          "scripts/contracts/result.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
           "scripts/shared/project-path.mjs"
@@ -443,7 +449,8 @@
           "maker-application",
           "maker-host",
           "project-path-contract",
-          "cli-data-contract"
+          "cli-data-contract",
+          "cli-result-contract"
         ]
       },
       {
@@ -482,7 +489,8 @@
           "maker-application",
           "maker-host",
           "project-path-contract",
-          "cli-data-contract"
+          "cli-data-contract",
+          "cli-result-contract"
         ]
       },
       {
@@ -555,13 +563,20 @@
           "companion-authoring-contract",
           "prototype-skill",
           "project-path-contract",
-          "cli-data-contract"
+          "cli-data-contract",
+          "cli-result-contract"
         ]
       },
       {
         "from": "cli-data-contract",
         "allow": [
           "cli-data-contract"
+        ]
+      },
+      {
+        "from": "cli-result-contract",
+        "allow": [
+          "cli-result-contract"
         ]
       },
       {

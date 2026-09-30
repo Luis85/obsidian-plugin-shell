@@ -86,7 +86,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C9:** Maker/bin apply callers (`first-run` report persistence and shared prepared-plan storage) now use the typed file-plan facade, so the maker application's typed path no longer imports `file-plan.mjs`.
 - **C10:** The remaining typed application-docs and compiler adapters now import the typed file-plan facade. An audit of all 197 TypeScript files under `scripts/` found no remaining typed imports of `file-plan.mjs`, `json-data.mjs`, or `shared/process.mjs`.
 - **C11:** The fully typed bounded-JSON implementation is now a dedicated `cli-data-contract` Fallow zone. Tests, tooling, maker-host and the compiler/companion tooling boundaries explicitly consume it; maker-domain remains isolated from it.
-- **Remaining C12–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C12:** `contracts/result.ts` now owns the typed protocol envelope and result constructor. Framework failures adapt into that envelope, while maker success and SketchError paths construct through the same helper; a dedicated `cli-result-contract` boundary prevents implementation dependencies from leaking back into the contract.
+- **Remaining C13–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
