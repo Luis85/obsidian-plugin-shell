@@ -106,3 +106,22 @@ test('typed bounded concurrency helper is isolated from implementation layers', 
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
 });
+
+test('legacy core entries remain compatibility-only shims over typed owners', async () => {
+  const wrappers = new Map([
+    ['scripts/contracts/json-data.mjs', './json-data.ts'],
+    ['scripts/shared/process.mjs', './process.ts'],
+    ['scripts/shared/confirmation.mjs', './confirmation.ts'],
+    ['scripts/shared/hash.mjs', './hash.ts'],
+    ['scripts/shared/fs-presence.mjs', './fs-presence.ts'],
+    ['scripts/shared/project-path.mjs', './project-path.ts'],
+    ['scripts/shared/bounded-map.mjs', './bounded-map.ts'],
+    ['scripts/shared/file-plan.mjs', './file-plan.ts'],
+  ]);
+  for (const [path, target] of wrappers) {
+    const source = await readFile(new URL(path, root), 'utf8');
+    const executable = source.split('\n').map(line => line.trim())
+      .filter(line => line && !line.startsWith('//'));
+    assert.deepEqual(executable, [`export * from '${target}';`], path);
+  }
+});

@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation through C23 on PR #60. The continuation uses separately pushed
+Status: Stage C typed-core consolidation complete through C24 on PR #60; Stage D is next. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -22,8 +22,7 @@ source under `bin/`.
 
 - `scripts/` holds 486 files. `scripts/framework` (60 `.ts`) is the CLI core behind `app.mjs`.
   `bin/` is its interactive maker/TUI half.
-- `bin/` already imports `scripts/`: 79 relative imports, split as framework 26, companion 16, compiler 14,
-  shared 12 (all `file-plan.mjs`), contracts 10 and application-docs 1.
+- The earlier 79-import `bin/ → scripts/` snapshot is now a migration baseline rather than the target state: shared JSON, result/error, process, input, confirmation, filesystem, project-path, concurrency and file-plan dependencies have typed owners and explicit boundaries.
 - No `scripts/` module imports executable `bin/` modules now. Angular setup and legacy preset qualification exercise the public CLI boundary instead.
 - Legacy preset qualification still reads its declarative compatibility catalog/guide from `bin/guides`; relocating those assets belongs with the later compiler/domain move, not this dependency-direction cleanup.
 - `application-docs/adapters/settings.ts` no longer imports `bin/`; maker and docs settings share the neutral project-path policy.
@@ -97,7 +96,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C21:** Bounded asynchronous mapping now has a canonical TypeScript implementation with a compatibility-only `.mjs` entry. Direct regressions preserve input-order results, invalid-concurrency refusal and stop-scheduling-on-first-failure semantics.
 - **C22:** File-plan validation, containment, locking, stale-preimage checks, staging and rollback now execute from strict `file-plan-runtime.ts`; `file-plan.mjs` is compatibility-only. The file-plan boundary explicitly depends only on typed bounded-concurrency and filesystem contracts, while existing stale-plan and apply regressions remain the behavioral guardrails.
 - **C23:** The machine-result envelope now has one bootstrap-safe runtime constructor in `contracts/result-runtime.mjs`. The typed `result.ts` API delegates to it, and both the pre-TypeScript root launcher and legacy handout shim use the same constructor for failures instead of hand-building protocol objects.
-- **Remaining C24–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C24:** Stage C closure: legacy JSON/process/confirmation/hash/presence/project-path/concurrency/file-plan `.mjs` entries are regression-locked as compatibility-only shims over typed owners. Typed result/error/input/file-plan/filesystem/process boundaries and maker coverage are explicit, so Stage D can move routing without reopening core contracts.
+- **Remaining D–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
@@ -114,7 +114,7 @@ on PR #60. Every stage runs the relevant suites plus
    - Make `scripts/handout.mjs` a thin delegate.
    - Retire `makers/cli.mjs` behind `bin/app make` (update `operations.json` and capability tests).
    - Remove the three reverse `scripts/ → bin/` imports.
-3. **C: typed core layer.**
+3. **C: typed core layer — complete on PR #60.**
    - Convert `shared/file-plan.mjs`, `shared/process.mjs` and `contracts/json-data.mjs` to TypeScript.
    - Unify them with `framework/{files,contracts,input,process}.ts`: one envelope, one `runNode`. About 60 import sites.
    - Needs new fallow zones and maker-coverage include/test updates.
