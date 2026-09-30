@@ -83,7 +83,8 @@ with sync_playwright() as pw:
             vault = Path(tmp) / 'vault'; vault.mkdir(); (vault / 'keep.md').write_text('preserve')
             run = subprocess.run(['node', str(ROOT / 'scripts/companion/generate.mjs'), '--input', str(OUT / 'project.companion.json'),
                                   '--vault', str(vault), '--target', 'plugins/companion'], capture_output=True, timeout=15)
-            check('Shell v1 consumes the actual browser export and prints exact bytes', run.returncode == 0 and run.stdout == original.encode() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
+            # This v5 build base exports the retired schema 5: the shell reads only project schema 6 and never migrates it.
+            check('Shell rejects the v5 build base export without output', run.returncode == 1 and run.stdout == b'' and run.stderr.startswith(b'COMPANION_VERSION: Unsupported project schemaVersion 5; only schema 6 is supported'), 'Actual CLI subprocess on exported browser bytes')
             check('Shell handoff creates no files or target directory', list(vault.iterdir()) == [vault / 'keep.md'] and (vault / 'keep.md').read_text() == 'preserve', 'Actual isolated filesystem before/after')
         act('close', '#modal'); act('settings'); act('project-folders', '#modal')
         check('Folder settings start with the current defaults', page.locator('#f-project-codebase-folder').input_value() == 'src')

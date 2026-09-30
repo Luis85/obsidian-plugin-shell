@@ -180,8 +180,16 @@ with sync_playwright() as pw:
         act('close', scope='#modal')
         with tempfile.TemporaryDirectory(prefix='storymap-cli-') as tmp:
             vault=Path(tmp)/'vault'; vault.mkdir(); keep=vault/'keep.md';keep.write_text('foreign record')
-            run=subprocess.run(['node',str(ROOT/'scripts/companion/generate.mjs'),'--input',str(OUT/'project.companion.json'),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
-            check('Read-only CLI returns the browser’s exact Storymaps export bytes',run.returncode==0 and run.stdout==(OUT/'project.companion.json').read_bytes() and not run.stderr,'Actual CLI subprocess')
+            # This v5 build base still exports schema 5 until it is rebuilt v6-natively; the shell reads only schema 6 and never
+            # migrates. The raw export is refused; its only difference from schema 6 (the two version fields) is relabeled
+            # here, explicitly and only in this test, so the exact-byte handoff of concept-authored Storymaps stays covered.
+            cli=lambda path: subprocess.run(['node',str(ROOT/'scripts/companion/generate.mjs'),'--input',str(path),'--vault',str(vault),'--target','plugins/companion'],capture_output=True,timeout=15)
+            refused=cli(OUT/'project.companion.json')
+            check('Read-only CLI refuses the retired schema 5 export without output',refused.returncode==1 and refused.stdout==b'' and refused.stderr.startswith(b'COMPANION_VERSION:'),'Actual CLI subprocess')
+            current=json.loads((OUT/'project.companion.json').read_text());current['schemaVersion']=6;current['design']['schema']=6
+            (OUT/'project-v6.companion.json').write_text(json.dumps(current,indent=2)+'\n')
+            run=cli(OUT/'project-v6.companion.json')
+            check('Read-only CLI returns the browser’s exact Storymaps export bytes',run.returncode==0 and run.stdout==(OUT/'project-v6.companion.json').read_bytes() and not run.stderr,'Actual CLI subprocess')
             check('Storymap handoff writes no target or foreign file', list(vault.iterdir())==[keep] and keep.read_text()=='foreign record','Actual isolated filesystem')
         # Confirmation is rendered only after parsing; locator auto-wait preserves the strict CSP.
         nav('overview'); act('project-import'); page.locator('#project-import-file').set_input_files(str(OUT/'project.companion.json')); page.locator('#project-import-confirm').check();act('project-import-apply',scope='#modal')

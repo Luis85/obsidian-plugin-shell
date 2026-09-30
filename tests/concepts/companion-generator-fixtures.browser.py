@@ -48,6 +48,14 @@ with sync_playwright() as pw:
         exported = OUT / 'project.companion.json'
         download.value.save_as(str(exported))
         check('Actual download retains the authored source recipes', json.loads(exported.read_text())['design']['dataSources']['testing']['recipes'])
+        # This v5 build base still exports schema 5 until it is rebuilt v6-natively. The shell reads only schema 6 and never
+        # migrates: the raw export is refused, and its only difference from schema 6 (the two version fields) is relabeled
+        # here, explicitly and only in this test, so generation from concept-authored data stays covered.
+        refused = subprocess.run(['node', str(ROOT / 'shell.mjs'), 'project', 'validate', '--input', str(exported), '--json'], cwd=ROOT, capture_output=True, text=True, timeout=45)
+        check('The shell refuses the retired schema 5 download', refused.returncode == 1 and json.loads(refused.stdout)['diagnostics'][0]['code'] == 'COMPANION_VERSION')
+        current = json.loads(exported.read_text()); current['schemaVersion'] = 6; current['design']['schema'] = 6
+        exported = OUT / 'project-v6.companion.json'
+        exported.write_text(json.dumps(current, indent=2) + '\n')
         page.locator('#modal [data-action="close"]').first.click()
         page.locator('#sidebar [data-action="nav"][data-value="testdata"]').click()
         page.locator('[data-action="td-preview"]').click()

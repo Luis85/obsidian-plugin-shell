@@ -394,7 +394,7 @@ jobs:
           node scripts/quality/check-repository.mjs
           node scripts/quality/check-source.mjs
           node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
-      - name: Type-check the compiler and test ownership, contracts and legacy handoff
+      - name: Type-check the compiler and test ownership, contracts and the read-only handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
           node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
