@@ -364,7 +364,7 @@
       {
         "name": "project-path-contract",
         "patterns": [
-          "scripts/shared/project-path.mjs"
+          "scripts/shared/project-path.ts"
         ]
       },
       {
