@@ -4,7 +4,8 @@ import { object, keys, list, text } from './data.ts';
 import { requireSketch, slug } from './errors.ts';
 import { companionRelativeFolder } from '../../scripts/companion/project-contract.mjs';
 function collection(document: SketchDocument, store: 'semantic' | 'dataSources', field: 'entities' | 'sources'): Record<string, unknown>[] {
-  document.design[store] ??= store === 'semantic' ? { entities: [], relationships: [] } : { sources: [], flows: [] };
+  document.design[store] ??= store === 'semantic' ? { schema: 1, nextId: 1, entities: [], relationships: [], sections: [],
+    canvas: { positions: {}, viewport: { x: 40, y: 40, zoom: 1 }, snap: true } } : { schema: 1, nextId: 1, sources: [], flows: [], positions: {} };
   const data = object(document.design[store]);
   data[field] ??= [];
   return list(data[field], field, field === 'entities' ? 60 : 24).map(object);
@@ -12,21 +13,33 @@ function collection(document: SketchDocument, store: 'semantic' | 'dataSources',
 function identity(rows: Record<string, unknown>[], name: string, prefix: string) {
   return { id: slug(name, prefix, rows.map(item => String(item.id))), slug: slug(name, prefix, rows.map(item => String(item.slug))), name };
 }
+/** Canonical IDs share one monotonic counter per catalog, like the browser Companion. */
+function catalogId(catalog: Record<string, unknown>, kind: string): string {
+  const n = Number(catalog.nextId);
+  requireSketch(Number.isSafeInteger(n) && n > 0 && n < Number.MAX_SAFE_INTEGER - 100000, 'BRICK_ID', 'Catalog identity capacity exhausted.');
+  catalog.nextId = n + 1;
+  return kind + '-' + n;
+}
 export function entityAdd(document: SketchDocument, title: unknown): string {
   const rows = collection(document, 'semantic', 'entities');
   requireSketch(rows.length < 60, 'BRICK_LIMIT', 'At most 60 entities.');
-  const item = { ...identity(rows, text(title, 'title', 80), 'entity'), folder: '', properties: [] };
-  object(document.design.semantic).entities = [...rows, item]; return item.id;
+  const m = object(document.design.semantic), info = identity(rows, text(title, 'title', 80), 'entity');
+  const item = m.schema === 1 ? { ...info, id: catalogId(m, 'er-entity'), folder: '', description: '', section: null, properties: [] } : { ...info, folder: '', properties: [] };
+  m.entities = [...rows, item]; return item.id;
 }
 export function entityProperties(document: SketchDocument, id: string, input: unknown): void {
   const entity = collection(document, 'semantic', 'entities').find(item => item.id === id);
   requireSketch(entity, 'BRICK_REFERENCE', 'Entity does not exist.');
+  const m = object(document.design.semantic), canonical = m.schema === 1;
+  const previous = list(entity.properties ?? [], 'properties', 40).map(object);
   const properties = list(input, 'properties', 40).map(value => {
     const item = object(value); keys(item, ['key', 'type', 'required']);
     const key = text(item.key, 'key', 60);
-    requireSketch(/^[A-Za-z][A-Za-z0-9_-]*$/.test(key) && !['id', 'type', 'constructor', 'prototype', '__proto__'].includes(key), 'BRICK_PROPERTY', 'Invalid or reserved entity property.');
+    requireSketch((canonical ? /^[a-z][a-z0-9_]{0,59}$/.test(key) : /^[A-Za-z][A-Za-z0-9_-]*$/.test(key)) && !['id', 'type', 'constructor', 'prototype', '__proto__'].includes(key), 'BRICK_PROPERTY', 'Invalid or reserved entity property.');
     requireSketch(['text', 'number', 'checkbox', 'date', 'datetime', 'tags', 'list'].includes(String(item.type)) && typeof item.required === 'boolean', 'BRICK_PROPERTY', 'Use a supported property type and a boolean required flag.');
-    return { key, type: item.type, required: item.required };
+    const old = previous.find(row => row.key === key);
+    return canonical ? { id: typeof old?.id === 'string' && /^er-property-[1-9][0-9]*$/.test(old.id) ? old.id : catalogId(m, 'er-property'),
+      key, type: item.type, required: item.required } : { key, type: item.type, required: item.required };
   });
   requireSketch(new Set(properties.map(item => item.key)).size === properties.length, 'BRICK_PROPERTY', 'Duplicate entity properties.');
   entity.properties = properties;
@@ -73,7 +86,8 @@ function collectionRecordSchema(document: SketchDocument, entity: Record<string,
   addCollectionRelationships(document, entity, properties, required);
   return { type: 'object', properties, required, additionalProperties: true };
 }
-function collectionOperations(sourceId: string, entityId: string, folder: string, record: Record<string, unknown>) {
+function collectionOperations(sourceId: string, entityId: string, folder: string, record: Record<string, unknown>,
+  allocate = (kind: string) => sourceId + '-' + kind) {
   const recordSchema = object(record), recordProperties = object(recordSchema.properties);
   const values = { type: 'object', properties: Object.fromEntries(Object.entries(recordProperties).filter(([key]) => !['id', 'type'].includes(key))),
     required: list(recordSchema.required, 'required').filter(key => !['id', 'type'].includes(String(key))), additionalProperties: false };
@@ -88,7 +102,7 @@ function collectionOperations(sourceId: string, entityId: string, folder: string
     ['update', 'Update record', 'write', objectSchema({ id: { type: 'string' }, revision: { type: 'integer' }, values }), snapshot],
     ['delete', 'Delete record', 'write', objectSchema({ id: { type: 'string' }, revision: { type: 'integer' } }), null],
   ].map(([operation, name, direction, input, output]) => ({
-    id: `${sourceId}-${operation}`, slug: operation, name, direction, method: 'adapter', resource: folder,
+    id: allocate(String(operation)), slug: operation, name, direction, method: 'adapter', resource: folder,
     description: 'Managed Collection CRUD over Markdown notes in the active vault.',
     input: shape(input as Record<string, unknown> | null), output: shape(output as Record<string, unknown> | null),
     implementation: { kind: 'note', entity: entityId, operation },
@@ -98,15 +112,19 @@ export function collectionAdd(document: SketchDocument, title: unknown, inputPat
   const entities = collection(document, 'semantic', 'entities'), entity = entities.find(item => item.id === entityId);
   requireSketch(entity, 'BRICK_REFERENCE', 'Collection needs an existing entity.');
   const folder = text(inputPath, 'collection path', 120);
-  requireSketch(companionRelativeFolder(folder), 'BRICK_COLLECTION_PATH', 'Use a safe vault-relative collection path outside protected folders.');
+  requireSketch(companionRelativeFolder(folder) && folder.split('/').every(part => /^[A-Za-z][A-Za-z0-9 _-]*$/.test(part)),
+    'BRICK_COLLECTION_PATH', 'Use a safe, visible entity folder in the active vault.');
   requireSketch(entity.folder === '' || entity.folder === folder, 'BRICK_COLLECTION_PATH', 'The selected entity already has a different note folder.');
   entity.folder = folder;
   const rows = collection(document, 'dataSources', 'sources');
   requireSketch(rows.length < 24, 'BRICK_LIMIT', 'At most 24 data sources.');
-  const item = { ...identity(rows, text(title, 'title', 80), 'source'), kind: 'collection', status: 'active', description: '',
+  const m = object(document.design.dataSources), info = identity(rows, text(title, 'title', 80), 'source');
+  const canonical = m.schema === 1;
+  const item = { ...info, ...(canonical ? { id: catalogId(m, 'ds-source') } : {}), kind: 'collection', status: 'active', description: '',
     locator: 'vault://active', auth: 'none', credentialRef: '', collectionPath: folder, entity: entityId, operations: [] as unknown[] };
-  item.operations = collectionOperations(item.id, entityId, folder, collectionRecordSchema(document, entity));
-  object(document.design.dataSources).sources = [...rows, item];
+  item.operations = collectionOperations(item.id, entityId, folder, collectionRecordSchema(document, entity),
+    canonical ? () => catalogId(m, 'ds-operation') : kind => item.id + '-' + kind);
+  m.sources = [...rows, item];
   return item.id;
 }
 
@@ -123,8 +141,10 @@ export function sourceAdd(document: SketchDocument, title: unknown, kind: unknow
   requireSketch(kind === 'vault' || kind === 'api' || kind === 'database', 'BRICK_SOURCE', 'Use vault, api or database. No connection is opened.');
   const rows = collection(document, 'dataSources', 'sources');
   requireSketch(rows.length < 24, 'BRICK_LIMIT', 'At most 24 data sources.');
-  const item = { ...identity(rows, text(title, 'title', 80), 'source'), kind, operations: [] };
-  object(document.design.dataSources).sources = [...rows, item]; return item.id;
+  const m = object(document.design.dataSources), info = identity(rows, text(title, 'title', 80), 'source');
+  const item = m.schema === 1 ? { ...info, id: catalogId(m, 'ds-source'), kind, status: 'draft', description: '',
+    locator: kind === 'vault' ? 'vault://active' : '', auth: 'none', credentialRef: '', operations: [] } : { ...info, kind, operations: [] };
+  m.sources = [...rows, item]; return item.id;
 }
 export function brickRename(document: SketchDocument, kind: unknown, id: string, title: unknown): void {
   requireSketch(kind === 'entity' || kind === 'data-source', 'BRICK_KIND', 'Use entity or data-source.');
