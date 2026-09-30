@@ -33,8 +33,9 @@ function pins(template: TemplateSnapshot, selected: PresetOutput): Record<string
       ...Object.fromEntries(selected.targets.map(target => ['build:' + target, 'node scripts/build.mjs ' + target])) }, dependencies, devDependencies };
 }
 function configuration(selected: PresetOutput, template: TemplateSnapshot): string {
-  // The root tsconfig.json is an editor stub; compiler options live in the shared base config.
-  const source = JSON.parse(template.text('configs/types/tsconfig.base.json')) as { compilerOptions: { skipLibCheck?: boolean } };
+  // The root tsconfig is now only an extends stub; read the actual policy from its relocated base.
+  const source = JSON.parse(template.text('configs/types/tsconfig.base.json')) as { compilerOptions?: { skipLibCheck?: boolean } };
+  if (typeof source.compilerOptions?.skipLibCheck !== 'boolean') throw new Error('PRESET_TYPESCRIPT_POLICY: missing vendor declaration setting');
   // Retain the template's vendor declaration boundary, not a weaker source check.
   const vendorDeclarations = selected.frontend === 'nuxt-ui' || selected.targets.includes('plugin');
   return json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', lib: selected.frontend === 'none' ? ['ES2022'] : ['ES2022', 'DOM', 'DOM.Iterable'],

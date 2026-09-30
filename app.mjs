@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
-let compiled = join(root, '.framework/compiled/scripts/framework/cli.js');
+const bundle = join(root, '.framework/compiled/app.js');
 let args = process.argv.slice(2);
 if (args[0] === 'make' && args[1] === 'project') args = ['new', ...args.slice(2)];
 if (args[0] === 'make' && args[1] === 'prototype') args = ['prototype', ...args.slice(2)];
@@ -14,12 +14,16 @@ if (args[0] === 'help' && ['sketch', 'prototype', 'studio', 'settings', 'project
 const legacyFlags = ['--starter', '--from', '--list', '--id', '--name', '--author', '--extension', '--extensions', '--install', '--inside-vault', '--storybook', '--storybook-stories', '--airship', '--no-airship', '--yes', '--dry-run', '--plan-out', '--timeout'];
 const legacyNew = args[0] === 'new' && ((args[1] && !args[1].startsWith('--') && !['presets', 'guide', 'validate'].includes(args[1])) || args.slice(1).some(arg => legacyFlags.includes(arg)));
 const maker = !args.length || (args[0] === 'new' && !legacyNew) || ['studio', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run', '--ui', '--no-color'].includes(args[0]);
-if (maker) compiled = join(root, '.framework/compiled/bin/app.js');
 const memory = args[0] === 'memory' || (args[0] === 'help' && args[1] === 'memory');
 try {
-  if (memory && (process.features.typescript || process.execArgv.includes('--experimental-strip-types'))) {
+  if (existsSync(bundle)) {
+    // An extracted kit starts without node_modules or TypeScript stripping: only app.js is executable.
+    const release = await import(pathToFileURL(bundle).href);
+    process.exitCode = memory ? await release.memoryMain(args[0] === 'help' ? ['--help', ...args.slice(2)] : args.slice(1))
+      : maker ? await release.makerMain(args, root) : await release.frameworkMain(args, root);
+  } else if (memory && (process.features.typescript || process.execArgv.includes('--experimental-strip-types'))) {
     process.exitCode = await (await import('./scripts/hindsight/cli.ts')).main(args[0] === 'help' ? ['--help', ...args.slice(2)] : args.slice(1));
-  } else if (!memory && existsSync(compiled)) process.exitCode = await (await import(pathToFileURL(compiled).href)).main(args, root);
+  }
   else if (!memory && (process.features.typescript || process.execArgv.includes('--experimental-strip-types'))) {
     process.exitCode = await (await import(maker ? './bin/app.ts' : './scripts/framework/cli.ts')).main(args, root);
   } else {

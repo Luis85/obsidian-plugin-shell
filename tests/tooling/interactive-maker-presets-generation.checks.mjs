@@ -42,7 +42,9 @@ for (const [preset, frontend, targets] of [['plugin', 'nuxt-ui'], ['plugin', 'va
     assert.equal(Boolean(allDeps.obsidian), descriptor.targets.includes('plugin'));
     const options = (await readData(join(output, 'tsconfig.json'))).compilerOptions;
     assert.equal(options.strict, true); assert.equal(options.noUncheckedIndexedAccess, true);
-    assert.equal(options.skipLibCheck, descriptor.targets.includes('plugin') || frontend === 'nuxt-ui');
+    const policy = JSON.parse(await readFile(join(frameworkRoot, 'configs/types/tsconfig.base.json'), 'utf8'));
+    assert.equal(options.skipLibCheck, (descriptor.targets.includes('plugin') || frontend === 'nuxt-ui') && policy.compilerOptions.skipLibCheck === true);
+    assert.equal(JSON.parse(await readFile(join(frameworkRoot, 'tsconfig.json'), 'utf8')).extends, './configs/types/tsconfig.base.json');
     assert.equal(options.rewriteRelativeImportExtensions, frontend === 'angular' ? true : undefined);
     assert.equal(options.allowImportingTsExtensions, frontend === 'angular' ? undefined : true);
     if (frontend === 'nuxt-ui') assert.deepEqual(options.paths['#build/*'], ['./node_modules/.nuxt-ui/*']);
