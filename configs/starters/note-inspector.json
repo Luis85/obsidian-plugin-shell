@@ -79,7 +79,7 @@
     "kind": "companion",
     "document": {
       "kind": "obsidian-companion-project",
-      "schemaVersion": 5,
+      "schemaVersion": 6,
       "executable": false,
       "project": {
         "id": "note-inspector-plugin",
@@ -93,7 +93,7 @@
         "testsFolder": "tests"
       },
       "design": {
-        "schema": 5,
+        "schema": 6,
         "blueprint": "blank",
         "goal": "Use for contextual helpers, property editors or note-quality tools.",
         "platform": "desktop",
