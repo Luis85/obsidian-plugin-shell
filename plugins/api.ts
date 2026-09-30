@@ -1,6 +1,8 @@
 import type { Readable } from 'node:stream';
 import type { Workspace } from '../bin/application/workspace.ts';
 import type { Prompts } from '../bin/presentation/prompts.ts';
+import type { FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../scripts/starters/types.ts';
 
 export interface PluginManifest {
   readonly id: string;
@@ -66,5 +68,7 @@ export interface WorkbenchPluginObject {
   readonly events?: readonly PluginEventDefinition[];
   readonly cli?: readonly PluginCliCommand[];
   readonly tui?: readonly PluginTuiAction[];
+  readonly frameworks?: readonly FrameworkAdapter[];
+  readonly starters?: readonly StarterDefinition[];
   activate?(context: WorkbenchPluginContext): void | (() => void) | Promise<void | (() => void)>;
 }
