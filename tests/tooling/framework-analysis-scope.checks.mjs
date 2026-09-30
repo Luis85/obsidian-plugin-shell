@@ -51,3 +51,13 @@ test('shared Node process primitive is isolated behind the tooling adapter', () 
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-process-contract'), false);
 });
+
+test('typed file-plan facade is isolated as a core boundary', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-file-plan-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/file-plan.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-file-plan-contract')?.allow, ['cli-file-plan-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-file-plan-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-file-plan-contract'), false);
+});

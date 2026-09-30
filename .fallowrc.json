@@ -337,6 +337,12 @@
         ]
       },
       {
+        "name": "cli-file-plan-contract",
+        "patterns": [
+          "scripts/shared/file-plan.ts"
+        ]
+      },
+      {
         "name": "cli-confirmation-contract",
         "patterns": [
           "scripts/shared/confirmation.ts"
@@ -465,7 +471,8 @@
           "cli-data-contract",
           "cli-result-contract",
           "cli-process-contract",
-          "cli-confirmation-contract"
+          "cli-confirmation-contract",
+          "cli-file-plan-contract"
         ]
       },
       {
@@ -507,7 +514,8 @@
           "cli-data-contract",
           "cli-result-contract",
           "cli-process-contract",
-          "cli-confirmation-contract"
+          "cli-confirmation-contract",
+          "cli-file-plan-contract"
         ]
       },
       {
@@ -582,7 +590,8 @@
           "project-path-contract",
           "cli-data-contract",
           "cli-result-contract",
-          "cli-confirmation-contract"
+          "cli-confirmation-contract",
+          "cli-file-plan-contract"
         ]
       },
       {
@@ -601,6 +610,12 @@
         "from": "cli-process-contract",
         "allow": [
           "cli-process-contract"
+        ]
+      },
+      {
+        "from": "cli-file-plan-contract",
+        "allow": [
+          "cli-file-plan-contract"
         ]
       },
       {
