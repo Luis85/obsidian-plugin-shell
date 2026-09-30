@@ -57,7 +57,7 @@ test('check without installed tools fails every step honestly and points to inst
   assert.equal(human.status, 1);
   assert.match(human.stdout, /^ {2}\[FAIL\] typecheck {2}vue-tsc --noEmit +\d+ms$/m);
   assert.match(human.stdout, /^ {2}Summary {2}0 passed, 4 failed, 0 skipped in /m);
-  assert.match(human.stdout, /^Next: node shell\.mjs install --yes$/m);
+  assert.match(human.stdout, /^Next: node bin\/app install --yes$/m);
 });
 test('scope detection selects project-suite steps in a generated project', async t => {
   const dir = await scratch(t);

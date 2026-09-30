@@ -82,7 +82,7 @@ test('check submission is read-only and reports per-rule outcomes with remediati
   const human = spawnSync(process.execPath, [join(root, 'app.mjs'), 'check', 'submission', '--root', dir], { encoding: 'utf8', timeout: 60000 });
   assert.equal(human.status, 1);
   assert.match(human.stdout, /^ {2}\[FAIL\] build-artifacts +dist\/manifest\.json id\/version differ from manifest\.json\.$/m);
-  assert.match(human.stdout, /^ +fix: Build the release assets: node shell\.mjs build$/m);
+  assert.match(human.stdout, /^ +fix: Build the release assets: node bin\/app build$/m);
   assert.match(human.stdout, /^ {2}\[ok\] {3}license +LICENSE is present\.$/m);
   assert.match(human.stdout, /Local mirror only/);
 });

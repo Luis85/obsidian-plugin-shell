@@ -37,7 +37,7 @@ test('human doctor output is aligned plain text with ASCII markers and an action
     assert.match(output.stdout, /^ {2}Root {10}/m);
     assert.match(output.stdout, /^ {2}\[warn\] CONFIG_MISSING {2}Project has not been configured\.$/m);
     assert.match(output.stdout, /^ {2}\[warn\] DEPENDENCIES_MISSING /m);
-    assert.match(output.stdout, /^Next: node shell\.mjs setup$/m);
+    assert.match(output.stdout, /^Next: node bin\/app setup$/m);
     assert.equal(output.stderr, '', 'diagnostics are shown once, inline');
   }
   const json = machine(['doctor', '--root', dir]);
@@ -63,7 +63,7 @@ test('a generated project is pointed at its own npm scripts, not the shell setup
   await writeFile(join(dir, 'manifest.json'), JSON.stringify({ id: 'quick-capture', name: 'Quick Capture', version: '0.1.0', minAppVersion: '1.5.0' }));
   const fresh = cli(['doctor', '--root', dir], { NO_COLOR: '1' });
   assert.equal(fresh.status, 0, fresh.stderr);
-  assert.doesNotMatch(fresh.stdout, /CONFIG_MISSING|shell\.mjs setup/); assert.match(fresh.stdout, /^Next: npm ci$/m);
+  assert.doesNotMatch(fresh.stdout, /CONFIG_MISSING|bin\/app setup/); assert.match(fresh.stdout, /^Next: npm ci$/m);
   await mkdir(join(dir, 'node_modules/typescript'), { recursive: true }); await writeFile(join(dir, 'node_modules/typescript/package.json'), '{}');
   const installed = machine(['doctor', '--root', dir]);
   assert.equal(installed.result.data.next, 'npm run check'); assert.equal(installed.result.data.identityAuthority, 'manifest.json');
@@ -72,18 +72,18 @@ test('make list and describe render readable tables instead of raw JSON', () => 
   const list = cli(['make', 'list']);
   assert.equal(list.status, 0, list.stderr); assert.doesNotMatch(list.stdout, /[{}]/);
   assert.match(list.stdout, /^ {2}feature +implemented +Compose /m);
-  assert.match(list.stdout, /^Describe one: node shell\.mjs make describe <recipe>$/m);
-  assert.match(list.stdout, /^Next: node shell\.mjs make feature <name> --dry-run$/m);
+  assert.match(list.stdout, /^Describe one: node bin\/app make describe <recipe>$/m);
+  assert.match(list.stdout, /^Next: node bin\/app make feature <name> --dry-run$/m);
   const describe = cli(['make', 'describe', 'entity']);
   assert.equal(describe.status, 0, describe.stderr);
   assert.match(describe.stdout, /^ {2}Options +--entity|^ {2}Options +.*--backend/m);
-  assert.match(describe.stdout, /^Next: node shell\.mjs make entity <name> --dry-run$/m);
+  assert.match(describe.stdout, /^Next: node bin\/app make entity <name> --dry-run$/m);
 });
 test('mistyped commands suggest the closest catalog entries, including multi-word commands', () => {
   const human = cli(['statu']);
   assert.equal(human.status, 1); assert.equal(human.stdout, 'unknown: failed\n');
   assert.match(human.stderr, /^UNKNOWN_COMMAND: Unknown command: statu\. Did you mean "status"\? Use help\.$/m);
-  assert.match(human.stderr, /^Next: node shell\.mjs help status$/m);
+  assert.match(human.stderr, /^Next: node bin\/app help status$/m);
   const status = machine(['statu']);
   assert.equal(status.exit, 1); assert.deepEqual(status.result.data.suggestions, ['status']);
   assert.equal(status.result.diagnostics[0].next, 'node bin/app help status');
@@ -113,7 +113,7 @@ test('help starts with the golden path and --all lists every command by group', 
   const order = [...short.stdout.matchAll(/^ {2}\d\. (\S+)/gm)].map(match => match[1]);
   assert.deepEqual(order, ['new', 'install', 'dev', 'test', 'check', 'make']);
   assert.deepEqual(order, goldenPath.map(item => item.command));
-  assert.match(short.stdout, /\$ node shell\.mjs new \.\.\/folio-tools --starter blank/);
+  assert.match(short.stdout, /\$ node bin\/app new \.\.\/folio-tools --starter blank/);
   assert.ok(!short.stdout.includes(commands.find(entry => entry.id === 'release operate').summary), 'the short tier omits maintainer summaries');
   assert.match(short.stdout, /help --all/);
   const all = cli(['help', '--all']);
@@ -126,13 +126,13 @@ test('command help lists options with allowed values, defaults and examples', ()
   const styles = cli(['help', 'styles', 'export']);
   assert.equal(styles.status, 0, styles.stderr);
   assert.match(styles.stdout, /--format <css\|json\|markdown\|html> +Export format\. \(default: css\)/);
-  assert.match(styles.stdout, /^Examples\n {2}node shell\.mjs styles export /m);
+  assert.match(styles.stdout, /^Examples\n {2}node bin\/app styles export /m);
   const profile = cli(['test', '--help']);
   assert.match(profile.stdout, /--profile <unit\|project\|browser\|native\|obsidian>/);
   assert.match(profile.stdout, /^Effect: process, /m);
   const check = cli(['help', 'check']);
   assert.match(check.stdout, /--fast +Typecheck plus tests related to changed files/);
-  assert.match(check.stdout, /node shell\.mjs check --fast --json/);
+  assert.match(check.stdout, /node bin\/app check --fast --json/);
 });
 test('help JSON carries the same tiers and returns isolated copies', async () => {
   const context = { root, frameworkRoot: root };
