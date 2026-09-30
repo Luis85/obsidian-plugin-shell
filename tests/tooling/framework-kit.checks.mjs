@@ -41,6 +41,12 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   assert.equal(pluginResult.command, 'example');
   assert.deepEqual(pluginResult.data, { plugin: 'example-extension', message: 'Compiled extension' });
   assert.match(output.stderr, /Compiled extension/);
+  output = cli(dir, ['help', 'example', '--json']);
+  assert.equal(output.status, 0, output.stderr + output.stdout);
+  pluginResult = JSON.parse(output.stdout);
+  assert.equal(pluginResult.command, 'example');
+  assert.equal(pluginResult.data.command, 'example');
+  assert.match(pluginResult.data.help, /Dispatch the example plugin event/);
   output = cli(dir, ['new', 'guide', '--starter', 'webapp-react', '--json']);
   assert.equal(output.status, 0, output.stderr + output.stdout);
   pluginResult = JSON.parse(output.stdout);
