@@ -1,11 +1,11 @@
 import { constants } from 'node:fs';
 import { mapBounded } from './bounded-map.mjs';
 import { lstat, realpath, readdir, readFile, writeFile, mkdir, copyFile, rename, unlink, rm } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { sha256 } from './hash.mjs';
 import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
 
 const protectedRoots = new Set(['.git', 'node_modules', '.worktrees', '.qualification', '.dev-vault', '.native-runner', '.codex-authoring.lock', '.shell-first-run.lock']);
-const hash = value => createHash('sha256').update(value).digest('hex');
+const hash = sha256;
 function contentBytes(entry) {
   if (entry.encoding !== undefined && entry.encoding !== 'base64') throw new Error('PLAN_INVALID_ENCODING');
   if (entry.content === null) {

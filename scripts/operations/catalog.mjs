@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
 import { assertJsonData, parseJsonData } from '../contracts/json-data.mjs';
 
 const slug = /^[a-z][a-z0-9]*(?:[-.][a-z0-9]+)*$/;
@@ -79,7 +79,7 @@ export function capabilityCatalog() {
 }
 export function catalogDigest(catalog = capabilityCatalog()) {
   validateCatalog(catalog);
-  return createHash('sha256').update(JSON.stringify(catalog)).digest('hex');
+  return sha256(JSON.stringify(catalog));
 }
 export function validateCatalogParity(catalog, makerHandlers, protocolHandlers) {
   validateCatalog(catalog);

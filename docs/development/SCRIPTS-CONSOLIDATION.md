@@ -69,6 +69,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B3:** Documentation, setup and two qualification scripts reuse the same SHA-256 implementation; added exact-byte documentation regression.
 - **B4:** Framework discovery, setup journal and handout workspace reuse the same `lstat` presence helper; missing and broken-symlink regressions added.
 - **B5:** Framework, maker TUI and legacy maker entry share one yes/no decision parser; prompt rendering remains presentation-specific.
+- **B6:** The file-plan safety boundary and capability-catalog digest use the shared SHA-256 implementation; exact digest parity is covered.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
