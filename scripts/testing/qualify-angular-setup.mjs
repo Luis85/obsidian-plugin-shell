@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promi
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
 import { assembleKit, installedCompiler } from '../framework/kit.ts';
 import { firstRunDefaults } from '../../bin/domain/first-run.ts';
 import { showcase } from '../../bin/adapters/first-run-preview.ts';
@@ -18,7 +18,7 @@ const root = await mkdtemp(join(await realpath(tmpdir()), 'workbench-angular-'))
 const evidence = { schemaVersion: 1, commit: process.env.GITHUB_SHA ?? null, node: process.versions.node,
   compiledKit: 'not-run', firstRun: 'not-run', regeneration: 'not-run', browser: 'not-run', status: 'running' };
 await mkdir(output, { recursive: true });
-const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const sha = sha256;
 async function run(executable, args, cwd = root) {
   return new Promise((accept, reject) => {
     const child = spawn(executable, args, { cwd, env: { ...process.env, CI: 'true' }, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });

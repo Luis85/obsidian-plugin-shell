@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdtemp, mkdir, readdir, rm, cp } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
 import { spawnSync } from 'node:child_process';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
@@ -34,9 +34,9 @@ async function treeDigest(path) {
   const hashes = [];
   for (const item of (await readdir(path, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
     assert.ok(!item.isSymbolicLink());
-    hashes.push([item.name, item.isDirectory() ? await treeDigest(join(path, item.name)) : createHash('sha256').update(await readFile(join(path, item.name))).digest('hex')]);
+    hashes.push([item.name, item.isDirectory() ? await treeDigest(join(path, item.name)) : sha256(await readFile(join(path, item.name)))]);
   }
-  return createHash('sha256').update(JSON.stringify(hashes)).digest('hex');
+  return sha256(JSON.stringify(hashes));
 }
 async function verifyArtifacts(source, selection, log) {
   if (selection.targets.includes('cli')) {

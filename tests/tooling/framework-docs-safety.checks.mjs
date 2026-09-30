@@ -120,3 +120,11 @@ test('non-regular documentation inputs are rejected before a blocking file open'
   assert.ifError(child.error); assert.equal(child.status, 0, child.stderr);
   assert.equal(child.stdout.trim(), 'DOCS_LIMIT');
 });
+
+test('documentation digest matches the shared sha256 implementation for exact bytes', async () => {
+  const { sha256 } = await import('../../scripts/shared/hash.mjs');
+  const { documentationDigest } = await import('../../scripts/application-docs/adapters/filesystem.ts');
+  for (const value of ['literal text with UTF-8 café', Buffer.from([0, 255, 16, 32])]) {
+    assert.equal(documentationDigest(value), sha256(value));
+  }
+});
