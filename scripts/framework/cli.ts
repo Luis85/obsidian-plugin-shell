@@ -9,7 +9,7 @@ import { parseCliArguments, descriptor } from './catalog.ts';
 import { executeOperation } from './operations.ts';
 import { projectRoot, exists } from './files.ts';
 import { failure, type Context, type Request, type Result } from './contracts.ts';
-import { invocationDirectory } from './starter-project.ts';
+import { invocationDirectory, starterInvocation } from './starter-project.ts';
 import { guidedStarter, starterText } from './starter-terminal.ts';
 import { renderHuman } from './terminal-render.ts';
 import { terminalStyle, runnable } from './terminal-style.ts';
@@ -54,7 +54,9 @@ export async function main(argv: string[], frameworkRoot: string): Promise<numbe
     // `new` creates a sibling project from this framework checkout; <dir> is relative to the invoking shell.
     if (command === 'new' && request.args[0]) request = { ...request, args: [invocationDirectory(request.args[0])] };
     if (command === 'new' && typeof request.options.from === 'string') request = { ...request, options: { ...request.options, from: invocationDirectory(request.options.from) } };
-    const root = discovery || command === 'new' || command.startsWith('starters ') ? resolve(selected) : await projectRoot(selected, typeof request.options.root === 'string');
+    const starters = command === 'new' || command.startsWith('starters ') ? starterInvocation(request, frameworkRoot) : null;
+    if (starters) request = starters.request;
+    const root = discovery ? resolve(selected) : starters ? starters.root : await projectRoot(selected, typeof request.options.root === 'string');
     const context: Context = { root, frameworkRoot, signal: controller.signal, progress: text => stderr.write(text) };
     if (request.options.input === '-') context.inputText = await readInput(stdin, controller.signal);
     const interactive = Boolean(stdin.isTTY && stderr.isTTY && !machine && !request.options['no-interaction'] && !request.options.yes && !request.options.help);

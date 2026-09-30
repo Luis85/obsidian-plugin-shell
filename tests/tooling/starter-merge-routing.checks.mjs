@@ -46,6 +46,16 @@ test('empty invoking workspace remains empty when starter discovery follows the 
   const result = command(root, ['starters', 'list']);
   assert.deepEqual(result.data.starters, []);
 }));
+test('without --root, discovery reads the pack beside shell.mjs, never the invoking folder', async () => isolated(async root => {
+  // A maintainer checkout carries the canonical pack; an extracted shell has none until the separate pack is added.
+  const expected = await readdir(fileURLToPath(new URL('../../configs/starters/', import.meta.url))).catch(error => { if (error.code === 'ENOENT') return []; throw error; });
+  for (const args of [['starters', 'list'], ['new', '--list']]) {
+    const run = spawnSync(process.execPath, [launcher, ...args, '--json'], { cwd: root, env: { ...process.env, CI: 'true' }, encoding: 'utf8', timeout: 15_000 });
+    assert.equal(run.status, 0, run.stderr + run.stdout);
+    const ids = JSON.parse(run.stdout).data.starters.map(starter => starter.id + '.json').sort();
+    assert.deepEqual(ids, expected.filter(name => name.endsWith('.json')).sort());
+  }
+}));
 test('merged manual retains starter and prototype-management command contracts together', async () => {
   const model = JSON.parse((await outputs())['commands.json']);
   const ids = new Set(model.commands.map(item => item.id));

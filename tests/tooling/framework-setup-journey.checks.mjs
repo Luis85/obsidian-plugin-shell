@@ -9,6 +9,9 @@ import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { setupProgress } from '../../scripts/framework/setup-progress.ts';
 import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
 import { result } from '../../scripts/framework/contracts.ts';
+import { assembleStarterPack } from '../../scripts/starters/operations.ts';
+import { zip } from '../../scripts/framework/zip.ts';
+import { extractArchive } from './framework-archive-fixture.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'setup-journey-')));
@@ -17,8 +20,13 @@ async function fixture(t) {
 }
 const run = (context, argv) => executeOperation(parseCliArguments(argv), context);
 const identity = ['--id', 'capture', '--name', 'Capture', '--author', 'Example'];
+/** The shell bundles no starters: extract the separate pack into the invoking folder, as a user does. */
+async function withStarterPack(ctx) {
+  await extractArchive(zip(await assembleStarterPack({ root: frameworkRoot, frameworkRoot })), ctx.root);
+  return ctx;
+}
 async function configured(t) {
-  const ctx = await fixture(t);
+  const ctx = await withStarterPack(await fixture(t));
   assert.equal((await run(ctx, ['setup', '--starter', 'quick-capture', ...identity, '--yes'])).status, 'applied');
   return ctx;
 }
@@ -27,10 +35,12 @@ function request(stage, resumeHash, extra = {}) {
   return { command: 'setup resume', args: [], options: { stage, yes: true, 'resume-hash': resumeHash, ...extra } };
 }
 test('setup in the current folder accepts a verified starter and retains the ordinary canonical model', async t => {
-  const ctx = await fixture(t); await writeFile(join(ctx.root, 'README.md'), 'existing kit or user readme\n');
+  const ctx = await withStarterPack(await fixture(t)); await writeFile(join(ctx.root, 'README.md'), 'existing kit or user readme\n');
+  const pack = await readdir(join(ctx.root, 'configs/starters'));
   const preview = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio']);
   assert.equal(preview.status, 'planned', JSON.stringify(preview));
-  assert.deepEqual(await readdir(ctx.root), ['README.md']);
+  assert.deepEqual(await readdir(ctx.root), ['README.md', 'configs']);
+  assert.deepEqual(await readdir(join(ctx.root, 'configs')), ['starters']);
   assert.equal(preview.data.summary.starter.id, 'custom-file-view');
   const applied = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio', '--apply', preview.data.planHash]);
   assert.equal(applied.status, 'applied', JSON.stringify(applied));
@@ -39,6 +49,7 @@ test('setup in the current folder accepts a verified starter and retains the ord
   assert.equal(document.design.nativeIntegrations.fileTypes[0].extension, 'folio');
   assert.equal(document.project.id, 'capture');
   assert.equal(await readFile(join(ctx.root, 'README.md'), 'utf8'), 'existing kit or user readme\n');
+  assert.deepEqual(await readdir(join(ctx.root, 'configs/starters')), pack, 'setup never edits the installed starter pack');
   assert.equal((await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio', '--yes'])).status, 'unchanged');
 });
 test('source choice ambiguity, unknown starters and native options without a starter fail before writes', async t => {
@@ -47,6 +58,9 @@ test('source choice ambiguity, unknown starters and native options without a sta
     assert.equal((await run(ctx, ['setup', ...identity, ...args, '--yes'])).status, 'failed');
     assert.deepEqual(await readdir(ctx.root), []);
   }
+  // Without the separate starter pack the shell has no fallback definitions, even for canonical IDs.
+  const missing = await run(ctx, ['setup', '--starter', 'quick-capture', ...identity, '--yes']);
+  assert.equal(missing.diagnostics[0].code, 'STARTER_UNKNOWN'); assert.deepEqual(await readdir(ctx.root), []);
 });
 test('headless import preserves imported identity; wizard does not request a replacement identity for JSON', async t => {
   const ctx = await fixture(t);

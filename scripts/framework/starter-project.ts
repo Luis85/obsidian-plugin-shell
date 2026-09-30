@@ -48,6 +48,20 @@ export function invocationDirectory(path: string, environment: NodeJS.ProcessEnv
   const base = environment.npm_lifecycle_event === 'new' && environment.INIT_CWD ? environment.INIT_CWD : cwd;
   return resolve(base, path);
 }
+const invocationPaths: Readonly<Record<string, readonly string[]>> = { new: ['values'], 'starters add': ['input'], 'starters edit': ['input'], 'starters pack': ['out'], 'starters run': ['project'] };
+/** Starter commands read the pack extracted beside shell.mjs unless --root names another starter workspace.
+ * Without --root their path options still resolve from the invoking shell, as they did when that was the root. */
+export function starterInvocation(request: Request, frameworkRoot: string): { request: Request; root: string } {
+  const selected = request.options.root;
+  if (typeof selected === 'string') return { request, root: resolve(selected) };
+  const options = { ...request.options };
+  if (request.command === 'starters run' && options.project === undefined) options.project = '.';
+  for (const key of invocationPaths[request.command] ?? []) {
+    const value = options[key];
+    if (typeof value === 'string' && value !== '-') options[key] = invocationDirectory(value);
+  }
+  return { request: { ...request, options }, root: frameworkRoot };
+}
 interface Placement { directory: string; vault: string; target: string }
 /** Map <dir> onto the generator's vault/target contract without creating anything:
  * the nearest existing ancestor is the vault and the file planner creates the rest. */
