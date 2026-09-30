@@ -39,7 +39,7 @@ test('setup in the current folder accepts a verified starter and retains the ord
   const pack = await readdir(join(ctx.root, 'configs/starters'));
   const preview = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio']);
   assert.equal(preview.status, 'planned', JSON.stringify(preview));
-  assert.deepEqual(await readdir(ctx.root), ['README.md', 'configs']);
+  assert.deepEqual((await readdir(ctx.root)).sort(), ['README.md', 'configs'].sort());
   assert.deepEqual(await readdir(join(ctx.root, 'configs')), ['starters']);
   assert.equal(preview.data.summary.starter.id, 'custom-file-view');
   const applied = await run(ctx, ['setup', '--starter', 'custom-file-view', ...identity, '--extension', 'folio', '--apply', preview.data.planHash]);
