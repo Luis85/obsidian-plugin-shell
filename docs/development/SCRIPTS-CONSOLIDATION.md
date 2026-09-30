@@ -67,6 +67,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B1:** Legacy standalone handout command delegates to the central reviewed plan and validation CLI; added parity regression.
 - **B2:** Framework and handout sha256 functions delegate to the existing shared hash helper; added binary and Unicode parity regression.
 - **B3:** Documentation, setup and two qualification scripts reuse the same SHA-256 implementation; added exact-byte documentation regression.
+- **B4:** Framework discovery, setup journal and handout workspace reuse the same `lstat` presence helper; missing and broken-symlink regressions added.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages

@@ -1,13 +1,13 @@
 import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
 import { HANDOUT_LIMIT, HANDOUT_PATH, HandoutError, digest, ensure, makeSnapshot, readSnapshot, renderHandout, refreshHandout, validateHandout, type SourceFile, type Suggestion } from './handout-model.ts';
+import { statIfPresent } from '../shared/fs-presence.mjs';
 
 const CONFIGURATION_FILES = ['configs/user-settings.json', 'shell.config.json'];
 const MAX_SOURCE_BYTES = 16_000_000;
 const MAX_FILE_BYTES = 1_000_000;
 const forbidden = new Set(['.git', '.obsidian', '.framework', '.companion', '.dev-vault', '.test-vault', 'node_modules']);
 export interface WorkspaceOptions { prds?: string; virtualFiles?: Record<string, string> }
-function missing(error: unknown): boolean { return error !== null && typeof error === 'object' && 'code' in error && error.code === 'ENOENT'; }
 export function portablePath(path: string): string {
   ensure(typeof path === 'string' && path.length > 0 && path.length <= 1024 && !isAbsolute(path) && !/[\\:\u0000-\u001f]/.test(path), 'HANDOUT_PATH', 'Use a bounded project-relative path with forward slashes.');
   ensure(path.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !forbidden.has(part.toLowerCase())), 'HANDOUT_PATH', 'The PRD path must stay inside the project and outside protected folders.');
@@ -25,8 +25,8 @@ async function inspectLocalPath(root: string, path: string) {
   let parent = root;
   for (const [index, part] of path.split('/').entries()) {
     parent = join(parent, part);
-    let stat;
-    try { stat = await lstat(parent); } catch (error) { if (missing(error)) return null; throw error; }
+    const stat = await statIfPresent(parent);
+    if (!stat) return null;
     ensure(!stat.isSymbolicLink(), 'HANDOUT_SYMLINK', 'Refusing a symlink in a handout input or output path.');
     if (index < path.split('/').length - 1) ensure(stat.isDirectory(), 'HANDOUT_PATH', 'A path ancestor is not a directory.');
     else return stat;

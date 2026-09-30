@@ -2,14 +2,13 @@ import { open, lstat, realpath } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { sha256 } from '../shared/hash.mjs';
+import { exists } from '../shared/fs-presence.mjs';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { parseJsonData } from '../contracts/json-data.mjs';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array): string => sha256(bytes);
-export async function exists(path: string): Promise<boolean> {
-  try { await lstat(path); return true; } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
-}
+export { exists };
 /** Refuse links in every supplied ancestor, not only the opened final file. */
 export async function readBounded(path: string, maxBytes = 1_048_576): Promise<Buffer> {
   path = resolve(path);

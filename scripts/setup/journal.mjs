@@ -1,10 +1,10 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { sha256 } from '../shared/hash.mjs';
+import { statIfPresent as present } from '../shared/fs-presence.mjs';
 import { createFilePlan, applyFilePlan } from '../shared/file-plan.mjs';
 const journalPath = '.template-state/setup.json';
 export const digest = value => sha256(value);
-async function present(path) { try { return await lstat(path); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 export async function readJournal(root) {
   await createFilePlan(root, [{ path: journalPath, content: null }]);
   if (!await present(join(root, journalPath))) return null;

@@ -310,3 +310,17 @@ test('canonical sha256 helper preserves framework and handout byte fingerprints'
     assert.equal(digest(bytes), sha256(bytes));
   }
 });
+
+test('shared filesystem presence preserves broken symlinks and missing-path semantics', async t => {
+  const { exists, statIfPresent } = await import('../../scripts/shared/fs-presence.mjs');
+  const root = await workspace(t);
+  const missing = join(root, 'missing.md');
+  assert.equal(await exists(missing), false);
+  assert.equal(await statIfPresent(missing), null);
+  const path = join(root, 'docs/prds/PRD-1.md');
+  assert.equal(await exists(path), true);
+  const link = join(root, 'broken-link.md');
+  await symlink(missing, link);
+  assert.equal(await exists(link), true);
+  assert.equal((await statIfPresent(link)).isSymbolicLink(), true);
+});
