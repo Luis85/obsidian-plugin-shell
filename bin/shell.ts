@@ -62,8 +62,7 @@ async function shouldCreate(args: Arguments, context: CommandContext, options: S
 }
 async function createInteractive(args: Arguments, context: CommandContext, ui: Prompts, options: StudioOptions): Promise<string | undefined> {
     if (['guide', 'project', 'kind'].some(key => args.flags[key])) throw new SketchError('PROJECT_OPTION', 'New project creation does not accept a baseline or legacy output kind.');
-    return await projectWizard(ui, { ...context, out: options.out, preset: option(args, 'preset') || undefined,
-    framework: option(args, 'framework') || undefined, targets: args.flags.targets ? option(args, 'targets').split(',') : undefined });
+    return await projectWizard(ui, { ...context, out: options.out, starter: option(args, 'starter') || undefined });
 
 }
 function errorResult(command: string, error: unknown) {

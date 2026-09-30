@@ -54,7 +54,7 @@ The tables list options with documented command semantics. Some common flags are
 
 ## Start a project
 
-- [new](#new) — Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.
+- [new](#new) — Create a new project in &lt;dir&gt; from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without &lt;dir&gt;: new --starter &lt;id&gt;.
 - [setup](#setup) — Configure this folder from a verified starter, blank project or JSON; no implicit install.
 - [setup status](#setup-status) — Inspect resumable setup progress against actual current input bytes; no processes or writes.
 - [setup resume](#setup-resume) — Explicitly run one setup stage with fresh input checks and retained interruption/failure history.
@@ -2202,7 +2202,7 @@ node shell.mjs setup [options]
 | --config-dir | value | Host configuration directory name inside the test vault. | Default: .obsidian |
 | --input | value | Input JSON file (use - for stdin where supported). | See command semantics |
 | --resolve | value | Which side wins a configured/imported identity conflict. | Values: project, import |
-| --starter | value | Starter ID (see new --list). | See command semantics |
+| --starter | value | Starter ID (see new --list). A project starter (generator project) runs without &lt;dir&gt; via new --starter &lt;id&gt; or new guide --starter &lt;id&gt;. | See command semantics |
 | --extension | value | Custom file suffix without a dot (lowercase, 1–16 letters/digits). Core Obsidian extensions are refused. | See command semantics |
 | --extensions | value | Comma-separated lowercase, dotless file-menu filters, for example md,txt. | See command semantics |
 | --blank | flag | Create an inert minimal design instead of importing one. | See command semantics |
@@ -2380,7 +2380,7 @@ node shell.mjs project import --input project.json --resolve project --dry-run
 
 ## new
 
-Create a new plugin project from a reviewed starter or an exported companion project (--from); previews unless --yes.
+Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.
 
 ```sh
 node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]
@@ -2394,7 +2394,7 @@ node shell.mjs new <dir> (--starter <id> | --from <project.json>) [options]
 | --- | --- | --- | --- |
 | --storybook | value | Enable or disable optional Storybook workspace emission. Does not install packages or imply story generation. | Values: on, off; Default: project JSON, otherwise off |
 | --storybook-stories | value | Enable or disable CSF story emission. Independent of Storybook installation. | Values: on, off; Default: project JSON, otherwise off |
-| --starter | value | Starter ID (see new --list). | See command semantics |
+| --starter | value | Starter ID (see new --list). A project starter (generator project) runs without &lt;dir&gt; via new --starter &lt;id&gt; or new guide --starter &lt;id&gt;. | See command semantics |
 | --from | value | Project JSON exported by the companion (instead of --starter). | See command semantics |
 | --id | value | Plugin ID: lowercase letters, digits and hyphens; must not contain "obsidian" or "plugin". | See command semantics |
 | --name | value | Plugin display name. | See command semantics |

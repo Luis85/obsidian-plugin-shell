@@ -34,10 +34,10 @@ reads this file and follows these same references and scripts. Do not fork the
 workflow, prompt templates, helper code or approval rules for an agent host.
 Use actual host capabilities; a Claude directory name never requires launching Claude.
 
-## Project-preset package routing
+## Project-starter package routing
 
 For `node shell.mjs new` packages, read `project.config.json` and
-`references/project-presets.md` **before** following the legacy Vue-only flow below.
+`references/project-starters.md` **before** following the legacy Vue-only flow below.
 Its target/framework contract governs source, build and artifact requirements.
 Do not convert a vanilla, Angular or CLI selection to Vue; no HTML is required for
 CLI-only projects. Preserve explicit agreement and the separate reviewed write plan.

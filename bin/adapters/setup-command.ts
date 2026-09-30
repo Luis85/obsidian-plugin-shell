@@ -9,13 +9,13 @@ import { angularSetupGuide, setupSchema, setupExample, setupStatus, projectSetup
 import { intakePrds } from './prd-intake.ts';
 import type { CommandContext } from './commands.ts';
 export async function setupCommand(args: Arguments, context: CommandContext, input: () => Promise<unknown>): Promise<Record<string, unknown>> {
-  requireSketch(!['project', 'out', 'guide', 'kind', 'preset', 'framework', 'targets'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; the target is Angular webapp.');
+  requireSketch(!['project', 'out', 'guide', 'kind', 'starter'].some(key => args.flags[key]), 'SETUP_OPTION', 'Configure setup paths in settings or the setup request; setup uses the webapp-angular starter.');
   const action = args.action;
   if (args.command === 'project-setup' && ['checkpoint', 'resume', 'checkpoint-status', 'discard-checkpoint'].includes(action)) return checkpointCommand(args, context, input);
   if (args.command === 'settings') return settingsCommand(args, context, input);
   const readers: Record<string, () => Promise<Record<string, unknown>> | Record<string, unknown>> = {
     schema: () => ({ schema: setupSchema, example: setupExample, checkpointSchema: { ...setupSchema, title: 'Partial setup answers', required: ['schemaVersion'] } }),
-    guide: angularSetupGuide, status: () => setupStatus(context.root), scan: () => scanPrds(context.root),
+    guide: () => angularSetupGuide(context.frameworkRoot), status: () => setupStatus(context.root), scan: () => scanPrds(context.root),
   };
   if (Object.hasOwn(readers, action)) return readers[action]!();
   requireSketch(!action || action === 'validate', 'SETUP_COMMAND', 'Use project-setup, schema, guide, status, scan or validate.');

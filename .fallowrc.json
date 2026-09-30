@@ -203,7 +203,7 @@
     "scripts/concepts/prototype-bridge.js",
     "bin/shell.ts",
     "scripts/makers/cli.mjs",
-    "scripts/compiler/qualify-presets.mjs",
+    "scripts/compiler/qualify-project-starters.mjs",
     "scripts/companion/prd-limits.mjs"
   ],
   "plugins": [

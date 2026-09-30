@@ -20,13 +20,17 @@ installs definitions. This includes Blank; there is no hidden fallback starter.
 The repository retains eleven historical `.companion.json` documents under
 `docs/concepts/companion/starters/` as compatibility fixtures. They are not runtime
 discovery inputs and are excluded from shell distributions and copied framework
-content. The canonical twelve installed definitions live under `configs/starters/`.
+content. The canonical installed definitions live under `configs/starters/`.
 Eleven preserve those original authored Companion models; `webapp.json` provides a
-complete dependency-free browser example using the file-generation primitive.
+complete dependency-free browser example using the file-generation primitive, and
+further Companion/file definitions cover the Workbench showcases. Eleven **project
+starters** (`generator.kind: "project"`) replace the former eight-preset maker
+catalog: `plugin-nuxtui`, `plugin-vanilla`, `plugin-angular`, `webapp-nuxtui`,
+`webapp-vanilla`, `webapp-angular` (also used by `project-setup`), `website`, `cli`,
+`hybrid-nuxtui`, `hybrid-vanilla` and `hybrid-angular`.
 
-Generic project/compiler presets and `new --from <project.json>` remain separate
-existing authoring/import operations, not installed starter definitions. This
-change does not merge the Angular setup/first-run work from the separate PR #52.
+Running a starter is the only way to create a project. `new --from <project.json>`
+remains the separate import of an existing exported Companion project.
 
 ## Installation and discovery
 
@@ -81,13 +85,14 @@ proof that a starter is safe to execute.
 | `id`, `name`, `category`, `level`, `summary`, `outcome` | Discovery and selection. The ID must match the filename. |
 | `includes`, `implementation`, `tags` | Descriptive metadata; each is a nonempty list. |
 | `inputs` | Declarative labels, types, required flags, defaults and optional choices. |
-| `generator` | Either generic file emission, or an embedded current Companion project document. |
+| `generator` | Generic file emission, an embedded current Companion project document, or a `project` compiler selection. |
 | `files` | Complete text or structured-JSON output payloads, with relative paths. |
 | `processes` | Named process graph, ordered steps, argument arrays and timeouts. |
 | `firstRun` | Process IDs selected only when the caller explicitly requests `--install`. |
 | `nextSteps` | Informational guidance. Printing it never runs a command. |
 
-Required identity inputs are string `id` and `name`. Other inputs support string,
+File and Companion starters require string `id` and `name` inputs (project starters
+declare none; see below). Other inputs support string,
 boolean and integer values. The wizard reads these descriptors, while automation
 can provide a JSON values file. Unknown inputs fail instead of being discarded.
 The input ID namespace is separate from a starter's hyphenated filename ID.
@@ -128,6 +133,14 @@ included `webapp.json` shows a runnable application with tests, build and previe
 `generator.kind = "files"` needs no starter-specific code. The alternative
 `generator.kind = "companion"` embeds a complete `generator.document` and calls
 the existing shared compiler. It does not reference one of the old fixture files.
+`generator.kind = "project"` selects the project compiler's `projectType`,
+`framework`, canonical-order `targets` and, for Angular only, exact `angularPins`.
+Its `inputs`, `files`, `processes` and `firstRun` must be empty: the maker's
+prototype interview supplies identity and design, and the compiler owns every file.
+Project starters run through `node shell.mjs new` (terminal) or `new guide --starter
+<id>` / `new --input` (agents), which prepare a reviewed prototype package; `new <dir>
+--starter <project-starter>` refuses with `STARTER_KIND`. The maker reads them from
+the starters folder beside `shell.mjs`. See [project starters](../../bin/PROJECT-STARTERS.md).
 Generic compiler/runtime/template code still belongs to the shell; starter-specific
 project designs and choices belong to the JSON. Native feature behavior retains
 the existing compiler's scaffold and acceptance boundaries.

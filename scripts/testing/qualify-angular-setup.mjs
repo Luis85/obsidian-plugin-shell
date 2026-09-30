@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { assembleKit, installedCompiler } from '../framework/kit.ts';
+import { assembleStarterPack } from '../starters/operations.ts';
 import { firstRunDefaults } from '../../bin/domain/first-run.ts';
 import { showcase } from '../../bin/adapters/first-run-preview.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
@@ -68,6 +69,9 @@ try {
   const compiler = await installedCompiler(); assert.equal(compiler.version, '6.0.3');
   const files = await assembleKit({ root, frameworkRoot }, compiler);
   for (const file of files) { const path = join(root, 'tools/shell-cli', file.path); await mkdir(dirname(path), { recursive: true }); await writeFile(path, file.bytes); }
+  // The shell ships no starters; extract the separate starter pack beside shell.mjs, as a user does.
+  await assert.rejects(readFile(join(root, 'tools/shell-cli/configs/starters/webapp-angular.json')), { code: 'ENOENT' });
+  for (const file of await assembleStarterPack({ root: frameworkRoot, frameworkRoot })) { const path = join(root, 'tools/shell-cli', file.path); await mkdir(dirname(path), { recursive: true }); await writeFile(path, file.bytes); }
   await assert.rejects(readFile(join(root, 'tools/shell-cli/node_modules/typescript/package.json')), { code: 'ENOENT' });
   await run('git', ['init', root]); await mkdir(join(root, '.obsidian'));
   await mkdir(join(root, 'docs/prds'), { recursive: true });
