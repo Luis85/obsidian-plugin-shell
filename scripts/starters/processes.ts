@@ -32,7 +32,7 @@ export async function processPlan(directory: string, requested: string[]) {
   const binding = { directory: resolve(directory), receiptSha256: hash(bytes), requested, processes: ordered, sources };
   return { ...binding, planHash: hash(JSON.stringify(binding)), effects: 'Trusted project code may write files, install dependencies, access the network, or launch a local preview. Not a sandbox.' };
 }
-export async function runProcesses(context: Context, directory: string, requested: string[], expected: string) {
+async function runProcesses(context: Context, directory: string, requested: string[], expected: string) {
   const plan = await processPlan(directory, requested);
   requireThat(plan.planHash === expected, 'PLAN_STALE', 'Process inputs changed after review.');
   const completed: Array<{ process: string; step: number; exitCode: number; signal: string | null; truncated: boolean }> = [];

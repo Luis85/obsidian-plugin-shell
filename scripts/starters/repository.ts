@@ -6,7 +6,7 @@ import { requireThat } from '../framework/contracts.ts';
 import { portablePath, record, validateDefinition } from './validation.ts';
 import type { LoadedStarter } from './types.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
-export const defaultStarterFolder = 'configs/starters';
+const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
 export async function starterFolder(root: string): Promise<string> {
   const settingsPath = join(root, 'configs/user-settings.json');

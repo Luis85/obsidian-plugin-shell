@@ -16,14 +16,14 @@ import { record, readProcesses } from './validation.ts';
 import type { InputValue, StarterReceipt, LoadedStarter } from './types.ts';
 export const receiptFile = '.workbench/starter.json';
 export interface Placement { directory: string; vault: string; target: string }
-export async function selectedStarter(request: Request, context: Context): Promise<LoadedStarter> {
+async function selectedStarter(request: Request, context: Context): Promise<LoadedStarter> {
   const id = stringOption(request.options, 'starter');
   requireThat(id, 'STARTER_REQUIRED', 'Supply --starter <id>; use starters list to discover local definitions.');
   const definitions = await loadDefinitions(context.root), selected = definitions.find(entry => entry.definition.id === id);
   requireThat(selected, 'STARTER_UNKNOWN', `Starter ${id} is not installed. Extract the separate starters ZIP into this project, or add configs/starters/${id}.json.`);
   return selected;
 }
-export async function starterValues(request: Request, context: Context, selected: LoadedStarter, directory: string): Promise<Record<string, InputValue>> {
+async function starterValues(request: Request, context: Context, selected: LoadedStarter, directory: string): Promise<Record<string, InputValue>> {
   const input = stringOption(request.options, 'values');
   const source = input ? record(await readJson(resolve(context.root, input))) : {};
   const inline = stringOption(request.options, 'answers');
