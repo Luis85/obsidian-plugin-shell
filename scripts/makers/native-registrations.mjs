@@ -1,5 +1,6 @@
 import { posix } from 'node:path';
-import ts from 'typescript';
+// Loaded on first use: the dependency-free release CLI must start without TypeScript installed.
+let ts;
 
 function literal(node) {
   while (node && (ts.isAsExpression(node) || ts.isSatisfiesExpression(node) || ts.isParenthesizedExpression(node)))
@@ -82,6 +83,7 @@ async function registrations(context, registry, names) {
   return found;
 }
 export async function checkNativeRegistration(context, candidate, source) {
+  ts ??= (await import('typescript')).default;
   const existing = await registrations(context, 'src/bootstrap/native-integrations.ts', [
     'nativeFileTypes',
     'nativeContextMenus',

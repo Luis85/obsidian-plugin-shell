@@ -190,7 +190,7 @@ test('upgrading a verified modular kit replaces only compiled runtime files and 
   await fixture(old, '0.4.0', legacy, bootstrapOld);
   const final = await fixture(next, '0.4.1', bundled, bootstrapNext);
   await fixture(unsafe, '0.4.0', { ...legacy, '.framework/template/obsolete.md': 'do not silently delete' }, bootstrapOld);
-  await assert.rejects(upgradePlan({ root: unsafe, frameworkRoot: unsafe }, next), /KIT_REMOVAL_REQUIRES_MIGRATION/);
+  await assert.rejects(upgradePlan({ root: unsafe, frameworkRoot: unsafe }, next), { code: 'KIT_REMOVAL_REQUIRES_MIGRATION' });
   const { plan } = await upgradePlan({ root: old, frameworkRoot: old }, next);
   const obsolete = plan.changes.filter(change => change.status === 'delete').map(change => change.path).sort();
   assert.deepEqual(obsolete, ['.framework/compiled/node_modules/yaml/LICENSE', '.framework/compiled/scripts/framework/cli.js']);

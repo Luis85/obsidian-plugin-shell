@@ -3,6 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { relative, resolve, isAbsolute, sep, posix, basename } from 'node:path';
 import { requireThat } from './contracts.ts';
 
+// Spelled indirectly: this file is bundled too, and the plugin below rewrites that token wherever it appears.
+const selfUrl = ['import', 'meta', 'url'].join('.');
+
 /** Rebase module-relative data references from the bundled file to the separately shipped template tree. */
 export async function bundleReleaseCli(frameworkRoot) {
   const root = resolve(frameworkRoot);
@@ -13,6 +16,8 @@ export async function bundleReleaseCli(frameworkRoot) {
     outfile: resolve(root, '.framework/compiled/app.js'),
     bundle: true, write: false, platform: 'node', format: 'esm', target: 'node22',
     packages: 'bundle', legalComments: 'inline', sourcemap: false, logLevel: 'silent',
+    // Bundled CommonJS dependencies (yaml's node build) require Node built-ins; ESM output needs a real require.
+    banner: { js: "import { createRequire as __kitCreateRequire } from 'node:module';\nconst require = __kitCreateRequire(" + selfUrl + ');' },
     // These are maintainer-only/optional tools. Regular extracted-kit commands never load them.
     external: ['node:*', 'typescript', 'esbuild'],
     plugins: [{
