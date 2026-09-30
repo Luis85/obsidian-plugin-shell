@@ -97,7 +97,9 @@ class EventBus implements PluginEventBus {
   private readonly listeners = new Map<string, Set<Listener>>();
   private disposed = false;
   private depth = 0;
-  constructor(definitions: readonly PluginEventDefinition[], private readonly report: (code: string) => void) {
+  private readonly report: (code: string) => void;
+  constructor(definitions: readonly PluginEventDefinition[], report: (code: string) => void) {
+    this.report = report;
     for (const definition of definitions) {
       if (!/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(definition.id) || typeof definition.valid !== 'function')
         throw new Error('WORKBENCH_PLUGIN_EVENT_INVALID');
