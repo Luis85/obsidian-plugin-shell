@@ -39,7 +39,7 @@ source under `bin/`.
 | companion `compiler/`, `schema/`, contracts | Generator + project contracts | → `bin/` (stage E). `qualify-*` stay |
 | companion `runtime/`, `devkit/`; examples `templates/` | Copied into generated projects | Templates, move only with a rewrite migration |
 | application-docs | `docs *` command behaviour | → `bin/docs` (stage E) |
-| makers | Maker engine + legacy standalone CLI | Engine → `bin/` (E); retire `cli.mjs` in favour of `bin/app make` (B) |
+| makers | Maker engine; the standalone CLI has been retired behind `bin/app make` | Engine → `bin/` (E) |
 | operations | Capability catalog | Catalog → `bin/` (E); `cli.mjs` stays as a script |
 | shared, contracts | Libraries | Typed core module set (C) |
 | hindsight | Optional memory app | Stays separate (optional), or `bin/memory` later |
@@ -70,6 +70,7 @@ are paths that generated projects depend on. Treat them as contracts.
 - **B4:** Framework discovery, setup journal and handout workspace reuse the same `lstat` presence helper; missing and broken-symlink regressions added.
 - **B5:** Framework, maker TUI and legacy maker entry share one yes/no decision parser; prompt rendering remains presentation-specific.
 - **B6:** The file-plan safety boundary and capability-catalog digest use the shared SHA-256 implementation; exact digest parity is covered.
+- **B7:** The duplicate `scripts/makers/cli.mjs` entry is retired; maker discovery and reviewed plan/apply now exercise `bin/app make`, and capability metadata names only its real sources.
 - **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages

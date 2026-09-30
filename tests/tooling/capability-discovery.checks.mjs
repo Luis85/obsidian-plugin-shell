@@ -179,15 +179,18 @@ test('[CAP-10] data-only catalog input schemas and entrypoints match declared cu
 });
 
 
-test('[CAP-11] original maker list/help entrypoints and recipe option contracts remain usable', () => {
-  for (const flag of ['--list', '--help']) {
-    const run = spawnSync(process.execPath, ['scripts/makers/cli.mjs', flag, '--json'], { cwd: root, encoding: 'utf8', timeout: 10000 });
-    assert.equal(run.status, 0, run.stderr);
-    const output = JSON.parse(run.stdout);
-    assert.equal(output.version, 2);
-    assert.deepEqual(output.recipes, builtinRecipes);
-    assert.match(output.help, /trusted explicit local custom recipe/);
-  }
+test('[CAP-11] central maker list/help entrypoints and recipe option contracts remain usable', () => {
+  const list = spawnSync(process.execPath, ['bin/app', 'make', 'list', '--json'], { cwd: root, encoding: 'utf8', timeout: 10000 });
+  assert.equal(list.status, 0, list.stderr);
+  const listed = JSON.parse(list.stdout);
+  assert.equal(listed.protocolVersion, 1); assert.equal(listed.command, 'make');
+  assert.deepEqual(listed.data.makers.map(item => item.id), builtinRecipes);
+  const help = spawnSync(process.execPath, ['bin/app', 'help', 'make', '--json'], { cwd: root, encoding: 'utf8', timeout: 10000 });
+  assert.equal(help.status, 0, help.stderr);
+  const documented = JSON.parse(help.stdout);
+  assert.equal(documented.data.scope, 'command');
+  assert.equal(documented.data.commands[0].id, 'make');
+  assert.deepEqual(documented.data.makers.map(item => item.id), builtinRecipes);
   for (const item of capabilityCatalog().makers) {
     const options = Object.entries(item.inputSchema.properties.options.properties).flatMap(([key, shape]) => shape.type === 'boolean' ? [key] : [key, shape.enum?.[0] ?? 'example']);
     assert.equal(parseArguments([item.id, 'example', ...options]).maker, item.id);
