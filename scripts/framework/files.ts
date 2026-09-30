@@ -1,8 +1,8 @@
 import { open, lstat, realpath } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { sha256 } from '../shared/hash.mjs';
-import { exists } from '../shared/fs-presence.mjs';
+import { sha256 } from '../shared/hash.ts';
+import { exists } from '../shared/fs-presence.ts';
 import { createFilePlan } from '../shared/file-plan.ts';
 import { parseJsonData } from '../contracts/json-data.ts';
 import { configuration, configFile, type Configuration } from './configuration.ts';

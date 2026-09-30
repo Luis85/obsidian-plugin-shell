@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
-import { readInput } from '../../scripts/framework/input.ts';
+import { readInput } from '../../scripts/shared/input.ts';
 import { runNode } from '../../scripts/framework/process.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { firstRunInventory } from './first-run-inventory.ts';

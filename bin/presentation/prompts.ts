@@ -1,6 +1,6 @@
 import type { RichPrompts } from './tui/contracts.ts';
 import { requireSketch, SketchError, hasControls, title } from '../domain/errors.ts';
-import { parseConfirmation } from '../../scripts/shared/confirmation.mjs';
+import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 export interface Prompts { rich?: RichPrompts; ask: (question: string) => Promise<string>; write: (text: string) => void }
 export interface Choice { id: string; label: string }
 export class Back extends Error { constructor() { super('Back'); this.name = 'Back'; } }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { realpath, mkdtemp, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { Readable } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { studio, prototypeWizard } from '../../bin/presentation/studio.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
@@ -10,6 +10,7 @@ import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { checkSteps } from '../../scripts/framework/check.ts';
 import { assertJsonData, parseJsonData } from '../../scripts/contracts/json-data.ts';
 import { result as operationResult } from '../../scripts/contracts/result.ts';
+import { ask, readInput } from '../../scripts/shared/input.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -92,4 +93,25 @@ test('maker production coverage includes shared typed CLI contracts', () => {
   const sparse = [];
   sparse[1] = 'gap';
   assert.throws(() => assertJsonData(sparse), /JSON_DATA_INVALID/);
+});
+
+test('maker shared input transport preserves bounded and prompt semantics', async () => {
+  const valid = new PassThrough();
+  const pending = readInput(valid);
+  const bytes = Buffer.from('Grüße');
+  valid.write(bytes.subarray(0, 3));
+  valid.end(bytes.subarray(3));
+  assert.equal(await pending, 'Grüße');
+
+  const bounded = new PassThrough();
+  const tooLarge = readInput(bounded, undefined, 2);
+  bounded.write('abc');
+  await assert.rejects(tooLarge, error => error.code === 'INPUT_LIMIT');
+
+  const promptInput = new PassThrough();
+  const promptOutput = new PassThrough();
+  promptOutput.resume();
+  const answer = ask(promptInput, promptOutput, 'Name: ', undefined, false);
+  promptInput.end('Workbench\n');
+  assert.equal(await answer, 'Workbench');
 });

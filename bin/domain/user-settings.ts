@@ -1,5 +1,5 @@
 import { defaultVaultConfigDirectory } from './host-paths.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.mjs';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../scripts/shared/project-path.ts';
 import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, type FirstRunPreferences } from './first-run.ts';
 import { object, keys, text } from './data.ts';
 import { requireSketch } from './errors.ts';

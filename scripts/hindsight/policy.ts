@@ -1,5 +1,5 @@
 /** Pure project-memory policy. Importing this module has no I/O or side effects. */
-import { sha256 } from '../shared/hash.mjs';
+import { sha256 } from '../shared/hash.ts';
 export const PYTHON_VERSION = '0.10.1';
 export const AGENT_VERSION = '0.7.0';
 export const PROFILE = 'obsidian-shell';

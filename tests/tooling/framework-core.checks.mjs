@@ -6,8 +6,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
-import { result as frameworkResult } from '../../scripts/framework/contracts.ts';
+import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
 import { result as canonicalResult } from '../../scripts/contracts/result.ts';
+import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
@@ -15,6 +16,9 @@ import { readBounded } from '../../scripts/framework/files.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
 import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.mjs';
+import { sha256 as typedSha256 } from '../../scripts/shared/hash.ts';
+import { exists as typedExists, statIfPresent as typedStatIfPresent } from '../../scripts/shared/fs-presence.ts';
+import { exists as legacyExists, statIfPresent as legacyStatIfPresent } from '../../scripts/shared/fs-presence.mjs';
 import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
 import * as legacyJsonData from '../../scripts/contracts/json-data.mjs';
@@ -229,4 +233,31 @@ test('framework result helper reuses the canonical typed envelope', () => {
     protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
   });
   assert.equal(canonicalResult('setup', null, 'blocked').status, 'blocked');
+});
+
+test('framework operation errors reuse the canonical contract primitives', () => {
+  assert.equal(frameworkOperationError, canonicalOperationError);
+  assert.equal(frameworkRequireThat, canonicalRequireThat);
+  assert.throws(() => canonicalRequireThat(false, 'CONTRACT_TEST', 'contract refusal'), error => {
+    assert.ok(error instanceof canonicalOperationError);
+    assert.equal(error.code, 'CONTRACT_TEST');
+    assert.equal(error.message, 'contract refusal');
+    return true;
+  });
+});
+
+test('typed filesystem helpers preserve compatibility and exact-byte hashing', async t => {
+  assert.equal(sha256, typedSha256);
+  assert.equal(legacyExists, typedExists);
+  assert.equal(legacyStatIfPresent, typedStatIfPresent);
+  assert.equal(typedSha256('Grüße'), sha256('Grüße'));
+
+  const ctx = await fixture(t);
+  const missing = join(ctx.root, 'missing.txt');
+  assert.equal(await typedStatIfPresent(missing), null);
+  assert.equal(await typedExists(missing), false);
+  const present = join(ctx.root, 'present.txt');
+  await writeFile(present, 'present');
+  assert.equal((await typedStatIfPresent(present))?.isFile(), true);
+  assert.equal(await legacyExists(present), true);
 });
