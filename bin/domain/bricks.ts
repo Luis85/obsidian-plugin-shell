@@ -31,25 +31,46 @@ export function entityProperties(document: SketchDocument, id: string, input: un
   requireSketch(new Set(properties.map(item => item.key)).size === properties.length, 'BRICK_PROPERTY', 'Duplicate entity properties.');
   entity.properties = properties;
 }
-function collectionRecordSchema(document: SketchDocument, entity: Record<string, unknown>): Record<string, unknown> {
-  const properties: Record<string, unknown> = { id: { type: 'string' }, type: { type: 'string', enum: [String(entity.slug)] } };
-  const required = ['id', 'type'];
+/** Construct a fresh field schema for every property; callers never share mutable schema objects. */
+function collectionFieldSchema(kind: string): Record<string, unknown> | null {
+  switch (kind) {
+    case 'text': return { type: 'string' };
+    case 'number': return { type: 'number' };
+    case 'checkbox': return { type: 'boolean' };
+    case 'date': return { type: 'string', format: 'date' };
+    case 'datetime': return { type: 'string', format: 'date-time' };
+    case 'tags': return { type: 'array', items: { type: 'string' } };
+    case 'list': return { type: 'array', items: { type: ['string', 'number'] } };
+    default: return null;
+  }
+}
+function addCollectionFields(entity: Record<string, unknown>, properties: Record<string, unknown>, required: string[]): void {
   for (const value of list(entity.properties ?? [], 'properties', 40)) {
-    const property = object(value), key = text(property.key, 'property key', 60), kind = String(property.type);
-    requireSketch(!Object.hasOwn(properties, key) && ['text', 'number', 'checkbox', 'date', 'datetime', 'tags', 'list'].includes(kind), 'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported or duplicate property.');
-    properties[key] = kind === 'text' ? { type: 'string' } : kind === 'number' ? { type: 'number' } : kind === 'checkbox' ? { type: 'boolean' } :
-      kind === 'date' ? { type: 'string', format: 'date' } : kind === 'datetime' ? { type: 'string', format: 'date-time' } :
-      kind === 'tags' ? { type: 'array', items: { type: 'string' } } : { type: 'array', items: { type: ['string', 'number'] } };
+    const property = object(value), key = text(property.key, 'property key', 60);
+    const shape = collectionFieldSchema(String(property.type));
+    requireSketch(!Object.hasOwn(properties, key) && shape !== null, 'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported or duplicate property.');
+    properties[key] = shape;
     if (property.required === true) required.push(key);
   }
+}
+function addCollectionRelationships(document: SketchDocument, entity: Record<string, unknown>,
+  properties: Record<string, unknown>, required: string[]): void {
   const semantic = object(document.design.semantic);
   for (const value of list(semantic.relationships ?? [], 'relationships', 120)) {
-    const relationship = object(value); if (relationship.source !== entity.id) continue;
+    const relationship = object(value);
+    if (relationship.source !== entity.id) continue;
     const key = text(relationship.key, 'relationship key', 60), card = String(relationship.targetCard);
-    requireSketch(!Object.hasOwn(properties, key) && ['0..1', '1', '1..1', '0..*', '1..+'].includes(card), 'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported relationship.');
+    requireSketch(!Object.hasOwn(properties, key) && ['0..1', '1', '1..1', '0..*', '1..+'].includes(card),
+      'BRICK_COLLECTION_ENTITY', 'Collection entity has an unsupported relationship.');
     properties[key] = card.endsWith('*') ? { type: 'array', items: { type: 'string' } } : { type: 'string' };
     if (card.startsWith('1')) required.push(key);
   }
+}
+function collectionRecordSchema(document: SketchDocument, entity: Record<string, unknown>): Record<string, unknown> {
+  const properties: Record<string, unknown> = { id: { type: 'string' }, type: { type: 'string', enum: [String(entity.slug)] } };
+  const required = ['id', 'type'];
+  addCollectionFields(entity, properties, required);
+  addCollectionRelationships(document, entity, properties, required);
   return { type: 'object', properties, required, additionalProperties: true };
 }
 function collectionOperations(sourceId: string, entityId: string, folder: string, record: Record<string, unknown>) {
