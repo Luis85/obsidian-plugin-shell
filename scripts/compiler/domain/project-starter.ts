@@ -1,6 +1,6 @@
 import { CompilerError, diagnostic } from './diagnostics.ts';
 type ProjectTarget = 'plugin' | 'webapp' | 'website' | 'cli';
-type ProjectFramework = 'nuxtui' | 'vanilla' | 'angular' | 'none';
+export type ProjectFramework = string;
 type ProjectType = ProjectTarget | 'hybrid';
 /** The `generator` block of a project starter definition (configs/starters/<id>.json). */
 export interface ProjectGenerator {
@@ -14,10 +14,10 @@ export interface ProjectSelection {
   targets: ProjectTarget[]; angularPins?: Record<string, string>;
 }
 const targetOrder: readonly ProjectTarget[] = ['plugin', 'webapp', 'website', 'cli'];
-const frameworks: readonly ProjectFramework[] = ['nuxtui', 'vanilla', 'angular', 'none'];
+const frameworkId = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 export const angularPackages = ['@angular/core', '@angular/common', '@angular/compiler', '@angular/platform-browser', '@angular/compiler-cli', 'rxjs', 'tslib'] as const;
 /** Human labels for guide context; data about the adapters the compiler implements, not a starter catalog. */
-export const frameworkLabels: Readonly<Record<ProjectFramework, string>> = {
+export const frameworkLabels: Readonly<Record<string, string>> = {
   nuxtui: 'Vue 3 + Nuxt UI — Vue single-file components, Pinia and Nuxt UI; not the Nuxt application framework.',
   vanilla: 'Vanilla, no frontend framework — TypeScript and DOM APIs; native Obsidian integration for plugin targets.',
   angular: 'Angular — standalone Angular components, AOT compilation and zoneless, per-view lifecycle.',
@@ -52,8 +52,8 @@ function readTargets(projectType: ProjectType, value: unknown): ProjectTarget[] 
 function readSelectionFields(data: Record<string, unknown>): Omit<ProjectGenerator, 'kind'> {
   check([...targetOrder, 'hybrid'].includes(String(data.projectType)), 'Unknown project type.');
   const projectType = data.projectType as ProjectType;
-  check(frameworks.includes(data.framework as ProjectFramework), 'Unknown frontend framework.');
-  const framework = data.framework as ProjectFramework, targets = readTargets(projectType, data.targets);
+  check(typeof data.framework === 'string' && data.framework.length <= 64 && frameworkId.test(data.framework), 'Invalid frontend framework ID.');
+  const framework = data.framework, targets = readTargets(projectType, data.targets);
   const visual = targets.some(target => target !== 'cli');
   check(visual ? framework !== 'none' : framework === 'none', 'A CLI-only project requires framework none; visual targets require a frontend framework.');
   check((framework === 'angular') === (data.angularPins !== undefined), 'Angular projects require angularPins; other frameworks must omit them.');

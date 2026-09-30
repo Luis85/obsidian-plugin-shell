@@ -5,6 +5,7 @@
     "verbatimModuleSyntax": true
   },
   "include": [
-    "bin/**/*.ts"
+    "bin/**/*.ts",
+    "plugins/**/*.ts"
   ]
 }

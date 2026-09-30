@@ -1,4 +1,6 @@
 import { pluginRegistry } from './registry.ts';
+import { defineFrameworkAdapter, type FrameworkAdapter } from '../scripts/compiler/adapters/project/framework-adapter.ts';
+import type { StarterDefinition } from '../scripts/starters/types.ts';
 import type {
   PluginCliCommand,
   PluginCommandContext,
@@ -64,6 +66,24 @@ export function pluginCliCommands(registry: readonly WorkbenchPluginObject[] = p
 }
 export function pluginTuiActions(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly PluginTuiAction[] {
   return validateTui(enabledPlugins(registry).flatMap(plugin => plugin.tui ?? []));
+}
+export function pluginFrameworkAdapters(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly FrameworkAdapter[] {
+  const adapters = enabledPlugins(registry).flatMap(plugin => plugin.frameworks ?? []).map(defineFrameworkAdapter);
+  const ids = new Set<string>();
+  for (const adapter of adapters) {
+    if (ids.has(adapter.id)) throw new Error('WORKBENCH_PLUGIN_FRAMEWORK_DUPLICATE:' + adapter.id);
+    ids.add(adapter.id);
+  }
+  return Object.freeze(adapters);
+}
+export function pluginStarterDefinitions(registry: readonly WorkbenchPluginObject[] = pluginRegistry): readonly StarterDefinition[] {
+  const starters = enabledPlugins(registry).flatMap(plugin => plugin.starters ?? []);
+  const ids = new Set<string>();
+  for (const starter of starters) {
+    if (ids.has(starter.id)) throw new Error('WORKBENCH_PLUGIN_STARTER_DUPLICATE:' + starter.id);
+    ids.add(starter.id);
+  }
+  return Object.freeze([...starters]);
 }
 
 class EventBus implements PluginEventBus {
