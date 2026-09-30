@@ -7,7 +7,7 @@ import { prototypeSkillFiles } from '../../companion/prototype-skill.mjs';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
 
-const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin'];
+const roots = ['src', 'scripts', 'tests', 'harness', 'docs', '.github', 'bin', 'plugins'];
 const rootFiles = ['package.json','package-lock.json','manifest.json','versions.json','tsconfig.json','vite.config.mjs',
   'vite.harness.config.mjs','vitest.config.mjs','vitest.production.config.mjs','playwright.config.ts','eslint.config.mjs',
   '.fallowrc.json','.oxlintrc.json','.gitignore','.nvmrc','AGENTS.md','LICENSE','README.md','TEMPLATE-GUIDE.md',
