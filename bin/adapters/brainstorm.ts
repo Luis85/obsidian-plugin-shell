@@ -10,7 +10,7 @@ import { compile } from './compiler.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { outputBoundary } from './package-plan.ts';
 import { readData, readSnapshot, prepared, applyPrepared, type Entry, type Prepared } from './storage.ts';
-import { object, text } from '../domain/data.ts';
+import { object, keys, text } from '../domain/data.ts';
 import { requireSketch, slug } from '../domain/errors.ts';
 import { documentText } from '../domain/document.ts';
 import { brainstormGuide, brainstormSchema, featureConcept, readFeatureBrainstorm, type FeatureBrainstorm } from '../domain/brainstorm.ts';
@@ -59,6 +59,9 @@ async function validateBrainstormFeature(input: unknown, options: BrainstormOpti
     candidate: summary(result.candidate), mapping: result.mapping };
 }
 type CompilerArtifact = Awaited<ReturnType<typeof compile>>['artifacts'][number];
+interface GeneratedPackage {
+  entries: Entry[]; compiler: Record<string, unknown> | null; sourceReceiptSha256: string | null;
+}
 function artifactEncoding(item: CompilerArtifact): 'base64' | undefined {
   const encoding = 'encoding' in item ? item.encoding : undefined;
   requireSketch(encoding === undefined || encoding === 'utf8' || encoding === 'base64',
@@ -73,8 +76,8 @@ function artifactEntry(out: string, item: CompilerArtifact): Entry {
   return { path: sourcePath(out) + '/' + item.path, content: item.content, ...(encoding ? { encoding } : {}) };
 }
 async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<typeof featureConcept>,
-  options: BrainstormOptions, out: string): Promise<{ entries: Entry[]; compiler: Record<string, unknown> | null }> {
-  if (request.output === 'definition') return { entries: [], compiler: null };
+  options: BrainstormOptions, out: string): Promise<GeneratedPackage> {
+  if (request.output === 'definition') return { entries: [], compiler: null, sourceReceiptSha256: null };
   const selection = await savedProjectSelection(options.root);
   const kind = request.output === 'prototype' ? 'clickdummy' : selection ? 'project' : 'obsidian-plugin';
   const selected = kind === 'obsidian-plugin' ? undefined : selection;
@@ -82,10 +85,15 @@ async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<t
   const compiler = { outputKind: kind, fingerprint: emitted.compilation.fingerprint,
     readiness: emitted.compilation.readiness, artifacts: emitted.artifacts.length };
   const owned = emitted.artifacts.map(item => ({ path: item.path, sha256: hash(artifactBytes(item)) }));
+  const receipt = JSON.stringify({ schemaVersion: 1, files: owned }, null, 2) + '\n';
   const entries = emitted.artifacts.map(item => artifactEntry(out, item));
-  entries.push({ path: sourcePath(out) + '/.maker/receipt.json',
-    content: JSON.stringify({ schemaVersion: 1, files: owned }, null, 2) + '\n' });
-  return { entries, compiler };
+  entries.push({ path: sourcePath(out) + '/.maker/receipt.json', content: receipt });
+  return { entries, compiler, sourceReceiptSha256: hash(receipt) };
+}
+function preparedDefinition(result: ReturnType<typeof featureConcept>, out: string, generated: GeneratedPackage) {
+  return { ...result.definition, generatedSource: generated.sourceReceiptSha256 === null ? null : {
+    path: sourcePath(out), receiptSha256: generated.sourceReceiptSha256,
+  } };
 }
 /**
  * Prepare an immutable concept handoff, an inspectable definition, and optionally
@@ -96,20 +104,21 @@ export async function brainstormFeaturePlan(input: unknown, options: BrainstormO
   const current = await base(options), request = readFeatureBrainstorm(input);
   const result = featureConcept(request, current), out = outputFolder(request, options.out);
   outputBoundary(options.root, options.frameworkRoot, out);
+  const generated = await generatedEntries(request, result, options, out);
+  const definition = preparedDefinition(result, out, generated);
   const conceptPath = 'docs/concepts/brainstorms/' + String(result.definition.featureId) + '.json';
   const entries: Entry[] = [
-    { path: out + '/feature.definition.json', content: JSON.stringify(result.definition, null, 2) + '\n' },
+    { path: out + '/feature.definition.json', content: JSON.stringify(definition, null, 2) + '\n' },
     { path: out + '/candidate.project.json', content: documentText(result.candidate) },
     { path: conceptPath, content: JSON.stringify(result.concept, null, 2) + '\n' },
+    ...generated.entries,
   ];
-  const generated = await generatedEntries(request, result, options, out);
-  entries.push(...generated.entries);
   const prompt = handoff(request, out, conceptPath, result.mapping, generated.compiler);
   entries.push({ path: out + '/README.md', content: prompt });
   const plan = await createFilePlan(options.root, entries);
   requireSketch(plan.changes.every(change => change.status === 'create' || change.status === 'unchanged'),
     'BRAINSTORM_OUTPUT_EXISTS', 'An existing brainstorm or source file differs. Preserve it and choose a different --out or feature ID.');
-  const detail = { definition: result.definition, conceptPath, candidatePath: out + '/candidate.project.json',
+  const detail = { definition, conceptPath, candidatePath: out + '/candidate.project.json',
     output: out, compiler: generated.compiler, verification: request.verification,
     generated: request.output !== 'definition', imported: false, executed: false,
     prompt, document: result.candidate };
@@ -200,7 +209,7 @@ function equal(actual: unknown, expected: unknown) {
   return JSON.stringify(actual) === JSON.stringify(expected);
 }
 interface VerificationDefinition {
-  request: FeatureBrainstorm; definitionHash: string;
+  request: FeatureBrainstorm; definitionHash: string; receiptSha256: string;
 }
 async function verificationDefinition(context: ProcessContext, out: string): Promise<VerificationDefinition> {
   const bytes = await readBounded(join(context.root, out, 'feature.definition.json'), 4_000_000);
@@ -211,10 +220,19 @@ async function verificationDefinition(context: ProcessContext, out: string): Pro
   const request = readFeatureBrainstorm(definition.feature);
   requireSketch(request.output !== 'definition' && request.verification !== 'none',
     'BRAINSTORM_VERIFICATION', 'This definition did not request generated source with verification.');
-  return { request, definitionHash: hash(bytes) };
+  const generated = object(definition.generatedSource);
+  keys(generated, ['path', 'receiptSha256']);
+  const receiptSha256 = text(generated.receiptSha256, 'source receipt sha256', 64);
+  requireSketch(generated.path === sourcePath(out) && /^[a-f0-9]{64}$/.test(receiptSha256),
+    'BRAINSTORM_DEFINITION', 'Generated-source identity is missing or invalid.');
+  return { request, definitionHash: hash(bytes), receiptSha256 };
 }
-async function verifiedInventory(context: ProcessContext, source: string) {
-  const receipt = object(await readData(join(context.root, source, '.maker/receipt.json')));
+async function verifiedInventory(context: ProcessContext, source: string, expectedReceiptHash: string) {
+  const receiptPath = join(context.root, source, '.maker/receipt.json');
+  const receiptBytes = await readBounded(receiptPath, 4_000_000);
+  requireSketch(hash(receiptBytes) === expectedReceiptHash, 'BRAINSTORM_SOURCE_CHANGED',
+    'Generated source receipt differs from the reviewed definition.');
+  const receipt = object(parseJsonData(receiptBytes.toString('utf8')));
   requireSketch(receipt.schemaVersion === 1 && Array.isArray(receipt.files), 'BRAINSTORM_RECEIPT',
     'Generated source ownership receipt is missing or invalid.');
   const inventory = await firstRunInventory(context.root, source);
@@ -223,10 +241,13 @@ async function verifiedInventory(context: ProcessContext, source: string) {
     requireSketch(/^[a-f0-9]{64}$/.test(digest), 'BRAINSTORM_RECEIPT', 'Generated source receipt contains an invalid digest.');
     return [path, digest];
   }));
-  const unchanged = owned.size === receipt.files.length && [...owned].every(([path, digest]) =>
-    inventory.some(file => file.path === source + '/' + path && file.sha256 === digest));
+  const allowed = new Set([...owned.keys()].map(path => source + '/' + path));
+  allowed.add(source + '/.maker/receipt.json');
+  const unchanged = owned.size === receipt.files.length && inventory.length === allowed.size &&
+    inventory.every(file => allowed.has(file.path)) && [...owned].every(([path, digest]) =>
+      inventory.some(file => file.path === source + '/' + path && file.sha256 === digest));
   requireSketch(unchanged, 'BRAINSTORM_SOURCE_CHANGED',
-    'Generated source differs from the reviewed compiler output; do not execute it through brainstorm.');
+    'Generated source differs from the reviewed compiler output or contains unowned inputs; do not execute it through brainstorm.');
   return inventory;
 }
 async function generatedToolchain(context: ProcessContext, source: string,
@@ -261,7 +282,7 @@ export async function brainstormVerifyPlan(context: ProcessContext, folder: stri
   requireSketch(folder, 'BRAINSTORM_OUTPUT', 'Supply --out <existing-brainstorm-package>.');
   const out = projectPath(folder), source = sourcePath(out);
   const definition = await verificationDefinition(context, out);
-  const inventory = await verifiedInventory(context, source);
+  const inventory = await verifiedInventory(context, source, definition.receiptSha256);
   const environment = await generatedToolchain(context, source, definition.request, inventory);
   const requested = definition.request.verification as BrainstormVerificationPlan['requested'];
   const steps = verificationSteps(requested), effects = verificationEffects();
