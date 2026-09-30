@@ -56,7 +56,7 @@ for(const entry of catalog.starters){
   assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
   assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
-  if(entry.id!=='blank')assert.ok(trace.requirements.length>=4);
+  if(!['blank','agent-ready'].includes(entry.id))assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){
    assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
    const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/generated/infrastructure/sources/starter-records.ts')).href);

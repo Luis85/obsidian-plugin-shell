@@ -29,8 +29,8 @@ surface_kind: view
 `;
 test('status pins 1.12.7+ and always targets the explicitly selected vault first', async t => {
   const root=await fixture(t), fake=port({
-    'version':'1.12.7\\n','vault=Work|vault|info=name':'Work\\n','vault=Work|vault|info=path': join(root,'vault')+'\\n',
-    'vault=Work|files|total':'3\\n','vault=Work|folders|total':'2\\n'
+    'version':'1.12.7\n','vault=Work|vault|info=name':'Work\n','vault=Work|vault|info=path': join(root,'vault')+'\n',
+    'vault=Work|files|total':'3\n','vault=Work|folders|total':'2\n'
   });
   const value=await obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),{root,frameworkRoot:root},fake);
   assert.equal(value.status,'ok'); assert.equal(value.data.cli.version,'1.12.7'); assert.equal(value.data.vault.files,3);
@@ -48,9 +48,9 @@ test('prepare reads only configured Markdown candidates and proposes existing re
   const fake=port({
     'version':'1.12.7',
     'vault=Work|vault|info=path':vault,
-    'vault=Work|files|ext=md':['docs/application/project.md','docs/application/generated/index.md','Other.md'].join('\\n')+'\\n',
+    'vault=Work|files|ext=md':['docs/application/project.md','docs/application/generated/index.md','Other.md'].join('\n')+'\n',
     'vault=Work|read|path=docs/application/project.md':typed,
-    'vault=Work|read|path=docs/application/generated/index.md':'# generated index\\n'
+    'vault=Work|read|path=docs/application/generated/index.md':'# generated index\n'
   });
   const value=await obsidianRead(request('obsidian prepare',{'obsidian-vault':'Work'}),{root,frameworkRoot:root},fake);
   assert.equal(value.status,'ok'); assert.equal(value.data.scan.typed,1); assert.equal(value.data.scan.untyped,1);
