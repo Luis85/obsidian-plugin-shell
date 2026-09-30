@@ -11,6 +11,7 @@ import { planOperation, applyOperation } from '../../scripts/framework/planning.
 import { configuration, defaults } from '../../scripts/framework/configuration.ts';
 import { readBounded } from '../../scripts/framework/files.ts';
 import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan as createTypedFilePlan, applyFilePlan as applyTypedFilePlan } from '../../scripts/shared/file-plan.ts';
 import { sha256 } from '../../scripts/shared/hash.mjs';
 import { capabilityCatalog, catalogDigest } from '../../scripts/operations/catalog.mjs';
 import * as typedJsonData from '../../scripts/contracts/json-data.ts';
@@ -196,4 +197,15 @@ test('typed JSON data contract remains the canonical compatibility implementatio
   Object.defineProperty(poisoned, 'value', { enumerable: true, get() { invoked++; return 1; } });
   assert.throws(() => typedJsonData.assertJsonData(poisoned), /JSON_DATA_INVALID/);
   assert.equal(invoked, 0);
+});
+
+test('typed file-plan facade preserves the reviewed runtime plan/apply boundary', async t => {
+  const ctx = await fixture(t);
+  const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
+  assert.equal(plan.version, 1);
+  assert.equal(plan.changes[0].status, 'create');
+  assert.equal(plan.changes[0].beforeHash, null);
+  const applied = await applyTypedFilePlan(plan);
+  assert.deepEqual(applied.written, ['typed-facade.txt']);
+  assert.equal(await readFile(join(ctx.root, 'typed-facade.txt'), 'utf8'), 'typed facade\n');
 });
