@@ -8,6 +8,7 @@
     "harness/app/main.ts",
     "harness/style-fixture/fixture.js",
     "scripts/testing/node-reporter.mjs",
+    "scripts/framework/release-entry.ts",
     "configs/testing/vitest.obsidian.config.mjs",
     "scripts/testing/evidence-vitest-reporter.mjs",
     "scripts/styles/export-host-css.mjs",
