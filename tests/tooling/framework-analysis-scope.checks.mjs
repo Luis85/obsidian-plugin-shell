@@ -52,10 +52,14 @@ test('shared Node process primitive is isolated behind the tooling adapter', () 
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-process-contract'), false);
 });
 
-test('typed file-plan facade is isolated as a core boundary', () => {
+test('typed file-plan runtime is isolated behind bounded concurrency and filesystem contracts', () => {
+  const concurrency = config.boundaries.zones.find(item => item.name === 'cli-concurrency-contract');
+  assert.deepEqual(concurrency?.patterns, ['scripts/shared/bounded-map.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-concurrency-contract')?.allow, ['cli-concurrency-contract']);
   const zone = config.boundaries.zones.find(item => item.name === 'cli-file-plan-contract');
-  assert.deepEqual(zone?.patterns, ['scripts/shared/file-plan.ts']);
-  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-file-plan-contract')?.allow, ['cli-file-plan-contract']);
+  assert.deepEqual(zone?.patterns, ['scripts/shared/file-plan-types.ts', 'scripts/shared/file-plan.ts', 'scripts/shared/file-plan-runtime.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-file-plan-contract')?.allow,
+    ['cli-file-plan-contract', 'cli-concurrency-contract', 'cli-files-contract']);
   for (const source of ['test', 'tooling', 'maker-host']) {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-file-plan-contract'), source);
   }
@@ -90,4 +94,15 @@ test('typed project-path policy is isolated from implementation layers', () => {
   for (const source of ['test', 'tooling', 'maker-domain', 'maker-host']) {
     assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('project-path-contract'), source);
   }
+});
+
+
+test('typed bounded concurrency helper is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-bounded-map-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/bounded-map.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-bounded-map-contract')?.allow, ['cli-bounded-map-contract']);
+  for (const source of ['test', 'tooling']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-bounded-map-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-bounded-map-contract'), false);
 });

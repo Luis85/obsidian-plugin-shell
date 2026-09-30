@@ -208,6 +208,7 @@ test('typed JSON data contract remains the canonical compatibility implementatio
 });
 
 test('typed file-plan facade preserves the reviewed runtime plan/apply boundary', async t => {
+  assert.equal(createFilePlan, createTypedFilePlan);
   const ctx = await fixture(t);
   const plan = await createTypedFilePlan(ctx.root, [{ path: 'typed-facade.txt', content: 'typed facade\n' }]);
   assert.equal(plan.version, 1);
