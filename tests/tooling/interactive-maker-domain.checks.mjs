@@ -10,6 +10,7 @@ import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
 import { noteOperations } from '../../scripts/companion/runtime/note-operations.ts';
 import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
+import { visualAllocate, visualText } from '../../scripts/companion/visual/visual-ir.mjs';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }
 test('titles are the only creation fields and identifiers remain stable after renaming', () => {
@@ -93,6 +94,32 @@ test('shell wires a Collection table, explicit read binding and create interacti
   assert.ok(schema.some(item => item.properties.op.const === 'page.bind'));
   assert.throws(() => runOperations(initial.document, [{ op: 'page.bind', page: initial.aliases.tasksPage,
     node: initial.aliases.table, prop: 'data', source: initial.aliases.tasks, operation: 'delete', field: '' }]));
+});
+test('source bindings validate the field path and the declared or portable prop for each node kind', () => {
+  const initial = runOperations(base(), [
+    { op: 'page.add', title: 'Tasks', as: 'tasksPage' }, { op: 'entity.add', title: 'Task', as: 'task' },
+    { op: 'entity.properties', id: '@task', properties: [{ key: 'title', type: 'text', required: true }] },
+    { op: 'collection.add', title: 'Tasks data', path: 'Records/Tasks', entity: '@task', as: 'tasks' },
+    { op: 'page.collection-table', page: '@tasksPage', source: '@tasks', title: 'Task records', as: 'table' },
+    { op: 'component.add', title: 'Card', as: 'card' }, { op: 'page.attach', page: '@tasksPage', components: [{ id: '@card' }] },
+  ]);
+  const document = structuredClone(initial.document), { tasksPage, table, tasks } = initial.aliases;
+  const page = document.design.visualDesigns.pages.find(item => item.ownerId === tasksPage);
+  const card = page.root.find(item => item.kind === 'component' && item.ref.kind !== 'nuxt-ui');
+  const store = document.design.visualDesigns, adapter = visualAllocate(store, 'vn'), heading = visualAllocate(store, 'vn');
+  page.root.push({ id: adapter, kind: 'external', package: 'example', adapter: 'chart', props: {}, events: [] }, visualText(heading, 'Heading'));
+  const coded = code => error => error.code === code;
+  const bind = (node, prop, field = '') => runOperations(document, [{ op: 'page.bind', page: tasksPage, node, prop, source: tasks, operation: 'list', field }]);
+  assert.throws(() => bind(table, 'data', 'items..title'), coded('SOURCE_BIND_FIELD'));
+  assert.throws(() => bind(table, 'notAProp'), coded('SOURCE_BIND_PROP'));
+  assert.throws(() => bind(card.id, 'undeclared'), coded('SOURCE_BIND_PROP'));
+  assert.throws(() => bind(adapter, 'Bad-Prop'), coded('SOURCE_BIND_PROP'));
+  assert.throws(() => bind(heading, 'data'), coded('SOURCE_BIND_PROP'));
+  // A portable external prop passes binding validation; the page gate still keeps adapters in component templates.
+  assert.throws(() => bind(adapter, 'series', 'items'), /external libraries belong in component templates/);
+  page.root.splice(page.root.findIndex(item => item.id === adapter), 1);
+  const text = bind(heading, '@value').document.design.visualDesigns.pages.find(item => item.ownerId === tasksPage).root.find(item => item.id === heading);
+  assert.equal(text.value.kind, 'source');
 });
 test('bulk reuse creates distinct instances without duplicating definitions', () => {
   const start = page();
