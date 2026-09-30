@@ -116,9 +116,9 @@ native qualification stay in `verify` and CI.
 | Scope | Detected by | Steps |
 |---|---|---|
 | Shell repository | default | `vue-tsc --noEmit`, `scripts/quality/lint-source.mjs`, `eslint src --max-warnings 0`, `vitest run` |
-| Generated project | `.companion/generation.json` and `tsconfig.project.json` | `vue-tsc --noEmit --project tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
+| Generated project | `.companion/generation.json` and `configs/types/tsconfig.project.json` | `vue-tsc --noEmit --project configs/types/tsconfig.project.json`, `eslint src <product roots> --max-warnings 0`, `vitest run --config vitest.project.config.mjs` |
 
-A generated project's product roots are the folders named in `tsconfig.project.json`
+A generated project's product roots are the folders named in `configs/types/tsconfig.project.json`
 that are not test roots (`tests/suites.json`), for example `<codebaseFolder>/generated`
 for a custom codebase folder. ESLint, the dev watchers and the agent hooks all derive
 them from `scripts/shared/project-roots.mjs`. After a passing run in a generated

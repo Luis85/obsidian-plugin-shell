@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { checkSuites, globToRegExp, selectSuites } from './suite-manifest.mjs';
+import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 
 const usage = `Usage: node scripts/testing/suites.mjs <suite...|tooling> [--dry-run] [--json] [-- extra runner args]
        node scripts/testing/suites.mjs --list [--json]
@@ -43,12 +44,17 @@ function eachFiles(root, pattern) {
   return files;
 }
 
+/** A project generated before configs/<concern>/ keeps its retired root config until it regenerates. */
+function runnerConfig(root, config) {
+  const kind = Object.keys(projectConfigs).find(key => projectConfigs[key].path === config);
+  return kind ? projectConfigPath(root, kind) ?? config : config;
+}
 /** Exact argv lists a suite executes; runner-specific extra arguments keep their position. */
 function suiteCommands(root, suite, extra = []) {
   const runner = suite.runner;
   switch (runner.type) {
     case 'node-test': return [[process.execPath, '--test', '--test-concurrency=1', ...extra, ...suite.files]];
-    case 'vitest': return [[process.execPath, 'node_modules/vitest/vitest.mjs', 'run', '--config', runner.config, ...extra]];
+    case 'vitest': return [[process.execPath, 'node_modules/vitest/vitest.mjs', 'run', '--config', runnerConfig(root, runner.config), ...extra]];
     case 'playwright': return [[process.execPath, 'node_modules/@playwright/test/cli.js', 'test', '--config', 'configs/testing/playwright.config.ts', ...extra]];
     case 'npm-script': return [[process.execPath, process.env.npm_execpath ?? 'npm-cli.js', 'run', runner.script, ...(extra.length ? ['--', ...extra] : [])]];
     case 'manual': return [];

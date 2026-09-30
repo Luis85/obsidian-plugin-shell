@@ -72,3 +72,34 @@ test('catalog exposes only the read adapter surface; dangerous Obsidian commands
   for(const denied of [['obsidian','eval'],['obsidian','dev:cdp'],['obsidian','plugin:install'],['obsidian','plugin:enable'],['obsidian','restricted-mode']])
     assert.throws(()=>parseCliArguments([...denied,'--obsidian-vault','Work']));
 });
+test('setup opt-in verifies the named vault, prepares on request and imports its typed notes through reviewed plans', async () => {
+  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
+  const { result } = await import('../../scripts/framework/contracts.ts');
+  const notes = ['/vault/docs/application/project.md', '/vault/docs/application/page.md'];
+  const answers = ['yes', 'Work', 'yes', 'yes', 'yes', 'no', 'no'], prompts = [], calls = [];
+  const execute = async request => {
+    calls.push(request);
+    if (request.command === 'obsidian status') return result(request.command, { vault: { selector: 'Work' } });
+    if (request.command === 'obsidian prepare') return result(request.command, { import: { batches: [['node', 'bin/app', 'docs', 'import', ...notes, '--dry-run', '--json']] } });
+    return request.options.apply ? result(request.command, {}, 'applied') : result(request.command, { planHash: 'c'.repeat(64) }, 'planned');
+  };
+  const outcome = await continueSetup({ root: '/', frameworkRoot: '/' }, execute, async question => { prompts.push(question); return answers.shift(); }, () => {}, result('setup', {}, 'applied'));
+  assert.equal(outcome.status, 'applied'); assert.equal(answers.length, 0);
+  assert.deepEqual(calls.map(request => request.command), ['obsidian status', 'obsidian prepare', 'docs import', 'docs import']);
+  assert.deepEqual(calls.slice(0, 2).map(request => request.options), [{ 'obsidian-vault': 'Work' }, { 'obsidian-vault': 'Work' }]);
+  assert.deepEqual(calls[2].args, notes); assert.equal(calls[3].options.apply, 'c'.repeat(64));
+  assert.match(prompts[3], /Import 2 supported typed note\(s\) found in the Obsidian vault/);
+  assert.ok(!prompts.some(question => /^File or folder/.test(question)), 'vault notes replace the generic import path question');
+});
+test('an unavailable Obsidian CLI or a declined prepare only skips the vault step', async () => {
+  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
+  const { result } = await import('../../scripts/framework/contracts.ts');
+  // Remaining answers decline the generic docs import, generation and docs export.
+  for (const [failing, answers] of [[true, ['yes', 'Work', 'no', 'no', 'no']], [false, ['yes', 'Work', 'no', 'no', 'no', 'no']]]) {
+    const calls = [], expected = ['obsidian status'];
+    const execute = async request => { calls.push(request.command);
+      return request.command === 'obsidian status' && failing ? result(request.command, null, 'failed') : result(request.command, {}); };
+    const outcome = await continueSetup({ root: '/', frameworkRoot: '/' }, execute, async () => answers.shift(), () => {}, result('setup', {}, 'applied'));
+    assert.equal(outcome.status, 'applied'); assert.deepEqual(calls, expected); assert.equal(answers.length, 0);
+  }
+});

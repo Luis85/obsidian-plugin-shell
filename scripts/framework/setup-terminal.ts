@@ -1,4 +1,5 @@
 import { setupDocumentation } from './docs-setup.ts';
+import { setupObsidian } from './obsidian-setup.ts';
 import { starterCatalog, derivedId, derivedName } from './starter-project.ts';
 import { readConfiguration } from './files.ts';
 import { requireThat, type Context, type Request, type Result } from './contracts.ts';
@@ -36,7 +37,14 @@ export async function guidedSetup(request: Request, context: Context, prompt: Pr
 }
 /** Each effect needs a separate approval. Returning early retains completed state for setup resume. */
 export async function continueSetup(context: Context, execute: Execute, prompt: Prompt, render: (value: Result) => void, configured: Result): Promise<Result> {
-  let outcome = await setupDocumentation('import', configured, context, execute, prompt, render);
+  // Typed notes found in an opted-in Obsidian vault replace the generic import question; each batch is its own reviewed plan.
+  const vaultNotes = await setupObsidian(context, execute, prompt, render);
+  let outcome = configured;
+  for (const batch of vaultNotes) {
+    outcome = await setupDocumentation('import', outcome, context, execute, prompt, render, batch);
+    if (!['ok', 'applied', 'unchanged'].includes(outcome.status)) return outcome;
+  }
+  if (!vaultNotes.length) outcome = await setupDocumentation('import', configured, context, execute, prompt, render);
   if (!['ok', 'applied', 'unchanged'].includes(outcome.status)) return outcome;
   for (const [stage, question] of [
     ['generate', 'Review and generate source for the accepted project?'],

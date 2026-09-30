@@ -15,7 +15,7 @@ Requirement: $ARGUMENTS (if empty, pick the first entry with `"verification": "t
    assertions derived from `acceptance`: success result, failure keeps the draft,
    exact Markdown or data written, no writes on failure.
 3. Run the test and confirm it fails for the right reason:
-   `npx vitest run --config vitest.project.config.mjs <test path>`.
+   `npx vitest run --config configs/testing/vitest.project.config.mjs <test path>`.
 4. Implement the smallest change at the `implementation` path (framework-free
    application code; adapters and UI only through existing ports and stores).
 5. Re-run the test until it passes, then run `npm run check`.

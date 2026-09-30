@@ -171,7 +171,7 @@ test('machine schema discovery succeeds outside a configured project without pro
 test('interactive setup reviews docs import before generation and offers independent docs export', async () => {
   const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
   const { result } = await import('../../scripts/framework/contracts.ts');
-  const answers=['yes','docs/application','yes','no','yes','yes'], calls=[];
+  const answers=['no','yes','docs/application','yes','no','yes','yes'], calls=[];
   const execute=async request=>{calls.push(request);return request.options.apply ? result(request.command,{},'applied') : result(request.command,{planHash:'a'.repeat(64)},'planned');};
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},execute,async()=>answers.shift(),()=>{},result('setup',{},'applied'));
   assert.equal(outcome.status,'applied');assert.deepEqual(calls.map(request=>request.command),['docs import','docs import','docs export','docs export']);
@@ -179,7 +179,7 @@ test('interactive setup reviews docs import before generation and offers indepen
 });
 test('declining reviewed docs changes cancels setup rather than applying or generating', async()=>{
   const { continueSetup }=await import('../../scripts/framework/setup-terminal.ts');const { result }=await import('../../scripts/framework/contracts.ts');
-  const answers=['yes','','no'], calls=[];
+  const answers=['no','yes','','no'], calls=[];
   const outcome=await continueSetup({root:'/',frameworkRoot:'/'},async request=>{calls.push(request.command);return result(request.command,{planHash:'b'.repeat(64)},'planned');},async()=>answers.shift(),()=>{},result('setup',{},'applied'));
   assert.equal(outcome.status,'cancelled');assert.deepEqual(calls,['docs import']);
 });

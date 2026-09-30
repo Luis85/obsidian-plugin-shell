@@ -128,7 +128,7 @@ const specific: Record<string, OptionHelp> = {
   replace: { description: 'Replace the previous local clickdummy only after successful build and static offline validation.' },
   fast: { description: 'Typecheck plus tests related to changed files (git); for agent Stop hooks.' },
 };
-const profileDefaults: Record<string, string> = { test: 'unit (project when vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
+const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
   'prototypes compare': 'node bin/app prototypes compare <prototype> --version <version> --variant <variant> --with-prototype <prototype> --with-version <version> --with-variant <variant> [options]',
   'prototypes prototype-details': 'node bin/app prototypes prototype-details <prototype> [--name <name>] [--description <text>] [options]',

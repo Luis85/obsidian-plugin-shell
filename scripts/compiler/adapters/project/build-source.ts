@@ -46,7 +46,7 @@ if (prototype && !visual) throw new Error('CLI projects have no HTML prototype. 
 if (prototype && !args.includes('--replace') && await exists('dist/prototype.html')) throw new Error('Prototype exists. Review before passing --replace.');
 if (visual && config.framework === 'angular') {
   const angular = JSON.parse(await readFile('node_modules/@angular/compiler-cli/package.json', 'utf8'));
-  run(join('node_modules/@angular/compiler-cli', angular.bin.ngc), ['--project', 'tsconfig.angular.json']);
+  run(join('node_modules/@angular/compiler-cli', angular.bin.ngc), ['--project', 'configs/types/tsconfig.angular.json']);
   // ngc emits JavaScript, not imported CSS. Preserve its explicit relative stylesheet dependency.
   await mkdir('.compiled/src/ui', { recursive: true });
   await copyFile('src/ui/styles.css', '.compiled/src/ui/styles.css');
@@ -66,7 +66,7 @@ if (prototype) {
 } else {
   for (const target of config.targets) {
     if (target === 'cli') {
-      run('node_modules/typescript/bin/tsc', ['--project', 'tsconfig.cli.json']);
+      run('node_modules/typescript/bin/tsc', ['--project', 'configs/types/tsconfig.cli.json']);
       await writeFile('dist/cli/package.json', JSON.stringify({ type: 'module', private: true }) + '\n');
     } else await buildVisual(target, 'dist/' + target);
   }

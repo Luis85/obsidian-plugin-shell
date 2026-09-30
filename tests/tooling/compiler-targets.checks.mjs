@@ -28,9 +28,9 @@ test('browser output shares generated product code and packages an explicit offl
     const generated = JSON.parse(result.artifacts.find(file => file.path === 'package.json').content);
     assert.equal(generated.devDependencies.typescript, ts.version);
     assert.match(generated.devDependencies.typescript, /^6\.\d+\.\d+$/);
-    assert.equal(generated.scripts['typecheck:project'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.project.json');
+    assert.equal(generated.scripts['typecheck:project'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json');
   }
-  assert.equal(pkg.scripts['typecheck:clickdummy'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.clickdummy.json');
+  assert.equal(pkg.scripts['typecheck:clickdummy'], 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.clickdummy.json');
 });
 test('compiled browser sources refuse an explicitly writable operation at runtime', async t => {
   const document = JSON.parse(source);

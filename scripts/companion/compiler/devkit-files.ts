@@ -34,7 +34,7 @@ export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add:
     add(path, renderTemplate(await templateRoot.text(['scripts/companion/devkit', template].join('/')), values), 'extension');
   }
   for (const file of templateRoot.skillFiles) add(file.path, file.content, 'extension');
-  add('vitest.project.config.mjs', projectVitestConfig(m), 'extension');
+  add('configs/testing/vitest.project.config.mjs', projectVitestConfig(m), 'extension');
   // The copied suite manifest classifies product tests under tests/project; follow a custom tests folder.
   if (m.testRoot !== 'tests/project') {
     const suites = await templateRoot.text(['tests/suites.json'].join('/'));
@@ -47,7 +47,7 @@ export async function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add:
 function projectVitestConfig(m: Model): string {
   return `import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
-import { sharedConfig } from './scripts/bundling/vite-shared.mjs';
+import { sharedConfig } from '../../scripts/bundling/vite-shared.mjs';
 const shared = sharedConfig();
 // Product tests. A bare \`obsidian\` import throws on purpose: each test file opts in to the
 // in-memory host with \`vi.mock('obsidian', () => import('@test/obsidian'))\` (docs/testing/OBSIDIAN-TEST-KIT.md).
@@ -55,7 +55,7 @@ const hostBoundary = { name: 'vitest-obsidian-boundary',
   resolveId(id) { if (id === 'obsidian') return '\\0obsidian-host-boundary'; },
   load(id) { if (id === '\\0obsidian-host-boundary') return 'throw new Error("OBSIDIAN_BOUNDARY_REQUIRES_EXPLICIT_TEST_DOUBLE")'; },
 };
-const testKit = { '@test/obsidian': fileURLToPath(new URL('./tests/support/obsidian/index.ts', import.meta.url)) };
+const testKit = { '@test/obsidian': fileURLToPath(new URL('../../tests/support/obsidian/index.ts', import.meta.url)) };
 // DOM tests (views, settings, Vue components) start with \`// @vitest-environment happy-dom\`.
 // Reporters are left at Vitest's defaults so coding agents automatically get the concise \`agent\` reporter.
 // \`npm run make\` writes the tests of the features it creates to ${makerTests}.

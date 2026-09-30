@@ -75,7 +75,7 @@ test('all presets compile through shared v6 validation into actual target-specif
     assert.match(files.get('README.md'), /NOT a resolved dependency graph/);
     const pkg = JSON.parse(files.get('package.json'));
     assert.equal(JSON.parse(files.get('tsconfig.json')).compilerOptions.rewriteRelativeImportExtensions, undefined, 'no-emit SFC validation must not rewrite virtual .vue imports');
-    for (const path of ['tsconfig.angular.json', 'tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
+    for (const path of ['configs/types/tsconfig.angular.json', 'configs/types/tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
     for (const target of selected.targets) assert.ok(files.has(`src/targets/${target}/main.ts`));
     if (selected.framework === 'none') { assert.ok(!files.has('src/ui/mount.ts')); assert.ok(!pkg.devDependencies.vite); assert.ok(!pkg.scripts['build:prototype']); }
     if (selected.framework === 'vanilla') { assert.deepEqual(pkg.dependencies, {}); assert.match(files.get('src/ui/mount.ts'), /createElement/); }
@@ -83,7 +83,7 @@ test('all presets compile through shared v6 validation into actual target-specif
       assert.ok(files.has('scripts/angular-linker.mjs')); assert.equal(pkg.devDependencies['@babel/core'], '7.29.0');
       assert.ok(pkg.dependencies['@angular/core']); assert.ok(!pkg.dependencies.vue); assert.ok(!pkg.dependencies['zone.js']);
       assert.match(files.get('src/ui/mount.ts'), /createApplication/); assert.match(files.get('src/ui/mount.ts'), /app.destroy/);
-      assert.equal(JSON.parse(files.get('tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
+      assert.equal(JSON.parse(files.get('configs/types/tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
     }
     if (selected.framework === 'nuxtui') {
       assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.2'); assert.ok(!pkg.dependencies.nuxt);

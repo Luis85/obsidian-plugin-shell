@@ -52,7 +52,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   output = cli(dir, ['plan', 'apply', 'generation.plan.json', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
   assert.equal(JSON.parse(output.stdout).status, 'applied');
   assert.match(await readFile(join(dir, 'app/source/generated/presentation/stores/authoring-vault.ts'), 'utf8'), /defineStore/);
-  assert.match(await readFile(join(dir, 'vitest.project.config.mjs'), 'utf8'), /spec\/project/);
+  assert.match(await readFile(join(dir, 'configs/testing/vitest.project.config.mjs'), 'utf8'), /spec\/project/);
   assert.equal(JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8')).id, 'field-notes');
   output = cli(dir, ['generate', '--yes', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout); assert.equal(JSON.parse(output.stdout).status, 'unchanged');
   await writeFile(join(dir, 'draft.json'), JSON.stringify({ ...design, design: { ...design.design, goal: 'Unreviewed draft' } }));

@@ -3,11 +3,13 @@ import vue from 'eslint-plugin-vue';
 import obsidian from 'eslint-plugin-obsidianmd';
 import { fileURLToPath } from 'node:url';
 import { sourceRoots } from '../../scripts/shared/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '../../scripts/shared/project-configs.mjs';
 // This file lives in configs/lint; every path and tsconfig resolves from the project root.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
- * tsconfig.project.json); that code gets the same rules, type-checked through that project file. */
+ * configs/types/tsconfig.project.json); that code gets the same rules, type-checked through that project file. */
 const productRoots = sourceRoots(root).filter(path => path !== 'src');
+const projectTsconfig = './' + (projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path);
 const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfigs.recommendedTypeChecked,
   '@typescript-eslint/no-floating-promises': 'error', '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
 };
@@ -26,7 +28,7 @@ export default ts.config(
   { files: ['bin/app'], languageOptions: { sourceType: 'module' } },
   { files: ['bin/domain/**/*.ts', 'bin/application/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   ...productRoots.map(folder => ({ files: [`${folder}/**/*.{ts,vue}`],
-    languageOptions: { parserOptions: { parser: ts.parser, project: ['./tsconfig.project.json'], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
+    languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian }, rules: pluginRules })),
   { files: ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },

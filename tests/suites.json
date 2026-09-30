@@ -486,7 +486,7 @@
     {
       "name": "project",
       "purpose": "Generated product tests (tests/project) that exist only in a project created by the companion compiler.",
-      "runner": {"type": "vitest", "config": "vitest.project.config.mjs"},
+      "runner": {"type": "vitest", "config": "configs/testing/vitest.project.config.mjs"},
       "include": ["tests/project/**/*.test.ts", "tests/project/**/*.test.mjs"],
       "optional": true,
       "verify": "opt-in",

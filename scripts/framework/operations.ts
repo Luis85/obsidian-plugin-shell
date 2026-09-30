@@ -12,6 +12,7 @@ import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
 import { readBounded } from './files.ts';
 import { compilerOperation } from '../compiler/adapters/cli.ts';
 import { resolve, join } from 'node:path';
+import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 import { buildClickdummy } from './clickdummy.ts';
 import { inspectStyles } from './styles.ts';
 import { inspectConcept } from './concepts.ts';
@@ -79,7 +80,7 @@ async function processOperation(request: Request, context: Context): Promise<Res
     // Real-Obsidian Vitest suite in contained vaults; downloads only with OBSIDIAN_ALLOW_DOWNLOAD=1.
     else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
     else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test', '--config', 'configs/testing/playwright.config.ts']; }
-    else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); else args.push('--config', 'configs/testing/vitest.config.mjs'); }
+    else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; const project = projectConfigPath(context.root, 'vitest'); if (profile === 'project' || (profile === undefined && project)) args.push('--config', project ?? projectConfigs.vitest.path); else args.push('--config', 'configs/testing/vitest.config.mjs'); }
   } else if (request.command === 'verify') {
     acceptProfile(request.command, profile);
     if (profile === 'project') { entry = await npmEntry(); args = ['run', 'verify:project']; }
@@ -87,7 +88,7 @@ async function processOperation(request: Request, context: Context): Promise<Res
   } else if (request.command === 'dev') {
     acceptProfile(request.command, profile);
     entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
-    if (profile === 'preview') return result(request.command, { execution: await runNode(context, 'node_modules/vite/bin/vite.js', ['--config', 'vite.preview.config.mjs'], timeout), productAcceptance: 'not-inferred' });
+    if (profile === 'preview') return result(request.command, { execution: await runNode(context, 'node_modules/vite/bin/vite.js', ['--config', projectConfigPath(context.root, 'preview') ?? projectConfigs.preview.path], timeout), productAcceptance: 'not-inferred' });
     args = profile === 'ui' ? ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
   } else {
     const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');

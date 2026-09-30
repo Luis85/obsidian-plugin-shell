@@ -61,7 +61,7 @@ export function watchTree(root, changed, platform = process.platform) {
     { watched: () => [...watchers.keys()].sort() });
 }
 /** Source and build-configuration watchers shared by the local and real-Obsidian dev loops.
- * A generated project adds its configured product roots (tsconfig.project.json), for example
+ * A generated project adds its configured product roots (configs/types/tsconfig.project.json), for example
  * `<codebaseFolder>/generated`; a source root that is removed and recreated is watched again. */
 export function watchPluginSources(changed, { sources = ['src', 'scripts/bundling', ...sourceRoots('.')], configuration = ['configs', 'manifest.json', 'package.json', 'package-lock.json'] } = {}) {
   const names = new Set(configuration);

@@ -121,7 +121,7 @@ test('source changes during verification block reported acceptance; foreign prog
   assert.equal(await readFile(join(ctx.root, '.framework/setup-progress.json'), 'utf8'), 'foreign');
 });
 test('wizard stops after denied installation without silently invoking verification or a native host', async () => {
-  const calls = [], answers = ['no', 'yes', 'yes', 'no', 'no'];
+  const calls = [], answers = ['no', 'no', 'yes', 'yes', 'no', 'no'];
   const execute = async command => { if (command.command === 'setup resume') assert.equal(command.options.apply, 'b'.repeat(64)); calls.push(command.command); return command.command === 'generate' ? result('generate', { planHash: 'b'.repeat(64) }, 'planned')
     : command.command === 'setup status' ? result(command.command, { resumeHash: 'a'.repeat(64) }) : result(command.command, {}, 'applied'); };
   const response = await continueSetup({ root: '/', frameworkRoot: '/' }, execute, async () => answers.shift(), () => {}, result('setup', {}, 'applied'));

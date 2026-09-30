@@ -15,6 +15,10 @@ The adapter only invokes the official `version`, `vault`, `files`, `folders`, an
 
 `obsidian prepare` reads the project's configured application-documentation paths, asks Obsidian for the selected vault's Markdown inventory, and parses only matching files. Supported typed Markdown is reported separately from ordinary or invalid Markdown. The result proposes bounded `docs import ... --dry-run` argument arrays. Import remains the existing shell operation: review its file plan and apply that plan explicitly.
 
+## Interactive setup
+
+Terminal setup asks whether to connect an Obsidian vault before the documentation-import question. Answering yes asks for the vault name or ID, runs `obsidian status` against it, and then asks whether to prepare the vault. Preparing runs `obsidian prepare`, and each proposed batch of supported typed notes becomes its own reviewed `docs import` plan that you approve separately. An unavailable CLI, an unknown vault or a declined prepare only skips this step. The vault name is not stored, and nothing in the vault is written.
+
 ## Deliberately excluded
 
 The adapter does not expose Obsidian `eval`, `dev:cdp`, create/append/prepend/move/rename/delete, plugin installation or enablement, or restricted-mode changes. No adapter command installs or enables this project in a personal vault. Existing isolated test-vault installation remains a separate shell feature.

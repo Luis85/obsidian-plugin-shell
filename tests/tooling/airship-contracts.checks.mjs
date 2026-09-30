@@ -61,14 +61,16 @@ test('all starters emit source previews without optional dependencies; Airship i
     assert.ok(file, JSON.stringify(starter));
     const document = JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', file), 'utf8'));
     for (const outputKind of ['obsidian-plugin', 'clickdummy']) {
-      const plain = await compileProject({ source: JSON.stringify(document), template, outputKind });
+      // Explicitly opted out, so a starter whose defaults enable Airship (agent-ready) is compared like the rest.
+      const plain = await compileProject({ source: JSON.stringify(withAirshipOption(document, { 'no-airship': true })), template, outputKind });
       const opted = await compileProject({ source: JSON.stringify(withAirshipOption(document, { airship: true })), template, outputKind });
       assert.equal(plain.status, 'ok', JSON.stringify(plain.diagnostics));
       assert.equal(opted.status, 'ok', JSON.stringify(opted.diagnostics));
       const get = (result, path) => result.artifacts.find(file => file.path === path)?.content;
-      assert.ok(get(plain, 'vite.preview.config.mjs'));
+      assert.ok(get(plain, 'configs/bundling/vite.preview.config.mjs'));
       assert.equal(get(plain, 'airship.config.json'), undefined);
       assert.equal(JSON.parse(get(opted, 'airship.config.json')).safe, true);
+      if (airshipOptions(document.tooling).enabled) assert.equal(get(await compileProject({ source: JSON.stringify(document), template, outputKind }), 'airship.config.json'), get(opted, 'airship.config.json'));
       assert.equal(get(plain, 'package-lock.json'), get(opted, 'package-lock.json'));
       assert.equal(get(plain, 'package.json'), get(opted, 'package.json'));
       assert.equal(JSON.parse(get(opted, 'package.json')).dependencies['@airshiplabs/cli'], undefined);
@@ -86,7 +88,7 @@ test('custom source paths survive preview generation and unrelated optional scri
   const enhanced = { ...template, frameworkFiles: template.frameworkFiles.map(file => file === original ? { ...file, content: JSON.stringify(pkg) } : file) };
   const compiled = await compileProject({ source: JSON.stringify(document), template: enhanced });
   assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));
-  assert.match(compiled.artifacts.find(file => file.path === 'vite.preview.config.mjs').content, /product source\/generated/);
+  assert.match(compiled.artifacts.find(file => file.path === 'configs/bundling/vite.preview.config.mjs').content, /product source\/generated/);
   assert.equal(JSON.parse(compiled.artifacts.find(file => file.path === 'package.json').content).scripts.storybook, pkg.scripts.storybook);
 });
 test('enable and disable use reviewed plans without installation; stale/foreign config stays untouched', async t => {

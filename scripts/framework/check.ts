@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process';
 import { join } from 'node:path';
 import { exists } from './files.ts';
 import { codeRoots, isWithinRoot, lintRoots } from '../shared/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '../shared/project-configs.mjs';
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 export interface CheckStep { id: string; display: string; entry: string; args: string[]; skip?: string }
@@ -23,7 +24,7 @@ const vueTsc = 'node_modules/vue-tsc/bin/vue-tsc.js', eslint = 'node_modules/esl
 const eslintConfig = 'configs/lint/eslint.config.mjs';
 /** A generated project carries its ownership receipt and a project-scoped TypeScript config. */
 async function checkScope(root: string): Promise<'generated-project' | 'shell-repository'> {
-  return await exists(join(root, '.companion/generation.json')) && await exists(join(root, 'tsconfig.project.json')) ? 'generated-project' : 'shell-repository';
+  return await exists(join(root, '.companion/generation.json')) && projectConfigPath(root, 'typescript') ? 'generated-project' : 'shell-repository';
 }
 const runGit: Git = (root, args) => new Promise(accept => {
   execFile('git', args, { cwd: root, shell: false, windowsHide: true, timeout: 10_000, maxBuffer: 16_777_216, encoding: 'utf8' },
@@ -64,10 +65,12 @@ async function makerSteps(root: string): Promise<CheckStep[]> {
 }
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit): Promise<{ scope: string; steps: CheckStep[]; changes?: Changes }> {
   const scope = await checkScope(root), project = scope === 'generated-project';
-  const makers = await makerSteps(root);
-  const config = ['--config', project ? 'vitest.project.config.mjs' : 'configs/testing/vitest.config.mjs'];
+  // Maker checks qualify the framework's own maker; a generated project inherits its configs/ but not its test suite.
+  const makers = project ? [] : await makerSteps(root);
+  const config = ['--config', project ? projectConfigPath(root, 'vitest') ?? projectConfigs.vitest.path : 'configs/testing/vitest.config.mjs'];
+  const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
   const typecheck: CheckStep = project
-    ? { id: 'typecheck', display: 'vue-tsc --noEmit --project tsconfig.project.json', entry: vueTsc, args: ['--noEmit', '--project', 'tsconfig.project.json'] }
+    ? { id: 'typecheck', display: `vue-tsc --noEmit --project ${tsconfig}`, entry: vueTsc, args: ['--noEmit', '--project', tsconfig] }
     : { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
   const fullTest: CheckStep = { id: 'test', display: `vitest run ${config.join(' ')}`, entry: vitest, args: ['run', ...config] };
   if (!fast) {

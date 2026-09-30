@@ -45,10 +45,10 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   Object.assign(pkg,{name:m.project.id,version:m.project.version,description:m.project.description,author:m.project.author});
   Object.assign(lock,{name:pkg.name,version:pkg.version}); Object.assign(lock.packages[''],{name:pkg.name,version:pkg.version,...(pkg.bin ? {bin:pkg.bin} : {})});
   pkg.scripts['test:framework'] = pkg.scripts.test;
-  pkg.scripts['test'] = 'vitest run --config vitest.project.config.mjs';
-  pkg.scripts['test:watch'] = 'vitest --config vitest.project.config.mjs';
-  pkg.scripts['test:tdd'] = `vitest --config vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
-  pkg.scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project tsconfig.project.json';
+  pkg.scripts['test'] = 'vitest run --config configs/testing/vitest.project.config.mjs';
+  pkg.scripts['test:watch'] = 'vitest --config configs/testing/vitest.project.config.mjs';
+  pkg.scripts['test:tdd'] = `vitest --config configs/testing/vitest.project.config.mjs ${JSON.stringify(m.testRoot+'/acceptance')}`;
+  pkg.scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
   pkg.scripts['test:ui-effects'] = `node --test ${m.testRoot}/ui-effects/*.checks.mjs`;
   pkg.scripts['build:clickdummy'] = 'node bin/app clickdummy build';
   pkg.scripts['doctor'] = 'node bin/app doctor';
@@ -65,7 +65,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('tsconfig.project.json',json({extends:'./tsconfig.json',compilerOptions:{allowImportingTsExtensions:true,...((m.document.design as {editors?:unknown}).editors ? {allowJs:true,checkJs:false} : {})},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts']}));
+  add('configs/types/tsconfig.project.json',json({extends:'../../tsconfig.json',compilerOptions:{allowImportingTsExtensions:true,...((m.document.design as {editors?:unknown}).editors ? {allowJs:true,checkJs:false} : {})},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts'].map(path => '../../'+path)}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');

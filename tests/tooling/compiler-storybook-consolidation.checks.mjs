@@ -15,7 +15,7 @@ const source = JSON.parse(await readFile(new URL('../fixtures/companion/detail-v
 const get = (result, path) => result.artifacts.find(file => file.path === path)?.content;
 test('both integrations share one strict tooling schema and preserve independent defaults', () => {
   const schema = toolingSchema();
-  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'storybook']);
+  assert.deepEqual(Object.keys(schema.properties).sort(), ['airship', 'hindsight', 'storybook']);
   assert.equal(schema.additionalProperties, false);
   assert.deepEqual(storybookOptions({}), { enabled: false, generateStories: false });
   assert.equal(airshipOptions({ storybook: { enabled: true } }).enabled, false);

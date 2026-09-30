@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { runCheckSteps, checkSteps, checkOperation, outputTail } from '../../scripts/framework/check.ts';
 import { codeRoots, sourceRoots } from '../../scripts/shared/project-roots.mjs';
+import { projectConfigPath } from '../../scripts/shared/project-configs.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-check-')));
@@ -65,15 +66,18 @@ test('scope detection selects project-suite steps in a generated project', async
   assert.deepEqual(shell.steps.map(step => [step.id, step.entry, step.args.join(' ')]), [
     ['typecheck', 'node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit'], ['lint', 'scripts/quality/lint-source.mjs', ''],
     ['eslint', 'node_modules/eslint/bin/eslint.js', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'node_modules/vitest/vitest.mjs', 'run --config configs/testing/vitest.config.mjs']]);
-  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}'); await writeFile(join(dir, 'tsconfig.project.json'), '{}');
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
+  // The framework's maker config ships in every project's configs/, but its maker suite does not.
+  await writeFile(join(dir, 'configs/types/tsconfig.maker.json'), '{}'); await mkdir(join(dir, 'bin')); await writeFile(join(dir, 'bin/app.ts'), '');
   const project = await checkSteps(dir, false);
   assert.equal(project.scope, 'generated-project');
   assert.deepEqual(project.steps.map(step => [step.id, step.args.join(' ')]), [
-    ['typecheck', '--noEmit --project tsconfig.project.json'], ['eslint', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'run --config vitest.project.config.mjs']]);
+    ['typecheck', '--noEmit --project configs/types/tsconfig.project.json'], ['eslint', '-c configs/lint/eslint.config.mjs src --max-warnings 0'], ['test', 'run --config configs/testing/vitest.project.config.mjs']]);
   const { exit, result } = cli(['check', '--root', dir, '--dry-run']);
   assert.equal(exit, 0); assert.equal(result.status, 'planned'); assert.equal(result.data.execution, 'not-run');
   assert.deepEqual(result.data.steps.map(step => step.status), ['not-run', 'not-run', 'not-run']);
-  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'tsconfig.project.json']);
+  assert.deepEqual((await readdir(dir)).sort(), ['.companion', 'bin', 'configs']);
 });
 test('fast mode runs tests related to changed and untracked source files only', async t => {
   const dir = await scratch(t);
@@ -107,8 +111,8 @@ test('fast mode runs the full suite when deleted, configuration or non-code test
   assert.deepEqual(deleted.changes.untraceable, ['src/gone.ts']); assert.match(deleted.changes.reason, /deleted, configuration or non-code files changed \(src\/gone\.ts\); running the full suite/);
   assert.deepEqual(deleted.steps[1].args, full);
   git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', 'delete');
-  for (const [path, content] of [['tests/fixtures/data.json', '{"changed":true}'], ['package.json', '{"type":"module"}'], ['vitest.project.config.mjs', 'export default {};'], ['tests/fixtures/new.md', 'new']]) {
-    await writeFile(join(dir, path), content);
+  for (const [path, content] of [['tests/fixtures/data.json', '{"changed":true}'], ['package.json', '{"type":"module"}'], ['configs/testing/vitest.project.config.mjs', 'export default {};'], ['tests/fixtures/new.md', 'new']]) {
+    await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), content);
     const outcome = await checkSteps(dir, true);
     assert.deepEqual(outcome.changes.untraceable, [path], path); assert.deepEqual(outcome.steps[1].args, full, path);
     git(dir, 'add', '-A'); git(dir, 'commit', '-q', '-m', path);
@@ -125,7 +129,8 @@ test('a generated project lints and watches its configured product roots, not on
   const dir = await scratch(t);
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await mkdir(join(dir, 'product/code/generated'), { recursive: true }); await mkdir(join(dir, 'src'));
-  await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'] }));
+  await mkdir(join(dir, 'configs/types'), { recursive: true });
+  await writeFile(join(dir, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts', 'product/code/generated/**/*.vue', 'verification/specs/project/**/*.ts', 'tests/runtime/generated/**/*.ts'].map(path => '../../' + path) }));
   await mkdir(join(dir, 'tests')); await writeFile(join(dir, 'tests/suites.json'), JSON.stringify({ roots: [{ path: 'verification/specs/project' }] }));
   const full = await checkSteps(dir, false);
   assert.deepEqual(full.steps.find(step => step.id === 'eslint').args, ['-c', 'configs/lint/eslint.config.mjs', 'src', 'product/code/generated', '--max-warnings', '0']);
@@ -157,4 +162,22 @@ test('cancellation skips remaining steps and reports cancelled', async t => {
   const outcome = await checkOperation({ command: 'check', args: [], options: {} }, { root: dir, frameworkRoot: root, signal: controller.signal });
   assert.equal(outcome.status, 'cancelled');
   assert.ok(outcome.data.steps.every(step => step.status === 'skipped' && step.reason === 'cancelled'));
+});
+test('a project generated before configs/<concern>/ keeps using its retired root configs until it regenerates', async t => {
+  const dir = await scratch(t);
+  await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
+  await writeFile(join(dir, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/generated/**/*.ts'] }));
+  await writeFile(join(dir, 'vitest.project.config.mjs'), 'export default {};');
+  const legacy = await checkSteps(dir, false);
+  assert.equal(legacy.scope, 'generated-project');
+  assert.deepEqual(legacy.steps.map(step => [step.id, step.args.at(-1)]).filter(([id]) => id !== 'eslint'),
+    [['typecheck', 'tsconfig.project.json'], ['test', 'vitest.project.config.mjs']]);
+  assert.deepEqual(sourceRoots(dir), ['src', 'product/code/generated']);
+  // Once regeneration writes the configs/ copies they win, even while the retired root copies remain.
+  await mkdir(join(dir, 'configs/types'), { recursive: true }); await mkdir(join(dir, 'configs/testing'), { recursive: true });
+  await writeFile(join(dir, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['../../src/**/*.ts', '../../app/generated/**/*.ts'] }));
+  await writeFile(join(dir, 'configs/testing/vitest.project.config.mjs'), 'export default {};');
+  assert.equal(projectConfigPath(dir, 'vitest'), 'configs/testing/vitest.project.config.mjs');
+  assert.deepEqual(sourceRoots(dir), ['src', 'app/generated']);
+  assert.equal(projectConfigPath(dir, 'preview'), null);
 });

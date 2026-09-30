@@ -15,8 +15,9 @@ async function project(t) {
   const root = await mkdtemp(join(tmpdir(), 'agent hooks ü-')); t.after(() => rm(root, { recursive: true, force: true }));
   for (const folder of ['src/core', 'product/code', 'scripts', 'node_modules/vitest', '.obsidian-sandbox']) await mkdir(join(root, folder), { recursive: true });
   await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: { check: 'node check.mjs' } }));
-  await writeFile(join(root, 'vitest.project.config.mjs'), 'export default {};\n');
-  await writeFile(join(root, 'tsconfig.project.json'), JSON.stringify({ include: ['src/**/*.ts', 'product/code/**/*.vue', '*.ts'] }));
+  for (const folder of ['configs/testing', 'configs/types']) await mkdir(join(root, folder), { recursive: true });
+  await writeFile(join(root, 'configs/testing/vitest.project.config.mjs'), 'export default {};\n');
+  await writeFile(join(root, 'configs/types/tsconfig.project.json'), JSON.stringify({ include: ['../../src/**/*.ts', '../../product/code/**/*.vue', '../../*.ts'] }));
   const fake = variable => `console.log(JSON.stringify(process.argv.slice(2)));\nconsole.error('\\u001b[31mFAIL\\u001b[39m src/core/a.test.ts');\nprocess.exit(Number(process.env.${variable} ?? 0));\n`;
   await writeFile(join(root, 'node_modules/vitest/vitest.mjs'), fake('FAKE_VITEST_EXIT'));
   await writeFile(join(root, 'check.mjs'), fake('FAKE_CHECK_EXIT'));
@@ -65,7 +66,7 @@ test('[AGENT-HOOKS-04] the PostToolUse hook process runs vitest related for the 
   const passed = run('post-edit-tests.mjs', input);
   assert.equal(passed.status, 0, passed.stderr); assert.equal(passed.stdout, ''); assert.equal(passed.stderr, '');
   const failed = run('post-edit-tests.mjs', input, { FAKE_VITEST_EXIT: '1' });
-  assert.equal(failed.status, 2); assert.match(failed.stderr, /"related","src\/core\/a\.ts","--run","--config","vitest\.project\.config\.mjs"/);
+  assert.equal(failed.status, 2); assert.match(failed.stderr, /"related","src\/core\/a\.ts","--run","--config","configs\/testing\/vitest\.project\.config\.mjs"/);
   assert.match(failed.stderr, /FAIL src\/core\/a\.test\.ts/); assert.doesNotMatch(failed.stderr, /\u001b/);
   const skipped = run('post-edit-tests.mjs', { ...input, tool_input: { file_path: join(root, 'scripts/tool.mjs') } }, { FAKE_VITEST_EXIT: '1' });
   assert.equal(skipped.status, 0); assert.equal(skipped.stderr, '');

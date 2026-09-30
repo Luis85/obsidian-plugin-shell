@@ -17,7 +17,7 @@ export function previewCode(model: Model, add: Add): void {
 <body class="theme-dark"><main id="prototype-app" class="ps--${String(model.project.id)}" data-plugin-ui="${String(model.project.id)}"></main>
 <script type="module" src="/harness/prototype/clickdummy.ts"></script></body></html>
 `);
-  add('vite.preview.config.mjs', `import { previewConfig } from './scripts/airship/preview-config.mjs';
+  add('configs/bundling/vite.preview.config.mjs', `import { previewConfig } from '../../scripts/airship/preview-config.mjs';
 export default previewConfig(${literal(model.sourceRoot)});
 `);
   if (options.enabled) add('airship.config.json', json(airshipConfig(tooling)));

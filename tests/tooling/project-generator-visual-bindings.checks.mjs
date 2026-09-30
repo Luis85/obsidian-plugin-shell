@@ -38,7 +38,7 @@ test('generated binding tests assert every bound prop, table rows and cells, and
 });
 test('generated binding tests pass in a generated workspace and fail once bound data no longer reaches the table', async () => {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'visual-bindings-')));
-  const run = () => spawnSync(process.execPath, [vitest, 'run', '--config', 'vitest.project.config.mjs', bindings], { cwd: dir, encoding: 'utf8', timeout: 300000, maxBuffer: 16 * 1024 * 1024, env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
+  const run = () => spawnSync(process.execPath, [vitest, 'run', '--config', 'configs/testing/vitest.project.config.mjs', bindings], { cwd: dir, encoding: 'utf8', timeout: 300000, maxBuffer: 16 * 1024 * 1024, env: Object.fromEntries(Object.entries(process.env).filter(([key]) => key !== 'NODE_TEST_CONTEXT')) });
   try {
     for (const file of await projectFiles(root, projectModel(bindingFixture()))) {
       await mkdir(dirname(join(dir, file.path)), { recursive: true });
