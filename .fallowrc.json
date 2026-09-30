@@ -355,6 +355,13 @@
         ]
       },
       {
+        "name": "cli-files-contract",
+        "patterns": [
+          "scripts/shared/hash.ts",
+          "scripts/shared/fs-presence.ts"
+        ]
+      },
+      {
         "name": "project-path-contract",
         "patterns": [
           "scripts/shared/project-path.mjs"
@@ -479,7 +486,8 @@
           "cli-process-contract",
           "cli-confirmation-contract",
           "cli-file-plan-contract",
-          "cli-input-contract"
+          "cli-input-contract",
+          "cli-files-contract"
         ]
       },
       {
@@ -523,7 +531,8 @@
           "cli-process-contract",
           "cli-confirmation-contract",
           "cli-file-plan-contract",
-          "cli-input-contract"
+          "cli-input-contract",
+          "cli-files-contract"
         ]
       },
       {
@@ -638,6 +647,12 @@
         "allow": [
           "cli-input-contract",
           "cli-result-contract"
+        ]
+      },
+      {
+        "from": "cli-files-contract",
+        "allow": [
+          "cli-files-contract"
         ]
       },
       {
