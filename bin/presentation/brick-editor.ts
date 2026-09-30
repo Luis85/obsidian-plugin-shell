@@ -46,6 +46,7 @@ async function operation(ui: Prompts, workspace: Workspace, kind: string): Promi
   return extendedOperation(ui, workspace, kind);
 }
 async function extendedOperation(ui: Prompts, workspace: Workspace, kind: string): Promise<Edit[]> {
+  if (kind === 'collection.add') return [{ op: kind, title: await titleInput(ui, 'Collection title'), entity: await entity(ui, workspace), path: await input(ui, 'Collection path (vault-relative, for example Records/Tasks)') }];
   if (kind === 'data-source.add') return [{ op: kind, title: await titleInput(ui, 'Data-source title'), kind: await choose(ui, 'Data-source kind (specification only)', ['vault', 'api', 'database'].map(id => ({ id, label: id }))) }];
   if (kind === 'entity.properties') return [{ op: kind, id: await entity(ui, workspace), properties: await properties(ui) }];
   if (kind === 'brick.rename') {
@@ -65,7 +66,7 @@ const labels = {
   'page.add': 'Add page', 'page.rename': 'Rename page', 'page.layout': 'Set page layout',
   'component.add': 'Add component', 'component.rename': 'Rename component', 'page.attach': 'Attach component to page',
   'sitemap.group': 'Add sitemap group', 'sitemap.parent': 'Move page/group in sitemap', 'sitemap.route': 'Set route', 'sitemap.link': 'Link pages',
-  'entity.add': 'Add entity', 'entity.properties': 'Edit entity properties', 'data-source.add': 'Add data source',
+  'entity.add': 'Add entity', 'entity.properties': 'Edit entity properties', 'data-source.add': 'Add data source', 'collection.add': 'Add Markdown collection',
   'brick.rename': 'Rename entity/data source', 'journey.add': 'Add ordered journey',
 };
 /** Returns the exact successful operations for the setup request; the normal studio shares the same editor. */
@@ -73,7 +74,7 @@ export async function editBricks(ui: Prompts, workspace: Workspace): Promise<Edi
   const operations: Edit[] = [];
   while (true) {
     const summary = outline(workspace.document);
-    ui.write(`\nApplication bricks: ${summary.pages.length} pages, ${summary.components.length} components. Data sources describe contracts; no connections are opened.\n`);
+    ui.write(`\nApplication bricks: ${summary.pages.length} pages, ${summary.components.length} components. Data sources describe contracts; Collections provision managed Markdown CRUD in the generated plugin.\n`);
     const action = await choose(ui, 'Application bricks', [...Object.entries(labels).map(([id, label]) => ({ id, label })), { id: 'done', label: 'Done' }]);
     if (action === 'done') return operations;
     try { const edits = await operation(ui, workspace, action); workspace.edit(edits); operations.push(...edits); }

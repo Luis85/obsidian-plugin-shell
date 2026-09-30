@@ -13340,9 +13340,6 @@ Edge: ${id2}`,
 }({}, Vue);
 </script>
 <script>
-// Product capacity bounds. They do not relax source quality or safe-tree validation.
-const PRD_LIMITS = Object.freeze({ count: 256, bytes: 250000, aggregateBytes: 3000000, scanEntries: 2000, scanDepth: 20 });
-
 
 /** Optional v5 project namespace. JSON describes capabilities, never executable handlers. */
 const nativeReservedExtensions = Object.freeze([
@@ -14963,6 +14960,9 @@ function validateStorymaps(value) {
   return value;
 }
 
+// Product capacity bounds. They do not relax source quality or safe-tree validation.
+const PRD_LIMITS = Object.freeze({ count: 256, bytes: 250000, aggregateBytes: 3000000, scanEntries: 2000, scanDepth: 20 });
+
 // Shared by the standalone concept and read-only shell entrypoint. No host I/O.
 const COMPANION_FORMAT = 'obsidian-companion-project';
 const COMPANION_VERSION = 5;
@@ -15379,10 +15379,12 @@ function tdRows(shape,side){
 }
 
 // Data-only source catalog. Rendering and source previews never open a connection.
-const DS_KINDS = Object.freeze({vault:'Obsidian vault',api:'External service / API',database:'Database'});
+const DS_KINDS = Object.freeze({vault:'Obsidian vault',collection:'Collection · Markdown records',api:'External service / API',database:'Database'});
 const DS_DIRECTIONS = Object.freeze({read:'Read · source → card',write:'Write · card → source',both:'Read & write · source ↔ card'});
 const DS_TYPES = ['string','number','integer','boolean','object','array','null'];
 const DS_LIMITS = Object.freeze({sources:24,operations:12,flows:120,fields:40,schemaBytes:12000});
+function dsVaultKind(kind){return kind==='vault'||kind==='collection';}
+function dsCollectionPathValid(path){return dsText(path,120)&&path.length>0&&validVaultRelativePath(path)&&!path.split('/').some(p=>p.startsWith('.'));}
 function emptyDataSources(){return {schema:1,nextId:1,sources:[],flows:[],positions:{}};}
 function dataSources(d=design()){if(!d.dataSources)d.dataSources=emptyDataSources();return d.dataSources;}
 function dsPlain(v){return v!==null&&typeof v==='object'&&!Array.isArray(v);}
@@ -15422,7 +15424,7 @@ function dsShapeValid(s){
  return s.schema===null&&s.many===false;
 }
 function dsLocatorValid(source){
- if(source.kind==='vault')return source.locator==='vault://active'&&source.auth==='none'&&source.credentialRef==='';
+ if(dsVaultKind(source.kind))return source.locator==='vault://active'&&source.auth==='none'&&source.credentialRef==='';
  if(source.kind==='database')return source.locator===''||dsKey(source.locator);
  if(!source.locator)return true;
  try{const u=new URL(source.locator);return u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash&&!/[\s\\\x00-\x1f]/.test(source.locator)&&!/%(?:0[0-9a-f]|1[0-9a-f]|7f)/i.test(source.locator);}catch{return false;}
@@ -15430,7 +15432,7 @@ function dsLocatorValid(source){
 function dsResourceValid(source,resource){
  if(!dsText(resource,240)||/[\\\x00-\x1f?#]/.test(resource)||resource.split('/').some(p=>['..','.','.obsidian','.git'].includes(p)))return false;
  if(source.kind==='api')return resource===''||/^\/[a-zA-Z0-9_\-/{},.]*$/.test(resource);
- if(source.kind==='vault')return resource===''||validVaultRelativePath(resource)&&!resource.split('/').some(p=>p.startsWith('.'));
+ if(dsVaultKind(source.kind))return resource===''||validVaultRelativePath(resource)&&!resource.split('/').some(p=>p.startsWith('.'))&&(source.kind!=='collection'||resource===source.collectionPath);
  return resource===''||/^[a-zA-Z][a-zA-Z0-9_.-]{0,119}$/.test(resource);
 }
 function dataSourcesShape(m){
@@ -15438,10 +15440,14 @@ function dataSourcesShape(m){
  if(!dsKeys(m,['schema','nextId','sources','flows','positions','testing'])||m.schema!==1||!Number.isSafeInteger(m.nextId)||m.nextId<1||m.nextId>=Number.MAX_SAFE_INTEGER-10000||!Array.isArray(m.sources)||m.sources.length>DS_LIMITS.sources||!Array.isArray(m.flows)||m.flows.length>DS_LIMITS.flows||!dsPlain(m.positions))return false;
  const ids=[];
  for(const s of m.sources){
-  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
+  if(!dsKeys(s,['id','slug','name','kind','status','description','locator','auth','credentialRef','operations','collectionPath','entity'])||!dsId(s.id,'source')||!dsSlug(s.slug)||!dsText(s.name,80)||!s.name.trim()||!Object.hasOwn(DS_KINDS,s.kind)||!['draft','active','deprecated'].includes(s.status)||!dsText(s.description,1000)||!dsText(s.locator,240)||!['none','api-key','oauth','runtime'].includes(s.auth)||!dsText(s.credentialRef,60)||s.credentialRef!==''&&!dsKey(s.credentialRef)||!dsLocatorValid(s)||!Array.isArray(s.operations)||s.operations.length>DS_LIMITS.operations)return false;
+  if(s.kind==='collection'){
+   if(!dsCollectionPathValid(s.collectionPath)||!/^er-entity-[1-9][0-9]*$/.test(s.entity)||s.operations.length!==4||
+     ['list','create','update','delete'].some(slug=>!s.operations.some(o=>o.slug===slug)))return false;
+  }else if(s.collectionPath!==undefined||s.entity!==undefined)return false;
   ids.push(s.id);
   for(const o of s.operations){
-   if(o.implementation!==undefined&&(!dsKeys(o.implementation,['kind','entity','operation'])||s.kind!=='vault'||o.implementation.kind!=='note'||!/^er-entity-[1-9][0-9]*$/.test(o.implementation.entity)||!['list','create','update','delete'].includes(o.implementation.operation)))return false;
+   if(o.implementation!==undefined&&(!dsKeys(o.implementation,['kind','entity','operation'])||!dsVaultKind(s.kind)||o.implementation.kind!=='note'||!/^er-entity-[1-9][0-9]*$/.test(o.implementation.entity)||!['list','create','update','delete'].includes(o.implementation.operation)))return false;
    if(!dsKeys(o,['id','slug','name','direction','method','resource','description','input','output','implementation'])||!dsId(o.id,'operation')||!dsSlug(o.slug)||!dsText(o.name,80)||!o.name.trim()||!Object.hasOwn(DS_DIRECTIONS,o.direction)||!['GET','POST','PUT','PATCH','DELETE','HEAD','adapter'].includes(o.method)||!dsResourceValid(s,o.resource)||!dsText(o.description,1000)||!dsShapeValid(o.input)||!dsShapeValid(o.output))return false;
    if(s.kind!=='api'&&o.method!=='adapter'||s.kind==='api'&&o.method==='adapter')return false;
    if(['GET','HEAD'].includes(o.method)&&o.direction!=='read')return false;
@@ -15471,6 +15477,13 @@ function dataSourceIssues(d,qualify=true){
  const usedIds=new Set([...d.nodes,...d.links].map(x=>x.id));
  for(const x of [...m.sources,...m.flows])if(usedIds.has(x.id))add('error','collision','Data-source and sitemap identities must be distinct.');
  for(const r of dsReferences(d))if(!d.semantic?.entities.some(e=>e.id===r.entity))add('error','entity','Data shape for '+r.source.name+' / '+r.operation.name+' references a missing entity.');
+ for(const source of m.sources.filter(s=>s.kind==='collection')){
+  const entity=d.semantic?.entities.find(e=>e.id===source.entity);
+  if(!entity)add('error','collection-entity',source.name+': choose an existing entity for this collection.');
+  else if(entity.folder!==source.collectionPath)add('error','collection-path',source.name+': collection path must match the entity note folder so generated Markdown CRUD has one canonical location.');
+  const expected=entity?dsCollectionCrud(source,d):[];
+  if(entity&&(source.operations.length!==expected.length||expected.some(e=>{const o=source.operations.find(x=>x.slug===e.slug);return !o||JSON.stringify({...o,id:null})!==JSON.stringify({...e,id:null});})))add('error','collection-contract',source.name+': refresh the managed CRUD contract after changing its entity schema or path.');
+ }
  for(const f of m.flows){
   const card=d.nodes.find(n=>n.id===f.card),source=m.sources.find(s=>s.id===f.source),op=source.operations.find(o=>o.id===f.operation);
   if(!card||card.kind==='group')add('error','card','Data flow '+f.label+' needs an existing view, screen, dialog, settings surface or action.');
@@ -15505,6 +15518,18 @@ function dsShapeLabel(s,d=design()){
  if(s.mode==='entity')return (d.semantic?.entities.find(e=>e.id===s.entity)?.name||'Missing entity')+(s.many?'[]':'');
  if(s.mode==='fields')return s.fields.length+(s.fields.length===1?' field':' fields')+(s.many?' · collection':'');
  return 'JSON Schema · '+s.schema?.type;
+}
+
+function dsCollectionCrud(source,d=design()){
+ const entity=d.semantic?.entities.find(e=>e.id===source.entity);if(!entity)return [];
+ const record=dsResolveShape({...dsNewShape('entity'),entity:entity.id},d);record.properties.type={type:'string',enum:[entity.slug]};
+ for(const p of entity.properties||[])if(p.type==='date'||p.type==='datetime')record.properties[p.key].format=p.type==='date'?'date':'date-time';
+ const valueProps=Object.fromEntries(Object.entries(record.properties||{}).filter(([key])=>!['id','type'].includes(key)));
+ const values={type:'object',properties:valueProps,required:(record.required||[]).filter(key=>!['id','type'].includes(key)),additionalProperties:false};
+ const object=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
+ const snapshot=object({record,revision:{type:'integer'}}),shape=schema=>schema===null?dsNewShape('none'):{...dsNewShape('schema'),schema};
+ const spec=[['list','List records','read',null,{type:'array',items:snapshot}],['create','Create record','write',object({values,requestId:{type:'string'}}),snapshot],['update','Update record','write',object({id:{type:'string'},revision:{type:'integer'},values}),snapshot],['delete','Delete record','write',object({id:{type:'string'},revision:{type:'integer'}}),null]];
+ return spec.map(([slug,name,direction,input,output])=>({id:null,slug,name,direction,method:'adapter',resource:source.collectionPath,description:'Managed Collection CRUD over Markdown notes in the active vault.',input:shape(input),output:shape(output),implementation:{kind:'note',entity:source.entity,operation:slug}}));
 }
 
 // Data-only semantic layer. Native persistence and relationship resolution are separate adapters.
@@ -20017,7 +20042,7 @@ function companionExampleRequirements(d, surfaces) {
       ['Select blueprints and patterns', 'blueprints', 'Use a reviewed starter and shared action patterns without overwriting an existing design silently.'],
     ]],
     ['Data & visual contracts', 'Developers need explicit data and visual contracts before implementation can be safely generated.', [
-      ['Describe every source port', 'sources', 'Vault, API and database declarations include operations and explicit input/output shapes; credentials remain symbolic.'],
+      ['Describe every source port', 'sources', 'Vault, Collection, API and database declarations include operations and explicit input/output shapes; Collections pair one vault-relative path with one entity and managed Markdown CRUD; credentials remain symbolic.'],
       ['Reuse source operations', 'sitemap', 'A screen references a declared source operation through a named directional data flow, not a duplicate source definition.'],
       ['Generate deterministic test data', 'test-data', 'Equal seed, schema and fixed reference date yield equal fixtures. No operation contacts a live source as fallback.'],
       ['Exercise isolated operations', 'test-data', 'Run and cancel a simulation, retain focus and distinguish status announcements from result payloads.'],
@@ -20091,6 +20116,12 @@ function companionExampleEntities(d, surfaces) {
   const source = { id: dsNext(sources, 'source'), slug: 'authoring-vault', name: 'Companion authoring vault', kind: 'vault', status: 'active',
     description: 'Proposed native adapter over project authoring notes. The HTML only declares this port.', locator: 'vault://active', auth: 'none', credentialRef: '', operations: [] };
   sources.sources.push(source); sources.positions[source.id] = { x: 900, y: 80 };
+  const collectionEntity=entities['test-recipe'];
+  const collection={id:dsNext(sources,'source'),slug:'test-recipes',name:'Test recipe collection',kind:'collection',status:'active',
+    description:'Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.',locator:'vault://active',auth:'none',credentialRef:'',
+    collectionPath:collectionEntity.folder,entity:collectionEntity.id,operations:[]};
+  collection.operations=dsCollectionCrud(collection,d).map(op=>({...op,id:dsNext(sources,'operation')}));
+  sources.sources.push(collection); sources.positions[collection.id] = { x: 900, y: 430 };
   sources.testing = { ...tdDefaults(), count: 5 };
   for (const [key, entity] of [['requirements', 'requirement'], ['sitemap', 'screen'], ['components', 'component']]) {
     const op = { id: dsNext(sources, 'operation'), slug: 'list-' + key, name: 'List ' + key, direction: 'read', method: 'adapter',
@@ -20652,19 +20683,22 @@ function dsCommit(change){
  try{
   change(candidate.dataSources,candidate);
   const errors=dataSourceIssues(candidate,false).filter(i=>i.level==='error');if(errors.length)throw Error(errors[0].message);
-  if(JSON.stringify(candidate.dataSources)===JSON.stringify(m))return true;
-  const changed=JSON.stringify(dsGeneration(d))!==JSON.stringify(dsGeneration(candidate));recordDesign();d.dataSources=candidate.dataSources;
+  const semanticChanged=JSON.stringify(candidate.semantic)!==JSON.stringify(d.semantic);if(JSON.stringify(candidate.dataSources)===JSON.stringify(m)&&!semanticChanged)return true;
+  const changed=semanticChanged||JSON.stringify(dsGeneration(d))!==JSON.stringify(dsGeneration(candidate));recordDesign();d.dataSources=candidate.dataSources;if(semanticChanged)d.semantic=candidate.semantic;
   if(changed)designChanged();else save();return true;
  }catch(error){return dsFail(error.message);}
 }
 function dsFreshSource(kind='api'){
- const names={api:'External API',vault:'Active Obsidian vault',database:'Database'},base=semanticName(names[kind]);let slug=base,n=2;
+ const names={api:'External API',vault:'Active Obsidian vault',collection:'Collection',database:'Database'},base=semanticName(names[kind]);let slug=base,n=2;
  while(dataSources().sources.some(s=>s.slug===slug))slug=base+'-'+n++;
- return {id:null,name:n===2?names[kind]:names[kind]+' '+(n-1),slug,kind,status:'draft',description:'',locator:kind==='vault'?'vault://active':'',auth:'none',credentialRef:'',operations:[]};
+ const entity=kind==='collection'?design().semantic?.entities[0]:null;
+ return {id:null,name:n===2?names[kind]:names[kind]+' '+(n-1),slug,kind,status:'draft',description:'',locator:dsVaultKind(kind)?'vault://active':'',auth:'none',credentialRef:'',operations:[],...(kind==='collection'?{collectionPath:entity?.folder||'',entity:entity?.id||''}:{})};
 }
 function dsEditSource(id){const source=dataSources().sources.find(s=>s.id===id);if(id&&!source)return dsFail('This source no longer exists. Select a current source.');dsOpen('source',source||dsFreshSource());}
+function dsCollectionOperations(source,m,d,previous=[]){return dsCollectionCrud(source,d).map(def=>({...def,id:previous.find(o=>o.slug===def.slug)?.id||dsNext(m,'operation')}));}
 function dsEditOperation(value){
  const [sourceId,id]=value.split(':'),source=dataSources().sources.find(s=>s.id===sourceId);if(!source)return notify('Select an existing data source first.');
+ if(source.kind==='collection')return notify('Collection CRUD operations are managed from its path and entity. Edit the collection instead.');
  if(id&&!source.operations.some(o=>o.id===id))return dsFail('This operation no longer exists. Select a current operation.');
  const op=source.operations.find(o=>o.id===id)||{id:null,name:'Read records',slug:'read-records',direction:'read',method:source.kind==='api'?'GET':'adapter',resource:'',description:'',input:dsNewShape('none'),output:dsNewShape()};
  dsOpen('operation',{...op,sourceId,inputSchemaText:op.input.schema?JSON.stringify(op.input.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}',outputSchemaText:op.output.schema?JSON.stringify(op.output.schema,null,2):'{\n  "type": "object",\n  "properties": {}\n}'});
@@ -20699,10 +20733,12 @@ function dsSave(){
    const old=m.sources.find(s=>s.id===f.id);if(f.id&&!old)throw Error('The source no longer exists.');
    if(old&&old.slug!==f.slug.trim())throw Error('Source code names are stable.');
    if(old?.operations.length&&old.kind!==f.kind)throw Error('Keep the source kind while it has operations.');
-   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:f.kind==='vault'?'vault://active':f.locator.trim(),auth:f.kind==='vault'?'none':f.auth,credentialRef:f.kind==='vault'||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[]};
+   const collection=f.kind==='collection';
+   const s={id:f.id||dsNext(m,'source'),slug:f.slug.trim(),name:f.name.trim(),kind:f.kind,status:f.status,description:f.description.trim(),locator:dsVaultKind(f.kind)?'vault://active':f.locator.trim(),auth:dsVaultKind(f.kind)?'none':f.auth,credentialRef:dsVaultKind(f.kind)||f.auth==='none'?'':f.credentialRef.trim(),operations:old?.operations||[],...(collection?{collectionPath:f.collectionPath.trim(),entity:f.entity}:{})};
    if(!dsLocatorValid(s))throw Error(s.kind==='api'?'Use an HTTPS base URL without credentials, query parameters or fragments.':'Use a logical connection name, not a connection string or password.');
    if(!dsSlug(s.slug)||!s.name)throw Error('Enter a name and a portable, unique code name.');
    if(m.sources.some(x=>x.id!==s.id&&x.slug===s.slug))throw Error('That source code name already exists.');
+   if(collection){const entity=d.semantic?.entities.find(e=>e.id===s.entity);if(!entity)throw Error('Choose an existing entity for this collection.');if(!dsCollectionPathValid(s.collectionPath))throw Error('Use a non-hidden vault-relative collection path, for example Records/Tasks.');if(entity.folder&&entity.folder!==s.collectionPath)throw Error('This entity already uses '+entity.folder+'. Use that path or change the entity storage contract first.');if(!entity.folder)entity.folder=s.collectionPath;s.operations=dsCollectionOperations(s,m,d,old?.operations||[]);}
    if(old)m.sources[m.sources.indexOf(old)]=s;else m.sources.push(s);selected=s.id;
   }else if(f.formKind==='operation'){
    if(f.implementationText!==undefined)f.implementation=f.implementationText.trim()?JSON.parse(f.implementationText):undefined;
@@ -20754,7 +20790,7 @@ function handleDataSourceAction(action,value=''){
   case 'ds-flow':if(state.view==='sitemap'){selectSitemapItem('data-flow',value);paintMapSelection();}dsEditFlow(value);break;
   case 'ds-flow-reveal':if(!document.getElementById('modal').open||!askDiscardForm()){closeModal();dsRevealFlow(value);}break;
   case 'ds-remove-source':{if(requestInlineRemoval('remove-source',value))break;const s=dataSources().sources.find(s=>s.id===value);if(s)dsOpen('remove-source',s);break;}
-  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');if(requestInlineRemoval('remove-operation',id))break;const op=dataSources().sources.find(s=>s.id===sourceId)?.operations.find(o=>o.id===id);if(op)dsOpen('remove-operation',{id,sourceId});else dsFail('This operation no longer exists.');break;}
+  case 'ds-remove-operation':{const [sourceId,id]=value.split(':');if(dataSources().sources.find(s=>s.id===sourceId)?.kind==='collection'){notify('Collection CRUD operations are managed. Remove or edit the collection instead.');break;}if(requestInlineRemoval('remove-operation',id))break;const op=dataSources().sources.find(s=>s.id===sourceId)?.operations.find(o=>o.id===id);if(op)dsOpen('remove-operation',{id,sourceId});else dsFail('This operation no longer exists.');break;}
   case 'ds-remove-flow':if(!requestInlineRemoval('remove-flow',value)){const f=dataSources().flows.find(f=>f.id===value);if(f)dsOpen('remove-flow',f);else dsFail('This data flow no longer exists.');}break;
   case 'ds-place':if(dsIsNode(value)&&dsCommit((m,d)=>dsPosition(value,m,d))){dsUi.show=true;selectSitemapItem('source',value);referenceUi.panel='inspector';designUi.mode='map';setView('sitemap');Vue.nextTick(()=>fitMap(true));}break;
   case 'ds-position':{const p=dataSources().positions[value];if(p)dsOpen('position',{id:value,x:String(p.x),y:String(p.y)});break;}
@@ -20782,9 +20818,10 @@ function editDataSourceField(el){
   return true;
  }
  if(key==='ds-implementation'){try{const value=el.value.trim();f.implementation=value?JSON.parse(value):undefined;}catch{dsUi.error='Native adapter metadata must be valid JSON.';} f.implementationText=el.value;return true;}
- const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
+ const name=key.slice(3),previous=f.name,oldOperation=dataSources().sources.find(s=>s.id===f.source)?.operations.find(o=>o.id===f.operation),autoLabel=!f.label||f.label===oldOperation?.name;if(['name','slug','kind','status','description','locator','auth','credentialRef','collectionPath','entity','direction','method','resource','source','operation','card','label','trigger','notes','x','y'].includes(name))f[name]=el.value;
  if(name==='name'&&!f.id&&f.slug===semanticName(previous)){f.slug=semanticName(f.name);const control=document.getElementById('ds-slug');if(control)control.value=f.slug;}
- if(name==='kind'){f.locator=f.kind==='vault'?'vault://active':'';f.auth='none';f.credentialRef='';redrawModal();}
+ if(name==='kind'){f.locator=dsVaultKind(f.kind)?'vault://active':'';f.auth='none';f.credentialRef='';if(f.kind==='collection'){const e=design().semantic?.entities[0];f.entity=e?.id||'';f.collectionPath=e?.folder||'';}else{delete f.entity;delete f.collectionPath;}redrawModal();}
+ if(name==='entity'&&f.kind==='collection'){const e=design().semantic?.entities.find(x=>x.id===f.entity);if(e?.folder)f.collectionPath=e.folder;redrawModal();}
  if(name==='source'){const o=dataSources().sources.find(s=>s.id===f.source)?.operations[0];f.operation=o?.id||'';f.direction=o?.direction||'read';if(autoLabel)f.label=o?.name||'';redrawModal();}
  if(name==='operation'){const source=dataSources().sources.find(s=>s.id===f.source),o=source?.operations.find(o=>o.id===f.operation);if(o){if(autoLabel)f.label=o.name;f.direction=o.direction==='both'?f.direction:o.direction;}redrawModal();}
  if(name==='card')redrawModal();
@@ -20814,7 +20851,7 @@ function dsInput(label, key, value, hint = '', area = false, extra = '') {
 function dsSelect(label, key, values, current, extra = '') {
   return uiSelect(label, 'ds-' + key, values, current, extra);
 }
-function dsGlyph(kind){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${kind==='vault'?'<path d="m12 2 8 6-3 12-10 2-4-13Z"/><path d="m12 2-2 10 7 8M3 9l7 3-3 10"/>':kind==='database'?'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 8-4 4 4 4m6-8 4 4-4 4m-2-10-2 12"/>'}</svg>`;}
+function dsGlyph(kind){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${kind==='collection'?'<path d="M3 6h7l2 2h9v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M7 12h10M7 16h7"/>':kind==='vault'?'<path d="m12 2 8 6-3 12-10 2-4-13Z"/><path d="m12 2-2 10 7 8M3 9l7 3-3 10"/>':kind==='database'?'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 8-4 4 4 4m6-8 4 4-4 4m-2-10-2 12"/>'}</svg>`;}
 function dsCatalogItems(){
  const list=dataSources().sources.filter(s=>(dsUi.kind==='all'||s.kind===dsUi.kind)&&(s.name+' '+s.slug+' '+s.description).toLowerCase().includes(dsUi.query.trim().toLowerCase()));
  return list.map(s=>`<button class="ds-catalog-row ${dsUi.catalogSelected===s.id?'selected':''}" data-action="ds-select" data-value="${s.id}" aria-pressed="${dsUi.catalogSelected===s.id}"><span class="ds-glyph">${dsGlyph(s.kind)}</span><span><strong>${esc(s.name)}</strong><small>${esc(DS_KINDS[s.kind])} · ${s.operations.length} operations</small><small>${esc(s.status)} · ${dataSources().flows.filter(f=>f.source===s.id).length} usages</small></span></button>`).join('')||'<p class="muted ds-empty-result">No matching sources. Clear the filter or add a source.</p>';
@@ -20823,17 +20860,17 @@ function dataSourcesView(){
  const m=dataSources(),selected=m.sources.find(s=>s.id===dsUi.catalogSelected)||m.sources[0];if(selected)dsUi.catalogSelected=selected.id;
  return `<section class="ds-workspace"><header class="page-heading"><div><h1>Data Sources</h1><p>Define where your plugin reads and writes data. One catalog, reused across the sitemap.</p></div><div class="row wrap">${button('Open sitemap','nav','sitemap','small','layers')}${button('Review generator','design-plan','','small','wand')}${button('Add source','ds-add','api','primary small','plus')}</div></header>
  <div class="ds-boundary">Design declarations only. No connection is tested, no request is sent, and no vault or database is changed.</div>
- ${!m.sources.length?`<div class="ds-empty"><h2>Start with the data your plugin needs.</h2><p>A source contains operations such as “Fetch tasks” or “Save note”. Give each operation an input and output shape, then connect it to a sitemap card.</p><div class="ds-starters">${Object.entries(DS_KINDS).map(([id,label])=>`<button data-action="ds-add" data-value="${id}">${dsGlyph(id)}<strong>${label}</strong><span>${{api:'Declare a service and its request / response contracts.',database:'Describe a runtime adapter, tables and record shapes.',vault:'Read or save notes in the generated plugin’s active vault.'}[id]}</span></button>`).join('')}</div><div class="mt24">${button('Use example sources','ds-example','','ghost small','layers')}<p class="small muted">Adds illustrative API, vault and database contracts. No live connections.</p></div></div>`:
+ ${!m.sources.length?`<div class="ds-empty"><h2>Start with the data your plugin needs.</h2><p>A source contains operations such as “Fetch tasks” or “Save note”. Give each operation an input and output shape, then connect it to a sitemap card.</p><div class="ds-starters">${Object.entries(DS_KINDS).map(([id,label])=>`<button data-action="ds-add" data-value="${id}">${dsGlyph(id)}<strong>${label}</strong><span>${{api:'Declare a service and its request / response contracts.',database:'Describe a runtime adapter, tables and record shapes.',vault:'Read or save notes in the generated plugin’s active vault.',collection:'Use an entity at one vault-relative path as a managed Markdown CRUD collection.'}[id]}</span></button>`).join('')}</div><div class="mt24">${button('Use example sources','ds-example','','ghost small','layers')}<p class="small muted">Adds illustrative API, vault and database contracts. No live connections.</p></div></div>`:
  `<div class="ds-catalog-layout"><aside class="ds-catalog" aria-label="Data-source catalog"><label class="field" for="ds-query">Find a source<input id="ds-query" type="search" data-field="ds-query" value="${esc(dsUi.query)}" placeholder="Name, code or purpose…"></label>${dsSelect('Source type','filter',[['all','All types'],...Object.entries(DS_KINDS)],dsUi.kind)}<div id="ds-results" aria-live="polite">${dsCatalogItems()}</div></aside><section class="ds-detail" aria-label="Selected data source"><p id="ds-filter-context" class="ds-filter-context" role="status">${dsFilterContext()}</p>${selected?dsDetail(selected):''}</section></div>`}</section>`;
 }
 function dsDetail(source){
  const flows=dataSources().flows.filter(f=>f.source===source.id),placed=Object.hasOwn(dataSources().positions,source.id);
  return `<header class="ds-detail-heading"><span class="ds-glyph">${dsGlyph(source.kind)}</span><div><h2>${esc(source.name)}</h2><code>${esc(source.slug)}</code></div>${badge(source.status,source.status==='deprecated'?'warn':'')}</header><p>${esc(source.description||'Describe why the plugin uses this source.')}</p>
- <dl class="ds-facts"><dt>Source type</dt><dd>${esc(DS_KINDS[source.kind])}</dd><dt>${source.kind==='database'?'Connection reference':'Location'}</dt><dd><code>${esc(source.locator||'Configure at runtime')}</code></dd><dt>Authentication</dt><dd>${esc(source.auth)}${source.credentialRef?' · reference '+esc(source.credentialRef):''}</dd></dl>
- ${source.kind==='vault'?'<p class="ds-note">“Active vault” means the vault where the generated plugin runs, not permission to read this authoring vault. Its folder paths remain vault-relative.</p>':''}
+ <dl class="ds-facts"><dt>Source type</dt><dd>${esc(DS_KINDS[source.kind])}</dd><dt>${source.kind==='database'?'Connection reference':source.kind==='collection'?'Collection path':'Location'}</dt><dd><code>${esc(source.kind==='collection'?source.collectionPath:source.locator||'Configure at runtime')}</code></dd>${source.kind==='collection'?'<dt>Entity</dt><dd>'+esc(design().semantic?.entities.find(e=>e.id===source.entity)?.name||'Missing entity')+'</dd>':''}<dt>Authentication</dt><dd>${esc(source.auth)}${source.credentialRef?' · reference '+esc(source.credentialRef):''}</dd></dl>
+ ${dsVaultKind(source.kind)?'<p class="ds-note">“Active vault” means the vault where the generated plugin runs, not permission to read this authoring vault. Its folder paths remain vault-relative.</p>':''}${source.kind==='collection'?'<p class="ds-note"><strong>Collection:</strong> List can feed component Source bindings; Create, Update and Delete can be called from component interactions. The generated shell maps these operations to Markdown notes with frontmatter through the selected entity contract.</p>'+button('Bind in page / component editor','nav','components','small','layout'):''}
  <div class="row wrap">${button('Edit source','ds-edit',source.id,'small','settings')}${button('Test data','td-open',source.id,'small','play')}${button(placed?'Show on sitemap':'Place on sitemap','ds-place',source.id,'small','layers')}${button('Remove source','ds-remove-source',source.id,'ghost small','trash')}</div>
- <div class="ds-section-heading"><h3>Operations & data shapes</h3>${button('Add operation','ds-operation',source.id,'small','plus',source.operations.length>=DS_LIMITS.operations?'disabled':'')}</div><p class="small muted">Input goes <strong>into the source</strong>. Output comes <strong>out of the source</strong>. Editing a contract affects every listed usage and requires a new generator review.</p>
- ${source.operations.length?source.operations.map(o=>`<article class="ds-operation"><div class="row between"><div><h4>${esc(o.name)}</h4><code>${esc(o.slug)}</code></div>${button('Edit operation','ds-operation',source.id+':'+o.id,'small')}</div><p class="small">${esc(DS_DIRECTIONS[o.direction])} · <code>${esc(o.method==='adapter'?o.resource||'Runtime adapter':o.method+' '+(o.resource||'/'))}</code></p><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${esc(dsShapeLabel(o.input))}</strong></div><div><span>Output · from source</span><strong>${esc(dsShapeLabel(o.output))}</strong></div></div><div class="row between"><small>${flows.filter(f=>f.operation===o.id).length} sitemap usages</small>${button('Remove operation','ds-remove-operation',source.id+':'+o.id,'ghost small')}</div></article>`).join(''):'<div class="ds-help-empty">Add the first operation. A source alone does not define what data can be read or written.</div>'}
+ <div class="ds-section-heading"><h3>Operations & data shapes</h3>${source.kind==='collection'?'<span class="small muted">Managed CRUD · path + entity</span>':button('Add operation','ds-operation',source.id,'small','plus',source.operations.length>=DS_LIMITS.operations?'disabled':'')}</div><p class="small muted">Input goes <strong>into the source</strong>. Output comes <strong>out of the source</strong>. Editing a contract affects every listed usage and requires a new generator review.</p>
+ ${source.operations.length?source.operations.map(o=>`<article class="ds-operation"><div class="row between"><div><h4>${esc(o.name)}</h4><code>${esc(o.slug)}</code></div>${source.kind==='collection'?badge(o.slug,o.direction==='read'?'':'warn'):button('Edit operation','ds-operation',source.id+':'+o.id,'small')}</div><p class="small">${esc(DS_DIRECTIONS[o.direction])} · <code>${esc(o.method==='adapter'?o.resource||'Runtime adapter':o.method+' '+(o.resource||'/'))}</code></p><div class="ds-shape-pair"><div><span>Input · into source</span><strong>${esc(dsShapeLabel(o.input))}</strong></div><div><span>Output · from source</span><strong>${esc(dsShapeLabel(o.output))}</strong></div></div><div class="row between"><small>${flows.filter(f=>f.operation===o.id).length} sitemap usages</small>${source.kind==='collection'?'<small>Managed by collection</small>':button('Remove operation','ds-remove-operation',source.id+':'+o.id,'ghost small')}</div></article>`).join(''):'<div class="ds-help-empty">Add the first operation. A source alone does not define what data can be read or written.</div>'}
  <div class="ds-section-heading"><h3>Sitemap data flows</h3>${button('Connect to card','ds-connect',source.id,'primary small','link',!source.operations.length||source.status==='deprecated'?'disabled':'')}</div>${dsFlowList(flows)}<div class="row wrap mt16">${button('Validate declarations','ds-validate','','small','check')}${button('Preview contracts','ds-preview','','ghost small','code')}</div>`;
 }
 function dsFlowSentence(f,d=design()){
@@ -20857,11 +20894,11 @@ function dataSourceFormDialog(){
  const m=dataSources();let title='',body='',danger='';
  if(f.formKind==='source'){
   title=f.id?'Edit data source':'Add data source';
-  body=`<p>Reusable design metadata, not a live connection. Do not enter secrets in names, descriptions or locations.</p><div class="grid2">${dsInput('Source name','name',f.name)}${dsInput('Stable code name','slug',f.slug,'Used for generator filenames.',false,f.id?'readonly':'')}</div><div class="grid2">${dsSelect('Source type','kind',Object.entries(DS_KINDS),f.kind,f.operations.length?'disabled':'')}${dsSelect('Design status','status',[['draft','Draft'],['active','Active in design'],['deprecated','Deprecated · no new usages']],f.status)}</div>${dsInput('Purpose','description',f.description,'',true)}${f.kind==='vault'?'<p class="ds-note">The generated plugin’s active Obsidian vault. Operations declare relative note folders. The authoring vault and test vault are not selected here.</p>':dsInput(f.kind==='api'?'HTTPS base URL (optional)':'Logical connection reference (optional)','locator',f.locator,f.kind==='api'?'Example: https://api.example.test · No user/password, query parameters or tokens.':'Example: reportingDatabase · Not a database connection string.')}<div class="grid2">${f.kind!=='vault'?dsSelect('Authentication design','auth',[['none','None'],['api-key','API key via runtime adapter'],['oauth','OAuth via runtime adapter'],['runtime','Other runtime credential']],f.auth):''}${f.kind!=='vault'&&f.auth!=='none'?dsInput('Credential reference name','credentialRef',f.credentialRef,'An identifier only, e.g. TASKS_API_KEY. Never the credential value.'):''}</div><p class="small muted">Changing the source kind requires removing its operations first. “Active” does not mean reachable or authenticated.</p>`;
+  body=`<p>Reusable design metadata, not a live connection. Do not enter secrets in names, descriptions or locations.</p><div class="grid2">${dsInput('Source name','name',f.name)}${dsInput('Stable code name','slug',f.slug,'Used for generator filenames.',false,f.id?'readonly':'')}</div><div class="grid2">${dsSelect('Source type','kind',Object.entries(DS_KINDS),f.kind,f.operations.length?'disabled':'')}${dsSelect('Design status','status',[['draft','Draft'],['active','Active in design'],['deprecated','Deprecated · no new usages']],f.status)}</div>${dsInput('Purpose','description',f.description,'',true)}${f.kind==='collection'?'<div class="grid2">'+dsInput('Vault-relative collection path','collectionPath',f.collectionPath,'Example: Records/Tasks. This becomes the entity note folder for a new storage contract.')+dsSelect('Collection entity','entity',[['','Choose an entity'],...(design().semantic?.entities||[]).map(e=>[e.id,e.name+(e.folder?' · '+e.folder:'')])],f.entity||'')+'</div><p class="ds-note">A Collection is a managed active-vault subtype. Saving provisions List, Create, Update and Delete contracts. If the entity has no note folder yet, this path becomes its folder; an existing different folder is not moved silently.</p>':f.kind==='vault'?'<p class="ds-note">The generated plugin’s active Obsidian vault. Operations declare relative note folders. The authoring vault and test vault are not selected here.</p>':dsInput(f.kind==='api'?'HTTPS base URL (optional)':'Logical connection reference (optional)','locator',f.locator,f.kind==='api'?'Example: https://api.example.test · No user/password, query parameters or tokens.':'Example: reportingDatabase · Not a database connection string.')}<div class="grid2">${!dsVaultKind(f.kind)?dsSelect('Authentication design','auth',[['none','None'],['api-key','API key via runtime adapter'],['oauth','OAuth via runtime adapter'],['runtime','Other runtime credential']],f.auth):''}${!dsVaultKind(f.kind)&&f.auth!=='none'?dsInput('Credential reference name','credentialRef',f.credentialRef,'An identifier only, e.g. TASKS_API_KEY. Never the credential value.'):''}</div><p class="small muted">Changing the source kind requires removing its operations first. “Active” does not mean reachable or authenticated.</p>`;
  }else if(f.formKind==='operation'){
   const s=m.sources.find(s=>s.id===f.sourceId);if(!s)return dialogBody('Source removed','Close and reopen the catalog.');
   title=f.id?'Edit source operation':'Add source operation';
-  body=`<p><strong>${esc(s.name)}</strong> · Define a use case such as Fetch records, Save note or Push update. Request and response payloads do not automatically mean bidirectional synchronization.</p><div class="grid2">${dsInput('Operation name','name',f.name)}${dsInput('Stable operation code','slug',f.slug,'',false,f.id?'readonly':'')}</div>${dsSelect('Supported business data direction','direction',Object.entries(DS_DIRECTIONS),f.direction,s.kind==='api'&&['GET','HEAD'].includes(f.method)?'disabled':'')}<div class="grid2">${s.kind==='api'?dsSelect('HTTP method','method',['GET','POST','PUT','PATCH','DELETE','HEAD'].map(x=>[x,x]),f.method):''}${dsInput(s.kind==='api'?'Resource path':s.kind==='vault'?'Vault-relative folder':'Logical table / collection','resource',f.resource,s.kind==='api'?'Example: /tasks/{id}. Put query/body data in the input shape.':s.kind==='vault'?'Example: Records/Task. No protected or hidden folders.':'Example: public.tasks. SQL and drivers remain adapter work.')}</div>${dsInput('Operation notes','description',f.description,'',true)}${dsShapeEditor('input',f.input,f)}${dsShapeEditor('output',f.output,f)}${s.kind==='vault'?'<details><summary>Native note adapter (explicit contract)</summary>'+dsInput('Implementation declaration','implementation',f.implementationText??(f.implementation?JSON.stringify(f.implementation,null,2):''),'Optional: {"kind":"note","entity":"er-entity-1","operation":"create"}. Use the documented values/snapshot input and output schemas. Blank retains a custom adapter.',true)+'</details>':''}<p class="ds-note">${m.flows.filter(x=>x.operation===f.id).length} current usages. Saving updates their contract immediately and invalidates the generator review; it does not migrate stored records.</p>`;
+  body=`<p><strong>${esc(s.name)}</strong> · Define a use case such as Fetch records, Save note or Push update. Request and response payloads do not automatically mean bidirectional synchronization.</p><div class="grid2">${dsInput('Operation name','name',f.name)}${dsInput('Stable operation code','slug',f.slug,'',false,f.id?'readonly':'')}</div>${dsSelect('Supported business data direction','direction',Object.entries(DS_DIRECTIONS),f.direction,s.kind==='api'&&['GET','HEAD'].includes(f.method)?'disabled':'')}<div class="grid2">${s.kind==='api'?dsSelect('HTTP method','method',['GET','POST','PUT','PATCH','DELETE','HEAD'].map(x=>[x,x]),f.method):''}${dsInput(s.kind==='api'?'Resource path':s.kind==='vault'?'Vault-relative folder':'Logical table / collection','resource',f.resource,s.kind==='api'?'Example: /tasks/{id}. Put query/body data in the input shape.':s.kind==='vault'?'Example: Records/Task. No protected or hidden folders.':'Example: public.tasks. SQL and drivers remain adapter work.')}</div>${dsInput('Operation notes','description',f.description,'',true)}${dsShapeEditor('input',f.input,f)}${dsShapeEditor('output',f.output,f)}${dsVaultKind(s.kind)?'<details><summary>Native note adapter (explicit contract)</summary>'+dsInput('Implementation declaration','implementation',f.implementationText??(f.implementation?JSON.stringify(f.implementation,null,2):''),'Optional: {"kind":"note","entity":"er-entity-1","operation":"create"}. Use the documented values/snapshot input and output schemas. Blank retains a custom adapter.',true)+'</details>':''}<p class="ds-note">${m.flows.filter(x=>x.operation===f.id).length} current usages. Saving updates their contract immediately and invalidates the generator review; it does not migrate stored records.</p>`;
  }else if(f.formKind==='flow'){
   const sources=m.sources.filter(s=>s.id===f.source||s.status!=='deprecated'&&s.operations.length),source=sources.find(s=>s.id===f.source),op=source?.operations.find(o=>o.id===f.operation);
   title=f.id?'Edit data flow':'Connect data source';
@@ -21091,10 +21128,11 @@ function dataSourceFiles(d){
   }).join('\n');
   files.push({path:'src/application/data-sources/'+s.slug+'-port.ts',content:header+'export interface '+semanticPascal(s.slug)+'Port {\n'+operations+'\n}\n',owner:s.id,role:'Declared application data port · adapter still required'});
   files.push({path:'docs/data-sources/'+s.slug+'.json',content:JSON.stringify({schema:1,executable:false,source:s,shapes:spec.resolvedShapes.filter(o=>o.source===s.id)},null,2)+'\n',owner:s.id,role:'Source operation and payload contracts'});
+  if(s.kind==='collection')files.push({path:'docs/collections/'+s.slug+'.json',content:JSON.stringify({schema:1,kind:'markdown-collection',path:s.collectionPath,entity:s.entity,operations:s.operations.map(o=>({id:o.id,slug:o.slug,direction:o.direction}))},null,2)+'\n',owner:s.id,role:'Managed active-vault Markdown collection contract'});
  }
  files.push({path:'src/bootstrap/data-flow-outlines.ts',content:header+'export const dataFlowOutlines = '+JSON.stringify(spec.flows,null,2)+' as const;\n',owner:'data-sources',role:'Explicit source-to-surface data-flow bindings'});
  const rows=spec.flows.map(f=>'| '+[f.label,dsFlowSentence(f,d),f.direction,f.trigger,f.notes||'Define mapping and failure behavior.'].map(x=>x.replace(/[\r\n|]/g,' ')).join(' | ')+' |').join('\n');
- files.push({path:'docs/DATA-FLOW-HANDOFF.md',content:'# Data-flow implementation handoff\n\nDesign only. No connection test, query, request, synchronization, database operation or vault write has run.\n\n| Intent | Business-data direction | Mode | Trigger | Mapping / behavior |\n| --- | --- | --- | --- | --- |\n'+rows+'\n\n## Required implementation\n\nBind application ports to explicitly approved infrastructure adapters. Resolve credential reference names in runtime configuration, never design files. Validate untrusted request/response shapes; format annotations are not validators. Implement authentication, permissions, cancellation, bounded retries, timeouts, error/empty/loading states, privacy and redacted logging. Database drivers and server access need platform/security review. Use the generated plugin’s active vault and preserve unrelated note properties/body content. Writes need reviewed conflict and failure policies. Bidirectional arrows declare two directions, not synchronization or permission to send vault data externally. No mapping, request or transformation is inferred from the diagram.\n',owner:'data-sources',role:'Unimplemented data-access obligations'});
+ files.push({path:'docs/DATA-FLOW-HANDOFF.md',content:'# Data-flow implementation handoff\n\nDesign only. No connection test, query, request, synchronization, database operation or vault write has run.\n\n| Intent | Business-data direction | Mode | Trigger | Mapping / behavior |\n| --- | --- | --- | --- | --- |\n'+rows+'\n\n## Required implementation\n\nBind application ports to explicitly approved infrastructure adapters. Resolve credential reference names in runtime configuration, never design files. Validate untrusted request/response shapes; format annotations are not validators. Implement authentication, permissions, cancellation, bounded retries, timeouts, error/empty/loading states, privacy and redacted logging. Database drivers and server access need platform/security review. Use the generated plugin’s active vault and preserve unrelated note properties/body content. Collection declarations are active-vault Markdown repositories keyed by one entity and path; the full shell compiler supplies revision-aware List/Create/Update/Delete note adapters, while this browser preview never executes them. Writes need reviewed conflict and failure policies. Bidirectional arrows declare two directions, not synchronization or permission to send vault data externally. No mapping, request or transformation is inferred from the diagram.\n',owner:'data-sources',role:'Unimplemented data-access obligations'});
  return files;
 }
 

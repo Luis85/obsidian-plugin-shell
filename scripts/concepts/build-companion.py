@@ -127,8 +127,9 @@ def build(output: Path, check: bool = False):
   path='scripts/companion/visual/'+name
   if path not in config['entry']:raise ValueError('Visual contract missing from analyzer inventory: '+path)
   visual_shared+='\n'+'\n'.join(line for line in (ROOT.parents[2]/path).read_text(encoding='utf-8').splitlines() if not line.startswith('import '))
- prd_limits=(ROOT.parents[2]/'scripts/companion/prd-limits.mjs').read_text(encoding='utf-8')
- shared=(prd_limits+'\n'+ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+contract.read_text(encoding='utf-8').replace("import { PRD_LIMITS } from './prd-limits.mjs';\n",'').replace("import { validateNativeIntegrations } from './native-contract.mjs';\n",'').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'').replace("import { validateVisualDesigns } from './visual/visual-validate.mjs';\n",'').replace("import { migrateDetailDesigns } from './visual/visual-migrate.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
+ prd_limits=ROOT.parents[2]/'scripts/companion/prd-limits.mjs'
+ if 'scripts/companion/prd-limits.mjs' not in config['entry']:raise ValueError('Shared PRD limits missing from inventory')
+ shared=(ds_shared+'\n'+composition_contract.read_text(encoding='utf-8')+'\n'+re.sub(r'^import .*composition-contract.mjs.*\n', '', detail_contract.read_text(encoding='utf-8'), flags=re.M)+visual_shared+'\n'+storymap_contract.read_text(encoding='utf-8')+'\n'+prd_limits.read_text(encoding='utf-8').replace('export const ','const ')+'\n'+contract.read_text(encoding='utf-8').replace("import { PRD_LIMITS } from './prd-limits.mjs';\n",'').replace("import { validateNativeIntegrations } from './native-contract.mjs';\n",'').replace("import { validateDesignSystem } from './design-system-contract.mjs';\n",'').replace("import { validateDetailDesigns } from './detail-contract.mjs';\n",'').replace("import { validateStorymaps } from './storymap-contract.mjs';\n",'').replace("import { validateVisualDesigns } from './visual/visual-validate.mjs';\n",'').replace("import { migrateDetailDesigns } from './visual/visual-migrate.mjs';\n",'')).replace('export const ', 'const ').replace('export function ', 'function ')
  starter_contract=ROOT.parents[2]/'scripts/companion/starter-contract.mjs'
  if 'scripts/companion/starter-contract.mjs' not in config['entry']:raise ValueError('Starter contract missing from inventory')
  shared+='\n'+re.sub(r'^import .*\n','',starter_contract.read_text(encoding='utf-8'),flags=re.M).replace('export const ','const ').replace('export function ','function ')
@@ -157,8 +158,13 @@ def build(output: Path, check: bool = False):
  s=s.replace('</head>', '<!--\n'+notices+'\n-->\n</head>',1)
  encoded=s.encode('utf-8')
  if check:
-  if not output.exists() or output.read_bytes()!=encoded:
-   raise ValueError('Generated concept differs; rebuild before qualification')
+  actual=output.read_bytes() if output.exists() else b''
+  if actual!=encoded:
+   limit=min(len(actual),len(encoded));offset=next((i for i in range(limit) if actual[i]!=encoded[i]),limit)
+   expected_hash=hashlib.sha256(encoded).hexdigest();actual_hash=hashlib.sha256(actual).hexdigest()
+   expected_context=encoded[max(0,offset-80):offset+160].decode('utf-8','backslashreplace').replace('\\n','\\\\n')
+   actual_context=actual[max(0,offset-80):offset+160].decode('utf-8','backslashreplace').replace('\\n','\\\\n')
+   raise ValueError(f'Generated concept differs; rebuild before qualification (expected {len(encoded)} bytes {expected_hash}, actual {len(actual)} bytes {actual_hash}, first byte {offset}; expected={expected_context!r}; actual={actual_context!r})')
  else:
   output.parent.mkdir(parents=True,exist_ok=True)
   output.write_bytes(encoded)

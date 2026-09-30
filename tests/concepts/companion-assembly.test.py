@@ -41,6 +41,19 @@ class AssemblyContract(unittest.TestCase):
         self.assertEqual(self.output.read_bytes(), (ROOT / 'docs/concepts/companion/index.html').read_bytes())
         self.build(check=True)
 
+    def test_shared_prd_limits_are_inlined_and_inventoried(self):
+        self.build()
+        html = self.output.read_text(encoding='utf-8')
+        self.assertEqual(html.count('const PRD_LIMITS = Object.freeze('), 1)
+        self.assertNotIn("import { PRD_LIMITS } from './prd-limits.mjs'", html)
+        self.assertLess(html.index('const PRD_LIMITS'), html.index('const COMPANION_FORMAT'))
+        config = self.root / '.fallowrc.json'
+        value = json.loads(config.read_text())
+        value['entry'].remove('scripts/companion/prd-limits.mjs')
+        config.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError, 'Shared PRD limits missing from inventory'):
+            self.build()
+
     def test_starter_bytes_and_inventory_are_verified(self):
         source = self.concept / 'starters/blank.companion.json'
         original = source.read_bytes()

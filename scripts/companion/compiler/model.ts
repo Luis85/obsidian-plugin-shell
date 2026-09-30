@@ -95,9 +95,14 @@ export function projectModel(input: unknown): Model {
   }
   const links = rows(design.links,120).map(l => ({id:text(l.id,120),from:text(l.from,120),to:text(l.to,120),kind:text(l.kind,80),label:text(l.label ?? '',500)})); unique(links,l=>l.id); requireValue(links.every(l => screens.some(s => s.id === l.from) && screens.some(s => s.id === l.to)), 'Dangling interaction endpoint.');
   const ds = row(design.dataSources ?? {}); const sources = rows(ds.sources ?? [],24).map(s => {
-    requireValue(['vault','api','database'].includes(String(s.kind)), 'Unsupported source adapter kind.');
+    requireValue(['vault','collection','api','database'].includes(String(s.kind)), 'Unsupported source adapter kind.');
     const operations = rows(s.operations,12).map(o => ({ id:text(o.id,120), slug:slug(o.slug), name:text(o.name,80), direction:text(o.direction,10), input:shape(o.input,entityModels), output:shape(o.output,entityModels), contract:o }));
     requireValue(operations.every(o => ['read','write','both'].includes(o.direction)), 'Unsupported operation direction.'); unique(operations,o => o.slug); unique(operations,o=>symbol(o.slug)); unique(operations,o => o.id);
+    if(s.kind==='collection'){
+      const collectionPath=text(s.collectionPath,120),entity=entityModels.find(e=>e.id===s.entity);
+      requireValue(entity&&collectionPath!==''&&companionRelativeFolder(collectionPath)&&entity.folder===collectionPath,'Collection needs one safe vault-relative path matching its declared entity folder.');
+      requireValue(operations.length===4&&['list','create','update','delete'].every(kind=>operations.some(o=>{const i=o.contract.implementation as Row|undefined;return o.slug===kind&&i?.kind==='note'&&i.entity===entity.id&&i.operation===kind;})),'Collection requires managed List/Create/Update/Delete note operations for its entity.');
+    }
     return { id:text(s.id,120), slug:slug(s.slug), name:text(s.name,80), kind:String(s.kind), operations, contract:s };
   });
   unique(sources,s => s.slug); unique(sources,s=>symbol(s.slug)); unique(sources,s => s.id); const flows = rows(ds.flows ?? [],120).map(f=>({...f,source:text(f.source,120),operation:text(f.operation,120),id:text(f.id,120),card:text(f.card,120),label:text(f.label ?? '',500),trigger:text(f.trigger,80),direction:text(f.direction,10)})); unique(flows,f=>f.id);

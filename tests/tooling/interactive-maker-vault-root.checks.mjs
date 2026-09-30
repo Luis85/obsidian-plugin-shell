@@ -28,9 +28,20 @@ test('canonicalization does not hide a symbolic-link vault root', async () => sc
   finally { await rm(alias); }
 }));
 const windows = process.platform === 'win32' ? test : test.skip;
-windows('Windows existing vault accepts case and 8.3 path spellings returned by the host', async () => scratch(async root => {
-  assert.equal((await setupPrerequisites(root.toUpperCase())).git, 'existing');
-  const short = spawnSync('cmd.exe', ['/d', '/c', `for %I in ("${root}") do @echo %~sI`], { encoding: 'utf8' });
+windows('Windows existing vault accepts case and 8.3 path spellings returned by the host', async t => scratch(async root => {
+  const canonical = await realpath(root);
+  assert.equal((await setupPrerequisites(canonical.toUpperCase())).git, 'existing');
+  // Pass the path through an environment variable: cmd.exe must not double-quote
+  // the argument string that Node constructs when spaces occur in runner paths.
+  const short = spawnSync('cmd.exe', ['/d', '/v:off', '/s', '/c', 'for %I in ("%MAKER_VAULT_DIRECTORY%") do @echo "%~sI"'], {
+    encoding: 'utf8', windowsHide: true, windowsVerbatimArguments: true,
+    env: { ...process.env, MAKER_VAULT_DIRECTORY: canonical }, timeout: 10000,
+  });
   assert.equal(short.status, 0, short.stderr);
-  assert.equal((await setupPrerequisites(short.stdout.trim())).git, 'existing');
+  const alias = short.stdout.trim().replace(/^"|"$/g, '');
+  assert.equal(await realpath(alias), canonical);
+  if (!alias.includes('~') || alias.toLowerCase() === canonical.toLowerCase()) {
+    t.skip('8.3 spelling is unavailable on this volume; case and symlink cases remain covered'); return;
+  }
+  assert.equal((await setupPrerequisites(alias)).git, 'existing');
 }));

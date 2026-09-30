@@ -15,13 +15,13 @@ export function noteEntity(m: Model, sourceId: string, operationId: string): Ent
   const source = m.sources.find(s => s.id === sourceId)!; const op = source.operations.find(o => o.id === operationId)!;
   const declared = op.contract.implementation as { kind?: string; entity?: string; operation?: string } | undefined;
   if (declared) {
-    requireValue(Object.keys(declared).length === 3 && Object.keys(declared).every(key=>['kind','entity','operation'].includes(key)) && source.kind === 'vault' && declared.kind === 'note' && ['list','create','update','delete'].includes(String(declared.operation)), 'Unsupported persistence adapter.');
+    requireValue(Object.keys(declared).length === 3 && Object.keys(declared).every(key=>['kind','entity','operation'].includes(key)) && ['vault','collection'].includes(source.kind) && declared.kind === 'note' && ['list','create','update','delete'].includes(String(declared.operation)), 'Unsupported persistence adapter.');
     const entity = m.entities.find(e => e.id === declared.entity); requireValue(entity && entity.folder !== '' && entity.folder === op.contract.resource, 'Native repository needs an exact declared entity folder.');
     validateNoteWire(entity,op,String(declared.operation));
     return entity;
   }
   const output = op.contract.output as { mode?: string; entity?: string; many?: boolean };
-  if (source.kind === 'vault' && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
+  if (['vault','collection'].includes(source.kind) && op.direction === 'read' && op.input === null && output.mode === 'entity' && output.many) return m.entities.find(e => e.id === output.entity && e.folder === op.contract.resource && e.folder !== '');
   return undefined;
 }
 // The maker's registry layout: one callback object of `    key: register(feature, ...),` lines.

@@ -54,6 +54,14 @@ The editor rejects URL user information, query strings, fragments, unsafe contro
 
 Declare an optional logical connection reference such as `reportingDatabase` and a logical table or collection such as `public.tasks`. The editor does not accept a connection URI or SQL statement. Driver selection, hosting, parameterized queries, access controls, platform compatibility and credentials are explicitly left to infrastructure adapters. A declared database is not proof that it can be accessed from Obsidian or mobile.
 
+### Collection (managed Obsidian-vault subtype)
+
+A **Collection** turns one declared ER entity and one vault-relative path into a managed Markdown record set in the generated plugin's active vault. It is not another filesystem root: its locator remains `vault://active`, authentication is `none`, and the collection path must be a safe, visible path inside that vault.
+
+Saving a Collection provisions four managed operations: **List**, **Create**, **Update**, and **Delete**. Their contracts use revision-bearing note snapshots so generated updates and deletes can reject stale writes. The selected entity defines frontmatter fields and the collection path is also that entity's canonical note folder; an existing different folder is never moved silently.
+
+Collection operations participate in the same source references as every other source. Read operations can feed Page/Component editor **Source** bindings, while create/update/delete operations can be selected by component interaction actions. The browser concept only authors these contracts. The shell/compiler turns the managed declarations into the existing Markdown note repository/runtime and tests; the browser itself never reads or mutates vault files.
+
 ### Obsidian vault
 
 The location is `vault://active`: the generated plugin's active vault at runtime. It is not the authoring vault, an arbitrary filesystem path or a selector for another vault. Operations declare visible vault-relative folders such as `Records/Task`.
