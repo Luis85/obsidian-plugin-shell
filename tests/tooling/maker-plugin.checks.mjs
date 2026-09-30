@@ -24,6 +24,15 @@ test('[MAKER-PLUGIN] make plugin requires the Workbench SDK source checkout', ()
 
 test('[MAKER-PLUGIN] make plugin creates one self-contained registered extension and reruns safely', () => makerFixture(async root => {
   await seedRegistry(root);
+  const shell = spawnSync(process.execPath, [
+    resolve(makerSourceRoot, 'shell.mjs'), 'make', 'plugin', 'metrics',
+    '--root', root, '--dry-run', '--json', '--no-interaction',
+  ], { cwd: makerSourceRoot, encoding: 'utf8', timeout: 30000 });
+  assert.equal(shell.status, 0, shell.stdout + shell.stderr);
+  const shellPreview = JSON.parse(shell.stdout);
+  assert.equal(shellPreview.status, 'planned');
+  assert.ok(shellPreview.data.changes.some(change => change.path === 'plugins/metrics/manifest.json'));
+
   const cli = spawnSync(process.execPath, [
     resolve(makerSourceRoot, 'scripts/makers/cli.mjs'), 'plugin', 'metrics', '--dry-run', '--json',
   ], { cwd: root, encoding: 'utf8', timeout: 20000 });
