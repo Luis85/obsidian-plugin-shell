@@ -1,6 +1,6 @@
 /** Explicit CI qualification of the assembled ZIP. This never publishes or activates a plugin. */
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile, realpath } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, realpath, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -82,15 +82,20 @@ for (const group of ['dependencies', 'devDependencies', 'optionalDependencies'])
 }
 assert.equal((await (await import('node:fs/promises')).readdir(starterConsumer)).includes('node_modules'), false,
   'starter must not install dependencies before explicit npm approval');
-const installed = spawnSync(process.execPath, [npm, 'ci', '--no-audit', '--no-fund'], {
-  cwd: starterConsumer, encoding: 'utf8', timeout: 900000, maxBuffer: 16_000_000,
-});
-checks.push({ name: 'blank-starter-npm-ci', exitCode: installed.status, error: installed.error?.message, scope: 'shipped lockfile clean install' });
-await writeFile(join(evidence, 'blank-starter-npm-ci.log'), (installed.stdout ?? '') + (installed.stderr ?? ''));
-await writeFile(join(evidence, 'checks.json'), JSON.stringify(checks, null, 2));
-assert.ifError(installed.error);
-assert.equal(installed.status, 0, 'shipped blank starter npm ci failed: ' + installed.stdout + installed.stderr);
-assert.deepEqual(await readFile(join(starterConsumer, 'package-lock.json')), starterLockBytes, 'clean install must not rewrite shipped lockfile');
+async function qualifiedNpm(stage, args, scope) {
+  const output = spawnSync(process.execPath, [npm, ...args], {
+    cwd: starterConsumer, encoding: 'utf8', timeout: 900000, maxBuffer: 16_000_000,
+  });
+  checks.push({ name: stage, exitCode: output.status, error: output.error?.message, scope });
+  await writeFile(join(evidence, stage + '.log'), (output.stdout ?? '') + (output.stderr ?? ''));
+  await writeFile(join(evidence, 'checks.json'), JSON.stringify(checks, null, 2));
+  assert.ifError(output.error);
+  assert.equal(output.status, 0, stage + ' failed: ' + output.stdout + output.stderr);
+  assert.deepEqual(await readFile(join(starterConsumer, 'package-lock.json')), starterLockBytes, stage + ' must not rewrite shipped lockfile');
+}
+await qualifiedNpm('blank-starter-npm-install', ['install', '--no-audit', '--no-fund'], 'shipped lockfile ordinary install');
+await rm(join(starterConsumer, 'node_modules'), { recursive: true, force: true });
+await qualifiedNpm('blank-starter-npm-ci', ['ci', '--no-audit', '--no-fund'], 'shipped lockfile clean install');
 targets.push(starterConsumer);
 await writeFile(join(evidence, 'targets.json'), JSON.stringify(targets, null, 2));
 await writeFile(join(evidence, 'summary.json'), JSON.stringify({ status: 'archive-project-journey-qualified', archiveHash, consumers: targets.length,
