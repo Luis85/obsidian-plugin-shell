@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D2 on PR #60. The continuation uses separately pushed
+Status: Stage D implementation through D3 on PR #60. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -100,7 +100,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C25:** Merge repair: the bounded-map primitive now belongs to one Fallow zone (`cli-bounded-map-contract`) instead of two overlapping zones. The file-plan contract depends on that single boundary and the architecture regression uses the same name.
 - **D1:** Command-surface routing and legacy aliases moved from `app.mjs` into the typed `bin/adapters/router.ts`. `app.mjs` now only selects compiled/source `bin/app` (or re-execs Node with type stripping); `bin/app.ts` delegates framework and memory surfaces to their existing owners. The routing table has direct maker coverage.
 - **D2:** The framework CLI composition root is split before relocation: result rendering/diagnostics live in `cli-output.ts`, reviewed interactive plan application lives in `cli-interactive.ts`, and `cli.ts` is reduced to root discovery, setup/new guidance and command orchestration. Behavior remains behind the existing framework CLI tests.
-- **Remaining D3–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D3:** `operations.ts` is split by effect before relocation: reviewed file-plan execution, trusted project-process execution and read-only inspection now live in `operation-files.ts`, `operation-process.ts` and `operation-read.ts`. The public dispatcher retains command classification, discovery, special adapters and release authorization.
+- **Remaining D4–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

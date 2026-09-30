@@ -1,153 +1,74 @@
-import { docsRead } from './docs.ts';
-import { prototypesRead, prototypesCompare } from './prototypes.ts';
-import { measureProject } from './project-measure.ts';
-import { handoutRead } from './handout-adapter.ts';
-import { supportReport } from './support-report.ts';
-import { setupProgress } from './setup-progress.ts';
-import { projectContractOperation } from './project-contract.ts';
-import { storybookOperation } from './storybook.ts';
+import { resolve } from 'node:path';
 import { airshipOperation } from './airship.ts';
-import { dependencyReadiness } from '../compiler/adapters/dependencies.ts';
-import { readBounded } from './files.ts';
-import { compilerOperation } from '../compiler/adapters/cli.ts';
-import { resolve, join } from 'node:path';
 import { buildClickdummy } from './clickdummy.ts';
-import { inspectStyles } from './styles.ts';
-import { inspectConcept } from './concepts.ts';
-import { conceptSchema } from '../companion/concepts/contract.ts';
-import { fixtureOperation } from './fixtures.ts';
-import { operationSchemas } from './schemas.ts';
-import { commands, descriptor, validateRequest, parameterKinds, profiles } from './catalog.ts';
-import { capabilityCatalog } from '../operations/catalog.mjs';
-import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { planOperation, applyOperation, saveOperationPlan, loadPlan } from './planning.ts';
-import { status, releaseCheck } from './inspection.ts';
-import { inspectDesign } from './changes.ts';
-import { inspectSitemapSummary } from '../companion/sitemap/summary.ts';
-import { readConfiguration, exists } from './files.ts';
-import { verifyKit } from './kit-integrity.ts';
-import { packKit } from './kit.ts';
-import { npmEntry, runNode } from './process.ts';
-import { starterListing, completeStarterProject } from './starter-project.ts';
-import { commandHelp, helpIndex } from './help-text.ts';
 import { checkOperation } from './check.ts';
+import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
+import { compilerOperation } from '../compiler/adapters/cli.ts';
+import { docsRead } from './docs.ts';
+import { fixtureOperation } from './fixtures.ts';
+import { commandHelp, helpIndex } from './help-text.ts';
+import { operationSchemas } from './schemas.ts';
+import { setupProgress } from './setup-progress.ts';
+import { starterListing, completeStarterProject } from './starter-project.ts';
+import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from './submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
-async function fileOperation(request: Request, context: Context): Promise<Result> {
-  const stored = request.command.startsWith('plan ');
-  if (stored) requireThat(request.args[0], 'PLAN_REQUIRED', 'Supply the saved plan filename.');
-  const planned = stored ? await loadPlan(context, request.args[0]!) : await planOperation(request, context);
-  const output = stringOption(request.options, 'plan-out');
-  const diagnostics = (planned.review as {compiler?: {diagnostics?: Result['diagnostics']}}).compiler?.diagnostics ?? [];
-  if (planned.request.command.startsWith('docs ') && planned.conflicts.length) return {
-    ...result(request.command, planned.review, 'blocked'),
-    diagnostics: planned.conflicts.slice(0, 50).map(message => ({ code: 'DOCS_CONFLICT', message, next: 'Inspect --json for conflict keys; resolve fields with docs import --resolutions <file>.' })),
-  };
-  const saved = output ? await saveOperationPlan(context, planned, output) : null;
-  const apply = request.command !== 'plan inspect' && !request.options['dry-run'] && (request.options.apply !== undefined || request.options.yes === true);
-  if (!apply) return { ...result(request.command, { ...planned.review, ...(saved ? { saved } : {}) }, planned.conflicts.length ? 'blocked' : 'planned'), diagnostics };
-  const expected = stringOption(request.options, 'apply') ?? planned.planHash;
-  const applied = await applyOperation(planned, context, expected);
-  return { ...result(request.command, { ...planned.review, applied }, applied.written.length ? 'applied' : 'unchanged'), diagnostics };
-}
-function acceptProfile(command: string, profile: string | undefined): void {
-  const allowed = profiles[command] ?? [];
-  const label = command[0]!.toUpperCase() + command.slice(1);
-  requireThat(profile === undefined || allowed.includes(profile), 'PROFILE_UNKNOWN', `${label} profile: ${allowed.slice(0, -1).join(', ')} or ${allowed.at(-1)}.`);
-}
-async function processOperation(request: Request, context: Context): Promise<Result> {
-  const options = request.options, timeout = Number(stringOption(options, 'timeout') ?? (request.command === 'dev' ? '3600000' : '600000'));
-  if (request.command === 'framework pack') {
-    const output = stringOption(options, 'out'); requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <archive.zip>.');
-    if (!options.yes || options['dry-run']) return result(request.command, { output, requires: '--yes', publication: 'not-authorized' }, 'planned');
-    return result(request.command, await packKit(context, output), 'applied');
-  }
-  if (options['dry-run'] || (request.command === 'install' && !options.yes)) return result(request.command, { execution: 'not-run', requires: request.command === 'install' ? '--yes' : 'explicit execution', effects: 'project processes may write build output, reports, dependencies or caches' }, 'planned');
-  let entry: string, args: string[] = [];
-  const environment: Record<string, string> = {};
-  const profile = stringOption(options, 'profile');
-  if (request.command === 'install') {
-    const manifests = await Promise.all(['package.json','package-lock.json'].map(async path => ({path,content:(await readBounded(join(context.root,path),8_000_000)).toString('utf8'),ownership:'extension' as const})));
-    const readiness = dependencyReadiness(manifests);
-    if (!readiness.ready) return { ...result(request.command,{execution:'not-run',dependencies:'resolution-required'},'blocked'),diagnostics:readiness.diagnostics };
-    entry = await npmEntry(); args = ['ci', '--no-fund']; }
-  else if (request.command === 'build') entry = 'scripts/bundling/build.mjs';
-  else if (request.command === 'test') {
-    acceptProfile(request.command, profile);
-    if (profile === 'native') entry = 'scripts/testing/check-native.mjs';
-    // Real-Obsidian Vitest suite in contained vaults; downloads only with OBSIDIAN_ALLOW_DOWNLOAD=1.
-    else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
-    else if (profile === 'browser') { entry = 'node_modules/@playwright/test/cli.js'; args = ['test']; }
-    else { entry = 'node_modules/vitest/vitest.mjs'; args = ['run']; if (profile === 'project' || (profile === undefined && await exists(join(context.root, 'vitest.project.config.mjs')))) args.push('--config', 'vitest.project.config.mjs'); }
-  } else if (request.command === 'verify') {
-    acceptProfile(request.command, profile);
-    if (profile === 'project') { entry = await npmEntry(); args = ['run', 'verify:project']; }
-    else entry = 'scripts/quality/verify.mjs';
-  } else if (request.command === 'dev') {
-    acceptProfile(request.command, profile);
-    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js' : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs' : 'scripts/dev/watch-local.mjs';
-    if (profile === 'preview') return result(request.command, { execution: await runNode(context, 'node_modules/vite/bin/vite.js', ['--config', 'vite.preview.config.mjs'], timeout), productAcceptance: 'not-inferred' });
-    args = profile === 'ui' ? ['--config', 'vite.harness.config.mjs', '--host', '127.0.0.1'] : profile === 'obsidian' ? [] : ['--no-local'];
-  } else {
-    const commit = stringOption(options, 'commit'), version = stringOption(options, 'version');
-    requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');
-    entry = 'scripts/release/rehearse.mjs'; args = ['--commit', commit, '--version', version]; environment.npm_execpath = await npmEntry();
-  }
-  return result(request.command, { execution: await runNode(context, entry, args, timeout, environment), profile: profile ?? 'default', productAcceptance: 'not-inferred', publication: 'not-run' });
-}
-async function readOperation(request: Request, context: Context): Promise<Result> {
-  if (request.command === 'prototypes list') return result(request.command, await prototypesRead(context));
-  if (request.command === 'prototypes compare') return result(request.command, await prototypesCompare(request, context));
-  if (request.command === 'handout validate' || request.command === 'handout inspect') return handoutRead(request, context);
-  if (request.command === 'project measure') return measureProject(request, context);
-  if (request.command === 'support report') return supportReport(context);
-  if (['project schema', 'project validate'].includes(request.command)) return projectContractOperation(request, context);
-  if (request.command === 'concept schema') return result(request.command, conceptSchema());
-  if (request.command === 'concept inspect') return result(request.command, await inspectConcept(request, context));
-  if (request.command === 'version') {
-    const kit = await exists(join(context.frameworkRoot, '.framework/kit.json'));
-    const { readJson } = await import('./files.ts');
-    const metadata = await readJson(join(context.frameworkRoot, kit ? '.framework/kit.json' : 'package.json')) as { version?: string };
-    return result(request.command, { frameworkVersion: metadata.version, nodeVersion: process.version, protocolVersion: 1, distribution: kit ? 'compiled-kit' : 'source' });
-  }
-  if (request.command === 'styles inspect') return result(request.command, await inspectStyles(request, context));
-  if (request.command.startsWith('config ')) return result(request.command, { configuration: await readConfiguration(context.root), source: 'shell.config.json', identityAuthority: 'manifest.json after generation', overrides: 'none' });
-  if (request.command === 'project inspect') {
-    const input = stringOption(request.options, 'input'); requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json>.');
-    const { model, source } = await inspectDesign(context, input);
-    return result(request.command, { schemaVersion: source.document.schemaVersion, project: model.project, entities: model.entities.length, sources: model.sources.length, screens: model.screens.length, components: model.components.length, acceptanceObligations: model.requirements.length, warnings: model.warnings, sitemap: inspectSitemapSummary(source.document.design) });
-  }
-  if (request.command === 'framework status') {
-    const kit = await verifyKit(context.root); return result(request.command, { version: kit.version, sourceHash: kit.sourceHash, compilerVersion: kit.compilerVersion, verifiedFiles: kit.files.length, authenticity: 'checksums-are-not-signatures' });
-  }
-  if (request.command === 'release check') return releaseCheck(context, stringOption(request.options, 'input'));
-  return status(context, request.command);
-}
+import { capabilityCatalog } from '../operations/catalog.mjs';
+import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
+import { runNode } from './process.ts';
+import { fileOperation } from './operation-files.ts';
+import { processOperation } from './operation-process.ts';
+import { readOperation } from './operation-read.ts';
+
 /** Programmatic adapter shared by the terminal and future companion. No prompt or process-global cwd change. */
 export async function executeOperation(input: Request, context: Context): Promise<Result> {
   let command = 'unknown';
   try {
-    const request = validateRequest(input); command = request.command;
+    const request = validateRequest(input);
+    command = request.command;
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
     if (command === 'schema') return result(command, operationSchemas());
     if (request.options.help || command === 'help' || command === 'capabilities') {
       const selected = command === 'help' ? request.args.join(' ') : request.options.help ? command : '';
       const entries = selected ? [descriptor(selected)] : commands;
       const scope = selected ? 'command' : command === 'capabilities' || request.options.all ? 'all' : 'golden-path';
-      return result(command, { protocolVersion: 1, scope, ...helpIndex(), commands: entries.map(entry => ({ ...entry, options: parameterKinds(entry), availability: 'implemented', execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect, ...commandHelp(entry) })),
-        makers: capabilityCatalog().makers, examples: ['node bin/app new ../my-plugin --starter blank --yes', 'node bin/app setup --input project.json --dry-run', 'node bin/app generate --plan-out generation.plan.json', 'node bin/app plan apply generation.plan.json --yes'],
-        transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
+      return result(command, {
+        protocolVersion: 1,
+        scope,
+        ...helpIndex(),
+        commands: entries.map(entry => ({
+          ...entry,
+          options: parameterKinds(entry),
+          availability: 'implemented',
+          execution: entry.effect === 'process' ? 'trusted-project-code' : entry.effect,
+          ...commandHelp(entry),
+        })),
+        makers: capabilityCatalog().makers,
+        examples: [
+          'node bin/app new ../my-plugin --starter blank --yes',
+          'node bin/app setup --input project.json --dry-run',
+          'node bin/app generate --plan-out generation.plan.json',
+          'node bin/app plan apply generation.plan.json --yes',
+        ],
+        transport: 'terminal-or-shared-TypeScript-API',
+        approvals: 'never portable',
+      });
     }
     if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {
       const catalog: Array<{ id: string }> = capabilityCatalog().makers;
       const makers = catalog.filter(item => request.args[0] !== 'describe' || item.id === request.args[1]);
-      requireThat(makers.length > 0, 'MAKER_UNKNOWN', `Supply an existing recipe ID; use make list.${didYouMean(suggestions(request.args[1] ?? '', catalog.map(item => item.id)), value => `"${value}"`)}`);
+      requireThat(makers.length > 0, 'MAKER_UNKNOWN',
+        `Supply an existing recipe ID; use make list.${didYouMean(suggestions(request.args[1] ?? '', catalog.map(item => item.id)), value => `"${value}"`)}`);
       return result(command, { makers });
     }
     if (command === 'setup status' || command === 'setup resume') return await setupProgress(request, context, executeOperation);
-    if (command === 'new') return request.options.list ? await starterListing(context) : await completeStarterProject(await fileOperation(request, context), request, context);
+    if (command === 'new') {
+      return request.options.list
+        ? await starterListing(context)
+        : await completeStarterProject(await fileOperation(request, context), request, context);
+    }
     if (command.startsWith('storybook ')) return await storybookOperation(request, context);
     if (command.startsWith('compiler ')) return await compilerOperation(request, context);
     if (command === 'clickdummy build') return await buildClickdummy(request, context);
@@ -157,15 +78,33 @@ export async function executeOperation(input: Request, context: Context): Promis
     if (command === 'plan inspect' || descriptor(command).effect === 'plan') return await fileOperation(request, context);
     if (descriptor(command).effect === 'process') return await processOperation(request, context);
     if (command === 'release operate') {
-      const path = stringOption(request.options, 'input'); requireThat(path, 'INPUT_REQUIRED', 'Supply --input <release-operation.json>.');
-      if (request.options['dry-run']) return result(command, { execution: 'not-run', input: path, requestedMode: request.options.execute ? 'candidate-write' : 'remote-discovery', candidateEligibility: 'not-checked', publication: 'not-authorized' }, 'planned');
+      const path = stringOption(request.options, 'input');
+      requireThat(path, 'INPUT_REQUIRED', 'Supply --input <release-operation.json>.');
+      if (request.options['dry-run']) {
+        return result(command, {
+          execution: 'not-run',
+          input: path,
+          requestedMode: request.options.execute ? 'candidate-write' : 'remote-discovery',
+          candidateEligibility: 'not-checked',
+          publication: 'not-authorized',
+        }, 'planned');
+      }
       const args = ['--input', resolve(context.root, path)];
-      if (request.options.execute) { const authorization = stringOption(request.options, 'authorize'); requireThat(authorization, 'RELEASE_AUTHORIZATION', 'Public execution requires a separate --authorize digest. --yes is not authorization.'); args.push('--execute', '--authorize', authorization); }
-      else requireThat(request.options.authorize === undefined, 'RELEASE_AUTHORIZATION', '--authorize requires --execute.');
+      if (request.options.execute) {
+        const authorization = stringOption(request.options, 'authorize');
+        requireThat(authorization, 'RELEASE_AUTHORIZATION',
+          'Public execution requires a separate --authorize digest. --yes is not authorization.');
+        args.push('--execute', '--authorize', authorization);
+      } else {
+        requireThat(request.options.authorize === undefined, 'RELEASE_AUTHORIZATION', '--authorize requires --execute.');
+      }
       const exit = await runNode(context, 'scripts/release/cli.mjs', args);
-      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'Release output exceeded its bound; do not infer success or retry writes automatically.');
+      requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT',
+        'Release output exceeded its bound; do not infer success or retry writes automatically.');
       return result(command, { execution: exit, receipt: JSON.parse(exit.stdout) });
     }
     return await readOperation(request, context);
-  } catch (error) { return failure(command, error); }
+  } catch (error) {
+    return failure(command, error);
+  }
 }
