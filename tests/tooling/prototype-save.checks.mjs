@@ -19,8 +19,9 @@ test('concept save uses the same scanner and shared planner with explicit approv
   // Reuse the existing synthetic package fixture, rather than creating a second test schema.
   const script = `import sys, shutil, json\nsys.path.insert(0, sys.argv[1])\nfrom test_pack_concept import PackagingTests\nf=PackagingTests(); f.setUp()\nf.manifest['slug']=sys.argv[3]; f.update_manifest()\nshutil.copytree(f.root, sys.argv[2]); f.doCleanups()\n`;
   const source = path.join(temp, 'delivery');
-  const fixture = spawnSync(python, ['-B', '-c', script, tests, source, slug], { encoding: 'utf8', timeout: 30000 });
-  assert.equal(fixture.status, 0, fixture.stderr);
+  // Interpreter start-up plus copytree can exceed 30 s on loaded Windows runners; report a kill instead of a bare null status.
+  const fixture = spawnSync(python, ['-B', '-c', script, tests, source, slug], { encoding: 'utf8', timeout: 120000 });
+  assert.equal(fixture.status, 0, fixture.stderr || String(fixture.error ?? fixture.signal));
   const planned = await saveConcept(root, source, slug);
   assert.equal(planned.status, 'planned'); assert.equal(fs.existsSync(destination), false);
   assert.ok(planned.data.changes.every(change => change.status === 'create'));
