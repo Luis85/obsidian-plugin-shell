@@ -1,8 +1,8 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation. Stage A (launcher migration) is on PR #60. Its continuation
-uses separately pushed and validated milestones on the same PR; later restructuring remains
-subject to explicit gate checks. The inventory and sequencing below are planning inputs,
+Status: staged implementation through C10 on PR #60. The continuation uses separately pushed
+milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
+gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
 
 ## Target shape
