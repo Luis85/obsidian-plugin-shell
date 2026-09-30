@@ -12,6 +12,12 @@ const scenarioDelta=JSON.parse(await readFile(join(root,'tests/fixtures/compiler
 const liveTemplate=await loadTemplateSnapshot(root);
 const baselineInputs=JSON.parse(await readFile(join(root,'tests/fixtures/compiler/template-inputs.json'),'utf8'));
 const digest=value=>createHash('sha256').update(value).digest('hex');
+// Note repositories now bind leases to record ID AND revision. Reverse only this
+// independently pinned security delta when comparing with untouched PR5 goldens.
+const noteRuntimeDelta=Object.freeze({
+  before:'4a8c2fd59b1bea492e31d24ba7daef0d6e5ef58b4b66a4efa94f7634c41aa8fe',
+  after:'ca98f2d7690ce8a53e0b994621815d30e355801688d668abdf02294699786ef1',
+});
 // Output goldens bind BOTH the project and original framework composition. A renamed,
 // maker-extended or example-removed consumer is not that original template input.
 assert.equal(baselineInputs.sourceCommit,baseline.sourceCommit);
@@ -71,6 +77,14 @@ function historicalBytes(selected,model,source) {
     if(change.before===null){assert.equal(path,'harness/prototype/clickdummy-host.ts');hashes.delete(path);}
     else hashes.set(path,change.before);
   }
+  // An exact, separately reviewed note-runtime security change is compatible
+  // with the frozen pre-collection product baseline. Any other output must
+  // still match the original historical SHA-256 aggregate unchanged.
+  const noteRuntimePath=model.sourceRoot+'/application/note-operations.ts';
+  if(hashes.has(noteRuntimePath)){
+    assert.equal(hashes.get(noteRuntimePath),noteRuntimeDelta.after,'reviewed note lease runtime output: '+noteRuntimePath);
+    hashes.set(noteRuntimePath,noteRuntimeDelta.before);
+  }
   return [...hashes].sort(([a],[b])=>a<b?-1:a>b?1:0);
 }
 for(const expected of baseline.cases){
@@ -91,6 +105,21 @@ for(const expected of baseline.cases){
     assert.equal(selected.length,expected.files+3);assert.equal(digest(JSON.stringify(historicalBytes(preserved,model,expected.source))),expected.sha256);
   });
 }
+test('note lease compatibility delta refuses unreviewed generated runtime changes',async()=>{
+  const expected=baseline.cases.find(item=>item.source.endsWith('/knowledge-collection.companion.json'));assert.ok(expected);
+  const source=await readFile(join(root,expected.source),'utf8');
+  const result=await compileProject({source,template});assert.equal(result.status,'ok');
+  const noteRuntimePath=result.model.sourceRoot+'/application/note-operations.ts';
+  const selected=result.artifacts.filter(file=>file.path.startsWith(result.model.sourceRoot+'/')||
+    file.path.startsWith(result.model.testRoot+'/')||file.path.startsWith('harness/prototype/')||
+    ['src/main.ts','src/bootstrap/features.ts','design/project.json','design/traceability.json'].includes(file.path))
+    .filter(file=>file.path!=='harness/prototype/index.html');
+  assert.equal(selected.filter(file=>file.path===noteRuntimePath).length,1,'fixture must emit a note repository');
+  const changed=selected.map(file=>file.path===noteRuntimePath?
+    {...file,content:file.content+'// unreviewed runtime edit\n'}:file);
+  assert.throws(()=>historicalBytes(changed,result.model,expected.source),/reviewed note lease runtime output/);
+});
+
 test('same frozen snapshot stays deterministic while telemetry changes',async()=>{
   const source=await readFile(join(root,baseline.cases[0].source),'utf8');const events=[];
   const first=await compileProject({source,template},{onEvent:e=>events.push(e)});const again=await compileProject({source,template});

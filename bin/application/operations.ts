@@ -1,8 +1,8 @@
 import { entityAdd, entityProperties, sourceAdd, collectionAdd, brickRename, routeSet, pageParent, journeyAdd, groupAdd, navigationAdd } from '../domain/bricks.ts';
 import { editDocument, type SketchDocument } from '../domain/document.ts';
 import { addPage, renamePage, moveNode, setPageLayout } from '../domain/pages.ts';
-import { addComponent, attachComponents, renameComponent, removeNode, type ComponentChoice } from '../domain/components.ts';
-import { addInteraction, renameInteraction, removeInteraction, setInteractionAction } from '../domain/interactions.ts';
+import { addComponent, attachComponents, renameComponent, removeNode, pageCollectionTable, pageBindSource, type ComponentChoice } from '../domain/components.ts';
+import { addInteraction, renameInteraction, removeInteraction, setInteractionAction, setSourceInteractionAction } from '../domain/interactions.ts';
 import { requireSketch } from '../domain/errors.ts';
 import { object, keys, text, list } from '../domain/data.ts';
 
@@ -27,8 +27,10 @@ function attach(state: Transaction, op: Operation): void {
   state.created.push(...ids);
 }
 function action(state: Transaction, op: Operation): void {
-  const value = object(op.action); keys(value, ['kind', 'target', 'state']);
+  const value = object(op.action); keys(value, ['kind', 'target', 'state', 'source', 'operation', 'input']);
   const page = ref(state, op.page), id = ref(state, op.id);
+  if (value.kind === 'source') { keys(value, ['kind', 'source', 'operation', 'input']);
+    setSourceInteractionAction(state.document, page, id, ref(state, value.source), text(value.operation, 'operation'), value.input); return; }
   if (value.kind === 'todo') { keys(value, ['kind']); setInteractionAction(state.document, page, id, null); return; }
   if (value.kind === 'navigate') { keys(value, ['kind', 'target']); setInteractionAction(state.document, page, id, { kind: 'navigate', surfaceId: ref(state, value.target) }); return; }
   if (value.kind === 'set-state') {
@@ -36,7 +38,7 @@ function action(state: Transaction, op: Operation): void {
     requireSketch(value.state === 'default' || value.state === 'loading' || value.state === 'empty' || value.state === 'error' || value.state === 'disabled', 'MAKER_STATE', 'Choose a supported preview state.');
     setInteractionAction(state.document, page, id, { kind: 'set-state', state: value.state }); return;
   }
-  requireSketch(false, 'MAKER_ACTION', 'Use todo, navigate or set-state. No executable expressions are accepted.');
+  requireSketch(false, 'MAKER_ACTION', 'Use todo, navigate, set-state or a declared source call. No executable expressions are accepted.');
 }
 const handlers: Record<string, Handler> = {
   'entity.add': { fields: ['title'], run: (s, o) => entityAdd(s.document, o.title) },
@@ -58,6 +60,11 @@ const handlers: Record<string, Handler> = {
   'component.add': { fields: ['title'], run: (s, o) => addComponent(s.document, text(o.title, 'title')) },
   'component.rename': { fields: ['id', 'title'], run: (s, o) => renameComponent(s.document, ref(s, o.id), text(o.title, 'title')) },
   'page.attach': { fields: ['page', 'components'], run: attach },
+  'page.collection-table': { fields: ['page', 'source', 'title'], run: (s, o) => pageCollectionTable(s.document, ref(s, o.page), ref(s, o.source), text(o.title, 'table title', 80)) },
+  'page.bind': { fields: ['page', 'node', 'prop', 'source', 'operation', 'field'], run(s, o) {
+    requireSketch(typeof o.field === 'string', 'MAKER_FIELD', 'field must be an output path or the empty string.');
+    pageBindSource(s.document, ref(s, o.page), ref(s, o.node), text(o.prop, 'prop', 60), ref(s, o.source), text(o.operation, 'operation'), o.field);
+  } },
   'page.remove': { fields: ['page', 'id'], run: (s, o) => removeNode(s.document, ref(s, o.page), ref(s, o.id)) },
   'page.move': { fields: ['page', 'id', 'direction'], run(s, o) {
     requireSketch(o.direction === 'up' || o.direction === 'down', 'MAKER_DIRECTION', 'Choose up or down.');

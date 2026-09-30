@@ -9,6 +9,7 @@ import { sketchSchema } from '../../bin/application/schema.ts';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { noteEntity } from '../../scripts/companion/compiler/persistence-code.ts';
 import { noteOperations } from '../../scripts/companion/runtime/note-operations.ts';
+import { visualSources } from '../../scripts/companion/compiler/visual-ports.ts';
 const base = () => newDocument('My sketch');
 function page() { return runOperations(base(), [{ op: 'page.add', title: 'Home', as: 'home' }]); }
 test('titles are the only creation fields and identifiers remain stable after renaming', () => {
@@ -69,6 +70,29 @@ test('collection leases distinguish multiple Markdown records at the same revisi
   assert.deepEqual(updated, ['a']); assert.deepEqual(deleted, ['b']);
   await assert.rejects(operations.update({ id: first.record.id, revision: first.revision, values: { title: 'Stale' } }), /NOTE_REVISION_STALE/);
   assert.deepEqual([...records.keys()], ['a']);
+});
+test('shell wires a Collection table, explicit read binding and create interaction to the visual compiler', () => {
+  const initial = runOperations(base(), [
+    { op: 'page.add', title: 'Tasks', as: 'tasksPage' },
+    { op: 'entity.add', title: 'Task', as: 'task' },
+    { op: 'entity.properties', id: '@task', properties: [{ key: 'title', type: 'text', required: true }] },
+    { op: 'collection.add', title: 'Tasks data', path: 'Records/Tasks', entity: '@task', as: 'tasks' },
+    { op: 'page.collection-table', page: '@tasksPage', source: '@tasks', title: 'Task records', as: 'table' },
+    { op: 'page.bind', page: '@tasksPage', node: '@table', prop: 'data', source: '@tasks', operation: 'list', field: '' },
+    { op: 'interaction.add', page: '@tasksPage', title: 'Create task', as: 'create' },
+    { op: 'interaction.action', page: '@tasksPage', id: '@create', action: { kind: 'source', source: '@tasks', operation: 'create',
+      input: { kind: 'value', value: { values: { title: 'Example' }, requestId: 'create-task-1' } } } },
+  ]);
+  const page = initial.document.design.visualDesigns.pages.find(item => item.ownerId === initial.aliases.tasksPage);
+  const table = page.root.find(item => item.id === initial.aliases.table);
+  assert.equal(table.ref.entryId, 'u-table'); assert.equal(table.props.data.kind, 'source');
+  const model = projectModel(initial.document), uses = visualSources(model);
+  assert.deepEqual(uses.map(item => item.operation.slug).sort(), ['create', 'list']);
+  const schema = sketchSchema.properties.operations.items.oneOf;
+  assert.ok(schema.some(item => item.properties.op.const === 'page.collection-table'));
+  assert.ok(schema.some(item => item.properties.op.const === 'page.bind'));
+  assert.throws(() => runOperations(initial.document, [{ op: 'page.bind', page: initial.aliases.tasksPage,
+    node: initial.aliases.table, prop: 'data', source: initial.aliases.tasks, operation: 'delete', field: '' }]));
 });
 test('bulk reuse creates distinct instances without duplicating definitions', () => {
   const start = page();
@@ -135,7 +159,7 @@ test('history is bounded, redo is invalidated and failed edits never enter histo
   for (let i = 0; i < 52; i++) workspace.edit([]);
   for (let i = 0; i < 50; i++) assert.equal(workspace.undo(), true);
   assert.equal(workspace.undo(), false);
-  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 22);
+  assert.equal(sketchSchema.properties.operations.items.oneOf.length, 24);
 });
 
 test('nested removal retires only unused component references and preserves library definitions', () => {
