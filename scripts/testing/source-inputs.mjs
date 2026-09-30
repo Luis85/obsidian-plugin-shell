@@ -5,17 +5,20 @@ import { readdir, readFile, lstat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { vendorArchive, decodeVendor } from '../styles/vendor-policy.mjs';
 import { codeLines } from './code-lines.mjs';
+import { loadThresholds } from '../quality/thresholds.mjs';
 
-const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
+const inputRoots = ['src', 'harness', 'scripts', 'tests', 'docs/design/obsidian-tokens.json', 'docs/testing/test-plan.json', '.github/workflows', 'package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'tsconfig.json', 'configs/quality/thresholds.json', 'eslint.config.mjs', '.fallowrc.json', '.oxlintrc.json', 'vite.config.mjs', 'vite.harness.config.mjs', 'vitest.config.mjs', 'vitest.production.config.mjs', 'playwright.config.ts'];
 export function physicalLines(text) {
   if (!text) return 0;
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   return normalized.split('\n').length - (normalized.endsWith('\n') ? 1 : 0);
 }
+let limits;
 export function lineLimit(path) {
   if (!/\.(?:[cm]?[jt]sx?|vue|css|html)$/.test(path)) return null;
-  if (path === 'src/main.ts') return 100;
-  return path.startsWith('tests/') ? 450 : 400;
+  limits ??= loadThresholds().codeLines;
+  if (path === 'src/main.ts') return limits.mainTs;
+  return path.startsWith('tests/') ? limits.tests : limits.source;
 }
 // This optional executable sidecar is present with the companion concept. It
 // must participate in archive transport and evidence freshness when installed.

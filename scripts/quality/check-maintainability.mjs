@@ -7,8 +7,11 @@ import { maintainabilityInventory } from './maintainability-inventory.mjs';
 import { healthReport, duplicationReport, suppressionReport } from './maintainability-reports.mjs';
 import { sha256 } from '../testing/source-inputs.mjs';
 import { duplicateArguments, measureCorpus, assertCorpus, checkCorpus } from './maintainability-corpus.mjs';
+import { loadThresholds } from './thresholds.mjs';
 
-const policy = { version: 1, cyclomatic: 10, cognitive: 15, duplication: 3, minTokens: 50, minLines: 5,
+const limits = loadThresholds().maintainability;
+const policy = { version: 1, cyclomatic: limits.cyclomatic, cognitive: limits.cognitive, duplication: limits.duplicationPercent,
+  minTokens: limits.duplicationMinTokens, minLines: limits.duplicationMinLines,
   mode: 'mild', ignoreImports: true, production: 'every src and bin JS/TS/Vue file, including generated consumers' };
 async function execute(tool, stage, args, output) {
   const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('FALLOW_')));
@@ -26,7 +29,7 @@ function failureList(views) {
   const production = views.production;
   if (!production.health.functions) throw new Error('METRIC_EMPTY_PRODUCTION_MEASUREMENT');
   const failures = production.health.findings.map(finding => `${finding.path}:${finding.line} ${finding.name} ${finding.cyclomatic}/${finding.cognitive}`);
-  if (production.duplication.duplication_percentage > policy.duplication) failures.push('PRODUCTION_DUPLICATION_ABOVE_3_PERCENT');
+  if (production.duplication.duplication_percentage > policy.duplication) failures.push(`PRODUCTION_DUPLICATION_ABOVE_${policy.duplication}_PERCENT`);
   return failures;
 }
 async function toolIdentity(tool) {
@@ -82,7 +85,7 @@ export async function measureMaintainability(root = process.cwd(), options = {})
       }
       const suppressions = await execute(tool, stage, ['suppressions'], join(output, `${view}-suppressions`));
       const suppressionInventory = suppressionReport(suppressions.report);
-      const health = await execute(tool, stage, ['health', '--complexity', '--max-cyclomatic', '10', '--max-cognitive', '15'], join(output, `${view}-health`));
+      const health = await execute(tool, stage, ['health', '--complexity', '--max-cyclomatic', String(policy.cyclomatic), '--max-cognitive', String(policy.cognitive)], join(output, `${view}-health`));
       const dupes = await execute(tool, stage, duplicateArguments, join(output, `${view}-dupes`));
       views[view] = { inputs, suppressions: suppressionInventory, health: healthReport(health.report, inputs), duplication: duplicationReport(dupes.report, inputs),
         execution: { health: { exit: health.exit, command: health.command, sha256: health.rawHash }, dupes: { exit: dupes.exit, command: dupes.command, sha256: dupes.rawHash }, suppressions: { exit: suppressions.exit, command: suppressions.command, sha256: suppressions.rawHash } } };

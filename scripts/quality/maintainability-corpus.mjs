@@ -2,8 +2,11 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { sha256 } from '../testing/source-inputs.mjs';
 import { duplicationReport } from './maintainability-reports.mjs';
+import { loadThresholds } from './thresholds.mjs';
 
-export const duplicateArguments = ['dupes', '--mode', 'mild', '--min-tokens', '50', '--min-lines', '5', '--threshold', '3', '--no-fragments'];
+const { maintainability } = loadThresholds();
+export const duplicateArguments = ['dupes', '--mode', 'mild', '--min-tokens', String(maintainability.duplicationMinTokens),
+  '--min-lines', String(maintainability.duplicationMinLines), '--threshold', String(maintainability.duplicationPercent), '--no-fragments'];
 export async function measureCorpus(tool, stage, inputs, output, execute) {
   await mkdir(output, { recursive: true });
   const captured = new Map();
