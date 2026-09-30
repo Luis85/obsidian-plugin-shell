@@ -11,7 +11,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable, Writable } from 'node:stream';
-import { ask } from '../scripts/framework/input.ts';
+import { ask } from '../scripts/shared/input.ts';
 import { failure } from '../scripts/framework/contracts.ts';
 import { result as operationResult, type ResultStatus } from '../scripts/contracts/result.ts';
 import { SketchError } from './domain/errors.ts';
