@@ -35,7 +35,7 @@ async function approve(args) {
   assert.ok(['applied', 'unchanged', 'ok'].includes(applied.status)); return applied.data;
 }
 async function browserChecks() {
-  await writeFile(join(root, 'showcase.json'), JSON.stringify({ schemaVersion: 1, mode: 'showcase', port: 4197, openBrowser: false, showcaseDurationMs: 300000 }));
+  await writeFile(join(root, 'showcase.json'), JSON.stringify({ schemaVersion: 1, mode: 'showcase', port: 4197, openBrowser: false, showcaseDurationMs: 120000 }));
   const planned = await cli(['first-run', '--input', 'showcase.json']);
   assert.equal(planned.status, 'planned');
   const child = spawn(process.execPath, [join(root, 'tools/shell-cli/app.mjs'), 'first-run', '--input', 'showcase.json', '--apply', planned.data.planHash, '--json'], {
@@ -58,6 +58,9 @@ async function browserChecks() {
   });
   const { chromium, expect } = await import('@playwright/test');
   const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) });
+  // Windows cannot signal a child to stop gracefully (kill terminates it without an exit code), so a passing run
+  // lets the showcase end on its own after its bounded window; the child is killed only when a check failed.
+  let checked = false;
   try {
     await serving;
     const page = await browser.newPage(); const errors = [];
@@ -77,8 +80,9 @@ async function browserChecks() {
     assert.deepEqual(errors, []);
     await page.screenshot({ path: join(output, 'angular-after-edit.png') });
     await page.close();
+    checked = true;
   } finally {
-    if (child.exitCode === null) child.kill();
+    if (!checked && child.exitCode === null) child.kill();
     await browser.close();
   }
   const code = await closed;
