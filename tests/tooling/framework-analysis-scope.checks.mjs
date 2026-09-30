@@ -61,3 +61,13 @@ test('typed file-plan facade is isolated as a core boundary', () => {
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-file-plan-contract'), false);
 });
+
+test('shared input transport is isolated and depends only on CLI error contracts', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'cli-input-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/input.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'cli-input-contract')?.allow, ['cli-input-contract', 'cli-result-contract']);
+  for (const source of ['test', 'tooling', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('cli-input-contract'), source);
+  }
+  assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-input-contract'), false);
+});
