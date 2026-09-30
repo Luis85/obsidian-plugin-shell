@@ -1,12 +1,10 @@
 import { applyFilePlanRuntime, createFilePlanRuntime } from './file-plan-runtime.ts';
+// Only the types callers use are re-exported; file-plan-types.ts keeps the full contract.
 export type {
   ApplyFilePlanOptions,
   ApplyFilePlanReport,
   FilePlan,
-  FilePlanChange,
-  FilePlanEncoding,
   FilePlanEntry,
-  FilePlanStatus,
 } from './file-plan-types.ts';
 import type { ApplyFilePlanOptions, ApplyFilePlanReport, FilePlan, FilePlanEntry } from './file-plan-types.ts';
 
