@@ -20127,7 +20127,8 @@ function companionExampleEntities(d, surfaces) {
     sources.testing.recipes.push({ source: source.id, operation: op.id, enabled: true, behavior: 'list', dataset: entity,
       keyField: 'id', scenario: 'populated', latencyMs: 0, errorStatus: 503, rules: [] });
   }
-  // Allocated after the vault operations so the hash-pinned visual seed keeps its ds-source-1/ds-operation-2 binding.
+  // Allocate the example Collection only after the historical authoring-vault IDs.
+  // The visual seed deliberately references ds-source-1/ds-operation-2 and those IDs are a retained contract.
   const collectionEntity=entities['test-recipe'];
   const collection={id:dsNext(sources,'source'),slug:'test-recipes',name:'Test recipe collection',kind:'collection',status:'active',
     description:'Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.',locator:'vault://active',auth:'none',credentialRef:'',

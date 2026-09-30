@@ -71,9 +71,12 @@ function requireBindableProp(document: SketchDocument, node: UiNode, prop: strin
     requireSketch(/^[a-z][a-zA-Z0-9]{0,59}$/.test(prop), 'SOURCE_BIND_PROP', 'External adapter prop must be portable.');
     return;
   }
-  const ref = node.ref;
-  const available: readonly { name: string }[] | undefined = ref.kind === 'nuxt-ui' ? visualCatalogEntry(ref.entryId)?.props :
-    document.design.visualDesigns.components.find(component => component.id === ref.componentId)?.props;
+  let available: readonly { name: string }[] | undefined;
+  if (node.ref.kind === 'nuxt-ui') available = visualCatalogEntry(node.ref.entryId)?.props;
+  else if (node.ref.kind === 'project') {
+    const componentId = node.ref.componentId;
+    available = document.design.visualDesigns.components.find(component => component.id === componentId)?.props;
+  }
   requireSketch(available?.some(candidate => candidate.name === prop), 'SOURCE_BIND_PROP', 'That component has no such declared prop.');
 }
 /** Bind a page component prop (or the value of a text element) to a reusable source read port. */
