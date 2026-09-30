@@ -6,15 +6,19 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES, migrateCompanionDocument, COMPANION_VERSION,
-  companionDesignKey, companionDropLegacy, companionLegacyDetails, companionUpgradeDesign } from '../../scripts/companion/project-contract.mjs';
+// The read-only reader and CLI use the current (schema 6) contract. project-contract.mjs, visual-migrate.mjs and the v5
+// self-project below are only the retained v5 concept build base (docs/concepts/companion/index.html), removed with it.
+import { parseAuthoringDocument as parseCompanionDocument, validateCompanionFolders, companionRelativeFolder, COMPANION_MAX_BYTES } from '../../scripts/companion/authoring-contract.ts';
+import { migrateCompanionDocument, COMPANION_VERSION, companionDesignKey, companionDropLegacy, companionLegacyDetails, companionUpgradeDesign } from '../../scripts/companion/project-contract.mjs';
 import { migrateDetailDesigns } from '../../scripts/companion/visual/visual-migrate.mjs';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 import { readCompanionProject } from '../../scripts/companion/read-project.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'scripts/companion/generate.mjs');
-const seed = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
+const seed = starterDocumentText('companion-plugin');
 const document = JSON.parse(seed);
+const conceptSeed = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
 // Build an own JSON property, not an object-literal prototype or a newline-dependent splice.
 function unsafeRootDocument(text, key = '__proto__') {
   return JSON.stringify({ ...JSON.parse(text), [key]: {} }, null, 2);
@@ -51,17 +55,18 @@ test('[COMPANION-SEED] full companion definition has authored coverage, not exec
   assert.equal(Object.hasOwn(document, 'trusted'), false);
   assert.equal(Object.hasOwn(document.design, 'emitted'), false);
 });
-test('[COMPANION-VISUAL-SEED] self-project is v5 visual designs equal to the embedded seed and to its v4 migration', async () => {
-  const v = document.design.visualDesigns;
-  assert.equal(document.schemaVersion, COMPANION_VERSION); assert.equal(document.design.schema, COMPANION_VERSION);
-  assert.equal(Object.hasOwn(document.design, 'detailDesigns'), false);
+test('[COMPANION-VISUAL-SEED] v5 concept self-project visual designs equal the embedded seed, its v4 migration and the v6 starter', async () => {
+  const v = conceptSeed.design.visualDesigns;
+  assert.equal(conceptSeed.schemaVersion, COMPANION_VERSION); assert.equal(conceptSeed.design.schema, COMPANION_VERSION);
+  assert.equal(Object.hasOwn(conceptSeed.design, 'detailDesigns'), false);
   assert.deepEqual([v.pages.length, v.components.length, v.revisions.length, v.layouts.length], [27, 54, 54, 0]);
   const embedded = JSON.parse(await readFile(join(root, 'docs/concepts/companion/seeds/visual-self-project.json'), 'utf8'));
   assert.deepEqual(v, embedded);
   // The seed was produced from the last v4 self-project, retained as the migration fixture.
   const legacy = JSON.parse(await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8'));
   assert.deepEqual(migrateDetailDesigns(structuredClone(legacy.design.detailDesigns), legacy.design).visualDesigns, embedded);
-  assert.deepEqual(migrateCompanionDocument(structuredClone(document)), { document, report: null });
+  assert.deepEqual(migrateCompanionDocument(structuredClone(conceptSeed)), { document: conceptSeed, report: null });
+  assert.deepEqual(document.design.visualDesigns, embedded, 'the current v6 self-project carries the same reviewed visual designs');
 });
 test('[COMPANION-LEGACY] design keys are an explicit allow-list; kind, executable and prototype names are not design keys', () => {
   for (const key of ['schema', 'blueprint', 'nodes', 'library', 'storymaps', 'detailDesigns', 'visualDesigns']) assert.equal(companionDesignKey(key), true, key);
@@ -87,7 +92,7 @@ test('[COMPANION-LEGACY] upgrade replaces a legacy store with its validated migr
   assert.deepEqual(broken, before);
 });
 test('[COMPANION-CLI] original Unicode/whitespace bytes returned, zero writes even to missing target', async t => {
-  const f = await fixture(t), text = '  ' + seed.replace('Plugin Companion', 'Plugin Companion — ä') + '\n\n';
+  const f = await fixture(t), text = '  ' + seed.replace('"Workbench"', '"Workbench — ä"') + '\n\n';
   await writeFile(f.input, text);
   const before = await snapshot(f.dir);
   const result = run(['--input', f.input, '--target', 'plugins/new companion', '--vault', f.vault]);
@@ -100,27 +105,28 @@ test('[COMPANION-READ] exported service returns data and canonical targets witho
   const alias = join(f.dir, 'vault-alias');
   await symlink(f.vault, alias, 'junction');
   const before = await snapshot(f.dir);
-  const migrated = migrateCompanionDocument(structuredClone(document));
   // Keep the supplied spelling, including a Windows 8.3 temp path, as the input.
   for (const vault of [f.vault, alias]) {
     for (const target of ['.', 'plugins/new companion']) {
       const result = await readCompanionProject({ input: f.input, vault, target });
       assert.equal(result.content.toString(), seed);
-      assert.deepEqual(result.document, migrated.document);
-      assert.deepEqual(result.migration, migrated.report);
+      assert.deepEqual(result.document, document);
+      assert.equal('migration' in result, false);
       assert.equal(result.vault, canonicalRoot);
       assert.equal(result.target, resolve(canonicalRoot, target));
     }
   }
   assert.deepEqual(await snapshot(f.dir), before);
 });
-test('[COMPANION-READ] a v4 export is migrated on read and reports what the migration dropped', async t => {
-  const f = await fixture(t), legacy = await readFile(join(root, 'tests/fixtures/companion/detail-v4.json'), 'utf8');
-  await writeFile(f.input, legacy);
-  const expected = migrateCompanionDocument(JSON.parse(legacy)), result = await readCompanionProject({ input: f.input, vault: f.vault, target: '.' });
-  assert.equal(result.content.toString(), legacy);
-  assert.deepEqual(result.document, expected.document); assert.deepEqual(result.migration, expected.report);
-  assert.equal(result.document.schemaVersion, COMPANION_VERSION); assert.ok(result.migration.droppedPositions > 0);
+test('[COMPANION-READ] retired v4 and v5 exports are rejected on read and by the CLI, never migrated', async t => {
+  const f = await fixture(t);
+  for (const path of ['tests/fixtures/companion/detail-v4.json', 'docs/concepts/companion/companion-project.json']) {
+    const legacy = await readFile(join(root, path), 'utf8'); await writeFile(f.input, legacy);
+    await assert.rejects(readCompanionProject({ input: f.input, vault: f.vault, target: '.' }), /COMPANION_VERSION: Unsupported project schemaVersion [45]; only schema 6 is supported/);
+    const before = await snapshot(f.dir), result = run(['--input', f.input, '--vault', f.vault, '--target', 'not-created']);
+    assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /^COMPANION_VERSION: .*Earlier formats are not migrated/);
+    assert.deepEqual(await snapshot(f.dir), before);
+  }
 });
 test('[COMPANION-CWD] explicit vault and default current-vault invocation work outside the shell', async t => {
   const f = await fixture(t);
@@ -164,9 +170,9 @@ test('[COMPANION-INVALID] malformed/future/wrong-kind/authority documents produc
   }
 });
 test('[COMPANION-BOUNDS] size, nesting, unsafe keys and invalid UTF-8 fail closed', async t => {
-  assert.throws(() => parseCompanionDocument(unsafeRootDocument(seed)), /Unsafe object key/);
+  assert.throws(() => parseCompanionDocument(unsafeRootDocument(seed)), /Unsafe key/);
   const value = structuredClone(document); value.notes = [JSON.parse('{"constructor":1}')];
-  assert.throws(() => parseCompanionDocument(JSON.stringify(value)), /Unsafe object key/);
+  assert.throws(() => parseCompanionDocument(JSON.stringify(value)), /Unsafe key/);
   assert.throws(() => parseCompanionDocument(' '.repeat(COMPANION_MAX_BYTES) + seed), /limit/);
   const nested = '['.repeat(42) + '1' + ']'.repeat(42);
   assert.throws(() => parseCompanionDocument(nested), /nesting/);
@@ -194,13 +200,13 @@ test('[COMPANION-EOL] LF, CRLF and trailing whitespace preserve bytes and unsafe
         const unsafe = unsafeRootDocument(text, key).replace(/\n/g, eol) + trailing;
         // A valid JSON fixture must reach the unsafe-key guard, not a syntax error.
         assert.equal(Object.hasOwn(JSON.parse(unsafe), key), true);
-        assert.throws(() => parseCompanionDocument(unsafe), /COMPANION_INVALID: Unsafe object key/);
+        assert.throws(() => parseCompanionDocument(unsafe), /Unsafe key/);
         await writeFile(f.input, unsafe);
         const retained = await snapshot(f.dir);
         const rejected = run(['--input', f.input, '--vault', f.vault, '--target', 'not-created']);
         assert.equal(rejected.error, undefined, rejected.error?.message);
         assert.equal(rejected.status, 1); assert.equal(rejected.stdout, '');
-        assert.match(rejected.stderr, /COMPANION_INVALID: Unsafe object key/);
+        assert.match(rejected.stderr, /SITEMAP_JSON: Unsafe key/);
         assert.deepEqual(await snapshot(f.dir), retained);
       }
     }

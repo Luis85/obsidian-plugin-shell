@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { parseAuthoringDocument, migrateAuthoringDocument } from '../companion/authoring-contract.ts';
+import { parseAuthoringDocument } from '../companion/authoring-contract.ts';
 import { sitemapProjection } from '../companion/sitemap/projection.ts';
 import { arrangeSitemap } from '../companion/sitemap/arrangement.ts';
 import { readBounded, hash } from './files.ts';
@@ -13,14 +13,14 @@ export async function measureProject(request: Request, context: Context) {
   const count = Number(samples);
   requireThat(input, 'INPUT_REQUIRED', 'Supply --input <project.json> or --input - with JSON stdin.');
   requireThat(/^(?:[3-9]|[12]\d|30)$/.test(samples) && Number.isInteger(count) && count >= 3 && count <= 30, 'MEASUREMENT_COUNT', 'Choose 3 to 30 measured samples.');
-  const operations = ['import-validate-migrate', 'export-json', 'hierarchy-projection', 'arrange-proposal'];
+  const operations = ['import-validate', 'export-json', 'hierarchy-projection', 'arrange-proposal'];
   if (request.options['dry-run']) return result(request.command, { execution: 'not-run', operations, samples: count, written: [], network: false }, 'planned');
   requireThat(input !== '-' || context.inputText !== undefined, 'STDIN_REQUIRED', 'Supply JSON on stdin.');
   const text = input === '-' ? context.inputText! : new TextDecoder('utf-8', { fatal: true }).decode(await readBounded(resolve(context.root, input), 4_000_000));
-  const document = migrateAuthoringDocument(parseAuthoringDocument(text)).document;
+  const document = parseAuthoringDocument(text);
   const heapBeforeBytes = process.memoryUsage().heapUsed;
   const actions = [
-    () => migrateAuthoringDocument(parseAuthoringDocument(text)),
+    () => parseAuthoringDocument(text),
     () => JSON.stringify(document),
     () => sitemapProjection(document.design, { lens: 'hierarchy' }),
     () => arrangeSitemap(document.design, 'all'),

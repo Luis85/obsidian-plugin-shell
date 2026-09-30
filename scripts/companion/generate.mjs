@@ -31,7 +31,9 @@ try {
   if (value === null) process.stdout.write(help);
   else process.stdout.write((await readCompanionProject(value)).content);
 } catch (error) {
-  const message = error instanceof Error && (error.message.startsWith('COMPANION_') || error.message.startsWith('DETAIL_INVALID:')) ? error.message :
+  // Shared JSON-safety errors carry their code as a field; contract errors already prefix it.
+  const code = error instanceof Error && typeof error.code === 'string' && /^(?:COMPANION|SITEMAP)_[A-Z_]+$/.test(error.code) && !error.message.startsWith(error.code) ? error.code : null;
+  const message = code ? code + ': ' + error.message : error instanceof Error && error.message.startsWith('COMPANION_') ? error.message :
     'COMPANION_READ: Could not safely read the input or validate the vault target. No files were written.';
   process.stderr.write(message + '\n');
   process.exitCode = 1;

@@ -36,7 +36,7 @@ export async function compileProject(request:CompileRequest,control:Control={}) 
   const frontend = companionFrontend(sourceName);
   return runCompiler(request,{
     ...frontend,
-    migrate: value => contractCall('migrate', sourceName, () => frontend.migrate(withStorybookOptions(value, request.storybook))),
+    validate: value => contractCall('validate', sourceName, () => frontend.validate(withStorybookOptions(value, request.storybook))),
     lower: (model,template,kind) => {
       if (kind !== 'project') {
         if (request.projectSelection) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'A project selection requires outputKind project.'));

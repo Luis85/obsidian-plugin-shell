@@ -5,7 +5,13 @@ import { loadDefinitions } from '../starters/repository.ts';
 import { record, inputValue } from '../starters/validation.ts';
 /** Terminal-only presentation and prompts for `new`. The operation result stays the authority. */
 import { requireThat, type Context, type Request, type Result } from './contracts.ts';
-import { starterCatalog, derivedId, derivedName, invocationDirectory } from './starter-project.ts';
+import { companionStarterSet, derivedId, derivedName, invocationDirectory } from './starter-project.ts';
+import { validateNativeIntegrations, type NativeProjectIntegrations } from '../companion/native-contract.mjs';
+import type { AuthoringDocument } from '../companion/authoring-contract.ts';
+/** The starter's declared native integrations, read through their own contract. */
+function nativeIntegrations(document?: AuthoringDocument): NativeProjectIntegrations | undefined {
+  return document?.design.nativeIntegrations === undefined ? undefined : validateNativeIntegrations(document.design.nativeIntegrations);
+}
 type Prompt = (query: string) => Promise<string>;
 type Write = (text: string) => void;
 /** Ask only for what is missing; every answer still passes the operation's own validation. */
@@ -45,8 +51,8 @@ export async function guidedStarter(request: Request, context: Context, prompt: 
   delete options.values; options.answers = JSON.stringify(values);
   if (d.generator.kind === 'companion') {
     if (options.airship === undefined && options['no-airship'] === undefined && /^y(?:es)?$/i.test((await prompt('Enable optional Airship tooling? No install or launch [y/N]: ')).trim())) options.airship = true;
-    const { catalog } = await starterCatalog(context);
-    const native = catalog.starters.find(entry => entry.id === options.starter)?.document.design?.nativeIntegrations;
+    const { starters } = await companionStarterSet(context);
+    const native = nativeIntegrations(starters.find(entry => entry.definition.id === options.starter)?.document);
     if (native?.fileTypes.length === 1 && options.extension === undefined) options.extension = (await prompt(`Custom extension [${native.fileTypes[0]!.extension}]: `)).trim() || native.fileTypes[0]!.extension;
     if (native?.contextMenus.length === 1 && options.extensions === undefined) options.extensions = (await prompt(`File extension filters [${native.contextMenus[0]!.extensions.join(',')}]: `)).trim() || native.contextMenus[0]!.extensions.join(',');
   }

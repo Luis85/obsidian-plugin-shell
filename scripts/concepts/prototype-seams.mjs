@@ -1,4 +1,4 @@
-/** Exact, additive composition seams: the historical v5 fixtures are never rewritten. */
+/** Exact, additive composition seams over the assembled build base (the current format is project v6 only). */
 export function composePrototypeSeams(source) {
   let program = source;
   const once = (from,to) => { if(program.split(from).length!==2)throw Error('PROTOTYPE_ASSEMBLY: Ambiguous seam '+from.slice(0,100));program=program.replace(from,to); };

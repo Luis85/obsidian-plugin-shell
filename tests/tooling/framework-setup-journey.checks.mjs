@@ -12,6 +12,7 @@ import { result } from '../../scripts/framework/contracts.ts';
 import { assembleStarterPack } from '../../scripts/starters/operations.ts';
 import { zip } from '../../scripts/framework/zip.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 const frameworkRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'setup-journey-')));
@@ -64,7 +65,7 @@ test('source choice ambiguity, unknown starters and native options without a sta
 });
 test('headless import preserves imported identity; wizard does not request a replacement identity for JSON', async t => {
   const ctx = await fixture(t);
-  const document = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  const document = starterDocument('quick-capture');
   document.project.author = 'Synthetic author';
   await writeFile(join(ctx.root, 'input.json'), JSON.stringify(document));
   const prompts = [], answers = ['json', 'input.json', ''];
@@ -163,7 +164,7 @@ test('a reviewed generation hash survives the resume adapter instead of being re
 
 async function customConfigured(t) {
   const ctx = await fixture(t);
-  const input = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/starters/quick-capture.companion.json')));
+  const input = starterDocument('quick-capture');
   input.project = { ...input.project, id: 'capture', name: 'Capture', author: 'Example' };
   input.settings = { codebaseFolder: 'application', testsFolder: 'checks' };
   await writeFile(join(ctx.root, 'input.json'), JSON.stringify(input));

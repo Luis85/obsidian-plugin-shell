@@ -46,7 +46,7 @@ test('CLI has headless JSON parity and rejects unsupported commands', () => {
   assert.equal(run(['help']).exitCode, 0);
 });\n` : ''}`;
 }
-/** Pure target adapter downstream of the shared parser, migration, model and reference validation. */
+/** Pure target adapter downstream of the shared parser, model and reference validation. */
 export function renderStarterProject(model: Model, template: TemplateSnapshot, input: ProjectSelection): Artifact[] {
   const selected = validateProjectSelection(input);
   const id = String(model.project.id), name = String(model.project.name);

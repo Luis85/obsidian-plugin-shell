@@ -5,7 +5,7 @@ import { visualNodes, visualLocate, visualLiteral, visualNuxt } from '../../scri
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { visualInstantiateLayout, visualSaveLayout } from '../../scripts/companion/visual/visual-layout.mjs';
 import * as cmd from '../../scripts/companion/visual/visual-commands.mjs';
-const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-v5.json', 'utf8'));
+const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-store.json', 'utf8'));
 const store = () => structuredClone(seed);
 const pageRef = s => ({ kind: 'page', id: s.pages[0].id });
 const byName = (nodes, name) => visualNodes(nodes).find(n => n.name === name);

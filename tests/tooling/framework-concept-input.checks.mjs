@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { decodeConceptInput } from '../../scripts/framework/concept-input.ts';
-const project = await readFile(new URL('../../docs/concepts/companion/starters/blank.companion.json',import.meta.url),'utf8');
+import { starterDocumentText } from '../support/starter-documents.mjs';
+const project = starterDocumentText('blank');
 const direct = `<script type="application/json" id="companion-project">${project}</script>`;
 const digest = value => createHash('sha256').update(value).digest('hex');
 const decode = html => decodeConceptInput(Buffer.from(html), 'html');

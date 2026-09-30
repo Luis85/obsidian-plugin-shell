@@ -17,7 +17,7 @@ assert.ok(npm, 'QUALIFIED_NPM must select the qualified npm CLI.');
 await mkdir(out, { recursive: true });
 // Fixed scratch directory under reports only. A prior retained run is never mistaken for this run.
 await rm(project, { recursive: true, force: true });
-const doc = withAirshipOption(JSON.parse(await readFile('docs/concepts/companion/starters/quick-capture.companion.json', 'utf8')), { airship: true });
+const doc = withAirshipOption(JSON.parse(await readFile('configs/starters/quick-capture.json', 'utf8')).generator.document, { airship: true });
 doc.tooling.airship = { enabled: true, agent: 'codex', targetPort: 5741, port: 5742 };
 const compiled = await compileProject({ source: JSON.stringify(doc), template: await loadTemplateSnapshot(root) });
 assert.equal(compiled.status, 'ok', JSON.stringify(compiled.diagnostics));

@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { JourneyProjectStore, importJourneyProject, projectFilePath } from '../../scripts/companion/journey/project-store.ts';
 import { SitemapSession } from '../../scripts/companion/sitemap/session.ts';
 import { canonicalKey } from '../../scripts/companion/sitemap/safety.ts';
 import { editorBindings } from '../../scripts/companion/sitemap/editor-bindings.ts';
 import { journeyVaultFiles } from '../../scripts/companion/runtime/journey-vault.ts';
-const seed = await readFile(new URL('../../docs/concepts/companion/starters/quick-capture.companion.json', import.meta.url), 'utf8');
+import { starterDocumentText } from '../support/starter-documents.mjs';
+const seed = starterDocumentText('quick-capture');
 function fixture(t) {
   let raw = seed, writes = 0, outcome = null, release = null;
   const port = { async read() { return raw; }, async create(_path, content) {

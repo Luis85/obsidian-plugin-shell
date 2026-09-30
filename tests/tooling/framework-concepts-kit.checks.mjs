@@ -10,6 +10,7 @@ import { assembleKit, installedCompiler } from '../../scripts/framework/kit.ts';
 import { extractArchive } from './framework-archive-fixture.mjs';
 import { zip } from '../../scripts/framework/zip.ts';
 import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
 function cli(dir, args) {
@@ -24,7 +25,7 @@ test('an extracted dependency-free kit imports a feature concept, generates its 
   const files=await assembleKit({root,frameworkRoot:root},await installedCompiler());
   await extractArchive(zip(files),dir);
   await mkdir(join(dir,'docs/concepts/capture'),{recursive:true});
-  const project=JSON.parse(await readFile(join(root,'docs/concepts/companion/starters/blank.companion.json'),'utf8'));project.project.author='Test Author';
+  const project=starterDocument('blank');project.project.author='Test Author';
   await writeFile(join(dir,'docs/concepts/capture/project.json'),JSON.stringify(project));
   assert.equal(cli(dir,['concept','schema']).status,'ok');
   assert.equal(cli(dir,['setup','--input','docs/concepts/capture/project.json','--yes']).status,'applied');

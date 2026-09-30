@@ -45,12 +45,12 @@ async function prepare(context: Context, input: string) {
     conceptRequire(current && current.sha256 === receipt.resultSha256 && current.document.project.id === receipt.projectId,
       'CONCEPT_REPLAY_CHANGED', 'This concept was already imported, but the project has changed. Create a new reviewed improvement instead of replaying an old snapshot.');
     return { source, current, referenceOnly: false as const, receiptPath, receipt, candidate: current.document,
-      changes: [], migration: null, replay: true, concept };
+      changes: [], replay: true, concept };
   }
   const applied = applyConcept(concept, current);
   candidateSummary(applied.document);
   return { source, current, referenceOnly: false as const, receiptPath, receipt: null, candidate: applied.document,
-    changes: applied.changes, migration: applied.migration, replay: false, concept };
+    changes: applied.changes, replay: false, concept };
 }
 
 /** No compiler/build processes or storage writes are performed by discovery and inspection. */
@@ -67,7 +67,7 @@ export async function inspectConcept(request: Request, context: Context) {
   if (prepared.referenceOnly) return { ...provenance, disposition: 'reference-only',
     reason: prepared.source.decoded.status === 'reference-only' ? prepared.source.decoded.reason : '' };
   return { ...provenance, disposition: 'data-compatible', mode: prepared.concept.mode,
-    baseSha256: prepared.current?.sha256 ?? null, replay: prepared.replay, migration: prepared.migration, changes: prepared.changes,
+    baseSha256: prepared.current?.sha256 ?? null, replay: prepared.replay, changes: prepared.changes,
     replacement: prepared.concept.mode === 'project' && !!prepared.current && !prepared.replay,
     candidateSha256: hash(serializeJson(prepared.candidate)), ...candidateSummary(prepared.candidate),
     acceptance: 'not-inferred', next: 'concept import with the same input to review filesystem changes; generation remains separate.' };
@@ -107,6 +107,6 @@ export async function conceptImportPlan(request: Request, context: Context) {
     plan.changes.find(change => change.path === receiptPath)?.beforeHash === null, 'CONCEPT_BASE_STALE', 'Concept input or receipt changed during preparation.');
   return { plan, hash: hash(serializeJson({ input: source.sha256, base: current?.sha256 ?? null })), conflicts: [] as string[],
     summary: { ...imported.summary, mode: concept.mode, source: source.path, sourceSha256: source.sha256,
-      changes: prepared.changes, migration: prepared.migration, replacement: concept.mode === 'project' && !!current,
+      changes: prepared.changes, replacement: concept.mode === 'project' && !!current,
       replay: false, preservation: 'Original concept and implementation files unchanged.', execution: 'not-run' } };
 }

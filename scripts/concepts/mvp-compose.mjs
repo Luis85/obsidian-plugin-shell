@@ -9,7 +9,8 @@ export function composeMvp(base,bundle,css,bridge,graphStyle,startup) {
   const replacements={
     validateCompanionDocument:'function validateCompanionDocument(v){return CompanionJourney.validateAuthoringDocument(v);}',
     parseCompanionDocument:'function parseCompanionDocument(v){return CompanionJourney.parseAuthoringDocument(v);}',
-    migrateCompanionDocument:'function migrateCompanionDocument(v){const r=CompanionJourney.migrateAuthoringDocument(v);return {document:r.document,report:r.report?.legacy??null};}',
+    // Current format only: earlier project versions are rejected by the v6 contract, never migrated.
+    migrateCompanionDocument:'function migrateCompanionDocument(v){return {document:CompanionJourney.validateAuthoringDocument(v),report:null};}',
     companionDesignKey:'function companionDesignKey(k){return CompanionJourney.authoringDesignKey(k);}',
     sitemapView:'function sitemapView(){return `<div id="jm-root" class="ps--plugin-shell" data-plugin-ui="plugin-shell"></div>`;}',
   };

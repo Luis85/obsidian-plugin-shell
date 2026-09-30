@@ -4,7 +4,8 @@ import { parseDesignData } from '../contracts/json-data.mjs';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
 import { portablePath, record, validateDefinition } from './validation.ts';
-import type { LoadedStarter } from './types.ts';
+import type { CompanionStarter, LoadedStarter } from './types.ts';
+import { validateAuthoringDocument } from '../companion/authoring-contract.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
 const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
@@ -56,13 +57,8 @@ export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
   }
   return results;
 }
-/** Adapter for the pre-existing Companion authoring/compiler contract. No separate source of truth. */
-export function companionCatalog(entries: LoadedStarter[]) {
-  return { schemaVersion: 1, starters: entries.filter(entry => entry.definition.generator.kind === 'companion').map(entry => {
-    const d = entry.definition;
-    requireThat(d.generator.kind === 'companion', 'STARTER_KIND', 'Expected a Companion definition.');
-    return { id: d.id, name: d.name, category: d.category, level: d.level, summary: d.summary, outcome: d.outcome,
-      includes: d.includes, implementation: d.implementation, tags: d.tags, version: d.version,
-      file: d.id + '.companion.json', sha256: entry.sha256, document: d.generator.document };
-  }) };
+/** The definitions that embed an editable Companion project v6 document; no separate catalog or synthetic file names. */
+export function companionStarters(entries: LoadedStarter[]): CompanionStarter[] {
+  return entries.flatMap(entry => entry.definition.generator.kind === 'companion'
+    ? [{ ...entry, document: validateAuthoringDocument(entry.definition.generator.document) }] : []);
 }

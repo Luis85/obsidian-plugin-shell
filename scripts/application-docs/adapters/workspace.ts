@@ -1,5 +1,5 @@
 import { join, resolve } from 'node:path';
-import { parseAuthoringDocument, migrateAuthoringDocument } from '../../companion/authoring-contract.ts';
+import { parseAuthoringDocument } from '../../companion/authoring-contract.ts';
 import { configuration } from '../../framework/configuration.ts';
 import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Entity, type Resolutions } from '../domain/contracts.ts';
 import { readDocumentationSettings, validateSettings } from './settings.ts';
@@ -12,7 +12,7 @@ export async function readWorkspace(root: string, args: string[], output?: strin
   const settingsRead = await readDocumentationSettings(root, config ? [config.paths.codebaseFolder, config.paths.testsFolder, config.paths.testVaultFolder] : [] , output);
   const { settings, projectPath } = settingsRead;
   const projectBytes = await readBytes(join(root, projectPath)); insist(projectBytes, 'DOCS_PROJECT_REQUIRED', 'Run setup or project import first.');
-  const project = migrateAuthoringDocument(parseAuthoringDocument(decode(projectBytes))).document;
+  const project = parseAuthoringDocument(decode(projectBytes));
   const makerSetupBytes = config ? null : await readBytes(join(root, 'configs/project-setup.json'));
   const indexBytes = await readBytes(join(root, settings.indexFile), 16_000_000);
   let index: DocsIndex = { schemaVersion: 1, project: project.project.id, entries: {} };

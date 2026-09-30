@@ -1,13 +1,13 @@
 /** Versioned compiler data contracts. No host, filesystem, process or UI dependencies. */
 export type OutputKind = 'obsidian-plugin' | 'clickdummy' | 'project';
 export interface StorybookOptions { enabled?: boolean; generateStories?: boolean }
-export type Phase = 'parse' | 'migrate' | 'validate' | 'resolve' | 'lower' | 'emit';
+export type Phase = 'parse' | 'validate' | 'resolve' | 'lower' | 'emit';
 export type Severity = 'error' | 'warning' | 'info';
 export interface SourceLocation {
   file: string;
   jsonPointer: string;
   entityId?: string;
-  /** Migration-derived locations name the normalized document rather than guessing old offsets. */
+  /** Model-derived locations name the normalized document rather than guessing input offsets. */
   document?: 'input' | 'normalized';
 }
 export interface CompilerDiagnostic {
@@ -58,7 +58,6 @@ export interface Compilation<Model> {
   status: 'ok' | 'failed' | 'cancelled';
   outputKind: OutputKind;
   model?: Model;
-  migration: unknown;
   diagnostics: CompilerDiagnostic[];
   artifacts: Artifact[];
   fingerprint: string | null;

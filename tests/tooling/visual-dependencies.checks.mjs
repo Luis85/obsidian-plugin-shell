@@ -5,7 +5,7 @@ import { visualExternal, visualLiteral, visualNodes, visualIsPackage, visualIsEx
 import { validateVisualDesigns } from '../../scripts/companion/visual/visual-validate.mjs';
 import { visualSetDependencies, visualPublish, visualDuplicateNode } from '../../scripts/companion/visual/visual-commands.mjs';
 import { visualSession, visualTransition, visualVisible } from '../../scripts/companion/visual/visual-session.mjs';
-const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-v5.json', 'utf8'));
+const seed = JSON.parse(await readFile('tests/fixtures/companion/visual-store.json', 'utf8'));
 function withEditor() {
   const s = structuredClone(seed), c = s.components[0];
   c.dependencies = [{ package: '@tiptap/vue-3', version: '2.11.5', purpose: 'Rich text editing' }];

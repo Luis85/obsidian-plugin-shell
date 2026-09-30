@@ -25,8 +25,7 @@ export async function planProject(options:GenerateOptions) {
   if(compiled.status!=='ok' || !compiled.model)throw new CompilationFailure(compiled.diagnostics);
   const output=options.output ?? compiled.artifacts;
   const selection=generationSelection(compiled.model,output,options.scope);
-  const migration=compiled.migration as {interactionIds?:Record<string,string>} | null;
-  const planned=await planArtifacts({...options,templateRoot,selection},{...input,migration},compiled.model,output);
+  const planned=await planArtifacts({...options,templateRoot,selection},input,compiled.model,output);
   return {...planned,summary:{...planned.summary,compiler:{version:compiled.compilerVersion,outputKind:compiled.outputKind,
     fingerprint:compiled.fingerprint,readiness:compiled.readiness,diagnostics:compiled.diagnostics}}};
 }

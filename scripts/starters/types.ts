@@ -1,5 +1,6 @@
 /** Versioned, data-only recipes. Hosts implement these primitives, never starter IDs. */
 import type { ProjectGenerator } from '../compiler/domain/project-starter.ts';
+import type { AuthoringDocument } from '../companion/authoring-contract.ts';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type InputValue = string | boolean | number;
 export interface StarterInput {
@@ -19,6 +20,8 @@ export interface StarterDefinition {
   files: StarterFile[]; processes: StarterProcess[]; firstRun: string[]; nextSteps: string[];
 }
 export interface LoadedStarter { definition: StarterDefinition; file: string; sha256: string; bytes: Buffer }
+/** A loaded definition whose generator embeds a validated Companion project v6 document. */
+export interface CompanionStarter extends LoadedStarter { document: AuthoringDocument }
 export interface StarterReceipt {
   schemaVersion: 1; starter: { id: string; name: string; version: string; sha256: string };
   values: Record<string, InputValue>; processes: StarterProcess[]; firstRun: string[]; nextSteps: string[];

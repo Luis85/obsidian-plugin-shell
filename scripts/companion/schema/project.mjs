@@ -36,7 +36,7 @@ const schema = {
     semanticValidator: 'scripts/companion/authoring-contract.ts#validateAuthoringDocument',
     generationCommand: 'node shell.mjs compiler check --input project.json --json',
     limits: { utf8Bytes: 4000000, depth: 40, values: 120000, totalJourneySteps: 4096 },
-    checks: ['all retained subsystem validators', 'portable folder names/overlap', 'unique stable IDs', 'referential integrity', 'containment/dependency cycles', 'route collisions', 'component contracts/pins', 'bounded UTF-8 input'],
+    checks: ['only project schema 6 (earlier versions are rejected, never migrated)', 'all subsystem validators', 'portable folder names/overlap', 'unique stable IDs', 'referential integrity', 'containment/dependency cycles', 'route collisions', 'component contracts/pins', 'bounded UTF-8 input'],
   },
 };
 /** Each caller gets an isolated schema, so mutable help/agent consumers cannot change the contract. */

@@ -37,7 +37,7 @@ test('extracted kit discovers v6 schema, sets up a starter, resumes generation a
   assert.deepEqual(await readdir(dir), initial);
   assert.equal(cli(dir, [...args, '--apply', preview.data.planHash]).status, 'applied');
   const validated = cli(dir, ['project', 'validate', '--input', 'design/project.json']);
-  assert.equal(validated.data.inputVersion, 6); assert.deepEqual(validated.data.written, []);
+  assert.equal(validated.data.schemaVersion, 6); assert.deepEqual(validated.data.written, []);
   const generation = cli(dir, ['generate']); assert.equal(generation.status, 'planned');
   const before = cli(dir, ['setup', 'status']); assert.equal(before.data.generated, false);
   const generated = cli(dir, ['setup', 'resume', '--stage', 'generate', '--resume-hash', before.data.resumeHash, '--apply', generation.data.planHash, '--yes']);

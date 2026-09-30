@@ -1,5 +1,5 @@
 import { OperationError, requireThat } from './contracts.ts';
-import { companionRelativeFolder } from '../companion/project-contract.mjs';
+import { companionRelativeFolder, type AuthoringDocument } from '../companion/authoring-contract.ts';
 export interface Identity { id: string; name: string; author: string; version: string; description: string }
 export interface Configuration {
   schemaVersion: 1;
@@ -47,7 +47,7 @@ export function configuration(value: unknown): Configuration {
 export function defaults(project: Identity): Configuration {
   return configuration({ schemaVersion: 1, project, paths: { codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian' } });
 }
-export function resolveImport(config: Configuration | null, document: Record<string, unknown>, policy?: string) {
+export function resolveImport(config: Configuration | null, document: AuthoringDocument, policy?: string) {
   requireThat(policy === undefined || ['project', 'import'].includes(policy), 'INVALID_POLICY', 'Resolution must be project or import.');
   const imported = identity(document.project), settings = object(document.settings);
   const proposed = configuration({ ...defaults(imported), paths: { ...defaults(imported).paths, ...settings } });

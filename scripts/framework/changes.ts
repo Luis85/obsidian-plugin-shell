@@ -4,19 +4,18 @@ import { withAirshipOption } from '../companion/tooling-options.ts';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { join, resolve } from 'node:path';
 import { createFilePlan } from '../shared/file-plan.mjs';
-import { parseAuthoringDocument as parseCompanionDocument, authoringReader, AUTHORING_VERSION as COMPANION_VERSION } from '../companion/authoring-contract.ts';
+import { parseAuthoringDocument, AUTHORING_VERSION as COMPANION_VERSION } from '../companion/authoring-contract.ts';
 import { readCompanionProject } from '../companion/read-project.mjs';
 import { projectModel } from '../companion/compiler/model.ts';
 import { defaults, configuration, identity, object, configFile, designFile, resolveImport, type Configuration } from './configuration.ts';
 import { exists, hash, readBounded, readConfiguration, readJson } from './files.ts';
 import { requireThat, stringOption, type Context, type Request } from './contracts.ts';
-const migrateCompanionDocument = authoringReader.migrate;
 type Entry = { path: string; content: string };
 export async function inspectDesign(context: Context, input: string) {
   requireThat(input !== '-' || context.inputText !== undefined, 'STDIN_REQUIRED', 'Supply JSON on stdin.');
   const source = input === '-'
-    ? (() => { const { document, report } = migrateCompanionDocument(parseCompanionDocument(context.inputText!)); return { content: Buffer.from(context.inputText!), document, migration: report }; })()
-    : await readCompanionProject({ input: resolve(context.root, input), vault: context.root, target: '.' }, authoringReader);
+    ? { content: Buffer.from(context.inputText!), document: parseAuthoringDocument(context.inputText!) }
+    : await readCompanionProject({ input: resolve(context.root, input), vault: context.root, target: '.' });
   const model = projectModel(source.document);
   return { source, model };
 }

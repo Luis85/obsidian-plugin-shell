@@ -6,8 +6,9 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),template=await loadTemplateSnapshot(root);
-const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
+const source=starterDocumentText('quick-capture');
 test('browser output shares generated product code and packages an explicit offline build entry',async()=>{
   const plugin=await compileProject({source,template});const browser=await compileProject({source,template,outputKind:'clickdummy'});
   assert.equal(browser.status,'ok',JSON.stringify(browser.diagnostics));
@@ -66,8 +67,7 @@ test('pure rendering never schedules a runtime provider, timer or network call',
 });
 
 test('v6 authoring routes survive compiler analysis, emission and both output targets', async () => {
-  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
-  const document = migrateAuthoringDocument(JSON.parse(source)).document;
+  const document = structuredClone(JSON.parse(source));
   const surface = document.design.nodes.find(node => !['group','action','modal'].includes(node.kind));
   document.design.sitemap = { schema: 1, routes: [{ id: 'compiler-route', surface: surface.id, path: '/capture/:recordId' }], journeys: [] };
   const text = JSON.stringify(document);
@@ -83,12 +83,11 @@ test('v6 authoring routes survive compiler analysis, emission and both output ta
   assert.equal(JSON.stringify(document), text);
 });
 test('typed authoring validation failures are schema diagnostics, never internal compiler defects', async () => {
-  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
   for (const mutate of [
     document => { document.schemaVersion = document.design.schema = 7; },
     document => { document.design.sitemap = { schema: 1, routes: [{ id: 'bad', surface: 'absent', path: '/bad' }], journeys: [] }; },
   ]) {
-    const document = migrateAuthoringDocument(JSON.parse(source)).document; mutate(document);
+    const document = structuredClone(JSON.parse(source)); mutate(document);
     const result = await compileProject({ source: JSON.stringify(document), template });
     assert.equal(result.status, 'failed'); assert.deepEqual(result.artifacts, []);
     assert.ok(result.diagnostics.some(item => item.code === 'COMPILER_SCHEMA_INVALID'), JSON.stringify(result.diagnostics));

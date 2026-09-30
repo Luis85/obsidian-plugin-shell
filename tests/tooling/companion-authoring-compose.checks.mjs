@@ -4,8 +4,10 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import ts from 'typescript';
 import { composeMvp } from '../../scripts/concepts/mvp-compose.mjs';
-import { validateAuthoringDocument, migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-import { COMPANION_VERSION, validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
+import { createHash } from 'node:crypto';
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { starterProjection } from '../../scripts/starters/browser.ts';
+import { companionStarterIds, starterDocument, starterPath } from '../support/starter-documents.mjs';
 const root = new URL('../../', import.meta.url);
 const base = await readFile(new URL('docs/concepts/companion/index.html', root), 'utf8');
 const graphStyle = await readFile(new URL('docs/concepts/companion/vendor/vue-flow.scoped.css', root), 'utf8');
@@ -16,23 +18,27 @@ function declaration(source, name) {
   const ast = ts.createSourceFile('composed.js', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
   return ast.statements.find(s => ts.isFunctionDeclaration(s) && s.name?.text === name)?.getText(ast);
 }
-test('modern export does not reinterpret immutable legacy starter bytes as v6', async () => {
+test('the current workspace validates external v6 starters and rejects retired project versions', async () => {
   const html = composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle, startup), composed = program(html);
-  const catalog = JSON.parse(await readFile(new URL('docs/concepts/companion/starters/catalog.json', root), 'utf8'));
-  for (const entry of catalog.starters) entry.document = JSON.parse(await readFile(new URL('docs/concepts/companion/starters/' + entry.file, root), 'utf8'));
+  const catalog = { schemaVersion: 1, starters: [] };
+  for (const id of companionStarterIds()) {
+    const bytes = await readFile(new URL(starterPath(id), root));
+    catalog.starters.push(starterProjection(JSON.parse(bytes.toString('utf8')), createHash('sha256').update(bytes).digest('hex')));
+  }
   // Current runtime starts empty: starter definitions are external JSON, never embedded seed data.
   assert.match(html, /<script type="application\/json" id="project-starters-data">\{"schemaVersion":1,"starters":\[\]\}<\/script>/);
   assert.doesNotMatch(html, /id="companion-visual-seed"/);
-  const context = vm.createContext({ validateCompanionDocument, validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)), COMPANION_VERSION: 6, STARTER_CATALOG_VERSION: 1 });
+  const journey = { validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)) };
+  const context = vm.createContext({ CompanionJourney: journey, validateAuthoringDocument: journey.validateAuthoringDocument, STARTER_CATALOG_VERSION: 1 });
   const fields = /const STARTER_FIELDS = ([^;]+);/.exec(composed)[0];
-  const validate = vm.runInContext(fields + '\n' + ['starterAssert','starterText','validateStarterCatalog'].map(n => declaration(composed,n)).join('\n') + '\nvalidateStarterCatalog;', context);
+  const validate = vm.runInContext(fields + '\n' + ['validateCompanionDocument','starterAssert','starterText','validateStarterCatalog'].map(n => declaration(composed,n)).join('\n') + '\nvalidateStarterCatalog;', context);
   assert.equal(validate(catalog), catalog);
-  // The retained v5 bytes are validated as v5 and never relabeled to the current version.
-  assert.ok(catalog.starters.every(s => s.document.schemaVersion === COMPANION_VERSION));
-  const bad = structuredClone(catalog); bad.starters[0].document.schemaVersion = 6;
-  assert.throws(() => validate(bad));
+  assert.ok(catalog.starters.every(s => s.document.schemaVersion === 6));
+  // A retired v5 document is rejected by the v6 contract; it is never relabeled or migrated.
+  const retired = structuredClone(catalog); retired.starters[0].document.schemaVersion = 5; retired.starters[0].document.design.schema = 5;
+  assert.throws(() => validate(retired), /only schema 6 is supported/);
   assert.match(composed, /const COMPANION_VERSION = 6;/);
-  assert.match(declaration(composed, 'validateStarterCatalog'), /\[5, 6\]\.includes\(entry\.document\.schemaVersion\)/);
+  assert.equal(declaration(composed, 'migrateCompanionDocument'), 'function migrateCompanionDocument(v){return {document:CompanionJourney.validateAuthoringDocument(v),report:null};}');
 });
 test('missing scoped graph styles fail closed; declarations and keyframes survive remapping', () => {
   assert.throws(() => composeMvp(base, '', '', bridge, undefined, startup), /MVP_ASSEMBLY/);
@@ -40,7 +46,7 @@ test('missing scoped graph styles fail closed; declarations and keyframes surviv
   assert.ok(html.includes(graphStyle.replaceAll('#vf-root','#jm-root')));
   assert.match(html, /#jm-root \.vue-flow__container \{\s*position: absolute;/);
 });
-test('composition leaves the legacy artifact unchanged and escapes embedded script terminators', () => {
+test('composition leaves the v5 build base unchanged and escapes embedded script terminators', () => {
   const html = composeMvp(base, 'var test="</script>";', '', bridge, graphStyle, startup);
   assert.match(html, /var test="<\\\/script>"/);
   assert.equal(program(base).includes('const COMPANION_VERSION = 5;'), true);
@@ -48,12 +54,11 @@ test('composition leaves the legacy artifact unchanged and escapes embedded scri
 
 test('current companion transfer preserves both optional tooling switches without enabling either', async () => {
   const composed = program(composeMvp(base, 'var CompanionJourney={};', '', bridge, graphStyle, startup));
-  const input = migrateAuthoringDocument(JSON.parse(await readFile(new URL('docs/concepts/companion/starters/quick-capture.companion.json', root), 'utf8'))).document;
+  const input = starterDocument('quick-capture');
   // The browser bundle validates within one realm. Re-home this VM fixture's plain data before
   // crossing into the real host-realm contract; production prototype/accessor checks stay strict.
   const context = vm.createContext({ COMPANION_FORMAT: input.kind, CompanionJourney: {
     validateAuthoringDocument: value => validateAuthoringDocument(structuredClone(value)),
-    migrateAuthoringDocument: value => migrateAuthoringDocument(structuredClone(value)),
   },
     designCopy: value => JSON.parse(JSON.stringify(value)), structuralDesign: () => true, importCounter: () => 0,
     newPlanningProject: identity => ({ ...identity, design: {} }), validSavedDesign: () => true,

@@ -10,6 +10,7 @@ import { companionProjectSchema } from '../../scripts/companion/schema/project.m
 import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 import { schemaCorpus } from './companion-schema-fixture.mjs';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const corpus = schemaCorpus();
 const sha = text => createHash('sha256').update(text).digest('hex');
@@ -59,17 +60,24 @@ test('schema discovery never reads executable project configuration and help doc
     assert.equal(parseCliArguments(['project', 'validate', '--input', '-']).command, 'project validate');
   } finally { await rm(scratch, { recursive: true, force: true }); }
 });
-test('project validate preserves input bytes, reports migration and never leaks content or infers business acceptance', async () => {
-  const bytes = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
+test('project validate preserves input bytes, never leaks content or infers business acceptance', async () => {
+  const bytes = starterDocumentText('companion-plugin');
   const { output, result } = cli(['project', 'validate', '--input', '-'], root, bytes);
   assert.equal(output.status, 0, output.stderr);
   assert.equal(result.data.inputSha256, sha(bytes));
-  assert.equal(result.data.inputVersion, 5);
-  assert.equal(result.data.normalizedVersion, 6);
+  assert.equal(result.data.schemaVersion, 6);
+  assert.equal('migration' in result.data || 'normalizedVersion' in result.data, false);
   assert.deepEqual(result.data.written, []);
   assert.equal(result.data.contentIncluded, false);
   assert.equal(result.data.generationReadiness, 'not-inferred');
   assert.equal('document' in result.data, false);
   assert.equal(result.data.counts.surfaces, 28);
   assert.equal(cli(['project', 'validate', '--input', '-'], root, '{invalid').output.status, 1);
+});
+test('project validate rejects a retired v5 export with its version diagnostic and writes nothing', async () => {
+  const bytes = await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const { output, result } = cli(['project', 'validate', '--input', '-'], root, bytes);
+  assert.equal(output.status, 1);
+  assert.equal(result.diagnostics[0].code, 'COMPANION_VERSION');
+  assert.match(result.diagnostics[0].message, /schemaVersion 5; only schema 6 is supported\. Earlier formats are not migrated/);
 });

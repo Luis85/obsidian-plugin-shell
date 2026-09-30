@@ -1,16 +1,16 @@
 import { storybookFlags } from './storybook-options.ts';
 /** One-command project creation from a reviewed local JSON starter. It composes the
- * existing catalog loader, identity-only customization and project compiler/plan
+ * definition loader, identity-only customization and project compiler/plan
  * engine; it never has its own template, hashing or file-writing rules. */
-import type { NativeProjectIntegrations } from '../companion/native-contract.mjs';
 import { mkdtemp, writeFile, rm, lstat, readdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { loadStarterCatalog } from '../companion/starter-files.mjs';
+import { companionStarters, loadDefinitions } from '../starters/repository.ts';
+import type { CompanionStarter } from '../starters/types.ts';
 import { listStarters } from '../starters/operations.ts';
 import { definitionProjectPlan } from '../starters/project.ts';
 import { completeDefinition } from '../starters/processes.ts';
-import { companionRelativeFolder } from '../companion/project-contract.mjs';
+import { companionRelativeFolder } from '../companion/authoring-contract.ts';
 import { planProject } from '../companion/compiler/plan.ts';
 import { exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
@@ -19,18 +19,16 @@ import { OperationError, requireThat, stringOption, type Context, type Request, 
 import { withAirshipOption } from '../companion/tooling-options.ts';
 import { exportedProject } from './project-from.ts';
 import { derivedPluginId, exportedIdProblem, exportedIdWarning, pluginIdProblem } from './plugin-id.ts';
-interface StarterEntry { id: string; name: string; category: string; level: string; summary: string; version: string; sha256: string; document: { project: { id: string }; design?: { nativeIntegrations?: NativeProjectIntegrations } } }
-interface StarterCatalog { starters: StarterEntry[] }
 interface StarterSummary { directory: string; nextSteps?: string[] }
 /** A kit or configured consumer carries its verified template under .framework/template. */
 async function templateRoot(context: Context): Promise<string> {
   if (!await exists(join(context.frameworkRoot, '.framework/kit.json'))) return context.frameworkRoot;
   await verifyKit(context.frameworkRoot); return join(context.frameworkRoot, '.framework/template');
 }
-export async function starterCatalog(context: Context): Promise<{ template: string; catalog: StarterCatalog }> {
+/** Companion starters from the invocation project's starter folder, with the template that generates them. */
+export async function companionStarterSet(context: Context): Promise<{ template: string; starters: CompanionStarter[] }> {
   const template = await templateRoot(context);
-  const catalog: StarterCatalog = await loadStarterCatalog(context.root);
-  return { template, catalog };
+  return { template, starters: companionStarters(await loadDefinitions(context.root)) };
 }
 export async function starterListing(context: Context): Promise<Result> {
   return listStarters(context, 'new');

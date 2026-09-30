@@ -9,8 +9,9 @@ import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { projectFiles } from '../../scripts/companion/compiler/project-files.ts';
 import { clickdummyCode } from '../../scripts/companion/compiler/clickdummy-code.ts';
 import { matches } from '../../scripts/companion/runtime/contract.ts';
+import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../',import.meta.url));
-const document = JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
+const document = selfProject();
 const model = projectModel(document);
 function emitted(m=model) { const files=new Map(); clickdummyCode(m,(path,content,ownership)=>files.set(path,{content,ownership})); return files; }
 test('clickdummy emits a browser composition using the same generated panels, services and visual context', () => {
@@ -60,8 +61,7 @@ test('full generator includes the public command, fixed browser entry and native
   assert.ok(page); assert.match(page[1].content,/:design-state="props.designState"/);
 });
 test('full v6 route declarations compile with stable IDs and parameter paths intact', async t => {
-  const { migrateAuthoringDocument } = await import('../../scripts/companion/authoring-contract.ts');
-  const v6 = migrateAuthoringDocument(document).document;
+  const v6 = structuredClone(document);
   const owner = v6.design.nodes.find(node => node.kind === 'page');
   v6.design.sitemap = { schema: 1, routes: [{ id: 'route-regression', surface: owner.id, path: '/record/:recordId' }], journeys: [] };
   const source = emitted(projectModel(v6)).get('harness/prototype/clickdummy.ts').content;

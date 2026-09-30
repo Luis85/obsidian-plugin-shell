@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPrototype } from '../../.claude/skills/companion-prototype-design/scripts/build-prototype.mjs';
 import { checkHtml } from '../../.claude/skills/companion-prototype-design/scripts/lib/offline.mjs';
+import { starterDocument } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const available = ['vite', 'typescript', 'vue', 'pinia', '@nuxt/ui'].every(name => fs.existsSync(path.join(root, 'node_modules', name, 'package.json')));
 test('real shared pipeline compiles a Nuxt UI button backed by Pinia into one offline HTML', {
@@ -22,7 +23,7 @@ test('real shared pipeline compiles a Nuxt UI button backed by Pinia into one of
   const componentImport = path.relative(harness, component).split(path.sep).join('/');
   const entry = path.join(harness, 'main.ts');
   fs.writeFileSync(entry, `import { createApp, nextTick } from 'vue';\nimport { createPinia } from 'pinia';\nimport ui from '@nuxt/ui/vue-plugin';\nimport Root from ${JSON.stringify(componentImport)};\nimport '../../../src/styles/app.css';\nconst app = createApp(Root); app.use(createPinia()); app.use(ui); app.mount('#prototype-app');\nvoid nextTick(() => { document.documentElement.dataset.prototypeReady = 'true'; });\n`);
-  const design = JSON.parse(fs.readFileSync(path.join(root, 'docs/concepts/companion/starters/blank.companion.json')));
+  const design = starterDocument('blank');
   design.project.id = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'))).id;
   const input = path.join(scratch, 'project.json'), output = path.join(scratch, 'prototype.html');
   fs.writeFileSync(input, JSON.stringify(design));

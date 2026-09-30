@@ -1,5 +1,5 @@
 import { setupDocumentation } from './docs-setup.ts';
-import { starterCatalog, derivedId, derivedName } from './starter-project.ts';
+import { companionStarterSet, derivedId, derivedName } from './starter-project.ts';
 import { readConfiguration } from './files.ts';
 import { requireThat, type Context, type Request, type Result } from './contracts.ts';
 
@@ -10,15 +10,15 @@ type Execute = (request: Request, context: Context) => Promise<Result>;
 export async function guidedSetup(request: Request, context: Context, prompt: Prompt, write: Write): Promise<Request> {
   const options = { ...request.options }, previous = await readConfiguration(context.root);
   if (!options.input && !options.starter && !options.blank && !previous) {
-    const { catalog } = await starterCatalog(context);
+    const { starters } = await companionStarterSet(context);
     write('Start with a reviewed starter, or import existing project JSON.\n');
-    for (const item of catalog.starters) write(`  ${item.id} — ${item.name} (${item.level})\n`);
+    for (const { definition: item } of starters) write(`  ${item.id} — ${item.name} (${item.level})\n`);
     const source = (await prompt('Starter ID, or json [blank]: ')).trim() || 'blank';
     if (source === 'json') {
       options.input = (await prompt('Project JSON path: ')).trim();
       requireThat(options.input, 'INPUT_REQUIRED', 'A JSON import needs a file path. No files were changed.');
     } else {
-      requireThat(catalog.starters.some(item => item.id === source), 'STARTER_UNKNOWN', 'Choose a listed starter ID. No files were changed.');
+      requireThat(starters.some(item => item.definition.id === source), 'STARTER_UNKNOWN', 'Choose a listed starter ID. No files were changed.');
       options.starter = source;
     }
   }

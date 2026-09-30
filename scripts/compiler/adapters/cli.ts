@@ -44,7 +44,7 @@ export async function compilerOperation(request: Request, context: Context): Pro
     artifacts: compiled.artifacts.length, diagnostics: compiled.diagnostics, readiness: compiled.readiness };
   const report = reportDirectory ? await writeReports(context.root, reportDirectory, recorder, summary, debug) : null;
   const data = { ...summary, diagnostics: undefined, ...(report ? { report } : {}),
-    ...(request.command === 'compiler inspect' && stage === 'ir' && compiled.model ? { ir: compiled.model, migration: compiled.migration } : {}),
+    ...(request.command === 'compiler inspect' && stage === 'ir' && compiled.model ? { ir: compiled.model } : {}),
     ...(inspectArtifacts ? { inventory: compiled.artifacts.map(({ path, ownership, producer }) => ({ path, ownership, producer })) } : {}),
     ...(compiled.model ? { project: compiled.model.project.id, screens: compiled.model.screens.length, components: compiled.model.components.length } : {}) };
   return { ...result(request.command, data, compiled.status), diagnostics: compiled.diagnostics };

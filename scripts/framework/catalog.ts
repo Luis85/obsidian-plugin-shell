@@ -32,7 +32,7 @@ export const commands: readonly Command[] = [
   { id: 'support report', summary: 'Collect an opt-in, allowlisted local support report without identities, paths, content or network calls.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'project measure', summary: 'Measure bounded model import/export, projection and arrangement locally; no UI or native qualification.', options: values('input', 'samples'), maxArgs: 0, effect: 'read' },
   { id: 'project schema', summary: 'Discover the versioned project-v6 transport schema and semantic validation boundary.', options: values('version'), maxArgs: 0, effect: 'read' },
-  { id: 'project validate', summary: 'Validate/migrate complete project JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
+  { id: 'project validate', summary: 'Validate complete project v6 JSON without generation or writes; no authored content in reports.', options: values('input'), maxArgs: 0, effect: 'read' },
   { id: 'airship status', summary: 'Read optional Airship configuration and local install state.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'airship enable', summary: 'Review enabling local safe Airship tooling; never installs or launches.', options: values('agent', 'target-port', 'port'), maxArgs: 0, effect: 'plan' },
   { id: 'airship disable', summary: 'Review disabling future Airship launches; preserve installed tooling and edits.', options: {}, maxArgs: 0, effect: 'plan' },

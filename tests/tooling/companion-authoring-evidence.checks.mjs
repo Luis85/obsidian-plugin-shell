@@ -4,15 +4,13 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
 import { authoringEvidence } from '../../scripts/companion/authoring-evidence.mjs';
-import { migrateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { selfProject } from '../support/starter-documents.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 async function fixture(t) {
   const root=await mkdtemp(join(tmpdir(),'authoring-evidence-')); t.after(()=>rm(root,{recursive:true,force:true}));
   const folder=join(root,'reports/companion-mvp');await mkdir(folder,{recursive:true});
-  const document=JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
-  const project=JSON.stringify(migrateAuthoringDocument(document).document), html='<!doctype html><title>Evidence</title>';
+  const project=JSON.stringify(selfProject()), html='<!doctype html><title>Evidence</title>';
   await writeFile(join(folder,'index.html'),html);await writeFile(join(folder,'companion-project.json'),project);
   await writeFile(join(folder,'build.json'),JSON.stringify({schema:1,project:hash(project),html:hash(html)}));
   return {root,folder,project,html};

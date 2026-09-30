@@ -1,9 +1,11 @@
-// Synthetic qualification design. Never substituted for the actual companion export.
+// Synthetic qualification design over the current (project v6) self-project starter. Never substituted for the actual companion export.
+import { readFileSync } from 'node:fs';
 import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { noteWireSchemas } from '../../scripts/companion/compiler/note-contracts.ts';
+// Reviewed visual page (IDs vp-5993, vn-5994..vn-6008, vi-6009) with typed controls, a mapped save and a slotted component.
+const boundaryPage = JSON.parse(readFileSync(new URL('./companion/boundary-page.json', import.meta.url), 'utf8'));
 export function boundaryProject(original) {
   const project = structuredClone(original), design = project.design;
-  project.schemaVersion=4;design.schema=4;
   const entity = structuredClone(design.semantic.entities[0]);
   entity.id = 'er-entity-900'; entity.slug = 'boundary-record'; entity.name = 'Boundary record'; entity.folder = 'Boundary/Records';
   entity.properties = [['title','text'],['amount','number'],['enabled','checkbox'],['category','text'],['due','date'],['body','text']].map(([key,type],i)=>({id:'er-property-'+(910+i),key,type,required:true}));
@@ -20,29 +22,12 @@ export function boundaryProject(original) {
   design.dataSources.sources.push(api);
   design.dataSources.testing.recipes.push({source:api.id,operation:api.operations[0].id,enabled:true,behavior:'fixture',dataset:'api-status',keyField:'id',scenario:'populated',latencyMs:0,errorStatus:503,rules:[{side:'output',path:'/status',provider:'literal',argument:'\"ready\"'}]});
   design.dataSources.sources.push(source); design.dataSources.nextId=1000;
-  const store=design.detailDesigns; store.schema=2; store.nextId=Math.max(store.nextId,6000);
   const owner={...structuredClone(design.nodes.find(n=>n.kind==='page')),id:'node-900',slug:'boundary-validation',label:'Boundary validation',components:[],nav:false,command:false,ribbon:false};
   design.nodes.push(owner);design.nextId=Math.max(design.nextId,1000);
-  const doc={id:'detail-document-5000',kind:'page',ownerId:owner.id,ownerLabel:owner.label,notes:'Boundary verification only',nodes:[],edges:[]};
-  const node=(id,kind,label,parentId='detail-node-5001')=>({id:'detail-node-'+(id+4900),kind,label,text:'',parentId,layout:'stack',position:{x:0,y:0},size:{width:240,height:120},component:null,props:{},binding:null,a11y:'Enter '+label,visibleIn:['default','loading','empty','error','disabled'],sourceBrickId:null});
-  doc.nodes.push(node(101,'region','Form',null));
-  for(const [id,kind,label] of [[102,'number','Amount'],[103,'checkbox','Enabled'],[104,'select','Category'],[105,'date','Due'],[106,'json-editor','Configuration'],[107,'markdown-editor','Body'],[108,'json-file','Import JSON'],[115,'datetime-local','Appointment'],[116,'textarea','Description']]) {
-    const field=node(id,'input',label); field.control={kind,...(kind==='select'?{options:[{value:'first',label:'First'},{value:'second',label:'Second'}]}:{} )}; doc.nodes.push(field);
-  }
-  doc.nodes.push(node(109,'button','Save'),node(110,'text','Saved records'));
-  const instance=node(111,'component','Review'); const definition=design.library.find(c=>c.id==='project-json-review');
-  instance.component={id:definition.id,label:definition.name,version:definition.version,variantId:'default'}; instance.slots={content:['detail-node-5012']};
-  const region=node(112,'region','Assigned slot',null), text=node(113,'text','Slot content',region.id); text.text='This content must render once in the reusable slot.';
-  doc.nodes.push(instance,region,text);
-  const draft=nodeId=>({kind:'draft',nodeId:'detail-node-'+(nodeId+4900)});
-  const input = {kind:'object',fields:{
-    requestId:{kind:'value',value:'boundary-request-1'},
-    values:{kind:'object',fields:{title:{kind:'value',value:'Boundary note'},amount:draft(102),enabled:draft(103),category:draft(104),due:draft(105),body:draft(107)}}
-  }};
-  doc.edges.push({id:'detail-edge-5014',source:'detail-node-5009',target:'detail-node-5010',event:'click',label:'Save mapped record',
-    notes:'Explicit mapping; no prose inference',acceptance:'The native adapter persists the entered values',targetSurfaceId:null,
-    action:{kind:'source',sourceId:source.id,operationId:source.operations[1].id,input}});
-  store.documents.push(doc);
-  store.documents[0].edges[0].action={kind:'emit',event:'select',payload:{kind:'value',value:'reviewed-project'}};
+  const visual=design.visualDesigns; visual.pages.push(structuredClone(boundaryPage)); visual.nextId=Math.max(visual.nextId,6010);
+  // The reusable review component's confirmation emits an explicit, mapped selection to its owning page.
+  const review=visual.components.find(c=>c.libraryId==='project-json-review'), confirm=review?.template[0]?.children?.[2]?.events?.[0];
+  if(!confirm||confirm.id!=='vi-114')throw new Error('BOUNDARY_FIXTURE: the self-project review confirmation moved.');
+  confirm.actions=[{kind:'emit',event:'select',payload:{kind:'value',value:'reviewed-project'}}];
   return project;
 }

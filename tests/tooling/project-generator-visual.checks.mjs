@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import { createApp, effectScope, nextTick, reactive } from 'vue';
 import { Window } from 'happy-dom';
+import { selfProject } from '../support/starter-documents.mjs';
 
 // Resolves through ancestor node_modules so the check also runs inside git worktrees.
 const tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
@@ -219,9 +220,8 @@ test('external adapters mount after render and never mount an element removed be
 });
 
 const { projectModel } = await import('../../scripts/companion/compiler/model.ts');
-const { migrateCompanionDocument } = await import('../../scripts/companion/project-contract.mjs');
 const { visualDefinitions, visualSpecs, visualNuxtImports, visualContractTypes, visualComponentPath, visualPagePath, visualComponentName, visualLibraryWithoutDefinition, visualPackages } = await import('../../scripts/companion/compiler/visual-model.ts');
-const self = migrateCompanionDocument(JSON.parse(await readFile('docs/concepts/companion/companion-project.json', 'utf8'))).document;
+const self = structuredClone(selfProject());
 test('model exposes validated definitions and explicit Nuxt UI imports', () => {
   const m = projectModel(self), store = visualDefinitions(m);
   assert.equal(visualSpecs(m).length, store.pages.length + store.components.length);
@@ -281,11 +281,12 @@ const { writeFile } = await import('node:fs/promises');
 const { readFileSync } = await import('node:fs');
 const { visualNodes } = await import('../../scripts/companion/visual/visual-ir.mjs');
 const { parse: parseSfc, compileTemplate } = await import('vue/compiler-sfc');
-/** Golden fixture: the reviewed v5 seed plus an editor wrapping a declared package and a placeholder component. */
+/** Golden fixture: the reviewed visual store fixture on the current self-project plus an editor wrapping a declared package and a placeholder component. */
 function goldenFixture() {
-  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-v5.json', 'utf8'));
-  const [page] = design.nodes.filter(n => n.kind === 'page');
-  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: null, components: [], bricks: [] })));
+  const doc = structuredClone(self), design = doc.design, store = JSON.parse(readFileSync('tests/fixtures/companion/visual-store.json', 'utf8'));
+  const [page] = design.nodes.filter(n => n.kind === 'page'), view = design.nodes.find(n => n.kind === 'view');
+  // Internal pages belong to the native view (the v6 sitemap contract).
+  design.nodes.push(...[['node-customers', 'customers', 'Customers'], ['node-settings', 'customer-settings', 'Settings']].map(([id, slug, label]) => ({ ...page, id, slug, label, parent: view.id, components: [], bricks: [] })));
   const [library] = design.library;
   design.library.push(...[['library-search', 'SearchField'], ['library-editor', 'RichEditor'], ['library-pending', 'PendingCard']].map(([id, name]) => ({ ...library, id, name })));
   const [source] = design.dataSources.sources, [operation] = source.operations;

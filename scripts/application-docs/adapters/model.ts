@@ -1,4 +1,4 @@
-import { validateAuthoringDocument, migrateAuthoringDocument, type AuthoringDocument } from '../../companion/authoring-contract.ts';
+import { validateAuthoringDocument, type AuthoringDocument } from '../../companion/authoring-contract.ts';
 import { visualNodes, type UiNode } from '../../companion/visual/visual-ir.mjs';
 import { docsObject as object, array, text, insist, keyOf, equal, validateEntity, type Entity, type DocType, type ObjectData } from '../domain/contracts.ts';
 import { restoreProject } from './restore.ts';
@@ -26,7 +26,7 @@ function extractEvents(root: unknown, ownerType: string, ownerId: string, projec
 }
 /** Complete projection: non-extracted validated fields stay in the explicit project context. */
 export function projectEntities(input: unknown): Entity[] {
-  const doc = structuredClone(migrateAuthoringDocument(input).document), design = object(doc.design);
+  const doc = structuredClone(validateAuthoringDocument(input)), design = object(doc.design);
   const project = doc.project.id, output: Entity[] = [], order: Record<string, string[]> = {};
   const add = (entity: Entity): void => { validateEntity(entity); output.push(entity); };
   const visual = design.visualDesigns === undefined ? undefined : object(design.visualDesigns);

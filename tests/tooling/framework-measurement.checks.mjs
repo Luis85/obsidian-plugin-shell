@@ -7,8 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { sampleSummary, measureOperation } from '../../scripts/framework/measurement.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
+const source=starterDocumentText('quick-capture');
 const request=(...args)=>parseCliArguments(args);
 
 test('measurements keep cold, warmup and all slow samples with nearest-rank statistics',async()=>{

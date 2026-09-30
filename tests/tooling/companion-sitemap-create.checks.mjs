@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { newSitemapSurface } from '../../scripts/companion/sitemap/create.ts';
 import { applySitemapCommand } from '../../scripts/companion/sitemap/commands.ts';
-import { validateCompanionDocument } from '../../scripts/companion/project-contract.mjs';
-const original=JSON.parse(await readFile(new URL('../../docs/concepts/companion/companion-project.json',import.meta.url),'utf8'));
+import { validateAuthoringDocument as validateCompanionDocument } from '../../scripts/companion/authoring-contract.ts';
+import { selfProject } from '../support/starter-documents.mjs';
+const original=selfProject();
 const owner=original.design.nodes.find(n=>n.kind==='view');
 
 test('new surfaces use complete canonical defaults and retain all existing definitions',()=>{

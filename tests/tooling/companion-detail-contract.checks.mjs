@@ -1,5 +1,5 @@
-// The retained legacy (companion v3/v4) detail and composition contracts. The detail editors are gone; these validators
-// still gate legacy imports before their migration to visual designs, and ve-canvas.js resolves composition layout tokens.
+// The legacy (companion v3/v4) detail contract is retained only inside the v5 concept build base (docs/concepts/companion/index.html)
+// and is removed with it; the current tooling rejects these formats. The composition contract stays live (ve-canvas.js and generated runtime).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, mkdtemp, writeFile, readdir, rm } from 'node:fs/promises';
@@ -71,14 +71,13 @@ test('legacy v1 and v2 imports remain valid; old envelopes cannot conceal detail
   }
   const mismatch = copy(seed); mismatch.design.schema = 2; assert.throws(() => validateCompanionDocument(mismatch), /versions must match/);
 });
-test('real CLI returns exact v3 bytes; malformed detail data produces no output and no writes', async () => {
+test('the read-only CLI refuses a legacy v3 detail-design export with no output and no writes', async () => {
   const vault = await mkdtemp(join(tmpdir(), 'detail-contract-'));
   try {
     const input = join(vault, 'project.json'), text = JSON.stringify(seed, null, 2) + '\r\n'; await writeFile(input, text);
-    const run = () => spawnSync(process.execPath, ['scripts/companion/generate.mjs', '--input', input, '--vault', vault, '--target', 'new-plugin'], { encoding: 'utf8' });
-    let result = run(); assert.equal(result.status, 0, result.stderr); assert.equal(result.stdout, text); assert.deepEqual(await readdir(vault), ['project.json']);
-    const invalid = copy(seed); invalid.design.detailDesigns.documents[0].nodes[0].parentId = 'missing'; await writeFile(input, JSON.stringify(invalid)); result = run();
-    assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /DETAIL_INVALID/); assert.deepEqual(await readdir(vault), ['project.json']);
+    const result = spawnSync(process.execPath, ['scripts/companion/generate.mjs', '--input', input, '--vault', vault, '--target', 'new-plugin'], { encoding: 'utf8' });
+    assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /^COMPANION_VERSION: Unsupported project schemaVersion 3/);
+    assert.deepEqual(await readdir(vault), ['project.json']);
   } finally { await rm(vault, { recursive: true, force: true }); }
 });
 

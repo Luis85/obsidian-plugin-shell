@@ -11,6 +11,7 @@ import { reviewedExamplesRemoved } from './example-sources-fixture.mjs';
 import { zip } from '../../scripts/framework/zip.ts';
 import { hash } from '../../scripts/framework/files.ts';
 import { kitManifest, verifyKit } from '../../scripts/framework/kit-integrity.ts';
+import { selfProject } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 function cli(dir, args) {
   return spawnSync(process.execPath, [join(dir, 'shell.mjs'), ...args], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 5_000_000 });
@@ -36,7 +37,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   for (const name of ['tsconfig.sitemap.json', 'tsconfig.authoring.json']) {
     assert.deepEqual(await readFile(join(dir, '.framework/template', name)), await readFile(join(root, name)), name + ' must ship before generation');
   }
-  const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+  const design = selfProject();
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
   design.settings = { codebaseFolder: 'app/source', testsFolder: 'spec' };
   await writeFile(join(dir, 'input.json'), JSON.stringify(design));
@@ -80,7 +81,7 @@ test('compiled kit preserves Storybook overrides and intake ownership across rep
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'shell-kit-storybook-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   const files = await assembleKit({ root, frameworkRoot: root }, await installedCompiler());
   await extractArchive(zip(files), dir); await verifyKit(dir);
-  const design = JSON.parse(await readFile(join(root, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+  const design = selfProject();
   design.project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '0.1.0', description: '' };
   design.settings = { codebaseFolder: 'app/source', testsFolder: 'spec' };
   await writeFile(join(dir, 'input.json'), JSON.stringify(design));

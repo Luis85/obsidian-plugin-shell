@@ -13,10 +13,9 @@ import { projectModel } from '../../scripts/companion/compiler/model.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
 import { providerProject } from '../fixtures/generator-provider-project.mjs';
 import { boundaryProject } from '../fixtures/generator-boundaries.mjs';
+import { selfProject } from '../support/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const original=JSON.parse(await readFile(join(root,'docs/concepts/companion/companion-project.json'),'utf8'));
-// Legacy-authored boundary data extends the last v4 self-project retained as a fixture.
-const legacy=JSON.parse(await readFile(join(root,'tests/fixtures/companion/detail-v4.json'),'utf8'));
+const original=selfProject();
 function cli(cwd, command, ...args) {
   const run=spawnSync(process.execPath,['scripts/test-data/'+(command==='verify'?'verify.mjs':'cli.mjs'),...(command==='verify'?[]:[command,...args])],{cwd,encoding:'utf8',timeout:20000,maxBuffer:5_000_000});
   assert.equal(run.status,0,run.stderr+'\n'+run.stdout);return JSON.parse(run.stdout);
@@ -48,7 +47,7 @@ test('generated notes carry canonical metadata but operation DTOs retain their d
   assert.equal(output.operations[0].outputValue[0].schema_version,undefined);
 });
 test('native wire recipes seed the mapped entity instead of trying to persist a snapshot DTO',()=>{
-  const p=boundaryProject(legacy), source=p.design.dataSources.sources.at(-1), op=source.operations[0];
+  const p=boundaryProject(original), source=p.design.dataSources.sources.at(-1), op=source.operations[0];
   p.design.dataSources.testing.recipes.push({source:source.id,operation:op.id,enabled:true,behavior:'list',dataset:'native-records',keyField:'id',scenario:'populated',latencyMs:0,errorStatus:503,rules:[]});
   const m=buildCompanionFixtureManifest(p.design), output=createFixtureEngine().generate(m);
   const adapter=createFixtureAdapter(m);adapter.dispose();

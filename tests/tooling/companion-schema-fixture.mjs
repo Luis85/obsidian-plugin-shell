@@ -1,18 +1,11 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { companionProjectSchema } from '../../scripts/companion/schema/project.mjs';
-import { migrateAuthoringDocument, validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
-const root = new URL('../../', import.meta.url);
-const read = path => JSON.parse(readFileSync(new URL(path, root), 'utf8'));
+import { validateAuthoringDocument } from '../../scripts/companion/authoring-contract.ts';
+import { companionStarterIds, starterDocument, starterPath } from '../support/starter-documents.mjs';
 /** Shared inert corpus; an independent Draft 2020-12 implementation also consumes these bytes. */
 export function schemaCorpus() {
-  const starters = 'docs/concepts/companion/starters/';
-  const paths = [
-    'docs/concepts/companion/companion-project.json',
-    ...readdirSync(fileURLToPath(new URL(starters, root))).filter(name => name.endsWith('.companion.json')).sort().map(name => starters + name),
-  ];
-  const positive = paths.map(path => ({ name: path, document: migrateAuthoringDocument(read(path)).document }));
-  const full = positive[0].document;
+  const ids = companionStarterIds();
+  const positive = ids.map(id => ({ name: starterPath(id), document: validateAuthoringDocument(starterDocument(id)) }));
+  const full = positive[ids.indexOf('companion-plugin')].document;
   const negative = [];
   const bad = (name, edit, schemaRejects = true) => {
     const document = structuredClone(full); edit(document);
@@ -22,6 +15,8 @@ export function schemaCorpus() {
     negative.push({ name, document, schemaRejects });
   };
   bad('future version', doc => { doc.schemaVersion = 7; });
+  bad('retired version', doc => { doc.schemaVersion = 5; doc.design.schema = 5; });
+  bad('retired detail designs', doc => { doc.design.detailDesigns = { schema: 2, nextId: 1, documents: [], revisions: [] }; });
   bad('future design', doc => { doc.design.schema = 7; });
   bad('wrong kind', doc => { doc.kind = 'jev-workspace'; });
   bad('execution flag', doc => { doc.executable = true; });

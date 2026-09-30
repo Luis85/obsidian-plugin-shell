@@ -7,8 +7,9 @@ import { tmpdir } from 'node:os';
 import { storybookOperation } from '../../scripts/framework/storybook.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planProject, applyProject } from '../../scripts/companion/compiler/plan.ts';
+import { starterDocumentText } from '../support/starter-documents.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const source = await readFile(join(root, 'docs/concepts/companion/starters/quick-capture.companion.json'), 'utf8');
+const source = starterDocumentText('quick-capture');
 async function scratch(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'storybook-contract-')));
   t.after(() => rm(dir, { recursive: true, force: true })); return dir;
