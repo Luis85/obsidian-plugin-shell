@@ -194,7 +194,8 @@
     "scripts/concepts/prototype-bridge.js",
     "bin/shell.ts",
     "scripts/makers/cli.mjs",
-    "scripts/compiler/qualify-presets.mjs"
+    "scripts/compiler/qualify-presets.mjs",
+    "scripts/companion/prd-limits.mjs"
   ],
   "plugins": [
     "scripts/quality/fallow-node-tests.json"
@@ -249,7 +250,8 @@
           "scripts/companion/design-system-roles.mjs",
           "scripts/companion/storymap-contract.mjs",
           "scripts/companion/detail-contract.mjs",
-          "scripts/companion/composition-contract.mjs"
+          "scripts/companion/composition-contract.mjs",
+          "scripts/companion/prd-limits.mjs"
         ]
       },
       {
