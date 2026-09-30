@@ -283,3 +283,20 @@ test('checked but rejected or missing trio approvals cannot produce readiness', 
 test('an impossible approval date is rejected', () => {
   assert.ok(validateHandout(full().replace('date=2026-09-29', 'date=2026-02-30'), base).diagnostics.some(item => item.code === 'HANDOUT_APPROVAL_OPEN'));
 });
+
+test('legacy handout entry delegates to the integrated reviewed-plan protocol', async t => {
+  const root = await workspace(t);
+  const run = (entry, args) => spawnSync(process.execPath, ['--experimental-strip-types', resolve(entry), ...args, '--root', root, '--json'], { encoding: 'utf8' });
+  const legacy = run('scripts/handout.mjs', ['generate', '--dry-run']);
+  const integrated = run('bin/app', ['handout', 'generate', '--dry-run']);
+  assert.equal(legacy.status, 0, legacy.stderr + legacy.stdout);
+  assert.equal(integrated.status, 0, integrated.stderr + integrated.stdout);
+  assert.deepEqual(JSON.parse(legacy.stdout), JSON.parse(integrated.stdout));
+  await assert.rejects(readFile(join(root, HANDOUT_PATH)), { code: 'ENOENT' });
+  const created = run('scripts/handout.mjs', ['generate', '--write']);
+  assert.equal(created.status, 0, created.stderr + created.stdout);
+  const outcome = JSON.parse(created.stdout);
+  assert.equal(outcome.status, 'applied');
+  assert.equal(outcome.command, 'handout generate');
+  assert.ok(outcome.data.applied.written.includes(HANDOUT_PATH));
+});
