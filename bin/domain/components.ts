@@ -66,7 +66,7 @@ export function pageBindSource(document: SketchDocument, surfaceId: string, node
   const { source, operation } = sourceOperation(document, sourceId, operationRef);
   requireSketch(['read', 'both'].includes(String(operation.direction)), 'SOURCE_BIND_DIRECTION', 'A display binding requires a read operation.');
   requireSketch(typeof field === 'string' && field.length <= 120 &&
-    (field === '' || /^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)(?:\\.(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*))*$/.test(field)),
+    (field === '' || /^(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*)(?:\.(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*))*$/.test(field)),
     'SOURCE_BIND_FIELD', 'Use a declared dotted output path or an empty path for the entire result.');
   const node = visualLocate(pageFor(document, surfaceId).root, nodeId)?.node;
   requireSketch(node, 'SOURCE_BIND_NODE', 'Choose an existing page component or text element.');
