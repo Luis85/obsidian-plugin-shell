@@ -12,6 +12,7 @@ import { resolveValues, renderFiles, renderProcesses } from '../../scripts/start
 import { angularPackages } from '../../scripts/compiler/domain/project-starter.ts';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const reference = JSON.parse(await readFile(join(root, 'configs/starters/webapp.json'), 'utf8'));
+const loadFileDefinitions = rootPath => loadDefinitions(rootPath, []);
 async function workspace(t) {
   const dir = await realpath(await mkdtemp(join(tmpdir(), 'starter-definitions-'))); t.after(() => rm(dir, { recursive: true, force: true }));
   return dir;
@@ -21,7 +22,7 @@ async function seed(dir, definition = reference, name = definition.id) {
   await writeFile(join(dir, 'configs/starters', name + '.json'), JSON.stringify(definition));
 }
 test('all twenty-five standalone definitions validate and carry their metadata, source and process contracts', async () => {
-  const entries = await loadDefinitions(root); assert.equal(entries.length, 25);
+  const entries = await loadFileDefinitions(root); assert.equal(entries.length, 25);
   assert.deepEqual(entries.map(entry => entry.definition.id), entries.map(entry => entry.definition.id).sort());
   assert.equal(entries.filter(entry => entry.definition.generator.kind === 'project').length, 11, 'eight former presets, two hybrid frameworks and the Angular setup');
   for (const { definition, file, sha256 } of entries) {
@@ -35,26 +36,26 @@ test('all twenty-five standalone definitions validate and carry their metadata, 
     JSON.parse(await readFile(join(root, 'docs/concepts/companion/starters', item.file))), item.id + ' loses no authored design');
 });
 test('missing and empty folders mean no installed starters, without creating anything', async t => {
-  const dir = await workspace(t); assert.deepEqual(await loadDefinitions(dir), []); assert.deepEqual(await readdir(dir), []);
-  await mkdir(join(dir, 'configs/starters'), { recursive: true }); assert.deepEqual(await loadDefinitions(dir), []);
+  const dir = await workspace(t); assert.deepEqual(await loadFileDefinitions(dir), []); assert.deepEqual(await readdir(dir), []);
+  await mkdir(join(dir, 'configs/starters'), { recursive: true }); assert.deepEqual(await loadFileDefinitions(dir), []);
 });
 test('adding, editing and removing just one JSON file changes discovery immediately', async t => {
   const dir = await workspace(t); await seed(dir);
-  assert.equal((await loadDefinitions(dir))[0].definition.id, 'webapp');
+  assert.equal((await loadFileDefinitions(dir))[0].definition.id, 'webapp');
   const edited = { ...reference, name: 'Edited' }; await seed(dir, edited);
-  assert.equal((await loadDefinitions(dir))[0].definition.name, 'Edited');
-  await rm(join(dir, 'configs/starters/webapp.json')); assert.deepEqual(await loadDefinitions(dir), []);
+  assert.equal((await loadFileDefinitions(dir))[0].definition.name, 'Edited');
+  await rm(join(dir, 'configs/starters/webapp.json')); assert.deepEqual(await loadFileDefinitions(dir), []);
 });
 test('user-settings selects a contained starter folder without overriding other settings', async t => {
   const dir = await workspace(t); await seed(dir); await mkdir(join(dir, 'recipes'));
   const d = { ...reference, id: 'custom' }; await writeFile(join(dir, 'recipes/custom.json'), JSON.stringify(d));
   const text = JSON.stringify({ schemaVersion: 1, paths: { startersFolder: 'recipes', prds: 'docs/prds' }, preferences: { firstRun: 'skip' } });
   await writeFile(join(dir, 'configs/user-settings.json'), text);
-  assert.deepEqual((await loadDefinitions(dir)).map(entry => entry.definition.id), ['custom']); assert.equal(await readFile(join(dir, 'configs/user-settings.json'), 'utf8'), text);
+  assert.deepEqual((await loadFileDefinitions(dir)).map(entry => entry.definition.id), ['custom']); assert.equal(await readFile(join(dir, 'configs/user-settings.json'), 'utf8'), text);
 });
 for (const folder of ['../outside', '/tmp', 'C:\\outside', '.obsidian', 'recipes/../starters', '.framework/starters']) test('rejects unsafe configured path ' + folder, async t => {
   const dir = await workspace(t); await seed(dir); await writeFile(join(dir, 'configs/user-settings.json'), JSON.stringify({ paths: { startersFolder: folder } }));
-  await assert.rejects(loadDefinitions(dir), /contained relative folder/);
+  await assert.rejects(loadFileDefinitions(dir), /contained relative folder/);
 });
 for (const [label, change] of [
   ['future version', d => { d.schemaVersion = 2; }], ['unknown field', d => { d.execute = true; }],
@@ -105,27 +106,27 @@ for (const args of [['publish'], ['install', '-g'], ['ci', '--prefix=../outside'
 test('future JSON and unsafe object keys fail before discovery exposes a usable recipe', async t => {
   const dir = await workspace(t); await seed(dir);
   for (const raw of ['{broken', '{"__proto__":{"polluted":true}}', JSON.stringify({ ...reference, schemaVersion: 99 })]) {
-    await writeFile(join(dir, 'configs/starters/webapp.json'), raw); await assert.rejects(loadDefinitions(dir));
+    await writeFile(join(dir, 'configs/starters/webapp.json'), raw); await assert.rejects(loadFileDefinitions(dir));
   }
   assert.equal({}.polluted, undefined);
 });
 test('file identity must match the ID and filenames must be lower-case regular JSON files', async t => {
-  const dir = await workspace(t); await seed(dir, reference, 'different'); await assert.rejects(loadDefinitions(dir), /ID must match/);
-  await rm(join(dir, 'configs/starters/different.json')); await seed(dir, reference, 'WebApp'); await assert.rejects(loadDefinitions(dir), /lower-case/);
+  const dir = await workspace(t); await seed(dir, reference, 'different'); await assert.rejects(loadFileDefinitions(dir), /ID must match/);
+  await rm(join(dir, 'configs/starters/different.json')); await seed(dir, reference, 'WebApp'); await assert.rejects(loadFileDefinitions(dir), /lower-case/);
 });
 test('valid local edits have a new content hash; hashes are not catalog signatures', async t => {
-  const dir = await workspace(t); await seed(dir); const before = (await loadDefinitions(dir))[0].sha256;
+  const dir = await workspace(t); await seed(dir); const before = (await loadFileDefinitions(dir))[0].sha256;
   await writeFile(join(dir, 'configs/starters/webapp.json'), JSON.stringify({ ...reference, name: 'Changed' }, null, 2));
-  assert.notEqual((await loadDefinitions(dir))[0].sha256, before);
+  assert.notEqual((await loadFileDefinitions(dir))[0].sha256, before);
 });
 test('file and ancestor symlinks are refused', async t => {
   const dir = await workspace(t); await seed(dir);
   await rm(join(dir, 'configs/starters/webapp.json'));
-  if (!await fileSymlink(t, join(root, 'configs/starters/webapp.json'), join(dir, 'configs/starters/webapp.json'))) return; await assert.rejects(loadDefinitions(dir));
-  await rm(join(dir, 'configs'), { recursive: true }); await symlink(join(root, 'configs'), join(dir, 'configs'), 'junction'); await assert.rejects(loadDefinitions(dir));
+  if (!await fileSymlink(t, join(root, 'configs/starters/webapp.json'), join(dir, 'configs/starters/webapp.json'))) return; await assert.rejects(loadFileDefinitions(dir));
+  await rm(join(dir, 'configs'), { recursive: true }); await symlink(join(root, 'configs'), join(dir, 'configs'), 'junction'); await assert.rejects(loadFileDefinitions(dir));
 });
 test('oversized files fail without parsing or execution', async t => {
-  const dir = await workspace(t); await seed(dir); await writeFile(join(dir, 'configs/starters/webapp.json'), ' '.repeat(STARTER_MAX_BYTES + 1)); await assert.rejects(loadDefinitions(dir), /bounded|limit/i);
+  const dir = await workspace(t); await seed(dir); await writeFile(join(dir, 'configs/starters/webapp.json'), ' '.repeat(STARTER_MAX_BYTES + 1)); await assert.rejects(loadFileDefinitions(dir), /bounded|limit/i);
 });
 test('rendering structured JSON escapes values while HTML escaping is explicit', () => {
   const d = validateDefinition(reference), values = resolveValues(d, { id: 'test-app', name: 'A "quoted" <App>', description: '<script>bad()</script>' });
@@ -181,7 +182,7 @@ test('validation placeholder syntax matches rendering exactly, so a valid defini
   assert.equal(JSON.parse(renderFiles(validateDefinition(keys), resolveValues(validateDefinition(keys), { id: 'app', name: 'App' })).at(-1).content)['{{typo}}'], 'literal key');
 });
 test('CI qualifies exactly the shipped project starters and reads Angular pins from the setup starter', async () => {
-  const ids = (await loadDefinitions(root)).filter(entry => entry.definition.generator.kind === 'project').map(entry => entry.definition.id);
+  const ids = (await loadFileDefinitions(root)).filter(entry => entry.definition.generator.kind === 'project').map(entry => entry.definition.id);
   const workflow = await readFile(join(root, '.github/workflows/project-starter-qualification.yml'), 'utf8');
   assert.deepEqual(workflow.match(/^\s+starter: \[([^\]]+)\]$/m)[1].split(',').map(id => id.trim()).sort(), ids);
   assert.match(workflow, /qualify-project-starters\.mjs --starter '\$\{\{ matrix\.starter \}\}' --execute/);
