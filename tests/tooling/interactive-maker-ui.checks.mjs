@@ -14,7 +14,7 @@ import { interview } from '../../bin/presentation/guide.ts';
 import { loadGuide } from '../../bin/adapters/prototype.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
-import { main } from '../../bin/app.ts';
+import { main, makerMain } from '../../bin/app.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0; const transcript = [];
@@ -86,15 +86,15 @@ test('CLI human help, human failures and terminal cancellation do not pollute ma
   const output = [], errors = [];
   const stdout = new Writable({ write(chunk, _encoding, done) { output.push(String(chunk)); done(); } });
   const stderr = new Writable({ write(chunk, _encoding, done) { errors.push(String(chunk)); done(); } });
-  assert.equal(await main(['--help'], frameworkRoot, { input: Readable.from([]), output: stdout, error: stderr }), 0);
+  assert.equal(await makerMain(['--help'], frameworkRoot, { input: Readable.from([]), output: stdout, error: stderr }), 0);
   assert.match(output.join(''), /make first/);
-  assert.equal(await main(['sketch', '--input', '-', '--root', root], frameworkRoot, { input: Readable.from(['not-json']), output: stdout, error: stderr }), 1);
+  assert.equal(await makerMain(['sketch', '--input', '-', '--root', root], frameworkRoot, { input: Readable.from(['not-json']), output: stdout, error: stderr }), 1);
   assert.ok(errors.length > 0);
   const input = new PassThrough(); input.isTTY = true;
   const terminal = new Writable({ write(chunk, _encoding, done) {
     if (String(chunk).includes('Project title')) queueMicrotask(() => input.end());
     done();
   } }); terminal.isTTY = true;
-  assert.equal(await main(['sketch', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
+  assert.equal(await makerMain(['sketch', '--root', root], frameworkRoot, { input, output: stdout, error: terminal, env: {} }), 130);
   input.destroy();
 }));

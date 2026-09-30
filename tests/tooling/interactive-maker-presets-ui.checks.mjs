@@ -8,7 +8,7 @@ import { projectWizard } from '../../bin/presentation/project-create.ts';
 import { loadProjectCatalog, loadProjectGuide, projectCreatePlan } from '../../bin/adapters/project-create.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
 import { execute, parseArguments } from '../../bin/adapters/commands.ts';
-import { main } from '../../bin/app.ts';
+import { main, makerMain } from '../../bin/app.ts';
 import { Back } from '../../bin/presentation/prompts.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 const catalog = await loadProjectCatalog(), guide = await loadProjectGuide();
@@ -108,7 +108,7 @@ test('agent discovery, validation and failures use one JSON response without ope
     error: new Writable({ write(chunk, _encoding, done) { stderr.push(String(chunk)); done(); } }), env: { CI: '1' } });
   for (const action of ['presets', 'guide']) {
     stdout.length = 0;
-    assert.equal(await main(['new', action, '--json', '--root', root], frameworkRoot, io('')), 0);
+    assert.equal(await makerMain(['new', action, '--json', '--root', root], frameworkRoot, io('')), 0);
     const data = JSON.parse(stdout.join('')).data;
     if (action === 'guide') { assert.equal(data.input.interview.answers.approved, false); assert.equal(data.input.preset, 'plugin-nuxtui'); }
     else assert.deepEqual(data.flow, ['preset', 'framework', 'hybrid-targets-if-needed', 'prototype', 'agreement', 'plan-review', 'apply']);
@@ -116,11 +116,11 @@ test('agent discovery, validation and failures use one JSON response without ope
   const input = { schemaVersion: 1, catalogVersion: catalog.version, preset: 'cli', prototypeRequest: {
     schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { title: 'Desk', approved: false } } };
   stdout.length = 0;
-  assert.equal(await main(['new', 'validate', '--input', '-', '--json', '--root', root], frameworkRoot, io(JSON.stringify(input))), 0);
+  assert.equal(await makerMain(['new', 'validate', '--input', '-', '--json', '--root', root], frameworkRoot, io(JSON.stringify(input))), 0);
   assert.equal(JSON.parse(stdout.join('')).data.ready, false);
   for (const args of [['new', 'unexpected'], ['new', '--kind', 'clickdummy'], ['new', '--input', '-']]) {
     stdout.length = 0;
-    assert.equal(await main([...args, '--json', '--root', root], frameworkRoot, io('{"prototype":{}}')), 1);
+    assert.equal(await makerMain([...args, '--json', '--root', root], frameworkRoot, io('{"prototype":{}}')), 1);
     assert.equal(JSON.parse(stdout.join('')).status, 'failed');
   }
   assert.deepEqual(stderr, []); assert.deepEqual(await readdir(root), []);

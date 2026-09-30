@@ -87,7 +87,10 @@ export async function main(argv: string[], frameworkRoot: string, io: IO = { inp
     const { main: memoryMain } = await import('../scripts/hindsight/cli.ts');
     return memoryMain(routed.args);
   }
-  argv = routed.args;
+  return makerMain(routed.args, frameworkRoot, io);
+}
+/** The maker surface itself, without routing; its help and failures stay on the supplied streams. */
+export async function makerMain(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const controller = new AbortController(), stop = () => controller.abort();
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const machine = argv.includes('--json'); let command = 'maker';
