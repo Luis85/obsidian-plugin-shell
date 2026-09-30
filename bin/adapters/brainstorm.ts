@@ -49,7 +49,7 @@ export async function brainstormContext(options: BrainstormOptions) {
     features: current.document.design.features?.items.map(item => ({ id: item.id, name: item.name })) ?? [],
     note: 'The exact baseSha256 can be included in an agent-generated brainstorm request to reject stale input.' };
 }
-export async function validateBrainstormFeature(input: unknown, options: BrainstormOptions) {
+async function validateBrainstormFeature(input: unknown, options: BrainstormOptions) {
   const current = await base(options), request = readFeatureBrainstorm(input);
   const result = featureConcept(request, current);
   return { ready: true, request, definition: result.definition, concept: result.concept,
