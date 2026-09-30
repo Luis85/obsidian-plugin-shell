@@ -12,7 +12,7 @@ import { defineFrameworkAdapter } from '../../../scripts/compiler/adapters/proje
 import { renderStarterProject } from '../../../scripts/compiler/adapters/project/emitter.ts';
 import { projectSelection } from '../../../scripts/compiler/domain/project-starter.ts';
 import { loadDefinitions } from '../../../scripts/starters/repository.ts';
-import { definePluginEvent } from '../../api.ts';
+import { definePluginEvent, type WorkbenchPluginObject } from '../../api.ts';
 import { createPluginRuntime, pluginFrameworkAdapters, pluginStarterDefinitions } from '../../runtime.ts';
 import { PluginObject, exampleNotice, reactAdapter, reactStarter } from '../src/index.ts';
 
@@ -204,7 +204,7 @@ test('plugin event bus bounds recursive dispatch without crashing the invocation
     activate({ eventBus }) {
       return eventBus.on(recursive, payload => eventBus.dispatch(recursive, { value: payload.value + 1 }));
     },
-  };
+  } satisfies WorkbenchPluginObject;
   const runtime = await createPluginRuntime({
     root: '/workspace', frameworkRoot: '/framework', input: Readable.from([]), registry: [recursivePlugin],
     onError: code => errors.push(code),
