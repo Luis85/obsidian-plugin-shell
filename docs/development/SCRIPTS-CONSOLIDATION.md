@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation through C17 on PR #60. The continuation uses separately pushed
+Status: staged implementation through C19 on PR #60. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -93,7 +93,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C16:** Yes/no confirmation policy now lives in `shared/confirmation.ts`; framework and maker TypeScript presentation paths import it directly, the legacy `.mjs` entry is compatibility-only, and the contract has dedicated Fallow and maker-coverage ownership.
 - **C17:** The typed file-plan facade is now a dedicated `cli-file-plan-contract` boundary. Tests, tooling and maker-host may consume it explicitly; maker domain remains isolated, preparing the safety-critical runtime migration without broad tooling dependencies.
 - **C18:** Stdin reading and readline prompt lifecycle now live in `shared/input.ts`. `framework/input.ts` is a compatibility re-export, maker/bin callers import the shared typed transport directly, and input is explicitly owned by maker coverage plus a narrow `cli-input-contract` architecture boundary.
-- **Remaining C19–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C19:** Canonical SHA-256 and lstat-presence helpers now have typed implementations with compatibility-only `.mjs` entries. Framework files/handout and memory-policy TypeScript callers import the typed helpers directly; the helpers have explicit architecture and maker-coverage ownership.
+- **Remaining C20–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
