@@ -62,7 +62,7 @@ async function generate(ui: Prompts, options: StudioOptions, workspace: Workspac
   await review(ui, plan, options.signal);
 }
 interface StudioAction { label: string; run: () => unknown }
-function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
+export function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace): Record<string, StudioAction> {
   const actions: Record<string, StudioAction> = {
     new: { label: 'Sketch a new page', run: async () => {
       const result = workspace.edit([{ op: 'page.add', title: await titleInput(ui, 'Page title') }]);
