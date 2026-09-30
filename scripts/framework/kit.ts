@@ -38,6 +38,8 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     add('.framework/template/' + path, bytes);
     if (path.startsWith('scripts/') || path.startsWith('bin/') || path.startsWith('docs/concepts/companion/test-kit/')) {
       if (path.endsWith('.ts') && !path.endsWith('.d.ts')) add('.framework/compiled/' + path.slice(0, -3) + '.js', Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
+      // A JavaScript shim that re-exports TypeScript source is compiled too, so its specifiers point at the emitted .js.
+      else if (/\.m?js$/.test(path) && /\bfrom\s*['"]\.{1,2}\/[^'"]+\.ts['"]/.test(bytes.toString('utf8'))) add('.framework/compiled/' + path, Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
       else if (!path.endsWith('.ts')) add('.framework/compiled/' + path, bytes);
     }
   }
