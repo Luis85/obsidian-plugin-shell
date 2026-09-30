@@ -220,6 +220,6 @@ must meet 90%/85%. Missing coverage inputs fail closed. Tests retain 450 code li
 Full `verify`, normal/fast `shell check`, compiled kits and generated workspaces all
 include maker checks. The dedicated CI job uses the exact pinned toolchain.
 
-## Integrated preset compatibility
+## Project presets
 
-`new` now discovers the eight named presets documented in [PROJECT-PRESETS.md](PROJECT-PRESETS.md). The earlier five-family `prototypeRequest`/`frontend` request format is still accepted by `new --input` and `new validate`; its historical reference is [LEGACY-PROJECT-PRESETS.md](LEGACY-PROJECT-PRESETS.md). Existing `shell.project.json` projects retain their original emitter during sketch regeneration. New projects use the strict `project.config.json` sidecar. A workspace containing both sidecars is rejected rather than silently choosing one. Both formats retain plan hashes and default-No writes.
+`new` discovers the eight named presets documented in [PROJECT-PRESETS.md](PROJECT-PRESETS.md). Projects use the strict `project.config.json` sidecar, and `new --input`/`new validate` accept only that request format; unknown fields fail validation without writing. Plans retain hashes and default-No writes.

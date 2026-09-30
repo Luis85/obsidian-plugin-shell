@@ -1,4 +1,3 @@
-import { legacyProjectCommand } from './legacy-project-command.ts';
 import { resolve } from 'node:path';
 import { readInput } from '../../scripts/framework/input.ts';
 import { parseJsonData } from '../../scripts/contracts/json-data.mjs';
@@ -20,7 +19,6 @@ export async function newProjectCommand(args: Arguments, context: CommandContext
   requireSketch(!args.action || args.action === 'validate', 'MAKER_COMMAND', 'Use new presets, new guide, new validate, or new --input.');
   requireSketch(!['preset', 'framework', 'targets'].some(key => args.flags[key]), 'PROJECT_AMBIGUOUS_INPUT', 'Put selection in --input for agent mode; do not override a reviewed request with selection flags.');
   const data = await requestData(args, context);
-  if (data !== null && typeof data === 'object' && Object.hasOwn(data, 'prototypeRequest')) return legacyProjectCommand(args, context, data);
   if (args.action === 'validate') {
     requireSketch(!args.flags.apply && !args.flags.out, 'PROJECT_OPTION', 'Validation never writes; omit --apply and --out.');
     const request = await projectRequest(data);

@@ -1,7 +1,5 @@
 import { firstRunWizard } from './first-run.ts';
 import { editBricks } from './brick-editor.ts';
-import { requireSketch } from '../domain/errors.ts';
-import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
 import { newDocument } from '../domain/document.ts';
@@ -53,11 +51,6 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
   const selection = await savedProjectSelection(options.root);
-  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(options.root, catalog);
-  requireSketch(!selection || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
-  if (legacy) {
-    await review(ui, await presetBoilerplatePlan(options.root, options.frameworkRoot, out, workspace.document, legacy, catalog, options.signal), options.signal); return;
-  }
   const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
