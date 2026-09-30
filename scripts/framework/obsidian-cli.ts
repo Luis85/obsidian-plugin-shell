@@ -3,7 +3,6 @@ import { spawn } from 'node:child_process';
 import { isAbsolute, join } from 'node:path';
 import { readConfiguration } from './files.ts';
 import { readDocumentationSettings } from '../application-docs/adapters/settings.ts';
-import { parseMarkdown } from '../application-docs/adapters/markdown.ts';
 import { OperationError, requireThat, result, stringOption, type Context, type Request } from './contracts.ts';
 
 const minimum = [1, 12, 7] as const;
@@ -115,6 +114,8 @@ export async function obsidianRead(request: Request, context: Context, supplied?
     'OBSIDIAN_OUTPUT_INVALID', 'Selected vault path from Obsidian CLI is invalid.');
   const candidates = listedMarkdown(inventoryText).filter(path => roots.some(root => under(path, root)));
   requireThat(candidates.length <= 500, 'OBSIDIAN_SCAN_LIMIT', 'Configured documentation paths contain more than 500 Markdown files; narrow the documentation settings.');
+  // The YAML-backed parser loads only for prepare, so the CLI catalog stays importable without installed packages.
+  const { parseMarkdown } = await import('../application-docs/adapters/markdown.ts');
   const typed: string[] = [], untyped: string[] = [], invalid: string[] = []; let bytes = 0;
   for (const path of candidates) {
     const content = await inVault(port, vault, 'read', `path=${path}`); bytes += Buffer.byteLength(content);
