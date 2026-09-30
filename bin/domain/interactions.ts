@@ -1,6 +1,8 @@
-import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction } from '../../scripts/companion/visual/visual-ir.mjs';
+import { visualAllocate, visualElement, visualText, visualLiteral, type Interaction, type VisualAction, type Mapping } from '../../scripts/companion/visual/visual-ir.mjs';
 import type { SketchDocument } from './document.ts';
 import { requireSketch, title } from './errors.ts';
+import { object, list } from './data.ts';
+import { validateVisualMapping } from '../../scripts/companion/visual/visual-mapping.mjs';
 import { pageContent, pageNodes, surfaceFor } from './pages.ts';
 
 export function interactions(document: SketchDocument, surface: string) {
@@ -32,6 +34,22 @@ export function setInteractionAction(document: SketchDocument, surface: string, 
   if (action?.kind === 'navigate') surfaceFor(document, action.surfaceId);
   interactionFor(document, surface, id).actions = action ? [action] : [];
 }
+
+/** Agent and terminal actions author only the declared source call, never invoke a vault mutation. */
+export function setCollectionInteractionAction(document: SketchDocument, surface: string, id: string,
+  sourceId: string, operationId: string, input: unknown): void {
+  const catalog = object(document.design.dataSources ?? { sources: [] });
+  const source = list(catalog.sources ?? [], 'sources', 24).map(object).find(s => s.id === sourceId);
+  requireSketch(source && source.kind === 'collection' && source.status !== 'deprecated',
+    'COLLECTION_REFERENCE', 'Select an active Collection for this interaction.');
+  const operation = list(source.operations, 'operations', 12).map(object).find(o => o.id === operationId);
+  requireSketch(operation, 'COLLECTION_OPERATION', 'Choose a current Collection operation.');
+  validateVisualMapping(input);
+  const mode = object(operation.input).mode, kind = object(input).kind;
+  requireSketch((mode === 'none') === (kind === 'none'), 'COLLECTION_INPUT', 'Match the operation input: use none for List and a payload mapping for writes.');
+  setInteractionAction(document, surface, id, { kind: 'source', sourceId, operationId, input: input as Mapping });
+}
+
 export function renameInteraction(document: SketchDocument, surface: string, id: string, name: string): void {
   interactionFor(document, surface, id).label = title(name);
 }

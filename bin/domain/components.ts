@@ -3,6 +3,7 @@ import type { SketchDocument } from './document.ts';
 import { visualCatalogEntry } from '../../scripts/companion/visual/visual-catalog.mjs';
 import { sourceOperation } from './bricks.ts';
 import { requireSketch, slug, title } from './errors.ts';
+import { object, list } from './data.ts';
 import { pageContent, pageFor, pageNodes, surfaceFor } from './pages.ts';
 
 export type ComponentChoice = { kind: 'new'; title: string } | { kind: 'existing'; id: string };
@@ -91,6 +92,40 @@ export function renameComponent(document: SketchDocument, id: string, name: stri
 function referencedComponents(nodes: UiNode[]): Set<string> {
   return new Set(nodes.flatMap(node => node.kind === 'component' && node.ref.kind === 'project' ? [node.ref.componentId] : []));
 }
+
+/** Source bindings reference the same managed collection operations as the visual editor. */
+function collectionRead(document: SketchDocument, sourceId: string, operationId: string): void {
+  const sources = list(object(document.design.dataSources ?? { sources: [] }).sources ?? [], 'sources', 24);
+  const source = sources.map(object).find(s => s.id === sourceId);
+  requireSketch(source && source.kind === 'collection' && source.status !== 'deprecated', 'COLLECTION_REFERENCE', 'Select an active Collection.');
+  const operation = list(source.operations, 'operations', 12).map(object).find(o => o.id === operationId);
+  requireSketch(operation && ['read', 'both'].includes(String(operation.direction)) && object(operation.output).mode !== 'none',
+    'COLLECTION_READ', 'Choose a declared Collection read operation.');
+}
+function applySourceBinding(node: UiNode, key: string, sourceId: string, operationId: string, field: string): void {
+  const binding = { kind: 'source' as const, sourceId, operationId, field };
+  if (node.kind === 'text' && key === '@value') { node.value = binding; return; }
+  requireSketch((node.kind === 'component' || node.kind === 'external') && /^[a-z][A-Za-z0-9]*$/.test(key) &&
+    !['prototype','constructor'].includes(key), 'COLLECTION_BINDING', 'Bind a text value (@value) or a declared component prop.');
+  if (node.kind === 'component' || node.kind === 'external') node.props[key] = binding;
+}
+export function bindComponentSource(document: SketchDocument, componentId: string, nodeId: string, key: string,
+  sourceId: string, operationId: string, field = ''): void {
+  collectionRead(document, sourceId, operationId);
+  const component = componentFor(document, componentId), node = visualLocate(component.template, nodeId)?.node;
+  requireSketch(node, 'COLLECTION_BINDING', 'Choose an existing element of the reusable component.');
+  requireSketch(typeof field === 'string' && field.length <= 120, 'COLLECTION_BINDING', 'Source field is too long.');
+  applySourceBinding(node, key, sourceId, operationId, field);
+}
+export function bindPageSource(document: SketchDocument, surfaceId: string, nodeId: string, key: string,
+  sourceId: string, operationId: string, field = ''): void {
+  collectionRead(document, sourceId, operationId);
+  const node = visualLocate(pageFor(document, surfaceId).root, nodeId)?.node;
+  requireSketch(node, 'COLLECTION_BINDING', 'Choose an existing page element.');
+  requireSketch(typeof field === 'string' && field.length <= 120, 'COLLECTION_BINDING', 'Source field is too long.');
+  applySourceBinding(node, key, sourceId, operationId, field);
+}
+
 export function removeNode(document: SketchDocument, surfaceId: string, nodeId: string): void {
   const page = pageFor(document, surfaceId), hit = visualLocate(page.root, nodeId);
   requireSketch(hit, 'SKETCH_NODE_MISSING', 'The selected element no longer exists.');
