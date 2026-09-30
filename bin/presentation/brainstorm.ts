@@ -1,7 +1,7 @@
 import { applyOperation, planOperation } from '../../scripts/framework/planning.ts';
 import type { Request } from '../../scripts/framework/contracts.ts';
 import { brainstormContext, brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification,
-  type BrainstormOptions, type BrainstormVerificationPlan } from '../adapters/brainstorm.ts';
+  type BrainstormOptions } from '../adapters/brainstorm.ts';
 import { slug } from '../domain/errors.ts';
 import type { FeatureBrainstorm, BrainstormPage } from '../domain/brainstorm.ts';
 import { review } from './review.ts';
