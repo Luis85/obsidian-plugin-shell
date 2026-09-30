@@ -1,4 +1,5 @@
 import { docsParserFiles } from './docs-vendor.ts';
+import { bundleReleaseCli } from './release-bundle.mjs';
 import { serializeJson as json } from '../contracts/serialization.ts';
 import { prototypeSkillFiles } from '../companion/prototype-skill.mjs';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
@@ -36,10 +37,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     // Skill templates are literal authoring inputs; preserve their byte-exact inventory.
     const bytes = skill.get(path) ?? standaloneSource(path, original);
     add('.framework/template/' + path, bytes);
-    if (path.startsWith('scripts/') || path.startsWith('bin/') || path.startsWith('docs/concepts/companion/test-kit/')) {
-      if (path.endsWith('.ts') && !path.endsWith('.d.ts')) add('.framework/compiled/' + path.slice(0, -3) + '.js', Buffer.from(compiler.compile(bytes.toString('utf8'), path)));
-      else if (!path.endsWith('.ts')) add('.framework/compiled/' + path, bytes);
-    }
+    // Templates stay editable source data; runtime code is shipped only in the bundled CLI.
   }
   const ownership = files.find(file => file.path === '.framework/template/scripts/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('.framework/template/')).map(file => [file.path.slice('.framework/template/'.length), file.bytes]));
@@ -49,6 +47,7 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     const record = records.find(entry => entry.path === path)!; record.hash = hash(file.bytes); record.bytes = file.bytes.length;
   }
   add('.framework/compiled/package.json', Buffer.from('{"type":"module"}\n'));
+  add('.framework/compiled/app.js', await bundleReleaseCli(context.frameworkRoot));
   const pkg = object(await readJson(join(context.frameworkRoot, 'package.json')));
   const rootPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: { ...object(pkg.scripts), setup: 'node app.mjs setup', shell: 'node app.mjs', app: 'node app.mjs', make: 'node app.mjs make' } };
   const bootstrap: Kit['bootstrap'] = [];
