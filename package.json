@@ -68,7 +68,7 @@
     "check:source": "node scripts/quality/check-source.mjs",
     "check:presentation": "node scripts/quality/check-presentation.mjs",
     "check:artifacts": "node scripts/quality/check-artifacts.mjs",
-    "lint": "node scripts/quality/lint-source.mjs && eslint src bin",
+    "lint": "node scripts/quality/lint-source.mjs && eslint src bin plugins",
     "analyze": "fallow dead-code",
     "verify": "node scripts/quality/verify.mjs",
     "help": "node scripts/help.mjs",
