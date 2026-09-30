@@ -4,10 +4,12 @@ import type { ProjectSelection } from '../../domain/project-starter.ts';
 import { CompilerError, diagnostic } from '../../domain/diagnostics.ts';
 import { json } from '../../../companion/compiler/model.ts';
 import { requireFrameworkAdapter } from './framework-registry.ts';
+import type { FrameworkAdapter } from './framework-adapter.ts';
 /** Minimal direct dependencies, all exact pins. A root-only lock honestly requires registry resolution. */
-export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string) {
+export function packageFiles(template: TemplateSnapshot, selected: ProjectSelection, id: string,
+  adapter: FrameworkAdapter = requireFrameworkAdapter(selected.framework)) {
   const original = JSON.parse(template.text('package.json'));
-  const adapter = requireFrameworkAdapter(selected.framework), engine = adapter.engine;
+  const engine = adapter.engine;
   const dependencies: Record<string, string> = {}, devDependencies: Record<string, string> = {};
   function copy(names: string[], group: Record<string, string>) {
     for (const name of names) {
@@ -52,8 +54,8 @@ export function packageFiles(template: TemplateSnapshot, selected: ProjectSelect
     '.gitignore': 'node_modules/\ndist/\n.compiled/\n.prototype-build/\n',
   };
 }
-export function typecheckFiles(selected: ProjectSelection) {
-  const engine = requireFrameworkAdapter(selected.framework).engine;
+export function typecheckFiles(selected: ProjectSelection, adapter: FrameworkAdapter = requireFrameworkAdapter(selected.framework)) {
+  const engine = adapter.engine;
   const files: Record<string, string> = {
     'tsconfig.json': json({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true,
       noUncheckedIndexedAccess: true, noEmit: true, skipLibCheck: true, lib: ['ES2022', 'DOM', 'DOM.Iterable'],

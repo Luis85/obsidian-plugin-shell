@@ -4,7 +4,7 @@ import { parseDesignData } from '../contracts/json-data.mjs';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
 import { portablePath, record, validateDefinition } from './validation.ts';
-import type { LoadedStarter } from './types.ts';
+import type { LoadedStarter, StarterDefinition } from './types.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
 import { pluginStarterDefinitions } from '../../plugins/runtime.ts';
 const defaultStarterFolder = 'configs/starters';
@@ -37,7 +37,7 @@ export async function checkDirectoryChain(path: string, missing = false): Promis
 export function parseDefinition(bytes: Buffer) {
   return validateDefinition(parseDesignData(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
 }
-export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
+export async function loadDefinitions(root: string, contributed: readonly StarterDefinition[] = pluginStarterDefinitions()): Promise<LoadedStarter[]> {
   const folder = await starterFolder(root), path = resolve(root, folder);
   const results: LoadedStarter[] = [];
   let size = 0;
@@ -56,7 +56,7 @@ export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
       results.push({ definition, file, sha256: hash(bytes), bytes });
     }
   }
-  for (const source of pluginStarterDefinitions()) {
+  for (const source of contributed) {
     const definition = validateDefinition(structuredClone(source));
     requireThat(!results.some(row => row.definition.id === definition.id), 'STARTER_ID', 'Plugin starter ID conflicts with an installed starter: ' + definition.id);
     const bytes = Buffer.from(JSON.stringify(definition, null, 2) + '\n');
