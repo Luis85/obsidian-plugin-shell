@@ -55,6 +55,44 @@ for (const [id, paths] of [['field-notes', {codebaseFolder: 'app/source', testsF
   await invoke('release-readiness', ['release', 'check'], { allowBlocked: true });
   await writeFile(join(evidence, 'targets.json'), JSON.stringify(targets, null, 2));
 }
+// Exercise a published data-only starter as well as the two JSON-import journeys.
+// The generated consumer must install from its *unchanged* shipped lockfile;
+// npm install --package-lock-only is not an acceptable qualification workaround.
+const starterFixture = await realpath(await mkdtemp(join(process.env.RUNNER_TEMP ?? tmpdir(), 'blank-starter-kit-')));
+const starterKit = join(starterFixture, 'framework'), starterConsumer = join(starterFixture, 'blank-consumer');
+await mkdir(starterKit);
+await extractArchive(bytes, starterKit);
+assert.equal((await (await import('node:fs/promises')).readdir(starterKit)).includes('node_modules'), false, 'extracted kit starts without installed packages');
+const starterApp = join(starterKit, 'bin/app');
+await run('blank-starter-discovery', starterKit, starterApp, ['new', '--list', '--json', '--no-interaction']).persist();
+const starter = await run('blank-starter-new', starterKit, starterApp,
+  ['new', starterConsumer, '--starter', 'blank', '--id', 'blank-consumer', '--name', 'Blank Consumer',
+    '--author', 'Qualification fixture', '--yes', '--json', '--no-interaction']).persist();
+assert.equal(starter.status, 'applied', 'blank starter must be generated through the shipped CLI');
+const starterPkg = JSON.parse(await readFile(join(starterConsumer, 'package.json'), 'utf8'));
+const starterLockBytes = await readFile(join(starterConsumer, 'package-lock.json'));
+const starterLock = JSON.parse(starterLockBytes);
+assert.equal(starterLock.packages?.['']?.name, starterPkg.name, 'generated lockfile root must match starter identity');
+for (const group of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+  for (const [name, pin] of Object.entries(starterPkg[group] ?? {})) {
+    assert.match(pin, /^\\d+\\.\\d+\\.\\d+$/, group + ': non-exact ' + name);
+    assert.equal(starterLock.packages?.['']?.[group]?.[name], pin, group + ': stale root lockfile declaration for ' + name);
+    assert.equal(starterLock.packages?.['node_modules/' + name]?.version, pin, group + ': stale installed lockfile entry for ' + name);
+  }
+}
+assert.equal((await (await import('node:fs/promises')).readdir(starterConsumer)).includes('node_modules'), false,
+  'starter must not install dependencies before explicit npm approval');
+const installed = spawnSync(process.execPath, [npm, 'ci', '--no-audit', '--no-fund'], {
+  cwd: starterConsumer, encoding: 'utf8', timeout: 900000, maxBuffer: 16_000_000,
+});
+checks.push({ name: 'blank-starter-npm-ci', exitCode: installed.status, error: installed.error?.message, scope: 'shipped lockfile clean install' });
+await writeFile(join(evidence, 'blank-starter-npm-ci.log'), (installed.stdout ?? '') + (installed.stderr ?? ''));
+await writeFile(join(evidence, 'checks.json'), JSON.stringify(checks, null, 2));
+assert.ifError(installed.error);
+assert.equal(installed.status, 0, 'shipped blank starter npm ci failed: ' + installed.stdout + installed.stderr);
+assert.deepEqual(await readFile(join(starterConsumer, 'package-lock.json')), starterLockBytes, 'clean install must not rewrite shipped lockfile');
+targets.push(starterConsumer);
+await writeFile(join(evidence, 'targets.json'), JSON.stringify(targets, null, 2));
 await writeFile(join(evidence, 'summary.json'), JSON.stringify({ status: 'archive-project-journey-qualified', archiveHash, consumers: targets.length,
   platform: process.platform, node: process.version, native: 'not-run', publication: 'not-run', acceptance: 'generated scaffold contracts only; PRD requirements remain obligations' }, null, 2));
 console.log(JSON.stringify({ archiveHash, evidence, targets }));
