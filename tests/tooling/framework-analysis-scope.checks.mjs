@@ -81,3 +81,13 @@ test('typed filesystem primitives are isolated from application layers', () => {
   }
   assert.equal(config.boundaries.rules.find(item => item.from === 'maker-domain')?.allow.includes('cli-files-contract'), false);
 });
+
+
+test('typed project-path policy is isolated from implementation layers', () => {
+  const zone = config.boundaries.zones.find(item => item.name === 'project-path-contract');
+  assert.deepEqual(zone?.patterns, ['scripts/shared/project-path.ts']);
+  assert.deepEqual(config.boundaries.rules.find(item => item.from === 'project-path-contract')?.allow, ['project-path-contract']);
+  for (const source of ['test', 'tooling', 'maker-domain', 'maker-host']) {
+    assert.ok(config.boundaries.rules.find(item => item.from === source)?.allow.includes('project-path-contract'), source);
+  }
+});
