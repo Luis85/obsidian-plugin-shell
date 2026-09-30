@@ -84,6 +84,9 @@ test('[CAP-04] fresh Git-free copy discovers capabilities without installed pack
   }
   await mkdir(join(folder, 'scripts/makers'), { recursive: true });
   await cp(join(root, 'scripts/makers/recipes.json'), join(folder, 'scripts/makers/recipes.json'));
+  // The dependency-free canonical digest is part of the discovery surface.
+  await mkdir(join(folder, 'scripts/shared'), { recursive: true });
+  await cp(join(root, 'scripts/shared/hash.mjs'), join(folder, 'scripts/shared/hash.mjs'));
   const run = spawnSync(process.execPath, ['scripts/operations/cli.mjs', 'catalog'], { cwd: folder, encoding: 'utf8', timeout: 10000 });
   assert.equal(run.status, 0, run.stderr);
   assert.deepEqual(JSON.parse(run.stdout), capabilityCatalog());

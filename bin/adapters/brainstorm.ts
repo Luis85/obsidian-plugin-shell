@@ -63,7 +63,7 @@ interface GeneratedPackage {
   entries: Entry[]; compiler: Record<string, unknown> | null; sourceReceiptSha256: string | null;
 }
 function artifactEncoding(item: CompilerArtifact): 'base64' | undefined {
-  const encoding = 'encoding' in item ? item.encoding : undefined;
+  const encoding: unknown = 'encoding' in item ? item.encoding : undefined;
   requireSketch(encoding === undefined || encoding === 'utf8' || encoding === 'base64',
     'BRAINSTORM_ENCODING', 'Unsupported compiler artifact encoding.');
   return encoding === 'base64' ? encoding : undefined;

@@ -318,6 +318,12 @@
         ]
       },
       {
+        "name": "project-path-contract",
+        "patterns": [
+          "scripts/shared/project-path.mjs"
+        ]
+      },
+      {
         "name": "tooling",
         "patterns": [
           "scripts/**",
@@ -429,7 +435,8 @@
           "prototype-skill",
           "maker-domain",
           "maker-application",
-          "maker-host"
+          "maker-host",
+          "project-path-contract"
         ]
       },
       {
@@ -466,7 +473,8 @@
           "companion-authoring-contract",
           "maker-domain",
           "maker-application",
-          "maker-host"
+          "maker-host",
+          "project-path-contract"
         ]
       },
       {
@@ -516,7 +524,8 @@
         "from": "maker-domain",
         "allow": [
           "maker-domain",
-          "companion-authoring-contract"
+          "companion-authoring-contract",
+          "project-path-contract"
         ]
       },
       {
@@ -534,7 +543,14 @@
           "maker-domain",
           "tooling",
           "companion-authoring-contract",
-          "prototype-skill"
+          "prototype-skill",
+          "project-path-contract"
+        ]
+      },
+      {
+        "from": "project-path-contract",
+        "allow": [
+          "project-path-contract"
         ]
       }
     ]

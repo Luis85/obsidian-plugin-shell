@@ -5,7 +5,7 @@ const controls = value => [...value].some(character => {
 });
 
 /** Roots that CLI-authored project paths never own. */
-export const protectedProjectRoots = Object.freeze([
+const protectedProjectRoots = Object.freeze([
   '.git', '.obsidian', '.framework', 'node_modules', '.codex-authoring.lock', '.shell-first-run.lock',
 ]);
 
@@ -14,6 +14,6 @@ export function hasPortableProjectSegments(path) {
     !part || part === '.' || part === '..' || /[<>:"|?*]/.test(part) || controls(part) || /[ .]$/.test(part) || reserved.test(part));
 }
 
-export function hasProtectedProjectRoot(path, protected = protectedProjectRoots) {
-  return protected.includes(path.split('/')[0].toLowerCase());
+export function hasProtectedProjectRoot(path, roots = protectedProjectRoots) {
+  return roots.includes(path.split('/')[0].toLowerCase());
 }
