@@ -66,6 +66,7 @@ Options: --root <folder>, --project <relative.json> (design/project.json), --inp
 Sketch transactions contain schemaVersion:1, title (new projects only), and operations.
 Operation IDs accept @aliases from earlier creation steps. Only titles are required to create things.
 Use collection.add with title, a vault-relative path and an entity reference to provision managed Markdown List/Create/Update/Delete operations.
+Use page.collection-table to insert a Collection-backed UTable, page.bind for typed source bindings and interaction.action kind=source for CRUD calls.
 First-run guide: bin/FIRST-RUN.md. Execution is separately approved; generated source is kept on failure.
 All existing shell setup/make/generate/check commands remain available.
 `;
