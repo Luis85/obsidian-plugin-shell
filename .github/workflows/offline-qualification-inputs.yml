@@ -75,6 +75,7 @@ jobs:
           writeFileSync(join(process.env.ANGULAR_INPUT_ROOT, 'package.json'), JSON.stringify({ name: 'angular-qualification-inputs', version: '0.1.0', private: true, type: 'module', dependencies, devDependencies }, null, 2));
           NODE
           npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          export npm_config_before="$(node -e 'console.log(new Date(Date.now() - 864e5).toISOString())')"
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" install --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --ignore-scripts --no-audit --no-fund
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --prefix "$ANGULAR_INPUT_ROOT" --cache "$RUNNER_TEMP/angular-npm-cache" --offline --ignore-scripts --no-audit --no-fund
       - name: Retain input hashes without credentials, logs or font binaries
