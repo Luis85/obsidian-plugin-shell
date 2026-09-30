@@ -1,4 +1,4 @@
-import { createFilePlan } from '../../scripts/shared/file-plan.mjs';
+import { createFilePlan } from '../../scripts/shared/file-plan.ts';
 import { hash, readBounded } from '../../scripts/framework/files.ts';
 import { join } from 'node:path';
 import { parseJsonData } from '../../scripts/contracts/json-data.ts';

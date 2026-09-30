@@ -82,7 +82,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C5:** `shared/file-plan.ts` now provides strict plan/change/apply contracts over the unchanged reviewed runtime. Typed callers can migrate without changing path validation, locking, stale-preimage checks or rollback semantics in the same milestone.
 - **C6:** Framework create/inspect-only consumers now import the typed file-plan facade directly. Apply/rollback callers remain isolated for the next milestone.
 - **C7:** Framework apply/rollback callers now use the typed file-plan facade too. The plugin-install artifact list is explicitly typed so only the reviewed `base64` encoding enters the plan boundary.
-- **Remaining C8–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C8:** Maker/bin create/inspect-only adapters now import the typed file-plan facade directly; the two apply callers remain isolated for the next milestone.
+- **Remaining C9–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
