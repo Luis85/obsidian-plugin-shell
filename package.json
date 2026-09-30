@@ -14,7 +14,7 @@
     "eslint": "10.11.0",
     "eslint-plugin-obsidianmd": "0.4.2",
     "eslint-plugin-vue": "10.11.1",
-    "fallow": "3.28.0",
+    "fallow": "3.30.0",
     "fast-check": "4.10.2",
     "happy-dom": "20.14.5",
     "obsidian": "1.13.1",
