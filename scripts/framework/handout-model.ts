@@ -1,11 +1,11 @@
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
 import { handoutSections } from './handout-questions.ts';
 
 export const HANDOUT_PATH = 'PROJECT-SETUP-HANDOUT.md';
 const HANDOUT_VERSION = 1;
 export const HANDOUT_LIMIT = 2_000_000;
 const questionIndex = new Map(handoutSections.flatMap(section => section.questions.map(question => [question.id, question] as const)));
-export const digest = (value: string | Buffer): string => createHash('sha256').update(value).digest('hex');
+export const digest = (value: string | Buffer): string => sha256(value);
 const templateHash = digest(JSON.stringify(handoutSections));
 const metadataPattern = /^<!-- workbench-handout-snapshot: (.+) -->$/m;
 const questionPattern = /^- \[([ xX])\] \*\*(REQUIRED|OPTIONAL)\*\* `([a-z][a-z0-9.-]+)` — (.+)$/;

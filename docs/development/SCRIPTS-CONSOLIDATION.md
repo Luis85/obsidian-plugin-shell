@@ -1,8 +1,9 @@
 # `scripts/` consolidation plan
 
-Status: review and staged plan. This document records where `scripts/` stands after the
-`app.mjs` / `bin/app` launcher rename and how to reduce it to real scripts without weakening
-any gate. It authorizes no moves by itself; each stage below is its own reviewed PR.
+Status: staged implementation. Stage A (launcher migration) is on PR #60. Its continuation
+uses separately pushed and validated milestones on the same PR; later restructuring remains
+subject to explicit gate checks. The inventory and sequencing below are planning inputs,
+not permission to weaken any quality gate.
 
 ## Target shape
 
@@ -60,9 +61,17 @@ are paths that generated projects depend on. Treat them as contracts.
 | fs / JSON / path containment | `exists` ×5, JSON readers ×4, containment checks in ~17 files | Typed fs/plan adapter |
 | Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in 3 legacy CLIs | `framework/input.ts` / presentation prompts |
 
+## Progress on PR #60
+
+- **A:** Launcher migration, compatibility shim and kit support pushed.
+- **B1:** Legacy standalone handout command delegates to the central reviewed plan and validation CLI; added parity regression.
+- **B2:** Framework and handout sha256 functions delegate to the existing shared hash helper; added binary and Unicode parity regression.
+- **Remaining B–F:** Planned; no claim of completion until their own tests and gates pass.
+
 ## Stages
 
-Each stage is a separate PR stacked on the previous one. Every stage runs the relevant suites plus
+Each stage is an independently reviewed milestone; the current continuation pushes milestones
+on PR #60. Every stage runs the relevant suites plus
 `check:maintainability`, `check:analyzer`, `check:architecture`, lint and typecheck with no threshold changes.
 
 1. **A: launcher rename (this PR).**

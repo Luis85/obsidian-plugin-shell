@@ -300,3 +300,13 @@ test('legacy handout entry delegates to the integrated reviewed-plan protocol', 
   assert.equal(outcome.command, 'handout generate');
   assert.ok(outcome.data.applied.written.includes(HANDOUT_PATH));
 });
+
+test('canonical sha256 helper preserves framework and handout byte fingerprints', async () => {
+  const { sha256 } = await import('../../scripts/shared/hash.mjs');
+  const { hash } = await import('../../scripts/framework/files.ts');
+  assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  for (const bytes of ['Unicode ⛄', Buffer.from([0, 255, 1, 0])]) {
+    assert.equal(hash(bytes), sha256(bytes));
+    assert.equal(digest(bytes), sha256(bytes));
+  }
+});

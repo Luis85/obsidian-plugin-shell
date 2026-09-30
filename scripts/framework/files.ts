@@ -1,12 +1,12 @@
 import { open, lstat, realpath } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { createHash } from 'node:crypto';
+import { sha256 } from '../shared/hash.mjs';
 import { createFilePlan } from '../shared/file-plan.mjs';
 import { parseJsonData } from '../contracts/json-data.mjs';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
-export const hash = (bytes: string | Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+export const hash = (bytes: string | Uint8Array): string => sha256(bytes);
 export async function exists(path: string): Promise<boolean> {
   try { await lstat(path); return true; } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
 }
