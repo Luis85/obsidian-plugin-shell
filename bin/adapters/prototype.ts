@@ -1,4 +1,4 @@
-import { projectSelectionRequest, type ProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
+import type { ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from '../../scripts/framework/files.ts';
 import { artifactOrigins } from '../../scripts/compiler/adapters/origins.ts';
@@ -64,8 +64,7 @@ export async function prototypePlan(options: { root: string; frameworkRoot: stri
   entries.push(...artifacts.map(entry => ({ ...entry, path: 'source/' + entry.path })));
   if (selection) {
     entries.push({ path: 'project.config.json', content: JSON.stringify(selection, null, 2) + '\n' });
-    const request = projectSelectionRequest(selection);
-    entries.push({ path: 'project-request.json', content: JSON.stringify({ ...request, interview: JSON.parse(answersJson) }, null, 2) + '\n' });
+    entries.push({ path: 'project-request.json', content: JSON.stringify({ schemaVersion: 2, starter: selection.starter.id, interview: JSON.parse(answersJson) }, null, 2) + '\n' });
   }
   if (baseline) entries.push({ path: 'baseline.project.json', content: documentText(baseline) });
   return packagePlan(root, out, entries, { ...context, prompt: entries.find(item => item.path === 'execution-prompt.md')?.content,

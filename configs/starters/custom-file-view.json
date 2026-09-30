@@ -1,0 +1,1169 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "custom-file-view",
+  "name": "Custom File View",
+  "category": "Foundations",
+  "level": "Foundation",
+  "summary": "Own a text-backed file format and open it in a dedicated Obsidian editor.",
+  "outcome": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
+  "tags": [
+    "file-extension",
+    "file-view",
+    "json",
+    "native",
+    "editor"
+  ],
+  "includes": [
+    "Real .folio extension registration and TextFileView",
+    "Create command, folder-create menu and matching-file open menu",
+    "Raw JSON editing, validation messages and original-text preservation"
+  ],
+  "implementation": [
+    "Design a domain-specific editor or schema when needed",
+    "Qualify reload, external edits and conflicts in a disposable native vault"
+  ],
+  "version": "1.0.0",
+  "inputs": [
+    {
+      "id": "id",
+      "label": "Project ID",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "name",
+      "label": "Project name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "author",
+      "label": "Author",
+      "type": "string",
+      "required": false,
+      "default": ""
+    },
+    {
+      "id": "description",
+      "label": "Description",
+      "type": "string",
+      "required": false,
+      "default": "Own a text-backed file format and open it in a dedicated Obsidian editor."
+    },
+    {
+      "id": "version",
+      "label": "Project version",
+      "type": "string",
+      "required": true,
+      "default": "0.1.0"
+    },
+    {
+      "id": "codebaseFolder",
+      "label": "Source folder",
+      "type": "string",
+      "required": true,
+      "default": "src"
+    },
+    {
+      "id": "testsFolder",
+      "label": "Tests folder",
+      "type": "string",
+      "required": true,
+      "default": "tests"
+    },
+    {
+      "id": "extension",
+      "label": "Custom file extension",
+      "type": "string",
+      "required": true,
+      "default": "folio"
+    }
+  ],
+  "generator": {
+    "kind": "companion",
+    "document": {
+      "kind": "obsidian-companion-project",
+      "schemaVersion": 5,
+      "executable": false,
+      "project": {
+        "id": "custom-file-view-plugin",
+        "name": "Custom File View",
+        "author": "",
+        "version": "0.1.0",
+        "description": "Own a text-backed file format and open it in a dedicated Obsidian editor."
+      },
+      "settings": {
+        "codebaseFolder": "src",
+        "testsFolder": "tests"
+      },
+      "design": {
+        "schema": 5,
+        "blueprint": "blank",
+        "goal": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
+        "platform": "desktop",
+        "nodes": [
+          {
+            "id": "node-1",
+            "slug": "workspace",
+            "label": "Custom File View guide",
+            "kind": "view",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": null,
+            "nav": true,
+            "command": true,
+            "ribbon": false,
+            "entry": true,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-3",
+            "slug": "integration-contract",
+            "label": "The .folio format",
+            "kind": "page",
+            "layout": "sidebar-left",
+            "placement": "tab",
+            "parent": "node-1",
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "open-view"
+            ],
+            "goal": "A .folio file starts as JSON with schemaVersion, title and notes. Customize the extension, name, format and initial content in design.nativeIntegrations before generating.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          },
+          {
+            "id": "node-2",
+            "slug": "preferences",
+            "label": "Acceptance and safety",
+            "kind": "settings",
+            "layout": "form",
+            "placement": "tab",
+            "parent": null,
+            "nav": true,
+            "command": false,
+            "ribbon": false,
+            "entry": false,
+            "instance": "reuse",
+            "patterns": [
+              "settings"
+            ],
+            "goal": "In a disposable vault: create, edit, save, reopen, rename, disable and re-enable the plugin. Verify that the same file contents remain.",
+            "entity": "",
+            "intent": "",
+            "goals": [],
+            "components": [],
+            "bricks": []
+          }
+        ],
+        "links": [],
+        "nextId": 4,
+        "library": [],
+        "prds": [
+          {
+            "id": "starter-requirements",
+            "title": "Custom File View requirements",
+            "version": "0.1.0",
+            "revision": 1,
+            "status": "draft",
+            "problem": "Own a text-backed file format and open it in a dedicated Obsidian editor.",
+            "audience": "Obsidian plugin authors and users of custom native file workflows.",
+            "goals": "Create, open, edit and save .folio documents without replacing Markdown or another core format.",
+            "nonGoals": "Binary formats, editor-selection menus, network access and domain-specific visual document editing.",
+            "notes": "Native adapters are generated. These acceptance requirements remain designed until qualified in a disposable Obsidian vault.",
+            "nextReq": 5,
+            "baselines": [],
+            "requirements": [
+              {
+                "id": "starter-1",
+                "title": "Create a custom-format file",
+                "priority": "must",
+                "status": "designed",
+                "kind": "functional",
+                "acceptance": "Given a confirmed valid basename, create one .folio file in the selected folder; if it exists, refuse without replacing its bytes.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-2",
+                "title": "Open and edit a dedicated file view",
+                "priority": "must",
+                "status": "designed",
+                "kind": "functional",
+                "acceptance": "Given a .folio file, opening it selects the dedicated TextFileView; edits save through Obsidian and survive reopen.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-3",
+                "title": "Preserve invalid and unfamiliar document contents",
+                "priority": "must",
+                "status": "designed",
+                "kind": "quality",
+                "acceptance": "Given malformed JSON or unknown properties, loading never substitutes defaults or reserializes the source. The user can repair raw text.",
+                "nodes": [
+                  "node-3"
+                ],
+                "components": [],
+                "patterns": []
+              },
+              {
+                "id": "starter-4",
+                "title": "Dispose native integration safely",
+                "priority": "must",
+                "status": "designed",
+                "kind": "quality",
+                "acceptance": "Given plugin unload, callbacks stop, dialogs close, the host keeps workspace leaves and the final file buffer remains available for save.",
+                "nodes": [
+                  "node-1"
+                ],
+                "components": [],
+                "patterns": []
+              }
+            ]
+          }
+        ],
+        "librarySchema": 3,
+        "canvas": {
+          "schema": 1,
+          "layout": "vertical",
+          "positions": {},
+          "pan": {
+            "x": 32,
+            "y": 28
+          },
+          "zoom": 1,
+          "snap": true,
+          "collapsed": [],
+          "edges": "selected",
+          "custom": false,
+          "arrangedFor": "",
+          "fitted": false
+        },
+        "semantic": {
+          "schema": 1,
+          "nextId": 1,
+          "entities": [],
+          "relationships": [],
+          "sections": [],
+          "canvas": {
+            "positions": {},
+            "viewport": {
+              "x": 40,
+              "y": 40,
+              "zoom": 1
+            },
+            "snap": true
+          }
+        },
+        "dataSources": {
+          "schema": 1,
+          "nextId": 1,
+          "sources": [],
+          "flows": [],
+          "positions": {}
+        },
+        "designSystem": {
+          "schema": 1,
+          "name": "Custom File View tokens",
+          "description": "A starting point for a plugin that belongs in Obsidian. Customize these declarations before implementation.",
+          "principles": "Prefer the host theme and user font preferences.\nUse consistent spacing to group related information.\nProvide visible keyboard focus and a non-color-only selected state.",
+          "fonts": [
+            {
+              "id": "interface",
+              "name": "Interface",
+              "source": "interface",
+              "families": "",
+              "fallback": "system-ui",
+              "usage": "Navigation, controls and labels.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "body",
+              "name": "Reading",
+              "source": "text",
+              "families": "",
+              "fallback": "sans-serif",
+              "usage": "Descriptions and long-form content.",
+              "license": "Host font preference. No font files are embedded."
+            },
+            {
+              "id": "code",
+              "name": "Code",
+              "source": "mono",
+              "families": "",
+              "fallback": "monospace",
+              "usage": "Identifiers, paths and code samples.",
+              "license": "Host font preference. No font files are embedded."
+            }
+          ],
+          "typography": [
+            {
+              "id": "page-title",
+              "name": "Page title",
+              "font": "interface",
+              "size": 24,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.25,
+              "letterSpacing": 0,
+              "usage": "One primary heading per view."
+            },
+            {
+              "id": "section-title",
+              "name": "Section title",
+              "font": "interface",
+              "size": 18,
+              "unit": "px",
+              "weight": 600,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Group related controls or content."
+            },
+            {
+              "id": "body",
+              "name": "Body",
+              "font": "body",
+              "size": 16,
+              "unit": "px",
+              "weight": 400,
+              "lineHeight": 1.5,
+              "letterSpacing": 0,
+              "usage": "Main descriptive copy."
+            },
+            {
+              "id": "label",
+              "name": "Label",
+              "font": "interface",
+              "size": 14,
+              "unit": "px",
+              "weight": 500,
+              "lineHeight": 1.4,
+              "letterSpacing": 0,
+              "usage": "Form labels; do not rely on placeholders."
+            }
+          ],
+          "spacing": [
+            {
+              "id": "xs",
+              "name": "XS",
+              "value": 4,
+              "unit": "px",
+              "usage": "Related inline items"
+            },
+            {
+              "id": "sm",
+              "name": "SM",
+              "value": 8,
+              "unit": "px",
+              "usage": "Within a control group"
+            },
+            {
+              "id": "md",
+              "name": "MD",
+              "value": 16,
+              "unit": "px",
+              "usage": "Between related blocks"
+            },
+            {
+              "id": "lg",
+              "name": "LG",
+              "value": 24,
+              "unit": "px",
+              "usage": "Between sections"
+            },
+            {
+              "id": "xl",
+              "name": "XL",
+              "value": 32,
+              "unit": "px",
+              "usage": "Major content separation"
+            }
+          ],
+          "sizes": [
+            {
+              "id": "control",
+              "name": "Control height",
+              "value": 36,
+              "unit": "px",
+              "usage": "Proposed default, not an accessibility guarantee."
+            },
+            {
+              "id": "icon",
+              "name": "Icon",
+              "value": 18,
+              "unit": "px",
+              "usage": "Glyph size, not the clickable target."
+            },
+            {
+              "id": "inspector",
+              "name": "Inspector width",
+              "value": 320,
+              "unit": "px",
+              "usage": "Preferred width; adapt for narrower panes."
+            }
+          ],
+          "radii": [
+            {
+              "id": "control",
+              "name": "Control radius",
+              "value": 6,
+              "unit": "px",
+              "usage": "Inputs and compact actions."
+            },
+            {
+              "id": "surface",
+              "name": "Surface radius",
+              "value": 12,
+              "unit": "px",
+              "usage": "Standalone panels."
+            }
+          ],
+          "colors": [
+            {
+              "id": "background",
+              "name": "Background",
+              "light": "#FFFFFF",
+              "dark": "#1E1E24",
+              "host": "--background-primary",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "text",
+              "name": "Primary text",
+              "light": "#202027",
+              "dark": "#ECECF2",
+              "host": "--text-normal",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "muted",
+              "name": "Secondary text",
+              "light": "#595964",
+              "dark": "#B6B6C4",
+              "host": "--text-muted",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent",
+              "name": "Accent",
+              "light": "#6550B9",
+              "dark": "#B7A3FF",
+              "host": "--interactive-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            },
+            {
+              "id": "accent-text",
+              "name": "Text on accent",
+              "light": "#FFFFFF",
+              "dark": "#17131F",
+              "host": "--text-on-accent",
+              "usage": "Illustrative fallback palette; resolve the named variable from the active host theme."
+            }
+          ],
+          "guidelines": [
+            {
+              "id": "interaction",
+              "name": "Interaction states",
+              "usage": "Provide default, hover, pressed, selected, focused, disabled and error states. Keep focus visible; do not use color as the only state indicator."
+            },
+            {
+              "id": "components",
+              "name": "Component usage",
+              "usage": "Use the shared component library and document any variant-specific differences. These notes do not automatically restyle component implementations."
+            }
+          ],
+          "frontend": {
+            "schema": 1,
+            "target": "nuxt-ui",
+            "colorPolicy": "host",
+            "bindings": {}
+          }
+        },
+        "storymaps": {
+          "schema": 1,
+          "nextId": 1,
+          "maps": []
+        },
+        "visualDesigns": {
+          "schema": 3,
+          "nextId": 22,
+          "catalog": {
+            "id": "nuxt-ui",
+            "version": 1
+          },
+          "pages": [
+            {
+              "id": "vp-4",
+              "ownerId": "node-1",
+              "name": "Your native file plugin",
+              "root": [
+                {
+                  "id": "vn-5",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-1",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Your native file plugin"
+                      },
+                      "name": "Your native file plugin",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-2",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Use the command palette: Create Folio document. Confirm a name to create a .folio file in the vault root. Right-click a folder to create there instead."
+                      },
+                      "name": "Your native file plugin",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-3",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Open any .folio file to use its dedicated text editor. These workbench pages describe the native capability; they are not the file editor."
+                      },
+                      "name": "Your native file plugin",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "Your native file plugin layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-6",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-7",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            },
+            {
+              "id": "vp-11",
+              "ownerId": "node-3",
+              "name": "The .folio format",
+              "root": [
+                {
+                  "id": "vn-12",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-8",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "The .folio format"
+                      },
+                      "name": "The .folio format",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-9",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "A .folio file starts as JSON with schemaVersion, title and notes. Customize the extension, name, format and initial content in design.nativeIntegrations before generating."
+                      },
+                      "name": "The .folio format",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-10",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Malformed JSON remains editable. Validation reports the problem but never replaces the text, drops unknown properties or rewrites formatting."
+                      },
+                      "name": "The .folio format",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "The .folio format layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-13",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-14",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            },
+            {
+              "id": "vp-18",
+              "ownerId": "node-2",
+              "name": "Native acceptance checklist",
+              "root": [
+                {
+                  "id": "vn-19",
+                  "kind": "element",
+                  "tag": "div",
+                  "attrs": {},
+                  "children": [
+                    {
+                      "id": "vn-15",
+                      "kind": "text",
+                      "role": "h2",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Native acceptance checklist"
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-16",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "In a disposable vault: create, edit, save, reopen, rename, disable and re-enable the plugin. Verify that the same file contents remain."
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "vn-17",
+                      "kind": "text",
+                      "role": "p",
+                      "value": {
+                        "kind": "literal",
+                        "value": "Try an existing filename, malformed JSON and a save failure. No implicit replacement, recovery reset, network access or vault-wide migration is authorized."
+                      },
+                      "name": "Native acceptance checklist",
+                      "layout": {
+                        "mode": "stack",
+                        "ui": {
+                          "gap": 12,
+                          "padding": 16,
+                          "columns": 2,
+                          "align": "stretch",
+                          "justify": "start",
+                          "wrap": true,
+                          "overflow": "visible",
+                          "widthMode": "fill",
+                          "width": 320,
+                          "minWidth": 0,
+                          "maxWidth": 1600,
+                          "narrow": {
+                            "layout": "stack",
+                            "columns": 1,
+                            "hidden": false
+                          },
+                          "tokens": {
+                            "gap": "",
+                            "padding": "",
+                            "color": "",
+                            "background": "",
+                            "radius": "",
+                            "typography": ""
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "events": [],
+                  "name": "Native acceptance checklist layout",
+                  "layout": {
+                    "mode": "stack",
+                    "ui": {
+                      "gap": 12,
+                      "padding": 16,
+                      "columns": 2,
+                      "align": "stretch",
+                      "justify": "start",
+                      "wrap": true,
+                      "overflow": "visible",
+                      "widthMode": "fill",
+                      "width": 320,
+                      "minWidth": 0,
+                      "maxWidth": 1600,
+                      "narrow": {
+                        "layout": "stack",
+                        "columns": 1,
+                        "hidden": false
+                      },
+                      "tokens": {
+                        "gap": "",
+                        "padding": "",
+                        "color": "",
+                        "background": "",
+                        "radius": "",
+                        "typography": ""
+                      }
+                    }
+                  }
+                }
+              ],
+              "scenarios": [
+                {
+                  "id": "scenario-20",
+                  "name": "Default",
+                  "state": "default",
+                  "width": "wide",
+                  "values": {},
+                  "bindings": []
+                },
+                {
+                  "id": "scenario-21",
+                  "name": "Narrow",
+                  "state": "default",
+                  "width": "narrow",
+                  "values": {},
+                  "bindings": []
+                }
+              ],
+              "notes": "Native capability guide. The file-view and context-menu behavior runs in Obsidian, not inside the browser concept."
+            }
+          ],
+          "components": [],
+          "layouts": [],
+          "revisions": []
+        },
+        "nativeIntegrations": {
+          "schemaVersion": 1,
+          "fileTypes": [
+            {
+              "id": "folio",
+              "name": "Folio document",
+              "extension": "folio",
+              "format": "json",
+              "initialContent": "{\n  \"schemaVersion\": 1,\n  \"title\": \"Untitled\",\n  \"notes\": \"\"\n}\n"
+            }
+          ],
+          "contextMenus": []
+        }
+      },
+      "notes": [
+        "# Native starter scope\n\nReal .folio extension registration and TextFileView\nCreate command, folder-create menu and matching-file open menu\nRaw JSON editing, validation messages and original-text preservation\n\n## Remaining acceptance\n\nDesign a domain-specific editor or schema when needed\nQualify reload, external edits and conflicts in a disposable native vault\n\nUse an isolated development vault. The browser previews declarative guidance; only an enabled native plugin registers extensions or host menus. No credentials or code are embedded in this JSON."
+      ]
+    }
+  },
+  "files": [],
+  "processes": [
+    {
+      "id": "install",
+      "label": "Install dependencies",
+      "description": "Install the exact project dependency graph; network and dependency lifecycle effects require trust.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "ci",
+            "--no-fund"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "label": "Verify generated project",
+      "description": "Run the generated project verification without claiming native acceptance.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "verify:project"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "label": "Build project",
+      "description": "Build generated project artifacts.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    },
+    {
+      "id": "showcase",
+      "label": "Preview project",
+      "description": "Run the local browser showcase in the foreground; stop it with Ctrl+C.",
+      "dependsOn": [],
+      "steps": [
+        {
+          "runner": "npm",
+          "args": [
+            "run",
+            "dev:ui"
+          ],
+          "cwd": ".",
+          "timeout": 600000
+        }
+      ]
+    }
+  ],
+  "firstRun": [
+    "install",
+    "verify"
+  ],
+  "nextSteps": [
+    "npm ci",
+    "npm run verify:project",
+    "npm run dev:ui"
+  ]
+}

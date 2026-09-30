@@ -1,0 +1,122 @@
+name: Independent Workbench distributions
+on:
+  pull_request:
+    paths:
+      - 'configs/starters/**'
+      - 'scripts/starters/**'
+      - 'scripts/companion/**'
+      - 'scripts/compiler/**'
+      - 'scripts/concepts/**'
+      - 'scripts/bundling/**'
+      - 'docs/licenses/**'
+      - 'tests/concepts/*-showcase.browser.mjs'
+      - 'tests/concepts/starter-workspace.browser.mjs'
+      - 'scripts/framework/**'
+      - 'scripts/companion/starter-*.mjs'
+      - 'scripts/companion/compiler/framework-docs.ts'
+      - 'tests/tooling/starter-*.checks.mjs'
+      - '.github/workflows/starter-distribution.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: starter-distribution-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      source: ${{ steps.identity.outputs.source }}
+      version: ${{ steps.identity.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Select qualified npm locally
+        run: |
+          npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "QUALIFIED_NPM=$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install locked dependencies
+        run: node "$QUALIFIED_NPM" ci --strict-allow-scripts
+      - name: Typecheck and test the independent definition contract
+        run: |
+          node "$QUALIFIED_NPM" run typecheck:framework
+          node --experimental-strip-types --test --test-concurrency=1 tests/tooling/starter-*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/framework-new-project.checks.mjs tests/tooling/framework-distribution.checks.mjs
+      - name: Check suite registration and bounded asset contracts
+        run: node scripts/testing/suites.mjs --check
+      - name: Build current empty authoring and source-bound qualification input
+        run: |
+          node scripts/concepts/build-mvp.mjs
+          node scripts/concepts/export-golden-project.mjs
+          node scripts/concepts/export-golden-project.mjs --check
+          node shell.mjs starters coverage feature-showcase --require-model-coverage --json
+      - name: Generate and independently install the visual-feature showcase
+        run: |
+          node shell.mjs new "$RUNNER_TEMP/workbench-feature-showcase" --starter feature-showcase --yes --json
+          cd "$RUNNER_TEMP/workbench-feature-showcase"
+          node "$QUALIFIED_NPM" ci --strict-allow-scripts
+          node "$QUALIFIED_NPM" run typecheck:project
+          node "$QUALIFIED_NPM" test
+          node "$QUALIFIED_NPM" run test:ui-effects
+          node "$QUALIFIED_NPM" run testdata:check
+          node "$QUALIFIED_NPM" run build
+          node "$QUALIFIED_NPM" run build:clickdummy
+      - name: Exercise current startup and the independently compiled UI in Chromium
+        run: |
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+          mkdir -p reports/feature-showcase
+          cp "$RUNNER_TEMP/workbench-feature-showcase/clickdummy.html" reports/feature-showcase/clickdummy.html
+          node tests/concepts/starter-workspace.browser.mjs
+          node tests/concepts/feature-showcase.browser.mjs --html reports/feature-showcase/clickdummy.html
+      - name: Retain source-bound starter and browser evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: companion-starter-evidence-${{ github.sha }}
+          path: |
+            reports/companion-mvp/build.json
+            reports/companion-mvp/qualification-project.json
+            reports/companion-mvp/starter-lifecycle/
+            reports/feature-showcase/browser-evidence/
+          if-no-files-found: warn
+      - name: Bind assets to exact checked-out source
+        id: identity
+        run: |
+          SOURCE=$(git rev-parse HEAD)
+          VERSION=$(node -p 'JSON.parse(require("node:fs").readFileSync("package.json","utf8")).version')
+          [[ "$SOURCE" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+          echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Build separate release assets
+        env:
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+          SOURCE_COMMIT: ${{ steps.identity.outputs.source }}
+        run: |
+          mkdir -p reports/workbench-distributions
+          node shell.mjs framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
+          node shell.mjs starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          import { createHash } from 'node:crypto';
+          const version = process.env.RELEASE_VERSION, sourceCommit = process.env.SOURCE_COMMIT;
+          const root = 'reports/workbench-distributions/';
+          const assets = [];
+          for (const kind of ['shell', 'starters']) {
+            const name = `workbench-${kind}-${version}.zip`, bytes = await readFile(root + name);
+            assets.push({ kind, name, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') });
+          }
+          await writeFile(root + 'workbench-distributions.json', JSON.stringify({ schemaVersion: 1, version, sourceCommit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n');
+          await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
+          NODE
+      - name: Retain separate assets and their manifest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: workbench-distributions-${{ steps.identity.outputs.source }}
+          path: reports/workbench-distributions/
+          if-no-files-found: error

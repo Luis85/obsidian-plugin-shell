@@ -1,3 +1,5 @@
+import { packStarterOperation, readStarterOperation } from '../starters/operations.ts';
+import { processOperation as starterProcessOperation } from '../starters/processes.ts';
 import { docsRead } from './docs.ts';
 import { prototypesRead, prototypesCompare } from './prototypes.ts';
 import { measureProject } from './project-measure.ts';
@@ -138,6 +140,9 @@ export async function executeOperation(input: Request, context: Context): Promis
         makers: capabilityCatalog().makers, examples: ['node shell.mjs new ../my-plugin --starter blank --yes', 'node shell.mjs setup --input project.json --dry-run', 'node shell.mjs generate --plan-out generation.plan.json', 'node shell.mjs plan apply generation.plan.json --yes'],
         transport: 'terminal-or-shared-TypeScript-API', approvals: 'never portable' });
     }
+    if (command === 'starters pack') return await packStarterOperation(request, context);
+    if (command === 'starters run') return await starterProcessOperation(request, context);
+    if (command.startsWith('starters ') && descriptor(command).effect === 'read') return await readStarterOperation(request, context);
     if (command.startsWith('docs ') && descriptor(command).effect !== 'plan') return await docsRead(request, context);
     if (descriptor(command).effect === 'fixtures') return await fixtureOperation(request, context);
     if (command === 'make' && (request.args.length === 0 || ['list', 'describe'].includes(request.args[0]!) || request.options.list)) {

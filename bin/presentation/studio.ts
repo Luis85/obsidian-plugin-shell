@@ -1,7 +1,5 @@
 import { firstRunWizard } from './first-run.ts';
 import { editBricks } from './brick-editor.ts';
-import { requireSketch } from '../domain/errors.ts';
-import { loadProjectCatalog as loadLegacyCatalog, savedLegacyProjectSelection as savedLegacySelection, presetBoilerplatePlan } from '../adapters/project-create.ts';
 import { savedProjectSelection } from '../adapters/project-selection.ts';
 import { projectWizard } from './project-wizard.ts';
 import { brainstormWizard } from './brainstorm.ts';
@@ -54,11 +52,6 @@ async function library(ui: Prompts, workspace: Workspace): Promise<void> {
 async function generate(ui: Prompts, options: StudioOptions, workspace: Workspace): Promise<void> {
   const out = await input(ui, 'Boilerplate output folder', options.out ?? `generated/${workspace.document.project.id}`);
   const selection = await savedProjectSelection(options.root);
-  const catalog = await loadLegacyCatalog(), legacy = await savedLegacySelection(options.root, catalog);
-  requireSketch(!selection || !legacy, 'PROJECT_CONFIG_CONFLICT', 'Both project.config.json and shell.project.json exist; reconcile the project selection before generating.');
-  if (legacy) {
-    await review(ui, await presetBoilerplatePlan(options.root, options.frameworkRoot, out, workspace.document, legacy, catalog, options.signal), options.signal); return;
-  }
   const kind = await choose(ui, 'Output kind', selection ? [{ id: 'project', label: selection.targets.join(' + ') + ' / ' + selection.framework }] : [
     { id: 'obsidian-plugin', label: 'Obsidian plugin' }, { id: 'clickdummy', label: 'Offline clickdummy source' },
   ], selection ? 'project' : options.kind ?? 'obsidian-plugin');
@@ -91,7 +84,7 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
-    'new-project': { label: 'Create another project from a preset', run: () => projectWizard(ui, options) },
+    'new-project': { label: 'Create another project from a project starter', run: () => projectWizard(ui, options) },
   };
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {

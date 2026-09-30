@@ -267,7 +267,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "a8df5e2148433b1a8df50f61d21e9ca810922721f6fdf790ab2a7629ffdecd08",
+      "sha256": "8341350e73fac62a48e408efd5a30a3b72a98e78c8ad7d0c5699011c54d3a594",
       "template": "README.md.txt"
     },
     {
@@ -419,7 +419,7 @@
     },
     {
       "path": "tests/e2e/design-system.spec.ts",
-      "sha256": "14a76c95646367b673b562c759c08bb59e3706165aff5c5216d267e7cee14dc5"
+      "sha256": "d7115f46282af0025a39633ab3075581f891e61e06dff7b483b236eb2f153aad"
     },
     {
       "path": "scripts/testing/native-recovery-handles.mjs",

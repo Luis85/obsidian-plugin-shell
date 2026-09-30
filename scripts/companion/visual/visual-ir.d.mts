@@ -28,6 +28,7 @@ export interface ComponentRevision { id: string; componentId: string; version: s
 export interface VisualDesigns { schema: 3; nextId: number; catalog: { id: 'nuxt-ui'; version: 1 }; pages: PageDefinition[]; components: ComponentDefinition[]; layouts: LayoutDefinition[]; revisions: ComponentRevision[] }
 export type DefinitionRef = { kind: 'page' | 'component' | 'layout'; id: string };
 export interface WalkAt { parent: UiNode | null; depth: number; list: UiNode[]; index: number }
+export declare const VISUAL_ACTION_KINDS: readonly VisualAction['kind'][];
 export declare const VISUAL_SCHEMA: 3; export declare const VISUAL_CATALOG: { readonly id: 'nuxt-ui'; readonly version: 1 };
 export declare const VISUAL_TAGS: readonly string[]; export declare const VISUAL_TEXT_ROLES: readonly string[]; export declare const VISUAL_STATES: readonly VisualState[];
 export declare const VISUAL_PROP_TYPES: readonly string[]; export declare const VISUAL_PAYLOAD_TYPES: readonly string[]; export declare const VISUAL_LAYOUT_MODES: readonly string[]; export declare const VISUAL_DOM_EVENTS: readonly string[];

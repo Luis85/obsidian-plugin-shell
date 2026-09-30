@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, readdir, symlink } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, readdir, symlink, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -151,7 +151,7 @@ test('symlink sources and settings are refused rather than followed', async () =
   await assert.rejects(() => guardedText(root, 'docs/prds/link.md'), /SYMLINK/);
 }));
 for (const prototype of [false, true]) test(`Angular source plan with prototype=${prototype} has a Hello world entry and real npm start script`, async () => scratch(async root => {
-  await vault(root); const { guide } = await angularSetupGuide();
+  await vault(root); const { guide } = await angularSetupGuide(frameworkRoot);
   const answers = Object.fromEntries(guide.steps.flatMap(step => step.fields).filter(field => !field.when).map(field => [field.id, field.default]));
   const input = request({ boilerplate: true, prototypeInterview: prototype ? { schemaVersion: 1, guideId: guide.id, guideVersion: guide.version, answers: { ...answers, title: 'Example product', approved: true } } : null,
     operations: [{ op: 'page.add', title: 'Orders', as: 'orders' }, { op: 'entity.add', title: 'Order' }, { op: 'data-source.add', title: 'Orders', kind: 'api' }, { op: 'journey.add', title: 'Browse', pages: ['@orders'] }] });
@@ -201,4 +201,22 @@ test('packaged settings and setup examples execute against the canonical schema 
   assert.equal(plan.data.selection.framework, 'angular');
   await applyPrepared(plan, plan.planHash);
   assert.equal(await readFile(join(root, 'docs/prds/example.md'), 'utf8'), source);
+}));
+
+test('setup runs the installed webapp-angular starter by ID and fails closed when it is missing or not Angular', async () => scratch(async root => {
+  await vault(root);
+  const plan = await projectSetupPlan(context(root), request());
+  const saved = JSON.parse(plan.plan.changes.find(change => change.path === 'project.config.json').content);
+  assert.equal(saved.schemaVersion, 2); assert.equal(saved.starter.id, 'webapp-angular'); assert.deepEqual(saved, plan.data.selection);
+  const shell = join(root, 'shell'); await mkdir(join(shell, 'configs/starters'), { recursive: true });
+  await assert.rejects(() => projectSetupPlan({ root, frameworkRoot: shell }, request()), /No project starters are installed/);
+  const definition = JSON.parse(await readFile(join(frameworkRoot, 'configs/starters/webapp-angular.json'), 'utf8'));
+  delete definition.generator.angularPins; definition.generator.framework = 'vanilla';
+  await writeFile(join(shell, 'configs/starters/webapp-angular.json'), JSON.stringify(definition));
+  await assert.rejects(() => angularSetupGuide(shell), /select Angular with a webapp target/);
+  await cp(join(frameworkRoot, 'configs/starters/cli.json'), join(shell, 'configs/starters/cli.json'));
+  await rm(join(shell, 'configs/starters/webapp-angular.json'));
+  await assert.rejects(() => angularSetupGuide(shell), /Choose an installed project starter: cli/);
+  assert.equal((await run(root, ['project-setup', 'guide'], undefined)).selection.starter.id, 'webapp-angular');
+  await assert.rejects(() => execute(parseArguments(['project-setup', 'guide', '--starter', 'cli']), { ...context(root), input: Readable.from([]) }), /webapp-angular/);
 }));

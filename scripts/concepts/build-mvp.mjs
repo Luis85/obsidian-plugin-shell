@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -16,22 +16,16 @@ await build({...config,configFile:false,build:{...config.build,outDir:join(out,'
   lib:{entry:'docs/concepts/companion/editor/main.ts',name:'CompanionJourney',formats:['iife'],fileName:()=> 'journey.js',cssFileName:'journey'},
   rolldownOptions:{external:['vue','pinia'],output:{globals:{vue:'Vue',pinia:'Pinia'},codeSplitting:false}},
 }});
-const [base,bundle,css,bridge,graphStyle]=await Promise.all([
+const [base,bundle,css,bridge,graphStyle,startup,prototypeBridge]=await Promise.all([
   readFile('docs/concepts/companion/index.html','utf8'),readFile(join(out,'bundle/journey.js'),'utf8'),
-  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),
+  readFile(join(out,'bundle/journey.css'),'utf8'),readFile('scripts/concepts/mvp-bridge.js','utf8'),readFile('docs/concepts/companion/vendor/vue-flow.scoped.css','utf8'),readFile('scripts/concepts/starter-workspace.js','utf8'),readFile('scripts/concepts/prototype-bridge.js','utf8'),
 ]);
-const prototypeBridge=await readFile('scripts/concepts/prototype-bridge.js','utf8');
-const html=composeMvp(base,bundle,css,bridge+'\n'+prototypeBridge,graphStyle);
+const html=composeMvp(base,bundle,css,bridge+'\n'+prototypeBridge,graphStyle,startup);
 await writeFile(join(out,'index.html'),html);
-const exportResult=spawnSync(process.env.PYTHON??'python3',['-B','scripts/concepts/export-companion-project.py','--html',join(out,'index.html'),'--output',join(out,'companion-project.json')],{stdio:'inherit'});
-if(exportResult.status!==0)throw Error('MVP_EXPORT: Current self-project failed export.');
-// Named review entries distinguish the current replacement from the retained v5 compatibility fixture.
-const project=await readFile(join(out,'companion-project.json'));
-await Promise.all([
-  writeFile(join(out,'companion-journey-lens.html'),html),
-  writeFile(join(out,'companion-project-v6.json'),project),
-]);
+// Current output is an empty authoring workspace; project exports are explicit user/qualification operations.
+await writeFile(join(out,'companion-journey-lens.html'),html);
+for(const name of ['companion-project.json','companion-project-v6.json'])await rm(join(out,name),{force:true});
 const hash=v=>createHash('sha256').update(v).digest('hex');
 await writeFile(join(out,'build.json'),JSON.stringify({schema:1,scope:'Companion browser authoring, not native acceptance',
-  entry:'companion-journey-lens.html',projectEntry:'companion-project-v6.json',baseline:hash(base),html:hash(html),bundle:hash(bundle),stylesheet:hash(css),project:hash(project)},null,2)+'\n');
-console.log('Built integrated companion and full v6 self-project in reports/companion-mvp');
+  entry:'companion-journey-lens.html',startup:'empty-or-restored',starterDefinitions:'external-json-only',baseline:hash(base),html:hash(html),bundle:hash(bundle),stylesheet:hash(css)},null,2)+'\n');
+console.log('Built empty Companion workspace; load configs/starters/companion-plugin.json separately');

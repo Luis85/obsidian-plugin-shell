@@ -1,3 +1,4 @@
+import { loadDefinitions } from '../starters/repository.ts';
 /** Explicit qualified-toolchain integration: generated plugin and offline browser output. */
 import { mkdtemp, mkdir, readFile, writeFile, rm, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -21,7 +22,7 @@ async function command(label,args,cwd){
 }
 try{
   await command('preview-host-browser',[join(root,'scripts/compiler/verify-preview-host.mjs')],root);
-  const source=await readFile(join(root,'docs/concepts/companion/starters/quick-capture.companion.json'),'utf8');
+  const source=JSON.stringify((await loadDefinitions(root)).find(entry=>entry.definition.id==='quick-capture').definition.generator.document);
   const template=await loadTemplateSnapshot(root),start=performance.now();
   const compilation=await compileProject({source,template,outputKind:'clickdummy'});
   const elapsed=performance.now()-start;

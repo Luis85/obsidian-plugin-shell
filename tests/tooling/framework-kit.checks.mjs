@@ -23,7 +23,10 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   const extracted = await extractArchive(archive, dir);
   assert.equal(extracted.length, files.length);
   for (const file of files) assert.deepEqual(await readFile(join(dir, file.path)), file.bytes);
-  assert.ok(!extracted.some(path => /docs\/concepts\/companion\/(?:src|vendor)\//.test(path)));
+  assert.ok(!extracted.some(path => /docs\/concepts\/companion\/(?:src|starters|seeds)\/|(?:^|\/)configs\/starters\//.test(path)));
+  // Only the exact reviewed compiler runtime libraries and their notices ship; prototype runtimes stay maintainer-only.
+  const vendor = ['d3-NOTICE.txt', 'packages.json', 'vue-flow-core-LICENSE.txt', 'vue-flow-core.iife.js', 'vue-flow.scoped.css', 'vueuse-NOTICE.txt'];
+  assert.deepEqual(extracted.filter(path => /docs\/concepts\/companion\/vendor\//.test(path)).sort(), vendor.map(name => '.framework/template/docs/concepts/companion/vendor/' + name));
   assert.ok(!extracted.some(path => path.endsWith('docs/concepts/companion/index.html')));
   assert.ok(!(await readdir(dir)).includes('node_modules')); assert.ok(!(await readdir(dir)).includes('.git'));
   assert.ok((await verifyKit(dir)).files.length > 100);

@@ -14,7 +14,9 @@ export function relocatedPath(path: string): string {
 /** The maintainer runner script, the policy test for maintainer CI triggers and the standalone
  * standalone design prototypes (their own apps and retained evidence) are not copied. */
 export function maintainerOnly(path: string): boolean {
-  return path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
+  return path === 'docs/concepts/companion/companion-project.json' || path.startsWith('docs/concepts/companion/seeds/')
+    || path.startsWith('configs/starters/') || path.startsWith('docs/concepts/companion/starters/') || path === '.github/workflows/starter-distribution.yml'
+    || path.startsWith('.github/scripts/') || path === 'tests/tooling/qualification-trigger.checks.mjs'
     || path.startsWith('docs/concepts/sitemap-editor/')
     || path === 'docs/concepts/native-file-integration-handoff' || path === '.github/workflows/native-source-handoff.yml'
     || path.startsWith('docs/concepts/native-file-integration-handoff/') || path === 'tests/tooling/project-generator-native-handoff.checks.mjs'

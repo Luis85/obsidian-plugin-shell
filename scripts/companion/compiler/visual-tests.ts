@@ -105,7 +105,7 @@ function vtGroup(m: Model, spec: VisualSpec, rendered: Rendered[], node: UiNode,
 
 const vtPorts = (m: Model) => m.sources.flatMap(s => s.operations.map(o => ({ key: s.id + '\u0000' + o.id, code: `{ sourceId: ${literal(s.id)}, operationId: ${literal(o.id)}, direction: ${literal(o.direction)}, requiresInput: ${o.input !== null}, data: ${sampleCode(o.output)}, pending: false, error: null, run: runs[RUN]! }` })));
 /** One describe block per definition: per-state visibility and disabled controls, scenarios and natively dispatched interactions. */
-function vtDefinition(m: Model, spec: VisualSpec, subject: string): string {
+function vtDefinition(m: Model, spec: VisualSpec, subject: string): string[] {
   const roots = spec.kind === 'page' ? spec.root : spec.template, rendered = visualRendered(roots), props = visualFixtureProps(spec), ports = vtPorts(m);
   const states = vtStates.map(state => {
     const disabled = ['loading', 'disabled'].includes(state) ? rendered.filter(r => r.marked && VISUAL_RUNTIME_INTERACTIVE.includes(vtEntry(r.node) ?? '') && r.node.kind === 'component' && !Object.hasOwn(r.node.props, 'disabled') && visualVisible(spec, vtSession(state), r.node.id)).map(r => r.node.id) : [];
@@ -128,17 +128,21 @@ function vtDefinition(m: Model, spec: VisualSpec, subject: string): string {
       groups.push(vtGroup(m, spec, rendered, node, event, events.filter(i => i.event === event), state, ports.map(p => p.key)));
   }
   const name = spec.kind === 'page' ? spec.name : spec.exportName;
-  return `describe(${literal(spec.id + ' ' + name)}, () => {\nconst Subject = ${subject};\n${[...states, ...scenarios, ...groups].join('\n')}\n});`;
+  return [...states, ...scenarios, ...groups].map(test => `describe(${literal(spec.id + ' ' + name)}, () => {\nconst Subject = ${subject};\n${test}\n});`);
 }
 
-/** Generated UI suite for every definition in one file: module import and DOM setup are paid once, not per definition. */
+/** Bounded generated UI suites retain every case; source size does not grow with the catalog. */
 export function visualTests(m: Model, specs: VisualSpec[], add: Add): void {
   if (!specs.length) return;
-  const path = `${m.testRoot}/visual/definitions.test.ts`, ports = vtPorts(m), blocks = specs.map((spec, i) => vtDefinition(m, spec, 'Subject' + i)), filled = blocks.some(b => b.includes('await fill('));
-  add(path, `// @vitest-environment happy-dom
+  const path = `${m.testRoot}/visual/definitions.test.ts`, ports = vtPorts(m);
+  const cases = specs.flatMap((spec, i) => vtDefinition(m, spec, 'Subject' + i).map(code => ({ index: i, code })));
+  const render = (selected: typeof cases): string => {
+    const blocks = selected.map(entry => entry.code), filled = blocks.some(b => b.includes('await fill('));
+    const included = new Set(selected.map(entry => entry.index));
+    return `// @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
-${specs.map((spec, i) => `import Subject${i} from ${literal(relativeImport(path, visualDefinitionPath(m, spec)))};\n`).join('')}import { visualKey, type VisualContext } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-visual.ts`))};
+${specs.flatMap((spec, i) => included.has(i) ? [`import Subject${i} from ${literal(relativeImport(path, visualDefinitionPath(m, spec)))};\n`] : []).join('')}import { visualKey, type VisualContext } from ${literal(relativeImport(path, `${m.sourceRoot}/presentation/composables/use-visual.ts`))};
 import type { VisualRequest } from ${literal(relativeImport(path, `${m.sourceRoot}/domain/visual-runtime.ts`))};
 ${filled ? "import type { ComponentPublicInstance } from 'vue';\n" : ''}function fixture() {
   const handle = vi.fn(async (_request: VisualRequest) => undefined); const navigate = vi.fn((_target: string) => {});
@@ -155,5 +159,15 @@ async function fill(found: { vm: ComponentPublicInstance }[], id: string, raw: u
   control.vm.$.emit('update:modelValue', raw); await flushPromises();
 }
 ` : ''}${blocks.join('\n')}
-`);
+`;
+  };
+  let selected: typeof cases = [], part = 0;
+  const lines = (text: string) => text.split('\n').length;
+  const flush = () => { if (selected.length) { add(part ? path.replace('.test.ts', '-' + (part + 1) + '.test.ts') : path, render(selected)); part++; selected = []; } };
+  for (const test of cases) {
+    if (lines(render([...selected, test])) > 400) flush();
+    selected.push(test);
+    if (lines(render(selected)) > 400) throw new Error('VISUAL_TEST_TOO_LARGE: Split this definition interaction into smaller reviewed steps.');
+  }
+  flush();
 }
