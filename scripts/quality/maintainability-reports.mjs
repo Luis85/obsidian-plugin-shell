@@ -1,3 +1,4 @@
+import { assertExitVerdict, assertParsedCompletely, assertReportIdentity, fallowSchemas, gateStatus } from './fallow-contract.mjs';
 const finite = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const integer = value => Number.isSafeInteger(value) && value >= 0;
 const fail = message => { throw new Error(`METRIC_REPORT_${message}`); };
@@ -21,18 +22,21 @@ function cloneTotals(groups) {
   }
   return { lines, tokens };
 }
-function header(report, kind, schema) {
-  if (!report || report.kind !== kind || report.schema_version !== schema || report.version !== '3.28.0') fail('SCHEMA');
+function header(report, kind, exit) {
+  assertReportIdentity(report, kind, fail);
   if (report.workspace_diagnostics?.length || report.skipped_files?.length || report.parse_errors?.length) fail('INCOMPLETE');
   if (report.request_outcomes && Object.values(report.request_outcomes).some(outcome => outcome.status !== 'applied')) fail('REQUEST');
+  (kind === 'dupes' ? assertExitVerdict : assertParsedCompletely)(report, exit, fail);
 }
+// Only cyclomatic/cognitive ceilings gate; estimated CRAP stays visible as `warn`.
+const severity = finding => finding.cyclomatic > 10 || finding.cognitive > 15 ? 'error' : 'warn';
 export function suppressionReport(report) {
-  if (report?.kind !== 'suppression-inventory' || report.schema_version !== '1' || report.summary?.total !== 0
+  if (report?.kind !== 'suppression-inventory' || report.schema_version !== fallowSchemas['suppression-inventory'] || report.summary?.total !== 0
     || report.summary.files !== 0 || !Array.isArray(report.files) || report.files.length) fail('SUPPRESSION');
   return { total: 0, files: 0 };
 }
-export function healthReport(report, inputs) {
-  header(report, 'health', 11);
+export function healthReport(report, inputs, exit) {
+  header(report, 'health', exit);
   const summary = report.summary;
   const population = report.vital_signs?.cyclomatic_population;
   if (!summary || summary.files_analyzed !== inputs.length || !integer(summary.functions_analyzed)
@@ -48,21 +52,23 @@ export function healthReport(report, inputs) {
   const findings = report.findings.map(finding => {
     if (!mapping.has(finding.path) || typeof finding.name !== 'string' || !integer(finding.cyclomatic)
       || !integer(finding.cognitive) || !integer(finding.line) || finding.line < 1 || finding.line > lengths.get(finding.path)) fail('HEALTH_FINDING');
+    if (finding.effective_severity !== severity(finding)) fail('HEALTH_SEVERITY');
     if (finding.name === '<template>') {
       const region = templates.get(finding.path);
       if (!region || finding.line < region.startLine || finding.line > region.endLine) fail('HEALTH_TEMPLATE_CATEGORY');
     }
     return { path: mapping.get(finding.path), name: finding.name, line: finding.line,
       cyclomatic: finding.cyclomatic, cognitive: finding.cognitive };
-  }).filter(finding => finding.cyclomatic > 10 || finding.cognitive > 15);
+  }).filter(finding => severity(finding) === 'error');
+  if (gateStatus(report, 'health-findings', fail) !== (findings.length ? 'fail' : 'pass')) fail('HEALTH_GATE');
   const templateFindings = findings.filter(finding => finding.name === '<template>');
   if (new Set(templateFindings.map(finding => finding.path)).size !== templateFindings.length || templateFindings.length > population.templates.count) fail('HEALTH_TEMPLATE_CATEGORY');
   return { inputs: inputs.length, functions: population.functions.count, templateUnits: population.templates.count, analyzedUnits: summary.functions_analyzed,
     templateFindings,
     findings: findings.filter(finding => finding.name !== '<template>') };
 }
-export function duplicationReport(report, inputs) {
-  header(report, 'dupes', 10);
+export function duplicationReport(report, inputs, exit) {
+  header(report, 'dupes', exit);
   const stats = report.stats;
   const integers = ['total_files', 'files_with_clones', 'total_lines', 'duplicated_lines', 'total_tokens', 'duplicated_tokens', 'clone_groups', 'clone_instances'];
   if (!stats || integers.some(key => !integer(stats[key])) || !finite(stats.duplication_percentage)
