@@ -27,8 +27,10 @@ export async function bundleReleaseCli(frameworkRoot) {
           if (/\bimport\.meta\.(?:url|dirname)\b/.test(content)) {
             const target = '../template/' + file;
             const folder = '../template/' + posix.dirname(file) + '/';
-            content = content.replace(/\bimport\.meta\.dirname\b/g, '__kitFileURLToPath(new URL(' + JSON.stringify(folder) + ', import.meta.url))')
-              .replace(/\bimport\.meta\.url\b/g, 'new URL(' + JSON.stringify(target) + ', import.meta.url).href');
+            // Replace each original token exactly once: replacements also contain import.meta.url.
+            content = content.replace(/\bimport\.meta\.(dirname|url)\b/g, (_, kind) => kind === 'dirname'
+              ? '__kitFileURLToPath(new URL(' + JSON.stringify(folder) + ', import.meta.url))'
+              : 'new URL(' + JSON.stringify(target) + ', import.meta.url).href');
             if (content.includes('__kitFileURLToPath')) content = "import { fileURLToPath as __kitFileURLToPath } from 'node:url';\n" + content;
           }
           return { contents: content, loader: path.endsWith('.ts') ? 'ts' : 'js', resolveDir: resolve(path, '..') };
