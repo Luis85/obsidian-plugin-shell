@@ -43,7 +43,9 @@ export async function loadDefinitions(root: string): Promise<LoadedStarter[]> {
   requireThat(entries.length <= 256, 'STARTER_LIMIT', 'A starter folder supports at most 256 entries.');
   const results: LoadedStarter[] = [];
   let size = 0;
-  for (const entry of entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
+  // Order by definition ID (the name without .json), so webapp precedes webapp-angular.
+  const key = (name: string) => name.replace(/\.json$/i, '');
+  for (const entry of entries.sort((a, b) => key(a.name) < key(b.name) ? -1 : key(a.name) > key(b.name) ? 1 : 0)) {
     if (!entry.name.toLowerCase().endsWith('.json')) continue;
     requireThat(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.json$/.test(entry.name) && entry.isFile() && !entry.isSymbolicLink(), 'STARTER_SOURCE', 'Definitions must be regular lower-case $starterName.json files.');
     const file = folder + '/' + entry.name, bytes = await readBounded(join(root, file), STARTER_MAX_BYTES); size += bytes.length;

@@ -75,7 +75,7 @@ function studioActions(ui: Prompts, options: StudioOptions, workspace: Workspace
     generate: { label: 'Generate boilerplate from this sketch', run: () => generate(ui, options, workspace) },
     undo: { label: 'Undo last edit', run: () => workspace.undo() },
     redo: { label: 'Redo last edit', run: () => workspace.redo() },
-    'new-project': { label: 'Create another project from a preset', run: () => projectWizard(ui, options) },
+    'new-project': { label: 'Create another project from a project starter', run: () => projectWizard(ui, options) },
   };
 }
 export async function studio(ui: Prompts, options: StudioOptions): Promise<Workspace> {

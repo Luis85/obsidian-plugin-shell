@@ -1,4 +1,4 @@
-import type { ProjectSelection } from '../../scripts/compiler/domain/project-presets.ts';
+import type { ProjectSelection } from '../../scripts/compiler/domain/project-starter.ts';
 import { join } from 'node:path';
 import { exists, hash } from '../../scripts/framework/files.ts';
 import { compileProject, loadTemplateSnapshot } from '../../scripts/compiler/index.ts';

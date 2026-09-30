@@ -41,6 +41,7 @@ async function starterValues(request: Request, context: Context, selected: Loade
 }
 export async function definitionProjectPlan(request: Request, context: Context, place: Placement, template: string) {
   const selected = await selectedStarter(request, context), d = selected.definition;
+  requireThat(d.generator.kind !== 'project', 'STARTER_KIND', `${d.id} is a project starter; it is prepared with a prototype interview, not a target directory. Run node shell.mjs new --starter ${d.id}, or new guide --starter ${d.id} --json for agents.`);
   const values = await starterValues(request, context, selected, place.directory);
   const processes = readProcesses(renderProcesses(d, values));
   const requested = stringOption(request.options, 'run');

@@ -1,0 +1,44 @@
+{
+  "$schema": "../../scripts/starters/starter.schema.json",
+  "schemaVersion": 1,
+  "id": "plugin-vanilla",
+  "name": "Plugin with vanilla Obsidian",
+  "version": "1.0.0",
+  "category": "Projects",
+  "level": "Foundation",
+  "summary": "An Obsidian plugin without a frontend framework.",
+  "outcome": "A reviewed prototype package with Obsidian plugin source (Vanilla TypeScript), ready for explicit dependency resolution and implementation.",
+  "includes": [
+    "Shared core in src/core with stable page data",
+    "Obsidian plugin entrypoint and manifest",
+    "Offline single-file prototype build (npm run build:prototype)",
+    "Exact dependency pins with a root-only lock for explicit resolution"
+  ],
+  "implementation": [
+    "Agree the prototype brief in the interview before any files are written",
+    "Implement the agreed visual components and business actions",
+    "Resolve dependencies explicitly, then typecheck, test and build every target",
+    "Qualify plugin behavior in a disposable Obsidian vault"
+  ],
+  "tags": [
+    "plugin",
+    "obsidian",
+    "vanilla"
+  ],
+  "inputs": [],
+  "generator": {
+    "kind": "project",
+    "projectType": "plugin",
+    "framework": "vanilla",
+    "targets": [
+      "plugin"
+    ]
+  },
+  "files": [],
+  "processes": [],
+  "firstRun": [],
+  "nextSteps": [
+    "Review execution-prompt.md and source/README.md in the prepared package.",
+    "In source/, run npm install, then npm run typecheck, npm test and npm run build."
+  ]
+}

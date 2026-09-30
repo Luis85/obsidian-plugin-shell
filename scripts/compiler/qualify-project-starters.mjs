@@ -9,20 +9,20 @@ const root = process.cwd(), args = process.argv.slice(2), options = {};
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === '--execute') options.execute = true;
-  else if (['--preset', '--framework'].includes(arg) && args[i + 1] && !args[i + 1].startsWith('--')) options[arg.slice(2)] = args[++i];
-  else throw new Error('Use --preset <id> [--framework <id>] --execute.');
+  else if (arg === '--starter' && args[i + 1] && !args[i + 1].startsWith('--')) options.starter = args[++i];
+  else throw new Error('Use --starter <project-starter-id> --execute.');
 }
 if (!options.execute) {
-  console.log(JSON.stringify({ status: 'planned', steps: ['Create disposable approved fixture through new guide/plan/apply.', 'Explicit npm install, clean npm ci, typecheck, tests and build.', 'Exact-artifact offline browser or CLI acceptance; native host not activated.'], requires: '--execute and QUALIFIED_NPM' }));
+  console.log(JSON.stringify({ status: 'planned', starter: options.starter ?? null, steps: ['Create disposable approved fixture from the installed project starter through new guide/plan/apply.', 'Explicit npm install, clean npm ci, typecheck, tests and build.', 'Exact-artifact offline browser or CLI acceptance; native host not activated.'], requires: '--execute and QUALIFIED_NPM' }));
 } else await qualify();
 async function qualify() {
   const expected = 'v' + (await readFile('.nvmrc', 'utf8')).trim();
   if (process.version !== expected || !process.env.QUALIFIED_NPM) throw new Error('Use the exact .nvmrc Node and set QUALIFIED_NPM to npm 11.19.1.');
-  const preset = options.preset ?? 'plugin-vanilla';
-  if (!/^[a-z][a-z0-9-]*$/.test(preset) || (options.framework && !/^[a-z][a-z0-9-]*$/.test(options.framework))) throw new Error('Invalid preset/framework identifier.');
-  const folder = join(root, 'reports/project-presets', preset + '-' + (options.framework ?? 'default'));
+  const starter = options.starter;
+  if (!starter || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(starter)) throw new Error('Supply --starter <project-starter-id>.');
+  const folder = join(root, 'reports/project-starters', starter);
   await mkdir(folder, { recursive: true });
-  const report = { node: process.version, preset, framework: options.framework ?? 'preset default', status: 'running', commands: [], browser: 'not-run', nativeHost: 'not-run; separate authorization and disposable Obsidian vault required', artifacts: [] };
+  const report = { node: process.version, starter, status: 'running', commands: [], browser: 'not-run', nativeHost: 'not-run; separate authorization and disposable Obsidian vault required', artifacts: [] };
   let scratch;
   function run(label, cwd, arguments_, expectedStatus = 0) {
     const child = spawnSync(process.execPath, arguments_, { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 8 * 1024 * 1024 });
@@ -35,11 +35,9 @@ async function qualify() {
   try {
     if (run('npm version', root, [process.env.QUALIFIED_NPM, '--version']).trim() !== '11.19.1') throw new Error('Wrong npm version.');
     scratch = await mkdtemp(join(tmpdir(), 'qualify-project-'));
-    const flags = ['new', 'guide', '--preset', preset, '--json'];
-    if (options.framework) flags.push('--framework', options.framework);
-    if (preset === 'hybrid') flags.push('--targets', 'plugin,webapp,website,cli');
-    const discovery = JSON.parse(run('discover', root, ['shell.mjs', ...flags]));
+    const discovery = JSON.parse(run('discover', root, ['shell.mjs', 'new', 'guide', '--starter', starter, '--json']));
     const input = discovery.data.input; report.selection = discovery.data.selection;
+    if (report.selection.starter.id !== starter || input.starter !== starter) throw new Error('Discovery did not select the requested starter.');
     Object.assign(input.interview.answers, { title: 'Qualified starter fixture', pages: ['Overview', 'Details'], components: [], approved: true });
     await writeFile(join(scratch, 'request.json'), JSON.stringify(input));
     const planArgs = ['shell.mjs', 'new', '--root', scratch, '--input', 'request.json', '--out', 'prepared', '--json'];
