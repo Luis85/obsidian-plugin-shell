@@ -45,11 +45,16 @@ test('framework adapters reject ambiguous dependency ownership', () => {
   const template = { text() {
     return JSON.stringify({ dependencies: {}, devDependencies: { typescript: '6.0.3', '@types/node': '26.6.3', vite: '8.3.1' } });
   } };
-  const bad = defineFrameworkAdapter({
-    id: 'react', label: 'React conflict', engine: 'vanilla',
+  const wrongScope = defineFrameworkAdapter({
+    id: 'react', label: 'React scope conflict', engine: 'vanilla',
+    dependencies: { vite: '8.3.1' },
+  });
+  assert.throws(() => packageFiles(template as never, selection, 'react-app', wrongScope), /dependency scope/);
+  const wrongVersion = defineFrameworkAdapter({
+    id: 'react', label: 'React version conflict', engine: 'vanilla',
     devDependencies: { vite: '9.0.0' },
   });
-  assert.throws(() => packageFiles(template as never, selection, 'react-app', bad), /dependency scope/);
+  assert.throws(() => packageFiles(template as never, selection, 'react-app', wrongVersion), /dependency conflicts/);
 });
 
 test('plugin starter discovery and framework package emission use the normal project contracts', async () => {
