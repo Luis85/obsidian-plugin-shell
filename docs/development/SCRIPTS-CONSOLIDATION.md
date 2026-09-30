@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: staged implementation through C22 on PR #60. The continuation uses separately pushed
+Status: staged implementation through C23 on PR #60. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -54,7 +54,7 @@ are paths that generated projects depend on. Treat them as contracts.
 | --- | --- | --- |
 | sha256 | `shared/hash.mjs`, `framework/files.ts` `hash`, `handout-model` `digest`, `setup/journal`, `hindsight/policy`, local lambdas (39 files use `createHash`) | One typed hash helper |
 | Argument parsing | `framework/catalog.ts`, `bin/adapters/commands.ts`, `makers/arguments.mjs`, `release/*`, `testing/suites.mjs`, `companion/generate.mjs`, launcher routing in `app.mjs` | One parser/dispatcher in `bin/` |
-| JSON result envelope | `framework/contracts.ts` plus hand-built copies in `bin/app.ts`, `app.mjs`, `handout.mjs`; ad-hoc `{status,error}` shapes in legacy CLIs | `framework/contracts.ts` `result`/`failure` |
+| JSON result envelope | Framework/maker adapters plus pre-TypeScript bootstrap | `contracts/result-runtime.mjs` runtime + typed `contracts/result.ts`; framework adds bounded failure diagnostics |
 | Process spawning | `framework/process.ts` `runNode`, `shared/process.mjs` `runNode`, direct `spawnSync('git', …)` in 7 files | One `runNode` + one git helper |
 | fs / JSON / path containment | `exists` ×5, JSON readers ×4, containment checks in ~17 files | Typed fs/plan adapter |
 | Confirmation prompts | `framework/input.ts`, `bin/presentation/prompts.ts`, readline in legacy CLIs | Shared yes/no policy in `scripts/shared/confirmation.mjs`; presentation layers own rendering |
@@ -96,7 +96,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **C20:** The shared portable project-path policy now has a canonical TypeScript implementation with compatibility-only `.mjs` entry. Maker domain and application-doc settings use it directly, maker coverage owns it, and the existing `project-path-contract` boundary now points at the typed implementation with an explicit regression.
 - **C21:** Bounded asynchronous mapping now has a canonical TypeScript implementation with a compatibility-only `.mjs` entry. Direct regressions preserve input-order results, invalid-concurrency refusal and stop-scheduling-on-first-failure semantics.
 - **C22:** File-plan validation, containment, locking, stale-preimage checks, staging and rollback now execute from strict `file-plan-runtime.ts`; `file-plan.mjs` is compatibility-only. The file-plan boundary explicitly depends only on typed bounded-concurrency and filesystem contracts, while existing stale-plan and apply regressions remain the behavioral guardrails.
-- **Remaining C23–F:** Planned; no claim of completion until their own tests and gates pass.
+- **C23:** The machine-result envelope now has one bootstrap-safe runtime constructor in `contracts/result-runtime.mjs`. The typed `result.ts` API delegates to it, and both the pre-TypeScript root launcher and legacy handout shim use the same constructor for failures instead of hand-building protocol objects.
+- **Remaining C24–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

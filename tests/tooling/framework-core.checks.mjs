@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { parseCliArguments, validateRequest } from '../../scripts/framework/catalog.ts';
 import { result as frameworkResult, OperationError as frameworkOperationError, requireThat as frameworkRequireThat } from '../../scripts/framework/contracts.ts';
 import { result as canonicalResult } from '../../scripts/contracts/result.ts';
+import { resultEnvelope as bootstrapResultEnvelope } from '../../scripts/contracts/result-runtime.mjs';
 import { OperationError as canonicalOperationError, requireThat as canonicalRequireThat } from '../../scripts/contracts/errors.ts';
 import { executeOperation } from '../../scripts/framework/operations.ts';
 import { planOperation, applyOperation } from '../../scripts/framework/planning.ts';
@@ -231,6 +232,7 @@ test('typed file-plan facade refuses stale preimages and preserves the interveni
 });
 
 test('framework result helper reuses the canonical typed envelope', () => {
+  assert.deepEqual(bootstrapResultEnvelope('status', { ready: true }), canonicalResult('status', { ready: true }));
   assert.equal(frameworkResult, canonicalResult);
   assert.deepEqual(canonicalResult('status', { ready: true }), {
     protocolVersion: 1, command: 'status', status: 'ok', data: { ready: true }, diagnostics: [],
