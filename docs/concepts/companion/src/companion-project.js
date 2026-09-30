@@ -170,12 +170,6 @@ function companionExampleEntities(d, surfaces) {
   const source = { id: dsNext(sources, 'source'), slug: 'authoring-vault', name: 'Companion authoring vault', kind: 'vault', status: 'active',
     description: 'Proposed native adapter over project authoring notes. The HTML only declares this port.', locator: 'vault://active', auth: 'none', credentialRef: '', operations: [] };
   sources.sources.push(source); sources.positions[source.id] = { x: 900, y: 80 };
-  const collectionEntity=entities['test-recipe'];
-  const collection={id:dsNext(sources,'source'),slug:'test-recipes',name:'Test recipe collection',kind:'collection',status:'active',
-    description:'Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.',locator:'vault://active',auth:'none',credentialRef:'',
-    collectionPath:collectionEntity.folder,entity:collectionEntity.id,operations:[]};
-  collection.operations=dsCollectionCrud(collection,d).map(op=>({...op,id:dsNext(sources,'operation')}));
-  sources.sources.push(collection); sources.positions[collection.id] = { x: 900, y: 430 };
   sources.testing = { ...tdDefaults(), count: 5 };
   for (const [key, entity] of [['requirements', 'requirement'], ['sitemap', 'screen'], ['components', 'component']]) {
     const op = { id: dsNext(sources, 'operation'), slug: 'list-' + key, name: 'List ' + key, direction: 'read', method: 'adapter',
@@ -187,6 +181,14 @@ function companionExampleEntities(d, surfaces) {
     sources.testing.recipes.push({ source: source.id, operation: op.id, enabled: true, behavior: 'list', dataset: entity,
       keyField: 'id', scenario: 'populated', latencyMs: 0, errorStatus: 503, rules: [] });
   }
+  // Allocate the example Collection only after the historical authoring-vault IDs.
+  // The visual seed deliberately references ds-source-1/ds-operation-2 and those IDs are a retained contract.
+  const collectionEntity=entities['test-recipe'];
+  const collection={id:dsNext(sources,'source'),slug:'test-recipes',name:'Test recipe collection',kind:'collection',status:'active',
+    description:'Managed Markdown collection demonstrating the active-vault path + entity CRUD contract.',locator:'vault://active',auth:'none',credentialRef:'',
+    collectionPath:collectionEntity.folder,entity:collectionEntity.id,operations:[]};
+  collection.operations=dsCollectionCrud(collection,d).map(op=>({...op,id:dsNext(sources,'operation')}));
+  sources.sources.push(collection); sources.positions[collection.id] = { x: 900, y: 430 };
 }
 
 function companionExampleComponents(d, surfaces) {

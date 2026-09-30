@@ -86,7 +86,8 @@ def build(output: Path, check: bool = False):
  inputs={'src/'+name for name in source_inputs}|{'vendor/'+name for name in vendor_inputs}|{'test-kit/'+name for name in tools}
  config=json.loads((ROOT.parents[2]/'.fallowrc.json').read_text(encoding='utf-8'))
  prefix='docs/concepts/companion/'
- registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix)]
+ owned_roots=('src/','vendor/','test-kit/')
+ registered=[entry[len(prefix):] for entry in config['entry'] if entry.startswith(prefix) and entry[len(prefix):].startswith(owned_roots)]
  actual={file.relative_to(ROOT).as_posix() for folder in ['src','vendor','test-kit'] for file in (ROOT/folder).rglob('*') if file.suffix in {'.js','.css','.mjs'}}
  if inputs!=set(registered) or len(registered)!=len(inputs) or inputs!=actual:
   raise ValueError('Concept assembly/analyzer entry inventory differs; do not hide unassembled source')
