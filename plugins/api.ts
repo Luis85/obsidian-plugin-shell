@@ -19,7 +19,7 @@ export interface PluginEventDefinition<N extends string = string, P = unknown> {
   readonly valid: (payload: unknown) => payload is P;
 }
 export function definePluginEvent<const N extends string, P>(
-  id: N,
+  id: string extends N ? never : N,
   valid: (payload: unknown) => payload is P,
 ): PluginEventDefinition<N, P> {
   if (!/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(id) || typeof valid !== 'function') throw new Error('PLUGIN_EVENT_INVALID');
