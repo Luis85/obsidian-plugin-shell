@@ -7,6 +7,7 @@ import { zip } from '../framework/zip.ts';
 import { result, requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
 import { STARTER_MAX_BYTES } from './browser.ts';
 import { loadDefinitions, parseDefinition, starterFolder } from './repository.ts';
+import { pluginStarterDefinitions } from '../../plugins/runtime.ts';
 export async function listStarters(context: Context, command = 'starters list') {
   const definitions = await loadDefinitions(context.root), folder = await starterFolder(context.root);
   return result(command, { folder, integrity: 'local-content-sha256; not a signature', starters: definitions.map(({ definition: d, sha256, file }) => ({
@@ -63,6 +64,8 @@ export async function editStarterPlan(request: Request, context: Context) {
   } else requireThat(!await exists(join(context.root, path)), 'STARTER_EXISTS', 'Starter already exists; use starters edit with a reviewed plan.');
   // Validate every other installed definition as well; no registry or cached index needs updating.
   requireThat(!(await otherDefinitionIds(context.root, folder, definition.id)).includes(definition.id), 'STARTER_ID', 'Starter IDs must be unique.');
+  requireThat(!pluginStarterDefinitions().some(starter => starter.id === definition.id), 'STARTER_ID',
+    'Starter ID is already contributed by an enabled Workbench plugin: ' + definition.id);
   const plan = await createFilePlan(context.root, [{ path, content: bytes.toString('utf8') }]);
   return { plan, hash: hash(bytes), conflicts: [] as string[], summary: { id: definition.id, file: path, sha256: hash(bytes), processes: 'not-run' } };
 }
