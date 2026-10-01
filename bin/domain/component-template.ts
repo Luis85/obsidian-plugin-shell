@@ -68,6 +68,13 @@ export interface ComponentTemplate {
   };
 }
 
+export interface ComponentTemplateEntry {
+  template: ComponentTemplate;
+  file: string;
+  sha256: string;
+  origin: 'baseline' | 'project' | 'plugin';
+}
+
 export interface ComponentTemplateQuery {
   query?: string;
   templateType?: ComponentTemplateType;

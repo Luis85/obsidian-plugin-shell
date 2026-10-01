@@ -1,5 +1,6 @@
-import type { FilePlanEntry } from '../../scripts/shared/file-plan.ts';
-import type { LoadedComponentTemplate } from '../adapters/component-template-repository.ts';
+import type { ComponentTemplateEntry } from '../domain/component-template.ts';
+
+interface ComponentTemplateDocument { path: string; content: string }
 
 const folders: Record<string, string> = {
   atom: 'atoms',
@@ -24,12 +25,12 @@ function table(headers: string[], rows: string[][]): string {
   ].join('\n');
 }
 
-function sourceNote(entry: LoadedComponentTemplate): string {
+function sourceNote(entry: ComponentTemplateEntry): string {
   return '> Generated from ' + code(entry.file) + ' (' + entry.origin
     + '). Do not edit this Markdown directly; edit the JSON template and regenerate.';
 }
 
-function renderComponentTemplateMarkdown(entry: LoadedComponentTemplate): string {
+function renderComponentTemplateMarkdown(entry: ComponentTemplateEntry): string {
   const template = entry.template;
   const composition = template.children.length
     ? template.children.map(child => '- ' + code(child.template)
@@ -75,7 +76,7 @@ function renderComponentTemplateMarkdown(entry: LoadedComponentTemplate): string
     + '## Tags\n\n' + tags + '\n';
 }
 
-function index(entries: readonly LoadedComponentTemplate[]): string {
+function index(entries: readonly ComponentTemplateEntry[]): string {
   const rows = [...entries]
     .sort((a, b) => a.template.atomicLevel.localeCompare(b.template.atomicLevel)
       || a.template.name.localeCompare(b.template.name))
@@ -99,9 +100,9 @@ function index(entries: readonly LoadedComponentTemplate[]): string {
 }
 
 export function componentTemplateDocumentation(
-  entries: readonly LoadedComponentTemplate[],
+  entries: readonly ComponentTemplateEntry[],
   output: string,
-): FilePlanEntry[] {
+): ComponentTemplateDocument[] {
   const root = output.replace(/\/+$/, '');
   return [
     { path: root + '/README.md', content: index(entries) },

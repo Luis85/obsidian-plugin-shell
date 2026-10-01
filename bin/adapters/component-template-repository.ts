@@ -3,14 +3,12 @@ import { lstat, readdir } from 'node:fs/promises';
 import { parseDesignData } from '../../scripts/contracts/json-data.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
 import { requireThat } from './framework/contracts.ts';
-import { validateComponentTemplate, validateComponentTemplateCatalog, type ComponentTemplate } from '../domain/component-template.ts';
-
-export interface LoadedComponentTemplate {
-  template: ComponentTemplate;
-  file: string;
-  sha256: string;
-  origin: 'baseline' | 'project' | 'plugin';
-}
+import {
+  validateComponentTemplate,
+  validateComponentTemplateCatalog,
+  type ComponentTemplate,
+  type ComponentTemplateEntry,
+} from '../domain/component-template.ts';
 
 const TEMPLATE_FOLDER = 'configs/templates';
 const MAX_FILE_BYTES = 500_000;
@@ -20,11 +18,11 @@ function safeName(name: string): boolean {
   return /^[a-z][a-z0-9-]*$/.test(name);
 }
 
-async function scanFolder(folder: string, displayRoot: string, origin: LoadedComponentTemplate['origin']): Promise<LoadedComponentTemplate[]> {
+async function scanFolder(folder: string, displayRoot: string, origin: ComponentTemplateEntry['origin']): Promise<ComponentTemplateEntry[]> {
   if (!await exists(folder)) return [];
   const stat = await lstat(folder);
   requireThat(stat.isDirectory() && !stat.isSymbolicLink(), 'TEMPLATE_SOURCE', 'Component-template root must be a regular directory.');
-  const result: LoadedComponentTemplate[] = [];
+  const result: ComponentTemplateEntry[] = [];
   let total = 0;
 
   async function visit(path: string, relative: string, depth: number): Promise<void> {
@@ -64,7 +62,7 @@ async function baselineFolder(frameworkRoot: string): Promise<{ path: string; di
   return null;
 }
 
-function uniqueSource(entries: readonly LoadedComponentTemplate[], label: string): void {
+function uniqueSource(entries: readonly ComponentTemplateEntry[], label: string): void {
   const ids = new Set<string>();
   for (const entry of entries) {
     requireThat(!ids.has(entry.template.id), 'TEMPLATE_DUPLICATE', label + ' defines ' + entry.template.id + ' more than once.');
@@ -76,7 +74,7 @@ export async function loadComponentTemplates(
   root: string,
   frameworkRoot: string,
   contributed: readonly ComponentTemplate[] = [],
-): Promise<LoadedComponentTemplate[]> {
+): Promise<ComponentTemplateEntry[]> {
   const baseline = await baselineFolder(frameworkRoot);
   const project = resolve(root, TEMPLATE_FOLDER);
   const baselineEntries = baseline ? await scanFolder(baseline.path, baseline.display, 'baseline') : [];

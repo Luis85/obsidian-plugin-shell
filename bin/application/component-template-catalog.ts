@@ -1,15 +1,14 @@
 import { requireSketch } from '../domain/errors.ts';
-import type { ComponentTemplate, ComponentTemplateQuery } from '../domain/component-template.ts';
-import type { LoadedComponentTemplate } from '../adapters/component-template-repository.ts';
+import type { ComponentTemplate, ComponentTemplateEntry, ComponentTemplateQuery } from '../domain/component-template.ts';
 
 function same(value: string, expected?: string): boolean {
   return expected === undefined || value.toLowerCase() === expected.toLowerCase();
 }
 
 export function filterComponentTemplates(
-  entries: readonly LoadedComponentTemplate[],
+  entries: readonly ComponentTemplateEntry[],
   query: ComponentTemplateQuery = {},
-): LoadedComponentTemplate[] {
+): ComponentTemplateEntry[] {
   const needle = query.query?.trim().toLowerCase();
   return entries.filter(({ template }) => {
     const searchable = [
@@ -29,7 +28,7 @@ export function filterComponentTemplates(
   });
 }
 
-export function componentTemplateSummary(entry: LoadedComponentTemplate) {
+export function componentTemplateSummary(entry: ComponentTemplateEntry) {
   const template = entry.template;
   return {
     id: template.id,
@@ -49,7 +48,7 @@ export function componentTemplateSummary(entry: LoadedComponentTemplate) {
   };
 }
 
-export function componentTemplateTree(entries: readonly LoadedComponentTemplate[], id: string) {
+export function componentTemplateTree(entries: readonly ComponentTemplateEntry[], id: string) {
   const byId = new Map(entries.map(entry => [entry.template.id, entry.template]));
   const root = byId.get(id);
   requireSketch(root, 'TEMPLATE_UNKNOWN', 'Component template not found; use templates list.');
@@ -68,7 +67,7 @@ export function componentTemplateTree(entries: readonly LoadedComponentTemplate[
   return visit(root);
 }
 
-export function componentTemplateCoverage(entries: readonly LoadedComponentTemplate[]) {
+export function componentTemplateCoverage(entries: readonly ComponentTemplateEntry[]) {
   const templates = entries.map(entry => entry.template);
   const atomic = ['atom', 'molecule', 'organism', 'template', 'page'];
   const types = ['component', 'component-with-children', 'page', 'page-with-bricks'];
