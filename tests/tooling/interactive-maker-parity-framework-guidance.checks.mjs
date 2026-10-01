@@ -14,7 +14,8 @@ test('relocated CLI help metadata and tiered rendering preserve command guidance
   assert.equal(relocatedCommandHelp(statusDescriptor).examples.includes('mutated'), false);
 
   const devHelp = relocatedCommandHelp(frameworkDescriptor('dev'));
-  assert.deepEqual(devHelp.optionHelp.profile.values, ['obsidian', 'ui']);
+  assert.deepEqual(devHelp.optionHelp.profile.values, ['watch', 'ui', 'preview', 'obsidian']);
+  assert.equal(devHelp.optionHelp.profile.default, 'watch');
   assert.equal(devHelp.optionHelp.timeout.default, '3600000');
 
   const resumeHelp = relocatedCommandHelp(frameworkDescriptor('setup resume'));
