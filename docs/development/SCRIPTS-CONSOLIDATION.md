@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D16 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D17 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -115,7 +115,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D14:** Framework request/context types, option validation and bounded failure adaptation moved to `bin/adapters/framework/contracts.ts`. Relocated CLI modules import it locally, `scripts/framework/contracts.ts` is compatibility-only, and maker coverage locks operation/compiler errors plus safe recovery metadata extraction.
 - **D15:** Framework filesystem/root-discovery services moved to `bin/adapters/framework/files.ts`. The relocated CLI/read/process adapters import it locally, `scripts/framework/files.ts` is compatibility-only, and maker coverage verifies bounded reads, hashing, lstat presence and implicit/explicit project-root discovery.
 - **D16:** Framework configuration parsing, defaults and import-conflict resolution moved to `bin/adapters/framework/configuration.ts`. The relocated filesystem adapter imports it locally, the former framework path is compatibility-only, and maker coverage verifies portable defaults, invalid identity/overlap refusal and explicit import-resolution semantics.
-- **Remaining D17–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D17:** Framework npm discovery and public Node-process policy moved to `bin/adapters/framework/process.ts`. Dispatcher/process-operation imports are local, `scripts/framework/process.ts` is compatibility-only, and maker coverage verifies explicit npm selection, success/failure metadata, invalid timeout, missing tools and pre-start cancellation.
+- **Remaining D18–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

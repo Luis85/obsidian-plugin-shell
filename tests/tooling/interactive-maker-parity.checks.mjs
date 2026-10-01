@@ -27,6 +27,8 @@ import { hash as relocatedHash, readBounded as relocatedReadBounded, projectRoot
 import * as legacyFrameworkFiles from '../../scripts/framework/files.ts';
 import { configuration as relocatedConfiguration, defaults as relocatedDefaults, identity as relocatedIdentity, resolveImport as relocatedResolveImport } from '../../bin/adapters/framework/configuration.ts';
 import * as legacyFrameworkConfiguration from '../../scripts/framework/configuration.ts';
+import { npmEntry as relocatedNpmEntry, runNode as relocatedRunNode } from '../../bin/adapters/framework/process.ts';
+import * as legacyFrameworkProcess from '../../scripts/framework/process.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -557,4 +559,42 @@ test('relocated framework configuration preserves defaults, validation and compa
   const resolved = relocatedResolveImport(config, imported, 'project');
   assert.equal(resolved.config, config);
   assert.equal(resolved.document.project.name, 'Field Notes');
+});
+
+
+test('relocated framework process policy preserves npm selection and child execution diagnostics', async () => {
+  assert.equal(legacyFrameworkProcess.npmEntry, relocatedNpmEntry);
+  assert.equal(legacyFrameworkProcess.runNode, relocatedRunNode);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-policy-')));
+  const previousQualified = process.env.QUALIFIED_NPM;
+  try {
+    const npm = join(root, 'npm-cli.js');
+    await writeFile(npm, 'export {};\n');
+    process.env.QUALIFIED_NPM = npm;
+    assert.equal(await relocatedNpmEntry(), npm);
+
+    await writeFile(join(root, 'ok.mjs'), "process.stdout.write('ok');\n");
+    const output = await relocatedRunNode({ root, frameworkRoot }, 'ok.mjs', [], 10_000);
+    assert.equal(output.exitCode, 0);
+    assert.equal(output.stdout, 'ok');
+
+    await writeFile(join(root, 'fail.mjs'), "process.exitCode = 3;\n");
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'fail.mjs', [], 10_000), error => {
+      assert.equal(error.code, 'PROCESS_FAILED');
+      assert.equal(error.details.execution.exitCode, 3);
+      assert.equal(error.details.automaticRetry, false);
+      return true;
+    });
+
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'ok.mjs', [], 0), error => error.code === 'INVALID_TIMEOUT');
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'missing.mjs', [], 10_000), error => error.code === 'TOOL_MISSING');
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot, signal: controller.signal }, 'ok.mjs', [], 10_000), error => error.code === 'CANCELLED');
+  } finally {
+    if (previousQualified === undefined) delete process.env.QUALIFIED_NPM;
+    else process.env.QUALIFIED_NPM = previousQualified;
+    await rm(root, { recursive: true, force: true });
+  }
 });
