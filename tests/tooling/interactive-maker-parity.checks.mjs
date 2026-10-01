@@ -18,6 +18,8 @@ import { main as frameworkMain } from '../../bin/adapters/framework-cli.ts';
 import { processOperation } from '../../bin/adapters/framework/process-operation.ts';
 import { executeOperation as frameworkOperation } from '../../bin/adapters/framework/operations.ts';
 import { descriptor as frameworkDescriptor, parameterKinds as frameworkParameterKinds, parseCliArguments as parseFrameworkArguments } from '../../bin/adapters/framework/catalog.ts';
+import { suggestions as frameworkSuggestions, didYouMean as frameworkDidYouMean } from '../../bin/adapters/framework/suggest.ts';
+import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalog.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -434,4 +436,14 @@ test('relocated framework catalog preserves parsing, validation and suggestions'
     assert.ok(error.details.suggestions.includes('--json'));
     return true;
   });
+});
+
+
+test('relocated parser support preserves prototype catalog and typo suggestions', () => {
+  assert.ok(prototypeCommands.some(command => command.id === 'prototypes list' && command.effect === 'read'));
+  assert.ok(prototypeCommands.some(command => command.id === 'prototypes generate' && command.effect === 'plan'));
+  assert.deepEqual(frameworkSuggestions('statsu', ['status', 'doctor', 'config get']), ['status']);
+  assert.deepEqual(frameworkSuggestions('plan', ['plan inspect', 'plan apply', 'status']), ['plan apply', 'plan inspect']);
+  assert.equal(frameworkDidYouMean(['status']), ' Did you mean status?');
+  assert.equal(frameworkDidYouMean([], value => `"${value}"`), '');
 });

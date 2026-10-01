@@ -1,7 +1,7 @@
-import { prototypeCommands } from '../../../scripts/framework/prototype-catalog.ts';
+import { prototypeCommands } from './prototype-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from '../../../scripts/framework/contracts.ts';
 import { assertJsonData } from '../../../scripts/contracts/json-data.ts';
-import { suggestions, didYouMean } from '../../../scripts/framework/suggest.ts';
+import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {
   id: string; summary: string; options: Record<string, 'value' | 'flag'>;
   maxArgs: number; effect: 'read' | 'plan' | 'process' | 'release' | 'fixtures';
