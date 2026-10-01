@@ -6,6 +6,7 @@ import type { Readable, Writable } from 'node:stream';
 const MAX_OUTPUT_BYTES = 1024 * 1024;
 const MAX_ARGS = 64;
 const MAX_ARG_LENGTH = 4096;
+const MAX_STDIN_LENGTH = 256 * 1024;
 const legacyProtocols = new Set(['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']);
 const supportedVersions = ['2026-07-28', ...legacyProtocols];
 const serverInfo = { name: 'workbench-local', version: '1.0.0' };
@@ -31,6 +32,7 @@ export const workbenchMcpTools = [
     description: 'Execute the project-local Workbench CLI with an exact argument array. The MCP layer never adds --yes, --apply, release authorization, process trust, or other permissions; existing Workbench planning and approval rules remain authoritative.',
     inputSchema: { type: 'object', additionalProperties: false, required: ['args'], properties: {
       args: { type: 'array', minItems: 1, maxItems: MAX_ARGS, items: { type: 'string', maxLength: MAX_ARG_LENGTH } },
+      stdin: { type: 'string', maxLength: MAX_STDIN_LENGTH, description: 'Optional stdin payload for commands using --input -.' },
       timeoutMs: { type: 'integer', minimum: 1000, maximum: 600000 },
     } },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
@@ -38,7 +40,7 @@ export const workbenchMcpTools = [
 ] as const;
 
 type RunResult = { exitCode: number; signal: string | null; stdout: string; stderr: string; timedOut: boolean; overflow: boolean; error?: string };
-export type McpRunner = (args: string[], timeoutMs: number) => Promise<RunResult>;
+export type McpRunner = (args: string[], timeoutMs: number, stdin?: string) => Promise<RunResult>;
 type JsonRpc = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: unknown };
 function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -52,6 +54,9 @@ function exactArgs(value: unknown): string[] {
   if (!Array.isArray(value) || value.length < 1 || value.length > MAX_ARGS) throw new Error('args must contain 1-64 CLI arguments.');
   for (const item of value) if (typeof item !== 'string' || item.length > MAX_ARG_LENGTH || item.includes('\0')) {
     throw new Error('Each CLI argument must be a bounded string without NUL bytes.');
+  }
+  if (value.some(item => item === '--root' || item.startsWith('--root='))) {
+    throw new Error('The project-local MCP is bound to its Workbench root; --root is not accepted.');
   }
   return value;
 }
@@ -86,7 +91,11 @@ async function tool(name: string, input: unknown, run: McpRunner) {
     const args = exactArgs(options.args);
     const timeoutMs = options.timeoutMs === undefined ? 120000 : options.timeoutMs;
     if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 600000) throw new Error('timeoutMs must be 1000-600000.');
-    const value = await run(args, timeoutMs);
+    const stdin = options.stdin;
+    if (stdin !== undefined && (typeof stdin !== 'string' || stdin.length > MAX_STDIN_LENGTH || stdin.includes('\0'))) {
+      throw new Error('stdin must be a bounded string without NUL bytes.');
+    }
+    const value = await run(args, timeoutMs, stdin as string | undefined);
     return textResult(value, value.exitCode !== 0 || value.timedOut || value.overflow);
   } catch (cause) {
     return textResult({ code: 'INVALID_INPUT', message: cause instanceof Error ? cause.message : 'Invalid tool input.' }, true);
@@ -111,10 +120,10 @@ export async function mcpResponse(message: JsonRpc, run: McpRunner): Promise<Rec
   return result(message.id, await tool(name, params.arguments ?? {}, run), isModern);
 }
 
-export function runWorkbench(root: string, args: string[], timeoutMs: number): Promise<RunResult> {
+export function runWorkbench(root: string, args: string[], timeoutMs: number, stdin?: string): Promise<RunResult> {
   return new Promise(resolveRun => {
     const child = spawn(process.execPath, [join(root, 'bin/app'), ...args], {
-      cwd: root, shell: false, windowsHide: true, env: { ...process.env, NO_COLOR: '1' }, stdio: ['ignore', 'pipe', 'pipe'],
+      cwd: root, shell: false, windowsHide: true, env: { ...process.env, NO_COLOR: '1' }, stdio: ['pipe', 'pipe', 'pipe'],
     });
     let stdout = '', stderr = '', bytes = 0, settled = false, timedOut = false, overflow = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -125,13 +134,15 @@ export function runWorkbench(root: string, args: string[], timeoutMs: number): P
       if (target === 'stdout') stdout += chunk.toString('utf8'); else stderr += chunk.toString('utf8');
     };
     child.stdout.on('data', chunk => collect('stdout', chunk)); child.stderr.on('data', chunk => collect('stderr', chunk));
+    child.stdin.on('error', cause => settle({ exitCode: 1, signal: null, stdout, stderr, error: cause.message, timedOut, overflow }));
+    child.stdin.end(stdin ?? '');
     child.once('error', cause => settle({ exitCode: 1, signal: null, stdout, stderr, error: cause.message, timedOut, overflow }));
     child.once('close', (code, signal) => settle({ exitCode: code ?? 1, signal, stdout, stderr, timedOut, overflow }));
     timer = setTimeout(() => { timedOut = true; child.kill(); }, timeoutMs);
   });
 }
 
-export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (args, timeout) => runWorkbench(root, args, timeout)): Promise<number> {
+export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (args, timeout, stdin) => runWorkbench(root, args, timeout, stdin)): Promise<number> {
   const lines = createInterface({ input: io.input, crlfDelay: Infinity });
   for await (const line of lines) {
     if (!line.trim()) continue;

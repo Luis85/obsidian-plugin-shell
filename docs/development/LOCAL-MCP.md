@@ -25,7 +25,7 @@ Setup never installs Claude Code or Codex, authenticates either client, changes 
 Opt-in creates three project-local client files:
 
 - `.mcp.json` — Claude Code project MCP registration. Claude still asks the user to trust project-scoped MCP configuration.
-- `.claude/settings.local.json` — local project permission for the `workbench` MCP server. It coexists with generated shared `.claude/settings.json` and is already git-ignored.
+- `.claude/settings.local.json` — local project permissions that auto-allow only `workbench_capabilities` and `workbench_help`; `workbench_execute` still asks for approval. It coexists with generated shared `.claude/settings.json` and is already git-ignored.
 - `.codex/config.toml` — Codex project MCP registration with `default_tools_approval_mode = "writes"`. Codex loads project configuration only after the project is trusted.
 
 Both clients launch the same application-owned transport:
@@ -42,9 +42,9 @@ The bundled CLI owns the server; there is no second application API to keep in s
 - `workbench_help` — read-only CLI help.
 - `workbench_execute` — exact argument-array delegation to `node bin/app`.
 
-`workbench_execute` can reach the whole Workbench command surface, but the MCP layer never injects `--yes`, `--apply`, process trust, release authorization, or other permissions. Existing Workbench planners, plan hashes, file-ownership checks, test-vault restrictions, process trust and release boundaries remain authoritative.
+`workbench_execute` can reach the whole Workbench command surface, including data-driven commands through optional bounded stdin, but the MCP layer never injects `--yes`, `--apply`, process trust, release authorization, or other permissions. The project-local server rejects `--root`, so it cannot redirect operations into another repository. Claude Code keeps this write-capable tool behind an explicit approval prompt; Codex keeps its write-aware MCP approval policy. Existing Workbench planners, plan hashes, file-ownership checks, test-vault restrictions, process trust and release boundaries remain authoritative.
 
-The stdio bridge supports the legacy initialize era through MCP revision 2025-11-25 and the stateless 2026-07-28 discovery era. Delegated output is bounded to 1 MiB and a tool-selected timeout is bounded to ten minutes.
+The stdio bridge is anchored to the Workbench root rather than the client's current subdirectory. It supports the legacy initialize era through MCP revision 2025-11-25 and the stateless 2026-07-28 discovery era. Delegated output is bounded to 1 MiB, stdin to 256 KiB, and a tool-selected timeout to ten minutes.
 
 ## Ownership and reruns
 

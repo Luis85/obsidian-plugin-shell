@@ -28,14 +28,16 @@ test('MCP supports current modern discovery and legacy initialize with determini
 
 test('MCP delegates exact Workbench arguments and validates unsafe inputs', async () => {
   const calls = [];
-  const run = async (args, timeout) => { calls.push([args, timeout]); return ok(args); };
+  const run = async (args, timeout, stdin) => { calls.push([args, timeout, stdin ?? null]); return ok(args); };
   for (const [id, name, args] of [[1, 'workbench_capabilities', {}], [2, 'workbench_help', { topic: 'setup' }],
-    [3, 'workbench_execute', { args: ['check', '--fast'], timeoutMs: 5000 }]]) {
+    [3, 'workbench_execute', { args: ['check', '--fast'], timeoutMs: 5000, stdin: '{"scope":"current"}\n' }]]) {
     const response = await mcpResponse({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: args } }, run);
     assert.equal(response.result.isError, false);
   }
-  assert.deepEqual(calls, [[['capabilities', '--json'], 120000], [['help', 'setup', '--json'], 120000], [['check', '--fast'], 5000]]);
-  for (const arguments_ of [{}, { args: [] }, { args: ['x'], timeoutMs: 1 }, { args: ['bad\0arg'] }]) {
+  assert.deepEqual(calls, [[['capabilities', '--json'], 120000, null], [['help', 'setup', '--json'], 120000, null],
+    [['check', '--fast'], 5000, '{"scope":"current"}\n']]);
+  for (const arguments_ of [{}, { args: [] }, { args: ['x'], timeoutMs: 1 }, { args: ['bad\0arg'] },
+    { args: ['check', '--root', '../other'] }, { args: ['check', '--root=../other'] }, { args: ['check'], stdin: 'bad\0input' }]) {
     const response = await mcpResponse({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name: 'workbench_execute', arguments: arguments_ } }, run);
     assert.equal(response.result.isError, true);
   }
@@ -90,7 +92,9 @@ test('the real runner delegates to bin/app and modern setup owns Claude/Codex pr
     assert.equal(applied.status, 'applied', JSON.stringify(applied));
     assert.deepEqual(JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8')).mcpServers.workbench.args, ['${CLAUDE_PROJECT_DIR}/bin/app', 'mcp']);
     assert.match(await readFile(join(root, '.codex/config.toml'), 'utf8'), /default_tools_approval_mode = "writes"/);
-    assert.deepEqual(JSON.parse(await readFile(join(root, '.claude/settings.local.json'), 'utf8')).permissions.allow, ['mcp__workbench']);
+    const claude = JSON.parse(await readFile(join(root, '.claude/settings.local.json'), 'utf8')).permissions;
+    assert.deepEqual(claude.allow, ['mcp__workbench__workbench_capabilities', 'mcp__workbench__workbench_help']);
+    assert.deepEqual(claude.ask, ['mcp__workbench__workbench_execute']);
     await writeFile(join(root, '.mcp.json'), '{"edited":true}\n');
     const replay = await executeOperation(request, context);
     assert.equal(replay.status, 'failed'); assert.equal(replay.diagnostics[0].code, 'IMPORT_OWNERSHIP');

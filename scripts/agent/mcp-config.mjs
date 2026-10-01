@@ -31,7 +31,10 @@ export function setupMcpFiles() {
       path: '.claude/settings.local.json',
       content: json({
         $schema: 'https://json.schemastore.org/claude-code-settings.json',
-        permissions: { allow: ['mcp__workbench'] },
+        permissions: {
+          allow: ['mcp__workbench__workbench_capabilities', 'mcp__workbench__workbench_help'],
+          ask: ['mcp__workbench__workbench_execute'],
+        },
       }),
     },
   ];
