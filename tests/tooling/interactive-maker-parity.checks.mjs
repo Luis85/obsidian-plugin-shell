@@ -14,6 +14,7 @@ import { ask, readInput } from '../../scripts/shared/input.ts';
 import { routeArguments } from '../../bin/adapters/router.ts';
 import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
+import { main as frameworkMain } from '../../bin/adapters/framework-cli.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -210,4 +211,40 @@ test('relocated interactive plan adapter preserves review, apply and cancellatio
   });
   assert.equal(dryRun, planned);
   assert.equal(dryRunConfirmed, false);
+});
+
+
+test('relocated framework CLI composition root preserves machine success and parser failure channels', async () => {
+  const capture = () => {
+    let text = '';
+    return {
+      stream: { isTTY: false, write(value) { text += String(value); return true; } },
+      read: () => text,
+    };
+  };
+  const run = async argv => {
+    const output = capture(), error = capture();
+    const code = await frameworkMain(argv, frameworkRoot, {
+      input: Readable.from([]),
+      output: output.stream,
+      error: error.stream,
+      env: { CI: 'true' },
+    });
+    return { code, stdout: output.read(), stderr: error.read() };
+  };
+
+  const schema = await run(['schema', '--json']);
+  assert.equal(schema.code, 0);
+  assert.equal(schema.stderr, '');
+  const schemaResult = JSON.parse(schema.stdout);
+  assert.equal(schemaResult.command, 'schema');
+  assert.equal(schemaResult.status, 'ok');
+  assert.equal(schema.stdout.trim().split('\n').length, 1);
+
+  const failure = await run(['unknown', '--json', '--no-interaction']);
+  assert.equal(failure.code, 1);
+  assert.equal(failure.stderr, '');
+  const failed = JSON.parse(failure.stdout);
+  assert.equal(failed.status, 'failed');
+  assert.equal(failed.diagnostics[0].code, 'UNKNOWN_COMMAND');
 });

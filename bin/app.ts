@@ -80,7 +80,7 @@ function errorResult(command: string, error: unknown) {
 export async function main(argv: string[], frameworkRoot: string, io: IO = { input: stdin, output: stdout, error: stderr }): Promise<number> {
   const routed = routeArguments(argv);
   if (routed.surface === 'framework') {
-    const { main: frameworkMain } = await import('../scripts/framework/cli.ts');
+    const { main: frameworkMain } = await import('./adapters/framework-cli.ts');
     return frameworkMain(routed.args, frameworkRoot);
   }
   if (routed.surface === 'memory') {

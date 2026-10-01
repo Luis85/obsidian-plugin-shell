@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D5 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D6 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -104,7 +104,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D3:** `operations.ts` is split by effect before relocation: reviewed file-plan execution, trusted project-process execution and read-only inspection now live in `operation-files.ts`, `operation-process.ts` and `operation-read.ts`. The public dispatcher retains command classification, discovery, special adapters and release authorization.
 - **D4:** Framework CLI result rendering moved into `bin/presentation/terminal/cli-output.ts`. Framework orchestration imports the relocated adapter directly; the old path is a compatibility re-export. Output streams are injectable so maker production coverage verifies JSON-channel isolation, human diagnostics and legacy `new` cancellation rendering without weakening thresholds.
 - **D5:** Reviewed interactive plan application moved into `bin/presentation/terminal/cli-interactive.ts`. The adapter keeps framework execution/catalog policy behind injected defaults, while maker coverage verifies review rendering, hash-bound apply, cancellation and dry-run no-prompt behavior. The former framework path is compatibility-only.
-- **Remaining D6–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D6:** The framework CLI composition root moved to `bin/adapters/framework-cli.ts`; `bin/app.ts` now delegates framework routes there directly and `scripts/framework/cli.ts` is compatibility-only. Injected streams preserve stdout JSON isolation and make success/parser-failure paths part of maker production coverage.
+- **Remaining D7–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
