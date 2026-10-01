@@ -54,31 +54,36 @@ async function pluginPlan(context: Context): Promise<Planned> {
   }
   return { plan: await createFilePlan(context.root, entries), conflicts: [], summary: { plugin: manifest.id, activation: 'manual', dataJson: 'preserved', target: prefix } };
 }
+type Planner = (request: Request, context: Context) => Promise<Planned>;
+async function frameworkUpgradePlan(request: Request, context: Context): Promise<Planned> {
+  const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
+  return upgradePlan(context, from);
+}
+/** Each command's reviewed planner; prototype subcommands share one planner. */
+const planners: Record<string, Planner> = {
+  'docs import': docsPlan, 'docs export': docsPlan,
+  'handout generate': handoutPlan, 'handout refresh': handoutPlan,
+  'airship enable': airshipPlan, 'airship disable': airshipPlan,
+  setup: configurationPlan, 'config set': configurationPlan, 'project import': configurationPlan,
+  generate: generationPlan,
+  'concept import': conceptImportPlan,
+  'starters add': editStarterPlan, 'starters edit': editStarterPlan,
+  new: starterProjectPlan,
+  'styles export': styleExportPlan,
+  make: makerPlan,
+  'vault prepare': (_request, context) => vaultPlan(context),
+  'plugin install': (_request, context) => pluginPlan(context),
+  'release prepare': releaseVersionPlan,
+  'framework upgrade': frameworkUpgradePlan,
+};
+function plannerFor(command: string): Planner {
+  if (Object.hasOwn(planners, command)) return planners[command]!;
+  if (command.startsWith('prototypes ')) return prototypesPlan;
+  throw new Error('Operation has no file plan.');
+}
 export async function planOperation(request: Request, context: Context) {
   requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled.');
-  let planned: Planned;
-  switch (request.command) {
-    case 'docs import': case 'docs export': planned = await docsPlan(request, context); break;
-    case 'handout generate': case 'handout refresh': planned = await handoutPlan(request, context); break;
-    case 'airship enable': case 'airship disable': planned = await airshipPlan(request, context); break;
-    case 'setup': case 'config set': case 'project import': planned = await configurationPlan(request, context); break;
-    case 'generate': planned = await generationPlan(request, context); break;
-    case 'concept import': planned = await conceptImportPlan(request, context); break;
-    case 'starters add': case 'starters edit': planned = await editStarterPlan(request, context); break;
-    case 'new': planned = await starterProjectPlan(request, context); break;
-    case 'styles export': planned = await styleExportPlan(request, context); break;
-    case 'make': planned = await makerPlan(request, context); break;
-    case 'vault prepare': planned = await vaultPlan(context); break;
-    case 'plugin install': planned = await pluginPlan(context); break;
-    case 'release prepare': planned = await releaseVersionPlan(request, context); break;
-    case 'framework upgrade': {
-      const from = stringOption(request.options, 'from'); requireThat(from, 'INPUT_REQUIRED', 'Supply --from <extracted-kit>.');
-      planned = await upgradePlan(context, from); break;
-    }
-    default:
-      if (request.command.startsWith('prototypes ')) { planned = await prototypesPlan(request, context); break; }
-      throw new Error('Operation has no file plan.');
-  }
+  const planned: Planned = await plannerFor(request.command)(request, context);
   const requestData = canonicalRequest(request);
   const configurationHash = await exists(join(context.root, configFile)) ? hash(await readBounded(join(context.root, configFile))) : null;
   const changes = planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash }));
