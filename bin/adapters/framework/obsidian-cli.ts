@@ -5,7 +5,7 @@ import * as timers from 'node:timers';
 import { isAbsolute, join } from 'node:path';
 import { readConfiguration } from './files.ts';
 import { readDocumentationSettings } from '../../../scripts/application-docs/adapters/settings.ts';
-import { OperationError, requireThat, result, stringOption, type Context, type Request } from './contracts.ts';
+import { OperationError, requireThat, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 const minimum = [1, 12, 7] as const;
 const outputLimit = 4 * 1024 * 1024;
@@ -85,43 +85,43 @@ function listedMarkdown(text: string): string[] {
 function under(path: string, root: string): boolean { return path === root || path.startsWith(root + '/'); }
 function chunks<T>(values: T[], size: number): T[][] { const out:T[][]=[]; for(let i=0;i<values.length;i+=size) out.push(values.slice(i,i+size)); return out; }
 
-export async function obsidianRead(request: Request, context: Context, supplied?: ObsidianCliPort) {
-  const port = supplied ?? systemPort(context), vault = vaultSelector(request), version = await qualified(port);
-  if (request.command === 'obsidian status') {
-    const [name, path, files, folders] = await Promise.all([
-      inVault(port, vault, 'vault', 'info=name'), inVault(port, vault, 'vault', 'info=path'),
-      inVault(port, vault, 'files', 'total'), inVault(port, vault, 'folders', 'total'),
-    ]);
-    const location = path.trim();
-    // oxlint-disable-next-line no-control-regex
-    requireThat(location.length > 0 && location.length <= 4096 && isAbsolute(location) && !/[\u0000-\u001f]/.test(location),
-      'OBSIDIAN_OUTPUT_INVALID', 'Selected vault path from Obsidian CLI is invalid.');
-    return result(request.command, { cli: { version, minimum: '1.12.7' }, vault: { selector: vault, name: name.trim(), path: location, files: integer(files, 'file'), folders: integer(folders, 'folder') },
-      capabilities: { reads: ['vault', 'files', 'folders', 'read'], writes: [], excluded: ['eval', 'dev:cdp', 'plugin:install', 'plugin:enable', 'restricted-mode changes'] } });
-  }
-  if (request.command === 'obsidian files') {
-    const folder = stringOption(request.options, 'obsidian-folder');
-    const args = [...(folder ? [`folder=${relativePath(folder, 'folder')}`] : []), 'ext=md'];
-    return result(request.command, { cli: { version }, vault, folder: folder ?? null, files: listedMarkdown(await inVault(port, vault, 'files', ...args)) });
-  }
-  if (request.command === 'obsidian read') {
-    const path = stringOption(request.options, 'obsidian-path');
-    requireThat(path, 'OBSIDIAN_PATH_REQUIRED', 'Supply --obsidian-path <note.md>.');
-    const safe = relativePath(path, 'file');
-    return result(request.command, { cli: { version }, vault, path: safe, content: await inVault(port, vault, 'read', `path=${safe}`) });
-  }
-  requireThat(request.command === 'obsidian prepare', 'OBSIDIAN_COMMAND_DENIED', 'Only the documented read-only Obsidian adapter commands are allowed.');
+const excluded = ['eval', 'dev:cdp', 'plugin:install', 'plugin:enable', 'restricted-mode changes'];
+/** The vault path the CLI reports must be one bounded absolute path. */
+function vaultLocation(text: string): string {
+  const location = text.trim();
+  // oxlint-disable-next-line no-control-regex
+  requireThat(location.length > 0 && location.length <= 4096 && isAbsolute(location) && !/[\u0000-\u001f]/.test(location),
+    'OBSIDIAN_OUTPUT_INVALID', 'Selected vault path from Obsidian CLI is invalid.');
+  return location;
+}
+async function statusRead(request: Request, port: ObsidianCliPort, vault: string, version: string) {
+  const [name, path, files, folders] = await Promise.all([
+    inVault(port, vault, 'vault', 'info=name'), inVault(port, vault, 'vault', 'info=path'),
+    inVault(port, vault, 'files', 'total'), inVault(port, vault, 'folders', 'total'),
+  ]);
+  const location = vaultLocation(path);
+  return result(request.command, { cli: { version, minimum: '1.12.7' }, vault: { selector: vault, name: name.trim(), path: location, files: integer(files, 'file'), folders: integer(folders, 'folder') },
+    capabilities: { reads: ['vault', 'files', 'folders', 'read'], writes: [], excluded } });
+}
+async function filesRead(request: Request, port: ObsidianCliPort, vault: string, version: string) {
+  const folder = stringOption(request.options, 'obsidian-folder');
+  const args = [...(folder ? [`folder=${relativePath(folder, 'folder')}`] : []), 'ext=md'];
+  return result(request.command, { cli: { version }, vault, folder: folder ?? null, files: listedMarkdown(await inVault(port, vault, 'files', ...args)) });
+}
+async function noteRead(request: Request, port: ObsidianCliPort, vault: string, version: string) {
+  const path = stringOption(request.options, 'obsidian-path');
+  requireThat(path, 'OBSIDIAN_PATH_REQUIRED', 'Supply --obsidian-path <note.md>.');
+  const safe = relativePath(path, 'file');
+  return result(request.command, { cli: { version }, vault, path: safe, content: await inVault(port, vault, 'read', `path=${safe}`) });
+}
+async function documentationRoots(context: Context): Promise<string[]> {
   const config = await readConfiguration(context.root);
   const protectedPaths = config ? [config.paths.codebaseFolder, config.paths.testsFolder, config.paths.testVaultFolder] : [];
   const { settings } = await readDocumentationSettings(context.root, protectedPaths);
-  const roots = [...new Set([settings.root, ...Object.values(settings.paths)])].map(root => relativePath(root, 'folder')).sort();
-  const [vaultPathText, inventoryText] = await Promise.all([inVault(port, vault, 'vault', 'info=path'), inVault(port, vault, 'files', 'ext=md')]);
-  const vaultPath = vaultPathText.trim();
-  // oxlint-disable-next-line no-control-regex
-  requireThat(vaultPath.length > 0 && vaultPath.length <= 4096 && isAbsolute(vaultPath) && !/[\u0000-\u001f]/.test(vaultPath),
-    'OBSIDIAN_OUTPUT_INVALID', 'Selected vault path from Obsidian CLI is invalid.');
-  const candidates = listedMarkdown(inventoryText).filter(path => roots.some(root => under(path, root)));
-  requireThat(candidates.length <= 500, 'OBSIDIAN_SCAN_LIMIT', 'Configured documentation paths contain more than 500 Markdown files; narrow the documentation settings.');
+  return [...new Set([settings.root, ...Object.values(settings.paths)])].map(root => relativePath(root, 'folder')).sort();
+}
+/** Reads each candidate once within the aggregate bound and classifies it as typed, untyped or invalid. */
+async function classifyNotes(port: ObsidianCliPort, vault: string, candidates: string[]) {
   // The YAML-backed parser loads only for prepare, so the CLI catalog stays importable without installed packages.
   const { parseMarkdown } = await import('../../../scripts/application-docs/adapters/markdown.ts');
   const typed: string[] = [], untyped: string[] = [], invalid: string[] = []; let bytes = 0;
@@ -130,11 +130,27 @@ export async function obsidianRead(request: Request, context: Context, supplied?
     requireThat(bytes <= 16 * 1024 * 1024, 'OBSIDIAN_SCAN_LIMIT', 'Configured documentation scan exceeded 16 MiB.');
     try { (parseMarkdown(content, path) ? typed : untyped).push(path); } catch { invalid.push(path); }
   }
+  return { typed, untyped, invalid };
+}
+async function prepareRead(request: Request, context: Context, port: ObsidianCliPort, vault: string, version: string) {
+  const roots = await documentationRoots(context);
+  const [vaultPathText, inventoryText] = await Promise.all([inVault(port, vault, 'vault', 'info=path'), inVault(port, vault, 'files', 'ext=md')]);
+  const vaultPath = vaultLocation(vaultPathText);
+  const candidates = listedMarkdown(inventoryText).filter(path => roots.some(root => under(path, root)));
+  requireThat(candidates.length <= 500, 'OBSIDIAN_SCAN_LIMIT', 'Configured documentation paths contain more than 500 Markdown files; narrow the documentation settings.');
+  const { typed, untyped, invalid } = await classifyNotes(port, vault, candidates);
   const imports = chunks(typed, 32).map(batch => ['node', 'bin/app', 'docs', 'import',
     ...batch.map(path => join(vaultPath, ...path.split('/'))), '--dry-run', '--json']);
   return result(request.command, { cli: { version, minimum: '1.12.7' }, vault: { selector: vault, path: vaultPath }, configuredRoots: roots,
     scan: { markdown: candidates.length, typed: typed.length, untyped: untyped.length, invalid: invalid.length, typedPaths: typed, invalidPaths: invalid },
     import: { operation: 'docs import', writesVault: false, reviewedPlanRequired: true, batches: imports,
       next: typed.length ? 'Run one proposed docs import command, review its plan, then apply that plan explicitly.' : 'No supported typed Markdown was found in the configured documentation paths.' },
-    excluded: ['eval', 'dev:cdp', 'plugin:install', 'plugin:enable', 'restricted-mode changes'] });
+    excluded });
+}
+const reads: Record<string, (request: Request, port: ObsidianCliPort, vault: string, version: string) => Promise<Result>> = { 'obsidian status': statusRead, 'obsidian files': filesRead, 'obsidian read': noteRead };
+export async function obsidianRead(request: Request, context: Context, supplied?: ObsidianCliPort) {
+  const port = supplied ?? systemPort(context), vault = vaultSelector(request), version = await qualified(port);
+  if (Object.hasOwn(reads, request.command)) return reads[request.command]!(request, port, vault, version);
+  requireThat(request.command === 'obsidian prepare', 'OBSIDIAN_COMMAND_DENIED', 'Only the documented read-only Obsidian adapter commands are allowed.');
+  return prepareRead(request, context, port, vault, version);
 }
