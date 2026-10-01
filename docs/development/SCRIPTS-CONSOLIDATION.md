@@ -159,7 +159,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D53:** Managed prototype-generation binding moved to `bin/adapters/framework/prototype-generation.ts`; it consumes the relocated workspace locally and the former framework path is compatibility-only. Direct coverage locks explicit-input passthrough, unmanaged-workspace fallback and cancellation while existing prototype generation tests guard provenance binding.
 - **D54:** General source-generation planning moved to `bin/adapters/framework/generation.ts`; relocated prototype generation, storybook, kit, filesystem and configuration services are consumed locally while the not-yet-relocated change planner remains behind compatibility. Maker coverage locks compatibility identity, output-kind validation, explicit-target vault authority and setup/import prerequisites.
 - **D55:** Bounded concept JSON/HTML intake moved to `bin/adapters/framework/concept-input.ts`; the former framework path is compatibility-only. Maker coverage locks canonical JSON decoding, reference-only HTML handling, inert embedded project markers and project-relative `docs/concepts` containment.
-- **Remaining D56–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D56:** Concept inspection and reviewed import adaptation moved to `bin/adapters/framework/concepts.ts`; relocated reads consume it locally and the former framework path is compatibility-only. Maker coverage locks missing-base refusal, reference-only HTML, canonical project inspection and pre-plan reference-only import refusal.
+- **Remaining D57–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
