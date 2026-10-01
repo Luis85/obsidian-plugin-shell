@@ -155,7 +155,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D49:** Setup source selection moved to `bin/adapters/framework/setup-source.ts`; the former framework path is compatibility-only. Maker coverage locks ordinary input passthrough, conflicting-start/native-option refusal and real verified-starter conversion into bounded stdin authoring input.
 - **D50:** Data-only design-system rendering moved to `bin/adapters/framework/style-export.ts`; the former framework path is compatibility-only. Maker coverage locks CSS/JSON/Markdown/HTML output selection, format refusal and bounded-data rejection without filesystem or network effects.
 - **D51:** Style inspection and reviewed export planning moved to `bin/adapters/framework/styles.ts`; relocated read operations import it locally and the former framework path is compatibility-only. Maker coverage locks real project inspection, create-only JSON export planning, protected-path refusal and output-extension matching.
-- **Remaining D52–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D52:** Prototype workspace loading, bounded document/bundle reads and guarded workspace planning moved to `bin/adapters/framework/prototype-workspace.ts`; it consumes relocated prototype integrity locally and the former framework path is compatibility-only. Maker coverage locks empty-workspace and bounded-input behavior while existing prototype flows exercise managed planning.
+- **Remaining D53–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
