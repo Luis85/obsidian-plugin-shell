@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D9 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D10 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -108,7 +108,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D7:** Reviewed file-plan command execution moved to `bin/adapters/framework/file-operation.ts`. The dispatcher imports the relocated adapter directly, the old framework path is compatibility-only, and maker coverage drives real setup planning plus hash-bound apply through the relocated CLI.
 - **D8:** Read-only framework command execution moved to `bin/adapters/framework/read-operation.ts`. The dispatcher imports the relocated adapter directly, the old framework path is compatibility-only, and maker coverage verifies version, concept-schema and configuration reads through the relocated CLI.
 - **D9:** Trusted project-process execution moved to `bin/adapters/framework/process-operation.ts`. Host operations are injectable for tests, preserving real defaults while maker coverage verifies dry-run, build, browser test, project verify, preview dev, release rehearsal, install and framework-pack selection without launching external tools.
-- **Remaining D10–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D10:** The public framework dispatcher moved to `bin/adapters/framework/operations.ts`; the relocated CLI and interactive adapter import it directly and `scripts/framework/operations.ts` is compatibility-only. Maker coverage verifies schema/capability discovery, maker discovery, dry-run process routing and release-operation planning.
+- **Remaining D11–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

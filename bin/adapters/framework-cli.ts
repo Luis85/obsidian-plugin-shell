@@ -6,7 +6,7 @@ import { guidedSetup, continueSetup } from '../../scripts/framework/setup-termin
 import { ask, readInput } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from '../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../scripts/framework/operations.ts';
+import { executeOperation } from './framework/operations.ts';
 import { projectRoot, exists } from '../../scripts/framework/files.ts';
 import { failure, type Context } from '../../scripts/framework/contracts.ts';
 import { invocationDirectory } from '../../scripts/framework/starter-project.ts';

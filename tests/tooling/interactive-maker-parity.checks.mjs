@@ -16,6 +16,7 @@ import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
 import { main as frameworkMain } from '../../bin/adapters/framework-cli.ts';
 import { processOperation } from '../../bin/adapters/framework/process-operation.ts';
+import { executeOperation as frameworkOperation } from '../../bin/adapters/framework/operations.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -378,4 +379,33 @@ test('relocated process-operation adapter selects trusted commands without launc
   const packed = await processOperation(request('framework pack', { out: 'kit.zip', yes: true }), context, dependencies);
   assert.equal(packed.status, 'applied');
   assert.equal(packed.data.archive, 'kit.zip');
+});
+
+
+test('relocated framework dispatcher preserves discovery and nonexecuting effect routing', async () => {
+  const context = { root: frameworkRoot, frameworkRoot };
+  const capabilities = await frameworkOperation({ command: 'capabilities', args: [], options: {} }, context);
+  assert.equal(capabilities.status, 'ok');
+  assert.ok(capabilities.data.commands.length > 20);
+  assert.ok(capabilities.data.makers.length > 10);
+
+  const makers = await frameworkOperation({ command: 'make', args: ['list'], options: {} }, context);
+  assert.equal(makers.status, 'ok');
+  assert.ok(makers.data.makers.length > 10);
+
+  const build = await frameworkOperation({ command: 'build', args: [], options: { 'dry-run': true } }, context);
+  assert.equal(build.status, 'planned');
+  assert.equal(build.data.execution, 'not-run');
+
+  const release = await frameworkOperation({
+    command: 'release operate',
+    args: [],
+    options: { input: 'release-operation.json', 'dry-run': true },
+  }, context);
+  assert.equal(release.status, 'planned');
+  assert.equal(release.data.publication, 'not-authorized');
+
+  const schema = await frameworkOperation({ command: 'schema', args: [], options: {} }, context);
+  assert.equal(schema.status, 'ok');
+  assert.equal(schema.data.protocolVersion, 1);
 });

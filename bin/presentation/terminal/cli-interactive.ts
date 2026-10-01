@@ -2,7 +2,7 @@ import { stdin, stderr } from 'node:process';
 import { ask } from '../../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
 import { descriptor } from '../../../scripts/framework/catalog.ts';
-import { executeOperation } from '../../../scripts/framework/operations.ts';
+import { executeOperation } from '../../adapters/framework/operations.ts';
 import type { Context, Request } from '../../../scripts/framework/contracts.ts';
 import type { Result } from '../../../scripts/contracts/result.ts';
 import { renderCliResult } from './cli-output.ts';
