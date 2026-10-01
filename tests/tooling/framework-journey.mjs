@@ -75,7 +75,7 @@ const starterLock = JSON.parse(starterLockBytes);
 assert.equal(starterLock.packages?.['']?.name, starterPkg.name, 'generated lockfile root must match starter identity');
 for (const group of ['dependencies', 'devDependencies', 'optionalDependencies']) {
   for (const [name, pin] of Object.entries(starterPkg[group] ?? {})) {
-    assert.match(pin, /^\\d+\\.\\d+\\.\\d+$/, group + ': non-exact ' + name);
+    assert.match(pin, /^\d+\.\d+\.\d+$/, group + ': non-exact ' + name);
     assert.equal(starterLock.packages?.['']?.[group]?.[name], pin, group + ': stale root lockfile declaration for ' + name);
     assert.equal(starterLock.packages?.['node_modules/' + name]?.version, pin, group + ': stale installed lockfile entry for ' + name);
   }
