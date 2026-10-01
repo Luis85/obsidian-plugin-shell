@@ -5,8 +5,8 @@ import { stripTypeScriptTypes } from "node:module";
 const source = await readFile(new URL("./app.ts", import.meta.url), "utf8");
 const css = await readFile(new URL("./styles.css", import.meta.url), "utf8");
 const frame = await readFile(new URL("./frame.html", import.meta.url), "utf8");
-const script = stripTypeScriptTypes(source, { mode: "strip" }).replace(/<\\/script/gi, "<\\\\/script");
-const policy = `'sha256-${createHash("sha256").update(script).digest("base64")}'`;
+const script = stripTypeScriptTypes(source, { mode: "strip" }).replace(/<\/script/gi, "<\\/script");
+const policy = "'sha256-" + createHash("sha256").update(script).digest("base64") + "'";
 const html = frame
   .replace("__SCRIPT_POLICY__", policy)
   .replace("/*__STYLES__*/", css)
@@ -20,4 +20,5 @@ if (check) {
 } else {
   await writeFile(output, html, "utf8");
 }
-console.log(`${check ? "Checked" : "Built"} index.html: ${Buffer.byteLength(html)} bytes; SHA-256 ${createHash("sha256").update(html).digest("hex")}`);
+const digest = createHash("sha256").update(html).digest("hex");
+console.log((check ? "Checked" : "Built") + " index.html: " + Buffer.byteLength(html) + " bytes; SHA-256 " + digest);
