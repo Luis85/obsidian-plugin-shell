@@ -241,6 +241,10 @@ export function validateComponentTemplate(value: unknown): ComponentTemplate {
   requireSketch(templateType !== 'page-with-bricks' || slots.length > 0, 'TEMPLATE_INVALID', 'A page-with-bricks template needs at least one named slot.');
   requireSketch(templateType !== 'component-with-children' || children.length > 0 || slots.length > 0,
     'TEMPLATE_INVALID', 'A component-with-children template needs children or slots.');
+  requireSketch(templateType !== 'component' || (children.length === 0 && slots.length === 0),
+    'TEMPLATE_INVALID', 'A component template cannot declare children or bricks; use component-with-children.');
+  requireSketch(templateType !== 'page' || slots.length === 0,
+    'TEMPLATE_INVALID', 'A page template cannot declare bricks; use page-with-bricks.');
   const design = readDesign(row.design);
   requireSketch(!templateType.startsWith('page') || design.kind === 'page' || design.kind === 'recipe',
     'TEMPLATE_INVALID', 'Page templates use page or recipe designs.');
@@ -276,14 +280,19 @@ export function validateComponentTemplateCatalog(templates: readonly ComponentTe
     requireSketch(!byId.has(template.id), 'TEMPLATE_DUPLICATE', 'Duplicate component template ' + template.id + '.');
     byId.set(template.id, template);
   }
+  const rank: Record<AtomicLevel, number> = { atom: 0, molecule: 1, organism: 2, template: 3, page: 4 };
   for (const template of templates) {
     for (const child of template.children) {
       const target = byId.get(child.template);
       requireSketch(target, 'TEMPLATE_REFERENCE', template.id + ' references missing template ' + child.template + '.');
       requireSketch(!target.templateType.startsWith('page'), 'TEMPLATE_REFERENCE', 'Pages cannot be nested as component-template children.');
+      requireSketch(rank[target.atomicLevel] < rank[template.atomicLevel], 'TEMPLATE_REFERENCE',
+        template.id + ' must compose lower Atomic Design levels, not ' + target.atomicLevel + '.');
       if (child.slot !== undefined) {
-        requireSketch(template.slots.some(slot => slot.id === child.slot), 'TEMPLATE_REFERENCE',
-          template.id + ' places a child in unknown slot ' + child.slot + '.');
+        const slot = template.slots.find(candidate => candidate.id === child.slot);
+        requireSketch(slot, 'TEMPLATE_REFERENCE', template.id + ' places a child in unknown slot ' + child.slot + '.');
+        requireSketch(slot.accepts.includes(target.id) || slot.accepts.includes(target.atomicLevel) || slot.accepts.includes(target.templateType),
+          'TEMPLATE_REFERENCE', template.id + ' slot ' + child.slot + ' does not accept ' + target.id + '.');
       }
     }
   }

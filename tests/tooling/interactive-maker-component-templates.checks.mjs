@@ -107,6 +107,8 @@ test('component-template validation accepts the complete contract and rejects ma
     { ...baseTemplate(), templateType: 'page', atomicLevel: 'atom', design: { kind: 'recipe', recipeId: 'recipe-empty-state' } },
     { ...baseTemplate(), templateType: 'page-with-bricks', atomicLevel: 'page', design: { kind: 'page', layout: 'stack' } },
     { ...baseTemplate(), templateType: 'component-with-children', atomicLevel: 'molecule', design: { kind: 'composition', tag: 'div', layout: 'row' } },
+    { ...baseTemplate(), children: [{ template: 'atom.other' }] },
+    { ...baseTemplate(), templateType: 'page', atomicLevel: 'page', slots: [{ id: 'main', role: 'content', accepts: ['organism'] }], design: { kind: 'page', layout: 'stack' } },
   ];
   for (const value of failures) assert.throws(() => validateComponentTemplate(value));
 });
@@ -133,6 +135,16 @@ test('catalog validation rejects duplicate, dangling, page, slot and cyclic depe
     children: [{ template: 'atom.fixture', slot: 'missing' }],
   }));
   assert.throws(() => validateComponentTemplateCatalog([atom, badSlot]), /unknown slot/);
+
+  const rejectingSlot = validateComponentTemplate(composite('molecule.rejecting-slot', 'atom.fixture', {
+    children: [{ template: 'atom.fixture', slot: 'main' }],
+    slots: [{ id: 'main', role: 'content', accepts: ['organism'] }],
+  }));
+  assert.throws(() => validateComponentTemplateCatalog([atom, rejectingSlot]), /does not accept/);
+
+  const organism = validateComponentTemplate(baseTemplate({ id: 'organism.fixture', name: 'Organism', atomicLevel: 'organism' }));
+  const inverted = validateComponentTemplate(composite('molecule.inverted', 'organism.fixture'));
+  assert.throws(() => validateComponentTemplateCatalog([organism, inverted]), /lower Atomic Design levels/);
 
   const a = validateComponentTemplate(composite('molecule.a', 'molecule.b'));
   const b = validateComponentTemplate(composite('molecule.b', 'molecule.a'));
