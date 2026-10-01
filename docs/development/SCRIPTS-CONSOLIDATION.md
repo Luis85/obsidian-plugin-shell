@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D20 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D21 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -119,7 +119,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D18:** Owned child process-tree termination moved to `bin/adapters/framework/process-tree.ts`; the process policy imports it locally and the former framework path is compatibility-only. A real hanging child timeout regression drives the relocated termination path while preserving bounded failure metadata.
 - **D19:** Handout planning/read adaptation moved to `bin/adapters/framework/handout-adapter.ts`. Read operations import it locally, `scripts/framework/handout-adapter.ts` is compatibility-only, and maker coverage creates/applies a real handout plan then verifies blocked validation/inspection readiness.
 - **D20:** Project schema publication and read-only validation/migration moved to `bin/adapters/framework/project-contract.ts`. Read operations import it locally, the former framework path is compatibility-only, and maker coverage verifies current schema publication plus stdin validation with bounded digest/count output.
-- **Remaining D21–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D21:** Project model measurement moved to `bin/adapters/framework/project-measure.ts`. Read operations import it locally, the former framework path is compatibility-only, and maker coverage verifies dry-run behavior, sample-count refusal and a minimal local four-operation measurement without network or writes.
+- **Remaining D22–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

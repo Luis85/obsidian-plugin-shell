@@ -6,7 +6,7 @@ import { inspectDesign } from '../../../scripts/framework/changes.ts';
 import { readConfiguration, exists } from './files.ts';
 import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
-import { measureProject } from '../../../scripts/framework/project-measure.ts';
+import { measureProject } from './project-measure.ts';
 import { projectContractOperation } from './project-contract.ts';
 import { prototypesRead, prototypesCompare } from '../../../scripts/framework/prototypes.ts';
 import { inspectStyles } from '../../../scripts/framework/styles.ts';

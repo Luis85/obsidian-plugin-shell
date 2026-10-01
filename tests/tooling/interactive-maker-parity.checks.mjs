@@ -36,6 +36,8 @@ import * as legacyHandoutAdapter from '../../scripts/framework/handout-adapter.t
 import { applyFilePlan as applySharedFilePlan } from '../../scripts/shared/file-plan.ts';
 import { projectContractOperation as relocatedProjectContractOperation } from '../../bin/adapters/framework/project-contract.ts';
 import * as legacyProjectContract from '../../scripts/framework/project-contract.ts';
+import { measureProject as relocatedMeasureProject } from '../../bin/adapters/framework/project-measure.ts';
+import * as legacyProjectMeasure from '../../scripts/framework/project-measure.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -663,4 +665,35 @@ test('relocated project contract preserves schema publication and stdin validati
   assert.equal(validated.data.normalizedVersion, 6);
   assert.equal(validated.data.contentIncluded, false);
   assert.match(validated.data.inputSha256, /^[a-f0-9]{64}$/);
+});
+
+
+test('relocated project measurement preserves dry-run and bounded local measurement semantics', async () => {
+  assert.equal(legacyProjectMeasure.measureProject, relocatedMeasureProject);
+  const inputText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const context = { root: frameworkRoot, frameworkRoot, inputText };
+
+  const dry = await relocatedMeasureProject(
+    { command: 'project measure', args: [], options: { input: '-', samples: '3', 'dry-run': true } },
+    context,
+  );
+  assert.equal(dry.status, 'planned');
+  assert.equal(dry.data.execution, 'not-run');
+  assert.deepEqual(dry.data.operations, ['import-validate-migrate', 'export-json', 'hierarchy-projection', 'arrange-proposal']);
+
+  await assert.rejects(
+    relocatedMeasureProject({ command: 'project measure', args: [], options: { input: '-', samples: '2' } }, context),
+    error => error.code === 'MEASUREMENT_COUNT',
+  );
+
+  const measured = await relocatedMeasureProject(
+    { command: 'project measure', args: [], options: { input: '-', samples: '3' } },
+    context,
+  );
+  assert.equal(measured.status, 'ok');
+  assert.equal(measured.data.schemaVersion, 1);
+  assert.equal(measured.data.measured.length, 4);
+  assert.equal(measured.data.contentIncluded, false);
+  assert.equal(measured.data.network, false);
+  assert.match(measured.data.inputSha256, /^[a-f0-9]{64}$/);
 });
