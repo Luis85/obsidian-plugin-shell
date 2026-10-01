@@ -1,4 +1,4 @@
-import { terminateProcessTree } from '../../../scripts/framework/process-tree.ts';
+import { terminateProcessTree } from './process-tree.ts';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { realpath } from 'node:fs/promises';
 import { exists } from './files.ts';

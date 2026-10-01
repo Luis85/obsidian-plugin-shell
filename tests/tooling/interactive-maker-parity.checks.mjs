@@ -29,6 +29,8 @@ import { configuration as relocatedConfiguration, defaults as relocatedDefaults,
 import * as legacyFrameworkConfiguration from '../../scripts/framework/configuration.ts';
 import { npmEntry as relocatedNpmEntry, runNode as relocatedRunNode } from '../../bin/adapters/framework/process.ts';
 import * as legacyFrameworkProcess from '../../scripts/framework/process.ts';
+import { terminateProcessTree as relocatedTerminateProcessTree } from '../../bin/adapters/framework/process-tree.ts';
+import * as legacyProcessTree from '../../scripts/framework/process-tree.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -565,6 +567,7 @@ test('relocated framework configuration preserves defaults, validation and compa
 test('relocated framework process policy preserves npm selection and child execution diagnostics', async () => {
   assert.equal(legacyFrameworkProcess.npmEntry, relocatedNpmEntry);
   assert.equal(legacyFrameworkProcess.runNode, relocatedRunNode);
+  assert.equal(legacyProcessTree.terminateProcessTree, relocatedTerminateProcessTree);
 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-policy-')));
   const previousQualified = process.env.QUALIFIED_NPM;
@@ -589,6 +592,8 @@ test('relocated framework process policy preserves npm selection and child execu
 
     await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'ok.mjs', [], 0), error => error.code === 'INVALID_TIMEOUT');
     await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'missing.mjs', [], 10_000), error => error.code === 'TOOL_MISSING');
+    await writeFile(join(root, 'hang.mjs'), "setInterval(() => {}, 1000);\n");
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'hang.mjs', [], 100), error => error.code === 'TIMEOUT');
     const controller = new AbortController();
     controller.abort();
     await assert.rejects(relocatedRunNode({ root, frameworkRoot, signal: controller.signal }, 'ok.mjs', [], 10_000), error => error.code === 'CANCELLED');
