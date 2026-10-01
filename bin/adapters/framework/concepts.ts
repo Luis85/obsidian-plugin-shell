@@ -6,7 +6,7 @@ import { conceptRequire } from '../../../scripts/companion/concepts/contract.ts'
 import { parseAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { projectModel } from '../../../scripts/companion/compiler/model.ts';
 import { record } from '../../../scripts/companion/sitemap/safety.ts';
-import { configurationPlan } from '../../../scripts/framework/changes.ts';
+import { configurationPlan } from './changes.ts';
 import { designFile } from './configuration.ts';
 import { hash, exists, readBounded } from './files.ts';
 import { readConceptInput } from './concept-input.ts';

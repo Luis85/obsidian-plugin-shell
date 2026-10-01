@@ -6,7 +6,7 @@ import { prototypeJsonText } from '../../../scripts/companion/prototypes/files.t
 import { validateSelection } from '../../../scripts/companion/prototypes/validate.ts';
 import { comparePrototypeDocuments } from '../../../scripts/companion/prototypes/compare.ts';
 import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { configurationPlan } from '../../../scripts/framework/changes.ts';
+import { configurationPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { designFile } from './configuration.ts';
 import { stringOption, requireThat, type Request, type Context } from './contracts.ts';

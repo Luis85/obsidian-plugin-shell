@@ -161,7 +161,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D55:** Bounded concept JSON/HTML intake moved to `bin/adapters/framework/concept-input.ts`; the former framework path is compatibility-only. Maker coverage locks canonical JSON decoding, reference-only HTML handling, inert embedded project markers and project-relative `docs/concepts` containment.
 - **D56:** Concept inspection and reviewed import adaptation moved to `bin/adapters/framework/concepts.ts`; relocated reads consume it locally and the former framework path is compatibility-only. Maker coverage locks missing-base refusal, reference-only HTML, canonical project inspection and pre-plan reference-only import refusal.
 - **D57:** Prototype list/compare and reviewed workspace command planning moved to `bin/adapters/framework/prototypes.ts`; relocated reads consume it locally, generation/workspace dependencies are local and the former framework path is compatibility-only. Maker coverage locks empty listing, real create/apply/load behavior and missing-workspace compare/export refusal.
-- **Remaining D58–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D58:** Configuration/import, isolated-vault and release-version change planning moved to `bin/adapters/framework/changes.ts`; relocated generation, concept and prototype adapters consume it locally while handout workspace remains behind compatibility. Maker coverage locks stdin design inspection, real blank setup/apply/vault planning and explicit configuration/release prerequisites.
+- **Remaining D59–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
