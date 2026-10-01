@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -8,10 +7,13 @@ import {
 } from '../../bin/adapters/framework/handout-workspace.ts';
 import * as legacy from '../../scripts/framework/handout-workspace.ts';
 import { HANDOUT_PATH, readSnapshot } from '../../bin/adapters/framework/handout-model.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+/** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
+const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 
 async function workspace(t) {
   const root=await mkdtemp(join(tmpdir(),'maker-handout-workspace-'));
-  t.after(()=>rm(root,{recursive:true,force:true}));
+  after(t, ()=>rm(root,{recursive:true,force:true}));
   await mkdir(join(root,'docs/prds'),{recursive:true});
   await writeFile(join(root,'docs/prds/PRD-1.md'),'# Example\n');
   return root;
@@ -33,7 +35,7 @@ test('existing human-owned handouts are preserved instead of overwritten', async
   const prepared=await prepareHandout(root);
   assert.equal(prepared.entries.length,0);
   assert.equal(prepared.summary.action,'preserved');
-  await assert.rejects(prepareHandoutRefresh(root),/HANDOUT_METADATA/);
+  await assert.rejects(prepareHandoutRefresh(root), { code: 'HANDOUT_METADATA' });
 });
 
 test('configured and explicit PRD roots plus first-run suggestions are honored without approval', async t => {
@@ -54,7 +56,7 @@ test('virtual setup fingerprints match the settings bytes eventually written', a
   const prepared=await prepareHandout(root,{virtualFiles:{'shell.config.json':content}});
   await writeFile(join(root,'shell.config.json'),content); await writeFile(join(root,HANDOUT_PATH),prepared.entries[0].content);
   assert.ok(!(await inspectHandout(root)).diagnostics.some(item=>item.code==='HANDOUT_SOURCES_STALE'));
-  await assert.rejects(prepareHandout(root,{virtualFiles:{'other.json':'{}'}}),/HANDOUT_VIRTUAL_INPUT/);
+  await assert.rejects(prepareHandout(root,{virtualFiles:{'other.json':'{}'}}), { code: 'HANDOUT_VIRTUAL_INPUT' });
 });
 
 test('source changes and explicit PRD overrides persist through refresh', async t => {
@@ -69,25 +71,25 @@ test('source changes and explicit PRD overrides persist through refresh', async 
 
 test('portable handout paths reject absolute traversal Windows and protected roots', () => {
   assert.equal(portablePath('docs/prds'),'docs/prds');
-  for(const path of ['../outside','/etc','C:\\data','.git','.obsidian','a/../b','a//b','.','node_modules/docs','a\\b']) assert.throws(()=>portablePath(path),/HANDOUT_PATH/);
+  for(const path of ['../outside','/etc','C:\\data','.git','.obsidian','a/../b','a//b','.','node_modules/docs','a\\b']) assert.throws(()=>portablePath(path), { code: 'HANDOUT_PATH' });
 });
 
 test('handout workspace refuses symlinks malformed settings invalid modes and oversized or binary PRDs', async t => {
   const root=await workspace(t);
   await symlink(join(root,'docs/prds/PRD-1.md'),join(root,'docs/prds/link.md'));
-  await assert.rejects(prepareHandout(root),/HANDOUT_SYMLINK/);
+  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_SYMLINK' });
   await rm(join(root,'docs/prds/link.md'));
   await mkdir(join(root,'configs'));
   await writeFile(join(root,'configs/user-settings.json'),'{no');
-  await assert.rejects(prepareHandout(root),/HANDOUT_SETTINGS_JSON/);
+  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_SETTINGS_JSON' });
   await writeFile(join(root,'configs/user-settings.json'),JSON.stringify({preferences:{firstRun:'deploy'}}));
-  await assert.rejects(prepareHandout(root),/HANDOUT_RUN_MODE/);
+  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_RUN_MODE' });
   await rm(join(root,'configs/user-settings.json'));
   await writeFile(join(root,'docs/prds/huge.md'),'x'.repeat(1_000_001));
-  await assert.rejects(prepareHandout(root),/HANDOUT_INPUT_LIMIT/);
+  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_INPUT_LIMIT' });
   await rm(join(root,'docs/prds/huge.md'));
   await writeFile(join(root,'docs/prds/binary.md'),Buffer.from([0,0,1]));
-  await assert.rejects(prepareHandout(root),/HANDOUT_INPUT_LIMIT/);
+  await assert.rejects(prepareHandout(root), { code: 'HANDOUT_INPUT_LIMIT' });
 });
 
 test('BOM changes participate in fingerprints while BOM settings remain readable', async t => {

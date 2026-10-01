@@ -57,6 +57,10 @@ function optionalString(value: unknown, name: string): string | undefined {
   ensure(typeof value === 'string' && value.length <= 4096, 'HANDOUT_SETTINGS_VALUE', `Expected a bounded string for ${name}.`);
   return value;
 }
+/** Virtual inputs are limited to the reviewed configuration files, whether or not a handout already exists. */
+function assertVirtualInputs(options: WorkspaceOptions): void {
+  ensure(Object.keys(options.virtualFiles ?? {}).every(path => CONFIGURATION_FILES.includes(path)), 'HANDOUT_VIRTUAL_INPUT', 'Only reviewed configuration entries may be supplied as virtual inputs.');
+}
 export async function loadHandoutWorkspace(root: string, options: WorkspaceOptions = {}) {
   const local = await localRoot(root), files: SourceFile[] = [], configTexts: Record<string, string | null> = {};
   let totalBytes = 0;
@@ -70,7 +74,7 @@ export async function loadHandoutWorkspace(root: string, options: WorkspaceOptio
     files.push({ path, sha256: text === null ? null : digest(text) });
     totalBytes += text === null ? 0 : Buffer.byteLength(text);
   }
-  ensure(Object.keys(options.virtualFiles ?? {}).every(path => CONFIGURATION_FILES.includes(path)), 'HANDOUT_VIRTUAL_INPUT', 'Only reviewed configuration entries may be supplied as virtual inputs.');
+  assertVirtualInputs(options);
   const settings = object(configTexts['configs/user-settings.json'] ?? null), legacy = object(configTexts['shell.config.json'] ?? null);
   const configuredPaths = record(settings.paths), legacyPaths = record(legacy.paths);
   const prdsRoot = portablePath(options.prds ?? optionalString(configuredPaths.prds, 'paths.prds') ?? 'docs/prds');
@@ -138,6 +142,7 @@ async function readHandout(root: string): Promise<string | null> {
 }
 /** Pure preparation: returned entries participate in the caller's reviewed file plan. */
 export async function prepareHandout(root: string, options: WorkspaceOptions = {}) {
+  assertVirtualInputs(options);
   const previous = await readHandout(root);
   if (previous !== null) return { entries: [] as { path: string; content: string }[], summary: { path: HANDOUT_PATH, action: 'preserved', execution: 'not-run' } };
   const workspace = await loadHandoutWorkspace(root, options);

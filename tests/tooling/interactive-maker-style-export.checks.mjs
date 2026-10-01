@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
 import { exportDesignSystem as relocated } from '../../bin/adapters/framework/style-export.ts';
 import * as legacy from '../../scripts/framework/style-export.ts';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 
 test('relocated style renderer preserves compatibility identity and all supported formats', () => {
   assert.equal(legacy.exportDesignSystem, relocated);
@@ -16,7 +16,7 @@ test('relocated style renderer preserves compatibility identity and all supporte
 });
 
 test('relocated style renderer refuses unsupported formats and accessor-bearing data', () => {
-  assert.throws(() => relocated(undefined, 'style-test', 'svg'), /STYLE_FORMAT/);
+  assert.throws(() => relocated(undefined, 'style-test', 'svg'), { code: 'STYLE_FORMAT' });
   let invoked = 0;
   const hostile = {};
   Object.defineProperty(hostile, 'colors', { enumerable: true, get() { invoked++; return []; } });
