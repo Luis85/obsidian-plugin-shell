@@ -40,5 +40,9 @@ check('compiled maker kit discovers contracts without dependencies and refuses r
     }
     const bundle = await readFile(join(root, '.framework/compiled/app.js'), 'utf8');
     assert.match(bundle, /node:readline/);
+    // Only executable module locations are rebased; generated-project source text in templates stays verbatim.
+    assert.ok(bundle.includes('loadVaultFixtures(join(import.meta.dirname, '), 'devkit test template keeps import.meta.dirname');
+    assert.ok(bundle.includes("fileURLToPath(new URL('../../tests/support/obsidian/index.ts', import.meta.url))"), 'devkit Vitest template keeps import.meta.url');
+    assert.match(bundle, /new URL\("\.\.\/template\/[^"]+", import\.meta\.url\)\.href/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
