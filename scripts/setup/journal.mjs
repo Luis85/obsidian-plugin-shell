@@ -10,8 +10,9 @@ function invalidAgentMcp(value) {
   return !value || value.version !== 1 || typeof value.enabled !== 'boolean' || value.server !== 'workbench' || value.transport !== 'stdio'
     || !Array.isArray(value.clients) || value.clients.some(client => !['claude-code', 'codex'].includes(client))
     || !['pending', 'skipped', 'verified'].includes(value.status) || !Array.isArray(value.files)
-    || value.files.some(file => !file || typeof file.path !== 'string' || !['create', 'update', 'unchanged'].includes(file.status)
-      || (file.beforeHash !== null && !/^[a-f0-9]{64}$/.test(file.beforeHash ?? '')) || !/^[a-f0-9]{64}$/.test(file.afterHash ?? ''));
+    || value.files.some(file => !file || typeof file.path !== 'string' || !['create', 'update', 'unchanged', 'delete'].includes(file.status)
+      || (file.beforeHash !== null && !/^[a-f0-9]{64}$/.test(file.beforeHash ?? ''))
+      || (file.afterHash !== null && !/^[a-f0-9]{64}$/.test(file.afterHash ?? '')));
 }
 export async function readJournal(root) {
   await createFilePlan(root, [{ path: journalPath, content: null }]);

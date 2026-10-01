@@ -8,7 +8,7 @@ const MAX_OUTPUT_BYTES = 1024 * 1024;
 const MAX_ARGS = 64;
 const MAX_ARG_LENGTH = 4096;
 const MAX_STDIN_LENGTH = 256 * 1024;
-const MAX_REQUEST_CHARS = 512 * 1024;
+const MAX_REQUEST_BYTES = 512 * 1024;
 const MAX_INFLIGHT = 4;
 const legacyProtocols = new Set(['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']);
 const supportedVersions = ['2026-07-28', ...legacyProtocols];
@@ -176,10 +176,11 @@ export function runWorkbench(root: string, args: string[], timeoutMs: number, st
       settled = true; clearTimeout(timer); if (forceTimer) clearTimeout(forceTimer);
       signal?.removeEventListener('abort', abort); resolveRun(value);
     };
-    const collect = (target: 'stdout' | 'stderr', chunk: Buffer) => {
-      bytes += chunk.length;
+    child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
+    const collect = (target: 'stdout' | 'stderr', chunk: string) => {
+      bytes += Buffer.byteLength(chunk, 'utf8');
       if (bytes > MAX_OUTPUT_BYTES) { if (!overflow) { overflow = true; stop(); } return; }
-      if (target === 'stdout') stdout += chunk.toString('utf8'); else stderr += chunk.toString('utf8');
+      if (target === 'stdout') stdout += chunk; else stderr += chunk;
     };
     child.stdout.on('data', chunk => collect('stdout', chunk)); child.stderr.on('data', chunk => collect('stderr', chunk));
     child.stdin.on('error', cause => settle({ exitCode: 1, signal: null, stdout, stderr, error: cause.message, timedOut, overflow }));
@@ -216,7 +217,7 @@ export async function runMcpServer(root: string, io: McpIo, run: McpRunner = (ar
   };
   for await (const line of lines) {
     if (!line.trim()) continue;
-    if (line.length > MAX_REQUEST_CHARS) { send(error(null, -32600, 'Request too large.')); continue; }
+    if (Buffer.byteLength(line, 'utf8') > MAX_REQUEST_BYTES) { send(error(null, -32600, 'Request too large.')); continue; }
     let message: JsonRpc;
     try { message = JSON.parse(line) as JsonRpc; }
     catch { send(error(null, -32700, 'Parse error.')); continue; }

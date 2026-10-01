@@ -18,7 +18,7 @@ node bin/app setup --mcp --dry-run --id my-plugin --name "My Plugin" --author "T
 node bin/app setup --mcp --yes --id my-plugin --name "My Plugin" --author "Team" --blank
 ```
 
-Interactive Workbench setup asks whether to enable the local MCP and defaults to **No**. Non-interactive setup must pass `--mcp`; `--no-mcp` suppresses the interactive offer. The bootstrap setup also accepts `"mcp": true` in its data-only answers file.
+Interactive Workbench setup asks whether to enable the local MCP and defaults to **No**. Non-interactive setup must pass `--mcp`; `--no-mcp` explicitly disables a previously setup-owned MCP. A setup rerun with neither flag preserves the current MCP state. The bootstrap setup also accepts `"mcp": true` or `"mcp": false` in its data-only answers file.
 
 Setup never installs Claude Code or Codex, authenticates either client, changes user-global settings, or stores credentials.
 
@@ -44,13 +44,13 @@ The bundled CLI owns the server; there is no second application API to keep in s
 
 `workbench_execute` can reach the whole Workbench command surface, including data-driven commands through optional bounded stdin, but the MCP layer never injects `--yes`, `--apply`, process trust, release authorization, or other permissions. The project-local server rejects `--root`, so it cannot redirect operations into another repository. Claude Code keeps this write-capable tool behind an explicit approval prompt; Codex keeps its write-aware MCP approval policy. Existing Workbench planners, plan hashes, file-ownership checks, test-vault restrictions, process trust and release boundaries remain authoritative.
 
-The stdio bridge is anchored to the Workbench root rather than the client's current subdirectory. It supports the legacy initialize era through MCP revision 2025-11-25 and the stateless 2026-07-28 discovery era. Tool results include both readable text and structured machine output when Workbench returns JSON. Up to four requests may be in flight; stdio cancellation stops the owned Workbench process tree and cancelled calls emit no stale response. Delegated output is bounded to 1 MiB, stdin to 256 KiB, an individual request line to 512 KiB, and a tool-selected timeout to ten minutes.
+The stdio bridge is anchored to the Workbench root rather than the client's current subdirectory. It supports the legacy initialize era through MCP revision 2025-11-25 and the stateless 2026-07-28 discovery era. Tool results include both readable text and structured machine output when Workbench returns JSON. Up to four requests may be in flight; stdio cancellation stops the owned Workbench process tree and cancelled calls emit no stale response. Output collection is UTF-8 aware; delegated output is bounded to 1 MiB, stdin to 256 KiB, each request frame to 512 KiB measured as UTF-8 bytes, and a tool-selected timeout to ten minutes.
 
 ## Ownership and reruns
 
 Bootstrap setup records exact hashes of the three client files in `.template-state/setup.json`. Workbench setup places them under its existing intake ownership receipt. A rerun may update only bytes setup still owns. If a user or another tool edits a managed MCP configuration file, setup stops rather than overwriting it.
 
-Disabling MCP later does not automatically delete existing configuration. Removal is explicit so setup cannot destroy agent settings that may have been extended after installation.
+MCP lifecycle is explicit: ordinary setup reruns preserve the existing state; `--mcp` enables or refreshes setup-owned configuration; `--no-mcp` removes only files whose current hashes still match setup ownership. Edited or unmanaged client files are never deleted automatically and instead produce an ownership conflict.
 
 ## Verify the client connection
 

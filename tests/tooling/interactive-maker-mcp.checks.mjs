@@ -178,6 +178,18 @@ test('enabling MCP later preserves prior setup ownership instead of replacing th
     assert.equal(after['design/project.json'], before['design/project.json']);
     assert.equal(after['.framework/imported-project.json'], before['.framework/imported-project.json']);
     for (const path of ['.mcp.json', '.codex/config.toml', '.claude/settings.local.json']) assert.match(after[path], /^[a-f0-9]{64}$/);
+    const preserved = await executeOperation({ command: 'setup', args: [], options: { yes: true } }, context);
+    assert.equal(preserved.status, 'unchanged', JSON.stringify(preserved));
+    assert.equal(preserved.data.summary.agentMcp.enabled, true);
+    assert.equal(preserved.data.summary.agentMcp.action, 'preserve');
+    const disabled = await executeOperation({ command: 'setup', args: [], options: { 'no-mcp': true, yes: true } }, context);
+    assert.equal(disabled.status, 'applied', JSON.stringify(disabled));
+    assert.equal(disabled.data.summary.agentMcp.enabled, false);
+    const disabledReceipt = JSON.parse(await readFile(join(root, '.framework/intake.json'), 'utf8')).files;
+    for (const path of ['.mcp.json', '.codex/config.toml', '.claude/settings.local.json']) {
+      assert.equal(disabledReceipt[path], undefined);
+      await assert.rejects(readFile(join(root, path)), { code: 'ENOENT' });
+    }
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -198,6 +210,8 @@ test('the real runner delegates to bin/app and modern setup owns Claude/Codex pr
     assert.deepEqual(JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8')).mcpServers.workbench.args, ['${CLAUDE_PROJECT_DIR}/bin/app', 'mcp']);
     const codex = await readFile(join(root, '.codex/config.toml'), 'utf8');
     assert.match(codex, /default_tools_approval_mode = "writes"/); assert.match(codex, /tool_timeout_sec = 600/);
+    assert.match(codex, /workbench_capabilities\]\napproval_mode = "approve"/);
+    assert.match(codex, /workbench_help\]\napproval_mode = "approve"/);
     assert.match(codex, /workbench_execute\]\napproval_mode = "prompt"/);
     const claude = JSON.parse(await readFile(join(root, '.claude/settings.local.json'), 'utf8')).permissions;
     assert.deepEqual(claude.allow, ['mcp__workbench__workbench_capabilities', 'mcp__workbench__workbench_help']);

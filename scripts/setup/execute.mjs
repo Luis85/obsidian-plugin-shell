@@ -37,16 +37,20 @@ export async function executeSetup(root, options, planned, previous, { run = run
   const saveJournal = async () => { journalHash = await writeJournal(root, journal, journalHash); };
   try {
     const toolchain = activeToolchain(options);
+    const nextAgentMcp = { version: 1, action: planned.agentMcp.action, enabled: planned.agentMcp.enabled,
+      server: planned.agentMcp.server, transport: planned.agentMcp.transport, clients: planned.agentMcp.clients,
+      status: planned.agentMcp.action === 'preserve' ? (planned.agentMcp.enabled ? 'verified' : 'skipped') : 'pending',
+      files: planned.agentMcp.files };
+    const retainedAgentMcp = planned.agentMcp.action !== 'preserve' && previous?.agentMcp
+      ? { ...previous.agentMcp, action: planned.agentMcp.action } : nextAgentMcp;
     journal = { version: 1, identity: planned.identity, options: savedOptions(options), fingerprint: await inputFingerprint(root, toolchain, options), toolchain,
-      status: 'running', migration: null,
-      agentMcp: { version: 1, enabled: planned.agentMcp.enabled, server: planned.agentMcp.server, transport: planned.agentMcp.transport,
-        clients: planned.agentMcp.clients, status: planned.agentMcp.enabled ? 'pending' : 'skipped', files: planned.agentMcp.files },
+      status: 'running', migration: null, agentMcp: retainedAgentMcp,
       stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
     await saveJournal();
     await applyFilePlan(planned.plan);
-    if (planned.agentMcp.enabled) {
+    if (planned.agentMcp.action !== 'preserve') {
       await applyFilePlan(planned.agentMcp.plan);
-      journal.agentMcp.status = 'verified';
+      journal.agentMcp = { ...nextAgentMcp, status: 'verified' };
       await saveJournal();
     }
     const fingerprint = await inputFingerprint(root, toolchain, options); journal.fingerprint = fingerprint;

@@ -30,9 +30,14 @@ test('[SETUP-MCP-02] the opt-in plan creates exact Claude and Codex project conf
   const codex = await readFile(join(f.root, '.codex/config.toml'), 'utf8');
   assert.match(codex, /\[mcp_servers\.workbench\]/); assert.match(codex, /default_tools_approval_mode = "writes"/);
   assert.match(codex, /tool_timeout_sec = 600/); assert.match(codex, /enabled_tools = \["workbench_capabilities", "workbench_help", "workbench_execute"\]/);
+  assert.match(codex, /\[mcp_servers\.workbench\.tools\.workbench_capabilities\]\napproval_mode = "approve"/);
+  assert.match(codex, /\[mcp_servers\.workbench\.tools\.workbench_help\]\napproval_mode = "approve"/);
   assert.match(codex, /\[mcp_servers\.workbench\.tools\.workbench_execute\]\napproval_mode = "prompt"/);
-  const rerun = await planLocalMcp(f.root, true, { files: planned.files });
+  const rerun = await planLocalMcp(f.root, true, { enabled: true, files: planned.files });
   assert.ok(rerun.files.every(file => file.status === 'unchanged'));
+  const preserved = await planLocalMcp(f.root, 'preserve', { enabled: true, files: planned.files });
+  assert.equal(preserved.enabled, true); assert.equal(preserved.action, 'preserve');
+  assert.deepEqual(preserved.files, planned.files); assert.equal(preserved.plan.changes.length, 0);
   await writeFile(join(f.root, '.mcp.json'), '{"user":"edit"}\n');
   await assert.rejects(planLocalMcp(f.root, true, { files: planned.files }), /MCP_CONFIG_CONFLICT/);
   assert.equal(await readFile(join(f.root, '.mcp.json'), 'utf8'), '{"user":"edit"}\n');
@@ -55,5 +60,15 @@ test('[SETUP-MCP-03] setup dry-run is read-only and apply journals the MCP owner
   const journal = JSON.parse(await readFile(join(applied.root, '.template-state/setup.json'), 'utf8'));
   assert.equal(journal.options.mcp, true); assert.equal(journal.agentMcp.status, 'verified');
   assert.ok((await readFile(join(applied.root, '.mcp.json'), 'utf8')).includes('workbench'));
+  const preserved = run(applied.root, applied.launcher, flags);
+  assert.equal(preserved.status, 0, preserved.stdout + preserved.stderr);
+  assert.equal(JSON.parse(preserved.stdout).agentMcp.enabled, true);
+  const disabled = run(applied.root, applied.launcher, [...flags, '--no-mcp']);
+  assert.equal(disabled.status, 0, disabled.stdout + disabled.stderr);
+  const disabledResult = JSON.parse(disabled.stdout);
+  assert.equal(disabledResult.agentMcp.enabled, false); assert.equal(disabledResult.agentMcp.status, 'verified');
+  for (const path of ['.mcp.json', '.codex/config.toml', '.claude/settings.local.json']) {
+    await assert.rejects(readFile(join(applied.root, path)), { code: 'ENOENT' });
+  }
 });
 
