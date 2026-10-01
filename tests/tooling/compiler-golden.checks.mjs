@@ -26,8 +26,10 @@ test('the product scope covers generated source, tests, preview, design records 
   const result = await compileProject({ source: starterDocumentText('quick-capture'), template });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
   const model = result.model, scoped = result.artifacts.filter(file => productPath(model, file.path)).map(file => file.path);
-  for (const path of ['src/main.ts', 'src/bootstrap/features.ts', 'design/project.json', 'PROJECT-IMPLEMENTATION.md', 'harness/prototype/clickdummy.ts'])
+  for (const path of ['src/main.ts', 'design/project.json', 'PROJECT-IMPLEMENTATION.md', 'harness/prototype/clickdummy.ts'])
     assert.ok(scoped.includes(path), path);
+  // The registry is the consumer's template file plus generated registrations; renamed or removed examples change it.
+  assert.ok(!scoped.includes('src/bootstrap/features.ts'));
   assert.ok(scoped.some(path => path.startsWith(model.sourceRoot + '/')) && scoped.some(path => path.startsWith(model.testRoot + '/')));
   assert.ok(!scoped.includes('package.json') && !scoped.includes('README.md') && !scoped.some(path => path.startsWith('.claude/')));
   assert.equal(JSON.parse(result.artifacts.find(file => file.path === 'design/project.json').content).schemaVersion, 6);
