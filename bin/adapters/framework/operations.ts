@@ -3,7 +3,7 @@ import { packStarterOperation, readStarterOperation } from '../../../scripts/sta
 import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';
-import { checkOperation } from '../../../scripts/framework/check.ts';
+import { checkOperation } from './check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
