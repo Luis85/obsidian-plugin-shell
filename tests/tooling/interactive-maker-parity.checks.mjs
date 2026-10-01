@@ -133,10 +133,12 @@ test('single bin router preserves launcher surface ownership and aliases', () =>
     [[], 'maker', []],
     [['studio'], 'maker', ['studio']],
     [['--ui', 'tui'], 'maker', ['--ui', 'tui']],
-    [['new', 'presets'], 'maker', ['new', 'presets']],
+    [['new', 'starters'], 'maker', ['new', 'starters']],
     [['new', 'guide'], 'maker', ['new', 'guide']],
     [['new', 'validate'], 'maker', ['new', 'validate']],
-    [['new', '--preset', 'cli'], 'maker', ['new', '--preset', 'cli']],
+    [['new', '--starter', 'cli'], 'maker', ['new', '--starter', 'cli']],
+    [['new', '../app', '--starter', 'blank'], 'framework', ['new', '../app', '--starter', 'blank']],
+    [['new', '--values', 'values.json'], 'framework', ['new', '--values', 'values.json']],
     [['new', '--help'], 'maker', ['new', '--help']],
     [['new', '../legacy'], 'framework', ['new', '../legacy']],
     [['new', '--list'], 'framework', ['new', '--list']],
@@ -149,6 +151,14 @@ test('single bin router preserves launcher surface ownership and aliases', () =>
     [['help', 'memory', '--json'], 'memory', ['--help', '--json']],
   ];
   for (const [argv, surface, args] of cases) assert.deepEqual(routeArguments(argv), { surface, args }, argv.join(' '));
+  // Plugin CLI commands route to the maker; a framework command keeps precedence over a plugin with the same root.
+  const extensions = { pluginCommands: new Set(['example', 'status']), frameworkRoots: new Set(['status', 'help']) };
+  for (const [argv, surface, args] of [
+    [['example', '--json'], 'maker', ['example', '--json']],
+    [['help', 'example'], 'maker', ['example', '--help']],
+    [['status'], 'framework', ['status']],
+    [['unknown'], 'framework', ['unknown']],
+  ]) assert.deepEqual(routeArguments(argv, extensions), { surface, args }, 'plugin ' + argv.join(' '));
 });
 
 

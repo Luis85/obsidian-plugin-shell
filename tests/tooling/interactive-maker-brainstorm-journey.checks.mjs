@@ -3,7 +3,8 @@ import { readdir } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { hash } from '../../scripts/framework/files.ts';
-import { main } from '../../bin/app.ts';
+// Maker-only surface: these requests must not be routed to the framework CLI.
+import { makerMain as main } from '../../bin/app.ts';
 import { brainstormWizard } from '../../bin/presentation/brainstorm.ts';
 import { brainstormFeaturePlan } from '../../bin/adapters/brainstorm.ts';
 import { terminalFixture } from './interactive-maker-tui-fixture.mjs';
