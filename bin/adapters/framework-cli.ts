@@ -1,13 +1,13 @@
 import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable } from 'node:stream';
-import { unavailableSupport } from '../../scripts/framework/support-report.ts';
+import { unavailableSupport } from './framework/support-report.ts';
 import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from './framework/catalog.ts';
 import { executeOperation } from './framework/operations.ts';
-import { projectRoot, exists } from '../../scripts/framework/files.ts';
+import { projectRoot, exists } from './framework/files.ts';
 import { failure, type Context } from './framework/contracts.ts';
 import { invocationDirectory, starterInvocation } from '../../scripts/framework/starter-project.ts';
 import { guidedStarter } from '../../scripts/framework/starter-terminal.ts';

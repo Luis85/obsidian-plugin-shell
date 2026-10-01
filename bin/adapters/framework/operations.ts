@@ -17,7 +17,7 @@ import { submissionCheck } from '../../../scripts/framework/submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
-import { runNode } from '../../../scripts/framework/process.ts';
+import { runNode } from './process.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';

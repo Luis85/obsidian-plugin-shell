@@ -23,6 +23,27 @@ import { prototypeCommands } from '../../bin/adapters/framework/prototype-catalo
 import { operationSchemas } from '../../bin/adapters/framework/schema.ts';
 import { failure as frameworkFailure, stringOption as frameworkStringOption, OperationError as FrameworkOperationError, requireThat as frameworkRequireThat } from '../../bin/adapters/framework/contracts.ts';
 import { CompilerError, CompilationFailure, diagnostic as compilerDiagnostic } from '../../scripts/compiler/domain/diagnostics.ts';
+import { hash as relocatedHash, readBounded as relocatedReadBounded, projectRoot as relocatedProjectRoot, exists as relocatedExists } from '../../bin/adapters/framework/files.ts';
+import * as legacyFrameworkFiles from '../../scripts/framework/files.ts';
+import { configuration as relocatedConfiguration, defaults as relocatedDefaults, identity as relocatedIdentity, resolveImport as relocatedResolveImport } from '../../bin/adapters/framework/configuration.ts';
+import * as legacyFrameworkConfiguration from '../../scripts/framework/configuration.ts';
+import { npmEntry as relocatedNpmEntry, runNode as relocatedRunNode } from '../../bin/adapters/framework/process.ts';
+import * as legacyFrameworkProcess from '../../scripts/framework/process.ts';
+import { terminateProcessTree as relocatedTerminateProcessTree } from '../../bin/adapters/framework/process-tree.ts';
+import * as legacyProcessTree from '../../scripts/framework/process-tree.ts';
+import { handoutPlan as relocatedHandoutPlan, handoutRead as relocatedHandoutRead } from '../../bin/adapters/framework/handout-adapter.ts';
+import * as legacyHandoutAdapter from '../../scripts/framework/handout-adapter.ts';
+import { applyFilePlan as applySharedFilePlan } from '../../scripts/shared/file-plan.ts';
+import { projectContractOperation as relocatedProjectContractOperation } from '../../bin/adapters/framework/project-contract.ts';
+import * as legacyProjectContract from '../../scripts/framework/project-contract.ts';
+import { measureProject as relocatedMeasureProject } from '../../bin/adapters/framework/project-measure.ts';
+import * as legacyProjectMeasure from '../../scripts/framework/project-measure.ts';
+import { sampleSummary as relocatedSampleSummary, measureOperation as relocatedMeasureOperation } from '../../bin/adapters/framework/measurement.ts';
+import * as legacyMeasurement from '../../scripts/framework/measurement.ts';
+import { supportSnapshot as relocatedSupportSnapshot, supportReport as relocatedSupportReport, unavailableSupport as relocatedUnavailableSupport } from '../../bin/adapters/framework/support-report.ts';
+import * as legacySupportReport from '../../scripts/framework/support-report.ts';
+import { status as relocatedStatus, releaseCheck as relocatedReleaseCheck } from '../../bin/adapters/framework/inspection.ts';
+import * as legacyInspection from '../../scripts/framework/inspection.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -515,4 +536,282 @@ test('relocated framework contracts preserve option, failure and compiler diagno
     compilerDiagnostic('COMPILER_REFERENCE_MISSING', 'resolve', 'Missing two.'),
   ];
   assert.deepEqual(frameworkFailure('compiler check', new CompilationFailure(diagnostics)).diagnostics, diagnostics);
+});
+
+
+test('relocated framework filesystem adapter preserves root discovery, bounded reads and compatibility identity', async () => {
+  assert.equal(legacyFrameworkFiles.readBounded, relocatedReadBounded);
+  assert.equal(legacyFrameworkFiles.projectRoot, relocatedProjectRoot);
+  assert.equal(legacyFrameworkFiles.exists, relocatedExists);
+  assert.equal(legacyFrameworkFiles.hash, relocatedHash);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-files-')));
+  try {
+    await mkdir(join(root, 'nested'));
+    await writeFile(join(root, 'app.mjs'), 'export {};\n');
+    await writeFile(join(root, 'payload.txt'), 'bounded payload\n');
+    assert.equal(await relocatedProjectRoot(join(root, 'nested')), root);
+    assert.equal(await relocatedProjectRoot(root, true), root);
+    assert.equal((await relocatedReadBounded(join(root, 'payload.txt'))).toString('utf8'), 'bounded payload\n');
+    assert.equal(relocatedHash('bounded payload\n').length, 64);
+    assert.equal(await relocatedExists(join(root, 'payload.txt')), true);
+    assert.equal(await relocatedExists(join(root, 'missing.txt')), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated framework configuration preserves defaults, validation and compatibility identity', () => {
+  assert.equal(legacyFrameworkConfiguration.configuration, relocatedConfiguration);
+  assert.equal(legacyFrameworkConfiguration.defaults, relocatedDefaults);
+  assert.equal(legacyFrameworkConfiguration.identity, relocatedIdentity);
+  assert.equal(legacyFrameworkConfiguration.resolveImport, relocatedResolveImport);
+
+  const project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '1.2.3', description: 'Demo' };
+  const config = relocatedDefaults(project);
+  assert.equal(config.schemaVersion, 1);
+  assert.deepEqual(config.paths, {
+    codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian',
+  });
+  assert.throws(() => relocatedIdentity({ ...project, id: 'Invalid ID' }), error => error.code === 'INVALID_IDENTITY');
+  assert.throws(() => relocatedConfiguration({
+    ...config, paths: { ...config.paths, testsFolder: 'src/tests' },
+  }), error => error.code === 'CONFIG_OVERLAP');
+
+  const imported = { project: { ...project, name: 'Imported' }, settings: { codebaseFolder: 'app', testsFolder: 'spec' } };
+  assert.throws(() => relocatedResolveImport(config, imported), error => error.code === 'IMPORT_CONFLICT');
+  const resolved = relocatedResolveImport(config, imported, 'project');
+  assert.equal(resolved.config, config);
+  assert.equal(resolved.document.project.name, 'Field Notes');
+});
+
+
+test('relocated framework process policy preserves npm selection and child execution diagnostics', async () => {
+  assert.equal(legacyFrameworkProcess.npmEntry, relocatedNpmEntry);
+  assert.equal(legacyFrameworkProcess.runNode, relocatedRunNode);
+  assert.equal(legacyProcessTree.terminateProcessTree, relocatedTerminateProcessTree);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-process-policy-')));
+  const previousQualified = process.env.QUALIFIED_NPM;
+  try {
+    const npm = join(root, 'npm-cli.js');
+    await writeFile(npm, 'export {};\n');
+    process.env.QUALIFIED_NPM = npm;
+    assert.equal(await relocatedNpmEntry(), npm);
+
+    await writeFile(join(root, 'ok.mjs'), "process.stdout.write('ok');\n");
+    const output = await relocatedRunNode({ root, frameworkRoot }, 'ok.mjs', [], 10_000);
+    assert.equal(output.exitCode, 0);
+    assert.equal(output.stdout, 'ok');
+
+    await writeFile(join(root, 'fail.mjs'), "process.exitCode = 3;\n");
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'fail.mjs', [], 10_000), error => {
+      assert.equal(error.code, 'PROCESS_FAILED');
+      assert.equal(error.details.execution.exitCode, 3);
+      assert.equal(error.details.automaticRetry, false);
+      return true;
+    });
+
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'ok.mjs', [], 0), error => error.code === 'INVALID_TIMEOUT');
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'missing.mjs', [], 10_000), error => error.code === 'TOOL_MISSING');
+    await writeFile(join(root, 'hang.mjs'), "setInterval(() => {}, 1000);\n");
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot }, 'hang.mjs', [], 100), error => error.code === 'TIMEOUT');
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(relocatedRunNode({ root, frameworkRoot, signal: controller.signal }, 'ok.mjs', [], 10_000), error => error.code === 'CANCELLED');
+  } finally {
+    if (previousQualified === undefined) delete process.env.QUALIFIED_NPM;
+    else process.env.QUALIFIED_NPM = previousQualified;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated handout adapter preserves reviewed plan and blocked readiness semantics', async () => {
+  assert.equal(legacyHandoutAdapter.handoutPlan, relocatedHandoutPlan);
+  assert.equal(legacyHandoutAdapter.handoutRead, relocatedHandoutRead);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-handout-adapter-')));
+  try {
+    await mkdir(join(root, 'docs/prds'), { recursive: true });
+    await writeFile(join(root, 'docs/prds/example.md'), '# Example PRD\n');
+    const context = { root, frameworkRoot };
+    const request = { command: 'handout generate', args: [], options: {} };
+    const planned = await relocatedHandoutPlan(request, context);
+    assert.equal(planned.conflicts.length, 0);
+    assert.ok(planned.plan.changes.some(change => change.path === 'PROJECT-SETUP-HANDOUT.md' && change.status === 'create'));
+
+    const applied = await applySharedFilePlan(planned.plan);
+    assert.deepEqual(applied.written, ['PROJECT-SETUP-HANDOUT.md']);
+
+    const validated = await relocatedHandoutRead({ command: 'handout validate', args: [], options: {} }, context);
+    assert.equal(validated.status, 'blocked');
+    assert.ok(validated.diagnostics.some(item => item.code === 'HANDOUT_REQUIRED_OPEN'));
+
+    const inspected = await relocatedHandoutRead({ command: 'handout inspect', args: [], options: {} }, context);
+    assert.equal(inspected.status, 'blocked');
+    assert.ok(Array.isArray(inspected.data.answers));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated project contract preserves schema publication and stdin validation', async () => {
+  assert.equal(legacyProjectContract.projectContractOperation, relocatedProjectContractOperation);
+  const context = { root: frameworkRoot, frameworkRoot };
+
+  const schema = await relocatedProjectContractOperation({ command: 'project schema', args: [], options: {} }, context);
+  assert.equal(schema.status, 'ok');
+  assert.equal(schema.command, 'project schema');
+  assert.equal(typeof schema.data, 'object');
+  await assert.rejects(
+    relocatedProjectContractOperation({ command: 'project schema', args: [], options: { version: '5' } }, context),
+    error => error.code === 'SCHEMA_VERSION',
+  );
+
+  const inputText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const validated = await relocatedProjectContractOperation(
+    { command: 'project validate', args: [], options: { input: '-' } },
+    { ...context, inputText },
+  );
+  assert.equal(validated.status, 'ok');
+  assert.equal(validated.data.valid, true);
+  assert.equal(validated.data.normalizedVersion, 6);
+  assert.equal(validated.data.contentIncluded, false);
+  assert.match(validated.data.inputSha256, /^[a-f0-9]{64}$/);
+});
+
+
+test('relocated project measurement preserves dry-run and bounded local measurement semantics', async () => {
+  assert.equal(legacyProjectMeasure.measureProject, relocatedMeasureProject);
+  const inputText = await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8');
+  const context = { root: frameworkRoot, frameworkRoot, inputText };
+
+  const dry = await relocatedMeasureProject(
+    { command: 'project measure', args: [], options: { input: '-', samples: '3', 'dry-run': true } },
+    context,
+  );
+  assert.equal(dry.status, 'planned');
+  assert.equal(dry.data.execution, 'not-run');
+  assert.deepEqual(dry.data.operations, ['import-validate-migrate', 'export-json', 'hierarchy-projection', 'arrange-proposal']);
+
+  await assert.rejects(
+    relocatedMeasureProject({ command: 'project measure', args: [], options: { input: '-', samples: '2' } }, context),
+    error => error.code === 'MEASUREMENT_COUNT',
+  );
+
+  const measured = await relocatedMeasureProject(
+    { command: 'project measure', args: [], options: { input: '-', samples: '3' } },
+    context,
+  );
+  assert.equal(measured.status, 'ok');
+  assert.equal(measured.data.schemaVersion, 1);
+  assert.equal(measured.data.measured.length, 4);
+  assert.equal(measured.data.contentIncluded, false);
+  assert.equal(measured.data.network, false);
+  assert.match(measured.data.inputSha256, /^[a-f0-9]{64}$/);
+});
+
+
+test('relocated measurement helper preserves deterministic statistics and synchronous-only timing', async () => {
+  assert.equal(legacyMeasurement.sampleSummary, relocatedSampleSummary);
+  assert.equal(legacyMeasurement.measureOperation, relocatedMeasureOperation);
+
+  assert.deepEqual(relocatedSampleSummary([4, 1, 3, 2]), {
+    count: 4, minMs: 1, maxMs: 4, medianMs: 2, p95Ms: 4, meanMs: 2.5,
+  });
+  assert.throws(() => relocatedSampleSummary([]), error => error.code === 'MEASUREMENT_INVALID');
+  assert.throws(() => relocatedSampleSummary([1, Number.NaN]), error => error.code === 'MEASUREMENT_INVALID');
+
+  let operationCalls = 0;
+  let clock = 0;
+  const measured = await relocatedMeasureOperation(
+    () => { operationCalls++; return operationCalls; },
+    3,
+    undefined,
+    () => clock++,
+  );
+  assert.equal(operationCalls, 7);
+  assert.equal(measured.coldMs, 1);
+  assert.deepEqual(measured.warmupMs, [1, 1, 1]);
+  assert.deepEqual(measured.samplesMs, [1, 1, 1]);
+  assert.equal(measured.meanMs, 1);
+
+  await assert.rejects(
+    relocatedMeasureOperation(() => Promise.resolve('async'), 3, undefined, () => clock++),
+    error => error.code === 'MEASUREMENT_ASYNC',
+  );
+});
+
+
+test('relocated support report preserves allowlist privacy and unavailable outcomes', async () => {
+  assert.equal(legacySupportReport.supportSnapshot, relocatedSupportSnapshot);
+  assert.equal(legacySupportReport.supportReport, relocatedSupportReport);
+  assert.equal(legacySupportReport.unavailableSupport, relocatedUnavailableSupport);
+
+  const observation = {
+    ...operationResult('doctor', {
+      generated: false,
+      imported: true,
+      dependencies: true,
+      designStale: null,
+      acceptanceObligations: 2,
+    }),
+    diagnostics: [
+      { code: 'CONFIG_MISSING', message: 'secret authored message' },
+      { code: 'UNLISTED_PRIVATE_CODE', message: '/private/path/should-not-leak' },
+    ],
+  };
+  const snapshot = relocatedSupportSnapshot(observation);
+  assert.deepEqual(snapshot.diagnosticCodes, ['CONFIG_MISSING', 'OTHER']);
+  assert.deepEqual(snapshot.observations, {
+    generated: false, imported: true, dependenciesPresent: true, designStale: null, acceptanceObligations: 2,
+  });
+  assert.deepEqual(snapshot.privacy, {
+    authoredContent: false, identities: false, paths: false, hashes: false, rawErrors: false, network: false,
+  });
+  const serialized = JSON.stringify(snapshot);
+  assert.equal(serialized.includes('secret authored message'), false);
+  assert.equal(serialized.includes('/private/path'), false);
+
+  assert.equal(relocatedUnavailableSupport(false).status, 'blocked');
+  assert.equal(relocatedUnavailableSupport(false).diagnostics[0].code, 'SUPPORT_UNAVAILABLE');
+  assert.equal(relocatedUnavailableSupport(true).status, 'cancelled');
+  assert.equal(relocatedUnavailableSupport(true).diagnostics[0].code, 'CANCELLED');
+
+  const controller = new AbortController();
+  controller.abort();
+  const cancelled = await relocatedSupportReport({ root: frameworkRoot, frameworkRoot, signal: controller.signal });
+  assert.equal(cancelled.status, 'cancelled');
+  assert.equal(cancelled.diagnostics[0].code, 'CANCELLED');
+});
+
+
+test('relocated inspection preserves status and blocked release-readiness diagnostics', async () => {
+  assert.equal(legacyInspection.status, relocatedStatus);
+  assert.equal(legacyInspection.releaseCheck, relocatedReleaseCheck);
+
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-inspection-')));
+  try {
+    const context = { root, frameworkRoot };
+    const status = await relocatedStatus(context);
+    assert.equal(status.status, 'ok');
+    assert.equal(status.data.generated, false);
+    assert.equal(status.data.imported, false);
+    assert.equal(status.data.dependencies, false);
+    assert.equal(status.data.next, 'setup');
+    assert.ok(status.diagnostics.some(item => item.code === 'CONFIG_MISSING'));
+    assert.ok(status.diagnostics.some(item => item.code === 'DEPENDENCIES_MISSING'));
+
+    const release = await relocatedReleaseCheck(context);
+    assert.equal(release.status, 'blocked');
+    assert.ok(release.diagnostics.some(item => item.code === 'BUILD_IDENTITY'));
+    assert.ok(release.diagnostics.some(item => item.code === 'ASSET_MISSING'));
+    assert.ok(release.diagnostics.some(item => item.code === 'RELEASE_EVIDENCE_REQUIRED'));
+    assert.equal(release.data.publication, 'not-authorized');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

@@ -1,17 +1,17 @@
 import { join } from 'node:path';
 import { conceptSchema } from '../../../scripts/companion/concepts/contract.ts';
 import { inspectSitemapSummary } from '../../../scripts/companion/sitemap/summary.ts';
-import { handoutRead } from '../../../scripts/framework/handout-adapter.ts';
+import { handoutRead } from './handout-adapter.ts';
 import { inspectDesign } from '../../../scripts/framework/changes.ts';
-import { readConfiguration, exists } from '../../../scripts/framework/files.ts';
-import { status, releaseCheck } from '../../../scripts/framework/inspection.ts';
+import { readConfiguration, exists } from './files.ts';
+import { status, releaseCheck } from './inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
-import { measureProject } from '../../../scripts/framework/project-measure.ts';
-import { projectContractOperation } from '../../../scripts/framework/project-contract.ts';
+import { measureProject } from './project-measure.ts';
+import { projectContractOperation } from './project-contract.ts';
 import { prototypesRead, prototypesCompare } from '../../../scripts/framework/prototypes.ts';
 import { inspectStyles } from '../../../scripts/framework/styles.ts';
 import { inspectConcept } from '../../../scripts/framework/concepts.ts';
-import { supportReport } from '../../../scripts/framework/support-report.ts';
+import { supportReport } from './support-report.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 
 export async function readOperation(request: Request, context: Context): Promise<Result> {
