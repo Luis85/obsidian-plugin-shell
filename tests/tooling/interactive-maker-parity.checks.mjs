@@ -38,6 +38,8 @@ import { projectContractOperation as relocatedProjectContractOperation } from '.
 import * as legacyProjectContract from '../../scripts/framework/project-contract.ts';
 import { measureProject as relocatedMeasureProject } from '../../bin/adapters/framework/project-measure.ts';
 import * as legacyProjectMeasure from '../../scripts/framework/project-measure.ts';
+import { sampleSummary as relocatedSampleSummary, measureOperation as relocatedMeasureOperation } from '../../bin/adapters/framework/measurement.ts';
+import * as legacyMeasurement from '../../scripts/framework/measurement.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -696,4 +698,35 @@ test('relocated project measurement preserves dry-run and bounded local measurem
   assert.equal(measured.data.contentIncluded, false);
   assert.equal(measured.data.network, false);
   assert.match(measured.data.inputSha256, /^[a-f0-9]{64}$/);
+});
+
+
+test('relocated measurement helper preserves deterministic statistics and synchronous-only timing', async () => {
+  assert.equal(legacyMeasurement.sampleSummary, relocatedSampleSummary);
+  assert.equal(legacyMeasurement.measureOperation, relocatedMeasureOperation);
+
+  assert.deepEqual(relocatedSampleSummary([4, 1, 3, 2]), {
+    count: 4, minMs: 1, maxMs: 4, medianMs: 2, p95Ms: 4, meanMs: 2.5,
+  });
+  assert.throws(() => relocatedSampleSummary([]), error => error.code === 'MEASUREMENT_INVALID');
+  assert.throws(() => relocatedSampleSummary([1, Number.NaN]), error => error.code === 'MEASUREMENT_INVALID');
+
+  let operationCalls = 0;
+  let clock = 0;
+  const measured = await relocatedMeasureOperation(
+    () => { operationCalls++; return operationCalls; },
+    3,
+    undefined,
+    () => clock++,
+  );
+  assert.equal(operationCalls, 7);
+  assert.equal(measured.coldMs, 1);
+  assert.deepEqual(measured.warmupMs, [1, 1, 1]);
+  assert.deepEqual(measured.samplesMs, [1, 1, 1]);
+  assert.equal(measured.meanMs, 1);
+
+  await assert.rejects(
+    relocatedMeasureOperation(() => Promise.resolve('async'), 3, undefined, () => clock++),
+    error => error.code === 'MEASUREMENT_ASYNC',
+  );
 });

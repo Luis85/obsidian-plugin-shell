@@ -3,7 +3,7 @@ import { parseAuthoringDocument, migrateAuthoringDocument } from '../../../scrip
 import { sitemapProjection } from '../../../scripts/companion/sitemap/projection.ts';
 import { arrangeSitemap } from '../../../scripts/companion/sitemap/arrangement.ts';
 import { readBounded, hash } from './files.ts';
-import { measureOperation } from '../../../scripts/framework/measurement.ts';
+import { measureOperation } from './measurement.ts';
 import { result, requireThat, stringOption, type Request, type Context } from './contracts.ts';
 
 /** Explicit local measurement, never code execution from the imported document. */
