@@ -91,6 +91,7 @@ test('[PLAN-03-08] apply rejects an ancestor replaced by a junction after review
 async function setupDryRun(alias, canonical) {
   const source = fileURLToPath(new URL('../../', import.meta.url)); await mkdir(join(canonical, 'scripts'));
   for (const path of ['setup.mjs', 'setup', 'shared']) await cp(join(source, 'scripts', path), join(canonical, 'scripts', path), { recursive: true });
+  await cp(join(source, 'scripts/agent/mcp-config.mjs'), join(canonical, 'scripts/agent/mcp-config.mjs'));
   for (const name of ['manifest.json', 'package.json', 'package-lock.json', 'versions.json']) await cp(join(source, name), join(canonical, name));
   const result = spawnSync(process.execPath, [join(alias, 'scripts/setup.mjs'), '--dry-run', '--json'], { cwd: alias, encoding: 'utf8', timeout: 15000 });
   assert.equal(result.status, 0, result.stdout + result.stderr); assert.equal(JSON.parse(result.stdout).dryRun, true);
