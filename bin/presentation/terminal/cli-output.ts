@@ -3,7 +3,7 @@ import { formatDiagnostics } from '../../../scripts/compiler/adapters/reporting.
 import type { CompilerDiagnostic } from '../../../scripts/compiler/domain/contracts.ts';
 import type { Result } from '../../../scripts/contracts/result.ts';
 import { starterText } from './starter-terminal.ts';
-import { renderHuman } from '../../../scripts/framework/terminal-render.ts';
+import { renderHuman } from './terminal-render.ts';
 import { terminalStyle, runnable } from './terminal-style.ts';
 
 export interface CliOutputStream {

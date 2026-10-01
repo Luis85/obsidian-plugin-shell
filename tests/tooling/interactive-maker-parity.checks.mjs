@@ -80,6 +80,8 @@ import { guidedSetup as relocatedGuidedSetup, continueSetup as relocatedContinue
 import * as legacySetupTerminal from '../../scripts/framework/setup-terminal.ts';
 import { guidedStarter as relocatedGuidedStarter, starterText as relocatedStarterText } from '../../bin/presentation/terminal/starter-terminal.ts';
 import * as legacyStarterTerminal from '../../scripts/framework/starter-terminal.ts';
+import { renderHuman as relocatedRenderHuman } from '../../bin/presentation/terminal/terminal-render.ts';
+import * as legacyTerminalRender from '../../scripts/framework/terminal-render.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1851,4 +1853,23 @@ test('relocated starter terminal preserves compatibility, from-short-circuit and
   assert.match(review, /Plan hash/);
   assert.match(review, /npm: exit 0/);
   assert.match(review, /Next steps:/);
+});
+
+
+test('relocated terminal renderer preserves compatibility and generic/check views', () => {
+  assert.equal(legacyTerminalRender.renderHuman, relocatedRenderHuman);
+  const style = { color: false, unicode: false };
+  const generic = relocatedRenderHuman(operationResult('inspect', { one: 1, nested: { two: 'value' } }), style);
+  assert.match(generic.text, /inspect: ok/);
+  assert.match(generic.text, /nested\.two/);
+  assert.equal(generic.diagnosticsShown, false);
+
+  const check = relocatedRenderHuman(operationResult('check', {
+    scope: 'shell-repository', mode: 'full',
+    steps: [{ id: 'types', command: 'tsc', status: 'passed', durationMs: 12, exitCode: 0 }],
+    summary: { passed: 1, failed: 0, skipped: 0, durationMs: 12 },
+  }), style);
+  assert.match(check.text, /types/);
+  assert.match(check.text, /All check steps passed/);
+  assert.equal(check.diagnosticsShown, true);
 });
