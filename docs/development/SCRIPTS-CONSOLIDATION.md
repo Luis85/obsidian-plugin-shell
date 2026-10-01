@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D47 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D complete through D67 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -167,7 +167,12 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D61:** Handout filesystem/source collection and create/refresh/inspect preparation moved to `bin/adapters/framework/handout-workspace.ts`; change planning and the handout command adapter consume it locally and the former framework path is compatibility-only. Maker coverage locks deterministic read-only preparation, human-owned preservation, path/settings/PRD overrides, virtual configuration fingerprints, staleness, symlink/input bounds and BOM semantics.
 - **D62:** The central reviewed-plan orchestrator moved to `bin/adapters/framework/planning.ts`; file-operation consumes it locally and the former framework path is compatibility-only. Already-relocated docs/prototypes/handout/changes/generation/concepts/styles services are local while starter, kit-upgrade and maker engines remain explicit compatibility dependencies. Maker coverage locks plan hashing, stale approval, save/load replay protection, setup/vault/handout/style routing and cancellation.
 - **D62a (CI repair):** Relocation cleanup fixes the release-preparation import depth, authorizes maker-host use of the already-reviewed shared process/files/concurrency contracts, removes six transient compatibility wrappers with zero consumers, and drops genuinely unused support/re-export surface. Documentation status keeps its lazy runtime boundary with an explicit adapter contract regression; analyzer rules and thresholds remain unchanged.
-- **Remaining D63–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D63:** New-project/starter orchestration moved to `bin/adapters/framework/starter-project.ts`. Framework CLI, planning, dispatcher, setup-source and terminal prompting now import it locally; the former framework path is compatibility-only. Maker parity coverage locks helper identity plus derived ID/name and invocation-directory semantics.
+- **D64:** Framework-kit assembly, packaging and upgrade planning moved to `bin/adapters/framework/kit.ts`. Process execution and reviewed planning now import it locally; the former framework path is compatibility-only. Existing maker distribution qualification exercises real kit assembly, and a parity regression locks the compatibility surface.
+- **D65:** The daily `check` gate moved to `bin/adapters/framework/check.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage now exercises full/fast step planning, changed/unavailable Git selection, step continuation and failure metadata, dry-run, cancellation, output-tail normalization and shim identity.
+- **D66:** The local submission-review mirror moved to `bin/adapters/framework/submission.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage locks compatibility identity, manifest/version/lint policy, dry-run non-execution, read-only outcomes, missing-tool remediation and build-identity drift without network or publication effects.
+- **D67:** Stage D closure: every retained TypeScript file under `scripts/framework/` is now a bounded compatibility-only export into `bin/` (or the shared typed input contract); an executable regression rejects any substantive implementation returning there. The framework CLI core, routing, parser, planning, terminal presentation and operational adapters now live under `bin/` with existing gates unchanged.
+- **Remaining E–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

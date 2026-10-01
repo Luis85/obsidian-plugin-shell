@@ -3,7 +3,7 @@ import { packStarterOperation, readStarterOperation } from '../../../scripts/sta
 import { starterProcessOperation } from '../../../scripts/starters/processes.ts';
 import { airshipOperation } from './airship.ts';
 import { buildClickdummy } from './clickdummy.ts';
-import { checkOperation } from '../../../scripts/framework/check.ts';
+import { checkOperation } from './check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
@@ -14,7 +14,7 @@ import { operationSchemas } from './schema.ts';
 import { setupProgress } from './setup-progress.ts';
 import { starterListing, completeStarterProject } from './starter-project.ts';
 import { storybookOperation } from './storybook.ts';
-import { submissionCheck } from '../../../scripts/framework/submission.ts';
+import { submissionCheck } from './submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../../../scripts/operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
