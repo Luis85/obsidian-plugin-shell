@@ -329,8 +329,7 @@ test('relocated daily check gate preserves compatibility and execution semantics
     await mkdir(join(root, 'bin'), { recursive: true });
     await mkdir(join(root, 'src'), { recursive: true });
     await writeFile(join(root, 'bin/app.ts'), 'export {};');
-    await mkdir(join(root, 'configs/types'), { recursive: true });
-    await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
+    await mkdir(join(root, 'configs/types'), { recursive: true }); await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
     await writeFile(join(root, 'src/a.ts'), 'export const a = 1;');
 
     const full = await checkSteps(root, false);
