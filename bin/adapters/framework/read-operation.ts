@@ -8,7 +8,7 @@ import { status, releaseCheck } from './inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from './project-measure.ts';
 import { projectContractOperation } from './project-contract.ts';
-import { prototypesRead, prototypesCompare } from '../../../scripts/framework/prototypes.ts';
+import { prototypesRead, prototypesCompare } from './prototypes.ts';
 import { inspectStyles } from './styles.ts';
 import { inspectConcept } from './concepts.ts';
 import { supportReport } from './support-report.ts';
