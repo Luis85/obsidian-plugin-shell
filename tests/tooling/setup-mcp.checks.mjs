@@ -81,9 +81,17 @@ function mcpClient() {
 test('[SETUP-MCP-04] the local server negotiates MCP, exposes bounded app tools and delegates read-only discovery to bin/app', async t => {
   const client = mcpClient();
   t.after(() => { client.child.stdin.end(); client.child.kill(); });
-  const initialized = await client.request(1, 'initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'setup-test', version: '1' } });
+  const discovered = await client.request(0, 'server/discover', { _meta: {
+    'io.modelcontextprotocol/protocolVersion': '2026-07-28',
+    'io.modelcontextprotocol/clientInfo': { name: 'setup-test', version: '1' },
+    'io.modelcontextprotocol/clientCapabilities': {},
+  } });
+  assert.ok(discovered.result.supportedVersions.includes('2026-07-28'));
+  assert.equal(discovered.result.resultType, 'complete');
+  assert.equal(discovered.result._meta['io.modelcontextprotocol/serverInfo'].name, 'workbench-local');
+  const initialized = await client.request(1, 'initialize', { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'setup-test', version: '1' } });
   assert.equal(initialized.result.serverInfo.name, 'workbench-local');
-  assert.equal(initialized.result.protocolVersion, '2025-06-18');
+  assert.equal(initialized.result.protocolVersion, '2025-11-25');
   client.notify('notifications/initialized');
   const listed = await client.request(2, 'tools/list');
   assert.deepEqual(listed.result.tools.map(tool => tool.name), ['workbench_capabilities', 'workbench_help', 'workbench_execute']);

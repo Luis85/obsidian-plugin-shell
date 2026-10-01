@@ -7,7 +7,10 @@ const app = resolve(root, 'bin/app');
 const MAX_OUTPUT_BYTES = 1024 * 1024;
 const MAX_ARGS = 64;
 const MAX_ARG_LENGTH = 4096;
-const protocols = new Set(['2025-06-18', '2025-03-26', '2024-11-05']);
+const handshakeProtocols = new Set(['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']);
+const supportedVersions = ['2026-07-28', ...handshakeProtocols];
+const serverInfo = { name: 'workbench-local', version: '1.0.0' };
+const serverCapabilities = { tools: { listChanged: false } };
 
 const tools = [
   {
@@ -96,8 +99,14 @@ async function callTool(name, input) {
 function send(value) {
   process.stdout.write(JSON.stringify(value) + '\n');
 }
-function response(id, result) {
-  send({ jsonrpc: '2.0', id, result });
+function modernRequest(message) {
+  return message.method === 'server/discover'
+    || message.params?._meta?.['io.modelcontextprotocol/protocolVersion'] === '2026-07-28';
+}
+function response(id, result, modern = false) {
+  const value = modern ? { ...result, resultType: result.resultType ?? 'complete',
+    _meta: { ...(result._meta ?? {}), 'io.modelcontextprotocol/serverInfo': serverInfo } } : result;
+  send({ jsonrpc: '2.0', id, result: value });
 }
 function errorResponse(id, code, message) {
   send({ jsonrpc: '2.0', id, error: { code, message } });
@@ -109,21 +118,26 @@ async function handle(message) {
   }
   if (message.method === 'notifications/initialized' || message.method === 'notifications/cancelled') return;
   if (message.id === undefined) return;
+  if (message.method === 'server/discover') {
+    response(message.id, { supportedVersions, capabilities: serverCapabilities, ttlMs: 0, cacheScope: 'private' }, true);
+    return;
+  }
   if (message.method === 'initialize') {
     const requested = message.params?.protocolVersion;
     response(message.id, {
-      protocolVersion: protocols.has(requested) ? requested : '2025-06-18',
-      capabilities: { tools: { listChanged: false } },
-      serverInfo: { name: 'workbench-local', version: '1.0.0' },
+      protocolVersion: handshakeProtocols.has(requested) ? requested : '2025-11-25',
+      capabilities: serverCapabilities,
+      serverInfo,
     });
     return;
   }
-  if (message.method === 'ping') { response(message.id, {}); return; }
-  if (message.method === 'tools/list') { response(message.id, { tools }); return; }
+  const modern = modernRequest(message);
+  if (message.method === 'ping') { response(message.id, {}, modern); return; }
+  if (message.method === 'tools/list') { response(message.id, { tools }, modern); return; }
   if (message.method === 'tools/call') {
     const name = message.params?.name;
     if (typeof name !== 'string') { errorResponse(message.id, -32602, 'Tool name is required.'); return; }
-    response(message.id, await callTool(name, message.params?.arguments ?? {}));
+    response(message.id, await callTool(name, message.params?.arguments ?? {}), modern);
     return;
   }
   errorResponse(message.id, -32601, 'Method not found.');
