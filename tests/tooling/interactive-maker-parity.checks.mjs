@@ -70,6 +70,14 @@ import { airshipPlan as relocatedAirshipPlan } from '../../bin/adapters/framewor
 import * as legacyAirshipPlan from '../../scripts/framework/airship-plan.ts';
 import { airshipEnvironment as relocatedAirshipEnvironment, airshipOperation as relocatedAirshipOperation } from '../../bin/adapters/framework/airship.ts';
 import * as legacyAirship from '../../scripts/framework/airship.ts';
+import { buildClickdummy as relocatedBuildClickdummy } from '../../bin/adapters/framework/clickdummy.ts';
+import * as legacyClickdummy from '../../scripts/framework/clickdummy.ts';
+import { docsRead as relocatedDocsRead, docsPlan as relocatedDocsPlan } from '../../bin/adapters/framework/docs.ts';
+import * as legacyDocs from '../../scripts/framework/docs.ts';
+import { fixtureOperation as relocatedFixtureOperation } from '../../bin/adapters/framework/fixtures.ts';
+import * as legacyFixtures from '../../scripts/framework/fixtures.ts';
+import { guidedSetup as relocatedGuidedSetup, continueSetup as relocatedContinueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
+import * as legacySetupTerminal from '../../scripts/framework/setup-terminal.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1394,4 +1402,405 @@ test('relocated Airship execution preserves opt-in, pinned install and safe laun
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+
+test('relocated clickdummy build preserves fixed paths, reviewed execution and receipt checks', async () => {
+  assert.equal(legacyClickdummy.buildClickdummy, relocatedBuildClickdummy);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-clickdummy-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const calls = [];
+    const dependencies = {
+      exists: async path => { calls.push(['exists', path]); return true; },
+      inspectDesign: async (ctx, input) => {
+        calls.push(['inspect', ctx.root, input]);
+        return { model: { project: { name: 'Workbench demo' } } };
+      },
+      runNode: async (ctx, entry, args, timeout) => {
+        calls.push(['run', ctx.root, entry, args, timeout]);
+        return {
+          exitCode: 0,
+          signal: null,
+          truncated: false,
+          stdout: JSON.stringify({ status: 'built-not-browser-verified', output: 'clickdummy.html' }),
+        };
+      },
+    };
+
+    const planned = await relocatedBuildClickdummy(
+      { command: 'clickdummy build', args: [], options: { 'dry-run': true } },
+      context,
+      dependencies,
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.execution, 'not-run');
+    assert.deepEqual(calls, []);
+
+    const built = await relocatedBuildClickdummy(
+      { command: 'clickdummy build', args: [], options: { replace: true, timeout: '1234' } },
+      context,
+      dependencies,
+    );
+    assert.equal(built.status, 'ok');
+    assert.equal(built.data.acceptance, 'not-inferred');
+    assert.equal(built.data.receipt.status, 'built-not-browser-verified');
+    const run = calls.find(call => call[0] === 'run');
+    assert.equal(run[2], '.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs');
+    assert.equal(run[4], 1234);
+    assert.ok(run[3].includes('--replace'));
+    assert.ok(run[3].includes('Workbench demo'));
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, exists: async () => false },
+      ),
+      error => error.code === 'CLICKDUMMY_PROJECT_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, runNode: async () => ({ exitCode: 0, signal: null, truncated: true, stdout: '' }) },
+      ),
+      error => error.code === 'CLICKDUMMY_OUTPUT_LIMIT',
+    );
+
+    await assert.rejects(
+      relocatedBuildClickdummy(
+        { command: 'clickdummy build', args: [], options: {} },
+        context,
+        { ...dependencies, runNode: async () => ({ exitCode: 0, signal: null, truncated: false, stdout: '{"status":"unexpected"}' }) },
+      ),
+      error => error.code === 'CLICKDUMMY_RECEIPT',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated documentation adapter preserves schema, read and plan command semantics', async () => {
+  assert.equal(legacyDocs.docsRead, relocatedDocsRead);
+  assert.equal(legacyDocs.docsPlan, relocatedDocsPlan);
+  const context = { root: frameworkRoot, frameworkRoot };
+
+  const schema = await relocatedDocsRead(
+    { command: 'docs schema', args: [], options: {} },
+    context,
+    {
+      documentationStatus: async () => { throw new Error('schema must not load documentation status'); },
+      recoverDocuments: async () => { throw new Error('schema must not load recovery'); },
+    },
+  );
+  assert.equal(schema.status, 'ok');
+  assert.equal(schema.data.doc_schema, 1);
+  assert.ok(schema.data.types.includes('page'));
+  assert.ok(schema.data.required.includes('title'));
+
+  const calls = [];
+  const recovered = await relocatedDocsRead(
+    { command: 'docs recover', args: [], options: { yes: true, apply: 'abc' } },
+    context,
+    {
+      recoverDocuments: async (root, apply, hash) => {
+        calls.push(['recover', root, apply, hash]);
+        return { data: { recovery: 'ready' }, status: 'planned' };
+      },
+    },
+  );
+  assert.equal(recovered.status, 'planned');
+  assert.deepEqual(calls[0], ['recover', frameworkRoot, true, 'abc']);
+
+  const dryRecovery = await relocatedDocsRead(
+    { command: 'docs recover', args: [], options: { yes: true, 'dry-run': true } },
+    context,
+    {
+      recoverDocuments: async (root, apply, hash) => {
+        calls.push(['recover-dry', root, apply, hash]);
+        return { data: {}, status: 'planned' };
+      },
+    },
+  );
+  assert.equal(dryRecovery.status, 'planned');
+  assert.equal(calls.at(-1)[2], false);
+
+  const blocked = await relocatedDocsRead(
+    { command: 'docs validate', args: ['docs/application'], options: {} },
+    context,
+    {
+      documentationStatus: async (root, args, validate) => {
+        calls.push(['status', root, args, validate]);
+        return { conflicts: [], missing: ['page:one'] };
+      },
+    },
+  );
+  assert.equal(blocked.status, 'blocked');
+  assert.deepEqual(calls.at(-1), ['status', frameworkRoot, ['docs/application'], true]);
+
+  const status = await relocatedDocsRead(
+    { command: 'docs status', args: [], options: {} },
+    context,
+    { documentationStatus: async () => ({ conflicts: [], missing: [] }) },
+  );
+  assert.equal(status.status, 'ok');
+
+  const planned = { plan: 'docs' };
+  const exportPlan = await relocatedDocsPlan(
+    { command: 'docs export', args: ['page-one'], options: { out: 'specs', resolutions: 'choices.json' } },
+    context,
+    {
+      documentationPlan: async (root, args, mode, options) => {
+        calls.push(['plan', root, args, mode, options]);
+        return planned;
+      },
+    },
+  );
+  assert.equal(exportPlan, planned);
+  assert.deepEqual(calls.at(-1), [
+    'plan',
+    frameworkRoot,
+    ['page-one'],
+    'export',
+    { out: 'specs', resolutions: 'choices.json' },
+  ]);
+
+  await relocatedDocsPlan(
+    { command: 'docs import', args: [], options: {} },
+    context,
+    {
+      documentationPlan: async (root, args, mode, options) => {
+        calls.push(['import-plan', root, args, mode, options]);
+        return planned;
+      },
+    },
+  );
+  assert.equal(calls.at(-1)[3], 'import');
+});
+
+
+test('relocated fixture adapter preserves approval, target, reset and cancellation boundaries', async () => {
+  assert.equal(legacyFixtures.fixtureOperation, relocatedFixtureOperation);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixtures-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const config = {
+      project: { id: 'demo' },
+      paths: { testVaultFolder: '.test-vault' },
+    };
+    const manifest = { target: '.test-vault', sources: [] };
+    const calls = [];
+    const dependencies = {
+      readConfiguration: async () => config,
+      readJson: async path => String(path).endsWith('.framework-vault.json')
+        ? { projectId: 'demo' }
+        : manifest,
+      planFixtures: async (planRoot, value, options) => {
+        calls.push(['plan', planRoot, value, options]);
+        return {
+          mode: options.reset ? 'reset' : 'apply',
+          approval: 'fixture-hash',
+          target: '.test-vault',
+          changes: [{ path: 'Notes/one.md' }],
+          blockers: [],
+          bytes: 12,
+        };
+      },
+      applyFixtures: async (applyRoot, value, approval, options) => {
+        calls.push(['apply', applyRoot, value, approval, options]);
+        return { unchanged: false, written: ['Notes/one.md'] };
+      },
+    };
+
+    await assert.rejects(
+      relocatedFixtureOperation({ command: 'data plan', args: [], options: {} }, context, dependencies),
+      error => error.code === 'INPUT_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readConfiguration: async () => null },
+      ),
+      error => error.code === 'CONFIG_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readConfiguration: async () => ({ ...config, paths: { testVaultFolder: 'vault' } }) },
+      ),
+      error => error.code === 'FIXTURE_TARGET_UNSUPPORTED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readJson: async () => ({ target: 'other' }) },
+      ),
+      error => error.code === 'FIXTURE_TARGET',
+    );
+
+    const planned = await relocatedFixtureOperation(
+      { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+      context,
+      dependencies,
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.approval, 'fixture-hash');
+
+    const blocked = await relocatedFixtureOperation(
+      { command: 'data reset-plan', args: [], options: { input: 'fixtures.json' } },
+      context,
+      {
+        ...dependencies,
+        planFixtures: async (planRoot, value, options) => {
+          calls.push(['blocked-plan', planRoot, value, options]);
+          return {
+            mode: 'reset',
+            approval: 'fixture-hash',
+            target: '.test-vault',
+            changes: [],
+            blockers: ['owned file changed'],
+            bytes: 0,
+          };
+        },
+      },
+    );
+    assert.equal(blocked.status, 'blocked');
+    assert.equal(calls.at(-1)[3].reset, true);
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', yes: true } },
+        context,
+        dependencies,
+      ),
+      error => error.code === 'FIXTURE_APPROVAL',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+        context,
+        { ...dependencies, readJson: async path => String(path).endsWith('.framework-vault.json')
+          ? { projectId: 'other' }
+          : manifest },
+      ),
+      error => error.code === 'VAULT_REQUIRED',
+    );
+
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+        { ...context, signal: controller.signal },
+        dependencies,
+      ),
+      error => error.code === 'CANCELLED',
+    );
+
+    const applied = await relocatedFixtureOperation(
+      { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+      context,
+      dependencies,
+    );
+    assert.equal(applied.status, 'applied');
+    assert.deepEqual(calls.at(-1), ['apply', root, manifest, 'fixture-hash', { reset: false }]);
+
+    const unchanged = await relocatedFixtureOperation(
+      { command: 'data reset', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+      context,
+      { ...dependencies, applyFixtures: async () => ({ unchanged: true }) },
+    );
+    assert.equal(unchanged.status, 'unchanged');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated setup terminal preserves interview and separately approved continuation flow', async () => {
+  assert.equal(legacySetupTerminal.guidedSetup, relocatedGuidedSetup);
+  assert.equal(legacySetupTerminal.continueSetup, relocatedContinueSetup);
+
+  const prompts = [];
+  const answers = ['blank', '', '', 'Example Author', 'yes'];
+  const writes = [];
+  const dependencies = {
+    readConfiguration: async () => null,
+    starterCatalog: async () => ({ catalog: { starters: [{ id: 'blank', name: 'Blank', level: 'basic' }] } }),
+    derivedId: () => 'derived-id',
+    derivedName: id => id === 'derived-id' ? 'Derived Id' : 'Unexpected',
+    setupDocumentation: async (_mode, value) => value,
+    setupObsidian: async () => [],
+  };
+  const guided = await relocatedGuidedSetup(
+    { command: 'setup', args: [], options: {} },
+    { root: '/project', frameworkRoot },
+    async query => { prompts.push(query); return answers.shift(); },
+    value => writes.push(value),
+    dependencies,
+  );
+  assert.equal(guided.options.starter, 'blank');
+  assert.equal(guided.options.id, 'derived-id');
+  assert.equal(guided.options.name, 'Derived Id');
+  assert.equal(guided.options.author, 'Example Author');
+  assert.equal(guided.options.airship, true);
+  assert.ok(writes.some(value => value.includes('GitHub is optional')));
+  assert.equal(prompts.length, 5);
+
+  const rendered = [];
+  const calls = [];
+  const continuationAnswers = ['yes', 'yes', 'yes', 'yes', 'yes'];
+  const execute = async request => {
+    calls.push(request);
+    if (request.command === 'generate') {
+      return { ...operationResult('generate', { planHash: 'b'.repeat(64) }, 'planned') };
+    }
+    if (request.command === 'setup status') {
+      return operationResult('setup status', { resumeHash: 'a'.repeat(64) });
+    }
+    return operationResult(request.command, {}, 'applied');
+  };
+  const documentationModes = [];
+  const completed = await relocatedContinueSetup(
+    { root: '/project', frameworkRoot },
+    execute,
+    async () => continuationAnswers.shift(),
+    value => rendered.push(value),
+    operationResult('setup', {}, 'applied'),
+    {
+      ...dependencies,
+      setupDocumentation: async (mode, value) => { documentationModes.push(mode); return value; },
+    },
+  );
+  assert.equal(completed.status, 'applied');
+  assert.deepEqual(documentationModes, ['import', 'export']);
+  assert.deepEqual(calls.filter(call => call.command === 'setup resume').map(call => call.options.stage),
+    ['generate', 'install', 'verify', 'preview']);
+  assert.equal(calls.find(call => call.command === 'setup resume' && call.options.stage === 'generate').options.apply, 'b'.repeat(64));
+  assert.ok(rendered.length >= 5);
+
+  const declinedModes = [];
+  const declined = await relocatedContinueSetup(
+    { root: '/project', frameworkRoot },
+    async () => { throw new Error('declined flow must not execute a stage'); },
+    async () => 'no',
+    () => {},
+    operationResult('setup', {}, 'applied'),
+    {
+      ...dependencies,
+      setupDocumentation: async (mode, value) => { declinedModes.push(mode); return value; },
+    },
+  );
+  assert.equal(declined.status, 'applied');
+  assert.deepEqual(declinedModes, ['import', 'export']);
 });

@@ -2,7 +2,7 @@ import { resolve, join } from 'node:path';
 import { stdin, stdout, stderr } from 'node:process';
 import type { Readable } from 'node:stream';
 import { unavailableSupport } from './framework/support-report.ts';
-import { guidedSetup, continueSetup } from '../../scripts/framework/setup-terminal.ts';
+import { guidedSetup, continueSetup } from '../presentation/terminal/setup-terminal.ts';
 import { ask, readInput } from '../../scripts/shared/input.ts';
 import { parseConfirmation } from '../../scripts/shared/confirmation.ts';
 import { parseCliArguments } from './framework/catalog.ts';
