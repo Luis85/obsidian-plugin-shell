@@ -5,7 +5,7 @@ import { loadDefinitions } from '../../../scripts/starters/repository.ts';
 import { record, inputValue } from '../../../scripts/starters/validation.ts';
 /** Terminal-only presentation and prompts for `new`. The operation result stays the authority. */
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
-import { starterCatalog, derivedId, derivedName, invocationDirectory } from '../../../scripts/framework/starter-project.ts';
+import { starterCatalog, derivedId, derivedName, invocationDirectory } from '../../adapters/framework/starter-project.ts';
 import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
 type Prompt = (query: string) => Promise<string>;
 type Write = (text: string) => void;
