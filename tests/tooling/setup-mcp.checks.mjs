@@ -29,6 +29,8 @@ test('[SETUP-MCP-02] the opt-in plan creates exact Claude and Codex project conf
   assert.deepEqual(claude.permissions.ask, ['mcp__workbench__workbench_execute']);
   const codex = await readFile(join(f.root, '.codex/config.toml'), 'utf8');
   assert.match(codex, /\[mcp_servers\.workbench\]/); assert.match(codex, /default_tools_approval_mode = "writes"/);
+  assert.match(codex, /tool_timeout_sec = 600/); assert.match(codex, /enabled_tools = \["workbench_capabilities", "workbench_help", "workbench_execute"\]/);
+  assert.match(codex, /\[mcp_servers\.workbench\.tools\.workbench_execute\]\napproval_mode = "prompt"/);
   const rerun = await planLocalMcp(f.root, true, { files: planned.files });
   assert.ok(rerun.files.every(file => file.status === 'unchanged'));
   await writeFile(join(f.root, '.mcp.json'), '{"user":"edit"}\n');

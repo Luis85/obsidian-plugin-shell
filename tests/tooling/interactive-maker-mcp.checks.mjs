@@ -15,13 +15,16 @@ test('MCP supports current modern discovery and legacy initialize with determini
   const discover = await mcpResponse({ jsonrpc: '2.0', id: 1, method: 'server/discover', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': '2026-07-28' } } }, ok);
   assert.ok(discover.result.supportedVersions.includes('2026-07-28'));
   assert.equal(discover.result.resultType, 'complete');
+  assert.match(discover.result.instructions, /workbench_capabilities/);
   assert.equal(discover.result._meta['io.modelcontextprotocol/serverInfo'].name, 'workbench-local');
   const initialized = await mcpResponse({ jsonrpc: '2.0', id: 2, method: 'initialize', params: { protocolVersion: '2025-11-25' } }, ok);
   assert.equal(initialized.result.protocolVersion, '2025-11-25');
+  assert.match(initialized.result.instructions, /dry-run\/plan/);
   const fallback = await mcpResponse({ jsonrpc: '2.0', id: 3, method: 'initialize', params: { protocolVersion: 'future' } }, ok);
   assert.equal(fallback.result.protocolVersion, '2025-11-25');
   const listed = await mcpResponse({ jsonrpc: '2.0', id: 4, method: 'tools/list', params: {} }, ok);
   assert.deepEqual(listed.result.tools.map(tool => tool.name), workbenchMcpTools.map(tool => tool.name));
+  assert.ok(listed.result.tools.every(tool => tool.outputSchema?.type === 'object'));
   assert.equal(await mcpResponse({ jsonrpc: '2.0', method: 'notifications/initialized' }, ok), null);
   assert.equal((await mcpResponse({ jsonrpc: '2.0', id: 5, method: 'unknown' }, ok)).error.code, -32601);
 });
@@ -33,11 +36,12 @@ test('MCP delegates exact Workbench arguments and validates unsafe inputs', asyn
     [3, 'workbench_execute', { args: ['check', '--fast'], timeoutMs: 5000, stdin: '{"scope":"current"}\n' }]]) {
     const response = await mcpResponse({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: args } }, run);
     assert.equal(response.result.isError, false);
+    assert.deepEqual(response.result.structuredContent.workbench.args, id === 1 ? ['capabilities', '--json'] : id === 2 ? ['help', 'setup', '--json'] : ['check', '--fast']);
   }
   assert.deepEqual(calls, [[['capabilities', '--json'], 120000, null], [['help', 'setup', '--json'], 120000, null],
     [['check', '--fast'], 5000, '{"scope":"current"}\n']]);
   for (const arguments_ of [{}, { args: [] }, { args: ['x'], timeoutMs: 1 }, { args: ['bad\0arg'] },
-    { args: ['check', '--root', '../other'] }, { args: ['check', '--root=../other'] }, { args: ['check'], stdin: 'bad\0input' }]) {
+    { args: ['check', '--root', '../other'] }, { args: ['check', '--root=../other'] }, { args: ['mcp'] }, { args: ['check'], stdin: 'bad\0input' }]) {
     const response = await mcpResponse({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name: 'workbench_execute', arguments: arguments_ } }, run);
     assert.equal(response.result.isError, true);
   }
@@ -45,6 +49,30 @@ test('MCP delegates exact Workbench arguments and validates unsafe inputs', asyn
   assert.equal((await mcpResponse({ jsonrpc: '2.0', id: 11, method: 'tools/call', params: { name: 'missing', arguments: {} } }, run)).result.isError, true);
   assert.equal((await mcpResponse({ jsonrpc: '2.0', id: 12, method: 'tools/call', params: {} }, run)).error.code, -32602);
   assert.equal((await mcpResponse({ jsonrpc: '1.0', id: 13, method: 'ping' }, run)).error.code, -32600);
+});
+
+test('stdio MCP keeps serving while work runs and cancellation stops the owned request without a response', async () => {
+  const value = streams();
+  let startedResolve;
+  const started = new Promise(resolveStarted => { startedResolve = resolveStarted; });
+  const run = async (args, _timeout, _stdin, signal) => {
+    if (args[0] !== 'check') return ok(args);
+    startedResolve();
+    await new Promise(resolveRun => signal.addEventListener('abort', resolveRun, { once: true }));
+    return { exitCode: 1, signal: 'SIGTERM', stdout: '', stderr: '', timedOut: false, overflow: false, error: 'cancelled' };
+  };
+  const running = runMcpServer(frameworkRoot, value.io, run);
+  value.input.write(JSON.stringify({ jsonrpc: '2.0', id: 20, method: 'tools/call', params: {
+    name: 'workbench_execute', arguments: { args: ['check', '--fast'] },
+  } }) + '\n');
+  await started;
+  value.input.write(JSON.stringify({ jsonrpc: '2.0', id: 21, method: 'ping', params: {} }) + '\n');
+  await new Promise(resolveWait => setTimeout(resolveWait, 20));
+  assert.match(value.read(), /"id":21/);
+  value.input.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/cancelled', params: { requestId: 20 } }) + '\n');
+  value.input.end();
+  assert.equal(await running, 0);
+  assert.doesNotMatch(value.read(), /"id":20/);
 });
 
 test('stdio and app entrypoint serve MCP without a second executable', async () => {
@@ -112,7 +140,9 @@ test('the real runner delegates to bin/app and modern setup owns Claude/Codex pr
     const applied = await executeOperation(request, context);
     assert.equal(applied.status, 'applied', JSON.stringify(applied));
     assert.deepEqual(JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8')).mcpServers.workbench.args, ['${CLAUDE_PROJECT_DIR}/bin/app', 'mcp']);
-    assert.match(await readFile(join(root, '.codex/config.toml'), 'utf8'), /default_tools_approval_mode = "writes"/);
+    const codex = await readFile(join(root, '.codex/config.toml'), 'utf8');
+    assert.match(codex, /default_tools_approval_mode = "writes"/); assert.match(codex, /tool_timeout_sec = 600/);
+    assert.match(codex, /workbench_execute\]\napproval_mode = "prompt"/);
     const claude = JSON.parse(await readFile(join(root, '.claude/settings.local.json'), 'utf8')).permissions;
     assert.deepEqual(claude.allow, ['mcp__workbench__workbench_capabilities', 'mcp__workbench__workbench_help']);
     assert.deepEqual(claude.ask, ['mcp__workbench__workbench_execute']);
