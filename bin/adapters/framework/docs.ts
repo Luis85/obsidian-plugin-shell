@@ -1,10 +1,18 @@
 import { result, stringOption, type Context, type Request, type ResultStatus } from './contracts.ts';
+import type { FilePlan } from '../../../scripts/shared/file-plan.ts';
 import { DOC_TYPES, fieldNames } from '../../../scripts/application-docs/domain/contracts.ts';
 
 interface DocumentationStatus {
   conflicts: unknown[];
   missing: unknown[];
   [key: string]: unknown;
+}
+
+interface DocumentationPlan {
+  plan: FilePlan;
+  summary: unknown;
+  conflicts: string[];
+  hash?: string;
 }
 
 interface DocsDependencies {
@@ -15,7 +23,7 @@ interface DocsDependencies {
     args: string[],
     mode: 'export' | 'import',
     options: { out?: string; resolutions?: string },
-  ) => Promise<unknown>;
+  ) => Promise<DocumentationPlan>;
 }
 
 /** Schema/help stay dependency-free so an extracted CLI remains discoverable before installation. */
@@ -59,7 +67,7 @@ export async function docsRead(request: Request, context: Context, dependencies:
   );
 }
 
-export async function docsPlan(request: Request, context: Context, dependencies: DocsDependencies = {}) {
+export async function docsPlan(request: Request, context: Context, dependencies: DocsDependencies = {}): Promise<DocumentationPlan> {
   const documentationPlan = dependencies.documentationPlan
     ?? (await import('../../../scripts/application-docs/adapters/plan.ts')).documentationPlan;
   return documentationPlan(

@@ -8,9 +8,9 @@ import { status, releaseCheck } from './inspection.ts';
 import { verifyKit } from '../../../scripts/framework/kit-integrity.ts';
 import { measureProject } from './project-measure.ts';
 import { projectContractOperation } from './project-contract.ts';
-import { prototypesRead, prototypesCompare } from '../../../scripts/framework/prototypes.ts';
-import { inspectStyles } from '../../../scripts/framework/styles.ts';
-import { inspectConcept } from '../../../scripts/framework/concepts.ts';
+import { prototypesRead, prototypesCompare } from './prototypes.ts';
+import { inspectStyles } from './styles.ts';
+import { inspectConcept } from './concepts.ts';
 import { supportReport } from './support-report.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 

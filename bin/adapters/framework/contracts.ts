@@ -2,7 +2,7 @@ import { CompilerError, CompilationFailure } from '../../../scripts/compiler/dom
 import { result, type Result } from '../../../scripts/contracts/result.ts';
 import { OperationError, requireThat } from '../../../scripts/contracts/errors.ts';
 export { result } from '../../../scripts/contracts/result.ts';
-export type { Diagnostic, Result } from '../../../scripts/contracts/result.ts';
+export type { Diagnostic, Result, ResultStatus } from '../../../scripts/contracts/result.ts';
 export { OperationError, requireThat } from '../../../scripts/contracts/errors.ts';
 /** Public host-independent operation contract. Requests never grant execution authority. */
 export type Values = Record<string, string | boolean>;
