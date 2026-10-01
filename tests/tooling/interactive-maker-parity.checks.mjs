@@ -74,6 +74,8 @@ import { buildClickdummy as relocatedBuildClickdummy } from '../../bin/adapters/
 import * as legacyClickdummy from '../../scripts/framework/clickdummy.ts';
 import { docsRead as relocatedDocsRead, docsPlan as relocatedDocsPlan } from '../../bin/adapters/framework/docs.ts';
 import * as legacyDocs from '../../scripts/framework/docs.ts';
+import { fixtureOperation as relocatedFixtureOperation } from '../../bin/adapters/framework/fixtures.ts';
+import * as legacyFixtures from '../../scripts/framework/fixtures.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1579,4 +1581,149 @@ test('relocated documentation adapter preserves schema, read and plan command se
     },
   );
   assert.equal(calls.at(-1)[3], 'import');
+});
+
+
+test('relocated fixture adapter preserves approval, target, reset and cancellation boundaries', async () => {
+  assert.equal(legacyFixtures.fixtureOperation, relocatedFixtureOperation);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixtures-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const config = {
+      project: { id: 'demo' },
+      paths: { testVaultFolder: '.test-vault' },
+    };
+    const manifest = { target: '.test-vault', sources: [] };
+    const calls = [];
+    const dependencies = {
+      readConfiguration: async () => config,
+      readJson: async path => String(path).endsWith('.framework-vault.json')
+        ? { projectId: 'demo' }
+        : manifest,
+      planFixtures: async (planRoot, value, options) => {
+        calls.push(['plan', planRoot, value, options]);
+        return {
+          mode: options.reset ? 'reset' : 'apply',
+          approval: 'fixture-hash',
+          target: '.test-vault',
+          changes: [{ path: 'Notes/one.md' }],
+          blockers: [],
+          bytes: 12,
+        };
+      },
+      applyFixtures: async (applyRoot, value, approval, options) => {
+        calls.push(['apply', applyRoot, value, approval, options]);
+        return { unchanged: false, written: ['Notes/one.md'] };
+      },
+    };
+
+    await assert.rejects(
+      relocatedFixtureOperation({ command: 'data plan', args: [], options: {} }, context, dependencies),
+      error => error.code === 'INPUT_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readConfiguration: async () => null },
+      ),
+      error => error.code === 'CONFIG_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readConfiguration: async () => ({ ...config, paths: { testVaultFolder: 'vault' } }) },
+      ),
+      error => error.code === 'FIXTURE_TARGET_UNSUPPORTED',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+        context,
+        { ...dependencies, readJson: async () => ({ target: 'other' }) },
+      ),
+      error => error.code === 'FIXTURE_TARGET',
+    );
+
+    const planned = await relocatedFixtureOperation(
+      { command: 'data plan', args: [], options: { input: 'fixtures.json' } },
+      context,
+      dependencies,
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.approval, 'fixture-hash');
+
+    const blocked = await relocatedFixtureOperation(
+      { command: 'data reset-plan', args: [], options: { input: 'fixtures.json' } },
+      context,
+      {
+        ...dependencies,
+        planFixtures: async (planRoot, value, options) => {
+          calls.push(['blocked-plan', planRoot, value, options]);
+          return {
+            mode: 'reset',
+            approval: 'fixture-hash',
+            target: '.test-vault',
+            changes: [],
+            blockers: ['owned file changed'],
+            bytes: 0,
+          };
+        },
+      },
+    );
+    assert.equal(blocked.status, 'blocked');
+    assert.equal(calls.at(-1)[3].reset, true);
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', yes: true } },
+        context,
+        dependencies,
+      ),
+      error => error.code === 'FIXTURE_APPROVAL',
+    );
+
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+        context,
+        { ...dependencies, readJson: async path => String(path).endsWith('.framework-vault.json')
+          ? { projectId: 'other' }
+          : manifest },
+      ),
+      error => error.code === 'VAULT_REQUIRED',
+    );
+
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(
+      relocatedFixtureOperation(
+        { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+        { ...context, signal: controller.signal },
+        dependencies,
+      ),
+      error => error.code === 'CANCELLED',
+    );
+
+    const applied = await relocatedFixtureOperation(
+      { command: 'data apply', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+      context,
+      dependencies,
+    );
+    assert.equal(applied.status, 'applied');
+    assert.deepEqual(calls.at(-1), ['apply', root, manifest, 'fixture-hash', { reset: false }]);
+
+    const unchanged = await relocatedFixtureOperation(
+      { command: 'data reset', args: [], options: { input: 'fixtures.json', apply: 'fixture-hash' } },
+      context,
+      { ...dependencies, applyFixtures: async () => ({ unchanged: true }) },
+    );
+    assert.equal(unchanged.status, 'unchanged');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

@@ -7,7 +7,7 @@ import { checkOperation } from '../../../scripts/framework/check.ts';
 import { commands, descriptor, parameterKinds, validateRequest } from './catalog.ts';
 import { compilerOperation } from '../../../scripts/compiler/adapters/cli.ts';
 import { docsRead } from './docs.ts';
-import { fixtureOperation } from '../../../scripts/framework/fixtures.ts';
+import { fixtureOperation } from './fixtures.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from '../../../scripts/framework/setup-progress.ts';
