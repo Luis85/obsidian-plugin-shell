@@ -337,3 +337,36 @@ test('TUI browser discovers and instantiates from the same catalog', async () =>
   assert.ok(workspace.document.design.library.some(item => item.templateId === 'organism.data-table'));
   assert.match(output.join(''), /Data Table/);
 });
+
+
+test('TUI browser uses the active plugin runtime template catalog', async () => {
+  const pluginTemplate = validateComponentTemplate({
+    ...baseTemplate(),
+    id: 'atom.runtime-chip',
+    name: 'Runtime Chip',
+    design: { kind: 'catalog', entryId: 'u-badge' },
+  });
+  const workspace = new Workspace(newDocument('Plugin TUI'), null);
+  const decisions = ['atom', 'atom.runtime-chip', 'yes', 'back'];
+  const ui = {
+    write() {},
+    ask: async () => '',
+    rich: {
+      async select(_title, choices) {
+        const next = decisions.shift();
+        assert.ok(choices.some(choice => choice.id === next), 'runtime choice ' + next + ' is available');
+        return next;
+      },
+      async text({ initial }) { return initial; },
+    },
+  };
+  const plugins = {
+    commandContext: {
+      templates: {
+        async list() { return [pluginTemplate]; },
+      },
+    },
+  };
+  await browseComponentTemplates(ui, workspace, { root: frameworkRoot, frameworkRoot, plugins });
+  assert.ok(workspace.document.design.library.some(item => item.templateId === 'atom.runtime-chip'));
+});

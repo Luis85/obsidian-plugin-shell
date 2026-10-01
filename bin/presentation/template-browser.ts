@@ -1,12 +1,13 @@
 import type { Workspace } from '../application/workspace.ts';
 import { loadComponentTemplates } from '../adapters/component-template-repository.ts';
-import { filterComponentTemplates } from '../application/component-template-catalog.ts';
 import { pluginComponentTemplates } from '../../plugins/template-contributions.ts';
+import type { WorkbenchPluginRuntime } from '../../plugins/runtime.ts';
 import { choose, titleInput, confirm, type Prompts } from './prompts.ts';
 
 interface TemplateBrowserOptions {
   root: string;
   frameworkRoot: string;
+  plugins?: WorkbenchPluginRuntime;
 }
 
 const levels = ['all', 'atom', 'molecule', 'organism', 'template', 'page'] as const;
@@ -16,11 +17,9 @@ export async function browseComponentTemplates(
   workspace: Workspace,
   options: TemplateBrowserOptions,
 ): Promise<void> {
-  const entries = await loadComponentTemplates(
-    options.root,
-    options.frameworkRoot,
-    pluginComponentTemplates(),
-  );
+  const templates = options.plugins
+    ? [...await options.plugins.commandContext.templates.list()]
+    : (await loadComponentTemplates(options.root, options.frameworkRoot, pluginComponentTemplates())).map(entry => entry.template);
   while (true) {
     const level = await choose(ui, 'Template library', [
       ...levels.map(id => ({ id, label: id === 'all' ? 'All templates' : id })),
@@ -28,21 +27,17 @@ export async function browseComponentTemplates(
     ]);
     if (level === 'back') return;
 
-    const selected = filterComponentTemplates(
-      entries,
-      level === 'all' ? {} : { atomicLevel: level as Exclude<typeof levels[number], 'all'> },
-    );
+    const selected = templates.filter(template => level === 'all' || template.atomicLevel === level);
     const id = await choose(ui, 'Choose a template', [
-      ...selected.map(entry => ({
-        id: entry.template.id,
-        label: entry.template.name + ' · ' + entry.template.category + ' · ' + entry.template.templateType,
+      ...selected.map(template => ({
+        id: template.id,
+        label: template.name + ' · ' + template.category + ' · ' + template.templateType,
       })),
       { id: 'back', label: 'Back' },
     ]);
     if (id === 'back') continue;
 
-    const entry = entries.find(item => item.template.id === id)!;
-    const template = entry.template;
+    const template = templates.find(item => item.id === id)!;
     ui.write(
       '\n' + template.name + '\n'
       + template.description + '\n'
@@ -58,7 +53,7 @@ export async function browseComponentTemplates(
       template.name,
     );
     const result = workspace.instantiateTemplate(
-      entries.map(item => item.template),
+      templates,
       template.id,
       name,
     );
