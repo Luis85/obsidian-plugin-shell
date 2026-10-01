@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { stripTypeScriptTypes } from "node:module";
 import { gzipSync } from "node:zlib";
 
-const modules=["core","metrics","persistence","render","dialogs-common","dialogs-plan","dialogs-team","dialogs-work","dialogs-governance","dialogs-navigation","app"];
+const modules=["core","metrics","engine","persistence","render","dialogs-common","dialogs-plan","dialogs-team","dialogs-work","dialogs-governance","dialogs-navigation","app"];
 const built=new Set(),chunks=[];
 for(const name of modules){
   const input=await readFile(new URL(`./${name}.ts`,import.meta.url),"utf8");let code=stripTypeScriptTypes(input,{mode:"strip"});

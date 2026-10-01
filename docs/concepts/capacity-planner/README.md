@@ -1,57 +1,47 @@
-# Capacity Planner — plan-first resource planning prototype
+# Capacity Planner — data-driven resource-planning prototype
 
-This is the self-contained Capacity Planner concept on PR #62 (`feat/cli-release-journey`) in `Luis85/obsidian-plugin-shell`. It models a custom-software order with shared iterations, named people, role/FTE planning, task ownership/team staffing, task allocation, project actuals, commercial forecasting, scenarios, baselines and Obsidian-oriented persistence.
+This is the self-contained Capacity Planner concept on PR #62 (`feat/cli-release-journey`) in `Luis85/obsidian-plugin-shell`. It models a custom-software order with shared iterations, named people, FTE/cost planning, task ownership/team staffing, allocation, actuals, commercial forecasting, scenarios, baselines and Obsidian-oriented persistence.
 
 Open `index.html` directly in a current browser. It has no remote runtime dependencies.
 
-See [REVIEW.md](REVIEW.md) for the comprehensive product review and this pass's findings.
+This pass moves plan creation, plan update and whole-plan JSON exchange behind a planner-engine contract. See [REVIEW.md](REVIEW.md) for the data/code review and `plan.schema.json` for the portable plan document structure.
 
-## Core planning questions
+## Planner engine
 
-The prototype separates four questions instead of compressing them into one score:
+The generated artifact exposes `window.CapacityPlannerEngine` with engine version `1`.
 
-1. **Scope:** how much estimated work exists, and how much is allocated?
-2. **Capacity:** how much role/person capacity is actually available and planned?
-3. **Staffing:** which work still lacks enough named people or breaches availability?
-4. **Commercials:** what cost/margin is supported by the currently allocated scope?
+The portable boundary is a self-contained `capacity-planner.plan` v1 JSON document containing:
 
-## Important forecast rule
+- the complete shared project facts required to understand the plan;
+- exactly one resource-plan scenario;
+- baselines associated with that plan.
 
-A plan with unallocated scope does **not** claim a complete EAC.
+The engine can create/update plans, export a plan document, serialize it to JSON, parse/validate that same JSON, open it as a standalone workspace, or add it to a compatible current project.
 
-It shows:
+The UI exposes this under **Manage -> Plan engine JSON -> Export whole plan / Import whole plan**. Workspace JSON remains available separately for backing up all scenarios and audit history.
 
-- estimated scope hours;
-- allocated scope hours;
-- allocation/forecast coverage;
-- unallocated and therefore unpriced hours;
-- a **Covered forecast / Covered margin** until coverage reaches 100%.
+## Create/update reliability
 
-The sample data contains 546 h estimated scope, 456 h allocated and 90 h open, so forecast coverage is 83.5%.
+New plan and Plan settings no longer mutate live scenario objects directly. They:
 
-## Task staffing
+1. create a prospective workspace through the engine;
+2. validate the complete cross-entity model;
+3. replace live state only after validation succeeds;
+4. commit an audit revision and persistence attempt;
+5. render and verify the selected plan.
 
-A task has:
+Numeric inputs use range validation with `step="any"`; arbitrary valid monetary/FTE/percentage precision is no longer rejected by presentation-only increments. Invalid forms keep the dialog open, focus the invalid field and announce the field/range problem instead of looking like a no-op.
 
-- one optional accountable owner;
-- many assigned people;
-- one or more allocation slices across roles, iterations and people.
+## Planning semantics
 
-The owner is always part of the task team. Selecting another person while allocating work adds them to the team. Role-level allocations without a named person are allowed for early planning but remain visible as an incomplete staffing decision.
+The planner continues to keep these concepts separate:
 
-## Actuals and reforecasting
+1. **Scope** — estimated versus allocated task hours.
+2. **Capacity** — planned role/person hours.
+3. **Staffing** — named people, availability and unresolved role-level work.
+4. **Commercials** — actual + allocated/covered forecast cost and margin.
 
-Actual effort is a project fact shared by every resource-plan scenario. Each actual entry snapshots its EUR/PT rate at booking time so historical actual cost cannot change when another scenario uses different future rates.
-
-Scenario rate overrides continue to drive planned/ETC cost.
-
-## UI hierarchy
-
-The default desktop flow is intentionally compact:
-
-`command bar → active plan strip → current capacity plan`
-
-Summary remains collapsed until requested. The plan board highlights the current/next/latest iteration and provides one compact control to jump back to it after horizontal scrolling.
+A plan with unallocated scope reports a **Covered forecast** rather than claiming a complete EAC.
 
 ## Source
 
@@ -60,6 +50,7 @@ source/
 ├── app.ts
 ├── build.mjs
 ├── core.ts
+├── engine.ts
 ├── metrics.ts
 ├── persistence.ts
 ├── render.ts
@@ -72,6 +63,13 @@ source/
 ├── frame.html
 ├── styles.css
 └── tsconfig.json
+
+tests/
+├── browser_journeys.py
+├── engine_contract.py
+├── interaction_matrix.py
+├── plan_schema.py
+└── static_actions.py
 ```
 
 All handwritten TypeScript modules remain below the repository's 400-code-line ceiling.
@@ -85,34 +83,33 @@ node docs/concepts/capacity-planner/source/build.mjs
 node docs/concepts/capacity-planner/source/build.mjs --check
 node node_modules/typescript/bin/tsc --noEmit --project docs/concepts/capacity-planner/source/tsconfig.json
 python docs/concepts/capacity-planner/tests/static_actions.py
+python docs/concepts/capacity-planner/tests/engine_contract.py
+python docs/concepts/capacity-planner/tests/interaction_matrix.py
+python docs/concepts/capacity-planner/tests/plan_schema.py
 python docs/concepts/capacity-planner/tests/browser_journeys.py
 ```
 
 Do not substitute a global TypeScript 5.x installation for the repository-pinned TypeScript 6.0.3.
 
-## Browser/product verification in this pass
+## Verification focus for this pass
 
-Verified locally with the self-contained artifact:
+The local prototype gates cover:
 
-- compact plan-first UI and collapsible summary;
-- correct scope/allocated/capacity math;
-- covered-forecast semantics for incomplete scope;
-- FTE/person availability and overload conditions;
-- task owner + many assigned people;
-- split allocations and role-level staffing warnings;
-- actual booking with snapshotted rate;
-- scenario creation/switching/comparison;
-- baseline/audit/commercial/persistence flows;
-- current/next iteration navigation;
-- keyboard access to backlog and allocated work;
-- dialog focus restoration;
-- JSON exchange;
-- Markdown ZIP output including project actuals;
-- no-op/static action coverage;
+- engine create and update transactions independently from dialogs;
+- engine JSON stringify -> parse -> validate -> open round trip;
+- whole-plan JSON export/import through the UI;
+- New plan creation with arbitrary valid decimal values;
+- Plan settings update and reread of saved values;
+- explicit invalid-form feedback rather than dead-looking submission;
+- all delegated actions represented in behavioral journeys;
+- scenario duplicate/archive/open state refresh;
+- non-labor remove state refresh;
+- plan-first UI, task teams, allocations, actuals, commercials, baselines, audit and persistence;
+- deterministic generated HTML;
 - no browser console/page errors.
 
-Local evidence uses the available Node/Chromium/Python environment and is prototype evidence, not a claim of the repository's qualified Node 24.21.0 / TypeScript 6.0.3 gate.
+Local evidence uses the available Node/Chromium/Python environment and is prototype evidence, not a claim of the repository-qualified Node 24.21.0 / TypeScript 6.0.3 gate.
 
 ## Scope boundary
 
-This remains a `docs/concepts` interaction prototype. Native vault writes, real collaboration/permissions, external HR/calendar/time-booking/finance integrations and production-scale virtualization belong to the implementation architecture, not the standalone browser concept.
+This remains a `docs/concepts` artifact. Native Obsidian writes, real collaboration/authorization, external HR/calendar/time-booking/finance integrations and production-scale virtualization belong to the implementation architecture. The production Vue/Pinia UI should consume the planner engine/domain contract rather than copy the standalone dialog implementation.

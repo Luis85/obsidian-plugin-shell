@@ -1,9 +1,20 @@
 import {activeScenario,announce,clone,commit,esc,normalizeWorkspace,save,slug,stateRef,validate} from "./core.ts";
 import {scenarioMetrics} from "./metrics.ts";
+import {exportPlanDocument,parsePlanJson,stringifyPlanDocument} from "./engine.ts";
 
 function downloadBlob(blob,name) {
   const url=URL.createObjectURL(blob),anchor=document.createElement("a");anchor.href=url;anchor.download=name;document.body.appendChild(anchor);anchor.click();anchor.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+export function exportActivePlan() {
+  const document=exportPlanDocument(stateRef.state,stateRef.state.activeScenarioId),name=`${slug(document.project.name)}-${slug(document.plan.name)}-capacity-plan.json`;
+  downloadBlob(new Blob([stringifyPlanDocument(document)],{type:"application/json"}),name);announce("Whole plan JSON exported from the planner engine.");return document;
+}
+export async function readPlanDocumentFile(file) {
+  try{return parsePlanJson(await file.text());}
+  catch(error){announce(error.message||"Import failed. Choose a JSON plan exported by the Capacity Planner engine.");return null;}
+}
+
 export function exportWorkspace() {
   const blob=new Blob([JSON.stringify(stateRef.state,null,2)],{type:"application/json"});
   downloadBlob(blob,`${slug(stateRef.state.project.name)}-capacity-workspace-r${stateRef.state.revision}.json`);announce("Workspace export created.");

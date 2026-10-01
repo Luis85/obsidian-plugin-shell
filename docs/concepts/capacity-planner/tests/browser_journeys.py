@@ -42,6 +42,11 @@ with sync_playwright() as playwright:
     assert page.locator(".summary-chip").count()==3
     initial_revision=page.locator("#revision-pill").inner_text()
 
+    # Sidebar add-task control is independently actionable, not only the header shortcut.
+    page.locator("#sidebar-add-task").click()
+    assert "add task" in page.locator("#dialog-title").inner_text().lower()
+    page.keyboard.press("Escape")
+
     # Summary is secondary and collapsible; the old dominant KPI-card grid is gone.
     page.locator("#summary-toggle").click()
     assert page.locator("#summary-panel").is_visible()
@@ -62,15 +67,29 @@ with sync_playwright() as playwright:
     # New plan stays primary and creates another scenario.
     open_dialog(page,"#new-plan-btn","New resource plan")
     page.locator('input[name="name"]').fill("Constrained Plan")
+    page.locator('input[name="budget"]').fill("285500.375")
+    page.locator('input[name="contingencyPct"]').fill("7.555")
+    page.locator('input[name="targetMarginPct"]').fill("23.875")
     submit(page)
     assert page.locator("#scenario-select option").count()==2
     assert page.locator("#revision-pill").inner_text()!=initial_revision
 
     # Secondary tools moved out of the header into one Manage surface.
     open_manage(page,"plan-settings","Plan settings")
+    # Invalid values must explain why Save did not commit instead of looking like a dead button.
+    page.locator('input[name="contingencyPct"]').fill("101")
+    submit(page)
+    assert page.locator("#dialog").get_attribute("open") is not None
+    assert "allowed range" in page.locator("#notice").inner_text().lower()
     page.locator('input[name="name"]').fill("Constrained Delivery Plan")
+    page.locator('input[name="budget"]').fill("287345.678")
+    page.locator('input[name="contingencyPct"]').fill("6.355")
     submit(page)
     assert page.locator("#plan-heading").inner_text()=="Constrained Delivery Plan"
+    open_manage(page,"plan-settings","Plan settings")
+    assert page.locator('input[name="budget"]').input_value()=="287345.678"
+    assert page.locator('input[name="contingencyPct"]').input_value()=="6.355"
+    page.keyboard.press("Escape")
 
     open_manage(page,"project-timeline","Project & shared timeline")
     page.locator('input[name="orderValue"]').fill("450000")
@@ -203,11 +222,39 @@ with sync_playwright() as playwright:
     import json
     exported_state=json.loads(Path(exported.value.path()).read_text(encoding="utf-8"))
     assert any(float(item.get("hours",0))==4 and float(item.get("dayRate",0))==1100 for item in exported_state["project"]["actuals"])
+    workspace_path=Path(exported.value.path())
     page.keyboard.press("Escape")
     open_dialog(page,"#manage-btn","Manage Capacity Planner")
-    with page.expect_file_chooser():
+    page.once("dialog",lambda prompt: prompt.accept())
+    with page.expect_file_chooser() as workspace_chooser:
         page.locator('[data-action="import-workspace"]').click()
+    workspace_chooser.value.set_files(str(workspace_path))
+    page.wait_for_timeout(100)
     assert page.locator("#workspace-import").count()==1
+    assert page.locator("#plan-heading").inner_text()==exported_state["scenarios"][[item["id"] for item in exported_state["scenarios"]].index(exported_state["activeScenarioId"])]["name"]
+
+    # Whole-plan engine JSON is a self-contained round-trip contract, distinct from workspace JSON.
+    open_dialog(page,"#manage-btn","Manage Capacity Planner")
+    with page.expect_download() as plan_export:
+        page.locator('[data-action="export-plan"]').click()
+    plan_path=Path(plan_export.value.path())
+    plan_document=json.loads(plan_path.read_text(encoding="utf-8"))
+    assert plan_document["schema"]=="capacity-planner.plan"
+    assert plan_document["engine"]=={"name":"capacity-planner","version":1}
+    assert plan_document["plan"]["name"]==page.locator("#plan-heading").inner_text()
+    page.keyboard.press("Escape")
+    before_roundtrip=page.locator("#scenario-select option").count()
+    open_dialog(page,"#manage-btn","Manage Capacity Planner")
+    with page.expect_file_chooser() as chooser_info:
+        page.locator('[data-action="import-plan"]').click()
+    chooser_info.value.set_files(str(plan_path))
+    page.wait_for_timeout(100)
+    assert "import plan" in page.locator("#dialog-title").inner_text().lower()
+    page.locator('select[name="mode"]').select_option("add")
+    page.locator('input[name="name"]').fill("Round-trip imported plan")
+    submit(page)
+    assert page.locator("#scenario-select option").count()==before_roundtrip+1
+    assert page.locator("#plan-heading").inner_text()=="Round-trip imported plan"
 
     # Scenario switch and upstream iteration authority remain intact.
     page.locator("#scenario-select").select_option("scenario-baseline")

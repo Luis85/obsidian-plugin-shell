@@ -1,11 +1,15 @@
 import {$,activeScenario,announce,commit,dialog,importInput,save,stateRef} from "./core.ts";
-import {exportWorkspace,exportMarkdownZip,importWorkspace} from "./persistence.ts";
+import {exportActivePlan,exportWorkspace,exportMarkdownZip,importWorkspace,readPlanDocumentFile} from "./persistence.ts";
 import {jumpToFocusIteration,render,renderSummaryVisibility} from "./render.ts";
-import {activateScenario,archiveScenario,duplicateScenario,newPlanDialog,planSettingsDialog,projectTimelineDialog,scenarioManagerDialog} from "./dialogs-plan.ts";
+import {activateScenario,archiveScenario,duplicateScenario,importPlanDialog,newPlanDialog,planSettingsDialog,projectTimelineDialog,scenarioManagerDialog} from "./dialogs-plan.ts";
 import {fteDialog,personAvailabilityDialog,personDialog,roleDialog,teamDialog} from "./dialogs-team.ts";
 import {actualDialog,allocationDialog,removeAllocation,taskDialog} from "./dialogs-work.ts";
 import {approveBaseline,auditDialog,baselinesDialog,commercialDialog,createBaselineDialog,nonLaborDialog,persistenceDialog,removeNonLabor,restoreBaseline,scenarioComparisonDialog} from "./dialogs-governance.ts";
 import {manageDialog} from "./dialogs-navigation.ts";
+import {ENGINE_NAME,ENGINE_VERSION,addPlanDocument,createPlan,exportPlanDocument,parsePlanJson,stringifyPlanDocument,updatePlan,validatePlanDocument,workspaceFromPlanDocument} from "./engine.ts";
+
+const planImportInput=$("#plan-import");
+(window as any).CapacityPlannerEngine=Object.freeze({name:ENGINE_NAME,version:ENGINE_VERSION,createPlan,updatePlan,exportPlanDocument,parsePlanJson,stringifyPlanDocument,validatePlanDocument,workspaceFromPlanDocument,addPlanDocument});
 
 function closeDialogIfOpen(){if(dialog.open)dialog.close();}
 function handleAction(target) {
@@ -41,6 +45,8 @@ function handleAction(target) {
   else if(action==="activate-scenario")activateScenario(target.dataset.scenarioId);
   else if(action==="duplicate-scenario")duplicateScenario(target.dataset.scenarioId);
   else if(action==="archive-scenario")archiveScenario(target.dataset.scenarioId);
+  else if(action==="export-plan")exportActivePlan();
+  else if(action==="import-plan"){closeDialogIfOpen();planImportInput.click();}
   else if(action==="export-workspace")exportWorkspace();
   else if(action==="import-workspace"){closeDialogIfOpen();importInput.click();}
   else if(action==="export-markdown")exportMarkdownZip();
@@ -61,6 +67,7 @@ $("#summary-close").addEventListener("click",()=>setSummary(false));
 $("#focus-iteration-btn").addEventListener("click",jumpToFocusIteration);
 $("#scenario-select").addEventListener("change",event=>{stateRef.state.activeScenarioId=event.target.value;commit("scenario.activated",activeScenario().name);render();announce(`${activeScenario().name} opened.`);});
 $("#task-search").addEventListener("input",event=>{stateRef.taskFilter=event.target.value;render();});
+planImportInput.addEventListener("change",async()=>{const file=planImportInput.files?.[0];if(file){const document=await readPlanDocumentFile(file);if(document)importPlanDialog(document);}planImportInput.value="";});
 importInput.addEventListener("change",async()=>{if(importInput.files?.[0]&&await importWorkspace(importInput.files[0]))render();importInput.value="";});
 dialog.addEventListener("click",event=>{if(event.target===dialog)closeDialogIfOpen();});
 
