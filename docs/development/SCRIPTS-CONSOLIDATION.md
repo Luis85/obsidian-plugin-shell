@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D66 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D complete through D67 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -171,7 +171,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D64:** Framework-kit assembly, packaging and upgrade planning moved to `bin/adapters/framework/kit.ts`. Process execution and reviewed planning now import it locally; the former framework path is compatibility-only. Existing maker distribution qualification exercises real kit assembly, and a parity regression locks the compatibility surface.
 - **D65:** The daily `check` gate moved to `bin/adapters/framework/check.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage now exercises full/fast step planning, changed/unavailable Git selection, step continuation and failure metadata, dry-run, cancellation, output-tail normalization and shim identity.
 - **D66:** The local submission-review mirror moved to `bin/adapters/framework/submission.ts`; the dispatcher imports it locally and the former framework path is compatibility-only. Maker coverage locks compatibility identity, manifest/version/lint policy, dry-run non-execution, read-only outcomes, missing-tool remediation and build-identity drift without network or publication effects.
-- **Remaining D67–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D67:** Stage D closure: every retained TypeScript file under `scripts/framework/` is now a bounded compatibility-only export into `bin/` (or the shared typed input contract); an executable regression rejects any substantive implementation returning there. The framework CLI core, routing, parser, planning, terminal presentation and operational adapters now live under `bin/` with existing gates unchanged.
+- **Remaining E–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
