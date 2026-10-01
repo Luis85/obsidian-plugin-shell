@@ -1,10 +1,11 @@
 import {$,activeScenario,announce,commit,dialog,importInput,save,stateRef} from "./core.ts";
 import {exportWorkspace,exportMarkdownZip,importWorkspace} from "./persistence.ts";
-import {render} from "./render.ts";
+import {render,renderSummaryVisibility} from "./render.ts";
 import {activateScenario,archiveScenario,duplicateScenario,newPlanDialog,planSettingsDialog,projectTimelineDialog,scenarioManagerDialog} from "./dialogs-plan.ts";
 import {fteDialog,personAvailabilityDialog,personDialog,roleDialog,teamDialog} from "./dialogs-team.ts";
 import {actualDialog,allocationDialog,removeAllocation,taskDialog} from "./dialogs-work.ts";
 import {approveBaseline,auditDialog,baselinesDialog,commercialDialog,createBaselineDialog,nonLaborDialog,persistenceDialog,removeNonLabor,restoreBaseline,scenarioComparisonDialog} from "./dialogs-governance.ts";
+import {manageDialog} from "./dialogs-navigation.ts";
 
 function closeDialogIfOpen(){if(dialog.open)dialog.close();}
 function handleAction(target) {
@@ -40,8 +41,11 @@ function handleAction(target) {
   else if(action==="activate-scenario")activateScenario(target.dataset.scenarioId);
   else if(action==="duplicate-scenario")duplicateScenario(target.dataset.scenarioId);
   else if(action==="archive-scenario")archiveScenario(target.dataset.scenarioId);
+  else if(action==="export-workspace")exportWorkspace();
+  else if(action==="import-workspace"){closeDialogIfOpen();importInput.click();}
   else if(action==="export-markdown")exportMarkdownZip();
 }
+function setSummary(expanded){stateRef.summaryExpanded=expanded;renderSummaryVisibility();}
 
 document.addEventListener("click",event=>{const target=event.target?.closest?.("button[data-action]");if(target)handleAction(target);});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&dialog.open){dialog.close();return;}const card=event.target?.closest?.(".backlog-card");if(card&&(event.key==="Enter"||event.key===" ")&&!event.target.closest?.("button")){event.preventDefault();allocationDialog(card.dataset.taskId);}});
@@ -49,19 +53,11 @@ document.addEventListener("capacity-drop",event=>{const {taskId,allocationId,rol
 
 $("#save-btn").addEventListener("click",()=>{const persisted=save();if(persisted)announce(`Workspace saved at revision r${stateRef.state.revision}.`);else{exportWorkspace();announce("Browser storage unavailable; downloaded a workspace backup instead.");}});
 $("#new-plan-btn").addEventListener("click",newPlanDialog);
-$("#plan-settings-btn").addEventListener("click",planSettingsDialog);
-$("#timeline-btn").addEventListener("click",projectTimelineDialog);
-$("#team-btn").addEventListener("click",teamDialog);
-$("#commercial-btn").addEventListener("click",commercialDialog);
-$("#plans-btn").addEventListener("click",scenarioManagerDialog);
-$("#compare-btn").addEventListener("click",scenarioComparisonDialog);
-$("#baselines-btn").addEventListener("click",baselinesDialog);
-$("#audit-btn").addEventListener("click",auditDialog);
-$("#persistence-btn").addEventListener("click",persistenceDialog);
+$("#manage-btn").addEventListener("click",manageDialog);
 $("#add-task-btn").addEventListener("click",()=>taskDialog());
 $("#sidebar-add-task").addEventListener("click",()=>taskDialog());
-$("#export-btn").addEventListener("click",exportWorkspace);
-$("#import-btn").addEventListener("click",()=>importInput.click());
+$("#summary-toggle").addEventListener("click",()=>setSummary(!stateRef.summaryExpanded));
+$("#summary-close").addEventListener("click",()=>setSummary(false));
 $("#scenario-select").addEventListener("change",event=>{stateRef.state.activeScenarioId=event.target.value;commit("scenario.activated",activeScenario().name);render();announce(`${activeScenario().name} opened.`);});
 $("#task-search").addEventListener("input",event=>{stateRef.taskFilter=event.target.value;render();});
 importInput.addEventListener("change",async()=>{if(importInput.files?.[0]&&await importWorkspace(importInput.files[0]))render();importInput.value="";});

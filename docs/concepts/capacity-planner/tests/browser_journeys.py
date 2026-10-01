@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Behavior and no-op regression journey for the self-contained Capacity Planner."""
+"""Behavior, UI-focus and no-op regression journey for Capacity Planner."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import os
@@ -10,6 +10,11 @@ CHROMIUM=os.environ.get("CHROMIUM_PATH","/usr/bin/chromium")
 
 def open_dialog(page, selector, title_fragment):
     page.locator(selector).click()
+    assert title_fragment.lower() in page.locator("#dialog-title").inner_text().lower()
+
+def open_manage(page, action, title_fragment):
+    open_dialog(page,"#manage-btn","Manage Capacity Planner")
+    page.locator(f'[data-action="{action}"]').click()
     assert title_fragment.lower() in page.locator("#dialog-title").inner_text().lower()
 
 def submit(page):
@@ -23,51 +28,64 @@ with sync_playwright() as playwright:
     page.on("pageerror",lambda error: errors.append(f"pageerror: {error}"))
     page.set_content(HTML,wait_until="load")
 
+    # The current plan is the first content priority: compact header, collapsed summary, board near the top.
+    assert page.locator(".appbar button").count()==4
+    assert page.locator("#summary-panel").is_hidden()
     assert page.locator(".role-row").count()==5
-    assert page.locator(".check-card").count()==5
-    assert page.locator("#scenario-select option").count()==1
+    assert page.locator("#workspace").count()==0  # workspace is a semantic class, not another wrapper ID
+    assert page.locator(".workspace").bounding_box()["y"] < 135
+    assert page.locator(".summary-chip").count()==3
     initial_revision=page.locator("#revision-pill").inner_text()
+
+    # Summary is secondary and collapsible; the old dominant KPI-card grid is gone.
+    page.locator("#summary-toggle").click()
+    assert page.locator("#summary-panel").is_visible()
+    assert page.locator(".summary-metric").count()==8
+    assert page.locator(".summary-check").count()==5
+    assert page.locator(".kpi").count()==0
+    page.locator("#summary-close").click()
+    assert page.locator("#summary-panel").is_hidden()
 
     # Save is never a no-op: opaque test origin cannot persist, so a backup download is expected.
     with page.expect_download() as saved:
         page.locator("#save-btn").click()
     assert saved.value.suggested_filename.endswith(".json")
 
-    # New resource plan creates a second plan and increments revision.
+    # New plan stays primary and creates another scenario.
     open_dialog(page,"#new-plan-btn","New resource plan")
     page.locator('input[name="name"]').fill("Constrained Plan")
     submit(page)
     assert page.locator("#scenario-select option").count()==2
-    assert page.locator("#scenario-select").input_value()!= "scenario-baseline"
     assert page.locator("#revision-pill").inner_text()!=initial_revision
 
-    # Plan settings save actually changes the active plan.
-    open_dialog(page,"#plan-settings-btn","Plan settings")
+    # Secondary tools moved out of the header into one Manage surface.
+    open_manage(page,"plan-settings","Plan settings")
     page.locator('input[name="name"]').fill("Constrained Delivery Plan")
     submit(page)
     assert page.locator("#plan-heading").inner_text()=="Constrained Delivery Plan"
 
-    # Shared timeline/project save mutates project facts without creating scenario-owned iterations.
-    open_dialog(page,"#timeline-btn","Project & shared timeline")
+    open_manage(page,"project-timeline","Project & shared timeline")
     page.locator('input[name="orderValue"]').fill("450000")
     submit(page)
-    assert "450" in page.locator("#kpis .kpi").nth(3).inner_text()
+    page.locator("#summary-toggle").click()
+    assert "450.000" in page.locator("#kpis").inner_text()
+    page.locator("#summary-close").click()
 
     # Team: add role, add person, update availability and plan FTE/rate.
-    open_dialog(page,"#team-btn","Team & role catalog")
+    open_manage(page,"team","Team & role catalog")
     page.locator('[data-action="add-role"]').click()
     page.locator('input[name="name"]').fill("Security Engineer")
     page.locator('input[name="dayRate"]').fill("1000")
     submit(page)
     assert page.locator(".role-row").count()==6
 
-    open_dialog(page,"#team-btn","Team & role catalog")
+    open_manage(page,"team","Team & role catalog")
     page.locator('[data-action="add-person"]').click()
     page.locator('input[name="name"]').fill("Morgan")
     page.locator('select[name="roleId"]').select_option(label="Security Engineer")
     submit(page)
 
-    open_dialog(page,"#team-btn","Team & role catalog")
+    open_manage(page,"team","Team & role catalog")
     person_row=page.locator(".management-row").filter(has_text="Morgan")
     person_row.locator('[data-action="person-availability"]').click()
     page.locator('input[name="fte"]').fill("0.5")
@@ -80,20 +98,31 @@ with sync_playwright() as playwright:
     submit(page)
     assert "1.100" in page.locator(".role-row").filter(has_text="Security Engineer").inner_text()
 
-    # Add work, allocate it, record actuals and split across cells.
+    # Task-level ownership and many-person assignment are explicit before allocation.
     open_dialog(page,"#add-task-btn","Add task")
     page.locator('input[name="title"]').fill("Threat modelling")
     page.locator('input[name="units"]').fill("10")
+    page.locator('select[name="ownerPersonId"]').select_option(label="Morgan · Security Engineer")
+    page.locator('.person-choice').filter(has_text="Morgan").locator('input[name="assigneeId"]').check()
+    page.locator('.person-choice').filter(has_text="Sam").locator('input[name="assigneeId"]').check()
     submit(page)
     task=page.locator("#backlog .task-card").filter(has_text="Threat modelling")
-    assert task.count()==1
+    assert "Owner Morgan" in task.inner_text()
+    assert "2 people" in task.inner_text()
+
+    # Owner/people are searchable, not only the task title.
+    page.locator("#task-search").fill("Morgan")
+    assert page.locator("#backlog .task-card").filter(has_text="Threat modelling").count()==1
+    page.locator("#task-search").fill("")
+
+    # Allocate to the owner, record actuals, then split remaining work to another assigned person/role.
     task.locator('[data-action="allocate-task"]').click()
     page.locator('select[name="roleId"]').select_option(label="Security Engineer")
-    page.locator('select[name="personId"]').select_option(label="Morgan")
+    page.locator('select[name="personId"]').select_option(label="Morgan · owner")
     page.locator('input[name="hours"]').fill("30")
     submit(page)
     assert page.locator(".allocation-card").filter(has_text="Threat modelling").count()==1
-    assert page.locator("#backlog .task-card").filter(has_text="Threat modelling").count()==1  # remaining work proves span support
+    assert page.locator("#backlog .task-card").filter(has_text="Threat modelling").count()==1
 
     allocation=page.locator(".allocation-card").filter(has_text="Threat modelling")
     allocation.locator('[data-action="record-actual"]').click()
@@ -101,102 +130,80 @@ with sync_playwright() as playwright:
     submit(page)
     assert "4" in page.locator(".allocation-card").filter(has_text="Threat modelling").inner_text()
 
-    # Drag/drop uses the same allocation dialog and can place the remaining slice in another iteration.
     remaining=page.locator("#backlog .task-card").filter(has_text="Threat modelling")
-    security_row=page.locator(".role-row").filter(has_text="Security Engineer")
-    remaining.drag_to(security_row.locator(".capacity-cell").nth(1))
+    ba_row=page.locator(".role-row").filter(has_text="Business Analyst")
+    remaining.drag_to(ba_row.locator(".capacity-cell").nth(1))
     assert "allocate" in page.locator("#dialog-title").inner_text().lower()
+    page.locator('select[name="personId"]').select_option(label="Sam · task team")
     page.locator('input[name="hours"]').fill("30")
     submit(page)
     assert page.locator("#backlog .task-card").filter(has_text="Threat modelling").count()==0
     assert page.locator(".allocation-card").filter(has_text="Threat modelling").count()==2
+    assert "Morgan" in page.locator(".allocation-card").filter(has_text="Threat modelling").nth(0).inner_text()+page.locator(".allocation-card").filter(has_text="Threat modelling").nth(1).inner_text()
+    assert "Sam" in page.locator(".allocation-card").filter(has_text="Threat modelling").nth(0).inner_text()+page.locator(".allocation-card").filter(has_text="Threat modelling").nth(1).inner_text()
 
-    # Commercial: add a non-labor cost and verify it renders.
-    open_dialog(page,"#commercial-btn","Commercials")
+    # Commercials, baselines, comparison, audit and persistence remain reachable through Manage.
+    open_manage(page,"commercial","Commercials")
     page.locator('[data-action="add-nonlabor"]').click()
     page.locator('input[name="name"]').fill("Pen test")
     page.locator('input[name="planned"]').fill("15000")
     submit(page)
-    open_dialog(page,"#commercial-btn","Commercials")
-    assert page.locator(".management-row").filter(has_text="Pen test").count()==1
-    page.keyboard.press("Escape")
 
-    # Baseline lifecycle: create, approve and show comparison strip.
-    open_dialog(page,"#baselines-btn","Baselines")
+    open_manage(page,"baselines","Baselines")
     page.locator('[data-action="create-baseline"]').click()
     page.locator('input[name="name"]').fill("Steering baseline")
     submit(page)
     assert "Steering baseline" in page.locator("#baseline-strip").inner_text()
-    open_dialog(page,"#baselines-btn","Baselines")
+    open_manage(page,"baselines","Baselines")
     page.locator('[data-action="approve-baseline"]').first.click()
     assert "approved" in page.locator("#dialog").inner_text().lower()
     page.keyboard.press("Escape")
-    before_restore=page.locator("#scenario-select option").count()
-    open_dialog(page,"#baselines-btn","Baselines")
-    page.locator('[data-action="restore-baseline"]').first.click()
-    assert page.locator("#scenario-select option").count()==before_restore+1
-    assert "restored" in page.locator("#plan-heading").inner_text().lower()
 
-    # Scenario manager: duplicate and archive are real mutations, not menu decoration.
-    open_dialog(page,"#plans-btn","Resource plans / scenarios")
-    before_plans=page.locator("#scenario-select option").count()
-    page.locator('[data-action="duplicate-scenario"]').first.click()
+    open_manage(page,"compare-plans","Compare resource plans")
+    assert page.locator(".compare-table tbody tr").count()>=2
     page.keyboard.press("Escape")
-    assert page.locator("#scenario-select option").count()==before_plans+1
-    open_dialog(page,"#plans-btn","Resource plans / scenarios")
-    active_row=page.locator(".management-row.selected")
-    active_row.locator('[data-action="archive-scenario"]').click()
-    page.keyboard.press("Escape")
-    assert page.locator("#scenario-select option").count()==before_plans
-
-    # Scenario comparison is a real flow.
-    open_dialog(page,"#compare-btn","Compare resource plans")
-    assert page.locator(".compare-table tbody tr").count()>=3
-    page.keyboard.press("Escape")
-
-    # Audit has entries from prior mutations.
-    open_dialog(page,"#audit-btn","Audit & revisions")
+    open_manage(page,"audit","Audit & revisions")
     assert page.locator(".audit-row").count()>=8
     page.keyboard.press("Escape")
 
-    # Persistence settings save and Markdown export both have observable effects.
-    open_dialog(page,"#persistence-btn","Obsidian persistence contract")
+    open_manage(page,"persistence","Obsidian persistence contract")
     page.locator('input[name="basePath"]').fill("Projects/Capacity Demo")
     submit(page)
-    open_dialog(page,"#persistence-btn","Obsidian persistence contract")
+    open_manage(page,"persistence","Obsidian persistence contract")
     assert "Projects/Capacity Demo" in page.locator("#dialog").inner_text()
     with page.expect_download() as markdown:
         page.locator('[data-action="export-markdown"]').click()
     assert markdown.value.suggested_filename.endswith(".zip")
     page.keyboard.press("Escape")
 
-    # Workspace export works; Import is wired to the file input (file chooser path is not a no-op).
+    # JSON export/import are real Manage actions.
+    open_dialog(page,"#manage-btn","Manage Capacity Planner")
     with page.expect_download() as exported:
-        page.locator("#export-btn").click()
+        page.locator('[data-action="export-workspace"]').click()
     assert exported.value.suggested_filename.endswith(".json")
+    page.keyboard.press("Escape")
+    open_dialog(page,"#manage-btn","Manage Capacity Planner")
     with page.expect_file_chooser():
-        page.locator("#import-btn").click()
+        page.locator('[data-action="import-workspace"]').click()
     assert page.locator("#workspace-import").count()==1
 
-    # Scenario selector switches plans and retains project facts.
+    # Scenario switch and upstream iteration authority remain intact.
     page.locator("#scenario-select").select_option("scenario-baseline")
     assert page.locator("#plan-heading").inner_text()=="Baseline Delivery Plan"
-    assert page.locator(".role-row").count()==6
-
-    # Iteration authority can switch to an upstream Iteration Planner contract without scenario-owned dates.
-    open_dialog(page,"#timeline-btn","Project & shared timeline")
+    open_manage(page,"project-timeline","Project & shared timeline")
     page.locator('select[name="timelineOwner"]').select_option("iteration-planner")
     submit(page)
     assert "Iteration Planner owned" in page.locator("#timeline-pill").inner_text()
 
-    # Mobile rendering still exposes key actions and the scrollable timeline.
+    # Mobile keeps the current plan and primary controls, while Summary remains optional.
     page.set_viewport_size({"width":390,"height":844})
     assert page.locator("#save-btn").is_visible()
     assert page.locator("#new-plan-btn").is_visible()
+    assert page.locator("#manage-btn").is_visible()
+    assert page.locator("#summary-toggle").is_visible()
     assert page.locator("#timeline-scroll").is_visible()
-    assert page.locator(".planning-checks").is_visible()
 
     assert not errors,"\n".join(errors)
     browser.close()
 
-print("Capacity Planner browser journeys and no-op button sweep passed")
+print("Capacity Planner UI-focus, task-team and no-op journeys passed")

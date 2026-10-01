@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src __SCRIPT_POLICY__; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'">
-<meta name="description" content="Offline capacity planner prototype for scenarios, shared iterations, staffing, task allocation, actuals, commercial forecasts, baselines and Obsidian persistence.">
+<meta name="description" content="Offline capacity planner prototype for scenarios, shared iterations, staffing, task ownership, multi-person allocation, actuals, forecasts, baselines and Obsidian persistence.">
 <title>Capacity Planner · Companion concept</title>
 <style>/*__STYLES__*/</style>
 </head>
@@ -12,25 +12,29 @@
 <a class="skip-link" href="#main">Skip to main content</a>
 <div class="shell">
 <header class="appbar">
-  <div class="brand"><div class="logo" aria-hidden="true">C</div><div><h1>Capacity Planner</h1><span id="app-plan-title">Project</span></div></div>
-  <label class="scenario-picker">Resource plan<select id="scenario-select" aria-label="Active resource plan"></select></label>
-  <div class="appbar-actions"><button id="save-btn" class="primary" type="button">Save</button><button id="export-btn" type="button">Export</button><button id="import-btn" type="button">Import</button><button id="new-plan-btn" type="button">New plan</button></div>
+  <div class="brand"><div class="logo" aria-hidden="true">C</div><h1>Capacity</h1></div>
+  <label class="scenario-picker"><span>Plan</span><select id="scenario-select" aria-label="Active resource plan"></select></label>
+  <div class="header-state"><span class="pill" id="storage-pill">Demo</span><span class="revision" id="revision-pill">r1</span></div>
+  <div class="appbar-actions"><button id="add-task-btn" type="button">+ Task</button><button id="save-btn" class="primary" type="button">Save</button><button id="new-plan-btn" type="button">New plan</button><button id="manage-btn" type="button" aria-haspopup="dialog">Manage</button></div>
 </header>
 <main id="main" class="main">
-  <section class="toolbar" aria-labelledby="plan-heading">
-    <div class="toolbar-context"><div class="plan-meta"><strong id="plan-heading">Resource plan</strong><span class="pill" id="scenario-status-pill"></span><span class="pill" id="timeline-pill"></span><span class="pill" id="calendar-pill"></span><span class="pill" id="unit-pill"></span><span class="pill" id="revision-pill">r1</span><span class="pill" id="storage-pill">Demo</span></div><div class="section-note">One shared project timeline and team; multiple resource-plan scenarios, immutable baselines and project actuals.</div></div>
-    <div class="toolbar-actions"><button id="plan-settings-btn" type="button">Plan settings</button><button id="timeline-btn" type="button">Project & timeline</button><button id="team-btn" type="button">Team</button><button id="commercial-btn" type="button">Commercial</button><button id="plans-btn" type="button">Plans</button><button id="compare-btn" type="button">Compare plans</button><button id="baselines-btn" type="button">Baselines</button><button id="audit-btn" type="button">Audit</button><button id="persistence-btn" type="button">Persistence</button><button id="add-task-btn" type="button">Add task</button></div>
+  <section class="plan-focus" aria-labelledby="plan-heading">
+    <div class="plan-focus-main"><div class="plan-title-line"><strong id="plan-heading">Resource plan</strong><span class="pill" id="scenario-status-pill"></span></div><div class="plan-focus-meta"><span id="app-plan-title">Project</span><span aria-hidden="true">·</span><span id="timeline-pill"></span><span aria-hidden="true">·</span><span id="calendar-pill"></span><span aria-hidden="true">·</span><span id="unit-pill"></span></div></div>
+    <div class="plan-focus-actions"><div class="summary-signal" id="summary-signal" aria-live="polite"></div><button id="summary-toggle" type="button" aria-expanded="false" aria-controls="summary-panel">Summary <span aria-hidden="true">⌄</span></button></div>
   </section>
-  <section class="kpis" id="kpis" aria-label="Plan summary"></section>
-  <section class="planning-checks" id="checks" aria-label="Planning checks"></section>
+  <section class="summary-panel" id="summary-panel" aria-label="Plan summary" hidden>
+    <div class="summary-panel-head"><div><strong>Plan summary</strong><span>Forecast, delivery and planning exceptions</span></div><button type="button" id="summary-close" aria-label="Collapse plan summary">Collapse</button></div>
+    <div class="summary-metrics" id="kpis"></div>
+    <div class="summary-checks" id="checks"></div>
+  </section>
   <section class="workspace">
     <aside class="sidebar" aria-labelledby="backlog-heading">
       <div class="sidebar-head"><h2 id="backlog-heading">Unallocated work</h2><span class="pill" id="backlog-count">0</span><button type="button" id="sidebar-add-task" aria-label="Add task">+</button></div>
-      <div class="sidebar-search"><label for="task-search">Find task</label><input id="task-search" type="search" placeholder="Filter by title" autocomplete="off"></div>
+      <div class="sidebar-search"><label for="task-search">Find task</label><input id="task-search" type="search" placeholder="Filter by title or owner" autocomplete="off"></div>
       <div class="task-list" id="backlog"></div>
     </aside>
     <section class="board-card" aria-labelledby="board-heading">
-      <div class="board-toolbar"><div><h2 id="board-heading">Role capacity by shared iteration</h2><span>Drop remaining task work into a cell or use Allocate. Person assignment is optional.</span></div><div class="legend"><span><i class="dot open"></i>planned</span><span><i class="dot"></i>within</span><span><i class="dot staffing"></i>staffing gap</span><span><i class="dot over"></i>load over</span></div></div>
+      <div class="board-toolbar"><div><h2 id="board-heading">Current plan</h2><span>Role capacity by shared iteration. Drop remaining work into a cell or use Allocate.</span></div><div class="legend"><span><i class="dot open"></i>planned</span><span><i class="dot"></i>within</span><span><i class="dot staffing"></i>staffing gap</span><span><i class="dot over"></i>load over</span></div></div>
       <div class="timeline-scroll" id="timeline-scroll"><div class="timeline" id="timeline"></div></div>
     </section>
   </section>

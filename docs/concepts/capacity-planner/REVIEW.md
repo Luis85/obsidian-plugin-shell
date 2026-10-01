@@ -116,3 +116,41 @@ The pass has strong browser-prototype evidence but is not production qualificati
 - repository-pinned TypeScript 6.0.3 qualification in the local environment.
 
 Those are implementation/qualification concerns rather than unresolved product-model decisions.
+
+## UI-focused improvement and polishing pass
+
+This pass changes the information hierarchy rather than adding another layer of controls.
+
+### Header and first-screen priority
+
+The previous screen spent two stacked bands on application actions and plan controls before the capacity matrix, followed by a seven-card KPI grid and a full-width planning-check row. At a 1440×900 viewport, the user had to visually traverse product chrome, toolbar actions, KPIs and checks before reaching the current plan.
+
+The revised hierarchy is:
+
+1. **46px command bar** — Capacity identity, active plan selector, storage/revision state, `+ Task`, Save, New plan and one Manage entrypoint.
+2. **Current-plan strip** — scenario title/status and compact project/timeline context, plus three tiny decision signals.
+3. **Current plan matrix** — the main working surface.
+4. **Optional Summary** — collapsed by default; expands into compact Commercial, Delivery and Planning-check groups.
+
+Secondary actions no longer compete with the plan. Plan settings, project/timeline, team, commercials, plan management/comparison, baselines, audit, persistence and exchange are grouped in one Manage dialog.
+
+### KPI redesign
+
+The seven large KPI cards and separate checks row are no longer rendered. The collapsed state exposes only three deliberately small signals: budget variance, unallocated hours and issue count. Expanding Summary shows eight compact metrics in two semantic groups and five concise planning checks. This preserves decision support without making summary information the visual center of the application.
+
+The expanded state also deliberately reduces the matrix viewport; collapsing it immediately gives that space back to planning.
+
+### Task ownership and many-person assignment
+
+Task staffing now has two project-level concepts independent of scenario allocation:
+
+- **Owner** — one accountable person (`ownerPersonId`).
+- **Assigned people** — zero or more contributors (`assigneeIds`).
+
+The owner is always included in the assigned people. Existing allocation people are retained if a task is edited, avoiding an inconsistent task team. Task cards show the owner and team size, backlog search includes owner/assigned-person names, and allocation selection prioritizes the owner and existing task team. Selecting a new role member in an allocation automatically adds that person to the task team.
+
+This keeps accountability stable while still letting one task span many people, roles and iterations. Allocation slices remain the source of planned hours; task-level assignment does not fabricate capacity consumption.
+
+### Visual QA result
+
+At 1440×900 with Summary collapsed, the capacity workspace begins directly below the plan strip at roughly the first 120px of the viewport, instead of after several summary/control sections. The plan matrix therefore occupies the majority of the first screen. Summary, task-team authoring and the Manage surface were visually inspected after the browser regression suite passed.

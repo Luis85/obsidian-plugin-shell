@@ -1,4 +1,4 @@
-import {activeScenario,announce,clone,commit,esc,save,slug,stateRef,validate} from "./core.ts";
+import {activeScenario,announce,clone,commit,esc,normalizeWorkspace,save,slug,stateRef,validate} from "./core.ts";
 import {scenarioMetrics} from "./metrics.ts";
 
 function downloadBlob(blob,name) {
@@ -16,7 +16,7 @@ export async function importWorkspace(file) {
     }
     const relation=candidate.id===stateRef.state.id?`Imported revision r${candidate.revision}; current is r${stateRef.state.revision}.`:"Imported workspace has a different workspace ID.";
     if(!window.confirm(`${relation}\n\nReplace the current workspace with “${candidate.project.name}”?`))return false;
-    stateRef.state=clone(candidate);stateRef.taskFilter="";stateRef.dirty=true;save();announce("Workspace imported and saved.");return true;
+    stateRef.state=normalizeWorkspace(clone(candidate));stateRef.taskFilter="";stateRef.dirty=true;save();announce("Workspace imported and saved.");return true;
   }catch{announce("Import failed. Choose a valid Capacity Planner v2 JSON workspace.");return false;}
 }
 
@@ -39,7 +39,7 @@ export function markdownFiles() {
   for(const it of project.iterations)add(p.iterationPath,`${slug(it.name)}-${it.id}.md`,frontmatter({type:"capacity-iteration",id:it.id,index:it.index,name:it.name,start:it.start,end:it.end,project:project.id,timelineOwner:project.timelineOwner})+`# ${it.name}\n`);
   for(const role of project.roles)add(p.rolePath,`${slug(role.name)}-${role.id}.md`,frontmatter({type:"capacity-role",id:role.id,name:role.name,dayRate:role.dayRate,manualFte:role.manualFte,budgetCap:role.budgetCap,project:project.id})+`# ${role.name}\n`);
   for(const person of project.people)add(p.personPath,`${slug(person.name)}-${person.id}.md`,frontmatter({type:"capacity-person",id:person.id,name:person.name,role:person.roleId,baseFte:person.baseFte,project:project.id,availabilityByIteration:person.availabilityByIteration||{}})+`# ${person.name}\n\n${(person.leave||[]).length?mdTable(["Leave","Start","End"],person.leave.map(item=>[item.label||"Leave",item.start,item.end])):"No recorded leave.\n"}`);
-  for(const task of project.tasks)add(p.taskPath,`${slug(task.title)}-${task.id}.md`,frontmatter({type:"capacity-task",id:task.id,title:task.title,units:task.units,unitName:project.unitName,project:project.id})+`# ${task.title}\n`);
+  for(const task of project.tasks)add(p.taskPath,`${slug(task.title)}-${task.id}.md`,frontmatter({type:"capacity-task",id:task.id,title:task.title,units:task.units,unitName:project.unitName,project:project.id,owner:task.ownerPersonId||"",assignees:task.assigneeIds||[]})+`# ${task.title}\n`);
   for(const scenario of state.scenarios){const metrics=scenarioMetrics(scenario);add(p.scenarioPath,`${slug(scenario.name)}-${scenario.id}.md`,frontmatter({type:"capacity-scenario",id:scenario.id,name:scenario.name,status:scenario.status,budget:scenario.budget,contingencyPct:scenario.contingencyPct,targetMarginPct:scenario.targetMarginPct,project:project.id,revision:state.revision})+`# ${scenario.name}\n\n## Forecast\n\n- Forecast internal cost: €${Math.round(metrics.forecastWithContingency)}\n- Planned capacity: ${metrics.plannedHours.toFixed(1)} h\n- Unallocated work: ${metrics.unallocatedHours.toFixed(1)} h\n\n## Allocations\n\n${mdTable(["Task","Role","Person","Iteration","Hours"],scenario.allocations.map(item=>[item.taskId,item.roleId,item.personId||"—",item.iterationId,item.hours]))}`);}
   for(const baseline of state.baselines)add(p.baselinePath,`${slug(baseline.name)}-${baseline.id}.md`,frontmatter({type:"capacity-baseline",id:baseline.id,name:baseline.name,scenario:baseline.scenarioId,createdAt:baseline.createdAt,approvedAt:baseline.approvedAt||"",revision:baseline.revision,project:project.id})+`# ${baseline.name}\n\nImmutable resource-plan snapshot.\n`);
   add(p.auditPath,"capacity-planner-audit.md",frontmatter({type:"capacity-audit",workspace:state.id,project:project.id,revision:state.revision})+`# Capacity Planner audit log\n\n${mdTable(["Revision","Timestamp","Action","Detail"],state.audit.map(item=>[item.revision,item.at,item.action,item.detail]))}`);

@@ -83,15 +83,15 @@ function baseProject() {
       {id:"person-priya",name:"Priya",roleId:"role-qa",baseFte:1,availabilityByIteration:{},leave:[]}
     ],
     tasks:[
-      {id:"task-1",title:"Kick-off and delivery setup",units:5},
-      {id:"task-2",title:"Domain discovery and backlog",units:8},
-      {id:"task-3",title:"Experience map and key flows",units:8},
-      {id:"task-4",title:"Core order service",units:21},
-      {id:"task-5",title:"Pricing and validation rules",units:13},
-      {id:"task-6",title:"Order-management UI",units:13},
-      {id:"task-7",title:"Automation foundation",units:8},
-      {id:"task-8",title:"Release hardening",units:10},
-      {id:"task-9",title:"Operational handover",units:5}
+      {id:"task-1",title:"Kick-off and delivery setup",units:5,ownerPersonId:"person-alex",assigneeIds:["person-alex"]},
+      {id:"task-2",title:"Domain discovery and backlog",units:8,ownerPersonId:"person-sam",assigneeIds:["person-sam"]},
+      {id:"task-3",title:"Experience map and key flows",units:8,ownerPersonId:"person-mia",assigneeIds:["person-mia"]},
+      {id:"task-4",title:"Core order service",units:21,ownerPersonId:"person-lin",assigneeIds:["person-lin","person-jordan"]},
+      {id:"task-5",title:"Pricing and validation rules",units:13,ownerPersonId:"person-jordan",assigneeIds:["person-lin","person-jordan"]},
+      {id:"task-6",title:"Order-management UI",units:13,ownerPersonId:"person-mia",assigneeIds:["person-mia","person-lin","person-jordan"]},
+      {id:"task-7",title:"Automation foundation",units:8,ownerPersonId:"person-priya",assigneeIds:["person-priya"]},
+      {id:"task-8",title:"Release hardening",units:10,ownerPersonId:"person-priya",assigneeIds:["person-priya","person-jordan"]},
+      {id:"task-9",title:"Operational handover",units:5,ownerPersonId:"person-alex",assigneeIds:["person-alex","person-sam"]}
     ],
     actuals:[
       {id:"actual-1",taskId:"task-1",roleId:"role-dm",personId:"person-alex",iterationId:iterations[0].id,hours:18},
@@ -128,7 +128,22 @@ function baseScenario(project) {
 }
 export function baseState() {
   const project=baseProject(),scenario=baseScenario(project),at=nowIso();
-  return {schema:"capacity-planner.workspace",version:VERSION,id:"workspace-demo",revision:1,updatedAt:at,project,scenarios:[scenario],activeScenarioId:scenario.id,baselines:[],audit:[{id:"audit-1",at,revision:1,action:"workspace.created",detail:"Demo workspace created"}]};
+  return normalizeWorkspace({schema:"capacity-planner.workspace",version:VERSION,id:"workspace-demo",revision:1,updatedAt:at,project,scenarios:[scenario],activeScenarioId:scenario.id,baselines:[],audit:[{id:"audit-1",at,revision:1,action:"workspace.created",detail:"Demo workspace created"}]});
+}
+
+export function normalizeWorkspace(workspace) {
+  if(!workspace?.project)return workspace;
+  const people=new Set((workspace.project.people||[]).map(person=>person.id));
+  for(const task of workspace.project.tasks||[]){
+    const inferred=[];
+    for(const scenario of workspace.scenarios||[])for(const allocation of scenario.allocations||[])if(allocation.taskId===task.id&&allocation.personId&&people.has(allocation.personId))inferred.push(allocation.personId);
+    const existing=Array.isArray(task.assigneeIds)?task.assigneeIds:[];
+    task.assigneeIds=[...new Set([...existing,...inferred].filter(id=>people.has(id)))];
+    if(task.ownerPersonId&&!people.has(task.ownerPersonId))task.ownerPersonId=null;
+    if(task.ownerPersonId&&!task.assigneeIds.includes(task.ownerPersonId))task.assigneeIds.unshift(task.ownerPersonId);
+    if(task.ownerPersonId===undefined)task.ownerPersonId=null;
+  }
+  return workspace;
 }
 
 export function activeScenario(state=stateRef.state) { return state.scenarios.find(item=>item.id===state.activeScenarioId) || state.scenarios[0]; }
@@ -145,6 +160,11 @@ export function validate(candidate) {
   if(!candidate.scenarios.some(item=>item.id===candidate.activeScenarioId))return"Active resource plan is missing.";
   const ids=(items)=>{const set=new Set();for(const item of items){if(!item?.id||set.has(item.id))return false;set.add(item.id);}return true;};
   if(!ids(candidate.project.iterations)||!ids(candidate.project.roles)||!ids(candidate.project.people)||!ids(candidate.project.tasks)||!ids(candidate.scenarios))return"Duplicate or missing identities detected.";
+  const personIds=new Set(candidate.project.people.map(person=>person.id));
+  for(const task of candidate.project.tasks){
+    if(task.ownerPersonId&& !personIds.has(task.ownerPersonId))return `Task ${task.title||task.id} refers to a missing owner.`;
+    if(task.assigneeIds!==undefined&&(!Array.isArray(task.assigneeIds)||task.assigneeIds.some(id=>!personIds.has(id))))return `Task ${task.title||task.id} has invalid assigned people.`;
+  }
   return null;
 }
 function load() {
@@ -153,10 +173,10 @@ function load() {
     if(!raw){storageStatus="demo";return baseState();}
     const candidate=JSON.parse(raw),error=validate(candidate);
     if(error){storageStatus="invalid";return baseState();}
-    storageStatus="saved";return candidate;
+    storageStatus="saved";return normalizeWorkspace(candidate);
   }catch{storageStatus="unavailable";return baseState();}
 }
-export const stateRef={state:load(),taskFilter:"",dragged:null,dirty:false,lastSavedAt:null};
+export const stateRef={state:load(),taskFilter:"",dragged:null,dirty:false,lastSavedAt:null,summaryExpanded:false};
 export function renderStorageStatus() {
   const pill=$("#storage-pill"),labels={saved:"Saved",demo:"Demo · not saved",dirty:"Unsaved changes",invalid:"Stored data invalid · demo shown",unavailable:"In-memory only"};
   const key=stateRef.dirty?"dirty":storageStatus;

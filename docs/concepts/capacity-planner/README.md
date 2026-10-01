@@ -20,6 +20,21 @@ The Capacity Planner now models the full planning loop requested for a custom-so
 10. Every mutation increments a revision and writes an audit entry. Imports compare revision tokens and follow the configured conflict policy.
 11. Obsidian persistence settings define canonical target paths. The prototype exports those entities as a real Markdown ZIP with frontmatter rather than pretending browser local storage is native vault persistence.
 12. UI colors consume Obsidian-style host tokens first, with offline fallbacks for the standalone prototype.
+13. The UI is **plan-first**: the current plan and matrix start immediately below a 46px command bar; secondary tools live behind one Manage surface.
+14. Task staffing is explicit: each task can have one accountable **owner** plus many assigned people, independently of how its effort is split into allocation slices.
+
+## UI focus and task staffing pass
+
+This pass removes the previous header/action wall and KPI-first hierarchy. The compact header now contains only plan selection, Save, New plan, +Task and Manage. Plan/project/team/commercial/baseline/audit/persistence/export actions are grouped in the Manage dialog.
+
+The current plan is the first substantive surface. A thin plan-context row shows the scenario and three small summary signals. The full forecast and planning checks are collapsed by default and can be expanded on demand. The old seven-card KPI grid and separate full-width planning-check row are no longer rendered.
+
+Tasks now carry two project-level staffing concepts:
+
+- `ownerPersonId` — the single accountable owner;
+- `assigneeIds` — any number of people who may contribute to the task.
+
+The owner is always included in the assigned people. Existing allocation people are retained when editing a task. Allocation slices still determine where hours are planned; selecting another role member for a slice automatically adds that person to the task team. Markdown/frontmatter export includes both owner and assignee identities.
 
 ## Save behavior and no-op prevention
 
@@ -62,12 +77,13 @@ The estimate-unit conversion remains an explicit planning approximation. A unit 
 - `source/core.ts` — workspace model, revisions, persistence boundary and shared timeline data
 - `source/metrics.ts` — calendar availability, staffing, allocation, actual and forecast calculations
 - `source/persistence.ts` — JSON import/export, revision conflict policy, Markdown/frontmatter generation and ZIP packaging
-- `source/render.ts` — KPIs, planning checks, task backlog, capacity matrix and baseline comparison
+- `source/render.ts` — collapsible plan summary, task ownership/staffing, backlog, capacity matrix and baseline comparison
 - `source/dialogs-common.ts` — normal-form dialog lifecycle and validation
 - `source/dialogs-plan.ts` — plans/scenarios and canonical timeline authority
 - `source/dialogs-team.ts` — roles, people, leave, availability, FTE and rate planning
 - `source/dialogs-work.ts` — tasks, multi-slice allocation and actuals
 - `source/dialogs-governance.ts` — commercials, baselines, audit, comparison and Obsidian persistence
+- `source/dialogs-navigation.ts` — compact Manage surface for secondary commands
 - `source/app.ts` — action routing and composition
 - `source/styles.css` / `source/frame.html` — standalone shell using host-token fallbacks
 - `source/build.mjs` — dependency-free deterministic assembler
@@ -96,14 +112,17 @@ Local environment: Node 22.16.0, Python 3.13.5, Chromium 144.
 Passed:
 
 - deterministic build and byte-for-byte `--check`;
-- all ten TypeScript modules through Node's strip-types/assembly path;
+- all eleven TypeScript modules through Node's strip-types/assembly path;
 - static action wiring: every delegated action and every static button has a handler;
 - explicit Save fallback download when storage is unavailable;
 - New plan creation and plan settings persistence;
 - canonical timeline/project save and upstream Iteration Planner authority switch;
 - role creation, named-person staffing and per-iteration availability;
 - FTE planning and rate override;
-- task creation, split allocation, drag/drop allocation and actuals;
+- compact four-action header and Manage command surface;
+- collapsed-by-default plan summary with compact grouped metrics/checks;
+- task owner plus multiple assigned people, including owner/person search;
+- task creation, split allocation across different assigned people/roles, drag/drop allocation and actuals;
 - commercial non-labor cost planning;
 - baseline creation, approval and restore-as-new-plan;
 - plan comparison, duplication/archive management and scenario switching;
@@ -117,8 +136,8 @@ Local Node is not the repository-qualified Node 24.21.0 and the local environmen
 
 Generated artifact for this pass:
 
-- size: 41,233 bytes
-- SHA-256: `337e488d7805bf6a7a219e895264abba5fb5786cb4f4cb2a99848ef61f8653d0`
+- size: 46,038 bytes
+- SHA-256: `d87f426a7275a4440cb02105be1de51ee80b8798dd667fe77c2d2ab5657c877e`
 
 ## Scope boundary
 
