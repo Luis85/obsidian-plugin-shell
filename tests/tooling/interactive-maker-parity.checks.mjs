@@ -52,6 +52,8 @@ import { pluginIdWordProblem as relocatedPluginIdWordProblem, derivedPluginId as
 import * as legacyPluginId from '../../scripts/framework/plugin-id.ts';
 import { storybookFlags as relocatedStorybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
 import * as legacyStorybookOptions from '../../scripts/framework/storybook-options.ts';
+import { terminalStyle as relocatedTerminalStyle, marker as relocatedMarker, bold as relocatedBold, rows as relocatedRows, duration as relocatedDuration, runnable as relocatedRunnable, nextLine as relocatedNextLine } from '../../bin/presentation/terminal/terminal-style.ts';
+import * as legacyTerminalStyle from '../../scripts/framework/terminal-style.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -949,4 +951,29 @@ test('relocated Storybook option policy preserves explicit on/off semantics', ()
   });
   assert.throws(() => relocatedStorybookFlags({ storybook: 'yes' }), error => error.code === 'STORYBOOK_OPTION_INVALID');
   assert.throws(() => relocatedStorybookFlags({ 'storybook-stories': true }), error => error.code === 'INVALID_OPTION');
+});
+
+
+test('relocated terminal style preserves plain/rich formatting and runnable hints', () => {
+  assert.equal(legacyTerminalStyle.terminalStyle, relocatedTerminalStyle);
+  assert.equal(legacyTerminalStyle.runnable, relocatedRunnable);
+
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: false }, {}), { color: false, unicode: false });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'xterm' }), { color: true, unicode: true });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'dumb' }), { color: false, unicode: false });
+  assert.deepEqual(relocatedTerminalStyle({ isTTY: true }, { TERM: 'xterm', NO_COLOR: '1' }), { color: false, unicode: false });
+
+  const plain = { color: false, unicode: false };
+  const rich = { color: true, unicode: true };
+  assert.equal(relocatedMarker(plain, 'pass'), '[ok]  ');
+  assert.match(relocatedMarker(rich, 'fail'), /^\u001b\[31m✗/);
+  assert.equal(relocatedBold(plain, 'Title'), 'Title');
+  assert.match(relocatedBold(rich, 'Title'), /\u001b\[1mTitle/);
+  assert.equal(relocatedRows([['A', 1], ['Long', 'value'], ['Skip', null]]), '  A     1\n  Long  value\n');
+  assert.equal(relocatedDuration(999), '999ms');
+  assert.equal(relocatedDuration(1500), '1.5s');
+  assert.equal(relocatedRunnable('status'), 'node bin/app status');
+  assert.equal(relocatedRunnable('npm ci'), 'npm ci');
+  assert.equal(relocatedNextLine(plain, 'status'), 'Next: node bin/app status\n');
+  assert.equal(relocatedNextLine(plain, null), '');
 });

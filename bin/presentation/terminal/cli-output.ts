@@ -4,7 +4,7 @@ import type { CompilerDiagnostic } from '../../../scripts/compiler/domain/contra
 import type { Result } from '../../../scripts/contracts/result.ts';
 import { starterText } from '../../../scripts/framework/starter-terminal.ts';
 import { renderHuman } from '../../../scripts/framework/terminal-render.ts';
-import { terminalStyle, runnable } from '../../../scripts/framework/terminal-style.ts';
+import { terminalStyle, runnable } from './terminal-style.ts';
 
 export interface CliOutputStream {
   write(text: string): unknown;
