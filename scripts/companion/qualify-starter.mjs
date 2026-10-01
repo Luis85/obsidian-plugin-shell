@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { loadStarterCatalog } from './starter-files.mjs';
 import { customizeStarter } from './starter-contract.mjs';
-import { planProject, applyProject } from './compiler/plan.ts';
+import { planProject, applyProject } from '../compiler/adapters/project-plan.ts';
 const root=fileURLToPath(new URL('../../',import.meta.url)),id=process.argv[2];
 const catalog=await loadStarterCatalog(root),entry=catalog.starters.find(s=>s.id===id);
 if(!entry)throw Error('Supply a built-in starter ID.');

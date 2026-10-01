@@ -11,7 +11,7 @@ import { listStarters } from '../../../scripts/starters/operations.ts';
 import { definitionProjectPlan } from '../../../scripts/starters/project.ts';
 import { completeDefinition } from '../../../scripts/starters/processes.ts';
 import { companionRelativeFolder } from '../../../scripts/companion/project-contract.mjs';
-import { planProject } from '../../../scripts/companion/compiler/plan.ts';
+import { planProject } from '../../../scripts/compiler/adapters/project-plan.ts';
 import { exists } from './files.ts';
 import { verifyKit } from './kit-integrity.ts';
 import { npmEntry, runNode } from './process.ts';
