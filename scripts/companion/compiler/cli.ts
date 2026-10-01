@@ -1,5 +1,5 @@
 import { storybookFlags } from '../../framework/storybook-options.ts';
-import { planProject, applyProject, reviewProject } from './plan.ts';
+import { planProject, applyProject, reviewProject } from '../../compiler/adapters/project-plan.ts';
 export async function generatorCli(args: string[]) {
   if (args.length === 0 || (args.length === 1 && args[0] === '--help')) {
     process.stdout.write('Usage: node bin/app generate --input <project.json> --vault <vault> --target <relative-folder> [--apply <reviewed-plan-hash>] [--output-kind obsidian-plugin|clickdummy] [--storybook-stories on|off] [--storybook on|off]\nDefault: read-only JSON file plan. --apply must match a freshly rebuilt plan. No install/build/publish side effects.\n'); return;
