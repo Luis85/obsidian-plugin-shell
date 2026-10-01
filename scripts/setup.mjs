@@ -39,17 +39,20 @@ async function setup() {
       planned = await planIdentity(root, options, previous);
     } finally { prompt.close(); }
   }
-  const agentMcp = await planLocalMcp(root, Boolean(options.mcp), existing?.agentMcp);
+  const explicitMcpFalse = options.explicitKeys.includes('mcp') && options.mcp === false;
+  const mcpAction = options.mcp === true ? 'enable' : options['no-mcp'] || explicitMcpFalse ? 'disable' : 'preserve';
+  const agentMcp = await planLocalMcp(root, mcpAction, existing?.agentMcp);
+  options.mcp = agentMcp.enabled;
   planned = { ...planned, agentMcp };
   const plan = { status: 'planned', identity: planned.identity, profile: options.profile,
     lifecycleHooks: { reviewedAllowlist: Object.entries(pkg.allowScripts).filter(([, allowed]) => allowed === true).map(([name]) => name),
       persistentPolicyPreserved: true, installation: 'npm ci may replace node_modules; registry/network access and reviewed dependency hooks are part of the selected install stage' },
     files: planned.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path, status, beforeHash, afterHash })),
-    agentMcp: { enabled: agentMcp.enabled, server: agentMcp.server, transport: agentMcp.transport, clients: agentMcp.clients, files: agentMcp.files },
+    agentMcp: { action: agentMcp.action, enabled: agentMcp.enabled, server: agentMcp.server, transport: agentMcp.transport, clients: agentMcp.clients, files: agentMcp.files },
     migration: planned.migration ? { from: planned.migration.from, to: planned.migration.to, oldInstallationPreserved: true,
       files: planned.migration.plan.changes.map(({ path, status, beforeHash, afterHash }) => ({ path: `.dev-vault/.obsidian/plugins/${path}`, status, beforeHash, afterHash })) } : null,
     stages: setupStages(options), exclusions: ['No personal vault, host install, global packages, PATH edits, Restricted Mode changes, enabling plugins, publishing, or dependency upgrades',
-      'MCP opt-in writes project-local client configuration only; Claude Code/Codex installation, authentication and project trust stay user-owned',
+      'MCP is preserved unless explicitly enabled or disabled; --no-mcp removes only unchanged setup-owned client configuration',
       'Only root package-lock identity metadata changes; resolved dependency entries are retained', 'Multi-file edits, dependency installation and caches are separate stages, not one globally atomic transaction'],
   };
   const progress = options.json ? stderr : stdout;

@@ -60,6 +60,7 @@ export const setupHelp = `npm run setup -- [--id ID --name NAME --description TE
   [--skip-install] [--defer-verify] [--no-local] [--help]
 Default: browser profile and no MCP. Interactive setup offers the project-local Workbench MCP as an explicit opt-in.
 --mcp installs repository-local Claude Code and Codex settings plus the stdio MCP registration; it never installs either client globally.
+Reruns preserve the current MCP state by default. --no-mcp explicitly removes only unchanged setup-owned MCP client files and refuses edited/unmanaged files.
 Installed identity migration requires both old/new plugins disabled and preserves the old installation.
 --defer-verify skips the complete verify stage for automation that runs npm run verify itself afterwards; the checkout is not verified until then.
 Dry run is read-only and works without dependencies. Answers are data, never executable hooks.`;

@@ -18,7 +18,18 @@ command = "node"
 args = ["bin/app", "mcp"]
 cwd = "."
 startup_timeout_sec = 10
+tool_timeout_sec = 600
+enabled_tools = ["workbench_capabilities", "workbench_help", "workbench_execute"]
 default_tools_approval_mode = "writes"
+
+[mcp_servers.workbench.tools.workbench_capabilities]
+approval_mode = "approve"
+
+[mcp_servers.workbench.tools.workbench_help]
+approval_mode = "approve"
+
+[mcp_servers.workbench.tools.workbench_execute]
+approval_mode = "prompt"
 `,
     },
   ];
