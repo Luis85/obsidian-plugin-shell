@@ -22,6 +22,7 @@ import { runNode } from './process.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
+import { readComponentTemplateOperation } from './component-templates.ts';
 
 function helpOperation(request: Request): Result {
   const command = request.command;
@@ -96,6 +97,7 @@ const named = (...names: string[]) => (request: Request) => names.includes(reque
 const routes: Route[] = [
   [named('schema'), request => result(request.command, operationSchemas())],
   [request => Boolean(request.options.help) || ['help', 'capabilities'].includes(request.command), helpOperation],
+  [(request, effect) => request.command.startsWith('templates ') && effect === 'read', readComponentTemplateOperation],
   [named('starters pack'), packStarterOperation],
   [named('starters run'), starterProcessOperation],
   [(request, effect) => request.command.startsWith('starters ') && effect === 'read', readStarterOperation],

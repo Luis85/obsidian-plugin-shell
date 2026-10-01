@@ -5,6 +5,7 @@ import {
   visualNuxt,
   visualProject,
   visualText,
+  type UiNode,
 } from '../../scripts/companion/visual/visual-ir.mjs';
 import { visualCatalogEntry, visualExpand } from '../../scripts/companion/visual/visual-catalog.mjs';
 import { addComponent } from './components.ts';
@@ -84,7 +85,7 @@ function componentFromTemplate(
 
   requireSketch(template.design.kind === 'composition', 'TEMPLATE_KIND',
     'Component templates use catalog, recipe or composition designs.');
-  const children = template.children.map(child => {
+  const children: UiNode[] = template.children.map(child => {
     const target = catalog.get(child.template)!;
     return visualProject(
       visualAllocate(store, 'vn'),
@@ -98,7 +99,7 @@ function componentFromTemplate(
       template.description,
       'p',
       { name: template.name + ' placeholder' },
-    ) as ReturnType<typeof visualProject>);
+    ));
   }
   definition.template = [visualElement(
     visualAllocate(store, 'vn'),

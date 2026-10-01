@@ -12,6 +12,7 @@ import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
 import { generationPlan } from './generation.ts';
 import { conceptImportPlan } from './concepts.ts';
 import { editStarterPlan } from '../../../scripts/starters/operations.ts';
+import { componentTemplatePlan } from './component-templates.ts';
 import { starterProjectPlan } from './starter-project.ts';
 import { styleExportPlan } from './styles.ts';
 import { upgradePlan } from './kit.ts';
@@ -68,6 +69,7 @@ const planners: Record<string, Planner> = {
   generate: generationPlan,
   'concept import': conceptImportPlan,
   'starters add': editStarterPlan, 'starters edit': editStarterPlan,
+  'templates docs': componentTemplatePlan, 'templates instantiate': componentTemplatePlan,
   new: starterProjectPlan,
   'styles export': styleExportPlan,
   make: makerPlan,
