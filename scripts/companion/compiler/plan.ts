@@ -9,7 +9,7 @@ import { parseSelection } from '../../compiler/domain/selection.ts';
 import { planArtifacts } from '../../compiler/adapters/workspace-plan.ts';
 import type { Entry } from './file-code.ts';
 import type { OutputKind, StorybookOptions } from '../../compiler/domain/contracts.ts';
-export { applyProject, reviewProject } from '../../compiler/adapters/workspace-plan.ts';
+export { applyProject } from '../../compiler/adapters/workspace-plan.ts';
 export interface GenerateOptions {
   input:string;target:string;vault?:string;templateRoot?:string;
   bootstrap?:ReadonlyArray<{path:string;hash:string}>;output?:Entry[];outputKind?:OutputKind;scope?:string;storybook?:StorybookOptions;signal?:AbortSignal;

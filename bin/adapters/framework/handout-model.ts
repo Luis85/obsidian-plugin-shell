@@ -76,76 +76,104 @@ export function readSnapshot(text: string): HandoutSnapshot {
   ensure(makeSnapshot(value.prdsRoot, value.files, value.prdsMode === 'explicit').fingerprint === value.fingerprint, 'HANDOUT_METADATA', 'Source-snapshot fingerprint does not match its inventory.');
   return value;
 }
+type Fence = { character: string; length: number } | undefined;
+/** Tracks fenced code blocks: returns whether the line is a fence marker and the fence state after it. */
+function fenceStep(line: string, fence: Fence): { marker: boolean; fence: Fence } {
+  const block = line.match(/^\s{0,3}(`{3,}|~{3,})(.*)$/);
+  if (!block) return { marker: false, fence };
+  const character = block[1]![0]!, length = block[1]!.length;
+  if (!fence) return { marker: true, fence: { character, length } };
+  const closes = fence.character === character && length >= fence.length && block[2]!.trim() === '';
+  return { marker: true, fence: closes ? undefined : fence };
+}
+interface ParseState {
+  answers: HandoutAnswer[]; diagnostics: HandoutDiagnostic[]; seen: Set<string>; seenFields: Set<string>;
+  active?: HandoutAnswer; field?: 'answer' | 'evidence';
+}
+function startQuestion(state: ParseState, match: RegExpMatchArray): void {
+  const id = match[3]!, definition = questionIndex.get(id);
+  state.active = undefined; state.field = undefined;
+  if (!definition) { state.diagnostics.push({ code: 'HANDOUT_UNKNOWN_ID', id, message: 'Unknown checklist ID.' }); return; }
+  if (state.seen.has(id)) { state.diagnostics.push({ code: 'HANDOUT_DUPLICATE_ID', id, message: 'Duplicate checklist ID.' }); return; }
+  state.seen.add(id);
+  if ((match[2] === 'REQUIRED') !== definition.required) state.diagnostics.push({ code: 'HANDOUT_REQUIREMENT_CHANGED', id, message: 'Required/optional classification was changed.' });
+  state.active = { id, required: definition.required, checked: match[1]!.toLowerCase() === 'x', answer: '', evidence: '' };
+  state.seenFields = new Set<string>();
+  state.answers.push(state.active);
+}
+/** Answer/Evidence fields and their indented continuation lines belong to the active checklist item. */
+function fieldLine(state: ParseState, active: HandoutAnswer, line: string): void {
+  const entry = line.match(/^  - (Answer|Evidence):\s*(.*)$/);
+  if (entry) {
+    const field = entry[1] === 'Answer' ? 'answer' : 'evidence';
+    if (state.seenFields.has(field)) state.diagnostics.push({ code: 'HANDOUT_DUPLICATE_FIELD', id: active.id, message: `Repeated ${entry[1]} field.` });
+    state.seenFields.add(field); state.field = field;
+    active[field] = entry[2]!.trim(); return;
+  }
+  if (line.startsWith('  - Guidance:')) { state.field = undefined; return; }
+  if (state.field && /^\s{4,}\S/.test(line)) active[state.field] += '\n' + line.trim();
+}
+function contentLine(state: ParseState, line: string): void {
+  const match = line.match(questionPattern);
+  if (match) { startQuestion(state, match); return; }
+  if (line.startsWith('## ') || /^- \[[^\]]*\]/.test(line)) { state.active = undefined; state.field = undefined; }
+  if (state.active) fieldLine(state, state.active, line);
+}
 export function parseAnswers(text: string): { answers: HandoutAnswer[]; diagnostics: HandoutDiagnostic[] } {
   ensure(Buffer.byteLength(text, 'utf8') <= HANDOUT_LIMIT, 'HANDOUT_TOO_LARGE', 'Handout exceeds its size limit.');
-  const answers: HandoutAnswer[] = [], diagnostics: HandoutDiagnostic[] = [];
-  const seen = new Set<string>();
-  let seenFields = new Set<string>();
-  let active: HandoutAnswer | undefined;
-  let field: 'answer' | 'evidence' | undefined;
-  let fence: { character: string; length: number } | undefined;
+  const state: ParseState = { answers: [], diagnostics: [], seen: new Set<string>(), seenFields: new Set<string>() };
+  let fence: Fence;
   for (const line of text.split(/\r?\n/)) {
-    const block = line.match(/^\s{0,3}(`{3,}|~{3,})(.*)$/);
-    if (block) {
-      const character = block[1]![0]!, length = block[1]!.length;
-      if (!fence) fence = { character, length };
-      else if (fence.character === character && length >= fence.length && block[2]!.trim() === '') fence = undefined;
-      continue;
-    }
-    if (fence) continue;
-    const match = line.match(questionPattern);
-    if (match) {
-      const id = match[3]!, definition = questionIndex.get(id);
-      active = undefined; field = undefined;
-      if (!definition) { diagnostics.push({ code: 'HANDOUT_UNKNOWN_ID', id, message: 'Unknown checklist ID.' }); continue; }
-      if (seen.has(id)) { diagnostics.push({ code: 'HANDOUT_DUPLICATE_ID', id, message: 'Duplicate checklist ID.' }); continue; }
-      seen.add(id);
-      if ((match[2] === 'REQUIRED') !== definition.required) diagnostics.push({ code: 'HANDOUT_REQUIREMENT_CHANGED', id, message: 'Required/optional classification was changed.' });
-      active = { id, required: definition.required, checked: match[1]!.toLowerCase() === 'x', answer: '', evidence: '' };
-      seenFields = new Set<string>();
-      answers.push(active); continue;
-    }
-    if (line.startsWith('## ') || /^- \[[^\]]*\]/.test(line)) { active = undefined; field = undefined; }
-    if (!active) continue;
-    const entry = line.match(/^  - (Answer|Evidence):\s*(.*)$/);
-    if (entry) {
-      field = entry[1] === 'Answer' ? 'answer' : 'evidence';
-      if (seenFields.has(field)) diagnostics.push({ code: 'HANDOUT_DUPLICATE_FIELD', id: active.id, message: `Repeated ${entry[1]} field.` });
-      seenFields.add(field);
-      active[field] = entry[2]!.trim(); continue;
-    }
-    if (line.startsWith('  - Guidance:')) { field = undefined; continue; }
-    if (field && /^\s{4,}\S/.test(line)) active[field] += '\n' + line.trim();
+    const step = fenceStep(line, fence);
+    fence = step.fence;
+    if (!step.marker && !fence) contentLine(state, line);
   }
-  if (fence) diagnostics.push({ code: 'HANDOUT_FENCE', message: 'Unclosed fenced code block; remaining checklist cannot be validated.' });
-  for (const id of questionIndex.keys()) if (!seen.has(id)) diagnostics.push({ code: 'HANDOUT_MISSING_ID', id, message: 'Expected checklist item is missing or malformed.' });
-  return { answers, diagnostics };
+  if (fence) state.diagnostics.push({ code: 'HANDOUT_FENCE', message: 'Unclosed fenced code block; remaining checklist cannot be validated.' });
+  for (const id of questionIndex.keys()) if (!state.seen.has(id)) state.diagnostics.push({ code: 'HANDOUT_MISSING_ID', id, message: 'Expected checklist item is missing or malformed.' });
+  return { answers: state.answers, diagnostics: state.diagnostics };
 }
 function completed(answer: HandoutAnswer): boolean {
   return answer.checked && answer.answer.trim().length > 0 && answer.evidence.trim().length > 0 && !placeholder.test(answer.answer) && !placeholder.test(answer.evidence);
 }
-export function validateHandout(text: string, current: HandoutSnapshot) {
-  const parsed = parseAnswers(text), diagnostics = [...parsed.diagnostics];
+function snapshotDiagnostics(text: string, current: HandoutSnapshot): HandoutDiagnostic[] {
+  const diagnostics: HandoutDiagnostic[] = [];
   let saved: HandoutSnapshot | undefined;
   try { saved = readSnapshot(text); } catch (error) {
     diagnostics.push({ code: error instanceof HandoutError ? error.code : 'HANDOUT_METADATA', message: error instanceof Error ? error.message : 'Invalid snapshot.' });
   }
   if (saved && saved.fingerprint !== current.fingerprint) diagnostics.push({ code: 'HANDOUT_SOURCES_STALE', message: 'Source files/settings changed, were added or removed. Refresh the source snapshot and re-review the retained answers.' });
   if (!current.files.some(file => file.path.toLowerCase().endsWith('.md') && file.sha256 !== null)) diagnostics.push({ code: 'HANDOUT_PRDS_MISSING', message: 'No PRD Markdown files found. Provide the given PRDs in the configured PRD folder.' });
-  for (const answer of parsed.answers) if (answer.required && !completed(answer)) diagnostics.push({ code: 'HANDOUT_REQUIRED_OPEN', id: answer.id, message: 'Review this required item and provide a concrete Answer and Evidence.' });
-  for (const answer of parsed.answers) if (!answer.required && answer.checked && !completed(answer)) diagnostics.push({ code: 'HANDOUT_OPTIONAL_OPEN', id: answer.id, message: 'A selected optional item also needs a concrete Answer and Evidence; otherwise leave it unchecked.' });
-  for (const id of ['ready.product', 'ready.design', 'ready.engineering']) {
-    const answer = parsed.answers.find(item => item.id === id);
-    const approval = answer?.answer.match(/^approved;\s*reviewer=([^;]+);\s*date=(\d{4}-\d{2}-\d{2})(?:;.*)?$/i);
-    const date = approval ? new Date(approval[2]! + 'T00:00:00Z') : null;
-    if (!approval || !approval[1]!.trim() || !date || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== approval[2]) diagnostics.push({ code: 'HANDOUT_APPROVAL_OPEN', id, message: 'Record explicit approval as: approved; reviewer=<name or role>; date=YYYY-MM-DD; limitations=<details>. A rejection is blocking.' });
-  }
-  const mode = parsed.answers.find(answer => answer.id === 'run.mode');
-  if (mode && !['skip', 'verify', 'showcase'].includes(mode.answer.trim().toLowerCase())) diagnostics.push({ code: 'HANDOUT_RUN_MODE', id: 'run.mode', message: 'Choose exactly skip, verify or showcase.' });
-  if (mode?.answer.trim().toLowerCase() === 'showcase') {
-    const showcase = parsed.answers.find(answer => answer.id === 'run.showcase');
-    if (!showcase || !completed(showcase)) diagnostics.push({ code: 'HANDOUT_SHOWCASE_OPEN', id: 'run.showcase', message: 'Showcase requires its local preview and shutdown behavior to be reviewed.' });
-  }
+  return diagnostics;
+}
+function openAnswerDiagnostics(answers: HandoutAnswer[]): HandoutDiagnostic[] {
+  return [
+    ...answers.filter(answer => answer.required && !completed(answer)).map(answer => ({ code: 'HANDOUT_REQUIRED_OPEN', id: answer.id, message: 'Review this required item and provide a concrete Answer and Evidence.' })),
+    ...answers.filter(answer => !answer.required && answer.checked && !completed(answer)).map(answer => ({ code: 'HANDOUT_OPTIONAL_OPEN', id: answer.id, message: 'A selected optional item also needs a concrete Answer and Evidence; otherwise leave it unchecked.' })),
+  ];
+}
+/** An approval reads `approved; reviewer=<name>; date=YYYY-MM-DD` with a real calendar date. */
+function approved(answer: HandoutAnswer | undefined): boolean {
+  const approval = answer?.answer.match(/^approved;\s*reviewer=([^;]+);\s*date=(\d{4}-\d{2}-\d{2})(?:;.*)?$/i);
+  if (!approval || !approval[1]!.trim()) return false;
+  const date = new Date(approval[2]! + 'T00:00:00Z');
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === approval[2];
+}
+function approvalDiagnostics(answers: HandoutAnswer[]): HandoutDiagnostic[] {
+  return ['ready.product', 'ready.design', 'ready.engineering'].filter(id => !approved(answers.find(item => item.id === id)))
+    .map(id => ({ code: 'HANDOUT_APPROVAL_OPEN', id, message: 'Record explicit approval as: approved; reviewer=<name or role>; date=YYYY-MM-DD; limitations=<details>. A rejection is blocking.' }));
+}
+function runModeDiagnostics(answers: HandoutAnswer[]): HandoutDiagnostic[] {
+  const mode = answers.find(answer => answer.id === 'run.mode')?.answer.trim().toLowerCase();
+  if (mode === undefined) return [];
+  if (!['skip', 'verify', 'showcase'].includes(mode)) return [{ code: 'HANDOUT_RUN_MODE', id: 'run.mode', message: 'Choose exactly skip, verify or showcase.' }];
+  const showcase = answers.find(answer => answer.id === 'run.showcase');
+  if (mode !== 'showcase' || (showcase && completed(showcase))) return [];
+  return [{ code: 'HANDOUT_SHOWCASE_OPEN', id: 'run.showcase', message: 'Showcase requires its local preview and shutdown behavior to be reviewed.' }];
+}
+export function validateHandout(text: string, current: HandoutSnapshot) {
+  const parsed = parseAnswers(text);
+  const diagnostics = [...parsed.diagnostics, ...snapshotDiagnostics(text, current), ...openAnswerDiagnostics(parsed.answers),
+    ...approvalDiagnostics(parsed.answers), ...runModeDiagnostics(parsed.answers)];
   return {
     schemaVersion: HANDOUT_VERSION, ready: diagnostics.length === 0, executionAuthorized: false,
     sourceFingerprint: current.fingerprint, requiredTotal: [...questionIndex.values()].filter(question => question.required).length,
@@ -160,16 +188,12 @@ export function refreshHandout(text: string, current: HandoutSnapshot): string {
   const parsed = parseAnswers(text);
   ensure(parsed.diagnostics.length === 0, 'HANDOUT_STRUCTURE', 'Repair malformed checklist structure before refreshing; original text is preserved.');
   if (previous.fingerprint === current.fingerprint) return text;
-  let fence: { character: string; length: number } | undefined;
+  let fence: Fence;
   return text.replace(metadataPattern, () => metadata(current)).split(/(?<=\n)/).map(chunk => {
     const line = chunk.replace(/\r?\n$/, '');
-    const block = line.match(/^\s{0,3}(`{3,}|~{3,})(.*)$/);
-    if (block) {
-      const character = block[1]![0]!, length = block[1]!.length;
-      if (!fence) fence = { character, length };
-      else if (fence.character === character && length >= fence.length && block[2]!.trim() === '') fence = undefined;
-      return chunk;
-    }
+    const step = fenceStep(line, fence);
+    fence = step.fence;
+    if (step.marker) return chunk;
     return !fence && questionPattern.test(line) ? chunk.replace(/^- \[[xX]\]/, '- [ ]') : chunk;
   }).join('');
 }
