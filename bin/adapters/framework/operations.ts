@@ -10,7 +10,7 @@ import { docsRead } from './docs.ts';
 import { fixtureOperation } from './fixtures.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
-import { setupProgress } from '../../../scripts/framework/setup-progress.ts';
+import { setupProgress } from './setup-progress.ts';
 import { starterListing, completeStarterProject } from '../../../scripts/framework/starter-project.ts';
 import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from '../../../scripts/framework/submission.ts';

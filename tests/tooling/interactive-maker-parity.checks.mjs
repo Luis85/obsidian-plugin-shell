@@ -84,6 +84,8 @@ import { renderHuman as relocatedRenderHuman } from '../../bin/presentation/term
 import * as legacyTerminalRender from '../../scripts/framework/terminal-render.ts';
 import { setupSnapshot as relocatedSetupSnapshot } from '../../bin/adapters/framework/setup-state.ts';
 import * as legacySetupState from '../../scripts/framework/setup-state.ts';
+import { setupProgress as relocatedSetupProgress } from '../../bin/adapters/framework/setup-progress.ts';
+import * as legacySetupProgress from '../../scripts/framework/setup-progress.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1915,6 +1917,91 @@ test('relocated setup-state fingerprinting preserves identity, source and genera
 
     await writeFile(join(root, '.companion/generation.json'), '{}');
     await assert.rejects(relocatedSetupSnapshot(context), error => error.code === 'SETUP_GENERATION_INVALID');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated setup-progress preserves status, approval and persisted attempt semantics', async () => {
+  assert.equal(legacySetupProgress.setupProgress, relocatedSetupProgress);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-setup-progress-relocated-')));
+  try {
+    const context = { root, frameworkRoot };
+    const setup = await frameworkOperation({
+      command: 'setup', args: [],
+      options: { id: 'progress-demo', name: 'Progress Demo', author: 'Example', blank: true, yes: true },
+    }, context);
+    assert.equal(setup.status, 'applied', JSON.stringify(setup));
+
+    const status = await relocatedSetupProgress(
+      { command: 'setup status', args: [], options: {} },
+      context,
+      async () => { throw new Error('status must not execute a stage'); },
+    );
+    assert.equal(status.status, 'ok');
+    assert.match(status.data.resumeHash, /^[a-f0-9]{64}$/);
+    assert.deepEqual(status.data.attempts, []);
+
+    const planned = await relocatedSetupProgress(
+      { command: 'setup resume', args: [], options: { stage: 'generate' } },
+      context,
+      async () => { throw new Error('unapproved resume must not execute a stage'); },
+    );
+    assert.equal(planned.status, 'planned');
+    assert.equal(planned.data.execution, 'not-run');
+
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'unknown' } },
+        context,
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'SETUP_STAGE_REQUIRED',
+    );
+
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': '0'.repeat(64) } },
+        context,
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'SETUP_INPUT_CHANGED',
+    );
+
+    let calls = 0;
+    const applied = await relocatedSetupProgress(
+      { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': status.data.resumeHash } },
+      context,
+      async request => {
+        calls++;
+        assert.equal(request.command, 'generate');
+        return operationResult('generate', { synthetic: true }, 'applied');
+      },
+    );
+    assert.equal(applied.status, 'applied');
+    assert.equal(calls, 1);
+    assert.equal(applied.data.selectedStage, 'generate');
+    assert.equal(applied.data.attempt.status, 'applied');
+
+    const after = await relocatedSetupProgress(
+      { command: 'setup status', args: [], options: {} },
+      context,
+      async () => { throw new Error('status must not execute'); },
+    );
+    assert.equal(after.data.attempts.length, 1);
+    assert.equal(after.data.attempts[0].stage, 'generate');
+
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(
+      relocatedSetupProgress(
+        { command: 'setup resume', args: [], options: { stage: 'generate', yes: true, 'resume-hash': after.data.resumeHash } },
+        { ...context, signal: controller.signal },
+        async () => operationResult('generate', {}),
+      ),
+      error => error.code === 'CANCELLED',
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }
