@@ -815,3 +815,56 @@ test('relocated inspection preserves status and blocked release-readiness diagno
     await rm(root, { recursive: true, force: true });
   }
 });
+
+
+test('relocated inspection covers generated identity, traceability, doctor drift and stale design branches', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-inspection-generated-')));
+  try {
+    const project = { id: 'field-notes', name: 'Field Notes', author: 'Example', version: '1.2.3', description: 'Demo' };
+    const config = relocatedDefaults(project);
+    await writeFile(join(root, 'shell.config.json'), JSON.stringify(config));
+    await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: project.id, version: project.version }));
+    await mkdir(join(root, '.companion'));
+    await mkdir(join(root, 'node_modules/typescript'), { recursive: true });
+    await writeFile(join(root, 'node_modules/typescript/package.json'), '{}');
+    await mkdir(join(root, 'design'));
+    const designPath = join(root, 'design/project.json');
+    await writeFile(designPath, '{"schemaVersion":6}\n');
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({ inputHash: relocatedHash(await readFile(designPath)) }));
+    await writeFile(join(root, 'design/traceability.json'), JSON.stringify({
+      requirements: [{ id: 'R1', verification: 'pending' }, { id: 'R2', verification: 'verified' }],
+    }));
+    await writeFile(join(root, '.nvmrc'), '0.0.1\n');
+
+    const context = { root, frameworkRoot: root };
+    const doctor = await relocatedStatus(context, 'doctor');
+    assert.equal(doctor.data.generated, true);
+    assert.equal(doctor.data.imported, true);
+    assert.equal(doctor.data.dependencies, true);
+    assert.equal(doctor.data.designStale, false);
+    assert.equal(doctor.data.acceptanceObligations, 1);
+    assert.equal(doctor.data.next, 'npm run check');
+    assert.ok(doctor.diagnostics.some(item => item.code === 'ACCEPTANCE_PENDING'));
+    assert.ok(doctor.diagnostics.some(item => item.code === 'NODE_UNQUALIFIED'));
+    assert.equal(doctor.diagnostics.some(item => item.code === 'DEPENDENCIES_MISSING'), false);
+
+    await writeFile(join(root, 'manifest.json'), JSON.stringify({ id: 'other-id', version: project.version }));
+    await writeFile(designPath, '{"schemaVersion":6,"changed":true}\n');
+    const stale = await relocatedStatus(context);
+    assert.equal(stale.data.designStale, true);
+    assert.equal(stale.data.next, 'generate');
+    assert.ok(stale.diagnostics.some(item => item.code === 'IDENTITY_DRIFT'));
+    assert.ok(stale.diagnostics.some(item => item.code === 'DESIGN_GENERATION_STALE'));
+
+    await mkdir(join(root, 'dist'));
+    await writeFile(join(root, 'dist/manifest.json'), JSON.stringify({ id: 'other-id', version: project.version }));
+    await writeFile(join(root, 'dist/main.js'), 'export {};\n');
+    const release = await relocatedReleaseCheck(context);
+    assert.equal(release.status, 'blocked');
+    assert.equal(release.diagnostics.some(item => item.code === 'BUILD_IDENTITY'), false);
+    assert.equal(release.diagnostics.some(item => item.code === 'ASSET_MISSING'), false);
+    assert.ok(release.diagnostics.some(item => item.code === 'RELEASE_EVIDENCE_REQUIRED'));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
