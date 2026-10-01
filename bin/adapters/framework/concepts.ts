@@ -74,39 +74,59 @@ export async function inspectConcept(request: Request, context: Context) {
 }
 
 /** Reuses project-import configuration, compiler validation and file ownership; it is not another writer. */
+type Prepared = Extract<Awaited<ReturnType<typeof prepare>>, { referenceOnly: false }>;
+/** A replay re-checks the exact input, design and receipt bytes; it plans no content change. */
+async function replayPlan(context: Context, prepared: Prepared, sourceEntry: FilePlanEntry) {
+  const { source, current, concept, receiptPath } = prepared;
+  conceptRequire(current, 'CONCEPT_BASE_REQUIRED', 'Missing replay target.');
+  const plan = await createFilePlan(context.root, [sourceEntry, { path: designFile, content: current.bytes.toString('base64'), encoding: 'base64' },
+    { path: receiptPath, content: (await readBounded(join(context.root, receiptPath), 8192)).toString('base64'), encoding: 'base64' }]);
+  return { plan, hash: hash(serializeJson({ input: source.sha256, base: current.sha256 })), conflicts: [] as string[],
+    summary: { mode: concept.mode, replay: true, source: source.path, changes: [], next: 'generate', execution: 'not-run' } };
+}
+function intakeReceipt(prepared: Prepared, saved: { content: string | null; afterHash: string | null }) {
+  const { source, current, concept } = prepared;
+  const actual = parseAuthoringDocument(saved.content!);
+  return { kind: 'concept-intake-receipt', schemaVersion: 1, source: source.path, sourceSha256: source.sha256,
+    payloadSha256: source.decoded.status === 'data' ? source.decoded.payloadSha256 : '', mode: concept.mode, conceptId: concept.id,
+    projectId: actual.project.id, baseSha256: current?.sha256 ?? null, resultSha256: saved.afterHash };
+}
+type Plan = Awaited<ReturnType<typeof createFilePlan>>;
+/** Every destination, the concept input and the absent receipt must still match what intake prepared against. */
+function checkUnchanged(plan: Plan, imported: Plan, prepared: Prepared): void {
+  for (const before of imported.changes) conceptRequire(plan.changes.find(change => change.path === before.path)?.beforeHash === before.beforeHash,
+    'CONCEPT_BASE_STALE', 'Intake destinations changed while preparing the reviewed plan.');
+  conceptRequire(plan.changes.find(change => change.path === prepared.source.path)?.beforeHash === prepared.source.sha256 &&
+    plan.changes.find(change => change.path === prepared.receiptPath)?.beforeHash === null, 'CONCEPT_BASE_STALE', 'Concept input or receipt changed during preparation.');
+}
+const baseHash = (current: Prepared['current']) => current?.sha256 ?? null;
+async function importable(context: Context, input: string): Promise<Prepared> {
+  const prepared = await prepare(context, input);
+  conceptRequire(!prepared.referenceOnly, 'CONCEPT_REFERENCE_ONLY', 'This HTML has no recognized inert project data. Export a canonical project JSON or compatible concept manifest first.');
+  return prepared;
+}
 export async function conceptImportPlan(request: Request, context: Context) {
   const input = stringOption(request.options, 'input');
   conceptRequire(input, 'INPUT_REQUIRED', 'Supply --input <docs/concepts/...json|html>.');
-  const prepared = await prepare(context, input);
-  conceptRequire(!prepared.referenceOnly, 'CONCEPT_REFERENCE_ONLY', 'This HTML has no recognized inert project data. Export a canonical project JSON or compatible concept manifest first.');
+  const prepared = await importable(context, input);
   const { source, current, candidate, concept, receiptPath } = prepared;
   const policy = stringOption(request.options, 'resolve');
   conceptRequire(concept.mode === 'project' || policy === undefined, 'CONCEPT_RESOLUTION', 'Scoped changes preserve current identity and paths; resolution flags only apply to project replacement.');
   // A no-op source entry checks exact input bytes under the same apply lock; it never rewrites the concept.
   const sourceEntry: FilePlanEntry = { path: source.path, encoding: 'base64', content: source.bytes.toString('base64') };
-  if (prepared.replay) {
-    conceptRequire(current, 'CONCEPT_BASE_REQUIRED', 'Missing replay target.');
-    const plan = await createFilePlan(context.root, [sourceEntry, { path: designFile, content: current.bytes.toString('base64'), encoding: 'base64' },
-      { path: receiptPath, content: (await readBounded(join(context.root, receiptPath), 8192)).toString('base64'), encoding: 'base64' }]);
-    return { plan, hash: hash(serializeJson({ input: source.sha256, base: current.sha256 })), conflicts: [] as string[],
-      summary: { mode: concept.mode, replay: true, source: source.path, changes: [], next: 'generate', execution: 'not-run' } };
-  }
+  if (prepared.replay) return replayPlan(context, prepared, sourceEntry);
   const imported = await configurationPlan({ command: 'project import', args: [], options: { input: '-', ...(policy ? { resolve: policy } : {}) } },
     { ...context, inputText: serializeJson(candidate) });
   const saved = imported.plan.changes.find(change => change.path === designFile);
-  conceptRequire(saved && saved.content !== null && saved.beforeHash === (current?.sha256 ?? null), 'CONCEPT_BASE_STALE', 'The canonical project changed while preparing intake. Inspect a new base.');
-  const actual = parseAuthoringDocument(saved.content);
-  const receipt = { kind: 'concept-intake-receipt', schemaVersion: 1, source: source.path, sourceSha256: source.sha256,
-    payloadSha256: source.decoded.status === 'data' ? source.decoded.payloadSha256 : '', mode: concept.mode, conceptId: concept.id,
-    projectId: actual.project.id, baseSha256: current?.sha256 ?? null, resultSha256: saved.afterHash };
+  conceptRequire(saved && saved.content !== null && saved.beforeHash === baseHash(current), 'CONCEPT_BASE_STALE', 'The canonical project changed while preparing intake. Inspect a new base.');
   const plan = await createFilePlan(context.root, [...imported.plan.changes.map(change => ({ path: change.path, content: change.content })),
-    { path: receiptPath, content: serializeJson(receipt) }, sourceEntry]);
-  for (const before of imported.plan.changes) conceptRequire(plan.changes.find(change => change.path === before.path)?.beforeHash === before.beforeHash,
-    'CONCEPT_BASE_STALE', 'Intake destinations changed while preparing the reviewed plan.');
-  conceptRequire(plan.changes.find(change => change.path === source.path)?.beforeHash === source.sha256 &&
-    plan.changes.find(change => change.path === receiptPath)?.beforeHash === null, 'CONCEPT_BASE_STALE', 'Concept input or receipt changed during preparation.');
-  return { plan, hash: hash(serializeJson({ input: source.sha256, base: current?.sha256 ?? null })), conflicts: [] as string[],
-    summary: { ...imported.summary, mode: concept.mode, source: source.path, sourceSha256: source.sha256,
-      changes: prepared.changes, migration: prepared.migration, replacement: concept.mode === 'project' && !!current,
-      replay: false, preservation: 'Original concept and implementation files unchanged.', execution: 'not-run' } };
+    { path: receiptPath, content: serializeJson(intakeReceipt(prepared, saved)) }, sourceEntry]);
+  checkUnchanged(plan, imported.plan, prepared);
+  return { plan, hash: hash(serializeJson({ input: source.sha256, base: baseHash(current) })), conflicts: [] as string[], summary: importSummary(prepared, imported.summary) };
+}
+function importSummary(prepared: Prepared, imported: object) {
+  const { source, current, concept } = prepared;
+  return { ...imported, mode: concept.mode, source: source.path, sourceSha256: source.sha256,
+    changes: prepared.changes, migration: prepared.migration, replacement: concept.mode === 'project' && !!current,
+    replay: false, preservation: 'Original concept and implementation files unchanged.', execution: 'not-run' };
 }
