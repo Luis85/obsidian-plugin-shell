@@ -163,7 +163,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D57:** Prototype list/compare and reviewed workspace command planning moved to `bin/adapters/framework/prototypes.ts`; relocated reads consume it locally, generation/workspace dependencies are local and the former framework path is compatibility-only. Maker coverage locks empty listing, real create/apply/load behavior and missing-workspace compare/export refusal.
 - **D58:** Configuration/import, isolated-vault and release-version change planning moved to `bin/adapters/framework/changes.ts`; relocated generation, concept and prototype adapters consume it locally while handout workspace remains behind compatibility. Maker coverage locks stdin design inspection, real blank setup/apply/vault planning and explicit configuration/release prerequisites.
 - **D59:** The data-only 20-section/69-question handout catalog moved to `bin/adapters/framework/handout-questions.ts`; the former framework path is compatibility-only. Maker coverage locks catalog identity, unique stable IDs and the existing 49-required/20-optional review split before relocating validation logic.
-- **Remaining D60–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D60:** Handout snapshot/render/parse/readiness/refresh policy moved to `bin/adapters/framework/handout-model.ts`; it consumes the relocated question catalog locally and the former framework path is compatibility-only. Maker coverage carries the established readiness, structural-corruption, source-staleness, approval, showcase, escaping and refresh regression matrix.
+- **Remaining D61–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 
