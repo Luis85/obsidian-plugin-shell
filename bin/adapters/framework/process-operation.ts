@@ -36,28 +36,68 @@ async function vitestArguments(root: string, profile: string | undefined, exists
   return ['run', '--config', 'configs/testing/vitest.config.mjs'];
 }
 
-export async function processOperation(
-  request: Request,
-  context: Context,
-  dependencies: ProcessOperationDependencies = {},
-): Promise<Result> {
-  const dependencyCheck = dependencies.dependencyReadiness ?? dependencyReadiness;
-  const existsPath = dependencies.exists ?? exists;
-  const read = dependencies.readBounded ?? readBounded;
-  const pack = dependencies.packKit ?? packKit;
-  const npm = dependencies.npmEntry ?? npmEntry;
-  const run = dependencies.runNode ?? runNode;
-
-  const options = request.options;
-  const timeout = Number(stringOption(options, 'timeout') ?? (request.command === 'dev' ? '3600000' : '600000'));
-  if (request.command === 'framework pack') {
-    const output = stringOption(options, 'out');
-    requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <archive.zip>.');
-    if (!options.yes || options['dry-run']) {
-      return result(request.command, { output, requires: '--yes', publication: 'not-authorized' }, 'planned');
-    }
-    return result(request.command, await pack(context, output), 'applied');
+interface Host {
+  dependencyCheck: typeof dependencyReadiness; existsPath: typeof exists; read: typeof readBounded;
+  pack: typeof packKit; npm: typeof npmEntry; run: typeof runNode;
+}
+/** The trusted process to launch, or a finished result when the command resolves without one. */
+type Invocation = { entry: string; args?: string[]; environment?: Record<string, string> } | { done: Result };
+type Resolve = (request: Request, context: Context, host: Host, profile: string | undefined, timeout: number) => Promise<Invocation>;
+async function installInvocation(request: Request, context: Context, host: Host): Promise<Invocation> {
+  const manifests = await Promise.all(['package.json', 'package-lock.json'].map(async path => ({
+    path,
+    content: (await host.read(join(context.root, path), 8_000_000)).toString('utf8'),
+    ownership: 'extension' as const,
+  })));
+  const readiness = host.dependencyCheck(manifests);
+  if (!readiness.ready) return { done: {
+    ...result(request.command, { execution: 'not-run', dependencies: 'resolution-required' }, 'blocked'),
+    diagnostics: readiness.diagnostics,
+  } };
+  return { entry: await host.npm(), args: ['ci', '--no-fund'] };
+}
+const testEntries: Record<string, { entry: string; args?: string[] }> = {
+  native: { entry: 'scripts/testing/check-native.mjs' },
+  obsidian: { entry: 'scripts/testing/run-obsidian-tests.mjs' },
+  browser: { entry: 'node_modules/@playwright/test/cli.js', args: ['test', '--config', 'configs/testing/playwright.config.ts'] },
+};
+async function testInvocation(request: Request, context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
+  acceptProfile(request.command, profile);
+  if (profile && Object.hasOwn(testEntries, profile)) return { ...testEntries[profile]!, args: [...(testEntries[profile]!.args ?? [])] };
+  return { entry: 'node_modules/vitest/vitest.mjs', args: await vitestArguments(context.root, profile, host.existsPath) };
+}
+async function verifyInvocation(request: Request, _context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
+  acceptProfile(request.command, profile);
+  return profile === 'project' ? { entry: await host.npm(), args: ['run', 'verify:project'] } : { entry: 'scripts/quality/verify.mjs' };
+}
+const devEntries: Record<string, { entry: string; args: string[] }> = {
+  ui: { entry: 'node_modules/vite/bin/vite.js', args: ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1'] },
+  obsidian: { entry: 'scripts/dev/obsidian-dev.mjs', args: [] },
+};
+async function devInvocation(request: Request, context: Context, host: Host, profile: string | undefined, timeout: number): Promise<Invocation> {
+  acceptProfile(request.command, profile);
+  if (profile === 'preview') {
+    const config = await projectConfig(context.root, 'preview', host.existsPath) ?? projectConfigs.preview.path;
+    return { done: result(request.command, { execution: await host.run(context, 'node_modules/vite/bin/vite.js', ['--config', config], timeout), productAcceptance: 'not-inferred' }) };
   }
+  if (profile && Object.hasOwn(devEntries, profile)) return { ...devEntries[profile]!, args: [...devEntries[profile]!.args] };
+  return { entry: 'scripts/dev/watch-local.mjs', args: ['--no-local'] };
+}
+async function rehearseInvocation(request: Request, _context: Context, host: Host): Promise<Invocation> {
+  const commit = stringOption(request.options, 'commit');
+  const version = stringOption(request.options, 'version');
+  requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');
+  return { entry: 'scripts/release/rehearse.mjs', args: ['--commit', commit, '--version', version], environment: { npm_execpath: await host.npm() } };
+}
+const invocations: Record<string, Resolve> = {
+  install: installInvocation,
+  build: async () => ({ entry: 'scripts/bundling/build.mjs' }),
+  test: testInvocation,
+  verify: verifyInvocation,
+  dev: devInvocation,
+};
+function dryRunPlan(request: Request): Result | null {
+  const options = request.options;
   if (options['dry-run'] || (request.command === 'install' && !options.yes)) {
     return result(request.command, {
       execution: 'not-run',
@@ -65,68 +105,43 @@ export async function processOperation(
       effects: 'project processes may write build output, reports, dependencies or caches',
     }, 'planned');
   }
-
-  let entry: string;
-  let args: string[] = [];
-  const environment: Record<string, string> = {};
-  const profile = stringOption(options, 'profile');
-
-  if (request.command === 'install') {
-    const manifests = await Promise.all(['package.json', 'package-lock.json'].map(async path => ({
-      path,
-      content: (await read(join(context.root, path), 8_000_000)).toString('utf8'),
-      ownership: 'extension' as const,
-    })));
-    const readiness = dependencyCheck(manifests);
-    if (!readiness.ready) return {
-      ...result(request.command, { execution: 'not-run', dependencies: 'resolution-required' }, 'blocked'),
-      diagnostics: readiness.diagnostics,
-    };
-    entry = await npm();
-    args = ['ci', '--no-fund'];
-  } else if (request.command === 'build') {
-    entry = 'scripts/bundling/build.mjs';
-  } else if (request.command === 'test') {
-    acceptProfile(request.command, profile);
-    if (profile === 'native') entry = 'scripts/testing/check-native.mjs';
-    else if (profile === 'obsidian') entry = 'scripts/testing/run-obsidian-tests.mjs';
-    else if (profile === 'browser') {
-      entry = 'node_modules/@playwright/test/cli.js';
-      args = ['test', '--config', 'configs/testing/playwright.config.ts'];
-    } else {
-      entry = 'node_modules/vitest/vitest.mjs';
-      args = await vitestArguments(context.root, profile, existsPath);
-    }
-  } else if (request.command === 'verify') {
-    acceptProfile(request.command, profile);
-    if (profile === 'project') {
-      entry = await npm();
-      args = ['run', 'verify:project'];
-    } else entry = 'scripts/quality/verify.mjs';
-  } else if (request.command === 'dev') {
-    acceptProfile(request.command, profile);
-    entry = profile === 'ui' ? 'node_modules/vite/bin/vite.js'
-      : profile === 'obsidian' ? 'scripts/dev/obsidian-dev.mjs'
-      : 'scripts/dev/watch-local.mjs';
-    if (profile === 'preview') {
-      return result(request.command, {
-        execution: await run(context, 'node_modules/vite/bin/vite.js', ['--config', await projectConfig(context.root, 'preview', existsPath) ?? projectConfigs.preview.path], timeout),
-        productAcceptance: 'not-inferred',
-      });
-    }
-    args = profile === 'ui' ? ['--config', 'configs/bundling/vite.harness.config.mjs', '--host', '127.0.0.1']
-      : profile === 'obsidian' ? [] : ['--no-local'];
-  } else {
-    const commit = stringOption(options, 'commit');
-    const version = stringOption(options, 'version');
-    requireThat(commit && version, 'RELEASE_INPUT_REQUIRED', 'Supply --commit and --version for fixed-source rehearsal.');
-    entry = 'scripts/release/rehearse.mjs';
-    args = ['--commit', commit, '--version', version];
-    environment.npm_execpath = await npm();
+  return null;
+}
+async function frameworkPack(request: Request, context: Context, host: Host): Promise<Result> {
+  const output = stringOption(request.options, 'out');
+  requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <archive.zip>.');
+  if (!request.options.yes || request.options['dry-run']) {
+    return result(request.command, { output, requires: '--yes', publication: 'not-authorized' }, 'planned');
   }
-
+  return result(request.command, await host.pack(context, output), 'applied');
+}
+/** Real host operations unless a contract test injects one. */
+function hostFor(dependencies: ProcessOperationDependencies): Host {
+  return {
+    dependencyCheck: dependencies.dependencyReadiness ?? dependencyReadiness,
+    existsPath: dependencies.exists ?? exists,
+    read: dependencies.readBounded ?? readBounded,
+    pack: dependencies.packKit ?? packKit,
+    npm: dependencies.npmEntry ?? npmEntry,
+    run: dependencies.runNode ?? runNode,
+  };
+}
+export async function processOperation(
+  request: Request,
+  context: Context,
+  dependencies: ProcessOperationDependencies = {},
+): Promise<Result> {
+  const host = hostFor(dependencies);
+  const timeout = Number(stringOption(request.options, 'timeout') ?? (request.command === 'dev' ? '3600000' : '600000'));
+  if (request.command === 'framework pack') return frameworkPack(request, context, host);
+  const planned = dryRunPlan(request);
+  if (planned) return planned;
+  const profile = stringOption(request.options, 'profile');
+  const resolveInvocation = Object.hasOwn(invocations, request.command) ? invocations[request.command]! : rehearseInvocation;
+  const invocation = await resolveInvocation(request, context, host, profile, timeout);
+  if ('done' in invocation) return invocation.done;
   return result(request.command, {
-    execution: await run(context, entry, args, timeout, environment),
+    execution: await host.run(context, invocation.entry, invocation.args ?? [], timeout, invocation.environment ?? {}),
     profile: profile ?? 'default',
     productAcceptance: 'not-inferred',
     publication: 'not-run',
