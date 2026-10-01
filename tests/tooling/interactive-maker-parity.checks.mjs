@@ -66,6 +66,8 @@ import { exportedProject as relocatedExportedProject } from '../../bin/adapters/
 import * as legacyProjectFrom from '../../scripts/framework/project-from.ts';
 import { storybookOperation as relocatedStorybookOperation } from '../../bin/adapters/framework/storybook.ts';
 import * as legacyStorybook from '../../scripts/framework/storybook.ts';
+import { airshipPlan as relocatedAirshipPlan } from '../../bin/adapters/framework/airship-plan.ts';
+import * as legacyAirshipPlan from '../../scripts/framework/airship-plan.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1234,6 +1236,61 @@ test('relocated Storybook lifecycle preserves planning, install and execution bo
     await assert.rejects(
       relocatedStorybookOperation({ command: 'storybook build', args: [], options: {} }, context, executor),
       error => error.code === 'STORYBOOK_LOCK_MISMATCH',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated Airship planning preserves reviewed enable/disable and ownership safeguards', async () => {
+  assert.equal(legacyAirshipPlan.airshipPlan, relocatedAirshipPlan);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-airship-plan-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await mkdir(join(root, 'design'));
+    await writeFile(join(root, 'design/project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+
+    const enabled = await relocatedAirshipPlan({
+      command: 'airship enable', args: [], options: { agent: 'codex', 'target-port': '6200', port: '6201' },
+    }, context);
+    assert.equal(enabled.conflicts.length, 0);
+    assert.equal(enabled.summary.airship.enabled, true);
+    assert.equal(enabled.summary.airship.agent, 'codex');
+    assert.equal(enabled.summary.airship.targetPort, 6200);
+    assert.equal(enabled.summary.airship.port, 6201);
+    assert.ok(enabled.plan.changes.some(change => change.path === 'design/project.json'));
+    assert.ok(enabled.plan.changes.some(change => change.path === 'airship.config.json'));
+    assert.match(enabled.summary.next, /airship install --yes/);
+
+    const disabled = await relocatedAirshipPlan({ command: 'airship disable', args: [], options: {} }, context);
+    assert.equal(disabled.summary.airship.enabled, false);
+    assert.equal(disabled.plan.changes.some(change => change.path === 'airship.config.json'), false);
+    assert.match(disabled.summary.next, /Stop existing sessions/);
+
+    await writeFile(join(root, 'airship.config.json'), JSON.stringify({ custom: true }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_CONFIG_CONFLICT',
+    );
+    await rm(join(root, 'airship.config.json'));
+
+    await mkdir(join(root, '.companion'));
+    await writeFile(join(root, '.companion/generation.json'), JSON.stringify({
+      version: 1, projectId: source.project.id, files: [],
+    }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_OWNERSHIP',
+    );
+    await rm(join(root, '.companion/generation.json'));
+
+    await mkdir(join(root, '.framework'));
+    await writeFile(join(root, '.framework/intake.json'), JSON.stringify({ schemaVersion: 1, files: {} }));
+    await assert.rejects(
+      relocatedAirshipPlan({ command: 'airship enable', args: [], options: {} }, context),
+      error => error.code === 'AIRSHIP_OWNERSHIP',
     );
   } finally {
     await rm(root, { recursive: true, force: true });
