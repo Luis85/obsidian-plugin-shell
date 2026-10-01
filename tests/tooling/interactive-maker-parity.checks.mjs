@@ -328,7 +328,7 @@ test('relocated daily check gate preserves compatibility and execution semantics
     await mkdir(join(root, 'bin'), { recursive: true });
     await mkdir(join(root, 'src'), { recursive: true });
     await writeFile(join(root, 'bin/app.ts'), 'export {};');
-    await writeFile(join(root, 'tsconfig.maker.json'), '{}');
+    await mkdir(join(root, 'configs/types'), { recursive: true }); await writeFile(join(root, 'configs/types/tsconfig.maker.json'), '{}');
     await writeFile(join(root, 'src/a.ts'), 'export const a = 1;');
 
     const full = await checkSteps(root, false);
@@ -341,7 +341,7 @@ test('relocated daily check gate preserves compatibility and execution semantics
 
     const unavailable = await checkSteps(root, true, async () => null);
     assert.equal(unavailable.changes.source, 'unavailable');
-    assert.deepEqual(unavailable.steps.find(step => step.id === 'test').args, ['run']);
+    assert.deepEqual(unavailable.steps.find(step => step.id === 'test').args, ['run', '--config', 'configs/testing/vitest.config.mjs']);
 
     const progress = [];
     const fakeRun = async (_context, entry) => {
