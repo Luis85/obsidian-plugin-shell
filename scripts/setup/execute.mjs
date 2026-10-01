@@ -38,15 +38,22 @@ export async function executeSetup(root, options, planned, previous, { run = run
   try {
     const toolchain = activeToolchain(options);
     journal = { version: 1, identity: planned.identity, options: savedOptions(options), fingerprint: await inputFingerprint(root, toolchain, options), toolchain,
-      status: 'running', migration: null, stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
-    await saveJournal(); // Record desired public options before the first identity write, so interruption can resume.
+      status: 'running', migration: null,
+      agentMcp: { version: 1, enabled: planned.agentMcp.enabled, server: planned.agentMcp.server, transport: planned.agentMcp.transport,
+        clients: planned.agentMcp.clients, status: planned.agentMcp.enabled ? 'pending' : 'skipped', files: planned.agentMcp.files },
+      stages: setupStages(options).map(stage => ({ ...stage, status: stage.selected ? 'pending' : 'skipped' })) };
+    await saveJournal();
     await applyFilePlan(planned.plan);
+    if (planned.agentMcp.enabled) {
+      await applyFilePlan(planned.agentMcp.plan);
+      journal.agentMcp.status = 'verified';
+      await saveJournal();
+    }
     const fingerprint = await inputFingerprint(root, toolchain, options); journal.fingerprint = fingerprint;
     journal.lockHash = digest(await readFile(join(root, 'package-lock.json')));
     const compatible = previous?.fingerprint === fingerprint;
     await saveJournal();
     if (planned.migration) {
-      // Revalidate disabled state and source/destination data immediately before this separate stage.
       const migration = await planMigration(root, { from: planned.migration.from, to: planned.identity.id, previousId: planned.identity.id, profile: options.profile,
         expectedManifest: planned.manifest, previousManifest: planned.manifest, receipt: previous?.migration });
       if (JSON.stringify(migration.plan.changes) !== JSON.stringify(planned.migration.plan.changes)) throw new Error('Migration inputs changed after review; review a new plan');
@@ -57,7 +64,7 @@ export async function executeSetup(root, options, planned, previous, { run = run
     const env = projectInstallEnvironment().env;
     for (const stage of journal.stages) {
       if (!stage.selected) continue;
-      const prior = compatible && previous.stages.find(item => item.id === stage.id);
+      const prior = compatible && previous?.stages.find(item => item.id === stage.id);
       if (options.resume && prior && await stageIsCurrent(root, prior, planned.identity)) {
         Object.assign(stage, { status: 'verified', resumed: true, exitCode: prior.exitCode, ...(prior.outputHash ? { outputHash: prior.outputHash } : {}), ...(prior.assets ? { assets: prior.assets } : {}) });
         await saveJournal(); continue;
