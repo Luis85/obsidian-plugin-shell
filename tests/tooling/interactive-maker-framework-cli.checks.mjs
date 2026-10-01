@@ -76,9 +76,9 @@ test('interactive sessions run reads directly and cancel unapproved plans', asyn
   assert.equal(version.code, 0); assert.match(version.stdout, /version: ok/);
   await withRoot(async root => {
     await writeFile(join(root, 'project.json'), await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
-    const dry = await run(['setup', '--input', 'project.json', '--root', root, '--dry-run', '--no-airship'], { answers: [] });
+    const dry = await run(['setup', '--input', 'project.json', '--root', root, '--dry-run', '--no-airship', '--no-mcp'], { answers: [] });
     assert.equal(dry.code, 0, dry.stderr); assert.match(dry.stdout, /setup: planned/);
-    const declined = await run(['setup', '--input', 'project.json', '--root', root, '--no-airship'], { answers: ['n'] });
+    const declined = await run(['setup', '--input', 'project.json', '--root', root, '--no-airship', '--no-mcp'], { answers: ['n'] });
     assert.equal(declined.code, 130, declined.stdout + declined.stderr);
     const created = await run(['new', join(root, 'made'), '--starter', 'blank', '--id', 'made-app', '--name', 'Made', '--author', 'Team', '--no-airship'], { answers: ['', '', '', '', 'n'] });
     assert.equal(created.code, 130, created.stdout + created.stderr);

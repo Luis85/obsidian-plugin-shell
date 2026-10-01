@@ -150,7 +150,7 @@ test('relocated setup terminal preserves interview and separately approved conti
   assert.equal(legacySetupTerminal.continueSetup, relocatedContinueSetup);
 
   const prompts = [];
-  const answers = ['blank', '', '', 'Example Author', 'yes'];
+  const answers = ['blank', '', '', 'Example Author', 'yes', 'yes'];
   const writes = [];
   const dependencies = {
     readConfiguration: async () => null,
@@ -172,8 +172,9 @@ test('relocated setup terminal preserves interview and separately approved conti
   assert.equal(guided.options.name, 'Derived Id');
   assert.equal(guided.options.author, 'Example Author');
   assert.equal(guided.options.airship, true);
+  assert.equal(guided.options.mcp, true);
   assert.ok(writes.some(value => value.includes('GitHub is optional')));
-  assert.equal(prompts.length, 5);
+  assert.equal(prompts.length, 6);
 
   const rendered = [];
   const calls = [];
