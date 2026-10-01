@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { hash } from '../../scripts/framework/files.ts';
+import { loadTemplateSnapshot } from '../../scripts/compiler/index.ts';
 import { newDocument, documentText } from '../../bin/domain/document.ts';
 import { runOperations } from '../../bin/application/operations.ts';
 import { applyOperation, planOperation } from '../../scripts/framework/planning.ts';
@@ -96,6 +97,32 @@ export async function resign(root, out, mutate) {
   const definition = await readScratchJson(root, out + '/feature.definition.json');
   definition.generatedSource.receiptSha256 = hash(text);
   await writeJson(root, out + '/feature.definition.json', definition);
+}
+
+/**
+ * Pins the generated source's `.nvmrc` to the running Node through the reviewed
+ * re-signing path, so verification plans carry no Node blocker on any toolchain
+ * row (as the first-run fixture app does). No-op when the pin already matches.
+ */
+export async function pinGeneratedNode(root, out) {
+  const path = join(root, out, 'source/.nvmrc');
+  if ((await readFile(path, 'utf8')).trim() === process.versions.node) return;
+  await resign(root, out, async () => { await writeFile(path, process.versions.node + '\n'); return ['.nvmrc']; });
+}
+/**
+ * Materializes the exact framework template snapshot under the scratch root with
+ * its `.nvmrc` pinned to the running Node. Generated prototype source copies that
+ * pin, so a wizard flow that generates and then offers its run can execute on
+ * every toolchain row. The repository template itself is never changed.
+ */
+export async function pinnedFramework(root) {
+  const target = join(root, 'pinned-framework'), snapshot = await loadTemplateSnapshot(frameworkRoot);
+  for (const file of [...snapshot.frameworkFiles, ...snapshot.skillFiles]) {
+    await mkdir(dirname(join(target, file.path)), { recursive: true });
+    await writeFile(join(target, file.path), Buffer.from(file.content, file.encoding ?? 'utf8'));
+  }
+  await writeFile(join(target, '.nvmrc'), process.versions.node + '\n');
+  return target;
 }
 
 /** One-screen feature with no interactions; `extra` overrides or extends the scripted answers. */

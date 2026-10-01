@@ -6,12 +6,14 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 import { parseArguments, execute } from '../../bin/adapters/commands.ts';
 import { brainstormFeaturePlan, brainstormVerifyPlan, executeBrainstormVerification } from '../../bin/adapters/brainstorm.ts';
 import { applyPrepared } from '../../bin/adapters/storage.ts';
-import { brainstormScratch, captureRequest, fakeNpm, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
+import { brainstormScratch, captureRequest, fakeNpm, pinGeneratedNode, resign, readScratchJson, writeJson } from './interactive-maker-brainstorm-fixture.mjs';
 
 const out = 'brainstorms/capture-inbox', source = out + '/source';
+/** Generated source is re-pinned to the running Node, so no row adds a Node blocker. */
 async function generated(options, patch) {
   const plan = await brainstormFeaturePlan({ ...captureRequest, ...patch }, options);
   await applyPrepared(plan, plan.planHash);
+  if (plan.data.generated) await pinGeneratedNode(options.root, out);
   return plan;
 }
 const verify = (options, extra = []) => execute(parseArguments(['brainstorm', 'verify', '--out', out, ...extra, '--json']),
