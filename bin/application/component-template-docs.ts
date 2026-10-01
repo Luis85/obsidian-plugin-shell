@@ -29,7 +29,7 @@ function sourceNote(entry: LoadedComponentTemplate): string {
     + '). Do not edit this Markdown directly; edit the JSON template and regenerate.';
 }
 
-export function renderComponentTemplateMarkdown(entry: LoadedComponentTemplate): string {
+function renderComponentTemplateMarkdown(entry: LoadedComponentTemplate): string {
   const template = entry.template;
   const composition = template.children.length
     ? template.children.map(child => '- ' + code(child.template)

@@ -12,7 +12,7 @@ export interface LoadedComponentTemplate {
   origin: 'baseline' | 'project' | 'plugin';
 }
 
-export const TEMPLATE_FOLDER = 'configs/templates';
+const TEMPLATE_FOLDER = 'configs/templates';
 const MAX_FILE_BYTES = 500_000;
 const MAX_TOTAL_BYTES = 12_000_000;
 

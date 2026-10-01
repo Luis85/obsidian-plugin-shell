@@ -2,31 +2,31 @@ import { VISUAL_STATES, VISUAL_TAGS } from '../../scripts/companion/visual/visua
 import { visualBuiltinLayouts, visualCatalogEntry, visualRecipes } from '../../scripts/companion/visual/visual-catalog.mjs';
 import { requireSketch } from './errors.ts';
 
-export const TEMPLATE_TYPES = ['component', 'component-with-children', 'page', 'page-with-bricks'] as const;
-export const ATOMIC_LEVELS = ['atom', 'molecule', 'organism', 'template', 'page'] as const;
+const TEMPLATE_TYPES = ['component', 'component-with-children', 'page', 'page-with-bricks'] as const;
+const ATOMIC_LEVELS = ['atom', 'molecule', 'organism', 'template', 'page'] as const;
 
 export type ComponentTemplateType = typeof TEMPLATE_TYPES[number];
 export type AtomicLevel = typeof ATOMIC_LEVELS[number];
 
-export type TemplateDesign =
+type TemplateDesign =
   | { kind: 'catalog'; entryId: string }
   | { kind: 'recipe'; recipeId: string }
   | { kind: 'composition'; tag: string; layout: 'stack' | 'row' | 'grid' }
   | { kind: 'page'; layout: 'stack' | 'row' | 'grid' };
 
-export interface TemplateChild {
+interface TemplateChild {
   template: string;
   slot?: string;
   optional?: boolean;
 }
 
-export interface TemplateSlot {
+interface TemplateSlot {
   id: string;
   role: string;
   accepts: string[];
 }
 
-export interface TemplateProp {
+interface TemplateProp {
   name: string;
   type: 'string' | 'number' | 'boolean';
   required: boolean;
@@ -34,7 +34,7 @@ export interface TemplateProp {
   description?: string;
 }
 
-export interface TemplateEvent {
+interface TemplateEvent {
   name: string;
   payloadType: 'void' | 'string' | 'number' | 'boolean' | 'unknown';
   description?: string;

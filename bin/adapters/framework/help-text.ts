@@ -291,6 +291,8 @@ const optionOverrides: OptionOverride[] = [
   [option('release prepare', 'version'), describe('Release version x.y.z.')],
   [option('make', 'format'), doc => { doc.description = 'Custom file content format (file-extension recipe).'; doc.values = ['json', 'text']; doc.default = 'json'; }],
   [option('docs export', 'out'), doc => { doc.description = 'Documentation root for new files and navigation; registered files keep their locations.'; doc.default = 'configured documentation.root, otherwise docs/application'; }],
+  [option('templates docs', 'out'), doc => { doc.description = 'Generated component-library Markdown root. JSON remains authoritative.'; doc.default = 'docs/generated/component-library'; }],
+  [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON to update through a reviewed plan.'; doc.default = 'design/project.json'; }],
   [prototypeOption('version'), describe('Portable version slug, for example v1 or v2; distinct from the application release version.')],
   [option('prototypes version', 'from'), describe('Source version slug to copy into the new version.')],
   [prototypeOption('name'), describe('Prototype or variant display name; its folder slug stays unchanged.')],
