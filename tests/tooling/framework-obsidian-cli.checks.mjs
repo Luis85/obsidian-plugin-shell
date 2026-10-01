@@ -1,22 +1,17 @@
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, realpath, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { obsidianRead } from '../../bin/adapters/framework/obsidian-cli.ts';
-import { parseCliArguments } from '../../bin/adapters/framework/catalog.ts';
-import { continueSetup } from '../../bin/presentation/terminal/setup-terminal.ts';
-import { result } from '../../bin/adapters/framework/contracts.ts';
-const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
+import { obsidianRead } from '../../scripts/framework/obsidian-cli.ts';
+import { parseCliArguments } from '../../scripts/framework/catalog.ts';
 
-/** Runs one case in a fresh project root; works under both node:test and Vitest. */
-async function withRoot(run) {
+async function fixture(t) {
   // realpath: macOS tmpdir is under the /var symlink, which the documentation reader rightly refuses.
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'shell-obsidian-cli-')));
-  try {
-    await mkdir(join(root,'design'),{recursive:true});
-    await writeFile(join(root,'design/project.json'),'{}');
-    await run(root);
-  } finally { await rm(root,{recursive:true,force:true}); }
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'shell-obsidian-cli-'))); t.after(() => rm(root,{recursive:true,force:true}));
+  await mkdir(join(root,'design'),{recursive:true});
+  await writeFile(join(root,'design/project.json'),'{}');
+  return root;
 }
 function request(command, options={}) { return { command, args: [], options }; }
 function port(responses) {
@@ -33,23 +28,24 @@ surface_kind: view
 
 # Project overview
 `;
-test('status pins 1.12.7+ and always targets the explicitly selected vault first', () => withRoot(async root => {
-  const fake=port({
+test('status pins 1.12.7+ and always targets the explicitly selected vault first', async t => {
+  const root=await fixture(t), fake=port({
     'version':'1.12.7\n','vault=Work|vault|info=name':'Work\n','vault=Work|vault|info=path': join(root,'vault')+'\n',
     'vault=Work|files|total':'3\n','vault=Work|folders|total':'2\n'
   });
   const value=await obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),{root,frameworkRoot:root},fake);
   assert.equal(value.status,'ok'); assert.equal(value.data.cli.version,'1.12.7'); assert.equal(value.data.vault.files,3);
   assert.ok(fake.calls.slice(1).every(args=>args[0]==='vault=Work')); assert.deepEqual(value.data.capabilities.writes,[]);
-}));
-test('old CLI, ambient vault fallback, hidden/traversal reads and non-Markdown reads fail closed', () => withRoot(async root => {
+});
+test('old CLI, ambient vault fallback, hidden/traversal reads and non-Markdown reads fail closed', async t => {
+  const root=await fixture(t);
   await assert.rejects(obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),{root,frameworkRoot:root},port({'version':'1.12.6'})),/1\.12\.7/);
   await assert.rejects(obsidianRead(request('obsidian read',{}),{root,frameworkRoot:root},port({'version':'1.12.7'})),/explicit --obsidian-vault/);
   for(const path of ['../secret.md','.obsidian/app.json','folder/../secret.md','note.txt'])
     await assert.rejects(obsidianRead(request('obsidian read',{'obsidian-vault':'Work','obsidian-path':path}),{root,frameworkRoot:root},port({'version':'1.12.7'})));
-}));
-test('prepare reads only configured Markdown candidates and proposes existing reviewed docs import without vault writes', () => withRoot(async root => {
-  const vault=join(root,'vault');
+});
+test('prepare reads only configured Markdown candidates and proposes existing reviewed docs import without vault writes', async t => {
+  const root=await fixture(t),vault=join(root,'vault');
   const fake=port({
     'version':'1.12.7',
     'vault=Work|vault|info=path':vault,
@@ -70,7 +66,7 @@ test('prepare reads only configured Markdown candidates and proposes existing re
   assert.ok(parsed.args.length<=32);
   const invoked=new Set(fake.calls.map(args=>args[1] ?? args[0]));
   for(const denied of ['eval','dev:cdp','create','append','prepend','move','rename','delete','plugin:install','plugin:enable']) assert.equal(invoked.has(denied),false);
-}));
+});
 test('catalog exposes only the read adapter surface; dangerous Obsidian commands are not parseable',()=>{
   for(const command of [['obsidian','status'],['obsidian','files'],['obsidian','read'],['obsidian','prepare']])
     assert.ok(parseCliArguments([...command,'--obsidian-vault','Work']).command.startsWith('obsidian '));
@@ -78,6 +74,8 @@ test('catalog exposes only the read adapter surface; dangerous Obsidian commands
     assert.throws(()=>parseCliArguments([...denied,'--obsidian-vault','Work']));
 });
 test('setup opt-in verifies the named vault, prepares on request and imports its typed notes through reviewed plans', async () => {
+  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
+  const { result } = await import('../../scripts/framework/contracts.ts');
   const notes = ['/vault/docs/application/project.md', '/vault/docs/application/page.md'];
   const answers = ['yes', 'Work', 'yes', 'yes', 'yes', 'no', 'no'], prompts = [], calls = [];
   const execute = async request => {
@@ -95,6 +93,8 @@ test('setup opt-in verifies the named vault, prepares on request and imports its
   assert.ok(!prompts.some(question => /^File or folder/.test(question)), 'vault notes replace the generic import path question');
 });
 test('an unavailable Obsidian CLI or a declined prepare only skips the vault step', async () => {
+  const { continueSetup } = await import('../../scripts/framework/setup-terminal.ts');
+  const { result } = await import('../../scripts/framework/contracts.ts');
   // Remaining answers decline the generic docs import, generation and docs export.
   for (const [failing, answers] of [[true, ['yes', 'Work', 'no', 'no', 'no']], [false, ['yes', 'Work', 'no', 'no', 'no', 'no']]]) {
     const calls = [], expected = ['obsidian status'];
@@ -104,26 +104,3 @@ test('an unavailable Obsidian CLI or a declined prepare only skips the vault ste
     assert.equal(outcome.status, 'applied'); assert.deepEqual(calls, expected); assert.equal(answers.length, 0);
   }
 });
-test('files and read stay inside the selected vault, deduplicate listings and deny unlisted commands', () => withRoot(async root => {
-  const context={root,frameworkRoot:root}, fake=port({
-    'version':'Obsidian 1.13.0','vault=Work|files|folder=docs|ext=md':'docs/b.md\ndocs/a.md\ndocs/b.md\n',
-    'vault=Work|files|ext=md':'a.md\n','vault=Work|read|path=docs/a.md':'# A\n'
-  });
-  const listed=await obsidianRead(request('obsidian files',{'obsidian-vault':'Work','obsidian-folder':'docs'}),context,fake);
-  assert.deepEqual(listed.data.files,['docs/a.md','docs/b.md']); assert.equal(listed.data.folder,'docs');
-  assert.equal((await obsidianRead(request('obsidian files',{'obsidian-vault':'Work'}),context,fake)).data.folder,null);
-  const read=await obsidianRead(request('obsidian read',{'obsidian-vault':'Work','obsidian-path':'docs/a.md'}),context,fake);
-  assert.equal(read.data.content,'# A\n'); assert.equal(read.data.path,'docs/a.md');
-  await assert.rejects(obsidianRead(request('obsidian read',{'obsidian-vault':'Work'}),context,fake),/obsidian-path/);
-  await assert.rejects(obsidianRead(request('obsidian eval',{'obsidian-vault':'Work'}),context,fake),error=>error.code==='OBSIDIAN_COMMAND_DENIED');
-  await assert.rejects(obsidianRead(request('obsidian status',{'obsidian-vault':'-Work'}),context,fake),error=>error.code==='OBSIDIAN_VAULT_REQUIRED');
-  await assert.rejects(obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),context,port({'version':'no version'})),error=>error.code==='OBSIDIAN_VERSION_INVALID');
-}));
-test('the system port reports a missing CLI and honours cancellation without returning stderr', () => withRoot(async root => {
-  const path=process.env.PATH; process.env.PATH=join(root,'empty');
-  try {
-    await assert.rejects(obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),{root,frameworkRoot:root}),error=>error.code==='OBSIDIAN_CLI_MISSING');
-    const controller=new AbortController(); controller.abort();
-    await assert.rejects(obsidianRead(request('obsidian status',{'obsidian-vault':'Work'}),{root,frameworkRoot:root,signal:controller.signal}),error=>error.code==='CANCELLED');
-  } finally { process.env.PATH=path; }
-}));

@@ -1,5 +1,5 @@
 import { setupDocumentation } from './docs-setup.ts';
-import { setupObsidian } from './obsidian-setup.ts';
+import { setupObsidian } from '../../../scripts/framework/obsidian-setup.ts';
 import { starterCatalog, derivedId, derivedName } from '../../../scripts/framework/starter-project.ts';
 import { readConfiguration } from '../../adapters/framework/files.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
