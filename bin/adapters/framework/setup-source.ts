@@ -1,4 +1,4 @@
-import { starterCatalog } from '../../../scripts/framework/starter-project.ts';
+import { starterCatalog } from './starter-project.ts';
 import { customizeStarter } from '../../../scripts/companion/starter-contract.mjs';
 import { migrateAuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
 import { serializeJson } from '../../../scripts/contracts/serialization.ts';
