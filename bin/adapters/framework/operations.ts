@@ -11,7 +11,7 @@ import { fixtureOperation } from './fixtures.ts';
 import { commandHelp, helpIndex } from './help-text.ts';
 import { operationSchemas } from './schema.ts';
 import { setupProgress } from './setup-progress.ts';
-import { starterListing, completeStarterProject } from '../../../scripts/framework/starter-project.ts';
+import { starterListing, completeStarterProject } from './starter-project.ts';
 import { storybookOperation } from './storybook.ts';
 import { submissionCheck } from '../../../scripts/framework/submission.ts';
 import { suggestions, didYouMean } from './suggest.ts';
