@@ -32,6 +32,11 @@ with sync_playwright() as playwright:
     assert page.locator(".appbar button").count()==4
     assert page.locator("#summary-panel").is_hidden()
     assert page.locator(".role-row").count()==5
+    assert page.locator(".iter-head.time-focus").count()==1
+    page.locator("#timeline-scroll").evaluate("el => el.scrollLeft = 900")
+    page.locator("#focus-iteration-btn").click()
+    page.wait_for_timeout(250)
+    assert page.locator("#timeline-scroll").evaluate("el => el.scrollLeft") < 900
     assert page.locator("#workspace").count()==0  # workspace is a semantic class, not another wrapper ID
     assert page.locator(".workspace").bounding_box()["y"] < 135
     assert page.locator(".summary-chip").count()==3
@@ -43,6 +48,9 @@ with sync_playwright() as playwright:
     assert page.locator(".summary-metric").count()==8
     assert page.locator(".summary-check").count()==5
     assert page.locator(".kpi").count()==0
+    assert "Covered forecast" in page.locator("#kpis").inner_text()
+    assert "456 h" in page.locator("#kpis").inner_text()  # allocated task work, not role capacity minus open scope
+    assert "83,5%" in page.locator("#kpis").inner_text()
     page.locator("#summary-close").click()
     assert page.locator("#summary-panel").is_hidden()
 
@@ -125,8 +133,13 @@ with sync_playwright() as playwright:
     assert page.locator("#backlog .task-card").filter(has_text="Threat modelling").count()==1
 
     allocation=page.locator(".allocation-card").filter(has_text="Threat modelling")
+    allocation.focus()
+    page.keyboard.press("Enter")
+    assert "edit" in page.locator("#dialog-title").inner_text().lower()
+    page.keyboard.press("Escape")
     allocation.locator('[data-action="record-actual"]').click()
     page.locator('input[name="hours"]').fill("4")
+    assert page.locator('input[name="dayRate"]').input_value()=="1100"
     submit(page)
     assert "4" in page.locator(".allocation-card").filter(has_text="Threat modelling").inner_text()
 
@@ -161,6 +174,7 @@ with sync_playwright() as playwright:
 
     open_manage(page,"compare-plans","Compare resource plans")
     assert page.locator(".compare-table tbody tr").count()>=2
+    assert "Coverage" in page.locator(".compare-table thead").inner_text()
     page.keyboard.press("Escape")
     open_manage(page,"audit","Audit & revisions")
     assert page.locator(".audit-row").count()>=8
@@ -174,6 +188,11 @@ with sync_playwright() as playwright:
     with page.expect_download() as markdown:
         page.locator('[data-action="export-markdown"]').click()
     assert markdown.value.suggested_filename.endswith(".zip")
+    import zipfile
+    with zipfile.ZipFile(markdown.value.path()) as archive:
+        assert any("/Actuals/" in name for name in archive.namelist())
+        actual_name=next(name for name in archive.namelist() if "/Actuals/" in name and name.endswith(".md"))
+        assert "dayRate:" in archive.read(actual_name).decode("utf-8")
     page.keyboard.press("Escape")
 
     # JSON export/import are real Manage actions.
@@ -181,6 +200,9 @@ with sync_playwright() as playwright:
     with page.expect_download() as exported:
         page.locator('[data-action="export-workspace"]').click()
     assert exported.value.suggested_filename.endswith(".json")
+    import json
+    exported_state=json.loads(Path(exported.value.path()).read_text(encoding="utf-8"))
+    assert any(float(item.get("hours",0))==4 and float(item.get("dayRate",0))==1100 for item in exported_state["project"]["actuals"])
     page.keyboard.press("Escape")
     open_dialog(page,"#manage-btn","Manage Capacity Planner")
     with page.expect_file_chooser():

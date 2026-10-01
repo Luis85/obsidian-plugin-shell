@@ -1,6 +1,6 @@
 import {$,activeScenario,announce,commit,dialog,importInput,save,stateRef} from "./core.ts";
 import {exportWorkspace,exportMarkdownZip,importWorkspace} from "./persistence.ts";
-import {render,renderSummaryVisibility} from "./render.ts";
+import {jumpToFocusIteration,render,renderSummaryVisibility} from "./render.ts";
 import {activateScenario,archiveScenario,duplicateScenario,newPlanDialog,planSettingsDialog,projectTimelineDialog,scenarioManagerDialog} from "./dialogs-plan.ts";
 import {fteDialog,personAvailabilityDialog,personDialog,roleDialog,teamDialog} from "./dialogs-team.ts";
 import {actualDialog,allocationDialog,removeAllocation,taskDialog} from "./dialogs-work.ts";
@@ -48,7 +48,7 @@ function handleAction(target) {
 function setSummary(expanded){stateRef.summaryExpanded=expanded;renderSummaryVisibility();}
 
 document.addEventListener("click",event=>{const target=event.target?.closest?.("button[data-action]");if(target)handleAction(target);});
-document.addEventListener("keydown",event=>{if(event.key==="Escape"&&dialog.open){dialog.close();return;}const card=event.target?.closest?.(".backlog-card");if(card&&(event.key==="Enter"||event.key===" ")&&!event.target.closest?.("button")){event.preventDefault();allocationDialog(card.dataset.taskId);}});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&dialog.open){dialog.close();return;}if(!(event.key==="Enter"||event.key===" ")||event.target.closest?.("button"))return;const backlog=event.target?.closest?.(".backlog-card");if(backlog){event.preventDefault();allocationDialog(backlog.dataset.taskId);return;}const card=event.target?.closest?.(".allocation-card");if(card){const allocation=activeScenario().allocations.find(item=>item.id===card.dataset.allocationId);if(allocation){event.preventDefault();allocationDialog(allocation.taskId,allocation.id);}}});
 document.addEventListener("capacity-drop",event=>{const {taskId,allocationId,roleId,iterationId}=event.detail||{};if(taskId)allocationDialog(taskId,null,roleId,iterationId);else if(allocationId){const allocation=activeScenario().allocations.find(item=>item.id===allocationId);if(allocation)allocationDialog(allocation.taskId,allocation.id,roleId,iterationId);}});
 
 $("#save-btn").addEventListener("click",()=>{const persisted=save();if(persisted)announce(`Workspace saved at revision r${stateRef.state.revision}.`);else{exportWorkspace();announce("Browser storage unavailable; downloaded a workspace backup instead.");}});
@@ -58,6 +58,7 @@ $("#add-task-btn").addEventListener("click",()=>taskDialog());
 $("#sidebar-add-task").addEventListener("click",()=>taskDialog());
 $("#summary-toggle").addEventListener("click",()=>setSummary(!stateRef.summaryExpanded));
 $("#summary-close").addEventListener("click",()=>setSummary(false));
+$("#focus-iteration-btn").addEventListener("click",jumpToFocusIteration);
 $("#scenario-select").addEventListener("change",event=>{stateRef.state.activeScenarioId=event.target.value;commit("scenario.activated",activeScenario().name);render();announce(`${activeScenario().name} opened.`);});
 $("#task-search").addEventListener("input",event=>{stateRef.taskFilter=event.target.value;render();});
 importInput.addEventListener("change",async()=>{if(importInput.files?.[0]&&await importWorkspace(importInput.files[0]))render();importInput.value="";});

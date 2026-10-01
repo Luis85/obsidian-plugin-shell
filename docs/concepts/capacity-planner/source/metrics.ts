@@ -14,13 +14,13 @@ function datesInLeave(leave,iteration,state) {
   return count;
 }
 export function personAvailability(person,iteration,state=stateRef.state) {
-  const project=state.project,days=workingDays(iteration,state),baseFte=Number(person.availabilityByIteration?.[iteration.id] ?? person.baseFte ?? 0),gross=baseFte*days*Number(project.hoursPerDay||8);
+  const project=state.project,days=workingDays(iteration,state),baseFte=person.inactive?0:Number(person.availabilityByIteration?.[iteration.id] ?? person.baseFte ?? 0),gross=baseFte*days*Number(project.hoursPerDay||8);
   const leaveHours=(person.leave||[]).reduce((sum,leave)=>sum+datesInLeave(leave,iteration,state)*Math.min(Number(project.hoursPerDay||8),Number(project.hoursPerDay||8)*baseFte),0);
   const hours=Math.max(0,gross-leaveHours),fte=days>0?hours/(days*Number(project.hoursPerDay||8)):0;
   return {hours,fte,leaveHours,workingDays:days};
 }
 export function roleEnvelope(role,iteration,state=stateRef.state) {
-  const people=state.project.people.filter(person=>person.roleId===role.id),days=workingDays(iteration,state),hoursPerDay=Number(state.project.hoursPerDay||8);
+  const people=state.project.people.filter(person=>!person.inactive&&person.roleId===role.id),days=workingDays(iteration,state),hoursPerDay=Number(state.project.hoursPerDay||8);
   if(people.length){const hours=people.reduce((sum,person)=>sum+personAvailability(person,iteration,state).hours,0);return{hours,fte:days>0?hours/(days*hoursPerDay):0,source:"people"};}
   const fte=Number(role.manualFte||0);return{hours:fte*days*hoursPerDay,fte,source:"manual"};
 }
@@ -37,7 +37,8 @@ export function cellAllocations(roleId,iterationId,scenario=activeScenario()){re
 export function cellLoad(roleId,iterationId,scenario=activeScenario()){return cellAllocations(roleId,iterationId,scenario).reduce((sum,item)=>sum+Number(item.hours||0),0);}
 export function actualHoursFor({taskId,roleId,personId,iterationId},state=stateRef.state){return state.project.actuals.filter(item=>item.taskId===taskId&&item.roleId===roleId&&item.iterationId===iterationId&&(!personId||item.personId===personId)).reduce((sum,item)=>sum+Number(item.hours||0),0);}
 export function cellActualHours(roleId,iterationId,state=stateRef.state){return state.project.actuals.filter(item=>item.roleId===roleId&&item.iterationId===iterationId).reduce((sum,item)=>sum+Number(item.hours||0),0);}
-export function cellActualCost(role,iteration,state=stateRef.state,scenario=activeScenario(state)) {const hours=cellActualHours(role.id,iteration,state),rate=rolePlan(role,iteration,scenario).rate;return hours/Number(state.project.hoursPerDay||8)*rate;}
+export function actualCostFor({taskId,roleId,personId,iterationId},state=stateRef.state){const hpd=Number(state.project.hoursPerDay||8);return state.project.actuals.filter(item=>item.taskId===taskId&&item.roleId===roleId&&item.iterationId===iterationId&&(!personId||item.personId===personId)).reduce((sum,item)=>sum+Number(item.hours||0)/hpd*Number(item.dayRate??roleById(roleId,state)?.dayRate??0),0);}
+export function cellActualCost(role,iteration,state=stateRef.state){const hpd=Number(state.project.hoursPerDay||8);return state.project.actuals.filter(item=>item.roleId===role.id&&item.iterationId===iteration.id).reduce((sum,item)=>sum+Number(item.hours||0)/hpd*Number(item.dayRate??role.dayRate??0),0);}
 export function personLoad(personId,iterationId,scenario=activeScenario()){return scenario.allocations.filter(item=>item.personId===personId&&item.iterationId===iterationId).reduce((sum,item)=>sum+Number(item.hours||0),0);}
 
 export function roleTotals(role,scenario=activeScenario()) {
@@ -46,17 +47,21 @@ export function roleTotals(role,scenario=activeScenario()) {
   result.budgetOver=Number(role.budgetCap||0)>0&&result.cost>Number(role.budgetCap)+.01;return result;
 }
 export function iterationTotals(iteration,scenario=activeScenario()) {
-  const result={plannedFte:0,envelopeFte:0,pt:0,hours:0,cost:0,load:0,actualHours:0,actualCost:0,envelopeBreaches:0,overloadCells:0,personOverloads:0};
+  const result={plannedFte:0,envelopeFte:0,pt:0,hours:0,cost:0,load:0,actualHours:0,actualCost:0,envelopeBreaches:0,overloadCells:0,personOverloads:0,roleLevelHours:0};
   for(const role of stateRef.state.project.roles){const p=rolePlan(role,iteration,scenario),e=roleEnvelope(role,iteration);result.plannedFte+=p.fte;result.envelopeFte+=e.fte;result.pt+=p.pt;result.hours+=p.hours;result.cost+=p.cost;result.load+=cellLoad(role.id,iteration.id,scenario);result.actualHours+=cellActualHours(role.id,iteration.id);result.actualCost+=cellActualCost(role,iteration,stateRef.state,scenario);if(p.hours>e.hours+.01)result.envelopeBreaches+=1;if(cellLoad(role.id,iteration.id,scenario)>p.hours+.01)result.overloadCells+=1;}
-  for(const person of stateRef.state.project.people)if(personLoad(person.id,iteration.id,scenario)>personAvailability(person,iteration).hours+.01)result.personOverloads+=1;
+  for(const person of stateRef.state.project.people.filter(item=>!item.inactive))if(personLoad(person.id,iteration.id,scenario)>personAvailability(person,iteration).hours+.01)result.personOverloads+=1;
+  result.roleLevelHours=(scenario.allocations||[]).filter(item=>item.iterationId===iteration.id&&!item.personId).reduce((sum,item)=>sum+Number(item.hours||0),0);
   return result;
 }
 export function scenarioMetrics(scenario=activeScenario()) {
-  const project=stateRef.state.project,hpd=Number(project.hoursPerDay||8),result={plannedHours:0,plannedLaborCost:0,actualHours:0,actualLaborCost:0,etcHours:0,etcLaborCost:0,envelopeBreaches:0,overloadCells:0,personOverloads:0,unallocatedHours:0,unallocatedTasks:0,nonLaborPlanned:0,nonLaborActual:0,nonLaborForecast:0};
-  for(const role of project.roles){for(const it of project.iterations){const p=rolePlan(role,it,scenario),planned=cellLoad(role.id,it.id,scenario),actual=cellActualHours(role.id,it.id),remaining=Math.max(0,planned-actual);result.plannedHours+=p.hours;result.plannedLaborCost+=p.cost;result.actualHours+=actual;result.actualLaborCost+=actual/hpd*p.rate;result.etcHours+=remaining;result.etcLaborCost+=remaining/hpd*p.rate;const e=roleEnvelope(role,it);if(p.hours>e.hours+.01)result.envelopeBreaches+=1;if(planned>p.hours+.01)result.overloadCells+=1;}}
-  for(const it of project.iterations)for(const person of project.people)if(personLoad(person.id,it.id,scenario)>personAvailability(person,it).hours+.01)result.personOverloads+=1;
-  for(const task of project.tasks){const remaining=remainingTaskHours(task,scenario);result.unallocatedHours+=remaining;if(remaining>.01)result.unallocatedTasks+=1;}
+  const project=stateRef.state.project,hpd=Number(project.hoursPerDay||8),activeTasks=project.tasks.filter(task=>!task.inactive),result={plannedHours:0,plannedLaborCost:0,actualHours:0,actualLaborCost:0,etcHours:0,etcLaborCost:0,envelopeBreaches:0,overloadCells:0,personOverloads:0,roleLevelAllocationHours:0,unallocatedHours:0,unallocatedTasks:0,scopeHours:0,allocatedScopeHours:0,unownedTasks:0,teamlessTasks:0,nonLaborPlanned:0,nonLaborActual:0,nonLaborForecast:0};
+  for(const role of project.roles){for(const it of project.iterations){const p=rolePlan(role,it,scenario),planned=cellLoad(role.id,it.id,scenario),actual=cellActualHours(role.id,it.id),remaining=Math.max(0,planned-actual);result.plannedHours+=p.hours;result.plannedLaborCost+=p.cost;result.actualHours+=actual;result.actualLaborCost+=cellActualCost(role,it);result.etcHours+=remaining;result.etcLaborCost+=remaining/hpd*p.rate;const e=roleEnvelope(role,it);if(p.hours>e.hours+.01)result.envelopeBreaches+=1;if(planned>p.hours+.01)result.overloadCells+=1;}}
+  for(const it of project.iterations)for(const person of project.people.filter(item=>!item.inactive))if(personLoad(person.id,it.id,scenario)>personAvailability(person,it).hours+.01)result.personOverloads+=1;
+  result.roleLevelAllocationHours=(scenario.allocations||[]).filter(item=>!item.personId).reduce((sum,item)=>sum+Number(item.hours||0),0);
+  for(const task of activeTasks){const estimate=taskEstimateHours(task),remaining=remainingTaskHours(task,scenario);result.scopeHours+=estimate;result.allocatedScopeHours+=Math.max(0,estimate-remaining);result.unallocatedHours+=remaining;if(remaining>.01)result.unallocatedTasks+=1;if(!task.ownerPersonId)result.unownedTasks+=1;if(!(task.assigneeIds||[]).length)result.teamlessTasks+=1;}
   for(const cost of scenario.nonLaborCosts||[]){const planned=Number(cost.planned||0),actual=Number(cost.actual||0);result.nonLaborPlanned+=planned;result.nonLaborActual+=actual;result.nonLaborForecast+=Math.max(planned,actual);}
+  result.scopeCoverage=result.scopeHours>0?result.allocatedScopeHours/result.scopeHours:1;
+  result.forecastComplete=result.unallocatedHours<=.01;
   result.plannedInternalCost=result.plannedLaborCost+result.nonLaborPlanned;
   result.actualInternalCost=result.actualLaborCost+result.nonLaborActual;
   result.forecastInternalCost=result.actualLaborCost+result.etcLaborCost+result.nonLaborForecast;
@@ -66,6 +71,7 @@ export function scenarioMetrics(scenario=activeScenario()) {
   result.marginPct=Number(project.orderValue||0)>0?result.margin/Number(project.orderValue):0;
   return result;
 }
+
 export function baselineComparison(baseline,scenario=activeScenario()) {
   const current=scenarioMetrics(scenario),summary=baseline?.summary||{};
   return {costDelta:current.forecastWithContingency-Number(summary.forecastWithContingency||0),hoursDelta:current.plannedHours-Number(summary.plannedHours||0),marginDelta:current.margin-Number(summary.margin||0),taskDelta:current.unallocatedTasks-Number(summary.unallocatedTasks||0)};

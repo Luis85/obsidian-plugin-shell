@@ -94,11 +94,11 @@ function baseProject() {
       {id:"task-9",title:"Operational handover",units:5,ownerPersonId:"person-alex",assigneeIds:["person-alex","person-sam"]}
     ],
     actuals:[
-      {id:"actual-1",taskId:"task-1",roleId:"role-dm",personId:"person-alex",iterationId:iterations[0].id,hours:18},
-      {id:"actual-2",taskId:"task-2",roleId:"role-ba",personId:"person-sam",iterationId:iterations[0].id,hours:30},
-      {id:"actual-3",taskId:"task-4",roleId:"role-dev",personId:"person-lin",iterationId:iterations[1].id,hours:32}
+      {id:"actual-1",taskId:"task-1",roleId:"role-dm",personId:"person-alex",iterationId:iterations[0].id,hours:18,dayRate:950},
+      {id:"actual-2",taskId:"task-2",roleId:"role-ba",personId:"person-sam",iterationId:iterations[0].id,hours:30,dayRate:850},
+      {id:"actual-3",taskId:"task-4",roleId:"role-dev",personId:"person-lin",iterationId:iterations[1].id,hours:32,dayRate:900}
     ],
-    persistence:{basePath:"Projects/Custom Order Platform",projectPath:"Project",scenarioPath:"Capacity Plans",iterationPath:"Iterations",rolePath:"Roles",personPath:"People",taskPath:"Tasks",baselinePath:"Baselines",auditPath:"Audit",conflictPolicy:"warn"}
+    persistence:{basePath:"Projects/Custom Order Platform",projectPath:"Project",scenarioPath:"Capacity Plans",iterationPath:"Iterations",rolePath:"Roles",personPath:"People",taskPath:"Tasks",actualPath:"Actuals",baselinePath:"Baselines",auditPath:"Audit",conflictPolicy:"warn"}
   };
 }
 function baseScenario(project) {
@@ -133,7 +133,12 @@ export function baseState() {
 
 export function normalizeWorkspace(workspace) {
   if(!workspace?.project)return workspace;
-  const people=new Set((workspace.project.people||[]).map(person=>person.id));
+  workspace.project.actuals=Array.isArray(workspace.project.actuals)?workspace.project.actuals:[];
+  workspace.project.persistence=workspace.project.persistence||{};if(!workspace.project.persistence.actualPath)workspace.project.persistence.actualPath="Actuals";
+  workspace.baselines=Array.isArray(workspace.baselines)?workspace.baselines:[];
+  workspace.audit=Array.isArray(workspace.audit)?workspace.audit:[];
+  const people=new Set((workspace.project.people||[]).map(person=>person.id)),roles=new Map((workspace.project.roles||[]).map(role=>[role.id,role]));
+  for(const scenario of workspace.scenarios||[]){scenario.allocations=Array.isArray(scenario.allocations)?scenario.allocations:[];scenario.nonLaborCosts=Array.isArray(scenario.nonLaborCosts)?scenario.nonLaborCosts:[];scenario.rolePlans=scenario.rolePlans||{};}
   for(const task of workspace.project.tasks||[]){
     const inferred=[];
     for(const scenario of workspace.scenarios||[])for(const allocation of scenario.allocations||[])if(allocation.taskId===task.id&&allocation.personId&&people.has(allocation.personId))inferred.push(allocation.personId);
@@ -143,6 +148,7 @@ export function normalizeWorkspace(workspace) {
     if(task.ownerPersonId&&!task.assigneeIds.includes(task.ownerPersonId))task.assigneeIds.unshift(task.ownerPersonId);
     if(task.ownerPersonId===undefined)task.ownerPersonId=null;
   }
+  for(const actual of workspace.project.actuals){if(!Number.isFinite(Number(actual.dayRate)))actual.dayRate=Number(roles.get(actual.roleId)?.dayRate||0);}
   return workspace;
 }
 
@@ -155,18 +161,40 @@ export function iterationById(id,state=stateRef.state){return state.project.iter
 export function validate(candidate) {
   if(!candidate||candidate.schema!=="capacity-planner.workspace"||candidate.version!==VERSION)return"Unsupported capacity-planner workspace version.";
   if(!candidate.id||!candidate.project||!Array.isArray(candidate.scenarios)||!candidate.scenarios.length)return"Workspace structure is incomplete.";
-  if(!candidate.project.name||!Array.isArray(candidate.project.iterations)||!candidate.project.iterations.length)return"Project timeline is missing.";
-  if(!Array.isArray(candidate.project.roles)||!Array.isArray(candidate.project.people)||!Array.isArray(candidate.project.tasks))return"Project resources are incomplete.";
+  const project=candidate.project;
+  if(!project.name||!Array.isArray(project.iterations)||!project.iterations.length)return"Project timeline is missing.";
+  if(!Array.isArray(project.roles)||!Array.isArray(project.people)||!Array.isArray(project.tasks)||!Array.isArray(project.actuals))return"Project resources are incomplete.";
   if(!candidate.scenarios.some(item=>item.id===candidate.activeScenarioId))return"Active resource plan is missing.";
   const ids=(items)=>{const set=new Set();for(const item of items){if(!item?.id||set.has(item.id))return false;set.add(item.id);}return true;};
-  if(!ids(candidate.project.iterations)||!ids(candidate.project.roles)||!ids(candidate.project.people)||!ids(candidate.project.tasks)||!ids(candidate.scenarios))return"Duplicate or missing identities detected.";
-  const personIds=new Set(candidate.project.people.map(person=>person.id));
-  for(const task of candidate.project.tasks){
-    if(task.ownerPersonId&& !personIds.has(task.ownerPersonId))return `Task ${task.title||task.id} refers to a missing owner.`;
+  if(!ids(project.iterations)||!ids(project.roles)||!ids(project.people)||!ids(project.tasks)||!ids(project.actuals)||!ids(candidate.scenarios))return"Duplicate or missing identities detected.";
+  const iterationIds=new Set(project.iterations.map(item=>item.id)),roleIds=new Set(project.roles.map(item=>item.id)),personIds=new Set(project.people.map(item=>item.id)),taskIds=new Set(project.tasks.map(item=>item.id));
+  for(const person of project.people)if(!roleIds.has(person.roleId))return `Person ${person.name||person.id} refers to a missing role.`;
+  for(const task of project.tasks){
+    if(task.ownerPersonId&&!personIds.has(task.ownerPersonId))return `Task ${task.title||task.id} refers to a missing owner.`;
     if(task.assigneeIds!==undefined&&(!Array.isArray(task.assigneeIds)||task.assigneeIds.some(id=>!personIds.has(id))))return `Task ${task.title||task.id} has invalid assigned people.`;
+    if(!Number.isFinite(Number(task.units))||Number(task.units)<0)return `Task ${task.title||task.id} has an invalid estimate.`;
+  }
+  for(const actual of project.actuals){
+    if(!taskIds.has(actual.taskId)||!roleIds.has(actual.roleId)||!iterationIds.has(actual.iterationId)||actual.personId&&!personIds.has(actual.personId))return"An actual-effort record has an invalid task, role, person or iteration reference.";
+    if(!Number.isFinite(Number(actual.hours))||Number(actual.hours)<=0||actual.dayRate!==undefined&&(!Number.isFinite(Number(actual.dayRate))||Number(actual.dayRate)<0))return"An actual-effort record has invalid hours or rate.";
+  }
+  for(const scenario of candidate.scenarios){
+    if(!Array.isArray(scenario.allocations)||!Array.isArray(scenario.nonLaborCosts))return `Resource plan ${scenario.name||scenario.id} is incomplete.`;
+    if(!ids(scenario.allocations)||!ids(scenario.nonLaborCosts))return `Resource plan ${scenario.name||scenario.id} has duplicate allocation or cost identities.`;
+    const allocated=new Map();
+    for(const allocation of scenario.allocations){
+      if(!taskIds.has(allocation.taskId)||!roleIds.has(allocation.roleId)||!iterationIds.has(allocation.iterationId)||allocation.personId&&!personIds.has(allocation.personId))return `Resource plan ${scenario.name||scenario.id} has an invalid allocation reference.`;
+      if(allocation.personId&&project.people.find(person=>person.id===allocation.personId)?.roleId!==allocation.roleId)return `Allocation person does not belong to its selected role.`;
+      const hours=Number(allocation.hours);if(!Number.isFinite(hours)||hours<=0)return"Task allocation hours must be positive.";
+      allocated.set(allocation.taskId,(allocated.get(allocation.taskId)||0)+hours);
+    }
+    for(const [taskId,hours] of allocated){const task=project.tasks.find(item=>item.id===taskId),estimate=Number(task?.units||0)*Number(project.hoursPerUnit||0);if(hours>estimate+.01)return `Task ${task?.title||taskId} is allocated beyond its estimate.`;}
+    for(const roleId of Object.keys(scenario.rolePlans||{}))if(!roleIds.has(roleId))return `Resource plan ${scenario.name||scenario.id} refers to a missing role plan.`;
+    for(const cost of scenario.nonLaborCosts)if(!Number.isFinite(Number(cost.planned))||Number(cost.planned)<0||!Number.isFinite(Number(cost.actual))||Number(cost.actual)<0)return"Non-labor costs must be non-negative numbers.";
   }
   return null;
 }
+
 function load() {
   try{
     const raw=localStorage.getItem(STORAGE_KEY);

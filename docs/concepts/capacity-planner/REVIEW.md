@@ -1,156 +1,163 @@
-# Capacity Planner — closure of the comprehensive product review
+# Capacity Planner — comprehensive product review and polishing pass 3
 
-This pass closes the ten product decisions left open by the previous review and fixes the reported no-op Save/New-plan experience. The concept is now a coherent project-capacity model rather than a collection of independent planning widgets.
+Review baseline: PR #62, `feat/cli-release-journey`, head `c1cfa2bf032a483a6c922c3c92512637d976bed6` at the start of this pass.
 
-## Product model after this pass
+This pass reviews the current Capacity Planner as a delivery-manager decision surface for a custom software order. It deliberately distinguishes project facts (timeline, people, tasks, actuals) from resource-plan assumptions (FTE, rates, allocations, budget, contingency, non-labor cost) and evaluates whether the UI supports a manager making staffing, scope and commercial decisions without overclaiming precision.
 
-### Project facts versus scenario assumptions
+## Review result
 
-The key architectural decision is separation of facts from assumptions.
+The previous UI-focus pass fixed the largest information-hierarchy problem: the current plan is now above the fold and Summary is secondary. The remaining high-impact findings were mostly **decision-integrity** rather than visual defects:
 
-**Project facts** are shared by every resource plan:
+1. the summary displayed allocated work using a capacity-derived formula, producing an incorrect value;
+2. budget variance and margin looked like complete EAC values even while estimated scope remained unallocated and therefore unpriced;
+3. shared project actuals were costed using the currently selected scenario's rates, so actual cost could change when comparing scenarios;
+4. role availability still included inactive people;
+5. role-level allocations with no named person were not surfaced as an incomplete staffing decision;
+6. inactive tasks could continue contributing to open-scope metrics;
+7. workspace import validation covered only part of the cross-entity model;
+8. the wide timeline lacked orientation to the current/next iteration;
+9. allocation cards were keyboard-focusable but Enter/Space did not perform the equivalent edit action;
+10. dialog focus was not restored to the invoking control;
+11. Markdown handoff exported plans and tasks but omitted the project's actual-effort records.
 
-- project identity and order value;
-- canonical iterations and timeline authority;
-- working weekdays and holidays;
-- role catalog and role commercial defaults;
-- named people, leave and availability overrides;
-- task catalog;
-- actual effort;
-- persistence paths and conflict policy;
-- audit/revision history.
+All eleven findings are addressed in this pass.
 
-**Scenario assumptions** are plan-specific:
+## Product-perspective review
 
-- resource budget;
-- contingency and margin target;
-- planned FTE per role/iteration;
-- iteration-specific rate overrides;
-- task allocation slices;
-- non-labor planned/actual values;
-- draft/approved status.
+| Perspective | Finding | Improvement |
+| --- | --- | --- |
+| Product outcome | The prototype exposed a large amount of planning data, but some summary numbers could imply more certainty than the plan actually contained. | Summary and commercials now explicitly distinguish **covered forecast** from full forecast while scope remains unallocated. |
+| Primary user / JTBD | A delivery manager needs to know what is staffed, what is still open, what is commercially credible, and where to act next. | Summary now reports real scope allocation coverage; planning checks surface role-level unnamed work, missing ownership/team decisions and unpriced scope. |
+| Domain model | Project actuals are shared facts, but cost depended on whichever scenario was open. | Actual entries snapshot their EUR/PT rate when booked. Actual cost is therefore stable across resource-plan scenarios. |
+| Scope planning | `Allocated work` was calculated as role capacity minus unallocated task scope. Capacity and task scope are different quantities. | Added explicit `scopeHours`, `allocatedScopeHours`, `unallocatedHours` and `scopeCoverage`. Sample plan now correctly shows 546 h scope, 456 h allocated and 90 h open. |
+| Forecasting | EAC/margin appeared complete with 90 h of scope still unallocated. | Incomplete plans use **Covered forecast**, **Covered variance**, and **Covered margin**, with forecast coverage shown prominently. |
+| Staffing | Allocations could remain at role level with no named person but were not visible in the global staffing condition. | Metrics now count role-level allocation hours and flag them as work still requiring named staffing. |
+| People availability | Inactive people still contributed hours to a role envelope. | Inactive people now contribute zero availability and are excluded from people-derived role envelopes. |
+| Task lifecycle | Archived tasks could still contribute open scope. | Scope metrics and the unallocated-work queue now operate on active tasks only. |
+| Task accountability | Owner + many assigned people are already explicit, but missing ownership/team information did not affect planning checks. | Scope checks now show counts of active tasks without an owner or without assigned people. |
+| Commercial integrity | Actual-cost changes between scenarios would undermine comparison/baseline trust. | Actual rate is stored on the booking; scenario rates now affect ETC/planned cost, not historical actual cost. |
+| Scenario comparison | Plans with different degrees of allocation could be compared as though their forecasts had equal completeness. | Compare Plans now includes a **Coverage** column and labels partial forecast values as covered. |
+| Information architecture | The compact plan-first layout is strong, but an eight-plus iteration horizontal matrix has weak temporal orientation. | Added a compact **Current/Next/Latest iteration** control and a subtle highlighted focus column. |
+| Matrix readability | Iteration totals and cells showed issues, but role-level unnamed work was hidden. | Iteration summaries and cells now include unnamed-person hours when present. |
+| Navigation | Archived roles could continue cluttering a current-plan board even when no current scenario data referenced them. | Current-plan rows hide inactive roles unless they still contain planned FTE or allocations in the active scenario. |
+| Accessibility | Backlog cards supported keyboard assignment; allocated cards did not have equivalent keyboard activation. | Enter/Space on an allocated card now opens its allocation editor. |
+| Dialog accessibility | Closing a dialog did not reliably return focus to the invoking control. | The shared dialog layer now preserves and restores the original opener, including nested Manage flows. |
+| Data integrity | Import validation mostly checked top-level identity and task people references. | Validation now checks iteration/role/person/task/actual/allocation/non-labor references, person-role consistency, positive hours/rates and allocation totals against task estimates. |
+| Persistence | Actual effort was not represented as canonical Markdown output. | Added an `Actuals` path and one frontmatter-backed Markdown record per actual booking, including snapshotted rate. |
+| Responsiveness | Plan-first/mobile behavior from the prior pass remains effective. | New focus controls wrap into the board toolbar without reintroducing header density. |
+| Maintainability | Source modules were already below the repository's handwritten-code ceiling. | Changes remain within the existing module boundaries; no new runtime dependency or production code path was introduced. |
 
-This prevents cloning a resource plan from creating a second truth for iteration dates, people or actuals.
+## Decision model after this pass
 
-## Closure of the previous remaining items
+### Project facts
 
-| Previous open item | Decision and implementation in this pass |
-| --- | --- |
-| Multiple plans / scenarios | A project now owns multiple named resource plans. New Plan can clone the active plan or start blank. Plans can be selected, compared, duplicated and archived. |
-| Iteration authority | Iterations moved to the project layer. `timelineOwner` explicitly identifies Capacity Project or upstream Iteration Planner authority. Upstream mode accepts stable iteration IDs as canonical JSON; scenarios never own dates. |
-| Variable role availability | Exact working dates use configured weekdays minus project holidays. People contribute base FTE or iteration override; working-day leave reduces available hours. Role availability is derived from active people, with manual FTE only as a fallback. |
-| People versus roles | Named people are first-class project entities assigned to roles. Task slices may optionally name a person, enabling person-level overload checks while still permitting role-level planning. |
-| Task span | Tasks now have multiple allocation slices. A single estimate may span roles, iterations and people; remaining estimate stays in Unallocated Work until fully distributed. |
-| Actuals and reforecasting | Actual hours are project facts shared across plans. Forecast separates actual labor, remaining allocated work (ETC), forecast non-labor and contingency. EAC/forecast and margin update as actuals arrive. |
-| Commercial depth | Added order value, plan budget, contingency, target margin, non-labor planned/actual costs, role budget buckets and iteration-specific rate overrides. |
-| Collaboration/versioning | Every mutation increments a revision and appends an audit record. Baselines are immutable snapshots with optional approval and restore-as-new-plan. Import compares revision tokens and supports warn or block-older conflict policy. This is the prototype's explicit single-file concurrency contract. |
-| Obsidian persistence | Configurable canonical paths now exist for project, scenarios, iterations, roles, people, tasks, baselines and audit. The prototype generates real Markdown/frontmatter bytes and packages them as an offline ZIP. Native vault writes remain an implementation adapter, not simulated browser writes. |
-| Host theming | Prototype variables consume Obsidian-style host tokens first and use local fallbacks only when hosted standalone. Production should connect the same semantic variables through the repo's Nuxt UI/Obsidian style pipeline. |
+- shared iterations and calendar;
+- roles and people;
+- people availability, leave and active/inactive state;
+- task estimates, owner and assigned people;
+- actual effort with snapshotted booking rate;
+- order value;
+- canonical persistence paths.
 
-## No-op and save defect review
+### Resource-plan assumptions
 
-The previous dialog pattern used `method="dialog"` together with an intercepted submit event. Although the flow could work in some browser states, it was unnecessarily ambiguous and produced the reported experience that Save/Create controls did nothing.
+- planned FTE by role and iteration;
+- scenario rate overrides for future/planned work;
+- task allocation slices by role, iteration and optional named person;
+- resource budget and contingency;
+- target margin;
+- non-labor planned/actual items.
 
-The new dialog contract uses:
+This separation is important: changing a forecast assumption must not rewrite historical actual cost.
 
-1. a normal `<form>`;
-2. a normal submit button;
-3. explicit `reportValidity()`;
-4. an explicit mutation callback;
-5. revision/audit update;
-6. persistence attempt;
-7. rerender and visible status message.
+## Forecast semantics
 
-There is also a top-level **Save** button. When local storage works it persists the workspace. When browser storage is unavailable, Save downloads the current JSON workspace instead. It therefore never silently succeeds without a durable result.
+The planner now distinguishes three different quantities:
 
-A static no-op gate scans all source-rendered `data-action` values and static frame buttons. A browser journey then performs the main actions and checks the resulting state or download. This prevents future visual controls from being added without behavior.
+- **Estimated scope** — total hours implied by active task estimates;
+- **Allocated scope** — task hours placed into role/iteration slices;
+- **Planned capacity** — role hours available in the active resource plan.
 
-## Product perspectives
+They are intentionally not interchangeable.
 
-### Delivery management
+When allocation coverage is below 100%, the commercial view says **Covered forecast** rather than EAC. The unallocated hours remain an explicit unpriced uncertainty. The planner does not invent a blended rate for scope that has no role or iteration yet.
 
-The manager can answer, per project, plan, role, iteration and person:
+Once all active estimated scope is allocated, the same metrics become normal Forecast / EAC, variance and margin values.
 
-- what capacity exists;
-- what capacity is planned;
-- what work is allocated;
-- where staffing or work exceeds capacity;
-- what has actually been spent;
-- what remains to complete the allocated plan;
-- whether the forecast fits the resource budget;
-- whether forecast margin meets the commercial target;
-- what changed from the approved baseline.
+## Staffing semantics
 
-### Resource management
+Task team membership and capacity consumption remain separate:
 
-Availability is no longer a manually typed role envelope when named staff exists. People, FTE patterns, leave and holidays derive the envelope. Role-level fallback remains useful for early-stage planning before staffing names are known.
+- one task owner is accountable;
+- zero or more assigned people identify the task team;
+- allocation slices consume hours from a role/iteration and may name one person;
+- role-level slices without a person are permitted for early scenario design but now remain visibly incomplete staffing decisions.
 
-### Work planning
+Inactive people no longer count toward role availability. Existing task/team references can still retain inactive people for historical continuity, but they do not contribute future capacity.
 
-Task estimates remain independent from allocations. This avoids forcing a work item into one role/iteration just to use the capacity matrix. Partial allocations preserve the unallocated remainder and make handoffs/splits explicit.
+## Timeline orientation
 
-### Finance / commercial management
+The plan board now identifies one temporal focus iteration:
 
-The planner now distinguishes order value, internal resource budget, planned labor, actual labor, ETC labor, non-labor costs, contingency and margin. The concept is still not an accounting ledger, but it no longer collapses all commercial reasoning into one budget number.
+1. iteration containing today's date;
+2. otherwise the next future iteration;
+3. otherwise the latest iteration when the plan is historical.
 
-### Governance
+The focused column is subtly highlighted and the board offers a single button to scroll back to it. This improves navigation without adding another toolbar or persistent control row.
 
-Baseline snapshots are immutable. Approval attaches to the snapshot, not to mutable live plan data. Restore creates a new scenario, preserving the audit trail. Revision tokens and conflict policy make import replacement behavior explicit.
+## Import and persistence integrity
 
-### Obsidian / implementation fit
+Capacity Planner v2 import now rejects workspaces with:
 
-The standalone browser does not pretend to have vault APIs. Instead it produces the exact file paths and Markdown/frontmatter payloads the future Obsidian adapter would write. That makes persistence inspectable without coupling the concept to a fake native API.
+- missing or duplicate core identities;
+- people referencing missing roles;
+- tasks referencing missing owners/assignees;
+- actuals referencing missing task/role/person/iteration;
+- invalid actual hours/rates;
+- allocations referencing missing entities;
+- a named allocation person whose role does not match the allocation role;
+- non-positive allocation hours;
+- allocations exceeding the task estimate;
+- role plans referencing missing roles;
+- invalid non-labor cost values.
 
-### Accessibility and interaction
+Normalization remains intentionally small and safe: missing historical `dayRate` on a v2 actual is filled from its role's default rate, task team membership is reconciled with existing named allocations, and the new `Actuals` persistence path receives a default when absent.
 
-Primary workflows have button alternatives to drag/drop. Dialog submit behavior is standard form behavior. Status changes are textual as well as color-coded. The matrix remains horizontally scrollable; narrow layouts keep Save/New Plan and planning checks visible.
+## Accessibility and interaction polish
 
-## Validation boundary
+- Summary remains collapsed by default.
+- Drag/drop still has explicit Allocate/Edit controls.
+- Backlog cards use Enter/Space for allocation.
+- Allocation cards now use Enter/Space for editing.
+- Dialog Close/Escape restores focus to the original opener when it still exists.
+- Current/next iteration highlighting is not the sole signal; the focus control has text.
+- Existing reduced-motion behavior is retained.
 
-The pass has strong browser-prototype evidence but is not production qualification. Specifically not claimed:
+## Verification scope
 
-- native Obsidian file writes;
-- live synchronization with the existing Iteration Planner;
-- multi-process locking across two Obsidian clients;
-- payroll, invoice or accounting compliance;
-- repository-pinned TypeScript 6.0.3 qualification in the local environment.
+The repeatable browser journey now additionally verifies:
 
-Those are implementation/qualification concerns rather than unresolved product-model decisions.
+- correct 546 h / 456 h / 90 h scope math;
+- 83.5% forecast coverage on the sample plan;
+- partial forecast labeling;
+- current/next iteration focus navigation;
+- allocation-card keyboard editing;
+- actual-rate snapshot persistence;
+- Markdown export of actual records and their day rate;
+- Compare Plans coverage column;
+- dialog focus restoration.
 
-## UI-focused improvement and polishing pass
+The static action gate continues to fail on any visible delegated action or static button without a handler.
 
-This pass changes the information hierarchy rather than adding another layer of controls.
+## Remaining production boundaries
 
-### Header and first-screen priority
+These are integration boundaries rather than unresolved prototype defects:
 
-The previous screen spent two stacked bands on application actions and plan controls before the capacity matrix, followed by a seven-card KPI grid and a full-width planning-check row. At a 1440×900 viewport, the user had to visually traverse product chrome, toolbar actions, KPIs and checks before reaching the current plan.
+- the standalone concept still exports Markdown instead of writing through a native Obsidian adapter;
+- multi-user locking, merge/conflict resolution and authorization are not simulated by the single-browser prototype;
+- external time-booking, HR/calendar and finance-system integrations are not connected;
+- national/regional holiday calendars must be supplied by a production calendar source if required;
+- very large portfolios would need virtualization/pagination beyond the prototype's 100-iteration generation guard;
+- production must reuse the repository's Vue/Pinia/Nuxt UI/Obsidian host pipeline rather than transplanting the standalone implementation directly.
 
-The revised hierarchy is:
-
-1. **46px command bar** — Capacity identity, active plan selector, storage/revision state, `+ Task`, Save, New plan and one Manage entrypoint.
-2. **Current-plan strip** — scenario title/status and compact project/timeline context, plus three tiny decision signals.
-3. **Current plan matrix** — the main working surface.
-4. **Optional Summary** — collapsed by default; expands into compact Commercial, Delivery and Planning-check groups.
-
-Secondary actions no longer compete with the plan. Plan settings, project/timeline, team, commercials, plan management/comparison, baselines, audit, persistence and exchange are grouped in one Manage dialog.
-
-### KPI redesign
-
-The seven large KPI cards and separate checks row are no longer rendered. The collapsed state exposes only three deliberately small signals: budget variance, unallocated hours and issue count. Expanding Summary shows eight compact metrics in two semantic groups and five concise planning checks. This preserves decision support without making summary information the visual center of the application.
-
-The expanded state also deliberately reduces the matrix viewport; collapsing it immediately gives that space back to planning.
-
-### Task ownership and many-person assignment
-
-Task staffing now has two project-level concepts independent of scenario allocation:
-
-- **Owner** — one accountable person (`ownerPersonId`).
-- **Assigned people** — zero or more contributors (`assigneeIds`).
-
-The owner is always included in the assigned people. Existing allocation people are retained if a task is edited, avoiding an inconsistent task team. Task cards show the owner and team size, backlog search includes owner/assigned-person names, and allocation selection prioritizes the owner and existing task team. Selecting a new role member in an allocation automatically adds that person to the task team.
-
-This keeps accountability stable while still letting one task span many people, roles and iterations. Allocation slices remain the source of planned hours; task-level assignment does not fabricate capacity consumption.
-
-### Visual QA result
-
-At 1440×900 with Summary collapsed, the capacity workspace begins directly below the plan strip at roughly the first 120px of the viewport, instead of after several summary/control sections. The plan matrix therefore occupies the majority of the first screen. Summary, task-team authoring and the Manage surface were visually inspected after the browser regression suite passed.
+No legacy Companion schema support or migration path is reintroduced by this concept work.
