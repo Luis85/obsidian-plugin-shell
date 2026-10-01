@@ -50,6 +50,8 @@ import { zip as relocatedZip } from '../../bin/adapters/framework/zip.ts';
 import * as legacyZip from '../../scripts/framework/zip.ts';
 import { pluginIdWordProblem as relocatedPluginIdWordProblem, derivedPluginId as relocatedDerivedPluginId, pluginIdProblem as relocatedPluginIdProblem, exportedIdProblem as relocatedExportedIdProblem, exportedIdWarning as relocatedExportedIdWarning } from '../../bin/adapters/framework/plugin-id.ts';
 import * as legacyPluginId from '../../scripts/framework/plugin-id.ts';
+import { storybookFlags as relocatedStorybookFlags } from '../../bin/adapters/framework/storybook-options.ts';
+import * as legacyStorybookOptions from '../../scripts/framework/storybook-options.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -933,4 +935,18 @@ test('relocated plugin ID policy preserves creation, derivation and export revie
   assert.match(relocatedExportedIdWarning('notes-plugin'), /fail check submission/);
   assert.equal(relocatedExportedIdWarning('field-notes'), null);
   assert.equal(relocatedExportedIdWarning('Invalid ID'), null);
+});
+
+
+test('relocated Storybook option policy preserves explicit on/off semantics', () => {
+  assert.equal(legacyStorybookOptions.storybookFlags, relocatedStorybookFlags);
+  assert.equal(relocatedStorybookFlags({}), undefined);
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'on' }), { enabled: true });
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'off' }), { enabled: false });
+  assert.deepEqual(relocatedStorybookFlags({ 'storybook-stories': 'on' }), { generateStories: true });
+  assert.deepEqual(relocatedStorybookFlags({ storybook: 'on', 'storybook-stories': 'off' }), {
+    enabled: true, generateStories: false,
+  });
+  assert.throws(() => relocatedStorybookFlags({ storybook: 'yes' }), error => error.code === 'STORYBOOK_OPTION_INVALID');
+  assert.throws(() => relocatedStorybookFlags({ 'storybook-stories': true }), error => error.code === 'INVALID_OPTION');
 });
