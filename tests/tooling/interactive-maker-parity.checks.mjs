@@ -15,6 +15,7 @@ import { routeArguments } from '../../bin/adapters/router.ts';
 import { renderCliResult } from '../../bin/presentation/terminal/cli-output.ts';
 import { interactiveRun } from '../../bin/presentation/terminal/cli-interactive.ts';
 import { main as frameworkMain } from '../../bin/adapters/framework-cli.ts';
+import { processOperation } from '../../bin/adapters/framework/process-operation.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -323,4 +324,58 @@ test('relocated read-operation adapter preserves version, concept schema and con
   assert.equal(config.result.command, 'config get');
   assert.equal(config.result.status, 'ok');
   assert.equal(config.result.data.source, 'shell.config.json');
+});
+
+
+test('relocated process-operation adapter selects trusted commands without launching real tools', async () => {
+  const context = { root: frameworkRoot, frameworkRoot };
+  const calls = [];
+  const execution = { exitCode: 0, signal: null, truncated: false, stdout: '{}' };
+  const dependencies = {
+    runNode: async (_context, entry, args, timeout, environment) => {
+      calls.push({ entry, args, timeout, environment });
+      return execution;
+    },
+    npmEntry: async () => '/qualified/npm-cli.js',
+    exists: async () => false,
+    readBounded: async () => Buffer.from('{}'),
+    dependencyReadiness: () => ({ ready: true, diagnostics: [] }),
+    packKit: async (_context, output) => ({ archive: output, publication: 'not-authorized' }),
+  };
+  const request = (command, options = {}) => ({ command, args: [], options });
+
+  const dry = await processOperation(request('build', { 'dry-run': true }), context, dependencies);
+  assert.equal(dry.status, 'planned');
+  assert.equal(calls.length, 0);
+
+  const build = await processOperation(request('build'), context, dependencies);
+  assert.equal(build.status, 'ok');
+  assert.equal(calls.at(-1).entry, 'scripts/bundling/build.mjs');
+
+  await processOperation(request('test', { profile: 'browser' }), context, dependencies);
+  assert.deepEqual(calls.at(-1).args, ['test']);
+  assert.equal(calls.at(-1).entry, 'node_modules/@playwright/test/cli.js');
+
+  await processOperation(request('verify', { profile: 'project' }), context, dependencies);
+  assert.deepEqual(calls.at(-1).args, ['run', 'verify:project']);
+  assert.equal(calls.at(-1).entry, '/qualified/npm-cli.js');
+
+  const preview = await processOperation(request('dev', { profile: 'preview' }), context, dependencies);
+  assert.equal(preview.status, 'ok');
+  assert.deepEqual(calls.at(-1).args, ['--config', 'vite.preview.config.mjs']);
+
+  await processOperation(request('release rehearse', { commit: 'abc123', version: '1.2.3' }), context, dependencies);
+  assert.equal(calls.at(-1).entry, 'scripts/release/rehearse.mjs');
+  assert.equal(calls.at(-1).environment.npm_execpath, '/qualified/npm-cli.js');
+
+  const install = await processOperation(request('install', { yes: true }), context, dependencies);
+  assert.equal(install.status, 'ok');
+  assert.equal(calls.at(-1).entry, '/qualified/npm-cli.js');
+  assert.deepEqual(calls.at(-1).args, ['ci', '--no-fund']);
+
+  const pack = await processOperation(request('framework pack', { out: 'kit.zip' }), context, dependencies);
+  assert.equal(pack.status, 'planned');
+  const packed = await processOperation(request('framework pack', { out: 'kit.zip', yes: true }), context, dependencies);
+  assert.equal(packed.status, 'applied');
+  assert.equal(packed.data.archive, 'kit.zip');
 });

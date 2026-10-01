@@ -17,7 +17,7 @@ import { capabilityCatalog } from '../operations/catalog.mjs';
 import { result, failure, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
 import { fileOperation } from '../../bin/adapters/framework/file-operation.ts';
-import { processOperation } from './operation-process.ts';
+import { processOperation } from '../../bin/adapters/framework/process-operation.ts';
 import { readOperation } from '../../bin/adapters/framework/read-operation.ts';
 
 /** Programmatic adapter shared by the terminal and future companion. No prompt or process-global cwd change. */
