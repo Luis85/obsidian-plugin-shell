@@ -1,6 +1,6 @@
 # `scripts/` consolidation plan
 
-Status: Stage D implementation through D31 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
+Status: Stage D implementation through D32 on PR #60; C26 aligns maker coverage with the executable shared core. The continuation uses separately pushed
 milestones on the same PR; each validation checkpoint is expected to pass the repository's existing
 gates before deeper restructuring, with no threshold or scope exemptions. The inventory and sequencing below are planning inputs,
 not permission to weaken any quality gate.
@@ -132,7 +132,8 @@ are paths that generated projects depend on. Treat them as contracts.
 - **D29:** Command help metadata and tiered human help rendering moved to `bin/adapters/framework/help-text.ts` and `bin/presentation/terminal/terminal-help.ts`. Former framework paths are compatibility-only; maker coverage locks fresh-copy metadata, profile/stage/schema option guidance and command/golden/all rendering.
 - **D30:** Interactive documentation setup flow moved to `bin/presentation/terminal/docs-setup.ts`. It now shares the canonical yes/no parser instead of local regexes; the former framework path is compatibility-only and maker coverage locks decline, blocked/no-plan, cancellation and hash-bound apply behavior.
 - **D31:** Documentation-parser packaging moved to `bin/adapters/framework/docs-vendor.ts`. The former framework path is compatibility-only; maker coverage verifies exact YAML version pinning and packaging only JS/JSON/license assets into the compiled kit.
-- **Remaining D32–F:** Planned; no claim of completion until their own tests and gates pass.
+- **D32:** Data-only `new --from` project intake moved to `bin/adapters/framework/project-from.ts`. The former framework path is compatibility-only; maker coverage locks bounded source loading, identity overrides, missing/malformed/future-schema refusal and plugin-ID validation.
+- **Remaining D33–F:** Planned; no claim of completion until their own tests and gates pass.
 
 ## Stages
 

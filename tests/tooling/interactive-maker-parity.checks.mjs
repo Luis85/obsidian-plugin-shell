@@ -62,6 +62,8 @@ import { setupDocumentation as relocatedSetupDocumentation } from '../../bin/pre
 import * as legacyDocsSetup from '../../scripts/framework/docs-setup.ts';
 import { docsParserFiles as relocatedDocsParserFiles } from '../../bin/adapters/framework/docs-vendor.ts';
 import * as legacyDocsVendor from '../../scripts/framework/docs-vendor.ts';
+import { exportedProject as relocatedExportedProject } from '../../bin/adapters/framework/project-from.ts';
+import * as legacyProjectFrom from '../../scripts/framework/project-from.ts';
 const frameworkRoot = resolve(import.meta.dirname, '../..');
 function scripted(answers) {
   let cursor = 0;
@@ -1102,6 +1104,48 @@ test('relocated documentation parser packaging preserves exact pin and allowlist
 
     await writeFile(join(root, 'node_modules/yaml/package.json'), JSON.stringify({ version: '2.9.0' }));
     await assert.rejects(relocatedDocsParserFiles(root), error => error.code === 'DOCS_PARSER_VERSION');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+
+test('relocated exported-project intake preserves bounded data and identity semantics', async () => {
+  assert.equal(legacyProjectFrom.exportedProject, relocatedExportedProject);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'framework-project-from-')));
+  try {
+    const source = JSON.parse(await readFile(join(frameworkRoot, 'docs/concepts/companion/companion-project.json'), 'utf8'));
+    await writeFile(join(root, 'project.json'), JSON.stringify(source));
+    const context = { root, frameworkRoot };
+    const baseRequest = { command: 'new', args: [], options: { from: 'project.json' } };
+
+    const loaded = await relocatedExportedProject(baseRequest, context, () => null);
+    assert.equal(loaded.document.schemaVersion, source.schemaVersion);
+    assert.equal(loaded.source.file, 'project.json');
+    assert.match(loaded.source.sha256, /^[a-f0-9]{64}$/);
+
+    const overridden = await relocatedExportedProject({
+      ...baseRequest, options: { ...baseRequest.options, id: 'field-notes', name: 'Field Notes', author: 'Example' },
+    }, context, () => null);
+    assert.equal(overridden.document.project.id, 'field-notes');
+    assert.equal(overridden.document.project.name, 'Field Notes');
+    assert.equal(overridden.document.project.author, 'Example');
+
+    await assert.rejects(relocatedExportedProject({ command: 'new', args: [], options: {} }, context, () => null),
+      error => error.code === 'PROJECT_FILE_REQUIRED');
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'missing.json' } }, context, () => null),
+      error => error.code === 'PROJECT_FILE_NOT_FOUND');
+
+    await writeFile(join(root, 'bad.json'), '{');
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'bad.json' } }, context, () => null),
+      error => error.code === 'PROJECT_JSON_MALFORMED');
+
+    await writeFile(join(root, 'future.json'), JSON.stringify({ ...source, schemaVersion: Number(source.schemaVersion) + 100 }));
+    await assert.rejects(relocatedExportedProject({ ...baseRequest, options: { from: 'future.json' } }, context, () => null),
+      error => error.code === 'PROJECT_VERSION_UNSUPPORTED');
+
+    await assert.rejects(relocatedExportedProject(baseRequest, context, () => 'reserved ID'),
+      error => error.code === 'INVALID_PLUGIN_ID');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
